@@ -108,7 +108,7 @@ var Lineage_relationFilter = (function () {
                     }
                 }
                 $("#Lineage_relation_constraints").html(
-                    "<b>" + self.currentProperty.label + "</b>" + "<br> Domain :" + getHtmlLink(domainLabel, self.domain) + "<br> Range :" + getHtmlLink(rangeLabel, self.range)
+                    "<b>" + self.currentProperty.label + "</b>" + "<br> Domain :" + getHtmlLink(domainLabel, self.domain) + "<br> Range :" + getHtmlLink(rangeLabel, self.range),
                 );
             }
         }

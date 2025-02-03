@@ -134,7 +134,7 @@ export default function App(uploadFormData: UploadFormData) {
 
 window.DataSourceManager.createApp = function createApp(uploadFormData: UploadFormData) {
     const container = document.getElementById("mount-mappingModeler-upload-app-here");
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
     const root = createRoot(container!);
     root.render(<App {...uploadFormData} />);
     return root.unmount.bind(root);

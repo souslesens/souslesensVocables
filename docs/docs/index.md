@@ -17,6 +17,13 @@ configuration/sls-py-api.md
 configuration/jowl.md
 ```
 
+## Migration
+
+```{toctree}
+:maxdepth: 1
+migrations/migrate-to-v2.md
+```
+
 ## Contribute to development
 
 ```{toctree}
@@ -25,7 +32,6 @@ contribute/contribute-to-development.md
 ```
 
 ## Administration
-
 
 ## Code documentation
 

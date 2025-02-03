@@ -499,7 +499,7 @@ var _botEngine = (function () {
         var x = visjsData;
 
         $("#mainDialogDiv").html(
-            "" + "<div><button onclick='  Lineage_whiteboard.lineageVisjsGraph.toSVG();'>toSVG</button> </div>" + "<div id='botGraphDiv' style='width:1200px;height:800px'></div>"
+            "" + "<div><button onclick='  Lineage_whiteboard.lineageVisjsGraph.toSVG();'>toSVG</button> </div>" + "<div id='botGraphDiv' style='width:1200px;height:800px'></div>",
         );
         $("#mainDialogDiv").dialog("open");
         //  $("#mainDialogDiv").parent().css("z-index", 1);

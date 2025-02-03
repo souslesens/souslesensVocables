@@ -93,7 +93,7 @@ $("#sourceDivControlPanelDiv").html(html);*/
                     function (err, _result) {
                         UI.message("DONE " + source, true);
                         callbackEach(err);
-                    }
+                    },
                 );
             },
             function (err) {
@@ -102,7 +102,7 @@ $("#sourceDivControlPanelDiv").html(html);*/
                 }
                 UI.message("ALL DONE", true);
                 $("#sourceSelector_jstreeDiv").jstree(true).uncheck_all();
-            }
+            },
         );
     };
 
@@ -341,7 +341,7 @@ $("#sourceDivControlPanelDiv").html(html);*/
                     return UI.message(err, true);
                 }
                 return UI.message("DONE", true);
-            }
+            },
         );
     };
 

@@ -663,7 +663,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
     self.processClicks = function (
         /** @type {{ edges: string | any[]; nodes: string | any[]; event: { srcEvent: { ctrlKey: any; altKey: any; shiftKey: any; }; }; pointer: { DOM: any; }; }} */ params,
         /** @type {{ fixedLayout: any; onclickFn: (arg0: null, arg1: any, arg2: { dbleClick?: any; ctrlKey?: number; altKey?: number; shiftKey?: number; }) => void; onClusterClickFn: (arg0: any, arg1: any, arg2: { dbleClick: any; ctrlKey: number; altKey: number; shiftKey: number; }) => any; }} */ _options,
-        /** @type {any} */ isDbleClick
+        /** @type {any} */ isDbleClick,
     ) {
         var now = new Date();
         if (now - lastClickTime < dbleClickIntervalDuration) {
@@ -1132,7 +1132,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
                 "<select onchange='Lineage_sources.setTheme($(this).val())' >" +
                 "<option>white</option>" +
                 "<option>dark</option>" +
-                "</select></div>"
+                "</select></div>",
         );
         // these are all options in full.
         var options = {

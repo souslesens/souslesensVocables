@@ -4,21 +4,24 @@ const z = require("zod");
 
 const { readMainConfig } = require("./config");
 const { toolModel } = require("./tools");
+const { cleanupConnection, getKnexConnection } = require("./utils");
 
 /**
  * @typedef {import("./UserTypes").UserAccount} UserAccount
  * @typedef {import("./ProfileTypes").Profile} Profile
  */
 
-const ProfileObject = z.object({
-    id: z.string(),
-    name: z.string(),
-    theme: z.string().default(""),
-    allowedSourceSchemas: z.enum(["OWL", "SKOS"]).array().optional(),
-    sourcesAccessControl: z.record(z.string(), z.string()).optional(),
-    allowedTools: z.string().array().optional(),
-    _type: z.string().default("profile"),
-}).strict();
+const ProfileObject = z
+    .object({
+        id: z.string(),
+        name: z.string(),
+        theme: z.string().default(""),
+        allowedSourceSchemas: z.enum(["OWL", "SKOS"]).array().optional(),
+        sourcesAccessControl: z.record(z.string(), z.string()).optional(),
+        allowedTools: z.string().array().optional(),
+        _type: z.string().default("profile"),
+    })
+    .strict();
 
 class ProfileModel {
     /**
@@ -64,35 +67,27 @@ class ProfileModel {
      * @param {Profile} profile - the profile to convert
      * @returns {Profile} - the converted object with the correct fields
      */
-    _convertToLegacy = (profile) => [ profile.label, {
-        id: profile.label,
-        name: profile.label,
-        theme: profile.theme,
-        allowedSourceSchemas: profile.schema_types,
-        allowedTools: profile.allowed_tools,
-        sourcesAccessControl: profile.access_control,
-    }];
-
-    /**
-     * Retrieve the Postgres connection from the configuration information
-     *
-     * @returns {knex} - the knex connection instance configure to use Postgres
-     */
-    _getConnection = () => {
-        return knex({ client: "pg", connection: this._mainConfig.database });
-    };
+    _convertToLegacy = (profile) => [
+        profile.label,
+        {
+            id: profile.label,
+            name: profile.label,
+            theme: profile.theme,
+            allowedSourceSchemas: profile.schema_types,
+            allowedTools: profile.allowed_tools,
+            sourcesAccessControl: profile.access_control,
+        },
+    ];
 
     /**
      * @returns {Promise<Record<string, Profile>>} a collection of profiles
      */
     getAllProfiles = async () => {
-        const conn = this._getConnection();
+        const conn = getKnexConnection(this._mainConfig.database);
         const results = await conn.select("*").from("profiles_list");
-        conn.destroy();
+        cleanupConnection(conn);
 
-        const profiles = Object.fromEntries(
-            results.map((profile) => this._convertToLegacy(profile))
-        );
+        const profiles = Object.fromEntries(results.map((profile) => this._convertToLegacy(profile)));
 
         if (profiles["admin"] === undefined) {
             profiles["admin"] = {
@@ -103,7 +98,7 @@ class ProfileModel {
                 allowedTools: this._mainConfig.tools_available,
                 sourcesAccessControl: {},
                 defaultSourceAccessControl: "readwrite",
-            }
+            };
         }
 
         return profiles;
@@ -119,11 +114,7 @@ class ProfileModel {
             return allProfiles;
         }
 
-        return Object.fromEntries(
-            Object.entries(allProfiles).filter(
-                ([profileName, _profile]) => user.groups.includes(profileName)
-            )
-        );
+        return Object.fromEntries(Object.entries(allProfiles).filter(([profileName, _profile]) => user.groups.includes(profileName)));
     };
 
     /**
@@ -159,15 +150,15 @@ class ProfileModel {
      * @param {string} profileNameId -  a profile name or Id
      */
     deleteProfile = async (profileNameId) => {
-        const conn = this._getConnection();
+        const conn = getKnexConnection(this._mainConfig.database);
         const results = await conn.select("label").from("profiles").where("label", profileNameId).first();
         if (results === undefined) {
-            conn.destroy();
+            cleanupConnection(conn);
             return false;
         }
 
         await conn("profiles").where("label", profileNameId).del();
-        conn.destroy();
+        cleanupConnection(conn);
         return true;
     };
 
@@ -178,15 +169,15 @@ class ProfileModel {
     updateProfile = async (profile) => {
         const data = this._checkProfile(profile);
 
-        const conn = this._getConnection();
+        const conn = getKnexConnection(this._mainConfig.database);
         const results = await conn.select("label").from("profiles").where("label", data.name).first();
         if (results === undefined) {
-            conn.destroy();
+            cleanupConnection(conn);
             return false;
         }
 
         await conn.update(this._convertToDatabase(data)).into("profiles").where("label", data.name);
-        conn.destroy();
+        cleanupConnection(conn);
         return true;
     };
 
@@ -196,15 +187,15 @@ class ProfileModel {
     addProfile = async (profile) => {
         const data = this._checkProfile(profile);
 
-        const conn = this._getConnection();
+        const conn = getKnexConnection(this._mainConfig.database);
         const results = await conn.select("label").from("profiles").where("label", data.name).first();
         if (results !== undefined) {
-            conn.destroy();
+            cleanupConnection(conn);
             throw Error("The profile already exists, try updating it");
         }
 
         await conn.insert(this._convertToDatabase(data)).into("profiles");
-        conn.destroy();
+        cleanupConnection(conn);
     };
 
     /**
@@ -212,9 +203,9 @@ class ProfileModel {
      * @returns {string} the theme currently defined for this profile
      */
     getThemeFromProfile = async (profileName) => {
-        const conn = this._getConnection();
+        const conn = getKnexConnection(this._mainConfig.database);
         const results = await conn.select("theme").from("profiles").where("label", profileName).first();
-        conn.destroy();
+        cleanupConnection(conn);
         if (results === undefined) {
             return this._mainConfig.theme.defaultTheme;
         }

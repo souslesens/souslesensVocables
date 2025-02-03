@@ -113,7 +113,7 @@ var MappingModeler = (function () {
                 if (err) {
                     return err;
                 }
-            }
+            },
         );
     };
 

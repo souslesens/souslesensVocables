@@ -132,7 +132,7 @@ var MappingTransform = (function () {
                     object = self.nodeToKGcreatorColumnName(
                         Object.values(columnsMap).filter(function (node) {
                             return object == node.label;
-                        })[0].data
+                        })[0].data,
                     );
                 }
 

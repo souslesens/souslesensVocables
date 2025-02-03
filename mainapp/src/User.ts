@@ -3,7 +3,7 @@ import { failure, success } from "srd";
 import { Msg } from "./Admin";
 import { Msg_, Type, Mode } from "../src/Component/UsersTable";
 import { Dispatch, SetStateAction } from "react";
-const endpoint = "/api/v1/users";
+const endpoint = "/api/v1/admin/users";
 
 async function getUsers(): Promise<User[]> {
     const response = await fetch(endpoint);

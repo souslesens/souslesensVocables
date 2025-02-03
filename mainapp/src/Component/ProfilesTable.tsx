@@ -70,7 +70,6 @@ const ProfilesTable = () => {
 
     const renderProfiles = SRD.match(
         {
-            // eslint-disable-next-line react/no-unescaped-entities
             notAsked: () => <p>Let’s fetch some data!</p>,
             loading: () => (
                 <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
@@ -97,7 +96,7 @@ const ProfilesTable = () => {
                                 return [key, value.replace("\n", " ")];
                             }
                             return [key, value];
-                        })
+                        }),
                     );
                     return { ...dataWithoutCarriageReturns };
                 });
@@ -105,7 +104,7 @@ const ProfilesTable = () => {
                     let left = "";
                     let right = "";
 
-                    if (a[orderBy] instanceof Array) {
+                    if (a[orderBy] instanceof Array && b[orderBy] instanceof Array) {
                         left = a[orderBy]?.toString() ?? "";
                         right = b[orderBy]?.toString() ?? "";
                     } else {
@@ -197,7 +196,7 @@ const ProfilesTable = () => {
                 );
             },
         },
-        model.profiles
+        model.profiles,
     );
 
     return renderProfiles;
@@ -274,10 +273,12 @@ type ProfileFormProps = {
 
 const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = "" }: ProfileFormProps) => {
     const [nodesClicked, setNodeToExpand] = useState<Array<string>>([]);
+    const [manualExpand, setManualExpand] = useState(false);
     const { model, updateModel } = useModel();
     const unwrappedSources = SRD.unwrap([], identity, model.sources);
     const unwrappedProfiles = SRD.unwrap([], identity, model.profiles);
     const [issues, setIssues] = useState<ZodIssue[]>([]);
+    const [filter, setFilter] = useState<string>("");
     const sources = useMemo(() => {
         return unwrappedSources;
     }, [unwrappedSources]);
@@ -294,7 +295,7 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
                 selector: false,
             },
         },
-        model.config
+        model.config,
     );
     const [profileModel, update] = useReducer(updateProfile, { modal: false, profileForm: profile });
 
@@ -309,6 +310,14 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
     const handleFieldUpdate = (fieldname: string) => (event: ChangeEvent<HTMLTextAreaElement | HTMLInputElement> | SelectChangeEvent<string[]>) =>
         update({ type: Type.UserUpdatedField, payload: { fieldname: fieldname, newValue: event.target.value } });
 
+    const sourceFilter = (event: ChangeEvent<HTMLTextAreaElement>) => {
+        setFilter(event.target.value);
+        setManualExpand(false);
+    };
+    const handleManualExpand = (nodeIds: string[]) => {
+        setNodeToExpand(nodeIds);
+        setManualExpand(true);
+    };
     const profilesSchema = create ? ProfileSchemaCreate : ProfileSchema;
     const zo = useZorm("form", profilesSchema, { setupListeners: false, customIssues: issues });
     const handleSourceAccessControlUpdate = (src: SourceTreeNode) => (event: SelectChangeEvent) => {
@@ -395,31 +404,41 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
         return fields.concat(source.name);
     };
 
-    const generateSourcesTree = () => {
+    const generateSourcesTree = (filter: string) => {
+        const filteredFields = new Set();
+        sources.forEach((source) => {
+            fieldsFromSource(source)
+                .filter((item) => item.toLowerCase().includes(filter.toLowerCase()))
+                .forEach((field) => {
+                    filteredFields.add(field);
+                    filteredFields.add(source.schemaType);
+                    source.group.split("/").forEach((gr) => filteredFields.add(gr));
+                });
+        });
         const sourcesTree: SourceTreeNode[] = [];
-
         let index = 0;
         sources.forEach((source) => {
             let currentTree = sourcesTree;
             const tree: string[] = [];
-            fieldsFromSource(source).forEach((field) => {
-                tree.push(field);
-                let root = currentTree.find((key) => key.name == field);
-                if (root === undefined) {
-                    root = {
-                        name: field,
-                        children: [],
-                        index: index,
-                        source: source,
-                        treeStr: tree.join("/"),
-                    };
-                    currentTree.push(root);
-                }
-                index = index + 1;
-                currentTree = root.children;
-            });
+            fieldsFromSource(source)
+                .filter((item) => filteredFields.has(item))
+                .forEach((field) => {
+                    tree.push(field);
+                    let root = currentTree.find((key) => key.name == field);
+                    if (root === undefined) {
+                        root = {
+                            name: field,
+                            children: [],
+                            index: index,
+                            source: source,
+                            treeStr: tree.join("/"),
+                        };
+                        currentTree.push(root);
+                    }
+                    index = index + 1;
+                    currentTree = root.children;
+                });
         });
-
         return sourcesTree;
     };
 
@@ -491,15 +510,31 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
         });
     };
 
-    function SourcesTreeView() {
-        const treeviewSources = displayFormTree(generateSourcesTree());
+    const getAllNodeIds = (sources: JSX.Element[]) => {
+        const nodeIds: string[] = [];
+        sources.forEach((item: JSX.Element) => {
+            const iProps = item.props as TreeItemProps;
+            nodeIds.push(iProps.nodeId);
+            if (iProps.children) {
+                nodeIds.push(...getAllNodeIds(iProps.children as JSX.Element[]));
+            }
+        });
+        return nodeIds;
+    };
+
+    function SourcesTreeView({ filter }: { filter: string }) {
+        const treeviewSources = displayFormTree(generateSourcesTree(filter));
+        let expanded = Array.from(nodesClicked);
+        if (filter && treeviewSources && !manualExpand) {
+            expanded = getAllNodeIds(treeviewSources);
+        }
         return (
             <TreeView
                 aria-label="Sources access control navigator"
                 id="sources-access-treeview"
-                defaultExpanded={Array.from(nodesClicked)}
+                defaultExpanded={expanded}
                 onNodeToggle={(_event, nodeIds) => {
-                    setNodeToExpand(nodeIds);
+                    handleManualExpand(nodeIds);
                 }}
                 defaultCollapseIcon={<ExpandMore sx={{ width: 30, height: 30 }} />}
                 defaultExpandIcon={<ChevronRight sx={{ width: 30, height: 30 }} />}
@@ -572,10 +607,11 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
                                 ))}
                             </Select>
                         </FormControl>
-                        <Box style={{ maxHeight: "300px", overflow: "auto" }}>
+                        <Box style={{ height: "300px", overflow: "auto" }}>
                             <FormControl>
                                 <FormLabel id="default-source-access-control-label">Default source access control</FormLabel>
-                                <SourcesTreeView />
+                                <TextField id="filter" label="Filter" onChange={sourceFilter} value={filter} variant="standard" />
+                                <SourcesTreeView filter={filter} />
                             </FormControl>
                         </Box>
                         <FormControl>

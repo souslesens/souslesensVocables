@@ -135,7 +135,7 @@ var Lineage_sources = (function () {
                 if (callback) {
                     return callback(err);
                 }
-            }
+            },
         );
     };
 
@@ -379,7 +379,7 @@ var Lineage_sources = (function () {
                             return UI.message(err, true);
                         }
                         UI.message("ALL DONE", true);
-                    }
+                    },
                 );
             }
         });
@@ -508,7 +508,7 @@ sourceDivId +
             function (importSource, callbackEach) {
                 self.registerSource(importSource, callbackEach);
             },
-            callback
+            callback,
         );
     };
 
@@ -881,7 +881,7 @@ Lineage_whiteboard.lineageVisjsGraph.network.options.edges.font = { color: self.
                     return 0;
                 });
                 callback(null, sourceObjects);
-            }
+            },
         );
     };
 
@@ -944,7 +944,7 @@ target: Math.round(Math.random() * (id-1))
                 const middlePos = Object.assign(
                     ...["x", "y", "z"].map((c) => ({
                         [c]: start[c] + (end[c] - start[c]) / 2, // calc middle point
-                    }))
+                    })),
                 );
 
                 // Position sprite

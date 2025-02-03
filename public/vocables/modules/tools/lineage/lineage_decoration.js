@@ -227,7 +227,7 @@ var Lineage_decoration = (function () {
 
             function (err) {
                 var x = distinctNodeClassesMap;
-            }
+            },
         );
     };
 

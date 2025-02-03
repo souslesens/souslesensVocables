@@ -275,7 +275,7 @@ var SparqlQuery_bot = (function () {
                             _botEngine.nextStep();
 
                             // _botEngine.end()
-                        }
+                        },
                     );
                 }
             });
@@ -360,7 +360,7 @@ var SparqlQuery_bot = (function () {
                             title: "label",
                             defaultContent: "",
                         },
-                        { title: "uri", defaultContent: "" }
+                        { title: "uri", defaultContent: "" },
                     );
                     var dataset = [];
 
@@ -435,7 +435,7 @@ var SparqlQuery_bot = (function () {
                     return _botEngine.abort(err.responseText || err);
                 }
                 return _botEngine.end();
-            }
+            },
         );
     };
 
@@ -535,7 +535,7 @@ var SparqlQuery_bot = (function () {
 
             function (err) {
                 _botEngine.end();
-            }
+            },
         );
     };
     self.processObjectPropertyQuery = function () {
@@ -711,7 +711,7 @@ var SparqlQuery_bot = (function () {
                             { title: "domainLabel", defaultContent: "" },
                             { title: "rangeLabel", defaultContent: "" },
                             { title: "domainUri", defaultContent: "" },
-                            { title: "rangeUri", defaultContent: "" }
+                            { title: "rangeUri", defaultContent: "" },
                         );
 
                         edgeDomainLabel = "domain";
@@ -721,7 +721,7 @@ var SparqlQuery_bot = (function () {
                             { title: "subClassLabel", defaultContent: "" },
                             { title: "propertyLabel", defaultContent: "" },
                             { title: "subClassUri", defaultContent: "" },
-                            { title: "propertyUri", defaultContent: "" }
+                            { title: "propertyUri", defaultContent: "" },
                         );
 
                         edgeDomainLabel = "subClassOf";
@@ -734,7 +734,7 @@ var SparqlQuery_bot = (function () {
                             title: "superProperty",
                             defaultContent: "",
                         },
-                        { title: "inverseProperty", defaultContent: "" }
+                        { title: "inverseProperty", defaultContent: "" },
                     );
 
                     for (var property in properties) {
@@ -865,7 +865,7 @@ var SparqlQuery_bot = (function () {
             ],
             function (err) {
                 _botEngine.end();
-            }
+            },
         );
     };
 
@@ -989,7 +989,7 @@ var SparqlQuery_bot = (function () {
                         { title: "Object", defaultContent: "" },
                         { title: "subjectURI", defaultContent: "" },
                         { title: "PredicateURI", defaultContent: "" },
-                        { title: "ObjectURI", defaultContent: "" }
+                        { title: "ObjectURI", defaultContent: "" },
                     );
 
                     data.forEach(function (item) {
@@ -1012,7 +1012,7 @@ var SparqlQuery_bot = (function () {
                     alert(err.responseText || err);
                 }
                 _botEngine.end();
-            }
+            },
         );
     };
 
@@ -1099,13 +1099,13 @@ var SparqlQuery_bot = (function () {
                     ],
                     function (err) {
                         return callbackEach(err);
-                    }
+                    },
                 );
             },
             function (err) {
                 self.IndividualsModels[sources[0]] = model;
                 return callback(err, model);
-            }
+            },
         );
     };
 

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { SyntheticEvent, useState } from "react";
 import {
     Alert,
     Box,
@@ -8,7 +8,9 @@ import {
     IconButton,
     Link,
     Paper,
+    Snackbar,
     Stack,
+    styled,
     Table,
     TableBody,
     TableCell,
@@ -40,6 +42,10 @@ const SourcesTable = () => {
     const [filteringChars, setFilteringChars] = useState("");
     const [orderBy, setOrderBy] = useState<OrderBy>("name");
     const [order, setOrder] = useState<Order>("asc");
+
+    const [snackOpen, setSnackOpen] = useState(false);
+    const [snackMessages, setSnackMessages] = useState(new Set());
+    const [snackSeverity, setSnackSeverity] = useState<"warning" | "error" | undefined>(undefined);
 
     const [openModal, setOpenModal] = useState(false);
     const [editModal, setEditModal] = useState(false);
@@ -94,6 +100,41 @@ const SourcesTable = () => {
         setOpenModal(true);
     };
 
+    const handleSnackbarClose = (_event: SyntheticEvent | Event, reason?: string) => {
+        if (reason === "clickaway") {
+            return;
+        }
+        setSnackOpen(false);
+        setSnackMessages(new Set());
+    };
+
+    const handleUploadSource = async (sourceFiles: FileList | null) => {
+        if (sourceFiles && sourceFiles !== undefined && sourceFiles?.length > 0) {
+            const source = JSON.parse(await sourceFiles[0].text()) as ServerSource;
+            // check name
+            const existingSourcesName: string[] = SRD.withDefault([], model.sources).map((source) => source.name);
+            if (existingSourcesName.includes(source.name)) {
+                setSnackOpen(true);
+                setSnackSeverity("error");
+                setSnackMessages((msg) => new Set(msg).add(`La source ${source.name} existe déjà`));
+                return;
+            }
+            // remove unknown imports
+            const imports: string[] = [];
+            source.imports.forEach((imp) => {
+                if (existingSourcesName.includes(imp)) {
+                    imports.push(imp);
+                } else {
+                    setSnackOpen(true);
+                    setSnackSeverity("warning");
+                    setSnackMessages((msg) => new Set(msg).add(`L'import ${imp} n'existe pas`));
+                }
+            });
+            source.imports = imports;
+            await handleUpdateSource(source);
+        }
+    };
+
     const renderSources = SRD.match(
         {
             notAsked: () => <p>Let&apos;s fetch some data!</p>,
@@ -125,7 +166,7 @@ const SourcesTable = () => {
                                 return [key, value.replace("\n", " ")];
                             }
                             return [key, value];
-                        })
+                        }),
                     );
 
                     return { ...dataWithoutCarriageReturns };
@@ -144,6 +185,16 @@ const SourcesTable = () => {
 
                 return (
                     <Stack direction="column" spacing={{ xs: 2 }} sx={{ m: 4 }} useFlexGap>
+                        <Snackbar autoHideDuration={5000} open={snackOpen} onClose={handleSnackbarClose}>
+                            <Alert onClose={handleSnackbarClose} severity={snackSeverity} sx={{ width: "100%" }}>
+                                {Array.from(snackMessages).map((msg) => (
+                                    <>
+                                        {msg}
+                                        <br />
+                                    </>
+                                ))}
+                            </Alert>
+                        </Snackbar>
                         <TextField
                             inputProps={{ autocomplete: "off" }}
                             label="Search Sources by name"
@@ -222,7 +273,7 @@ const SourcesTable = () => {
                                                                 href={createSingleSourceDownloadUrl(
                                                                     // TODO fix typing
                                                                     (model.sources as unknown as Record<string, ServerSource[]>)["data"],
-                                                                    source.name
+                                                                    source.name,
                                                                 )}
                                                                 download={`source${source.name}.json`}
                                                             >
@@ -249,7 +300,7 @@ const SourcesTable = () => {
                                 }}
                                 href={createSourcesDownloadUrl(
                                     // TODO fix typing
-                                    (model.sources as unknown as Record<string, ServerSource[]>)["data"]
+                                    (model.sources as unknown as Record<string, ServerSource[]>)["data"],
                                 )}
                                 download={"sources.json"}
                             >
@@ -270,16 +321,32 @@ const SourcesTable = () => {
                                 selectedSource={selectedSource}
                                 sources={sortedSources}
                             />
+                            <Button component="label" variant="contained" tabIndex={-1}>
+                                Upload Source file
+                                <VisuallyHiddenInput type="file" onChange={(event) => handleUploadSource(event.target.files)} multiple />
+                            </Button>
                         </Stack>
                     </Stack>
                 );
             },
         },
-        model.sources
+        model.sources,
     );
 
     return renderSources;
 };
+
+const VisuallyHiddenInput = styled("input")({
+    clip: "rect(0 0 0 0)",
+    clipPath: "inset(50%)",
+    height: 1,
+    overflow: "hidden",
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    whiteSpace: "nowrap",
+    width: 1,
+});
 
 function createSourcesDownloadUrl(sources: ServerSource[]): string {
     const sourcesObject: Record<string, ServerSource> = {};

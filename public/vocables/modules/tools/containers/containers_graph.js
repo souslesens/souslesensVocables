@@ -373,7 +373,7 @@ var Containers_graph = (function () {
                     return callback(null, visjsData);
                 }
                 return;
-            }
+            },
         );
     };
 

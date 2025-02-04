@@ -230,14 +230,11 @@ describe("ProfileModel", () => {
         await expect(profileModel.updateProfile("unknown")).rejects.toThrow("The profile do not follow the standard");
     });
 
-    /* FIXME: the mock cannot be done on the `conn("profiles")` part of the
-     *        deleteProfile method. We needs to find a way to resolve
-     *        this problem */
-    test.skip("delete an existing profile", async () => {
+    test("delete an existing profile", async () => {
         tracker.on.select("profiles").response(dbProfiles[2]);
         tracker.on.delete("profiles").response();
 
-        const result = await userModel.deleteUserAccount("readwrite_folder_1");
+        const result = await profileModel.deleteProfile("readwrite_folder_1");
         expect(result).toBeTruthy();
     });
 

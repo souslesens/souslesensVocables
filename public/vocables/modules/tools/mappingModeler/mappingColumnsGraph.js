@@ -9,6 +9,7 @@ import DataSourceManager from "./dataSourcesManager.js";
  * MappingColumnsGraph module.
  * Handles the visualization and management of mapping columns in a graph.
  * @module MappingColumnsGraph
+ * @see [Tutorial: Overview]{@tutorial overview}
  */
 var MappingColumnsGraph = (function () {
 

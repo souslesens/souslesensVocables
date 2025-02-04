@@ -22,6 +22,7 @@ import UIcontroller from "./uiController.js";
  * MappingModeler module.
  * The MappingModeler tool helps creating new mappings from sources, and visualising and editing these mappings.
  * @module MappingModeler
+ * @see [Tutorial: Overview]{@tutorial overview}
  */
 var MappingModeler = (function () {
     var self = {};

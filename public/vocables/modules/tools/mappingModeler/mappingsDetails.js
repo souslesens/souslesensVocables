@@ -13,6 +13,7 @@ import UIcontroller from "./uiController.js";
  *
  * @module MappingsDetails
  * @type {{}}
+ * @see [Tutorial: Overview]{@tutorial overview}
  */
 var MappingsDetails = (function () {
     var self = {};

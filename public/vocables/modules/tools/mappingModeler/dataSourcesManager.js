@@ -7,6 +7,7 @@ import UIcontroller from "./uiController.js";
  * DataSourceManager module
  * Responsible for managing data source configurations and operations.
  * @module DataSourceManager
+ * @see [Tutorial: Overview]{@tutorial overview}
  */
 var DataSourceManager = (function () {
     var self = {};

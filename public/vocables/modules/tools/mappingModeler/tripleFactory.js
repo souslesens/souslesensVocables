@@ -11,6 +11,7 @@ import UIcontroller from "./uiController.js";
  * The TripleFactory module handles the creation, filtering, and writing of RDF triples.
  * It includes functions for generating sample triples, creating all mappings triples, and indexing the graph.
  * @module TripleFactory
+ * @see [Tutorial: Overview]{@tutorial overview}
  */
 var TripleFactory = (function () {
     var self = {};

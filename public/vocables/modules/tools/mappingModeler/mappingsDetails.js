@@ -119,6 +119,14 @@ var MappingsDetails = (function () {
 
                             })
                         }
+                        if(node.data.transform){
+                            jstreeData.push({
+                                id: node.id + "|" + "transform" +  "|" + node.data.transform,
+                                text: "<span style='color: blue'>" + 'transform' + "</span>  " + node.data.transform,
+                                parent: node.id,
+                            });
+                           
+                        }
                     }
 
 
@@ -290,9 +298,17 @@ var MappingsDetails = (function () {
                 })
 
             }
+            //transform gestion
+            if(array.length>=2 && array[1]=='transform'){
+                if(graphNode.data.transform){
+                    delete graphNode.data.transform
+                }
+            }
+
 
             JstreeWidget.deleteNode("detailedMappings_jsTreeDiv", treeNode);
             self.drawDetailedMappingsGraph();
+            MappingColumnsGraph.saveVisjsGraph();
 
 
         };
@@ -582,7 +598,7 @@ var MappingsDetails = (function () {
                     true,
                     MappingModeler.currentTable.name,
                     {
-                        filteredMappings: filteredMapping,
+                        filteredMappings: mappingWithTransform,
                         table: MappingModeler.currentTable.name,
                     },
                     function (err, result) {
@@ -606,7 +622,11 @@ var MappingsDetails = (function () {
                 })[0];
                 currentNode.data.transform = transformFn;
                 MappingColumnsGraph.updateNode(currentNode);
-                MappingColumnsGraph.saveVisjsGraph();
+                
+                MappingColumnsGraph.saveVisjsGraph(function(){
+                    self.showDetailedMappingsTree();
+                });
+
             }
         }
 

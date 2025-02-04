@@ -56,28 +56,50 @@ var TripleFactory = (function () {
                 columnsSelection[node.id] = MappingColumnsGraph.visjsGraph.data.nodes.get(node.parent)
             } else if (node.data && node.data.type == "Column") {// filter only mapping nodes
                 columnsSelection[node.id] = MappingColumnsGraph.visjsGraph.data.nodes.get(node.id)
+            }else if (node.data && node.data.type == "VirtualColumn"){
+                columnsSelection[node.id] = MappingColumnsGraph.visjsGraph.data.nodes.get(node.id)
+            }else if (node.data && node.data.type == "RowIndex"){
+                columnsSelection[node.id] = MappingColumnsGraph.visjsGraph.data.nodes.get(node.id)
             }
 
 
         });
         var mappings = MappingTransform.mappingsToKGcreatorJson(columnsSelection)
         var uniqueFilteredMappings = {}
+        var transforms={}
+        // checkedNodeAttrs work only for technical mappings we need to also add structural column mappings
         mappings.forEach(function (mapping) {
+
+            
             checkedNodeAttrs.forEach(function (treeNodeId) {
+                
                 if (treeNodeId.indexOf(mapping.o) > -1) {
-                   if(! uniqueFilteredMappings[mapping.s+"|"+mapping.o]){
+                   if(treeNodeId.indexOf('transform') > -1 && mapping.p=='transform'){
+                    transforms[mapping.s]=mapping.o
+                   }
+                   else if(! uniqueFilteredMappings[mapping.s+"|"+mapping.o]){
                        uniqueFilteredMappings[mapping.s+"|"+mapping.o]=1
                        filteredMappings.push(mapping)
                    }
+                   
 
                 }
-            })
+                
 
 
-        })
-        var table=MappingModeler.currentTable.name
-     filteredMappings ={[table]:{tripleModels:filteredMappings}}
+            });
 
+            
+
+
+        });
+        var columnMappings = MappingTransform.mappingsToKGcreatorJson(columnsSelection,{getColumnMappingsOnly:true});
+        // selection isn't concerned for column mappings select all
+        filteredMappings=filteredMappings.concat(columnMappings);
+        var table=MappingModeler.currentTable.name;
+        
+        filteredMappings ={[table]:{tripleModels:filteredMappings,transform:transforms}}
+        
         TripleFactory.createTriples(self.filterMappingIsSample, MappingModeler.currentTable.name, {filteredMappings: filteredMappings}, function (err, result) {
             if (err) {
                 return alert(err.responseText);

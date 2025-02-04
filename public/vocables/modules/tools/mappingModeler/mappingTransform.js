@@ -69,12 +69,21 @@ var MappingTransform = (function () {
         if (colname && data.type == "VirtualColumn") {
             colname = "@" + colname + "_$";
         }
+        if(data.type=='RowIndex'){
+            colname='_rowIndex'
+        }
         if (data.type == "URI") {
             colname = data.id + "_#";
         }
         return colname;
     };
-    self.mappingsToKGcreatorJson = function (columnsMap) {
+    self.mappingsToKGcreatorJson = function (columnsMap,options) {
+        if(!options){
+            options={};
+        }
+        if(!options.getColumnMappingsOnly){
+            options.getColumnMappingsOnly=false;
+        }   
         var columnsMapLabels = Object.values(columnsMap).map(function (column) {
             return column.label;
         });
@@ -89,34 +98,36 @@ var MappingTransform = (function () {
                 return alert("Error in column " + nodeId);
             }
 
-          
-            if (data.rdfType) {
-                var predicate = "rdf:type";
-               
+            if(!options.getColumnMappingsOnly){
+                if (data.rdfType) {
+                    var predicate = "rdf:type";
+                
 
-                allMappings.push({
-                    s: subject,
-                    p: predicate,
-                    o: data.rdfType,
-                });
-            }
-
-            if (data.rdfsLabel) {
-                allMappings.push({
-                    s: subject,
-                    p: "rdfs:label",
-                    o: data.rdfsLabel,
-                    dataType: "xsd:string",
-                });
-            }
-
-            if (data.transform) {
-                if (!allMappings[data.dataTable].transform) {
-                    allMappings[data.dataTable].transform = {};
+                    allMappings.push({
+                        s: subject,
+                        p: predicate,
+                        o: data.rdfType,
+                    });
                 }
-                allMappings[data.dataTable].transform[data.label] = data.transform;
-            }
 
+                if (data.rdfsLabel) {
+                    allMappings.push({
+                        s: subject,
+                        p: "rdfs:label",
+                        o: data.rdfsLabel,
+                        dataType: "xsd:string",
+                    });
+                }
+                
+                if (data.transform) {
+                    allMappings.push({
+                        s: subject,
+                        p: "transform",
+                        o: data.transform,
+                        
+                    });
+                }
+            }
             var connections = MappingColumnsGraph.visjsGraph.getFromNodeEdgesAndToNodes(nodeId);
 
             connections.forEach(function (connection) {
@@ -144,7 +155,7 @@ var MappingTransform = (function () {
 
                 allMappings.push(mapping);
             });
-            if (data.otherPredicates) {
+            if (data.otherPredicates && !options.getColumnMappingsOnly) {
                 data.otherPredicates.forEach(function (predicate) {
                     var triple = {
                         s: subject,

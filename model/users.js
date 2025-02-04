@@ -251,7 +251,8 @@ class UserModel {
             return false;
         }
 
-        await conn("users").where("login", login).del();
+        // using select here allows mocking in tests
+        await conn.select("*").from("users").where("login", login).del();
         cleanupConnection(conn);
         return true;
     };

@@ -63,6 +63,10 @@ var MappingsDetails = (function () {
      * @param {Object} [column] - Optional column data to filter the tree by.
      * @param {string} [divId="detailedMappings_jsTreeDiv"] - The ID of the div to display the tree in. Default is "detailedMappings_jsTreeDiv".
      * @param {Object} [_options={}] - Optional configuration options for the tree, such as context menu behavior.
+     * @param {boolean} [_options.withoutContextMenu=false] - If true, disables the context menu.
+     * @param {boolean} [_options.searchPlugin=true] - Enables or disables the search plugin.
+     * @param {boolean} [_options.openAll=true] - If true, expands all nodes by default.
+     * @param {Function} [_options.selectTreeNodeFn] - Callback function for when a tree node is selected.
      * @returns {void}
      */
     self.showDetailedMappingsTree = function (column, divId, _options) {

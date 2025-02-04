@@ -237,7 +237,10 @@ var MappingColumnsGraph = (function () {
      * @memberof module:MappingColumnsGraph
      * @param {Object} node - The clicked node object.
      * @param {Object} event - The click event object.
-     * @param {Object} options - Additional event options, including key modifiers.
+     * @param {Object} options - Additional event options.
+     * @param {boolean} [options.ctrlKey=false] - Indicates if the Ctrl key was pressed during the click.
+     * @param {boolean} [options.shiftKey=false] - Indicates if the Shift key was pressed during the click.
+     * @param {boolean} [options.altKey=false] - Indicates if the Alt key was pressed during the click.
      * @returns {void}   
      */
     self.onVisjsGraphClick = function (node, event, options) {

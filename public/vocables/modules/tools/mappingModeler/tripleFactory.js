@@ -224,7 +224,13 @@ var TripleFactory = (function () {
      * @memberof module:TripleFactory
      * @param {boolean} sampleData - Indicates whether to create sample data triples or full triples.
      * @param {string} table - The table for which to create triples.
-     * @param {Object} options - Options for creating triples, such as sample size and filter options.
+     * @param {Object} [options] - Options for creating triples, such as sample size and filter options.
+     * @param {boolean} [options.deleteOldGraph=false] - If true, deletes the existing graph before creating new triples.
+     * @param {number} [options.sampleSize=500] - The number of sample triples to create if `sampleData` is true.
+     * @param {string} [options.clientSocketId] - The client socket ID for real-time updates.
+     * @param {Object} [options.mappingsFilter] - Filters for selecting specific mappings.
+     * @param {Object} [options.filteredMappings] - Alternative mapping filter.
+     * @param {boolean} [options.deleteTriples=false] - If true, deletes existing triples before creation.
      * @param {function} callback - A callback function to be executed after the triples creation process.
      */
     self.createTriples = function (sampleData, table, options, callback) {

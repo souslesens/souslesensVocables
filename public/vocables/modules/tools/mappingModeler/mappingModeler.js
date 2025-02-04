@@ -172,7 +172,7 @@ var MappingModeler = (function () {
     };
 
 
-        /**
+    /**
      * Loads and initializes a suggestion tree in the specified container.
      * @function
      * @name loadSuggestionSelectJstree

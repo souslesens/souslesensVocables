@@ -127,19 +127,24 @@ class UserDataModel {
             throw Error("The specified identifier do not exists", { cause: 404 });
         }
 
-        await connection("user_data").where("id", identifier).del();
+        // using select here allows mocking in tests
+        await connection.select("*").from("user_data").where("id", identifier).del();
         cleanupConnection(connection);
+        return true;
     };
 
     update = async (userData) => {
         const data = this._check(userData);
 
-        const connection = getKnexConnection(this._mainConfig.database);
+        let connection = getKnexConnection(this._mainConfig.database);
         let results = await connection.select("id").from("user_data").where("id", data.id).first();
         if (results === undefined) {
             cleanupConnection(connection);
             throw Error("The specified identifier do not exists", { cause: 404 });
         }
+
+        // We need to reinitialize connection for tests
+        connection = getKnexConnection(this._mainConfig.database);
 
         results = await connection.select("id").from("users").where("login", data.owned_by).first();
         if (results === undefined) {
@@ -151,6 +156,7 @@ class UserDataModel {
         data.owned_by = results.id;
         await connection.update(data).into("user_data").where("id", data.id);
         cleanupConnection(connection);
+        return true;
     };
 }
 

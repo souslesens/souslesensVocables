@@ -1,4 +1,4 @@
-const { convertType, chunk } = require("../model/utils");
+const { convertType, chunk, cleanupConnection, getKnexConnection } = require("../model/utils");
 
 describe("convertTypeUtils", () => {
     test("Convert string to boolean", async () => {
@@ -46,5 +46,18 @@ describe("chunkUtils", () => {
     });
     test("Chunk list of 4 element in -1", async () => {
         expect(chunk([1, 2, 3, 4], -1)).toStrictEqual([[1, 2, 3, 4]]);
+    });
+});
+
+describe("knex functions", () => {
+    test("get a false knex connection", async () => {
+        const connection = getKnexConnection({});
+        expect(connection.client).toBeDefined();
+    });
+
+    test("destroy the knex connection", async () => {
+        const connection = { destroy: jest.fn() };
+        cleanupConnection(connection);
+        expect(connection.destroy).toHaveBeenCalled();
     });
 });

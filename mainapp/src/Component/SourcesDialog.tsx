@@ -238,6 +238,7 @@ export const SourcesDialog = ({ edit, me, onClose, onSubmit, open, selectedSourc
                         freeSolo
                         id="group"
                         onChange={(_e, value) => handleField("group", value)}
+                        onInputChange={(_e, value) => handleField("group", value)}
                         options={groups}
                         renderInput={(params) => <TextField error={errors.group !== undefined} helperText={errors.group} {...params} label="Group" required />}
                         value={source.group}

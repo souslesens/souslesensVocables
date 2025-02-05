@@ -24,5 +24,12 @@
       "OWL/FOLDER_1": "readwrite"
     },
     "schema_types": ["OWL"]
+  },
+  {
+    "id": "4",
+    "label": "all",
+    "allowed_tools": ["ALL"],
+    "access_control": {},
+    "schema_types": ["OWL", "SKOS"]
   }
 ]

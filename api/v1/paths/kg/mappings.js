@@ -47,6 +47,7 @@ module.exports = function () {
                 },
             },
         },
+        tags: ["KG"],
     };
 
     return operations;

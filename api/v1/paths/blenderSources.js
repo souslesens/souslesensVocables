@@ -21,6 +21,7 @@ module.exports = function () {
         operationId: "getAllBlenderSources",
         parameters: [],
         responses: responseSchema("BlenderSources", "GET"),
+        tags: ["Sources"],
     };
     function POST(req, res, next) {
         try {
@@ -51,6 +52,7 @@ module.exports = function () {
             },
         ],
         responses: responseSchema("BlenderSources", "POST"),
+        tags: ["Sources"],
     };
     async function DELETE(req, res, next) {
         try {
@@ -80,6 +82,7 @@ module.exports = function () {
             },
         ],
         responses: responseSchema("BlenderSources", "DELETE"),
+        tags: ["Sources"],
     };
     return operations;
 };

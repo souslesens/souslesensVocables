@@ -18,6 +18,7 @@ module.exports = function () {
         responses: responseSchema("DatabaseMinimal", "GET"),
         security: [{ restrictLoggedUser: [] }],
         summary: "Returns the table without insecure information",
+        tags: ["Databases"],
     };
 
     return operations;

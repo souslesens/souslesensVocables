@@ -19,6 +19,7 @@ module.exports = function () {
         responses: responseSchema("DatabaseNames", "GET"),
         security: [{ restrictLoggedUser: [] }],
         summary: "Returns all databases name",
+        tags: ["Databases"],
     };
 
     return operations;

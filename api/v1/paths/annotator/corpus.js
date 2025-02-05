@@ -50,6 +50,7 @@ module.exports = function () {
                 },
             },
         },
+        tags: ["Annotate"],
     };
 
     POST.apiDoc = {
@@ -97,6 +98,7 @@ module.exports = function () {
                 },
             },
         },
+        tags: ["Annotate"],
     };
 
     return operations;

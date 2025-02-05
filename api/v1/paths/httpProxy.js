@@ -39,6 +39,7 @@ module.exports = function () {
                 description: "Response provided by the proxied server",
             },
         },
+        tags: ["Misc"],
     };
 
     function GET(req, res, next) {
@@ -50,6 +51,18 @@ module.exports = function () {
             next(e);
         }
     }
+    GET.apiDoc = {
+        summary: "Retrieve a request from a different domain",
+        security: [{ restrictLoggedUser: [] }],
+        operationId: "httpProxy",
+        parameters: [],
+        responses: {
+            default: {
+                description: "Response provided by the proxied server",
+            },
+        },
+        tags: ["Misc"],
+    };
 
     return operations;
 };

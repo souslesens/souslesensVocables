@@ -91,6 +91,7 @@ module.exports = function () {
                 },
             },
         },
+        tags: ["RDF"],
     };
     GET.apiDoc = {
         security: [{ restrictLoggedUser: [] }],
@@ -115,6 +116,7 @@ module.exports = function () {
                 },
             },
         },
+        tags: ["RDF"],
     };
 
     return operations;

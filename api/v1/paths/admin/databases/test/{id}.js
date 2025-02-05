@@ -43,6 +43,7 @@ module.exports = function () {
         },
         security: [{ restrictAdmin: [] }],
         summary: "Test the connection to the database",
+        tags: ["Databases"],
     };
 
     return operations;

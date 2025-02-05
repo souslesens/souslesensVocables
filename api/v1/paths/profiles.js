@@ -22,6 +22,7 @@ module.exports = function () {
         security: [{ restrictLoggedUser: [] }],
         operationId: "getProfilesCurrentUser",
         responses: responseSchema("Profiles", "GET"),
+        tags: ["Profiles"],
     };
     return operations;
 };

@@ -51,6 +51,7 @@ module.exports = function () {
                 },
             },
         },
+        tags: ["Sparql"],
     };
 
     return operations;

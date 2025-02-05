@@ -37,6 +37,7 @@ module.exports = function () {
                 required: false,
             },
         ],
+        tags: ["Sources"],
     };
 
     ///// POST api/v1/sources
@@ -82,6 +83,7 @@ module.exports = function () {
         operationId: "updateSources",
         parameters: [],
         responses: responseSchema("Sources", "POST"),
+        tags: ["Sources"],
     };
 
     return operations;

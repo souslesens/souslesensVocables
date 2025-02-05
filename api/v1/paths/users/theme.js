@@ -30,6 +30,7 @@ module.exports = function () {
         },
         security: [{ restrictLoggedUser: [] }],
         summary: "Get the logged user profile theme",
+        tags: ["Users"],
     };
 
     return operations;

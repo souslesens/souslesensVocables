@@ -154,6 +154,7 @@ module.exports = function () {
                 },
             },
         },
+        tags: ["RDF"],
     };
 
     GET.apiDoc = {
@@ -192,6 +193,7 @@ module.exports = function () {
                 },
             },
         },
+        tags: ["RDF"],
     };
 
     return operations;

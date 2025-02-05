@@ -38,6 +38,7 @@ module.exports = function () {
         operationId: "getAllUsersWithProfiles",
         parameters: [],
         responses: responseSchema("Users", "GET"),
+        tags: ["Users"],
     };
 
     return operations;

@@ -57,6 +57,7 @@ module.exports = function () {
                 },
             },
         },
+        tags: ["Annotate"],
     };
 
     return operations;

@@ -39,6 +39,7 @@ module.exports = function () {
                 },
             },
         },
+        tags: ["Authentication"],
     };
 
     return operations;

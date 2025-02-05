@@ -19,6 +19,7 @@ module.exports = function () {
         responses: responseSchema("PluginConfig", "GET"),
         security: [{ restrictAdmin: [] }],
         summary: "Retrieve the plugins configuration",
+        tags: ["Plugins"],
     };
 
     // PUT /api/v1/admin/plugins/config
@@ -42,6 +43,7 @@ module.exports = function () {
         responses: responseSchema("Tools", "PUT"),
         security: [{ restrictAdmin: [] }],
         summary: "Save the plugins configuration",
+        tags: ["Plugins"],
     };
 
     return operations;

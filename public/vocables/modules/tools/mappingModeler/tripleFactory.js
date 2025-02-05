@@ -104,7 +104,38 @@ var TripleFactory = (function () {
             if (err) {
                 return alert(err.responseText);
             } else {
-                UI.message("Done", true)
+                UI.message("Done", true);
+                if(!self.filterMappingIsSample){
+                    //Admin.clearOntologyModelCache();
+                    SearchUtil.generateElasticIndex(MappingModeler.currentSLSsource, { indexProperties: 1, indexNamedIndividuals: 1 }, () => {
+
+                        $.ajax({
+                            type: "DELETE",
+                            url:  `${Config.apiUrl}/ontologyModels?source=${MappingModeler.currentSLSsource}`,
+                            
+                            dataType: "json",
+                            success: function (result, _textStatus, _jqXHR) {
+                                delete Config.ontologiesVocabularyModels[MappingModeler.currentSLSsource];
+
+                                UI.message('ALL DONE');
+                            },
+                            error: function (err) {
+                                if (callback) {
+                                    return callback(err);
+                                }
+                                UI.message(err.responseText);
+                            },
+                        });
+                        /*
+                        $.ajax(`/api/v1/ontologyModels?source=${MappingModeler.currentSLSsource}`, { method: "DELETE" })
+                            .then((_success) => {
+                                window.UI.message(`${MappingModeler.currentSLSsource} was updated successfully`, true);
+                            })
+                            .catch((error) => {
+                                alert(error);
+                            });*/
+                    });
+                }
             }
         });
     };

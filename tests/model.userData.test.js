@@ -25,9 +25,14 @@ describe("UserDataModel", () => {
 
     beforeAll(() => {
         tracker = createTracker(getKnexConnection);
-
         dbUserData = JSON.parse(fs.readFileSync(
             path.join(__dirname, "data", "config", "users", "userData.json")
+        ));
+        dbUsers = JSON.parse(fs.readFileSync(
+            path.join(__dirname, "data", "config", "users", "users.json")
+        ));
+        dbProfiles = JSON.parse(fs.readFileSync(
+            path.join(__dirname, "data", "config", "profiles.json")
         ));
     });
 
@@ -130,5 +135,57 @@ describe("UserDataModel", () => {
                 }
             }
         }
+    });
+
+    test("find userData", async () => {
+        tracker.on.select("user_data_list").response(dbUserData);
+        const userData = await userDataModel.find(1);
+        expect(userData).toBeTruthy();
+    });
+
+    test("insert userData", async () => {
+        tracker.on.select("user_data_list").response(dbUserData);
+        tracker.on.select("users").response(dbUsers);
+        tracker.on.select("profiles").response(dbProfiles);
+        tracker.on.insert("user_data").response([]);
+
+        const addUserData = {
+            data_path: "data_path",
+            data_type: "data_type",
+            owned_by: "test",
+        }
+        await userDataModel.insert(addUserData);
+
+        const updatedUserData = Array.from(dbUserData);
+        updatedUserData.push(addUserData);
+
+        tracker.reset();
+        tracker.on.select("user_data").response(updatedUserData);
+        const userDatas = await userDataModel.all({login: "test", groups: []});
+        expect(userDatas[0].owned_by).toStrictEqual("test");
+    });
+
+    test("remove userData", async () => {
+        tracker.on.select("user_data").response(dbUserData);
+        tracker.on.delete("user_data").response();
+        const result = await userDataModel.remove(1);
+        expect(result).toBeTruthy();
+    });
+
+    test("update userData", async () => {
+        tracker.on.select("user_data").response(dbUserData);
+        tracker.on.select("users").response(dbUsers);
+        tracker.on.select("profiles").response(dbProfiles);
+        tracker.on.update("user_data").response([]);
+
+        const updateUserData = {
+            id: 3,
+            data_path: "update",
+            data_type: "data_type",
+            owned_by: "owl_user",
+        };
+
+        const result = await userDataModel.update(updateUserData);
+        expect(result).toBeTruthy();
     });
 });

@@ -67,6 +67,7 @@ module.exports = function () {
                 },
             },
         },
+        tags: ["Misc"],
     };
 
     return operations;

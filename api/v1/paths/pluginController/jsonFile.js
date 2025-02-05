@@ -32,6 +32,7 @@ module.exports = function () {
                 schema: {},
             },
         },
+        tags: ["Misc"],
     };
 
     return operations;

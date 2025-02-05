@@ -104,6 +104,7 @@ module.exports = function () {
             },
         ],
         responses: responseSchema("SparqlQueryResponse", "POST"),
+        tags: ["Sparql"],
     };
 
     return operations;

@@ -25,6 +25,7 @@ module.exports = function () {
         responses: responseSchema("PluginConfig", "GET"),
         security: [{ restrictAdmin: [] }],
         summary: "Retrieve the tags of the Git repository",
+        tags: ["Plugins"],
     };
 
     return operations;

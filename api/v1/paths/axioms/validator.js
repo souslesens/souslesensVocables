@@ -71,6 +71,7 @@ module.exports = function () {
                 },
             },
         },
+        tags: ["Axiom"],
     };
 
     return operations;

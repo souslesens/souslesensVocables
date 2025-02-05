@@ -75,6 +75,7 @@ module.exports = function () {
                 },
             },
         },
+        tags: ["ElasticSearch"],
     };
 
     POST.apiDoc = {
@@ -101,6 +102,7 @@ module.exports = function () {
                 },
             },
         },
+        tags: ["ElasticSearch"],
     };
 
     return operations;

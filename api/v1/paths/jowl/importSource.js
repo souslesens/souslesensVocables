@@ -211,6 +211,7 @@ module.exports = function () {
                 description: "Response…",
             },
         },
+        tags: ["JOWL"],
     };
 
     return operations;

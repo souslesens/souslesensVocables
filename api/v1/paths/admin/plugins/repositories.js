@@ -19,6 +19,7 @@ module.exports = function () {
         responses: responseSchema("PluginConfig", "GET"),
         security: [{ restrictAdmin: [] }],
         summary: "Retrieve the plugins repositories",
+        tags: ["Plugins"],
     };
 
     return operations;

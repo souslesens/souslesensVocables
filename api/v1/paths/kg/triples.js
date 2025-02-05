@@ -48,6 +48,7 @@ module.exports = function () {
                 },
             },
         },
+        tags: ["KG"],
     };
 
     DELETE.apiDoc = {
@@ -79,6 +80,7 @@ module.exports = function () {
                 },
             },
         },
+        tags: ["KG"],
     };
     async function DELETE(req, res, next) {
         try {

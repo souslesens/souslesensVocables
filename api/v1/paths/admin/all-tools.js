@@ -19,6 +19,7 @@ module.exports = function () {
         responses: responseSchema("Tools", "GET"),
         security: [{ restrictAdmin: [] }],
         summary: "Returns all existing tools wether they are made available or not",
+        tags: ["Tools"],
     };
 
     return operations;

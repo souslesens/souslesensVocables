@@ -70,6 +70,7 @@ module.exports = function () {
                 },
             },
         },
+        tags: ["Profiles"],
     };
     DELETE.apiDoc = {
         summary: "Delete a specific profile",
@@ -84,6 +85,7 @@ module.exports = function () {
                 },
             },
         },
+        tags: ["Profiles"],
     };
     PUT.apiDoc = {
         summary: "Update Profile",
@@ -98,6 +100,7 @@ module.exports = function () {
                 },
             },
         },
+        tags: ["Profiles"],
     };
 
     return operations;

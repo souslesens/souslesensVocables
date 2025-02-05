@@ -160,6 +160,7 @@ module.exports = function () {
                 },
             },
         },
+        tags: ["ElasticSearch"],
     };
 
     return operations;

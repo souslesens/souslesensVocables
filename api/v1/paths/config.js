@@ -44,6 +44,7 @@ module.exports = function () {
                 },
             },
         },
+        tags: ["Config"],
     };
 
     async function PUT(req, res, next) {
@@ -72,6 +73,7 @@ module.exports = function () {
                 },
             },
         },
+        tags: ["Config"],
     };
 
     return operations;

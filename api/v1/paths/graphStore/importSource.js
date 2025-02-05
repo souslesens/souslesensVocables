@@ -117,6 +117,7 @@ module.exports = function () {
                 description: "Response…",
             },
         },
+        tags: ["Graph"],
     };
 
     return operations;

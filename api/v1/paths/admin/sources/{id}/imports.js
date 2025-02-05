@@ -35,6 +35,7 @@ module.exports = function () {
         responses: {
             200: { description: "results", schema: { type: "object", properties: { result: { type: "string" } } } },
         },
+        tags: ["Sources"],
     };
 
     return operations;

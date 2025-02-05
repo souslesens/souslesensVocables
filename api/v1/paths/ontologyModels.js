@@ -40,6 +40,7 @@ module.exports = function () {
                 },
             },
         },
+        tags: ["Ontology"],
     };
 
     ///// POST api/v1/sources
@@ -90,6 +91,7 @@ module.exports = function () {
                 },
             },
         },
+        tags: ["Ontology"],
     };
     DELETE.apiDoc = {
         summary: "delete ontology model",
@@ -113,6 +115,7 @@ module.exports = function () {
                 },
             },
         },
+        tags: ["Ontology"],
     };
 
     ///// POST api/v1/sources
@@ -160,6 +163,7 @@ module.exports = function () {
                 },
             },
         },
+        tags: ["Ontology"],
     };
 
     async function PUT(req, res, next) {

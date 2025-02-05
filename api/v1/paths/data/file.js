@@ -49,6 +49,7 @@ module.exports = function () {
                 },
             },
         },
+        tags: ["Data"],
     };
 
     function POST(req, res, next) {
@@ -96,6 +97,7 @@ module.exports = function () {
                 },
             },
         },
+        tags: ["Data"],
     };
 
     return operations;

@@ -17,7 +17,13 @@ import UIcontroller from "./uiController.js";
 var MappingsDetails = (function () {
         var self = {};
         var filterMappingIsSample;
+        self.colorsMap={
+            "rdfType":'#33caff',
+            'rdfsLabel':'#33ff36',
+            'transform':'#ffe333',
+            'otherPredicates':'#ca33ff'
 
+        }
         self.showDetailsDialog = function (divId) {
             if (!MappingModeler.currentTable) {
                 return alert("Select a table");
@@ -98,11 +104,18 @@ var MappingsDetails = (function () {
                             rdfsLabel: "rdfs:label",
                             uriType: "uri Type"
                         }
+                       
+                        var color='';
                         for (var key in node.data) {
                             if (predicates[key]) {
+                                if(self.colorsMap[key]){
+                                    color=self.colorsMap[key]
+                                }else{
+                                    color='#3339ff'
+                                }
                                 jstreeData.push({
                                     id: node.id + "|" + key + "|" + node.data[key],
-                                    text: "<span style='color: blue'>" + key + "</span>  " + node.data[key],
+                                    text: "<span style='color: "+color+"'>" + key + "</span>  " + node.data[key],
                                     parent: node.id,
                                 });
                             }
@@ -112,7 +125,7 @@ var MappingsDetails = (function () {
                             node.data.otherPredicates.forEach(function (item) {
                                 jstreeData.push({
                                     id: node.id + "|" + "otherPredicates" + "|" + item.property + "|" + item.object,
-                                    text: "<span style='color: blue'>" + item.property + "</span>  " + item.object,
+                                    text: "<span style='color: "+self.colorsMap['otherPredicates']+"'>" + item.property + "</span>  " + item.object,
                                     parent: node.id,
                                 });
 
@@ -122,7 +135,7 @@ var MappingsDetails = (function () {
                         if(node.data.transform){
                             jstreeData.push({
                                 id: node.id + "|" + "transform" +  "|" + node.data.transform,
-                                text: "<span style='color: blue'>" + 'transform' + "</span>  " + node.data.transform,
+                                text: "<span style='color: "+self.colorsMap['transform']+"'>" + 'transform' + "</span>  " + node.data.transform,
                                 parent: node.id,
                             });
                            
@@ -373,12 +386,18 @@ var MappingsDetails = (function () {
                 });
                 return role;
             }
-
+            var predicates = {
+                "rdf:type":"rdfType",
+                 "rdfs:label":"rdfsLabel",
+                
+            }
             mappings.forEach(function (item, index) {
                 if (!item.s || !item.p || !item.o) {
                     return alert("tripleModel is malformed " + JSON.stringify(item));
                 }
-
+                if(item.p=='transform'){
+                    item.o='transform';
+                }
                 function getNodeAttrs(str) {
                     if (str.indexOf("http") > -1) {
                         return {type: "Class", color: "#00afef", shape: "box", size: 30};
@@ -479,6 +498,13 @@ var MappingsDetails = (function () {
                     }
                     if (!existingNodes[edgeId]) {
                         existingNodes[edgeId] = 1;
+                        if(self.colorsMap[label]){
+                            color=self.colorsMap[label]
+                        }else{
+                            if(predicates[label] && self.colorsMap[predicates[label]]){
+                                color=self.colorsMap[predicates[label]]
+                            }
+                        }
                         visjsData.edges.push({
                             id: edgeId,
                             from: sId,

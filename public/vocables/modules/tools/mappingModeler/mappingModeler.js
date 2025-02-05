@@ -807,7 +807,7 @@ var MappingModeler = (function () {
             },
             color: "#375521",
         };
-        self.addEdge([edge]);
+        MappingColumnsGraph.addEdge([edge]);
         $("#smallDialogDiv").dialog("close");
     };
     self.loadSource = function (callback) {

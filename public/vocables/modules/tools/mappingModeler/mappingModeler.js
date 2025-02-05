@@ -32,7 +32,7 @@ var MappingModeler = (function () {
      * @type {string}
      * @memberof module:MappingModeler
      */
-    self.jstreeDivId = "mappingModeler_jstreeDiv";
+    self.jstreeDivId = "mappingModeler_dataSourcesJstreeDiv";
     /**
      * ID of the legend container.
      * @type {string}

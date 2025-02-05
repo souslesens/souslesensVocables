@@ -218,66 +218,66 @@ var KGbuilder_main = {
 
             async.series([
 // interruption
-                    function(callbackSeries) {
-                        if (KGbuilder_main.stopCreateTriples) {
-                            var message = "mapping " + mappings.table + " : import interrupted by user";
-                            KGbuilder_socket.message(options.clientSocketId, message);
-                            return callbackSeries(message);
-                        }
-                        return callbackSeries();
-                    },
-                    //set triples
-                    function(callbackSeries) {
-                        options.customMetaData = { [KGbuilder_triplesMaker.mappingFilePredicate]: mappings.table };
-                        KGbuilder_triplesMaker.createTriples(mappings, dataSlice, options, function(err, result) {
-                            if (err) {
-                                return callbackSeries(err);
-                            }
-                            triples = result;
-
-                            callbackSeries();
-
-
-                        });
-                    },
-
-
-                    //add metadata
-                    function(callbackSeries) {
-
-                        triples.forEach(function(triple) {
-                            if (!uniqueSubjects[triple.s]) {
-                                uniqueSubjects[triple.s] = 1;
-
-                                triples = triples.concat(KGbuilder_triplesMaker.getMetaDataTriples(triple.s, { mappingTable: mappings.table }));
-                            }
-                        });
-                        callbackSeries();
+                function(callbackSeries) {
+                    if (KGbuilder_main.stopCreateTriples) {
+                        var message = "mapping " + mappings.table + " : import interrupted by user";
+                        KGbuilder_socket.message(options.clientSocketId, message);
+                        return callbackSeries(message);
                     }
+                    return callbackSeries();
+                },
+                //set triples
+                function(callbackSeries) {
+                    options.customMetaData = { [KGbuilder_triplesMaker.mappingFilePredicate]: mappings.table };
+                    KGbuilder_triplesMaker.createTriples(mappings, dataSlice, options, function(err, result) {
+                        if (err) {
+                            return callbackSeries(err);
+                        }
+                        triples = result;
 
-                    ,
+                        callbackSeries();
 
-                    //writeTriples
-                    function(callbackSeries) {
-                        // KGbuilder_socket.message(options.clientSocketId, "table " + mappings.table + " : writing triples:" + triples.length);
+
+                    });
+                },
+
+
+                //add metadata
+                function(callbackSeries) {
+
+                    triples.forEach(function(triple) {
+                        if (!uniqueSubjects[triple.s]) {
+                            uniqueSubjects[triple.s] = 1;
+
+                            triples = triples.concat(KGbuilder_triplesMaker.getMetaDataTriples(triple.s, { mappingTable: mappings.table }));
+                        }
+                    });
+                    callbackSeries();
+                }
+
+                ,
+
+                //writeTriples
+                function(callbackSeries) {
+                   // KGbuilder_socket.message(options.clientSocketId, "table " + mappings.table + " : writing triples:" + triples.length);
 
 //return callbackSeries();
-                        KGbuilder_triplesWriter.writeTriples(triples, mappings.graphUri, mappings.sparqlServerUrl, function(err, result) {
-                            if (err) {
-                                var error = " slice " + sliceIndex + "/" + slices.length + "\n";
-                                KGbuilder_socket.message(options.clientSocketId, error);
-                                return callbackEach(err);
-                            }
-                            sliceIndex += 1;
-                            totalTriples += result;
-                            KGbuilder_socket.message(options.clientSocketId, "table " + mappings.table + " : writen triples:" + totalTriples);
+                    KGbuilder_triplesWriter.writeTriples(triples, mappings.graphUri, mappings.sparqlServerUrl, function(err, result) {
+                        if (err) {
+                            var error = " slice " + sliceIndex + "/" + slices.length + "\n";
+                            KGbuilder_socket.message(options.clientSocketId, error);
+                            return callbackEach(err);
+                        }
+                        sliceIndex += 1;
+                        totalTriples += result;
+                        KGbuilder_socket.message(options.clientSocketId, "table " + mappings.table + " : writen triples:" + totalTriples);
 
-                            callbackSeries();
-                        });
-                    }],
+                        callbackSeries();
+                    });
+                }],
                 function(err) {
-                    callbackEach(err)
-                })
+                callbackEach(err)
+            })
         }, function(err) {
             return callback(err, totalTriples);
         });
@@ -335,7 +335,7 @@ var KGbuilder_main = {
 
                         var mappings;
                         if (options.mappingsFilter) {
-                            //  mappings = JSON.parse(options.mappingsFilter);
+                          //  mappings = JSON.parse(options.mappingsFilter);
                             mappings = options.mappingsFilter;
                         } else {
                             var dataSourceMappingsPath = sourceMappingsDir + datasource + ".json";

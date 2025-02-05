@@ -17,12 +17,35 @@ import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import DataSourceManager from "./dataSourcesManager.js";
 import UIcontroller from "./uiController.js";
 
+
+/**
+ * MappingModeler module.
+ * The MappingModeler tool helps creating new mappings from sources, and visualising and editing these mappings.
+ * @module MappingModeler
+ * @see [Tutorial: Overview]{@tutorial overview}
+ */
 var MappingModeler = (function () {
     var self = {};
 
-
-    self.jstreeDivId = "mappingModeler_dataSourcesJstreeDiv";
+        /**
+     * ID of the tree container.
+     * @type {string}
+     * @memberof module:MappingModeler
+     */
+    self.jstreeDivId = "mappingModeler_jstreeDiv";
+    /**
+     * ID of the legend container.
+     * @type {string}
+     * @memberof module:MappingModeler
+     */
     self.legendGraphDivId = "nodeInfosAxioms_activeLegendDiv";
+
+    /**
+     * Array defining the legend items for the graph.
+     * Each item includes label, color, shape, and size properties.
+     * @type {Array<{label: string, color: string, shape: string, size: number}>}
+     * @memberof module:MappingModeler
+     */
     self.legendItemsArray = [
         //{ label: "Table", color: "#a8da83", shape: "ellipse" },
         {label: "Column", color: "#cb9801", shape: "ellipse", size: 14},
@@ -33,8 +56,26 @@ var MappingModeler = (function () {
         {label: "Class", color: "#00afef", shape: "box"},
 
     ];
+
     self.propertyColor="#409304"
 
+
+    /**
+     * Initializes the MappingModeler module.
+     *
+     * This method performs the following steps in sequence:
+     * 1. Sets up the current source and initializes the UI menu bar.
+     * 2. Loads the source configuration using `DataSourceManager`.
+     * 3. Loads the HTML structure for the graph container.
+     * 4. Initializes an empty VisJS graph canvas.
+     * 5. Loads the VisJS mapping graph with data.
+     * 6. Loads and sets up the lateral panel with tabs and the data source tree.
+     *
+     * @function onLoaded
+     * @memberof module:MappingModeler
+     * @returns {void}
+     * @throws {Error} If any step in the initialization sequence fails.
+     */
     self.onLoaded = function () {
         async.series(
             [
@@ -116,7 +157,30 @@ var MappingModeler = (function () {
             },
         );
     };
+    self.activateRightPanel = function (PanelLabel) {
+        $(".mappingModeler_rightPanel").css("display", "none");
 
+        if (PanelLabel == "Data Sources") {
+            $("#mappingModeler_structuralPanel").css("display", "block");
+        } else if (PanelLabel == "Mappings") {
+            // $("#mappingModeler_mappingsPanel").css("display","block")
+            $("#mappingModeler_structuralPanel").css("display", "block");
+        } else if (PanelLabel == "Triples") {
+            $("#mappingModeler_genericPanel").css("display", "block");
+        } else {
+            $("#mappingModeler_genericPanel").css("display", "block");
+        }
+    };
+
+
+    /**
+     * Loads and initializes a suggestion tree in the specified container.
+     * @function
+     * @name loadSuggestionSelectJstree
+     * @memberof module:MappingModeler
+     * @param {Array<Object>} objects - The objects to populate the tree with.
+     * @param {string} parentName - The name of the parent node.
+     */
     self.loadSuggestionSelectJstree = function (objects, parentName) {
         if ($("#suggestionsSelectJstreeDiv").jstree()) {
             try {
@@ -235,6 +299,13 @@ var MappingModeler = (function () {
         });
     };
 
+    /**
+     * Initializes the active legend for a given container.
+     * @function
+     * @name initActiveLegend
+     * @memberof module:MappingModeler
+     * @param {string} divId - The ID of the container where the legend will be displayed.
+     */
     self.initActiveLegend = function (divId) {
         var options = {
             onLegendNodeClick: self.onLegendNodeClick,
@@ -253,6 +324,13 @@ var MappingModeler = (function () {
         });
     };
 
+    /**
+     * Hides specific resources in the legend based on the resource type.
+     * @function
+     * @name hideForbiddenResources
+     * @memberof module:MappingModeler
+     * @param {string} resourceType - The type of resource to hide.
+     */
     self.hideForbiddenResources = function (resourceType) {
         var hiddenNodes = [];
         if (resourceType == "Table") {
@@ -263,6 +341,14 @@ var MappingModeler = (function () {
         Axiom_activeLegend.hideLegendItems(hiddenNodes);
     };
 
+    /**
+     * Handles the selection of a suggestion from the tree.
+     * @function
+     * @name onSuggestionsSelect
+     * @memberof module:MappingModeler
+     * @param {Object} event - The selection event object.
+     * @param {Object} obj - The selected tree node object.
+     */
     self.onSuggestionsSelect = function (event, obj) {
         if(!DataSourceManager.currentConfig.  currentDataSource )
             return alert("Select a data source")
@@ -299,6 +385,7 @@ var MappingModeler = (function () {
                 },
             };
             MappingColumnsGraph.drawResource(newResource);
+          //  MappingColumnsGraph.graphActions. showColumnDetails(newResource)
             setTimeout(function () {
                 self.onLegendNodeClick({id: "Class"});
             }, 500);
@@ -318,7 +405,7 @@ var MappingModeler = (function () {
             };
 
             MappingColumnsGraph.drawResource(newResource);
-             MappingColumnsGraph.graphActions. showColumnDetails(newResource)
+
             setTimeout(function () {
                 self.onLegendNodeClick({id: "Column"});
             }, 500);
@@ -409,6 +496,20 @@ var MappingModeler = (function () {
     };
 
 
+    /**
+     * Handles a click on a legend node to perform specific actions based on the node type.
+     * @function
+     * @name onLegendNodeClick
+     * @memberof module:MappingModeler
+     * @param {Object} node - The legend node clicked, containing its ID and properties.
+     * @param {Object} event - The click event triggering the action.
+     *
+     * @description
+     * Performs actions such as:
+     * - Creating a specific URI resource.
+     * - Loading suggestions for columns, classes, or properties.
+     * - Managing virtual columns or row indices.
+     */
     self.onLegendNodeClick = function (node, event) {
         if (!node) {
             return;
@@ -513,10 +614,32 @@ var MappingModeler = (function () {
         }
     };
 
-    self.showLegendGraphPopupMenu = function () {
-    };
+        /**
+     * Displays the legend graph popup menu (TO DO).
+     * @function
+     * @name showLegendGraphPopupMenu
+     * @memberof module:MappingModeler
+     */
+    self.showLegendGraphPopupMenu = function () {};
 
 
+    /**
+     * Retrieves all classes from the specified source or the current source if none is provided.
+     * Caches the result to avoid redundant API calls.
+     *
+     * @function
+     * @name get    AllClasses
+     * @memberof module:MappingModeler
+     * @param {string} source - The source to retrieve classes from. Defaults to `self.currentSource` if not provided.
+     * @param {function} callback - Callback function to handle the result. Receives two arguments: error and result.
+     *
+     * @description
+     * - If the classes are already cached in `self.allClasses`, returns the cached list.
+     * - Otherwise, fetches all classes using `CommonBotFunctions.listSourceAllClasses`.
+     * - Filters out duplicate class IDs and formats labels with source prefixes.
+     * - The resulting class list is sorted alphabetically by label.
+     * - Calls the callback with the formatted list or an error if the API call fails.
+     */
     self.getAllClasses = function (source, callback) {
         if (!source) {
             source = MappingModeler.currentSLSsource;
@@ -555,6 +678,33 @@ var MappingModeler = (function () {
             return self.allClasses;
         }
     };
+
+    /**
+     * Retrieves all object properties from the specified source or the current source if none is provided.
+     * Caches the result to avoid redundant API calls.
+     *
+     * @function
+     * @name getAllProperties
+     * @memberof module:MappingModeler
+     * @param {string} source - The source to retrieve properties from. Defaults to `self.currentSource` if not provided.
+     * @param {function} callback - Callback function to handle the result. Receives two arguments: error and result.
+     *
+     * @description
+     * - If the properties are already cached in `self.allProperties`, returns the cached list.
+     * - Otherwise, fetches all object properties using `CommonBotFunctions.listSourceAllObjectProperties`.
+     * - Filters out duplicate property IDs and prepares labels for each property.
+     * - Sorts the resulting property list alphabetically by label.
+     * - Calls the callback with the formatted list or an error if the API call fails.
+     *
+     * @example
+     * self.getAllProperties("mySource", function(err, properties) {
+     *     if (err) {
+     *         console.error(err);
+     *     } else {
+     *         console.log(properties);
+     *     }
+     * });
+     */
     self.getAllProperties = function (source, callback) {
         if (!source) {
             source = MappingModeler.currentSLSsource;
@@ -589,6 +739,23 @@ var MappingModeler = (function () {
             return self.allProperties;
         }
     };
+
+    /**
+     * Hides or shows legend items based on the provided list of nodes to keep visible.
+     *
+     * @function
+     * @name hideLegendItems
+     * @memberof module:MappingModeler
+     * @param {Array} hiddenNodes - Array of node IDs to keep visible. If not provided, all legend items are hidden.
+     *
+     * @description
+     * - Retrieves all legend node IDs from `Axiom_activeLegend.data.nodes`.
+     * - Iterates through each node ID, marking them as `hidden` if they are not in the `hiddenNodes` list.
+     * - Updates the visibility of legend items using `self.updateNode`.
+     *
+     * @example
+     * self.hideLegendItems(["node1", "node2"]);
+     */
     self.hideLegendItems = function (hiddenNodes) {
         var legendNodes = Axiom_activeLegend.data.nodes.getIds();
         var newNodes = [];
@@ -626,6 +793,31 @@ var MappingModeler = (function () {
         common.fillSelectOptions("axioms_legend_suggestionsSelect", filteredItems, false, "label", "id");
     };
 
+    /**
+     * Initializes a map containing all classes and properties for a given source.
+     *
+     * @function
+     * @name initResourcesMap
+     * @memberof module:MappingModeler
+     * @param {string} source - The data source from which resources are fetched.
+     * @param {function} callback - Callback function invoked after resources are initialized. Receives two arguments: error and result.
+     *
+     * @description
+     * - Initializes `self.allResourcesMap` as an empty object.
+     * - Resets `self.allClasses` and `self.allProperties` to `null`.
+     * - Calls `self.getAllClasses` to fetch all classes, adding each to the `self.allResourcesMap` by ID.
+     * - Calls `self.getAllProperties` to fetch all properties, adding each to the `self.allResourcesMap` by ID.
+     * - If a callback is provided, it is invoked after all resources are processed.
+     *
+     * @example
+     * self.initResourcesMap("mySource", function(err, result) {
+     *     if (err) {
+     *         console.error(err);
+     *     } else {
+     *         console.log("Resources initialized:", self.allResourcesMap);
+     *     }
+     * });
+     */
     self.initResourcesMap = function (source, callback) {
         self.allResourcesMap = {};
         self.allClasses = null;
@@ -652,6 +844,22 @@ var MappingModeler = (function () {
         });
     };
 
+    /**
+     * Clears the current graph mappings and resets the graph canvas.
+     *
+     * @function
+     * @name clearMappings
+     * @memberof module:MappingModeler
+     *
+     * @description
+     * - Clears the `visjsGraph` object, which contains the graph visualization data.
+     * - Removes all content from the graph's HTML container using its ID.
+     * - Resets `self.visjsGraph` to `null`.
+     * - Reinitializes an empty graph canvas using `self.drawGraphCanvas` with empty nodes and edges.
+     *
+     * @example
+     * self.clearMappings();
+     */
     self.clearMappings = function () {
 
         $("#" + MappingColumnsGraph.graphDivId).html("");
@@ -659,6 +867,26 @@ var MappingModeler = (function () {
     };
 
 
+    /** 
+     * Displays the create resource bot and starts the resource creation workflow based on the provided resource type.
+     *
+     * @function
+     * @name showCreateResourceBot
+     * @memberof module:MappingModeler
+     *
+     * @param {string} resourceType - The type of resource to create ("Class" or "ObjectProperty").
+     * @param {Array} filteredUris - The URIs to filter the resource creation process.
+     *
+     * @description
+     * - Initializes the workflow for creating a new resource based on the resource type.
+     * - If the resource type is "Class", it uses the `workflowNewClass` workflow, otherwise, if it's "ObjectProperty", it uses the `workflowNewObjectProperty` workflow.
+     * - Updates internal data structures (`allClasses`, `allProperties`, `allResourcesMap`) with the newly created resource.
+     * - Adds the new resource to a suggestion list displayed in a jsTree widget.
+     * - If the resource type is invalid, it alerts the user.
+     *
+     * @example
+     * self.showCreateResourceBot("Class", filteredUris);
+     */
     self.showCreateResourceBot = function (resourceType, filteredUris) {
         var botWorkFlow;
         if (resourceType == "Class") {
@@ -713,6 +941,25 @@ var MappingModeler = (function () {
     };
 
 
+    /**
+     * Sends a request to generate and display sample triples based on the provided mappings.
+     *
+     * @function
+     * @name viewSampleTriples
+     * @memberof module:MappingModeler
+     *
+     * @param {Object} mappings - The mappings to be applied as a filter when generating the sample triples.
+     *
+     * @description
+     * - Constructs a payload with the current source, data source, table name, and options.
+     * - Sends a POST request to the server to generate sample triples based on the provided mappings.
+     * - Displays the generated triples in a data table using `TripleFactory.showTriplesInDataTable`.
+     * - Shows a dialog with the generated triples and allows the user to close the dialog.
+     * - If an error occurs during the request, an alert is shown with the error message.
+     *
+     * @example
+     * self.viewSampleTriples(mappings);
+     */
     self.viewSampleTriples = function (mappings) {
         var options = {};
         if (Config.clientSocketId) {
@@ -752,6 +999,22 @@ var MappingModeler = (function () {
         });
     };
 
+    /**
+     * Filters the suggestion tree based on the input keyword.
+     *
+     * @function
+     * @name filterSuggestionTree
+     * @memberof module:MappingModeler
+     *
+     * @description
+     * - Retrieves the input keyword from the filter field and converts it to lowercase.
+     * - Checks if the suggestion tree data exists and creates a copy of it if necessary.
+     * - Filters the nodes in the suggestion tree, only including leaf nodes whose text contains the keyword.
+     * - Updates the jstree with the filtered nodes using `JstreeWidget.updateJstree`.
+     *
+     * @example
+     * self.filterSuggestionTree();
+     */
     self.filterSuggestionTree = function () {
         var keyword = $("#mappingModeler_suggestionsnput").val();
         var data = $("#suggestionsSelectJstreeDiv").jstree()._model.data;
@@ -783,11 +1046,41 @@ var MappingModeler = (function () {
         JstreeWidget.updateJstree("suggestionsSelectJstreeDiv", newData);
     };
 
+    /**
+     * Opens a dialog displaying a function from an external HTML file.
+     *
+     * @function
+     * @name predicateFunctionShowDialog
+     * @memberof module:MappingModeler
+     *
+     * @description
+     * - Loads the HTML content from `functionDialog.html` into the `#smallDialogDiv` element.
+     * - Opens the dialog to display the loaded content.
+     *
+     * @example
+     * self.predicateFunctionShowDialog();
+     */
     self.predicateFunctionShowDialog = function () {
         $("#smallDialogDiv").load("./modules/tools/mappingModeler/html/functionDialog.html", function () {
             $("#smallDialogDiv").dialog("open");
         });
     };
+
+    /**
+     * Adds a predicate function edge to the current graph.
+     *
+     * @function
+     * @name addPredicateFunction
+     * @memberof module:MappingModeler
+     *
+     * @description
+     * - Creates an edge with a label "_function_" and a diamond-shaped arrow pointing to the target node.
+     * - The edge's data contains the function body retrieved from the `#MappingModeler_fnBody` input field.
+     * - Adds the edge to the graph and then closes the dialog displaying the function input.
+     *
+     * @example
+     * self.addPredicateFunction();
+     */
     self.addPredicateFunction = function () {
         var edge = {
             from: self.currentRelation.from.id,
@@ -810,6 +1103,26 @@ var MappingModeler = (function () {
         MappingColumnsGraph.addEdge([edge]);
         $("#smallDialogDiv").dialog("close");
     };
+
+    /**
+     * Loads the current source data and hides the graph edition buttons.
+     *
+     * @function
+     * @name loadSource
+     * @memberof module:MappingModeler
+     *
+     * @param {Function} callback - The function to be executed once the source is loaded successfully.
+     *
+     * @description
+     * - Uses `Lineage_sources.loadSources` to load the current source specified in `MainController.currentSource`.
+     * - On success, hides the graph edition buttons and calls the provided callback function.
+     * - If an error occurs during the loading process, an alert is displayed with the error message.
+     *
+     * @example
+     * self.loadSource(function() {
+     *   console.log("Source loaded successfully");
+     * });
+     */
     self.loadSource = function (callback) {
         Lineage_sources.loadSources(MainController.currentSource, function (err) {
             if (err) {
@@ -819,6 +1132,31 @@ var MappingModeler = (function () {
             return callback();
         });
     };
+
+    /**
+     * Displays sample data for the selected node with the specified columns.
+     *
+     * @function
+     * @name showSampleData
+     * @memberof module:MappingModeler
+     *
+     * @param {Object} node - The selected node from which to fetch data.
+     * @param {Array|string} columns - The specific columns to display, can be an array or a single column name.
+     * @param {Function} callback - A callback function to be executed after showing the data (optional).
+     *
+     * @description
+     * - Checks if columns are specified and prepares the table accordingly.
+     * - Fetches and displays sample data from either a database or CSV source.
+     * - For a database source, it fetches the first 200 rows based on a predefined SQL query.
+     * - Displays the data in a table with the specified columns.
+     * - Alerts the user if the CSV source is not yet implemented.
+     *
+     * @example
+     * self.showSampleData(node, ['column1', 'column2'], function() {
+     *   console.log("Sample data displayed");
+     * });
+     */
+
     self.showSampleData = function (node, columns, callback) {
         // alert("coming soon");
         if (!columns) {

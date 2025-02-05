@@ -1,11 +1,26 @@
 import MappingsDetails from "./mappingsDetails.js";
 import DataSourceManager from "./dataSourcesManager.js";
 
+
+/**
+ * UIcontroller module manages the display of panels in the mapping modeler interface,
+ * handling tab activation and panel visibility for data sources, column mappings, technical mappings, and triples.
+ * @module UIcontroller
+ * @see [Tutorial: Overview]{@tutorial overview}
+ */
 var UIcontroller=(function(){
 
     var self={}
 
 
+    /**
+     * Handles the activation of left panel tabs in the UI based on the provided tab ID.
+     * It shows or hides the corresponding panels based on the selected tab.
+     * @function
+     * @name onActivateLeftPanelTab
+     * @param {string} tabId - The ID of the tab to activate.
+     * @memberof module:UIcontroller
+     */
     self.onActivateLeftPanelTab=function(tabId){
         $(".mappingModeler_rightPanel").css("display", "none");
      if(tabId=="MappingModeler_dataSourcesTab" ){
@@ -39,7 +54,15 @@ var UIcontroller=(function(){
     }
 
 
-
+    /**
+     * Switches the active left panel tab to the target tab.
+     * It also performs necessary UI updates based on the target tab, such as loading columns or technical mappings.
+     * 
+     * @function
+     * @name switchLeftPanel
+     * @param {string} target - The name of the target tab to activate.
+     * @memberof module:UIcontroller
+     */
     self.switchLeftPanel = function (target) {
         var tabsArray = ["dataSource", "mappings", "triples"];
         if (target == "Column Mappings") {
@@ -55,7 +78,15 @@ var UIcontroller=(function(){
         $("#MappingModeler_leftTabs").tabs("option", "active", tabsArray.indexOf(target));
     };
 
-
+    /**
+     * Activates the specified right panel based on the provided panel label.
+     * It controls the visibility of different right panels like "Data Sources", "Column Mappings", and "Technical Mappings".
+     * 
+     * @function
+     * @name activateRightPanel
+     * @param {string} PanelLabel - The label of the right panel to activate.
+     * @memberof module:UIcontroller
+     */
     self.activateRightPanel = function (PanelLabel) {
         $(".mappingModeler_rightPanel").css("display", "none");
 

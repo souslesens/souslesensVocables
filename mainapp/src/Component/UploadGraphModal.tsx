@@ -145,6 +145,7 @@ export function UploadGraphModal({ onClose, open, sourceName, indexAfterSuccess 
                     window.SearchUtil.generateElasticIndex(sourceName, { indexProperties: 1, indexNamedIndividuals: 1 }, () => {
                         fetch(`/api/v1/ontologyModels?source=${sourceName}`, { method: "DELETE" })
                             .then((_success) => {
+                                delete window.Config.ontologiesVocabularyModels[sourceName];
                                 window.UI.message(`${sourceName} was updated successfully`, true);
                             })
                             .catch((error) => {

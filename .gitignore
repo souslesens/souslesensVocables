@@ -10,6 +10,8 @@ core
 cypress/screenshots/
 cypress/videos/
 
+docs
+out
 
 # Logs
 logs/*.log*
@@ -161,3 +163,4 @@ mainapp/static/assets
 /scripts/personalScripts/
 /plugins/Lifex_cost/
 /plugins/
+/public/tutorials/

@@ -9,6 +9,14 @@ import Sparql_common from "../../sparqlProxies/sparql_common.js";
 var Lineage_createResource = (function () {
     var self = {};
 
+    /**
+     * Displays the dialog for adding a new node to the ontology graph.
+     * Loads the HTML template and initializes necessary UI components.
+     *
+     * @function
+     * @name showAddNodeGraphDialog
+     * @memberof Lineage_createResource
+     */
     self.showAddNodeGraphDialog = function () {
         self.currentResourceTriples = [];
         self.currentResourceUri = null;
@@ -32,6 +40,15 @@ var Lineage_createResource = (function () {
             });
         });
     };
+
+    /**
+     * Initializes the resource creation form.
+     * Resets stored triples, clears input fields, and adjusts UI visibility.
+     *
+     * @function
+     * @name init
+     * @memberof Lineage_createResource
+     */
     self.init = function () {
         self.currentResourceTriples = [];
         self.currentResourceUri = null;
@@ -45,6 +62,15 @@ var Lineage_createResource = (function () {
         $("#lineageCreateResource_labelInput").val("");
     };
 
+    /**
+     * Handles the selection of a resource type (e.g., owl:Class or owl:NamedIndividual).
+     * Adjusts UI elements and predicate settings accordingly.
+     *
+     * @function
+     * @name onSelectResourceType
+     * @memberof Lineage_createResource
+     * @param {string} type - The type of resource to be created (e.g., "owl:Class", "owl:NamedIndividual").
+     */
     self.onSelectResourceType = function (type) {
         //  $("#editPredicate_propertyValue").val(type)
         self.currentResourceType = type;
@@ -68,6 +94,23 @@ var Lineage_createResource = (function () {
             }
         }
     };
+
+    /**
+     * Generates RDF triples for defining a new resource in the ontology.
+     * Creates metadata, type definitions, and relationships based on provided parameters.
+     *
+     * @function
+     * @name getResourceTriples
+     * @memberof Lineage_createResource
+     * @param {string} source - The ontology source in which the resource is created.
+     * @param {string} resourceType - The type of the resource (e.g., "owl:Class", "owl:NamedIndividual").
+     * @param {string} resourceUri - The URI of the resource (if not provided, it will be generated).
+     * @param {string} label - The label of the resource.
+     * @param {string} superClass - The superclass of the resource, if applicable.
+     * @param {string} predicate - The predicate defining the relationship of the resource.
+     * @param {string} object - The object linked to the resource by the predicate.
+     * @returns {Array<Object>} An array of RDF triples representing the new resource.
+     */
     self.getResourceTriples = function (source, resourceType, resourceUri, label, superClass, predicate, object) {
         function getTriple(resourceUri, predicate, object) {
             var triple = {
@@ -116,6 +159,15 @@ var Lineage_createResource = (function () {
         return triples;
     };
 
+    /**
+     * Retrieves the URI for the resource being created.
+     * The URI is determined based on the selected type (specific or random) and the provided label or custom URI.
+     *
+     * @function
+     * @name getResourceUri
+     * @memberof Lineage_createResource
+     * @returns {string} The URI of the resource being created.
+     */
     self.getResourceUri = function () {
         var uriType = $("#lineageCreateResource_creatingNodeUriType").val();
         var specificUri = $("#lineageCreateResource_specificUri").val();
@@ -129,6 +181,15 @@ var Lineage_createResource = (function () {
         return uri;
     };
 
+    /**
+     * Retrieves a list of possible named individuals from the ontology.
+     * The individuals are returned as a key-value map where the key is the individual label, and the value is the URI.
+     *
+     * @function
+     * @name getPossibleNamedIndividuals
+     * @memberof Lineage_createResource
+     * @param {Function} callback - The callback function to handle the result, with signature (error, individuals).
+     */
     self.getPossibleNamedIndividuals = function (callback) {
         var individuals = {};
         //   return callback(null, individuals);
@@ -144,6 +205,14 @@ var Lineage_createResource = (function () {
         });
     };
 
+    /**
+     * Sets the resource triples from the user interface.
+     * Collects the values from the input fields and updates the current resource triples.
+     *
+     * @function
+     * @name setResourceTriplesFromUI
+     * @memberof Lineage_createResource
+     */
     self.setResourceTriplesFromUI = function () {
         var label = $("#lineageCreateResource_labelInput").val();
         var predicate = $("#lineageCreateResource_predicateDiv").html() || $("#editPredicate_propertyValue").val();
@@ -172,6 +241,14 @@ var Lineage_createResource = (function () {
         $("#lineageCreateResource_additionalTripleBtn").css("display", "block");
     };
 
+    /**
+     * Displays the resource triples in the UI for review.
+     * The triples are shown with a remove button for each triple.
+     *
+     * @function
+     * @name showResourceTriples
+     * @memberof Lineage_createResource
+     */
     self.showResourceTriples = function () {
         var num = 0;
         var html = "<b>" + self.currentResourceUri + "</b>";
@@ -194,6 +271,14 @@ var Lineage_createResource = (function () {
         $("#lineageCreateResource_newResourceTiplesDiv").html(html);
     };
 
+    /**
+     * Writes the resource from the UI to the backend by calling the writeResource function.
+     * Displays a success message and adds the resource to the whiteboard once created.
+     *
+     * @function
+     * @name writeResourceFromUI
+     * @memberof Lineage_createResource
+     */
     self.writeResourceFromUI = function () {
         self.writeResource(self.currentSource, self.currentResourceTriples, function (err, result) {
             if (err) {
@@ -212,6 +297,17 @@ var Lineage_createResource = (function () {
         });
     };
 
+    /**
+     * Writes the resource (defined by its triples) to the backend and indexes it.
+     * If the URI already exists, the user is notified to choose a new one.
+     *
+     * @function
+     * @name writeResource
+     * @memberof Lineage_createResource
+     * @param {string} source - The source to which the resource will be written.
+     * @param {Array<Object>} triples - The RDF triples defining the resource.
+     * @param {Function} callback - The callback function to handle the result, with signature (error, resourceUri).
+     */
     self.writeResource = function (source, triples, callback) {
         if (!triples || triples.length == 0) {
             return callback({ responseText: "no predicates for node" });
@@ -264,20 +360,53 @@ var Lineage_createResource = (function () {
         });
     };
 
+    /**
+     * Closes the resource creation dialog.
+     *
+     * @function
+     * @name closeDialog
+     * @memberof Lineage_createResource
+     */
     self.closeDialog = function () {
         $("#LineagePopup").dialog("close");
     };
 
+    /**
+     * Removes a specific triple from the list of resource triples.
+     * The triple is removed both from the data structure and the UI.
+     *
+     * @function
+     * @name removeTriple
+     * @memberof Lineage_createResource
+     * @param {number} index - The index of the triple to remove.
+     */
     self.removeTriple = function (index) {
         self.currentResourceTriples.splice(index, 1);
         $("#triple_" + index).remove();
     };
 
+    /**
+     * Handles the selection of the URI type (specific or random) for the resource.
+     * Shows or hides the specific URI input field based on the selected type.
+     *
+     * @function
+     * @name onselectNodeUriType
+     * @memberof Lineage_createResource
+     * @param {string} uriType - The selected URI type ("specific" or other).
+     */
     self.onselectNodeUriType = function (uryType) {
         var display = uriType == "specific" ? "block" : "none";
         $("#lineageCreateResource_specificUri").css("display", display);
     };
 
+    /**
+     * Displays the form for adding a new predicate to the resource.
+     * Resets the relevant input fields and UI elements to allow predicate creation.
+     *
+     * @function
+     * @name addNewPredicate
+     * @memberof Lineage_createResource
+     */
     self.addNewPredicate = function () {
         $("#editPredicate_propertyDiv").css("display", "block");
         $("#editPredicate_controlsDiv").css("display", "block");
@@ -287,7 +416,16 @@ var Lineage_createResource = (function () {
         $("#editPredicate_objectInput").val("");
         $("#lineageCreateResource_predicateDiv").html("");
     };
+
     self.drawNodeAxioms = function () {};
+
+    /**
+     * Starts the resource creation bot, which automates the creation of resources.
+     * This function initiates the bot with the current source as a parameter.
+     * @function
+     * @name startCreateRessourceBot
+     * @memberof Lineage_createResource
+     */
     self.startCreateRessourceBot = function () {
         CreateResource_bot.start(null, { source: Lineage_sources.activeSource }, function (err, result) {});
     };

@@ -30,7 +30,7 @@ var KGquery = (function () {
     self.classeMap = {};
     self.allPathEdges = {};
     self.isLoaded = false;
-    self.maxResultSizeforLineageViz = 1000;
+    self.maxResultSizeforLineageViz = 3000;
     self.maxOptionalPredicatesInQuery = 10;
     self.pathEdgesColors = ["green", "blue", "orange", "grey", "yellow"];
 

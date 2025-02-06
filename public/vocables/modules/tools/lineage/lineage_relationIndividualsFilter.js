@@ -11,6 +11,14 @@ var Lineage_relationIndividualsFilter = (function () {
     self.filter = "";
     self.individualsFilter = [];
 
+    /**
+     * Initializes the filter UI for relation individuals.
+     * Loads the dialog and sets up event listeners for filtering individuals.
+     * @function
+     * @name init
+     * @memberof Lineage_relationIndividualsFilter
+     * @returns {void}
+     */
     self.init = function () {
         self.filter = "";
         var currentPropertyNode = Lineage_relations.currentPropertyTreeNode;
@@ -38,6 +46,15 @@ var Lineage_relationIndividualsFilter = (function () {
         });
     };
 
+    /**
+     * Searches for individuals belonging to a specific class based on a search term.
+     * Populates a tree structure with the matching individuals.
+     * @function
+     * @name searchClassIndividuals
+     * @memberof Lineage_relationIndividualsFilter
+     * @param {string} term - The search term used to filter individuals.
+     * @returns {void}
+     */
     self.searchClassIndividuals = function (term) {
         var classId = $("#lineage_relationIndividuals_filterRoleSelect").val();
         IndividualValueFilterWidget.getClassLabelsJstreeData(term, classId, function (err, jstreeData) {
@@ -52,6 +69,16 @@ var Lineage_relationIndividualsFilter = (function () {
         });
     };
 
+    /**
+     * Adds an individual filter based on the selected search result.
+     * Updates the filter textarea with the generated SPARQL filter query.
+     * @function
+     * @name addIndividualFilter
+     * @memberof Lineage_relationIndividualsFilter
+     * @param {Object} event - The event object triggered by the selection.
+     * @param {Object} obj - The selected individual node data.
+     * @returns {void}
+     */
     self.addIndividualFilter = function (event, obj) {
         var classId = $("#lineage_relationIndividuals_filterRoleSelect").val();
         var classIndex = $("#lineage_relationIndividuals_filterRoleSelect")[0].selectedIndex;
@@ -78,6 +105,15 @@ var Lineage_relationIndividualsFilter = (function () {
         $("#lineage_relationIndividuals_filterTA").text(message);
     };
 
+    /**
+     * Executes the current filter and applies it to the relation visualization.
+     * Closes the dialog after applying the filter.
+     * @function
+     * @name execFilter
+     * @memberof Lineage_relationIndividualsFilter
+     * @param {string} action - The action to execute after applying the filter.
+     * @returns {void}
+     */
     self.execFilter = function (action) {
         Lineage_relationIndividualsFilter.addRangeAndDomainFilter();
         Lineage_relations.onshowDrawRelationsDialogValidate(action);
@@ -85,6 +121,14 @@ var Lineage_relationIndividualsFilter = (function () {
         $("#mainDialogDiv").dialog("close");
     };
 
+    /**
+     * Adds the range and domain filter to the query.
+     * Updates the internal filter value based on the selected conditions.
+     * @function
+     * @name addRangeAndDomainFilter
+     * @memberof Lineage_relationIndividualsFilter
+     * @returns {void}
+     */
     self.addRangeAndDomainFilter = function () {
         var filter = $("#lineage_relationIndividuals_filterTA").val();
         if (filter) {
@@ -94,6 +138,15 @@ var Lineage_relationIndividualsFilter = (function () {
         }
     };
 
+    /**
+     * Handles the selection of a filter type and updates the UI accordingly.
+     * Allows users to choose between different filtering options.
+     * @function
+     * @name onFilterTypeSelect
+     * @memberof Lineage_relationIndividualsFilter
+     * @param {string} filterType - The type of filter selected (e.g., "searchLabel", "dateRange").
+     * @returns {void}
+     */
     self.onFilterTypeSelect = function (filterType) {
         $(".lineage_relationIndividuals_filterTypeDiv").css("display", "none");
         /*   var classId = $("#lineage_relationIndividuals_filterRoleSelect").val();
@@ -123,6 +176,16 @@ var Lineage_relationIndividualsFilter = (function () {
             PredicatesSelectorWidget.load("lineage_relation_predicateSelectorDiv", Lineage_sources.activeSource, { withOperators: true });
         }
     };
+
+    /**
+     * Sets a date-based filter with the specified precision.
+     * Updates the filter query based on the selected date and precision.
+     * @function
+     * @name setDateFilter
+     * @memberof Lineage_relationIndividualsFilter
+     * @param {string} precision - The level of precision for the date filter (e.g., "day", "month").
+     * @returns {void}
+     */
     self.setDateFilter = function (precision) {
         if (!precision) {
             return;

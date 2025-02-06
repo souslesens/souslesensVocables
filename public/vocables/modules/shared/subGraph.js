@@ -15,6 +15,7 @@ var SubGraph = (function () {
         var uniqueRestrictions = {};
         var allProperties = {};
         var filteredProperties = {};
+        var level = 0;
 
         var filterPropStr = "";
 
@@ -27,6 +28,7 @@ var SubGraph = (function () {
                 function (callbackSeries) {
                     async.whilst(
                         function (callbackTest) {
+                            level += 1;
                             return nClasses > 0;
                         },
 
@@ -52,24 +54,24 @@ var SubGraph = (function () {
                                     if (!item.type) {
                                         return;
                                     }
-                                    console.log(
-                                        Sparql_common.getLabelFromURI(item.s.value) +
-                                            "-->" +
-                                            Sparql_common.getLabelFromURI(item.o.value) +
-                                            "--" +
-                                            (item.property ? Sparql_common.getLabelFromURI(item.property.value) : "") +
-                                            "--" +
-                                            (item.targetClass ? Sparql_common.getLabelFromURI(item.targetClass.value) : ""),
-                                    );
+                                    /*  console.log(
+                                            Sparql_common.getLabelFromURI(item.s.value) +
+                                                "-->" +
+                                                Sparql_common.getLabelFromURI(item.o.value) +
+                                                "--" +
+                                                (item.property ? Sparql_common.getLabelFromURI(item.property.value) : "") +
+                                                "--" +
+                                                (item.targetClass ? Sparql_common.getLabelFromURI(item.targetClass.value) : "")
+                                        );*/
 
                                     if (item.type.value.endsWith("Class")) {
                                         if (!allClasses[item.s.value]) {
-                                            allClasses[item.s.value] = { ancestors: [] };
+                                            allClasses[item.s.value] = { ancestors: [], level: level };
                                             currentClasses.push(item.s.value);
                                         }
                                         if (!allClasses[item.o.value]) {
                                             currentClasses.push(item.o.value);
-                                            allClasses[item.o.value] = { ancestors: [] };
+                                            allClasses[item.o.value] = { ancestors: [], level: level };
                                         }
                                         if (allClasses[item.s.value].ancestors.indexOf(item.o.value) < 0) {
                                             allClasses[item.s.value].ancestors.push(item.o.value);
@@ -99,7 +101,7 @@ var SubGraph = (function () {
 
                                         if (item.targetClass) {
                                             if (!allClasses[item.targetClass.value]) {
-                                                allClasses[item.targetClass.value] = { ancestors: [] };
+                                                allClasses[item.targetClass.value] = { ancestors: [], level: level };
                                                 currentClasses.push(item.targetClass.value);
                                             }
                                         }
@@ -195,48 +197,105 @@ var SubGraph = (function () {
         return nodesMap;
     };
 
-    self.instantiateSubGraph = function (sourceLabel, classUri, options, callback) {
-        if (!classUri) {
-            classUri = "http://tsf/resources/ontology/DEXPIProcess_gfi_2/TransportingFluidsActivity";
+    /**
+     * extract inerited restrictions  starting from a Class  and build triples that instantiate the generated graph
+     *
+     * @param sourceLabel
+     * @param classUri
+     * @param options
+     * @param callback
+     */
+    self.instantiateSubGraphTriples = function (sourceLabel, classUri, options, callback) {
+        var grahUri = Config.sources[sourceLabel].graphUri;
+        grahUri += grahUri.endsWith("/") ? "" : "/";
+        var triples = [];
+        var uniqueResources = {};
+        var classesDictionary = {};
+
+        function getResourceUri() {
+            return grahUri + common.getRandomHexaId(10);
+        }
+
+        function getCardinalityRange(restrictionTarget) {
+            var str = restrictionTarget.cardinalityType;
+            if (!str) {
+                return { min: 1, max: 1 };
+            }
+            str = restrictionTarget.cardinalityValue.substring(0, 1);
+            var value = parseInt(str);
+
+            // to be refined later
+            if (restrictionTarget.cardinalityType.endsWith("ardinality")) {
+                return { min: value, max: value };
+            }
+        }
+
+        function registerIndividual(classUri) {
+            if (uniqueResources[classUri]) {
+                return uniqueResources[classUri];
+            }
+            var uri = classUri + "#" + common.getRandomHexaId(10);
+            uniqueResources[classUri] = uri;
+            triples.push({
+                subject: uri,
+                predicate: "rdf:type",
+                object: classUri,
+            });
+            if (classesDictionary[classUri]) {
+                var label = classesDictionary[classUri].label;
+                if (label) {
+                    triples.push({
+                        subject: uri,
+                        predicate: "rdfs:label",
+                        object: ":" + label,
+                    });
+                }
+            }
+            return uri;
         }
 
         self.getSubGraphResources(sourceLabel, classUri, options, function (err, result) {
-            var resources = result.classes.concat(result.restrictions);
-            // return;
-            self.getResourcesPredicates(sourceLabel, resources, "SELECT", {}, function (err, result) {
-                var itemsMap = self.rawTriplesToNodesMap(result);
-                var newTriples = [];
-                // var prefix=Config.sources[sourceLabel].graphUri
-                for (var classUri in itemsMap) {
-                    var id = classUri; //+"/"+common.getRandomHexaId(5)
-                    var item = itemsMap[classUri];
-                    if (item.type == "Class") {
-                        newTriples.push({
-                            subject: id,
-                            predicate: "rdf:type",
-                            object: classUri,
-                        });
-                        newTriples.push({
-                            subject: id,
-                            predicate: "rdfs:label",
-                            object: item.label,
-                        });
-                        if (item.restrictions) {
-                            item.restrictions.forEach(function (restriction) {
-                                var restriction = itemsMap[item.restriction];
-                                if (restriction) {
-                                    newTriples.push({
-                                        subject: id,
-                                        predicate: restriction.property,
-                                        object: restriction.range,
-                                    });
-                                }
-                            });
-                        }
+            if (err) {
+                return callback(err);
+            }
+            classesDictionary = result.classes;
+            var subClassesMap = {};
+            for (var classUri in result.classes) {
+                var ancestors = result.classes[classUri].ancestors;
+                ancestors.forEach(function (ancestor) {
+                    if (!subClassesMap[ancestor]) {
+                        subClassesMap[ancestor] = [];
                     }
+                    subClassesMap[ancestor].push(classUri);
+                });
+            }
+
+            for (var classUri in result.restrictions) {
+                var subjectUri = registerIndividual(classUri);
+
+                var propUris = result.restrictions[classUri];
+                for (var propUri in propUris) {
+                    var predicateUri = propUri;
+                    result.restrictions[classUri][propUri].forEach(function (item) {
+                        var range = getCardinalityRange(item);
+                        ///  for (var i = range.min; i <= range.max; i++) {
+
+                        for (var i = 1; i <= 1; i++) {
+                            var objectUri = registerIndividual(item.targetClass);
+                            if (!subClassesMap[item.targetClass]) {
+                                // if a subClass is not present in the graph
+                                triples.push({
+                                    subject: subjectUri,
+                                    predicate: predicateUri,
+                                    object: objectUri,
+                                });
+                            }
+                        }
+                    });
                 }
-                return callback(null, newTriples);
-            });
+            }
+
+            return callback(null, { triples: triples, classes: result.classes });
         });
     };
 
@@ -387,20 +446,237 @@ var SubGraph = (function () {
         );
     };
 
-    self.getSubGraphTurtles = function (sourceLabel, options, classUri) {
-        if (!classUri) {
-            classUri = "http://tsf/resources/ontology/DEXPIProcess_gfi_2/TransportingFluidsActivity";
-        }
+    self.getSubGraphRDF = function (sourceLabel, processClass, options, callback) {
+        SubGraph.instantiateSubGraphTriples(sourceLabel, processClass, options, function (err, result) {
+            var triples = result.triples;
 
-        self.instantiateSubGraph(sourceLabel, classUri, function (err, result) {});
+            const params = new URLSearchParams({
+                triples: "ddccc",
+            });
+            UI.message("generating manchester syntax ");
+            $.ajax({
+                type: "GET",
+                url: Config.apiUrl + "/triples2rdf?" + params.toString(),
+                dataType: "json",
 
-        return;
-        self.getSubGraphResources(sourceLabel, classUri, options, function (err, result) {
-            var resources = result.classes.concat(result.restrictions);
-            self.getResourcesPredicates(sourceLabel, resources, "SELECT", null, function (err, result) {
-                console.log(result);
+                success: function (data, _textStatus, _jqXHR) {
+                    return data.output;
+                },
+                error(err) {
+                    UI.message("", true);
+                    callback(err.responseText);
+                },
             });
         });
+    };
+
+    self.getSubGraphVisjsData = function (sourceLabel, processClass, options, callback) {
+        SubGraph.instantiateSubGraphTriples(sourceLabel, processClass, options, function (err, result) {
+            if (err) {
+                return callback(err);
+            }
+            var labelsMap = {};
+            var typesMap = {};
+            var qualitiesMap = {};
+            var triples = result.triples;
+            var classes = result.classes;
+
+            triples.forEach(function (triple) {
+                if (triple.predicate == "rdfs:label") {
+                    labelsMap[triple.subject] = triple.object;
+                }
+                if (triple.predicate == "rdf:type") {
+                    typesMap[triple.subject] = triple.object;
+                }
+                if (triple.predicate == "rdf:type") {
+                    typesMap[triple.subject] = triple.object;
+                }
+                if (triple.predicate.endsWith("hasPhysicalQuantity")) {
+                    if (!qualitiesMap[triple.subject]) {
+                        qualitiesMap[triple.subject] = {};
+                    }
+                    qualitiesMap[triple.subject][triple.object] = "?";
+                }
+            });
+
+            var visjsData = { nodes: [], edges: [] };
+            var uniqueIds = {};
+
+            var getLevel = function (uri) {
+                var classUri = uri.substring(0, uri.lastIndexOf("#"));
+                var level = 0;
+                if (classUri == processClass) {
+                    return 0;
+                }
+                if (classes[classUri]) {
+                    level = classes[classUri].level || 0;
+                }
+                return level;
+            };
+
+            var colorsMap = {
+                Material: "#3892ca",
+                Energy: "#07b611",
+            };
+
+            var levelShapes = ["box", "box", "box", "box", "box", "box", "box", "box"];
+
+            function getNodeColor(uri) {
+                var color = "#ddd";
+                for (var key in colorsMap) {
+                    if (uri.indexOf(key) > -1) {
+                        color = colorsMap[key];
+                    }
+                }
+                return color;
+            }
+
+            triples.forEach(function (triple) {
+                if (triple.predicate == "rdfs:label") {
+                    return;
+                }
+                if (triple.predicate == "rdf:type") {
+                    return;
+                }
+
+                if (triple.predicate.endsWith("hasPhysicalQuantity")) {
+                    return;
+                }
+
+                if (!uniqueIds[triple.subject]) {
+                    var level = getLevel(triple.subject);
+                    uniqueIds[triple.subject] = 1;
+                    visjsData.nodes.push({
+                        id: triple.subject,
+                        label: labelsMap[triple.subject],
+                        shape: levelShapes[level],
+                        level: level,
+                        color: getNodeColor(triple.subject),
+                        data: {
+                            id: triple.subject,
+                            label: labelsMap[triple.subject],
+                            type: typesMap[triple.subject],
+                            qualities: qualitiesMap[triple.subject],
+                        },
+                    });
+                }
+
+                if (!uniqueIds[triple.object]) {
+                    var level = getLevel(triple.object);
+                    uniqueIds[triple.object] = 1;
+                    visjsData.nodes.push({
+                        id: triple.object,
+                        label: labelsMap[triple.object],
+                        shape: levelShapes[level],
+                        level: level,
+                        color: getNodeColor(triple.object),
+                        data: {
+                            id: triple.object,
+                            label: labelsMap[triple.object],
+                            type: typesMap[triple.object],
+                        },
+                    });
+                }
+                visjsData.edges.push({
+                    from: triple.subject,
+                    to: triple.object,
+                    label: Sparql_common.getLabelFromURI(triple.predicate),
+                    arrows: { to: true },
+                });
+            });
+
+            var graphOptions = {
+                keepNodePositionOnDrag: true,
+                layoutHierarchical: {
+                    direction: "UD",
+                    nodeSpacing: 200,
+                    levelSeparation: 70,
+                },
+                /* physics: {
+            enabled:true},*/
+
+                visjsOptions: {
+                    edges: {
+                        smooth: false,
+                        /* smooth: {
+                                type: "cubicBezier",
+                                // type: "diagonalCross",
+                                forceDirection: "horizontal",
+                                roundness: 0.4,
+                            },*/
+                    },
+                },
+            };
+            var position = { x: 0, y: 0 };
+            var nodeSpacing = 150;
+            var levelSpacing = 50;
+            //   self.setHierachicalLayout(visjsData, position, nodeSpacing, levelSpacing)
+
+            if (callback) {
+                return callback(null, { visjsData: visjsData, graphOptions: graphOptions });
+            } else {
+                self.visjsGraph = new VisjsGraphClass(options.graphDiv, visjsData, graphOptions);
+                self.visjsGraph.draw(function () {});
+            }
+        });
+        return;
+    };
+
+    self.setHierachicalLayout = function (visjsData, topPosition, nodeSpacing, levelSpacing) {
+        var levelsMap = {};
+        var groupId = "group_" + common.getRandomHexaId(5);
+        var edgesToMap = {};
+        var edgesFromMap = {};
+        var nodesMap = {};
+
+        visjsData.nodes.forEach(function (node) {
+            nodesMap[node.id] = node;
+        });
+        visjsData.edges.forEach(function (edge) {
+            edgesToMap[edge.to] = nodesMap[edge.from];
+            if (!edgesFromMap[edge.to]) edgesFromMap[edge.from] = [];
+            edgesFromMap[edge.from].push(edge.to);
+        });
+
+        visjsData.nodes.forEach(function (node) {
+            if (!levelsMap[node.level]) {
+                levelsMap[node.level] = [];
+            }
+
+            levelsMap[node.level].push(node);
+        });
+
+        var nLevels = Object.keys(levelsMap).length;
+        for (var level = 0; level < nLevels; level++) {
+            var nodes = levelsMap[level];
+
+            nodes.sort(function (a, b) {
+                if (a.id.indexOf("PortIn") > -1) {
+                    return 1;
+                }
+                if (a.id.indexOf("Connection") > -1) {
+                    return -1;
+                }
+                return 0;
+            });
+            nodes.forEach(function (node, index) {
+                var nSiblings;
+                var parentNodeX;
+                if (index == 0) {
+                    nSiblings = 0;
+                    parentNodeX = topPosition.x;
+                } else {
+                    var parentNode = edgesToMap[node.id];
+
+                    var nSiblings = edgesFromMap[parentNode.id].length;
+                    parentNodeX = parentNode.x;
+                }
+                node.x = parentNodeX + nodeSpacing * index; //- ((nodes.length * nodeSpacing) / 2)
+                node.y = topPosition.y + levelSpacing * level;
+                node.fixed = { x: true, y: true };
+                node.group = groupId;
+            });
+        }
     };
 
     return self;

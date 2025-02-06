@@ -178,6 +178,9 @@ var JstreeWidget = (function () {
                 if (!options.doNotAdjustDimensions) {
                     JstreeWidget.setTreeParentDivDimensions(jstreeDiv);
                 }
+                if (options.check_all) {
+                    self.checkAll();
+                }
                 if (callback) {
                     if (jstreeData) {
                         callback(jstreeData);

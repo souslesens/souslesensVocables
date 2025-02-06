@@ -40,23 +40,26 @@ var Containers_widget = (function () {
         if (!source) {
             source = Lineage_sources.activeSource;
         }
-        //  self.currentSource = source;
-        Containers_graph.getContainerTypes(source, null, function (err, types) {
-            if (err) {
-                return alert(err.responseText);
-            }
 
+        //  self.currentSource = source;
+
+        var rootNodes = JstreeWidget.getNodeDescendants("lineage_containers_containersJstree", "#", 1);
+
+        $("#smallDialogDiv").dialog("open");
+        $("#smallDialogDiv").dialog("option", "title", "Parent Containers Type");
+        $("#smallDialogDiv").load("./modules/tools/lineage/html/parentContainers.html", function () {
+            rootNodes;
+            var types = [];
             types.splice(0, 0, { id: "all", label: "all" });
-            $("#containerSearchWidget_typesSelect").css("display", "block");
-            $("#smallDialogDiv").dialog("open");
-            $("#smallDialogDiv").dialog("option", "title", "Parent Containers Type");
-            $("#smallDialogDiv").load("./modules/tools/lineage/html/parentContainers.html", function () {
-                common.fillSelectOptions("containerSearchWidget_typesSelect", types, true, "label", "id");
-                $("#containerSearchWidget_typesSelect").val("all");
-                //$("#containerSearchWidget_typesSelect").hide();
-                //self.execParentContainersSearch();
+            rootNodes.forEach(function (item) {
+                types.push({ id: item.id, label: item.text });
             });
+            common.fillSelectOptions("containerSearchWidget_typesSelect", types, true, "label", "id");
+            $("#containerSearchWidget_typesSelect").val("all");
+            //$("#containerSearchWidget_typesSelect").hide();
+            //self.execParentContainersSearch();
         });
+        // });
     };
 
     self.execParentContainersSearch = function () {

@@ -7,6 +7,13 @@ var Lineage_relationFilter = (function () {
     var self = {};
     var restrictions = null;
     var constraints = null;
+
+    /**
+     * @function showAddFilterDiv
+     * @memberof Lineage_relationFilter
+     * @description Affiche l'interface utilisateur pour ajouter un filtre sur une relation.
+     * @param {boolean} clear - Indique si la propriété actuelle doit être réinitialisée.
+     */
     self.showAddFilterDiv = function (clear) {
         if (clear) {
             self.currentProperty = null;
@@ -115,6 +122,12 @@ var Lineage_relationFilter = (function () {
         $("#Lineage_relation_property").html(propStr);
     };
 
+    /**
+     * @function onSelectRoleType
+     * @memberof Lineage_relationFilter
+     * @description Gère la sélection d'un type de rôle (sujet ou objet) pour le filtre.
+     * @param {string} role - Le rôle sélectionné ("subject" ou "object").
+     */
     self.onSelectRoleType = function (role) {
         self.currentResourceFilterRole = role;
         $("#lineage_relation_filterRole").html(role);
@@ -199,6 +212,12 @@ var Lineage_relationFilter = (function () {
     }
   };*/
 
+    /**
+     * @function onCommonUIWidgetSelectObjectValue
+     * @memberof Lineage_relationFilter
+     * @description Applique un formatage spécifique à la valeur sélectionnée en fonction de son type.
+     * @param {string} value - La valeur sélectionnée.
+     */
     self.onCommonUIWidgetSelectObjectValue = function (value) {
         if (value.indexOf("xsd") == 0) {
             if (value == "xsd:dateTime") {
@@ -210,6 +229,11 @@ var Lineage_relationFilter = (function () {
         }
     };
 
+    /**
+     * @function addFilter
+     * @memberof Lineage_relationFilter
+     * @description Ajoute un filtre basé sur la propriété et la valeur sélectionnées.
+     */
     self.addFilter = function () {
         var role = $("#lineage_relation_filterRoleSelect2").val();
         if (!role) role = "subject";

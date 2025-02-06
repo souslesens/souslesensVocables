@@ -513,6 +513,13 @@ var Axiom_activeLegend = (function () {
         $("#smallDialogDiv").dialog("open");
     };
 
+    /**
+     *
+     * @param {*} graphLegendDiv
+     * @param {*} legendItems
+     * @param {{horizontal: string, xOffset: string, onLegendNodeClick: string, showLegendGraphPopupMenu: string}} options:
+     * @param {*} callback
+     */
     self.drawLegend = function (graphLegendDiv, legendItems, options, callback) {
         if (!options) {
             options = {};

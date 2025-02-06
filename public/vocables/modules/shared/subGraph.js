@@ -2,6 +2,7 @@ import Sparql_proxy from "../sparqlProxies/sparql_proxy.js";
 import Sparql_common from "../sparqlProxies/sparql_common.js";
 import Shacl from "./shacl.js";
 
+
 var SubGraph = (function () {
         var self = {};
 
@@ -15,7 +16,7 @@ var SubGraph = (function () {
             var uniqueRestrictions = {};
             var allProperties = {};
             var filteredProperties = {};
-            var level=0
+            var level = 0
 
             var filterPropStr = "";
 
@@ -28,7 +29,7 @@ var SubGraph = (function () {
                     function (callbackSeries) {
                         async.whilst(
                             function (callbackTest) {
-                                level+=1
+                                level += 1
                                 return nClasses > 0;
                             },
 
@@ -66,12 +67,12 @@ var SubGraph = (function () {
 
                                         if (item.type.value.endsWith("Class")) {
                                             if (!allClasses[item.s.value]) {
-                                                allClasses[item.s.value] = {ancestors: [],level:level};
+                                                allClasses[item.s.value] = {ancestors: [], level: level};
                                                 currentClasses.push(item.s.value);
                                             }
                                             if (!allClasses[item.o.value]) {
                                                 currentClasses.push(item.o.value);
-                                                allClasses[item.o.value] = {ancestors: [],level:level};
+                                                allClasses[item.o.value] = {ancestors: [], level: level};
                                             }
                                             if (allClasses[item.s.value].ancestors.indexOf(item.o.value) < 0) {
                                                 allClasses[item.s.value].ancestors.push(item.o.value);
@@ -101,7 +102,7 @@ var SubGraph = (function () {
 
                                             if (item.targetClass) {
                                                 if (!allClasses[item.targetClass.value]) {
-                                                    allClasses[item.targetClass.value] = {ancestors: [],level:level};
+                                                    allClasses[item.targetClass.value] = {ancestors: [], level: level};
                                                     currentClasses.push(item.targetClass.value);
                                                 }
                                             }
@@ -235,11 +236,11 @@ var SubGraph = (function () {
 
 
             function registerIndividual(classUri) {
-                if(uniqueResources[classUri]){
+                if (uniqueResources[classUri]) {
                     return uniqueResources[classUri]
                 }
                 var uri = classUri + "#" + common.getRandomHexaId(10);
-                uniqueResources[classUri]=uri
+                uniqueResources[classUri] = uri
                 triples.push({
                     subject: uri,
                     predicate: "rdf:type",
@@ -258,11 +259,25 @@ var SubGraph = (function () {
                 return uri
             }
 
+
             self.getSubGraphResources(sourceLabel, classUri, options, function (err, result) {
                 if (err) {
                     return callback(err)
                 }
-                classesDictionary = result.classes
+                classesDictionary = result.classes;
+                var subClassesMap = {}
+                for (var classUri in result.classes) {
+                    var ancestors = result.classes[classUri].ancestors
+                    ancestors.forEach(function (ancestor) {
+                        if (!subClassesMap[ancestor]) {
+                            subClassesMap[ancestor] = []
+                        }
+                        subClassesMap[ancestor].push(classUri)
+                    })
+
+
+                }
+
 
                 for (var classUri in result.restrictions) {
                     var subjectUri = registerIndividual(classUri)
@@ -272,15 +287,17 @@ var SubGraph = (function () {
                         var predicateUri = propUri
                         result.restrictions[classUri][propUri].forEach(function (item) {
                             var range = getCardinalityRange(item)
-                          ///  for (var i = range.min; i <= range.max; i++) {
+                            ///  for (var i = range.min; i <= range.max; i++) {
+
                             for (var i = 1; i <= 1; i++) {
                                 var objectUri = registerIndividual(item.targetClass)
-
-                                triples.push({
-                                    subject: subjectUri,
-                                    predicate: predicateUri,
-                                    object: objectUri,
-                                })
+                                if (!subClassesMap[item.targetClass]) {// if a subClass is not present in the graph
+                                    triples.push({
+                                        subject: subjectUri,
+                                        predicate: predicateUri,
+                                        object: objectUri,
+                                    })
+                                }
 
                             }
 
@@ -291,7 +308,7 @@ var SubGraph = (function () {
 
                 }
 
-                return callback(null, {triples:triples,classes:result.classes});
+                return callback(null, {triples: triples, classes: result.classes});
             })
         }
 
@@ -442,6 +459,184 @@ var SubGraph = (function () {
                 }
             );
         };
+
+
+        self.getSubGraphRDF = function (sourceLabel, processClass, options, callback) {
+
+            SubGraph.instantiateSubGraphTriples(sourceLabel, processClass, options, function (err, result) {
+                var triples = result.triples
+
+                const params = new URLSearchParams({
+                    triples:"ddccc"
+                });
+                UI.message("generating manchester syntax ");
+                $.ajax({
+                    type: "GET",
+                    url: Config.apiUrl + "/triples2rdf?" + params.toString(),
+                    dataType: "json",
+
+                    success: function (data, _textStatus, _jqXHR) {
+                        return data.output
+                    },
+                    error(err) {
+                        UI.message("", true);
+                        callback(err.responseText);
+                    },
+                })
+            })
+        }
+
+        self.getSubGraphVisjsData = function (sourceLabel, processClass, options, callback) {
+            SubGraph.instantiateSubGraphTriples(sourceLabel, processClass, options, function (err, result) {
+                if (err) {
+                    return callback(err);
+                }
+                var labelsMap = {}
+                var triples = result.triples;
+                var classes = result.classes
+
+                triples.forEach(function (triple) {
+                    if (triple.predicate == "rdfs:label") {
+                        labelsMap[triple.subject] = triple.object
+                    }
+                })
+
+                var visjsData = {nodes: [], edges: []};
+                var uniqueIds = {}
+
+                var getLevel = function (uri) {
+                    var classUri = uri.substring(0, uri.lastIndexOf("#"))
+                    var level = 0;
+                    if (classUri == processClass) {
+                        return 0;
+                    }
+                    if (classes[classUri]) {
+                        level = classes[classUri].level || 0
+                    }
+                    return level
+                }
+
+                var colorsMap = {
+                    "Material": "#3892ca",
+                    "Energy": "#07b611",
+                }
+
+                var levelShapes = [
+                    "box",
+                    "box",
+                    "box",
+                    "box",
+                    "box",
+                    "box",
+                    "box",
+                    "box",
+                ]
+
+                function getNodeColor(uri) {
+                    var color = "#ddd";
+                    for (var key in colorsMap) {
+
+                        if (uri.indexOf(key) > -1) {
+                            color = colorsMap[key]
+                        }
+                    }
+                    return color
+                }
+
+
+                triples.forEach(function (triple) {
+                    if (triple.predicate == "rdfs:label") {
+                        return;
+                    }
+                    if (triple.predicate == "rdf:type") {
+                        return;
+
+
+                    }
+
+                    if (triple.predicate.endsWith("hasPhysicalQuantity")) {
+                        return
+                    }
+
+
+                    if (!uniqueIds[triple.subject]) {
+                        var level = getLevel(triple.subject)
+                        uniqueIds[triple.subject] = 1
+                        visjsData.nodes.push({
+                            id: triple.subject,
+                            label: labelsMap[triple.subject],
+                            shape: levelShapes[level],
+                            level: level,
+                            color: getNodeColor(triple.subject)
+                        })
+
+                    }
+
+                    if (!uniqueIds[triple.object]) {
+                        var level = getLevel(triple.object)
+                        uniqueIds[triple.object] = 1
+                        visjsData.nodes.push({
+                            id: triple.object,
+                            label: labelsMap[triple.object],
+                            shape: levelShapes[level],
+                            level: level,
+                            color: getNodeColor(triple.object)
+                        })
+
+                    }
+                    visjsData.edges.push({
+                        from: triple.subject,
+                        to: triple.object,
+                        label: Sparql_common.getLabelFromURI(triple.predicate),
+                        arrows: {to: true}
+                    })
+
+                })
+
+                var graphOptions = {
+                    keepNodePositionOnDrag: true,
+                    layoutHierarchical: {
+                        direction: "UD",
+                        nodeSpacing: 200,
+                        levelSeparation: 70
+
+                    },
+                    /* physics: {
+            enabled:true},*/
+
+                    visjsOptions: {
+                        edges: {
+                            smooth: {
+                                type: "cubicBezier",
+                                // type: "diagonalCross",
+                                forceDirection: "horizontal",
+                                roundness: 0.4,
+                            },
+
+                        },
+
+                    },
+
+
+                };
+
+
+                if (callback) {
+                    return callback(null, {visjsData: visjsData, graphOptions: graphOptions});
+                } else {
+                    self.visjsGraph = new VisjsGraphClass(options.graphDiv, visjsData, graphOptions);
+                    self.visjsGraph.draw(function () {
+                    });
+                }
+
+
+            })
+            return;
+        }
+
+
+
+
 
 
         return self;

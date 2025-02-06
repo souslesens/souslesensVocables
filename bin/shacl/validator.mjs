@@ -1,6 +1,20 @@
 import rdf from '@zazuko/env-node'
 import SHACLValidator from 'rdf-validate-shacl'
 
+
+
+
+var Validator={
+    test:function(){
+        return "eee"
+    }
+
+}
+
+export default Validator
+
+
+
 async function main() {
     const shapes = await rdf.dataset().import(rdf.fromFile('D:\\projects\\sls-shacl\\rdf\\exampleShapes.ttl'))
     const data = await rdf.dataset().import(rdf.fromFile('D:\\projects\\sls-shacl\\rdf\\exampleData.ttl'))
@@ -98,4 +112,4 @@ function getConstraintsMap(){
 
 
 
-getConstraintsMap()
+//getConstraintsMap()

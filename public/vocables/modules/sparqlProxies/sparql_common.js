@@ -766,6 +766,11 @@ var Sparql_common = (function () {
         return parseInt(valueStr);
     };
 
+
+
+    
+
+
     return self;
 })();
 

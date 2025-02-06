@@ -631,12 +631,13 @@ var SubGraph = (function () {
 
                     visjsOptions: {
                         edges: {
-                            smooth: {
+                            smooth:false
+                           /* smooth: {
                                 type: "cubicBezier",
                                 // type: "diagonalCross",
                                 forceDirection: "horizontal",
                                 roundness: 0.4,
-                            },
+                            },*/
 
                         },
 
@@ -688,12 +689,24 @@ var SubGraph = (function () {
                 if (!levelsMap[node.level]) {
                     levelsMap[node.level] = []
                 }
+
                 levelsMap[node.level].push(node)
             })
+
 
             var nLevels = Object.keys(levelsMap).length
             for (var level = 0; level < nLevels; level++) {
                 var nodes = levelsMap[level];
+
+                nodes.sort(function(a,b){
+                    if(a.id.indexOf("PortIn")>-1){
+                        return 1;
+                    }
+                    if(a.id.indexOf("Connection")>-1){
+                        return -1;
+                    }
+                    return 0;
+                })
                 nodes.forEach(function (node, index) {
                     var nSiblings;
                     var parentNodeX

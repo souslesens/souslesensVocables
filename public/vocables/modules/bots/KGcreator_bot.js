@@ -551,7 +551,7 @@ var KGcreator_bot = (function () {
                         p: "rdfs:label",
                         o: classLabelColumn,
                         isString: true,
-                    }
+                    },
                 );
                 return self.functions.saveFn();
             }

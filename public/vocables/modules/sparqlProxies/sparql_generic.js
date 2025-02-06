@@ -173,7 +173,7 @@ var Sparql_generic = (function () {
             },
             function (err) {
                 return callback(err, bulkResult);
-            }
+            },
         );
     };
 
@@ -225,7 +225,7 @@ var Sparql_generic = (function () {
             },
             function (err) {
                 return callback(err, bulkResult);
-            }
+            },
         );
     };
 
@@ -369,7 +369,7 @@ var Sparql_generic = (function () {
             },
             function (err) {
                 return callback(err, triples);
-            }
+            },
         );
     };
     /**
@@ -547,7 +547,7 @@ var Sparql_generic = (function () {
             },
             function (err) {
                 return callback(err, _triples.length);
-            }
+            },
         );
     };
 
@@ -636,7 +636,7 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
             },
             function (err) {
                 return callback(err, resultSize);
-            }
+            },
         );
     };
     self.getDistinctPredicates = function (sourceLabel, options, callback) {
@@ -799,13 +799,13 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
                         },
                         function (err) {
                             callbackSeries(err);
-                        }
+                        },
                     );
                 },
             ],
             function (err) {
                 return callback(err, newTriples.length);
-            }
+            },
         );
     };
 
@@ -1042,12 +1042,12 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
                                     //   UI.message(sourceLabel + "retreived triples :" + totalCount);
                                     offset += limitSize;
                                     callbackWhilst();
-                                }
+                                },
                             );
                         },
                         function (_err) {
                             callbackSeries();
-                        }
+                        },
                     );
                 },
 
@@ -1182,7 +1182,7 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
             ],
             function (err) {
                 return callback(err, { classesMap: allClassesMap, labels: allLabels });
-            }
+            },
         );
     };
 
@@ -1229,7 +1229,7 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
                         return callback(err);
                     }
                     return callback(err, total);
-                }
+                },
             );
         });
     };

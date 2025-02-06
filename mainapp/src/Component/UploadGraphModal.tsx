@@ -145,6 +145,7 @@ export function UploadGraphModal({ onClose, open, sourceName, indexAfterSuccess 
                     window.SearchUtil.generateElasticIndex(sourceName, { indexProperties: 1, indexNamedIndividuals: 1 }, () => {
                         fetch(`/api/v1/ontologyModels?source=${sourceName}`, { method: "DELETE" })
                             .then((_success) => {
+                                delete window.Config.ontologiesVocabularyModels[sourceName];
                                 window.UI.message(`${sourceName} was updated successfully`, true);
                             })
                             .catch((error) => {
@@ -249,7 +250,7 @@ declare global {
 window.UploadGraphModal = {
     createApp: (props: Omit<UploadGraphModalProps, "open">) => {
         const container = document.getElementById("mount-edit-upload-graph-modal-here");
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
         const root = createRoot(container!);
         root.render(<UploadGraphModal open={true} {...props} />);
         return root;

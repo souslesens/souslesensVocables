@@ -141,7 +141,7 @@ var Axioms_suggestions = (function () {
                 allSuggestions.selectProperties = selectProperties;
 
                 return callback(err, allSuggestions);
-            }
+            },
         );
     };
     /**

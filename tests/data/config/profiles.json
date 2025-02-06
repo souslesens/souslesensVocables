@@ -1,33 +1,35 @@
-{
-    "all_forbidden": {
-        "name": "all_forbidden",
-        "_type": "profile",
-        "id": "all_forbidden",
-        "allowedSourceSchemas": ["OWL"],
-        "allowedTools": ["lineage", "KGcreator", "KGquery"],
-        "defaultSourceAccessControl": "forbidden",
-        "sourcesAccessControl": {}
+[
+  {
+    "id": "1",
+    "label": "all_forbidden",
+    "theme": "default",
+    "allowed_tools": ["lineage", "KGcreator", "KGquery"],
+    "access_control": {},
+    "schema_types": ["OWL"]
+  },
+  {
+    "id": "2",
+    "label": "read_folder_1",
+    "allowed_tools": ["lineage", "KGcreator", "KGquery"],
+    "access_control": {
+      "OWL/FOLDER_1": "read"
     },
-    "read_folder_1": {
-        "name": "read_folder_1",
-        "_type": "profile",
-        "id": "read_folder_1",
-        "allowedSourceSchemas": ["OWL"],
-        "allowedTools": ["lineage", "KGcreator", "KGquery"],
-        "defaultSourceAccessControl": "forbidden",
-        "sourcesAccessControl": {
-            "OWL/FOLDER_1": "read"
-        }
+    "schema_types": ["OWL"]
+  },
+  {
+    "id": "3",
+    "label": "readwrite_folder_1",
+    "allowed_tools": ["lineage", "KGcreator", "KGquery"],
+    "access_control": {
+      "OWL/FOLDER_1": "readwrite"
     },
-    "readwrite_folder_1": {
-        "name": "readwrite_folder_1",
-        "_type": "profile",
-        "id": "readwrite_folder_1",
-        "allowedSourceSchemas": ["OWL"],
-        "allowedTools": ["lineage", "KGcreator", "KGquery"],
-        "defaultSourceAccessControl": "forbidden",
-        "sourcesAccessControl": {
-            "OWL/FOLDER_1": "readwrite"
-        }
-    }
-}
+    "schema_types": ["OWL"]
+  },
+  {
+    "id": "4",
+    "label": "all",
+    "allowed_tools": ["ALL"],
+    "access_control": {},
+    "schema_types": ["OWL", "SKOS"]
+  }
+]

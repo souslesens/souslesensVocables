@@ -13,24 +13,24 @@ module.exports = function () {
     function GET(req, res, next) {
         const jowlServerConfig = ConfigManager.config.jowlServer;
         if (!jowlServerConfig.enabled) {
-            res.status(500).json({ message: "Jowl Server is disable"});
+            res.status(500).json({ message: "Jowl Server is disable" });
         }
 
         let jowlConfigUrl = jowlServerConfig.url;
         if (!jowlConfigUrl.endsWith("/")) {
-            jowlConfigUrl += "/"
+            jowlConfigUrl += "/";
         }
         jowlConfigUrl += "axioms/getClassAxioms";
 
         const payload = {
-            "graphName": req.query.graphUri,
-            "classUri": req.query.classUri,
-            "tripleFormat": req.query.getTriples ? true : false,
-            "manchetserFormat": req.query.getManchesterExpression ? true : false,
-        }
+            graphName: req.query.graphUri,
+            classUri: req.query.classUri,
+            tripleFormat: req.query.getTriples ? true : false,
+            manchetserFormat: req.query.getManchesterExpression ? true : false,
+        };
 
         if (req.query.axiomType) {
-            payload.axiomType=req.query.axiomType;
+            payload.axiomType = req.query.axiomType;
         }
         if (req.query.getTriples) {
             payload.getTriples = true;
@@ -55,8 +55,8 @@ module.exports = function () {
     GET.apiDoc = {
         security: [{ restrictLoggedUser: [] }],
         summary: "get existing axioms for a class from owl API",
-        description:  "get existing axioms for a class from owl API",
-        operationId:  "get existing axioms for a class from owl API",
+        description: "get existing axioms for a class from owl API",
+        operationId: "get existing axioms for a class from owl API",
         parameters: [
             {
                 name: "graphUri",
@@ -92,7 +92,7 @@ module.exports = function () {
                 in: "query",
                 type: "string",
                 required: false,
-            }
+            },
         ],
 
         responses: {

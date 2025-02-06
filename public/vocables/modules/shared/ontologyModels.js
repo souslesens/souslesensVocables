@@ -196,6 +196,7 @@ var OntologyModels = (function () {
                                             if (item.sub.value == "http://souslesens.org/resources/ontology/cfihos-s-v01/Pressure") {
                                                 var x = 3;
                                             }
+                                            
                                             if (!Config.ontologiesVocabularyModels[source].classes[item.sub.value]) {
                                                 Config.ontologiesVocabularyModels[source].classes[item.sub.value] = {
                                                     id: item.sub.value,
@@ -207,6 +208,12 @@ var OntologyModels = (function () {
                                                             : Sparql_common.getLabelFromURI(item.superClass.value)
                                                         : null,
                                                 };
+                                            }else{
+                                                // select superClass for nodes which have a blankNode as superClass
+                                                if (Config.ontologiesVocabularyModels[source].classes[item.sub.value].superClass && Config.ontologiesVocabularyModels[source].classes[item.sub.value].superClass.startsWith('_:b')){
+                                                    Config.ontologiesVocabularyModels[source].classes[item.sub.value].superClass=item.superClass ? item.superClass.value : null;
+                                                    Config.ontologiesVocabularyModels[source].classes[item.sub.value].superClassLabel=item.superClass ? item.superClassLabel ? item.superClassLabel.value : Sparql_common.getLabelFromURI(item.superClass.value) : null;
+                                                }                                         
                                             }
                                         });
                                         callbackSeries();
@@ -487,7 +494,7 @@ var OntologyModels = (function () {
                     ],
                     function (err) {
                         callbackEach(err);
-                    }
+                    },
                 );
             },
             function (err) {
@@ -495,7 +502,7 @@ var OntologyModels = (function () {
                 if (callback) {
                     return callback(err, Config.ontologiesVocabularyModels);
                 }
-            }
+            },
         );
     };
 
@@ -629,7 +636,7 @@ var OntologyModels = (function () {
                 function (err, result) {
                     callback(err);
                 },
-                options
+                options,
             );
         } else {
             callback(done);
@@ -682,7 +689,7 @@ var OntologyModels = (function () {
             },
             function (err) {
                 callback(err);
-            }
+            },
         );
 
         return;
@@ -761,7 +768,7 @@ var OntologyModels = (function () {
                             }
                             hierarchies = result.hierarchies;
                             callbackSeries();
-                        }
+                        },
                     );
                 },
                 function (callbackSeries) {
@@ -785,7 +792,7 @@ var OntologyModels = (function () {
                             }
 
                             callbackSeries();
-                        }
+                        },
                     );
                 }, //get matching properties
                 function (callbackSeries) {
@@ -981,7 +988,7 @@ var OntologyModels = (function () {
                     constraints: validConstraints,
                     nodes: { startNode: startNodeAncestorIds, endNode: endNodeAncestorIds },
                 });
-            }
+            },
         );
     };
 
@@ -1099,7 +1106,7 @@ var OntologyModels = (function () {
                     ],
                     function (err) {
                         callbackEach(err);
-                    }
+                    },
                 );
             },
             function (err) {
@@ -1109,7 +1116,7 @@ var OntologyModels = (function () {
                     anyRange: anyRange,
                     anyDomain: anyDomain,
                 });
-            }
+            },
         );
     };
 
@@ -1307,7 +1314,7 @@ var OntologyModels = (function () {
                 Config.ontologiesVocabularyModels[source].KGnonObjectProperties = nonObjectPropertiesmap;
                 UI.message("", true);
                 return callback(null, nonObjectPropertiesmap);
-            }
+            },
         );
     };
 

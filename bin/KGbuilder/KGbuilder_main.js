@@ -332,11 +332,13 @@ var KGbuilder_main = {
                 function(callbackSeries) {
                     try {
 
+
                         var mappings;
                         if (options.mappingsFilter) {
                           //  mappings = JSON.parse(options.mappingsFilter);
                             mappings = options.mappingsFilter;
                         } else {
+                            var dataSourceMappingsPath = sourceMappingsDir + datasource + ".json";
                             var dataSourceMappingsPath = sourceMappingsDir + datasource + ".json";
                             mappings = JSON.parse("" + fs.readFileSync(dataSourceMappingsPath));
                         }
@@ -385,6 +387,7 @@ var KGbuilder_main = {
                 }
             ],
             function(err) {
+                return callback(err, tableMappingsToProcess);
                 return callback(err, tableMappingsToProcess);
             }
         );

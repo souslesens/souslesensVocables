@@ -14,12 +14,12 @@ module.exports = function () {
         const config = await mainConfigModel.getConfig();
         const vocablesLog = path.join(config.logDir, "vocables.log");
         if (!fs.existsSync(vocablesLog)) {
-            return res.status(500).json({"message": "The log files are not available", "status": 500});
+            return res.status(500).json({ message: "The log files are not available", status: 500 });
         }
 
         const vocablesLogStats = fs.lstatSync(vocablesLog);
         if (!vocablesLogStats.isSymbolicLink()) {
-            return res.status(500).json({"message": "The log files are not available", "status": 500});
+            return res.status(500).json({ message: "The log files are not available", status: 500 });
         }
 
         const symlink = fs.readlinkSync(vocablesLog);
@@ -31,7 +31,7 @@ module.exports = function () {
                 return { date: date, current: file == symlink };
             });
 
-        return res.status(200).json({"message": files, "status": 200});
+        return res.status(200).json({ message: files, status: 200 });
     }
     GET.apiDoc = {
         security: [{ restrictAdmin: [] }],

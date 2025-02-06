@@ -260,7 +260,7 @@ var Ontocommons = (function () {
                             };
 
                             callbackSeries(err);
-                        }
+                        },
                     );
                 },
                 function (callbackSeries) {
@@ -281,7 +281,7 @@ var Ontocommons = (function () {
             ],
             function (err) {
                 console.log("DONE");
-            }
+            },
         );
     };
     self.importOntologyFromURL = function () {

@@ -66,7 +66,7 @@ var Lineage_createSLSVsource = (function () {
                     return alert(err.responseText);
                 }
                 callback();
-            }
+            },
         );
     };
 

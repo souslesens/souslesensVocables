@@ -1,0 +1,34 @@
+[
+  {
+    "id": "1",
+    "login": "admin",
+    "profiles": ["admin"],
+    "auth": "database",
+    "create_source": false,
+    "maximum_source": 5
+  },
+  {
+    "id": "2",
+    "login": "owl_user",
+    "profiles": ["owl_only"],
+    "auth": "database",
+    "create_source": false,
+    "maximum_source": 5
+  },
+  {
+    "id": "3",
+    "login": "skos_user",
+    "profiles": ["skos_only"],
+    "auth": "database",
+    "create_source": false,
+    "maximum_source": 5
+  },
+  {
+    "id": "4",
+    "login": "not_admin",
+    "profiles": ["admin"],
+    "auth": "database",
+    "create_source": true,
+    "maximum_source": 5
+  }
+]

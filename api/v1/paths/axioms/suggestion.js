@@ -1,22 +1,16 @@
-
-
 const ManchesterSyntaxEngine = require("../../../../bin/axioms/manchesterSyntaxEngine.js");
 
 //import    ManchesterSyntaxEngine from  "../../../../bin/axioms/manchesterSyntaxEngine.js";
 
-
-
-
-
 const httpProxy = require("../../../../bin/httpProxy..js");
 const { processResponse } = require("../utils.js");
-module.exports = function() {
+module.exports = function () {
     let operations = {
-        GET
+        GET,
     };
 
     function GET(req, res, _next) {
-        const callback = function(err, result) {
+        const callback = function (err, result) {
             if (err) {
                 return res.status(400).json({ error: err });
             }
@@ -26,19 +20,17 @@ module.exports = function() {
         if (req.query.options) {
             options = JSON.parse(req.query.options);
         }
-        if(true) {
-            ManchesterSyntaxEngine.getSuggestion( req.query.lastToken, options, callback);
+        if (true) {
+            ManchesterSyntaxEngine.getSuggestion(req.query.lastToken, options, callback);
             return;
         }
-        var url="http://localhost:3000/getSuggestions"
-        httpProxy.post(url, null, { owlInput:req.query.lastToken }, function(result) {
-
+        var url = "http://localhost:3000/getSuggestions";
+        httpProxy.post(url, null, { owlInput: req.query.lastToken }, function (result) {
             try {
-                var json=JSON.parse(result)
+                var json = JSON.parse(result);
                 processResponse(res, null, json);
-            }
-            catch(err){
-                processResponse(res, err+" "+result, null);
+            } catch (err) {
+                processResponse(res, err + " " + result, null);
             }
         });
     }
@@ -49,32 +41,30 @@ module.exports = function() {
         description: "Return a suggestion to build an axiom",
         operationId: "Return a suggestion to build an axiom",
         parameters: [
-
             {
                 name: "lastToken",
                 description: "lastToken",
                 in: "query",
                 type: "string",
-                required: true
+                required: true,
             },
             {
                 name: "options",
                 description: "options",
                 in: "query",
                 type: "string",
-                required: false
-            }
-
+                required: false,
+            },
         ],
 
         responses: {
             200: {
                 description: "Results",
                 schema: {
-                    type: "object"
-                }
-            }
-        }
+                    type: "object",
+                },
+            },
+        },
     };
 
     return operations;

@@ -128,7 +128,7 @@ var Lineage_relations = (function () {
                     if (err) {
                         return alert(err.responseText);
                     }
-                }
+                },
             );
         });
     };
@@ -567,7 +567,7 @@ var Lineage_relations = (function () {
                 } else if (options.output == "table") {
                     Export.exportGraphToDataTable(self.lineageVisjsGraph, null, allVisjsData.nodes, allVisjsData.edges);
                 }
-            }
+            },
         );
     };
 
@@ -663,7 +663,7 @@ var Lineage_relations = (function () {
             ],
             function (err) {
                 return callback(err, jstreeData);
-            }
+            },
         );
     };
 

@@ -189,7 +189,7 @@ declare global {
 window.EditSourceDialog = {
     createApp: (props: Omit<EditSourceDialogProps, "open" | "sources">) => {
         const container = document.getElementById("mount-edit-source-dialog-here");
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
         const root = createRoot(container!);
         root.render(<EditSourceDialog open={true} {...props} />);
         return root;

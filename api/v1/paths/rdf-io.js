@@ -1,47 +1,41 @@
-const {default: rdfParser} = require("rdf-parse");
-const {processResponse} = require("./utils");
+const { default: rdfParser } = require("rdf-parse");
+const { processResponse } = require("./utils");
 module.exports = function () {
     let operations = {
         GET,
     };
 
     function GET(req, res, next) {
-
-        const str = req.query.turtle
+        const str = req.query.turtle;
         const textStream = require("streamify-string")(str);
         var triples = [];
-        var prefixMap = {}
+        var prefixMap = {};
 
-
-        rdfParser.parse(textStream, {contentType: "text/turtle", baseIRI: ""})
+        rdfParser
+            .parse(textStream, { contentType: "text/turtle", baseIRI: "" })
             .on("data", function (quad) {
                 var obj = {
                     o: quad.object.value,
                     s: quad.subject.value,
                     p: quad.predicate.value,
-                }
-                triples.push(obj)
+                };
+                triples.push(obj);
             })
-            .on('prefix', (prefix, iri) => {
-
-                prefixMap[prefix] = iri.id
+            .on("prefix", (prefix, iri) => {
+                prefixMap[prefix] = iri.id;
             })
             .on("error", function (error) {
                 console.error(error);
-                return processResponse(res, error, null)
+                return processResponse(res, error, null);
             })
 
             .on("end", function () {
-
-                return processResponse(res, null, {triples: triples, prefixMap: prefixMap});
+                return processResponse(res, null, { triples: triples, prefixMap: prefixMap });
             });
-
-
     }
 
-
     GET.apiDoc = {
-        security: [{restrictLoggedUser: []}],
+        security: [{ restrictLoggedUser: [] }],
         summary: "transform turtle into json triples",
         description: "transform turtle into json triples",
         operationId: "transform turtle into json triples",
@@ -53,7 +47,6 @@ module.exports = function () {
                 in: "query",
                 required: true,
             },
-
         ],
 
         responses: {

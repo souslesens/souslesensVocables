@@ -36,7 +36,7 @@ var common = (function () {
                 $("<option>", {
                     text: "",
                     value: "",
-                })
+                }),
             );
         }
 
@@ -64,7 +64,7 @@ var common = (function () {
                         text: text,
                         value: value,
                         selected: selected,
-                    })
+                    }),
                 );
             });
         } else {
@@ -74,7 +74,7 @@ var common = (function () {
                     $("<option>", {
                         text: item[textfield] || item,
                         value: item[valueField] || item,
-                    })
+                    }),
                 );
             }
         }

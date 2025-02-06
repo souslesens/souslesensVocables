@@ -189,7 +189,7 @@ var ElasticSearchProxy = (function () {
                     //   indexes. self.uncheckAllIndexes()
                     if (callback) callback();
                     return ui.showResultList(result.hits.hits);
-                }
+                },
             );
         });
     };
@@ -232,7 +232,7 @@ var ElasticSearchProxy = (function () {
                     if (result.hits.hits.length == 0) return $("#resultDiv").html("pas de résultats");
 
                     return ui.showHitDetails(result.hits.hits[0]);
-                }
+                },
             );
         });
     };

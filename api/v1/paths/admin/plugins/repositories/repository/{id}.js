@@ -76,7 +76,7 @@ module.exports = function () {
                         message: "The repository have been updated",
                         status: 200,
                     });
-                } else  {
+                } else {
                     res.status(500).json(response);
                 }
             }

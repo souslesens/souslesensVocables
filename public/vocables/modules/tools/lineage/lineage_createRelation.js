@@ -53,7 +53,7 @@ var Lineage_createRelation = (function () {
                         "</b><br><span onclick='Lineage_createRelation.showNodeInfos(\"start\")'>" +
                         self.sourceNode.label +
                         "</span> -><span onclick='Lineage_createRelation.showNodeInfos(\"end\")'> " +
-                        self.targetNode.label
+                        self.targetNode.label,
                 ) + "</span>";
             }
 
@@ -311,7 +311,7 @@ var Lineage_createRelation = (function () {
                     } else {
                         return; //callback(null);
                     }
-                }
+                },
             );
         });
     };
@@ -632,7 +632,7 @@ var Lineage_createRelation = (function () {
                     self.callbackFn();
                 }
                 $("#smallDialogDiv").dialog("close");
-            }
+            },
         );
     };
 
@@ -860,7 +860,7 @@ var Lineage_createRelation = (function () {
                 if (callback) {
                     return callback(null, blankNodeId);
                 }
-            }
+            },
         );
     };
 
@@ -913,7 +913,7 @@ var Lineage_createRelation = (function () {
                 if (callback) {
                     return callback(err);
                 }
-            }
+            },
         );
     };
 
@@ -964,7 +964,7 @@ var Lineage_createRelation = (function () {
                     if (callback) {
                         return callback(_err);
                     }
-                }
+                },
             );
         }
     };

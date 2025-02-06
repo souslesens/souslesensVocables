@@ -390,7 +390,7 @@ var KGcreator_graph = (function () {
                         }
 
                         KGcreator_mappings.setPredicatesBetweenColumnsInTable(sourceNode.data, targetNode.data, selectedColumn);
-                    }
+                    },
                 );
             } else {
                 KGcreator_mappings.setPredicatesBetweenColumnsInTable(sourceNode.data, targetNode.data, null);
@@ -823,7 +823,7 @@ var KGcreator_graph = (function () {
                         }
 
                         KGcreator_mappings.setPredicatesBetweenColumnsInTable(sourceNode.data, targetNode.data, selectedColumn);
-                    }
+                    },
                 );
             } else {
                 KGcreator_mappings.setPredicatesBetweenColumnsInTable(sourceNode.data, targetNode.data, null);

@@ -137,7 +137,7 @@ var Lineage_graphTraversal = (function () {
             ],
             function (err) {
                 return callback(err, relations);
-            }
+            },
         );
     };
 

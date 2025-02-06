@@ -141,26 +141,28 @@ const checkMainConfigSection = (errors, cleanedErrors) => {
 
 const colorText = (text, color = "31;1") => `\x1b[${color}m${text}\x1b[0m`;
 
-const printErrorReport = (errors, section) => {
+const printErrorReport = (errors, section, logs = []) => {
     Object.entries(errors).forEach(([key, data]) => {
         if (typeof data !== "string") {
-            printErrorReport(data, key);
+            logs = printErrorReport(data, key, logs);
         } else {
             const option = section === null ? key : `${section}.${key}`;
             if (data === "Required") {
-                console.error(`⛔ The option ${colorText(option)} is missing`);
+                logs.push(`⛔ The option ${colorText(option)} is missing`);
             } else if (data.startsWith("Unrecognized key")) {
                 const keys = data.split(": ")[1];
                 if (option === "root") {
-                    console.error(`❓ Unknown key(s): ${keys}`);
+                    logs.push(`❓ Unknown key(s): ${keys}`);
                 } else {
-                    console.error(`❓ Unknown key(s) for the option ${colorText(option)}: ${keys}`);
+                    logs.push(`❓ Unknown key(s) for the option ${colorText(option)}: ${keys}`);
                 }
             } else {
-                console.error(`❌ Wrong value for the option ${colorText(option)}: ${data}`);
+                logs.push(`❌ Wrong value for the option ${colorText(option)}: ${data}`);
             }
         }
     });
+
+    return logs;
 };
 
 const checkMainConfig = (config) => {
@@ -170,7 +172,8 @@ const checkMainConfig = (config) => {
     if (!results.success) {
         const errors = checkMainConfigSection(results.error.format(), {});
         console.error("The configuration file is invalid:");
-        printErrorReport(errors, null);
+        const logs = printErrorReport(errors, null);
+        logs.forEach((log) => console.error(log));
         return false;
     }
 
@@ -184,7 +187,10 @@ const readMainConfig = (path = mainConfigPath) => {
 const config = readMainConfig();
 
 module.exports = {
+    MainConfigObject,
     checkMainConfig,
+    checkMainConfigSection,
+    colorText,
     config,
     configDatabasesPath,
     configPath,
@@ -196,5 +202,6 @@ module.exports = {
     directoryPlugins,
     directoryPluginsRepositories,
     mainConfigPath,
+    printErrorReport,
     readMainConfig,
 };

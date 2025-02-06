@@ -76,7 +76,7 @@ export const LogsTable = () => {
                 if (logFiles.status === 500) {
                     return (
                         <Alert variant="filled" severity="error" sx={{ m: 4 }}>
-                            {`${logFiles.message.toString()}, consult the administrator of this instance for more information.`}
+                            {`${JSON.stringify(logFiles.message)}, consult the administrator of this instance for more information.`}
                         </Alert>
                     );
                 }
@@ -193,6 +193,6 @@ export const LogsTable = () => {
                 );
             },
         },
-        model.logFiles
+        model.logFiles,
     );
 };

@@ -31,6 +31,11 @@
     background-repeat: no-repeat;
     height: 30px;
 }
+.MappingModeler-logo {
+    background-image: url(@KGquery-logo);
+    background-repeat: no-repeat;
+    height: 30px;
+}
 .SPARQL-logo {
     background-image: url(@SPARQL-logo);
     background-repeat: no-repeat;

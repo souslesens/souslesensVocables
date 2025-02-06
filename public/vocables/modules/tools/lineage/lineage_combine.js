@@ -79,7 +79,7 @@ var Lineage_combine = (function () {
                     $("#Lineage_combine_actiosDiv").css("display", "block");
                 }
                 Lineage_sources.setCurrentSource(Lineage_sources.activeSource);
-            }
+            },
         );
     };
 
@@ -388,7 +388,7 @@ triples.push({})
                         },
                         function (err) {
                             callbackEachSource(err);
-                        }
+                        },
                     );
                 },
                 function (err) {
@@ -396,7 +396,7 @@ triples.push({})
                     if (err) return alert(err.responseText);
                     alert(message);
                     return UI.message("ALL DONE", true);
-                }
+                },
             );
         });
     };

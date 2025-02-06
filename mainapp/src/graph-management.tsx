@@ -77,7 +77,7 @@ export default function GraphManagement() {
                     return order === "asc" ? left.localeCompare(right) : right.localeCompare(left);
                 }
             }),
-        [sources, orderBy, order]
+        [sources, orderBy, order],
     );
 
     return (
@@ -193,7 +193,7 @@ export default function GraphManagement() {
 
 window.GraphManagement.createApp = function createApp() {
     const container = document.getElementById("mount-graph-management-here");
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
     const root = createRoot(container!);
     root.render(<GraphManagement />);
     return root.unmount.bind(root);

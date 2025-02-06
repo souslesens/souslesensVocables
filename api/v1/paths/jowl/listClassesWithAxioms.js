@@ -13,7 +13,7 @@ module.exports = function () {
     function GET(req, res, next) {
         const jowlServerConfig = ConfigManager.config.jowlServer;
         if (!jowlServerConfig.enabled) {
-            res.status(500).json({ message: "Jowl Server is disable"});
+            res.status(500).json({ message: "Jowl Server is disable" });
         }
 
         let jowlConfigUrl = jowlServerConfig.url;
@@ -23,8 +23,8 @@ module.exports = function () {
         jowlConfigUrl += "axioms/listClassesWithAxioms";
 
         const payload = {
-            "graphName": req.query.graphName,
-        }
+            graphName: req.query.graphName,
+        };
 
         const options = {
             method: "POST",
@@ -42,8 +42,8 @@ module.exports = function () {
     GET.apiDoc = {
         security: [{ restrictLoggedUser: [] }],
         summary: "get  classes with axioms from owl API",
-        description:  "get  classes with axioms from owl API",
-        operationId:  "get  classes with axioms from owl API",
+        description: "get  classes with axioms from owl API",
+        operationId: "get  classes with axioms from owl API",
         parameters: [
             {
                 name: "graphName",
@@ -51,7 +51,7 @@ module.exports = function () {
                 type: "string",
                 in: "query",
                 required: true,
-            }
+            },
         ],
 
         responses: {

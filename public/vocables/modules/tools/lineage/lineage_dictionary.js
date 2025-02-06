@@ -104,7 +104,7 @@ var Lineage_dictionary = (function () {
                         return callbackSeries();
                     },
                 ],
-                function (err) {}
+                function (err) {},
             );
         });
     };
@@ -237,7 +237,7 @@ var Lineage_dictionary = (function () {
                 if (err) {
                     return alert(err.responseText);
                 }
-            }
+            },
         );
     };
 
@@ -429,7 +429,7 @@ targets: [0]
             ],
             function (err) {
                 if (err) return alert(err.responseText);
-            }
+            },
         );
     };
 
@@ -546,7 +546,7 @@ targets: [0]
                         return alert(err.responseText);
                     }
                     Lineage_dictionary.validation.updateDatatableCells("delete");
-                }
+                },
             );
         },
 
@@ -603,7 +603,7 @@ query += " where { ?node <" + Config.dictionaryMetaDataPropertiesMap["status"] +
                     }
                     UI.message(operation + " " + data.length + " dictionary entries DONE", true);
                     callback(null);
-                }
+                },
             );
         },
         updateDatatableCells: function (operation) {

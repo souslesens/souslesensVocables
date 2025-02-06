@@ -453,7 +453,93 @@ const apiDoc = {
                     type: "string",
                 },
             },
-            required: ["data_path", "data_type", "owned_by"],
+            required: ["data_path", "data_type"],
+        },
+        UserDataWithoutID: {
+            type: "object",
+            properties: {
+                data_path: {
+                    type: "string",
+                },
+                data_type: {
+                    type: "string",
+                },
+                data_label: {
+                    type: "string",
+                    default: "",
+                },
+                data_comment: {
+                    type: "string",
+                    default: "",
+                },
+                data_group: {
+                    type: "string",
+                    default: "",
+                },
+                data_content: {
+                    $ref: "#/definitions/UserDataContent",
+                },
+                is_shared: {
+                    type: "boolean",
+                    default: false,
+                },
+                shared_profiles: {
+                    type: "array",
+                    default: [],
+                    items: { type: "string" },
+                },
+                shared_users: {
+                    type: "array",
+                    default: [],
+                    items: { type: "string" },
+                },
+            },
+            required: ["data_path", "data_type"],
+        },
+        UserDataWithoutOwner: {
+            type: "object",
+            properties: {
+                id: {
+                    type: "number",
+                    minimum: 1,
+                },
+                data_path: {
+                    type: "string",
+                },
+                data_type: {
+                    type: "string",
+                },
+                data_label: {
+                    type: "string",
+                    default: "",
+                },
+                data_comment: {
+                    type: "string",
+                    default: "",
+                },
+                data_group: {
+                    type: "string",
+                    default: "",
+                },
+                data_content: {
+                    $ref: "#/definitions/UserDataContent",
+                },
+                is_shared: {
+                    type: "boolean",
+                    default: false,
+                },
+                shared_profiles: {
+                    type: "array",
+                    default: [],
+                    items: { type: "string" },
+                },
+                shared_users: {
+                    type: "array",
+                    default: [],
+                    items: { type: "string" },
+                },
+            },
+            required: ["data_path", "data_type"],
         },
         UserDataContent: {
             type: "object",

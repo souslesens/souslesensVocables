@@ -269,7 +269,7 @@ var GraphDisplayLegend = (function () {
                 function (event) {
                     self.showHideLegend(legendCanvas, type, height, width);
                 },
-                false
+                false,
             );
             self.isRetractedLegend[legendCanvas] = expand;
         }

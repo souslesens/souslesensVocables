@@ -31,7 +31,7 @@ var MappingModeler = (function () {
      * @type {string}
      * @memberof module:MappingModeler
      */
-    self.jstreeDivId = "mappingModeler_jstreeDiv";
+    self.jstreeDivId = "mappingModeler_dataSourcesJstreeDiv";
     /**
      * ID of the legend container.
      * @type {string}
@@ -151,7 +151,7 @@ var MappingModeler = (function () {
                 if (err) {
                     return err;
                 }
-            }
+            },
         );
     };
     self.activateRightPanel = function (PanelLabel) {
@@ -1088,7 +1088,7 @@ var MappingModeler = (function () {
             },
             color: "#375521",
         };
-        self.addEdge([edge]);
+        MappingColumnsGraph.addEdge([edge]);
         $("#smallDialogDiv").dialog("close");
     };
 

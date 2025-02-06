@@ -192,7 +192,7 @@ var MergeNodes = (function () {
                             ],
                             function (err) {
                                 callbackEachNodeToMerge();
-                            }
+                            },
                         );
                     },
                     // end for each node to merge
@@ -329,7 +329,7 @@ var MergeNodes = (function () {
                             },
                             function (err) {
                                 callbackEachSource(err);
-                            }
+                            },
                         );
                     },
 
@@ -343,7 +343,7 @@ var MergeNodes = (function () {
                         }
                         alert(message);
                         return UI.message("ALL DONE", true);
-                    }
+                    },
                 );
             });
         },

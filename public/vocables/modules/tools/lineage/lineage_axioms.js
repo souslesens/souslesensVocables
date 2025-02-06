@@ -3,6 +3,17 @@ import NodeInfosAxioms from "../axioms/nodeInfosAxioms.js";
 var Lineage_axioms = (function () {
     var self = {};
 
+
+    /**
+     * Draws classes with associated axioms in a visual graph representation.
+     * Retrieves axioms from the specified source and visualizes them using Vis.js.
+     * @function
+     * @name drawClassesWithAxioms
+     * @memberof module:Lineage_axioms
+     * @param {string} [source] - The name of the data source. Defaults to the active source if not provided.
+     * @param {string} [axiomType] - The specific type of axiom to filter by (optional).
+     * @returns {void}
+     */
     self.drawClassesWithAxioms = function (source, axiomType) {
         if (!source) {
             source = Lineage_sources.activeSource;
@@ -58,6 +69,15 @@ var Lineage_axioms = (function () {
         });
     };
 
+
+    /**
+     * Tests axiom functionalities by initializing a sample node with axiom data.
+     * Opens a dialog displaying axioms for the test node.
+     * @function
+     * @name testAxioms
+     * @memberof module:Lineage_axioms
+     * @returns {void}
+     */
     self.testAxioms = function () {
         var node = {
             id: "https://spec.industrialontologies.org/ontology/core/Core/AgentRole",

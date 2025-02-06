@@ -6,6 +6,7 @@ import DataSourceManager from "./dataSourcesManager.js";
  * UIcontroller module manages the display of panels in the mapping modeler interface,
  * handling tab activation and panel visibility for data sources, column mappings, technical mappings, and triples.
  * @module UIcontroller
+ * @see [Tutorial: Overview]{@tutorial overview}
  */
 var UIcontroller=(function(){
 

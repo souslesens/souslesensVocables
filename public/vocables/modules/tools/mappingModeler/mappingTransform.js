@@ -8,6 +8,7 @@ import UIcontroller from "./uiController.js";
  * It interacts with the Vis.js graph to retrieve mappings and formats them as JSON for use in the application.
  * It also provides functionality for generating SLS mappings and R2ML mappings (coming soon).
  * @module MappingTransform
+ * @see [Tutorial: Overview]{@tutorial overview}
  */
 var MappingTransform = (function () {
     var self = {};

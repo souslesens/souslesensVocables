@@ -92,6 +92,16 @@ var Lineage_whiteboard = (function () {
      */
 
     self.firstLoad = true;
+
+    /**
+     * @function
+     * @name onLoaded
+     * @memberof Lineage_whiteboard
+     * Initializes the Lineage whiteboard module when loaded.
+     * Sets up the search widget, initializes the UI menu bar, and loads necessary components.
+     * Also resets the visualization graph for a fresh start.
+     * @returns {void}
+     */
     self.onLoaded = function () {
         if (self.firstLoad) {
             self.firstLoad = false;
@@ -108,16 +118,39 @@ var Lineage_whiteboard = (function () {
         self.resetVisjsGraph();
     };
 
+    /**
+     * @function
+     * @name unload
+     * @memberof Lineage_whiteboard
+     * Unloads the Lineage whiteboard by clearing the graph display and resetting the lateral panel.
+     * @returns {void}
+     */
     self.unload = function () {
         $("#graphDiv").empty();
         $("#lateralPanelDiv").resizable("destroy");
         $("#lateralPanelDiv").css("width", "435px");
     };
 
+    /**
+     * @function
+     * @name resetVisjsGraph
+     * @memberof Lineage_whiteboard
+     * Resets the Vis.js graph by clearing the graph container and drawing a new empty graph.
+     * @returns {void}
+     */
     self.resetVisjsGraph = function () {
         $("#graphDiv").html("");
         Lineage_whiteboard.drawNewGraph({ nodes: [], edges: [] });
     };
+
+    /**
+     * @function
+     * @name loadSources
+     * @memberof Lineage_whiteboard
+     * Loads available sources for the Lineage module and initializes the UI components.
+     * Handles errors and sets up the lateral panel with the required elements.
+     * @returns {void}
+     */
     self.loadSources = function () {
         Lineage_sources.loadSources(MainController.currentSource, function (err) {
             if (err) {
@@ -130,8 +163,28 @@ var Lineage_whiteboard = (function () {
         });
     };
 
+    /**
+     * @function
+     * @name onSourceSelect
+     * @memberof Lineage_whiteboard
+     * Handles the selection of a source.
+     * @param {string} sourceLabel - The label of the selected source.
+     * @param {Object} event - The event object containing information about the interaction.
+     * @returns {void}
+     */
     self.onSourceSelect = function (sourceLabel, /** @type {{ button: number; }} */ event) {};
 
+    /**
+     * @function
+     * @name onGraphOrTreeNodeClick
+     * @memberof Lineage_whiteboard
+     * Handles click events on graph or tree nodes, determining appropriate actions based on key combinations.
+     * @param {Object} node - The clicked node object containing data.
+     * @param {Object} nodeEvent - The event object containing key press information.
+     * @param {Object} [options={}] - Additional options related to the event.
+     * @param {string} [options.callee] - Specifies whether the event originated from "Graph" or "Tree".
+     * @returns {null|Object} - Returns null if the action is handled, otherwise returns the event object.
+     */
     self.onGraphOrTreeNodeClick = function (node, nodeEvent, options) {
         //  console.trace("onGraphOrTreeNodeClick");
 
@@ -180,6 +233,13 @@ var Lineage_whiteboard = (function () {
         return null;
     };
 
+    /**
+     * @function
+     * @name jstreeContextMenu
+     * @memberof Lineage_whiteboard
+     * Generates a custom context menu for the jsTree component, providing additional actions based on user permissions.
+     * @returns {Object} - The context menu items object.
+     */
     self.jstreeContextMenu = function () {
         var items = {};
 
@@ -203,6 +263,15 @@ var Lineage_whiteboard = (function () {
         return items;
     };
 
+    /**
+     * @function
+     * @name selectTreeNodeFn
+     * @memberof Lineage_whiteboard
+     * Handles selection events on tree nodes, managing node data and triggering actions based on user interaction.
+     * @param {Object} event - The event object triggered by node selection.
+     * @param {Object} propertiesMap - Contains node data and event-related properties.
+     * @returns {void}
+     */
     self.selectTreeNodeFn = function (event, propertiesMap) {
         SearchWidget.currentTreeNode = propertiesMap.node;
         self.currentTreeNode = propertiesMap.node;
@@ -215,6 +284,14 @@ var Lineage_whiteboard = (function () {
         }
     };
 
+    /**
+     * @function
+     * @name initUI
+     * @memberof Lineage_whiteboard
+     * Initializes the user interface, resetting elements and loading necessary components.
+     * @param {boolean} clearTree - If true, clears the tree and resets the lineage sources.
+     * @returns {void}
+     */
     self.initUI = function (clearTree) {
         UI.message("");
         self.lineageVisjsGraph.clearGraph();
@@ -233,6 +310,13 @@ var Lineage_whiteboard = (function () {
         }
     };
 
+    /**
+     * @function
+     * @name clearLastAddedNodesAndEdges
+     * @memberof Lineage_whiteboard
+     * Clears the last added nodes and edges from the graph, ensuring a clean state.
+     * @returns {void}
+     */
     self.clearLastAddedNodesAndEdges = function () {
         var nodes = self.lineageVisjsGraph.lastAddedNodes;
         if (nodes && nodes.length > 0) {
@@ -243,6 +327,13 @@ var Lineage_whiteboard = (function () {
         Lineage_decoration.decorateByUpperOntologyByClass();
     };
 
+    /**
+     * @function
+     * @name showLastAddedNodesOnly
+     * @memberof Lineage_whiteboard
+     * Displays only the last added nodes by removing all other nodes from the graph.
+     * @returns {void}
+     */
     self.showLastAddedNodesOnly = function () {
         if (!self.lineageVisjsGraph.lastAddedNodes || self.lineageVisjsGraph.lastAddedNodes.length == 0) {
             return;
@@ -259,6 +350,14 @@ var Lineage_whiteboard = (function () {
         }
     };
 
+
+    /**
+     * @function
+     * @name showHideIndividuals
+     * @memberof Lineage_whiteboard
+     * Toggles the visibility of individuals (nodes with a specific shape) in the graph.
+     * @returns {void}
+     */
     self.showHideIndividuals = function () {
         var hidden = false;
         if (!self.individualsShowing) {
@@ -278,12 +377,21 @@ var Lineage_whiteboard = (function () {
         self.lineageVisjsGraph.data.nodes.update(nodesToHide);
     };
 
+
     /**
-     *
-     * draws top classes and restrictions
-     *
-     * @param source
+     * @function
+     * @name drawModel
+     * @memberof Lineage_whiteboard
+     * Draws top classes and restrictions.
+     * @param {string} source - The source name to be visualized.
+     * @param {string} graphDiv - The ID of the div container where the graph will be drawn.
+     * @param {Object} options - Configuration options for drawing the model.
+     * @param {boolean} [options.inverse] - If true, draws inverse relations.
+     * @param {boolean} [options.all] - If true, draws all relations.
+     * @param {Function} callback - Callback function to execute after the graph is drawn.
+     * @returns {void}
      */
+
     self.drawModel = function (source, graphDiv, options, callback) {
         if (!options) {
             options = {};
@@ -368,6 +476,18 @@ var Lineage_whiteboard = (function () {
         );
     };
 
+    /**
+     * @function
+     * @name drawTopConcepts
+     * @memberof Lineage_whiteboard
+     * @description Retrieves and displays the top-level concepts for a given ontology source.
+     * It ensures that concepts are properly linked to their respective sources and adds them to the graph.
+     * @param {string} source - The ontology source to retrieve top concepts from.
+     * @param {Object} [options={}] - Configuration options for fetching and displaying concepts.
+     * @param {string} graphDiv - The ID of the div container where the graph will be drawn.
+     * @param {Function} callback - Callback function executed after fetching top concepts.
+     * @returns {void}
+     */
     self.drawTopConcepts = function (source, options, graphDiv, callback) {
         if (!options) {
             options = {};
@@ -553,6 +673,16 @@ var Lineage_whiteboard = (function () {
         );
     };
 
+    /**
+     * @function
+     * @name isResultAcceptable
+     * @memberof Lineage_whiteboard
+     * @description Checks if the result set is acceptable based on predefined constraints. 
+     * If too many nodes are present, an alert is shown, and false is returned.
+     * If no data is found, a message is displayed.
+     * @param {Array} result - The result array to be evaluated.
+     * @returns {boolean} - Returns true if the result is acceptable, otherwise false.
+     */
     self.isResultAcceptable = function (result) {
         if (result.length > self.showLimit) {
             alert("Too may nodes (" + result.length + "). Use a filering Query instead ");
@@ -565,12 +695,39 @@ var Lineage_whiteboard = (function () {
         return true;
     };
 
+
+    /**
+     * @function
+     * @name initWhiteBoard
+     * @memberof Lineage_whiteboard
+     * @description Initializes the whiteboard by clearing or redrawing the graph if necessary.
+     * If the graph is empty or the force parameter is set to true, a new empty graph is drawn.
+     * @param {boolean} force - If true, forces the graph to reset even if it's not empty.
+     * @returns {void}
+     */
     self.initWhiteBoard = function (force) {
         if (!self.lineageVisjsGraph.isGraphNotEmpty() || force) {
             self.drawNewGraph({ nodes: [], edges: [] });
         }
     };
 
+
+    /**
+     * @function
+     * @name drawNewGraph
+     * @memberof Lineage_whiteboard
+     * @description Draws a new graph with provided data and options. Configures visualization settings 
+     * such as physics, layout, and interaction settings. Also manages node and edge interactions.
+     * @param {Object} visjsData - The data containing nodes and edges to be displayed.
+     * @param {string} graphDiv - The ID of the div container where the graph will be rendered.
+     * @param {Object} [_options={}] - Optional configuration settings for the graph.
+     * @param {Object} [_options.visjsOptions] - Custom options for the Vis.js graph.
+     * @param {boolean} [_options.layoutHierarchical] - If true, enables hierarchical layout.
+     * @param {Object} [_options.physics] - Custom physics settings for the graph.
+     * @param {boolean} [_options.noDecorations] - If true, skips the decoration step after drawing.
+     * @param {string} [_options.legendType] - Type of legend to be used for decoration.
+     * @returns {void}
+     */
     self.drawNewGraph = function (visjsData, graphDiv, _options) {
         if (!_options) {
             _options = {};
@@ -726,6 +883,14 @@ var Lineage_whiteboard = (function () {
         return;
     };
 
+    /**
+     * Retrieves the graph node IDs associated with a specific data source.
+     * @function
+     * @name getGraphIdsFromSource
+     * @memberof module:LineageWhiteboard
+     * @param {any} source - The data source for which to retrieve the node IDs.
+     * @returns {Array<string>|null} An array of node IDs related to the source, or null if the graph is empty.
+     */
     self.getGraphIdsFromSource = function (/** @type {any} */ source) {
         if (!self.lineageVisjsGraph.isGraphNotEmpty()) {
             return null;
@@ -743,6 +908,13 @@ var Lineage_whiteboard = (function () {
         return sourceNodes;
     };
 
+    /**
+     * Adds child nodes associated with the active data source to the graph.
+     * @function
+     * @name addSourceChildrenToGraph
+     * @memberof module:LineageWhiteboard
+     * @returns {void} Displays an alert if no source is selected, otherwise adds child nodes to the graph.
+     */
     self.addSourceChildrenToGraph = function () {
         var source = Lineage_sources.activeSource;
         if (source == "") {
@@ -752,6 +924,15 @@ var Lineage_whiteboard = (function () {
         self.addChildrenToGraph(source, sourceNodes);
     };
 
+    /**
+     * Copies the list of cluster child nodes to the clipboard.
+     * @function
+     * @name listClusterToClipboard
+     * @memberof module:LineageWhiteboard
+     * @param {Object} clusterNode - The cluster node object containing the list of children.
+     * @param {Array<Object>} clusterNode.data.cluster - An array of objects with child and childLabel properties.
+     * @returns {void} Copies the formatted list to the clipboard and displays a message.
+     */
     self.listClusterToClipboard = function (/** @type {{ data: { cluster: any[]; }; }} */ clusterNode) {
         var text = "";
         clusterNode.data.cluster.forEach(function (/** @type {{ child: string; childLabel: string; }} */ item, /** @type {any} */ _index) {
@@ -766,6 +947,16 @@ var Lineage_whiteboard = (function () {
         });
     };
 
+    /**
+     * Displays the content of a cluster in a tree structure.
+     * @function
+     * @name listClusterContent
+     * @memberof module:LineageWhiteboard
+     * @param {Object} clusterNode - The cluster node containing the child nodes to display.
+     * @param {Array<Object>} clusterNode.data.cluster - The list of child nodes to render in the tree.
+     * @param {string} clusterNode.data.source - The source related to the cluster.
+     * @returns {void} Initializes the tree widget and loads the cluster data.
+     */
     self.listClusterContent = function (/** @type {{ data: { cluster: any[]; source: any; }; }} */ clusterNode) {
         /**
          * @type {{ id: any; text: any; parent: string; data: { source: any; id: any; label: any; }; }[]}
@@ -791,6 +982,18 @@ var Lineage_whiteboard = (function () {
         JstreeWidget.loadJsTree(SearchWidget.currentTargetDiv, jstreeData, jstreeOptions);
     };
 
+    /**
+     * Opens and visualizes the content of a cluster node in the graph.
+     * If the cluster is too large, it is copied to the clipboard instead.
+     * @function
+     * @name openCluster
+     * @memberof module:LineageWhiteboard
+     * @param {Object} clusterNode - The cluster node to visualize.
+     * @param {Array<Object>} clusterNode.data.cluster - The child nodes within the cluster.
+     * @param {string} clusterNode.data.source - The source related to the cluster node.
+     * @param {string} clusterNode.id - The unique ID of the cluster node.
+     * @returns {void} Visualizes the cluster nodes and edges in the graph or copies large clusters to the clipboard.
+     */
     self.openCluster = function (/** @type {{ data: { cluster: any[]; source: any; }; id: any; }} */ clusterNode) {
         UI.message("");
         if (clusterNode.data.cluster.length > self.showLimit) {
@@ -836,6 +1039,18 @@ var Lineage_whiteboard = (function () {
         UI.message("");
     };
 
+    /**
+     * Draws similar nodes based on label matching between sources in the graph.
+     * This function finds nodes with similar labels and visualizes them with edges connecting the matches.
+     * @function
+     * @name drawSimilarsNodes
+     * @memberof module:LineageWhiteboard
+     * @param {any} _similarType - The type of similarity to match (e.g., exact match).
+     * @param {any} _node - The node for which similarities are being drawn.
+     * @param {any} _sources - The sources to search for similar nodes.
+     * @param {any} _descendantsAlso - Flag to include descendants in the search for similar nodes.
+     * @returns {void} Updates the graph with similar nodes and edges, or displays an alert in case of an error.
+     */
     self.drawSimilarsNodes = function (/** @type {any} */ _similarType, /** @type {any} */ _node, /** @type {any} */ _sources, /** @type {any} */ _descendantsAlso) {
         var toSource = $("#sourcesTreeDiv").jstree().get_selected()[0];
         var fromSource = Lineage_sources.activeSource;
@@ -931,6 +1146,15 @@ var Lineage_whiteboard = (function () {
         UI.message("", true);
     };
 
+    /**
+     * Initializes and displays the linked data properties for a source in a tree structure.
+     * This function uses the source label to find preferred properties and display them in a hierarchical format.
+     * @function
+     * @name initLinkedDataPropertiesSelect
+     * @memberof module:LineageWhiteboard
+     * @param {string | number} sourceLabel - The label of the source for which to display the linked data properties.
+     * @returns {void} Populates the tree view with properties from the source configuration.
+     */
     self.initLinkedDataPropertiesSelect = function (/** @type {string | number} */ sourceLabel) {
         var schemaType = Config.sources[sourceLabel].schemaType;
         if (schemaType == "INDIVIDUAL") {
@@ -967,6 +1191,15 @@ var Lineage_whiteboard = (function () {
         }
     };
 
+    /**
+     * Fetches and processes the ranges of properties for a given node, visualizing the data in a graph.
+     * It queries the SPARQL endpoint to retrieve the domain and range for object properties related to the node.
+     * @function
+     * @name graphNodeNeighborhoodRanges
+     * @memberof module:Lineage
+     * @param {Object} nodeData - The data of the node to fetch the property ranges for.
+     * @returns {void}
+     */
     self.graphNodeNeighborhoodRanges = function (/** @type {{ id: string; label: string; }} */ nodeData) {
         var fromSource = Lineage_sources.activeSource;
         Sparql_OWL.getObjectPropertiesDomainAndRange(source, [nodeData.id], {}, function (/** @type {any} */ err, /** @type {any[]} */ result) {
@@ -1054,6 +1287,18 @@ var Lineage_whiteboard = (function () {
             self.lineageVisjsGraph.data.edges.add(visjsData.edges);
         });
     };
+        
+    /**
+     * Fetches and processes the neighborhood data for a given node, filtering by the specified property type.
+     * It queries the SPARQL endpoint for outcoming, incoming, or all properties related to the node and visualizes the data in a graph.
+     * @function
+     * @name graphNodeNeighborhood
+     * @memberof module:Lineage
+     * @param {Object} nodeData - The data of the node to fetch the neighborhood for.
+     * @param {string} propFilter - The type of properties to fetch. Can be "ranges", "outcoming", "incoming", or "all".
+     * @param {Function} [callback] - A callback function to be executed after the process is complete.
+     * @returns {void}
+     */
     self.graphNodeNeighborhood = function (nodeData, propFilter, callback) {
         var fromSource = Lineage_sources.activeSource;
         if (propFilter == "ranges") {
@@ -1252,6 +1497,18 @@ var Lineage_whiteboard = (function () {
         );
     };
 
+    /**
+     * Adds nodes and their parent relationships to the graph for a given source and list of node IDs.
+     * It fetches the parent-child relationships from the SPARQL endpoint and visualizes the nodes and edges in the graph.
+     * @function
+     * @name addNodesAndParentsToGraph
+     * @memberof module:Lineage
+     * @param {string} [source] - The source from which to fetch the data. If not provided, the active source is used.
+     * @param {Array<string>} nodeIds - An array of node IDs to add to the graph.
+     * @param {Object} [options] - Optional configuration for the graph population.
+     * @param {Function} [callback] - A callback function to be executed after the process is complete.
+     * @returns {void}
+     */
     self.addNodesAndParentsToGraph = function (source, nodeIds, options, callback) {
         if (!nodeIds) {
             if (!source) {
@@ -1390,6 +1647,24 @@ var Lineage_whiteboard = (function () {
             }
         );
     };
+
+
+    /**
+     * Adds child nodes and their parent-child relationships to the graph for a given source and node IDs.
+     * The method queries the SPARQL endpoint to retrieve child nodes and then processes and visualizes them as nodes and edges in the graph.
+     * It supports clustering of child nodes based on a specified threshold.
+     * @function
+     * @name addChildrenToGraph
+     * @memberof module:Lineage
+     * @param {string} [source] - The source to fetch the child nodes from. If not provided, the active source is used.
+     * @param {Array<string>} nodeIds - An array of node IDs to add as parent nodes for retrieving children.
+     * @param {Object} [options] - Optional configuration options for adding child nodes.
+     * @param {number} [options.depth=1] - The depth of the child nodes to retrieve.
+     * @param {boolean} [options.dontClusterNodes=false] - If true, disables clustering of child nodes.
+     * @param {string} [options.shape] - The shape to assign to the nodes.
+     * @param {Function} [callback] - A callback function to be executed after the process is complete.
+     * @returns {void}
+     */
     self.addChildrenToGraph = function (source, nodeIds, options, callback) {
         var parentIds;
         if (!source) {
@@ -1637,6 +1912,18 @@ var Lineage_whiteboard = (function () {
         });
     };
 
+    /**
+     * Adds an edge between two nodes in the graph, optionally based on a specified predicate.
+     * If the predicate indicates a specific relationship (e.g., "subClassOf" or "type"), custom arrow configurations can be applied.
+     * @function
+     * @name addEdge
+     * @memberof module:Lineage
+     * @param {string} source - The source from which the edge is being added.
+     * @param {string} from - The ID of the starting node for the edge.
+     * @param {string} to - The ID of the ending node for the edge.
+     * @param {string} predicate - The predicate describing the relationship between the nodes.
+     * @returns {void}
+     */
     self.addEdge = function (source, from, to, predicate) {
         var arrows = null;
         if (predicate.indexOf("subClassOf") > -1 || predicate.indexOf("type") > -1) {
@@ -1653,11 +1940,30 @@ var Lineage_whiteboard = (function () {
         self.lineageVisjsGraph.data.edges.add(visjsData.edges);
     };
 
+    /**
+     * Deletes an existing edge between two nodes in the graph.
+     * @function
+     * @name deleteEdge
+     * @memberof module:Lineage
+     * @param {string} from - The ID of the starting node for the edge.
+     * @param {string} to - The ID of the ending node for the edge.
+     * @param {string} predicate - The predicate describing the relationship between the nodes (used for matching the edge).
+     * @returns {void}
+     */
     self.deleteEdge = function (from, to, predicate) {
         var id = from + "_" + to;
         self.lineageVisjsGraph.data.edges.remove(id);
     };
 
+    /**
+     * Applies decoration to edges based on their properties.
+     * Edges with specific predicates (e.g., "subClassOf" or "type") will have customized arrow types and colors.
+     * @function
+     * @name setEdgesDecoration
+     * @memberof module:Lineage
+     * @param {Array<Object>|Object} [edges] - The edges to apply decoration to. If not provided, all edges will be processed.
+     * @returns {void}
+     */
     self.setEdgesDecoration = function (edges) {
         if (!edges) {
             edges = self.lineageVisjsGraph.data.edges.get();
@@ -1684,6 +1990,15 @@ var Lineage_whiteboard = (function () {
         self.lineageVisjsGraph.data.edges.update(newEdges);
     };
 
+    /**
+     * Applies decoration to edges based on their properties.
+     * Edges with specific predicates (e.g., "subClassOf" or "type") will have customized arrow types and colors.
+     * @function
+     * @name setEdgesDecoration
+     * @memberof module:Lineage
+     * @param {Array<Object>|Object} [edges] - The edges to apply decoration to. If not provided, all edges will be processed.
+     * @returns {void}
+     */
     self.drawLinkedDataProperties = function (/** @type {any} */ propertyId, /** @type {any} */ classIds, /** @type {{ inverse?: any; }} */ options) {
         if (!options) {
             options = {};
@@ -1812,6 +2127,22 @@ var Lineage_whiteboard = (function () {
         });
     };
 
+    /**
+     * Draws properties as nodes and edges in the graph, based on SPARQL query results.
+     * The method processes the result to create nodes for the range and domain of each property
+     * and connects them with edges, visualizing the property relationships.
+     * @function
+     * @name drawProperties
+     * @memberof module:Lineage
+     * @param {Array<Object>} sparqlResults - The results of a SPARQL query containing property details.
+     * @param {Object} sparqlResults.range - The range of the property (target entity).
+     * @param {Object} sparqlResults.prop - The property itself (predicate).
+     * @param {Object} sparqlResults.domain - The domain of the property (source entity).
+     * @param {Object} sparqlResults.propLabel - The label for the property.
+     * @param {Object} sparqlResults.rangeLabel - The label for the range.
+     * @param {Object} sparqlResults.domainLabel - The label for the domain.
+     * @returns {void}
+     */
     self.drawProperties = function (sparqlResults) {
         var visjsData = { nodes: [], edges: [] };
         var existingNodes = self.lineageVisjsGraph.getExistingIdsMap();
@@ -1891,6 +2222,18 @@ var Lineage_whiteboard = (function () {
         $("#waitImg").css("display", "none");
     };
 
+    /**
+     * Draws object properties as nodes and edges in the graph, based on the specified class IDs
+     * and the data source.
+     * It fetches object properties and their domains and ranges, and visualizes them as nodes and edges in the graph.
+     * @function
+     * @name drawObjectProperties
+     * @memberof module:Lineage
+     * @param {string} source - The source of the data (e.g., OWL or Knowledge Graph).
+     * @param {string|Array<string>} [classIds] - An array of class IDs to use in the query. If not provided, all class IDs from the source are used.
+     * @param {boolean} [_descendantsAlso] - A flag to include descendants as well. 
+     * @returns {void}
+     */
     self.drawObjectProperties = function (/** @type {any} */ source, /** @type {string | null} */ classIds, /** @type {any} */ _descendantsAlso) {
         if (!classIds) {
             if (!source) {
@@ -1951,13 +2294,54 @@ var Lineage_whiteboard = (function () {
             });
         }
     };
+
+    /**
+     * Draws direct restrictions as nodes and edges in the graph.
+     * Direct restrictions are used to define the relationships between properties and entities in the graph.
+     * @function
+     * @name drawDirectRestrictions
+     * @memberof module:Lineage
+     * @param {function} callback - A callback function that is executed once the direct restrictions are drawn.
+     * @returns {void}
+     */
     self.drawDirectRestrictions = function (callback) {
         self.drawRestrictions(null, null, null, null, { inverse: false }, callback);
     };
+
+    /**
+     * Draws inverse restrictions as nodes and edges in the graph.
+     * Inverse restrictions treat the subject and object of a property as interchangeable, and relationships are drawn in reverse.
+     * @function
+     * @name drawInverseRestrictions
+     * @memberof module:Lineage
+     * @param {function} callback - A callback function that is executed once the inverse restrictions are drawn.
+     * @returns {void}
+     */
     self.drawInverseRestrictions = function (callback) {
         self.drawRestrictions(null, null, null, null, { inverse: true }, callback);
     };
 
+    /**
+     * Draws the predicates graph for a given source, node IDs, and properties.
+     * It visualizes the relationships between subjects, predicates, and objects in a graph, with nodes representing entities and edges representing their connections.
+     * The graph is generated using the data from the specified source and options.
+     * @function
+     * @name drawPredicatesGraph
+     * @memberof module:Lineage
+     * @param {string} source - The source from which the data is retrieved (e.g., OWL or Knowledge Graph).
+     * @param {Array<string>|string} [nodeIds] - The list of node IDs to visualize. If a single ID is provided, it is converted to an array.
+     * @param {Array<string>|string} [properties] - The properties to be used in the query. If not provided, default properties are used.
+     * @param {Object} [options] - Options to customize the graph generation.
+     * @param {boolean} [options.inversePredicate=false] - Whether to visualize inverse predicates.
+     * @param {string} [options.filter=""] - Custom filter to apply to the query.
+     * @param {boolean} [options.skipLiterals=false] - Whether to skip literal objects.
+     * @param {boolean} [options.OnlySubjects=false] - Whether to include only subject nodes.
+     * @param {boolean} [options.returnVisjsData=false] - Whether to return the Visjs graph data.
+     * @param {string} [options.edgesColor] - Custom color for the edges.
+     * @param {Array<string>} [options.includeSources] - Additional sources to include for equivalent classes or sameAs properties.
+     * @param {Function} callback - A callback function to handle the results of the graph generation.
+     * @returns {void}
+     */
     self.drawPredicatesGraph = function (source, nodeIds, properties, options, callback) {
         if (!options) {
             options = {};
@@ -2220,6 +2604,16 @@ var Lineage_whiteboard = (function () {
         );
     };
 
+    /**
+     * Re-spatializes the graph by adjusting the physics of edges based on the specified mode.
+     * If the mode is "excludeRelations", the physics of the edges are disabled. Otherwise, they remain active.
+     * This method updates the graph's edges accordingly.
+     * @function
+     * @name reSpatializeGraph
+     * @memberof module:Lineage
+     * @param {string} mode - The mode to determine how the graph edges are handled. If "excludeRelations", edges are spatialized without physics; otherwise, physics are applied.
+     * @returns {void}
+     */
     self.reSpatializeGraph = function (mode) {
         var physics = true;
         if (mode == "excludeRelations") {
@@ -2236,6 +2630,25 @@ var Lineage_whiteboard = (function () {
         self.lineageVisjsGraph.data.edges.update(newEdges);
     };
 
+    /**
+     * Draws the restrictions for a given source, class IDs, and related options.
+     * This function handles both inverse and non-inverse restrictions, processes the retrieved data, and updates the graph with nodes and edges representing the restrictions.
+     * It supports additional configuration options like excluding imports, adjusting the spatialization, and handling custom edges and nodes.
+     * @function
+     * @name drawRestrictions
+     * @memberof module:Lineage
+     * @param {string} source - The source from which the data is fetched (e.g., OWL or Knowledge Graph). If not provided, the active source is used.
+     * @param {Array<string>|string} [classIds] - The list of class IDs to consider for drawing the restrictions. If not provided, defaults to the active source's graph IDs.
+     * @param {Array<string>|string} [descendants] - The descendants to be included in the drawing (if any).
+     * @param {boolean} [withoutImports] - Flag to exclude imports from the restrictions query.
+     * @param {Object} [options] - Options to customize the restriction drawing behavior.
+     * @param {boolean} [options.inverse=false] - If true, draws inverse restrictions.
+     * @param {boolean} [options.allNodes=false] - If true, includes all nodes.
+     * @param {boolean} [options.output=""] - Determines the output format (e.g., "table").
+     * @param {string} [options.edgesColor] - Custom color for edges.
+     * @param {Function} callback - A callback function to handle the results of the restriction drawing.
+     * @returns {void}
+     */
     self.drawRestrictions = function (source, classIds, descendants, withoutImports, options, callback) {
         if (!options) {
             options = {};
@@ -2471,6 +2884,15 @@ restrictionSource = Config.predicatesSource;
         );
     };
 
+    /**
+     * Draws the sameAs restrictions for the dictionary.
+     * This function fetches and visualizes the sameAs properties for the dictionary source,
+     * displaying the relationships in a graph format.
+     * @function
+     * @name drawDictionarySameAs
+     * @memberof Lineage_whiteboard
+     * @returns {void}
+     */
     self.drawDictionarySameAs = function () {
         /**
          * @param {any[]} restrictionNodes
@@ -2490,6 +2912,16 @@ restrictionSource = Config.predicatesSource;
         self.drawRestrictions(Config.dictionarySource, existingNodes, false, false, options);
     };
 
+    /**
+     * Draws linked data for named classes.
+     * This function fetches named linked data from a source based on the provided class IDs,
+     * and visualizes the results in the graph, adding new nodes and edges as necessary.
+     * @function
+     * @name drawNamedLinkedData
+     * @memberof Lineage_whiteboard
+     * @param {any[]} [classIds] - The list of class IDs to filter the linked data by. If not provided, it will be retrieved from the active source.
+     * @returns {void}
+     */
     self.drawNamedLinkedData = function (/** @type {any[]} */ classIds) {
         var source = Lineage_sources.activeSource;
         if (!source) {
@@ -2580,6 +3012,15 @@ restrictionSource = Config.predicatesSource;
         });
     };
 
+    /**
+     * Collapses a node and removes its connected children from the graph.
+     * This function collapses the specified node and removes any connected nodes in the "from" direction.
+     * @function
+     * @name collapseNode
+     * @memberof Lineage_whiteboard
+     * @param {any} nodeId - The ID of the node to collapse.
+     * @returns {void}
+     */
     self.collapseNode = function (/** @type {any} */ nodeId) {
         if (nodeId) {
             var children = self.lineageVisjsGraph.network.getConnectedNodes(nodeId, "from");
@@ -2587,6 +3028,17 @@ restrictionSource = Config.predicatesSource;
         }
     };
 
+    /**
+     * Sets the context menu for a graph node based on the node's type and context.
+     * This function generates a dynamic context menu for the clicked node with options such as 
+     * opening clusters, showing property information, or removing nodes from the graph.
+     * @function
+     * @name setGraphPopupMenus
+     * @memberof Lineage_whiteboard
+     * @param {Object} node - The node that was clicked on in the graph.
+     * @param {Event} event - The event triggered by the click, used to set the context menu options.
+     * @returns {void}
+     */
     self.setGraphPopupMenus = function (node, event) {
         if (!node || !node.data) {
             return;
@@ -2652,6 +3104,18 @@ restrictionSource = Config.predicatesSource;
         $("#popupMenuWidgetDiv").html(html);
     };
 
+    /**
+     * Zooms in on a specific node in the graph and highlights it.
+     * This function focuses on the specified node by adjusting the zoom scale and updating its size and font color.
+     * It also stores the initial parameters for the node such as shadow, size, and shape.
+     * 
+     * @function
+     * @name zoomGraphOnNode
+     * @memberof module:LineageWhiteboard
+     * @param {any} nodeId - The ID of the node to zoom into.
+     * @param {boolean} changeSize - Flag to determine whether the node's size should be adjusted.
+     * @returns {void}
+     */
     self.zoomGraphOnNode = function (/** @type {any} */ nodeId, changeSise) {
         var nodes = self.lineageVisjsGraph.data.nodes.getIds();
         if (nodes.indexOf(nodeId) < 0) {
@@ -2694,14 +3158,23 @@ restrictionSource = Config.predicatesSource;
         });
         self.lineageVisjsGraph.data.nodes.update(newNodes);
     };
+
+
     /**
-     * draws nodes and parents
-     *
-     * @param node (with data id and source
-     * @param ancestorsDepth
-     * @param options
-     * @param callback
-     * @returns {void|*}
+     * Draws the nodes and their parent relationships in the graph.
+     * This function retrieves the parents of the specified nodes and visualizes them in the graph, along with any additional options like shape and level.
+     * It updates the graph with new nodes and edges based on the query result and the specified ancestors' depth.
+     * @function
+     * @name drawNodesAndParents
+     * @memberof module:LineageWhiteboard
+     * @param {Array|Object} nodes - The nodes to be drawn. Can be a single node or an array of nodes.
+     * @param {number} ancestorsDepth - The depth of ancestor nodes to be retrieved.
+     * @param {Object} [options={}] - Optional configuration for the drawing process.
+     * @param {string} [options.shape="dot"] - The shape of the node. Default is "dot".
+     * @param {number} [options.startLevel=0] - The starting level for drawing nodes. Default is 0.
+     * @param {boolean} [options.drawBeforeCallback=false] - If true, the callback is called before drawing. Default is false.
+     * @param {Function} [options.callback] - A callback function to handle the result after drawing the nodes and edges.
+     * @returns {void}
      */
     self.drawNodesAndParents = function (nodes, ancestorsDepth, options, callback) {
         if (!options) {
@@ -2912,6 +3385,17 @@ self.zoomGraphOnNode(node.data[0].id, false);
         });
     };
 
+    /**
+     * Draws the inferred classes model based on the active source or provided source.
+     * This function queries the inferred model data and visualizes it in the graph.
+     * If the graph is not empty, it updates the existing nodes and edges.
+     * 
+     * @function
+     * @name drawInferredClassesModel
+     * @memberof module:LineageWhiteboard
+     * @param {Object} [source] - The source of the lineage data. If not provided, the active source is used.
+     * @returns {void}
+     */
     self.drawInferredClassesModel = function (source) {
         if (!source) {
             source = Lineage_sources.activeSource;
@@ -2932,6 +3416,19 @@ self.zoomGraphOnNode(node.data[0].id, false);
     };
 
     self.graphActions = {
+
+        /**
+         * Displays the graph's popup menu for the given node at the specified point.
+         * The popup menu shows different options depending on whether the node is a graph edge or a regular node.
+         * 
+         * @function
+         * @name showGraphPopupMenu
+         * @memberof module:LineageWhiteboard.graphActions
+         * @param {Object} node - The node to show the popup for. Contains a `from` property if it is an edge.
+         * @param {Object} point - The coordinates (x, y) where the popup should be shown.
+         * @param {Object} event - The event object, typically the click event.
+         * @returns {void}
+         */
         showGraphPopupMenu: function (/** @type {{ from: any; }} */ node, /** @type {any} */ point, /** @type {any} */ event) {
             if (node.from) {
                 self.currentGraphEdge = node;
@@ -2958,6 +3455,19 @@ self.zoomGraphOnNode(node.data[0].id, false);
             }
         },
 
+        /**
+         * Handles a click event on a graph node. If the node is an edge, it updates the current graph edge; otherwise, it updates the current node.
+         * The function can also handle double-click actions and expand the node or open a cluster.
+         * 
+         * @function
+         * @name onNodeClick
+         * @memberof module:LineageWhiteboard.graphActions
+         * @param {Object} node - The node that was clicked.
+         * @param {Object} point - The coordinates (x, y) where the click occurred.
+         * @param {Object} options - Options for the click action.
+         * @param {boolean} options.dbleClick - Indicates if the click was a double-click.
+         * @returns {void}
+         */
         onNodeClick: function (/** @type {{ data: { cluster: any; }; }} */ node, /** @type {any} */ point, /** @type {{ dbleClick: any; }} */ options) {
             if (!node) {
                 PopupMenuWidget.hidePopup("popupMenuWidgetDiv");
@@ -2982,6 +3492,14 @@ self.zoomGraphOnNode(node.data[0].id, false);
             }
         },
 
+        /**
+         * Expands the current graph node by adding its children. The depth and whether nodes should be clustered is determined based on the current click options.
+         * 
+         * @function
+         * @name expand
+         * @memberof module:LineageWhiteboard.graphActions
+         * @returns {void}
+         */
         expand: function () {
             var dontClusterNodes = false;
             var depth = 1;
@@ -3000,6 +3518,16 @@ self.zoomGraphOnNode(node.data[0].id, false);
                 memberPredicate: memberPredicate,
             });
         },
+
+        /**
+         * Draws the parent nodes of the current graph node.
+         * It adds parent nodes based on the `memberPredicate` property, which is true if the node type is "container".
+         * 
+         * @function
+         * @name drawParents
+         * @memberof module:LineageWhiteboard.graphActions
+         * @returns {void}
+         */
         drawParents: function () {
             if (!self.currentGraphNode) {
                 return;
@@ -3011,6 +3539,15 @@ self.zoomGraphOnNode(node.data[0].id, false);
             Lineage_whiteboard.addNodesAndParentsToGraph(self.currentGraphNode.data.source, [self.currentGraphNode.id], { memberPredicate: memberPredicate });
         },
 
+
+        /**
+         * Draws similar nodes to the current graph node. If the user holds down certain keys, descendants may also be included in the search for similar nodes.
+         * 
+         * @function
+         * @name drawSimilars
+         * @memberof module:LineageWhiteboard.graphActions
+         * @returns {void}
+         */
         drawSimilars: function () {
             if (!self.currentGraphNode) {
                 return;
@@ -3018,24 +3555,60 @@ self.zoomGraphOnNode(node.data[0].id, false);
             var descendantsAlso = graphContext.clickOptions.ctrlKey && graphContext.clickOptions.shiftKey;
             Lineage_whiteboard.drawSimilarsNodes("label", self.currentGraphNode.data.source, self.currentGraphNode.id, descendantsAlso);
         },
+
+        /**
+         * Collapses the current graph node, hiding its children.
+         * 
+         * @function
+         * @name collapse
+         * @memberof module:LineageWhiteboard.graphActions
+         * @returns {void}
+         */
         collapse: function () {
             if (!self.currentGraphNode) {
                 return;
             }
             Lineage_whiteboard.collapseNode(self.currentGraphNode.id);
         },
+
+        /**
+         * Opens a cluster around the current graph node, displaying additional related nodes and information.
+         * 
+         * @function
+         * @name openCluster
+         * @memberof module:LineageWhiteboard.graphActions
+         * @returns {void}
+         */
         openCluster: function () {
             if (!self.currentGraphNode) {
                 return;
             }
             Lineage_whiteboard.openCluster(self.currentGraphNode);
         },
+
+        /**
+         * Lists the nodes in the current graph cluster and copies the list to the clipboard.
+         * 
+         * @function
+         * @name listClusterToClipboard
+         * @memberof module:LineageWhiteboard.graphActions
+         * @returns {void}
+         */
         listClusterToClipboard: function () {
             if (!self.currentGraphNode) {
                 return;
             }
             Lineage_whiteboard.listClusterToClipboard(self.currentGraphNode);
         },
+            
+        /**
+         * Lists the content of the current graph cluster.
+         * 
+         * @function
+         * @name listClusterContent
+         * @memberof module:LineageWhiteboard.graphActions
+         * @returns {void}
+         */
         listClusterContent: function () {
             if (!self.currentGraphNode) {
                 return;
@@ -3043,6 +3616,15 @@ self.zoomGraphOnNode(node.data[0].id, false);
             Lineage_whiteboard.listClusterContent(self.currentGraphNode);
         },
 
+        /**
+         * Displays the information panel for the current graph node or edge.
+         * If the node is selected, it shows detailed information about the node; otherwise, it shows information about the edge.
+         * 
+         * @function
+         * @name showNodeInfos
+         * @memberof module:LineageWhiteboard.graphActions
+         * @returns {void}
+         */
         showNodeInfos: function () {
             if (self.currentGraphNode) {
                 NodeInfosWidget.showNodeInfos(self.currentGraphNode.data.source, self.currentGraphNode, "mainDialogDiv");
@@ -3050,9 +3632,28 @@ self.zoomGraphOnNode(node.data[0].id, false);
                 NodeInfosWidget.showNodeInfos(self.currentGraphEdge.data.source, self.currentGraphEdge, "mainDialogDiv");
             }
         },
+
+        /**
+         * Displays the information panel for a restriction property in the current graph edge.
+         * 
+         * @function
+         * @name showRestrictionPropertyNodeInfos
+         * @memberof module:LineageWhiteboard.graphActions
+         * @returns {void}
+         */
         showRestrictionPropertyNodeInfos: function () {
             NodeInfosWidget.showNodeInfos(self.currentGraphEdge.data.source, self.currentGraphEdge?.data?.propertyId, "mainDialogDiv");
         },
+
+        /**
+         * Displays the axioms associated with the current graph node.
+         * The title of the dialog is updated to reflect the resource being examined.
+         * 
+         * @function
+         * @name showAxioms
+         * @memberof module:LineageWhiteboard.graphActions
+         * @returns {void}
+         */
         showAxioms: function () {
             if (self.currentGraphNode) {
                 $("#mainDialogDiv").dialog("option", "title", "Axioms of resource " + self.currentGraphNode.data.label);
@@ -3060,14 +3661,44 @@ self.zoomGraphOnNode(node.data[0].id, false);
                 NodeInfosAxioms.init(self.currentGraphNode.data.source, self.currentGraphNode, "mainDialogDiv");
             }
         },
+
+        /**
+         * Displays information about the object property for the current graph edge.
+         * The `hideModifyButtons` option determines whether the modification buttons are visible in the info panel.
+         * 
+         * @function
+         * @name showPropertyInfos
+         * @memberof module:LineageWhiteboard.graphActions
+         * @param {boolean} hideModifyButtons - Whether to hide the modification buttons in the property info panel.
+         * @returns {void}
+         */
         showPropertyInfos: function (hideModifyButtons) {
             NodeInfosWidget.showNodeInfos(self.currentGraphEdge.data.source, self.currentGraphEdge, "mainDialogDiv", { hideModifyButtons: hideModifyButtons });
         },
 
+        /**
+         * Displays information about the restriction for the current graph edge.
+         * The `hideModifyButtons` option determines whether the modification buttons are visible in the restriction info panel.
+         * 
+         * @function
+         * @name showRestrictionInfos
+         * @memberof module:LineageWhiteboard.graphActions
+         * @param {boolean} hideModifyButtons - Whether to hide the modification buttons in the restriction info panel.
+         * @returns {void}
+         */
         showRestrictionInfos: function (hideModifyButtons) {
             NodeInfosWidget.showNodeInfos(self.currentGraphEdge.data.source, self.currentGraphEdge, "mainDialogDiv", { hideModifyButtons: hideModifyButtons });
         },
 
+        /**
+         * Expands an individual node by adding related items (e.g., individuals) to the graph.
+         * It queries a filter based on the current node and adds new nodes and edges to the graph.
+         * 
+         * @function
+         * @name expandIndividual
+         * @memberof module:LineageWhiteboard.graphActions
+         * @returns {void}
+         */
         expandIndividual: function () {
             var source = Lineage_sources.activeSource;
             var filter = "?subject ?p2 <" + self.currentGraphNode.data.id + ">. ";
@@ -3129,14 +3760,42 @@ self.zoomGraphOnNode(node.data[0].id, false);
             });
         },
 
+        /**
+         * Pastes the current graph node into the selected container node from the search widget tree.
+         * 
+         * @function
+         * @name pasteNodeIntoContainer
+         * @memberof module:LineageWhiteboard.graphActions
+         * @returns {void}
+         */
         pasteNodeIntoContainer: function () {
             if (SearchWidget.currentTreeNode) {
                 Containers_tree.pasteNodeIntoContainer(Lineage_sources.activeSource, self.currentGraphNode);
             }
         },
+
+        /**
+         * Displays the neighborhood (incoming, outcoming, or ranges) of the current graph node.
+         * The filter parameter determines what type of neighborhood to display.
+         * 
+         * @function
+         * @name graphNodeNeighborhood
+         * @memberof module:LineageWhiteboard.graphActions
+         * @param {string} filter - The filter type, such as 'incoming', 'outcoming', or 'ranges'.
+         * @returns {void}
+         */
         graphNodeNeighborhood: function (/** @type {any} */ filter) {
             Lineage_whiteboard.graphNodeNeighborhood(self.currentGraphNode.data, filter);
         },
+
+        /**
+         * Displays the UI options for the graph node neighborhood, allowing the user to choose between incoming, outcoming, or range relationships.
+         * 
+         * @function
+         * @name graphNodeNeighborhoodUI
+         * @memberof module:LineageWhiteboard.graphActions
+         * @returns {void}
+         */
         graphNodeNeighborhoodUI: function () {
             var html = ' <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.graphNodeNeighborhood(\'incoming\');">incoming</span>';
             html += ' <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.graphNodeNeighborhood(\'outcoming\');">outcoming</span>';
@@ -3147,10 +3806,29 @@ self.zoomGraphOnNode(node.data[0].id, false);
                 $("#popupMenuWidgetDiv").css("display", "flex");
             }, 100);
         },
+
+        /**
+         * Removes the current graph node from the graph.
+         * The decoration of the graph is updated to reflect the removal.
+         * 
+         * @function
+         * @name removeFromGraph
+         * @memberof module:LineageWhiteboard.graphActions
+         * @returns {void}
+         */
         removeFromGraph: function () {
             self.lineageVisjsGraph.removeNodes("id", Lineage_whiteboard.currentGraphNode.id, true);
             Lineage_decoration.decorateByUpperOntologyByClass();
         },
+
+        /**
+         * Removes all nodes from the graph except for the current node.
+         * 
+         * @function
+         * @name removeOthersFromGraph
+         * @memberof module:LineageWhiteboard.graphActions
+         * @returns {void}
+         */
         removeOthersFromGraph: function () {
             if (!Lineage_whiteboard.currentGraphNode.id) {
                 return;
@@ -3158,14 +3836,44 @@ self.zoomGraphOnNode(node.data[0].id, false);
             self.lineageVisjsGraph.removeOtherNodesFromGraph(Lineage_whiteboard.currentGraphNode.id);
             Lineage_decoration.decorateByUpperOntologyByClass();
         },
+
+        /**
+         * Displays the object properties for the current graph node.
+         * If the user holds down certain keys, descendants may also be included in the displayed properties.
+         * 
+         * @function
+         * @name showObjectProperties
+         * @memberof module:LineageWhiteboard.graphActions
+         * @returns {void}
+         */
         showObjectProperties: function () {
             var descendantsAlso = graphContext.clickOptions.ctrlKey && graphContext.clickOptions.shiftKey;
             Lineage_whiteboard.drawObjectProperties(self.currentGraphNode.data.source, [self.currentGraphNode.id], descendantsAlso);
         },
+
+        /**
+         * Displays the restrictions for the current graph node.
+         * If the user holds down certain keys, descendants may also be included in the displayed restrictions.
+         * 
+         * @function
+         * @name showRestrictions
+         * @memberof module:LineageWhiteboard.graphActions
+         * @returns {void}
+         */
         showRestrictions: function () {
             var descendantsAlso = graphContext.clickOptions.ctrlKey && graphContext.clickOptions.shiftKey;
             Lineage_whiteboard.drawRestrictions(self.currentGraphNode.data.source, self.currentGraphNode.data.id, descendantsAlso);
         },
+
+        /**
+         * Deletes the selected restriction relation from the graph.
+         * A confirmation dialog is shown before deleting the relation.
+         * 
+         * @function
+         * @name deleteRestriction
+         * @memberof module:LineageWhiteboard.graphActions
+         * @returns {void}
+         */
         deleteRestriction: function () {
             var edge = self.currentGraphEdge;
             if (edge.data.bNodeId) {
@@ -3180,6 +3888,16 @@ self.zoomGraphOnNode(node.data[0].id, false);
                 }
             }
         },
+
+        /**
+         * Deletes the selected object property from the graph.
+         * A confirmation dialog is shown before deleting the object property.
+         * 
+         * @function
+         * @name deleteObjectProperty
+         * @memberof module:LineageWhiteboard.graphActions
+         * @returns {void}
+         */
         deleteObjectProperty: function () {
             var edge = self.currentGraphEdge;
 
@@ -3193,6 +3911,16 @@ self.zoomGraphOnNode(node.data[0].id, false);
             }
         },
 
+
+        /**
+         * Creates a sub-property for a selected object property and replaces the current relation.
+         * The user is prompted to enter a label for the sub-property before proceeding with the replacement.
+         * 
+         * @function
+         * @name createSubPropertyAndreplaceRelation
+         * @memberof module:LineageWhiteboard.graphActions
+         * @returns {void}
+         */
         createSubPropertyAndreplaceRelation: function () {
             var edge = self.currentGraphEdge;
 
@@ -3243,11 +3971,29 @@ self.zoomGraphOnNode(node.data[0].id, false);
                 var targetVisjsNode = self.lineageVisjsGraph.data.nodes.get(edge.to);
             }
         },
+
+        /**
+         * Displays the linked data for the current graph node.
+         * A panel is shown to provide more information about the linked data.
+         * 
+         * @function
+         * @name showLinkedData
+         * @memberof module:LineageWhiteboard.graphActions
+         * @returns {void}
+         */
         showLinkedData: function () {
             Lineage_linkedData.showLinkedDataPanel(self.currentGraphNode);
             //Lineage_whiteboard.drawNamedLinkedData([self.currentGraphNode.id]);
         },
 
+        /**
+         * Hides or shows all nodes in the graph except for the current node, based on the current state.
+         * 
+         * @function
+         * @name hideShowOthers
+         * @memberof module:LineageWhiteboard.graphActions
+         * @returns {void}
+         */
         hideShowOthers: function () {
             var node0 = self.currentGraphNode.id;
             var nodes = self.lineageVisjsGraph.data.nodes.getIds();
@@ -3270,6 +4016,18 @@ self.zoomGraphOnNode(node.data[0].id, false);
         },
     };
 
+    /**
+     * @function
+     * @name getSourceColor
+     * @memberof module:graphActions
+     * Returns the color associated with a given source.
+     * If the source has no color assigned, a color is generated based on the specified palette.
+     * If a node ID is provided, the color is determined based on the graph URI map.
+     * @param {string} source - The name of the source.
+     * @param {string} [nodeId] - The node identifier to check for specific graph mappings.
+     * @param {string} [palette="paletteIntense"] - The color palette to use if no color is found for the source.
+     * @returns {string} - The color associated with the source.
+     */
     self.getSourceColor = function (source, nodeId, palette) {
         if (!palette) {
             palette = "paletteIntense";
@@ -3290,6 +4048,17 @@ self.zoomGraphOnNode(node.data[0].id, false);
         return sourceColors[source];
     };
 
+
+    /**
+     * @function
+     * @name getPropertyColor
+     * @memberof module:graphActions
+     * Returns the color associated with a given property.
+     * If the property has no color assigned, a color is generated based on the specified palette.
+     * @param {string | number} propertyName - The name or number of the property.
+     * @param {string} [palette="paletteIntense"] - The color palette to use if no color is found for the property.
+     * @returns {string} - The color associated with the property.
+     */
     self.getPropertyColor = function (/** @type {string | number} */ propertyName, /** @type {string} */ palette) {
         if (!palette) {
             palette = "paletteIntense";
@@ -3300,6 +4069,16 @@ self.zoomGraphOnNode(node.data[0].id, false);
         return self.propertyColors[propertyName];
     };
 
+    /**
+     * @function
+     * @name getNodeVisjAttrs
+     * @memberof module:graphActions
+     * Returns the visual attributes (shape and color) for a node based on its type, super class, and source.
+     * @param {string} type - The type of the node.
+     * @param {string} superClass - The super class of the node.
+     * @param {string} source - The source of the node.
+     * @returns {Object} - An object containing the visual attributes (`shape`, `color`) of the node.
+     */
     self.getNodeVisjAttrs = function (type, superClass, source) {
         var attrs = {
             shape: self.defaultShape,
@@ -3321,6 +4100,14 @@ attrs.color=self.getSourceColor(superClassValue)
         return attrs;
     };
 
+    /**
+     * @function
+     * @name showHideHelp
+     * @memberof module:graphActions
+     * Toggles the visibility of the help section in the UI.
+     * If the help section is currently hidden, it will be shown; otherwise, it will be hidden.
+     * @returns {void}
+     */
     self.showHideHelp = function () {
         var display = $("#lineage_actionDiv_Keyslegend").css("display");
         if (display == "none") {
@@ -3331,11 +4118,28 @@ attrs.color=self.getSourceColor(superClassValue)
         $("#lineage_actionDiv_Keyslegend").css("display", display);
     };
 
+    /**
+     * @function
+     * @name showWikiPage
+     * @memberof module:graphActions
+     * Opens the wiki page for the specified source label in a new browser tab.
+     * The URL is constructed using the base wiki URL and the source label.
+     * @param {string} sourceLabel - The label of the source for which the wiki page should be opened.
+     * @returns {void}
+     */
     self.showWikiPage = function (sourceLabel) {
         var wikiUrl = Config.wiki.url + "Source " + sourceLabel;
         window.open(wikiUrl, "_slsvWiki");
     };
 
+    /**
+     * @function
+     * @name showEdgesLegend
+     * @memberof module:graphActions
+     * Displays a legend for the edges in the graph, showing each edge label and its associated color.
+     * This helps users understand the connections between different nodes in the graph.
+     * @returns {void}
+     */
     self.showEdgesLegend = function () {
         var edges = self.lineageVisjsGraph.data.edges.get();
         var newEdges = [];
@@ -3359,6 +4163,16 @@ attrs.color=self.getSourceColor(superClassValue)
         $(".vis-manipulation").html(html);
     };
 
+    /**
+     * @function
+     * @name copyNode
+     * @memberof module:graphActions
+     * Copies a node to the clipboard, allowing it to be pasted elsewhere.
+     * If no specific node is provided, it will use the currently selected node.
+     * @param {Event} event - The event triggering the copy action.
+     * @param {Object} node - The node to copy. If not provided, uses the current node.
+     * @returns {void}
+     */
     self.copyNode = function (event, node) {
         if (!node) {
             node = self.currentTreeNode;
@@ -3384,26 +4198,88 @@ attrs.color=self.getSourceColor(superClassValue)
     };
 
     self.graph = {
+
+        /**
+         * @function
+         * @name searchNode
+         * @memberof module:graphActions.graph
+         * Searches for a specific node by its ID and a search word.
+         * This helps locate specific nodes within the graph structure.
+         * @param {string} id - The ID of the node to search for.
+         * @param {string} word - The word to search within the node.
+         * @returns {void}
+         */
         searchNode: function (id, word) {
             self.lineageVisjsGraph.searchNode(id, word);
         },
+
+        /**
+         * @function
+         * @name setLayout
+         * @memberof module:graphActions.graph
+         * Sets the layout of the graph to the specified type.
+         * Different layouts can help present the graph data in various ways, such as hierarchical or circular.
+         * @param {string} layout - The layout type to apply to the graph.
+         * @returns {void}
+         */
         setLayout: function (layout) {
             self.lineageVisjsGraph.setLayout();
         },
+
+        /**
+         * @function
+         * @name showGraphConfig
+         * @memberof module:graphActions.graph
+         * Displays the configuration options for the graph.
+         * This includes settings like layout type, visual styles, and other graph preferences.
+         * @returns {void}
+         */
         showGraphConfig: function () {
             self.lineageVisjsGraph.showGraphConfig();
         },
 
+        /**
+         * @function
+         * @name toSVG
+         * @memberof module:graphActions.graph
+         * Exports the graph to an SVG format, allowing users to download a graphical representation of the data.
+         * @returns {void}
+         */
         toSVG: function () {
             self.lineageVisjsGraph.toSVG();
         },
+
+        /**
+         * @function
+         * @name toGraphMl
+         * @memberof module:graphActions.graph
+         * Exports the graph to the GraphML format, which can be used for further analysis or visualization in compatible tools.
+         * @returns {void}
+         */
         toGraphMl: function () {
             self.lineageVisjsGraph.toGraphMl();
         },
+
+        /**
+         * @function
+         * @name exportGraphToDataTable
+         * @memberof module:graphActions.graph
+         * Exports the graph data to a tabular format (data table) for easier inspection and manipulation.
+         * @returns {void}
+         */
         exportGraphToDataTable: function () {
             Export.exportGraphToDataTable(self.lineageVisjsGraph);
         },
 
+
+        /**
+         * @function
+         * @name saveWhiteboard
+         * @memberof module:graphActions.graph
+         * Saves the current whiteboard (graph visualization) to a file.
+         * The file name is provided by the user through a prompt.
+         * @returns {void}
+         */
         saveWhiteboard: function () {
             var visjsFileName = prompt("file name");
             if (!visjsFileName) {
@@ -3411,6 +4287,15 @@ attrs.color=self.getSourceColor(superClassValue)
             }
             Lineage_whiteboard.lineageVisjsGraph.saveGraph(visjsFileName);
         },
+
+        /**
+         * @function
+         * @name loadSavedGraph
+         * @memberof module:graphActions.graph
+         * Loads a previously saved graph file and renders it in the current workspace.
+         * The user is prompted to enter the file name.
+         * @returns {void}
+         */
         loadSavedGraph: function () {
             var visjsFileName = prompt("file name");
             if (!visjsFileName) {
@@ -3429,6 +4314,15 @@ attrs.color=self.getSourceColor(superClassValue)
         },
     };
 
+
+    /**
+     * @function
+     * @name initWhiteboardTab
+     * @memberof module:graphActions
+     * Initializes the whiteboard tab in the UI by loading the necessary HTML content and configuring actions.
+     * This includes binding event listeners and setting up the tab's content.
+     * @returns {void}
+     */
     self.initWhiteboardTab = function () {
         if ($("#whiteboardTab").children().length == 0) {
             $("#whiteboardTab").load("./modules/tools/lineage/html/whiteboardTab.html", function (s) {
@@ -3461,6 +4355,14 @@ attrs.color=self.getSourceColor(superClassValue)
         }
     };
 
+
+    /**
+     * @function
+     * @name initClassesTab
+     * @memberof module:graphActions
+     * Initializes the classes tab in the UI by loading relevant content and actions related to the classes.
+     * @returns {void}
+     */
     self.initClassesTab = function () {
         if ($("#classesTab").children().length == 0) {
             $("#classesTab").load("./modules/tools//lineage/html/classesTab.html", function (s) {
@@ -3483,6 +4385,14 @@ attrs.color=self.getSourceColor(superClassValue)
             });
         }
     };
+
+    /**
+     * @function
+     * @name initPropertiesTab
+     * @memberof module:graphActions
+     * Initializes the properties tab in the UI by loading content and setting up actions related to the properties.
+     * @returns {void}
+     */
     self.initPropertiesTab = function () {
         if ($("#propertiesTab").children().length == 0) {
             $("#propertiesTab").load("./modules/tools/lineage/html/propertiesTab.html", function (s) {
@@ -3492,6 +4402,14 @@ attrs.color=self.getSourceColor(superClassValue)
             });
         }
     };
+
+    /**
+     * @function
+     * @name initContainersTab
+     * @memberof module:graphActions
+     * Initializes the containers tab in the UI by loading the relevant content and setting up actions related to containers.
+     * @returns {void}
+     */
     self.initContainersTab = function () {
         if ($("#containersTab").children().length == 0) {
             $("#containersTab").load("./modules/tools//lineage/html/containersTab.html", function (s) {
@@ -3512,6 +4430,15 @@ attrs.color=self.getSourceColor(superClassValue)
         }
     };
 
+
+    /**
+     * @function
+     * @name resetCurrentTab
+     * @memberof module:graphActions
+     * Resets the content and actions of the current active tab.
+     * This ensures that each tab's content is refreshed based on its state.
+     * @returns {void}
+     */
     self.resetCurrentTab = function () {
         var currentTab = $(".slsv-tabButtonSelected").parent().attr("title");
         if (currentTab == "Classes") {
@@ -3524,6 +4451,16 @@ attrs.color=self.getSourceColor(superClassValue)
             Containers_tree.search("lineage_containers_containersJstree");
         }
     };
+
+    /**
+     * @function
+     * @name hideShowMoreActions
+     * @memberof module:graphActions
+     * Toggles the visibility of the "More Actions" section in the UI.
+     * This section contains additional actions that can be performed on the graph or data.
+     * @param {string} hideShowParameter - If "show", the actions are displayed; if "hide", they are hidden.
+     * @returns {void}
+     */
     self.hideShowMoreActions = function (hideShowParameter) {
         if (hideShowParameter == "hide") {
             self.MoreActionsShow = true;
@@ -3541,6 +4478,17 @@ attrs.color=self.getSourceColor(superClassValue)
             $("#Lineage_MoreActionsSection").addClass("TitleBoxLine");
         }
     };
+
+
+    /**
+     * @function
+     * @name hideShowMoreOptions
+     * @memberof module:graphActions
+     * Toggles the visibility of additional options for a specific section of the UI.
+     * @param {string} hideShowParameter - If "show", the options are displayed; if "hide", they are hidden.
+     * @param {string} divId - The ID of the section to toggle.
+     * @returns {void}
+     */
     self.hideShowMoreOptions = function (hideShowParameter, divId) {
         if (hideShowParameter == "hide") {
             self.MoreOptionsShow[divId] = false;
@@ -3556,6 +4504,15 @@ attrs.color=self.getSourceColor(superClassValue)
             self.MoreOptionsShow[divId] = true;
         }
     };
+
+    /**
+     * @function
+     * @name loadDecorationData
+     * @memberof module:graphActions
+     * Loads decoration data for a specific source label, which is used to modify the graph's appearance.
+     * @param {string} sourceLabel - The label of the source for which to load decoration data.
+     * @returns {void}
+     */
     self.loadDecorationData = function (sourceLabel) {
         var visjsGraphFileName = sourceLabel + "_decoration.json";
         var payload = {
@@ -3578,6 +4535,13 @@ attrs.color=self.getSourceColor(superClassValue)
         });
     };
 
+    /**
+     * @function
+     * @name showWhiteBoardDisplay
+     * @memberof module:graphActions
+     * Displays the whiteboard in a dialog window, allowing users to interact with the visual representation of the graph.
+     * @returns {void}
+     */
     self.showWhiteBoardDisplay = function () {
         $("#smallDialogDiv").load("./modules/tools/lineage/html/whiteboardDisplay.html", function () {
             $("#smallDialogDiv").dialog("open");

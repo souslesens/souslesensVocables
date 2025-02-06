@@ -42,3 +42,12 @@ Manages the UI display, including panels, tab activation, and visibility of data
 - **Technical & Structural Mappings**: Differentiates between different types of mappings.
 - **Triple Generation**: Supports RDF triple creation for semantic web applications.
 - **User-friendly Interface**: Provides a structured UI for efficient navigation and mapping operations.
+
+## Usage
+- Configure data sources in DataSourceManager.
+- Use MappingModeler to create and edit mappings.
+- Visualize mapping columns with MappingColumnsGraph.
+- Generate and format mappings with MappingTransform.
+- Manage technical mappings using MappingsDetails.
+- Handle RDF triples with TripleFactory.
+- Control UI components via UIcontroller.

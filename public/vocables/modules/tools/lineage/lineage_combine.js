@@ -12,16 +12,41 @@ import MainController from "../../shared/mainController.js";
 var Lineage_combine = (function () {
     var self = {};
     self.currentSources = [];
+
+    /**
+     * Displays a dialog for selecting ontology sources to add to the graph.
+     * Supports OWL and SKOS sources.
+     * @function
+     * @name showSourcesDialog
+     * @memberof module:Lineage_combine
+     * @returns {void}
+     */
     self.showSourcesDialog = function () {
         SourceSelectorWidget.showDialog(["OWL", "SKOS"], null, Lineage_combine.addSelectedSourcesToGraph);
     };
 
+    /**
+     * Initializes the Lineage_combine module by resetting selected sources
+     * and hiding action-related UI elements.
+     * @function
+     * @name init
+     * @memberof module:Lineage_combine
+     * @returns {void}
+     */
     self.init = function () {
         self.currentSources = [];
         $("#Lineage_combine_actiosDiv").css("display", "none");
         $("#Lineage_combine_mergeNodesDialogButton").css("display", "none");
     };
 
+    /**
+     * Adds selected ontology sources to the graph and updates the UI accordingly.
+     * Registers the selected sources, draws their top concepts, and updates menu actions.
+     * @function
+     * @name addSelectedSourcesToGraph
+     * @memberof module:Lineage_combine
+     * @returns {void}
+     */
     self.addSelectedSourcesToGraph = function () {
         $("#sourcesSelectionDialogdiv").dialog("close");
 
@@ -58,6 +83,15 @@ var Lineage_combine = (function () {
         );
     };
 
+
+    /**
+     * Sets the popup menu options for the graph, including actions to hide, show, 
+     * group, and ungroup sources.
+     * @function
+     * @name setGraphPopupMenus
+     * @memberof module:Lineage_combine
+     * @returns {void}
+     */
     self.setGraphPopupMenus = function () {
         var html =
             '    <span  class="popupMenuItem" onclick="Lineage_combine.menuActions.hideSource();"> Hide Source</span>' +
@@ -67,6 +101,16 @@ var Lineage_combine = (function () {
         $("#popupMenuWidgetDiv").html(html);
     };
 
+    /**
+     * Displays a dialog for merging selected ontology nodes. Allows users to specify 
+     * the target source and node, select merge options, and choose nodes for merging.
+     * @function
+     * @name showMergeNodesDialog
+     * @memberof module:Lineage_combine
+     * @param {Object} [fromNode] - The node from which the merge is initiated.
+     * @param {Object} [toNode] - The target node for the merge.
+     * @returns {void}
+     */
     self.showMergeNodesDialog = function (fromNode, toNode) {
         if (fromNode) {
             Lineage_selection.clearNodesSelection();
@@ -92,6 +136,15 @@ var Lineage_combine = (function () {
         //  $("#mainDialogDiv").dialog("open");
     };
 
+    /**
+     * Handles the UI logic for merging ontology nodes. Gathers user input such as 
+     * target source, merge mode, and selected nodes before triggering the merge process.
+     * @function
+     * @name mergeNodesUI
+     * @memberof module:Lineage_combine
+     * @param {Object} [testObj] - Optional test object for debugging.
+     * @returns {void}
+     */
     self.mergeNodesUI = function (testObj) {
         var targetNode = null;
         var targetSource = $("#LineageMerge_targetSourceSelect").val();
@@ -107,6 +160,22 @@ var Lineage_combine = (function () {
         self.mergeNodes(jstreeNodes, mergeMode, mergeDepth, mergeRestrictions, mergedNodesType, targetSource, targetNode);
     };
 
+    /**
+     * Merges multiple ontology nodes into a target source, preserving hierarchy and restrictions.
+     * This function retrieves node descendants, applies restrictions, and inserts the merged data into the target source.
+     * @function
+     * @name mergeNodes
+     * @memberof module:Lineage_combine
+     * @param {Object[]} jstreeNodes - The nodes selected for merging, represented as jstree objects.
+     * @param {string} mergeMode - The merging mode, e.g., "keepUri".
+     * @param {string} mergeDepth - Defines the depth of the merge operation ("nodeOnly", "nodeAndDirectChildren", "nodeDescendantsOnly").
+     * @param {boolean} mergeRestrictions - Whether to include ontology restrictions in the merge.
+     * @param {string} mergedNodesType - The RDF type of the merged nodes (e.g., "owl:NamedIndividual", "owl:Class").
+     * @param {string} targetSource - The target source where merged nodes will be inserted.
+     * @param {string} [targetNode] - The optional parent node under which merged nodes will be placed.
+     * @param {Function} callback - A callback function executed after the merge process completes.
+     * @returns {void}
+     */
     self.mergeNodes = function (jstreeNodes, mergeMode, mergeDepth, mergeRestrictions, mergedNodesType, targetSource, targetNode, callback) {
         var maxDepth = 10;
 

@@ -8,17 +8,24 @@ import Lineage_whiteboard from "./lineage_whiteboard.js";
 import SearchWidget from "../../uiWidgets/searchWidget.js";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
+/**
+ * @namespace Lineage_graphTraversal
+ * @description Module for managing the shortest path search between nodes in the Lineage graph.
+ */
 var Lineage_graphTraversal = (function () {
     var self = {};
 
     /**
-     *
-     * get nodes shortest path from server
-     *
-     * @param source
-     * @param fromNodeId
-     * @param toNodeId
-     * @param callback return shortestPath nodes array
+     * @function getShortestpathUris
+     * @memberof Lineage_graphTraversal
+     * @description Retrieves the shortest path between two nodes from the server.
+     * @param {string} source - The data source.
+     * @param {string} fromNodeId - The URI of the starting node.
+     * @param {string} toNodeId - The URI of the target node.
+     * @param {Object} options - Options for path calculation.
+     * @param {number} options.numberOfPathes - Number of paths to retrieve.
+     * @param {function} callback - Callback function receiving the result or an error.
      */
     self.getShortestpathUris = function (source, fromNodeId, toNodeId, options, callback) {
         var body = {
@@ -46,6 +53,17 @@ var Lineage_graphTraversal = (function () {
         });
     };
 
+
+    /**
+     * @function getShortestPathObjects
+     * @memberof Lineage_graphTraversal
+     * @description Retrieves and structures the shortest path relationships into usable objects.
+     * @param {string} source - The data source.
+     * @param {string} fromNodeId - The URI of the starting node.
+     * @param {string} toNodeId - The URI of the target node.
+     * @param {Object} options - Options for path calculation.
+     * @param {function} callback - Callback function receiving the relationships or an error.
+     */
     self.getShortestPathObjects = function (source, fromNodeId, toNodeId, options, callback) {
         var path = [];
         var relations = [];
@@ -124,6 +142,11 @@ var Lineage_graphTraversal = (function () {
         );
     };
 
+    /**
+     * @function showShortestPathDialog
+     * @memberof Lineage_graphTraversal
+     * @description Displays the dialog box for searching the shortest path.
+     */ 
     self.showShortestPathDialog = function () {
         self.pathFromUri = null;
         self.pathToUri = null;
@@ -136,17 +159,35 @@ var Lineage_graphTraversal = (function () {
         });
     };
 
+    /**
+     * @function initVisjsPathMode
+     * @memberof Lineage_graphTraversal
+     * @description Enables link addition mode in Vis.js for path selection.
+     */
     self.initVisjsPathMode = function () {
         self.inPathMode = true;
         Lineage_whiteboard.lineageVisjsGraph.network.addEdgeMode();
         $("#mainDialogDiv").dialog("close");
     };
 
+    /**
+     * @function showPathNodesList
+     * @memberof Lineage_graphTraversal
+     * @description Displays the list of nodes in the selected path.
+     * @param {string} source - The data source.
+     * @param {Array} path - List of nodes in the path.
+     */
     self.showPathNodesList = function (source, path) {
         var filter = Sparql_common.setFilter("subject", path, null);
         Sparql_OWL.getItems(source, { filter: filter }, function (err, result) {});
     };
 
+    /**
+     * @function onSearchKeyDown
+     * @memberof Lineage_graphTraversal
+     * @description Handles concept search in the interface via keyboard input.
+     * @param {Event} event - The keyboard event.
+     */
     self.onSearchKeyDown = function (event) {
         if (event.keyCode != 13 && event.keyCode != 9) return;
         var term = $("#lineage_shorterstPath_searchInput").val();
@@ -155,6 +196,13 @@ var Lineage_graphTraversal = (function () {
         self.searchConcept(term, exactMatch);
     };
 
+    /**
+     * @function searchConcept
+     * @memberof Lineage_graphTraversal
+     * @description Searches for a concept in the available sources.
+     * @param {string} term - The search term.
+     * @param {boolean} exactMatch - Whether the search should be an exact match.
+     */
     self.searchConcept = function (term, exactMatch) {
         /**
          *
@@ -184,6 +232,12 @@ var Lineage_graphTraversal = (function () {
         SearchWidget.searchTermInSources(options);
     };
 
+    /**
+     * @function contextMenufn
+     * @memberof Lineage_graphTraversal
+     * @description Defines the context menu for selecting start and end nodes.
+     * @returns {Object} - Object containing the context menu items.
+     */
     self.contextMenufn = function () {
         var items = {};
 
@@ -206,6 +260,14 @@ var Lineage_graphTraversal = (function () {
 
         return items;
     };
+
+    /**
+     * @function selectTreeNodeFn
+     * @memberof Lineage_graphTraversal
+     * @description Selects a node in the search tree.
+     * @param {Event} event - The selection event.
+     * @param {Object} obj - The object representing the selected node.
+     */
     self.selectTreeNodeFn = function (event, obj) {
         self.currentTreeNode = obj.node;
         if (!self.pathFromUri) {
@@ -219,6 +281,15 @@ var Lineage_graphTraversal = (function () {
         }
     };
 
+
+    /** 
+     * @function listShortestPath
+     * @memberof Lineage_graphTraversal
+     * @description Lists the relationships in the shortest path found.
+     * @param {string} source - The data source.
+     * @param {string} fromUri - The URI of the starting node.
+     * @param {string} toUri - The URI of the target node.
+     */
     self.listShortestPath = function (source, fromUri, toUri) {
         if (!source) source = Lineage_sources.activeSource;
         if (!fromUri) fromUri = self.pathFromUri;
@@ -253,6 +324,12 @@ var Lineage_graphTraversal = (function () {
         });
     };
 
+    /**
+     * @function drawPathesOnWhiteboard
+     * @memberof Lineage_graphTraversal
+     * @description Draws the relationships of the selected path on the Vis.js whiteboard.
+     * @param {Array} relations - List of relationships to display.
+     */
     self.drawPathesOnWhiteboard = function draw(relations) {
         var visjsData = { nodes: [], edges: [] };
         var existingIdsMap = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
@@ -337,6 +414,16 @@ var Lineage_graphTraversal = (function () {
         }
     };
 
+
+    /**
+     * @function drawAllShortestPathes
+     * @memberof Lineage_graphTraversal
+     * @description Retrieves and displays all shortest paths between two nodes.
+     * @param {string} source - The data source.
+     * @param {string} fromUri - The URI of the starting node.
+     * @param {string} toUri - The URI of the target node.
+     * @param {number} numberOfPathes - Number of paths to retrieve.
+     */
     self.drawAllShortestPathes = function (source, fromUri, toUri, numberOfPathes) {
         if (!source) source = Lineage_sources.activeSource;
         if (!fromUri) fromUri = self.pathFromUri;
@@ -350,6 +437,15 @@ var Lineage_graphTraversal = (function () {
         });
     };
 
+
+    /**
+     * @function drawShortestPath
+     * @memberof Lineage_graphTraversal
+     * @description Displays the shortest path between two nodes on the whiteboard.
+     * @param {string} source - The data source.
+     * @param {string} fromUri - The URI of the starting node.
+     * @param {string} toUri - The URI of the target node.
+     */
     self.drawShortestPath = function (source, fromUri, toUri) {
         if (!source) source = Lineage_sources.activeSource;
         if (!fromUri) fromUri = self.pathFromUri;
@@ -364,10 +460,21 @@ var Lineage_graphTraversal = (function () {
         });
     };
 
+    /**
+     * @function clearPathList
+     * @memberof Lineage_graphTraversal
+     * @description Clears the list of displayed paths in the user interface.
+     */
     self.clearPathList = function () {
         $("#lineage_shorterstPathListDiv").html("");
     };
 
+
+    /**
+     * @function clearNodes
+     * @memberof Lineage_graphTraversal
+     * @description Resets the selected start and end nodes.
+     */
     self.clearNodes = function () {
         self.pathFromUri = null;
         $("#lineage_shorterstPathFromUri").html("");

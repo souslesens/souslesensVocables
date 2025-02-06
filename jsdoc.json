@@ -1,12 +1,12 @@
 {
     "source": {
-      "include": ["public/vocables/modules/"],
+      "include": ["public/vocables/modules/tools/mappingModeler"],
       "includePattern": ".+\\.js(doc)?$",
       "excludePattern": "(^|\\/|\\\\)_"
     },
     "opts": {
-      "destination": "./docs",
-      "recurse": true,
-      "tutorials": "./tutorials"
-    }
+      "destination": "./docs/docs/developer-docs",
+      "recurse": true
+    },
+    "tutorials": "./tutorials"
 }

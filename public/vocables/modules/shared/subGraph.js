@@ -467,7 +467,7 @@ var SubGraph = (function () {
                 var triples = result.triples
 
                 const params = new URLSearchParams({
-                    triples:"ddccc"
+                    triples: "ddccc"
                 });
                 UI.message("generating manchester syntax ");
                 $.ajax({
@@ -492,12 +492,26 @@ var SubGraph = (function () {
                     return callback(err);
                 }
                 var labelsMap = {}
+                var typesMap = {}
+                var qualitiesMap = {}
                 var triples = result.triples;
                 var classes = result.classes
 
                 triples.forEach(function (triple) {
                     if (triple.predicate == "rdfs:label") {
                         labelsMap[triple.subject] = triple.object
+                    }
+                    if (triple.predicate == "rdf:type") {
+                        typesMap[triple.subject] = triple.object
+                    }
+                    if (triple.predicate == "rdf:type") {
+                        typesMap[triple.subject] = triple.object
+                    }
+                    if (triple.predicate.endsWith("hasPhysicalQuantity")) {
+                        if (!qualitiesMap[triple.subject]) {
+                            qualitiesMap[triple.subject] = {}
+                        }
+                        qualitiesMap[triple.subject][triple.object] = "?"
                     }
                 })
 
@@ -567,7 +581,13 @@ var SubGraph = (function () {
                             label: labelsMap[triple.subject],
                             shape: levelShapes[level],
                             level: level,
-                            color: getNodeColor(triple.subject)
+                            color: getNodeColor(triple.subject),
+                            data: {
+                                id: triple.subject,
+                                label: labelsMap[triple.subject],
+                                type: typesMap[triple.subject],
+                                qualities: qualitiesMap[triple.subject]
+                            }
                         })
 
                     }
@@ -580,7 +600,12 @@ var SubGraph = (function () {
                             label: labelsMap[triple.object],
                             shape: levelShapes[level],
                             level: level,
-                            color: getNodeColor(triple.object)
+                            color: getNodeColor(triple.object),
+                            data: {
+                                id: triple.object,
+                                label: labelsMap[triple.object],
+                                type: typesMap[triple.object]
+                            }
                         })
 
                     }
@@ -595,12 +620,12 @@ var SubGraph = (function () {
 
                 var graphOptions = {
                     keepNodePositionOnDrag: true,
-                    layoutHierarchical: {
-                        direction: "UD",
-                        nodeSpacing: 200,
-                        levelSeparation: 70
+                     layoutHierarchical: {
+                         direction: "UD",
+                         nodeSpacing: 200,
+                         levelSeparation: 70
 
-                    },
+                     },
                     /* physics: {
             enabled:true},*/
 
@@ -619,6 +644,10 @@ var SubGraph = (function () {
 
 
                 };
+                var position = {x: 0, y: 0}
+                var nodeSpacing = 150
+                var levelSpacing = 50
+             //   self.setHierachicalLayout(visjsData, position, nodeSpacing, levelSpacing)
 
 
                 if (callback) {
@@ -626,6 +655,8 @@ var SubGraph = (function () {
                 } else {
                     self.visjsGraph = new VisjsGraphClass(options.graphDiv, visjsData, graphOptions);
                     self.visjsGraph.draw(function () {
+
+
                     });
                 }
 
@@ -634,13 +665,63 @@ var SubGraph = (function () {
             return;
         }
 
+        self.setHierachicalLayout = function (visjsData, topPosition, nodeSpacing, levelSpacing) {
+            var levelsMap = {}
+            var groupId = "group_" + common.getRandomHexaId(5)
+            var edgesToMap={}
+            var edgesFromMap={}
+            var nodesMap={}
+
+            visjsData.nodes.forEach(function (node) {
+                nodesMap[node.id]=node
+            })
+            visjsData.edges.forEach(function (edge) {
+                edgesToMap[edge.to]=nodesMap[edge.from]
+                if(! edgesFromMap[edge.to])
+                edgesFromMap[edge.from]=[]
+                edgesFromMap[edge.from].push(edge.to)
+
+            })
 
 
+            visjsData.nodes.forEach(function (node) {
+                if (!levelsMap[node.level]) {
+                    levelsMap[node.level] = []
+                }
+                levelsMap[node.level].push(node)
+            })
 
+            var nLevels = Object.keys(levelsMap).length
+            for (var level = 0; level < nLevels; level++) {
+                var nodes = levelsMap[level];
+                nodes.forEach(function (node, index) {
+                    var nSiblings;
+                    var parentNodeX
+                    if (index == 0) {
+                        nSiblings=0
+                        parentNodeX =topPosition.x
+                    } else {
+                        var parentNode=edgesToMap[node.id]
+
+                       var nSiblings =  edgesFromMap[parentNode.id].length
+                        parentNodeX=parentNode.x
+                    }
+                    node.x = (parentNodeX + (nodeSpacing * index)) //- ((nodes.length * nodeSpacing) / 2)
+                    node.y = topPosition.y + (levelSpacing * level);
+                    node.fixed = {x: true, y: true}
+                    node.group = groupId
+
+                })
+
+
+            }
+
+        }
 
 
         return self;
     }
+
 )
 ();
 

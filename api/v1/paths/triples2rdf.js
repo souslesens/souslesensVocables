@@ -1,22 +1,6 @@
 const {processResponse} = require("./utils");
-
-
-var JsonLdSerializer=null;
-
-var dataFactory =null;
-(async () => {
-     await import('jsonld-streaming-serializer').then(function(obj){
-         JsonLdSerializer=obj.JsonLdSerializer
-         console.log(obj.JsonLdSerializer)
-    })
-    dataFactory =await import('@rdfjs/data-model').then(function(obj){
-       // dataFactory=obj
-        console.log(obj)
-    })
-    // YOUR CODE HERE
-})().catch(console.error)
-
-//const JsonLdSerializer = require("jsonld-streaming-serializer").JsonLdSerializer;
+const rdf = require('rdf');
+const { NamedNode, BlankNode, Literal } = rdf;
 
 
 module.exports = function () {
@@ -25,25 +9,41 @@ module.exports = function () {
     };
 
     function GET(req, res, next) {
+        try {
 
+            const graph = new rdf.Graph();
+            graph.add(new rdf.Triple(
+                new NamedNode('http://example.com/'),
+                rdf.rdfsns('label'),
+                new Literal('Book', '@en'))
+            );
+            graph.add(new rdf.Triple(
+                new NamedNode('http://example.com/'),
+                rdf.rdfns('value'),
+                new Literal('10.0', rdf.xsdns('decimal')))
+            );
+            graph.add(new rdf.Triple(
+                new BlankNode(),
+                rdf.rdfns('value'),
+                new Literal('10.1', rdf.xsdns('decimal')))
+            );
 
+            const profile = rdf.environment.createProfile();
+            profile.setDefaultPrefix('http://example.com/');
+            profile.setPrefix('ff', 'http://xmlns.com/foaf/0.1/');
+            const turtle = graph
+                .toArray()
+                .sort(function(a,b){ return a.compare(b); })
+                .map(function(stmt){
+                    return stmt.toTurtle(profile);
+                });
+//console.log(profile.n3());
+            console.log(turtle.join('\n'));
+        } catch (e) {
+            console.log(e)
+        }
 
-
-        const mySerializer = new JsonLdSerializer({ space: '  ' });
-        mySerializer.pipe(process.stdout);
-
-        mySerializer.write(
-            '<http://bfdfggfg1> <http://bfdfggfg2> "http://bfdfggfg3"'
-
-        )
-     /*   mySerializer.write(dataFactory.triple(
-            dataFactory.namedNode('http://ex.org/s1'),
-            dataFactory.namedNode('http://ex.org/p1'),
-            dataFactory.namedNode('http://ex.org/o2'),
-        ));*/
-        mySerializer.end();
-
-                return processResponse(res, null, {output: str});
+        return processResponse(res, null, {output: str});
 
 
     }

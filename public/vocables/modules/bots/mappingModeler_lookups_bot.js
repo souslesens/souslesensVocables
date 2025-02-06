@@ -1,7 +1,6 @@
 import _botEngine from "./_botEngine.js";
 
-
-var Lookups_bot = (function () {
+var Lookups_bot = function () {
     var self = {};
     self.start = function (workflow, _params, callbackFn) {
         self.title = _params.title || "LookUps Bot";
@@ -19,15 +18,16 @@ var Lookups_bot = (function () {
             }
             _botEngine.nextStep();
         });
-    }
+    };
 
     self.workflowColumnmMappingOther = {
-        startFn: {}};
+        startFn: {},
+    };
 
-    self.functionTitles = {}
+    self.functionTitles = {};
 
-    self.functions = {}
-})
+    self.functions = {};
+};
 
 export default Lookups_bot;
 window.Lookups_bot = Lookups_bot;

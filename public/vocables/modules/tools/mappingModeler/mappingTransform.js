@@ -2,7 +2,6 @@ import common from "../../shared/common.js";
 import MappingModeler from "./mappingModeler.js";
 import UIcontroller from "./uiController.js";
 
-
 /**
  * Module responsible for generating and managing mappings for the MappingTransform process.
  * It interacts with the Vis.js graph to retrieve mappings and formats them as JSON for use in the application.
@@ -16,7 +15,7 @@ var MappingTransform = (function () {
     /**
      * Generates the SLS mappings from the Vis.js graph and displays them in the right panel of the UI.
      * The mappings are formatted as JSON and placed inside a textarea for easy access and copying.
-     * 
+     *
      * @function
      * @name generateSLSmappings
      * @memberof module:MappingTransform
@@ -28,16 +27,15 @@ var MappingTransform = (function () {
 
         $("#mappingModeler_genericPanel").html(
             '<button class="w3-button nodesInfos-iconsButtons " style="font-size: 10px;margin-left:7px;" onclick=" MappingModeler.copyKGcreatorMappings()"><input type="image" src="./icons/CommonIcons/CopyIcon.png"></button>' +
-                ' <textarea id="mappingModeler_infosTA" style="display: block;width:80%;height: 700px;overflow: auto;"> </textarea>'
+                ' <textarea id="mappingModeler_infosTA" style="display: block;width:80%;height: 700px;overflow: auto;"> </textarea>',
         );
         //    $("#smallDialogDiv").dialog("open");
         $("#mappingModeler_infosTA").val(JSON.stringify(json, null, 2));
     };
 
-
     /**
      * Placeholder function for generating R2ML mappings. Currently displays an alert.
-     * 
+     *
      * @function
      * @name generateR2MLmappings
      * @memberof module:MappingTransform
@@ -86,7 +84,6 @@ var MappingTransform = (function () {
         return json;
     };
 
-
     /**
      * Converts a node's data to a KGcreator-compatible column name based on its URI type and data type.
      * It generates column names based on different conditions such as blankNode, randomIdentifier, or URI.
@@ -115,15 +112,14 @@ var MappingTransform = (function () {
         if (colname && data.type == "VirtualColumn") {
             colname = "@" + colname + "_$";
         }
-        if(data.type=='RowIndex'){
-            colname='_rowIndex'
+        if (data.type == "RowIndex") {
+            colname = "_rowIndex";
         }
         if (data.type == "URI") {
             colname = data.id + "_#";
         }
         return colname;
     };
-    
 
     /**
      * Transforms a columns map into KGcreator-compatible JSON format, generating mappings between columns, predicates, and objects.
@@ -135,13 +131,13 @@ var MappingTransform = (function () {
      * @param {Object} columnsMap - A map of nodes containing columns to be transformed.
      * @returns {Array} An array of mapping objects in KGcreator JSON format.
      */
-    self.mappingsToKGcreatorJson = function (columnsMap,options) {
-        if(!options){
-            options={};
+    self.mappingsToKGcreatorJson = function (columnsMap, options) {
+        if (!options) {
+            options = {};
         }
-        if(!options.getColumnMappingsOnly){
-            options.getColumnMappingsOnly=false;
-        }   
+        if (!options.getColumnMappingsOnly) {
+            options.getColumnMappingsOnly = false;
+        }
         var columnsMapLabels = Object.values(columnsMap).map(function (column) {
             return column.label;
         });
@@ -150,16 +146,14 @@ var MappingTransform = (function () {
         for (var nodeId in columnsMap) {
             var data = columnsMap[nodeId].data;
             var subject = self.nodeToKGcreatorColumnName(data);
-        
 
             if (!subject) {
                 return alert("Error in column " + nodeId);
             }
 
-            if(!options.getColumnMappingsOnly){
+            if (!options.getColumnMappingsOnly) {
                 if (data.rdfType) {
                     var predicate = "rdf:type";
-                
 
                     allMappings.push({
                         s: subject,
@@ -176,13 +170,12 @@ var MappingTransform = (function () {
                         dataType: "xsd:string",
                     });
                 }
-                
+
                 if (data.transform) {
                     allMappings.push({
                         s: subject,
                         p: "transform",
                         o: data.transform,
-                        
                     });
                 }
             }
@@ -280,7 +273,7 @@ var MappingTransform = (function () {
     /**
      * Copies the KGcreator mappings from the textarea to the clipboard.
      * It retrieves the current mappings as text from the UI and uses a common utility to copy the content to the clipboard.
-     * 
+     *
      * @function
      * @name copyKGcreatorMappings
      * @memberof module:MappingTransform

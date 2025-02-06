@@ -209,7 +209,7 @@ var MappingModeler_bot = (function () {
                 function (err, result) {
                     alert("under development");
                     MappingModeler.mappingColumnInfo.startOtherPredicatesBot();
-                }
+                },
             );
         },
         listDatatypePropertyRangeFn: function () {

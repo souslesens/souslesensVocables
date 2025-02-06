@@ -594,7 +594,7 @@ var MappingModeler = (function () {
                     propertiesCopy.unshift(...newObjects);
                     self.loadSuggestionSelectJstree(propertiesCopy, "Properties");
                     //self.setSuggestionsSelect(properties, false, newObjects);
-                }
+                },
             );
         } else if (self.currentResourceType == "RowIndex") {
             self.onSuggestionsSelect(null, { node: { id: "RowIndex" } });

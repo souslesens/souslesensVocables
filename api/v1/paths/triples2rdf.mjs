@@ -1,8 +1,7 @@
-
 //const {processResponse} = require("./utils");
-import {processResponse} from "./utils.js";
-import rdf from '@rdfjs/data-model'
-import toNT from '@rdfjs/to-ntriples'
+import { processResponse } from "./utils.js";
+import rdf from "@rdfjs/data-model";
+import toNT from "@rdfjs/to-ntriples";
 
 module.exports = function () {
     let operations = {
@@ -10,28 +9,16 @@ module.exports = function () {
     };
 
     function GET(req, res, next) {
+        var str = toNT([
+            rdf.quad(rdf.blankNode(), rdf.namedNode("http://example.org/predicate"), rdf.literal("1")),
+            rdf.quad(rdf.blankNode(), rdf.namedNode("http://example.org/predicate"), rdf.literal("2")),
+        ]);
 
-        var str=toNT([
-            rdf.quad(
-                rdf.blankNode(),
-                rdf.namedNode('http://example.org/predicate'),
-                rdf.literal('1')
-            ),
-            rdf.quad(
-                rdf.blankNode(),
-                rdf.namedNode('http://example.org/predicate'),
-                rdf.literal('2')
-            )
-        ])
-
-                return processResponse(res, null, {output: str});
-
-
+        return processResponse(res, null, { output: str });
     }
 
-
     GET.apiDoc = {
-        security: [{restrictLoggedUser: []}],
+        security: [{ restrictLoggedUser: [] }],
         summary: "transform sls triples to rdf",
         description: "transform turtle into json triples",
         operationId: "transform turtle into json triples",
@@ -43,7 +30,6 @@ module.exports = function () {
                 in: "query",
                 required: false,
             },
-
         ],
 
         responses: {

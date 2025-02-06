@@ -124,7 +124,7 @@ var SubGraph = (function () {
                         },
                         function (err) {
                             callbackSeries();
-                        }
+                        },
                     );
                 },
 
@@ -153,7 +153,7 @@ var SubGraph = (function () {
             ],
             function (err) {
                 return callback(err, { classes: allClasses, restrictions: allRestrictions });
-            }
+            },
         );
     };
 
@@ -442,7 +442,7 @@ var SubGraph = (function () {
                 }
 
                 return callback(null, result);
-            }
+            },
         );
     };
 

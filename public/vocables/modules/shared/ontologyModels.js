@@ -1370,7 +1370,8 @@ var OntologyModels = (function () {
             sourceGraphUri +
             ">" +
             " WHERE {   \n" +
-            " ?s rdf:type+ ?class.\n" +
+           // " ?s rdf:type+ ?class.\n" +
+            " ?s rdf:type ?class.\n" +
             "  filter (?class not in (owl:NamedIndividual))\n" +
             "  ?s ?prop ?v.\n" +
             "   bind (datatype(?v) as ?datatype)\n" +

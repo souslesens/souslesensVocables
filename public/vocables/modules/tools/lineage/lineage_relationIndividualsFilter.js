@@ -138,7 +138,6 @@ var Lineage_relationIndividualsFilter = (function () {
         }
     };
 
-
     /**
      * Handles the selection of a filter type and updates the UI accordingly.
      * Allows users to choose between different filtering options.

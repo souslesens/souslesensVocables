@@ -176,7 +176,6 @@ var Lineage_sources = (function () {
         );
     };
 
-
     /**
      * Sets the specified source as the current active source.
      * Updates the UI accordingly, initializes the whiteboard, and loads source-specific elements.
@@ -415,7 +414,6 @@ var Lineage_sources = (function () {
         });
         Lineage_whiteboard.lineageVisjsGraph.data.edges.update(newEdges);
     };
-
 
     /**
      * Initializes a given source by registering it and setting up ontology imports.

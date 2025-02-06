@@ -9,7 +9,6 @@ import Sparql_common from "../../sparqlProxies/sparql_common.js";
 var Lineage_createResource = (function () {
     var self = {};
 
-
     /**
      * Displays the dialog for adding a new node to the ontology graph.
      * Loads the HTML template and initializes necessary UI components.
@@ -63,7 +62,6 @@ var Lineage_createResource = (function () {
         $("#lineageCreateResource_labelInput").val("");
     };
 
-
     /**
      * Handles the selection of a resource type (e.g., owl:Class or owl:NamedIndividual).
      * Adjusts UI elements and predicate settings accordingly.
@@ -96,7 +94,6 @@ var Lineage_createResource = (function () {
             }
         }
     };
-
 
     /**
      * Generates RDF triples for defining a new resource in the ontology.
@@ -161,7 +158,6 @@ var Lineage_createResource = (function () {
 
         return triples;
     };
-
 
     /**
      * Retrieves the URI for the resource being created.
@@ -274,7 +270,6 @@ var Lineage_createResource = (function () {
         $("#lineageCreateResource_triplesDiv").css("display", "block");
         $("#lineageCreateResource_newResourceTiplesDiv").html(html);
     };
-
 
     /**
      * Writes the resource from the UI to the backend by calling the writeResource function.

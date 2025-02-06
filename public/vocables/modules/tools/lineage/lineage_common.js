@@ -15,7 +15,6 @@ var Lineage_common = (function () {
     var self = {};
     self.currentSource = null;
 
-
     /**
      * Copies a node's data to the clipboard as a JSON string.
      * @function
@@ -136,7 +135,7 @@ var Lineage_common = (function () {
             }
         });
     };
-    
+
     /**
      * Toggles the inclusion of ontology imports in SPARQL queries.
      * @function

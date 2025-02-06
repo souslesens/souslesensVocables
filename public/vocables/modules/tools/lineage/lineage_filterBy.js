@@ -4,7 +4,6 @@ var Lineage_filterBy = (function () {
     var self = {};
     self.context = {};
 
-
     /**
      * Adds a new filter to the lineage query parameters.
      * Generates a unique filter ID and appends the filter to the UI.
@@ -40,7 +39,6 @@ var Lineage_filterBy = (function () {
         self.filters[filterId] = obj;
         return obj;
     };
-
 
     /**
      * Removes a filter element from the lineage query parameters.

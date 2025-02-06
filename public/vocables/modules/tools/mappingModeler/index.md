@@ -36,9 +36,9 @@ Manages the UI display, including panels, tab activation, and visibility of data
 
 ## Features
 
-- **Graph-based Visualization**: Uses Vis.js for an interactive mapping experience.
-- **Data Source Management**: Supports configuring and integrating various data sources.
-- **Mapping Creation & Editing**: Enables users to define and modify mappings dynamically.
-- **Technical & Structural Mappings**: Differentiates between different types of mappings.
-- **Triple Generation**: Supports RDF triple creation for semantic web applications.
-- **User-friendly Interface**: Provides a structured UI for efficient navigation and mapping operations.
+-   **Graph-based Visualization**: Uses Vis.js for an interactive mapping experience.
+-   **Data Source Management**: Supports configuring and integrating various data sources.
+-   **Mapping Creation & Editing**: Enables users to define and modify mappings dynamically.
+-   **Technical & Structural Mappings**: Differentiates between different types of mappings.
+-   **Triple Generation**: Supports RDF triple creation for semantic web applications.
+-   **User-friendly Interface**: Provides a structured UI for efficient navigation and mapping operations.

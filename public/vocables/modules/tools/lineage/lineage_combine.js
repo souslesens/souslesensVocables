@@ -83,9 +83,8 @@ var Lineage_combine = (function () {
         );
     };
 
-
     /**
-     * Sets the popup menu options for the graph, including actions to hide, show, 
+     * Sets the popup menu options for the graph, including actions to hide, show,
      * group, and ungroup sources.
      * @function
      * @name setGraphPopupMenus
@@ -102,7 +101,7 @@ var Lineage_combine = (function () {
     };
 
     /**
-     * Displays a dialog for merging selected ontology nodes. Allows users to specify 
+     * Displays a dialog for merging selected ontology nodes. Allows users to specify
      * the target source and node, select merge options, and choose nodes for merging.
      * @function
      * @name showMergeNodesDialog
@@ -137,7 +136,7 @@ var Lineage_combine = (function () {
     };
 
     /**
-     * Handles the UI logic for merging ontology nodes. Gathers user input such as 
+     * Handles the UI logic for merging ontology nodes. Gathers user input such as
      * target source, merge mode, and selected nodes before triggering the merge process.
      * @function
      * @name mergeNodesUI

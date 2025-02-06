@@ -3,7 +3,6 @@ import NodeInfosAxioms from "../axioms/nodeInfosAxioms.js";
 var Lineage_axioms = (function () {
     var self = {};
 
-
     /**
      * Draws classes with associated axioms in a visual graph representation.
      * Retrieves axioms from the specified source and visualizes them using Vis.js.
@@ -68,7 +67,6 @@ var Lineage_axioms = (function () {
             Lineage_whiteboard.drawNewGraph(visjsData, "graphDiv");
         });
     };
-
 
     /**
      * Tests axiom functionalities by initializing a sample node with axiom data.

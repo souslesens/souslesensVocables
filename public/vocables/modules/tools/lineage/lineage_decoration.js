@@ -29,7 +29,6 @@ var Lineage_decoration = (function () {
     self.legendMap = {};
     self.currentVisjGraphNodesMap = {};
 
-
     /**
      * Decorates nodes in the visualization and updates the legend accordingly.
      * @function
@@ -264,7 +263,7 @@ var Lineage_decoration = (function () {
             }
         );
     };
-    
+
     /**
      * Draws the legend using the provided hierarchical tree data.
      * @function

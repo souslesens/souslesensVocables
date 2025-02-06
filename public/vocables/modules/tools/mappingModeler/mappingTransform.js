@@ -2,7 +2,6 @@ import common from "../../shared/common.js";
 import MappingModeler from "./mappingModeler.js";
 import UIcontroller from "./uiController.js";
 
-
 /**
  * Module responsible for generating and managing mappings for the MappingTransform process.
  * It interacts with the Vis.js graph to retrieve mappings and formats them as JSON for use in the application.
@@ -16,7 +15,7 @@ var MappingTransform = (function () {
     /**
      * Generates the SLS mappings from the Vis.js graph and displays them in the right panel of the UI.
      * The mappings are formatted as JSON and placed inside a textarea for easy access and copying.
-     * 
+     *
      * @function
      * @name generateSLSmappings
      * @memberof module:MappingTransform
@@ -34,10 +33,9 @@ var MappingTransform = (function () {
         $("#mappingModeler_infosTA").val(JSON.stringify(json, null, 2));
     };
 
-
     /**
      * Placeholder function for generating R2ML mappings. Currently displays an alert.
-     * 
+     *
      * @function
      * @name generateR2MLmappings
      * @memberof module:MappingTransform
@@ -86,7 +84,6 @@ var MappingTransform = (function () {
         return json;
     };
 
-
     /**
      * Converts a node's data to a KGcreator-compatible column name based on its URI type and data type.
      * It generates column names based on different conditions such as blankNode, randomIdentifier, or URI.
@@ -121,7 +118,6 @@ var MappingTransform = (function () {
         return colname;
     };
 
-
     /**
      * Transforms a columns map into KGcreator-compatible JSON format, generating mappings between columns, predicates, and objects.
      * This function handles RDF types, labels, transformations, and other predicates for each column.
@@ -141,16 +137,13 @@ var MappingTransform = (function () {
         for (var nodeId in columnsMap) {
             var data = columnsMap[nodeId].data;
             var subject = self.nodeToKGcreatorColumnName(data);
-        
 
             if (!subject) {
                 return alert("Error in column " + nodeId);
             }
 
-          
             if (data.rdfType) {
                 var predicate = "rdf:type";
-               
 
                 allMappings.push({
                     s: subject,
@@ -269,7 +262,7 @@ var MappingTransform = (function () {
     /**
      * Copies the KGcreator mappings from the textarea to the clipboard.
      * It retrieves the current mappings as text from the UI and uses a common utility to copy the content to the clipboard.
-     * 
+     *
      * @function
      * @name copyKGcreatorMappings
      * @memberof module:MappingTransform

@@ -350,7 +350,6 @@ var Lineage_whiteboard = (function () {
         }
     };
 
-
     /**
      * @function
      * @name showHideIndividuals
@@ -376,7 +375,6 @@ var Lineage_whiteboard = (function () {
 
         self.lineageVisjsGraph.data.nodes.update(nodesToHide);
     };
-
 
     /**
      * @function
@@ -677,7 +675,7 @@ var Lineage_whiteboard = (function () {
      * @function
      * @name isResultAcceptable
      * @memberof Lineage_whiteboard
-     * @description Checks if the result set is acceptable based on predefined constraints. 
+     * @description Checks if the result set is acceptable based on predefined constraints.
      * If too many nodes are present, an alert is shown, and false is returned.
      * If no data is found, a message is displayed.
      * @param {Array} result - The result array to be evaluated.
@@ -695,7 +693,6 @@ var Lineage_whiteboard = (function () {
         return true;
     };
 
-
     /**
      * @function
      * @name initWhiteBoard
@@ -711,12 +708,11 @@ var Lineage_whiteboard = (function () {
         }
     };
 
-
     /**
      * @function
      * @name drawNewGraph
      * @memberof Lineage_whiteboard
-     * @description Draws a new graph with provided data and options. Configures visualization settings 
+     * @description Draws a new graph with provided data and options. Configures visualization settings
      * such as physics, layout, and interaction settings. Also manages node and edge interactions.
      * @param {Object} visjsData - The data containing nodes and edges to be displayed.
      * @param {string} graphDiv - The ID of the div container where the graph will be rendered.
@@ -1287,7 +1283,7 @@ var Lineage_whiteboard = (function () {
             self.lineageVisjsGraph.data.edges.add(visjsData.edges);
         });
     };
-        
+
     /**
      * Fetches and processes the neighborhood data for a given node, filtering by the specified property type.
      * It queries the SPARQL endpoint for outcoming, incoming, or all properties related to the node and visualizes the data in a graph.
@@ -1647,7 +1643,6 @@ var Lineage_whiteboard = (function () {
             }
         );
     };
-
 
     /**
      * Adds child nodes and their parent-child relationships to the graph for a given source and node IDs.
@@ -2231,7 +2226,7 @@ var Lineage_whiteboard = (function () {
      * @memberof module:Lineage
      * @param {string} source - The source of the data (e.g., OWL or Knowledge Graph).
      * @param {string|Array<string>} [classIds] - An array of class IDs to use in the query. If not provided, all class IDs from the source are used.
-     * @param {boolean} [_descendantsAlso] - A flag to include descendants as well. 
+     * @param {boolean} [_descendantsAlso] - A flag to include descendants as well.
      * @returns {void}
      */
     self.drawObjectProperties = function (/** @type {any} */ source, /** @type {string | null} */ classIds, /** @type {any} */ _descendantsAlso) {
@@ -3030,7 +3025,7 @@ restrictionSource = Config.predicatesSource;
 
     /**
      * Sets the context menu for a graph node based on the node's type and context.
-     * This function generates a dynamic context menu for the clicked node with options such as 
+     * This function generates a dynamic context menu for the clicked node with options such as
      * opening clusters, showing property information, or removing nodes from the graph.
      * @function
      * @name setGraphPopupMenus
@@ -3108,7 +3103,7 @@ restrictionSource = Config.predicatesSource;
      * Zooms in on a specific node in the graph and highlights it.
      * This function focuses on the specified node by adjusting the zoom scale and updating its size and font color.
      * It also stores the initial parameters for the node such as shadow, size, and shape.
-     * 
+     *
      * @function
      * @name zoomGraphOnNode
      * @memberof module:LineageWhiteboard
@@ -3158,7 +3153,6 @@ restrictionSource = Config.predicatesSource;
         });
         self.lineageVisjsGraph.data.nodes.update(newNodes);
     };
-
 
     /**
      * Draws the nodes and their parent relationships in the graph.
@@ -3389,7 +3383,7 @@ self.zoomGraphOnNode(node.data[0].id, false);
      * Draws the inferred classes model based on the active source or provided source.
      * This function queries the inferred model data and visualizes it in the graph.
      * If the graph is not empty, it updates the existing nodes and edges.
-     * 
+     *
      * @function
      * @name drawInferredClassesModel
      * @memberof module:LineageWhiteboard
@@ -3416,11 +3410,10 @@ self.zoomGraphOnNode(node.data[0].id, false);
     };
 
     self.graphActions = {
-
         /**
          * Displays the graph's popup menu for the given node at the specified point.
          * The popup menu shows different options depending on whether the node is a graph edge or a regular node.
-         * 
+         *
          * @function
          * @name showGraphPopupMenu
          * @memberof module:LineageWhiteboard.graphActions
@@ -3458,7 +3451,7 @@ self.zoomGraphOnNode(node.data[0].id, false);
         /**
          * Handles a click event on a graph node. If the node is an edge, it updates the current graph edge; otherwise, it updates the current node.
          * The function can also handle double-click actions and expand the node or open a cluster.
-         * 
+         *
          * @function
          * @name onNodeClick
          * @memberof module:LineageWhiteboard.graphActions
@@ -3494,7 +3487,7 @@ self.zoomGraphOnNode(node.data[0].id, false);
 
         /**
          * Expands the current graph node by adding its children. The depth and whether nodes should be clustered is determined based on the current click options.
-         * 
+         *
          * @function
          * @name expand
          * @memberof module:LineageWhiteboard.graphActions
@@ -3522,7 +3515,7 @@ self.zoomGraphOnNode(node.data[0].id, false);
         /**
          * Draws the parent nodes of the current graph node.
          * It adds parent nodes based on the `memberPredicate` property, which is true if the node type is "container".
-         * 
+         *
          * @function
          * @name drawParents
          * @memberof module:LineageWhiteboard.graphActions
@@ -3539,10 +3532,9 @@ self.zoomGraphOnNode(node.data[0].id, false);
             Lineage_whiteboard.addNodesAndParentsToGraph(self.currentGraphNode.data.source, [self.currentGraphNode.id], { memberPredicate: memberPredicate });
         },
 
-
         /**
          * Draws similar nodes to the current graph node. If the user holds down certain keys, descendants may also be included in the search for similar nodes.
-         * 
+         *
          * @function
          * @name drawSimilars
          * @memberof module:LineageWhiteboard.graphActions
@@ -3558,7 +3550,7 @@ self.zoomGraphOnNode(node.data[0].id, false);
 
         /**
          * Collapses the current graph node, hiding its children.
-         * 
+         *
          * @function
          * @name collapse
          * @memberof module:LineageWhiteboard.graphActions
@@ -3573,7 +3565,7 @@ self.zoomGraphOnNode(node.data[0].id, false);
 
         /**
          * Opens a cluster around the current graph node, displaying additional related nodes and information.
-         * 
+         *
          * @function
          * @name openCluster
          * @memberof module:LineageWhiteboard.graphActions
@@ -3588,7 +3580,7 @@ self.zoomGraphOnNode(node.data[0].id, false);
 
         /**
          * Lists the nodes in the current graph cluster and copies the list to the clipboard.
-         * 
+         *
          * @function
          * @name listClusterToClipboard
          * @memberof module:LineageWhiteboard.graphActions
@@ -3600,10 +3592,10 @@ self.zoomGraphOnNode(node.data[0].id, false);
             }
             Lineage_whiteboard.listClusterToClipboard(self.currentGraphNode);
         },
-            
+
         /**
          * Lists the content of the current graph cluster.
-         * 
+         *
          * @function
          * @name listClusterContent
          * @memberof module:LineageWhiteboard.graphActions
@@ -3619,7 +3611,7 @@ self.zoomGraphOnNode(node.data[0].id, false);
         /**
          * Displays the information panel for the current graph node or edge.
          * If the node is selected, it shows detailed information about the node; otherwise, it shows information about the edge.
-         * 
+         *
          * @function
          * @name showNodeInfos
          * @memberof module:LineageWhiteboard.graphActions
@@ -3635,7 +3627,7 @@ self.zoomGraphOnNode(node.data[0].id, false);
 
         /**
          * Displays the information panel for a restriction property in the current graph edge.
-         * 
+         *
          * @function
          * @name showRestrictionPropertyNodeInfos
          * @memberof module:LineageWhiteboard.graphActions
@@ -3648,7 +3640,7 @@ self.zoomGraphOnNode(node.data[0].id, false);
         /**
          * Displays the axioms associated with the current graph node.
          * The title of the dialog is updated to reflect the resource being examined.
-         * 
+         *
          * @function
          * @name showAxioms
          * @memberof module:LineageWhiteboard.graphActions
@@ -3665,7 +3657,7 @@ self.zoomGraphOnNode(node.data[0].id, false);
         /**
          * Displays information about the object property for the current graph edge.
          * The `hideModifyButtons` option determines whether the modification buttons are visible in the info panel.
-         * 
+         *
          * @function
          * @name showPropertyInfos
          * @memberof module:LineageWhiteboard.graphActions
@@ -3679,7 +3671,7 @@ self.zoomGraphOnNode(node.data[0].id, false);
         /**
          * Displays information about the restriction for the current graph edge.
          * The `hideModifyButtons` option determines whether the modification buttons are visible in the restriction info panel.
-         * 
+         *
          * @function
          * @name showRestrictionInfos
          * @memberof module:LineageWhiteboard.graphActions
@@ -3693,7 +3685,7 @@ self.zoomGraphOnNode(node.data[0].id, false);
         /**
          * Expands an individual node by adding related items (e.g., individuals) to the graph.
          * It queries a filter based on the current node and adds new nodes and edges to the graph.
-         * 
+         *
          * @function
          * @name expandIndividual
          * @memberof module:LineageWhiteboard.graphActions
@@ -3762,7 +3754,7 @@ self.zoomGraphOnNode(node.data[0].id, false);
 
         /**
          * Pastes the current graph node into the selected container node from the search widget tree.
-         * 
+         *
          * @function
          * @name pasteNodeIntoContainer
          * @memberof module:LineageWhiteboard.graphActions
@@ -3777,7 +3769,7 @@ self.zoomGraphOnNode(node.data[0].id, false);
         /**
          * Displays the neighborhood (incoming, outcoming, or ranges) of the current graph node.
          * The filter parameter determines what type of neighborhood to display.
-         * 
+         *
          * @function
          * @name graphNodeNeighborhood
          * @memberof module:LineageWhiteboard.graphActions
@@ -3790,7 +3782,7 @@ self.zoomGraphOnNode(node.data[0].id, false);
 
         /**
          * Displays the UI options for the graph node neighborhood, allowing the user to choose between incoming, outcoming, or range relationships.
-         * 
+         *
          * @function
          * @name graphNodeNeighborhoodUI
          * @memberof module:LineageWhiteboard.graphActions
@@ -3810,7 +3802,7 @@ self.zoomGraphOnNode(node.data[0].id, false);
         /**
          * Removes the current graph node from the graph.
          * The decoration of the graph is updated to reflect the removal.
-         * 
+         *
          * @function
          * @name removeFromGraph
          * @memberof module:LineageWhiteboard.graphActions
@@ -3823,7 +3815,7 @@ self.zoomGraphOnNode(node.data[0].id, false);
 
         /**
          * Removes all nodes from the graph except for the current node.
-         * 
+         *
          * @function
          * @name removeOthersFromGraph
          * @memberof module:LineageWhiteboard.graphActions
@@ -3840,7 +3832,7 @@ self.zoomGraphOnNode(node.data[0].id, false);
         /**
          * Displays the object properties for the current graph node.
          * If the user holds down certain keys, descendants may also be included in the displayed properties.
-         * 
+         *
          * @function
          * @name showObjectProperties
          * @memberof module:LineageWhiteboard.graphActions
@@ -3854,7 +3846,7 @@ self.zoomGraphOnNode(node.data[0].id, false);
         /**
          * Displays the restrictions for the current graph node.
          * If the user holds down certain keys, descendants may also be included in the displayed restrictions.
-         * 
+         *
          * @function
          * @name showRestrictions
          * @memberof module:LineageWhiteboard.graphActions
@@ -3868,7 +3860,7 @@ self.zoomGraphOnNode(node.data[0].id, false);
         /**
          * Deletes the selected restriction relation from the graph.
          * A confirmation dialog is shown before deleting the relation.
-         * 
+         *
          * @function
          * @name deleteRestriction
          * @memberof module:LineageWhiteboard.graphActions
@@ -3892,7 +3884,7 @@ self.zoomGraphOnNode(node.data[0].id, false);
         /**
          * Deletes the selected object property from the graph.
          * A confirmation dialog is shown before deleting the object property.
-         * 
+         *
          * @function
          * @name deleteObjectProperty
          * @memberof module:LineageWhiteboard.graphActions
@@ -3911,11 +3903,10 @@ self.zoomGraphOnNode(node.data[0].id, false);
             }
         },
 
-
         /**
          * Creates a sub-property for a selected object property and replaces the current relation.
          * The user is prompted to enter a label for the sub-property before proceeding with the replacement.
-         * 
+         *
          * @function
          * @name createSubPropertyAndreplaceRelation
          * @memberof module:LineageWhiteboard.graphActions
@@ -3975,7 +3966,7 @@ self.zoomGraphOnNode(node.data[0].id, false);
         /**
          * Displays the linked data for the current graph node.
          * A panel is shown to provide more information about the linked data.
-         * 
+         *
          * @function
          * @name showLinkedData
          * @memberof module:LineageWhiteboard.graphActions
@@ -3988,7 +3979,7 @@ self.zoomGraphOnNode(node.data[0].id, false);
 
         /**
          * Hides or shows all nodes in the graph except for the current node, based on the current state.
-         * 
+         *
          * @function
          * @name hideShowOthers
          * @memberof module:LineageWhiteboard.graphActions
@@ -4047,7 +4038,6 @@ self.zoomGraphOnNode(node.data[0].id, false);
         }
         return sourceColors[source];
     };
-
 
     /**
      * @function
@@ -4198,7 +4188,6 @@ attrs.color=self.getSourceColor(superClassValue)
     };
 
     self.graph = {
-
         /**
          * @function
          * @name searchNode
@@ -4271,7 +4260,6 @@ attrs.color=self.getSourceColor(superClassValue)
             Export.exportGraphToDataTable(self.lineageVisjsGraph);
         },
 
-
         /**
          * @function
          * @name saveWhiteboard
@@ -4314,7 +4302,6 @@ attrs.color=self.getSourceColor(superClassValue)
         },
     };
 
-
     /**
      * @function
      * @name initWhiteboardTab
@@ -4354,7 +4341,6 @@ attrs.color=self.getSourceColor(superClassValue)
             });
         }
     };
-
 
     /**
      * @function
@@ -4430,7 +4416,6 @@ attrs.color=self.getSourceColor(superClassValue)
         }
     };
 
-
     /**
      * @function
      * @name resetCurrentTab
@@ -4478,7 +4463,6 @@ attrs.color=self.getSourceColor(superClassValue)
             $("#Lineage_MoreActionsSection").addClass("TitleBoxLine");
         }
     };
-
 
     /**
      * @function

@@ -10,7 +10,6 @@ import CreateRestriction_bot from "../../bots/createRestriction_bot.js";
 var Lineage_createRelation = (function () {
     var self = {};
 
-
     /**
      * Displays a dialog to create a relation between two ontology nodes.
      * The dialog allows the user to select a relation type from a predefined list of properties.
@@ -426,7 +425,6 @@ var Lineage_createRelation = (function () {
         JstreeWidget.addNodesToJstree("lineageAddEdgeDialog_authorizedPredicatesTreeDiv", "#", jstreeData, { positionLast: 1 });
     };
 
-
     /**
      * Displays node information based on the given role ('start' or 'end').
      * The function retrieves the corresponding node data and opens the node information widget.
@@ -638,7 +636,6 @@ var Lineage_createRelation = (function () {
         );
     };
 
-
     /**
      * Creates a new sub-property of an existing property in the ontology.
      * The new sub-property is assigned a unique URI and its relationship with the super-property is defined.
@@ -737,7 +734,6 @@ var Lineage_createRelation = (function () {
             });
         });
     };
-
 
     /**
      * Creates a restriction relation between two ontology nodes.
@@ -868,7 +864,6 @@ var Lineage_createRelation = (function () {
         );
     };
 
-
     /**
      * Deletes ontology restrictions based on their blank node IDs.
      * Iterates over a list of restriction nodes and removes them from the ontology.
@@ -922,7 +917,6 @@ var Lineage_createRelation = (function () {
         );
     };
 
-
     /**
      * Deletes a restriction from the ontology.
      * Removes all triples associated with the restriction and updates the ontology model.
@@ -975,7 +969,6 @@ var Lineage_createRelation = (function () {
         }
     };
 
-
     /**
      * Adds an import relationship between two ontology sources.
      * Ensures that the main source includes the imported source if it isn't already listed.
@@ -1012,7 +1005,6 @@ var Lineage_createRelation = (function () {
         });
     };
 
-
     /**
      * Adds an import relationship to the current ontology source.
      * Sends a request to the backend to register the imported source.
@@ -1045,8 +1037,6 @@ var Lineage_createRelation = (function () {
             },
         });
     };
-
-
 
     /**
      * Generates RDF triples for defining a restriction relation in an ontology.
@@ -1104,7 +1094,6 @@ var Lineage_createRelation = (function () {
         restrictionsTriples.blankNode = blankNode;
         return restrictionsTriples;
     };
-
 
     /**
      * Generates metadata RDF triples for ontology elements.

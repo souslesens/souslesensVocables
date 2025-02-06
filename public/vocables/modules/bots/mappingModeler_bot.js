@@ -207,7 +207,7 @@ var MappingModeler_bot = (function () {
                     datatypePropertyDomain: classId,
                 },
                 function (err, result) {
-                    alert("under development")
+                    alert("under development");
                     MappingModeler.mappingColumnInfo.startOtherPredicatesBot();
                 }
             );

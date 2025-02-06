@@ -82,7 +82,7 @@ var Lineage_createSLSVsource = (function () {
      * @param {string} userPrivateProfile - The private profile identifier of the user.
      * @param {Function} callback - A callback function executed after writing the source.
      * @returns {void}
-     */ 
+     */
     self.writeSource = function (sourceName, graphUri, imports, userPrivateProfile, callback) {
         var sourceObject = {
             id: common.getRandomHexaId(12),

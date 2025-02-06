@@ -2,7 +2,6 @@ import JstreeWidget from "../../uiWidgets/jstreeWidget.js";
 import MappingModeler from "./mappingModeler.js";
 import UIcontroller from "./uiController.js";
 
-
 /**
  * DataSourceManager module
  * Responsible for managing data source configurations and operations.
@@ -26,7 +25,6 @@ var DataSourceManager = (function () {
 
     self.createApp = null;
 
-
     /**
      * Retrieves the configuration for a given data source.
      * Transfers the "main.json" configuration to the Vis.js graph if not already transferred.
@@ -39,11 +37,11 @@ var DataSourceManager = (function () {
      */
     self.getSlsvSourceConfig = function (source, callback) {
         // Transfer Config main.json to visjsgraph for firstTime and if already transfered skip
-      if (self?.rawConfig?.isConfigInMappingGraph) {
+        if (self?.rawConfig?.isConfigInMappingGraph) {
             return callback(null, self.rawConfig);
         }
 
-      //obslolete here for old mappings migration
+        //obslolete here for old mappings migration
         var payload = {
             dir: mappingsDir + "/" + source,
             fileName: "main.json",
@@ -64,7 +62,7 @@ var DataSourceManager = (function () {
                 self.currentConfig.isConfigInMappingGraph = true;
                 self.rawConfig = self.currentConfig;
 
-               MappingColumnsGraph.saveVisjsGraphWithConfig();
+                MappingColumnsGraph.saveVisjsGraphWithConfig();
 
                 return callback(null, json);
             },
@@ -94,13 +92,12 @@ var DataSourceManager = (function () {
      * @returns {void}
      */
     self.initNewSlsvSource = function (source, callback) {
-       MappingColumnsGraph.saveVisjsGraphWithConfig(function () {
+        MappingColumnsGraph.saveVisjsGraphWithConfig(function () {
             self.currentConfig = self.rawConfig;
             if (callback) {
                 callback(null, self.currentConfig);
             }
         });
-
     };
 
     /**
@@ -192,7 +189,7 @@ var DataSourceManager = (function () {
                             id: key,
                             text: datasource.name || key,
                             parent: "databaseSources",
-                            data: {id: datasource.name, type: "databaseSource", sqlType: result.driver},
+                            data: { id: datasource.name, type: "databaseSource", sqlType: result.driver },
                         });
                         return callbackEach();
                     },
@@ -201,7 +198,7 @@ var DataSourceManager = (function () {
                             id: key,
                             text: datasource.name || key,
                             parent: "databaseSources",
-                            data: {id: datasource.name, type: "databaseSource"},
+                            data: { id: datasource.name, type: "databaseSource" },
                         });
                         return callbackEach();
                     },
@@ -215,7 +212,7 @@ var DataSourceManager = (function () {
                         text: datasource,
                         parent: "csvSources",
                         type: "CSV",
-                        data: {id: datasource, type: "csvSource"},
+                        data: { id: datasource, type: "csvSource" },
                     };
                     if (dataTables.includes(datasource)) {
                         jstreeNode.text = "<span style='color:blue'>" + datasource + "</span>";
@@ -248,7 +245,6 @@ var DataSourceManager = (function () {
             }
         );
     };
-
 
     /**
      * Initializes a new data source, updating the current configuration.
@@ -290,7 +286,6 @@ var DataSourceManager = (function () {
         };
     };
 
-
     /**
      * Loads a CSV source by fetching data from the server, including headers and sample data.
      * This function updates the current configuration with the columns of the CSV source and its sample data.
@@ -320,7 +315,7 @@ var DataSourceManager = (function () {
                         dataType: "json",
                         success: function (result, _textStatus, _jqXHR) {
                             columns = result.headers;
-                            var tableObj = {[fileName]: columns};
+                            var tableObj = { [fileName]: columns };
                             self.currentConfig.currentDataSource.tables = tableObj;
                             self.currentConfig.currentDataSource.sampleData = result.data[0];
                             callbackSeries();
@@ -348,7 +343,6 @@ var DataSourceManager = (function () {
             }
         );
     };
-
 
     /**
      * Loads a database source and its associated model by fetching data from the server.
@@ -380,7 +374,7 @@ var DataSourceManager = (function () {
                                 success: function (data, _textStatus, _jqXHR) {
                                     self.currentDataSourceModel = data;
                                     self.currentSource = self.dataSource;
-                                    self.currentdabase = {type: sqlType, dbName: self.dataSource};
+                                    self.currentdabase = { type: sqlType, dbName: self.dataSource };
                                     self.currentConfig.currentDataSource.tables = data;
                                     callbackSeries();
                                 },
@@ -467,9 +461,7 @@ var DataSourceManager = (function () {
                     columns: columns,
                 };
                 $("#MappingModeler_leftTabs").tabs("option", "active", 1);
-                UIcontroller.onActivateLeftPanelTab("MappingModeler_columnsTab")
-
-
+                UIcontroller.onActivateLeftPanelTab("MappingModeler_columnsTab");
             });
         } else if (obj.node.data.type == "table") {
             MappingModeler.currentTable = {
@@ -482,15 +474,13 @@ var DataSourceManager = (function () {
             //self.hideForbiddenResources("Table");
             MappingModeler.currentResourceType = "Column";
             $("#MappingModeler_leftTabs").tabs("option", "active", 1);
-            UIcontroller.onActivateLeftPanelTab("MappingModeler_columnsTab")
-
+            UIcontroller.onActivateLeftPanelTab("MappingModeler_columnsTab");
         }
 
         if (obj.node.data.type == "table") {
             $("#MappingModeler_currentDataSource").html(DataSourceManager.currentConfig.currentDataSource.currentTable);
         }
     };
-
 
     /**
      * Saves the current configuration of the SlsvSource by using the MappingColumnsGraph save function.
@@ -502,10 +492,7 @@ var DataSourceManager = (function () {
      * @returns {void}
      */
     self.saveSlsvSourceConfig = function (callback) {
-       MappingColumnsGraph.saveVisjsGraphWithConfig(callback)
-
-
-
+        MappingColumnsGraph.saveVisjsGraphWithConfig(callback);
     };
 
     /*********************************************************************************/
@@ -562,7 +549,6 @@ var DataSourceManager = (function () {
         $("#smallDialogDiv").dialog("open");
     };
 
-
     /**
      * Creates mappings for a selected database source.
      * Closes the upload app dialog, adds the selected database source to the current configuration,
@@ -582,10 +568,10 @@ var DataSourceManager = (function () {
             return;
         }
         if (!datasource.id) {
-            datasource = {id: datasource, name: datasource};
+            datasource = { id: datasource, name: datasource };
         }
-        DataSourceManager.currentConfig.databaseSources[datasource.id] = {name: datasource.name};
-        DataSourceManager.rawConfig.databaseSources[datasource.id] = {name: datasource.name};
+        DataSourceManager.currentConfig.databaseSources[datasource.id] = { name: datasource.name };
+        DataSourceManager.rawConfig.databaseSources[datasource.id] = { name: datasource.name };
         DataSourceManager.saveSlsvSourceConfig(function (err, result) {
             if (err) {
                 return alert(err);
@@ -594,7 +580,6 @@ var DataSourceManager = (function () {
             // self.addDataSourceToJstree("databaseSource", datasource, "sql.sqlserver");
         });
     };
-
 
     /**
      * Creates mappings for a selected CSV source.
@@ -617,22 +602,18 @@ var DataSourceManager = (function () {
         DataSourceManager.currentConfig.csvSources[datasourceName] = {};
         DataSourceManager.rawConfig = DataSourceManager.currentConfig;
 
-
         DataSourceManager.saveSlsvSourceConfig(function (err, result) {
             if (err) {
                 return alert(err);
             }
             MappingModeler.onLoaded();
         });
-
-
     };
-
 
     /**
      * Deletes a data source (either database or CSV) from the configuration.
-     * Removes the data source from the raw configuration, updates the JSTree, 
-     * and removes related nodes and edges from the graph. The updated configuration 
+     * Removes the data source from the raw configuration, updates the JSTree,
+     * and removes related nodes and edges from the graph. The updated configuration
      * is then saved. If the source is a CSV, additional steps would be taken to remove the file.
      * @function
      * @name deleteDataSource
@@ -646,13 +627,12 @@ var DataSourceManager = (function () {
         if (jstreeNode.data.type == "databaseSource") {
             if (DataSourceManager.rawConfig.databaseSources[datasourceName]) {
                 delete DataSourceManager.rawConfig.databaseSources[datasourceName];
-                JstreeWidget.deleteNode("mappingModeler_dataSourcesJstreeDiv",jstreeNode.id  )
+                JstreeWidget.deleteNode("mappingModeler_dataSourcesJstreeDiv", jstreeNode.id);
             }
         } else if (jstreeNode.data.type == "csvSource") {
             if (DataSourceManager.rawConfig.csvSources[datasourceName]) {
                 delete DataSourceManager.rawConfig.csvSources[datasourceName];
-                JstreeWidget.deleteNode("mappingModeler_dataSourcesJstreeDiv",jstreeNode.id  )
-
+                JstreeWidget.deleteNode("mappingModeler_dataSourcesJstreeDiv", jstreeNode.id);
             }
         } else {
             return;
@@ -672,7 +652,6 @@ var DataSourceManager = (function () {
                     // to not save n times
                     MappingColumnsGraph.visjsGraph.data.nodes.remove(node);
                 }
-
             });
             var newNodesIds = newNodes.map(function (node) {
                 return node.id;
@@ -684,15 +663,13 @@ var DataSourceManager = (function () {
                     MappingColumnsGraph.visjsGraph.data.edges.remove(edge);
                 }
             });
-           MappingColumnsGraph.saveVisjsGraphWithConfig(function () {
+            MappingColumnsGraph.saveVisjsGraphWithConfig(function () {
                 MappingModeler.onLoaded();
             });
             // Delete File from CSV if it's a CSV
             // Not done because road don't exist
         });
     };
-
-
 
     return self;
 })();

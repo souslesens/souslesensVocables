@@ -53,7 +53,6 @@ var Lineage_graphTraversal = (function () {
         });
     };
 
-
     /**
      * @function getShortestPathObjects
      * @memberof Lineage_graphTraversal
@@ -146,7 +145,7 @@ var Lineage_graphTraversal = (function () {
      * @function showShortestPathDialog
      * @memberof Lineage_graphTraversal
      * @description Displays the dialog box for searching the shortest path.
-     */ 
+     */
     self.showShortestPathDialog = function () {
         self.pathFromUri = null;
         self.pathToUri = null;
@@ -281,8 +280,7 @@ var Lineage_graphTraversal = (function () {
         }
     };
 
-
-    /** 
+    /**
      * @function listShortestPath
      * @memberof Lineage_graphTraversal
      * @description Lists the relationships in the shortest path found.
@@ -414,7 +412,6 @@ var Lineage_graphTraversal = (function () {
         }
     };
 
-
     /**
      * @function drawAllShortestPathes
      * @memberof Lineage_graphTraversal
@@ -436,7 +433,6 @@ var Lineage_graphTraversal = (function () {
             $("#mainDialogDiv").dialog("close");
         });
     };
-
 
     /**
      * @function drawShortestPath
@@ -468,7 +464,6 @@ var Lineage_graphTraversal = (function () {
     self.clearPathList = function () {
         $("#lineage_shorterstPathListDiv").html("");
     };
-
 
     /**
      * @function clearNodes

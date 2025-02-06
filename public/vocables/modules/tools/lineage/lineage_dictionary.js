@@ -6,7 +6,6 @@ import SearchUtil from "../../search/searchUtil.js";
 import Lineage_whiteboard from "./lineage_whiteboard.js";
 import Lineage_createRelation from "./lineage_createRelation.js";
 
-
 /**
  * Lineage Dictionary module
  * Manages the dictionary-related functionalities within the lineage tool.

@@ -122,7 +122,6 @@ var Lineage_relationFilter = (function () {
         $("#Lineage_relation_property").html(propStr);
     };
 
-
     /**
      * @function onSelectRoleType
      * @memberof Lineage_relationFilter
@@ -213,7 +212,6 @@ var Lineage_relationFilter = (function () {
     }
   };*/
 
-
     /**
      * @function onCommonUIWidgetSelectObjectValue
      * @memberof Lineage_relationFilter
@@ -230,8 +228,6 @@ var Lineage_relationFilter = (function () {
         } else {
         }
     };
-
-
 
     /**
      * @function addFilter

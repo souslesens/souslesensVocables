@@ -31,8 +31,6 @@ migrations/migrate-to-v2.md
 contribute/contribute-to-development.md
 ```
 
-## Administration
-
 ## Code documentation
 
 ```{toctree}

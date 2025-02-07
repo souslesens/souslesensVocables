@@ -8,7 +8,7 @@
 
 project = "SousLeSens documentation"
 copyright = "2024, SousLeSens contributors"
-# author = "SousLeSens contributors"
+author = "SousLeSens contributors"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

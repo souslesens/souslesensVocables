@@ -1,12 +1,12 @@
 {
+    "plugins": ["plugins/markdown"],
     "source": {
-      "include": ["public/vocables/modules/tools/mappingModeler"],
-      "includePattern": ".+\\.js(doc)?$",
-      "excludePattern": "(^|\\/|\\\\)_"
+        "include": ["public/vocables/modules/tools"],
+        "includePattern": ".+\\.js(doc)?$",
+        "excludePattern": "(^|\\/|\\\\)_"
     },
     "opts": {
-      "destination": "./docs/docs/developer-docs",
-      "recurse": true
-    },
-    "tutorials": "./tutorials"
+        "recurse": true
+    }
 }
+

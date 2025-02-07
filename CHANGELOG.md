@@ -2,6 +2,37 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.1.0](https://github.com/souslesens/souslesensVocables/compare/2.0.0...2.1.0) (2025-02-07)
+
+> [!IMPORTANT]
+> Updating to 2.1.0 require a data migration. Execute the following script after upgrade.
+
+```bash
+npm run migrate
+```
+
+
+### Features
+
+* add jest-coverage-comment github action ([e5fe272](https://github.com/souslesens/souslesensVocables/commit/e5fe2720b0239efa3796e8ae9a0a8d65394f4793))
+* add source tests ([492d5ec](https://github.com/souslesens/souslesensVocables/commit/492d5ecc346c6a4a5ba928bd86149fb5a466b871))
+* add tests for userData ([ec5cb7b](https://github.com/souslesens/souslesensVocables/commit/ec5cb7bb6064d00116a18e5fc985cb8ae6141d62))
+* add tests for userData model ([946ab88](https://github.com/souslesens/souslesensVocables/commit/946ab887bde4209c9daf910e2146c12535942ed9))
+* **database:** add the userdata schema into database ([a6b3e18](https://github.com/souslesens/souslesensVocables/commit/a6b3e18f583b59f88b5c7a478cf4c83361885eda))
+* **database:** migrate profiles entries into database ([622e09d](https://github.com/souslesens/souslesensVocables/commit/622e09d7acf4533b276046370ecbcb8cb937d5d3))
+* **database:** migrate users entries into database ([94571ce](https://github.com/souslesens/souslesensVocables/commit/94571cee590c0da51173cc5899b63941652543a9))
+* remove non existing users and profiles from userData at insert and update ([828c64a](https://github.com/souslesens/souslesensVocables/commit/828c64aa165ab39cee30d4fe35e4ea4d5ad6fb42)), closes [#1073](https://github.com/souslesens/souslesensVocables/issues/1073)
+
+
+### Bug Fixes
+
+* authentication with keycloak ([8cf5851](https://github.com/souslesens/souslesensVocables/commit/8cf5851524fcf8ac2a83930c2d231d082addd0d4))
+* indent userData test file properly ([01e513b](https://github.com/souslesens/souslesensVocables/commit/01e513bf43cc6d4a71e095ce5df2ad09bd05412d))
+* **mainapp:** always manage the value of the groups field in the sources editor ([eaf555d](https://github.com/souslesens/souslesensVocables/commit/eaf555d5a01cb03e906e2fbdfb85247dea614c8b))
+* **migrations:** bcrypt password only if user is local/json ([8f58ba5](https://github.com/souslesens/souslesensVocables/commit/8f58ba5adfed40fa2988f5f6d5bac2bbf8ea6865))
+* remove useless file ([72ac8cc](https://github.com/souslesens/souslesensVocables/commit/72ac8cc4a3d6537f5cc3b02e768f5cc141f44ca9))
+* use select for db deletion ([b016f0b](https://github.com/souslesens/souslesensVocables/commit/b016f0b462a427bad2ba20fceee665b5c8ff9f24))
+
 ## [2.0.0](https://github.com/souslesens/souslesensVocables/compare/1.100.2...2.0.0) (2025-01-30)
 
 > [!IMPORTANT]

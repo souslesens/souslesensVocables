@@ -471,6 +471,7 @@ var SubGraph = (function () {
     };
 
     self.getSubGraphVisjsData = function (sourceLabel, processClass, options, callback) {
+        self.graphDiv=options.graphDiv
         SubGraph.instantiateSubGraphTriples(sourceLabel, processClass, options, function (err, result) {
             if (err) {
                 return callback(err);
@@ -521,6 +522,9 @@ var SubGraph = (function () {
 
             var levelShapes = ["box", "box", "box", "box", "box", "box", "box", "box"];
 
+
+
+
             function getNodeColor(uri) {
                 var color = "#ddd";
                 for (var key in colorsMap) {
@@ -542,6 +546,14 @@ var SubGraph = (function () {
                 if (triple.predicate.endsWith("hasPhysicalQuantity")) {
                     return;
                 }
+                var font=null;
+                var borderWidth=null
+                var color=getNodeColor(triple.subject)
+                if(triple.subject.startsWith(processClass)){
+                    font={size:18,bold: {size:18}}
+                    borderWidth=5
+                    color="#ddd"
+                }
 
                 if (!uniqueIds[triple.subject]) {
                     var level = getLevel(triple.subject);
@@ -551,7 +563,9 @@ var SubGraph = (function () {
                         label: labelsMap[triple.subject],
                         shape: levelShapes[level],
                         level: level,
-                        color: getNodeColor(triple.subject),
+                        color: color,
+                        font:font,
+                        borderWidth:borderWidth,
                         data: {
                             id: triple.subject,
                             label: labelsMap[triple.subject],
@@ -590,7 +604,7 @@ var SubGraph = (function () {
                 layoutHierarchical: {
                     direction: "UD",
                     nodeSpacing: 200,
-                    levelSeparation: 70,
+                    levelSeparation: 50,
                 },
                 /* physics: {
             enabled:true},*/
@@ -607,9 +621,15 @@ var SubGraph = (function () {
                     },
                 },
             };
-            var position = { x: 0, y: 0 };
+
+
+
+
             var nodeSpacing = 150;
-            var levelSpacing = 50;
+            var levelSpacing = 30;
+            var position = options.position|| { x: 0, y: 0 };
+
+
             //   self.setHierachicalLayout(visjsData, position, nodeSpacing, levelSpacing)
 
             if (callback) {

@@ -6,7 +6,9 @@
     },
     "opts": {
       "destination": "./docs/docs/developer-docs",
+      "template": "node_modules/clean-jsdoc-theme",
       "recurse": true
     },
     "tutorials": "./tutorials"
 }
+

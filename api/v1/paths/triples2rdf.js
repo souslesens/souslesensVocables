@@ -1,37 +1,97 @@
+
+
+
 const { processResponse } = require("./utils");
-const rdf = require("rdf");
-const { NamedNode, BlankNode, Literal } = rdf;
+const rdf = require("../../../bin/RDF_IO..js");
+const { NamedNode, BlankNode, Literal ,Graph} = rdf;
+
+
+
+
+
+
+var Validator=null
+import('../../../bin/shacl/validator.mjs').then((mod) => {
+    Validator=mod; // true
+});
 
 module.exports = function () {
+
+
+
+
+
+
+
+
+
     let operations = {
-        GET,
+        GET,POST
     };
 
-    function GET(req, res, next) {
+    POST.apiDoc = {
+        summary: "Upload files",
+        security: [{restrictLoggedUser: []}],
+        operationId: "upload",
+
+        responses: {
+            200: {
+                description: "Response",
+                // schema: {}
+            }
+        } , parameters: [
+            {
+                name: "triples",
+                description: "triples",
+                in: "body",
+                schema: {
+                    type: "object"
+                }
+            }]
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+    function POST(req, res, next) {
         try {
-            const graph = new rdf.Graph();
-            graph.add(new rdf.Triple(new NamedNode("http://example.com/"), rdf.rdfsns("label"), new Literal("Book", "@en")));
-            graph.add(new rdf.Triple(new NamedNode("http://example.com/"), rdf.rdfns("value"), new Literal("10.0", rdf.xsdns("decimal"))));
-            graph.add(new rdf.Triple(new BlankNode(), rdf.rdfns("value"), new Literal("10.1", rdf.xsdns("decimal"))));
 
-            const profile = rdf.environment.createProfile();
-            profile.setDefaultPrefix("http://example.com/");
-            profile.setPrefix("ff", "http://xmlns.com/foaf/0.1/");
-            const turtle = graph
-                .toArray()
-                .sort(function (a, b) {
-                    return a.compare(b);
-                })
-                .map(function (stmt) {
-                    return stmt.toTurtle(profile);
-                });
-            //console.log(profile.n3());
-            console.log(turtle.join("\n"));
-        } catch (e) {
-            console.log(e);
+            var triples = req.body.triples
+
+            var turtle=rdf.triples2turtle(triples)
+            return processResponse(res, null, turtle);
+
+            rdf.triples2turtle(triples, function (err, result) {
+
+                const report = Validator.triples2turtle(result)
+                return processResponse(res, null, report);
+
+            })
+        }catch(e){
+            return processResponse(res, e);
         }
+    }
 
-        return processResponse(res, null, { output: str });
+
+
+
+
+            function GET(req, res, next) {
+
+
+
+
+
+
     }
 
     GET.apiDoc = {

@@ -450,16 +450,20 @@ var SubGraph = (function () {
         SubGraph.instantiateSubGraphTriples(sourceLabel, processClass, options, function (err, result) {
             var triples = result.triples;
 
-            const params = new URLSearchParams({
-                triples: "ddccc",
-            });
-            UI.message("generating manchester syntax ");
-            $.ajax({
-                type: "GET",
-                url: Config.apiUrl + "/triples2rdf?" + params.toString(),
-                dataType: "json",
 
+            var payload = {
+                triples:result.triples//triples
+
+            };
+
+            $.ajax({
+                type: "POST",
+                url: Config.apiUrl + "/triples2rdf",
+                data: JSON.stringify(payload),
+                contentType: "application/json",
+                dataType: "json",
                 success: function (data, _textStatus, _jqXHR) {
+
                     return data.output;
                 },
                 error(err) {

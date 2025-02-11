@@ -5,7 +5,7 @@ const z = require("zod");
 const { readMainConfig } = require("./config");
 const { toolModel } = require("./tools");
 const { cleanupConnection, getKnexConnection } = require("./utils");
-
+const { userDataModel } = require("./userData");
 /**
  * @typedef {import("./UserTypes").UserAccount} UserAccount
  * @typedef {import("./ProfileTypes").Profile} Profile
@@ -156,7 +156,16 @@ class ProfileModel {
             cleanupConnection(conn);
             return false;
         }
-
+        // delete profile in shared_profiles
+        const allUserData = await conn.select("*").from("user_data_list");
+        Object.values(allUserData).map((userData) => {
+            if (userData.shared_profiles.includes(profileNameId)) {
+                userData.shared_profiles = userData.shared_profiles.filter((p) => p !== profileNameId);
+                delete userData.created_at;
+                userDataModel.update(userData);
+            }
+        });
+        // delete profile
         // using select here allows mocking in tests
         await conn.select("*").from("profiles").where("label", profileNameId).del();
         cleanupConnection(conn);

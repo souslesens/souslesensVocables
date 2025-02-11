@@ -6,7 +6,6 @@ const jsonFileStorage = require("./jsonFileStorage");
 
 const request = require("request");
 const Util = require("./util.");
-const fs = require("fs");
 const ConfigManager = require("./configManager.");
 var exec = require("child_process").exec;
 

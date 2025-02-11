@@ -46,7 +46,7 @@ var EntityLinking_gaia = {
             json = filePath;
         } else {
             var str = "" + fs.readFileSync(filePath);
-            var json = JSON.parse(str);
+            json = JSON.parse(str);
         }
 
         var entitiesMap = {};
@@ -539,7 +539,7 @@ var EntityLinking_gaia = {
                         },
                         function (err) {
                             callbackSeries(err);
-                        }
+                        },
                     );
                 },
                 function (callbackSeries) {
@@ -565,7 +565,7 @@ var EntityLinking_gaia = {
                         },
                         function (err) {
                             callbackSeries(err);
-                        }
+                        },
                     );
                 },
             ],
@@ -575,7 +575,7 @@ var EntityLinking_gaia = {
                     return console.log(err);
                 }
                 return console.log("DONE");
-            }
+            },
         );
     },
 

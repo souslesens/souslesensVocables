@@ -1,5 +1,4 @@
 const async = require("async");
-const sqlServerProxy = require("../KG/SQLserverConnector.");
 const util = require("../util.");
 const KGbuilder_socket = require("./KGbuilder_socket");
 const KGbuilder_triplesWriter = require("./KGbuilder_triplesWriter");
@@ -7,6 +6,7 @@ var csvCrawler = require("../_csvCrawler.");
 const dataController = require("../dataController.");
 const path = require("path");
 const { databaseModel } = require("../../model/databases");
+
 var KGbuilder_triplesMaker = {
     mappingFilePredicate: "http://souslesens.org/KGcreator#mappingFile",
     existingTriples: {},

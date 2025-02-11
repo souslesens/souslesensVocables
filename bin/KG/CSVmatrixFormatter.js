@@ -1,9 +1,6 @@
 var fs = require("fs");
-var path = require("path");
-var csvCrawler = require("../_csvCrawler.");
 var async = require("async");
 const csv = require("csv-parser");
-const util = require("../util.");
 
 var CSVmatrixFormatter = {
     transform: function (filePath, columnsFields, callback) {
@@ -63,8 +60,6 @@ var CSVmatrixFormatter = {
         var headers = [];
         var jsonData = [];
         var jsonDataFetch = [];
-        var startId = 100000;
-        var linesCount = 0;
         fs.createReadStream(filePath).pipe(
             csv({
                 separator: separator,

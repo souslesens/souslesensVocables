@@ -1,6 +1,4 @@
-const fs = require("fs");
-const path = require("path");
-const { configPath, config } = require("../model/config");
+const { config } = require("../model/config");
 const { userModel } = require("../model/users");
 
 const user = {

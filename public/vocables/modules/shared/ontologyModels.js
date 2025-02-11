@@ -1234,7 +1234,7 @@ var OntologyModels = (function () {
                     return callback(err);
                 }
 
-                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["prop", "sClass", "oClass"], { source: source });
+                // result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["prop", "sClass", "oClass"], { source: source });
 
                 //   Config.ontologiesVocabularyModels[source].inferredClassModel = result.results.bindings;
                 return callback(null, result.results.bindings);

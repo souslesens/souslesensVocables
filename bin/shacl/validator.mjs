@@ -1,21 +1,49 @@
 import rdf from '@zazuko/env-node'
 import SHACLValidator from 'rdf-validate-shacl'
+//import N3Writer from "n3/lib/N3Writer.js";
+
+
+const N3 =import('n3')
 
 
 
 
-var Validator={
-    test:function(){
-        return "eee"
+
+export async function validateTriples(triples){
+
+
+const shapes = await rdf.dataset().import(rdf.fromFile('D:\\projects\\sls-shacl\\rdf\\exampleShapes.ttl'))
+const data = await rdf.dataset().import(rdf.fromFile('D:\\projects\\sls-shacl\\rdf\\exampleData.ttl'))
+
+const validator = new SHACLValidator(shapes, { factory: rdf })
+const report = await validator.validate(data)
+    for (const result of report.results) {
+        // See https://www.w3.org/TR/shacl/#results-validation-result for details
+        // about each property
+        console.log(result.message)
+        console.log(result.path)
+        console.log(result.focusNode)
+        console.log(result.severity)
+        console.log(result.sourceConstraintComponent)
+        console.log(result.sourceShape)
     }
+
+    // Validation report as RDF dataset
+    // console.log(await report.dataset.serialize({ format: 'text/n3' }))
+    var result=await report.dataset.serialize({ format: 'text/n3' })
+    return result
+
+
+
+
+
 
 }
 
-export default Validator
 
 
 
-async function main() {
+async function main(triples,callback) {
     const shapes = await rdf.dataset().import(rdf.fromFile('D:\\projects\\sls-shacl\\rdf\\exampleShapes.ttl'))
     const data = await rdf.dataset().import(rdf.fromFile('D:\\projects\\sls-shacl\\rdf\\exampleData.ttl'))
 
@@ -37,7 +65,9 @@ async function main() {
     }
 
     // Validation report as RDF dataset
-    console.log(await report.dataset.serialize({ format: 'text/n3' }))
+   // console.log(await report.dataset.serialize({ format: 'text/n3' }))
+    var result=await report.dataset.serialize({ format: 'text/n3' })
+    return callback(null,result)
 }
 
 //main();
@@ -103,7 +133,7 @@ function getConstraintsMap(){
 
 
     })
-    return map;
+    return console.log(JSON.stringify(map,null,2));
 
 }
 

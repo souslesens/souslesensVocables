@@ -1,5 +1,4 @@
 const { processResponse } = require("../utils");
-const SourceIntegrator = require("../../../../bin/sourceIntegrator.");
 const ConfigManager = require("../../../../bin/configManager.");
 const GraphStore = require("../../../../bin/graphStore.");
 const async2 = require("async");
@@ -78,11 +77,10 @@ module.exports = function () {
                     params.auth = sparqlServerConnection.auth;
                 }
 
-                sparqlServerUrl = sparqlServerConnection.url;
+                const sparqlServerUrl = sparqlServerConnection.url;
 
                 httpProxy.post(sparqlServerUrl, null, params, function (err, _result) {
                     if (err) {
-                        var x = queryGraph;
                         return callbackEach(err);
                     }
                     totalImportedTriples += triples.length;
@@ -106,7 +104,7 @@ module.exports = function () {
         return false;
     }
 
-    async function POST(req, res, next) {
+    async function POST(req, res, _next) {
         // upload from URL
         if (req.body.uploadUrl) {
             var graphUri = req.body.graphUri;
@@ -157,7 +155,7 @@ module.exports = function () {
                                 return callbackSeries();
                             }
 
-                            GraphStore.clearGraph(sparqlServerConnection, graphUri, function (err, result) {
+                            GraphStore.clearGraph(sparqlServerConnection, graphUri, function (err, _result) {
                                 if (err) {
                                     return callbackSeries(err);
                                 }
@@ -206,7 +204,6 @@ module.exports = function () {
         } else if (req.files && req.files["importRDF"]) {
             var graphUri = req.body.graphUri;
             var data = "" + req.files["importRDF"].data;
-            var uploadFromUrl = false;
 
             console.log("--------------1---------");
 
@@ -252,7 +249,7 @@ module.exports = function () {
                                 return callbackSeries();
                             }
 
-                            GraphStore.clearGraph(sparqlServerConnection, graphUri, function (err, result) {
+                            GraphStore.clearGraph(sparqlServerConnection, graphUri, function (err, _result) {
                                 if (err) {
                                     return callbackSeries(err);
                                 }

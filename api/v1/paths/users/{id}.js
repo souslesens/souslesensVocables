@@ -1,9 +1,4 @@
-const fs = require("fs");
 const { userModel } = require("../../../../model/users");
-const { configUsersPath } = require("../../../../model/config");
-const util = require("util");
-const readFile = util.promisify(fs.readFile);
-const writeFile = util.promisify(fs.writeFile);
 
 module.exports = function () {
     let operations = {
@@ -11,7 +6,7 @@ module.exports = function () {
         DELETE,
     };
 
-    async function GET(req, res, next) {
+    async function GET(req, res, _next) {
         try {
             const userId = req.params.id;
             const user = await userModel.getUserAccount(userId);
@@ -41,7 +36,7 @@ module.exports = function () {
         tags: ["Users"],
     };
 
-    async function DELETE(req, res, next) {
+    async function DELETE(req, res, _next) {
         try {
             const userId = req.params.id;
             const wasDeleted = await userModel.deleteUserAccount(userId);

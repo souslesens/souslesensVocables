@@ -7,7 +7,7 @@ module.exports = function () {
         GET,
         POST,
     };
-    async function POST(req, res, next) {
+    async function POST(req, res, _next) {
         try {
             const sourceName = req.query.source;
             const userInfo = await userManager.getUser(req.user);

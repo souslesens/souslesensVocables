@@ -1,5 +1,4 @@
 const { processResponse } = require("../utils");
-const SourceIntegrator = require("../../../../bin/sourceIntegrator.");
 const ConfigManager = require("../../../../bin/configManager.");
 const GraphStore = require("../../../../bin/graphStore.");
 const async2 = require("async");
@@ -12,7 +11,7 @@ module.exports = function () {
         POST,
     };
 
-    async function POST(req, res, next) {
+    async function POST(req, res, _next) {
         const body = req.body.body;
         var jowlConfig = ConfigManager.config.jowlServer;
         ConfigManager.getUser(req, res, function (err, userInfo) {
@@ -39,7 +38,7 @@ module.exports = function () {
                 [
                     // check if source name
                     function (callbackSeries) {
-                        GraphStore.insertSourceInConfig(body.sourceName, body.graphUri, ConfigManager.config.sparql_server.url, body.options, function (err, result) {
+                        GraphStore.insertSourceInConfig(body.sourceName, body.graphUri, ConfigManager.config.sparql_server.url, body.options, function (err, _result) {
                             return callbackSeries(err);
                         });
                     },
@@ -61,7 +60,7 @@ module.exports = function () {
                             return callbackSeries();
                         }
 
-                        GraphStore.clearGraph(sparqlServerConnection, body.graphUri, function (err, result) {
+                        GraphStore.clearGraph(sparqlServerConnection, body.graphUri, function (err, _result) {
                             if (err) {
                                 return callbackSeries(err);
                             }
@@ -157,7 +156,6 @@ module.exports = function () {
 
                                 httpProxy.post(sparqlServerUrl, null, params, function (err, _result) {
                                     if (err) {
-                                        var x = queryGraph;
                                         return callbackEach(err);
                                     }
                                     totalImportedTriples += triples.length;

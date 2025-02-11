@@ -8,13 +8,9 @@ const { userModel } = require(rootPath+"model\\users");
  */
 
 const ConfigManager = require("../bin/configManager.");
-const { userModel } = require("../model/users");
-
 const async = require("async");
-const path = require("path");
 const SparqlParser = require("sparqljs").Parser;
 const parser = new SparqlParser({ skipValidation: true });
-const fs = require("fs");
 
 var UserRequestFiltering = {
     existingSources: null,
@@ -45,7 +41,7 @@ var UserRequestFiltering = {
         userGraphUrisMap["http://souslesens.org/resource/stored-visjs-graphs/"] = { source: "slsvMyQueriesVisJsGraph", acl: "w" };
 
         for (var key in userSourcesMap) {
-            var source = userSourcesMap[key];
+            source = userSourcesMap[key];
             if ((source.sparql_server.url == "_default" || source.sparql_server.url == ConfigManager.config.sparql_server.url) && source.graphUri) {
                 userGraphUrisMap[source.graphUri] = { source: key, acl: source.accessControl == "readwrite" ? "w" : "r" };
             }
@@ -96,7 +92,7 @@ var UserRequestFiltering = {
         } else {
             var graphUri = null;
             var graphRegex = /(INTO|GRAPH |WITH) +<([^>]+)/gim;
-            var array = graphRegex.exec(query);
+            array = graphRegex.exec(query);
             if (array && array.length == 3) {
                 graphUri = array[2].trim();
             }

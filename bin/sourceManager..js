@@ -3,7 +3,6 @@ var async = require("async");
 var util = require("./util.");
 var fs = require("fs");
 var SourceManager = {
-    // eslint-disable-next-line no-unused-vars
     createNewOwlSourceGraph: function (_sourceName, _graphUri, _targetSparqlServerUrl, _options, _callback) {
         // do nothing ? XXX
     },

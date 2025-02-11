@@ -2,9 +2,7 @@ var fs = require("fs");
 var path = require("path");
 var async = require("async");
 
-var csvCrawler = require("../_csvCrawler.");
 var util = require("../util.");
-var httpProxy = require("../httpProxy.");
 const ConfigManager = require("../configManager.");
 
 const SocketManager = require("../socketManager.");
@@ -25,14 +23,7 @@ var KGbuilder_main = {
     importTriplesFromCsvOrTable: function (source, datasource, tables, options, callback) {
         //  var sparqlServerUrl;
         var output = "";
-        var clientSocketId = options.clientSocketId;
-        var tableMappingsToProcess = [];
-        var sourceMappingsDir = path.join(__dirname, "../../data/mappings/" + source + "/");
-        var sourceMainJson = {};
-        var dataSourceConfig = {};
-        var dataSourceMappings = {};
         var data = [];
-        var triples = [];
 
         KGbuilder_main.stopCreateTriples = false;
         if (options.clientSocketId) {

@@ -2,8 +2,6 @@ const async = require("async");
 const httpProxy = require("./httpProxy.");
 const request = require("request");
 const fs = require("fs");
-const path = require("path");
-
 //const sources=require("../model/sources")
 
 var OntologyModel = {

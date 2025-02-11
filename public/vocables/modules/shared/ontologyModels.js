@@ -1234,7 +1234,7 @@ var OntologyModels = (function () {
                     return callback(err);
                 }
 
-                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["prop", "sClass", "oClass"], { source: source });
+                // result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["prop", "sClass", "oClass"], { source: source });
 
                 //   Config.ontologiesVocabularyModels[source].inferredClassModel = result.results.bindings;
                 return callback(null, result.results.bindings);
@@ -1370,7 +1370,7 @@ var OntologyModels = (function () {
             sourceGraphUri +
             ">" +
             " WHERE {   \n" +
-           // " ?s rdf:type+ ?class.\n" +
+            // " ?s rdf:type+ ?class.\n" +
             " ?s rdf:type ?class.\n" +
             "  filter (?class not in (owl:NamedIndividual))\n" +
             "  ?s ?prop ?v.\n" +

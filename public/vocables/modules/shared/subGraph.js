@@ -80,7 +80,7 @@ var SubGraph = (function () {
                                         if (!item.property) {
                                             return;
                                         }
-                                        if (options.excludedproperties.indexOf(item.property.value) > -1) {
+                                        if (options.excludedproperties && options.excludedproperties.indexOf(item.property.value) > -1) {
                                             return;
                                         }
 
@@ -299,6 +299,75 @@ var SubGraph = (function () {
         });
     };
 
+    self.getSubGraphShaclTriplesXXX = function (sourceLabel, _classUri, options, callback) {
+        if (!options) {
+            options = {};
+        }
+
+        self.classUri = _classUri;
+
+        Shacl.initSourceLabelPrefixes(sourceLabel);
+
+        self.getSubGraphResources(sourceLabel, self.classUri, options, function (err, result) {
+            //  var resources = result.classes.concat(result.restrictions);
+            var classesMap = result.classes;
+            var restrictionsMap = result.restrictions;
+            // return;
+
+            var usedClasses = {};
+            usedClasses[self.classUri] = 1;
+            for (var classUri2 in restrictionsMap) {
+                for (var property in restrictionsMap[classUri2]) {
+                    restrictionsMap[classUri2][property].forEach(function (item) {
+                        if (item.targetClass) {
+                            usedClasses[item.targetClass] = 1;
+                        }
+                    });
+                }
+            }
+
+            var allSahcls = "";
+            for (var classUri2 in usedClasses) {
+                var item = classesMap[classUri2];
+
+                var classRestrictions = restrictionsMap[classUri2];
+                var shaclProperties = [];
+                if (classRestrictions) {
+                    for (var property in classRestrictions) {
+                        classRestrictions[property].forEach(function (restriction) {
+                            if (!restriction.property || !restriction.targetClass) {
+                                return;
+                            }
+
+                            var propStr = Shacl.uriToPrefixedUri(restriction.property);
+                            var rangeStr = Shacl.uriToPrefixedUri(restriction.targetClass);
+                            var property = " sh:path " + propStr + " ;\n";
+
+                            //  "        sh:maxCount " + count + " ;" +
+                            property += "        sh:node " + rangeStr + " ;";
+                            property += Shacl.getCardinalityProperty(restriction);
+
+                            shaclProperties.push(property);
+                        });
+                    }
+                    var domain = Shacl.uriToPrefixedUri(classUri2);
+                    if (shaclProperties.length > 0) {
+                        var shaclStr = Shacl.getShacl(domain, null, shaclProperties);
+                        allSahcls += shaclStr;
+                    }
+                }
+            }
+
+            var prefixes = Shacl.getPrefixes();
+            allSahcls = prefixes + "\n" + allSahcls; // + ".";
+            var payload = {
+                turtle: allSahcls,
+            };
+
+            return callback(null, allSahcls);
+        });
+    };
+
     self.getSubGraphShaclTriples = function (sourceLabel, _classUri, options, callback) {
         if (!options) {
             options = {};
@@ -363,6 +432,8 @@ var SubGraph = (function () {
             var payload = {
                 turtle: allSahcls,
             };
+
+            return callback(null, allSahcls);
 
             // transfom shacl to triples
             const params = new URLSearchParams(payload);
@@ -450,10 +521,8 @@ var SubGraph = (function () {
         SubGraph.instantiateSubGraphTriples(sourceLabel, processClass, options, function (err, result) {
             var triples = result.triples;
 
-
             var payload = {
-                triples:result.triples//triples
-
+                triples: result.triples, //triples
             };
 
             $.ajax({
@@ -463,7 +532,6 @@ var SubGraph = (function () {
                 contentType: "application/json",
                 dataType: "json",
                 success: function (data, _textStatus, _jqXHR) {
-
                     return data.output;
                 },
                 error(err) {
@@ -475,7 +543,7 @@ var SubGraph = (function () {
     };
 
     self.getSubGraphVisjsData = function (sourceLabel, processClass, options, callback) {
-        self.graphDiv=options.graphDiv
+        self.graphDiv = options.graphDiv;
         SubGraph.instantiateSubGraphTriples(sourceLabel, processClass, options, function (err, result) {
             if (err) {
                 return callback(err);
@@ -526,9 +594,6 @@ var SubGraph = (function () {
 
             var levelShapes = ["box", "box", "box", "box", "box", "box", "box", "box"];
 
-
-
-
             function getNodeColor(uri) {
                 var color = "#ddd";
                 for (var key in colorsMap) {
@@ -550,13 +615,13 @@ var SubGraph = (function () {
                 if (triple.predicate.endsWith("hasPhysicalQuantity")) {
                     return;
                 }
-                var font=null;
-                var borderWidth=null
-                var color=getNodeColor(triple.subject)
-                if(triple.subject.startsWith(processClass)){
-                    font={size:18,bold: {size:18}}
-                    borderWidth=5
-                    color="#ddd"
+                var font = null;
+                var borderWidth = null;
+                var color = getNodeColor(triple.subject);
+                if (triple.subject.startsWith(processClass)) {
+                    font = { size: 18, bold: { size: 18 } };
+                    borderWidth = 5;
+                    color = "#ddd";
                 }
 
                 if (!uniqueIds[triple.subject]) {
@@ -568,8 +633,8 @@ var SubGraph = (function () {
                         shape: levelShapes[level],
                         level: level,
                         color: color,
-                        font:font,
-                        borderWidth:borderWidth,
+                        font: font,
+                        borderWidth: borderWidth,
                         data: {
                             id: triple.subject,
                             label: labelsMap[triple.subject],
@@ -626,13 +691,9 @@ var SubGraph = (function () {
                 },
             };
 
-
-
-
             var nodeSpacing = 150;
             var levelSpacing = 30;
-            var position = options.position|| { x: 0, y: 0 };
-
+            var position = options.position || { x: 0, y: 0 };
 
             //   self.setHierachicalLayout(visjsData, position, nodeSpacing, levelSpacing)
 

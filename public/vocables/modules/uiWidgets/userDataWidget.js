@@ -29,7 +29,6 @@ var UserDataWidget = (function () {
 
     self.saveMetadata = function (label, data_path, jsonContent, group, callback) {
         var payload = {
-            id: common.getRandomInt(),
             data_path: data_path || "",
             data_type: "string",
             data_label: label,
@@ -42,6 +41,18 @@ var UserDataWidget = (function () {
             owned_by: Authentification.currentUser.login,
         };
 
+        /* async function excuteQuery() {
+            const response = await fetch( `${Config.apiUrl}/users/data`, {
+                method: "POST",
+                body:JSON.stringify(payload),
+                // ...
+            });
+        }
+
+        excuteQuery()
+
+        return;*/
+
         var type = "POST";
         if (self.currentTreeNode) {
             type = "PUT";
@@ -50,9 +61,9 @@ var UserDataWidget = (function () {
         $.ajax({
             type: type,
             url: `${Config.apiUrl}/users/data`,
-            data: payload,
-            dataType: "json",
-            //  contentType:"application/json",
+            data: JSON.stringify(payload),
+            // dataType: "json",
+            contentType: "application/json",
             success: function (_result, _textStatus, _jqXHR) {
                 callback(null, "graph saved");
             },

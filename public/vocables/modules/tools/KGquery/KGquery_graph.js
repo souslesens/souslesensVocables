@@ -358,7 +358,7 @@ var KGquery_graph = (function () {
             sources = [];
         }
         sources.push(source);
-
+        var currentInferredModel;
         async.eachSeries(
             sources,
             function (source, callbackEach) {
@@ -371,12 +371,26 @@ var KGquery_graph = (function () {
                                 if (err) {
                                     return callbackSeries(err);
                                 }
+                                //  inferredModel = inferredModel.concat(result);
+
+                                result.forEach(function (item) {});
+                                currentInferredModel = result;
+                                callbackSeries();
+                            });
+                        },
+
+                        //get labels
+                        function (callbackSeries) {
+                            KGquery_graph.message("getInferredModel");
+                            Sparql_OWL.getDictionary(source, { type: "owl:Class" }, null, function (err, result) {
+                                if (err) {
+                                    return callbackSeries(err);
+                                }
                                 inferredModel = inferredModel.concat(result);
 
                                 callbackSeries();
                             });
                         },
-
                         function (callbackSeries) {
                             KGquery_graph.message("getInferredClassValueDataTypes");
                             OntologyModels.getInferredClassValueDataTypes(source, {}, function (err, result) {

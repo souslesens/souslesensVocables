@@ -13,197 +13,210 @@ var sparql_server_url = "";
 var RDF_IO = {
 
 
+        triples2turtle: function (triples, callback) {
 
 
+            try {
+
+                var prefixes = {
+                    owl: "http://www.w3.org/2002/07/owl#",
+                    rdf: "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+                    rdfs: "http://www.w3.org/2000/01/rdf-schema#",
+                    dcterm: "http://purl.org/dc/terms/",
+                    dc: "http://purl.org/dc/elements/1.1/",
+                    skos: "http://www.w3.org/2004/02/skos/core#",
+                }
+                var prefixIndex = 0;
+                var dataFactory = N3.DataFactory;
+
+                function addPrefix(uri) {
+                    var p = uri.lastIndexOf("#")
+                    if (p < 0) {
+                        p = uri.lastIndexOf("/")
+                    }
+                    if (p > 0) {
+                        var baseUri = uri.substring(0, p + 1)
+                        var isNew = true
+                        for (var key in prefixes) {
+                            if (baseUri.startsWith(prefixes[key])) {
+                                isNew = false
+                            }
+                        }
+                        if (isNew) {
+                            prefixes["n" + prefixIndex++] = baseUri
+                        }
+                    }
+                }
+
+                function getRdfElement(elt) {
+
+                    var p
+                    var output = null
+                    var prefix = elt.split(":")[0]
+                    if (prefixes[prefix]){//already prefix
+                        output = dataFactory.namedNode(elt)
+                    } else if (prefix == "_") {
+                        output = dataFactory.blankNode(elt)
+                    } else if (elt.indexOf("http") == 0 || elt.valueType == "uri") {
+                        addPrefix(elt)
+                        output = dataFactory.namedNode(elt)
+                    }
+
+                 else if ((p = elt.indexOf("^^")) > 0) {
+                    //xsd type
+                    var string_number_version = +elt.substring(0, p).replace(/'/gm, "");
+                    if (!isNaN(string_number_version)) {
+                        output =dataFactory.literal(elt, rdf.xsdns('decimal'))
+                    }
+                    if (elt.split("^^")[1] == "xsd:dateTime") {
+                        output = dataFactory.literal(elt, rdf.xsdns('date'))
+
+                    } else {
+                        output = dataFactory.literal(elt)
+                    }
 
 
-   triples2turtle:function(triples,callback) {
+                } else {
+                        output = dataFactory.literal(elt)
+                }
+
+                 return output
 
 
-           try {
+                    if (elt.match(/^_:b\d+$/)) {
+                        return dataFactory.blankNode(elt)
+                    } else if (elt.indexOf("_:b") == 0) {
+                        return dataFactory.blankNode(elt)
+                    } else if (elt.indexOf("_:") == 0) {
+                        return dataFactory.blankNode(elt)
+                    } else if (elt.indexOf("http") == 0 || elt.valueType == "uri") {
+                        addPrefix(elt)
+                        return dataFactory.namedNode(elt)
+                    } else if ((p = elt.indexOf("^^")) > 0) {
+                        //xsd type
+                        var string_number_version = +elt.substring(0, p).replace(/'/gm, "");
+                        if (!isNaN(string_number_version)) {
+                            return dataFactory.literal(elt, rdf.xsdns('decimal'))
+                        }
+                        if (elt.split("^^")[1] == "xsd:dateTime") {
+                            return dataFactory.literal(elt, rdf.xsdns('date'))
 
-               var prefixes = {
-                   owl: "http://www.w3.org/2002/07/owl#",
-                   rdf: "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
-                   rdfs: "http://www.w3.org/2000/01/rdf-schema#",
-                   dcterm: "http://purl.org/dc/terms/",
-                   dc: "http://purl.org/dc/elements/1.1/",
-                   skos: "http://www.w3.org/2004/02/skos/core#",
-               }
-               var prefixIndex = 0;
-               var dataFactory=N3.DataFactory;
-
-               function addPrefix(uri) {
-                   var p = uri.lastIndexOf("#")
-                   if (p < 0)
-                       p = uri.lastIndexOf("/")
-                   if (p > 0) {
-                       var baseUri = uri.substring(0, p + 1)
-                       var isNew=true
-                       for (var key in prefixes) {
-                           if (baseUri.startsWith(prefixes[key])) {
-                               isNew
-                           }
-                       }
-                       if(isNew){
-                           prefixes[prefixIndex++] = baseUri
-                       }
-                   }
-               }
-
-               function getRdfElement(elt) {
-
-                   var p
-                   if (elt.match(/^_:b\d+$/)) {
-                       return  dataFactory.blankNode(elt)
-                   } else if (elt.indexOf("_:b") == 0) {
-                       return  dataFactory.blankNode(elt)
-                   } else if (elt.indexOf("_:") == 0) {
-                       return  dataFactory.blankNode(elt)
-                   } else if (elt.indexOf("http") == 0 || elt.valueType == "uri") {
-                       addPrefix(elt)
-                       return  dataFactory.namedNode(elt)
-                   } else if ((p = elt.indexOf("^^")) > 0) {
-                       //xsd type
-                       var string_number_version = +elt.substring(0, p).replace(/'/gm, "");
-                       if (!isNaN(string_number_version)) {
-                           return dataFactory.literal(elt, rdf.xsdns('decimal'))
-                       }
-                       if (elt.split("^^")[1] == "xsd:dateTime") {
-                           return dataFactory.literal(elt, rdf.xsdns('date'))
-
-                       } else {
-                           return dataFactory.literal(elt)
-                       }
+                        } else {
+                            return dataFactory.literal(elt)
+                        }
 
 
-                   } else {
-                       return dataFactory.literal(elt)
-                   }
+                    } else {
+                        return dataFactory.literal(elt)
+                    }
 
 
-               }
+                }
 
-               var quads=[]
-               triples.forEach(function (triple) {
-                   quads.push(dataFactory.quad(
-                       getRdfElement(triple.subject),
-                       getRdfElement(triple.predicate),
-                   getRdfElement(triple.object)
-                   ))
+                var quads = []
+                triples.forEach(function (triple) {
+                    quads.push(dataFactory.quad(
+                        getRdfElement(triple.subject),
+                        getRdfElement(triple.predicate),
+                        getRdfElement(triple.object)
+                    ))
 
-               })
+                })
 
-               const writer = new N3.Writer({ prefixes: prefixes}); // Create a writer which uses `c` as a prefix for the namespace `http://example.org/cartoons#`
-               quads.forEach(function(quad){
-               writer.addQuad(quad)
-           })
+                const writer = new N3.Writer({prefixes: prefixes}); // Create a writer which uses `c` as a prefix for the namespace `http://example.org/cartoons#`
+                quads.forEach(function (quad) {
+                    writer.addQuad(quad)
+                })
 
-               writer.end((error, result) => {
-                   console.log(result)
-                   return callback(null,result)
-               });
-
-
+                writer.end((error, result) => {
+                    console.log(result)
+                    return callback(null, result)
+                });
 
 
-
-               return;
-
+                return;
 
 
+                var graph = new rdf.Graph();
+
+                slsTriples.forEach(function (triple) {
+                    graph.add(
+                        getRdfElement.triple.subject,
+                        getRdfElement.triple.predicate,
+                        getRdfElement.triple.object)
+
+                })
+                var profile = rdf.environment.createProfile();
+                for (var key in prefixes) {
+                    profile.setPrefix(key, prefixes[key])
+                }
+
+                const turtle = graph
+                    .toArray()
+                    .sort(function (a, b) {
+                        return a.compare(b);
+                    })
+                    .map(function (stmt) {
+                        return stmt.toTurtle(profile);
+                    });
+
+                console.log(turtle.join("\n"));
 
 
-               var graph = new rdf.Graph();
-
-               slsTriples.forEach(function (triple) {
-                   graph.add(
-                       getRdfElement.triple.subject,
-                       getRdfElement.triple.predicate,
-                       getRdfElement.triple.object)
-
-               })
-               var profile = rdf.environment.createProfile();
-               for (var key in prefixes) {
-                   profile.setPrefix(key, prefixes[key])
-               }
-
-               const turtle = graph
-                   .toArray()
-                   .sort(function (a, b) {
-                       return a.compare(b);
-                   })
-                   .map(function (stmt) {
-                       return stmt.toTurtle(profile);
-                   });
-
-               console.log(turtle.join("\n"));
+                return turtle;
 
 
-               return  turtle;
-
-
-           } catch (e) {
-               return  e;
-           }
-
-
-
-           return;
-
-
-
-
-        const writer = new N3.Writer({
-            prefixes: {
-                c: 'http://example.org/cartoons#',
-                foaf: 'http://xmlns.com/foaf/0.1/'
+            } catch (e) {
+                return e;
             }
-        });
-        var dataFactory=N3.DataFactory;
-        writer.addQuad(
-            writer.blank(
 
-                dataFactory.namedNode('http://xmlns.com/foaf/0.1/givenName'),
-                dataFactory.literal('Tom', 'en')),
-            dataFactory.namedNode('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'),
-            dataFactory.namedNode('http://example.org/cartoons#Cat')
-        );
-        writer.addQuad( dataFactory.quad(
-            dataFactory.namedNode('http://example.org/cartoons#Jerry'),
-            dataFactory.namedNode('http://xmlns.com/foaf/0.1/knows'),
-            writer.blank([{
-                predicate:  dataFactory.namedNode('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'),
-                object:  dataFactory.namedNode('http://example.org/cartoons#Cat'),
-            }, {
-                predicate:  dataFactory.namedNode('http://xmlns.com/foaf/0.1/givenName'),
-                object:  dataFactory.literal('Tom', 'en'),
-            }])
-        ));
-        writer.addQuad(
-            dataFactory.namedNode('http://example.org/cartoons#Mammy'),
-            dataFactory.namedNode('http://example.org/cartoons#hasPets'),
-            writer.list([
-                dataFactory.namedNode('http://example.org/cartoons#Tom'),
+
+            return;
+
+
+            const writer = new N3.Writer({
+                prefixes: {
+                    c: 'http://example.org/cartoons#',
+                    foaf: 'http://xmlns.com/foaf/0.1/'
+                }
+            });
+            var dataFactory = N3.DataFactory;
+            writer.addQuad(
+                writer.blank(
+                    dataFactory.namedNode('http://xmlns.com/foaf/0.1/givenName'),
+                    dataFactory.literal('Tom', 'en')),
+                dataFactory.namedNode('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'),
+                dataFactory.namedNode('http://example.org/cartoons#Cat')
+            );
+            writer.addQuad(dataFactory.quad(
                 dataFactory.namedNode('http://example.org/cartoons#Jerry'),
-            ])
-        );
-        writer.end((error, result) => {
-           // console.log(result)
-            return callback(null,result)
-        });
+                dataFactory.namedNode('http://xmlns.com/foaf/0.1/knows'),
+                writer.blank([{
+                    predicate: dataFactory.namedNode('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'),
+                    object: dataFactory.namedNode('http://example.org/cartoons#Cat'),
+                }, {
+                    predicate: dataFactory.namedNode('http://xmlns.com/foaf/0.1/givenName'),
+                    object: dataFactory.literal('Tom', 'en'),
+                }])
+            ));
+            writer.addQuad(
+                dataFactory.namedNode('http://example.org/cartoons#Mammy'),
+                dataFactory.namedNode('http://example.org/cartoons#hasPets'),
+                writer.list([
+                    dataFactory.namedNode('http://example.org/cartoons#Tom'),
+                    dataFactory.namedNode('http://example.org/cartoons#Jerry'),
+                ])
+            );
+            writer.end((error, result) => {
+                // console.log(result)
+                return callback(null, result)
+            });
 
 
+        },
 
 
-},
-
-
-
-
-
-
-    getGraphUri: function (sourceLabel) {
+        getGraphUri: function (sourceLabel) {
             if (graphUrisMap[sourceLabel]) {
                 return graphUrisMap[sourceLabel];
             }

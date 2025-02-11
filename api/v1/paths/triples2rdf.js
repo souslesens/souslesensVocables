@@ -1,98 +1,58 @@
-
-
-
 const { processResponse } = require("./utils");
 const rdf = require("../../../bin/RDF_IO..js");
-const { NamedNode, BlankNode, Literal ,Graph} = rdf;
+const { NamedNode, BlankNode, Literal, Graph } = rdf;
 
-
-
-
-
-
-var Validator=null
-import('../../../bin/shacl/validator.mjs').then((mod) => {
-    Validator=mod; // true
+var Validator = null;
+import("../../../bin/shacl/validator.mjs").then((mod) => {
+    Validator = mod; // true
 });
 
 module.exports = function () {
-
-
-
-
-
-
-
-
-
     let operations = {
-        GET,POST
+        GET,
+        POST,
     };
 
     POST.apiDoc = {
         summary: "Upload files",
-        security: [{restrictLoggedUser: []}],
+        security: [{ restrictLoggedUser: [] }],
         operationId: "upload",
 
         responses: {
             200: {
                 description: "Response",
                 // schema: {}
-            }
-        } , parameters: [
+            },
+        },
+        parameters: [
             {
                 name: "triples",
                 description: "triples",
                 in: "body",
                 schema: {
-                    type: "object"
-                }
-            }]
-
-    }
-
-
-
-
-
-
-
-
-
-
-
+                    type: "object",
+                },
+            },
+        ],
+    };
 
     function POST(req, res, next) {
         try {
+            var triples = req.body.triples;
 
-            var triples = req.body.triples
-
-            var turtle=rdf.triples2turtle(triples)
+            var turtle = rdf.triples2turtle(triples);
             return processResponse(res, null, turtle);
 
             rdf.triples2turtle(triples, function (err, result) {
-
-                const report = Validator.triples2turtle(result)
+                const report = Validator.triples2turtle(result);
                 return processResponse(res, null, report);
-
-            })
-        }catch(e){
+            });
+        } catch (e) {
             return processResponse(res, e);
         }
     }
 
-
-
-
-
-            function GET(req, res, next) {
-
-
-
-
-
-
-    }
+    function GET(req, res, next) {}
 
     GET.apiDoc = {
         security: [{ restrictLoggedUser: [] }],

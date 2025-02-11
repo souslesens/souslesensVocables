@@ -48,7 +48,7 @@ const logger = createLogger({
         timestamp({
             format: "YYYY-MM-DD HH:mm:ss",
         }),
-        json()
+        json(),
     ),
 
     defaultMeta: { service: "user-navigation" },
@@ -60,7 +60,7 @@ if (process.env.NODE_ENV !== "production") {
     logger.add(
         new winston.transports.Console({
             format: winston.format.simple(),
-        })
+        }),
     );
 }
 

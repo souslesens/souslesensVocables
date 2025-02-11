@@ -60,7 +60,7 @@ var SourceManager = {
             ],
             function (err) {
                 callback(err, "done");
-            }
+            },
         );
     },
 
@@ -147,7 +147,7 @@ var SourceManager = {
             },
             function (_err) {
                 callback();
-            }
+            },
         );
     },
 

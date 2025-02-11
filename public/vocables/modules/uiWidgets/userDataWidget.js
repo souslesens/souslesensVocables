@@ -53,6 +53,9 @@ var UserDataWidget = (function () {
 
         return;*/
 
+
+
+
         var type = "POST";
         if (self.currentTreeNode) {
             type = "PUT";

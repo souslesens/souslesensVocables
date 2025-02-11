@@ -61,6 +61,7 @@ module.exports = function () {
                 },
             },
         },
+        tags: ["Sources"],
     };
     PUT.apiDoc = {
         summary: "Update Sources",
@@ -75,6 +76,7 @@ module.exports = function () {
                 },
             },
         },
+        tags: ["Sources"],
     };
     return operations;
 };

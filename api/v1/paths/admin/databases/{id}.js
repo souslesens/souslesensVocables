@@ -25,6 +25,7 @@ module.exports = function () {
         },
         security: [{ restrictAdmin: [] }],
         summary: "Get a specific database",
+        tags: ["Databases"],
     };
 
     async function DELETE(req, res, next) {
@@ -68,6 +69,7 @@ module.exports = function () {
                 },
             },
         },
+        tags: ["Databases"],
     };
 
     async function PUT(req, res, next) {
@@ -111,6 +113,7 @@ module.exports = function () {
                 },
             },
         },
+        tags: ["Databases"],
     };
 
     return operations;

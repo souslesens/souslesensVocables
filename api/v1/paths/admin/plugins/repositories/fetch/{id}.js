@@ -32,6 +32,7 @@ module.exports = function () {
         responses: responseSchema("PluginConfig", "GET"),
         security: [{ restrictAdmin: [] }],
         summary: "Update the plugin Git repository",
+        tags: ["Plugins"],
     };
 
     return operations;

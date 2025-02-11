@@ -60,6 +60,7 @@ module.exports = function () {
                 },
             },
         },
+        tags: ["Logs"],
     };
 
     ///// POST api/v1/logs
@@ -102,6 +103,7 @@ module.exports = function () {
                 },
             },
         },
+        tags: ["Logs"],
     };
 
     return operations;

@@ -69,6 +69,7 @@ module.exports = () => {
                 },
             },
         },
+        tags: ["Logs"],
     };
 
     return operations;

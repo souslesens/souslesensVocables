@@ -29,6 +29,7 @@ module.exports = function () {
                 },
             },
         },
+        tags: ["Users"],
     };
 
     return operations;

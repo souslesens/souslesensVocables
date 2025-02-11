@@ -19,6 +19,7 @@ module.exports = function () {
         responses: responseSchema("Databases", "GET"),
         security: [{ restrictAdmin: [] }],
         summary: "Returns all the databases from the configuration",
+        tags: ["Databases"],
     };
 
     // POST /api/v1/databases
@@ -44,6 +45,7 @@ module.exports = function () {
         responses: responseSchema("Databases", "POST"),
         security: [{ restrictAdmin: [] }],
         summary: "Add a new database in the configuration",
+        tags: ["Databases"],
     };
 
     return operations;

@@ -160,6 +160,7 @@ module.exports = function () {
                 },
             },
         },
+        tags: ["JOWL"],
     };
 
     return operations;

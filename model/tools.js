@@ -1,6 +1,5 @@
 const fg = require("fast-glob");
 const fs = require("fs");
-const os = require("os");
 const path = require("path");
 const { Lock } = require("async-await-mutex-lock");
 const { simpleGit } = require("simple-git");
@@ -123,7 +122,7 @@ class ToolModel {
     deleteRepository = async (repositoryId) => {
         const repositories = await this.readRepositories();
 
-        const filteredRepositories = Object.fromEntries(Object.entries(repositories).filter(([identifier, data]) => identifier !== repositoryId));
+        const filteredRepositories = Object.fromEntries(Object.entries(repositories).filter(([identifier, _data]) => identifier !== repositoryId));
 
         await this.writeRepositories(filteredRepositories);
 
@@ -303,7 +302,7 @@ class ToolModel {
             const currentPlugins = this.plugins.map((plugin) => plugin.name);
 
             const nextPlugins = Object.entries(repositories)
-                .map(([identifier, data]) => {
+                .map(([_identifier, data]) => {
                     if (data.plugins === undefined) {
                         return path.parse(data.url).name;
                     }

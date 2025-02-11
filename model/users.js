@@ -1,6 +1,5 @@
-const fs = require("fs");
 const bcrypt = require("bcrypt");
-const { readMainConfig, configUsersPath } = require("./config");
+const { readMainConfig } = require("./config");
 const { cleanupConnection, getKnexConnection } = require("./utils");
 const { userDataModel } = require("./userData");
 const { Lock } = require("async-await-mutex-lock");

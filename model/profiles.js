@@ -1,5 +1,3 @@
-const fs = require("fs");
-const knex = require("knex");
 const z = require("zod");
 
 const { readMainConfig } = require("./config");

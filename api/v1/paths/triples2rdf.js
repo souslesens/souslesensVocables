@@ -36,7 +36,7 @@ module.exports = function () {
         ],
     };
 
-    function POST(req, res, next) {
+    function POST(req, res, _next) {
         try {
             var triples = req.body.triples;
 
@@ -52,7 +52,7 @@ module.exports = function () {
         }
     }
 
-    function GET(req, res, next) {}
+    function GET(_req, _res, _next) {}
 
     GET.apiDoc = {
         security: [{ restrictLoggedUser: [] }],

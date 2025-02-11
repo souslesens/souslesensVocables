@@ -1,8 +1,5 @@
 const { processResponse } = require("./utils");
 const httpProxy = require("../../../bin/httpProxy.");
-const GraphTraversal = require("../../../bin/graphTraversal.");
-const ExportGraph = require("../../../bin/exportGraph.");
-const SourceIntegrator = require("../../../bin/sourceIntegrator.");
 const ConfigManager = require("../../../bin/configManager.");
 const UserRequestFiltering = require("../../../bin/userRequestFiltering.");
 

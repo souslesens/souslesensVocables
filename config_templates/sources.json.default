@@ -27,7 +27,8 @@
     "imports": [
       "GEMET"
     ],
-    "taxonomyPredicates": []
+    "taxonomyPredicates": [],
+    "baseUri": "http://www.eionet.europa.eu/gemet/"
   },
   "GEOSCMIL": {
     "name": "GEOSCMIL",
@@ -52,7 +53,8 @@
     },
     "group": "",
     "imports": [],
-    "taxonomyPredicates": []
+    "taxonomyPredicates": [],
+    "baseUri": "http://resource.geosciml.org/"
   },
   "INT_CHRONOSTRATIGRAPHIC_CHART": {
     "controller": "Sparql_SKOS",
@@ -71,7 +73,8 @@
     "color": "#c5b0d5",
     "imports": [],
     "topClassFilter": "?topConcept rdf:type <http://www.w3.org/2002/07/owl#Class>",
-    "name": "INT_CHRONOSTRATIGRAPHIC_CHART"
+    "name": "INT_CHRONOSTRATIGRAPHIC_CHART",
+    "baseUri": "http://resource.geosciml.org/vocabulary/timescale/isc2017/"
   },
   "LOTERRE": {
     "name": "LOTERRE",
@@ -98,7 +101,8 @@
     },
     "group": "",
     "imports": [],
-    "taxonomyPredicates": []
+    "taxonomyPredicates": [],
+    "baseUri": ""
   },
   "BFO": {
     "name": "BFO",
@@ -127,7 +131,8 @@
     "taxonomyPredicates": [
       "rdfs:subClassOf",
       "rdf:type"
-    ]
+    ],
+    "baseUri": "http://purl.obolibrary.org/obo/bfo.owl"
   },
   "DOLCE": {
     "graphUri": "http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#",
@@ -142,7 +147,8 @@
     "color": "#bcbd22",
     "group": "STANDARDS/ABSTRACT ONTOLOGIES",
     "imports": [],
-    "name": "DOLCE"
+    "name": "DOLCE",
+    "baseUri": "http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#"
   },
   "GUFO": {
     "graphUri": "http://purl.org/nemo/gufo#",
@@ -156,7 +162,8 @@
     "color": "#bcbd22",
     "group": "STANDARDS/ABSTRACT ONTOLOGIES",
     "imports": [],
-    "name": "GUFO"
+    "name": "GUFO",
+    "baseUri": "http://purl.org/nemo/gufo#"
   },
   "SUMO": {
     "graphUri": "http://www.ontologyportal.org/SUMO.owl",
@@ -170,7 +177,8 @@
     "color": "#bcbd22",
     "group": "STANDARDS/ABSTRACT ONTOLOGIES",
     "imports": [],
-    "name": "SUMO"
+    "name": "SUMO",
+    "baseUri": "http://www.ontologyportal.org/SUMO.owl"
   },
   "SEMANTIC-SCIENCE": {
     "graphUri": "http://semanticscience.org/ontology/sio.owl",
@@ -184,7 +192,8 @@
     "color": "#bcbd22",
     "group": "STANDARDS/ABSTRACT ONTOLOGIES",
     "imports": [],
-    "name": "SEMANTIC-SCIENCE"
+    "name": "SEMANTIC-SCIENCE",
+    "baseUri": "http://semanticscience.org/ontology/sio.owl"
   },
   "DATA_KNOWLEDGE": {
     "name": "DATA_KNOWLEDGE",
@@ -209,7 +218,8 @@
     },
     "group": "STANDARDS/ABSTRACT ONTOLOGIES",
     "imports": [],
-    "taxonomyPredicates": []
+    "taxonomyPredicates": [],
+    "baseUri": "http://http://www.data-knowledge.org/dk/"
   },
   "ISO_15926-part-14_PCA": {
     "name": "ISO_15926-part-14_PCA",
@@ -234,7 +244,8 @@
     },
     "group": "STANDARDS/ABSTRACT ONTOLOGIES",
     "imports": [],
-    "taxonomyPredicates": []
+    "taxonomyPredicates": [],
+    "baseUri": "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/"
   },
   "IOF_core": {
     "editable": false,
@@ -249,7 +260,8 @@
     "color": "#bcbd22",
     "group": "STANDARDS/ABSTRACT ONTOLOGIES",
     "imports": [],
-    "name": "IOF_core"
+    "name": "IOF_core",
+    "baseUri": "https://www.industrialontologies.org/core/"
   },
   "IOF_maintenance": {
     "editable": false,
@@ -266,7 +278,8 @@
     "schema": null,
     "color": "#bcbd22",
     "group": "STANDARDS/MAINTENANCE",
-    "name": "IOF_maintenance"
+    "name": "IOF_maintenance",
+    "baseUri": "https://www.industrialontologies.org/maintenance/"
   },
   "ROMAIN": {
     "editable": false,
@@ -282,7 +295,8 @@
     "schema": null,
     "color": "#bcbd22",
     "group": "STANDARDS/MAINTENANCE",
-    "name": "ROMAIN"
+    "name": "ROMAIN",
+    "baseUri": "http://www.semanticweb.org/hedi/ontologies/2018/11/ROMAIN/"
   },
   "QUDT": {
     "name": "QUDT",
@@ -308,7 +322,8 @@
     },
     "group": "TSF/DRAFTS/OTHERS_OWL",
     "imports": [],
-    "taxonomyPredicates": []
+    "taxonomyPredicates": [],
+    "baseUri": ""
   },
   "plant_ontology": {
     "name": "plant_ontology",
@@ -333,7 +348,8 @@
     },
     "group": "TSF/DRAFTS/OTHERS_OWL",
     "imports": [],
-    "taxonomyPredicates": []
+    "taxonomyPredicates": [],
+    "baseUri": "http://purl.obolibrary.org/obo/po/"
   },
   "cido_coronavirus": {
     "name": "cido_coronavirus",
@@ -358,7 +374,8 @@
     },
     "group": "TSF/DRAFTS/OTHERS_OWL",
     "imports": [],
-    "taxonomyPredicates": []
+    "taxonomyPredicates": [],
+    "baseUri": "http://purl.obolibrary.org/obo/cido.owl#"
   },
   "TSF_GAIA_TEST": {
     "name": "TSF_GAIA_TEST",
@@ -388,7 +405,8 @@
     "taxonomyPredicates": [
       "rdfs:subClassOf",
       "rdf:type"
-    ]
+    ],
+    "baseUri": "http://data.total.com/resource/tsf/ontology/gaia-test/"
   },
   "TSF_STANDARDS_LANDSCAPE": {
     "name": "TSF_STANDARDS_LANDSCAPE",
@@ -418,6 +436,7 @@
     "taxonomyPredicates": [
       "rdfs:subClassOf",
       "rdf:type"
-    ]
+    ],
+    "baseUri": "http://data.total.com/resource/tsf/ontology/tsf-standards_landscape/"
   }
 }

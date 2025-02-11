@@ -54,7 +54,7 @@ var CSVmatrixFormatter = {
             ],
             function (err) {
                 return callback(err);
-            }
+            },
         );
     },
     readCsv: function (filePath, separator, lines, callback) {
@@ -101,7 +101,7 @@ var CSVmatrixFormatter = {
                 .on("error", function (error) {
                     var x = error;
                     return callback(error);
-                })
+                }),
         );
     },
 };

@@ -92,7 +92,7 @@ var exportRDF = {
                 stream.write("}\n");
                 stream.end();
                 callback(err);
-            }
+            },
         );
     },
 };

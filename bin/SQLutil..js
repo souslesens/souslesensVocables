@@ -36,7 +36,7 @@ var SQLutil = {
                     })
                     .on("error", function (error) {
                         callback(error);
-                    })
+                    }),
             );
         });
     },

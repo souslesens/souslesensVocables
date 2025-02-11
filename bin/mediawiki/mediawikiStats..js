@@ -133,7 +133,7 @@ var mediawikiStats = {
             function (err, _n) {
                 if (err) return callback(err);
                 return callback(null, allBindings);
-            }
+            },
         );
     },
 };

@@ -190,7 +190,7 @@ var SourceIntegrator = {
                 },
                 function (err) {
                     return callback(err, { graphUri: graphUri, imports: imports, totalTriples: totalTriples });
-                }
+                },
             );
         }
 
@@ -376,7 +376,7 @@ var SourceIntegrator = {
                             },
                             function (err) {
                                 return callbackSeries(err);
-                            }
+                            },
                         );
                     } else {
                         return callbackSeries();
@@ -432,7 +432,7 @@ var SourceIntegrator = {
 
                 console.log(journal);
                 return callback(err, journal);
-            }
+            },
         );
     },
     getOntologyFormat: function (ontologyUrl, callback) {

@@ -128,7 +128,7 @@ var CSVtoSKOS = {
                         function (err) {
                             if (err) return callbackseries(err);
                             return callbackseries();
-                        }
+                        },
                     );
                 },
             ],
@@ -136,7 +136,7 @@ var CSVtoSKOS = {
                 if (err) return callback(err);
 
                 callback(null, triples);
-            }
+            },
         );
     },
 
@@ -183,7 +183,7 @@ var CSVtoSKOS = {
                     .on("end", function () {
                         jsonData.push(jsonDataFetch);
                         return callback(null, { headers: headers, data: jsonData });
-                    })
+                    }),
             );
         });
     },

@@ -96,7 +96,7 @@ var csvCrawler = {
                         function (err) {
                             if (err) return callbackseries(err);
                             return callbackseries();
-                        }
+                        },
                     );
                 },
             ],
@@ -107,7 +107,7 @@ var csvCrawler = {
                 var message = "*** indexation done : " + data.length + " records  in " + duration + " msec.";
                 socket.message(message);
                 callback(null, "done");
-            }
+            },
         );
     },
 
@@ -183,7 +183,7 @@ var csvCrawler = {
                     })
                     .on("error", function (error) {
                         return callback(error);
-                    })
+                    }),
             );
         });
     },

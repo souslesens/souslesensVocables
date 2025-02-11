@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.2.0](https://github.com/souslesens/souslesensVocables/compare/2.1.0...2.2.0) (2025-02-11)
+
+
+### Features
+
+* remove data in UserData when a profile is deleted ([815e4cc](https://github.com/souslesens/souslesensVocables/commit/815e4cc14e741686dcdf271a49a56a6a1a2d0fad)), closes [#1072](https://github.com/souslesens/souslesensVocables/issues/1072)
+* remove data in UserData when a user is deleted ([68cce76](https://github.com/souslesens/souslesensVocables/commit/68cce76863f1f122d175a502d5b959c026924f58)), closes [#1072](https://github.com/souslesens/souslesensVocables/issues/1072)
+
 ## [2.1.0](https://github.com/souslesens/souslesensVocables/compare/2.0.0...2.1.0) (2025-02-07)
 
 > [!IMPORTANT]

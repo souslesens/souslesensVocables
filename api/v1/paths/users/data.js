@@ -1,4 +1,5 @@
 const { userDataModel } = require("../../../../model/userData");
+const { cleanUserData } = require("../../../../model/cleanUserData");
 const userManager = require("../../../../bin/user.");
 
 module.exports = () => {
@@ -41,8 +42,9 @@ module.exports = () => {
 
     POST = async (req, res, _next) => {
         try {
+            const userData = await cleanUserData.clean(req.body);
             const userInfo = await userManager.getUser(req.user);
-            await userDataModel.insert({ ...req.body, owned_by: userInfo.user.login });
+            await userDataModel.insert({ ...userData, owned_by: userInfo.user.login });
             res.status(200).json({ message: "The resource has been inserted successfully" });
         } catch (error) {
             if (error.cause !== undefined) {
@@ -116,8 +118,8 @@ module.exports = () => {
             if (userInfo.user.login != existingData.owned_by) {
                 res.status(403).json({ message: `The resources is not owned by ${userInfo.user.login}` });
             }
-
-            await userDataModel.update({ ...req.body, owned_by: userInfo.user.login });
+            const userData = await cleanUserData.clean(req.body);
+            await userDataModel.update({ ...userData, owned_by: userInfo.user.login });
             res.status(200).json({ message: "The resource has been updated successfully" });
         } catch (error) {
             if (error.cause !== undefined) {

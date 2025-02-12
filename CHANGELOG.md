@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.2.1](https://github.com/souslesens/souslesensVocables/compare/2.2.0...2.2.1) (2025-02-12)
+
+
+### Bug Fixes
+
+* avoid cyclical imports ([6950981](https://github.com/souslesens/souslesensVocables/commit/69509815b81ea90c3f241b86259484bb509d8eaa))
+
 ## [2.2.0](https://github.com/souslesens/souslesensVocables/compare/2.1.0...2.2.0) (2025-02-11)
 
 

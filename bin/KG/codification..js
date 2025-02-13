@@ -156,7 +156,7 @@ var processTEPDKtags = function () {
         function (err) {
             if (err) return console.log(err);
             fs.writeFileSync("D:\\NLP\\ontologies\\TEPDK\\tagDescriptorFL.csv", str);
-        }
+        },
     );
 };
 

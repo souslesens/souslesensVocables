@@ -1,6 +1,4 @@
-const fs = require("fs");
-const path = require("path");
-const { configPath, config } = require("../model/config");
+const { config } = require("../model/config");
 const { userModel } = require("../model/users");
 
 const user = {
@@ -32,8 +30,8 @@ const user = {
                 logged: true,
                 user: { login: findUser.login, groups: findUser.groups, token: findUser.token },
                 authSource: config.auth,
-                allowSourceCreation:findUser.allowSourceCreation,
-                maxNumberCreatedSource:findUser.maxNumberCreatedSource,
+                allowSourceCreation: findUser.allowSourceCreation,
+                maxNumberCreatedSource: findUser.maxNumberCreatedSource,
                 auth: auth,
             };
         } else {

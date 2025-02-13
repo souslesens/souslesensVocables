@@ -1,7 +1,6 @@
 const path = require("path");
 const fsSync = require("fs");
 const fs = require("fs/promises");
-const UploadGraph = require("./jowl/uploadGraph");
 
 module.exports = function () {
     let operations = {

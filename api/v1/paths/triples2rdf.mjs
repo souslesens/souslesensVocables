@@ -8,7 +8,7 @@ module.exports = function () {
         GET,
     };
 
-    function GET(req, res, next) {
+    function GET(req, res, _next) {
         var str = toNT([
             rdf.quad(rdf.blankNode(), rdf.namedNode("http://example.org/predicate"), rdf.literal("1")),
             rdf.quad(rdf.blankNode(), rdf.namedNode("http://example.org/predicate"), rdf.literal("2")),

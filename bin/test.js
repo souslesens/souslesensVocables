@@ -12,7 +12,7 @@ var x = array;
 var tables = [];
 var views = [];
 
-var regexTable = /(CREATE TABLE +.*)(,  PRIMARY KEY CLUSTERED)/gm;
+var regexTable = /(CREATE TABLE +.*)(, {2}PRIMARY KEY CLUSTERED)/gm;
 /*
 var match=[];
 while((match=regexTable.exec(str))!=null) {

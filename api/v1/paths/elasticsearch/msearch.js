@@ -2,9 +2,7 @@ const path = require("path");
 const elasticRestProxy = require(path.resolve("bin/elasticRestProxy..js"));
 const ConfigManager = require("../../../../bin/configManager.");
 const UserRequestFiltering = require("../../../../bin/userRequestFiltering.");
-
 const { processResponse } = require("../utils");
-const httpProxy = require("../../../../bin/httpProxy.");
 
 module.exports = function () {
     let operations = {
@@ -18,7 +16,7 @@ module.exports = function () {
                     return res.status(400).json({ error: "error 1 " + err });
                 }
 
-                UserRequestFiltering.validateElasticSearchIndices(null, req.body.indexes, userSources, "r", function (parsingError, filteredQuery) {
+                UserRequestFiltering.validateElasticSearchIndices(null, req.body.indexes, userSources, "r", function (parsingError, _filteredQuery) {
                     if (parsingError) {
                         console.log("validateElasticSearchIndicesError");
                         return processResponse(res, "error 2 " + parsingError, null);

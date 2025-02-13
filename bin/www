@@ -36,8 +36,6 @@ function normalizePort(val) {
  */
 const app = require("../app");
 
-
-
 const port = normalizePort(process.env.PORT || config.listenPort || "3010");
 app.set("port", port);
 
@@ -45,7 +43,7 @@ const server = http.createServer(app);
 server.listen(port);
 server.on("listening", () => {
     const addr = server.address();
-    console.log('Listening on', addr);
+    console.log("Listening on", addr);
 });
 server.on("error", (error) => {
     if (error.syscall !== "listen") {
@@ -73,12 +71,12 @@ server.on("error", (error) => {
  *
 
  */
-const { Server  } = require("socket.io");
-const SocketManager=require('./socketManager.')
-const io = new Server (server, { /* options */ });
+const { Server } = require("socket.io");
+const SocketManager = require("./socketManager.");
+const io = new Server(server, {
+    /* options */
+});
 io.on("connection", (socket) => {
-    SocketManager.initClientSocket(socket)
-console.log("Client Socket connected "+socket.id)
-
-
+    SocketManager.initClientSocket(socket);
+    console.log("Client Socket connected " + socket.id);
 });

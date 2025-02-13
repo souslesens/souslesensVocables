@@ -3,7 +3,6 @@ const elasticRestProxy = require(path.resolve("bin/elasticRestProxy..js"));
 const ConfigManager = require("../../../../bin/configManager.");
 const UserRequestFiltering = require("../../../../bin/userRequestFiltering.");
 const { processResponse } = require("../utils");
-const userManager = require("../../../../bin/user..js");
 const { sourceModel } = require("../../../../model/sources");
 const async = require("async");
 
@@ -50,7 +49,7 @@ module.exports = function () {
                             return callbackSeries(err);
                         }
                         if (isPrivate) {
-                            elasticRestProxy.indexSource(req.body.indexName, req.body.data, req.body.options, function (err, result) {
+                            elasticRestProxy.indexSource(req.body.indexName, req.body.data, req.body.options, function (err, _result) {
                                 callbackSeries(err);
                             });
                         } else {
@@ -64,7 +63,7 @@ module.exports = function () {
                         return callbackSeries();
                     } else {
                         ConfigManager.getUserSources(req, res, function (err, userSources) {
-                            UserRequestFiltering.validateElasticSearchIndices(null, [req.body.indexName], userSources, "w", function (_parsingError, filteredQuery) {
+                            UserRequestFiltering.validateElasticSearchIndices(null, [req.body.indexName], userSources, "w", function (_parsingError, _filteredQuery) {
                                 if (_parsingError) {
                                     parsingError = _parsingError;
                                     return callbackSeries();

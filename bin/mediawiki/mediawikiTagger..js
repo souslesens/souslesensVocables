@@ -107,7 +107,7 @@ var mediaWikiTagger = {
 
             function (err) {
                 callback(err);
-            }
+            },
         );
     },
     tagPages: function (thesaurusGraphUris, elasticUrl, indexName, wikiUri, callback) {
@@ -137,7 +137,7 @@ var mediaWikiTagger = {
                         },
                         function (err) {
                             callbackSeries(err);
-                        }
+                        },
                     );
                 },
 
@@ -224,7 +224,7 @@ var mediaWikiTagger = {
                                 },
                                 function (err) {
                                     callbackEach(err);
-                                }
+                                },
                             );
                         });
                     });
@@ -237,7 +237,7 @@ var mediaWikiTagger = {
 
             function (err) {
                 callback(err);
-            }
+            },
         );
     },
 
@@ -290,7 +290,7 @@ var mediaWikiTagger = {
             function (err, _n) {
                 if (err) return callback(err);
                 callback(null, thesaurusConcepts);
-            }
+            },
         );
     },
 
@@ -465,7 +465,7 @@ var mediaWikiTagger = {
                     str += "";
                 }
                 fs.writeFileSync("D:\\Total\\2020\\Stephanie\\catWordsMatrix.csv", str);
-            }
+            },
         );
     },
 
@@ -540,14 +540,14 @@ var mediaWikiTagger = {
                             },
                             function (err) {
                                 return callbackSeries(err);
-                            }
+                            },
                         );
                     },
                 ],
 
                 function (err) {
                     callbackEach(err);
-                }
+                },
             );
         });
     },
@@ -811,7 +811,7 @@ var mediaWikiTagger = {
 
             function (err) {
                 return callback(err, pageNonThesaurusWords);
-            }
+            },
         );
     },
     setTulsaSchemes: function (graphUri) {
@@ -944,19 +944,19 @@ var mediaWikiTagger = {
                                 },
                                 function (err) {
                                     return callbackEachIterator(err);
-                                }
+                                },
                             );
                         },
                         function (err) {
                             return callbackSeries(err);
-                        }
+                        },
                     );
                 },
             ],
             function (err) {
                 console.log(str);
                 console.log(err);
-            }
+            },
         );
     },
     listWikiPages: function (elasticUrl, indexName, callback) {

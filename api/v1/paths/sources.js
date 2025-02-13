@@ -12,7 +12,7 @@ module.exports = function () {
     };
 
     ///// GET api/v1/sources
-    async function GET(req, res, next) {
+    async function GET(req, res, _next) {
         try {
             const userInfo = await userManager.getUser(req.user);
             let localSourceModel = sourceModel;

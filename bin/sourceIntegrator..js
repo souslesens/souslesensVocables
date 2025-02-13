@@ -6,7 +6,6 @@ const jsonFileStorage = require("./jsonFileStorage");
 
 const request = require("request");
 const Util = require("./util.");
-const fs = require("fs");
 const ConfigManager = require("./configManager.");
 var exec = require("child_process").exec;
 
@@ -190,7 +189,7 @@ var SourceIntegrator = {
                 },
                 function (err) {
                     return callback(err, { graphUri: graphUri, imports: imports, totalTriples: totalTriples });
-                }
+                },
             );
         }
 
@@ -376,7 +375,7 @@ var SourceIntegrator = {
                             },
                             function (err) {
                                 return callbackSeries(err);
-                            }
+                            },
                         );
                     } else {
                         return callbackSeries();
@@ -432,7 +431,7 @@ var SourceIntegrator = {
 
                 console.log(journal);
                 return callback(err, journal);
-            }
+            },
         );
     },
     getOntologyFormat: function (ontologyUrl, callback) {

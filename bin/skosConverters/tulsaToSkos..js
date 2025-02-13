@@ -277,7 +277,7 @@ var tulsaToSkos = {
             function (_err) {
                 console.log("done");
                 console.log(JSON.stringify(stats, null, 2));
-            }
+            },
         );
     },
 

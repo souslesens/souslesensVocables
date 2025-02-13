@@ -1,5 +1,4 @@
 const fs = require("fs");
-const path = require("path");
 const z = require("zod");
 
 const configPath = process.env.CONFIG_PATH || "config";

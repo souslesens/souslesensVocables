@@ -30,15 +30,15 @@ var DataController = {
      */
     saveDataToFile: function (dir, fileName, data, callback) {
         var filePath = path.join(__dirname, "../data/" + dir + "/" + fileName);
-        if(fileName.indexOf('.png')>-1){
+        if (fileName.indexOf(".png") > -1) {
             const jsonData = JSON.parse(data);
 
             // Décoder les données Base64
             const base64Data = jsonData.data;
 
             // Convertir les données Base64 en buffer
-            const bufferData = Buffer.from(base64Data, 'base64');
-            data=bufferData;
+            const bufferData = Buffer.from(base64Data, "base64");
+            data = bufferData;
         }
         fs.writeFile(filePath, data, {}, function (err) {
             return callback(err, "file saved");
@@ -48,7 +48,7 @@ var DataController = {
     /**
      * Reads a file in a sub-directory of `data`
      * @param {string} dir - directory path under data
-        * @param {string} fileName - name of the file to read
+     * @param {string} fileName - name of the file to read
      * @param {(err: Error | string | null, data: string | null) => void} callback -
      *   function to be called with the file content as second argument
      */

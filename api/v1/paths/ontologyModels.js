@@ -1,4 +1,4 @@
-const { responseSchema, processResponse } = require("./utils");
+const { processResponse } = require("./utils");
 
 var ontologyModelsCache = {};
 module.exports = function () {
@@ -10,7 +10,7 @@ module.exports = function () {
     };
 
     ///// GET api/v1/sources
-    async function GET(req, res, next) {
+    async function GET(req, res, _next) {
         const model = ontologyModelsCache[req.query.source];
         if (model) {
             return processResponse(res, null, model);
@@ -44,7 +44,7 @@ module.exports = function () {
     };
 
     ///// POST api/v1/sources
-    async function POST(req, res, next) {
+    async function POST(req, res, _next) {
         if (req.body.key) {
             if (!ontologyModelsCache[req.body.source]) {
                 ontologyModelsCache[req.body.source] = {};
@@ -119,7 +119,7 @@ module.exports = function () {
     };
 
     ///// POST api/v1/sources
-    async function DELETE(req, res, next) {
+    async function DELETE(req, res, _next) {
         if (req.query.source && req.query.source != "null") {
             delete ontologyModelsCache[req.query.source];
         } else {
@@ -166,7 +166,7 @@ module.exports = function () {
         tags: ["Ontology"],
     };
 
-    async function PUT(req, res, next) {
+    async function PUT(req, res, _next) {
         if (!ontologyModelsCache[req.body.source]) {
             return processResponse(res, null, "source not exists in ontologyModelsCache");
         } else {

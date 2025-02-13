@@ -15,7 +15,7 @@ const { profileModel } = require("../model/profiles");
 
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
-const Auth0Strategy = require('passport-auth0');
+const Auth0Strategy = require("passport-auth0");
 const KeyCloakStrategy = require("passport-keycloak-oauth2-oidc").Strategy;
 const ULID = require("ulid");
 
@@ -37,7 +37,7 @@ const getUserAccount = async (source, username) => {
             maxNumberCreatedSource: 5,
             password: "",
             source: source,
-        }
+        };
         await userModel.addUserAccount(account);
     }
     // Replace the password with an empty one if the user was not related to
@@ -53,36 +53,32 @@ const getUserAccount = async (source, username) => {
 };
 
 const fetchAccessTokenFromAPI = async (domain, clientID, clientSecret) => {
-    const response = await fetch(
-        `https://${domain}/oauth/token`, {
-            body: new URLSearchParams({
-                grant_type: "client_credentials",
-                client_id: clientID,
-                client_secret: clientSecret,
-                audience: `https://${domain}/api/v2/`,
-            }),
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded",
-            },
-            method: "POST",
-            redirect: "follow",
-        }
-    );
+    const response = await fetch(`https://${domain}/oauth/token`, {
+        body: new URLSearchParams({
+            grant_type: "client_credentials",
+            client_id: clientID,
+            client_secret: clientSecret,
+            audience: `https://${domain}/api/v2/`,
+        }),
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+        },
+        method: "POST",
+        redirect: "follow",
+    });
 
     const data = await response.json();
     return data.access_token || undefined;
 };
 
 const fetchUserRolesFromAPI = async (domain, userID, accessToken) => {
-    const response = await fetch(
-        `https://${domain}/api/v2/users/${userID}/roles`, {
-            headers: {
-                "Accept": "application/json",
-                "Authorization": `Bearer ${accessToken}`,
-            },
-            method: "GET",
-        }
-    );
+    const response = await fetch(`https://${domain}/api/v2/users/${userID}/roles`, {
+        headers: {
+            Accept: "application/json",
+            Authorization: `Bearer ${accessToken}`,
+        },
+        method: "GET",
+    });
 
     const data = await response.json();
     return data;
@@ -104,8 +100,8 @@ if (config.auth == "keycloak") {
             async function (_accessToken, _refreshToken, profile, done) {
                 const userAccount = await getUserAccount("keycloak", profile.username);
                 done(null, userAccount);
-            }
-        )
+            },
+        ),
     );
 } else if (config.auth === "auth0") {
     passport.use(
@@ -119,24 +115,14 @@ if (config.auth == "keycloak") {
                 scope: config.auth0.scope,
                 sslRequired: "external",
             },
-            async function(_accessToken, _refreshToken, response, profile, done) {
-                const accessToken = await fetchAccessTokenFromAPI(
-                    config.auth0.domain,
-                    config.auth0.api.clientID || config.auth0.clientID,
-                    config.auth0.api.clientSecret || config.auth0.clientSecret,
-                )
+            async function (_accessToken, _refreshToken, response, profile, done) {
+                const accessToken = await fetchAccessTokenFromAPI(config.auth0.domain, config.auth0.api.clientID || config.auth0.clientID, config.auth0.api.clientSecret || config.auth0.clientSecret);
 
-                const roles = await fetchUserRolesFromAPI(
-                    config.auth0.domain,
-                    profile.user_id,
-                    accessToken,
-                );
+                const roles = await fetchUserRolesFromAPI(config.auth0.domain, profile.user_id, accessToken);
 
                 const available_groups = Object.keys(await profileModel.getAllProfiles());
 
-                const groups = roles
-                    .filter((role) => available_groups.includes(role.name))
-                    .map((role) => role.name);
+                const groups = roles.filter((role) => available_groups.includes(role.name)).map((role) => role.name);
 
                 const userAccount = await getUserAccount("auth0", profile._json.nickname);
                 userAccount.groups = groups;
@@ -144,7 +130,7 @@ if (config.auth == "keycloak") {
 
                 done(null, userAccount);
             },
-        )
+        ),
     );
 } else if (config.auth === "local" || config.auth === "database") {
     passport.use(
@@ -157,7 +143,7 @@ if (config.auth == "keycloak") {
                     cb(null, userAccount);
                 });
             });
-        })
+        }),
     );
 } else {
     console.log("Auth is disabled");

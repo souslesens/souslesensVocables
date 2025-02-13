@@ -178,7 +178,7 @@ var termScienceToSkos = {
                             if (err) return callbackSeries(err);
                             console.log("children2 : " + children2.length);
                             callbackSeries();
-                        }
+                        },
                     );
                 },
                 function (callbackSeries) {
@@ -203,7 +203,7 @@ var termScienceToSkos = {
                             if (err) return callbackSeries(err);
                             console.log("children3 : " + children3.length);
                             callbackSeries();
-                        }
+                        },
                     );
                 },
                 function (callbackSeries) {
@@ -227,7 +227,7 @@ var termScienceToSkos = {
                             if (err) return callbackSeries(err);
                             console.log("children4 : " + children4.length);
                             callbackSeries();
-                        }
+                        },
                     );
                 },
                 function (callbackSeries) {
@@ -251,7 +251,7 @@ var termScienceToSkos = {
                             if (err) return callbackSeries(err);
                             console.log("children5 : " + children5.length);
                             callbackSeries();
-                        }
+                        },
                     );
                 },
 
@@ -275,7 +275,7 @@ var termScienceToSkos = {
                             if (err) return callbackSeries(err);
                             console.log("children6 : " + children6.length);
                             callbackSeries();
-                        }
+                        },
                     );
                 },
 
@@ -304,7 +304,7 @@ var termScienceToSkos = {
                     }
                     callback();
                 });
-            }
+            },
         );
     },
     treeToThesaurusEditor: function (tree) {
@@ -383,7 +383,7 @@ var termScienceToSkos = {
             function (err) {
                 if (err) return err;
                 return "DONE";
-            }
+            },
         );
     },
 
@@ -451,12 +451,12 @@ var termScienceToSkos = {
                         if (err && err == "endLetter") return callbackEachPageLetter();
 
                         return callbackEachPageLetter();
-                    }
+                    },
                 );
             },
             function (_err) {
                 fs.writeFileSync("D:\\NLP\\termScience\\allTerms.csv", JSON.stringify(terms, null, 2));
-            }
+            },
         );
     },
 };

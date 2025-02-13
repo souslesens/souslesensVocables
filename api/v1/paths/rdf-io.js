@@ -5,7 +5,7 @@ module.exports = function () {
         GET,
     };
 
-    function GET(req, res, next) {
+    function GET(req, res, _next) {
         const str = req.query.turtle;
         const textStream = require("streamify-string")(str);
         var triples = [];

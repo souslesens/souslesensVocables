@@ -3,7 +3,7 @@ const { databaseModel } = require("../../../../../model/databases");
 module.exports = function () {
     let operations = { DELETE, GET, PUT };
 
-    async function GET(req, res, next) {
+    async function GET(req, res, _next) {
         try {
             const database = await databaseModel.getDatabase(req.params.id);
             res.status(200).json(database);

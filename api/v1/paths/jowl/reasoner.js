@@ -1,8 +1,5 @@
 const HttpProxy = require("../../../../bin/httpProxy.");
 const ConfigManager = require("../../../../bin/configManager.");
-const GraphStore = require("../../../../bin/graphStore.");
-const Util = require("../../../../bin/util.");
-const fs = require("fs");
 const { processResponse } = require("../utils");
 const request = require("request");
 const async = require("async");
@@ -16,7 +13,6 @@ module.exports = function () {
     };
 
     function GET(req, res, next) {
-        let options = null;
         if (req.query.options) {
             options = JSON.parse(req.query.options);
         }

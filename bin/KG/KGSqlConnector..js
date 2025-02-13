@@ -124,7 +124,7 @@ var KGSqlConnector = {
             function (err, _n) {
                 if (err) return callback(err);
                 callback(null, allResults);
-            }
+            },
         );
     },
 

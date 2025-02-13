@@ -218,7 +218,7 @@ var KGtripleBuilder = {
                                 },
                                 function (err) {
                                     callbackSeries(err);
-                                }
+                                },
                             );
                         },
 
@@ -260,7 +260,7 @@ var KGtripleBuilder = {
                                     })
                                     .catch((err) => {
                                         return callbackSeries(err);
-                                    })
+                                    });
                             });
                         },
                         //fileProcessing
@@ -440,7 +440,8 @@ var KGtripleBuilder = {
                                                                 } else if (item.objectIsSpecificUri) {
                                                                     objectStr = item.o;
                                                                 } else if (typeof item.o === "function") {
-                                                                    try {ate
+                                                                    try {
+                                                                        ate;
                                                                         objectStr = item.o(line, item);
                                                                         objectStr = util.formatStringForTriple(objectStr, false);
                                                                     } catch (e) {
@@ -691,7 +692,7 @@ propertyStr = line[item.p];
                                                     },
                                                     function (err) {
                                                         callbackSeries2(err);
-                                                    }
+                                                    },
                                                 );
                                             },
                                             //write triples
@@ -772,19 +773,19 @@ callbackEach();
                                                         //   KGtripleBuilder.message(  options.clientSocketId,"total triples writen:" + totalTriples)
 
                                                         callbackSeries2(err);
-                                                    }
+                                                    },
                                                 );
                                             },
                                         ],
 
                                         function (err) {
                                             callbackEachLines(err);
-                                        }
+                                        },
                                     );
                                 },
                                 function (err) {
                                     callbackSeries(err);
-                                }
+                                },
                             );
                         },
                     ],
@@ -797,7 +798,7 @@ callbackEach();
 
                         KGtripleBuilder.message(options.clientSocketId, message);
                         callbackEachMapping(_err);
-                    }
+                    },
                 );
             },
             function (_err) {
@@ -809,7 +810,7 @@ callbackEach();
                     KGtripleBuilder.message(options.clientSocketId, message);
                     return callback(_err, message);
                 }
-            }
+            },
         );
     },
 
@@ -955,7 +956,7 @@ callbackEach();
             ],
             function (err) {
                 return callback(err, triples.length);
-            }
+            },
         );
     },
     /**
@@ -1006,7 +1007,6 @@ callbackEach();
             options = {};
         }
         var metaDataTriples = [];
-
 
         metaDataTriples.push({
             s: subjectUri,
@@ -1076,7 +1076,7 @@ callbackEach();
             ],
             function (err) {
                 return callback(err, "graph cleared");
-            }
+            },
         );
     },
     /**
@@ -1275,7 +1275,7 @@ callbackEach();
                         },
                         function (err) {
                             callbackSeries(err);
-                        }
+                        },
                     );
                 },
             ],
@@ -1284,7 +1284,7 @@ callbackEach();
                     err = null;
                 }
                 return callback(err, output);
-            }
+            },
         );
     },
     getUserPredicateUri: function (predicate, line, graphUri) {

@@ -8,7 +8,7 @@ module.exports = function () {
     };
 
     ///// GET api/v1/profiles
-    async function GET(req, res, next) {
+    async function GET(req, res, _next) {
         try {
             const userInfo = await userManager.getUser(req.user);
             const profiles = await profileModel.getUserProfiles(userInfo.user);

@@ -120,7 +120,7 @@ var dictionaryMatcher = {
                         },
                         function (_err) {
                             callbackSeries();
-                        }
+                        },
                     );
                 },
             ],
@@ -128,7 +128,7 @@ var dictionaryMatcher = {
                 fs.writeFileSync(filePath + "_" + index + "_orphans.json", JSON.stringify(orphans, null, 2));
                 fs.writeFileSync(filePath + "_" + index + "_matches.json", JSON.stringify(matchesMap, null, 2));
                 if (callback) return callback(null, matchesMap);
-            }
+            },
         );
     },
 

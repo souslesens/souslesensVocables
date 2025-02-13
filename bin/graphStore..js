@@ -440,7 +440,7 @@ var GraphStore = {
                             },
                             function (err) {
                                 return callbackSeries(err);
-                            }
+                            },
                         );
                     } else {
                         return callbackSeries();
@@ -496,7 +496,7 @@ var GraphStore = {
 
                 console.log(journal);
                 return callback(err, journal);
-            }
+            },
         );
     },
 };

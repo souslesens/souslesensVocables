@@ -33,7 +33,7 @@ module.exports = function () {
                                 return processResponse(res, err, userSources);
                             }
 
-                            UserRequestFiltering.filterSparqlRequest(query, userSources, user, function (parsingError, filteredQuery) {
+                            UserRequestFiltering.filterSparqlRequest(query, userSources, user, function (parsingError, _filteredQuery) {
                                 if (parsingError) {
                                     return processResponse(res, parsingError, null);
                                 }

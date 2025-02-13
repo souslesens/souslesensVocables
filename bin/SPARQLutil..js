@@ -68,7 +68,7 @@ var SPARQLutil = {
                         },
                         function (err) {
                             return callbackSeries(err);
-                        }
+                        },
                     );
                 },
             ],
@@ -77,7 +77,7 @@ var SPARQLutil = {
                     return callback(err);
                 }
                 return callback(null, "DONE " + totalTriples);
-            }
+            },
         );
     },
 };

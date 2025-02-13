@@ -2103,5 +2103,5 @@ async.eachSeries(
     },
     function (_err) {
         fs.writeFileSync("D:\\NLP\\ontologies\\dataDomains\\definitions.txt", dataStr);
-    }
+    },
 );

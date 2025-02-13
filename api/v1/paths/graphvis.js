@@ -1,15 +1,14 @@
-const fs = require("fs");
-//const { graphviz } = require('node-graphviz');
+// const { graphviz } = require("node-graphviz");
 const { processResponse } = require("./utils");
+
 module.exports = function () {
     let operations = {
         GET,
     };
 
-    function GET(req, res, next) {
+    function GET(req, res, _next) {
         const dotStr = req.query.dotStr;
         const format = req.query.format;
-        const output = req.query.output;
 
         try {
             graphviz.circo(dotStr, format).then((svg) => {

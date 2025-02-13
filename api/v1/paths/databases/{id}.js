@@ -4,7 +4,7 @@ const { responseSchema } = require("../utils");
 module.exports = function () {
     let operations = { GET };
 
-    async function GET(req, res, next) {
+    async function GET(req, res, _next) {
         try {
             const database = await databaseModel.getDatabaseMinimal(req.params.id);
             res.status(200).json(database);

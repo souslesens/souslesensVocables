@@ -1,5 +1,4 @@
 const { processResponse } = require("../utils");
-const SourceIntegrator = require("../../../../bin/sourceIntegrator.");
 const ConfigManager = require("../../../../bin/configManager.");
 const GraphStore = require("../../../../bin/graphStore.");
 
@@ -56,7 +55,7 @@ module.exports = function () {
         tags: ["Graph"],
     };
 
-    function POST(req, res, next) {
+    function POST(req, res, _next) {
         ConfigManager.getUser(req, res, function (err, userInfo) {
             if (err) {
                 return res.status(400).json({ error: err });
@@ -72,7 +71,7 @@ module.exports = function () {
                     };
                 }
 
-                GraphStore.importGraphFromUrl(sparqlServerConnection, body.sourceUrl, body.graphUri, function (err, result) {
+                GraphStore.importGraphFromUrl(sparqlServerConnection, body.sourceUrl, body.graphUri, function (err, _result) {
                     processResponse(res, err, "DONE");
                 });
             }

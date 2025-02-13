@@ -266,7 +266,7 @@ var elasticRestProxy = {
             ],
             function (err) {
                 callback(err);
-            }
+            },
         );
     },
     listIndexes: function (elasticUrl, callback) {
@@ -477,7 +477,7 @@ var elasticRestProxy = {
                     return callback(err);
                 }
                 callback(null, "done");
-            }
+            },
         );
     },
 };

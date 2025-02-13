@@ -1,6 +1,4 @@
 const { mainConfigModel } = require("../../../model/mainConfig");
-const { userModel } = require("../../../model/users");
-const userManager = require("../../../bin/user.");
 
 module.exports = function () {
     let operations = {

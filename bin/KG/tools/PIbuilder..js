@@ -54,7 +54,7 @@ var PIbuilder = {
             ],
             function (_err) {
                 /* do nothing ? */
-            }
+            },
         );
     },
 };

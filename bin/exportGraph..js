@@ -71,7 +71,7 @@ var ExportGraph = {
 
                 if (err) return console.log(err);
                 fs.writeFileSync(filePath, str);
-            }
+            },
         );
     },
 
@@ -223,18 +223,18 @@ var ExportGraph = {
                                 ],
                                 function (err) {
                                     return callbackWhilst(err);
-                                }
+                                },
                             );
                         },
                         function (err) {
                             return callbackSeries0(err);
-                        }
+                        },
                     );
                 },
             ],
             function (err) {
                 return callback(err, { result: totalResultSize });
-            }
+            },
         );
     },
 };

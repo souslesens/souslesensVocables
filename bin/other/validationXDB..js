@@ -1,9 +1,5 @@
 var fs = require("fs");
-var Util = require("../util..js");
-
 //var reader=require("../SQLutil.")
-
-const csvCrawler = require("../_csvCrawler.");
 
 var filePath = "D:\\NLP\\ontologies\\OntoGaia\\validationXDB3.csv";
 /*csvCrawler.readCsv({ filePath: filePath }, 500000, function (err, result) {
@@ -17,7 +13,7 @@ var filePath = "D:\\NLP\\ontologies\\OntoGaia\\validationXDB3.csv";
   */
 
 fs.readFile(filePath, function (err, data) {
-    var data = "" + data;
+    data = "" + data;
 
     var lines = data.split("\n");
 
@@ -39,7 +35,6 @@ fs.readFile(filePath, function (err, data) {
 
         if (indexLine > 0) {
             relations.forEach(function (header, indexCol) {
-                var colName = cells[indexCol - 1];
                 if (indexCol > 0 && indexCol % 2 == 0) {
                     if (cells[indexCol - 1]) {
                         relations[indexCol].data.push({ label: cells[indexCol - 1], status: cells[indexCol] || "-" });

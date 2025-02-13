@@ -16,7 +16,7 @@ module.exports = function () {
      * @returns {users} - user objects with matched profiles
      */
     filterUserByGroup = (users, profiles) => {
-        const userProfiles = Object.fromEntries(Object.entries(users).filter(([key, value]) => value.groups.some((g) => profiles.includes(g))));
+        const userProfiles = Object.fromEntries(Object.entries(users).filter(([_key, value]) => value.groups.some((g) => profiles.includes(g))));
         return Object.entries(userProfiles).map(([key, value]) => ({ [key]: { login: value.login, profiles: value.groups } }));
     };
     ///// GET api/v1/users

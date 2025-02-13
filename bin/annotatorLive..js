@@ -107,12 +107,12 @@ var annotatorLive = {
                                 },
                                 function (err) {
                                     callbackEachSource(err);
-                                }
+                                },
                             );
                         },
                         function (err) {
                             callbackSeries(err);
-                        }
+                        },
                     );
                 },
                 //set Missing nouns
@@ -128,7 +128,7 @@ var annotatorLive = {
             ],
             function (err) {
                 callback(err, { entities: entities, missingNouns: missingNouns });
-            }
+            },
         );
     },
     test: function () {

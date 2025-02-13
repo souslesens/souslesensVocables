@@ -315,7 +315,7 @@ var onTheFlyTagger = {
             function (err) {
                 onTheFlyTagger.pageWordsMap[pageUri] = pageWords;
                 return callback(err, pageWords);
-            }
+            },
         );
     },
 
@@ -418,7 +418,7 @@ var onTheFlyTagger = {
             function (err, _n) {
                 if (err) return callback(err);
                 callback(null, thesaurusConcepts);
-            }
+            },
         );
     },
 
@@ -529,7 +529,7 @@ var onTheFlyTagger = {
                         },
                         function (err) {
                             return callbackSeries(err);
-                        }
+                        },
                     );
                 },
                 //get commonWords
@@ -576,13 +576,13 @@ var onTheFlyTagger = {
                                     },
                                     function (_err) {
                                         return callbackEach1();
-                                    }
+                                    },
                                 );
                             });
                         },
                         function (_err) {
                             return callbackSeries();
-                        }
+                        },
                     );
                 }, //synthetise data
                 function (callbackSeries) {
@@ -617,7 +617,7 @@ var onTheFlyTagger = {
 
             function (err) {
                 callback(err, {});
-            }
+            },
         );
     },
     printCategoriesTriples: function (categoriesStatsFilePath) {
@@ -682,13 +682,13 @@ var onTheFlyTagger = {
                         },
                         function (_err) {
                             return callbackEach();
-                        }
+                        },
                     );
                 });
             },
             function (err) {
                 return callback(err);
-            }
+            },
         );
     },
     getCategoriesSignificantWords: function () {
@@ -890,14 +890,14 @@ var onTheFlyTagger = {
                             });
                             console.log(str);
                             callbackSeries();
-                        }
+                        },
                     );
                 },
             ],
 
             function (err) {
                 return console.log(err);
-            }
+            },
         );
     },
 

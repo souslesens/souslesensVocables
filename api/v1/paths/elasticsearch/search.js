@@ -5,7 +5,7 @@ module.exports = function () {
         POST,
     };
 
-    async function POST(req, res, next) {
+    async function POST(req, res, _next) {
         const indices = req.body.indices;
         const uris = req.body.uris;
 

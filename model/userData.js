@@ -1,4 +1,3 @@
-const { knex } = require("knex");
 const { z } = require("zod");
 const { cleanupConnection, getKnexConnection } = require("./utils");
 const { readMainConfig } = require("./config");

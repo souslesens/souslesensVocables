@@ -1,4 +1,3 @@
-const HttpProxy = require("../../../../bin/httpProxy.");
 const ConfigManager = require("../../../../bin/configManager.");
 const { processResponse } = require("../utils");
 const request = require("request");
@@ -8,7 +7,7 @@ module.exports = function () {
         GET,
     };
 
-    function GET(req, res, next) {
+    function GET(_req, res, _next) {
         var jowlConfig = ConfigManager.config.jowlServer;
         var options = {
             method: "GET",

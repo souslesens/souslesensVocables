@@ -5,7 +5,7 @@ module.exports = function () {
     let operations = {
         POST,
     };
-    async function POST(req, res, next) {
+    async function POST(req, res, _next) {
         const body = req.body;
         ExportGraph.copyGraphToEndPoint(body.source, body.toEndPointConfig, body.options, function (err, result) {
             processResponse(res, err, result);

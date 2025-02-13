@@ -76,7 +76,7 @@ var skosToElastic = {
                 if (err) {
                     return callback(err);
                 }
-            }
+            },
         );
     },
     flatToElastic: function (flatJson, startIdValue, createIndex, callback) {
@@ -166,7 +166,7 @@ var skosToElastic = {
             function (err) {
                 if (err) return callback(err);
                 callback(null, countCreated);
-            }
+            },
         );
     },
 
@@ -267,7 +267,7 @@ var skosToElastic = {
             function (err) {
                 if (err) return callback(err);
                 return callback(null, commonConcepts);
-            }
+            },
         );
     },
 
@@ -350,7 +350,7 @@ var skosToElastic = {
                                 if (err) return callbackSeries(err);
                                 fs.writeFileSync("D:\\NLP\\LOC\\commonConcepts_" + indexTarget + ".json", JSON.stringify(commonConcepts, null, 2));
                                 callbackSeries();
-                            }
+                            },
                         );
                     });
                 },
@@ -364,7 +364,7 @@ var skosToElastic = {
             function (err) {
                 if (err) return callback(err);
                 callback(null, commonConcepts);
-            }
+            },
         );
     },
 };

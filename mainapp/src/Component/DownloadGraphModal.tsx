@@ -231,7 +231,7 @@ export function DownloadGraphModal({ onClose, open, sourceName }: DownloadGraphM
                                     N-triples
                                 </MenuItem>
                                 <MenuItem disabled={transferPercent > 0 || slsPyApiBaseUrl === "/"} value={"xml"}>
-                                    RDF/XML
+                                    OWL/RDF/XML
                                 </MenuItem>
                                 <MenuItem disabled={transferPercent > 0 || slsPyApiBaseUrl === "/"} value={"ttl"}>
                                     Turtle

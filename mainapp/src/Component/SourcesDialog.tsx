@@ -216,24 +216,43 @@ export const SourcesDialog = ({ edit, me, onClose, onSubmit, open, selectedSourc
                         required
                         value={source.graphUri}
                     />
-                    <TextField
-                        fullWidth
-                        error={errors.prefix !== undefined}
-                        helperText={errors.prefix}
-                        id="prefix"
-                        InputProps={{
-                            endAdornment: (
-                                <InputAdornment position="end">
-                                    <HelpTooltip title={sourceHelp.prefix} />
-                                </InputAdornment>
-                            ),
-                        }}
-                        label="Prefix"
-                        name="prefix"
-                        onChange={(event) => handleField("prefix", event.target.value)}
-                        required
-                        value={source.prefix}
-                    />
+                    <Stack direction="row" spacing={1} useFlexGap>
+                        <TextField
+                            error={errors.prefix !== undefined}
+                            helperText={errors.prefix}
+                            id="prefix"
+                            InputProps={{
+                                endAdornment: (
+                                    <InputAdornment position="end">
+                                        <HelpTooltip title={sourceHelp.prefix} />
+                                    </InputAdornment>
+                                ),
+                            }}
+                            label="Prefix"
+                            name="prefix"
+                            onChange={(event) => handleField("prefix", event.target.value)}
+                            required
+                            value={source.prefix}
+                        />
+                        <TextField
+                            fullWidth
+                            error={errors.prefix !== undefined}
+                            helperText={errors.prefix}
+                            id="baseUri"
+                            InputProps={{
+                                endAdornment: (
+                                    <InputAdornment position="end">
+                                        <HelpTooltip title={sourceHelp.baseUri} />
+                                    </InputAdornment>
+                                ),
+                            }}
+                            label="Base URI"
+                            name="baseUri"
+                            onChange={(event) => handleField("baseUri", event.target.value)}
+                            required
+                            value={source.baseUri}
+                        />
+                    </Stack>
                     <Autocomplete
                         freeSolo
                         id="group"

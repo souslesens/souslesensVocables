@@ -166,7 +166,7 @@ export const SourcesDialog = ({ edit, me, onClose, onSubmit, open, selectedSourc
             void getUsers().then((availableUsers) => setUsers(availableUsers));
 
             if (selectedSource) {
-                setSource(selectedSource as ServerSource);
+                setSource(selectedSource);
             }
         }
     }, [open]);

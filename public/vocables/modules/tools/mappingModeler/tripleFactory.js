@@ -129,6 +129,8 @@ var TripleFactory = (function () {
         var columnMappings = MappingTransform.mappingsToKGcreatorJson(columnsSelection, { getColumnMappingsOnly: true });
         // selection isn't concerned for column mappings select all
         filteredMappings = filteredMappings.concat(columnMappings);
+
+        filteredMappings =mappings
         var table = MappingModeler.currentTable.name;
 
         filteredMappings = { [table]: { tripleModels: filteredMappings, transform: transforms } };

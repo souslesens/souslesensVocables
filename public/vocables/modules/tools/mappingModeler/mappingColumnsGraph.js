@@ -239,6 +239,7 @@ var MappingColumnsGraph = (function () {
      */
     self.onVisjsGraphClick = function (node, event, options) {
         if (!node) {
+            MappingModeler.currentRelation = null;
             PopupMenuWidget.hidePopup("popupMenuWidgetDiv");
             return;
         }
@@ -255,7 +256,7 @@ var MappingColumnsGraph = (function () {
 
                 var classId = null;
                 connections.forEach(function (connection) {
-                    if (connection.edge.data.type == "rdf:type" && connection.edge.label == "a") {
+                    if (connection.edge.data.type == "rdf:type"  || connection.edge.data.type == "rdfs:subClassOf" ) {
                         classId = connection.toNode.data.id;
                     }
                 });

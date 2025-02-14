@@ -23,7 +23,7 @@ var UserDataWidget = (function () {
                     self.callbackFn(err);
                 }
 
-                self.callbackFn(null, { label: label, data_path: data_path, data_content: self.jsonContent });
+                self.callbackFn(null, {label: label, data_path: data_path, data_content: self.jsonContent});
             });
         });
 
@@ -40,20 +40,6 @@ var UserDataWidget = (function () {
             shared_users: [],
             owned_by: Authentification.currentUser.login,
         };
-
-        /* async function excuteQuery() {
-            const response = await fetch( `${Config.apiUrl}/users/data`, {
-                method: "POST",
-                body:JSON.stringify(payload),
-                // ...
-            });
-        }
-
-        excuteQuery()
-
-        return;*/
-
-
 
 
         var type = "POST";
@@ -75,6 +61,31 @@ var UserDataWidget = (function () {
             },
         });
     };
+    self.loadUserDatabyId = function (id) {
+        $.ajax({
+            type: "GET",
+            url: `${Config.apiUrl}/users/data/` + "" +id,
+            dataType: "json",
+            success: function (_result, _textStatus, _jqXHR) {
+                callback(null, "graph saved");
+            },
+            error(err) {
+                return callback(err);
+            },
+        });
+    }
+    self.listUserData = function (filter,callback) {
+        $.ajax({
+            type: "GET",
+            url: `${Config.apiUrl}/users/data`,
+            dataType: "json",
+            success: function (_result, _textStatus, _jqXHR) {
+                callback(null,_result)
+            }, error(err) {
+                return callback(err);
+            }
+        })
+    }
 
     self.deleteItem = function (nodeData, callback) {
         if (!nodeData) {

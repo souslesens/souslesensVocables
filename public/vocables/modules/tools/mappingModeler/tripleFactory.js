@@ -126,6 +126,7 @@ var TripleFactory = (function () {
                 }
             });
         });
+
         var columnMappings = MappingTransform.mappingsToKGcreatorJson(columnsSelection, { getColumnMappingsOnly: true });
         // selection isn't concerned for column mappings select all
         filteredMappings = filteredMappings.concat(columnMappings);

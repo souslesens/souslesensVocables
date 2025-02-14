@@ -34,6 +34,7 @@ module.exports = function () {
                 },
             },
         ],
+        tags: ["RDF"],
     };
 
     function POST(req, res, next) {
@@ -77,6 +78,7 @@ module.exports = function () {
                 },
             },
         },
+        tags: ["RDF"],
     };
 
     return operations;

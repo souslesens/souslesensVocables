@@ -38,6 +38,7 @@ module.exports = function () {
                 },
             },
         },
+        tags: ["Users"],
     };
 
     async function DELETE(req, res, next) {
@@ -71,6 +72,7 @@ module.exports = function () {
                 },
             },
         },
+        tags: ["Users"],
     };
 
     return operations;

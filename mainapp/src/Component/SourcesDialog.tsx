@@ -165,7 +165,7 @@ export const SourcesDialog = ({ edit, me, onClose, onSubmit, open, selectedSourc
             setSourcesPrefixes(sources.map((s) => s.prefix));
             void getUsers().then((availableUsers) => setUsers(availableUsers));
 
-            if (edit) {
+            if (selectedSource) {
                 setSource(selectedSource as ServerSource);
             }
         }

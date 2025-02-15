@@ -234,7 +234,7 @@ var SubGraph = (function () {
             if (uniqueResources[classUri]) {
                 return uniqueResources[classUri];
             }
-            var uri = classUri + "#" + common.getRandomHexaId(10);
+            var uri = classUri + "_" + common.getRandomHexaId(10);
             uniqueResources[classUri] = uri;
             triples.push({
                 subject: uri,
@@ -299,7 +299,7 @@ var SubGraph = (function () {
         });
     };
 
-    self.getSubGraphShaclTriplesXXX = function (sourceLabel, _classUri, options, callback) {
+    self.getSubGraphShaclNtTriples = function (sourceLabel, _classUri, options, callback) {
         if (!options) {
             options = {};
         }
@@ -332,6 +332,7 @@ var SubGraph = (function () {
 
                 var classRestrictions = restrictionsMap[classUri2];
                 var shaclProperties = [];
+                var triples=[]
                 if (classRestrictions) {
                     for (var property in classRestrictions) {
                         classRestrictions[property].forEach(function (restriction) {
@@ -339,9 +340,10 @@ var SubGraph = (function () {
                                 return;
                             }
 
-                            var propStr = Shacl.uriToPrefixedUri(restriction.property);
-                            var rangeStr = Shacl.uriToPrefixedUri(restriction.targetClass);
-                            var property = " sh:path " + propStr + " ;\n";
+                            var propStr = restriction.property;
+                            var rangeStr = restriction.targetClass;
+                            triples.push("sh:path> "  + propStr)
+                          //  var property = " sh:path " + propStr + " ;\n";
 
                             //  "        sh:maxCount " + count + " ;" +
                             property += "        sh:node " + rangeStr + " ;";
@@ -532,7 +534,7 @@ var SubGraph = (function () {
                 contentType: "application/json",
                 dataType: "json",
                 success: function (data, _textStatus, _jqXHR) {
-                    return data.output;
+                    return callback(null,data.output);
                 },
                 error(err) {
                     UI.message("", true);

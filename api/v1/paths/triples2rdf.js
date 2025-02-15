@@ -40,9 +40,11 @@ module.exports = function () {
         try {
             var triples = req.body.triples;
 
-            var turtle = rdf.triples2turtle(triples);
-            return processResponse(res, null, turtle);
+            var turtle = rdf.triples2turtle(triples, function(err, turtle){
+                return processResponse(res, null,{output:turtle});
+            });
 
+return;
             rdf.triples2turtle(triples, function (err, result) {
                 const report = Validator.triples2turtle(result);
                 return processResponse(res, null, report);

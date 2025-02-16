@@ -46,12 +46,14 @@ var Shacl = (function () {
 
     self.getShacl = function (sourceClassUri, targetClassUri, shaclProperties) {
         var shacl = "";
-        shacl += sourceClassUri + "\n" + "    a sh:NodeShape ;\n";
-        if (targetClassUri) {
-            shacl += "    sh:self.targetClass  " + Shacl.uriToPrefixedUri(targetClassUri) + ";\n";
-        }
+        shacl += sourceClassUri + "Shape" + "\n" + "    a sh:NodeShape ;\n";
+        shacl += "    sh:targetClass  " + Shacl.uriToPrefixedUri(sourceClassUri) + ";\n";
+
         shaclProperties.forEach(function (property, index) {
             shacl += "  sh:property [\n" + property + "]";
+          /*  if (targetClassUri) {
+                shacl += "    sh:class  " + Shacl.uriToPrefixedUri(targetClassUri) + ";\n";
+            }*/
             if (index == shaclProperties.length - 1) {
                 shacl += ".\n";
             } else {

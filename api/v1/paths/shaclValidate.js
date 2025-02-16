@@ -1,7 +1,12 @@
+
 const { processResponse } = require("./utils");
 const rdf = require("../../../bin/RDF_IO..js");
 const { NamedNode, BlankNode, Literal, Graph } = rdf;
 
+var Validator = null;
+import("../../../bin/shacl/validator.mjs").then((mod) => {
+    Validator = mod; // true
+});
 
 module.exports = function () {
     let operations = {
@@ -35,11 +40,13 @@ module.exports = function () {
     function POST(req, res, next) {
         try {
             var triples = req.body.triples;
+            var shapes = req.body.shapes;
 
            rdf.triples2turtle(triples, function(err, turtle){
-                return processResponse(res, null,{output:turtle});
-            });
 
+                const report = Validator.validateTriples(shapes,turtle);
+                return processResponse(res, null, {output:report});
+            });
 
         } catch (e) {
             return processResponse(res, e);
@@ -50,16 +57,23 @@ module.exports = function () {
 
     GET.apiDoc = {
         security: [{ restrictLoggedUser: [] }],
-        summary: "transform sls triples to rdf",
-        description: "transform turtle into json triples",
-        operationId: "transform turtle into json triples",
+        summary: "validates triples  regarding shacl turtle rules ",
+        description: "validates triples  regarding shacl turtle rules ",
+        operationId: "validates triples  regarding shacl turtle rules",
         parameters: [
             {
-                name: "triples",
-                description: "triples Array in sls format {subjet:xx,predicate:fff, object : dddd}",
+                name: "shapes",
+                description: "shacl rules in turtle format",
                 type: "string",
                 in: "query",
-                required: false,
+                required: true,
+            },
+            {
+                name: "triples",
+                description: "triples graph  in sls format",
+                type: "string",
+                in: "query",
+                required: true,
             },
         ],
 

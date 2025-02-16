@@ -415,7 +415,7 @@ var SubGraph = (function () {
                             var property = " sh:path " + propStr + " ;\n";
 
                             //  "        sh:maxCount " + count + " ;" +
-                            property += "        sh:node " + rangeStr + " ;";
+                            property += "        sh:class " + rangeStr + " ;\n";
                             property += Shacl.getCardinalityProperty(restriction);
 
                             shaclProperties.push(property);
@@ -542,6 +542,10 @@ var SubGraph = (function () {
                 },
             });
         });
+    };
+
+    self.validateShalcRules = function (sourceLabel, processClass, options, callback) {
+
     };
 
     self.getSubGraphVisjsData = function (sourceLabel, processClass, options, callback) {

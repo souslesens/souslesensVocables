@@ -37,14 +37,7 @@ describe("UserDataModel", () => {
                 "data_label": "data1",
                 "data_comment": "",
                 "data_group": "",
-                "data_content": {
-                    "sparqlServerUrl": "string",
-                    "graphUri": "string",
-                    "prefixes": {},
-                    "lookups": {},
-                    "databaseSources": {},
-                    "cvsSources": {}
-                },
+                "data_content": {},
                 "is_shared": false,
                 "shared_profiles": [],
                 "shared_users": [],
@@ -58,14 +51,7 @@ describe("UserDataModel", () => {
                 "data_label": "",
                 "data_comment": "",
                 "data_group": "",
-                "data_content": {
-                    "sparqlServerUrl": "string",
-                    "graphUri": "string",
-                    "prefixes": {},
-                    "lookups": {},
-                    "databaseSources": {},
-                    "cvsSources": {}
-                },
+                "data_content": {},
                 "is_shared": false,
                 "shared_profiles": [],
                 "shared_users": [

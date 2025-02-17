@@ -82,7 +82,7 @@ class UserDataModel {
         this._checkIdentifier(identifier);
 
         const connection = getKnexConnection(this._mainConfig.database);
-        const results = await connection.select("*").from("user_data_list").where("id", identifier).first();
+        const results = await connection.select("*").from("user_data").where("id", identifier).first();
         if (results === undefined) {
             cleanupConnection(connection);
             throw Error("The specified identifier do not exists", { cause: 404 });

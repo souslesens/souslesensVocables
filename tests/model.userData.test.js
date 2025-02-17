@@ -138,7 +138,7 @@ describe("UserDataModel", () => {
     });
 
     test("find userData", async () => {
-        tracker.on.select("user_data_list").response(dbUserDataList);
+        tracker.on.select("user_data").response(dbUserDataList);
         const userData = await userDataModel.find(1);
         expect(userData).toBeTruthy();
     });

@@ -130,7 +130,7 @@ describe("UserDataModel", () => {
             owned_by: "skos_user",
         }
         const results = await userDataModel.insert(addUserData);
-        expect(results).toStrictEqual(6);
+        expect(results.id).toStrictEqual(6);
     });
 
     test("remove userData", async () => {

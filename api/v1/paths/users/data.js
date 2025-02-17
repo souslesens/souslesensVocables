@@ -44,8 +44,12 @@ module.exports = () => {
         try {
             const userData = await cleanUserData.clean(req.body);
             const userInfo = await userManager.getUser(req.user);
-            await userDataModel.insert({ ...userData, owned_by: userInfo.user.login });
-            res.status(200).json({ message: "The resource has been inserted successfully" });
+            const results = await userDataModel.insert({ ...userData, owned_by: userInfo.user.login });
+            if (results.length === 1) {
+                res.status(200).json({ message: "The resource has been inserted successfully", id: results[0].id });
+            } else {
+                res.status(422).json({ message: "The resource cannot be insert in the database" });
+            }
         } catch (error) {
             if (error.cause !== undefined) {
                 res.status(error.cause).json({ message: error.message });
@@ -76,6 +80,10 @@ module.exports = () => {
                             type: "string",
                             default: "The resource has been inserted successfully",
                         },
+                        id: {
+                            type: "number",
+                            default: 1,
+                        },
                     },
                 },
             },
@@ -87,6 +95,18 @@ module.exports = () => {
                         message: {
                             type: "string",
                             default: "The specified owned_by username do not exists",
+                        },
+                    },
+                },
+            },
+            422: {
+                description: "The resource cannot be insert in the database",
+                schema: {
+                    type: "object",
+                    properties: {
+                        message: {
+                            type: "string",
+                            default: "The resource cannot be insert in the database",
                         },
                     },
                 },

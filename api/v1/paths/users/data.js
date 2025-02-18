@@ -5,7 +5,19 @@ const userManager = require("../../../../bin/user.");
 module.exports = () => {
     GET = async (req, res, _next) => {
         try {
-            const data = await userDataModel.all(req.user);
+            let data = await userDataModel.all(req.user);
+
+            if (req.query.columns) {
+                const columns = req.query.columns;
+
+                data = data.map((element) =>
+                    columns.reduce((result, key) => {
+                        result[key.trim()] = element[key.trim()];
+                        return result;
+                    }, {}),
+                );
+            }
+
             res.status(200).json(data);
         } catch (error) {
             console.error(error);
@@ -13,7 +25,18 @@ module.exports = () => {
         }
     };
     GET.apiDoc = {
-        parameters: [],
+        parameters: [
+            {
+                in: "query",
+                name: "columns",
+                description: "filter the columns of the response",
+                required: false,
+                type: "array",
+                items: {
+                    type: "string",
+                },
+            },
+        ],
         responses: {
             200: {
                 description: "Retrieve the entire list of User Data",

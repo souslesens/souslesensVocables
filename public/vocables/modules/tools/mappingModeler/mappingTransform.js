@@ -1,4 +1,5 @@
 import common from "../../shared/common.js";
+import DataSourceManager from "./dataSourcesManager.js";
 import MappingModeler from "./mappingModeler.js";
 import UIcontroller from "./uiController.js";
 
@@ -240,8 +241,47 @@ var MappingTransform = (function () {
         }
 
         allMappings = self.addMappingsRestrictions(allMappings);
+        // allMappings add lookups_s and lookups_o for each mapping if there is lookup
+        allMappings=self.addLookupsToMappings(allMappings);
 
         return allMappings;
+    };
+    self.addLookupsToMappings=function(allMappings){
+        if(Object.keys(DataSourceManager.currentConfig.lookups).length==0){
+            return allMappings;
+        }
+        
+        DataSourceManager.currentConfig.lookups.forEach(function(lookup){
+            if(lookup.split('_')[0]==DataSourceManager.currentConfig.currentDataSource.currentTable){
+                var lookupColumn=lookup.split('_')[1];
+                var lookupObj=DataSourceManager.currentConfig.lookups[lookup];
+                is_object_lookup=false;
+                is_subject_lookup=false;
+                if(lookupObj.targetMapping=='both'){
+                    is_object_lookup=true;
+                    is_subject_lookup=true;
+                }
+                if(lookupObj.targetMapping=='object'){
+                    is_object_lookup=true; 
+                }
+                if(lookupObj.targetMapping=='subject'){
+                    is_subject_lookup=true;
+                }
+                allMappings.forEach(function(mapping){
+                    if(mapping.s==lookupColumn && is_subject_lookup){
+                       mapping.lookup_s=true;
+                    }
+                    if(mapping.o==lookupColumn && is_object_lookup){
+                        mapping.lookup_o=true;
+                    }
+                });
+
+            }
+                        
+        });
+        return allMappings;
+        
+
     };
 
     /**

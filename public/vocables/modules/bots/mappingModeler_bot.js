@@ -57,6 +57,9 @@ var MappingModeler_bot = (function () {
                 "create  datatypeProperty": {
                     createDatatypePropertyFn: {},
                 },
+                "add LookUp":{
+                    addLookUpFn:{},
+                },
 
                 end: {},
             },
@@ -230,6 +233,14 @@ var MappingModeler_bot = (function () {
         setSubClassOfFn: function () {
             self.params.addingSubClassOf = self.params.superClassId;
             _botEngine.nextStep();
+        },
+        addLookUpFn:function(){
+            Lookups_bot.start(Lookups_bot.lookUpWorkflow, {}, function (err, result) {
+                if (err) {
+                    return alert(err);
+                }
+                
+            });
         },
     };
 

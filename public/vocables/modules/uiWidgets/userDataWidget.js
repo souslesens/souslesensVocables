@@ -46,13 +46,13 @@ var UserDataWidget = (function () {
         if (self.currentTreeNode) {
             type = "PUT";
         }
-
+        payload=JSON.stringify(payload);
         $.ajax({
             type: type,
             url: `${Config.apiUrl}/users/data`,
             data: payload,
-            dataType: "json",
-            //  contentType:"application/json",
+            //dataType: "json",
+            contentType:"application/json",
             success: function (_result, _textStatus, _jqXHR) {
                 callback(null, "graph saved");
             },

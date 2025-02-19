@@ -80,6 +80,10 @@ var KGbuilder_triplesMaker = {
                         async.series(
                             [
                                 function (callbackSeries) {
+                                    if(mapping.p=="http://totalenergies/resources/tsf/onedata/dalia/planification/maximumPOB" && mapping.o=="maximunpob"&& line.jobcardphaseactivity=='CNT-DAL-MER-001029'){
+                                        console.log('here');
+                                    }
+
                                     KGbuilder_triplesMaker.getTripleSubject(tableMappings, mapping, line, function (err, result) {
                                         if (err) {
                                             if (err.indexOf("no mapping.subject") > -1) {
@@ -302,7 +306,7 @@ var KGbuilder_triplesMaker = {
             }
             if (tableMappings.transform && tableMappings.transform[mapping.o]) {
                 try {
-                    if (line[mapping.o]) {
+                    if (line[mapping. o]) {
                         if (mapping.dataType || mapping.isString) {
                             objectStr = tableMappings.transform[mapping.o](util.formatStringForTriple(line[mapping.o], false), "o", mapping.p, line, mapping);
                         } else {
@@ -501,8 +505,8 @@ var KGbuilder_triplesMaker = {
             tableMappings.lookups,
             function (lookup, callbackEachLookup) {
                 if (tableMappings.csvDataFilePath) {
+                    
                     var lookupFilePath = lookup.filePath;
-
                     KGbuilder_triplesMaker.readCsv(lookupFilePath, null, function (err, result) {
                         if (err) {
                             return callbackEachLookup(err);
@@ -543,7 +547,7 @@ var KGbuilder_triplesMaker = {
                 }
             },
             function (err) {
-                callback(err, lookupsMap);
+                callback(err, lookUpsMap);
             }
         );
     },

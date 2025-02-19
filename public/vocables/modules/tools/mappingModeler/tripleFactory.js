@@ -5,6 +5,7 @@ import MappingTransform from "./mappingTransform.js";
 import MappingModeler from "./mappingModeler.js";
 import Export from "../../shared/export.js";
 import UIcontroller from "./uiController.js";
+import DataSourceManager from "./dataSourcesManager.js";
 
 
 /**
@@ -146,7 +147,9 @@ var TripleFactory = (function () {
         var table=MappingModeler.currentTable.name;
         
         filteredMappings ={[table]:{tripleModels:filteredMappings,transform:transforms}}
-        
+        if(Object.keys(DataSourceManager.currentConfig.lookups)){
+            filteredMappings[table].lookups=DataSourceManager.currentConfig.lookups;
+        }
         TripleFactory.createTriples(self.filterMappingIsSample, MappingModeler.currentTable.name, {filteredMappings: filteredMappings}, function (err, result) {
             if (err) {
                 return alert(err.responseText);

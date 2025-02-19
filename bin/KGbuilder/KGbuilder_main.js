@@ -64,6 +64,7 @@ var KGbuilder_main = {
                                 if (!mappings.lookups || mappings.lookups.length == 0) {
                                     return callbackSeries();
                                 }
+                                // générer le filepath à partir du fileName
                                 KGbuilder_triplesMaker.loadLookups(mappings, function(err, result) {
                                     if (err) {
                                         return callbackSeries(err);

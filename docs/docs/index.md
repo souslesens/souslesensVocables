@@ -26,6 +26,14 @@ tutorials/mappingmodeler.md
 
 How to install, configure and manage your own SousLeSens instance.
 
+### Architecture
+
+```{toctree}
+:maxdepth: 1
+architecture/index.md
+architecture/docker.md
+```
+
 ### Installation
 
 ```{toctree}

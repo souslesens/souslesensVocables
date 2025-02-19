@@ -3,7 +3,7 @@
     "source": {
         "include": ["public/vocables/modules/tools"],
         "includePattern": ".+\\.js(doc)?$",
-        "excludePattern": "(^|\\/|\\\\)_"
+        "excludePattern": "lineage_whiteboard.js"
     },
     "opts": {
         "destination": "./docs/docs/developer-docs",

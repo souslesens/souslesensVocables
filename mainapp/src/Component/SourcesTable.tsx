@@ -94,8 +94,8 @@ const SourcesTable = () => {
         }
     };
 
-    const handleOpenModal = (source: ServerSource | null = null) => {
-        setEditModal(source !== null);
+    const handleOpenModal = (source: ServerSource | null = null, editMode: boolean = false) => {
+        setEditModal(editMode);
         setSelectedSource(source);
         setOpenModal(true);
     };
@@ -117,7 +117,6 @@ const SourcesTable = () => {
                 setSnackOpen(true);
                 setSnackSeverity("error");
                 setSnackMessages((msg) => new Set(msg).add(`La source ${source.name} existe déjà`));
-                return;
             }
             // remove unknown imports
             const imports: string[] = [];
@@ -131,7 +130,7 @@ const SourcesTable = () => {
                 }
             });
             source.imports = imports;
-            await handleUpdateSource(source);
+            handleOpenModal(source);
         }
     };
 
@@ -279,7 +278,7 @@ const SourcesTable = () => {
                                                             >
                                                                 <Download />
                                                             </IconButton>
-                                                            <IconButton aria-label="edit" color="primary" onClick={() => handleOpenModal(source)} size="small" title={"Edit Repository"}>
+                                                            <IconButton aria-label="edit" color="primary" onClick={() => handleOpenModal(source, true)} size="small" title={"Edit Repository"}>
                                                                 <Edit />
                                                             </IconButton>
                                                             <ButtonWithConfirmation label="Delete" msg={() => handleDeleteSource(source)} />

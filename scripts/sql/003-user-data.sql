@@ -13,9 +13,10 @@ create table if not exists user_data(
        owned_by         integer references users (id)
 );
 
-create view user_data_list as
+-- Add a view to retrieve the list of data without their content
+create or replace view user_data_list as
        select user_data.id, data_path, data_type, data_label, data_comment,
-              data_group, data_content, is_shared, shared_profiles,
-              shared_users, created_at, login as owned_by
+              data_group, is_shared, shared_profiles, shared_users,
+              created_at, login as owned_by
        from user_data, users
        where user_data.owned_by = users.id;

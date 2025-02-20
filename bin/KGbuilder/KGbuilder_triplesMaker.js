@@ -155,9 +155,32 @@ var KGbuilder_triplesMaker = {
         );
     },
 
+
+
+    getURIFromSpecificBaseUri:function(mapping,line){
+        var p=mapping.indexOf("]")
+        if(p>0 ){//specific baseURI
+            var  baseUri= mapping.substring(1,p)
+            var value=line[mapping.substring(p+1)]
+            if(value)
+              return "<" +baseUri+ util.formatStringForTriple(value, true) + ">";
+            else
+                return null
+
+        }else{
+            return null;
+        }
+
+    },
+
     getTripleSubject: function (tableMappings, mapping, line, callback) {
         //get value for Subject
-        var subjectStr = null;
+        var subjectStr = KGbuilder_triplesMaker.getURIFromSpecificBaseUri(mapping.s, line);
+        if(subjectStr)
+            return callback(null,subjectStr)
+
+
+
         if (mapping.subjectIsSpecificUri || mapping.s.endsWith("_#")) {
             subjectStr = mapping.s.replace("_#","");;
         } else if (typeof mapping.s === "function") {
@@ -229,14 +252,7 @@ var KGbuilder_triplesMaker = {
         //format subject
 
             subjectStr = subjectStr.trim();
-           /* if (subjectStr.indexOf && subjectStr.indexOf("http") == 0) {
-                subjectStr = "<" + subjectStr + ">";
-            } else if (subjectStr.indexOf && subjectStr.indexOf(":") > -1) {
-                //pass
-            }else {
-                subjectStr = "<" + tableMappings.graphUri + util.formatStringForTriple(subjectStr, true) + ">";
-            }
-        }*/
+
         if(KGbuilder_triplesMaker.isPrefixedUri(subjectStr)){
 
                //pass
@@ -245,14 +261,18 @@ var KGbuilder_triplesMaker = {
 
 
         }else{
-            subjectStr = "<" + tableMappings.graphUri + util.formatStringForTriple(subjectStr, true) + ">";
+
+                subjectStr = "<" + tableMappings.graphUri + util.formatStringForTriple(subjectStr, true) + ">";
+
 
         }
         return callback(null, subjectStr);
     },
 
     getTripleObject: function (tableMappings, mapping, line, callback) {
-        var objectStr = null;
+        var objectStr = KGbuilder_triplesMaker.getURIFromSpecificBaseUri(mapping.o, line);
+        if(objectStr)
+            return callback(null,objectStr)
 
         //get value for Object
 
@@ -437,9 +457,9 @@ var KGbuilder_triplesMaker = {
             else if (mapping.isString) {
                 objectStr = "'" + util.formatStringForTriple(objectStr, false) + "'";
             } else {
-                /* if(!mapping.isString)
-        objectStr=objectStr.replace(/[\-_]/g,"")*/
-                objectStr = "<" + tableMappings.graphUri + util.formatStringForTriple(objectStr, true) + ">";
+
+                    objectStr = "<" + tableMappings.graphUri + util.formatStringForTriple(objectStr, true) + ">";
+
             }
         }
 

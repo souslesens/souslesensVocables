@@ -96,7 +96,9 @@ var TripleFactory = (function () {
         var columnsSelection = {};
         var checkedNodeAttrs = [];
 
-        checkedNodes.forEach(function (node) {
+
+        // to be repeared DONT WORK !!!!!
+   /*     checkedNodes.forEach(function (node) {
             if (node.parents.length == 3) {
                 // attrs
                 checkedNodeAttrs.push(node.id);
@@ -130,8 +132,13 @@ var TripleFactory = (function () {
         var columnMappings = MappingTransform.mappingsToKGcreatorJson(columnsSelection, { getColumnMappingsOnly: true });
         // selection isn't concerned for column mappings select all
         filteredMappings = filteredMappings.concat(columnMappings);
+        */
+       // filteredMappings =mappings
 
-        filteredMappings =mappings
+        filteredMappings = MappingTransform.getSLSmappingsFromVisjsGraph();
+        var transforms={}
+
+
         var table = MappingModeler.currentTable.name;
 
         filteredMappings = { [table]: { tripleModels: filteredMappings, transform: transforms } };

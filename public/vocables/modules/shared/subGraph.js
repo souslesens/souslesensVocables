@@ -4,7 +4,16 @@ import Shacl from "./shacl.js";
 
 var SubGraph = (function () {
     var self = {};
-
+    /**
+     * recursively extracts restrictions associated to a node
+     * iterates to superclass restrictions of each target node
+     *
+     *
+     * @param sourceLabel
+     * @param baseClassId
+     * @param options
+     * @param callback
+     */
     self.getSubGraphResources = function (sourceLabel, baseClassId, options, callback) {
         if (!options) {
             options = {};
@@ -33,7 +42,7 @@ var SubGraph = (function () {
                         },
 
                         function (callbackWhilst) {
-                            var filter = Sparql_common.setFilter("s", currentClasses, null, { values: true });
+                            var filter = Sparql_common.setFilter("s", currentClasses, null, {values: true});
                             var strFrom = Sparql_common.getFromStr(sourceLabel, null, null, options);
                             var query =
                                 //  "PREFIX dexp: <http://totalenergies/resources/tsf/ontology/dexpi-process/specific/>\n" +
@@ -66,12 +75,12 @@ var SubGraph = (function () {
 
                                     if (item.type.value.endsWith("Class")) {
                                         if (!allClasses[item.s.value]) {
-                                            allClasses[item.s.value] = { ancestors: [], level: level };
+                                            allClasses[item.s.value] = {ancestors: [], level: level};
                                             currentClasses.push(item.s.value);
                                         }
                                         if (!allClasses[item.o.value]) {
                                             currentClasses.push(item.o.value);
-                                            allClasses[item.o.value] = { ancestors: [], level: level };
+                                            allClasses[item.o.value] = {ancestors: [], level: level};
                                         }
                                         if (allClasses[item.s.value].ancestors.indexOf(item.o.value) < 0) {
                                             allClasses[item.s.value].ancestors.push(item.o.value);
@@ -101,11 +110,13 @@ var SubGraph = (function () {
 
                                         if (item.targetClass) {
                                             if (!allClasses[item.targetClass.value]) {
-                                                allClasses[item.targetClass.value] = { ancestors: [], level: level };
+                                                allClasses[item.targetClass.value] = {ancestors: [], level: level};
                                                 currentClasses.push(item.targetClass.value);
                                             }
                                         }
-
+                                        if (obj.property == "http://totalenergies/resources/tsf/ontology/dexpi-process/generic/hasPortIn") {
+                                            var x = 3
+                                        }
                                         if (!allRestrictions[item.s.value][obj.property]) {
                                             allRestrictions[item.s.value][obj.property] = [];
                                         }
@@ -127,7 +138,7 @@ var SubGraph = (function () {
                         },
                     );
                 },
-
+                //getClass Labels
                 function (callbackSeries) {
                     var uris = Object.keys(allClasses).concat(Object.keys(allRestrictions));
                     var filter = Sparql_common.setFilter("s", uris);
@@ -150,9 +161,29 @@ var SubGraph = (function () {
                         return callbackSeries();
                     });
                 },
+//delete targetClass that are superClassOf other previous targetClass for this property
+                function (callbackSeries) {
+                    for (var classUri in allRestrictions) {
+                        for (var key in allRestrictions[classUri]) {
+var props=allRestrictions[classUri][key]
+
+                            var previousClass = null
+                            props.forEach(function (item, index) {
+                                var classObj = allClasses[item.targetClass]
+                                if (classObj.ancestors.indexOf(previousClass) > -1) {
+                                    props.slice(index, 1)
+                                }
+                                previousClass = item.targetClass
+
+
+                            })
+                        }
+                    }
+                    return callbackSeries();
+                }
             ],
             function (err) {
-                return callback(err, { classes: allClasses, restrictions: allRestrictions });
+                return callback(err, {classes: allClasses, restrictions: allRestrictions});
             },
         );
     };
@@ -219,14 +250,14 @@ var SubGraph = (function () {
         function getCardinalityRange(restrictionTarget) {
             var str = restrictionTarget.cardinalityType;
             if (!str) {
-                return { min: 1, max: 1 };
+                return {min: 1, max: 1};
             }
             str = restrictionTarget.cardinalityValue.substring(0, 1);
             var value = parseInt(str);
 
             // to be refined later
             if (restrictionTarget.cardinalityType.endsWith("ardinality")) {
-                return { min: value, max: value };
+                return {min: value, max: value};
             }
         }
 
@@ -295,7 +326,7 @@ var SubGraph = (function () {
                 }
             }
 
-            return callback(null, { triples: triples, classes: result.classes });
+            return callback(null, {triples: triples, classes: result.classes});
         });
     };
 
@@ -332,7 +363,7 @@ var SubGraph = (function () {
 
                 var classRestrictions = restrictionsMap[classUri2];
                 var shaclProperties = [];
-                var triples=[]
+                var triples = []
                 if (classRestrictions) {
                     for (var property in classRestrictions) {
                         classRestrictions[property].forEach(function (restriction) {
@@ -342,8 +373,8 @@ var SubGraph = (function () {
 
                             var propStr = restriction.property;
                             var rangeStr = restriction.targetClass;
-                            triples.push("sh:path> "  + propStr)
-                          //  var property = " sh:path " + propStr + " ;\n";
+                            triples.push("sh:path> " + propStr)
+                            //  var property = " sh:path " + propStr + " ;\n";
 
                             //  "        sh:maxCount " + count + " ;" +
                             property += "        sh:node " + rangeStr + " ;";
@@ -402,27 +433,31 @@ var SubGraph = (function () {
                 var item = classesMap[classUri2];
 
                 var classRestrictions = restrictionsMap[classUri2];
-                var shaclProperties = [];
+                var shaclProperties = {};
                 if (classRestrictions) {
-                    for (var property in classRestrictions) {
-                        classRestrictions[property].forEach(function (restriction) {
+                    for (var propertyUri in classRestrictions) {
+                        shaclProperties[propertyUri]=[]
+
+
+
+                        classRestrictions[propertyUri].forEach(function (restriction) {
                             if (!restriction.property || !restriction.targetClass) {
                                 return;
                             }
 
                             var propStr = Shacl.uriToPrefixedUri(restriction.property);
                             var rangeStr = Shacl.uriToPrefixedUri(restriction.targetClass);
-                            var property = " sh:path " + propStr + " ;\n";
+                            var shproperty = " sh:path " + propStr + " ;\n";
 
                             //  "        sh:maxCount " + count + " ;" +
-                            property += "        sh:class " + rangeStr + " ;\n";
-                            property += Shacl.getCardinalityProperty(restriction);
+                            shproperty += "        sh:class " + rangeStr + " ;\n";
+                            shproperty += Shacl.getCardinalityProperty(restriction);
 
-                            shaclProperties.push(property);
+                            shaclProperties[propertyUri].push(shproperty);
                         });
                     }
                     var domain = Shacl.uriToPrefixedUri(classUri2);
-                    if (shaclProperties.length > 0) {
+                    if (Object.keys(shaclProperties).length > 0) {
                         var shaclStr = Shacl.getShacl(domain, null, shaclProperties);
                         allSahcls += shaclStr;
                     }
@@ -448,7 +483,7 @@ var SubGraph = (function () {
                     if (data.result && data.result.indexOf("Error") > -1) {
                         return callback(data.result);
                     }
-                    return callback(null, { triples: data.triples, shacl: allSahcls, classesMap: classesMap });
+                    return callback(null, {triples: data.triples, shacl: allSahcls, classesMap: classesMap});
                     //  callback(null, data);
                 },
                 error(err) {
@@ -534,7 +569,7 @@ var SubGraph = (function () {
                 contentType: "application/json",
                 dataType: "json",
                 success: function (data, _textStatus, _jqXHR) {
-                    return callback(null,data.output);
+                    return callback(null, data.output);
                 },
                 error(err) {
                     UI.message("", true);
@@ -578,11 +613,11 @@ var SubGraph = (function () {
                 }
             });
 
-            var visjsData = { nodes: [], edges: [] };
+            var visjsData = {nodes: [], edges: []};
             var uniqueIds = {};
 
             var getLevel = function (uri) {
-                var classUri = uri.substring(0, uri.lastIndexOf("#"));
+                var classUri = uri.substring(0, uri.lastIndexOf("_"));
                 var level = 0;
                 if (classUri == processClass) {
                     return 0;
@@ -625,7 +660,7 @@ var SubGraph = (function () {
                 var borderWidth = null;
                 var color = getNodeColor(triple.subject);
                 if (triple.subject.startsWith(processClass)) {
-                    font = { size: 18, bold: { size: 18 } };
+                    font = {size: 18, bold: {size: 18}};
                     borderWidth = 5;
                     color = "#ddd";
                 }
@@ -670,7 +705,7 @@ var SubGraph = (function () {
                     from: triple.subject,
                     to: triple.object,
                     label: Sparql_common.getLabelFromURI(triple.predicate),
-                    arrows: { to: true },
+                    arrows: {to: true},
                 });
             });
 
@@ -699,15 +734,16 @@ var SubGraph = (function () {
 
             var nodeSpacing = 150;
             var levelSpacing = 30;
-            var position = options.position || { x: 0, y: 0 };
+            var position = options.position || {x: 0, y: 0};
 
             //   self.setHierachicalLayout(visjsData, position, nodeSpacing, levelSpacing)
 
             if (callback) {
-                return callback(null, { visjsData: visjsData, graphOptions: graphOptions });
+                return callback(null, {visjsData: visjsData, graphOptions: graphOptions});
             } else {
                 self.visjsGraph = new VisjsGraphClass(options.graphDiv, visjsData, graphOptions);
-                self.visjsGraph.draw(function () {});
+                self.visjsGraph.draw(function () {
+                });
             }
         });
         return;
@@ -725,7 +761,9 @@ var SubGraph = (function () {
         });
         visjsData.edges.forEach(function (edge) {
             edgesToMap[edge.to] = nodesMap[edge.from];
-            if (!edgesFromMap[edge.to]) edgesFromMap[edge.from] = [];
+            if (!edgesFromMap[edge.to]) {
+                edgesFromMap[edge.from] = [];
+            }
             edgesFromMap[edge.from].push(edge.to);
         });
 
@@ -764,7 +802,7 @@ var SubGraph = (function () {
                 }
                 node.x = parentNodeX + nodeSpacing * index; //- ((nodes.length * nodeSpacing) / 2)
                 node.y = topPosition.y + levelSpacing * level;
-                node.fixed = { x: true, y: true };
+                node.fixed = {x: true, y: true};
                 node.group = groupId;
             });
         }

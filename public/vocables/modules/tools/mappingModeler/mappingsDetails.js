@@ -207,7 +207,9 @@ var MappingsDetails = (function () {
     self.showColumnTechnicalMappingsDialog = function (divId, column, callbackFn) {
         self.afterSaveColumnTechnicalMappingsDialog = callbackFn;
         var html = `<tr><td>Table column</td><td><span id='class-column' ><b> ${column.text || column.label} </b></span> </td></tr>`;
+        html += `<tr><td>Base URI</td><td><input id='columnDetails-baseUri' style='width:600px;    background-color: #eee;'> </input>  </td></tr>`;
         html += `<tr><td>URI syntax*</td><td><select id='columnDetails-UriType' style='padding:6px 6px'> </select>  </td></tr>`;
+
         html += `<tr><td>rdf:type*</td><td><select id='columnDetails-rdfType' style='padding:6px 6px'> </select> </td></tr> `;
 
         html += `<tr><td>rdfs:label column</td><td><select id='columnDetails-rdfsLabel' style='padding:6px 6px'> </select> </td></tr>`;
@@ -217,6 +219,7 @@ var MappingsDetails = (function () {
         $("#" + divId).html(html);
 
         var URITType = ["fromLabel", "blankNode", "randomIdentifier"];
+
 
         var rdfObjectsType = ["owl:NamedIndividual", "owl:Class"];
 
@@ -244,6 +247,10 @@ var MappingsDetails = (function () {
         common.fillSelectOptions(`columnDetails-rdfsLabel`, columns, false);
         common.fillSelectOptions(`columnDetails-rdfType`, rdfObjectsType, false);
         common.fillSelectOptions(`columnDetails-UriType`, URITType, false);
+
+
+        var sourceObj = Config.sources[MappingModeler.currentSLSsource]
+        $("#columnDetails-baseUri").val(column.data.baseURI || sourceObj.baseUri || sourceObj.graphUri)
     };
 
     /**
@@ -281,14 +288,14 @@ var MappingsDetails = (function () {
                     property: "rdf:type",
                     object: params.rdfType,
                 });
-                MappingColumnsGraph.updateNode({ id: MappingColumnsGraph.currentGraphNode.id, data: data });
+                MappingColumnsGraph.updateNode({id: MappingColumnsGraph.currentGraphNode.id, data: data});
                 MappingColumnsGraph.saveVisjsGraph();
             } else if (params.addingSubClassOf) {
                 data.otherPredicates.push({
                     property: "rdfs:subClassOf",
                     object: params.addingSubClassOf,
                 });
-                MappingColumnsGraph.updateNode({ id: MappingColumnsGraph.currentGraphNode.id, data: data });
+                MappingColumnsGraph.updateNode({id: MappingColumnsGraph.currentGraphNode.id, data: data});
                 MappingColumnsGraph.saveVisjsGraph();
             } else if (params.nonObjectPropertyId) {
                 var range = params.datatypePropertyRange || Config.ontologiesVocabularyModels[params.nonObjectPropertyVocab].nonObjectProperties[params.nonObjectPropertyId].range;
@@ -298,10 +305,12 @@ var MappingsDetails = (function () {
                     range: range,
                     dateFormat: params.nonObjectPropertyDateFormat || null, //if any
                 });
-                MappingColumnsGraph.updateNode({ id: MappingColumnsGraph.currentGraphNode.id, data: data });
+                MappingColumnsGraph.updateNode({id: MappingColumnsGraph.currentGraphNode.id, data: data});
                 MappingColumnsGraph.saveVisjsGraph();
             }
-            if (MappingsDetails.afterSaveColumnTechnicalMappingsDialog) MappingsDetails.afterSaveColumnTechnicalMappingsDialog();
+            if (MappingsDetails.afterSaveColumnTechnicalMappingsDialog) {
+                MappingsDetails.afterSaveColumnTechnicalMappingsDialog();
+            }
             // self.showDetailsDialog();
         });
     };
@@ -324,6 +333,16 @@ var MappingsDetails = (function () {
         currentGraphNode.data.uriType = $("#columnDetails-UriType").val();
         currentGraphNode.data.rdfsLabel = $("#columnDetails-rdfsLabel").val();
         currentGraphNode.data.rdfType = $("#columnDetails-rdfType").val();
+
+
+        var baseUri = currentGraphNode.data.baseURI = $("#columnDetails-baseUri").val();
+        var sourceObj = Config.sources[MappingModeler.currentSLSsource]
+        var sourceBaseUri = sourceObj.baseUri || sourceObj.graphUri
+        if (baseUri != sourceBaseUri) {
+            currentGraphNode.data.baseURI = $("#columnDetails-baseUri").val();
+        }
+
+
         MappingColumnsGraph.updateNode(currentGraphNode);
         self.switchTypeToSubclass(currentGraphNode);
         // });
@@ -416,7 +435,7 @@ var MappingsDetails = (function () {
 
         var divId = "detailedMappingsGraphDiv";
 
-        var visjsData = { nodes: [], edges: [] };
+        var visjsData = {nodes: [], edges: []};
 
         var existingNodes = {};
         var json = {};
@@ -444,6 +463,7 @@ var MappingsDetails = (function () {
             });
             return role;
         }
+
         var predicates = {
             "rdf:type": "rdfType",
             "rdfs:label": "rdfsLabel",
@@ -455,20 +475,21 @@ var MappingsDetails = (function () {
             if (item.p == "transform") {
                 item.o = "transform";
             }
+
             function getNodeAttrs(str) {
                 if (str.indexOf("http") > -1) {
-                    return { type: "Class", color: "#00afef", shape: "box", size: 30 };
+                    return {type: "Class", color: "#00afef", shape: "box", size: 30};
                 } else if (str.indexOf(":") > -1) {
                     drawRelation = false; //rdf Bag
                     return null;
-                    return { type: "OwlType", color: "#aaa", shape: "ellipse" };
+                    return {type: "OwlType", color: "#aaa", shape: "ellipse"};
                 } else if (str.endsWith("_$")) {
-                    return { type: "blankNode", color: "#00afef", shape: "square" };
+                    return {type: "blankNode", color: "#00afef", shape: "square"};
                 } else if (str.indexOf("_rowIndex") > -1) {
-                    return { type: "rowIndex", color: "#f90edd", shape: "star" };
+                    return {type: "rowIndex", color: "#f90edd", shape: "star"};
                 } else {
                     drawRelation = false;
-                    return { type: "Column", color: "#cb9801", shape: "ellipse" };
+                    return {type: "Column", color: "#cb9801", shape: "ellipse"};
                 }
             }
 
@@ -534,7 +555,7 @@ var MappingsDetails = (function () {
                         label: label,
                         shape: attrs.shape,
                         color: attrs.color,
-                        font: attrs.shape == "box" ? { color: "white" } : { color: "black" },
+                        font: attrs.shape == "box" ? {color: "white"} : {color: "black"},
                         size: Lineage_whiteboard.defaultShapeSize,
                         data: {
                             id: item.o,
@@ -623,7 +644,8 @@ var MappingsDetails = (function () {
      * @param {Object} options - Additional options for handling the click event.
      * @returns {void}
      */
-    self.onDetailedMappingsGraphClick = function (obj, event, options) {};
+    self.onDetailedMappingsGraphClick = function (obj, event, options) {
+    };
 
     /**
      * Retrieves the RDF type of a column based on its connected edges in the graph.
@@ -726,7 +748,7 @@ var MappingsDetails = (function () {
             });
 
             var mappingWithTransform = {};
-            mappingWithTransform[MappingModeler.currentTable.name] = { tripleModels: filteredMapping, transform: {} };
+            mappingWithTransform[MappingModeler.currentTable.name] = {tripleModels: filteredMapping, transform: {}};
             mappingWithTransform[MappingModeler.currentTable.name].transform[self.transformColumn] = transformFn;
             TripleFactory.createTriples(
                 true,
@@ -735,7 +757,8 @@ var MappingsDetails = (function () {
                     filteredMappings: mappingWithTransform,
                     table: MappingModeler.currentTable.name,
                 },
-                function (err, result) {},
+                function (err, result) {
+                },
             );
         },
         saveTransform: function () {

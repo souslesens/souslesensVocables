@@ -95,19 +95,18 @@ var MappingTransform = (function () {
      * @returns {string} The generated column name in KGcreator format.
      */
     self.nodeToKGcreatorColumnName = function (data) {
-        var colname = null;
-        // if (data.uriType == "blankNode" || !data.rdfsLabel) {
-        if (data.uriType == "blankNode") {
-            colname = data.id + "_$";
-        } else if (data.uriType == "randomIdentifier") {
-            colname = data.id + "_£";
-        } else {
-            colname = data.id;
+        var colname = data.id;
+        if(data.baseURI){
+            colname="["+data.baseURI+"]"+colname
+
         }
-        /*
-        else if (data.uriType == "fromLabel") {
-            colname = data.id;
-        }*/
+
+        if (data.uriType == "blankNode") {
+            colname = colname + "_$";
+        } else if (data.uriType == "randomIdentifier") {
+            colname = colname + "_£";
+        }
+
 
         if (colname && data.type == "VirtualColumn") {
             colname = "@" + colname + "_$";

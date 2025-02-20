@@ -93,7 +93,7 @@ async function main(triples,callback) {
 
 
 
-
+//https://docs.cambridgesemantics.com/graphlakehouse/v3.2/userdoc/shacl-constraints.htm
 
 var constraintsStr="type\tconstraint\tshapeType\tdataType\texample\tdescription\n" +
     "Cardinality Constraints\tsh:maxCount\tproperty\tint\tsh:property [ sh:path ex:lastName ; sh:maxCount 1; sh:datatype xsd:string; ]\tThis constraint sets a limit on the maximum number of values for a property. The following example limits the lastName property to one value\n" +

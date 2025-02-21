@@ -37,6 +37,7 @@ module.exports = function () {
             },
         ],
         responses: { 200: { description: "results", schema: { type: "object" } } },
+        tags: ["ElasticSearch"],
     };
     return operations;
 };

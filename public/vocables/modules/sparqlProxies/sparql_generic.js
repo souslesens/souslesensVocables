@@ -1234,6 +1234,12 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
         });
     };
 
+    self.triplesToTurtle = function (triples) {
+        var subjectsMap = {};
+
+        triples.forEach(function () {});
+    };
+
     return self;
 })();
 

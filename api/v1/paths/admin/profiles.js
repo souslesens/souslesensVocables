@@ -23,6 +23,7 @@ module.exports = function () {
         security: [{ restrictAdmin: [] }],
         operationId: "getProfiles",
         responses: responseSchema("Profiles", "GET"),
+        tags: ["Profiles"],
     };
 
     ///// POST api/v1/profiles
@@ -46,6 +47,7 @@ module.exports = function () {
         operationId: "createProfile",
         parameters: [],
         responses: responseSchema("Profiles", "POST"),
+        tags: ["Profiles"],
     };
 
     return operations;

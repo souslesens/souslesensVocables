@@ -55,6 +55,7 @@ module.exports = function () {
                 },
             },
         },
+        tags: ["Data"],
     };
 
     return operations;

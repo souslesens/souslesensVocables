@@ -3,6 +3,15 @@ import common from "../../shared/common.js";
 var Lineage_filterBy = (function () {
     var self = {};
     self.context = {};
+
+    /**
+     * Adds a new filter to the lineage query parameters.
+     * Generates a unique filter ID and appends the filter to the UI.
+     * @function
+     * @name addFilter
+     * @memberof Lineage_filterBy
+     * @returns {Object} The filter object containing the filter ID, property, operator, and value.
+     */
     self.addFilter = function () {
         var filterId = "filter_" + common.getRandomHexaId(5);
         var property = $("#Lineage_filterBy_propertySelect").val();
@@ -31,6 +40,16 @@ var Lineage_filterBy = (function () {
         return obj;
     };
 
+    /**
+     * Removes a filter element from the lineage query parameters.
+     * Deletes the filter from the internal storage and removes its corresponding HTML element.
+     * @function
+     * @name removeQueryElement
+     * @memberof Lineage_filterBy
+     * @param {string} table - The name of the table associated with the filter.
+     * @param {string} filterId - The unique ID of the filter to be removed.
+     * @returns {void}
+     */
     self.removeQueryElement = function (table, filterId) {
         delete self.filters[filterId];
         $("#" + filterId).remove();

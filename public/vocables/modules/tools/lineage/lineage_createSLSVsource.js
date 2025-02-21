@@ -4,10 +4,30 @@ import CreateSLSVsource_bot from "../../bots/createSLSVsource_bot.js";
 
 var Lineage_createSLSVsource = (function () {
     var self = {};
+
+    /**
+     * Initializes the source creation module and starts the corresponding bot.
+     * @function
+     * @name onLoaded
+     * @memberof Lineage_createSLSVsource
+     * @returns {void}
+     */
     self.onLoaded = function () {
         CreateSLSVsource_bot.start();
     };
 
+    /**
+     * Creates a new source with the specified parameters.
+     * Validates input values and writes the source metadata.
+     * @function
+     * @name createSource
+     * @memberof Lineage_createSLSVsource
+     * @param {string} sourceName - The name of the source to be created.
+     * @param {string} graphUri - The URI of the source graph.
+     * @param {Array<string>} imports - An array of URIs to be imported into the source.
+     * @param {Function} callback - A callback function executed after the source creation.
+     * @returns {void|string} Returns an error message if validation fails, otherwise void.
+     */
     self.createSource = function (sourceName, graphUri, imports, callback) {
         var user = Authentification.currentUser.login;
         if (!sourceName) {
@@ -50,6 +70,19 @@ var Lineage_createSLSVsource = (function () {
         );
     };
 
+    /**
+     * Writes the source configuration to the server.
+     * Constructs a source object and sends it via an AJAX request.
+     * @function
+     * @name writeSource
+     * @memberof Lineage_createSLSVsource
+     * @param {string} sourceName - The name of the source.
+     * @param {string} graphUri - The URI of the source graph.
+     * @param {Array<string>} imports - An array of URIs to be imported.
+     * @param {string} userPrivateProfile - The private profile identifier of the user.
+     * @param {Function} callback - A callback function executed after writing the source.
+     * @returns {void}
+     */
     self.writeSource = function (sourceName, graphUri, imports, userPrivateProfile, callback) {
         var sourceObject = {
             id: common.getRandomHexaId(12),

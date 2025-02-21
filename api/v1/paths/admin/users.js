@@ -23,6 +23,7 @@ module.exports = function () {
         operationId: "getAllUsers",
         parameters: [],
         responses: responseSchema("Users", "GET"),
+        tags: ["Users"],
     };
 
     ///// PUT api/v1/users
@@ -45,6 +46,7 @@ module.exports = function () {
         operationId: "updateUsers",
         parameters: [],
         responses: responseSchema("Users", "PUT"),
+        tags: ["Users"],
     };
 
     ///// POST api/v1/users
@@ -67,6 +69,7 @@ module.exports = function () {
         operationId: "createUser",
         parameters: [],
         responses: responseSchema("Users", "POST"),
+        tags: ["Users"],
     };
 
     return operations;

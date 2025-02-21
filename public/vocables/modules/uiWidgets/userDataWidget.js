@@ -23,13 +23,12 @@ var UserDataWidget = (function () {
                     self.callbackFn(err);
                 }
 
-                self.callbackFn(null, { label: label, data_path: data_path, data_content: self.jsonContent });
+                self.callbackFn(null, {label: label, data_path: data_path, data_content: self.jsonContent});
             });
         });
 
     self.saveMetadata = function (label, data_path, jsonContent, group, callback) {
         var payload = {
-            id: common.getRandomInt(),
             data_path: data_path || "",
             data_type: "string",
             data_label: label,
@@ -41,6 +40,7 @@ var UserDataWidget = (function () {
             shared_users: [],
             owned_by: Authentification.currentUser.login,
         };
+
 
         var type = "POST";
         if (self.currentTreeNode) {
@@ -61,6 +61,31 @@ var UserDataWidget = (function () {
             },
         });
     };
+    self.loadUserDatabyId = function (id) {
+        $.ajax({
+            type: "GET",
+            url: `${Config.apiUrl}/users/data/` + "" +id,
+            dataType: "json",
+            success: function (_result, _textStatus, _jqXHR) {
+                callback(null, "graph saved");
+            },
+            error(err) {
+                return callback(err);
+            },
+        });
+    }
+    self.listUserData = function (filter,callback) {
+        $.ajax({
+            type: "GET",
+            url: `${Config.apiUrl}/users/data`,
+            dataType: "json",
+            success: function (_result, _textStatus, _jqXHR) {
+                callback(null,_result)
+            }, error(err) {
+                return callback(err);
+            }
+        })
+    }
 
     self.deleteItem = function (nodeData, callback) {
         if (!nodeData) {

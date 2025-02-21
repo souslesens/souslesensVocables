@@ -297,10 +297,7 @@ describe("UserModelJson", () => {
         expect(result).toBeFalsy();
     });
 
-    /* FIXME: the mock cannot be done on the `conn("users")` part of the
-     *        deleteUserAccount method. We needs to find a way to resolve
-     *        this problem */
-    test.skip("delete an existing user", async () => {
+    test("delete an existing user", async () => {
         tracker.on.select("users").response(dbUsers[2]);
         tracker.on.delete("users").response();
 

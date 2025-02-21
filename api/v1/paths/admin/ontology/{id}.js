@@ -37,6 +37,7 @@ module.exports = function () {
                 },
             },
         },
+        tags: ["Ontology"],
     };
     return operations;
 };

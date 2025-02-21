@@ -34,6 +34,7 @@ module.exports = function () {
                 },
             },
         },
+        tags: ["Tools"],
     };
     return operations;
 };

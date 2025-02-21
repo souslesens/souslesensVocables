@@ -53,6 +53,7 @@ module.exports = function () {
                 },
             },
         },
+        tags: ["Graph"],
     };
 
     function POST(req, res, next) {
@@ -110,6 +111,7 @@ module.exports = function () {
                 },
             },
         },
+        tags: ["Graph"],
     };
 
     return operations;

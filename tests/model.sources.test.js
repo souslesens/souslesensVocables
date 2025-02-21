@@ -89,4 +89,28 @@ describe("SourceModel", () => {
         );
         expect(sources).toStrictEqual(expectedResult);
     });
+
+    test("get one user sources",  async () => {
+        tracker.on.select("profiles_list").response(dbProfiles);
+        const user = {login: "admin", groups: []};
+        const source = await sourceModel.getOneUserSource(user, "SOURCE_2");
+        expect(source.name).toStrictEqual("SOURCE_2");
+    });
+
+    test("get unknow user sources",  async () => {
+        tracker.on.select("profiles_list").response(dbProfiles);
+        const user = {login: "doe", groups: []};
+        const source = await sourceModel.getOneUserSource(user, "SOURCE_2");
+        expect(source === undefined).toBe(true);
+    });
+
+    test("get owned user sources",  async () => {
+        tracker.on.select("profiles_list").response(dbProfiles);
+        const user = {login: "admin", groups: []};
+        const sources = await sourceModel.getOwnedSources(user);
+        expect(Object.entries(sources).length).toStrictEqual(3);
+        Object.entries(sources).map(([_, src]) => {
+            expect(src.owner).toStrictEqual(user.login);
+        })
+    });
 });

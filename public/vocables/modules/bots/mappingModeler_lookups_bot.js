@@ -2,8 +2,7 @@
 import _botEngine from "./_botEngine.js";
 import MappingColumnsGraph from "../tools/mappingModeler/mappingColumnsGraph.js";
 
-
-var Lookups_bot = (function () {
+var Lookups_bot = function () {
     var self = {};
     self.start = function (workflow, _params, callbackFn) {
         self.title = _params.title || "LookUps Bot";
@@ -21,7 +20,7 @@ var Lookups_bot = (function () {
             }
             _botEngine.nextStep();
         });
-    }
+    };
 
     self.lookUpWorkflow = {
         startFn: {

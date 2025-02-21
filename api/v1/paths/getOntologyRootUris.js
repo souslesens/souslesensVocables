@@ -39,6 +39,7 @@ module.exports = function () {
                 description: "Response…",
             },
         },
+        tags: ["Ontology"],
     };
 
     return operations;

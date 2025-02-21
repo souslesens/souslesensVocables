@@ -5,13 +5,144 @@ var path = require("path");
 const async = require("async");
 var util = require("./util.");
 const N3 = require("n3");
-const {DataFactory} = N3;
-const {namedNode, literal} = DataFactory;
+
 var graphUrisMap = {};
 
 var sparql_server_url = "";
 
 var RDF_IO = {
+
+
+        triples2turtle: function (triples, callback) {
+
+
+            try {
+
+                var prefixes = {
+                    owl: "http://www.w3.org/2002/07/owl#",
+                    rdf: "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+                    rdfs: "http://www.w3.org/2000/01/rdf-schema#",
+                    dcterm: "http://purl.org/dc/terms/",
+                    dc: "http://purl.org/dc/elements/1.1/",
+                    skos: "http://www.w3.org/2004/02/skos/core#",
+                }
+                var prefixIndex = 0;
+                var dataFactory = N3.DataFactory;
+
+                function addPrefix(uri) {
+                    var p = uri.lastIndexOf("#")
+                    if (p < 0) {
+                        p = uri.lastIndexOf("/")
+                    }
+                    if (p > 0) {
+                        var baseUri = uri.substring(0, p + 1)
+                        var isNew = true
+                        for (var key in prefixes) {
+                            if (baseUri.startsWith(prefixes[key])) {
+                                isNew = false
+                            }
+                        }
+                        if (isNew) {
+                            prefixes["n" + prefixIndex++] = baseUri
+                        }
+                    }
+                }
+
+                function getRdfElement(elt) {
+
+                    var p
+                    var output = null
+                    var prefix = elt.split(":")[0]
+                    if (prefixes[prefix]) {//already prefix
+                        output = dataFactory.namedNode(elt)
+                    } else if (prefix == "_") {
+                        output = dataFactory.blankNode(elt)
+                    } else if (elt.indexOf("http") == 0 || elt.valueType == "uri") {
+                        addPrefix(elt)
+                        output = dataFactory.namedNode(elt)
+                    } else if ((p = elt.indexOf("^^")) > 0) {
+                        //xsd type
+                        var string_number_version = +elt.substring(0, p).replace(/'/gm, "");
+                        if (!isNaN(string_number_version)) {
+                            output = dataFactory.literal(elt, rdf.xsdns('decimal'))
+                        }
+                        if (elt.split("^^")[1] == "xsd:dateTime") {
+                            output = dataFactory.literal(elt, rdf.xsdns('date'))
+
+                        } else {
+                            output = dataFactory.literal(elt)
+                        }
+
+
+                    } else {
+                        output = dataFactory.literal(elt)
+                    }
+
+                    return output
+
+
+                    if (elt.match(/^_:b\d+$/)) {
+                        return dataFactory.blankNode(elt)
+                    } else if (elt.indexOf("_:b") == 0) {
+                        return dataFactory.blankNode(elt)
+                    } else if (elt.indexOf("_:") == 0) {
+                        return dataFactory.blankNode(elt)
+                    } else if (elt.indexOf("http") == 0 || elt.valueType == "uri") {
+                        addPrefix(elt)
+                        return dataFactory.namedNode(elt)
+                    } else if ((p = elt.indexOf("^^")) > 0) {
+                        //xsd type
+                        var string_number_version = +elt.substring(0, p).replace(/'/gm, "");
+                        if (!isNaN(string_number_version)) {
+                            return dataFactory.literal(elt, rdf.xsdns('decimal'))
+                        }
+                        if (elt.split("^^")[1] == "xsd:dateTime") {
+                            return dataFactory.literal(elt, rdf.xsdns('date'))
+
+                        } else {
+                            return dataFactory.literal(elt)
+                        }
+
+
+                    } else {
+                        return dataFactory.literal(elt)
+                    }
+
+
+                }
+
+                var quads = []
+                triples.forEach(function (triple) {
+                    quads.push(dataFactory.quad(
+                        getRdfElement(triple.subject),
+                        getRdfElement(triple.predicate),
+                        getRdfElement(triple.object)
+                    ))
+
+                })
+
+                const writer = new N3.Writer({prefixes: prefixes}); // Create a writer which uses `c` as a prefix for the namespace `http://example.org/cartoons#`
+                quads.forEach(function (quad) {
+                    writer.addQuad(quad)
+                })
+
+                writer.end((error, result) => {
+                    // console.log(result)
+                    return callback(null, result)
+                });
+
+
+            }catch(e){
+                return callback(e)
+            }
+
+
+
+
+
+        },
+
+
         getGraphUri: function (sourceLabel) {
             if (graphUrisMap[sourceLabel]) {
                 return graphUrisMap[sourceLabel];

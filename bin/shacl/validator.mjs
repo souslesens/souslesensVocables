@@ -1,7 +1,65 @@
 import rdf from '@zazuko/env-node'
 import SHACLValidator from 'rdf-validate-shacl'
+import {writeFileSync,readFileSync}from 'fs'
+//import N3Writer from "n3/lib/N3Writer.js";
 
-async function main() {
+
+//const N3 =import('n3')
+
+
+
+
+
+export async function validateTriples(_shapes,_triples){
+
+
+   // const shapes = await rdf.dataset().import(_shapes)
+   // const data = await rdf.dataset().import(_triples)
+
+var shapesPath="D:\\myShapes.ttl"
+    var dataPath="D:\\myData.ttl"
+    try {
+
+    writeFileSync(shapesPath,_shapes)
+    writeFileSync(dataPath,_triples)
+
+const shapes = await rdf.dataset().import(rdf.fromFile(shapesPath))
+const data = await rdf.dataset().import(rdf.fromFile(dataPath))
+
+        const validator = new SHACLValidator(shapes, {factory: rdf})
+        const report = await validator.validate(data)
+        for (const result of report.results) {
+            // See https://www.w3.org/TR/shacl/#results-validation-result for details
+            // about each property
+            console.log(result.message)
+            console.log(result.path)
+            console.log(result.focusNode)
+            console.log(result.severity)
+            console.log(result.sourceConstraintComponent)
+            console.log(result.sourceShape)
+        }
+
+        // Validation report as RDF dataset
+        // console.log(await report.dataset.serialize({ format: 'text/n3' }))
+        var result = await report.dataset.serialize({format: 'text/n3'})
+        return result
+    }
+    catch(e){
+    console.log(e)
+        throw(e)
+    }
+
+
+
+
+
+
+}
+
+
+
+
+async function main(triples,callback) {
     const shapes = await rdf.dataset().import(rdf.fromFile('D:\\projects\\sls-shacl\\rdf\\exampleShapes.ttl'))
     const data = await rdf.dataset().import(rdf.fromFile('D:\\projects\\sls-shacl\\rdf\\exampleData.ttl'))
 
@@ -23,7 +81,9 @@ async function main() {
     }
 
     // Validation report as RDF dataset
-    console.log(await report.dataset.serialize({ format: 'text/n3' }))
+   // console.log(await report.dataset.serialize({ format: 'text/n3' }))
+    var result=await report.dataset.serialize({ format: 'text/n3' })
+    return callback(null,result)
 }
 
 //main();
@@ -33,7 +93,7 @@ async function main() {
 
 
 
-
+//https://docs.cambridgesemantics.com/graphlakehouse/v3.2/userdoc/shacl-constraints.htm
 
 var constraintsStr="type\tconstraint\tshapeType\tdataType\texample\tdescription\n" +
     "Cardinality Constraints\tsh:maxCount\tproperty\tint\tsh:property [ sh:path ex:lastName ; sh:maxCount 1; sh:datatype xsd:string; ]\tThis constraint sets a limit on the maximum number of values for a property. The following example limits the lastName property to one value\n" +
@@ -89,7 +149,7 @@ function getConstraintsMap(){
 
 
     })
-    return map;
+    return console.log(JSON.stringify(map,null,2));
 
 }
 
@@ -98,4 +158,4 @@ function getConstraintsMap(){
 
 
 
-getConstraintsMap()
+//getConstraintsMap()

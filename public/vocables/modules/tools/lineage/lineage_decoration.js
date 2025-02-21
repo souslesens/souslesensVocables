@@ -13,6 +13,13 @@ var Lineage_decoration = (function () {
     var self = {};
     self.legendColorsMap = {};
 
+    /**
+     * Initializes the legend by clearing the existing legend data and resetting the color map.
+     * @function
+     * @name initLegend
+     * @memberof Lineage_decoration
+     * @returns {void}
+     */
     self.initLegend = function () {
         $("#Lineage_classes_graphDecoration_legendDiv").html("");
         self.currentLegendData = null;
@@ -22,10 +29,28 @@ var Lineage_decoration = (function () {
     self.legendMap = {};
     self.currentVisjGraphNodesMap = {};
 
+    /**
+     * Decorates nodes in the visualization and updates the legend accordingly.
+     * @function
+     * @name decorateNodeAndDrawLegend
+     * @memberof Lineage_decoration
+     * @param {Array<Object>} visjsNodes - Array of nodes in the visualization.
+     * @param {string} legendType - The type of legend to be applied.
+     * @returns {void}
+     */
     self.decorateNodeAndDrawLegend = function (visjsNodes, legendType) {
         self.decorateByUpperOntologyByClass(visjsNodes);
     };
 
+    /**
+     * Retrieves a predefined color for a given class in a specific ontology source.
+     * @function
+     * @name getPredefinedColor
+     * @memberof Lineage_decoration
+     * @param {string} classId - The class identifier.
+     * @param {string} source - The ontology source.
+     * @returns {string|null} The predefined color if found, otherwise null.
+     */
     self.getPredefinedColor = function (classId, source) {
         var color = null;
         for (var key in Config.topLevelOntologyFixedlegendMap) {
@@ -40,7 +65,15 @@ var Lineage_decoration = (function () {
         }
         return color;
     };
-
+    /**
+     * Decorates nodes based on their upper ontology classification.
+     * Assigns colors and builds a legend.
+     * @function
+     * @name decorateByUpperOntologyByClass
+     * @memberof Lineage_decoration
+     * @param {Array<Object>} visjsNodes - Array of nodes to decorate.
+     * @returns {void}
+     */
     self.decorateByUpperOntologyByClass = function (visjsNodes) {
         if (!Config.topLevelOntologies[Config.currentTopLevelOntology]) {
             return $("#lineage_legendWrapperSection").css("display", "none");
@@ -231,6 +264,14 @@ var Lineage_decoration = (function () {
         );
     };
 
+    /**
+     * Draws the legend using the provided hierarchical tree data.
+     * @function
+     * @name drawLegend
+     * @memberof Lineage_decoration
+     * @param {Array<Object>} jstreeData - The data structure for rendering the legend.
+     * @returns {void}
+     */
     self.drawLegend = function (jstreeData) {
         if (!Config.currentTopLevelOntology) {
             $("#lineage_legendWrapperSection").css("display", "none");

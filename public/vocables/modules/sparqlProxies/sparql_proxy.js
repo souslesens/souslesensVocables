@@ -78,7 +78,7 @@ query=query.replace(/GRAPH ?[a-zA-Z0-9]+\{/,"{")
             query2 = query2.replace(/%2B/g, "+").trim();
             payload.url = url + query2 + queryOptions;
             if (sourceParams && sourceParams.sparql_server.headers) {
-                payload.options = JSON.stringify({ headers: sourceParams.sparql_server.headers, useProxy: useProxy });
+                payload.options = JSON.stringify({headers: sourceParams.sparql_server.headers, useProxy: useProxy});
             }
             return $.ajax({
                 type: "GET",
@@ -90,14 +90,15 @@ query=query.replace(/GRAPH ?[a-zA-Z0-9]+\{/,"{")
                         return callback(null, data);
                     }
                 },
-                error: function (data) {},
+                error: function (data) {
+                },
             });
         } else {
             //POST
             payload.POST = true;
 
             if (sourceParams && sourceParams.sparql_server.headers) {
-                body = JSON.stringify({ headers: sourceParams.sparql_server.headers });
+                body = JSON.stringify({headers: sourceParams.sparql_server.headers});
             }
             if (sourceParams && sourceParams.sparql_server.type == "fuseki") {
                 url = url.replace("&query=", "");
@@ -109,13 +110,13 @@ query=query.replace(/GRAPH ?[a-zA-Z0-9]+\{/,"{")
             headers["Content-Type"] = "application/x-www-form-urlencoded";
 
             if (query.toUpperCase().indexOf("CONSTRUCT ") > -1) {
-                headers = { "Content-Type": "text/turtle; charset=UTF-8" };
+                headers = {"Content-Type": "text/turtle; charset=UTF-8"};
             }
 
             query = Sparql_common.addBasicVocabulariesPrefixes(query);
 
             var body = {
-                params: { query: query, useProxy: useProxy },
+                params: {query: query, useProxy: useProxy},
                 headers: headers,
                 user: authentication.currentUser,
             };
@@ -127,6 +128,9 @@ query=query.replace(/GRAPH ?[a-zA-Z0-9]+\{/,"{")
                 console.log(query);
                 Config.logQueries = false;
             }
+            if ($("#developerControls_logQueriesCBX").prop("checked")) {
+                console.log(query)
+            }
 
             if (options.caller) {
                 if (!self.queriesHistory[options.caller]) {
@@ -134,6 +138,8 @@ query=query.replace(/GRAPH ?[a-zA-Z0-9]+\{/,"{")
                 }
                 self.queriesHistory[options.caller].push(body);
             }
+
+
         }
 
         $.ajax({
@@ -155,7 +161,7 @@ query=query.replace(/GRAPH ?[a-zA-Z0-9]+\{/,"{")
                 }
 
                 if (!data.results) {
-                    return callback(null, { results: { bindings: [] } });
+                    return callback(null, {results: {bindings: []}});
                 }
 
                 if (data.results.bindings.length > 500) {
@@ -216,7 +222,7 @@ query=query.replace(/GRAPH ?[a-zA-Z0-9]+\{/,"{")
         }
 
         var body = {
-            params: { query: query, useProxy: false },
+            params: {query: query, useProxy: false},
             headers: headers,
         };
         var payload = {};

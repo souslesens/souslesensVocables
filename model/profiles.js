@@ -157,7 +157,8 @@ class ProfileModel {
             return false;
         }
 
-        await conn("profiles").where("label", profileNameId).del();
+        // using select here allows mocking in tests
+        await conn.select("*").from("profiles").where("label", profileNameId).del();
         cleanupConnection(conn);
         return true;
     };

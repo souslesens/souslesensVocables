@@ -196,7 +196,7 @@ var OntologyModels = (function () {
                                             if (item.sub.value == "http://souslesens.org/resources/ontology/cfihos-s-v01/Pressure") {
                                                 var x = 3;
                                             }
-                                            
+
                                             if (!Config.ontologiesVocabularyModels[source].classes[item.sub.value]) {
                                                 Config.ontologiesVocabularyModels[source].classes[item.sub.value] = {
                                                     id: item.sub.value,
@@ -208,12 +208,19 @@ var OntologyModels = (function () {
                                                             : Sparql_common.getLabelFromURI(item.superClass.value)
                                                         : null,
                                                 };
-                                            }else{
+                                            } else {
                                                 // select superClass for nodes which have a blankNode as superClass
-                                                if (Config.ontologiesVocabularyModels[source].classes[item.sub.value].superClass && Config.ontologiesVocabularyModels[source].classes[item.sub.value].superClass.startsWith('_:b')){
-                                                    Config.ontologiesVocabularyModels[source].classes[item.sub.value].superClass=item.superClass ? item.superClass.value : null;
-                                                    Config.ontologiesVocabularyModels[source].classes[item.sub.value].superClassLabel=item.superClass ? item.superClassLabel ? item.superClassLabel.value : Sparql_common.getLabelFromURI(item.superClass.value) : null;
-                                                }                                         
+                                                if (
+                                                    Config.ontologiesVocabularyModels[source].classes[item.sub.value].superClass &&
+                                                    Config.ontologiesVocabularyModels[source].classes[item.sub.value].superClass.startsWith("_:b")
+                                                ) {
+                                                    Config.ontologiesVocabularyModels[source].classes[item.sub.value].superClass = item.superClass ? item.superClass.value : null;
+                                                    Config.ontologiesVocabularyModels[source].classes[item.sub.value].superClassLabel = item.superClass
+                                                        ? item.superClassLabel
+                                                            ? item.superClassLabel.value
+                                                            : Sparql_common.getLabelFromURI(item.superClass.value)
+                                                        : null;
+                                                }
                                             }
                                         });
                                         callbackSeries();
@@ -1227,7 +1234,7 @@ var OntologyModels = (function () {
                     return callback(err);
                 }
 
-                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["prop", "sClass", "oClass"], { source: source });
+                // result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["prop", "sClass", "oClass"], { source: source });
 
                 //   Config.ontologiesVocabularyModels[source].inferredClassModel = result.results.bindings;
                 return callback(null, result.results.bindings);
@@ -1363,7 +1370,8 @@ var OntologyModels = (function () {
             sourceGraphUri +
             ">" +
             " WHERE {   \n" +
-            " ?s rdf:type+ ?class.\n" +
+            // " ?s rdf:type+ ?class.\n" +
+            " ?s rdf:type ?class.\n" +
             "  filter (?class not in (owl:NamedIndividual))\n" +
             "  ?s ?prop ?v.\n" +
             "   bind (datatype(?v) as ?datatype)\n" +

@@ -70,6 +70,7 @@ module.exports = function () {
                 },
             },
         },
+        tags: ["Sources"],
     };
     DELETE.apiDoc = {
         summary: "Delete a specific source",
@@ -84,6 +85,7 @@ module.exports = function () {
                 },
             },
         },
+        tags: ["Sources"],
     };
     PUT.apiDoc = {
         summary: "Update Sources",
@@ -98,6 +100,7 @@ module.exports = function () {
                 },
             },
         },
+        tags: ["Sources"],
     };
     return operations;
 };

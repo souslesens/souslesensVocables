@@ -113,14 +113,12 @@
         <script type="module" src="modules/tools/DownloadGraphModal/DownloadGraphModal.js"></script>
         <script type="module" src="modules/tools/UploadGraphModal/UploadGraphModal.js"></script>
 
-     <!--
+        <!--
         <script type="module" src="modules/tools/KGcreator/KGcreator.js"></script>
         <script type="module" src="modules/tools/KGcreator/KGcreator_mappings.js"></script>
         <script type="module" src="modules/tools/KGcreator/KGcreator_graph.js"></script>
         <script type="module" src="modules/tools/KGcreator/KGcreator_run.js"></script>
         -->
-
-
 
         <script type="module" src="modules/tools/mappingModeler/mappingModeler.js"></script>
         <script type="module" src="modules/tools/mappingModeler/tripleFactory.js"></script>
@@ -129,7 +127,6 @@
         <script type="module" src="modules/tools/mappingModeler/dataSourcesManager.js"></script>
         <script type="module" src="modules/tools/mappingModeler/uiController.js"></script>
         <script type="module" src="modules/tools/mappingModeler/mappingColumnsGraph.js"></script>
-
 
         <script type="module" src="modules/tools/KGcreator/KGcreator_joinTables.js"></script>
 
@@ -398,6 +395,10 @@
                     </button>
 
                     <div id="SouslesensVocables_Github" class="w3-display-topright" style="font-size: 12px; margin-right: 10px">
+
+                            <input type="checkbox" style="display:none" id="developerControls_logQueriesCBX"/>logQueries
+
+
                         <a target="_blank noreferrer" href="/api/v1"><img src="/api/v1/favicon-16x16.png" style="margin-bottom: 3px; margin-right: 3px" /></a>
                         Swagger API
                         <a target="_blank noreferrer" href="https://github.com/souslesens/souslesensVocables"
@@ -461,7 +462,11 @@
 
                     <div class="w3-bar-item w3-right">
                         <button class="w3-button slsv-right-top-bar-button" id="copyQueryBtn">Copy Query</button>
+
                     </div>
+
+
+
                     <div class="w3-bar-item w3-dropdown-hover slsv-bg-intense slsv-top-menu-Button w3-right">
                         <button style="display: none" id="theme-selector-btn" class="w3-button slsv-right-top-bar-button">Themes</button>
                         <div class="w3-dropdown-content Lineage_PopUpStyle PopUpBorder">

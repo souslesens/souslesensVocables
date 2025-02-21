@@ -11,9 +11,14 @@
             <button class="slsv-button-1" onclick="KGquery.checkRequirements()">check</button>
             <!--  <button class="slsv-button-1" onclick="KGquery_nodeSelector.showInferredModelInJstree()">+</button>-->
             <select id="KGquery_outputTypeSelect" onchange="KGquery.onOutputTypeSelect($(this).val());">
+
+
+
                 <option selected disabled>Select tool</option>
                 <option>Graph</option>
             </select>
+            <button class="slsv-button-1" onclick=" KGquery_nodeSelector.showInferredModelInJstree(KGquery_graph.visjsData);">+</button>
+
             <!-- <button onclick="KGquery.queryKG('table',null,true)">Query database</button>-->
 
             <!--<button onclick="TimeLineWidget.init()">TimeLine</button>-->

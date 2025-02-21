@@ -102,6 +102,13 @@ export const SourcesDialog = ({ edit, me, onClose, onSubmit, open, selectedSourc
                     });
                 }
             }
+            if (value.baseUri && !value.baseUri.endsWith("/") && !value.baseUri.endsWith("#")) {
+                context.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    message: "Base URI must end with '/' or '#'",
+                    path: ["baseUri"],
+                });
+            }
             if (value.group.trim().length < 3) {
                 context.addIssue({
                     code: z.ZodIssueCode.custom,
@@ -109,7 +116,6 @@ export const SourcesDialog = ({ edit, me, onClose, onSubmit, open, selectedSourc
                     path: ["group"],
                 });
             }
-
             if (value.group.startsWith("/")) {
                 context.addIssue({
                     code: z.ZodIssueCode.custom,
@@ -117,7 +123,6 @@ export const SourcesDialog = ({ edit, me, onClose, onSubmit, open, selectedSourc
                     path: ["group"],
                 });
             }
-
             if (value.published && value.group.trim() === "PRIVATE") {
                 context.addIssue({
                     code: z.ZodIssueCode.custom,
@@ -242,8 +247,8 @@ export const SourcesDialog = ({ edit, me, onClose, onSubmit, open, selectedSourc
                             />
                             <TextField
                                 fullWidth
-                                error={errors.prefix !== undefined}
-                                helperText={errors.prefix}
+                                error={errors.baseUri !== undefined}
+                                helperText={errors.baseUri}
                                 id="baseUri"
                                 InputProps={{
                                     endAdornment: (

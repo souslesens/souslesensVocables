@@ -1,5 +1,5 @@
 import { Done, Close, Cancel, Folder } from "@mui/icons-material";
-import { Dialog, DialogTitle, DialogContent, Stack, Alert, LinearProgress, Typography, DialogActions, Button, Checkbox, FormControl, FormControlLabel } from "@mui/material";
+import { Dialog, DialogTitle, DialogContent, Stack, Alert, LinearProgress, Typography, DialogActions, Button, Checkbox, FormControl, FormControlLabel, TextField, FormLabel } from "@mui/material";
 import { VisuallyHiddenInput, fetchMe } from "../Utils";
 import { ChangeEvent, MouseEvent, useEffect, useRef, useState } from "react";
 import { writeLog } from "../Log";
@@ -31,6 +31,7 @@ export function UploadGraphModal({ onClose, open, sourceName, indexAfterSuccess 
     const [errorMessage, setErrorMessage] = useState("");
     const cancelCurrentOperation = useRef(false);
     const [slsPyApiBaseUrl, setSlsPyApiBaseUrl] = useState<string>("");
+    const [graphUrl, setGraphUrl] = useState<string>("");
 
     useEffect(() => {
         void fetchConfig();
@@ -40,6 +41,10 @@ export function UploadGraphModal({ onClose, open, sourceName, indexAfterSuccess 
         };
         void fetchAll();
     }, []);
+
+    const handleGraphUrl = (event: ChangeEvent<HTMLInputElement>) => {
+        setGraphUrl(event.currentTarget.value);
+    };
 
     const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
         if (event.currentTarget.files === null) {
@@ -77,6 +82,46 @@ export function UploadGraphModal({ onClose, open, sourceName, indexAfterSuccess 
 
         await writeLog(currentUser.login, "GraphManagement", "upload", sourceName);
 
+        if (graphUrl !== "") {
+            await uploadGraphByUrl(currentUser.token);
+        } else {
+            await uploadGraphByFile(currentUser.token);
+        }
+
+        if (indexAfterSuccess) {
+            try {
+                window.SearchUtil.generateElasticIndex(sourceName, { indexProperties: 1, indexNamedIndividuals: 1 }, () => {
+                    fetch(`/api/v1/ontologyModels?source=${sourceName}`, { method: "DELETE" })
+                        .then((_success) => {
+                            delete window.Config.ontologiesVocabularyModels[sourceName];
+                            window.UI.message(`${sourceName} was updated successfully`, true);
+                        })
+                        .catch((error) => {
+                            alert(error);
+                        });
+                });
+            } catch (error) {
+                console.error(error);
+                window.UI.message(`An error occurs during ${sourceName} update`, true);
+            }
+        }
+    };
+
+    const uploadGraphByUrl = async (userToken: string) => {
+        const formData = new FormData();
+        formData.append("url", graphUrl);
+        formData.append("source", sourceName);
+        // POST data
+        const res = await fetch("api/v1/rdf/graphUrl", { method: "post", headers: { Authorization: `Bearer ${userToken}` }, body: formData });
+        if (res.status != 200) {
+            const message = (await res.json()) as { error?: string; detail?: string };
+            console.error(message);
+            setErrorMessage(message.error ?? message.detail ?? "Internal server error");
+            return;
+        }
+    };
+
+    const uploadGraphByFile = async (userToken: string) => {
         try {
             // init progress bar
             setTransferPercent(0);
@@ -120,12 +165,12 @@ export function UploadGraphModal({ onClose, open, sourceName, indexAfterSuccess 
                 // if cancel button is pressed, remove uploaded file and return
                 if (cancelCurrentOperation.current) {
                     formData.set("clean", String(true));
-                    await fetch(`${slsPyApiBaseUrl}api/v1/rdf/graph`, { method: "post", headers: { Authorization: `Bearer ${currentUser.token}` }, body: formData });
+                    await fetch(`${slsPyApiBaseUrl}api/v1/rdf/graph`, { method: "post", headers: { Authorization: `Bearer ${userToken}` }, body: formData });
                     return;
                 }
 
                 // POST data
-                const res = await fetch(`${slsPyApiBaseUrl}api/v1/rdf/graph`, { method: "post", headers: { Authorization: `Bearer ${currentUser.token}` }, body: formData });
+                const res = await fetch(`${slsPyApiBaseUrl}api/v1/rdf/graph`, { method: "post", headers: { Authorization: `Bearer ${userToken}` }, body: formData });
                 if (res.status != 200) {
                     const message = (await res.json()) as { error?: string; detail?: string };
                     console.error(message);
@@ -139,24 +184,6 @@ export function UploadGraphModal({ onClose, open, sourceName, indexAfterSuccess 
                 }
             }
             setTransferPercent(100);
-
-            if (indexAfterSuccess) {
-                try {
-                    window.SearchUtil.generateElasticIndex(sourceName, { indexProperties: 1, indexNamedIndividuals: 1 }, () => {
-                        fetch(`/api/v1/ontologyModels?source=${sourceName}`, { method: "DELETE" })
-                            .then((_success) => {
-                                delete window.Config.ontologiesVocabularyModels[sourceName];
-                                window.UI.message(`${sourceName} was updated successfully`, true);
-                            })
-                            .catch((error) => {
-                                alert(error);
-                            });
-                    });
-                } catch (error) {
-                    console.error(error);
-                    window.UI.message(`An error occurs during ${sourceName} update`, true);
-                }
-            }
         } catch (error) {
             console.error(error);
             setErrorMessage((error as Error).message);
@@ -187,6 +214,10 @@ export function UploadGraphModal({ onClose, open, sourceName, indexAfterSuccess 
                                 {uploadfile.length === 1 ? uploadfile[0].name : "Select a file to upload…"}
                                 <VisuallyHiddenInput id="formUploadGraph" onChange={handleFileChange} type="file" />
                             </Button>
+                        </Stack>
+                        <FormLabel>Or upload from URL</FormLabel>
+                        <Stack spacing={1} direction="row" useFlexGap>
+                            <TextField fullWidth id="graphUrl" label="Graph URI" name="graphUrl" onChange={handleGraphUrl} />
                         </Stack>
                         <FormControl fullWidth>
                             <FormControlLabel
@@ -221,7 +252,7 @@ export function UploadGraphModal({ onClose, open, sourceName, indexAfterSuccess 
                 <Stack direction="row" gap={1}>
                     {transferPercent === 0 ? (
                         <>
-                            <Button color="primary" disabled={uploadfile.length < 1} onClick={uploadSource} startIcon={<Done />} type="submit" variant="contained">
+                            <Button color="primary" disabled={uploadfile.length < 1 && graphUrl === ""} onClick={uploadSource} startIcon={<Done />} type="submit" variant="contained">
                                 Submit
                             </Button>
                             <Button color="primary" onClick={onClose} startIcon={<Done />} variant="contained">

@@ -20,6 +20,7 @@ export default [{
         "mainapp/lib",
         "public/YasGui",
         "public/vocables/js/external",
+        "docker-data",
     ],
 }, ...compat.extends(
     "eslint:recommended",

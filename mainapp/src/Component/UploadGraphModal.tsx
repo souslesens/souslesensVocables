@@ -220,9 +220,14 @@ export function UploadGraphModal({ onClose, open, sourceName, indexAfterSuccess 
                 </Stack>
                 <Stack direction="row" gap={1}>
                     {transferPercent === 0 ? (
-                        <Button color="primary" disabled={uploadfile.length < 1} onClick={uploadSource} startIcon={<Done />} type="submit" variant="contained">
-                            Submit
-                        </Button>
+                        <>
+                            <Button color="primary" disabled={uploadfile.length < 1} onClick={uploadSource} startIcon={<Done />} type="submit" variant="contained">
+                                Submit
+                            </Button>
+                            <Button color="primary" onClick={onClose} startIcon={<Done />} variant="contained">
+                                Cancel
+                            </Button>
+                        </>
                     ) : (
                         <Button
                             color={errorMessage || transferPercent === 100 ? "primary" : "error"}

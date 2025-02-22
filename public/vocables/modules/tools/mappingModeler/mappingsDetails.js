@@ -249,8 +249,90 @@ var MappingsDetails = (function () {
         common.fillSelectOptions(`columnDetails-UriType`, URITType, false);
 
 
+         var sourceObj = Config.sources[MappingModeler.currentSLSsource]
+
+           $("#columnDetails-baseUri").val(column.data.baseURI || "")
+    };
+
+
+
+    /**
+     * Saves the mapping details to the Vis.js graph for a specific column.
+     * It updates the column's URI type, RDF type, and rdfs:label based on the user's selection,
+     * then saves the updated data to the graph and triggers any necessary transformations.
+     * @function
+     * @name saveMappingsDetailsToVisjsGraph
+     * @memberof module:MappingsDetails
+     * @param {string} columnId - The ID of the column whose mapping details are to be saved.
+     * @returns {void}
+     */
+    self.saveMappingsDetailsToVisjsGraph = function (columnId) {
+        var currentGraphNode = MappingColumnsGraph.visjsGraph.data.nodes.get(columnId);
+        if (!currentGraphNode) {
+            return alert("no current graphNode ");
+        }
+        currentGraphNode.data.uriType = $("#columnDetails-UriType").val();
+        currentGraphNode.data.rdfsLabel = $("#columnDetails-rdfsLabel").val();
+        currentGraphNode.data.rdfType = $("#columnDetails-rdfType").val();
+
+
+        var baseUri = currentGraphNode.data.baseURI = $("#columnDetails-baseUri").val();
         var sourceObj = Config.sources[MappingModeler.currentSLSsource]
-        $("#columnDetails-baseUri").val(column.data.baseURI || sourceObj.baseUri || sourceObj.graphUri)
+        var sourceBaseUri = sourceObj.baseUri || sourceObj.graphUri
+        if (baseUri && baseUri != sourceBaseUri) {
+            currentGraphNode.data.baseURI = $("#columnDetails-baseUri").val();
+        } else {
+            if (currentGraphNode.data.baseURI) {
+                delete currentGraphNode.data.baseURI
+            }
+        }
+
+
+        MappingColumnsGraph.updateNode(currentGraphNode);
+        self.switchTypeToSubclass(currentGraphNode);
+        // });
+        MappingColumnsGraph.saveVisjsGraph();
+    };
+
+    /**
+     * Deletes a specific mapping from the Vis.js graph node.
+     * It identifies the mapping based on the node's ID and removes the corresponding property
+     * or predicate from the node's data. After deletion, the tree is updated and the graph is re-rendered.
+     * @function
+     * @name deleteMappingInVisjsNode
+     * @memberof module:MappingsDetails
+     * @param {Object} treeNode - The tree node representing the mapping to be deleted.
+     * @returns {void}
+     */
+    self.deleteMappingInVisjsNode = function (treeNode) {
+        var array = treeNode.id.split("|");
+
+        var graphNode = MappingColumnsGraph.visjsGraph.data.nodes.get(array[0]);
+
+        if (array.length == 3) {
+            for (var key in graphNode.data) {
+                if (key == array[1] && graphNode.data[key] === array[2]) {
+                    delete graphNode.data[key];
+                }
+            }
+        } else if (array.length == 4) {
+            //otherPredicates
+            graphNode.data.otherPredicates.forEach(function (item, index) {
+                if (item.property == array[2] && item.object == array[3]) {
+                    graphNode.data.otherPredicates.splice(index, 1);
+                }
+            });
+        }
+        //transform gestion
+        if (array.length >= 2 && array[1] == "transform") {
+            if (graphNode.data.transform) {
+                delete graphNode.data.transform;
+            }
+        }
+
+        JstreeWidget.deleteNode("detailedMappings_jsTreeDiv", treeNode);
+        self.drawDetailedMappingsGraph();
+        MappingColumnsGraph.saveVisjsGraph();
     };
 
     /**
@@ -314,82 +396,6 @@ var MappingsDetails = (function () {
             // self.showDetailsDialog();
         });
     };
-
-    /**
-     * Saves the mapping details to the Vis.js graph for a specific column.
-     * It updates the column's URI type, RDF type, and rdfs:label based on the user's selection,
-     * then saves the updated data to the graph and triggers any necessary transformations.
-     * @function
-     * @name saveMappingsDetailsToVisjsGraph
-     * @memberof module:MappingsDetails
-     * @param {string} columnId - The ID of the column whose mapping details are to be saved.
-     * @returns {void}
-     */
-    self.saveMappingsDetailsToVisjsGraph = function (columnId) {
-        var currentGraphNode = MappingColumnsGraph.visjsGraph.data.nodes.get(columnId);
-        if (!currentGraphNode) {
-            return alert("no current graphNode ");
-        }
-        currentGraphNode.data.uriType = $("#columnDetails-UriType").val();
-        currentGraphNode.data.rdfsLabel = $("#columnDetails-rdfsLabel").val();
-        currentGraphNode.data.rdfType = $("#columnDetails-rdfType").val();
-
-
-        var baseUri = currentGraphNode.data.baseURI = $("#columnDetails-baseUri").val();
-        var sourceObj = Config.sources[MappingModeler.currentSLSsource]
-        var sourceBaseUri = sourceObj.baseUri || sourceObj.graphUri
-        if (baseUri != sourceBaseUri) {
-            currentGraphNode.data.baseURI = $("#columnDetails-baseUri").val();
-        }
-
-
-        MappingColumnsGraph.updateNode(currentGraphNode);
-        self.switchTypeToSubclass(currentGraphNode);
-        // });
-        MappingColumnsGraph.saveVisjsGraph();
-    };
-
-    /**
-     * Deletes a specific mapping from the Vis.js graph node.
-     * It identifies the mapping based on the node's ID and removes the corresponding property
-     * or predicate from the node's data. After deletion, the tree is updated and the graph is re-rendered.
-     * @function
-     * @name deleteMappingInVisjsNode
-     * @memberof module:MappingsDetails
-     * @param {Object} treeNode - The tree node representing the mapping to be deleted.
-     * @returns {void}
-     */
-    self.deleteMappingInVisjsNode = function (treeNode) {
-        var array = treeNode.id.split("|");
-
-        var graphNode = MappingColumnsGraph.visjsGraph.data.nodes.get(array[0]);
-
-        if (array.length == 3) {
-            for (var key in graphNode.data) {
-                if (key == array[1] && graphNode.data[key] === array[2]) {
-                    delete graphNode.data[key];
-                }
-            }
-        } else if (array.length == 4) {
-            //otherPredicates
-            graphNode.data.otherPredicates.forEach(function (item, index) {
-                if (item.property == array[2] && item.object == array[3]) {
-                    graphNode.data.otherPredicates.splice(index, 1);
-                }
-            });
-        }
-        //transform gestion
-        if (array.length >= 2 && array[1] == "transform") {
-            if (graphNode.data.transform) {
-                delete graphNode.data.transform;
-            }
-        }
-
-        JstreeWidget.deleteNode("detailedMappings_jsTreeDiv", treeNode);
-        self.drawDetailedMappingsGraph();
-        MappingColumnsGraph.saveVisjsGraph();
-    };
-
     /**
      * Handles the selection of a tree node and displays the corresponding column's technical details.
      * If the selected node is a column node, it opens the column technical mappings dialog.

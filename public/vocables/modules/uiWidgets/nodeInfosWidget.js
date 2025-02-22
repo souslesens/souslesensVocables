@@ -128,11 +128,6 @@ var NodeInfosWidget = (function () {
                             $(".nodeInfosWidget_tabDiv").removeClass("nodesInfos-selectedTab");
 
                             setTimeout(function () {
-                                /*if (NodeInfosAxioms.nodeInfosAxiomsLoaded) {
-                                    //reset nodeInfos
-
-                                    self.showNodeInfos(Lineage_sources.activeSource, NodeInfosAxioms.nodeBeforeNodeInfos, "mainDialogDiv", null, null);
-                                }*/
 
                                 $("[aria-selected='true']").addClass("nodesInfos-selectedTab");
                                 if (ui.newPanel.selector == "#nodeInfosWidget_AxiomsTabDiv") {
@@ -140,7 +135,11 @@ var NodeInfosWidget = (function () {
                                     // source = Lineage_sources.mainSource;
                                     NodeInfosAxioms.init(source, self.currentNode, "nodeInfosWidget_AxiomsTabDiv");
                                 }
-                                0;
+                                if (ui.newPanel.selector == "#nodeInfosWidget_relationsDiv") {
+                                    $("#nodeInfosWidget_relationsDiv").load("modules/uiWidgets/html/nodeRelationsWidget.html", function () {
+                                })
+                                    }
+
                             }, 100);
                         },
                     });
@@ -156,6 +155,8 @@ var NodeInfosWidget = (function () {
             $("[aria-selected='true']").addClass("nodesInfos-selectedTab");
             callback();
         });
+
+
     };
 
     self.drawAllInfos = function (sourceLabel, nodeId, options, callback) {

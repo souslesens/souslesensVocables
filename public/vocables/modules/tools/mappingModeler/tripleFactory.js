@@ -5,6 +5,7 @@ import MappingTransform from "./mappingTransform.js";
 import MappingModeler from "./mappingModeler.js";
 import Export from "../../shared/export.js";
 import UIcontroller from "./uiController.js";
+import OntologyModels from "../../shared/ontologyModels.js";
 
 /**
  * The TripleFactory module handles the creation, filtering, and writing of RDF triples.
@@ -78,7 +79,7 @@ var TripleFactory = (function () {
         $("#mappingModeler_genericPanel").load("./modules/tools/mappingModeler/html/filterMappingDialog.html", function () {
             //  $("#mainDialogDiv").dialog("option", "title", "Filter mappings : table " + MappingModeler.currentTable.name);
             // $("#mainDialogDiv").dialog("open");
-            var options = { withCheckboxes: true, withoutContextMenu: true, openAll: true, check_all: true };
+            var options = {withCheckboxes: true, withoutContextMenu: true, openAll: true, check_all: true};
             MappingsDetails.showDetailedMappingsTree(null, "detailedMappings_filterMappingsTree", options);
         });
     };
@@ -98,88 +99,105 @@ var TripleFactory = (function () {
 
 
         // to be repeared DONT WORK !!!!!
-   /*     checkedNodes.forEach(function (node) {
-            if (node.parents.length == 3) {
-                // attrs
-                checkedNodeAttrs.push(node.id);
-                columnsSelection[node.id] = MappingColumnsGraph.visjsGraph.data.nodes.get(node.parent);
-            } else if (node.data && node.data.type == "Column") {
-                // filter only mapping nodes
-                columnsSelection[node.id] = MappingColumnsGraph.visjsGraph.data.nodes.get(node.id);
-            } else if (node.data && node.data.type == "VirtualColumn") {
-                columnsSelection[node.id] = MappingColumnsGraph.visjsGraph.data.nodes.get(node.id);
-            } else if (node.data && node.data.type == "RowIndex") {
-                columnsSelection[node.id] = MappingColumnsGraph.visjsGraph.data.nodes.get(node.id);
-            }
-        });
-        var mappings = MappingTransform.mappingsToKGcreatorJson(columnsSelection);
-        var uniqueFilteredMappings = {};
-        var transforms = {};
-        // checkedNodeAttrs work only for technical mappings we need to also add structural column mappings
-        mappings.forEach(function (mapping) {
-            checkedNodeAttrs.forEach(function (treeNodeId) {
-                if (treeNodeId.indexOf(mapping.o) > -1) {
-                    if (treeNodeId.indexOf("transform") > -1 && mapping.p == "transform") {
-                        transforms[mapping.s] = mapping.o;
-                    } else if (!uniqueFilteredMappings[mapping.s + "|" + mapping.o]) {
-                        uniqueFilteredMappings[mapping.s + "|" + mapping.o] = 1;
-                        filteredMappings.push(mapping);
-                    }
-                }
-            });
-        });
+        /*     checkedNodes.forEach(function (node) {
+                 if (node.parents.length == 3) {
+                     // attrs
+                     checkedNodeAttrs.push(node.id);
+                     columnsSelection[node.id] = MappingColumnsGraph.visjsGraph.data.nodes.get(node.parent);
+                 } else if (node.data && node.data.type == "Column") {
+                     // filter only mapping nodes
+                     columnsSelection[node.id] = MappingColumnsGraph.visjsGraph.data.nodes.get(node.id);
+                 } else if (node.data && node.data.type == "VirtualColumn") {
+                     columnsSelection[node.id] = MappingColumnsGraph.visjsGraph.data.nodes.get(node.id);
+                 } else if (node.data && node.data.type == "RowIndex") {
+                     columnsSelection[node.id] = MappingColumnsGraph.visjsGraph.data.nodes.get(node.id);
+                 }
+             });
+             var mappings = MappingTransform.mappingsToKGcreatorJson(columnsSelection);
+             var uniqueFilteredMappings = {};
+             var transforms = {};
+             // checkedNodeAttrs work only for technical mappings we need to also add structural column mappings
+             mappings.forEach(function (mapping) {
+                 checkedNodeAttrs.forEach(function (treeNodeId) {
+                     if (treeNodeId.indexOf(mapping.o) > -1) {
+                         if (treeNodeId.indexOf("transform") > -1 && mapping.p == "transform") {
+                             transforms[mapping.s] = mapping.o;
+                         } else if (!uniqueFilteredMappings[mapping.s + "|" + mapping.o]) {
+                             uniqueFilteredMappings[mapping.s + "|" + mapping.o] = 1;
+                             filteredMappings.push(mapping);
+                         }
+                     }
+                 });
+             });
 
-        var columnMappings = MappingTransform.mappingsToKGcreatorJson(columnsSelection, { getColumnMappingsOnly: true });
-        // selection isn't concerned for column mappings select all
-        filteredMappings = filteredMappings.concat(columnMappings);
-        */
-       // filteredMappings =mappings
+             var columnMappings = MappingTransform.mappingsToKGcreatorJson(columnsSelection, { getColumnMappingsOnly: true });
+             // selection isn't concerned for column mappings select all
+             filteredMappings = filteredMappings.concat(columnMappings);
+             */
+        // filteredMappings =mappings
 
         filteredMappings = MappingTransform.getSLSmappingsFromVisjsGraph();
-        var transforms={}
+        var transforms = {}
 
 
         var table = MappingModeler.currentTable.name;
 
-        filteredMappings = { [table]: { tripleModels: filteredMappings, transform: transforms } };
+        filteredMappings = {[table]: {tripleModels: filteredMappings, transform: transforms}};
 
-        TripleFactory.createTriples(self.filterMappingIsSample, MappingModeler.currentTable.name, { filteredMappings: filteredMappings }, function (err, result) {
-            if (err) {
-                return alert(err.responseText);
-            } else {
-                UI.message("Done", true);
-                if (!self.filterMappingIsSample) {
-                    //Admin.clearOntologyModelCache();
-                    SearchUtil.generateElasticIndex(MappingModeler.currentSLSsource, { indexProperties: 1, indexNamedIndividuals: 1 }, () => {
-                        $.ajax({
-                            type: "DELETE",
-                            url: `${Config.apiUrl}/ontologyModels?source=${MappingModeler.currentSLSsource}`,
+        var result = null;
+        async.series([
+            function (callbackSeries) {
+                TripleFactory.createTriples(self.filterMappingIsSample, MappingModeler.currentTable.name, {filteredMappings: filteredMappings}, function (err, _result) {
+                    result = _result;
+                    callbackSeries(err)
 
-                            dataType: "json",
-                            success: function (result, _textStatus, _jqXHR) {
-                                delete Config.ontologiesVocabularyModels[MappingModeler.currentSLSsource];
+                })
 
-                                UI.message("ALL DONE");
-                            },
-                            error: function (err) {
-                                if (callback) {
-                                    return callback(err);
-                                }
-                                UI.message(err.responseText);
-                            },
-                        });
-                        /*
-                        $.ajax(`/api/v1/ontologyModels?source=${MappingModeler.currentSLSsource}`, { method: "DELETE" })
-                            .then((_success) => {
-                                window.UI.message(`${MappingModeler.currentSLSsource} was updated successfully`, true);
-                            })
-                            .catch((error) => {
-                                alert(error);
-                            });*/
-                    });
+            },
+            function (callbackSeries) {
+                if (self.filterMappingIsSample) {
+                    return callbackSeries()
+                }
+                var options = {
+                    indexProperties: 1,
+                    indexNamedIndividuals: 1
+                }
+                SearchUtil.generateElasticIndex(MappingModeler.currentSLSsource, options, function (err, result) {
+                    callbackSeries(err)
+
+                })
+            },
+
+            function (callbackSeries) {
+                if (self.filterMappingIsSample) {
+                    return callbackSeries()
+                }
+                if(!Config.ontologiesVocabularyModels[MappingModeler.currentSLSsource])
+                    return callbackSeries()
+                try {
+                    OntologyModels.clearOntologyModelCache(MappingModeler.currentSLSsource, function (err, result) {
+                        if (!err) {
+                            delete Config.ontologiesVocabularyModels[MappingModeler.currentSLSsource];
+                        }
+                        callbackSeries(err)
+
+                    })
+                }
+                catch(e){
+                    console.log(e)
                 }
             }
-        });
+
+
+        ], function (err) {
+            if (err) {
+                alert(err.responseText || err);
+            } else {
+                UI.message("ALL DONE");
+
+            }
+
+        })
     };
 
     /**
@@ -420,7 +438,7 @@ var TripleFactory = (function () {
         var tableCols = [];
         var hearders = ["subject", "predicate", "object"];
         hearders.forEach(function (item) {
-            tableCols.push({ title: item, defaultContent: "", width: "30%" });
+            tableCols.push({title: item, defaultContent: "", width: "30%"});
         });
 
         var tableData = [];
@@ -436,11 +454,13 @@ var TripleFactory = (function () {
 
         /*  $("#KGcreator_triplesDataTableDiv").html(str)
           return;*/
-        Export.showDataTable(div, tableCols, tableData, null, { paging: true, divId: div }, function (err, datatable) {});
+        Export.showDataTable(div, tableCols, tableData, null, {paging: true, divId: div}, function (err, datatable) {
+        });
     };
 
     return self;
-})();
+})
+();
 
 export default TripleFactory;
 window.TripleFactory = TripleFactory;

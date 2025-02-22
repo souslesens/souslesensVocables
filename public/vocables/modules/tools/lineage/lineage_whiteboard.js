@@ -1617,8 +1617,13 @@ var Lineage_whiteboard = (function () {
                     });
 
                     if (self.lineageVisjsGraph.isGraphNotEmpty()) {
-                        self.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
-                        self.lineageVisjsGraph.data.edges.add(visjsData.edges);
+                        try {
+                            self.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
+                            self.lineageVisjsGraph.data.edges.add(visjsData.edges);
+                        }
+                        catch(e){
+                            console.log(e)
+                        }
                     } else {
                         Lineage_whiteboard.drawNewGraph(visjsData);
                     }

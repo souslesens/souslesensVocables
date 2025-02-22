@@ -2,6 +2,7 @@ import Sparql_common from "../sparqlProxies/sparql_common.js";
 import Sparql_OWL from "../sparqlProxies/sparql_OWL.js";
 import Sparql_proxy from "../sparqlProxies/sparql_proxy.js";
 import Sparql_generic from "../sparqlProxies/sparql_generic.js";
+import SourceSelectorWidget from "../uiWidgets/sourceSelectorWidget.js";
 //import fflate from "fflate";
 
 // eslint-disable-next-line no-global-assign
@@ -586,6 +587,33 @@ var OntologyModels = (function () {
             },
             error: function (err) {
                 return callback(err);
+            },
+        });
+    };
+    self.clearOntologyModelCache = function (source,callback) {
+        const params = new URLSearchParams({
+            source: source,
+        });
+        $.ajax({
+            type: "DELETE",
+            url: Config.apiUrl + "/ontologyModels?" + params.toString(),
+            dataType: "json",
+
+            success: function (data, _textStatus, _jqXHR) {
+                if (source) {
+                    Config.ontologiesVocabularyModels[source] = null;
+                    OntologyModels.registerSourcesModel(source,{noCache:true},function(err,result){
+                        callback(null,"DONE")
+                    });
+                } else {
+                    Config.ontologiesVocabularyModels = {};
+                    callback(null,"DONE")
+                }
+
+
+            },
+            error: function (err) {
+               callback(err);
             },
         });
     };

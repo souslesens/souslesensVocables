@@ -1287,6 +1287,10 @@ var OntologyModels = (function () {
             sources.push(vocab);
         }
         var nonObjectPropertiesmap = {};
+        var filter=""
+        if(options.filter){
+            filter=options.filter
+        }
         UI.message("loading KG nonObjectProperties", false, true);
         async.eachSeries(
             sources,
@@ -1307,6 +1311,7 @@ var OntologyModels = (function () {
                     "   ?s ?prop ?o.\n" +
                     "      bind ( datatype(?o) as ?datatype )\n" +
                     "    ?prop rdf:type ?type. filter (?type in (<http://www.w3.org/2002/07/owl#DatatypeProperty>,rdf:Property,owl:AnnotationProperty)&& ?prop not in (rdf:type,<http://purl.org/dc/terms/created>,<http://purl.org/dc/terms/creator>,<http://purl.org/dc/terms/source>))\n" +
+                    filter +
                     "}\n" +
                     "  UNION\n" +
                     "  {\n" +

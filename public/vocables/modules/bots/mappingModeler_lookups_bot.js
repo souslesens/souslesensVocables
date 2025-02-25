@@ -193,12 +193,12 @@ var Lookups_bot = function () {
            
          
             
-        }
+        },
+    };   
         
-        
-    }
+    
     return self;
-})();
+}();
 
 export default Lookups_bot;
 window.Lookups_bot = Lookups_bot;

@@ -243,12 +243,12 @@ var MappingTransform = (function () {
             return allMappings;
         }
         
-        DataSourceManager.currentConfig.lookups.forEach(function(lookup){
+        Object.keys(DataSourceManager.currentConfig.lookups).forEach(function(lookup){
             if(lookup.split('_')[0]==DataSourceManager.currentConfig.currentDataSource.currentTable){
                 var lookupColumn=lookup.split('_')[1];
                 var lookupObj=DataSourceManager.currentConfig.lookups[lookup];
-                is_object_lookup=false;
-                is_subject_lookup=false;
+                var is_object_lookup=false;
+                var is_subject_lookup=false;
                 if(lookupObj.targetMapping=='both'){
                     is_object_lookup=true;
                     is_subject_lookup=true;
@@ -380,6 +380,7 @@ var MappingTransform = (function () {
         if(Object.keys(DataSourceManager.currentConfig.lookups)){
             filteredMappings[table].lookups=DataSourceManager.currentConfig.lookups;
         }
+        return filteredMappings;
     }
     return self;
 })();

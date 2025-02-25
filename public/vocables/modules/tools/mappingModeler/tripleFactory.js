@@ -94,7 +94,7 @@ var TripleFactory = (function () {
      * @memberof module:TripleFactory
      */
     self.runSlsFilteredMappings = function () {
-       
+        var filteredMappings=MappingTransform.getFilteredMappings();
         TripleFactory.createTriples(self.filterMappingIsSample, MappingModeler.currentTable.name, {filteredMappings: filteredMappings}, function (err, result) {
             if (err) {
                 alert(err.responseText || err);

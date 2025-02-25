@@ -161,13 +161,29 @@ var KGbuilder_triplesMaker = {
 
 
 
-    getURIFromSpecificBaseUri:function(mapping,line){
-        var p=mapping.indexOf("]")
+    getURIFromSpecificBaseUri:function(mappingValue,line,tableMappings,mapping){
+        var p=mappingValue.indexOf("]")
         if(p>0 ){//specific baseURI
-            var  baseUri= mapping.substring(1,p)
-            var value=line[mapping.substring(p+1)]
-            if(value)
-              return "<" +baseUri+ util.formatStringForTriple(value, true) + ">";
+            var  baseUri= mappingValue.substring(1,p)
+            var value=line[mappingValue.substring(p+1)]
+            // specific base URI can also have transforms and lookups 
+           if(value)
+                if(tableMappings.transform && tableMappings.transform[mappingValue]) {
+                    try {
+                       
+        
+                            return "<" +baseUri+ tableMappings.transform[mappingValue](util.formatStringForTriple(value, true), "s", mapping.p, line, mapping)+">";
+                        
+                        //   return callback(null,subjectStr);
+                    } catch (e) {
+                        return null;
+                    }
+                }
+                // lookup to do
+                else{
+                    return "<" +baseUri+ util.formatStringForTriple(value, true) + ">";
+                }
+              
             else
                 return null
 
@@ -179,9 +195,12 @@ var KGbuilder_triplesMaker = {
 
     getTripleSubject: function (tableMappings, mapping, line, callback) {
         //get value for Subject
-        var subjectStr = KGbuilder_triplesMaker.getURIFromSpecificBaseUri(mapping.s, line);
-        if(subjectStr)
-            return callback(null,subjectStr)
+        var subjectStr = KGbuilder_triplesMaker.getURIFromSpecificBaseUri(mapping.s, line,tableMappings,mapping);
+        if(subjectStr){
+            
+            return callback(null,subjectStr);
+        }
+        
 
 
 
@@ -274,7 +293,7 @@ var KGbuilder_triplesMaker = {
     },
 
     getTripleObject: function (tableMappings, mapping, line, callback) {
-        var objectStr = KGbuilder_triplesMaker.getURIFromSpecificBaseUri(mapping.o, line);
+        var objectStr = KGbuilder_triplesMaker.getURIFromSpecificBaseUri(mapping.o, line,tableMappings,mapping);
         if(objectStr)
             return callback(null,objectStr)
 

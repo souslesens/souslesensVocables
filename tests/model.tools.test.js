@@ -62,4 +62,30 @@ describe("ToolModel", () => {
             },
         });
     });
+
+    test("Tokenize Url", async () => {
+        const results = await toolModel._getTokenizeURL("https://github.com/souslesens/", "my_token");
+        expect(results).toStrictEqual("https://token:my_token@github.com/souslesens/");
+    });
+
+    test("Read/Write config", async () => {
+        let config_before = toolModel.readConfig();
+        const plugins = {
+            Test: {
+                boolean: false,
+                number: 1337,
+                string: "HELLO WORLD!",
+            },
+        };
+        await toolModel.writeConfig(plugins);
+        const result = toolModel.readConfig();
+        expect(result).toStrictEqual(plugins);
+        await toolModel.writeConfig(config_before);
+    });
+
+    test("Get non existing Repository tag", async () => {
+        const result = await toolModel.getRepositoryTags("Test");
+        expect(result.status).toStrictEqual('failure');
+        expect(result.message).toStrictEqual('Cannot found the identifier in the plugins directory');
+    });
 });

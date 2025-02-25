@@ -81,6 +81,7 @@ var TripleFactory = (function () {
             //  $("#mainDialogDiv").dialog("option", "title", "Filter mappings : table " + MappingModeler.currentTable.name);
             // $("#mainDialogDiv").dialog("open");
             var options = {withCheckboxes: true, withoutContextMenu: true, openAll: true, check_all: true};
+            
             MappingsDetails.showDetailedMappingsTree(null, "detailedMappings_filterMappingsTree", options);
         });
     };
@@ -96,7 +97,7 @@ var TripleFactory = (function () {
        
         TripleFactory.createTriples(self.filterMappingIsSample, MappingModeler.currentTable.name, {filteredMappings: filteredMappings}, function (err, result) {
             if (err) {
-                return alert(err.responseText);
+                alert(err.responseText || err);
             } else {
                 UI.message("Done", true);
                 if(!self.filterMappingIsSample){
@@ -375,6 +376,7 @@ var TripleFactory = (function () {
         var hearders = ["subject", "predicate", "object"];
         hearders.forEach(function (item) {
             tableCols.push({title: item, defaultContent: "", width: "30%"});
+           
         });
 
         var tableData = [];
@@ -392,10 +394,12 @@ var TripleFactory = (function () {
           return;*/
         Export.showDataTable(div, tableCols, tableData, null, {paging: true, divId: div}, function (err, datatable) {
         });
+       
     };
 
     return self;
-})();
+})
+();
 
 export default TripleFactory;
 window.TripleFactory = TripleFactory;

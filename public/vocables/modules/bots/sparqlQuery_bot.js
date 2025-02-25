@@ -12,10 +12,12 @@ var SparqlQuery_bot = (function () {
     var self = {};
     self.maxGraphDisplay = 150;
 
+
     self.start = function () {
         self.title = "Query graph";
         _botEngine.init(SparqlQuery_bot, self.workflow, null, function () {
-            self.params = { source: Lineage_sources.activeSource };
+            self.params = {source: Lineage_sources.activeSource, labelsMap: {}};
+
             _botEngine.nextStep();
         });
     };
@@ -24,9 +26,10 @@ var SparqlQuery_bot = (function () {
         chooseResourceTypeFn: {
             _OR: {
                 ObjectProperty: {
-                    listObjectPropertiesFn: {
-                        promptKeywordFn: {
-                            chooseObjectPropertyResourceTypeFn: {
+                    chooseObjectPropertyResourceTypeFn: {
+                        listObjectPropertiesFn: {
+                            promptKeywordFn: {
+
                                 chooseQueryScopeFn: {
                                     chooseOutputTypeFn: {
                                         searchKeywordFn: {},
@@ -56,7 +59,7 @@ var SparqlQuery_bot = (function () {
                 },
             },
         },
-        sparqlQuery: { showSparqlEditorFn: {} },
+        sparqlQuery: {showSparqlEditorFn: {}},
         similars: {
             chooseQueryScopeFn: {},
         },
@@ -86,11 +89,11 @@ var SparqlQuery_bot = (function () {
     self.functions = {
         chooseQueryScopeFn: function () {
             var choices = [
-                { id: "activeSource", label: "active source" },
-                { id: "whiteboardSources", label: "current sources" },
+                {id: "activeSource", label: "active source"},
+                {id: "whiteboardSources", label: "current sources"},
             ];
             if (self.params.resourceType == "Class") {
-                choices.push({ id: "", label: "all sources" });
+                choices.push({id: "", label: "all sources"});
             }
 
             _botEngine.showList(choices, "queryScope");
@@ -138,14 +141,26 @@ var SparqlQuery_bot = (function () {
             }
         },
         listObjectPropertiesFn: function () {
+
+            self.getResourcesList  (self.params.objectPropertyResourceType, "?predicate", null, function (err, result) {
+                var properties=[]
+                for(var key in result){
+                    properties.push({id:key,label:result[key]})
+                }
+                common.array.sort(properties, "label");
+                properties.unshift({id: "anyProperty", label: "anyProperty"});
+                _botEngine.showList(properties, "currentObjectProperty");
+            })
+
+            return;
             CommonBotFunctions.listSourceAllObjectProperties(self.params.source, "currentObjectProperty", null, function (err, properties) {
                 common.array.sort(properties, "label");
-                properties.unshift({ id: "anyProperty", label: "anyProperty" });
+                properties.unshift({id: "anyProperty", label: "anyProperty"});
                 _botEngine.showList(properties, "currentObjectProperty");
             });
         },
         chooseObjectPropertyResourceTypeFn: function () {
-            var choices = ["RangeAndDomain", "Restriction"]; //"Predicate"
+            var choices = ["Predicate", "Restriction", "RangeAndDomain"]; //
 
             _botEngine.showList(choices, "objectPropertyResourceType");
         },
@@ -203,7 +218,7 @@ var SparqlQuery_bot = (function () {
                         if (ok) {
                             if (!distinctValues[item.sClass.value]) {
                                 distinctValues[item.sClass.value] = 1;
-                                filteredClasses.push({ id: item.sClass.value, label: item.sClassLabel.value });
+                                filteredClasses.push({id: item.sClass.value, label: item.sClassLabel.value});
                             }
                         }
                     });
@@ -228,7 +243,7 @@ var SparqlQuery_bot = (function () {
                         if (ok) {
                             if (!distinctValues[item.oClass.value]) {
                                 distinctValues[item.oClass.value] = 1;
-                                filteredClasses.push({ id: item.oClass.value, label: item.oClassLabel.value });
+                                filteredClasses.push({id: item.oClass.value, label: item.oClassLabel.value});
                             }
                         }
                     });
@@ -355,12 +370,12 @@ var SparqlQuery_bot = (function () {
 
                     var cols = [];
                     cols.push(
-                        { title: "source", defaultContent: "" },
+                        {title: "source", defaultContent: ""},
                         {
                             title: "label",
                             defaultContent: "",
                         },
-                        { title: "uri", defaultContent: "" },
+                        {title: "uri", defaultContent: ""},
                     );
                     var dataset = [];
 
@@ -376,7 +391,7 @@ var SparqlQuery_bot = (function () {
                                             return;
                                         }
                                         if (cols.length <= indexParent + 3) {
-                                            cols.push({ title: "ancestor_" + indexParent, defaultContent: "" });
+                                            cols.push({title: "ancestor_" + indexParent, defaultContent: ""});
                                         }
 
                                         var parentLabel = self.params.elasticResult.parentIdsLabelsMap[parent];
@@ -397,7 +412,7 @@ var SparqlQuery_bot = (function () {
                     if (outputType != "Graph") {
                         return callbackSeries();
                     }
-                    var visjsData = { nodes: [], edges: [] };
+                    var visjsData = {nodes: [], edges: []};
                     var sources = [];
                     self.params.elasticResult.forEach(function (item0) {
                         var uniqueNodes = {};
@@ -455,7 +470,7 @@ var SparqlQuery_bot = (function () {
             [
                 //select propertie in Config.ontologiesVocabularyModels
                 function (callbackSeries) {
-                    OntologyModels.registerSourcesModel(searchedSources, { noCache: false }, function (err, result) {
+                    OntologyModels.registerSourcesModel(searchedSources, {noCache: false}, function (err, result) {
                         searchedSources.forEach(function (source) {
                             var sourceOntologyModel = Config.ontologiesVocabularyModels[source];
                             for (var classId in sourceOntologyModel.classes) {
@@ -480,7 +495,7 @@ var SparqlQuery_bot = (function () {
                     if (Object.keys(classes).length > self.maxGraphDisplay) {
                         return _botEngine.abort("too many nodes to display a usable graph");
                     }
-                    var visjsData = { nodes: [], edges: [] };
+                    var visjsData = {nodes: [], edges: []};
                     var existingNodes = {};
                     for (var classId in classes) {
                         var classLabel = classes[classId].label;
@@ -552,11 +567,64 @@ var SparqlQuery_bot = (function () {
         var currentObjectProperty = self.params.currentObjectProperty;
         var objectPropertyResourceType = self.params.objectPropertyResourceType;
         var properties = {};
+        var fromStr = Sparql_common.getFromStr(self.params.source)
+        var query = ""
+        var sparql_url = Config.sources[self.params.source].sparql_server.url
+
+        var labelsMap = {}
+        var properties = {}
         async.series(
             [
-                //select propertie in Config.ontologiesVocabularyModels
+
+                //build RestrictionQuery
                 function (callbackSeries) {
-                    OntologyModels.registerSourcesModel(searchedSources, { noCache: false }, function (err, result) {
+                    if (objectPropertyResourceType != "Restriction") {
+                        return callbackSeries()
+                    }
+
+                    query = "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
+                        "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+                        "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
+                        "SELECT distinct ?domain ?property ?range  " +
+                        fromStr +
+                        " WHERE { \n" +
+                        "  ?domain rdfs:subClassOf ?b.\n" +
+                        "  ?b owl:onProperty ?property .\n" +
+                        "  ?b ?q ?range .?range rdf:type owl:Class\n" +
+                        "  filter ( ?property=<https://spec.industrialontologies.org/ontology/core/Core/designatedBy>)\n" +
+
+                        "} limit 10000"
+                    callbackSeries()
+                },
+
+                function (callbackSeries) {
+
+
+                    Sparql_proxy.querySPARQL_GET_proxy(sparql_url, query, null, null, function (err, result) {
+                        if (err) {
+                            return callbackSeries(err)
+                        }
+                        result.results.bindings.forEach(function (item) {
+                            if (!properties[item.property.value]) {
+                                properties[item.property.value] = []
+                            }
+                            properties[item.property.value].push({domain: item.domain.value, range: item.range.value})
+                            labelsMap[item.property.value] = ""
+                            labelsMap[item.domain.value] = ""
+                            labelsMap[item.range.value] = ""
+                        })
+                        return callbackSeries();
+                    })
+
+
+                },
+
+
+                //select propertie in Config.ontologiesVocabularyModels
+
+                function (callbackSeries) {
+                    return callbackSeries()
+                    OntologyModels.registerSourcesModel(searchedSources, {noCache: false}, function (err, result) {
                         searchedSources.forEach(function (source) {
                             var sourceOntologyModel = Config.ontologiesVocabularyModels[source];
 
@@ -591,104 +659,58 @@ var SparqlQuery_bot = (function () {
                     if (Object.keys(properties).length > self.maxGraphDisplay) {
                         return _botEngine.abort("too many nodes to display a usable graph");
                     }
-                    var visjsData = { nodes: [], edges: [] };
+                    var visjsData = {nodes: [], edges: []};
                     var existingNodes = {};
-                    for (var property in properties) {
-                        if (objectPropertyResourceType == "RangeAndDomain" || objectPropertyResourceType == "Restriction") {
-                            var constraints;
-                            var edgeDomainLabel;
-                            var edgeRangeLabel;
-                            var propertyColor;
-                            var arrowDir = "to";
-                            if (objectPropertyResourceType == "RangeAndDomain") {
-                                constraints = properties[property].constraints;
-                                edgeDomainLabel = "domain";
-                                edgeRangeLabel = "range";
-                                propertyColor = "#dfa";
-                            } else if (objectPropertyResourceType == "Restriction") {
-                                constraints = properties[property].restrictions;
-                                edgeDomainLabel = "subClassOf";
-                                edgeRangeLabel = "targetClass";
-                                propertyColor = "#eab3b3";
-                                arrowDir = "from";
-                            }
-
-                            if (!Array.isArray(constraints)) {
-                                constraints = [constraints];
-                            }
-                            constraints.forEach(function (constraint) {
-                                var range = constraint.range;
-                                var domain = constraint.domain;
-                                if (range != domain) {
-                                    if (range) {
-                                        if (!existingNodes[range]) {
-                                            existingNodes[range] = 1;
-                                            visjsData.nodes.push({
-                                                id: range,
-                                                label: constraint.rangeLabel,
-                                                shape: "dot",
-                                                color: "#d44",
-                                                data: {
-                                                    id: range,
-                                                    label: constraint.rangeLabel,
-                                                    source: properties[property].source,
-                                                },
-                                            });
-                                        }
-                                    }
-                                }
-
-                                if (domain) {
-                                    if (!existingNodes[domain]) {
-                                        existingNodes[domain] = 1;
-                                        visjsData.nodes.push({
-                                            id: domain,
-                                            label: constraint.domainLabel,
-                                            shape: "dot",
-                                            color: "#d44",
-                                            data: {
-                                                id: domain,
-                                                label: constraint.domainLabel,
-                                                source: properties[property].source,
-                                            },
-                                        });
-                                    }
-                                }
-                                var label = properties[property].label;
-                                var propertyVisjsId = property; //common.getRandomHexaId(10)
-                                if (!existingNodes[propertyVisjsId]) {
-                                    existingNodes[propertyVisjsId] = 1;
+                    for (var prop in properties) {
+                        var items = properties[prop]
+                        items.forEach(function (item) {
+                            if (item.domain) {
+                                if (!existingNodes[item.domain]) {
+                                    existingNodes[item.domain] = 1;
                                     visjsData.nodes.push({
-                                        id: propertyVisjsId,
-                                        label: label,
-                                        shape: "box",
-                                        color: propertyColor,
+                                        id: item.domain,
+                                        label: labelsMap[item.domain],
+                                        shape: "dot",
+                                        color: "#d44",
                                         data: {
-                                            id: property,
-                                            label: label,
-                                            source: properties[property].source,
+                                            id: item.domain,
+                                            label: labelsMap[item.domain],
+                                            source: self.params.source,
                                         },
                                     });
                                 }
+                            }
 
-                                visjsData.edges.push({
-                                    id: common.getRandomHexaId(10),
-                                    label: edgeRangeLabel,
-                                    from: propertyVisjsId,
-                                    to: range,
-                                    data: {},
-                                    arrows: "to",
-                                });
-                                visjsData.edges.push({
-                                    id: common.getRandomHexaId(10),
-                                    label: edgeDomainLabel,
-                                    from: propertyVisjsId,
-                                    to: domain,
-                                    data: {},
-                                    arrows: arrowDir,
-                                });
+
+                            if (item.range) {
+                                if (!existingNodes[item.range]) {
+                                    existingNodes[item.range] = 1;
+                                    visjsData.nodes.push({
+                                        id: item.range,
+                                        label: labelsMap[item.range],
+                                        shape: "dot",
+                                        color: "#07b611",
+                                        data: {
+                                            id: item.range,
+                                            label: labelsMap[item.range],
+                                            source: self.params.source,
+                                        },
+                                    });
+                                }
+                            }
+
+
+                            visjsData.edges.push({
+                                id: common.getRandomHexaId(10),
+                                label: labelsMap[prop],
+                                from: item.domain,
+                                to: item.range,
+                                data: {},
+                                arrows: "to",
                             });
-                        }
+
+                        })
+
                     }
                     Lineage_whiteboard.drawNewGraph(visjsData);
                     callbackSeries();
@@ -700,7 +722,7 @@ var SparqlQuery_bot = (function () {
 
                     var cols = [];
                     var dataset = [];
-                    cols.push({ title: "source", defaultContent: "" }, { title: "label", defaultContent: "" });
+                    cols.push({title: "source", defaultContent: ""}, {title: "label", defaultContent: ""});
                     var constraints;
                     var edgeDomainLabel;
                     var edgeRangeLabel;
@@ -708,20 +730,20 @@ var SparqlQuery_bot = (function () {
                     var arrowDir = "to";
                     if (objectPropertyResourceType == "RangeAndDomain") {
                         cols.push(
-                            { title: "domainLabel", defaultContent: "" },
-                            { title: "rangeLabel", defaultContent: "" },
-                            { title: "domainUri", defaultContent: "" },
-                            { title: "rangeUri", defaultContent: "" },
+                            {title: "domainLabel", defaultContent: ""},
+                            {title: "rangeLabel", defaultContent: ""},
+                            {title: "domainUri", defaultContent: ""},
+                            {title: "rangeUri", defaultContent: ""},
                         );
 
                         edgeDomainLabel = "domain";
                         edgeRangeLabel = "range";
                     } else if (objectPropertyResourceType == "Restriction") {
                         cols.push(
-                            { title: "subClassLabel", defaultContent: "" },
-                            { title: "propertyLabel", defaultContent: "" },
-                            { title: "subClassUri", defaultContent: "" },
-                            { title: "propertyUri", defaultContent: "" },
+                            {title: "subClassLabel", defaultContent: ""},
+                            {title: "propertyLabel", defaultContent: ""},
+                            {title: "subClassUri", defaultContent: ""},
+                            {title: "propertyUri", defaultContent: ""},
                         );
 
                         edgeDomainLabel = "subClassOf";
@@ -729,12 +751,12 @@ var SparqlQuery_bot = (function () {
                     }
 
                     cols.push(
-                        { title: "Propertyuri", defaultContent: "" },
+                        {title: "Propertyuri", defaultContent: ""},
                         {
                             title: "superProperty",
                             defaultContent: "",
                         },
-                        { title: "inverseProperty", defaultContent: "" },
+                        {title: "inverseProperty", defaultContent: ""},
                     );
 
                     for (var property in properties) {
@@ -915,7 +937,7 @@ var SparqlQuery_bot = (function () {
                     if (data.length > self.maxGraphDisplay) {
                         return _botEngine.abort("too many nodes to display a usable graph");
                     }
-                    var visjsData = { nodes: [], edges: [] };
+                    var visjsData = {nodes: [], edges: []};
                     var existingNodes = {};
                     if (outputType != "New Graph") {
                         existingNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
@@ -984,12 +1006,12 @@ var SparqlQuery_bot = (function () {
                     var cols = [];
                     var dataset = [];
                     cols.push(
-                        { title: "subject", defaultContent: "" },
-                        { title: "Predicate", defaultContent: "" },
-                        { title: "Object", defaultContent: "" },
-                        { title: "subjectURI", defaultContent: "" },
-                        { title: "PredicateURI", defaultContent: "" },
-                        { title: "ObjectURI", defaultContent: "" },
+                        {title: "subject", defaultContent: ""},
+                        {title: "Predicate", defaultContent: ""},
+                        {title: "Object", defaultContent: ""},
+                        {title: "subjectURI", defaultContent: ""},
+                        {title: "PredicateURI", defaultContent: ""},
+                        {title: "ObjectURI", defaultContent: ""},
                     );
 
                     data.forEach(function (item) {
@@ -1108,6 +1130,104 @@ var SparqlQuery_bot = (function () {
             },
         );
     };
+
+
+    /**
+     *
+     * type :
+     * selectVars Sparql vars to select distinct ?subject ?predicate ?object
+     *
+     */
+    self.getResourcesList = function (type, selectVars, options, callback) {
+        var sparql_url = Config.sources[self.params.source].sparql_server.url
+        var fromStr = Sparql_common.getFromStr(self.params.source)
+
+        var query = "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
+            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
+            "SELECT distinct   " + selectVars+
+        fromStr+
+        " WHERE { \n"
+
+
+        if (type == "Restriction") {
+            query += "  ?subject rdfs:subClassOf ?b.\n" +
+                "  ?b owl:onProperty ?predicate .\n" +
+                "  ?b ?q ?object .?object rdf:type owl:Class\n"
+
+
+        } else if (type == "RangeAndDomains") {
+            query += "  ?predicate rdf:type owl:ObjectProperty.\n" +
+                "  OPTIONAL {?predicate rdfs:domain ?subject} .\n" +
+                "  OPTIONAL {?predicate rdfs:object ?object} .\n"
+        }
+
+        else if (type == "Predicate") {
+            query += "  ?subject ?predicate ?object.\n"
+        }
+
+        query += "} limit 10000"
+
+
+        Sparql_proxy.querySPARQL_GET_proxy(sparql_url, query, null, null, function (err, result) {
+            if (err) {
+                return callback(err)
+            }
+
+            var predicates=[]
+            var labelsMap={}
+            result.results.bindings.forEach(function (item) {
+                var obj={}
+                for(var key in item){
+                    obj[key]=item[key].value;
+                    labelsMap[item[key].value]=""
+                }
+                predicates.push(obj)
+
+                self.fillLabelsFromUris  (Object.keys(labelsMap), function(err, result){
+                   if(err)
+                       return callback(err)
+
+                    return callback(null,{predicates:predicates,labels:result});
+                })
+
+            })
+
+
+        })
+
+
+    },
+
+
+        self.fillLabelsFromUris = function (uris, callback) {
+            var sparql_url = Config.sources[self.params.source].sparql_server.url
+            var fromStr = Sparql_common.getFromStr(self.params.source)
+
+            var filter = Sparql_common.setFilter("s", uris);
+
+            var query =
+                "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
+                "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
+                "SELECT distinct * " +
+                fromStr +
+                " WHERE {\n" +
+                "  ?s rdfs:label ?sLabel. " +
+                filter +
+                "} limit 10000";
+            Sparql_proxy.querySPARQL_GET_proxy(sparql_url, query, null, null, function (err, result) {
+                if (err) {
+                    return callback(err);
+                }
+                var labelsMap={}
+                result.results.bindings.forEach(function (item) {
+                   labelsMap[item.s.value] = item.sLabel.value;
+                });
+                callback(null, labelsMap)
+
+            });
+        }
 
     return self;
 })();

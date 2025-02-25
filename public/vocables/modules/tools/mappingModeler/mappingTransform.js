@@ -290,7 +290,7 @@ var MappingTransform = (function () {
             var isClass = false;
             allMappings.forEach(function (mapping) {
                 if (mapping.s == nodeId) {
-                    if (mapping.p == "rdf:type" && mapping.o == "owl:Class") {
+                    if (mapping.p == "rdf:type" && mapping.o == "owl:Class"  ) {
                         isClass = true;
                     }
                 }
@@ -299,7 +299,7 @@ var MappingTransform = (function () {
         };
         allMappings.forEach(function (mapping) {
             if (!mapping.p.startsWith("http")) return;
-            if (isClass(mapping.s) && isClass(mapping.o)) {
+            if (isClass(mapping.s) && isClass(mapping.o) &&  mapping.p != "rdfs:subClassOf"  &&  mapping.p != "rdf:member") {
                 if (mapping.s != mapping.o) {
                     mapping.isRestriction = true;
                 }

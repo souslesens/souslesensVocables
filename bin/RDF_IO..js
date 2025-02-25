@@ -81,33 +81,6 @@ var RDF_IO = {
                     return output
 
 
-                    if (elt.match(/^_:b\d+$/)) {
-                        return dataFactory.blankNode(elt)
-                    } else if (elt.indexOf("_:b") == 0) {
-                        return dataFactory.blankNode(elt)
-                    } else if (elt.indexOf("_:") == 0) {
-                        return dataFactory.blankNode(elt)
-                    } else if (elt.indexOf("http") == 0 || elt.valueType == "uri") {
-                        addPrefix(elt)
-                        return dataFactory.namedNode(elt)
-                    } else if ((p = elt.indexOf("^^")) > 0) {
-                        //xsd type
-                        var string_number_version = +elt.substring(0, p).replace(/'/gm, "");
-                        if (!isNaN(string_number_version)) {
-                            return dataFactory.literal(elt, rdf.xsdns('decimal'))
-                        }
-                        if (elt.split("^^")[1] == "xsd:dateTime") {
-                            return dataFactory.literal(elt, rdf.xsdns('date'))
-
-                        } else {
-                            return dataFactory.literal(elt)
-                        }
-
-
-                    } else {
-                        return dataFactory.literal(elt)
-                    }
-
 
                 }
 

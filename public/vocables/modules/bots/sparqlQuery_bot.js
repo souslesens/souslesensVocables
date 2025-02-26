@@ -3,7 +3,7 @@ import Lineage_whiteboard from "../tools/lineage/lineage_whiteboard.js";
 import Sparql_common from "../sparqlProxies/sparql_common.js";
 import CommonBotFunctions from "./_commonBotFunctions.js";
 import OntologyModels from "../shared/ontologyModels.js";
-//import _botEngine from "./_botEngine.js";
+//importmysBotEngine from "./myBotEngine.js";
 import botEngine from "./_botEngineClass.js";
 import Export from "../shared/export.js";
 import KGquery from "../tools/KGquery/KGquery.js";
@@ -13,13 +13,13 @@ var SparqlQuery_bot = (function () {
         var self = {};
         self.maxGraphDisplay = 150;
 
-        var _botEngine=new botEngine()
+        var myBotEngine = new botEngine()
         self.start = function () {
             self.title = "Query graph";
-            _botEngine.init(SparqlQuery_bot, self.workflow, null, function () {
+            myBotEngine.init(SparqlQuery_bot, self.workflow, null, function () {
                 self.params = {source: Lineage_sources.activeSource, labelsMap: {}, maxPredicates: 300};
 
-                _botEngine.nextStep();
+                myBotEngine.nextStep();
             });
         };
 
@@ -29,24 +29,24 @@ var SparqlQuery_bot = (function () {
                     Facts: {
                         chooseQueryScopeFn: {
 
-                                chooseFactFilterTypeFn: {
-                                    listFactQueryFilterFn: {
-                                        addQueryFilterFn: {
+                            chooseFactFilterTypeFn: {
+                                listFactQueryFilterFn: {
+                                    addQueryFilterFn: {
 
-                                            _OR: {
-                                                "Resume": {
+                                        _OR: {
+                                            "Resume": {
 
-                                                    chooseOutputTypeFn : {showResultFn: {}}
-                                                }
-
-                                                , "Filter values": {
-                                                    objectValueFilterFn: {chooseOutputTypeFn: {showResultFn: {}}}
-
-                                                },
-                                                /*  "More filter": {
-                                                      moreFiltersFn: {}
-                                                  }*/
+                                                chooseOutputTypeFn: {showResultFn: {}}
                                             }
+
+                                            , "Filter values": {
+                                                objectValueFilterFn: {chooseOutputTypeFn: {showResultFn: {}}}
+
+                                            },
+                                            /*  "More filter": {
+                                                  moreFiltersFn: {}
+                                              }*/
+                                        }
 
                                     }
 
@@ -119,7 +119,7 @@ var SparqlQuery_bot = (function () {
         self.functions = {
             chooseResourceTypeFn: function () {
                 var choices = ["Facts", "Contraints",];
-                _botEngine.showList(choices, "resourceType");
+                myBotEngine.showList(choices, "resourceType");
             },
             chooseFactFilterTypeFn: function () {
                 var choices = [
@@ -127,7 +127,7 @@ var SparqlQuery_bot = (function () {
                     "ObjectProperty",
                     "Filter values"
                 ]
-                _botEngine.showList(choices, "predicateFilterType");
+                myBotEngine.showList(choices, "predicateFilterType");
             },
 
             chooseConstraintRole: function () {
@@ -140,9 +140,39 @@ var SparqlQuery_bot = (function () {
                     "classRangeOfProperty"
 
                 ]
-                _botEngine.showList(choices, "axiomRole");
+                myBotEngine.showList(choices, "axiomRole");
 
             },
+
+            chooseQueryScopeFn: function () {
+                var choices = [
+                    {id: "activeSource", label: "active source"},
+                    {id: "whiteboardSources", label: "current sources"},
+                ];
+                if (self.params.resourceType == "Class") {
+                    choices.push({id: "", label: "all sources"});
+                }
+                /*if( Lineage_whiteboard.currentGraphNode)
+                          choices.unshift () {id: "activeSource", label: "active source"})*/
+
+
+                myBotEngine.showList(choices, "queryScope");
+            },
+
+            chooseOutputTypeFn: function () {
+                var choices = ["New Graph", "Table", "CSV", "SPARQLquery"];
+                if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
+                    choices.splice(1, 0, "Add to Graph")
+                }
+                myBotEngine.showList(choices, "outputType");
+            },
+
+            showSparqlEditorFn: function () {
+                MainController.onToolSelect("SPARQL");
+                myBotEngine.end();
+            },
+
+
             listFactQueryFilterFn: function () {
                 var options = {}
                 if (self.params.queryScope == "activeSource") {
@@ -162,7 +192,7 @@ var SparqlQuery_bot = (function () {
                         common.array.sort(properties, "label");
                         properties.unshift({id: "anyClass", label: "anyClass"});
 
-                        _botEngine.showList(properties, "currentClassFilter");
+                        myBotEngine.showList(properties, "currentClassFilter");
                     })
                 } else if (predicateFilterType == "ObjectProperty") {
                     self.getResourcesList("ObjectProperty", null, null, {}, function (err, result) {
@@ -176,7 +206,7 @@ var SparqlQuery_bot = (function () {
                         common.array.sort(properties, "label");
                         properties.unshift({id: "anyProperty", label: "anyProperty"});
 
-                        _botEngine.showList(properties, "currentObjectPropertyFilter");
+                        myBotEngine.showList(properties, "currentObjectPropertyFilter");
                     })
                 }
 
@@ -208,7 +238,7 @@ var SparqlQuery_bot = (function () {
                         self.params.currentFilter = ""
                     }
                     self.params.currentFilter += " " + filter
-                    _botEngine.nextStep();
+                    myBotEngine.nextStep();
                 }
                 if (resourceType == "Axioms") {
                     self.processObjectPropertyQuery();
@@ -226,7 +256,7 @@ var SparqlQuery_bot = (function () {
                 self.runFilterClassBot(currentClass, function (err, filter) {
                     if (err) {
                         alert(err.responseText || err)
-                        _botEngine.end()
+                        myBotEngine.end()
                     }
 
                     self.params = self.currentParams
@@ -240,7 +270,8 @@ var SparqlQuery_bot = (function () {
 
 
                     self.params.currentFilter = filter
-                    _botEngine.nextStep()
+                    $("#botPanel").dialog("open");
+                    myBotEngine.nextStep()
 
 
                 })
@@ -258,9 +289,31 @@ var SparqlQuery_bot = (function () {
                     searchedSources = Config.currentProfile.userSources;
                 }
 
-                self.getResourcesList("Predicate", null, self.params.currentFilter, null, function (err, result) {
+                var options = {}
+                if (self.params.outputType == "SPARQLquery") {
+                    options.returnSparql = 1
+                }
+                self.getResourcesList("Predicate", null, self.params.currentFilter, options, function (err, result) {
                     if (err) {
                         return alert(err.responseText || err);
+                    }
+
+                    if (self.params.outputType == "SPARQLquery") {
+                      $("#"+myBotEngine.divId).dialog("close")
+                        $("#smallDialogDiv").html("<div style='background-color:#ddd' >" +
+                            "<textarea  id='sparqlQueryBot_textArea'" +
+                            " style='width:800px;height:500px'></textarea></div>" +
+                            "Output <select id='sparqlQueryBot_outputTypeSelect'><option></option></select>"+
+                        "<button onclick='SparqlQuery_bot.functions.onValidateSparqlQuery()'>Execute</button>"
+                    )
+                        $("#smallDialogDiv").dialog("open")
+                        $("#sparqlQueryBot_outputTypeSelect").css("z-index", 101)
+
+                        var array = ["New Graph", "Add to Graph", "Table", "CSV"]
+                        common.fillSelectOptions("sparqlQueryBot_outputTypeSelect", array)
+                        $("#sparqlQueryBot_textArea").text(result)
+
+                        return
                     }
 
                     if (result.predicates.length > self.params.maxPredicates && outputType != "CSV") {
@@ -269,10 +322,10 @@ var SparqlQuery_bot = (function () {
                         if (confirm("too many items add additional filter?")) {
                             self.functions.chooseFactFilterTypeFn()
                             return;
-                            //  return _botEngine.backToStep("chooseFactFilterTypeFn")
+                            //  returnmysBotEngine.backToStep("chooseFactFilterTypeFn")
                         } else {
                             if (!confirm("only " + self.params.maxPredicates + "items will be displayed")) {
-                                return _botEngine.end()
+                                return myBotEngine.end()
                             } else {
                                 self.params.queryLimit = self.params.maxPredicates
                             }
@@ -289,42 +342,20 @@ var SparqlQuery_bot = (function () {
                     } else if (outputType == "CSV") {
                         self.exportResultToCSV(result)
                     }
-                    _botEngine.nextStep()
+                    myBotEngine.nextStep()
                 })
 
 
             },
 
-
-            chooseQueryScopeFn: function () {
-                var choices = [
-                    {id: "activeSource", label: "active source"},
-                    {id: "whiteboardSources", label: "current sources"},
-                ];
-                if (self.params.resourceType == "Class") {
-                    choices.push({id: "", label: "all sources"});
-                }
-                /*if( Lineage_whiteboard.currentGraphNode)
-                          choices.unshift () {id: "activeSource", label: "active source"})*/
-
-
-                _botEngine.showList(choices, "queryScope");
+            onValidateSparqlQuery: function () {
+                var sparql = $("#sparqlQueryBot_textArea").text()
+                self.params.outputType=$("#sparqlQueryBot_outputTypeSelect").val()
+                self.params.sparqlQuery = sparql
+                $("#smallDialogDiv").dialog("close")
+                $("#"+myBotEngine.divId).dialog("open")
+                self.functions.showResultFn();
             },
-
-            showSparqlEditorFn: function () {
-                MainController.onToolSelect("SPARQL");
-                _botEngine.end();
-            },
-
-
-            chooseOutputTypeFn: function () {
-                var choices = ["New Graph", "Table", "CSV"];
-                if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
-                    choices.unshift("Add to Graph")
-                }
-                _botEngine.showList(choices, "outputType");
-            },
-
 
             listClassesFn: function () {
 
@@ -338,7 +369,7 @@ var SparqlQuery_bot = (function () {
                     }
                     common.array.sort(properties, "label");
                     properties.unshift({id: "anyClass", label: "anyClass"});
-                    _botEngine.showList(properties, "currentObjectProperty");
+                    myBotEngine.showList(properties, "currentObjectProperty");
                 })
 
 
@@ -348,13 +379,13 @@ var SparqlQuery_bot = (function () {
             chooseObjectPropertyResourceTypeFn: function () {
                 var choices = ["Predicate", "Restriction", "RangeAndDomain"]; //
 
-                _botEngine.showList(choices, "objectPropertyResourceType");
+                myBotEngine.showList(choices, "objectPropertyResourceType");
             },
 
             choosePredicateFilterFn: function () {
                 var choices = ["filterObjectProperty", "filterDatatypeProperty", "filterSubject", "filterObject", "_proceed"];
 
-                _botEngine.showList(choices, "predicateFilterType");
+                myBotEngine.showList(choices, "predicateFilterType");
             },
 
 
@@ -396,90 +427,98 @@ var SparqlQuery_bot = (function () {
             }
             var sparql_url = Config.sources[self.params.source].sparql_server.url
             var fromStr = Sparql_common.getFromStr(self.params.source, null, options.withoutImports)
-
-            var query = "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
-                "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
-                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>"
-
-
-            var selectVars = " ?subject ?predicate ?object "
-
-            if (type == "Class") {
-
-                query += "SELECT distinct  ?subject " +
-                    fromStr +
-                    " WHERE {{" +
-                    "?subject rdf:type owl:Class. " +
-                    "filter (exists{?subject ?p ?o} || exists{?s ?p ?subject })"
-            } else if (type == "ObjectProperty") {
-                query += "SELECT distinct  ?predicate " +
-                    fromStr +
-                    " WHERE {{" +
-                    "?predicate rdf:type owl:ObjectProperty. " +
-                    "filter (exists{?subject ?predicate ?o})"
-            } else if (type == "Restriction") {
-
-                if (role == "property") {
-                    selectVars = "?predicate"
-                }
-                if (role == "domain") {
-                    selectVars = "?subject"
-                }
-                if (role == "range") {
-                    selectVars = "?object"
-                }
-
-                query += "SELECT distinct   " + selectVars +
-                    fromStr +
-                    " WHERE {{   ?subject rdfs:subClassOf ?b.\n" +
-                    "  ?b owl:onProperty ?predicate .\n" +
-                    "  ?b ?q ?object .?object rdf:type owl:Class\n"
+var query="";
+            if(self.params.sparqlQuery){
+                query=self.params.sparqlQuery
+            }else {
+                var query = "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
+                    "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+                    "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>"
 
 
-            } else if (type == "RangeAndDomain") {
-                if (role == "property") {
-                    selectVars = "?predicate"
+                var selectVars = " ?subject ?predicate ?object "
+
+                if (type == "Class") {
+
+                    query += "SELECT distinct  ?subject " +
+                        fromStr +
+                        " WHERE {{" +
+                        "?subject rdf:type owl:Class. " +
+                        "filter (exists{?subject ?p ?o} || exists{?s ?p ?subject })"
+                } else if (type == "ObjectProperty") {
+                    query += "SELECT distinct  ?predicate " +
+                        fromStr +
+                        " WHERE {{" +
+                        "?predicate rdf:type owl:ObjectProperty. " +
+                        "filter (exists{?subject ?predicate ?o})"
+                } else if (type == "Restriction") {
+
+                    if (role == "property") {
+                        selectVars = "?predicate"
+                    }
+                    if (role == "domain") {
+                        selectVars = "?subject"
+                    }
+                    if (role == "range") {
+                        selectVars = "?object"
+                    }
+
+                    query += "SELECT distinct   " + selectVars +
+                        fromStr +
+                        " WHERE {{   ?subject rdfs:subClassOf ?b.\n" +
+                        "  ?b owl:onProperty ?predicate .\n" +
+                        "  ?b ?q ?object .?object rdf:type owl:Class\n"
+
+
+                } else if (type == "RangeAndDomain") {
+                    if (role == "property") {
+                        selectVars = "?predicate"
+                    }
+                    if (role == "domain") {
+                        selectVars = "?subject"
+                    }
+                    if (role == "range") {
+                        selectVars = "?object"
+                    }
+                    query += "SELECT distinct   " + selectVars +
+                        fromStr +
+                        " WHERE {{   ?predicate rdf:type owl:ObjectProperty.\n" +
+                        "  OPTIONAL {?predicate rdfs:domain ?subject} .\n" +
+                        "  OPTIONAL {?predicate rdfs:object ?object} .\n"
+                } else if (type == "Predicate") {
+                    if (role == "predicate") {
+                        selectVars = "?predicate"
+                    }
+                    if (role == "subject") {
+                        selectVars = "?subjectClass"
+                    }
+                    if (role == "object") {
+                        selectVars = "?objectClass"
+                    }
+                    query += "SELECT distinct   " + selectVars +
+                        fromStr +
+                        " WHERE {{  ?subject ?predicate ?object.\n"
                 }
-                if (role == "domain") {
-                    selectVars = "?subject"
+
+
+                if (filter) {
+                    query += filter
                 }
-                if (role == "range") {
-                    selectVars = "?object"
+                if (options.objectValueFilter) {
+                    query += options.objectValueFilter;
                 }
-                query += "SELECT distinct   " + selectVars +
-                    fromStr +
-                    " WHERE {{   ?predicate rdf:type owl:ObjectProperty.\n" +
-                    "  OPTIONAL {?predicate rdfs:domain ?subject} .\n" +
-                    "  OPTIONAL {?predicate rdfs:object ?object} .\n"
-            } else if (type == "Predicate") {
-                if (role == "predicate") {
-                    selectVars = "?predicate"
+                query += "}"
+
+                var limit = self.params.queryLimit || 10000
+                query += "} limit " + limit
+
+                UI.message("");
+
+
+                if (options.returnSparql) {
+                    return callback(null, query)
                 }
-                if (role == "subject") {
-                    selectVars = "?subjectClass"
-                }
-                if (role == "object") {
-                    selectVars = "?objectClass"
-                }
-                query += "SELECT distinct   " + selectVars +
-                    fromStr +
-                    " WHERE {{  ?subject ?predicate ?object.\n"
             }
-
-
-            if (filter) {
-                query += filter
-            }
-            if (options.objectValueFilter) {
-                query += options.objectValueFilter;
-            }
-            query += "}"
-
-            var limit = self.params.queryLimit || 10000
-            query += "} limit " + limit
-
-            UI.message("");
-
             Sparql_proxy.querySPARQL_GET_proxy(sparql_url, query, null, null, function (err, result) {
                 if (err) {
                     return callback(err)

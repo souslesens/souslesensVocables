@@ -31,7 +31,11 @@ const MainConfigObject = z
         cookieSecureTrustProxy: z.boolean(),
         cookieMaxAge: z.number().positive(),
         defaultGroups: z.array(z.string()),
-        logDir: z.string(),
+        logs: z.object({
+            directory: z.string(),
+            useFileLogger: z.boolean(),
+            useSymlink: z.boolean(),
+        }),
         default_lang: z.string(),
         sentryDsnNode: z.string(),
         sentryDsnJsFront: z.string(),

@@ -1,5 +1,6 @@
 import { useState, useMemo, useReducer, useEffect, ChangeEvent, forwardRef, Ref, Dispatch, MouseEventHandler } from "react";
 import {
+    Alert,
     Box,
     Button,
     Checkbox,
@@ -77,9 +78,9 @@ const ProfilesTable = () => {
                 </Box>
             ),
             failure: (msg: string) => (
-                <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
-                    ,<p>{`I stumbled into this error when I tried to fetch data: ${msg}. Please, reload this page.`}</p>
-                </Box>
+                <Alert variant="filled" severity="error" sx={{ m: 4 }}>
+                    {`I stumbled into this error when I tried to fetch data: ${msg}. Please, reload this page.`}
+                </Alert>
             ),
             success: (gotProfiles: Profile[]) => {
                 const datas = gotProfiles.map((profile) => {

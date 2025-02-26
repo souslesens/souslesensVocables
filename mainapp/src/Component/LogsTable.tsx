@@ -79,6 +79,12 @@ export const LogsTable = () => {
                             {`${JSON.stringify(logFiles.message)}, consult the administrator of this instance for more information.`}
                         </Alert>
                     );
+                } else if (logFiles.status !== 200) {
+                    return (
+                        <Alert variant="filled" severity="info" sx={{ m: 4 }}>
+                            {JSON.stringify(logFiles.message)}
+                        </Alert>
+                    );
                 }
 
                 const logFilesData = logFiles.message;

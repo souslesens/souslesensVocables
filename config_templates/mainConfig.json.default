@@ -13,7 +13,11 @@
     "cookieSecureTrustProxy": false,
     "cookieMaxAge": 2629800000,
     "defaultGroups": [],
-    "logDir": "logs",
+    "logs": {
+        "directory": "logs",
+        "useFileLogger": true,
+        "useSymlink": true
+    },
     "default_lang": "en",
     "sentryDsnNode": "",
     "sentryDsnJsFront": "",

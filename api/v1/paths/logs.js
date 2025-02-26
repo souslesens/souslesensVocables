@@ -12,23 +12,25 @@ module.exports = function () {
     ///// GET api/v1/logs
     async function GET(req, res, _next) {
         const config = await mainConfigModel.getConfig();
-        const vocablesLog = path.join(config.logDir, "vocables.log");
-        if (!fs.existsSync(vocablesLog)) {
-            return res.status(500).json({ message: "The log files are not available", status: 500 });
+        if (!config.logs.useFileLogger) {
+            return res.status(403).json({ message: "The file logger was disabled on this server", status: 403 });
         }
 
-        const vocablesLogStats = fs.lstatSync(vocablesLog);
-        if (!vocablesLogStats.isSymbolicLink()) {
-            return res.status(500).json({ message: "The log files are not available", status: 500 });
+        const todayDate = new Date();
+        const currentYear = todayDate.getFullYear();
+        const currentMonth = todayDate.getMonth() + 1;
+
+        const vocablesLog = `vocables.log.${currentYear}-${currentMonth < 10 ? "0" : ""}${currentMonth}`;
+        if (!fs.existsSync(path.join(config.logs.directory, vocablesLog))) {
+            return res.status(404).json({ message: "There is no log file available on this server", status: 404 });
         }
 
-        const symlink = fs.readlinkSync(vocablesLog);
         const files = fs
-            .readdirSync(config.logDir)
+            .readdirSync(config.logs.directory)
             .filter((file) => file.startsWith("vocables.log."))
             .map((file) => {
                 const date = path.extname(file).substring(1);
-                return { date: date, current: file == symlink };
+                return { date: date, current: file == vocablesLog };
             });
 
         return res.status(200).json({ message: files, status: 200 });
@@ -59,12 +61,49 @@ module.exports = function () {
                     },
                 },
             },
+            403: {
+                description: "The file logger was disabled on this server",
+                schema: {
+                    type: "object",
+                    properties: {
+                        message: {
+                            type: "string",
+                            default: "The file logger was disabled on this server",
+                        },
+                        status: {
+                            type: "number",
+                            default: 403,
+                        },
+                    },
+                },
+            },
+            404: {
+                description: "There is no log file available on this server",
+                schema: {
+                    type: "object",
+                    properties: {
+                        message: {
+                            type: "string",
+                            default: "There is no log file available on this server",
+                        },
+                        status: {
+                            type: "number",
+                            default: 404,
+                        },
+                    },
+                },
+            },
         },
         tags: ["Logs"],
     };
 
     ///// POST api/v1/logs
-    function POST(req, res, _next) {
+    async function POST(req, res, _next) {
+        const config = await mainConfigModel.getConfig();
+        if (!config.logs.useFileLogger) {
+            return res.status(403).json({ message: "The file logger was disabled on this server", status: 403 });
+        }
+
         const ip = req.header("x-forwarded-for") || req.connection.remoteAddress;
         req.body.infos += "," + ip;
         logger.info(req.body.infos);
@@ -98,6 +137,22 @@ module.exports = function () {
                     properties: {
                         done: {
                             type: "boolean",
+                        },
+                    },
+                },
+            },
+            403: {
+                description: "The file logger was disabled on this server",
+                schema: {
+                    type: "object",
+                    properties: {
+                        message: {
+                            type: "string",
+                            default: "The file logger was disabled on this server",
+                        },
+                        status: {
+                            type: "number",
+                            default: 403,
                         },
                     },
                 },

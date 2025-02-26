@@ -60,3 +60,7 @@ The `mainConfig.json` contain all the `souslesensVocables` configuration.
     -   `url`: The JOWL URL, with protocol and port
 -   `wiki`: The wiki configuration
     -   `url`: The wiki URL, with protocol and port
+-   `logs`: The logger configuration for the server
+    -   `directory`: The path to the directory where the log files are stored
+    -   `useFileLogger`: Set to `false` to disable the file logger and the writing on the filesystem
+    -   `useSymlink`: Set to `false` to disable the creation of symlinks in the logs directory. Useful for the operating system which have a hard time to manage them.

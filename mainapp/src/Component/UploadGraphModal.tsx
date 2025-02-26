@@ -30,11 +30,9 @@ export function UploadGraphModal({ onClose, open, sourceName, indexAfterSuccess 
     const [replaceGraph, setReplaceGraph] = useState<boolean>(true);
     const [errorMessage, setErrorMessage] = useState("");
     const cancelCurrentOperation = useRef(false);
-    const [slsPyApiBaseUrl, setSlsPyApiBaseUrl] = useState<string>("");
     const [graphUrl, setGraphUrl] = useState<string>("");
 
     useEffect(() => {
-        void fetchConfig();
         const fetchAll = async () => {
             const response = await fetchMe();
             setCurrentUser(response.user);
@@ -52,18 +50,6 @@ export function UploadGraphModal({ onClose, open, sourceName, indexAfterSuccess 
         }
         const filesList = Array.from(event.currentTarget.files);
         setUploadFile(filesList);
-    };
-
-    const fetchConfig = async () => {
-        const response = await fetch("/api/v1/config");
-        const json = (await response.json()) as { slsPyApi: { enabled: boolean; url: string } };
-        const slsPyApi = json.slsPyApi;
-        if (slsPyApi.enabled && slsPyApi.url) {
-            // force presence of trailing /
-            setSlsPyApiBaseUrl(json.slsPyApi.url.replace(/\/$/, "").concat("/"));
-            return;
-        }
-        setSlsPyApiBaseUrl("/");
     };
 
     const uploadSource = async (e: MouseEvent) => {
@@ -165,12 +151,12 @@ export function UploadGraphModal({ onClose, open, sourceName, indexAfterSuccess 
                 // if cancel button is pressed, remove uploaded file and return
                 if (cancelCurrentOperation.current) {
                     formData.set("clean", String(true));
-                    await fetch(`${slsPyApiBaseUrl}api/v1/rdf/graph`, { method: "post", headers: { Authorization: `Bearer ${userToken}` }, body: formData });
+                    await fetch("api/v1/rdf/graph", { method: "post", headers: { Authorization: `Bearer ${userToken}` }, body: formData });
                     return;
                 }
 
                 // POST data
-                const res = await fetch(`${slsPyApiBaseUrl}api/v1/rdf/graph`, { method: "post", headers: { Authorization: `Bearer ${userToken}` }, body: formData });
+                const res = await fetch("api/v1/rdf/graph", { method: "post", headers: { Authorization: `Bearer ${userToken}` }, body: formData });
                 if (res.status != 200) {
                     const message = (await res.json()) as { error?: string; detail?: string };
                     console.error(message);

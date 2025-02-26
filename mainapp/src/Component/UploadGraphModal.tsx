@@ -256,7 +256,7 @@ export function UploadGraphModal({ onClose, open, sourceName, indexAfterSuccess 
                             <Button color="primary" disabled={uploadfile.length < 1 && graphUrl === ""} onClick={uploadSource} startIcon={<Done />} type="submit" variant="contained">
                                 Submit
                             </Button>
-                            <Button color="primary" onClick={onClose} startIcon={<Done />} variant="contained">
+                            <Button color="error" onClick={onClose} startIcon={<Close />} variant="outlined">
                                 Cancel
                             </Button>
                         </>

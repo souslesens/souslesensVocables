@@ -244,9 +244,10 @@ var MappingTransform = (function () {
         }
         
         Object.keys(DataSourceManager.currentConfig.lookups).forEach(function(lookup){
-            if(lookup.split('_')[0]==DataSourceManager.currentConfig.currentDataSource.currentTable){
-                var lookupColumn=lookup.split('_')[1];
+            if(lookup==DataSourceManager.currentConfig.currentDataSource.currentTable){
+                
                 var lookupObj=DataSourceManager.currentConfig.lookups[lookup];
+                var lookupColumn=lookupObj.name.split('|')[1];
                 var is_object_lookup=false;
                 var is_subject_lookup=false;
                 if(lookupObj.targetMapping=='both'){
@@ -261,10 +262,10 @@ var MappingTransform = (function () {
                 }
                 allMappings.forEach(function(mapping){
                     if(mapping.s==lookupColumn && is_subject_lookup){
-                       mapping.lookup_s=true;
+                       mapping.lookup_s=lookupObj.name;
                     }
                     if(mapping.o==lookupColumn && is_object_lookup){
-                        mapping.lookup_o=true;
+                        mapping.lookup_o=lookupObj.name;
                     }
                 });
 
@@ -320,10 +321,10 @@ var MappingTransform = (function () {
     self.copyKGcreatorMappings = function () {
         var text = $("#mappingModeler_infosTA").val();
         $("#mappingModeler_infosTA").focus();
-        common.copyTextToClipboard(text);
+        common.copyTextToClipboard(text);  
     };
-    self.getFilteredMappings=function(){
-        var checkedNodes = JstreeWidget.getjsTreeCheckedNodes("detailedMappings_filterMappingsTree");
+    self.getFilteredMappings=function(checkedNodes){
+        
         var filteredMappings = [];
         var columnsSelection = {};
         var checkedNodeAttrs = []

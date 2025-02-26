@@ -11,7 +11,7 @@ const SocketManager = require("../socketManager.");
 const KGbuilder_triplesMaker = require("./KGbuilder_triplesMaker");
 const KGbuilder_triplesWriter = require("./KGbuilder_triplesWriter");
 const KGbuilder_socket = require("./KGbuilder_socket");
-const { lookup } = require("dns");
+
 
 var KGbuilder_main = {
 

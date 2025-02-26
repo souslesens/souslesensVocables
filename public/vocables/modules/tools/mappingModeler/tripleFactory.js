@@ -94,7 +94,25 @@ var TripleFactory = (function () {
      * @memberof module:TripleFactory
      */
     self.runSlsFilteredMappings = function () {
-        var filteredMappings=MappingTransform.getFilteredMappings();
+        var checkedNodes = JstreeWidget.getjsTreeCheckedNodes("detailedMappings_filterMappingsTree");
+        // sometimes parent are not selected, need them to get connections
+        var parentNodes = [];
+        if(checkedNodes.length>0){
+            checkedNodes.forEach(function(node){
+                var parent = $("#" + "detailedMappings_filterMappingsTree").jstree().get_parent(node.id);
+                if(parent ){
+                    parent=$("#" + "detailedMappings_filterMappingsTree").jstree().get_node(parent);
+                    var parentInCheckedNode=checkedNodes.filter(function(item){item.id==parent.id});
+                    if(parentInCheckedNode.length==0){
+                        parentNodes.push(parent);
+                    }
+                    
+                }
+
+            });
+        }
+        checkedNodes=checkedNodes.concat(parentNodes);
+        var filteredMappings=MappingTransform.getFilteredMappings(checkedNodes);
         TripleFactory.createTriples(self.filterMappingIsSample, MappingModeler.currentTable.name, {filteredMappings: filteredMappings}, function (err, result) {
             if (err) {
                 alert(err.responseText || err);

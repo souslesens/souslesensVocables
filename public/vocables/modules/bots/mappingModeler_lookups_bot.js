@@ -88,7 +88,7 @@ var Lookups_bot = function () {
         },
         SetLookupName: function () {
             // remplir avec le nom du mapping
-             _botEngine.currentBot.params['name']=DataSourceManager.currentConfig.currentDataSource.currentTable+'_'+MappingColumnsGraph.currentGraphNode.label;
+             _botEngine.currentBot.params['name']=DataSourceManager.currentConfig.currentDataSource.currentTable+'|'+MappingColumnsGraph.currentGraphNode.label;
 
              //_botEngine.promptValue("Set up lookupName" , "resourceLabel");
 
@@ -179,7 +179,7 @@ var Lookups_bot = function () {
                 return alert("targetColumn is mandatory");
             }
             // add lookup in json graph config
-            DataSourceManager.rawConfig.lookups[lookup.name]=lookup;
+            DataSourceManager.rawConfig.lookups[lookup.name.split('|')[0]]=lookup;
             // restore currentDataSource
             DataSourceManager.currentConfig.currentDataSource=self.currentDataSource;
              MappingColumnsGraph.saveVisjsGraph(function(err,result){

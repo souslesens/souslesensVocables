@@ -898,6 +898,7 @@ var Lineage_whiteboard = (function () {
         var sourceNodes = [];
         existingNodes.forEach(function (/** @type {{ id: string; data: { source: any; id: any; }; }} */ item) {
             if (item.id != "#" && item.data && item.data.source == source) {
+                if(item.id.indexOf( " ")<0)
                 sourceNodes.push(item.data.id || item.id);
             }
         });
@@ -1526,6 +1527,7 @@ var Lineage_whiteboard = (function () {
         }
         options.selectGraph = 1;
         var existingNodes = self.lineageVisjsGraph.getExistingIdsMap();
+
         var visjsData = { nodes: [], edges: [] };
         async.eachSeries(
             slices,

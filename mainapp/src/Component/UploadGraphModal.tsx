@@ -218,7 +218,7 @@ export function UploadGraphModal({ onClose, open, sourceName, indexAfterSuccess 
                         </Stack>
                         <FormLabel>Or upload from URL</FormLabel>
                         <Stack spacing={1} direction="row" useFlexGap>
-                            <TextField fullWidth id="graphUrl" label="Graph URI" name="graphUrl" onChange={handleGraphUrl} />
+                            <TextField fullWidth id="graphUrl" label="Graph URL" name="graphUrl" onChange={handleGraphUrl} />
                         </Stack>
                         <FormControl fullWidth>
                             <FormControlLabel

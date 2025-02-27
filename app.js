@@ -163,7 +163,7 @@ openapi.initialize({
 
                     // Only accept the Bearer scheme from the Authorization header
                     if (output !== null && output[0] === "Bearer") {
-                        req.user = await userModel.findUserAccountFromToken(output[1]);
+                        [_, req.user] = await userModel.findUserAccountFromToken(output[1]);
                     }
                 }
 

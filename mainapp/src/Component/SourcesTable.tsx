@@ -45,7 +45,7 @@ const SourcesTable = () => {
 
     const [snackOpen, setSnackOpen] = useState(false);
     const [snackMessages, setSnackMessages] = useState(new Set());
-    const [snackSeverity, setSnackSeverity] = useState<"warning" | "error" | undefined>(undefined);
+    const [snackSeverity, setSnackSeverity] = useState<"info" | "warning" | "error" | undefined>(undefined);
 
     const [openModal, setOpenModal] = useState(false);
     const [editModal, setEditModal] = useState(false);
@@ -89,6 +89,9 @@ const SourcesTable = () => {
             window.Config.sources = reformatSource(receivedSources);
             updateModel({ type: "sources", payload: success(receivedSources) });
             void writeLog(me, "ConfigEditor", editModal ? "edit" : "create", source.name);
+            setSnackSeverity("info");
+            setSnackMessages(new Set([`source ${source.name} is created`]));
+            setSnackOpen(true);
         } else {
             updateModel({ type: "sources", payload: failure(response.message as string) });
         }

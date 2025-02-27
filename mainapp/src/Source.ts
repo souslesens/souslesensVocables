@@ -170,9 +170,9 @@ export const ServerSourceSchema = z.object({
         .string()
         .default("")
         .refine((val) => val.match(/^([a-z0-9][a-z0-9-]*){0,10}$/i), { message: "Can only contain alphanum and - chars" }),
-    baseUri: z.string().url().optional(),
+    baseUri: z.string().url().optional().or(z.literal("")),
     _type: z.string().optional(),
-    graphUri: z.string().url().optional(),
+    graphUri: z.string().url().optional().or(z.literal("")),
     sparql_server: SparqlServerSchema,
     controller: z.string().default("Sparql_OWL"),
     topClassFilter: z.string().default("?topConcept rdf:type owl:Class ."),

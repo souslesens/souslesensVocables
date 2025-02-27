@@ -125,7 +125,7 @@ var SparqlQuery_bot = (function () {
                 var choices = [
                     "Class",
                     "ObjectProperty",
-                    "Filter values"
+                    "Value"
                 ]
                 myBotEngine.showList(choices, "predicateFilterType");
             },
@@ -185,14 +185,14 @@ var SparqlQuery_bot = (function () {
                         if (err) {
                             return alert(err.responseText || err);
                         }
-                        var properties = []
+                        var classes = []
                         for (var key in result.labels) {
-                            properties.push({id: key, label: result.labels[key]})
+                            classes.push({id: key, label: result.labels[key]})
                         }
-                        common.array.sort(properties, "label");
-                        properties.unshift({id: "anyClass", label: "anyClass"});
+                        common.array.sort(classes, "label");
+                        classes.unshift({id: "anyClass", label: "anyClass"});
 
-                        myBotEngine.showList(properties, "currentClassFilter");
+                        myBotEngine.showList(classes, "currentClassFilter");
                     })
                 } else if (predicateFilterType == "ObjectProperty") {
                     self.getResourcesList("ObjectProperty", null, null, {}, function (err, result) {
@@ -207,6 +207,53 @@ var SparqlQuery_bot = (function () {
                         properties.unshift({id: "anyProperty", label: "anyProperty"});
 
                         myBotEngine.showList(properties, "currentObjectPropertyFilter");
+                    })
+                } else if (predicateFilterType == "Value") {
+
+                    OntologyModels.getKGnonObjectProperties(self.params.source, {excludeBasicVocabularies: 1}, function (err, model) {
+                        if (err) {
+                            alert(err.responseText || err)
+                            return myBotEngine.end()
+                        }
+                        var classes = [];
+                        self.params.nonObjectPropertiesMap = model
+
+                        for (var key in model) {
+                            if (key.indexOf("http://www.w3.org/2002/07/owl") < 0 && key.indexOf("http://www.w3.org/1999/02/22-rdf-syntax-ns") < 0) {
+                                var classLabel = model[key].label
+
+                                classes.push({
+                                    label: classLabel,
+                                    id: key
+                                })
+
+
+                            }
+                        }
+
+                        common.array.sort(classes, "label")
+                        myBotEngine.showList(classes, "currentClassFilter", null, null, function (currentClassId) {
+                            var varName = "V" + common.getRandomHexaId(3)
+                            self.runFilterClassBot({id: currentClassId, label: varName}, function (err, result) {
+                                if (err) {
+                                    alert(err.responseText || err)
+                                    return myBotEngine.end()
+                                }
+
+                                var propertyId = KGquery_filter_bot.params.property
+
+
+                                var filter = "?subject rdf:type|rdfs:subClassOf <" + currentClassId + ">. ?subject <" + propertyId + "> " + varName + "." + result
+
+                                if(!  self.params.currentFilter)
+                                    self.params.currentFilter=""
+                                self.params.currentFilter += " " + filter;
+
+                                myBotEngine.nextStep()
+                            });
+
+                        })
+
                     })
                 }
 
@@ -251,15 +298,16 @@ var SparqlQuery_bot = (function () {
             },
 
             objectValueFilterFn: function () {
-                self.currentParams = self.params
-                var currentClass = {id: self.params.currentClassFilter, label: "subject"}
+                var currentClass = null;
+                if (self.params.currentClassFilter) {
+                    currentClass = {id: self.params.currentClassFilter, label: "subject"}
+                }
                 self.runFilterClassBot(currentClass, function (err, filter) {
                     if (err) {
                         alert(err.responseText || err)
                         myBotEngine.end()
                     }
 
-                    self.params = self.currentParams
 
                     filter = "?subject ?q <" + self.params.currentClassFilter + ">.\n" +
                         " ?subject rdfs:label ?subjectLabel " + filter +
@@ -299,13 +347,13 @@ var SparqlQuery_bot = (function () {
                     }
 
                     if (self.params.outputType == "SPARQLquery") {
-                      $("#"+myBotEngine.divId).dialog("close")
+                        $("#" + myBotEngine.divId).dialog("close")
                         $("#smallDialogDiv").html("<div style='background-color:#ddd' >" +
                             "<textarea  id='sparqlQueryBot_textArea'" +
                             " style='width:800px;height:500px'></textarea></div>" +
-                            "Output <select id='sparqlQueryBot_outputTypeSelect'><option></option></select>"+
-                        "<button onclick='SparqlQuery_bot.functions.onValidateSparqlQuery()'>Execute</button>"
-                    )
+                            "Output <select id='sparqlQueryBot_outputTypeSelect'><option></option></select>" +
+                            "<button onclick='SparqlQuery_bot.functions.onValidateSparqlQuery()'>Execute</button>"
+                        )
                         $("#smallDialogDiv").dialog("open")
                         $("#sparqlQueryBot_outputTypeSelect").css("z-index", 101)
 
@@ -350,10 +398,10 @@ var SparqlQuery_bot = (function () {
 
             onValidateSparqlQuery: function () {
                 var sparql = $("#sparqlQueryBot_textArea").text()
-                self.params.outputType=$("#sparqlQueryBot_outputTypeSelect").val()
+                self.params.outputType = $("#sparqlQueryBot_outputTypeSelect").val()
                 self.params.sparqlQuery = sparql
                 $("#smallDialogDiv").dialog("close")
-                $("#"+myBotEngine.divId).dialog("open")
+                $("#" + myBotEngine.divId).dialog("open")
                 self.functions.showResultFn();
             },
 
@@ -393,23 +441,71 @@ var SparqlQuery_bot = (function () {
 
         self.runFilterClassBot = function (currentClass, callback) {
             var filter = "";
+
+            OntologyModels.getKGnonObjectProperties(self.params.source, {filter: filter}, function (err, model) {
+
+                var currentFilterQuery = {
+                    currentClass: currentClass ? currentClass.id : "xxx",
+                    source: self.params.source,
+                    varName: currentClass ? currentClass.label : "xxx"
+                };
+
+                var nonObjectProperties = [];
+                var uniqueProps = {}
+                for (var key in model) {
+                    if (!uniqueProps[key]) {
+                        uniqueProps[key] = 1
+                        nonObjectProperties.push(model[key])
+                    }
+
+                }
+
+                var data = {nonObjectProperties: nonObjectProperties};
+                if (currentClass) {
+                    data = {nonObjectProperties: model[currentClass.id].properties};
+                }
+                KGquery_filter_bot.start(data, currentFilterQuery, function (err, result) {
+                    return callback(err, result.filter.replace("_label", "Label"));
+
+
+                });
+
+            })
+
+        };
+        self.runFilfilterOtherProperties = function (currentClass, callback) {
+            var filter = "";
             if (currentClass) {
                 filter = "filter( ?s=<" + currentClass.id + ">)"
             }
             OntologyModels.getKGnonObjectProperties(self.params.source, {filter: filter}, function (err, model) {
-                if (currentClass) {
-                    var currentFilterQuery = {
-                        currentClass: currentClass.id,
-                        source: self.params.source,
-                        varName: currentClass.label,
-                    };
-                    var data = model[currentClass.id];
-                    KGquery_filter_bot.start(data, currentFilterQuery, function (err, result) {
-                        return callback(err, result.filter.replace("_label", "Label"));
 
+                var currentFilterQuery = {
+                    currentClass: currentClass ? currentClass.id : "xxx",
+                    source: self.params.source,
+                    varName: currentClass ? currentClass.label : "xxx"
+                };
 
-                    });
+                var nonObjectProperties = [];
+                var uniqueProps = {}
+                for (var key in model) {
+                    if (!uniqueProps[key]) {
+                        uniqueProps[key] = 1
+                        nonObjectProperties.push(model[key])
+                    }
+
                 }
+
+                var data = {nonObjectProperties: nonObjectProperties};
+                if (currentClass) {
+                    data = {nonObjectProperties: model[currentClass.id]};
+                }
+                KGquery_filter_bot.start(data, currentFilterQuery, function (err, result) {
+                    return callback(err, result.filter.replace("_label", "Label"));
+
+
+                });
+
             })
 
         };
@@ -427,10 +523,10 @@ var SparqlQuery_bot = (function () {
             }
             var sparql_url = Config.sources[self.params.source].sparql_server.url
             var fromStr = Sparql_common.getFromStr(self.params.source, null, options.withoutImports)
-var query="";
-            if(self.params.sparqlQuery){
-                query=self.params.sparqlQuery
-            }else {
+            var query = "";
+            if (self.params.sparqlQuery) {
+                query = self.params.sparqlQuery
+            } else {
                 var query = "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
                     "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
                     "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>"

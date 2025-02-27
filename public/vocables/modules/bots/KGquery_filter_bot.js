@@ -123,7 +123,8 @@ var KGquery_filter_bot = (function () {
         });
         self.params.propertyDatatype = datatype;
         var choices = [];
-        if (self.params.propertyDatatype == "http://www.w3.org/2001/XMLSchema#date" || self.params.propertyDatatype == "http://www.w3.org/2001/XMLSchema#dateTime") {
+
+        if (self.params.propertyDatatype.indexOf("http://www.w3.org/2001/XMLSchema#date")>-1) {
             // propertyOperator = ">";
             choices = ["=", "<", "<=", ">", ">=", "range"];
         } else if (self.params.propertyDatatype == "http://www.w3.org/2001/XMLSchema#int") {
@@ -148,9 +149,7 @@ var KGquery_filter_bot = (function () {
         if (!self.params.propertyDatatype || self.params.propertyDatatype == "xsd:string") {
             self.aBotEngine.promptValue("enter value", "propertyValue");
         } else if (
-            !self.params.propertyDatatype ||
-            self.params.propertyDatatype == "http://www.w3.org/2001/XMLSchema#date" ||
-            self.params.propertyDatatype == "http://www.w3.org/2001/XMLSchema#dateTime"
+            !self.params.propertyDatatype ||self.params.propertyDatatype.indexOf("http://www.w3.org/2001/XMLSchema#date")>-1
         ) {
             if (self.params.propertyOperator == "range") {
                 DateWidget.showDateRangePicker("widgetGenericDialogDiv", null, null, function (minDate, maxDate) {
@@ -203,7 +202,7 @@ var KGquery_filter_bot = (function () {
             self.filterItems.push(filterBooleanOperator + "?" + varName + "_" + propLabel + " " + ">=" + ' "' + minDate + '"^^xsd:dateTime ');
             self.filterItems.push(filterBooleanOperator + "?" + varName + "_" + propLabel + " " + "<=" + ' "' + maxDate + '"^^xsd:dateTime  &&');
         } else if (propertyValue) {
-            if (self.params.propertyDatatype == "http://www.w3.org/2001/XMLSchema#date" || self.params.propertyDatatype == "http://www.w3.org/2001/XMLSchema#dateTime") {
+            if (self.params.propertyDatatype.indexOf("http://www.w3.org/2001/XMLSchema#date")>-1) {
                 var dateStr = new Date(propertyValue).toISOString();
                 dateStr = common.ISODateStrToRDFString(dateStr);
                 self.filterItems.push(filterBooleanOperator + "?" + varName + "_" + propLabel + " " + propertyOperator + ' "' + dateStr + '"^^xsd:dateTime');

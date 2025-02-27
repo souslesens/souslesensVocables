@@ -20,6 +20,24 @@ const botEngineClass = function () {
         self.history.step = [];
         self.currentList = [];
 
+        this.currentBot = botModule;
+        this.currentObj = initialWorkflow;
+        this.initialWorkflow = initialWorkflow;
+        this.history = {};
+        this.history.workflowObjects = [];
+        this.history.returnValues = [];
+
+        this.history.VarFilling = {};
+        this.history.currentIndex = -1;
+        // Step is the indexes when currentBot.nextStep is a function when the choice is let to the user
+        this.history.step = [];
+        this.currentList = [];
+
+
+
+
+
+
         var divId;
         if (options.divId) {
             divId = options.divId;
@@ -387,7 +405,7 @@ const botEngineClass = function () {
                 var value = $(this).val();
                 var varToFill = $("#botVarToFill").val();
                 if (!varToFill) {
-                    return self.previousStep();
+                    return this.previousStep();
                 }
                 //Il faut attribuer l'objet aux bon numéro de currentObject
                 self.history.VarFilling[self.history.currentIndex] = {VarFilled: varToFill, valueFilled: value.trim()};

@@ -1283,8 +1283,10 @@ var OntologyModels = (function () {
         if (Config.sources[source].imports) {
             sources = sources.concat(Config.sources[source].imports);
         }
-        for (var vocab in Config.basicVocabularies) {
-            sources.push(vocab);
+        if(!options.excludeBasicVocabularies) {
+            for (var vocab in Config.basicVocabularies) {
+                sources.push(vocab);
+            }
         }
         var nonObjectPropertiesmap = {};
         var filter=""

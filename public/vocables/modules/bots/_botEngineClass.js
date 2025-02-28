@@ -1,4 +1,3 @@
-
 const botEngineClass = function () {
     var self = {};
     self.firstLoad = true;
@@ -32,11 +31,6 @@ const botEngineClass = function () {
         // Step is the indexes when currentBot.nextStep is a function when the choice is let to the user
         this.history.step = [];
         this.currentList = [];
-
-
-
-
-
 
         var divId;
         if (options.divId) {
@@ -158,7 +152,6 @@ const botEngineClass = function () {
         }
     };
 
-
     /**
      *
      * back to a specific previous step
@@ -167,27 +160,23 @@ const botEngineClass = function () {
      * @param parentStep
      */
     self.backToStep = function (parentStep) {
-        var parentStepIndex = -1
+        var parentStepIndex = -1;
         self.history.workflowObjects.forEach(function (item, index) {
             if (item[parentStep]) {
-                parentStepIndex = index
+                parentStepIndex = index;
             }
-
-        })
+        });
         if (parentStepIndex < 0) {
-            return alert("wrong parentStep " + parentStep)
+            return alert("wrong parentStep " + parentStep);
         }
 
-        var n = 0
+        var n = 0;
         do {
-            self.previousStep()
-            n++
-        }
-        while (n <= parentStepIndex)
-        self.previousStep()
-
-
-    }
+            self.previousStep();
+            n++;
+        } while (n <= parentStepIndex);
+        self.previousStep();
+    };
 
     self.previousStep = function () {
         /*
@@ -275,9 +264,9 @@ const botEngineClass = function () {
             if ($(last_message).attr("class") == "chat-left") {
                 last_message.remove();
             }
-            self.writeCompletedHtml(message || "select an option", {question: true});
+            self.writeCompletedHtml(message || "select an option", { question: true });
         } else {
-            self.writeCompletedHtml("select an option", {question: true});
+            self.writeCompletedHtml("select an option", { question: true });
         }
     };
 
@@ -350,7 +339,7 @@ const botEngineClass = function () {
             }
             if (varToFill) {
                 //Il faut attribuer l'objet aux bon numéro de currentObject
-                self.history.VarFilling[self.history.currentIndex] = {VarFilled: varToFill, valueFilled: selectedValue};
+                self.history.VarFilling[self.history.currentIndex] = { VarFilled: varToFill, valueFilled: selectedValue };
                 if (Array.isArray(self.currentBot.params[varToFill])) {
                     self.currentBot.params[varToFill].push(selectedValue);
                 } else {
@@ -408,7 +397,7 @@ const botEngineClass = function () {
                     return this.previousStep();
                 }
                 //Il faut attribuer l'objet aux bon numéro de currentObject
-                self.history.VarFilling[self.history.currentIndex] = {VarFilled: varToFill, valueFilled: value.trim()};
+                self.history.VarFilling[self.history.currentIndex] = { VarFilled: varToFill, valueFilled: value.trim() };
 
                 self.currentBot.params[varToFill] = value.trim();
                 self.writeCompletedHtml(value);
@@ -470,7 +459,7 @@ const botEngineClass = function () {
     self.showAlternatives = function (alternatives, varToFill) {
         var choices = [];
         for (var key in alternatives) {
-            choices.push({id: key, label: key});
+            choices.push({ id: key, label: key });
         }
 
         self.showList(choices, varToFill);
@@ -492,7 +481,7 @@ const botEngineClass = function () {
         var functionTitles = self.currentBot.functionTitles;
         var workflow = self.initialWorkflow;
 
-        var visjsData = {nodes: [], edges: []};
+        var visjsData = { nodes: [], edges: [] };
 
         var existingNodes = {};
         var recurse = function (obj, parentId, level) {
@@ -539,7 +528,7 @@ const botEngineClass = function () {
             label: title,
             shape: "ellipse",
             color: "#117de8",
-            font: {color: "white", size: 18},
+            font: { color: "white", size: 18 },
 
             level: 0,
             data: {
@@ -557,8 +546,8 @@ const botEngineClass = function () {
         $("#mainDialogDiv").dialog("open");
         //  $("#mainDialogDiv").parent().css("z-index", 1);
         Lineage_whiteboard.drawNewGraph(visjsData, "botGraphDiv", {
-            layoutHierarchical: {vertical: true, levelSeparation: 150, nodeSpacing: 50, direction: "LR"},
-            physics: {enabled: true},
+            layoutHierarchical: { vertical: true, levelSeparation: 150, nodeSpacing: 50, direction: "LR" },
+            physics: { enabled: true },
         });
     };
     self.fillStartParams = function (params) {
@@ -571,8 +560,7 @@ const botEngineClass = function () {
                     // Essayer de convertir en JSON
                     var str = JSON.stringify(param);
                     param = JSON.parse(str);
-                } catch (e) {
-                }
+                } catch (e) {}
             }
 
             startParams.push(param);

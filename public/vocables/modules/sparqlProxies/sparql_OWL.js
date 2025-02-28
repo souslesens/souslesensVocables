@@ -1920,9 +1920,8 @@ var Sparql_OWL = (function () {
         var typeFilterStr = "";
         if (options.type) {
             typeFilterStr = "?id rdf:type ?type. FILTER (?type =" + options.type + ")";
-        }
-        else if (options.filter) {
-            typeFilterStr = options.filter
+        } else if (options.filter) {
+            typeFilterStr = options.filter;
         } else {
             typeFilterStr = "";
         }

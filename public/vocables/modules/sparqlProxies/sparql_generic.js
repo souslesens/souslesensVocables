@@ -993,7 +993,7 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
                             " ?firstParent." +
                             " OPTIONAL {?subject rdfs:label ?subjectLabel.}" +
                             //  Sparql_common.getVariableLangLabel("subject", false, true)
-                           "OPTIONAL{?subject skos:altLabel ?skosAltLabel }";
+                            "OPTIONAL{?subject skos:altLabel ?skosAltLabel }";
 
                         if (options.filter) {
                             where += " " + options.filter + " ";

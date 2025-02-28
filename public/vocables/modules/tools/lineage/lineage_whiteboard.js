@@ -898,8 +898,7 @@ var Lineage_whiteboard = (function () {
         var sourceNodes = [];
         existingNodes.forEach(function (/** @type {{ id: string; data: { source: any; id: any; }; }} */ item) {
             if (item.id != "#" && item.data && item.data.source == source) {
-                if(item.id.indexOf( " ")<0)
-                sourceNodes.push(item.data.id || item.id);
+                if (item.id.indexOf(" ") < 0) sourceNodes.push(item.data.id || item.id);
             }
         });
         return sourceNodes;
@@ -1622,9 +1621,8 @@ var Lineage_whiteboard = (function () {
                         try {
                             self.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
                             self.lineageVisjsGraph.data.edges.add(visjsData.edges);
-                        }
-                        catch(e){
-                            console.log(e)
+                        } catch (e) {
+                            console.log(e);
                         }
                     } else {
                         Lineage_whiteboard.drawNewGraph(visjsData);

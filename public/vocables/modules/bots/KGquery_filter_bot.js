@@ -4,14 +4,12 @@ import _botEngine from "./_BotEngine.js";
 //import botEngineClass from "./_botEngineClass.js";
 import Sparql_OWL from "../sparqlProxies/sparql_OWL.js";
 
-
-
 var KGquery_filter_bot = (function () {
     var self = {};
     self.title = "Filter Class";
-  self.aBotEngine=_botEngine//new botEngineClass()
+    self.aBotEngine = _botEngine; //new botEngineClass()
     self.start = function (data, currentQuery, validateFn) {
-      //  self.aBotEngine.startParams = self.aBotEngine.fillStartParams(arguments);
+        //  self.aBotEngine.startParams = self.aBotEngine.fillStartParams(arguments);
 
         self.data = data;
         self.filter = "";
@@ -23,7 +21,6 @@ var KGquery_filter_bot = (function () {
             workflow = self.workflow_filterClass;
         }
 
-      
         self.aBotEngine.init(KGquery_filter_bot, workflow, null, function () {
             self.validateFn = validateFn;
             self.callbackFn = function () {
@@ -126,7 +123,7 @@ var KGquery_filter_bot = (function () {
         self.params.propertyDatatype = datatype;
         var choices = [];
 
-        if (self.params.propertyDatatype.indexOf("http://www.w3.org/2001/XMLSchema#date")>-1) {
+        if (self.params.propertyDatatype.indexOf("http://www.w3.org/2001/XMLSchema#date") > -1) {
             // propertyOperator = ">";
             choices = ["=", "<", "<=", ">", ">=", "range"];
         } else if (self.params.propertyDatatype == "http://www.w3.org/2001/XMLSchema#int") {
@@ -150,9 +147,7 @@ var KGquery_filter_bot = (function () {
     self.functions.promptPropertyValueFn = function () {
         if (!self.params.propertyDatatype || self.params.propertyDatatype == "xsd:string") {
             self.aBotEngine.promptValue("enter value", "propertyValue");
-        } else if (
-            !self.params.propertyDatatype ||self.params.propertyDatatype.indexOf("http://www.w3.org/2001/XMLSchema#date")>-1
-        ) {
+        } else if (!self.params.propertyDatatype || self.params.propertyDatatype.indexOf("http://www.w3.org/2001/XMLSchema#date") > -1) {
             if (self.params.propertyOperator == "range") {
                 DateWidget.showDateRangePicker("widgetGenericDialogDiv", null, null, function (minDate, maxDate) {
                     self.params.dateValueRange = { minDate: minDate, maxDate: maxDate };
@@ -204,7 +199,7 @@ var KGquery_filter_bot = (function () {
             self.filterItems.push(filterBooleanOperator + "?" + varName + "_" + propLabel + " " + ">=" + ' "' + minDate + '"^^xsd:dateTime ');
             self.filterItems.push(filterBooleanOperator + "?" + varName + "_" + propLabel + " " + "<=" + ' "' + maxDate + '"^^xsd:dateTime  &&');
         } else if (propertyValue) {
-            if (self.params.propertyDatatype.indexOf("http://www.w3.org/2001/XMLSchema#date")>-1) {
+            if (self.params.propertyDatatype.indexOf("http://www.w3.org/2001/XMLSchema#date") > -1) {
                 var dateStr = new Date(propertyValue).toISOString();
                 dateStr = common.ISODateStrToRDFString(dateStr);
                 self.filterItems.push(filterBooleanOperator + "?" + varName + "_" + propLabel + " " + propertyOperator + ' "' + dateStr + '"^^xsd:dateTime');

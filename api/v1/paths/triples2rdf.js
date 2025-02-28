@@ -2,7 +2,6 @@ const { processResponse } = require("./utils");
 const rdf = require("../../../bin/RDF_IO..js");
 const { NamedNode, BlankNode, Literal, Graph } = rdf;
 
-
 module.exports = function () {
     let operations = {
         GET,
@@ -36,11 +35,9 @@ module.exports = function () {
         try {
             var triples = req.body.triples;
 
-           rdf.triples2turtle(triples, function(err, turtle){
-                return processResponse(res, null,{output:turtle});
+            rdf.triples2turtle(triples, function (err, turtle) {
+                return processResponse(res, null, { output: turtle });
             });
-
-
         } catch (e) {
             return processResponse(res, e);
         }

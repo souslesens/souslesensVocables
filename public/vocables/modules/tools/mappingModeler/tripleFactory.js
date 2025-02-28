@@ -7,7 +7,6 @@ import Export from "../../shared/export.js";
 import UIcontroller from "./uiController.js";
 import DataSourceManager from "./dataSourcesManager.js";
 
-
 /**
  * The TripleFactory module handles the creation, filtering, and writing of RDF triples.
  * It includes functions for generating sample triples, creating all mappings triples, and indexing the graph.
@@ -80,8 +79,8 @@ var TripleFactory = (function () {
         $("#mappingModeler_genericPanel").load("./modules/tools/mappingModeler/html/filterMappingDialog.html", function () {
             //  $("#mainDialogDiv").dialog("option", "title", "Filter mappings : table " + MappingModeler.currentTable.name);
             // $("#mainDialogDiv").dialog("open");
-            var options = {withCheckboxes: true, withoutContextMenu: true, openAll: true, check_all: true};
-            
+            var options = { withCheckboxes: true, withoutContextMenu: true, openAll: true, check_all: true };
+
             MappingsDetails.showDetailedMappingsTree(null, "detailedMappings_filterMappingsTree", options);
         });
     };
@@ -97,40 +96,43 @@ var TripleFactory = (function () {
         var checkedNodes = JstreeWidget.getjsTreeCheckedNodes("detailedMappings_filterMappingsTree");
         // sometimes parent are not selected, need them to get connections
         var parentNodes = [];
-        if(checkedNodes.length>0){
-            checkedNodes.forEach(function(node){
-                var parent = $("#" + "detailedMappings_filterMappingsTree").jstree().get_parent(node.id);
-                if(parent ){
-                    parent=$("#" + "detailedMappings_filterMappingsTree").jstree().get_node(parent);
-                    var parentInCheckedNode=checkedNodes.filter(function(item){item.id==parent.id});
-                    if(parentInCheckedNode.length==0){
+        if (checkedNodes.length > 0) {
+            checkedNodes.forEach(function (node) {
+                var parent = $("#" + "detailedMappings_filterMappingsTree")
+                    .jstree()
+                    .get_parent(node.id);
+                if (parent) {
+                    parent = $("#" + "detailedMappings_filterMappingsTree")
+                        .jstree()
+                        .get_node(parent);
+                    var parentInCheckedNode = checkedNodes.filter(function (item) {
+                        item.id == parent.id;
+                    });
+                    if (parentInCheckedNode.length == 0) {
                         parentNodes.push(parent);
                     }
-                    
                 }
-
             });
         }
-        checkedNodes=checkedNodes.concat(parentNodes);
-        var filteredMappings=MappingTransform.getFilteredMappings(checkedNodes);
-        TripleFactory.createTriples(self.filterMappingIsSample, MappingModeler.currentTable.name, {filteredMappings: filteredMappings}, function (err, result) {
+        checkedNodes = checkedNodes.concat(parentNodes);
+        var filteredMappings = MappingTransform.getFilteredMappings(checkedNodes);
+        TripleFactory.createTriples(self.filterMappingIsSample, MappingModeler.currentTable.name, { filteredMappings: filteredMappings }, function (err, result) {
             if (err) {
                 alert(err.responseText || err);
             } else {
                 UI.message("Done", true);
-                if(!self.filterMappingIsSample){
+                if (!self.filterMappingIsSample) {
                     //Admin.clearOntologyModelCache();
                     SearchUtil.generateElasticIndex(MappingModeler.currentSLSsource, { indexProperties: 1, indexNamedIndividuals: 1 }, () => {
-
                         $.ajax({
                             type: "DELETE",
-                            url:  `${Config.apiUrl}/ontologyModels?source=${MappingModeler.currentSLSsource}`,
-                            
+                            url: `${Config.apiUrl}/ontologyModels?source=${MappingModeler.currentSLSsource}`,
+
                             dataType: "json",
                             success: function (result, _textStatus, _jqXHR) {
                                 delete Config.ontologiesVocabularyModels[MappingModeler.currentSLSsource];
 
-                                UI.message('ALL DONE');
+                                UI.message("ALL DONE");
                             },
                             error: function (err) {
                                 if (callback) {
@@ -152,7 +154,6 @@ var TripleFactory = (function () {
             }
         });
     };
-
 
     /**
      * Checks if the current table is valid and if its mappings details are loaded.
@@ -234,7 +235,6 @@ var TripleFactory = (function () {
             },
         });
     };
-
 
     /**
      * Creates triples for a given table using the selected mappings.
@@ -330,7 +330,7 @@ var TripleFactory = (function () {
     /**
      * Generates KGcreator triples for the entire datasource, deleting any previous triples before creating new ones.
      * It proceeds with a series of steps: deleting old triples, creating new triples, and reindexing the graph.
-     * 
+     *
      * @function
      * @name createAllMappingsTriples
      * @memberof module:TripleFactory
@@ -376,7 +376,7 @@ var TripleFactory = (function () {
     /**
      * Displays the triples data in a table format within the specified div element.
      * The table includes columns for subject, predicate, and object, and the data is escaped to prevent HTML injection.
-     * 
+     *
      * @function
      * @name showTriplesInDataTable
      * @param {Array} data - The triples data to display, each item should contain 's', 'p', and 'o' properties.
@@ -393,8 +393,7 @@ var TripleFactory = (function () {
         var tableCols = [];
         var hearders = ["subject", "predicate", "object"];
         hearders.forEach(function (item) {
-            tableCols.push({title: item, defaultContent: "", width: "30%"});
-           
+            tableCols.push({ title: item, defaultContent: "", width: "30%" });
         });
 
         var tableData = [];
@@ -410,14 +409,11 @@ var TripleFactory = (function () {
 
         /*  $("#KGcreator_triplesDataTableDiv").html(str)
           return;*/
-        Export.showDataTable(div, tableCols, tableData, null, {paging: true, divId: div}, function (err, datatable) {
-        });
-       
+        Export.showDataTable(div, tableCols, tableData, null, { paging: true, divId: div }, function (err, datatable) {});
     };
 
     return self;
-})
-();
+})();
 
 export default TripleFactory;
 window.TripleFactory = TripleFactory;

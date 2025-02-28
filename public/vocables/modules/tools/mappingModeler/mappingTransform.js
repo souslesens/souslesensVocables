@@ -97,9 +97,8 @@ var MappingTransform = (function () {
      */
     self.nodeToKGcreatorColumnName = function (data) {
         var colname = data.id;
-        if(data.baseURI){
-            colname="["+data.baseURI+"]"+colname
-
+        if (data.baseURI) {
+            colname = "[" + data.baseURI + "]" + colname;
         }
 
         if (data.uriType == "blankNode") {
@@ -107,7 +106,6 @@ var MappingTransform = (function () {
         } else if (data.uriType == "randomIdentifier") {
             colname = colname + "_£";
         }
-
 
         if (colname && data.type == "VirtualColumn") {
             colname = "@" + colname + "_$";
@@ -234,47 +232,42 @@ var MappingTransform = (function () {
 
         allMappings = self.addMappingsRestrictions(allMappings);
         // allMappings add lookups_s and lookups_o for each mapping if there is lookup
-        allMappings=self.addLookupsToMappings(allMappings);
+        allMappings = self.addLookupsToMappings(allMappings);
 
         return allMappings;
     };
-    self.addLookupsToMappings=function(allMappings){
-        if(Object.keys(DataSourceManager.currentConfig.lookups).length==0){
+    self.addLookupsToMappings = function (allMappings) {
+        if (Object.keys(DataSourceManager.currentConfig.lookups).length == 0) {
             return allMappings;
         }
-        
-        Object.keys(DataSourceManager.currentConfig.lookups).forEach(function(lookup){
-            if(lookup==DataSourceManager.currentConfig.currentDataSource.currentTable){
-                
-                var lookupObj=DataSourceManager.currentConfig.lookups[lookup];
-                var lookupColumn=lookupObj.name.split('|')[1];
-                var is_object_lookup=false;
-                var is_subject_lookup=false;
-                if(lookupObj.targetMapping=='both'){
-                    is_object_lookup=true;
-                    is_subject_lookup=true;
+
+        Object.keys(DataSourceManager.currentConfig.lookups).forEach(function (lookup) {
+            if (lookup == DataSourceManager.currentConfig.currentDataSource.currentTable) {
+                var lookupObj = DataSourceManager.currentConfig.lookups[lookup];
+                var lookupColumn = lookupObj.name.split("|")[1];
+                var is_object_lookup = false;
+                var is_subject_lookup = false;
+                if (lookupObj.targetMapping == "both") {
+                    is_object_lookup = true;
+                    is_subject_lookup = true;
                 }
-                if(lookupObj.targetMapping=='object'){
-                    is_object_lookup=true; 
+                if (lookupObj.targetMapping == "object") {
+                    is_object_lookup = true;
                 }
-                if(lookupObj.targetMapping=='subject'){
-                    is_subject_lookup=true;
+                if (lookupObj.targetMapping == "subject") {
+                    is_subject_lookup = true;
                 }
-                allMappings.forEach(function(mapping){
-                    if(mapping.s==lookupColumn && is_subject_lookup){
-                       mapping.lookup_s=lookupObj.name;
+                allMappings.forEach(function (mapping) {
+                    if (mapping.s == lookupColumn && is_subject_lookup) {
+                        mapping.lookup_s = lookupObj.name;
                     }
-                    if(mapping.o==lookupColumn && is_object_lookup){
-                        mapping.lookup_o=lookupObj.name;
+                    if (mapping.o == lookupColumn && is_object_lookup) {
+                        mapping.lookup_o = lookupObj.name;
                     }
                 });
-
             }
-                        
         });
         return allMappings;
-        
-
     };
 
     /**
@@ -291,7 +284,7 @@ var MappingTransform = (function () {
             var isClass = false;
             allMappings.forEach(function (mapping) {
                 if (mapping.s == nodeId) {
-                    if (mapping.p == "rdf:type" && mapping.o == "owl:Class"  ) {
+                    if (mapping.p == "rdf:type" && mapping.o == "owl:Class") {
                         isClass = true;
                     }
                 }
@@ -300,7 +293,7 @@ var MappingTransform = (function () {
         };
         allMappings.forEach(function (mapping) {
             if (!mapping.p.startsWith("http")) return;
-            if (isClass(mapping.s) && isClass(mapping.o) &&  mapping.p != "rdfs:subClassOf"  &&  mapping.p != "rdf:member") {
+            if (isClass(mapping.s) && isClass(mapping.o) && mapping.p != "rdfs:subClassOf" && mapping.p != "rdf:member") {
                 if (mapping.s != mapping.o) {
                     mapping.isRestriction = true;
                 }
@@ -321,68 +314,54 @@ var MappingTransform = (function () {
     self.copyKGcreatorMappings = function () {
         var text = $("#mappingModeler_infosTA").val();
         $("#mappingModeler_infosTA").focus();
-        common.copyTextToClipboard(text);  
+        common.copyTextToClipboard(text);
     };
-    self.getFilteredMappings=function(checkedNodes){
-        
+    self.getFilteredMappings = function (checkedNodes) {
         var filteredMappings = [];
         var columnsSelection = {};
-        var checkedNodeAttrs = []
+        var checkedNodeAttrs = [];
 
         checkedNodes.forEach(function (node) {
-            if (node.parents.length == 3) {// attrs
-                checkedNodeAttrs.push(node.id)
-                columnsSelection[node.id] = MappingColumnsGraph.visjsGraph.data.nodes.get(node.parent)
-            } else if (node.data && node.data.type == "Column") {// filter only mapping nodes
-                columnsSelection[node.id] = MappingColumnsGraph.visjsGraph.data.nodes.get(node.id)
-            }else if (node.data && node.data.type == "VirtualColumn"){
-                columnsSelection[node.id] = MappingColumnsGraph.visjsGraph.data.nodes.get(node.id)
-            }else if (node.data && node.data.type == "RowIndex"){
-                columnsSelection[node.id] = MappingColumnsGraph.visjsGraph.data.nodes.get(node.id)
+            if (node.parents.length == 3) {
+                // attrs
+                checkedNodeAttrs.push(node.id);
+                columnsSelection[node.id] = MappingColumnsGraph.visjsGraph.data.nodes.get(node.parent);
+            } else if (node.data && node.data.type == "Column") {
+                // filter only mapping nodes
+                columnsSelection[node.id] = MappingColumnsGraph.visjsGraph.data.nodes.get(node.id);
+            } else if (node.data && node.data.type == "VirtualColumn") {
+                columnsSelection[node.id] = MappingColumnsGraph.visjsGraph.data.nodes.get(node.id);
+            } else if (node.data && node.data.type == "RowIndex") {
+                columnsSelection[node.id] = MappingColumnsGraph.visjsGraph.data.nodes.get(node.id);
             }
-
-
         });
-        var mappings = MappingTransform.mappingsToKGcreatorJson(columnsSelection)
-        var uniqueFilteredMappings = {}
-        var transforms={}
+        var mappings = MappingTransform.mappingsToKGcreatorJson(columnsSelection);
+        var uniqueFilteredMappings = {};
+        var transforms = {};
         // checkedNodeAttrs work only for technical mappings we need to also add structural column mappings
         mappings.forEach(function (mapping) {
-
-            
             checkedNodeAttrs.forEach(function (treeNodeId) {
-                
                 if (treeNodeId.indexOf(mapping.o) > -1) {
-                   if(treeNodeId.indexOf('transform') > -1 && mapping.p=='transform'){
-                    transforms[mapping.s]=mapping.o
-                   }
-                   else if(! uniqueFilteredMappings[mapping.s+"|"+mapping.o]){
-                       uniqueFilteredMappings[mapping.s+"|"+mapping.o]=1
-                       filteredMappings.push(mapping)
-                   }
-                   
-
+                    if (treeNodeId.indexOf("transform") > -1 && mapping.p == "transform") {
+                        transforms[mapping.s] = mapping.o;
+                    } else if (!uniqueFilteredMappings[mapping.s + "|" + mapping.o]) {
+                        uniqueFilteredMappings[mapping.s + "|" + mapping.o] = 1;
+                        filteredMappings.push(mapping);
+                    }
                 }
-                
-
-
             });
-
-            
-
-
         });
-        var columnMappings = MappingTransform.mappingsToKGcreatorJson(columnsSelection,{getColumnMappingsOnly:true});
+        var columnMappings = MappingTransform.mappingsToKGcreatorJson(columnsSelection, { getColumnMappingsOnly: true });
         // selection isn't concerned for column mappings select all
-        filteredMappings=filteredMappings.concat(columnMappings);
-        var table=MappingModeler.currentTable.name;
-        
-        filteredMappings ={[table]:{tripleModels:filteredMappings,transform:transforms}}
-        if(Object.keys(DataSourceManager.currentConfig.lookups)){
-            filteredMappings[table].lookups=DataSourceManager.currentConfig.lookups;
+        filteredMappings = filteredMappings.concat(columnMappings);
+        var table = MappingModeler.currentTable.name;
+
+        filteredMappings = { [table]: { tripleModels: filteredMappings, transform: transforms } };
+        if (Object.keys(DataSourceManager.currentConfig.lookups)) {
+            filteredMappings[table].lookups = DataSourceManager.currentConfig.lookups;
         }
         return filteredMappings;
-    }
+    };
     return self;
 })();
 export default MappingTransform;

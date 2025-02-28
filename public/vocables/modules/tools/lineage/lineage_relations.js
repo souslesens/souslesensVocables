@@ -389,12 +389,9 @@ var Lineage_relations = (function () {
                     source = Config.dictionarySource;
                     options.includeSources = Config.dictionarySource;
 
-                  //  data = Lineage_whiteboard.lineageVisjsGraph.data.nodes.getIds();
+                    //  data = Lineage_whiteboard.lineageVisjsGraph.data.nodes.getIds();
 
-                    data =  Lineage_whiteboard.getGraphIdsFromSource(source);
-
-
-
+                    data = Lineage_whiteboard.getGraphIdsFromSource(source);
 
                     options.filter = "FILTER (?prop in (owl:sameAs,owl:equivalentClass))";
                     Lineage_sources.registerSource(Config.dictionarySource);

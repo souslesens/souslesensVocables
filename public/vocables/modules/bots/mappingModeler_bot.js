@@ -57,8 +57,8 @@ var MappingModeler_bot = (function () {
                 "create  datatypeProperty": {
                     createDatatypePropertyFn: {},
                 },
-                "add LookUp":{
-                    addLookUpFn:{},
+                "add LookUp": {
+                    addLookUpFn: {},
                 },
 
                 end: {},
@@ -209,9 +209,7 @@ var MappingModeler_bot = (function () {
                     source: self.params.source,
                     datatypePropertyDomain: classId,
                 },
-                function (err, result) {
-                    
-                },
+                function (err, result) {},
             );
         },
         listDatatypePropertyRangeFn: function () {
@@ -233,12 +231,11 @@ var MappingModeler_bot = (function () {
             self.params.addingSubClassOf = self.params.superClassId;
             _botEngine.nextStep();
         },
-        addLookUpFn:function(){
+        addLookUpFn: function () {
             Lookups_bot.start(Lookups_bot.lookUpWorkflow, {}, function (err, result) {
                 if (err) {
                     return alert(err);
                 }
-                
             });
         },
     };

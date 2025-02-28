@@ -12,11 +12,10 @@ var SparqlQuery_bot = (function () {
     var self = {};
     self.maxGraphDisplay = 150;
 
-
     self.start = function () {
         self.title = "Query graph";
         _botEngine.init(SparqlQuery_bot, self.workflow, null, function () {
-            self.params = {source: Lineage_sources.activeSource, labelsMap: {}};
+            self.params = { source: Lineage_sources.activeSource, labelsMap: {} };
 
             _botEngine.nextStep();
         });
@@ -57,7 +56,7 @@ var SparqlQuery_bot = (function () {
                 },
             },
         },
-        sparqlQuery: {showSparqlEditorFn: {}},
+        sparqlQuery: { showSparqlEditorFn: {} },
         similars: {
             chooseQueryScopeFn: {},
         },
@@ -87,11 +86,11 @@ var SparqlQuery_bot = (function () {
     self.functions = {
         chooseQueryScopeFn: function () {
             var choices = [
-                {id: "activeSource", label: "active source"},
-                {id: "whiteboardSources", label: "current sources"},
+                { id: "activeSource", label: "active source" },
+                { id: "whiteboardSources", label: "current sources" },
             ];
             if (self.params.resourceType == "Class") {
-                choices.push({id: "", label: "all sources"});
+                choices.push({ id: "", label: "all sources" });
             }
 
             _botEngine.showList(choices, "queryScope");
@@ -110,7 +109,7 @@ var SparqlQuery_bot = (function () {
         chooseOutputTypeFn: function () {
             var choices = ["Tree", "Table", "New Graph"];
             if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
-                choices.push("Add to Graph")
+                choices.push("Add to Graph");
             }
             _botEngine.showList(choices, "outputType");
         },
@@ -123,8 +122,6 @@ var SparqlQuery_bot = (function () {
         },
 
         finalizeQuery: function () {
-
-
             var resourceType = self.params.resourceType;
             if (resourceType == "Class") {
                 self.processClassQuerySearch();
@@ -135,37 +132,28 @@ var SparqlQuery_bot = (function () {
             }
         },
         listObjectPropertiesFn: function () {
-
             self.getResourcesList(self.params.objectPropertyResourceType, "property", null, function (err, result) {
-                var properties = []
+                var properties = [];
                 for (var key in result.labels) {
-                    properties.push({id: key, label: result.labels[key]})
+                    properties.push({ id: key, label: result.labels[key] });
                 }
                 common.array.sort(properties, "label");
-                properties.unshift({id: "anyProperty", label: "anyProperty"});
+                properties.unshift({ id: "anyProperty", label: "anyProperty" });
                 _botEngine.showList(properties, "currentObjectProperty");
-            })
-
-
+            });
         },
 
         listClassesFn: function () {
-
             self.getResourcesList(self.params.objectPropertyResourceType, "property", null, function (err, result) {
-                var properties = []
+                var properties = [];
                 for (var key in result.labels) {
-                    properties.push({id: key, label: result.labels[key]})
+                    properties.push({ id: key, label: result.labels[key] });
                 }
                 common.array.sort(properties, "label");
-                properties.unshift({id: "anyClass", label: "anyClass"});
+                properties.unshift({ id: "anyClass", label: "anyClass" });
                 _botEngine.showList(properties, "currentObjectProperty");
-            })
-
-
+            });
         },
-
-
-
 
         chooseObjectPropertyResourceTypeFn: function () {
             var choices = ["Predicate", "Restriction", "RangeAndDomain"]; //
@@ -226,7 +214,7 @@ var SparqlQuery_bot = (function () {
                         if (ok) {
                             if (!distinctValues[item.sClass.value]) {
                                 distinctValues[item.sClass.value] = 1;
-                                filteredClasses.push({id: item.sClass.value, label: item.sClassLabel.value});
+                                filteredClasses.push({ id: item.sClass.value, label: item.sClassLabel.value });
                             }
                         }
                     });
@@ -251,7 +239,7 @@ var SparqlQuery_bot = (function () {
                         if (ok) {
                             if (!distinctValues[item.oClass.value]) {
                                 distinctValues[item.oClass.value] = 1;
-                                filteredClasses.push({id: item.oClass.value, label: item.oClassLabel.value});
+                                filteredClasses.push({ id: item.oClass.value, label: item.oClassLabel.value });
                             }
                         }
                     });
@@ -378,12 +366,12 @@ var SparqlQuery_bot = (function () {
 
                     var cols = [];
                     cols.push(
-                        {title: "source", defaultContent: ""},
+                        { title: "source", defaultContent: "" },
                         {
                             title: "label",
                             defaultContent: "",
                         },
-                        {title: "uri", defaultContent: ""},
+                        { title: "uri", defaultContent: "" },
                     );
                     var dataset = [];
 
@@ -399,7 +387,7 @@ var SparqlQuery_bot = (function () {
                                             return;
                                         }
                                         if (cols.length <= indexParent + 3) {
-                                            cols.push({title: "ancestor_" + indexParent, defaultContent: ""});
+                                            cols.push({ title: "ancestor_" + indexParent, defaultContent: "" });
                                         }
 
                                         var parentLabel = self.params.elasticResult.parentIdsLabelsMap[parent];
@@ -420,7 +408,7 @@ var SparqlQuery_bot = (function () {
                     if (outputType != "Graph") {
                         return callbackSeries();
                     }
-                    var visjsData = {nodes: [], edges: []};
+                    var visjsData = { nodes: [], edges: [] };
                     var sources = [];
                     self.params.elasticResult.forEach(function (item0) {
                         var uniqueNodes = {};
@@ -478,7 +466,7 @@ var SparqlQuery_bot = (function () {
             [
                 //select propertie in Config.ontologiesVocabularyModels
                 function (callbackSeries) {
-                    OntologyModels.registerSourcesModel(searchedSources, {noCache: false}, function (err, result) {
+                    OntologyModels.registerSourcesModel(searchedSources, { noCache: false }, function (err, result) {
                         searchedSources.forEach(function (source) {
                             var sourceOntologyModel = Config.ontologiesVocabularyModels[source];
                             for (var classId in sourceOntologyModel.classes) {
@@ -503,7 +491,7 @@ var SparqlQuery_bot = (function () {
                     if (Object.keys(classes).length > self.maxGraphDisplay) {
                         return _botEngine.abort("too many nodes to display a usable graph");
                     }
-                    var visjsData = {nodes: [], edges: []};
+                    var visjsData = { nodes: [], edges: [] };
                     var existingNodes = {};
                     for (var classId in classes) {
                         var classLabel = classes[classId].label;
@@ -572,30 +560,22 @@ var SparqlQuery_bot = (function () {
             searchedSources = Config.currentProfile.userSources;
         }
 
-        var filter = null
+        var filter = null;
         if (self.params.currentObjectProperty != "anyProperty") {
-            filter = Sparql_common.setFilter("predicate", self.params.currentObjectProperty)
+            filter = Sparql_common.setFilter("predicate", self.params.currentObjectProperty);
         }
 
         self.getResourcesList(self.params.objectPropertyResourceType, null, filter, function (err, result) {
             if (outputType == "New Graph") {
-                self.drawPredicateGraph(result, false, {})
+                self.drawPredicateGraph(result, false, {});
             } else if (outputType == "Add to Graph") {
-                self.drawPredicateGraph(result, true, {})
+                self.drawPredicateGraph(result, true, {});
             } else if (outputType == "Table") {
-                self.drawDataTableQueryResult(result)
+                self.drawDataTableQueryResult(result);
             }
-            _botEngine.nextStep()
-        })
-
-
-
+            _botEngine.nextStep();
+        });
     };
-
-
-
-
-
 
     /**
      *
@@ -603,117 +583,94 @@ var SparqlQuery_bot = (function () {
      * selectVars Sparql vars to select distinct ?subject ?predicate ?object
      *
      */
-    self.getResourcesList = function (type, role, filter, callback) {
-        var sparql_url = Config.sources[self.params.source].sparql_server.url
-        var fromStr = Sparql_common.getFromStr(self.params.source)
+    (self.getResourcesList = function (type, role, filter, callback) {
+        var sparql_url = Config.sources[self.params.source].sparql_server.url;
+        var fromStr = Sparql_common.getFromStr(self.params.source);
 
-        var query = "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
-            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
-            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>"
+        var query = "PREFIX owl: <http://www.w3.org/2002/07/owl#>" + "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" + "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>";
 
-
-        var selectVars = "*"
+        var selectVars = "*";
         if (type == "Restriction") {
-
             if (role == "property") {
-                selectVars = "?predicate"
+                selectVars = "?predicate";
             }
             if (role == "domain") {
-                selectVars = "?subject"
+                selectVars = "?subject";
             }
             if (role == "range") {
-                selectVars = "?object"
+                selectVars = "?object";
             }
 
-            query += "SELECT distinct   " + selectVars +
-                fromStr +
-                " WHERE {   ?subject rdfs:subClassOf ?b.\n" +
-                "  ?b owl:onProperty ?predicate .\n" +
-                "  ?b ?q ?object .?object rdf:type owl:Class\n"
-
-
-        }
-        else if (type == "RangeAndDomain") {
+            query += "SELECT distinct   " + selectVars + fromStr + " WHERE {   ?subject rdfs:subClassOf ?b.\n" + "  ?b owl:onProperty ?predicate .\n" + "  ?b ?q ?object .?object rdf:type owl:Class\n";
+        } else if (type == "RangeAndDomain") {
             if (role == "property") {
-                selectVars = "?predicate"
+                selectVars = "?predicate";
             }
             if (role == "domain") {
-                selectVars = "?subject"
+                selectVars = "?subject";
             }
             if (role == "range") {
-                selectVars = "?object"
+                selectVars = "?object";
             }
-            query += "SELECT distinct   " + selectVars +
+            query +=
+                "SELECT distinct   " +
+                selectVars +
                 fromStr +
                 " WHERE {   ?predicate rdf:type owl:ObjectProperty.\n" +
                 "  OPTIONAL {?predicate rdfs:domain ?subject} .\n" +
-                "  OPTIONAL {?predicate rdfs:object ?object} .\n"
-        }
-        else if (type == "Predicate") {
+                "  OPTIONAL {?predicate rdfs:object ?object} .\n";
+        } else if (type == "Predicate") {
             if (role == "property") {
-                selectVars = "?predicate"
+                selectVars = "?predicate";
             }
             if (role == "subject") {
-                selectVars = "?subject"
+                selectVars = "?subject";
             }
             if (role == "object") {
-                selectVars = "?object"
+                selectVars = "?object";
             }
-            query += "SELECT distinct   " + selectVars +
-                fromStr +
-                " WHERE {  ?subject ?predicate ?object.\n"
-        }
-        else if (type == "Class") {
+            query += "SELECT distinct   " + selectVars + fromStr + " WHERE {  ?subject ?predicate ?object.\n";
+        } else if (type == "Class") {
             if (role == "subject") {
-                selectVars = "?subject"
-            }
-            else if (role == "object") {
-                selectVars = "?object"
+                selectVars = "?subject";
+            } else if (role == "object") {
+                selectVars = "?object";
             }
         }
         if (filter) {
-            query += filter
+            query += filter;
         }
 
-        query += "} limit 10000"
-
+        query += "} limit 10000";
 
         Sparql_proxy.querySPARQL_GET_proxy(sparql_url, query, null, null, function (err, result) {
             if (err) {
-                return callback(err)
+                return callback(err);
             }
 
-            var predicates = []
-            var labelsMap = {}
+            var predicates = [];
+            var labelsMap = {};
             result.results.bindings.forEach(function (item) {
-                var obj = {}
+                var obj = {};
                 for (var key in item) {
                     obj[key] = item[key].value;
-                    labelsMap[item[key].value] = ""
+                    labelsMap[item[key].value] = "";
                 }
-                predicates.push(obj)
-
-
-            })
+                predicates.push(obj);
+            });
 
             self.fillLabelsFromUris(Object.keys(labelsMap), function (err, result) {
                 if (err) {
-                    return callback(err)
+                    return callback(err);
                 }
 
-                return callback(null, {predicates: predicates, labels: result});
-            })
-
-
-        })
-
-
-    },
-
-
-        self.fillLabelsFromUris = function (uris, callback) {
-            var sparql_url = Config.sources[self.params.source].sparql_server.url
-            var fromStr = Sparql_common.getFromStr(self.params.source)
+                return callback(null, { predicates: predicates, labels: result });
+            });
+        });
+    }),
+        (self.fillLabelsFromUris = function (uris, callback) {
+            var sparql_url = Config.sources[self.params.source].sparql_server.url;
+            var fromStr = Sparql_common.getFromStr(self.params.source);
 
             var filter = Sparql_common.setFilter("s", uris);
 
@@ -731,34 +688,30 @@ var SparqlQuery_bot = (function () {
                 if (err) {
                     return callback(err);
                 }
-                var labelsMap = {}
+                var labelsMap = {};
                 result.results.bindings.forEach(function (item) {
                     labelsMap[item.s.value] = item.sLabel.value;
                 });
                 uris.forEach(function (uri) {
                     if (!labelsMap[uri]) {
-                        labelsMap[uri] = Sparql_common.getLabelFromURI(uri)
+                        labelsMap[uri] = Sparql_common.getLabelFromURI(uri);
                     }
-                })
+                });
 
-                callback(null, labelsMap)
-
+                callback(null, labelsMap);
             });
-        }
-
+        });
 
     self.drawPredicateGraph = function (queryResult, addTograph, options, callback) {
-
-
         if (!options) {
-            options = {}
+            options = {};
         }
-        var visjsData = {nodes: [], edges: []};
+        var visjsData = { nodes: [], edges: [] };
         var existingNodes = {};
         if (addTograph) {
-            existingNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap()
+            existingNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
         }
-        var labelsMap = queryResult.labels
+        var labelsMap = queryResult.labels;
 
         queryResult.predicates.forEach(function (item) {
             if (item.subject) {
@@ -778,7 +731,6 @@ var SparqlQuery_bot = (function () {
                 }
             }
 
-
             if (item.object) {
                 if (!existingNodes[item.object]) {
                     existingNodes[item.object] = 1;
@@ -796,7 +748,6 @@ var SparqlQuery_bot = (function () {
                 }
             }
 
-
             visjsData.edges.push({
                 id: common.getRandomHexaId(10),
                 label: labelsMap[item.predicate],
@@ -805,46 +756,37 @@ var SparqlQuery_bot = (function () {
                 data: {},
                 arrows: "to",
             });
-
-        })
+        });
 
         if (addTograph) {
-            Lineage_whiteboard.lineageVisjsGraph.data.nodes.add(visjsData.nodes)
-            Lineage_whiteboard.lineageVisjsGraph.data.edges.add(visjsData.edges)
+            Lineage_whiteboard.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
+            Lineage_whiteboard.lineageVisjsGraph.data.edges.add(visjsData.edges);
         } else {
             Lineage_whiteboard.drawNewGraph(visjsData);
         }
         if (callback) {
             callback();
         }
-    }
+    };
 
     self.drawDataTableQueryResult = function (queryResult, callbacl) {
-
         var cols = [];
         var dataset = [];
         cols.push(
-            {title: "subject", defaultContent: ""},
-            {title: "Predicate", defaultContent: ""},
-            {title: "Object", defaultContent: ""},
-            {title: "subjectURI", defaultContent: ""},
-            {title: "PredicateURI", defaultContent: ""},
-            {title: "ObjectURI", defaultContent: ""},
+            { title: "subject", defaultContent: "" },
+            { title: "Predicate", defaultContent: "" },
+            { title: "Object", defaultContent: "" },
+            { title: "subjectURI", defaultContent: "" },
+            { title: "PredicateURI", defaultContent: "" },
+            { title: "ObjectURI", defaultContent: "" },
         );
-        var labelsMap = queryResult.labels
+        var labelsMap = queryResult.labels;
         queryResult.predicates.forEach(function (item) {
-            dataset.push([
-                labelsMap[item.subject],
-                labelsMap[item.predicate],
-                labelsMap[item.object],
-                item.subject,
-                item.predicate,
-                item.object,
-            ]);
+            dataset.push([labelsMap[item.subject], labelsMap[item.predicate], labelsMap[item.object], item.subject, item.predicate, item.object]);
         });
 
         Export.showDataTable("mainDialogDiv", cols, dataset);
-    }
+    };
 
     return self;
 })();

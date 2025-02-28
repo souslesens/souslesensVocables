@@ -256,7 +256,7 @@ var MappingColumnsGraph = (function () {
 
                 var classId = null;
                 connections.forEach(function (connection) {
-                    if (connection.edge.data.type == "rdf:type"  || connection.edge.data.type == "rdfs:subClassOf" ) {
+                    if (connection.edge.data.type == "rdf:type" || connection.edge.data.type == "rdfs:subClassOf") {
                         classId = connection.toNode.data.id;
                     }
                 });

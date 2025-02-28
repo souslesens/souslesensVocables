@@ -590,7 +590,7 @@ var OntologyModels = (function () {
             },
         });
     };
-    self.clearOntologyModelCache = function (source,callback) {
+    self.clearOntologyModelCache = function (source, callback) {
         const params = new URLSearchParams({
             source: source,
         });
@@ -602,18 +602,16 @@ var OntologyModels = (function () {
             success: function (data, _textStatus, _jqXHR) {
                 if (source) {
                     Config.ontologiesVocabularyModels[source] = null;
-                    OntologyModels.registerSourcesModel(source,{noCache:true},function(err,result){
-                        callback(null,"DONE")
+                    OntologyModels.registerSourcesModel(source, { noCache: true }, function (err, result) {
+                        callback(null, "DONE");
                     });
                 } else {
                     Config.ontologiesVocabularyModels = {};
-                    callback(null,"DONE")
+                    callback(null, "DONE");
                 }
-
-
             },
             error: function (err) {
-               callback(err);
+                callback(err);
             },
         });
     };
@@ -1283,15 +1281,15 @@ var OntologyModels = (function () {
         if (Config.sources[source].imports) {
             sources = sources.concat(Config.sources[source].imports);
         }
-        if(!options.excludeBasicVocabularies) {
+        if (!options.excludeBasicVocabularies) {
             for (var vocab in Config.basicVocabularies) {
                 sources.push(vocab);
             }
         }
         var nonObjectPropertiesmap = {};
-        var filter=""
-        if(options.filter){
-            filter=options.filter
+        var filter = "";
+        if (options.filter) {
+            filter = options.filter;
         }
         UI.message("loading KG nonObjectProperties", false, true);
         async.eachSeries(

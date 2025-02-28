@@ -213,6 +213,22 @@ var MappingsDetails = (function () {
                         },
                     };
                 }
+                if(node.id.split("|")[1]=="lookup"){
+                    items["edit lookup"] = {
+                        label: "edit lookup",
+                        action: function (_e) {
+                            MappingColumnsGraph.currentGraphNode = MappingColumnsGraph.visjsGraph.data.nodes.get(node.parent);
+                            Lookups_bot.start(Lookups_bot.lookUpWorkflow, {}, function (err, result) {
+                                if (err) {
+                                    return alert(err);
+                                }
+                                
+                            });
+
+                        },
+                    };
+                }
+
                 return items;
             },
         };

@@ -2,7 +2,7 @@ const fg = require("fast-glob");
 const fs = require("fs");
 const path = require("path");
 const { Lock } = require("async-await-mutex-lock");
-const { simpleGit } = require("simple-git");
+const { simpleGit, GitError } = require("simple-git");
 
 const { convertType } = require("./utils");
 const { configPluginsConfig, configPluginsRepository, directoryPlugins, directoryPluginsRepositories } = require("./config");
@@ -154,7 +154,7 @@ class ToolModel {
             if (!fs.existsSync(repositoryPath)) {
                 await simpleGit().clone(url, repositoryPath);
             } else {
-                await simpleGit(repositoryPath).remote(["set-url", "origin", url]).fetch();
+                await simpleGit(repositoryPath).env("LC_ALL", "C").remote(["set-url", "origin", url]).fetch();
             }
 
             if (Object.hasOwn(repositoryInfo, "version")) {
@@ -162,12 +162,9 @@ class ToolModel {
             }
         } catch (error) {
             console.error(error);
-
-            const result = error.toString().match(/remote: ([^\.]+)/);
-            if (result !== null) {
-                return { status: "failure", message: result[1] };
+            if (error instanceof GitError) {
+                return { status: "failure", message: error.message };
             }
-
             return { status: "failure", message: "Unknown error occurs on the server" };
         }
 

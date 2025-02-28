@@ -138,7 +138,7 @@ describe("UserDataModel", () => {
     });
 
     test("find userData", async () => {
-        tracker.on.select("user_data_list").response(dbUserDataList);
+        tracker.on.select("user_data").response(dbUserDataList);
         const userData = await userDataModel.find(1);
         expect(userData).toBeTruthy();
     });
@@ -147,14 +147,15 @@ describe("UserDataModel", () => {
         tracker.on.select("user_data_list").response(dbUserDataList);
         tracker.on.select("users").response(dbUsers);
         tracker.on.select("profiles").response(dbProfiles);
-        tracker.on.insert("user_data").response([]);
+        tracker.on.insert("user_data").response([{id: 6}]);
 
         const addUserData = {
             data_path: "data_path",
             data_type: "data_type",
             owned_by: "test",
         }
-        await userDataModel.insert(addUserData);
+        const results = await userDataModel.insert(addUserData);
+        expect(results[0].id).toStrictEqual(6);
 
         const updatedUserData = Array.from(dbUserDataList);
         updatedUserData.push(addUserData);

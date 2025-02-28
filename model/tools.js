@@ -145,7 +145,7 @@ class ToolModel {
             }
 
             let url = repositoryInfo.url;
-            if (repositoryInfo.hasOwnProperty("token")) {
+            if (Object.hasOwn(repositoryInfo, "token")) {
                 url = this._getTokenizeURL(url, repositoryInfo.token);
             }
 
@@ -157,7 +157,7 @@ class ToolModel {
                 await simpleGit(repositoryPath).remote(["set-url", "origin", url]).fetch();
             }
 
-            if (repositoryInfo.hasOwnProperty("version")) {
+            if (Object.hasOwn(repositoryInfo, "version")) {
                 await simpleGit(repositoryPath).checkout(repositoryInfo.version || ".");
             }
         } catch (error) {

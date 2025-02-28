@@ -296,6 +296,10 @@ var KGbuilder_main = {
                 callbackEach(err)
             })
         }, function(err) {
+            if(err){
+
+               alert(err);
+            }
             return callback(err, totalTriples);
         });
 

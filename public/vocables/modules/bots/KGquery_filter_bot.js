@@ -202,10 +202,10 @@ var KGquery_filter_bot = (function () {
             self.filterItems.push(filterBooleanOperator + "?" + varName + "_" + propLabel + " " + "<=" + ' "' + maxDate + '"^^xsd:dateTime  &&');
         } else if (propertyValue) {
             if (self.params.propertyDatatype == "http://www.w3.org/2001/XMLSchema#date" || self.params.propertyDatatype == "http://www.w3.org/2001/XMLSchema#dateTime") {
-                var dateStr = new Date(propertyValue).toISOString();
-                dateStr = common.ISODateStrToRDFString(dateStr);
-                self.filterItems.push(filterBooleanOperator + "?" + varName + "_" + propLabel + " " + propertyOperator + ' "' + dateStr + '"^^xsd:dateTime');
-            } else if (self.params.propertyDatatype == "http://www.w3.org/2001/XMLSchema#int") {
+                //var dateStr = new Date(propertyValue).toISOString();
+                //dateStr = common.ISODateStrToRDFString(dateStr);
+                self.filterItems.push(filterBooleanOperator + "?" + varName + "_" + propLabel + " " + propertyOperator + ' "' + propertyValue + '"^^xsd:dateTime');
+            } else if (self.params.propertyDatatype == "http://www.w3.org/2001/XMLSchema#int") { 
                 self.filterItems.push(filterBooleanOperator + "?" + varName + "_" + propLabel + " " + propertyOperator + ' "' + propertyValue + '"^^xsd:int ');
             } else if (self.params.propertyDatatype == "http://www.w3.org/2001/XMLSchema#float") {
                 self.filterItems.push(filterBooleanOperator + "?" + varName + "_" + propLabel + " " + propertyOperator + ' "' + propertyValue + '"^^xsd:float ');

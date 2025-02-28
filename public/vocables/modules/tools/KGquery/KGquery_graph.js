@@ -78,7 +78,7 @@ var KGquery_graph = (function () {
                         edges: []
                     }, self.visjsOptions);
 
-                    if(true) {
+                    if(false) {
                         UserDataWidget.listUserData(null, function (err, result) {
                             if (err) {
                                 return alert(err || err.responseText)

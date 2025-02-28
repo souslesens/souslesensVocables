@@ -230,21 +230,23 @@ var MappingTransform = (function () {
                     allMappings.push(triple);
                 });
             }
+
         }
 
         allMappings = self.addMappingsRestrictions(allMappings);
         // allMappings add lookups_s and lookups_o for each mapping if there is lookup
-        allMappings=self.addLookupsToMappings(allMappings);
+        allMappings=self.addLookupsToMappings(allMappings,columnsMap);
 
         return allMappings;
     };
-    self.addLookupsToMappings=function(allMappings){
+    self.addLookupsToMappings=function(allMappings,columnsMap){
+        
         if(Object.keys(DataSourceManager.currentConfig.lookups).length==0){
             return allMappings;
         }
         
         Object.keys(DataSourceManager.currentConfig.lookups).forEach(function(lookup){
-            if(lookup==DataSourceManager.currentConfig.currentDataSource.currentTable){
+            if(lookup.split('|')[0]==DataSourceManager.currentConfig.currentDataSource.currentTable && columnsMap[lookup.split('|')[0]+"|lookup"]){
                 
                 var lookupObj=DataSourceManager.currentConfig.lookups[lookup];
                 var lookupColumn=lookupObj.name.split('|')[1];
@@ -260,6 +262,12 @@ var MappingTransform = (function () {
                 if(lookupObj.targetMapping=='subject'){
                     is_subject_lookup=true;
                 }
+                /* 
+                allMappings.push({
+                    s:lookupColumn,
+                    p:'lookup',
+                    o:JSON.stringify(lookupObj)
+                });*/
                 allMappings.forEach(function(mapping){
                     if(mapping.s==lookupColumn && is_subject_lookup){
                        mapping.lookup_s=lookupObj.name;
@@ -344,42 +352,55 @@ var MappingTransform = (function () {
 
         });
         var mappings = MappingTransform.mappingsToKGcreatorJson(columnsSelection)
+        var columnMappings = MappingTransform.mappingsToKGcreatorJson(columnsSelection,{getColumnMappingsOnly:true});
         var uniqueFilteredMappings = {}
         var transforms={}
         // checkedNodeAttrs work only for technical mappings we need to also add structural column mappings
         mappings.forEach(function (mapping) {
-
+            // columnsMapping
+            var mappingInColumnMapping=columnMappings.filter(function(item){return item.s==mapping.s && item.p==mapping.p && item.o==mapping.o});
+            if(mappingInColumnMapping.length>0){
+                filteredMappings.push(mapping)
+            }
+            else{
+                checkedNodeAttrs.forEach(function (treeNodeId) {
+                
+                    if (treeNodeId.indexOf(mapping.o) > -1) {
+                       if(treeNodeId.indexOf('transform') > -1 && mapping.p=='transform'){
+                        transforms[mapping.s]=mapping.o
+                       }
+                       else if(! uniqueFilteredMappings[mapping.s+"|"+mapping.p+"|"+mapping.o]){
+                           uniqueFilteredMappings[mapping.s+"|"+mapping.p+"|"+mapping.o]=1
+                           filteredMappings.push(mapping)
+                       }
+                       
+    
+                    }
+                    
+    
+    
+                });
+            }
             
-            checkedNodeAttrs.forEach(function (treeNodeId) {
-                
-                if (treeNodeId.indexOf(mapping.o) > -1) {
-                   if(treeNodeId.indexOf('transform') > -1 && mapping.p=='transform'){
-                    transforms[mapping.s]=mapping.o
-                   }
-                   else if(! uniqueFilteredMappings[mapping.s+"|"+mapping.o]){
-                       uniqueFilteredMappings[mapping.s+"|"+mapping.o]=1
-                       filteredMappings.push(mapping)
-                   }
-                   
-
-                }
-                
-
-
-            });
 
             
 
 
         });
-        var columnMappings = MappingTransform.mappingsToKGcreatorJson(columnsSelection,{getColumnMappingsOnly:true});
+       
         // selection isn't concerned for column mappings select all
-        filteredMappings=filteredMappings.concat(columnMappings);
+        //filteredMappings=filteredMappings.concat(columnMappings);
         var table=MappingModeler.currentTable.name;
         
-        filteredMappings ={[table]:{tripleModels:filteredMappings,transform:transforms}}
+        filteredMappings ={[table]:{tripleModels:filteredMappings,transform:transforms,lookups:{}}};
         if(Object.keys(DataSourceManager.currentConfig.lookups)){
-            filteredMappings[table].lookups=DataSourceManager.currentConfig.lookups;
+            Object.keys(DataSourceManager.currentConfig.lookups).forEach(function(lookup){
+                var checkedLookup=checkedNodes.filter(function(item){return item?.data?.name==lookup});
+                if(checkedLookup.length>0){
+                    filteredMappings[table].lookups[lookup]=DataSourceManager.currentConfig.lookups[lookup];
+                }
+            })
+            
         }
         return filteredMappings;
     }

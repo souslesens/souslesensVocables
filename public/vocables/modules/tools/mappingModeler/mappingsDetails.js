@@ -6,6 +6,7 @@ import MappingModeler from "./mappingModeler.js";
 import TripleFactory from "./tripleFactory.js";
 import MappingTransform from "./mappingTransform.js";
 import UIcontroller from "./uiController.js";
+import DataSourceManager from "./dataSourcesManager.js";
 
 /**
  * MappingsDetails manages technical mappings (non structural mappings)
@@ -23,6 +24,7 @@ var MappingsDetails = (function () {
         rdfsLabel: "#33ff36",
         transform: "#ffe333",
         otherPredicates: "#ca33ff",
+        lookup:"#eeff33"
     };
 
     /**
@@ -160,6 +162,18 @@ var MappingsDetails = (function () {
                         text: "<span style='color: " + self.colorsMap["transform"] + "'>" + "transform" + "</span>  " + node.data.transform,
                         parent: node.id,
                     });
+                }
+                var currentLookupName=node.data.dataTable+'|'+node.data.label
+                if(DataSourceManager.currentConfig.lookups[currentLookupName]){
+                    var lookup=DataSourceManager.currentConfig.lookups[currentLookupName]
+                    if(lookup.name==currentLookupName){
+                        jstreeData.push({
+                            id:  lookup.fileName + "|" + "lookup" ,
+                            text: "<span style='color: " + self.colorsMap["lookup"] + "'>" + "lookup" + "</span>  " + JSON.stringify(lookup),
+                            parent: node.id,
+                            data:lookup
+                        });
+                    }
                 }
             }
         });
@@ -329,6 +343,15 @@ var MappingsDetails = (function () {
                 delete graphNode.data.transform;
             }
         }
+        // lookup gestion
+        if (array.length >= 2 && array[1] == "lookup") {
+            if (treeNode?.data?.name) {
+                delete DataSourceManager.currentConfig.lookups[treeNode.data.name];
+                //delete lookup
+            }
+        }
+
+
 
         JstreeWidget.deleteNode("detailedMappings_jsTreeDiv", treeNode);
         self.drawDetailedMappingsGraph();

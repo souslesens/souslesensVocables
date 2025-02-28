@@ -196,6 +196,23 @@ var MappingsDetails = (function () {
                         },
                     };
                 }
+                if(node.id.split("|")[1]=="transform"){
+                    items["edit transform"] = {
+                        label: "edit transform",
+                        action: function (_e) {
+                            var column=MappingColumnsGraph.visjsGraph.data.nodes.get(node.id.split("|")[0]);
+                            var columnLabel = column.label;
+                            var transformValue= column.data.transform;
+                            if(transformValue){
+                                transformValue = transformValue.match(/function{(.*)}/s)[1];
+                                MappingsDetails.transform.showTansformDialog(columnLabel,function(){
+                                    $('#MappingModeler_fnBody').val(transformValue);
+                                });
+                            }
+
+                        },
+                    };
+                }
                 return items;
             },
         };
@@ -713,7 +730,7 @@ var MappingsDetails = (function () {
          * @param {string} [column] - The column to transform (optional).
          * @returns {void}
          */
-        showTansformDialog: function (column) {
+        showTansformDialog: function (column,callback) {
             // return if  virtuals and rowIndex
             if (!column) {
                 column = MappingColumnsGraph.currentGraphNode.label;
@@ -722,6 +739,9 @@ var MappingsDetails = (function () {
                 $("#smallDialogDiv").dialog("open");
                 $("#smallDialogDiv").dialog("option", "title", "Transform for " + column);
                 self.transformColumn = column;
+                if(callback){
+                    callback();
+                }
             });
         },
 

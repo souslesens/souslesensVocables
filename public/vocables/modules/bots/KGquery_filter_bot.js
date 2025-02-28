@@ -1,13 +1,15 @@
 import Sparql_common from "../sparqlProxies/sparql_common.js";
 import SparqlQuery_bot from "./sparqlQuery_bot.js";
-//import self.aBotEngine from "./self.aBotEngine.js";
-import botEngineClass from "./_botEngineClass.js";
+import _botEngine from "./_BotEngine.js";
+//import botEngineClass from "./_botEngineClass.js";
 import Sparql_OWL from "../sparqlProxies/sparql_OWL.js";
+
+
 
 var KGquery_filter_bot = (function () {
     var self = {};
     self.title = "Filter Class";
-  self.aBotEngine=new botEngineClass()
+  self.aBotEngine=_botEngine//new botEngineClass()
     self.start = function (data, currentQuery, validateFn) {
       //  self.aBotEngine.startParams = self.aBotEngine.fillStartParams(arguments);
 

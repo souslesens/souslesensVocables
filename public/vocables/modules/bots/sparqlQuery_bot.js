@@ -23,6 +23,22 @@ var SparqlQuery_bot = (function () {
             });
         };
 
+        self.workflow_filterClass = {
+            listNonObjectPropertiesFn: {
+                choosePropertyOperatorFn: {
+                    _OR: {
+                        ChooseInList: { listIndividualsFn: { listLogicalOperatorFn: { setSparqlQueryFilterFn: {} } } },
+                        _DEFAULT: {
+                            promptPropertyValueFn: { listLogicalOperatorFn: { setSparqlQueryFilterFn: {} } },
+                        },
+                    },
+                },
+            },
+        };
+
+
+
+
         self.workflow = {
             chooseResourceTypeFn: {
                 _OR: {
@@ -43,9 +59,7 @@ var SparqlQuery_bot = (function () {
                                                 objectValueFilterFn: {chooseOutputTypeFn: {showResultFn: {}}}
 
                                             },
-                                            /*  "More filter": {
-                                                  moreFiltersFn: {}
-                                              }*/
+
                                         }
 
                                     }
@@ -215,9 +229,8 @@ var SparqlQuery_bot = (function () {
                             alert(err.responseText || err)
                             return myBotEngine.end()
                         }
-                        var classes = [];
-                        self.params.nonObjectPropertiesMap = model
 
+                        var classes = [];
                         for (var key in model) {
                             if (key.indexOf("http://www.w3.org/2002/07/owl") < 0 && key.indexOf("http://www.w3.org/1999/02/22-rdf-syntax-ns") < 0) {
                                 var classLabel = model[key].label
@@ -233,6 +246,20 @@ var SparqlQuery_bot = (function () {
 
                         common.array.sort(classes, "label")
                         myBotEngine.showList(classes, "currentClassFilter", null, null, function (currentClassId) {
+
+                            self.params.data = {nonObjectProperties: model[currentClassId].properties};
+                            self.params.varName="V" + common.getRandomHexaId(3)
+
+                     return    self.workflow_filterClass.listPropertiesFn()
+
+
+
+
+
+
+
+
+
                             var varName = "V" + common.getRandomHexaId(3)
                             self.runFilterClassBot({id: currentClassId, label: varName}, function (err, result) {
                                 if (err) {
@@ -271,6 +298,10 @@ var SparqlQuery_bot = (function () {
 
                     var filter = null
                     if (self.params.currentObjectPropertyFilter && self.params.currentObjectPropertyFilter != "anyProperty") {
+
+
+
+
                         filter = Sparql_common.setFilter("predicate", self.params.currentObjectPropertyFilter)
                     } else if (self.params.currentClassFilter && self.params.currentClassFilter != "anyClass") {
                         filter = "  ?subject ?q <" + self.params.currentClassFilter + ">.\n" +
@@ -438,6 +469,32 @@ var SparqlQuery_bot = (function () {
 
 
         };
+
+//     functions called in KGquery_filter_bot
+        self.functions.listPropertiesFn=function(){
+            KGquery_filter_bot.listPropertiesFn()
+        }
+        self.functions.choosePropertyOperatorFn=function(){
+            KGquery_filter_bot.choosePropertyOperatorFn()
+        }
+        self.functions.ChooseInList=function(){
+            KGquery_filter_bot.ChooseInList()
+        }
+        self.functions.listIndividualsFn=function(){
+            KGquery_filter_bot.listIndividualsFn()
+        }
+        self.functions.listLogicalOperatorFn=function(){
+            KGquery_filter_bot.listLogicalOperatorFn()
+        }
+        self.functions.setSparqlQueryFilterFn=function(){
+            KGquery_filter_bot.setSparqlQueryFilterFn()
+        }
+
+
+
+
+
+
 
         self.runFilterClassBot = function (currentClass, callback) {
             var filter = "";

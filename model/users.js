@@ -2,7 +2,6 @@ const bcrypt = require("bcrypt");
 const { readMainConfig } = require("./config");
 const { cleanupConnection, getKnexConnection } = require("./utils");
 const { userDataModel } = require("./userData");
-const { Lock } = require("async-await-mutex-lock");
 const ULID = require("ulid");
 const { createHash } = require("crypto");
 const z = require("zod");

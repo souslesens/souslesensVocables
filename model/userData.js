@@ -124,7 +124,7 @@ class UserDataModel {
     };
 
     update = async (userData) => {
-        if (userData.hasOwnProperty("created_at")) {
+        if (Object.hasOwn(userData, "created_at")) {
             delete userData.created_at;
         }
         const data = this._check(userData);

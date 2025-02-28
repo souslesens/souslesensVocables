@@ -385,6 +385,9 @@ var TripleFactory = (function () {
      */
     self.showTriplesInDataTable = function (data, div) {
         var escapeMarkup = function (str) {
+            if(!str){
+                return "";
+            }
             var str2 = str.replace(/</g, "&lt;");
             var str2 = str2.replace(/>/g, "&gt;");
             return str2;

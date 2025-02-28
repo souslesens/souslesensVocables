@@ -1,6 +1,6 @@
 import Sparql_common from "../sparqlProxies/sparql_common.js";
 import SparqlQuery_bot from "./sparqlQuery_bot.js";
-import _botEngine from "./_BotEngine.js";
+import _botEngine from "./_botEngine.js";
 //import botEngineClass from "./_botEngineClass.js";
 import Sparql_OWL from "../sparqlProxies/sparql_OWL.js";
 

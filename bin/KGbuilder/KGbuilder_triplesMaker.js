@@ -80,6 +80,10 @@ var KGbuilder_triplesMaker = {
                         async.series(
                             [
                                 function (callbackSeries) {
+                                    if(mapping.p=="http://totalenergies/resources/tsf/onedata/dalia/planification/maximumPOB" && mapping.o=="maximunpob"&& line.jobcardphaseactivity=='CNT-DAL-MER-001029'){
+                                        console.log('here');
+                                    }
+
                                     KGbuilder_triplesMaker.getTripleSubject(tableMappings, mapping, line, function (err, result) {
                                         if (err) {
                                             if (err.indexOf("no mapping.subject") > -1) {
@@ -157,13 +161,29 @@ var KGbuilder_triplesMaker = {
 
 
 
-    getURIFromSpecificBaseUri:function(mapping,line){
-        var p=mapping.indexOf("]")
+    getURIFromSpecificBaseUri:function(mappingValue,line,tableMappings,mapping){
+        var p=mappingValue.indexOf("]")
         if(p>0 ){//specific baseURI
-            var  baseUri= mapping.substring(1,p)
-            var value=line[mapping.substring(p+1)]
-            if(value)
-              return "<" +baseUri+ util.formatStringForTriple(value, true) + ">";
+            var  baseUri= mappingValue.substring(1,p)
+            var value=line[mappingValue.substring(p+1)]
+            // specific base URI can also have transforms and lookups 
+           if(value)
+                if(tableMappings.transform && tableMappings.transform[mappingValue]) {
+                    try {
+                       
+        
+                            return "<" +baseUri+ tableMappings.transform[mappingValue](util.formatStringForTriple(value, true), "s", mapping.p, line, mapping)+">";
+                        
+                        //   return callback(null,subjectStr);
+                    } catch (e) {
+                        return null;
+                    }
+                }
+                // lookup to do
+                else{
+                    return "<" +baseUri+ util.formatStringForTriple(value, true) + ">";
+                }
+              
             else
                 return null
 
@@ -175,9 +195,13 @@ var KGbuilder_triplesMaker = {
 
     getTripleSubject: function (tableMappings, mapping, line, callback) {
         //get value for Subject
-        var subjectStr = KGbuilder_triplesMaker.getURIFromSpecificBaseUri(mapping.s, line);
-        if(subjectStr)
-            return callback(null,subjectStr)
+        var subjectStr = KGbuilder_triplesMaker.getURIFromSpecificBaseUri(mapping.s, line,tableMappings,mapping);
+        var isTransformLookUp = false;
+        if(subjectStr){
+            
+            return callback(null,subjectStr);
+        }
+        
 
 
 
@@ -214,8 +238,19 @@ var KGbuilder_triplesMaker = {
         } else if (tableMappings.transform && tableMappings.transform[mapping.s]) {
             try {
                 if (line[mapping.s]) {
+                    
 
                     subjectStr = tableMappings.transform[mapping.s](util.formatStringForTriple(line[mapping.s], true), "s", mapping.p, line, mapping);
+                    // case when mapping is a lookup and a transform at same time
+                    if (mapping.lookup_s) {
+                        var lookupValue = KGbuilder_triplesMaker.getLookupValue(mapping.lookup_s, util.formatStringForTriple(line[mapping.s], true));
+                        if(lookupValue){
+                            subjectStr =  util.formatStringForTriple(line[mapping.s], true);
+                            subjectStr = tableMappings.transform[mapping.s](lookupValue, "s", mapping.p, line, mapping);
+                            okLookups_s += 1;
+                            isTransformLookUp = true;
+                        }
+                    }
                 }
                 //   return callback(null,subjectStr);
             } catch (e) {
@@ -232,7 +267,9 @@ var KGbuilder_triplesMaker = {
             
             subjectStr = line[mapping.s];
         }
-        if (mapping.lookup_s) {
+        if (mapping.lookup_s && !isTransformLookUp) {
+            var missingLookups_s;
+            var okLookups_s;
             if (!lookUpsMap[mapping.lookup_s]) {
                 KGbuilder_socket.message((lineError = "no lookup named " + mapping.lookup_s));
             }
@@ -270,7 +307,7 @@ var KGbuilder_triplesMaker = {
     },
 
     getTripleObject: function (tableMappings, mapping, line, callback) {
-        var objectStr = KGbuilder_triplesMaker.getURIFromSpecificBaseUri(mapping.o, line);
+        var objectStr = KGbuilder_triplesMaker.getURIFromSpecificBaseUri(mapping.o, line,tableMappings,mapping);
         if(objectStr)
             return callback(null,objectStr)
 
@@ -322,7 +359,7 @@ var KGbuilder_triplesMaker = {
             }
             if (tableMappings.transform && tableMappings.transform[mapping.o]) {
                 try {
-                    if (line[mapping.o]) {
+                    if (line[mapping. o]) {
                         if (mapping.dataType || mapping.isString) {
                             objectStr = tableMappings.transform[mapping.o](util.formatStringForTriple(line[mapping.o], false), "o", mapping.p, line, mapping);
                         } else {
@@ -417,6 +454,8 @@ var KGbuilder_triplesMaker = {
             }
 
             if (mapping.lookup_o) {
+                var missingLookups_o;
+                var okLookups_o;
                 if (!lookUpsMap[mapping.lookup_o]) {
                     return (lineError = "no lookup named " + mapping.lookup_o);
                 }
@@ -521,21 +560,29 @@ var KGbuilder_triplesMaker = {
             tableMappings.lookups,
             function (lookup, callbackEachLookup) {
                 if (tableMappings.csvDataFilePath) {
+                    
                     var lookupFilePath = lookup.filePath;
-
                     KGbuilder_triplesMaker.readCsv(lookupFilePath, null, function (err, result) {
                         if (err) {
                             return callbackEachLookup(err);
                         }
-                        var lookupLines = result.data[0];
                         lookUpsMap[lookup.name] = {dictionary: {}, transformFn: lookup.transformFn};
-                        lookupLines.forEach(function (line, index) {
-                            if (![line[lookup.sourceColumn]] && line[lookup.targetColumn]) {
-                                return KGbuilder_socket.message(options.clientSocketId, "missing lookup line" + index + " " + lookupFilePath, true);
+                        /*if(!lookup.transformFn){
+                            var columnLookUp=lookup.name.split("|")[1];
+                            if(columnLookUp && tableMappings.transform[columnLookUp]){
+                                lookUpsMap[lookup.name].transformFn=tableMappings.transform[columnLookUp];
                             }
-                            lookUpsMap[lookup.name].dictionary[line[lookup.sourceColumn]] = line[lookup.targetColumn];
+                        }*/
+                        result.data.forEach(function (slice) {
+                            var lookupLines = slice;
+                            
+                            lookupLines.forEach(function (line, index) {
+                                if (![line[lookup.sourceColumn]] && line[lookup.targetColumn]) {
+                                    return KGbuilder_socket.message(options.clientSocketId, "missing lookup line" + index + " " + lookupFilePath, true);
+                                }
+                                lookUpsMap[lookup.name].dictionary[line[lookup.sourceColumn]] = line[lookup.targetColumn];
+                            });
                         });
-
                         callbackEachLookup();
                     });
                 } else if (tableMappings.databaseSource) {
@@ -563,7 +610,7 @@ var KGbuilder_triplesMaker = {
                 }
             },
             function (err) {
-                callback(err, lookupsMap);
+                callback(err, lookUpsMap);
             }
         );
     },
@@ -676,27 +723,19 @@ var KGbuilder_triplesMaker = {
     },
 
     getLookupValue: function (lookupName, value, callback) {
-        var lookupArray = lookupName.split("|");
+        //var lookupArray = lookupName.split("|");
         var target = null;
-        lookupArray.forEach(function (lookup, index) {
-            if (index > 0) {
-                var x = 3;
-            }
-            if (target) {
-                return;
-            }
-            target = lookUpsMap[lookup].dictionary[value];
-            if (target && lookUpsMap[lookup].transformFn) {
+        if(lookUpsMap[lookupName])
+        target = lookUpsMap[lookupName].dictionary[value];
+        if (target && lookUpsMap[lookupName].transformFn) {
                 try {
-                    target = lookUpsMap[lookup].transformFn(target);
+                    target = lookUpsMap[lookupName].transformFn(target,"s", mapping.p, line, mapping);
                 } catch (e) {
                     return callback(e);
                 }
-            }
-        });
-        if (target == null) {
-            var x = 3;
         }
+        
+       
         return target;
     },
     loadData: function (tableMappings, options, callback) {

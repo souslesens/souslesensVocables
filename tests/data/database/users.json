@@ -1,0 +1,42 @@
+[
+  {
+    "id": "1",
+    "login": "admin",
+    "password": "$2b$10$LhdaXF3tHrvA8b8fKMvNmeOSyogCBgN/L9XLN/vqjz6tgN5rSxMyy",
+    "profiles": ["admin"],
+    "auth": "database",
+    "token": "admin-token",
+    "create_source": false,
+    "maximum_source": 5
+  },
+  {
+    "id": "2",
+    "login": "owl_user",
+    "password": "$2b$10$ed6ZDHUbN7NfOGrufiDniudK9EMLCFg9qFgJ0N/T.nRTBPlA5Mm9C",
+    "profiles": ["owl_only"],
+    "auth": "database",
+    "token": "owl-token",
+    "create_source": false,
+    "maximum_source": 5
+  },
+  {
+    "id": "3",
+    "login": "skos_user",
+    "password": "",
+    "profiles": ["skos_only"],
+    "auth": "database",
+    "token": "skos-token",
+    "create_source": false,
+    "maximum_source": 5
+  },
+  {
+    "id": "4",
+    "login": "not_admin",
+    "password": "",
+    "profiles": ["admin"],
+    "auth": "database",
+    "token": "",
+    "create_source": true,
+    "maximum_source": 5
+  }
+]

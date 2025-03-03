@@ -107,7 +107,6 @@ const getKnexConnection = (database) => {
     const profilesEntries = JSON.parse(fs.readFileSync(path.join("tests", "data", "database", "profiles.json")));
     const usersEntries = JSON.parse(fs.readFileSync(path.join("tests", "data", "database", "users.json")));
     const userDataEntries = JSON.parse(fs.readFileSync(path.join("tests", "data", "database", "userData.json")));
-
     Promise.all([
         connection("profiles").insert(
             profilesEntries.map((profile) => ({

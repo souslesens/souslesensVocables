@@ -4,6 +4,7 @@
     "label": "all_forbidden",
     "theme": "default",
     "allowed_tools": ["lineage", "KGcreator", "KGquery"],
+    "is_shared": true,
     "access_control": {},
     "schema_types": ["OWL"]
   },
@@ -11,6 +12,7 @@
     "id": "2",
     "label": "read_folder_1",
     "allowed_tools": ["lineage", "KGcreator", "KGquery"],
+    "is_shared": true,
     "access_control": {
       "OWL/FOLDER_1": "read"
     },
@@ -20,6 +22,7 @@
     "id": "3",
     "label": "readwrite_folder_1",
     "allowed_tools": ["lineage", "KGcreator", "KGquery"],
+    "is_shared": true,
     "access_control": {
       "OWL/FOLDER_1": "readwrite"
     },
@@ -29,6 +32,7 @@
     "id": "4",
     "label": "all",
     "allowed_tools": ["ALL"],
+    "is_shared": true,
     "access_control": {},
     "schema_types": ["OWL", "SKOS"]
   }

@@ -70,6 +70,9 @@ class UserModel {
     /**
      * Convert the user to restore the legacy JSON schema
      *
+     * Note: Use `typeof` to retrieve the correct value when the test are
+     * running with the sqlite backend.
+     *
      * @param {User} user - the user to convert
      * @returns {User} - the converted object with the correct fields
      */
@@ -80,8 +83,8 @@ class UserModel {
             login: user.login,
             password: user.password || "",
             token: user.token || "",
-            groups: user.profiles || [],
-            allowSourceCreation: user.create_source || false,
+            groups: (typeof user.profiles === "string" ? JSON.parse(user.profiles) : user.profiles) || [],
+            allowSourceCreation: (typeof user.create_source === "number" ? user.create_source === 1 : user.create_source) || false,
             maxNumberCreatedSource: user.maximum_source || 5,
             source: user.auth || "database",
         },
@@ -184,6 +187,7 @@ class UserModel {
 
     /**
      * @param {UserAccountWithPassword} user
+     * @returns {number} the index in the database of the new user
      */
     addUserAccount = async (user) => {
         const data = this._checkUser(user);
@@ -191,14 +195,15 @@ class UserModel {
         data.token = this._genToken(data.login);
 
         const conn = getKnexConnection(this._mainConfig.database);
-        const results = await conn.select("login").from("users").where("login", data.login).first();
+        let results = await conn.select("login").from("users").where("login", data.login).first();
         if (results !== undefined) {
             cleanupConnection(conn);
             throw Error("The user already exists, try updating it");
         }
 
-        await conn.insert(this._convertToDatabase(data)).into("users");
+        results = await conn.insert(this._convertToDatabase(data)).into("users");
         cleanupConnection(conn);
+        return results[0];
     };
 
     /**
@@ -244,7 +249,7 @@ class UserModel {
      * @param {string} login - the user login
      */
     deleteUserAccount = async (login) => {
-        let conn = getKnexConnection(this._mainConfig.database);
+        const conn = getKnexConnection(this._mainConfig.database);
         const results = await conn.select("*").from("users").where("login", login).first();
         if (results === undefined) {
             cleanupConnection(conn);
@@ -252,8 +257,6 @@ class UserModel {
         }
         // remove userData owned by deleted user
         await conn.select("*").from("user_data").where("owned_by", results.id).del();
-        // reset connection for tests
-        conn = getKnexConnection(this._mainConfig.database);
         // remove user login from userData.shared_user
         const allUserData = await conn.select("*").from("user_data_list");
         Object.values(allUserData).map((userData) => {

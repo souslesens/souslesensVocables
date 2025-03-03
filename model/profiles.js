@@ -4,7 +4,7 @@ const { readMainConfig } = require("./config");
 const { toolModel } = require("./tools");
 const { cleanupConnection, getKnexConnection } = require("./utils");
 const { userDataModel } = require("./userData");
-const { userModel } = require("./users")
+const { userModel } = require("./users");
 
 /**
  * @typedef {import("./UserTypes").UserAccount} UserAccount

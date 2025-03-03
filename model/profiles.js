@@ -4,6 +4,8 @@ const { readMainConfig } = require("./config");
 const { toolModel } = require("./tools");
 const { cleanupConnection, getKnexConnection } = require("./utils");
 const { userDataModel } = require("./userData");
+const { userModel } = require("./users")
+
 /**
  * @typedef {import("./UserTypes").UserAccount} UserAccount
  * @typedef {import("./ProfileTypes").Profile} Profile
@@ -111,10 +113,6 @@ class ProfileModel {
      */
     getUserProfiles = async (user) => {
         const allProfiles = await this.getAllProfiles();
-        if (user.login === "admin" || user.groups.includes("admin")) {
-            return allProfiles;
-        }
-
         return Object.fromEntries(Object.entries(allProfiles).filter(([profileName, _profile]) => user.groups.includes(profileName)));
     };
 
@@ -143,7 +141,13 @@ class ProfileModel {
      * @returns {Promise<Profile>} a collection of profiles
      */
     getOneUserProfile = async (user, profileName) => {
-        const userProfiles = await this.getUserProfiles(user);
+        let userProfiles;
+        if (user.login === "admin" || user.profiles?.includes("admin")) {
+            const allProfiles = await this.getAllProfiles();
+            userProfiles = Object.fromEntries(Object.entries(allProfiles));
+        } else {
+            userProfiles = await this.getUserProfiles(user);
+        }
         return userProfiles[profileName];
     };
 

@@ -23,11 +23,11 @@ module.exports = function () {
     async function GET(req, res, next) {
         try {
             const userInfo = await userManager.getUser(req.user);
-            const profiles = await profileModel.getUserProfiles(userInfo.user);
+            const userProfiles = await profileModel.getUserProfiles(userInfo.user);
             const allUsers = await userModel.getUserAccounts();
-            const profileNames = await [...new Set(Object.values(profiles).map((item) => item.name))];
-            const userProfiles = await this.filterUserByGroup(allUsers, profileNames);
-            res.status(200).json(successfullyFetched(sortObjectByKey(userProfiles)));
+            const profileNames = await [...new Set(Object.values(userProfiles).map((item) => item.name))];
+            const users = await this.filterUserByGroup(allUsers, profileNames);
+            res.status(200).json(successfullyFetched(sortObjectByKey(users)));
         } catch (error) {
             next(error);
         }

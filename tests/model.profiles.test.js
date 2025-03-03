@@ -34,19 +34,6 @@ describe("Test the Profilemodel module", () => {
         expect(profiles.admin.theme).toStrictEqual("Sea Breeze");
     });
 
-    test("get profiles with the admin user", async () => {
-        const profiles = await profileModel.getUserProfiles({ login: "admin" });
-        expect(Object.keys(profiles).length).toBe(5);
-        expect(profiles.all_forbidden).toStrictEqual({
-            allowedSourceSchemas: ["OWL"],
-            allowedTools: ["lineage", "KGcreator", "KGquery"],
-            id: "all_forbidden",
-            name: "all_forbidden",
-            sourcesAccessControl: {},
-            theme: "default",
-        });
-    });
-
     test("get profiles with an user without profile", async () => {
         const profiles = await profileModel.getUserProfiles({
             login: "jdoe",

@@ -6,11 +6,14 @@ var KGquery_myQueries = (function () {
 
     self.save = function (callback) {
         //   KGquery.execPathQuery({ dontExecute: true }, function (err, query) {
-        var data = {
-            querySets: KGquery.querySets,
-            sparqlQuery: KGquery.currentSparqlQuery,
-        };
-        return callback(null, data);
+        KGquery.execPathQuery({ }, function (err, query) {
+             var data = {
+                querySets: KGquery.querySets,
+                sparqlQuery: KGquery.currentSparqlQuery,
+            };
+            return callback(null, data);
+        });
+       
         //  });
     };
 

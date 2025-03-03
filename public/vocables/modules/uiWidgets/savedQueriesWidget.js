@@ -2,6 +2,8 @@ import Sparql_OWL from "../sparqlProxies/sparql_OWL.js";
 import common from "../shared/common.js";
 import Lineage_createRelation from "../tools/lineage/lineage_createRelation.js";
 import Sparql_generic from "../sparqlProxies/sparql_generic.js";
+import UI from "../shared/UI.js";
+
 
 var SavedQueriesWidget = (function () {
     var self = {};
@@ -148,7 +150,18 @@ var SavedQueriesWidget = (function () {
                 };
             };
 
-            var content64 = btoa(JSON.stringify(data, getCircularReplacer()));
+            //var content64 = btoa(JSON.stringify(data, getCircularReplacer()));
+            var data_path =  "KGquery/savedQueries/" ;
+            UserDataWidget.saveMetadata(label, data_path, data,null, function (err, result) {
+                if(err){
+                    return alert(err);
+                }
+                console.log(result);
+                $('#KGquery_messageDiv').text('saved query');
+
+
+            });
+            /*
             var triples = [];
             triples.push({
                 subject: queryUri,
@@ -191,6 +204,7 @@ var SavedQueriesWidget = (function () {
                 }
                 $("#SavedQueriesComponent_itemsSelect").append("<option value='" + queryUri + "'>" + label + "</option>");
             });
+            */
         });
     };
 

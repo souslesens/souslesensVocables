@@ -5,6 +5,7 @@
         "id": "admin",
         "allowedSourceSchemas": ["SKOS", "OWL", "INDIVIDUAL"],
         "allowedTools": ["lineage", "KGcreator", "KGquery"],
+        "is_shared": true,
         "defaultSourceAccessControl": "read",
         "sourcesAccessControl": {
             "Dbpedia": "forbidden"
@@ -16,6 +17,7 @@
         "id": "owl_only",
         "allowedSourceSchemas": ["OWL"],
         "allowedTools": ["lineage", "KGcreator", "KGquery"],
+        "is_shared": true,
         "defaultSourceAccessControl": "read",
         "sourcesAccessControl": {
             "Dbpedia": "forbidden"
@@ -27,6 +29,7 @@
         "id": "skos_only",
         "allowedSourceSchemas": ["SKOS"],
         "allowedTools": ["lineage", "KGcreator", "KGquery"],
+        "is_shared": true,
         "defaultSourceAccessControl": "read",
         "sourcesAccessControl": {
             "Dbpedia": "forbidden"

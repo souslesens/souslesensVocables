@@ -19,6 +19,7 @@ const ProfileObject = z
         allowedSourceSchemas: z.enum(["OWL", "SKOS"]).array().optional(),
         sourcesAccessControl: z.record(z.string(), z.string()).optional(),
         allowedTools: z.string().array().optional(),
+        isShared: z.boolean().default(true),
         _type: z.string().default("profile"),
     })
     .strict();
@@ -57,6 +58,7 @@ class ProfileModel {
         label: profile.name,
         theme: profile.theme || "",
         allowed_tools: profile.allowedTools || [],
+        is_shared: profile.isShared !== undefined ? profile.isShared : true,
         access_control: JSON.stringify(profile.sourcesAccessControl || {}),
         schema_types: profile.allowedSourceSchemas || [],
     });
@@ -78,6 +80,7 @@ class ProfileModel {
             theme: profile.theme || "",
             allowedSourceSchemas: typeof profile.schema_types === "string" ? JSON.parse(profile.schema_types) : profile.schema_types,
             allowedTools: typeof profile.allowed_tools === "string" ? JSON.parse(profile.allowed_tools) : profile.allowed_tools,
+            isShared: typeof profile.is_shared === "number" ? profile.is_shared === 1 : profile.is_shared,
             sourcesAccessControl: typeof profile.access_control === "string" ? JSON.parse(profile.access_control) : profile.access_control,
         },
     ];
@@ -99,6 +102,7 @@ class ProfileModel {
                 theme: this._mainConfig.theme.defaultTheme,
                 allowedSourceSchemas: ["OWL", "SKOS"],
                 allowedTools: this._mainConfig.tools_available,
+                isShared: true,
                 sourcesAccessControl: {},
                 defaultSourceAccessControl: "readwrite",
             };

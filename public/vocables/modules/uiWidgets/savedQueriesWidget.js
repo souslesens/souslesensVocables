@@ -3,6 +3,7 @@ import common from "../shared/common.js";
 import Lineage_createRelation from "../tools/lineage/lineage_createRelation.js";
 import Sparql_generic from "../sparqlProxies/sparql_generic.js";
 import UI from "../shared/UI.js";
+import UserDataWidget from "./userDataWidget.js";
 
 
 var SavedQueriesWidget = (function () {
@@ -11,7 +12,7 @@ var SavedQueriesWidget = (function () {
     self.contentPredicate = "hasContent";
     self.scopePredicate = "hasScope";
     self.sourcePredicate = "hasSource";
-
+    
     self.init = function (CRUDsource) {
         if (false && self.currentCRUDsourceLabel) {
             return;
@@ -23,7 +24,7 @@ var SavedQueriesWidget = (function () {
         }
         Config.sources[CRUDsource] = self.currentCRUDsourceObject;
     };
-
+    
     self.showDialog = function (CRUDsource, targetDiv, slsvSource, scope, saveQueryFn, loadQueryFn) {
         self.init(CRUDsource);
         self.saveQueryFn = saveQueryFn;
@@ -35,11 +36,11 @@ var SavedQueriesWidget = (function () {
                 $("#" + targetDiv).dialog("open");
             }
             if (slsvSource) {
-                self.list(CRUDsource, slsvSource, scope);
+                self.list( slsvSource);
             }
         });
     };
-
+    /*
     self.list = function (CRUDsource, slsvSource, scope, targetSelect, callback) {
         self.init(CRUDsource);
         self.currentCRUDsourceLabel;
@@ -89,6 +90,7 @@ var SavedQueriesWidget = (function () {
         });
     };
 
+
     self.loadItem = function (uri, options, callback) {
         var filter = "FILTER (?s =<" + uri + ">) ";
         var options = {
@@ -114,6 +116,40 @@ var SavedQueriesWidget = (function () {
         });
     };
 
+    */
+    self.list = function ( slsvSource, targetSelect, callback) {
+        if (!targetSelect) {
+            targetSelect = "SavedQueriesComponent_itemsSelect";
+        }
+        if (!slsvSource) {
+            slsvSource = MainController.currentSource;
+
+        }
+        var data_group = "KGquery/savedQueries/";
+        UserDataWidget.listUserData(null, function (err, result) {
+            var storedQueries = [];
+            result.forEach(function (item) {
+                if (item.data_group == data_group) {
+                    storedQueries.push({ label: item.data_label, id: item.id });
+                }
+            });
+            if(storedQueries.length>0){
+                common.fillSelectOptions(targetSelect, storedQueries, false, "label", "id");
+            }
+        });
+    }
+    self.loadItem = function (userDataId, options, callback) {
+        UserDataWidget.loadUserDatabyId(userDataId, function (err, result) {
+            if (err) {
+                return alert(err);
+            }
+            if(result && result?.data_content?.sparqlQuery && self.loadQueryFn){
+                self.loadQueryFn(null, result.data_content);
+            }
+          
+        });
+    };
+    
     self.save = function (slsvSource, scope, callback) {
         self.saveQueryFn(function (err, result) {
             if (err) {
@@ -151,14 +187,15 @@ var SavedQueriesWidget = (function () {
             };
 
             //var content64 = btoa(JSON.stringify(data, getCircularReplacer()));
-            var data_path =  "KGquery/savedQueries/" ;
-            UserDataWidget.saveMetadata(label, data_path, data,null, function (err, result) {
+            var data_group =  "KGquery/savedQueries/" ;
+            UserDataWidget.saveMetadata(label, null, data,data_group, function (err, result) {
                 if(err){
                     return alert(err);
                 }
                 console.log(result);
                 $('#KGquery_messageDiv').text('saved query');
-
+                $("#SavedQueriesComponent_itemsSelect").append("<option value='" + queryUri + "'>" + label + "</option>");
+                //SavedQueriesWidget.showDialog("STORED_KGQUERY_QUERIES", "KGquery_myQueriesDiv", self.currentSource, null, KGquery_myQueries.save, KGquery_myQueries.load);
 
             });
             /*
@@ -208,22 +245,23 @@ var SavedQueriesWidget = (function () {
         });
     };
 
-    self.delete = function (uri, callback) {
-        if (!uri) {
-            uri = $("#SavedQueriesComponent_itemsSelect").val();
+    self.delete = function (userDataId, callback) {
+        if (!userDataId) {
+            userDataId = $("#SavedQueriesComponent_itemsSelect").val();
+            var userDataLabel= $("#SavedQueriesComponent_itemsSelect option:selected").text();
         }
-        if (!uri) {
+        if (!userDataId) {
             return alert(" nothing to delete");
         }
-        if (confirm("delete selected query")) {
-            var CRUDsource = self.currentCRUDsourceLabel;
-            Sparql_generic.deleteTriples(CRUDsource, uri, null, null, function (err, result) {
-                $("#SavedQueriesComponent_itemsSelect option[value='" + uri + "']").remove();
-                if (callback) {
-                    return callback();
-                }
-            });
-        }
+
+         var node= {id: userDataId, data_label: userDataLabel};
+        UserDataWidget.deleteItem(node, function (err, result) {
+            if (err) {
+                return alert(err.responseText || err);
+            }
+            $('#KGquery_messageDiv').text('deleted query');
+            SavedQueriesWidget.showDialog("STORED_KGQUERY_QUERIES", "KGquery_myQueriesDiv", self.currentSource, null, KGquery_myQueries.save, KGquery_myQueries.load);
+        });
     };
 
     return self;

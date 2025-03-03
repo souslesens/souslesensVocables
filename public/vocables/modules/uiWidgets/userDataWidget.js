@@ -65,20 +65,20 @@ var UserDataWidget = (function () {
             //dataType: "json",
             contentType:"application/json",
             success: function (_result, _textStatus, _jqXHR) {
-                callback(null, "graph saved");
+                callback(null, _result);
             },
             error(err) {
                 return callback(err);
             },
         });
     };
-    self.loadUserDatabyId = function (id) {
+    self.loadUserDatabyId = function (id,callback) {
         $.ajax({
             type: "GET",
             url: `${Config.apiUrl}/users/data/` + "" +id,
             dataType: "json",
             success: function (_result, _textStatus, _jqXHR) {
-                callback(null, "graph saved");
+                callback(null, _result);
             },
             error(err) {
                 return callback(err);

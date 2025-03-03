@@ -4280,7 +4280,18 @@ attrs.color=self.getSourceColor(superClassValue)
             if (!visjsFileName) {
                 return;
             }
-            Lineage_whiteboard.lineageVisjsGraph.saveGraph(visjsFileName);
+            if(Lineage_whiteboard.lineageVisjsGraph.data && Lineage_whiteboard.lineageVisjsGraph.data.nodes.get().length > 0){
+                var nodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
+                var data = {
+                    nodes: nodes,
+                    edges: self.data.edges.get(),
+                    context: self.currentContext,
+                    positions: positions,
+                };
+
+
+                Lineage_whiteboard.lineageVisjsGraph.saveGraph(visjsFileName);
+            }
         },
 
         /**

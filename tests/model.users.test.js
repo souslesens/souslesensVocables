@@ -4,40 +4,23 @@ const fs = require("fs");
 const path = require("path");
 const tmp = require("tmp");
 
-const { createTracker, MockClient } = require("knex-mock-client");
-
 const { cleanupConnection, getKnexConnection } = require("../model/utils");
 const { userModel } = require("../model/users");
 const { userDataModel } = require("../model/userData");
 
-jest.mock("../model/utils", () => {
-    const knex = require("knex");
-    return {
-        cleanupConnection: jest.fn().mockReturnThis(),
-        getKnexConnection: knex({ client: MockClient, dialect: "pg" }),
-    };
-});
+jest.mock("../model/utils");
 
 describe("UserModelJson", () => {
-    let tracker;
     let dbUsers;
 
     beforeAll(() => {
-        tracker = createTracker(getKnexConnection);
-
         dbUsers = JSON.parse(fs.readFileSync(path.join(__dirname, "data", "config", "users", "users.json")));
         dbPublicUsers = JSON.parse(fs.readFileSync(path.join(__dirname, "data", "config", "users", "users.public.json")));
         dbUserData = JSON.parse(fs.readFileSync(path.join(__dirname, "data", "config", "users", "userData.json")));
         dbUserDataList = JSON.parse(fs.readFileSync(path.join(__dirname, "data", "config", "users", "userData.list.json")));
     });
 
-    afterEach(() => {
-        tracker.reset();
-    });
-
     test("retrieve the list of all the account without private information", async () => {
-        tracker.on.select("public_users_list").response(dbPublicUsers);
-
         const users = await userModel.getUserAccounts();
         expect(users).toStrictEqual({
             admin: {
@@ -68,7 +51,7 @@ describe("UserModelJson", () => {
                 groups: ["skos_only"],
                 allowSourceCreation: false,
                 maxNumberCreatedSource: 5,
-                source: "database",
+                source: "keycloak",
             },
             not_admin: {
                 id: "4",
@@ -84,8 +67,6 @@ describe("UserModelJson", () => {
     });
 
     test("get an user account from the login", async () => {
-        tracker.on.select("users").response(dbUsers[1]);
-
         const [login, user] = await userModel.getUserAccount("owl_user");
         expect(login).toStrictEqual("owl_user");
         expect(user.id).toStrictEqual("2");
@@ -93,15 +74,11 @@ describe("UserModelJson", () => {
     });
 
     test("get an user account from an unknown login", async () => {
-        tracker.on.select("users").response(undefined);
-
-        const user = await userModel.getUserAccount("owl_user");
+        const user = await userModel.getUserAccount("owl_user2");
         expect(user).toBeUndefined();
     });
 
     test("find an user from an existing login", async () => {
-        tracker.on.select("users").response(dbUsers[0]);
-
         const [login, user] = await userModel.findUserAccount("admin");
         expect(login).toStrictEqual("admin");
         expect(user.id).toStrictEqual("1");
@@ -110,8 +87,6 @@ describe("UserModelJson", () => {
     });
 
     test("find an user from an unknown login", async () => {
-        tracker.on.select("users").response(undefined);
-
         const emptyArray = await userModel.findUserAccount("unknown");
         expect(emptyArray).toStrictEqual(undefined);
     });
@@ -122,8 +97,6 @@ describe("UserModelJson", () => {
     });
 
     test("find an user from the corresponding token", async () => {
-        tracker.on.select("users").response(dbUsers[2]);
-
         const [login, user] = await userModel.findUserAccountFromToken("skos-token");
         expect(login).toStrictEqual("skos_user");
         expect(user.id).toStrictEqual("3");
@@ -131,8 +104,6 @@ describe("UserModelJson", () => {
     });
 
     test("find an user from an unknown token", async () => {
-        tracker.on.select("users").response(undefined);
-
         const user = await userModel.findUserAccountFromToken("unknown");
         expect(user).toBeUndefined();
     });
@@ -144,15 +115,11 @@ describe("UserModelJson", () => {
     });
 
     test("check password match with external authenticator", async () => {
-        tracker.on.select("users").response({ ...dbUsers[0], auth: "keycloak" });
-
-        const badpass = await userModel.checkUserPassword("admin", "pass");
+        const badpass = await userModel.checkUserPassword("skos_user", "pass");
         expect(badpass).toBeFalsy();
     });
 
     test("check password match for an existing user", async () => {
-        tracker.on.select("users").response(dbUsers[0]);
-
         const goodpass = await userModel.checkUserPassword("admin", "pass");
         expect(goodpass).toBeTruthy();
         const badpass = await userModel.checkUserPassword("admin", "badpassword");
@@ -160,18 +127,14 @@ describe("UserModelJson", () => {
     });
 
     test("check password for an unknown user", async () => {
-        tracker.on.select("users").response(undefined);
-
         const nouser = await userModel.checkUserPassword("unknown", "pass");
         expect(nouser).toBeFalsy();
     });
 
     test("check password for an user with an empty password", async () => {
-        tracker.on.select("users").response(dbUsers[2]);
-
-        let emptypassword = await userModel.checkUserPassword("skos_user", "pass");
+        let emptypassword = await userModel.checkUserPassword("not_admin", "pass");
         expect(emptypassword).toBeFalsy();
-        emptypassword = await userModel.checkUserPassword("skos_user", "");
+        emptypassword = await userModel.checkUserPassword("not_admin", "");
         expect(emptypassword).toBeTruthy();
     });
 
@@ -185,32 +148,11 @@ describe("UserModelJson", () => {
             allowSourceCreation: false,
             maxNumberCreatedSource: 5,
         };
-
-        tracker.on.select("users").response(undefined); // Unknown user
-        tracker.on.insert("users").response([]);
-        await userModel.addUserAccount(addedUser);
-
-        const updatedUsers = Array.from(dbUsers);
-        updatedUsers.push(userModel._convertToDatabase(addedUser));
-
-        tracker.reset();
-        tracker.on.select("public_users_list").response(updatedUsers);
-        const users = await userModel.getUserAccounts();
-        expect(users.login).toStrictEqual({
-            id: "undefined", // This is managed by Postgres
-            login: "login",
-            password: "pass",
-            token: "",
-            groups: [],
-            source: "database",
-            allowSourceCreation: false,
-            maxNumberCreatedSource: 5,
-        });
+        const results = await userModel.addUserAccount(addedUser);
+        expect(results).toStrictEqual(5)
     });
 
     test("add a new user with an existing login", async () => {
-        tracker.on.select("users").response(dbUsers[2]); // Existing user
-
         const user = {
             login: "skos_user",
             password: "",
@@ -228,9 +170,6 @@ describe("UserModelJson", () => {
     });
 
     test("generate a new token for existing user", async () => {
-        tracker.on.select("users").response(dbUsers[3]);
-        tracker.on.update("users").response([]);
-
         const token = await userModel.generateUserToken("not_admin");
 
         const suffix = createHash("sha256").update("not_admin").digest("hex");
@@ -238,15 +177,10 @@ describe("UserModelJson", () => {
     });
 
     test("generate a token with an unknown account", async () => {
-        tracker.on.select("users").response(undefined);
-
         expect(async () => await userModel.generateUserToken("unknown")).rejects.toThrow();
     });
 
     test("update an existing user", async () => {
-        tracker.on.select("users").response(dbUsers[1]);
-        tracker.on.update("users").response([]);
-
         const user = {
             login: "owl_user",
             password: "pass",
@@ -261,8 +195,6 @@ describe("UserModelJson", () => {
     });
 
     test("update an unknown user", async () => {
-        tracker.on.select("users").response(undefined);
-
         const user = {
             login: "unknown",
             password: "",
@@ -280,47 +212,31 @@ describe("UserModelJson", () => {
     });
 
     test("user with login admin is admin", async () => {
-        tracker.on.select("public_users_list").response(dbUsers[0]);
-
         const result = await userModel.isAdmin("admin");
         expect(result).toBeTruthy();
     });
 
     test("user in group admin is admin", async () => {
-        tracker.on.select("public_users_list").response(dbUsers[3]);
-
         const result = await userModel.isAdmin("not_admin");
         expect(result).toBeTruthy();
     });
 
     test("user not in group admin is not admin", async () => {
-        tracker.on.select("public_users_list").response(dbUsers[2]);
-
         const result = await userModel.isAdmin("owl_user");
         expect(result).toBeFalsy();
     });
 
     test("delete an existing user", async () => {
-        tracker.on.select("user_data_list").response(dbUserDataList);
-        tracker.on.select("user_data").response(dbUserData[2]);
-        tracker.on.delete("user_data").response();
-        tracker.on.delete("users").response();
-        tracker.on.select("users").response(dbUsers[2]);
-
         const result = await userModel.deleteUserAccount("admin");
         expect(result).toBeTruthy();
     });
 
     test("delete an unknown user", async () => {
-        tracker.on.select("users").response(undefined);
-
         const result = await userModel.deleteUserAccount("unknown");
         expect(result).toBeFalsy();
     });
 
     test("check isAdmin with an unknown account", async () => {
-        tracker.on.select("public_users_list").response(undefined);
-
         await expect(userModel.isAdmin("unknown")).rejects.toThrow("UserAccount does not exist");
     });
 

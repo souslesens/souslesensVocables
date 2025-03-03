@@ -62,6 +62,9 @@ class ProfileModel {
     /**
      * Convert the profile to restore the legacy JSON schema
      *
+     * Note: Use `typeof` to retrieve the correct value when the test are
+     * running with the sqlite backend.
+     *
      * @param {Profile} profile - the profile to convert
      * @returns {Profile} - the converted object with the correct fields
      */
@@ -70,10 +73,10 @@ class ProfileModel {
         {
             id: profile.label,
             name: profile.label,
-            theme: profile.theme,
-            allowedSourceSchemas: profile.schema_types,
-            allowedTools: profile.allowed_tools,
-            sourcesAccessControl: profile.access_control,
+            theme: profile.theme || "",
+            allowedSourceSchemas: typeof profile.schema_types === "string" ? JSON.parse(profile.schema_types) : profile.schema_types,
+            allowedTools: typeof profile.allowed_tools === "string" ? JSON.parse(profile.allowed_tools) : profile.allowed_tools,
+            sourcesAccessControl: typeof profile.access_control === "string" ? JSON.parse(profile.access_control) : profile.access_control,
         },
     ];
 
@@ -202,8 +205,10 @@ class ProfileModel {
             throw Error("The profile already exists, try updating it");
         }
 
-        await conn.insert(this._convertToDatabase(data)).into("profiles");
+        const idx = await conn.insert(this._convertToDatabase(data)).into("profiles");
         cleanupConnection(conn);
+
+        return idx[0];
     };
 
     /**
@@ -214,7 +219,7 @@ class ProfileModel {
         const conn = getKnexConnection(this._mainConfig.database);
         const results = await conn.select("theme").from("profiles").where("label", profileName).first();
         cleanupConnection(conn);
-        if (results === undefined || results.theme === undefined) {
+        if (!results || !results.theme) {
             return this._mainConfig.theme.defaultTheme;
         }
 

@@ -330,7 +330,7 @@ var MappingTransform = (function () {
      */
     self.copyKGcreatorMappings = function () {
         var text = $("#mappingModeler_infosTA").val();
-        $("#mappingModeler_infosTA").focus();
+        $("#mappingModeler_infosTA") .trigger( "focus" );
         common.copyTextToClipboard(text);  
     };
     self.getFilteredMappings=function(checkedNodes){

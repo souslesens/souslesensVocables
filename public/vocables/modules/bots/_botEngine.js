@@ -83,7 +83,7 @@ var _botEngine = (function () {
         }
 
         var key = keys[0];
-
+        console.log(key)
         if (key == "_OR") {
             // alternative
             var alternatives = self.currentObj[key];
@@ -133,6 +133,7 @@ var _botEngine = (function () {
             if (!fn || typeof fn !== "function") {
                 return alert("function not defined :" + key);
             }
+
             self.currentObj = self.currentObj[key];
             self.setStepMessage(key);
             fn();
@@ -368,6 +369,7 @@ var _botEngine = (function () {
             //DateWidget.unsetDatePickerOnInput("botPromptInput");
             DateWidget.setDatePickerOnInput("botPromptInput", null, function (date) {
                 _botEngine.currentBot.params[varToFill] = date.getTime();
+                $("#botPromptInput").trigger( "focus" );
 
                 // self.nextStep();
             });
@@ -400,7 +402,7 @@ var _botEngine = (function () {
         $("#botVarToFill").val(varToFill);
         $("#botPromptInput").val(defaultValue || "");
         $("#botPromptInput").css("display", "block");
-        $("#botPromptInput").focus();
+        $("#botPromptInput") .trigger( "focus" );
         if (!self.history.step.includes(self.history.currentIndex)) {
             self.history.step.push(self.history.currentIndex);
         }
@@ -435,7 +437,7 @@ var _botEngine = (function () {
         }
 
         $("#bot_input").val("");
-        $("#bot_input").focus();
+        $("#bot_input") .trigger( "focus" );
         if ($("#botDiv")[0].scrollHeight > 500) {
             $("#botPanel").scrollTop($("#botPanel")[0].scrollHeight);
         }

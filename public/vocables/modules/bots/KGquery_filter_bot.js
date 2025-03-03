@@ -110,7 +110,9 @@ var KGquery_filter_bot = (function () {
         if (self.data && self.data.nonObjectProperties) {
             choices = choices.concat(self.data.nonObjectProperties);
         }
-        self.aBotEngine.showList(choices, "property");
+        self.aBotEngine.showList(choices, "property", null,null, function(value){
+            self.params.property=value
+        });
     };
 
     self.functions.choosePropertyOperatorFn = function () {

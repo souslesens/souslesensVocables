@@ -1,5 +1,4 @@
 const { processResponse } = require("./utils");
-const ExportGraph = require("../../../bin/exportGraph.");
 const GraphTraversal = require("../../../bin/graphTraversal.");
 const ConfigManager = require("../../../bin/configManager.");
 const UserRequestFiltering = require("../../../bin/userRequestFiltering.");
@@ -9,7 +8,7 @@ module.exports = function () {
         POST,
     };
 
-    async function POST(req, res, next) {
+    async function POST(req, res, _next) {
         const body = req.body.body;
         var auth = null;
 

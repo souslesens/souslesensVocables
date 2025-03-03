@@ -155,7 +155,7 @@ var xsdToSkos = {
             function (err) {
                 if (err) return console.log(err);
                 fs.writeFileSync("D:\\NLP\\importedResources\\energistics\\" + options.scheme + ".rdf.nt", allElementsStr);
-            }
+            },
         );
     },
 };

@@ -18,6 +18,10 @@ jobs:
         uses: actions/checkout@v2
       - name: Install
         run: |
+          apt-get update && apt-get install -y npm nodejs
+          npm ci
+          mkdir -p docs/docs/jsdoc
+          npm run --silent tools:jsdoc2md -- -c jsdoc.json > docs/docs/jsdoc/index.md
           cd docs
           python3 -m venv venv
           . ./venv/bin/activate

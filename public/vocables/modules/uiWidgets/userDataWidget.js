@@ -41,6 +41,17 @@ var UserDataWidget = (function () {
             owned_by: Authentification.currentUser.login,
         };
 
+        /* async function excuteQuery() {
+            const response = await fetch( `${Config.apiUrl}/users/data`, {
+                method: "POST",
+                body:JSON.stringify(payload),
+                // ...
+            });
+        }
+
+        excuteQuery()
+
+        return;*/
 
         var type = "POST";
         if (self.currentTreeNode) {

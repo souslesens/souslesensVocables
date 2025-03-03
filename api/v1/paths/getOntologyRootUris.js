@@ -5,7 +5,7 @@ module.exports = function () {
     let operations = {
         POST,
     };
-    async function POST(req, res, next) {
+    async function POST(req, res, _next) {
         const body = req.body.body;
         SourceIntegrator.getOntologyRootUris(body.sourceUrl, body.options, function (err, result) {
             processResponse(res, err, result);

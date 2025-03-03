@@ -389,7 +389,7 @@ var KGbuilder = {
                                         callbackProcessor(err);
                                     }
                                     return callbackProcessor(null, totalTriples);
-                                }
+                                },
                             );
                         });
                     };
@@ -439,7 +439,7 @@ var KGbuilder = {
                             function (err, _result) {
                                 if (err) return callbackSeries(err);
                                 callbackSeries();
-                            }
+                            },
                         );
                     }
                 },
@@ -464,7 +464,7 @@ var KGbuilder = {
 
             function (err) {
                 return callback(err);
-            }
+            },
         );
     },
 
@@ -523,7 +523,7 @@ var KGbuilder = {
             },
             function (err) {
                 return callbackX(err, existingUrisMap);
-            }
+            },
         );
     },
     buidlKG: function (mappingFilePaths, sparqlServerUrl, graphUri, replaceGraph, dataSource, _options, callback) {
@@ -561,7 +561,7 @@ var KGbuilder = {
                 if (err) callback(err);
                 //   socket.message("KGbuild", "total triples created " + totalTriples)
                 callback();
-            }
+            },
         );
     },
 };

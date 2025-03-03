@@ -1,6 +1,5 @@
 const { processResponse } = require("../utils");
 const request = require("request");
-const async = require("async");
 const ConfigManager = require("../../../../bin/configManager.");
 
 //https://jena.apache.org/documentation/inference/
@@ -10,7 +9,7 @@ module.exports = function () {
         GET,
     };
 
-    function GET(req, res, next) {
+    function GET(req, res, _next) {
         const jowlServerConfig = ConfigManager.config.jowlServer;
         if (!jowlServerConfig.enabled) {
             res.status(500).json({ message: "Jowl Server is disable" });

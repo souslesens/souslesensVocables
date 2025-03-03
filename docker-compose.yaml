@@ -33,6 +33,15 @@ services:
         environment:
             DBA_PASSWORD: ${DBA_PASSWORD}
             SPARQL_UPDATE: "true"
+            VIRT_Parameters_NumberOfBuffers: ${VIRT_NBUFFERS:-170000}
+            VIRT_Parameters_MaxDirtyBuffers: ${VIRT_MAXDBUFFERS:-130000}
+            VIRT_Parameters_TN_MAX_memory: 4000000000
+            VIRT_Parameters_TransactionAfterImageLimit: 500000000
+            VIRT_SPARQL_ResultSetMaxRows: 1000000000
+            VIRT_SPARQL_MaxDataSourceSize: 1000000000
+            VIRT_SPARQL_MaxQueryCostEstimationTime: 0
+            VIRT_SPARQL_MaxQueryExecutionTime: 0
+
         volumes:
             - "${DATA_ROOT_DIR:-/tmp}/souslesens/virtuoso/data:\
               /data"

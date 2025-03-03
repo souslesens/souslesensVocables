@@ -32,7 +32,6 @@ if (!isValid) {
 // sentry/glitchtip
 if (config.sentryDsnNode) {
     Sentry.init({ dsn: config.sentryDsnNode });
-    app.use(Sentry.Handlers.requestHandler());
 }
 
 // body parsers
@@ -76,7 +75,7 @@ app.use(
             sameSite: config.cookieSameSite ? config.cookieSameSite : false,
             secure: config.cookieSecure ? config.cookieSecure : false,
         },
-    })
+    }),
 );
 
 app.use(function (req, res, next) {
@@ -164,7 +163,7 @@ openapi.initialize({
 
                     // Only accept the Bearer scheme from the Authorization header
                     if (output !== null && output[0] === "Bearer") {
-                        req.user = await userModel.findUserAccountFromToken(output[1]);
+                        [_, req.user] = await userModel.findUserAccountFromToken(output[1]);
                     }
                 }
 
@@ -214,7 +213,7 @@ app.use(
         swaggerOptions: {
             url: "/api/v1/api-docs",
         },
-    })
+    }),
 );
 
 // Home (redirect to /vocables)
@@ -254,12 +253,6 @@ app.use(function (req, res, next) {
 /**
  * Error handlers
  */
-
-// sentry/glitchtip
-// (this error handler must be before any other error middleware and after all controllers)
-if (config.sentryDsnNode) {
-    app.use(Sentry.Handlers.errorHandler());
-}
 
 // openapi error handler
 app.use("/api/v1/*", function (err, req, res, _next) {

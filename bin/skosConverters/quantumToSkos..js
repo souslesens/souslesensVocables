@@ -68,7 +68,7 @@ var generateRdf = function (entitiesArray) {
             console.log("done");
 
             console.log(JSON.stringify(stats, null, 2));
-        }
+        },
     );
 };
 

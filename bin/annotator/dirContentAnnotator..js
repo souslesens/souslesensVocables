@@ -64,7 +64,7 @@ var DirContentAnnotator = {
 
                             return;
                         } else entry.autodrain();
-                    })
+                    }),
                 )
 
                 .on("finish", function () {
@@ -163,14 +163,14 @@ var DirContentAnnotator = {
                         function (err) {
                             if (err) return callbackEachSeries(err);
                             callbackEachSeries();
-                        }
+                        },
                     );
                 }
             },
             function (_err) {
                 fs.writeFileSync(parsedDocumentsHomeDir + corpusName + "_concepts.json", JSON.stringify(jsonData, null, 2));
                 callback(null, "done");
-            }
+            },
         );
     },
 
@@ -239,12 +239,12 @@ var DirContentAnnotator = {
                     function (err) {
                         DirContentAnnotator.socket.message(fileObj.name + "/" + source.name + " nouns :" + Object.keys(fileObj.nouns).length + " entities " + entitiesCount + "");
                         callbackEachSource(err, fileObj);
-                    }
+                    },
                 );
             },
             function (err) {
                 callback(err);
-            }
+            },
         );
     },
 
@@ -442,7 +442,7 @@ var DirContentAnnotator = {
                         },
                         function (err) {
                             callbackSeries(err);
-                        }
+                        },
                     );
                 },
             ],
@@ -454,7 +454,7 @@ var DirContentAnnotator = {
                     storePath = parsedDocumentsHomeDir + name + ".jsonData";
                     fs.writeFileSync(storePath, JSON.stringify(files, null, 2));
                 }
-            }
+            },
         );
     },
     annotateParsedDocuments: function (data, sources, corpusName, options, callback) {
@@ -533,12 +533,12 @@ var DirContentAnnotator = {
                                 DirContentAnnotator.socket.message(" ---" + conceptsMap[fileObj.path].sources[source.name].missingNouns.length + " missing nouns");
 
                                 callbackEachSource(err);
-                            }
+                            },
                         );
                     },
                     function (_err) {
                         return callbackEachDocument();
-                    }
+                    },
                 );
             },
             function (err) {
@@ -553,7 +553,7 @@ var DirContentAnnotator = {
                     fs.writeFileSync(storePath, JSON.stringify(conceptsMap, null, 2));
                     return callback();
                 }
-            }
+            },
         );
     },
 
@@ -583,7 +583,7 @@ var DirContentAnnotator = {
             ],
             function (err) {
                 callback(err, corpusName);
-            }
+            },
         );
     },
     getAnnotatedCorpusList: function (group, callback) {

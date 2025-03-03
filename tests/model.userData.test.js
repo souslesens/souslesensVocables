@@ -21,12 +21,12 @@ jest.mock("../model/utils", () => {
 describe("UserDataModel", () => {
     let tracker;
     let dbUsers;
-    let dbUserData;
+    let dbUserDataList;
 
     beforeAll(() => {
         tracker = createTracker(getKnexConnection);
-        dbUserData = JSON.parse(fs.readFileSync(
-            path.join(__dirname, "data", "config", "users", "userData.json")
+        dbUserDataList = JSON.parse(fs.readFileSync(
+            path.join(__dirname, "data", "config", "users", "userData.list.json")
         ));
         dbUsers = JSON.parse(fs.readFileSync(
             path.join(__dirname, "data", "config", "users", "users.json")
@@ -41,8 +41,8 @@ describe("UserDataModel", () => {
     });
 
     test("get unshared userData", async () => {
-        tracker.on.select("user_data_list").response(dbUserData);
-        const adminUser = {login: "test", groups: []};
+        tracker.on.select("user_data_list").response(dbUserDataList);
+        const adminUser = {login: "admin", groups: []};
         const userData = await userDataModel.all(adminUser);
         expect(Array.from(userData).length).toBe(2);
         expect(userData).toStrictEqual([
@@ -65,7 +65,7 @@ describe("UserDataModel", () => {
                 "shared_profiles": [],
                 "shared_users": [],
                 "created_at": "2025-01-24T14:16:41.111Z",
-                "owned_by": "test"
+                "owned_by": "admin"
             },
             {
                 "id": 5,
@@ -89,13 +89,13 @@ describe("UserDataModel", () => {
                     "skos_user"
                 ],
                 "created_at": "2025-01-27T08:05:51.750Z",
-                "owned_by": "test"
+                "owned_by": "admin"
             }
         ])
     });
 
     test("get userData with shared user", async () => {
-        tracker.on.select("user_data_list").response(dbUserData);
+        tracker.on.select("user_data_list").response(dbUserDataList);
         const user = {login: "owl_user", groups: []};
         const userData = await userDataModel.all(user);
         for (const ud of userData) {
@@ -106,7 +106,7 @@ describe("UserDataModel", () => {
     });
 
     test("get userData with shared user and shared profile", async () => {
-        tracker.on.select("user_data_list").response(dbUserData);
+        tracker.on.select("user_data_list").response(dbUserDataList);
         const user = {login: "skos_user", groups: ["skos_only"]};
         const userData = await userDataModel.all(user);
         for (const ud of userData) {
@@ -119,7 +119,7 @@ describe("UserDataModel", () => {
     });
 
     test("get userData with shared user and shared profiles", async () => {
-        tracker.on.select("user_data_list").response(dbUserData);
+        tracker.on.select("user_data_list").response(dbUserDataList);
         const user = {login: "skos_user", groups: ["skos_only", "owl_only"]};
         const userData = await userDataModel.all(user);
         for (const ud of userData) {
@@ -138,13 +138,13 @@ describe("UserDataModel", () => {
     });
 
     test("find userData", async () => {
-        tracker.on.select("user_data_list").response(dbUserData);
+        tracker.on.select("user_data_list").response(dbUserDataList);
         const userData = await userDataModel.find(1);
         expect(userData).toBeTruthy();
     });
 
     test("insert userData", async () => {
-        tracker.on.select("user_data_list").response(dbUserData);
+        tracker.on.select("user_data_list").response(dbUserDataList);
         tracker.on.select("users").response(dbUsers);
         tracker.on.select("profiles").response(dbProfiles);
         tracker.on.insert("user_data").response([]);
@@ -156,7 +156,7 @@ describe("UserDataModel", () => {
         }
         await userDataModel.insert(addUserData);
 
-        const updatedUserData = Array.from(dbUserData);
+        const updatedUserData = Array.from(dbUserDataList);
         updatedUserData.push(addUserData);
 
         tracker.reset();
@@ -166,14 +166,14 @@ describe("UserDataModel", () => {
     });
 
     test("remove userData", async () => {
-        tracker.on.select("user_data").response(dbUserData);
+        tracker.on.select("user_data").response(dbUserDataList);
         tracker.on.delete("user_data").response();
         const result = await userDataModel.remove(1);
         expect(result).toBeTruthy();
     });
 
     test("update userData", async () => {
-        tracker.on.select("user_data").response(dbUserData);
+        tracker.on.select("user_data").response(dbUserDataList);
         tracker.on.select("users").response(dbUsers);
         tracker.on.select("profiles").response(dbProfiles);
         tracker.on.update("user_data").response([]);

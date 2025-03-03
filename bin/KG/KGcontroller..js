@@ -72,7 +72,7 @@ var KGcontroller = {
             },
             function (err) {
                 return callback(err, globalJson);
-            }
+            },
         );
     },
 

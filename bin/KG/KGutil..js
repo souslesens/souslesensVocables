@@ -10,10 +10,10 @@
 var fs = require("fs");
 
 var util = {
-    sliceArray: function(array, sliceSize) {
+    sliceArray: function (array, sliceSize) {
         var slices = [];
         var slice = [];
-        array.forEach(function(item) {
+        array.forEach(function (item) {
             if (slice.length >= sliceSize) {
                 slices.push(slice);
                 slice = [];
@@ -23,7 +23,7 @@ var util = {
         slices.push(slice);
         return slices;
     },
-    deconcatSQLTableColumn: function(str) {
+    deconcatSQLTableColumn: function (str) {
         if (str.indexOf(":") > -1) {
             return null;
         }
@@ -46,12 +46,12 @@ var util = {
      * @param length
      * @return {string}
      */
-    getRandomHexaId: function(length) {
+    getRandomHexaId: function (length) {
         const str = Math.floor(Math.random() * Math.pow(16, length)).toString(16);
         return "0".repeat(length - str.length) + str;
     },
 
-    getStringHash: function(str) {
+    getStringHash: function (str) {
         var hash = 5381,
             i = str.length;
 
@@ -65,7 +65,7 @@ var util = {
         return hash >>> 0;
     },
 
-    prepareJsonForsource: function(obj) {
+    prepareJsonForsource: function (obj) {
         /*  if (!(typeof obj === "object"))
          obj = JSON.parse(obj);*/
 
@@ -99,14 +99,14 @@ var util = {
         return obj;
     },
 
-    hashCode: function(str) {
+    hashCode: function (str) {
         var hash = 0;
         for (var i = 0; i < str.length; i++) {
             hash = ~~((hash << 5) - hash + str.charCodeAt(i));
         }
         return hash;
     },
-    convertNumStringToNumber: function(value) {
+    convertNumStringToNumber: function (value) {
         if (value.match && value.match(/.*[a-zA-Z/\\$].*/)) {
             return value;
         }
@@ -124,17 +124,17 @@ var util = {
         }
         return value;
     },
-    isNumber: function(n) {
+    isNumber: function (n) {
         return !isNaN(parseFloat(n)) && isFinite(n);
     },
-    isInt: function(value) {
+    isInt: function (value) {
         return /^-?[0-9]+$/.test("" + value);
     },
-    isFloat: function(value) {
+    isFloat: function (value) {
         return /^-?[0-9]+[.,]+[0-9]?$/.test("" + value);
     },
 
-    cleanFieldsForNeo: function(obj) {
+    cleanFieldsForNeo: function (obj) {
         var obj2 = {};
         for (var key in obj) {
             var key2 = key.replace(/-/g, "_");
@@ -183,17 +183,17 @@ var util = {
 
         return obj2;
     },
-    capitalizeFirstLetter: function(string) {
+    capitalizeFirstLetter: function (string) {
         return string.charAt(0).toUpperCase() + string.slice(1);
     },
 
-    formatStringForTriple: function(str, forUri) {
+    formatStringForTriple: function (str, forUri) {
         if (!str || !str.replace) {
             return null;
         }
         str = str.trim();
         str = str.replace(/\\/gm, "");
-        str = str.replace(/"/gm, "\\\"");
+        str = str.replace(/"/gm, '\\"');
         // str = str.replace(/;/gm, "\\\;")
         //  str = str.replace(/\n/gm, "\\\\n")
         str = str.replace(/\n/gm, "\\\\n");
@@ -208,10 +208,10 @@ var util = {
 
         return str;
     },
-    getCsvFileSeparator: function(file, callback) {
+    getCsvFileSeparator: function (file, callback) {
         var readStream = fs.createReadStream(file, { start: 0, end: 5000, encoding: "utf8" });
         readStream
-            .on("data", function(chunk) {
+            .on("data", function (chunk) {
                 var separators = [",", "\t", ";"];
                 var p = chunk.indexOf("\n");
                 if (p < 0) {
@@ -231,19 +231,19 @@ var util = {
 
                 readStream.destroy();
             })
-            .on("end", function() {
+            .on("end", function () {
                 return;
             })
-            .on("close", function() {
+            .on("close", function () {
                 return;
             });
     },
 
-    normalizeHeader: function(headerArray, s) {
+    normalizeHeader: function (headerArray, s) {
         //   var   r = s.toLowerCase();
         var r = s;
         r = r.replace(/[()'.]/g, "");
-        r = r.replace(/[\s-_]+\w/g, function(txt) {
+        r = r.replace(/[\s-_]+\w/g, function (txt) {
             return txt.charAt(txt.length - 1).toUpperCase();
         });
         r = r.replace(new RegExp("\\s", "g"), "");
@@ -263,23 +263,22 @@ var util = {
         return r;
     },
 
-    csvToJson: function(filePath) {
+    csvToJson: function (filePath) {
         var str = "" + fs.readFileSync(filePath);
         str = str.replace(/[\u{0080}-\u{FFFF}]/gu, ""); //charactrese vides
         var lines = str.split("\n");
         var pagesJson = [];
         var cols = [];
 
-        lines[0].split("\t").forEach(function(cell) {
+        lines[0].split("\t").forEach(function (cell) {
             cols.push(cell.trim());
         });
 
-        lines.forEach(function(line, lineIndex) {
+        lines.forEach(function (line, lineIndex) {
             var cells = line.trim().split("\t");
             var obj = {};
-            cells.forEach(function(cell, index) {
+            cells.forEach(function (cell, index) {
                 if (lineIndex == 0) {
-                    ;
                 } else {
                     // cols.push(cell.trim())
                     obj[cols[index]] = cell.trim();
@@ -289,7 +288,7 @@ var util = {
         });
         return pagesJson;
     },
-    getFilesInDirRecursively: function(dirPath, options, callback) {
+    getFilesInDirRecursively: function (dirPath, options, callback) {
         var path = require("path");
         var dirsArray = [];
         var dirFilesMap = {};
@@ -337,20 +336,16 @@ var util = {
                         type: "file",
                         parent: parent,
                         name: files[i],
-                        infos: infos
+                        infos: infos,
                     });
                 }
             }
         }
 
-
         recurse(dirPath, dirPath);
 
         return callback(null, dirFilesMap);
     },
-
-
-
 };
 
 module.exports = util;

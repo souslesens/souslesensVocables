@@ -1,7 +1,7 @@
-const fs = require("fs");
 const bcrypt = require("bcrypt");
-const { readMainConfig, configUsersPath } = require("./config");
+const { readMainConfig } = require("./config");
 const { cleanupConnection, getKnexConnection } = require("./utils");
+const { userDataModel } = require("./userData");
 const { Lock } = require("async-await-mutex-lock");
 const ULID = require("ulid");
 const { createHash } = require("crypto");
@@ -244,13 +244,25 @@ class UserModel {
      * @param {string} login - the user login
      */
     deleteUserAccount = async (login) => {
-        const conn = getKnexConnection(this._mainConfig.database);
-        const results = await conn.select("login").from("users").where("login", login).first();
+        let conn = getKnexConnection(this._mainConfig.database);
+        const results = await conn.select("*").from("users").where("login", login).first();
         if (results === undefined) {
             cleanupConnection(conn);
             return false;
         }
-
+        // remove userData owned by deleted user
+        await conn.select("*").from("user_data").where("owned_by", results.id).del();
+        // reset connection for tests
+        conn = getKnexConnection(this._mainConfig.database);
+        // remove user login from userData.shared_user
+        const allUserData = await conn.select("*").from("user_data_list");
+        Object.values(allUserData).map((userData) => {
+            if (userData.shared_users.includes(login)) {
+                userData.shared_users = userData.shared_users.filter((u) => u !== login);
+                userDataModel.update(userData);
+            }
+        });
+        // remove user account
         // using select here allows mocking in tests
         await conn.select("*").from("users").where("login", login).del();
         cleanupConnection(conn);

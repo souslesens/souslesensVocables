@@ -45,7 +45,7 @@ const SourcesTable = () => {
 
     const [snackOpen, setSnackOpen] = useState(false);
     const [snackMessages, setSnackMessages] = useState(new Set());
-    const [snackSeverity, setSnackSeverity] = useState<"warning" | "error" | undefined>(undefined);
+    const [snackSeverity, setSnackSeverity] = useState<"info" | "warning" | "error" | undefined>(undefined);
 
     const [openModal, setOpenModal] = useState(false);
     const [editModal, setEditModal] = useState(false);
@@ -89,13 +89,16 @@ const SourcesTable = () => {
             window.Config.sources = reformatSource(receivedSources);
             updateModel({ type: "sources", payload: success(receivedSources) });
             void writeLog(me, "ConfigEditor", editModal ? "edit" : "create", source.name);
+            setSnackSeverity("info");
+            setSnackMessages(new Set([`source ${source.name} is created`]));
+            setSnackOpen(true);
         } else {
             updateModel({ type: "sources", payload: failure(response.message as string) });
         }
     };
 
-    const handleOpenModal = (source: ServerSource | null = null) => {
-        setEditModal(source !== null);
+    const handleOpenModal = (source: ServerSource | null = null, editMode: boolean = false) => {
+        setEditModal(editMode);
         setSelectedSource(source);
         setOpenModal(true);
     };
@@ -117,7 +120,6 @@ const SourcesTable = () => {
                 setSnackOpen(true);
                 setSnackSeverity("error");
                 setSnackMessages((msg) => new Set(msg).add(`La source ${source.name} existe déjà`));
-                return;
             }
             // remove unknown imports
             const imports: string[] = [];
@@ -131,7 +133,7 @@ const SourcesTable = () => {
                 }
             });
             source.imports = imports;
-            await handleUpdateSource(source);
+            handleOpenModal(source);
         }
     };
 
@@ -279,7 +281,7 @@ const SourcesTable = () => {
                                                             >
                                                                 <Download />
                                                             </IconButton>
-                                                            <IconButton aria-label="edit" color="primary" onClick={() => handleOpenModal(source)} size="small" title={"Edit Repository"}>
+                                                            <IconButton aria-label="edit" color="primary" onClick={() => handleOpenModal(source, true)} size="small" title={"Edit Repository"}>
                                                                 <Edit />
                                                             </IconButton>
                                                             <ButtonWithConfirmation label="Delete" msg={() => handleDeleteSource(source)} />

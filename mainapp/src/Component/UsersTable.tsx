@@ -16,6 +16,7 @@ import {
     Chip,
     Button,
     FormControl,
+    IconButton,
     InputLabel,
     Select,
     MenuItem,
@@ -27,7 +28,7 @@ import {
     DialogContent,
     DialogActions,
 } from "@mui/material";
-
+import { Edit } from "@mui/icons-material";
 import CsvDownloader from "react-csv-downloader";
 import { SRD } from "srd";
 import { ulid } from "ulid";
@@ -167,9 +168,9 @@ export const UsersTable = () => {
                                                     </TableCell>
                                                     <TableCell align="center">
                                                         <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
-                                                            <Button color="primary" variant="contained" onClick={() => setUserDialogState({ open: true, user: user })}>
-                                                                Edit
-                                                            </Button>
+                                                            <IconButton aria-label="edit" color="primary" onClick={() => setUserDialogState({ open: true, user: user })} size="small" title="Edit">
+                                                                <Edit />
+                                                            </IconButton>
                                                             <ButtonWithConfirmation label="Delete" msg={() => handleDeleteUser(user, updateModel)} />
                                                         </Stack>
                                                     </TableCell>

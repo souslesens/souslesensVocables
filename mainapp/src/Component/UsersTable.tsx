@@ -1,4 +1,4 @@
-import { useState, useReducer, ChangeEvent, Dispatch } from "react";
+import { useState, ChangeEvent, Dispatch, useEffect } from "react";
 import {
     Box,
     CircularProgress,
@@ -39,7 +39,7 @@ import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
 import { PasswordField } from "./PasswordField";
 import { writeLog } from "../Log";
 
-const UsersTable = () => {
+export const UsersTable = () => {
     const { model, updateModel } = useModel();
     const [filteringChars, setFilteringChars] = useState("");
     const [orderBy, setOrderBy] = useState<keyof User>("login");
@@ -58,6 +58,24 @@ const UsersTable = () => {
         void deleteUser(user, updateModel);
         void writeLog(me, "ConfigEditor", "delete", user.login);
     };
+
+    const [userDialogState, setUserDialogState] = useState<{ open: boolean; user?: User }>({ open: false });
+
+    const config = SRD.unwrap(
+        {
+            auth: "database",
+            tools_available: [],
+            defaultGroups: [],
+            theme: {
+                defaultTheme: "",
+                selector: false,
+            },
+        },
+        identity,
+        model.config,
+    );
+
+    const canCreateUsers = config.auth != "keycloak";
 
     const renderUsers = SRD.match(
         {
@@ -149,7 +167,9 @@ const UsersTable = () => {
                                                     </TableCell>
                                                     <TableCell align="center">
                                                         <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
-                                                            <UserForm id={`edit-button-${user.id}`} maybeuser={user} me={me} />
+                                                            <Button color="primary" variant="contained" onClick={() => setUserDialogState({ open: true, user: user })}>
+                                                                Edit
+                                                            </Button>
                                                             <ButtonWithConfirmation label="Delete" msg={() => handleDeleteUser(user, updateModel)} />
                                                         </Stack>
                                                     </TableCell>
@@ -163,8 +183,13 @@ const UsersTable = () => {
                             <CsvDownloader separator="&#9;" filename="users" extension=".tsv" datas={csvData}>
                                 <Button variant="outlined">Download CSV</Button>
                             </CsvDownloader>
-                            <UserForm id={`create-button`} create={true} me={me} />
+                            {canCreateUsers ? (
+                                <Button color="primary" variant="contained" onClick={() => setUserDialogState({ open: true })}>
+                                    Create User
+                                </Button>
+                            ) : null}
                         </Stack>
+                        <UserFormDialog open={userDialogState.open} maybeuser={userDialogState.user} me={me} onClose={() => setUserDialogState((prev) => ({ ...prev, open: false }))} />
                     </Stack>
                 );
             },
@@ -175,63 +200,25 @@ const UsersTable = () => {
     return renderUsers;
 };
 
-type UserEditionState = { modal: boolean; userForm: User };
-
-const enum Type {
-    UserClickedModal,
-    UserUpdatedField,
-    ResetUser,
-}
-const enum Mode {
-    Creation,
-    Edition,
-}
-
-export type Msg_ =
-    | { type: Type.UserClickedModal; payload: boolean }
-    | { type: Type.UserUpdatedField; payload: { fieldname: string; newValue: string | string[] | boolean | number } }
-    | { type: Type.ResetUser; payload: Mode };
-
-const updateUser = (userEditionState: UserEditionState, msg: Msg_): UserEditionState => {
-    //console.log(Type[msg.type], msg.payload)
-    const { model } = useModel();
-    const unwrappedUsers = SRD.unwrap([], identity, model.users);
-    const getUnmodifiedUsers = unwrappedUsers.reduce((acc, value) => (userEditionState.userForm.id === value.id ? value : acc), newUser(ulid()));
-    const resetSourceForm = msg.payload ? userEditionState.userForm : getUnmodifiedUsers;
-    const fieldToUpdate = msg.type === Type.UserUpdatedField ? msg.payload.fieldname : "";
-    switch (msg.type) {
-        case Type.UserClickedModal:
-            return { ...userEditionState, modal: msg.payload };
-
-        case Type.UserUpdatedField:
-            return { ...userEditionState, userForm: { ...userEditionState.userForm, [fieldToUpdate]: msg.payload.newValue } };
-
-        case Type.ResetUser:
-            switch (msg.payload) {
-                case Mode.Creation:
-                    return { ...userEditionState, userForm: newUser(ulid()) };
-                case Mode.Edition:
-                    return { ...userEditionState, userForm: msg.payload ? userEditionState.userForm : resetSourceForm };
-            }
-    }
-};
-
-type UserFormProps = {
+type UserFormDialogProps = {
+    open: boolean;
     me: string;
     maybeuser?: User;
-    create?: boolean;
-    id: string;
+    onClose: () => void;
 };
 
-const UserForm = ({ maybeuser: maybeUser, create = false, id, me = "" }: UserFormProps) => {
-    const user = maybeUser ? maybeUser : newUser(ulid());
+const UserFormDialog = ({ open, maybeuser: maybeUser, me = "", onClose }: UserFormDialogProps) => {
+    const create = maybeUser === undefined;
     const { model, updateModel } = useModel();
     const unwrappedProfiles = SRD.unwrap([], identity, model.profiles);
+    const [userForm, setUserForm] = useState<User>(maybeUser ? maybeUser : newUser(ulid()));
 
-    const [userModel, update] = useReducer(updateUser, { modal: false, userForm: user });
+    useEffect(() => {
+        if (open) {
+            setUserForm(maybeUser ? maybeUser : newUser(ulid()));
+        }
+    }, [open, maybeUser]);
 
-    const handleOpen = () => update({ type: Type.UserClickedModal, payload: true });
-    const handleClose = () => update({ type: Type.UserClickedModal, payload: false });
     const handleFieldUpdate = (fieldname: string) => (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent<string | string[]>) => {
         let value: string | string[] | boolean | number = event.target.value;
         if (fieldname === "allowSourceCreation") {
@@ -243,118 +230,91 @@ const UserForm = ({ maybeuser: maybeUser, create = false, id, me = "" }: UserFor
                 value = 0;
             }
         }
-        update({ type: Type.UserUpdatedField, payload: { fieldname: fieldname, newValue: value } });
+        setUserForm((prev) => ({
+            ...prev,
+            [fieldname]: value,
+        }));
     };
-    const saveUser = () => {
-        void putUsersBis(userModel.userForm, create ? Mode.Creation : Mode.Edition, updateModel, update);
+    const saveUser = async () => {
+        try {
+            await putUsersBis(userForm, create, updateModel);
+        } catch (e) {
+            console.error(e);
+        }
         const mode = create ? "create" : "edit";
-        void writeLog(me, "ConfigEditor", mode, userModel.userForm.login);
+        void writeLog(me, "ConfigEditor", mode, userForm.login);
+        onClose();
     };
-
-    const config = SRD.unwrap(
-        {
-            auth: "database",
-            tools_available: [],
-            defaultGroups: [],
-            theme: {
-                defaultTheme: "",
-                selector: false,
-            },
-        },
-        identity,
-        model.config,
-    );
-    const createEditButton = (
-        <Button id={id} color="primary" variant="contained" onClick={handleOpen}>
-            {create ? "Create User" : "Edit"}
-        </Button>
-    );
 
     return (
-        <>
-            {create ? (config.auth != "keycloak" ? createEditButton : null) : createEditButton}
-            <Dialog
-                onClose={handleClose}
-                open={userModel.modal}
-                PaperProps={{
-                    component: "form",
-                    onSubmit: (event: React.FormEvent<HTMLFormElement>) => {
-                        event.preventDefault();
-                        saveUser();
-                    },
-                }}
-                maxWidth="md"
-                fullWidth
-            >
-                <DialogTitle>{maybeUser ? `Edit user '${user.login}'` : "Create new user"}</DialogTitle>
-                <DialogContent>
-                    <Stack
-                        spacing={2}
-                        // Prevents textfield label from being cut
-                        sx={{ paddingTop: 1 }}
-                    >
-                        <TextField
-                            variant="outlined"
+        <Dialog
+            onClose={onClose}
+            open={open}
+            PaperProps={{
+                component: "form",
+                onSubmit: (event: React.FormEvent<HTMLFormElement>) => {
+                    event.preventDefault();
+                    void saveUser();
+                },
+            }}
+            maxWidth="md"
+            fullWidth
+        >
+            <DialogTitle>{create ? "Create new user" : `Edit user '${userForm.login}'`}</DialogTitle>
+            <DialogContent>
+                <Stack
+                    spacing={2}
+                    // Prevents textfield label from being cut
+                    sx={{ paddingTop: 1 }}
+                >
+                    <TextField variant="outlined" fullWidth onChange={handleFieldUpdate("login")} value={userForm.login} id={`login`} label={"Login"} disabled={create ? false : true} required />
+                    {userForm.source === "database" && <PasswordField id={`password`} label={"New Password"} onChange={handleFieldUpdate("password")} value={userForm.password} required />}
+                    <FormControl>
+                        <InputLabel id="select-groups-label">Profiles</InputLabel>
+                        <Select
+                            labelId="select-profiles-label"
+                            id="select-groups"
+                            multiple
+                            value={userForm.groups}
+                            label="select-profile-label"
                             fullWidth
-                            onChange={handleFieldUpdate("login")}
-                            value={userModel.userForm.login}
-                            id={`login`}
-                            label={"Login"}
-                            disabled={create ? false : true}
-                            required
-                        />
-                        {user.source === "database" && <PasswordField id={`password`} label={"New Password"} onChange={handleFieldUpdate("password")} value={userModel.userForm.password} required />}
-                        <FormControl>
-                            <InputLabel id="select-groups-label">Profiles</InputLabel>
-                            <Select
-                                labelId="select-profiles-label"
-                                id="select-groups"
-                                multiple
-                                value={userModel.userForm.groups}
-                                label="select-profile-label"
-                                fullWidth
-                                renderValue={(selected: string | string[]) => (typeof selected === "string" ? selected : selected.join(", "))}
-                                onChange={handleFieldUpdate("groups")}
-                            >
-                                {unwrappedProfiles.map((profile) => (
-                                    <MenuItem key={profile.name} value={profile.name}>
-                                        <Checkbox checked={userModel.userForm.groups.indexOf(profile.name) > -1} />
-                                        {profile.name}
-                                    </MenuItem>
-                                ))}
-                            </Select>
-                        </FormControl>
+                            renderValue={(selected: string | string[]) => (typeof selected === "string" ? selected : selected.join(", "))}
+                            onChange={handleFieldUpdate("groups")}
+                        >
+                            {unwrappedProfiles.map((profile) => (
+                                <MenuItem key={profile.name} value={profile.name}>
+                                    <Checkbox checked={userForm.groups.indexOf(profile.name) > -1} />
+                                    {profile.name}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
 
-                        <FormControl>
-                            <FormControlLabel
-                                control={
-                                    <Checkbox value={userModel.userForm.allowSourceCreation} checked={userModel.userForm.allowSourceCreation} onChange={handleFieldUpdate("allowSourceCreation")} />
-                                }
-                                label="Allow the user to create sources"
-                            />
-                        </FormControl>
-                        <TextField
-                            id="max-allowed-sources"
-                            type="number"
-                            label="Limit the number of source the user can create"
-                            value={userModel.userForm.maxNumberCreatedSource || 0}
-                            disabled={!userModel.userForm.allowSourceCreation}
-                            onChange={handleFieldUpdate("maxNumberCreatedSource")}
-                            InputLabelProps={{
-                                shrink: true,
-                            }}
+                    <FormControl>
+                        <FormControlLabel
+                            control={<Checkbox value={userForm.allowSourceCreation} checked={userForm.allowSourceCreation} onChange={handleFieldUpdate("allowSourceCreation")} />}
+                            label="Allow the user to create sources"
                         />
-                    </Stack>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleClose}>Cancel</Button>
-                    <Button type="submit" color="primary" variant="contained">
-                        Save User
-                    </Button>
-                </DialogActions>
-            </Dialog>
-        </>
+                    </FormControl>
+                    <TextField
+                        id="max-allowed-sources"
+                        type="number"
+                        label="Limit the number of source the user can create"
+                        value={userForm.maxNumberCreatedSource || 0}
+                        disabled={!userForm.allowSourceCreation}
+                        onChange={handleFieldUpdate("maxNumberCreatedSource")}
+                        InputLabelProps={{
+                            shrink: true,
+                        }}
+                    />
+                </Stack>
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={onClose}>Cancel</Button>
+                <Button type="submit" color="primary" variant="contained">
+                    Save User
+                </Button>
+            </DialogActions>
+        </Dialog>
     );
 };
-
-export { UsersTable, Type, Mode };

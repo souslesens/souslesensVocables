@@ -56,26 +56,7 @@ var KGquery_myQueries = (function () {
         );
 
         return;
-        querySets.forEach(function (set) {
-            set.elements.forEach(function (element) {
-                var node = element.fromNode;
-                KGquery.addNode(node);
-                node = element.toNode;
-                KGquery.addNode(node);
-            });
-        });
-        var queryElementsObjects = {};
-        querySets.forEach(function (value, key) {
-            value.elements.forEach(function (value2, key2) {
-                queryElementsObjects[value2.divId] = value2;
-                if (value2.fromNode != "") {
-                    value2.fromNode.data.queryElement = queryElementsObjects[value2.fromNode.data.queryElement];
-                }
-                if (value2.toNode != "") {
-                    value2.fromNode.data.queryElement = queryElementsObjects[value2.toNode.data.queryElement];
-                }
-            });
-        });
+        
     };
 
     return self;

@@ -62,7 +62,8 @@ var KGquery = (function () {
     self.init = function () {
         KGquery_graph.drawVisjsModel("saved");
         //SavedQueriesWidget.list();
-        SavedQueriesWidget.showDialog("STORED_KGQUERY_QUERIES", "KGquery_myQueriesDiv", self.currentSource, null, KGquery_myQueries.save, KGquery_myQueries.load);
+        SavedQueriesWidget.showDialog("tabs_myQueries",self.currentSource,KGquery_myQueries.save, KGquery_myQueries.load);
+        
     };
 
     self.initOutputType = function () {
@@ -809,8 +810,9 @@ var KGquery = (function () {
         $("KGquery_outputTypeSelect");
     };
     self.initMyQuery = function () {
-        SavedQueriesWidget.list();
-        SavedQueriesWidget.showDialog("STORED_KGQUERY_QUERIES", "tabs_myQueries", KGquery.currentSource, null, KGquery_myQueries.save, KGquery_myQueries.load);
+        //SavedQueriesWidget.list();
+        SavedQueriesWidget.showDialog("tabs_myQueries",self.currentSource,KGquery_myQueries.save, KGquery_myQueries.load);
+        
     };
     self.initQuery = function () {
         if ($("#tabs_Query").children().length == 0) {

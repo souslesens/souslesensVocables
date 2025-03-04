@@ -12,7 +12,7 @@ var SavedQueriesWidget = (function () {
     self.contentPredicate = "hasContent";
     self.scopePredicate = "hasScope";
     self.sourcePredicate = "hasSource";
-    
+    /*
     self.init = function (CRUDsource) {
         if (false && self.currentCRUDsourceLabel) {
             return;
@@ -24,9 +24,9 @@ var SavedQueriesWidget = (function () {
         }
         Config.sources[CRUDsource] = self.currentCRUDsourceObject;
     };
-    
-    self.showDialog = function (CRUDsource, targetDiv, slsvSource, scope, saveQueryFn, loadQueryFn) {
-        self.init(CRUDsource);
+    */
+    self.showDialog = function ( targetDiv, slsvSource, saveQueryFn, loadQueryFn) {
+        //self.init(CRUDsource);
         self.saveQueryFn = saveQueryFn;
         self.loadQueryFn = loadQueryFn;
         self.slsvSource = slsvSource;
@@ -129,7 +129,7 @@ var SavedQueriesWidget = (function () {
         UserDataWidget.listUserData(null, function (err, result) {
             var storedQueries = [];
             result.forEach(function (item) {
-                if (item.data_group == data_group) {
+                if (item.data_group == data_group+'/'+slsvSource) {
                     storedQueries.push({ label: item.data_label, id: item.id });
                 }
             });
@@ -164,30 +164,15 @@ var SavedQueriesWidget = (function () {
             if (!label) {
                 return;
             }
-            if (!scope) {
-                scope = $("#SavedQueriesComponent_scope").val();
-            }
+            
             if (!slsvSource) {
+                if(!self.slsvSource){
+                    return alert("no source");
+                }
                 slsvSource = self.slsvSource;
+               
             }
-            if (!confirm("save query " + label + "with scope " + scope + " in source " + self.currentCRUDsourceLabel + " ?")) {
-                return;
-            }
-            if (scope == "private") {
-                scope = authentication.currentUser.login;
-            }
-            var queryUri = self.currentCRUDsourceObject.graphUri + common.getRandomHexaId(10);
-            const getCircularReplacer = () => {
-                return (key, value) => {
-                    if (key == "queryElement") {
-                        value = value["divId"];
-                    }
-                    return value;
-                };
-            };
-
-            //var content64 = btoa(JSON.stringify(data, getCircularReplacer()));
-            var data_group =  "KGquery/savedQueries" ;
+            var data_group =  "KGquery/savedQueries/"+slsvSource ;
             UserDataWidget.saveMetadata(label, null, data,data_group, function (err, result) {
                 if(err){
                     return alert(err);
@@ -198,7 +183,7 @@ var SavedQueriesWidget = (function () {
                     $("#SavedQueriesComponent_itemsSelect").append("<option value='" + result.insertedId[0].id + "'>" + label + "</option>");
                 }
                 
-                //SavedQueriesWidget.showDialog("STORED_KGQUERY_QUERIES", "KGquery_myQueriesDiv", self.currentSource, null, KGquery_myQueries.save, KGquery_myQueries.load);
+                
 
             });
             /*
@@ -264,7 +249,7 @@ var SavedQueriesWidget = (function () {
             }
             $('#KGquery_messageDiv').text('deleted query');
             $("#SavedQueriesComponent_itemsSelect").find("option[value='" + userDataId + "']").remove();
-            SavedQueriesWidget.showDialog("STORED_KGQUERY_QUERIES", "KGquery_myQueriesDiv", self.currentSource, null, KGquery_myQueries.save, KGquery_myQueries.load);
+          
         });
     };
 

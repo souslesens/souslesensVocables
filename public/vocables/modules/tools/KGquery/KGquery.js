@@ -342,11 +342,11 @@ var KGquery = (function () {
                 if (result.results.bindings.length == 0) return alert("no result");
                 self.message("found items :" + result.results.bindings.length);
             }
-
+            /*
             KGquery_myQueries.save(function (err, query) {
                 Config.clientCache.KGquery = query;
             });
-
+            */
             if (output == "table") {
                 self.queryResultToTable(result);
             } else if (output == "Graph") {

@@ -44,8 +44,8 @@ module.exports = () => {
         try {
             const userData = await cleanUserData.clean(req.body);
             const userInfo = await userManager.getUser(req.user);
-            await userDataModel.insert({ ...userData, owned_by: userInfo.user.login });
-            res.status(200).json({ message: "The resource has been inserted successfully" });
+            const insertedId = await userDataModel.insert({ ...userData, owned_by: userInfo.user.login });
+            res.status(200).json({ message: "The resource has been inserted successfully" ,"insertedId": insertedId});
         } catch (error) {
             if (error.cause !== undefined) {
                 res.status(error.cause).json({ message: error.message });

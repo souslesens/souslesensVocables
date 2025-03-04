@@ -124,9 +124,13 @@ var UserDataWidget = (function () {
         self.showDialog(divId, "save");
     };
 
-    self.showListDialog = function (divId, callbackFn) {
+    self.showListDialog = function (divId,options, callbackFn) {
         self.callbackFn = callbackFn;
         self.currentTreeNode = null;
+        if(!options){
+            options={};
+        }
+        self.options=options;
         self.showDialog(divId, "list", function () {
             $.ajax({
                 type: "GET",
@@ -141,6 +145,14 @@ var UserDataWidget = (function () {
 
                     var jstreeData = [];
                     var uniqueNodes = {};
+                    if(self.options.filter && Object.keys(self.options.filter).length>0){
+                        Object.keys(self.options.filter).forEach(function(key){
+                            if(self.options.filter[key]){
+                                data=data.filter(function(item){return item[key]==self.options.filter[key]});
+                            }
+                        });
+                        
+                    }
 
                     data.forEach(function (item) {
                         var parent = "#";
@@ -175,7 +187,7 @@ var UserDataWidget = (function () {
 
                     var options = {
                         selectTreeNodeFn: function (event, obj) {
-                            if (obj.event.ctrlKey) {
+                            
                                 self.currentTreeNode = obj.node;
                                 if (!obj.node.data) {
                                     return;
@@ -183,7 +195,7 @@ var UserDataWidget = (function () {
                                 $("#" + self.divId).dialog("close");
 
                                 callbackFn(null, obj.node.data);
-                            }
+                            
                         },
                         contextMenu: function (node) {
                             var items = {};

@@ -125,7 +125,7 @@ var SavedQueriesWidget = (function () {
             slsvSource = MainController.currentSource;
 
         }
-        var data_group = "KGquery/savedQueries/";
+        var data_group = "KGquery/savedQueries";
         UserDataWidget.listUserData(null, function (err, result) {
             var storedQueries = [];
             result.forEach(function (item) {
@@ -187,14 +187,17 @@ var SavedQueriesWidget = (function () {
             };
 
             //var content64 = btoa(JSON.stringify(data, getCircularReplacer()));
-            var data_group =  "KGquery/savedQueries/" ;
+            var data_group =  "KGquery/savedQueries" ;
             UserDataWidget.saveMetadata(label, null, data,data_group, function (err, result) {
                 if(err){
                     return alert(err);
                 }
                 console.log(result);
                 $('#KGquery_messageDiv').text('saved query');
-                $("#SavedQueriesComponent_itemsSelect").append("<option value='" + queryUri + "'>" + label + "</option>");
+                if(result?.insertedId?.length>0){ 
+                    $("#SavedQueriesComponent_itemsSelect").append("<option value='" + result.insertedId[0].id + "'>" + label + "</option>");
+                }
+                
                 //SavedQueriesWidget.showDialog("STORED_KGQUERY_QUERIES", "KGquery_myQueriesDiv", self.currentSource, null, KGquery_myQueries.save, KGquery_myQueries.load);
 
             });
@@ -260,6 +263,7 @@ var SavedQueriesWidget = (function () {
                 return alert(err.responseText || err);
             }
             $('#KGquery_messageDiv').text('deleted query');
+            $("#SavedQueriesComponent_itemsSelect").find("option[value='" + userDataId + "']").remove();
             SavedQueriesWidget.showDialog("STORED_KGQUERY_QUERIES", "KGquery_myQueriesDiv", self.currentSource, null, KGquery_myQueries.save, KGquery_myQueries.load);
         });
     };

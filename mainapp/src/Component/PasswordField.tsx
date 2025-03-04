@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FormControl, FormHelperText, IconButton, InputAdornment, InputLabel, OutlinedInput, TextFieldProps } from "@mui/material";
+import { IconButton, InputAdornment, TextField, TextFieldProps } from "@mui/material";
 
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 
@@ -10,27 +10,28 @@ export const PasswordField = ({ disabled, error, helperText, id, label, onChange
     const handleMouseDown = (event: React.MouseEvent<HTMLButtonElement>) => event.preventDefault();
 
     return (
-        <FormControl error={error} fullWidth>
-            <InputLabel htmlFor={id}>{label}</InputLabel>
-            <OutlinedInput
-                disabled={disabled}
-                endAdornment={
+        <TextField
+            variant="outlined"
+            fullWidth
+            error={error}
+            disabled={disabled}
+            InputProps={{
+                endAdornment: (
                     <InputAdornment position="end">
                         <IconButton aria-label="toggle password visibility" onClick={handleClick} onMouseDown={handleMouseDown} edge="end">
                             {display ? <VisibilityOff /> : <Visibility />}
                         </IconButton>
                     </InputAdornment>
-                }
-                id={id}
-                label={label}
-                name={id}
-                onChange={onChange}
-                required={required}
-                type={display ? "text" : "password"}
-                value={value}
-                aria-describedby="password-helper-text"
-            />
-            <FormHelperText id="password-helper-text">{helperText}</FormHelperText>
-        </FormControl>
+                ),
+            }}
+            id={id}
+            label={label}
+            name={id}
+            onChange={onChange}
+            required={required}
+            type={display ? "text" : "password"}
+            value={value}
+            helperText={helperText}
+        />
     );
 };

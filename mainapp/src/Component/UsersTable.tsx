@@ -15,15 +15,17 @@ import {
     TableBody,
     Chip,
     Button,
-    Modal,
     FormControl,
     InputLabel,
-    OutlinedInput,
     Select,
     MenuItem,
     Checkbox,
     FormControlLabel,
     SelectChangeEvent,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
 } from "@mui/material";
 
 import CsvDownloader from "react-csv-downloader";
@@ -31,7 +33,7 @@ import { SRD } from "srd";
 import { ulid } from "ulid";
 
 import { Msg, useModel } from "../Admin";
-import { cleanUpText, identity, style } from "../Utils";
+import { cleanUpText, identity } from "../Utils";
 import { newUser, deleteUser, putUsersBis, User } from "../User";
 import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
 import { PasswordField } from "./PasswordField";
@@ -271,17 +273,37 @@ const UserForm = ({ maybeuser: maybeUser, create = false, id, me = "" }: UserFor
     return (
         <>
             {create ? (config.auth != "keycloak" ? createEditButton : null) : createEditButton}
-            <Modal onClose={handleClose} open={userModel.modal}>
-                <Box sx={style}>
-                    <Stack spacing={4}>
-                        <h2>{`Edit ${user.login}`}</h2>
-                        <FormControl>
-                            <InputLabel id="login-label">Login</InputLabel>
-                            <OutlinedInput fullWidth onChange={handleFieldUpdate("login")} value={userModel.userForm.login} id={`login`} label={"Login"} disabled={create ? false : true} />
-                        </FormControl>
-
-                        {user.source === "database" && <PasswordField id={`password`} label={"New Password"} onChange={handleFieldUpdate("password")} value={userModel.userForm.password} />}
-
+            <Dialog
+                onClose={handleClose}
+                open={userModel.modal}
+                PaperProps={{
+                    component: "form",
+                    onSubmit: (event: React.FormEvent<HTMLFormElement>) => {
+                        event.preventDefault();
+                        saveUser();
+                    },
+                }}
+                maxWidth="md"
+                fullWidth
+            >
+                <DialogTitle>{maybeUser ? `Edit user '${user.login}'` : "Create new user"}</DialogTitle>
+                <DialogContent>
+                    <Stack
+                        spacing={2}
+                        // Prevents textfield label from being cut
+                        sx={{ paddingTop: 1 }}
+                    >
+                        <TextField
+                            variant="outlined"
+                            fullWidth
+                            onChange={handleFieldUpdate("login")}
+                            value={userModel.userForm.login}
+                            id={`login`}
+                            label={"Login"}
+                            disabled={create ? false : true}
+                            required
+                        />
+                        {user.source === "database" && <PasswordField id={`password`} label={"New Password"} onChange={handleFieldUpdate("password")} value={userModel.userForm.password} required />}
                         <FormControl>
                             <InputLabel id="select-groups-label">Profiles</InputLabel>
                             <Select
@@ -311,27 +333,26 @@ const UserForm = ({ maybeuser: maybeUser, create = false, id, me = "" }: UserFor
                                 label="Allow the user to create sources"
                             />
                         </FormControl>
-
-                        <FormControl>
-                            <TextField
-                                id="max-allowed-sources"
-                                type="number"
-                                label="Limit the number of source the user can create"
-                                value={userModel.userForm.maxNumberCreatedSource || 0}
-                                disabled={!userModel.userForm.allowSourceCreation}
-                                onChange={handleFieldUpdate("maxNumberCreatedSource")}
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                            />
-                        </FormControl>
-
-                        <Button id="btn-save-user" color="primary" variant="contained" onClick={saveUser}>
-                            Save User
-                        </Button>
+                        <TextField
+                            id="max-allowed-sources"
+                            type="number"
+                            label="Limit the number of source the user can create"
+                            value={userModel.userForm.maxNumberCreatedSource || 0}
+                            disabled={!userModel.userForm.allowSourceCreation}
+                            onChange={handleFieldUpdate("maxNumberCreatedSource")}
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
+                        />
                     </Stack>
-                </Box>
-            </Modal>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleClose}>Cancel</Button>
+                    <Button type="submit" color="primary" variant="contained">
+                        Save User
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </>
     );
 };

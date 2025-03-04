@@ -289,7 +289,6 @@ const UserFormDialog = ({ open, maybeuser: maybeUser, me = "", onClose }: UserFo
                             ))}
                         </Select>
                     </FormControl>
-
                     <FormControl>
                         <FormControlLabel
                             control={<Checkbox value={userForm.allowSourceCreation} checked={userForm.allowSourceCreation} onChange={handleFieldUpdate("allowSourceCreation")} />}

@@ -30,8 +30,8 @@ import {
     Typography,
     styled,
 } from "@mui/material";
-import { ChevronRight, Edit, ExpandMore } from "@mui/icons-material";
 
+import { ChevronRight, Close, Done, Edit, ExpandMore } from "@mui/icons-material";
 import { TreeView, TreeItem, TreeItemProps, TreeItemContentProps, useTreeItem } from "@mui/x-tree-view";
 
 import clsx from "clsx";
@@ -178,7 +178,7 @@ const ProfilesTable = () => {
                                                     </TableCell>
                                                     <TableCell align="center">
                                                         <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
-                                                            {profile.isShared.toString()}
+                                                            {profile.isShared ? <Done sx={{ width: 30, height: 30 }} /> : <Close sx={{ width: 30, height: 30 }} />}
                                                         </Stack>
                                                     </TableCell>
                                                     <TableCell align="center">

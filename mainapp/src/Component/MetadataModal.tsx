@@ -148,7 +148,7 @@ function EditMetadataToolbar(props: {
 function MetadataTable({ metadata, prefixes, onSubmit, loading, isReadOnly }: MetadataTableProps) {
     const [rows, setRows] = useState<MetadataRow[]>([]);
     const [paginationModel, setPaginationModel] = useState({
-        pageSize: 8,
+        pageSize: 10,
         page: 0,
     });
 

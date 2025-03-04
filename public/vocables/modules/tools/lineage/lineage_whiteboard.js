@@ -4308,14 +4308,14 @@ attrs.color=self.getSourceColor(superClassValue)
         },
         /**
          * @function
-         * @name loadSavedGraph
+         * @name loadSavedWhiteboard
          * @memberof module:graphActions.graph
          * Select a previously saved graph on userData and renders it in the current workspace.
          * 
          * @returns {void}
          */
     
-        loadSavedGraph: function () {
+        loadSavedWhiteboard: function () {
             UserDataWidget.showListDialog(null,{filter:{data_group:"Lineage/savedWhiteboards"}},function(err,result){
                 if(err){
                     return alert(err.responseText);

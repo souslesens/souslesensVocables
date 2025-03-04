@@ -125,11 +125,11 @@ var SavedQueriesWidget = (function () {
             slsvSource = MainController.currentSource;
 
         }
-        var data_group = "KGquery/savedQueries";
+        var data_path = "KGquery/savedQueries/"+slsvSource;
         UserDataWidget.listUserData(null, function (err, result) {
             var storedQueries = [];
             result.forEach(function (item) {
-                if (item.data_group == data_group+'/'+slsvSource) {
+                if (item.data_path.includes(data_path)) {
                     storedQueries.push({ label: item.data_label, id: item.id });
                 }
             });
@@ -160,10 +160,7 @@ var SavedQueriesWidget = (function () {
                 return alert(" nothing to save");
             }
 
-            var label = prompt("query name");
-            if (!label) {
-                return;
-            }
+           
             
             if (!slsvSource) {
                 if(!self.slsvSource){
@@ -172,20 +169,24 @@ var SavedQueriesWidget = (function () {
                 slsvSource = self.slsvSource;
                
             }
-            var data_group =  "KGquery/savedQueries/"+slsvSource ;
-            UserDataWidget.saveMetadata(label, null, data,data_group, function (err, result) {
-                if(err){
-                    return alert(err);
-                }
-                console.log(result);
-                $('#KGquery_messageDiv').text('saved query');
-                if(result?.insertedId?.length>0){ 
-                    $("#SavedQueriesComponent_itemsSelect").append("<option value='" + result.insertedId[0].id + "'>" + label + "</option>");
-                }
-                
-                
-
+            var data_path =  "KGquery/savedQueries/"+slsvSource ;
+            UserDataWidget.showSaveDialog(data_path,data,null, function (err, result) {
+               
+                    if(err){
+                        return alert(err);
+                    }
+                    //console.log(result);
+                    $('#KGquery_messageDiv').text('saved query');
+                    if(result?.insertedId?.length>0){ 
+                        $("#SavedQueriesComponent_itemsSelect").append("<option value='" + result.insertedId[0].id + "'>" + result.label + "</option>");
+                    }
+                    
+                    
+    
+                });
             });
+
+            
             /*
             var triples = [];
             triples.push({
@@ -230,7 +231,7 @@ var SavedQueriesWidget = (function () {
                 $("#SavedQueriesComponent_itemsSelect").append("<option value='" + queryUri + "'>" + label + "</option>");
             });
             */
-        });
+        
     };
 
     self.delete = function (userDataId, callback) {
@@ -252,7 +253,51 @@ var SavedQueriesWidget = (function () {
           
         });
     };
+    self.update=function(){
+        var userDataId = $('#SavedQueriesComponent_itemsSelect').val();
+        if(!userDataId){
+            return alert("no MyQuery selected");
+        }
+        UserDataWidget.loadUserDatabyId(userDataId, function (err, result) {
+            if (err) {
+                return alert(err);
+            }
+            if(result && result?.data_content?.sparqlQuery){
+                self.saveQueryFn(function (err, result) {
+                    if (err) {
+                        return alert(err.responseText);
+                    }
+                    var data = result;
+                    if (!data) {
+                        return alert(" nothing to save");
+                    }
+        
+                    var label = $('#SavedQueriesComponent_itemsSelect').text();
+                    if (!label) {
+                        return;
+                    }
+                    var slsvSource;
+                    if (!slsvSource) {
+                        if(!self.slsvSource){
+                            return alert("no source");
+                        }
+                        slsvSource = self.slsvSource;
+                       
+                    }
+                    var data_group =  "KGquery/savedQueries/"+slsvSource ;
+                    UserDataWidget.currentTreeNode={id:userDataId, data_label:label};
+                    UserDataWidget.saveMetadata(label, null, data,data_group, function (err, result) {
+                        if(err){
+                            return alert(err);
+                        }
+                        console.log(result);
+                        $('#KGquery_messageDiv').text('updated query');
+                    })
+                });
+            }
 
+        });
+    };
     return self;
 })();
 

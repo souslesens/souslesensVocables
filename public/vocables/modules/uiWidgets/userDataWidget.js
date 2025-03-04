@@ -22,8 +22,8 @@ var UserDataWidget = (function () {
                 if (err) {
                     self.callbackFn(err);
                 }
-
-                self.callbackFn(null, {label: label, data_path: data_path, data_content: self.jsonContent});
+                
+                self.callbackFn(null, {label: label, data_path: data_path, data_content: self.jsonContent,insertedId:result.insertedId});
             });
         });
 
@@ -56,6 +56,7 @@ var UserDataWidget = (function () {
         var type = "POST";
         if (self.currentTreeNode) {
             type = "PUT";
+            payload.id = self.currentTreeNode.id;
         }
         payload=JSON.stringify(payload);
         $.ajax({

@@ -140,7 +140,7 @@ function LogsTableComponent({ logFiles }: { logFiles: LogFiles }) {
                     ))}
                 </TextField>
                 <TextField
-                    inputProps={{ autocomplete: "off" }}
+                    inputProps={{ autoComplete: "off" }}
                     label="Search logs by username"
                     id="search-logs"
                     onChange={(event) => {

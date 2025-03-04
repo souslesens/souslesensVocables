@@ -89,7 +89,7 @@ export default function GraphManagement() {
             ) : null}
             <Stack direction="column" spacing={{ xs: 2 }} sx={{ m: 4 }} useFlexGap>
                 <TextField
-                    inputProps={{ autocomplete: "off" }}
+                    inputProps={{ autoComplete: "off" }}
                     label="Search Sources by name"
                     id="search-graph"
                     onChange={(event) => {

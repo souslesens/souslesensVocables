@@ -198,7 +198,7 @@ const SourcesTable = () => {
                             </Alert>
                         </Snackbar>
                         <TextField
-                            inputProps={{ autocomplete: "off" }}
+                            inputProps={{ autoComplete: "off" }}
                             label="Search Sources by name"
                             id="search-sources"
                             onChange={(event) => {

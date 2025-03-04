@@ -1,7 +1,6 @@
 import { ulid } from "ulid";
 import { failure, success } from "srd";
 import { Msg } from "./Admin";
-import { Msg_, Type, Mode } from "../src/Component/UsersTable";
 import { Dispatch, SetStateAction } from "react";
 const endpoint = "/api/v1/admin/users";
 
@@ -35,23 +34,24 @@ async function putUsers(body: User[]): Promise<User[]> {
     return mapUsers(json.resources);
 }
 
-async function saveUserBis(body: User, mode: Mode, updateModel: Dispatch<Msg>, updateLocal: Dispatch<Msg_>) {
+async function saveUserBis(body: User, create: boolean, updateModel: Dispatch<Msg>) {
     try {
         const response = await fetch(endpoint, {
-            method: mode === Mode.Edition ? "put" : "post",
+            method: create ? "post" : "put",
             body: JSON.stringify({ [body.id]: body }, null, "\t"),
             headers: { "Content-Type": "application/json" },
         });
         const { message, resources } = (await response.json()) as { message: string; resources: User[] };
         if (response.status === 200) {
             updateModel({ type: "users", payload: success(mapUsers(resources)) });
-            updateLocal({ type: Type.UserClickedModal, payload: false });
-            updateLocal({ type: Type.ResetUser, payload: mode });
+            return Promise.resolve();
         } else {
             updateModel({ type: "users", payload: failure(`${response.status}, ${message}`) });
+            return Promise.reject(Error(message));
         }
     } catch (e) {
         updateModel({ type: "users", payload: failure(e as string) });
+        return Promise.reject(Error(e as string));
     }
 }
 

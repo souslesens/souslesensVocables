@@ -5,7 +5,11 @@
         </button>
     </div>
     <!--<div class="slsvTabSeparation"> </div>-->
-
+    <div class="w3-bar-item lineage-tabDiv" title="Query">
+        <button class="w3-button slsv-tabButton queryIcon" onclick="UI.openTab('lineage-tab','queryTab',Lineage_whiteboard.initQueryTab,this)">
+            <!--<img src="./icons/CommonIcons/ClassesIcon.png" />-->
+        </button>
+    </div>
     <div class="w3-bar-item lineage-tabDiv" title="Classes">
         <button class="w3-button slsv-tabButton classesIcon" onclick="UI.openTab('lineage-tab','classesTab',Lineage_whiteboard.initClassesTab,this)">
             <!--<img src="./icons/CommonIcons/ClassesIcon.png" />-->
@@ -28,6 +32,8 @@
 <div id="whiteboardTab" class="w3-container lineage-tab slsv-bg-pale"></div>
 
 <div id="classesTab" class="w3-container lineage-tab slsv-bg-pale"></div>
+
+<div id="queryTab" class="w3-container lineage-tab slsv-bg-pale"></div>
 
 <div id="propertiesTab" class="w3-container lineage-tab slsv-bg-pale"></div>
 

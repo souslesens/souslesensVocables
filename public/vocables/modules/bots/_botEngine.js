@@ -6,6 +6,7 @@ var _botEngine = (function () {
         if (!options) {
             options = {};
         }
+        self.options=options
         self.currentBot = botModule;
         self.currentObj = initialWorkflow;
         self.initialWorkflow = initialWorkflow;
@@ -40,26 +41,28 @@ var _botEngine = (function () {
                 $("#KGcreatorBot_exportToGraph").css("display", "none");
             }
 
-            if (!self.firstLoad) {
-                $("#BotUpperButtons").remove();
-            }
-            $("#botFilterProposalInput").on("keyup", self.filterList);
-            self.firstLoad = false;
-            $("#BotUpperButtons").insertAfter($("#botPanel").parent().find(".ui-dialog-titlebar-close"));
+            if(!options.divId) {
+                if (!self.firstLoad) {
+                    $("#BotUpperButtons").remove();
+                }
+                $("#botFilterProposalInput").on("keyup", self.filterList);
+                self.firstLoad = false;
+                $("#BotUpperButtons").insertAfter($("#botPanel").parent().find(".ui-dialog-titlebar-close"));
 
-            if (divId != "botDiv") {
-                var dialogWindow = $("#" + divId)
-                    .parents()
-                    .filter('div[role="dialog"]')[0];
-                var titleDialog = $(dialogWindow).find(".ui-dialog-titlebar-close");
-                var idDialog = "#" + $(dialogWindow).attr("aria-describedby");
-                $("#BotUpperButtons").insertAfter(titleDialog);
-                $(dialogWindow).on("dialogclose", function (event) {
-                    $("#" + self.divId).empty();
-                    $(dialogWindow).find("#resetButtonBot").remove();
-                    $(dialogWindow).find("#previousButtonBot").remove();
-                    self.firstLoad = true;
-                });
+                if (divId != "botDiv") {
+                    var dialogWindow = $("#" + divId)
+                        .parents()
+                        .filter('div[role="dialog"]')[0];
+                    var titleDialog = $(dialogWindow).find(".ui-dialog-titlebar-close");
+                    var idDialog = "#" + $(dialogWindow).attr("aria-describedby");
+                    $("#BotUpperButtons").insertAfter(titleDialog);
+                    $(dialogWindow).on("dialogclose", function (event) {
+                        $("#" + self.divId).empty();
+                        $(dialogWindow).find("#resetButtonBot").remove();
+                        $(dialogWindow).find("#previousButtonBot").remove();
+                        self.firstLoad = true;
+                    });
+                }
             }
             //UI.PopUpOnHoverButtons();
             if (callback) {
@@ -271,7 +274,7 @@ var _botEngine = (function () {
         if (self.startParams && self.startParams.length > 0) {
             self.currentBot.start(...self.startParams);
         } else {
-            self.currentBot.start();
+            self.currentBot.start(self.options);
         }
     };
 

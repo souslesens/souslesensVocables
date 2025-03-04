@@ -296,21 +296,6 @@ var SparqlQuery_bot = (function () {
         },
     };
 
-    self.runFilterClassBot = function (model, currentClass, callback) {
-        if (currentClass) {
-            var currentFilterQuery = {
-                currentClass: currentClass.id,
-                source: self.params.source,
-                varName: currentClass.label,
-            };
-            var data = model.nonObjectPropertiesmap[currentClass.id];
-            KGquery_filter_bot.start(data, currentFilterQuery, function (err, result) {
-                return callback(err, result.filter.replace("_label", "Label"));
-
-                s;
-            });
-        }
-    };
 
     self.processClassQuerySearch = function () {
         var outputType = self.params.outputType;

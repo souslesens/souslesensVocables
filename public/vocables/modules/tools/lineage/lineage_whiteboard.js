@@ -776,7 +776,7 @@ var Lineage_whiteboard = (function () {
                             var node = self.lineageVisjsGraph.data.nodes.get(_properties.items[0]);
                             Lineage_sources.activeSource = node.data.source;
                         }
-                        if (true) {
+                        if (!options.skipDrawLegend) {
                             var nodes = self.lineageVisjsGraph.data.nodes.get(_properties.items);
                             if (nodes) {
                                 Lineage_decoration.decorateNodeAndDrawLegend(nodes, _options.legendType);
@@ -4346,6 +4346,21 @@ attrs.color=self.getSourceColor(superClassValue)
                     },
                 });
             });
+        }
+    };
+
+    /**
+     * @function
+     * @name initQueryTab
+     * @memberof module:graphActions
+     * Initializes the classes tab in the UI by loading relevant content and actions related to the classes.
+     * @returns {void}
+     */
+    self.initQueryTab = function () {
+        if ($("#queryTab").children().length == 0) {
+            $("#queryTab").html("<div id='queryTabDiv'></div>")
+            $("#botContainerDiv").css("width","100%")
+            SparqlQuery_bot.start({divId:"queryTabDiv"})
         }
     };
 

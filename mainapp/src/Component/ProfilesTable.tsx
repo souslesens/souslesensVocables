@@ -118,7 +118,7 @@ const ProfilesTable = () => {
                 return (
                     <Stack direction="column" spacing={{ xs: 2 }} sx={{ m: 4 }} useFlexGap>
                         <TextField
-                            inputProps={{ autocomplete: "off" }}
+                            inputProps={{ autoComplete: "off" }}
                             label="Search Profiles by name"
                             id="filter profiles"
                             onChange={(event) => {

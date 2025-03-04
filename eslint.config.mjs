@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import js from "@eslint/js";
 import { FlatCompat } from "@eslint/eslintrc";
 import jest from 'eslint-plugin-jest';
+import reactHooks from 'eslint-plugin-react-hooks';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -279,4 +280,6 @@ export default [{
 
         "react/prop-types": "off",
     },
-}];
+},
+    reactHooks.configs['recommended-latest'],
+];

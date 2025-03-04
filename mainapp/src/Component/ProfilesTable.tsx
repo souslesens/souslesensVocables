@@ -9,6 +9,7 @@ import {
     FormControl,
     FormLabel,
     Grid,
+    IconButton,
     InputLabel,
     MenuItem,
     Modal,
@@ -28,7 +29,7 @@ import {
     Typography,
     styled,
 } from "@mui/material";
-import { ExpandMore, ChevronRight } from "@mui/icons-material";
+import { ChevronRight, Edit, ExpandMore } from "@mui/icons-material";
 
 import { TreeView, TreeItem, TreeItemProps, TreeItemContentProps, useTreeItem } from "@mui/x-tree-view";
 
@@ -547,9 +548,15 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
 
     return (
         <>
-            <Button variant="contained" color="primary" onClick={handleOpen}>
-                {create ? "Create Profile" : "Edit"}
-            </Button>
+            {create ? (
+                <Button variant="contained" color="primary" onClick={handleOpen}>
+                    Create Profile
+                </Button>
+            ) : (
+                <IconButton aria-label="edit" color="primary" onClick={handleOpen} size="small" title="Edit">
+                    <Edit />
+                </IconButton>
+            )}
             <Modal onClose={handleClose} open={profileModel.modal}>
                 <Box
                     component="form"

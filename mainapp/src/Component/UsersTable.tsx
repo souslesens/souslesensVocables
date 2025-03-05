@@ -27,6 +27,7 @@ import {
     DialogTitle,
     DialogContent,
     DialogActions,
+    FormHelperText,
 } from "@mui/material";
 import { Edit } from "@mui/icons-material";
 import CsvDownloader from "react-csv-downloader";
@@ -39,6 +40,7 @@ import { newUser, deleteUser, putUsersBis, User } from "../User";
 import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
 import { PasswordField } from "./PasswordField";
 import { writeLog } from "../Log";
+import { z } from "zod";
 
 export const UsersTable = () => {
     const { model, updateModel } = useModel();
@@ -208,6 +210,18 @@ type UserFormDialogProps = {
     onClose: () => void;
 };
 
+const UserFormSchema = z.object({
+    login: z.string().nonempty(),
+    password: z.string().nonempty(),
+    groups: z.array(z.string()),
+    allowSourceCreation: z.boolean(),
+    maxNumberCreatedSource: z.number(),
+});
+
+const UserFormEditShema = UserFormSchema.extend({
+    password: z.string().optional(),
+});
+
 const UserFormDialog = ({ open, maybeuser: maybeUser, me = "", onClose }: UserFormDialogProps) => {
     const create = maybeUser === undefined;
     const { model, updateModel } = useModel();
@@ -217,6 +231,7 @@ const UserFormDialog = ({ open, maybeuser: maybeUser, me = "", onClose }: UserFo
     useEffect(() => {
         if (open) {
             setUserForm(maybeUser ? maybeUser : newUser(ulid()));
+            setErrors(undefined);
         }
     }, [open, maybeUser]);
 
@@ -236,16 +251,18 @@ const UserFormDialog = ({ open, maybeuser: maybeUser, me = "", onClose }: UserFo
             [fieldname]: value,
         }));
     };
-    const saveUser = async () => {
+    const saveUser = async (data: User) => {
         try {
-            await putUsersBis(userForm, create, updateModel);
+            await putUsersBis(data, create, updateModel);
         } catch (e) {
             console.error(e);
         }
         const mode = create ? "create" : "edit";
-        void writeLog(me, "ConfigEditor", mode, userForm.login);
+        void writeLog(me, "ConfigEditor", mode, data.login);
         onClose();
     };
+
+    const [errors, setErrors] = useState<Record<string, string> | undefined>();
 
     return (
         <Dialog
@@ -255,7 +272,19 @@ const UserFormDialog = ({ open, maybeuser: maybeUser, me = "", onClose }: UserFo
                 component: "form",
                 onSubmit: (event: React.FormEvent<HTMLFormElement>) => {
                     event.preventDefault();
-                    void saveUser();
+                    const validation = (create ? UserFormSchema : UserFormEditShema).safeParse(userForm);
+                    if (validation.success) {
+                        void saveUser(userForm);
+                        setErrors(undefined);
+                    } else {
+                        const currentErrors: Record<string, string> = {};
+                        validation.error.issues.forEach((issue) => {
+                            issue.path.forEach((path) => {
+                                currentErrors[path] = issue.message;
+                            });
+                        });
+                        setErrors(currentErrors);
+                    }
                 },
             }}
             maxWidth="md"
@@ -268,11 +297,36 @@ const UserFormDialog = ({ open, maybeuser: maybeUser, me = "", onClose }: UserFo
                     // Prevents textfield label from being cut
                     sx={{ paddingTop: 1 }}
                 >
-                    <TextField variant="outlined" fullWidth onChange={handleFieldUpdate("login")} value={userForm.login} id={`login`} label={"Login"} disabled={create ? false : true} required />
+                    <TextField
+                        variant="outlined"
+                        fullWidth
+                        onChange={handleFieldUpdate("login")}
+                        value={userForm.login}
+                        id={`login`}
+                        label={"Login"}
+                        disabled={create ? false : true}
+                        error={errors?.login !== undefined}
+                        helperText={errors?.login}
+                        InputLabelProps={{
+                            // Leave the validation to zod
+                            required: true,
+                        }}
+                    />
                     {userForm.source === "database" && (
-                        <PasswordField id={`password`} label={create ? "Password" : "New Password"} onChange={handleFieldUpdate("password")} value={userForm.password} required={create} />
+                        <PasswordField
+                            id={`password`}
+                            label={create ? "Password" : "New Password"}
+                            onChange={handleFieldUpdate("password")}
+                            value={userForm.password}
+                            error={errors?.password !== undefined}
+                            helperText={errors?.password}
+                            InputLabelProps={{
+                                // Leave the validation to zod
+                                required: true,
+                            }}
+                        />
                     )}
-                    <FormControl>
+                    <FormControl error={errors?.groups !== undefined}>
                         <InputLabel id="select-groups-label">Profiles</InputLabel>
                         <Select
                             labelId="select-profiles-label"
@@ -291,12 +345,14 @@ const UserFormDialog = ({ open, maybeuser: maybeUser, me = "", onClose }: UserFo
                                 </MenuItem>
                             ))}
                         </Select>
+                        <FormHelperText>{errors?.groups}</FormHelperText>
                     </FormControl>
                     <FormControl>
                         <FormControlLabel
                             control={<Checkbox value={userForm.allowSourceCreation} checked={userForm.allowSourceCreation} onChange={handleFieldUpdate("allowSourceCreation")} />}
                             label="Allow the user to create sources"
                         />
+                        <FormHelperText>{errors?.allowSourceCreation}</FormHelperText>
                     </FormControl>
                     <TextField
                         id="max-allowed-sources"
@@ -308,6 +364,8 @@ const UserFormDialog = ({ open, maybeuser: maybeUser, me = "", onClose }: UserFo
                         InputLabelProps={{
                             shrink: true,
                         }}
+                        error={errors?.maxNumberCreatedSource !== undefined}
+                        helperText={errors?.maxNumberCreatedSource}
                     />
                 </Stack>
             </DialogContent>

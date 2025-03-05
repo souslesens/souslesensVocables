@@ -27,7 +27,7 @@ const migrateProfileListView = async (configDirectory, writeMode) => {
     const configPath = path.resolve(configDirectory, "mainConfig.json");
     const configJSON = JSON.parse(fs.readFileSync(configPath, { encoding: "utf-8" }));
 
-    const profileListSchema = path.resolve("scripts", "sql", "001-profiles.sql");
+    const profileListSchema = path.resolve("scripts", "sql", "011-profiles-view.sql");
     if (fs.existsSync(profileListSchema)) {
         const connection = await knex({ client: "pg", connection: configJSON.database });
         if (!await connection.schema.hasColumn("profiles_list", "is_shared")) {

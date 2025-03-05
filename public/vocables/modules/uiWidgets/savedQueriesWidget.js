@@ -254,51 +254,6 @@ var SavedQueriesWidget = (function () {
           
         });
     };
-    self.update=function(){
-        var userDataId = $('#SavedQueriesComponent_itemsSelect').val();
-        if(!userDataId){
-            return alert("no MyQuery selected");
-        }
-        UserDataWidget.loadUserDatabyId(userDataId, function (err, result) {
-            if (err) {
-                return alert(err);
-            }
-            if(result && result?.data_content?.sparqlQuery){
-                self.saveQueryFn(function (err, result) {
-                    if (err) {
-                        return alert(err.responseText);
-                    }
-                    var data = result;
-                    if (!data) {
-                        return alert(" nothing to save");
-                    }
-        
-                    var label = $('#SavedQueriesComponent_itemsSelect').text();
-                    if (!label) {
-                        return;
-                    }
-                    var slsvSource;
-                    if (!slsvSource) {
-                        if(!self.slsvSource){
-                            return alert("no source");
-                        }
-                        slsvSource = self.slsvSource;
-                       
-                    }
-                    var data_group =  "KGquery/savedQueries/"+slsvSource ;
-                    UserDataWidget.currentTreeNode={id:userDataId, data_label:label};
-                    UserDataWidget.saveMetadata(label, null, data,data_group, function (err, result) {
-                        if(err){
-                            return alert(err);
-                        }
-                        console.log(result);
-                        $('#KGquery_messageDiv').text('updated query');
-                    })
-                });
-            }
-
-        });
-    };
     return self;
 })();
 

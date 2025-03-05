@@ -170,6 +170,7 @@ var SavedQueriesWidget = (function () {
                
             }
             var data_path =  "KGquery/savedQueries/"+slsvSource ;
+            UserDataWidget.currentTreeNode=null;
             UserDataWidget.showSaveDialog(data_path,data,null, function (err, result) {
                
                     if(err){

@@ -374,7 +374,7 @@ var KGquery = (function () {
                     }
                     if(KGquery_myQueries.currentOptionalPredicatesSparql){
                         optionalPredicatesSparql = KGquery_myQueries.currentOptionalPredicatesSparql;
-                        //KGquery_myQueries.currentOptionalPredicatesSparql = null;
+                        KGquery_myQueries.currentOptionalPredicatesSparql = null;
                         return callbackSeries();
                     }
 

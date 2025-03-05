@@ -34,11 +34,19 @@ async function putUsers(body: User[]): Promise<User[]> {
     return mapUsers(json.resources);
 }
 
-async function saveUserBis(body: User, create: boolean, updateModel: Dispatch<Msg>) {
+async function saveUserBis(user: User, create: boolean, updateModel: Dispatch<Msg>) {
     try {
+        // Do not send password on edit if blank
+        let body: Omit<User, "password">;
+        if (!create && !user.password) {
+            const { password: _, ...bodyWithoutPassword } = user;
+            body = bodyWithoutPassword;
+        } else {
+            body = { ...user };
+        }
         const response = await fetch(endpoint, {
             method: create ? "post" : "put",
-            body: JSON.stringify({ [body.id]: body }, null, "\t"),
+            body: JSON.stringify({ [user.id]: body }, null, "\t"),
             headers: { "Content-Type": "application/json" },
         });
         const { message, resources } = (await response.json()) as { message: string; resources: User[] };

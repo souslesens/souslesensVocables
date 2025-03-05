@@ -25,18 +25,18 @@ var SavedQueriesWidget = (function () {
         Config.sources[CRUDsource] = self.currentCRUDsourceObject;
     };
     */
-    self.showDialog = function ( targetDiv, slsvSource, saveQueryFn, loadQueryFn) {
+    self.showDialog = function ( targetDiv, slsvSource, saveQueryFn, loadQueryFn,path) {
         //self.init(CRUDsource);
         self.saveQueryFn = saveQueryFn;
         self.loadQueryFn = loadQueryFn;
         self.slsvSource = slsvSource;
-
+        self.path=path;
         $("#" + targetDiv).load("./modules/uiWidgets/html/savedQueriesWidget.html", function () {
             if (targetDiv.indexOf("Dialog") > -1) {
                 $("#" + targetDiv).dialog("open");
             }
             if (slsvSource) {
-                self.list( slsvSource);
+                self.list( slsvSource,null,path);
             }
         });
     };
@@ -117,7 +117,8 @@ var SavedQueriesWidget = (function () {
     };
 
     */
-    self.list = function ( slsvSource, targetSelect, callback) {
+   
+    self.list = function ( slsvSource, targetSelect,path ,callback) {
         if (!targetSelect) {
             targetSelect = "SavedQueriesComponent_itemsSelect";
         }
@@ -125,7 +126,7 @@ var SavedQueriesWidget = (function () {
             slsvSource = MainController.currentSource;
 
         }
-        var data_path = "KGquery/savedQueries/"+slsvSource;
+        var data_path = path+slsvSource;
         UserDataWidget.listUserData(null, function (err, result) {
             var storedQueries = [];
             result.forEach(function (item) {
@@ -169,7 +170,7 @@ var SavedQueriesWidget = (function () {
                 slsvSource = self.slsvSource;
                
             }
-            var data_path =  "KGquery/savedQueries/"+slsvSource ;
+            var data_path =  self.path+slsvSource ;
             UserDataWidget.currentTreeNode=null;
             UserDataWidget.showSaveDialog(data_path,data,null, function (err, result) {
                

@@ -62,7 +62,7 @@ var KGquery = (function () {
     self.init = function () {
         KGquery_graph.drawVisjsModel("saved");
         //SavedQueriesWidget.list();
-        SavedQueriesWidget.showDialog("tabs_myQueries",self.currentSource,KGquery_myQueries.save, KGquery_myQueries.load);
+        SavedQueriesWidget.showDialog("tabs_myQueries",self.currentSource,KGquery_myQueries.save, KGquery_myQueries.load,"KGquery/savedQueries/");
         
     };
 
@@ -793,9 +793,50 @@ var KGquery = (function () {
     };
 
     self.removeQueryElement = function (queryElementDivId) {
-        $("#" + queryElementDivId).remove();
+        //$("#" + queryElementDivId).remove();
         var queryElement = self.divsMap[queryElementDivId];
-        self.querySets.sets[queryElement.setIndex].elements.splice(queryElement.index, 1);
+        var elementLength=self.querySets.sets[queryElement.setIndex].elements.length;
+        var classFiltersMap=self.querySets.sets[queryElement.setIndex].classFiltersMap
+        if(elementLength>0){
+            for (let i = elementLength-1; i >= queryElement.index; i--) {
+                var element=self.querySets.sets[queryElement.setIndex].elements[i];
+                //delete filters
+                if(element?.fromNode?.data?.nodeDivId && classFiltersMap[element?.fromNode?.data?.nodeDivId]){
+                    delete classFiltersMap[element?.fromNode?.data?.nodeDivId]
+                }
+                if(element?.toNode?.data?.nodeDivId && classFiltersMap[element?.toNode?.data?.nodeDivId]){
+                    delete classFiltersMap[element?.toNode?.data?.nodeDivId]
+                }
+                $('#'+element.divId).remove();
+                // Restore color of nodes
+                if(element?.fromNode?.color){
+                    KGquery_graph.KGqueryGraph.data.nodes.update([{id: element.fromNode.id, color: element.fromNode.color}]);
+                }
+                if(element?.toNode?.color){
+                    KGquery_graph.KGqueryGraph.data.nodes.update([{id: element.toNode.id, color: element.toNode.color}]);
+                }
+                
+            }
+            
+            self.querySets.sets[queryElement.setIndex].elements.splice(queryElement.index, elementLength-queryElement.index);
+            self.querySets.sets[queryElement.setIndex].elements.forEach(function(item){
+                if(item?.fromNode?.id){
+                    KGquery_graph.outlineNode(item?.fromNode?.id)
+                }
+                if(item?.toNode?.id){
+                    KGquery_graph.outlineNode(item?.toNode?.id)
+                }
+
+            })
+            
+        }
+        else{
+            KGquery.clearAll();
+            KGquery.switchRightPanel(true);
+        }
+       
+        //self.querySets.sets[queryElement.setIndex].classFiltersMap[]
+
     };
 
     self.removeSet = function (querySetDivId) {
@@ -817,7 +858,7 @@ var KGquery = (function () {
     };
     self.initMyQuery = function () {
         //SavedQueriesWidget.list();
-        SavedQueriesWidget.showDialog("tabs_myQueries",self.currentSource,KGquery_myQueries.save, KGquery_myQueries.load);
+        SavedQueriesWidget.showDialog("tabs_myQueries",self.currentSource,KGquery_myQueries.save, KGquery_myQueries.load,"KGquery/savedQueries/");
         
     };
     self.initQuery = function () {

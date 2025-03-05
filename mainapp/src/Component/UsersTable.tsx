@@ -269,7 +269,9 @@ const UserFormDialog = ({ open, maybeuser: maybeUser, me = "", onClose }: UserFo
                     sx={{ paddingTop: 1 }}
                 >
                     <TextField variant="outlined" fullWidth onChange={handleFieldUpdate("login")} value={userForm.login} id={`login`} label={"Login"} disabled={create ? false : true} required />
-                    {userForm.source === "database" && <PasswordField id={`password`} label={"New Password"} onChange={handleFieldUpdate("password")} value={userForm.password} required />}
+                    {userForm.source === "database" && (
+                        <PasswordField id={`password`} label={create ? "Password" : "New Password"} onChange={handleFieldUpdate("password")} value={userForm.password} required={create} />
+                    )}
                     <FormControl>
                         <InputLabel id="select-groups-label">Profiles</InputLabel>
                         <Select

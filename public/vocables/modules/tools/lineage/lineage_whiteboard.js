@@ -4280,10 +4280,7 @@ attrs.color=self.getSourceColor(superClassValue)
          */
        
         saveWhiteboard: function () {
-            var graph_label = prompt("graph name");
-            if (!graph_label) {
-                return;
-            }
+           
             if(Lineage_whiteboard.lineageVisjsGraph.data && Lineage_whiteboard.lineageVisjsGraph.data.nodes.get().length > 0){
                 var nodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
                 var positions = Lineage_whiteboard.lineageVisjsGraph.network.getPositions();
@@ -4293,17 +4290,22 @@ attrs.color=self.getSourceColor(superClassValue)
                     context: Lineage_whiteboard.lineageVisjsGraph.currentContext,
                     positions: positions,
                 };
-                var data_group= "Lineage/savedWhiteboards";
-                UserDataWidget.saveMetadata(graph_label,null,data,data_group,function(err,result){
+                var data_path= "Lineage/savedWhiteboards/" + MainController.currentSource;
+                UserDataWidget.currentTreeNode=null;
+                UserDataWidget.showSaveDialog(data_path,data,null,function(err,result){
                     if(err){
                         return alert(err.responseText);
                     }
                     UI.message("Graph saved successfully");
-                });
+                })
+               
 
 
 
                 //Lineage_whiteboard.lineageVisjsGraph.saveGraph(visjsFileName);
+            }
+            else{
+                alert("No Whiteboard to save");
             }
         },
         /**
@@ -4316,7 +4318,7 @@ attrs.color=self.getSourceColor(superClassValue)
          */
     
         loadSavedWhiteboard: function () {
-            UserDataWidget.showListDialog(null,{filter:{data_group:"Lineage/savedWhiteboards"}},function(err,result){
+            UserDataWidget.showListDialog(null,{filter:{data_path:"Lineage/savedWhiteboards/"+MainController.currentSource}},function(err,result){
                 if(err){
                     return alert(err.responseText);
                 }

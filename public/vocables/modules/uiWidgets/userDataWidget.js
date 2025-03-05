@@ -149,11 +149,16 @@ var UserDataWidget = (function () {
                     if(self.options.filter && Object.keys(self.options.filter).length>0){
                         Object.keys(self.options.filter).forEach(function(key){
                             if(self.options.filter[key]){
-                                data=data.filter(function(item){return item[key]==self.options.filter[key]});
+                                data=data.filter(function(item){return item[key].includes(self.options.filter[key])});
                             }
                         });
                         
                     }
+                    // check data after filters
+                    if (data.length == 0) {
+                        $("#userDataWidget_jstree").html("nothing to load");
+                    }
+
 
                     data.forEach(function (item) {
                         var parent = "#";
@@ -161,18 +166,27 @@ var UserDataWidget = (function () {
                             var array = item.data_group.split("/");
 
                             // if (array.length > 0) {
-
-                            array.forEach(function (group, index) {
-                                if (!uniqueNodes[group]) {
-                                    uniqueNodes[group] = 1;
-                                    jstreeData.push({
-                                        id: group,
-                                        text: group,
-                                        parent: parent,
-                                    });
-                                    parent = group;
+                            if(array.length>0){
+                                array.forEach(function (group, index) {
+                                    if (!uniqueNodes[group]) {
+                                        uniqueNodes[group] = 1;
+                                        jstreeData.push({
+                                            id: group,
+                                            text: group,
+                                            parent: parent,
+                                        });
+                                        parent = group;
+                                    }
+                                });
+                                if(parent=="#" ){
+                                    var lastItem = array.at(-1);
+                                    if(uniqueNodes[lastItem]){
+                                        parent=lastItem;
+                                    }
                                 }
-                            });
+                                   
+                            }
+                            
                         }
 
                         if (!uniqueNodes[item.id]) {
@@ -191,11 +205,18 @@ var UserDataWidget = (function () {
                             
                                 self.currentTreeNode = obj.node;
                                 if (!obj.node.data) {
+                                    $("#userDataWidget_jstree").jstree().open_node(obj.node.id);
                                     return;
                                 } // refuse groups
-                                $("#" + self.divId).dialog("close");
+                               
 
-                                callbackFn(null, obj.node.data);
+                                if(obj.event.type=='click'){
+                                    $("#" + self.divId).dialog("close");
+                                    callbackFn(null, obj.node.data);
+                                }
+                            
+                            
+                               
                             
                         },
                         contextMenu: function (node) {

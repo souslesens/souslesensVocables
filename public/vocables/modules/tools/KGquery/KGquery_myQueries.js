@@ -11,6 +11,7 @@ var KGquery_myQueries = (function () {
             var data = {
                 querySets: KGquery.querySets,
                 sparqlQuery: KGquery.currentSparqlQuery,
+                optionalPredicatesSparql: KGquery.currentOptionalPredicatesSparql,
             };
             if(data.sparqlQuery == null){
                 return alert("No query to save");
@@ -32,6 +33,9 @@ var KGquery_myQueries = (function () {
         KGquery.switchRightPanel(true);
         var querySets = result.querySets.sets;
         var index = -1;
+        if(result.optionalPredicatesSparql){
+            self.currentOptionalPredicatesSparql = result.optionalPredicatesSparql;
+        }
         async.eachSeries(
             querySets,
             function (set, callbackEach1) {
@@ -47,27 +51,29 @@ var KGquery_myQueries = (function () {
                             
                             if(filters){
                                 Object.values(filters).forEach(function(filter){
-                                    if(filter.class.id==node.id){
+                                    if(filter.class.id==node.id && !filter.isChecked){
                                         var classDivId=KGquery.querySets.sets[index].elements[elementIndex].fromNode.data.nodeDivId;
                                         if(classDivId){
                                             KGquery.querySets.sets[index].classFiltersMap[classDivId] = filter;
                                             $("#" + classDivId + "_filter").text( filter?.filter);
+                                            filter.isChecked = true;
                                         }
                                     }
                                 });
                                 
                             }
-                                // cest KGquery.addNode qui rajoure le noeud precedent
-                            
+                            // cest KGquery.addNode qui rajoure le noeud precedent
+                            if(elementIndex>0) {return callbackEach2(err1)};
                             node = element.toNode;
                             KGquery.addNode(node, null, function (err2, result2) {
                                 if(filters){
                                     Object.values(filters).forEach(function(filter){
-                                        if(filter.class.id==node.id){
+                                        if(filter.class.id==node.id && !filter.isChecked){
                                             var classDivId=KGquery.querySets.sets[index].elements[elementIndex].toNode.data.nodeDivId;
                                             if(classDivId){
                                                 KGquery.querySets.sets[index].classFiltersMap[classDivId] = filter;
                                                 $("#" + classDivId + "_filter").text( filter?.filter);
+                                                filter.isChecked = true;
                                             }
                                         }
                                     });

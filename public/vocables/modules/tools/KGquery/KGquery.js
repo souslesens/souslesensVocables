@@ -372,6 +372,11 @@ var KGquery = (function () {
                     if (options.aggregate) {
                         return callbackSeries();
                     }
+                    if(KGquery_myQueries.currentOptionalPredicatesSparql){
+                        optionalPredicatesSparql = KGquery_myQueries.currentOptionalPredicatesSparql;
+                        //KGquery_myQueries.currentOptionalPredicatesSparql = null;
+                        return callbackSeries();
+                    }
 
                     KGquery_filter.selectOptionalPredicates(self.querySets, options, function (err, result) {
                         if (err) {
@@ -379,6 +384,7 @@ var KGquery = (function () {
                             callbackSeries(err);
                         }
                         optionalPredicatesSparql = result;
+                        KGquery.currentOptionalPredicatesSparql = optionalPredicatesSparql;
                         callbackSeries();
                     });
                 },

@@ -2,12 +2,6 @@ const { userModel } = require("../../../../model/users");
 const { sortObjectByKey, responseSchema, successfullyUpdated, successfullyCreated, successfullyFetched } = require("../utils");
 
 module.exports = function () {
-    let operations = {
-        GET,
-        POST,
-        PUT,
-    };
-
     ///// GET api/v1/admin/users
     async function GET(req, res, next) {
         try {
@@ -31,6 +25,9 @@ module.exports = function () {
         try {
             await Promise.all(
                 Object.entries(req.body).map(async function ([_key, value]) {
+                    if ("password" in value && !value.password) {
+                        return res.status(400).json({ message: "Password cannot be empty" });
+                    }
                     await userModel.updateUserAccount(value);
                 }),
             );
@@ -50,11 +47,14 @@ module.exports = function () {
     };
 
     ///// POST api/v1/users
-    async function POST(req, res, next) {
+    async function POST(req, res, _next) {
         try {
             await Promise.all(
                 Object.entries(req.body).map(async function ([_key, value]) {
-                    await userModel.addUserAccount(value);
+                    if ("password" in value && !value.password) {
+                        return res.status(400).json({ message: "Password cannot be empty" });
+                    }
+                    userModel.addUserAccount(value);
                 }),
             );
             const users = await userModel.getUserAccounts();
@@ -72,5 +72,9 @@ module.exports = function () {
         tags: ["Users"],
     };
 
-    return operations;
+    return {
+        GET,
+        POST,
+        PUT,
+    };
 };

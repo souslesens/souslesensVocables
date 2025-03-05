@@ -94,9 +94,10 @@ const getKnexConnection = (database) => {
     });
 
     Promise.all([
-        ...readSchema("001-profiles").map((data) => createDatabaseFromSchema(connection, data)),
-        ...readSchema("002-users").map((data) => createDatabaseFromSchema(connection, data)),
-        ...readSchema("003-user-data").map((data) => createDatabaseFromSchema(connection, data)),
+        ...readSchema("010-profiles").map((data) => createDatabaseFromSchema(connection, data)),
+        ...readSchema("011-profiles-view").map((data) => createDatabaseFromSchema(connection, data)),
+        ...readSchema("020-users").map((data) => createDatabaseFromSchema(connection, data)),
+        ...readSchema("030-user-data").map((data) => createDatabaseFromSchema(connection, data)),
     ])
         .then(() => {})
         .catch((error) => {

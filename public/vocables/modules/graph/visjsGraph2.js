@@ -922,10 +922,10 @@ var visjsGraph = (function () {
         //    $('#graphConfigDiv').dialog("open")
         /*
         setTimeout(function () {
-       
+
 
             setTimeout(function () {
-               
+
             }, 500);
         }, 500);*/
     };

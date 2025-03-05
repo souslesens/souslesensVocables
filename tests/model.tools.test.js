@@ -88,4 +88,32 @@ describe("ToolModel", () => {
         expect(result.status).toStrictEqual('failure');
         expect(result.message).toStrictEqual('Cannot found the identifier in the plugins directory');
     });
+
+    test("Read default config", async () => {
+        const config = toolModel.readConfig();
+        expect(config["Test"]["number"]).toStrictEqual(42);
+    });
+
+    test("Read empty repository", async () => {
+        const repos = toolModel.readRepositories();
+        expect(repos).toStrictEqual({});
+    });
+
+    test("get fake Repository Plugins", async () => {
+        const repositoryPlugins = await toolModel.getRepositoryPlugins("fakeId");
+        expect(repositoryPlugins.status).toStrictEqual("failure")
+        expect(repositoryPlugins.message).toStrictEqual(
+            "Cannot found the identifier in the plugins directory"
+        );
+    });
+
+    test("fetch fake Repository", async () => {
+        jest.spyOn(console, "error").mockImplementation(() => {});
+        const fetchRepo = await toolModel.fetchRepository(
+            "myRepo",
+            {url: "fakeurl", token: "token", version: "1.0"},
+        )
+        expect(fetchRepo.status).toStrictEqual("failure");
+        expect(fetchRepo.message).toContain('https://fakeurl/');
+    });
 });

@@ -538,7 +538,7 @@ var _botEngine = (function () {
         $("#mainDialogDiv").dialog("open");
         //  $("#mainDialogDiv").parent().css("z-index", 1);
         Lineage_whiteboard.drawNewGraph(visjsData, "botGraphDiv", {
-            layoutHierarchical: { vertical: true, levelSeparation: 150, nodeSpacing: 50, direction: "LR" },
+            layoutHierarchical: { direction: "UD", levelSeparation: 150, nodeSpacing: 50, direction: "LR" },
             physics: { enabled: true },
         });
     };

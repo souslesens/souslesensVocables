@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useState } from "react";
+import { MouseEvent, useEffect, useState } from "react";
 
 import {
     Accordion,
@@ -19,7 +19,7 @@ import {
     Stack,
     TextField,
 } from "@mui/material";
-import { Assignment, CheckBox, CheckBoxOutlineBlank, ExpandMore, MiscellaneousServices, RuleFolder, Storage } from "@mui/icons-material";
+import { Assignment, CheckBox, CheckBoxOutlineBlank, Close, Done, ExpandMore, MiscellaneousServices, RuleFolder, Storage } from "@mui/icons-material";
 
 import { ulid } from "ulid";
 import { z } from "zod";
@@ -73,14 +73,16 @@ export const SourcesDialog = ({ edit, me, onClose, onSubmit, open, selectedSourc
         }
     };
 
-    const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    const handleSubmit = (event: MouseEvent<HTMLButtonElement>, submit = false) => {
         event.preventDefault();
 
         const parsedForm = handleValidation(source);
         if (parsedForm.success) {
             onSubmit(source);
             setSourceName(source.name);
-            setUploadGraphModal(true);
+            if (submit) {
+                setUploadGraphModal(true);
+            }
         }
     };
 
@@ -176,15 +178,7 @@ export const SourcesDialog = ({ edit, me, onClose, onSubmit, open, selectedSourc
 
     return (
         <>
-            <Dialog
-                aria-labelledby="sources-dialog-title"
-                aria-describedby="sources-dialog-description"
-                fullWidth
-                maxWidth="md"
-                open={open}
-                onClose={onClose}
-                PaperProps={{ component: "form", onSubmit: handleSubmit }}
-            >
+            <Dialog aria-labelledby="sources-dialog-title" aria-describedby="sources-dialog-description" fullWidth maxWidth="md" open={open} onClose={onClose} PaperProps={{ component: "form" }}>
                 <DialogTitle id="sources-dialog-title">{edit ? `Edit ${source.name}` : "New Source"}</DialogTitle>
                 <DialogContent>
                     <Stack spacing={2} sx={{ pt: 1, maxHeight: "75%" }}>
@@ -542,11 +536,14 @@ export const SourcesDialog = ({ edit, me, onClose, onSubmit, open, selectedSourc
                     </Stack>
                 </DialogContent>
                 <DialogActions>
-                    <Button autoFocus onClick={onClose}>
+                    <Button color="error" autoFocus onClick={onClose} startIcon={<Close />} variant="outlined">
                         Cancel
                     </Button>
-                    <Button color="primary" type="submit">
+                    <Button color="primary" onClick={(e) => handleSubmit(e)} startIcon={<Done />} variant="contained">
                         Submit
+                    </Button>
+                    <Button color="primary" onClick={(e) => handleSubmit(e, true)} startIcon={<Done />} variant="contained">
+                        Submit and upload graph
                     </Button>
                 </DialogActions>
             </Dialog>

@@ -89,7 +89,7 @@ export default function GraphManagement() {
             ) : null}
             <Stack direction="column" spacing={{ xs: 2 }} sx={{ m: 4 }} useFlexGap>
                 <TextField
-                    inputProps={{ autocomplete: "off" }}
+                    inputProps={{ autoComplete: "off" }}
                     label="Search Sources by name"
                     id="search-graph"
                     onChange={(event) => {
@@ -129,7 +129,9 @@ export default function GraphManagement() {
                                         <TableRow key={source.name}>
                                             <TableCell>{source.name}</TableCell>
                                             <TableCell>
-                                                <Link href={source.graphUri}>{source.graphUri}</Link>
+                                                <Link href={source.graphUri} target="_blank">
+                                                    {source.graphUri}
+                                                </Link>
                                             </TableCell>
                                             <TableCell align="center">{humanizeSize(getGraphSize(source, graphs))}</TableCell>
                                             <TableCell align="center">

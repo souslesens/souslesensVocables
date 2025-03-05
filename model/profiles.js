@@ -4,6 +4,8 @@ const { readMainConfig } = require("./config");
 const { toolModel } = require("./tools");
 const { cleanupConnection, getKnexConnection } = require("./utils");
 const { userDataModel } = require("./userData");
+const { userModel } = require("./users");
+
 /**
  * @typedef {import("./UserTypes").UserAccount} UserAccount
  * @typedef {import("./ProfileTypes").Profile} Profile
@@ -17,6 +19,7 @@ const ProfileObject = z
         allowedSourceSchemas: z.enum(["OWL", "SKOS"]).array().optional(),
         sourcesAccessControl: z.record(z.string(), z.string()).optional(),
         allowedTools: z.string().array().optional(),
+        isShared: z.boolean().default(true),
         _type: z.string().default("profile"),
     })
     .strict();
@@ -55,12 +58,16 @@ class ProfileModel {
         label: profile.name,
         theme: profile.theme || "",
         allowed_tools: profile.allowedTools || [],
+        is_shared: profile.isShared !== undefined ? profile.isShared : true,
         access_control: JSON.stringify(profile.sourcesAccessControl || {}),
         schema_types: profile.allowedSourceSchemas || [],
     });
 
     /**
      * Convert the profile to restore the legacy JSON schema
+     *
+     * Note: Use `typeof` to retrieve the correct value when the test are
+     * running with the sqlite backend.
      *
      * @param {Profile} profile - the profile to convert
      * @returns {Profile} - the converted object with the correct fields
@@ -70,10 +77,11 @@ class ProfileModel {
         {
             id: profile.label,
             name: profile.label,
-            theme: profile.theme,
-            allowedSourceSchemas: profile.schema_types,
-            allowedTools: profile.allowed_tools,
-            sourcesAccessControl: profile.access_control,
+            theme: profile.theme || "",
+            allowedSourceSchemas: typeof profile.schema_types === "string" ? JSON.parse(profile.schema_types) : profile.schema_types,
+            allowedTools: typeof profile.allowed_tools === "string" ? JSON.parse(profile.allowed_tools) : profile.allowed_tools,
+            isShared: typeof profile.is_shared === "number" ? profile.is_shared === 1 : profile.is_shared,
+            sourcesAccessControl: typeof profile.access_control === "string" ? JSON.parse(profile.access_control) : profile.access_control,
         },
     ];
 
@@ -94,6 +102,7 @@ class ProfileModel {
                 theme: this._mainConfig.theme.defaultTheme,
                 allowedSourceSchemas: ["OWL", "SKOS"],
                 allowedTools: this._mainConfig.tools_available,
+                isShared: true,
                 sourcesAccessControl: {},
                 defaultSourceAccessControl: "readwrite",
             };
@@ -108,10 +117,6 @@ class ProfileModel {
      */
     getUserProfiles = async (user) => {
         const allProfiles = await this.getAllProfiles();
-        if (user.login === "admin" || user.groups.includes("admin")) {
-            return allProfiles;
-        }
-
         return Object.fromEntries(Object.entries(allProfiles).filter(([profileName, _profile]) => user.groups.includes(profileName)));
     };
 
@@ -140,7 +145,13 @@ class ProfileModel {
      * @returns {Promise<Profile>} a collection of profiles
      */
     getOneUserProfile = async (user, profileName) => {
-        const userProfiles = await this.getUserProfiles(user);
+        let userProfiles;
+        if (user.login === "admin" || user.profiles?.includes("admin")) {
+            const allProfiles = await this.getAllProfiles();
+            userProfiles = Object.fromEntries(Object.entries(allProfiles));
+        } else {
+            userProfiles = await this.getUserProfiles(user);
+        }
         return userProfiles[profileName];
     };
 
@@ -202,8 +213,10 @@ class ProfileModel {
             throw Error("The profile already exists, try updating it");
         }
 
-        await conn.insert(this._convertToDatabase(data)).into("profiles");
+        const idx = await conn.insert(this._convertToDatabase(data)).into("profiles");
         cleanupConnection(conn);
+
+        return idx[0];
     };
 
     /**
@@ -214,7 +227,7 @@ class ProfileModel {
         const conn = getKnexConnection(this._mainConfig.database);
         const results = await conn.select("theme").from("profiles").where("label", profileName).first();
         cleanupConnection(conn);
-        if (results === undefined || results.theme === undefined) {
+        if (!results || !results.theme) {
             return this._mainConfig.theme.defaultTheme;
         }
 

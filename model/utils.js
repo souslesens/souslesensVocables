@@ -21,11 +21,11 @@ const convertType = (value, trimValue = true) => {
         return value === "true" ? true : false;
     }
 
-    if (value.search(/^(\+|\-)?[0-9]+$/) > -1) {
+    if (value.search(/^(\+|-)?[0-9]+$/) > -1) {
         return parseInt(value);
     }
 
-    if (value.search(/^(\+|\-)?[0-9]+(\.[0-9]*)?([eE](\+|\-)?[0-9]+)?$/) > -1) {
+    if (value.search(/^(\+|-)?[0-9]+(\.[0-9]*)?([eE](\+|-)?[0-9]+)?$/) > -1) {
         return parseFloat(value);
     }
 
@@ -65,7 +65,7 @@ const getKnexConnection = (database) => {
  * @param {knex} connection - the instance of the connection to the Postgres database
  */
 const cleanupConnection = (connection) => {
-    connection.destroy && connection.destroy();
+    return connection.destroy && connection.destroy();
 };
 
 module.exports = { cleanupConnection, convertType, chunk, getKnexConnection };

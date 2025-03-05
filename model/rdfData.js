@@ -1,5 +1,6 @@
 const { readMainConfig } = require("./config");
 const DigestClient = require("digest-fetch");
+const fetch = require("node-fetch");
 
 class RdfDataModel {
     /**

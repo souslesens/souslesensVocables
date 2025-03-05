@@ -7,8 +7,10 @@ import {
     Chip,
     CircularProgress,
     FormControl,
+    FormControlLabel,
     FormLabel,
     Grid,
+    IconButton,
     InputLabel,
     MenuItem,
     Modal,
@@ -28,8 +30,8 @@ import {
     Typography,
     styled,
 } from "@mui/material";
-import { ExpandMore, ChevronRight } from "@mui/icons-material";
 
+import { ChevronRight, Close, Done, Edit, ExpandMore } from "@mui/icons-material";
 import { TreeView, TreeItem, TreeItemProps, TreeItemContentProps, useTreeItem } from "@mui/x-tree-view";
 
 import clsx from "clsx";
@@ -84,10 +86,11 @@ const ProfilesTable = () => {
             ),
             success: (gotProfiles: Profile[]) => {
                 const datas = gotProfiles.map((profile) => {
-                    const { allowedSourceSchemas, allowedTools, sourcesAccessControl, ...restOfProperties } = profile;
+                    const { allowedSourceSchemas, allowedTools, isShared, sourcesAccessControl, ...restOfProperties } = profile;
                     const processedData = {
                         ...restOfProperties,
                         allowedTools: joinWhenArray(allowedTools),
+                        isShared: JSON.stringify(isShared),
                         allowedSourceSchemas: allowedSourceSchemas.join(";"),
                         sourcesAccessControl: JSON.stringify(sourcesAccessControl),
                     };
@@ -118,7 +121,7 @@ const ProfilesTable = () => {
                 return (
                     <Stack direction="column" spacing={{ xs: 2 }} sx={{ m: 4 }} useFlexGap>
                         <TextField
-                            inputProps={{ autocomplete: "off" }}
+                            inputProps={{ autoComplete: "off" }}
                             label="Search Profiles by name"
                             id="filter profiles"
                             onChange={(event) => {
@@ -137,6 +140,11 @@ const ProfilesTable = () => {
                                         <TableCell align="center" style={{ fontWeight: "bold", whiteSpace: "nowrap" }}>
                                             <TableSortLabel active={orderBy === "allowedTools"} direction={order} onClick={() => handleRequestSort("allowedTools")}>
                                                 Allowed Tools
+                                            </TableSortLabel>
+                                        </TableCell>
+                                        <TableCell align="center" style={{ fontWeight: "bold", whiteSpace: "nowrap" }}>
+                                            <TableSortLabel active={orderBy === "isShared"} direction={order} onClick={() => handleRequestSort("isShared")}>
+                                                Shared Users
                                             </TableSortLabel>
                                         </TableCell>
                                         <TableCell align="center" style={{ fontWeight: "bold", whiteSpace: "nowrap" }}>
@@ -166,6 +174,11 @@ const ProfilesTable = () => {
                                                                     <Chip label={`+ ${profile.allowedTools.slice(3).length}`} size="small" color="info" variant="outlined" />
                                                                 </Tooltip>
                                                             ) : null}
+                                                        </Stack>
+                                                    </TableCell>
+                                                    <TableCell align="center">
+                                                        <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
+                                                            {profile.isShared ? <Done sx={{ width: 30, height: 30 }} /> : <Close sx={{ width: 30, height: 30 }} />}
                                                         </Stack>
                                                     </TableCell>
                                                     <TableCell align="center">
@@ -220,7 +233,7 @@ const enum Mode {
 
 export type Msg_ =
     | { type: Type.UserClickedModal; payload: boolean }
-    | { type: Type.UserUpdatedField; payload: { fieldname: string; newValue: string | string[] } }
+    | { type: Type.UserUpdatedField; payload: { fieldname: string; newValue: string | string[] | boolean } }
     | { type: Type.UserUpdatedSourceAccessControl; payload: { treeStr: string; newValue: SourceAccessControl | null } }
     | { type: Type.ResetProfile; payload: Profile }
     | { type: Type.UserClickedCheckAll; payload: { fieldname: string; value: boolean } };
@@ -308,8 +321,13 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
         setNodeToExpand([]);
         update({ type: Type.UserClickedModal, payload: false });
     };
-    const handleFieldUpdate = (fieldname: string) => (event: ChangeEvent<HTMLTextAreaElement | HTMLInputElement> | SelectChangeEvent<string[]>) =>
-        update({ type: Type.UserUpdatedField, payload: { fieldname: fieldname, newValue: event.target.value } });
+    const handleFieldUpdate = (fieldname: string) => (event: ChangeEvent<HTMLTextAreaElement | HTMLInputElement> | SelectChangeEvent<string[]>) => {
+        if (fieldname === "isShared") {
+            update({ type: Type.UserUpdatedField, payload: { fieldname: fieldname, newValue: (event.target as HTMLInputElement).checked } });
+        } else {
+            update({ type: Type.UserUpdatedField, payload: { fieldname: fieldname, newValue: event.target.value } });
+        }
+    };
 
     const sourceFilter = (event: ChangeEvent<HTMLTextAreaElement>) => {
         setFilter(event.target.value);
@@ -547,9 +565,15 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
 
     return (
         <>
-            <Button variant="contained" color="primary" onClick={handleOpen}>
-                {create ? "Create Profile" : "Edit"}
-            </Button>
+            {create ? (
+                <Button variant="contained" color="primary" onClick={handleOpen}>
+                    Create Profile
+                </Button>
+            ) : (
+                <IconButton aria-label="edit" color="primary" onClick={handleOpen} size="small" title="Edit">
+                    <Edit />
+                </IconButton>
+            )}
             <Modal onClose={handleClose} open={profileModel.modal}>
                 <Box
                     component="form"
@@ -633,6 +657,9 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
                                     </MenuItem>
                                 ))}
                             </Select>
+                        </FormControl>
+                        <FormControl>
+                            <FormControlLabel control={<Checkbox checked={profileModel.profileForm.isShared} onChange={handleFieldUpdate("isShared")} />} label={"shared Users"} />
                         </FormControl>
                         <TextField defaultValue={profileModel.profileForm.theme ?? config.theme.defaultTheme} fullWidth id="theme" label="Theme" onChange={handleFieldUpdate("theme")} select>
                             {getAvailableThemes().map((theme) => (

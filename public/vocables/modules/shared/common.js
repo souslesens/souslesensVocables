@@ -909,9 +909,6 @@ if (callback) return callback(err);
 
         StackTrace.get().then(callback).catch(errback);
         return;
-        console.debug();
-        var xx = console.trace();
-        var stack = new Error().stack;
     };
 
     self.getUrlParamsMap = function () {

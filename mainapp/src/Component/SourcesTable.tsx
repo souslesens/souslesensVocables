@@ -198,7 +198,7 @@ const SourcesTable = () => {
                             </Alert>
                         </Snackbar>
                         <TextField
-                            inputProps={{ autocomplete: "off" }}
+                            inputProps={{ autoComplete: "off" }}
                             label="Search Sources by name"
                             id="search-sources"
                             onChange={(event) => {
@@ -249,7 +249,9 @@ const SourcesTable = () => {
                                                 <TableRow key={source.name}>
                                                     <TableCell>{source.name}</TableCell>
                                                     <TableCell>
-                                                        <Link href={source.graphUri}>{source.graphUri}</Link>
+                                                        <Link href={source.graphUri} target="_blank">
+                                                            {source.graphUri}
+                                                        </Link>
                                                     </TableCell>
                                                     <TableCell align="center">{humanizeSize(getGraphSize(source, graphs))}</TableCell>
                                                     <TableCell align="center">{source.group ? <Chip label={source.group} size="small" /> : ""}</TableCell>

@@ -11,7 +11,7 @@ var Axiom_editorUI = (function () {
         $("#graphDiv").load("modules/tools/axioms/html/mainPanel2.html", function (x, y) {
             $("#axiomsEditor_input").on("keyup", Axiom_editor.onAxiomIntputKey);
             $("#axiomsEditor_input").on("keydown", Axiom_editor.onAxiomIntputKey);
-            $("#axiomsEditor_input").focus();
+            $("#axiomsEditor_input") .trigger( "focus" );
 
             $("#axiom_triplesTab").tabs();
 

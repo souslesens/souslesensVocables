@@ -267,7 +267,6 @@ var MappingsDetails = (function () {
 
         var URITType = ["fromLabel", "blankNode", "randomIdentifier"];
 
-
         var rdfObjectsType = ["owl:NamedIndividual", "owl:Class"];
 
         //  sort by similarity for others than rowIndex
@@ -295,13 +294,10 @@ var MappingsDetails = (function () {
         common.fillSelectOptions(`columnDetails-rdfType`, rdfObjectsType, false);
         common.fillSelectOptions(`columnDetails-UriType`, URITType, false);
 
+        var sourceObj = Config.sources[MappingModeler.currentSLSsource];
 
-         var sourceObj = Config.sources[MappingModeler.currentSLSsource]
-
-           $("#columnDetails-baseUri").val(column.data.baseURI || "")
+        $("#columnDetails-baseUri").val(column.data.baseURI || "");
     };
-
-
 
     /**
      * Saves the mapping details to the Vis.js graph for a specific column.
@@ -322,18 +318,16 @@ var MappingsDetails = (function () {
         currentGraphNode.data.rdfsLabel = $("#columnDetails-rdfsLabel").val();
         currentGraphNode.data.rdfType = $("#columnDetails-rdfType").val();
 
-
-        var baseUri = currentGraphNode.data.baseURI = $("#columnDetails-baseUri").val();
-        var sourceObj = Config.sources[MappingModeler.currentSLSsource]
-        var sourceBaseUri = sourceObj.baseUri || sourceObj.graphUri
+        var baseUri = (currentGraphNode.data.baseURI = $("#columnDetails-baseUri").val());
+        var sourceObj = Config.sources[MappingModeler.currentSLSsource];
+        var sourceBaseUri = sourceObj.baseUri || sourceObj.graphUri;
         if (baseUri && baseUri != sourceBaseUri) {
             currentGraphNode.data.baseURI = $("#columnDetails-baseUri").val();
         } else {
             if (currentGraphNode.data.baseURI) {
-                delete currentGraphNode.data.baseURI
+                delete currentGraphNode.data.baseURI;
             }
         }
-
 
         MappingColumnsGraph.updateNode(currentGraphNode);
         self.switchTypeToSubclass(currentGraphNode);
@@ -426,14 +420,14 @@ var MappingsDetails = (function () {
                     property: "rdf:type",
                     object: params.rdfType,
                 });
-                MappingColumnsGraph.updateNode({id: MappingColumnsGraph.currentGraphNode.id, data: data});
+                MappingColumnsGraph.updateNode({ id: MappingColumnsGraph.currentGraphNode.id, data: data });
                 MappingColumnsGraph.saveVisjsGraph();
             } else if (params.addingSubClassOf) {
                 data.otherPredicates.push({
                     property: "rdfs:subClassOf",
                     object: params.addingSubClassOf,
                 });
-                MappingColumnsGraph.updateNode({id: MappingColumnsGraph.currentGraphNode.id, data: data});
+                MappingColumnsGraph.updateNode({ id: MappingColumnsGraph.currentGraphNode.id, data: data });
                 MappingColumnsGraph.saveVisjsGraph();
             } else if (params.nonObjectPropertyId) {
                 var range = params.datatypePropertyRange || Config.ontologiesVocabularyModels[params.nonObjectPropertyVocab].nonObjectProperties[params.nonObjectPropertyId].range;
@@ -443,7 +437,7 @@ var MappingsDetails = (function () {
                     range: range,
                     dateFormat: params.nonObjectPropertyDateFormat || null, //if any
                 });
-                MappingColumnsGraph.updateNode({id: MappingColumnsGraph.currentGraphNode.id, data: data});
+                MappingColumnsGraph.updateNode({ id: MappingColumnsGraph.currentGraphNode.id, data: data });
                 MappingColumnsGraph.saveVisjsGraph();
             }
             if (MappingsDetails.afterSaveColumnTechnicalMappingsDialog) {
@@ -497,7 +491,7 @@ var MappingsDetails = (function () {
 
         var divId = "detailedMappingsGraphDiv";
 
-        var visjsData = {nodes: [], edges: []};
+        var visjsData = { nodes: [], edges: [] };
 
         var existingNodes = {};
         var json = {};
@@ -540,18 +534,18 @@ var MappingsDetails = (function () {
 
             function getNodeAttrs(str) {
                 if (str.indexOf("http") > -1) {
-                    return {type: "Class", color: "#00afef", shape: "box", size: 30};
+                    return { type: "Class", color: "#00afef", shape: "box", size: 30 };
                 } else if (str.indexOf(":") > -1) {
                     drawRelation = false; //rdf Bag
                     return null;
-                    return {type: "OwlType", color: "#aaa", shape: "ellipse"};
+                    return { type: "OwlType", color: "#aaa", shape: "ellipse" };
                 } else if (str.endsWith("_$")) {
-                    return {type: "blankNode", color: "#00afef", shape: "square"};
+                    return { type: "blankNode", color: "#00afef", shape: "square" };
                 } else if (str.indexOf("_rowIndex") > -1) {
-                    return {type: "rowIndex", color: "#f90edd", shape: "star"};
+                    return { type: "rowIndex", color: "#f90edd", shape: "star" };
                 } else {
                     drawRelation = false;
-                    return {type: "Column", color: "#cb9801", shape: "ellipse"};
+                    return { type: "Column", color: "#cb9801", shape: "ellipse" };
                 }
             }
 
@@ -617,7 +611,7 @@ var MappingsDetails = (function () {
                         label: label,
                         shape: attrs.shape,
                         color: attrs.color,
-                        font: attrs.shape == "box" ? {color: "white"} : {color: "black"},
+                        font: attrs.shape == "box" ? { color: "white" } : { color: "black" },
                         size: Lineage_whiteboard.defaultShapeSize,
                         data: {
                             id: item.o,
@@ -706,8 +700,7 @@ var MappingsDetails = (function () {
      * @param {Object} options - Additional options for handling the click event.
      * @returns {void}
      */
-    self.onDetailedMappingsGraphClick = function (obj, event, options) {
-    };
+    self.onDetailedMappingsGraphClick = function (obj, event, options) {};
 
     /**
      * Retrieves the RDF type of a column based on its connected edges in the graph.
@@ -813,7 +806,7 @@ var MappingsDetails = (function () {
             });
 
             var mappingWithTransform = {};
-            mappingWithTransform[MappingModeler.currentTable.name] = {tripleModels: filteredMapping, transform: {}};
+            mappingWithTransform[MappingModeler.currentTable.name] = { tripleModels: filteredMapping, transform: {} };
             mappingWithTransform[MappingModeler.currentTable.name].transform[self.transformColumn] = transformFn;
             TripleFactory.createTriples(
                 true,
@@ -822,8 +815,7 @@ var MappingsDetails = (function () {
                     filteredMappings: mappingWithTransform,
                     table: MappingModeler.currentTable.name,
                 },
-                function (err, result) {
-                },
+                function (err, result) {},
             );
         },
         saveTransform: function () {

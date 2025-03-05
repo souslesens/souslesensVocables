@@ -159,6 +159,7 @@
         <script type="module" src="modules/bots/createRestriction_bot.js"></script>
         <script type="module" src="modules/bots/mappingModeler_bot.js"></script>
         <script type="module" src="modules/bots/mappingModeler_lookups_bot.js"></script>
+        <script type="module" src="modules/bots/_nonObjectPropertyFilterWorklow.js"></script>
         <!--   <script type="module" src="modules/sparqlProxies/sparql_INDIVIDUALS.js"></script>-->
 
         <script type="module" src="modules/sparqlProxies/sparql_common.js"></script>
@@ -397,9 +398,7 @@
                     </button>
 
                     <div id="SouslesensVocables_Github" class="w3-display-topright" style="font-size: 12px; margin-right: 10px">
-
-                            <input type="checkbox" style="display:none" id="developerControls_logQueriesCBX"/>logQueries
-
+                        <input type="checkbox" style="display: none" id="developerControls_logQueriesCBX" />logQueries
 
                         <a target="_blank noreferrer" href="/api/v1"><img src="/api/v1/favicon-16x16.png" style="margin-bottom: 3px; margin-right: 3px" /></a>
                         Swagger API
@@ -464,10 +463,7 @@
 
                     <div class="w3-bar-item w3-right">
                         <button class="w3-button slsv-right-top-bar-button" id="copyQueryBtn">Copy Query</button>
-
                     </div>
-
-
 
                     <div class="w3-bar-item w3-dropdown-hover slsv-bg-intense slsv-top-menu-Button w3-right">
                         <button style="display: none" id="theme-selector-btn" class="w3-button slsv-right-top-bar-button">Themes</button>

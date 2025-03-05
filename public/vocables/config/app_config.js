@@ -374,6 +374,7 @@ var Config = (function () {
         "@propertiesIcon": "PropertiesIcon",
         "@containersIcon": "ContainerIcon",
         "@classesIcon": "ClassesIcon",
+        "@queryIcon": "SPARQL",
     };
 
     self.slsvColorThemes = {

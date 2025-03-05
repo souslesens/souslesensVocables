@@ -198,185 +198,175 @@ var MainController = (function () {
                     },
 
                     function (callbackSeries) {
-// show special controls to admin profiles
+                        // show special controls to admin profiles
                         if (Authentification.currentUser.groupes.indexOf("admin") > -1) {
-                            $("#developerControls_logQueriesCBX").css("display", "inline")
+                            $("#developerControls_logQueriesCBX").css("display", "inline");
                         }
-                        callbackSeries()
-                    }
+                        callbackSeries();
+                    },
+                ],
 
-
-                    ],
-
-                        function (_err) {
-                        }
-
-                    ,
-                    )
-                        ;
-                        callback(_err);
-                    });
-        };
-        self.initControllers = function () {
-            Object.keys(Config.sources)
-                .sort()
-                .forEach(function (sourceLabel) {
-                    if (!Config.sources[sourceLabel].controllerName) {
-                        var controllerName = Config.sources[sourceLabel].controller;
-                        Config.sources[sourceLabel].controllerName = controllerName;
-                        Config.sources[sourceLabel].controller = window[controllerName];
-                    }
-                });
-        };
-        self.initTool = function (toolId, callback) {
-            MainController.writeUserLog(authentication.currentUser, self.currentTool, self.currentSource || "");
-            var toolObj = Config.userTools[toolId];
-            self.initControllers();
-            Clipboard.clear();
-            Lineage_sources.loadedSources = {};
-            /*  if(!Config.userTools[toolId].controller)
+                function (_err) {},
+            );
+            callback(_err);
+        });
+    };
+    self.initControllers = function () {
+        Object.keys(Config.sources)
+            .sort()
+            .forEach(function (sourceLabel) {
+                if (!Config.sources[sourceLabel].controllerName) {
+                    var controllerName = Config.sources[sourceLabel].controller;
+                    Config.sources[sourceLabel].controllerName = controllerName;
+                    Config.sources[sourceLabel].controller = window[controllerName];
+                }
+            });
+    };
+    self.initTool = function (toolId, callback) {
+        MainController.writeUserLog(authentication.currentUser, self.currentTool, self.currentSource || "");
+        var toolObj = Config.userTools[toolId];
+        self.initControllers();
+        Clipboard.clear();
+        Lineage_sources.loadedSources = {};
+        /*  if(!Config.userTools[toolId].controller)
                 Config.userTools[toolId].controller= window[toolId]*/
-            if (Config.userTools[toolId].controller.onLoaded) {
-                Config.userTools[toolId].controller.onLoaded();
-            } else {
-                if (true) {
-                    var url = window.location.href;
-                    var p = url.indexOf("?");
-                    if (p > -1) {
-                        url = url.substring(0, p);
-                    }
-                    url = url.replace("index_r.html", "");
-                    url += "?tool=" + toolId;
-                    window.location.href = url;
+        if (Config.userTools[toolId].controller.onLoaded) {
+            Config.userTools[toolId].controller.onLoaded();
+        } else {
+            if (true) {
+                var url = window.location.href;
+                var p = url.indexOf("?");
+                if (p > -1) {
+                    url = url.substring(0, p);
                 }
+                url = url.replace("index_r.html", "");
+                url += "?tool=" + toolId;
+                window.location.href = url;
             }
-        };
-        self.onToolSelect = function (toolId, event, callback) {
-            if (event) {
-                var clickedElement = event.target;
-                // if class
-                if (clickedElement.className == "Lineage_PopUpStyleDiv") {
-                    var toolId = $(clickedElement).children()[1].innerHTML;
+        }
+    };
+    self.onToolSelect = function (toolId, event, callback) {
+        if (event) {
+            var clickedElement = event.target;
+            // if class
+            if (clickedElement.className == "Lineage_PopUpStyleDiv") {
+                var toolId = $(clickedElement).children()[1].innerHTML;
+            } else {
+                if (clickedElement.id == "toolsSelect") {
+                    return;
+                } else if (clickedElement.innerHTML) {
+                    toolId = clickedElement.innerHTML;
                 } else {
-                    if (clickedElement.id == "toolsSelect") {
-                        return;
-                    } else if (clickedElement.innerHTML) {
-                        toolId = clickedElement.innerHTML;
-                    } else {
-                        toolId = clickedElement.nextSibling.innerHTML;
-                    }
+                    toolId = clickedElement.nextSibling.innerHTML;
                 }
             }
+        }
 
-            if (self.currentTool != null) {
-                if (Config.userTools[self.currentTool].resetURLParamsDiv) {
-                    $("#" + Config.userTools[self.currentTool].resetURLParamsDiv).dialog("close");
-                }
-                if (Config.userTools[toolId].displayImports) {
-                    if (self.oldRegisterSource) {
-                        Lineage_sources.registerSource = self.oldRegisterSource;
-                    }
-                }
-                if (Config.userTools[self.currentTool].controller.unload) {
-                    try {
-                        Config.userTools[self.currentTool].controller.unload();
-                    } catch (e) {
-                        console.log(e);
-                    }
+        if (self.currentTool != null) {
+            if (Config.userTools[self.currentTool].resetURLParamsDiv) {
+                $("#" + Config.userTools[self.currentTool].resetURLParamsDiv).dialog("close");
+            }
+            if (Config.userTools[toolId].displayImports) {
+                if (self.oldRegisterSource) {
+                    Lineage_sources.registerSource = self.oldRegisterSource;
                 }
             }
-            self.currentTool = toolId;
+            if (Config.userTools[self.currentTool].controller.unload) {
+                try {
+                    Config.userTools[self.currentTool].controller.unload();
+                } catch (e) {
+                    console.log(e);
+                }
+            }
+        }
+        self.currentTool = toolId;
 
-            if (!Config.userTools[toolId].displayImports && !Config.userTools[toolId].noSource) {
-                self.oldRegisterSource = Lineage_sources.registerSource;
-                Lineage_sources.registerSource = Lineage_sources.registerSourceWithoutDisplayingImports;
-                $("#Lineage_graphEditionButtons").hide();
-            }
-            $("#currentToolTitle").html("");
-            if (UI.currentTheme["@" + toolId + "-logo"]) {
-                $("#currentToolTitle").prepend(`<button class="${toolId}-logo slsv-invisible-button" style="height:41px;width:41px;">`);
+        if (!Config.userTools[toolId].displayImports && !Config.userTools[toolId].noSource) {
+            self.oldRegisterSource = Lineage_sources.registerSource;
+            Lineage_sources.registerSource = Lineage_sources.registerSourceWithoutDisplayingImports;
+            $("#Lineage_graphEditionButtons").hide();
+        }
+        $("#currentToolTitle").html("");
+        if (UI.currentTheme["@" + toolId + "-logo"]) {
+            $("#currentToolTitle").prepend(`<button class="${toolId}-logo slsv-invisible-button" style="height:41px;width:41px;">`);
+        } else {
+            $("#currentToolTitle").html(toolId);
+        }
+        MainController.currentTool = toolId;
+
+        if (!Config.userTools[toolId].noSource) {
+            if (self.currentSource == null) {
+                SourceSelectorWidget.showSourceDialog(true);
             } else {
-                $("#currentToolTitle").html(toolId);
+                SourceSelectorWidget.initSource(self.currentSource);
             }
-            MainController.currentTool = toolId;
-
-            if (!Config.userTools[toolId].noSource) {
-                if (self.currentSource == null) {
-                    SourceSelectorWidget.showSourceDialog(true);
-                } else {
-                    SourceSelectorWidget.initSource(self.currentSource);
-                }
-            } else {
-                UI.cleanPage();
-                self.initTool(toolId);
-                var homePageOptions = {};
-                if (toolId != "ConfigEditor") {
-                    homePageOptions["notRefresh"] = true;
-                }
-                if (Config.userTools[toolId].resetURLParamsDiv) {
-                    $("#" + Config.userTools[toolId].resetURLParamsDiv).dialog({
-                        close: function () {
-                            UI.homePage(homePageOptions);
-                        },
-                    });
-                }
-
-                //Config.userTools[self.currentTool].controller.unload=UI.homePage;
-                self.currentSource = null;
-            }
-
-            // set or replace tool in url params
-            const params = new URLSearchParams(document.location.search);
+        } else {
+            UI.cleanPage();
+            self.initTool(toolId);
+            var homePageOptions = {};
             if (toolId != "ConfigEditor") {
-                params.delete("tab");
+                homePageOptions["notRefresh"] = true;
             }
-            params.set("tool", toolId);
-            if (self.currentSource) {
-                params.set("source", self.currentSource);
-            } else {
-                params.delete("source");
+            if (Config.userTools[toolId].resetURLParamsDiv) {
+                $("#" + Config.userTools[toolId].resetURLParamsDiv).dialog({
+                    close: function () {
+                        UI.homePage(homePageOptions);
+                    },
+                });
             }
 
-            window.history.replaceState(null, "", `?${params.toString()}`);
+            //Config.userTools[self.currentTool].controller.unload=UI.homePage;
+            self.currentSource = null;
+        }
 
-            if (callback) {
-                callback();
-            }
-        };
+        // set or replace tool in url params
+        const params = new URLSearchParams(document.location.search);
+        if (toolId != "ConfigEditor") {
+            params.delete("tab");
+        }
+        params.set("tool", toolId);
+        if (self.currentSource) {
+            params.set("source", self.currentSource);
+        } else {
+            params.delete("source");
+        }
 
-        self.test = function () {
-            //   bc.postMessage("bc")
-        };
-        self.parseUrlParam = function (callback) {
-            var paramsMap = common.getUrlParamsMap();
+        window.history.replaceState(null, "", `?${params.toString()}`);
 
-            // old or new url
-            if (paramsMap.tool) {
-                var tool = paramsMap["tool"];
+        if (callback) {
+            callback();
+        }
+    };
 
-                if (tool) {
-                    var source = paramsMap["source"];
+    self.test = function () {
+        //   bc.postMessage("bc")
+    };
+    self.parseUrlParam = function (callback) {
+        var paramsMap = common.getUrlParamsMap();
 
-                    var url = window.location.href;
+        // old or new url
+        if (paramsMap.tool) {
+            var tool = paramsMap["tool"];
 
-                    // if tool available load it in responsive
-                    if (source) {
-                        self.currentSource = source;
-                    }
-                    MainController.onToolSelect(tool);
+            if (tool) {
+                var source = paramsMap["source"];
 
+                var url = window.location.href;
+
+                // if tool available load it in responsive
+                if (source) {
+                    self.currentSource = source;
                 }
-
+                MainController.onToolSelect(tool);
             }
-            if (callback) {
-                callback();
-            }
-        };
+        }
+        if (callback) {
+            callback();
+        }
+    };
 
-        return self;
-    }
-)
-    ();
+    return self;
+})();
 
-    export default MainController;
-    window.MainController = MainController;
+export default MainController;
+window.MainController = MainController;

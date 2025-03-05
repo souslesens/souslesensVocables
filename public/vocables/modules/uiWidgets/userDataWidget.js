@@ -41,30 +41,18 @@ var UserDataWidget = (function () {
             owned_by: Authentification.currentUser.login,
         };
 
-        /* async function excuteQuery() {
-            const response = await fetch( `${Config.apiUrl}/users/data`, {
-                method: "POST",
-                body:JSON.stringify(payload),
-                // ...
-            });
-        }
-
-        excuteQuery()
-
-        return;*/
-
         var type = "POST";
         if (self.currentTreeNode) {
             type = "PUT";
             payload.id = self.currentTreeNode.id;
         }
-        payload=JSON.stringify(payload);
+        payload = JSON.stringify(payload);
         $.ajax({
             type: type,
             url: `${Config.apiUrl}/users/data`,
             data: payload,
             //dataType: "json",
-            contentType:"application/json",
+            contentType: "application/json",
             success: function (_result, _textStatus, _jqXHR) {
                 callback(null, _result);
             },
@@ -76,7 +64,7 @@ var UserDataWidget = (function () {
     self.loadUserDatabyId = function (id,callback) {
         $.ajax({
             type: "GET",
-            url: `${Config.apiUrl}/users/data/` + "" +id,
+            url: `${Config.apiUrl}/users/data/` + "" + id,
             dataType: "json",
             success: function (_result, _textStatus, _jqXHR) {
                 callback(null, _result);
@@ -85,19 +73,20 @@ var UserDataWidget = (function () {
                 return callback(err);
             },
         });
-    }
-    self.listUserData = function (filter,callback) {
+    };
+    self.listUserData = function (filter, callback) {
         $.ajax({
             type: "GET",
             url: `${Config.apiUrl}/users/data`,
             dataType: "json",
             success: function (_result, _textStatus, _jqXHR) {
-                callback(null,_result)
-            }, error(err) {
+                callback(null, _result);
+            },
+            error(err) {
                 return callback(err);
-            }
-        })
-    }
+            },
+        });
+    };
 
     self.deleteItem = function (nodeData, callback) {
         if (!nodeData) {

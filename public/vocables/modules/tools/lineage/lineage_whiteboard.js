@@ -777,7 +777,7 @@ var Lineage_whiteboard = (function () {
                             var node = self.lineageVisjsGraph.data.nodes.get(_properties.items[0]);
                             Lineage_sources.activeSource = node.data.source;
                         }
-                        if (true) {
+                        if (!options.skipDrawLegend) {
                             var nodes = self.lineageVisjsGraph.data.nodes.get(_properties.items);
                             if (nodes) {
                                 Lineage_decoration.decorateNodeAndDrawLegend(nodes, _options.legendType);
@@ -899,7 +899,7 @@ var Lineage_whiteboard = (function () {
         var sourceNodes = [];
         existingNodes.forEach(function (/** @type {{ id: string; data: { source: any; id: any; }; }} */ item) {
             if (item.id != "#" && item.data && item.data.source == source) {
-                sourceNodes.push(item.data.id || item.id);
+                if (item.id.indexOf(" ") < 0) sourceNodes.push(item.data.id || item.id);
             }
         });
         return sourceNodes;
@@ -1527,6 +1527,7 @@ var Lineage_whiteboard = (function () {
         }
         options.selectGraph = 1;
         var existingNodes = self.lineageVisjsGraph.getExistingIdsMap();
+
         var visjsData = { nodes: [], edges: [] };
         async.eachSeries(
             slices,
@@ -1621,9 +1622,8 @@ var Lineage_whiteboard = (function () {
                         try {
                             self.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
                             self.lineageVisjsGraph.data.edges.add(visjsData.edges);
-                        }
-                        catch(e){
-                            console.log(e)
+                        } catch (e) {
+                            console.log(e);
                         }
                     } else {
                         Lineage_whiteboard.drawNewGraph(visjsData);
@@ -4418,6 +4418,21 @@ attrs.color=self.getSourceColor(superClassValue)
                     },
                 });
             });
+        }
+    };
+
+    /**
+     * @function
+     * @name initQueryTab
+     * @memberof module:graphActions
+     * Initializes the classes tab in the UI by loading relevant content and actions related to the classes.
+     * @returns {void}
+     */
+    self.initQueryTab = function () {
+        if ($("#queryTab").children().length == 0) {
+            $("#queryTab").html("<div id='queryTabDiv'></div>")
+            $("#botContainerDiv").css("width","100%")
+            SparqlQuery_bot.start({divId:"queryTabDiv"})
         }
     };
 

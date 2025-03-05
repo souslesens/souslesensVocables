@@ -8,7 +8,7 @@ var SourceSelectorWidget = (function () {
     self.currentTreeDiv = null;
 
     self.showSourceDialog = function (resetAll) {
-        $("#sourceSelector_searchInput").focus();
+        $("#sourceSelector_searchInput") .trigger( "focus" );
         var onSourceSelect;
         if (resetAll) {
             Lineage_sources.loadedSources = {};
@@ -45,7 +45,7 @@ var SourceSelectorWidget = (function () {
                 $("#" + targetDivId).dialog("open");
             } catch (e) {}
             self.loadSourcesTreeDiv("sourceSelector_jstreeDiv", jsTreeOptions);
-            $("#sourceSelector_searchInput").focus();
+            $("#sourceSelector_searchInput") .trigger( "focus" );
             //  $("#sourceSelector_SearchSourceInput");
             $("#sourceSelector_validateButton").bind("click", function () {
                 okButtonValidateFn();

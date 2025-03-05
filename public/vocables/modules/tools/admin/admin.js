@@ -248,7 +248,7 @@ $("#sourceDivControlPanelDiv").html(html);*/
     };
 
     self.clearOntologyModelCache = function (source) {
-        if(!source) {
+        if (!source) {
             var sources = SourceSelectorWidget.getCheckedSources();
 
             if (sources.length == 0) {
@@ -257,14 +257,13 @@ $("#sourceDivControlPanelDiv").html(html);*/
                 source = sources[0];
             }
         }
-        OntologyModels.clearOntologyModelCache(source, function(err, result){
+        OntologyModels.clearOntologyModelCache(source, function (err, result) {
             if (err) {
                 return alert(err.responseText || err);
             }
 
-            UI.message( "DONE")
-        })
-
+            UI.message("DONE");
+        });
     };
 
     self.exportTaxonomyToCsv = function (_rootUri) {

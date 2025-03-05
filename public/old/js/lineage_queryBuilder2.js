@@ -75,7 +75,7 @@ var Lineage_queryBuilder = (function () {
         html += "<span>&nbsp;</span>";
         $(html).insertBefore("#bot_input");
         $("#bot_input").val("");
-        $("#bot_input").focus();
+        $("#bot_input") .trigger( "focus" );
         return;
     };
 

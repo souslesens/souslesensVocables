@@ -42,7 +42,7 @@ var SubGraph = (function () {
                         },
 
                         function (callbackWhilst) {
-                            var filter = Sparql_common.setFilter("s", currentClasses, null, {values: true});
+                            var filter = Sparql_common.setFilter("s", currentClasses, null, { values: true });
                             var strFrom = Sparql_common.getFromStr(sourceLabel, null, null, options);
                             var query =
                                 //  "PREFIX dexp: <http://totalenergies/resources/tsf/ontology/dexpi-process/specific/>\n" +
@@ -75,12 +75,12 @@ var SubGraph = (function () {
 
                                     if (item.type.value.endsWith("Class")) {
                                         if (!allClasses[item.s.value]) {
-                                            allClasses[item.s.value] = {ancestors: [], level: level};
+                                            allClasses[item.s.value] = { ancestors: [], level: level };
                                             currentClasses.push(item.s.value);
                                         }
                                         if (!allClasses[item.o.value]) {
                                             currentClasses.push(item.o.value);
-                                            allClasses[item.o.value] = {ancestors: [], level: level};
+                                            allClasses[item.o.value] = { ancestors: [], level: level };
                                         }
                                         if (allClasses[item.s.value].ancestors.indexOf(item.o.value) < 0) {
                                             allClasses[item.s.value].ancestors.push(item.o.value);
@@ -110,12 +110,12 @@ var SubGraph = (function () {
 
                                         if (item.targetClass) {
                                             if (!allClasses[item.targetClass.value]) {
-                                                allClasses[item.targetClass.value] = {ancestors: [], level: level};
+                                                allClasses[item.targetClass.value] = { ancestors: [], level: level };
                                                 currentClasses.push(item.targetClass.value);
                                             }
                                         }
                                         if (obj.property == "http://totalenergies/resources/tsf/ontology/dexpi-process/generic/hasPortIn") {
-                                            var x = 3
+                                            var x = 3;
                                         }
                                         if (!allRestrictions[item.s.value][obj.property]) {
                                             allRestrictions[item.s.value][obj.property] = [];
@@ -161,29 +161,27 @@ var SubGraph = (function () {
                         return callbackSeries();
                     });
                 },
-//delete targetClass that are superClassOf other previous targetClass for this property
+                //delete targetClass that are superClassOf other previous targetClass for this property
                 function (callbackSeries) {
                     for (var classUri in allRestrictions) {
                         for (var key in allRestrictions[classUri]) {
-var props=allRestrictions[classUri][key]
+                            var props = allRestrictions[classUri][key];
 
-                            var previousClass = null
+                            var previousClass = null;
                             props.forEach(function (item, index) {
-                                var classObj = allClasses[item.targetClass]
+                                var classObj = allClasses[item.targetClass];
                                 if (classObj.ancestors.indexOf(previousClass) > -1) {
-                                    props.slice(index, 1)
+                                    props.slice(index, 1);
                                 }
-                                previousClass = item.targetClass
-
-
-                            })
+                                previousClass = item.targetClass;
+                            });
                         }
                     }
                     return callbackSeries();
-                }
+                },
             ],
             function (err) {
-                return callback(err, {classes: allClasses, restrictions: allRestrictions});
+                return callback(err, { classes: allClasses, restrictions: allRestrictions });
             },
         );
     };
@@ -250,14 +248,14 @@ var props=allRestrictions[classUri][key]
         function getCardinalityRange(restrictionTarget) {
             var str = restrictionTarget.cardinalityType;
             if (!str) {
-                return {min: 1, max: 1};
+                return { min: 1, max: 1 };
             }
             str = restrictionTarget.cardinalityValue.substring(0, 1);
             var value = parseInt(str);
 
             // to be refined later
             if (restrictionTarget.cardinalityType.endsWith("ardinality")) {
-                return {min: value, max: value};
+                return { min: value, max: value };
             }
         }
 
@@ -326,7 +324,7 @@ var props=allRestrictions[classUri][key]
                 }
             }
 
-            return callback(null, {triples: triples, classes: result.classes});
+            return callback(null, { triples: triples, classes: result.classes });
         });
     };
 
@@ -363,7 +361,7 @@ var props=allRestrictions[classUri][key]
 
                 var classRestrictions = restrictionsMap[classUri2];
                 var shaclProperties = [];
-                var triples = []
+                var triples = [];
                 if (classRestrictions) {
                     for (var property in classRestrictions) {
                         classRestrictions[property].forEach(function (restriction) {
@@ -373,7 +371,7 @@ var props=allRestrictions[classUri][key]
 
                             var propStr = restriction.property;
                             var rangeStr = restriction.targetClass;
-                            triples.push("sh:path> " + propStr)
+                            triples.push("sh:path> " + propStr);
                             //  var property = " sh:path " + propStr + " ;\n";
 
                             //  "        sh:maxCount " + count + " ;" +
@@ -436,9 +434,7 @@ var props=allRestrictions[classUri][key]
                 var shaclProperties = {};
                 if (classRestrictions) {
                     for (var propertyUri in classRestrictions) {
-                        shaclProperties[propertyUri]=[]
-
-
+                        shaclProperties[propertyUri] = [];
 
                         classRestrictions[propertyUri].forEach(function (restriction) {
                             if (!restriction.property || !restriction.targetClass) {
@@ -483,7 +479,7 @@ var props=allRestrictions[classUri][key]
                     if (data.result && data.result.indexOf("Error") > -1) {
                         return callback(data.result);
                     }
-                    return callback(null, {triples: data.triples, shacl: allSahcls, classesMap: classesMap});
+                    return callback(null, { triples: data.triples, shacl: allSahcls, classesMap: classesMap });
                     //  callback(null, data);
                 },
                 error(err) {
@@ -579,9 +575,7 @@ var props=allRestrictions[classUri][key]
         });
     };
 
-    self.validateShalcRules = function (sourceLabel, processClass, options, callback) {
-
-    };
+    self.validateShalcRules = function (sourceLabel, processClass, options, callback) {};
 
     self.getSubGraphVisjsData = function (sourceLabel, processClass, options, callback) {
         self.graphDiv = options.graphDiv;
@@ -613,7 +607,7 @@ var props=allRestrictions[classUri][key]
                 }
             });
 
-            var visjsData = {nodes: [], edges: []};
+            var visjsData = { nodes: [], edges: [] };
             var uniqueIds = {};
 
             var getLevel = function (uri) {
@@ -660,7 +654,7 @@ var props=allRestrictions[classUri][key]
                 var borderWidth = null;
                 var color = getNodeColor(triple.subject);
                 if (triple.subject.startsWith(processClass)) {
-                    font = {size: 18, bold: {size: 18}};
+                    font = { size: 18, bold: { size: 18 } };
                     borderWidth = 5;
                     color = "#ddd";
                 }
@@ -705,7 +699,7 @@ var props=allRestrictions[classUri][key]
                     from: triple.subject,
                     to: triple.object,
                     label: Sparql_common.getLabelFromURI(triple.predicate),
-                    arrows: {to: true},
+                    arrows: { to: true },
                 });
             });
 
@@ -734,16 +728,15 @@ var props=allRestrictions[classUri][key]
 
             var nodeSpacing = 150;
             var levelSpacing = 30;
-            var position = options.position || {x: 0, y: 0};
+            var position = options.position || { x: 0, y: 0 };
 
             //   self.setHierachicalLayout(visjsData, position, nodeSpacing, levelSpacing)
 
             if (callback) {
-                return callback(null, {visjsData: visjsData, graphOptions: graphOptions});
+                return callback(null, { visjsData: visjsData, graphOptions: graphOptions });
             } else {
                 self.visjsGraph = new VisjsGraphClass(options.graphDiv, visjsData, graphOptions);
-                self.visjsGraph.draw(function () {
-                });
+                self.visjsGraph.draw(function () {});
             }
         });
         return;
@@ -802,7 +795,7 @@ var props=allRestrictions[classUri][key]
                 }
                 node.x = parentNodeX + nodeSpacing * index; //- ((nodes.length * nodeSpacing) / 2)
                 node.y = topPosition.y + levelSpacing * level;
-                node.fixed = {x: true, y: true};
+                node.fixed = { x: true, y: true };
                 node.group = groupId;
             });
         }

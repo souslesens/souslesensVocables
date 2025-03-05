@@ -276,8 +276,6 @@ var SubGraph = (function () {
         );
     };
 
-
-
     return self;
 })();
 

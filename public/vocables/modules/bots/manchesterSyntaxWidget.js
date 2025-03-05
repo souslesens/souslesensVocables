@@ -7,7 +7,7 @@ var ManchesterSyntaxWidget = (function () {
     self.init = function (divId, sourceLabel, specificKeywordsMap, basicVocabularies, callback) {
         //  $("#"+divId).before(self.getCss(self.getCss()))
         $("#" + divId).html(self.getHtml());
-        $("#bot_input").focus();
+        $("#bot_input") .trigger( "focus" );
         $("#bot_resourcesProposalSelect").css("display", "none");
 
         self.initKeywords(sourceLabel, specificKeywordsMap, basicVocabularies, callback);
@@ -115,7 +115,7 @@ var ManchesterSyntaxWidget = (function () {
         html += "<span>&nbsp;</span>";
         $(html).insertBefore("#bot_inputContainer");
         $("#bot_input").val("");
-        $("#bot_input").focus();
+        $("#bot_input") .trigger( "focus" );
 
         return;
     };

@@ -1,4 +1,4 @@
-var _botEngine = (function () {
+const botEngineClass = function () {
     var self = {};
     self.firstLoad = true;
     self.lastFilterListStr = "";
@@ -6,7 +6,6 @@ var _botEngine = (function () {
         if (!options) {
             options = {};
         }
-        self.options=options
         self.currentBot = botModule;
         self.currentObj = initialWorkflow;
         self.initialWorkflow = initialWorkflow;
@@ -19,6 +18,19 @@ var _botEngine = (function () {
         // Step is the indexes when currentBot.nextStep is a function when the choice is let to the user
         self.history.step = [];
         self.currentList = [];
+
+        this.currentBot = botModule;
+        this.currentObj = initialWorkflow;
+        this.initialWorkflow = initialWorkflow;
+        this.history = {};
+        this.history.workflowObjects = [];
+        this.history.returnValues = [];
+
+        this.history.VarFilling = {};
+        this.history.currentIndex = -1;
+        // Step is the indexes when currentBot.nextStep is a function when the choice is let to the user
+        this.history.step = [];
+        this.currentList = [];
 
         var divId;
         if (options.divId) {
@@ -41,28 +53,26 @@ var _botEngine = (function () {
                 $("#KGcreatorBot_exportToGraph").css("display", "none");
             }
 
-            if(!options.divId) {
-                if (!self.firstLoad) {
-                    $("#BotUpperButtons").remove();
-                }
-                $("#botFilterProposalInput").on("keyup", self.filterList);
-                self.firstLoad = false;
-                $("#BotUpperButtons").insertAfter($("#botPanel").parent().find(".ui-dialog-titlebar-close"));
+            if (!self.firstLoad) {
+                $("#BotUpperButtons").remove();
+            }
+            $("#botFilterProposalInput").on("keyup", self.filterList);
+            self.firstLoad = false;
+            $("#BotUpperButtons").insertAfter($("#botPanel").parent().find(".ui-dialog-titlebar-close"));
 
-                if (divId != "botDiv") {
-                    var dialogWindow = $("#" + divId)
-                        .parents()
-                        .filter('div[role="dialog"]')[0];
-                    var titleDialog = $(dialogWindow).find(".ui-dialog-titlebar-close");
-                    var idDialog = "#" + $(dialogWindow).attr("aria-describedby");
-                    $("#BotUpperButtons").insertAfter(titleDialog);
-                    $(dialogWindow).on("dialogclose", function (event) {
-                        $("#" + self.divId).empty();
-                        $(dialogWindow).find("#resetButtonBot").remove();
-                        $(dialogWindow).find("#previousButtonBot").remove();
-                        self.firstLoad = true;
-                    });
-                }
+            if (divId != "botDiv") {
+                var dialogWindow = $("#" + divId)
+                    .parents()
+                    .filter('div[role="dialog"]')[0];
+                var titleDialog = $(dialogWindow).find(".ui-dialog-titlebar-close");
+                var idDialog = "#" + $(dialogWindow).attr("aria-describedby");
+                $("#BotUpperButtons").insertAfter(titleDialog);
+                $(dialogWindow).on("dialogclose", function (event) {
+                    $("#" + self.divId).empty();
+                    $(dialogWindow).find("#resetButtonBot").remove();
+                    $(dialogWindow).find("#previousButtonBot").remove();
+                    self.firstLoad = true;
+                });
             }
             //UI.PopUpOnHoverButtons();
             if (callback) {
@@ -86,7 +96,7 @@ var _botEngine = (function () {
         }
 
         var key = keys[0];
-        console.log(key)
+
         if (key == "_OR") {
             // alternative
             var alternatives = self.currentObj[key];
@@ -136,7 +146,6 @@ var _botEngine = (function () {
             if (!fn || typeof fn !== "function") {
                 return alert("function not defined :" + key);
             }
-
             self.currentObj = self.currentObj[key];
             self.setStepMessage(key);
             fn();
@@ -274,7 +283,7 @@ var _botEngine = (function () {
         if (self.startParams && self.startParams.length > 0) {
             self.currentBot.start(...self.startParams);
         } else {
-            self.currentBot.start(self.options);
+            self.currentBot.start();
         }
     };
 
@@ -371,8 +380,7 @@ var _botEngine = (function () {
         if (options && options.datePicker) {
             //DateWidget.unsetDatePickerOnInput("botPromptInput");
             DateWidget.setDatePickerOnInput("botPromptInput", null, function (date) {
-                _botEngine.currentBot.params[varToFill] = date.getTime();
-                $("#botPromptInput").trigger( "focus" );
+                self.currentBot.params[varToFill] = date.getTime();
 
                 // self.nextStep();
             });
@@ -386,12 +394,12 @@ var _botEngine = (function () {
                 var value = $(this).val();
                 var varToFill = $("#botVarToFill").val();
                 if (!varToFill) {
-                    return _botEngine.previousStep();
+                    return this.previousStep();
                 }
                 //Il faut attribuer l'objet aux bon numéro de currentObject
                 self.history.VarFilling[self.history.currentIndex] = { VarFilled: varToFill, valueFilled: value.trim() };
 
-                _botEngine.currentBot.params[varToFill] = value.trim();
+                self.currentBot.params[varToFill] = value.trim();
                 self.writeCompletedHtml(value);
                 $("#botPromptInput").off();
                 if (callback) {
@@ -561,7 +569,7 @@ var _botEngine = (function () {
     };
 
     return self;
-})();
-export default _botEngine;
+};
+export default botEngineClass;
 
-window._botEngine = _botEngine;
+window.botEngineClass = botEngineClass;

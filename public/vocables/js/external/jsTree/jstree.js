@@ -2636,7 +2636,7 @@
 				if(f) {
 					t = this.element[0].scrollTop;
 					l = this.element[0].scrollLeft;
-					node.childNodes[1].focus();
+					node.childNodes[1] .focus();
 					this.element[0].scrollTop = t;
 					this.element[0].scrollLeft = l;
 				}

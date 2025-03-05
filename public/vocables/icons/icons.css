@@ -128,6 +128,13 @@
     width: 40px;
     margin-top: 10px;
 }
+.queryIcon {
+    background-image: url(@queryIcon);
+    background-repeat: no-repeat;
+    height: 50px;
+    width: 40px;
+    margin-top: 10px;
+}
 .containersIcon {
     background-image: url(@containersIcon);
     background-repeat: no-repeat;

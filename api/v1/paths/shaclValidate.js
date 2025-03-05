@@ -1,4 +1,3 @@
-
 const { processResponse } = require("./utils");
 const rdf = require("../../../bin/RDF_IO..js");
 const { NamedNode, BlankNode, Literal, Graph } = rdf;
@@ -42,12 +41,10 @@ module.exports = function () {
             var triples = req.body.triples;
             var shapes = req.body.shapes;
 
-           rdf.triples2turtle(triples, function(err, turtle){
-
-                const report = Validator.validateTriples(shapes,turtle);
-                return processResponse(res, null, {output:report});
+            rdf.triples2turtle(triples, function (err, turtle) {
+                const report = Validator.validateTriples(shapes, turtle);
+                return processResponse(res, null, { output: report });
             });
-
         } catch (e) {
             return processResponse(res, e);
         }

@@ -128,7 +128,6 @@ var NodeInfosWidget = (function () {
                             $(".nodeInfosWidget_tabDiv").removeClass("nodesInfos-selectedTab");
 
                             setTimeout(function () {
-
                                 $("[aria-selected='true']").addClass("nodesInfos-selectedTab");
                                 if (ui.newPanel.selector == "#nodeInfosWidget_AxiomsTabDiv") {
                                     var source = self.currentSource;
@@ -136,10 +135,8 @@ var NodeInfosWidget = (function () {
                                     NodeInfosAxioms.init(source, self.currentNode, "nodeInfosWidget_AxiomsTabDiv");
                                 }
                                 if (ui.newPanel.selector == "#nodeInfosWidget_relationsDiv") {
-                                    $("#nodeInfosWidget_relationsDiv").load("modules/uiWidgets/html/nodeRelationsWidget.html", function () {
-                                })
-                                    }
-
+                                    $("#nodeInfosWidget_relationsDiv").load("modules/uiWidgets/html/nodeRelationsWidget.html", function () {});
+                                }
                             }, 100);
                         },
                     });
@@ -155,8 +152,6 @@ var NodeInfosWidget = (function () {
             $("[aria-selected='true']").addClass("nodesInfos-selectedTab");
             callback();
         });
-
-
     };
 
     self.drawAllInfos = function (sourceLabel, nodeId, options, callback) {
@@ -1439,7 +1434,7 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
 
             $("#editPredicate_objectValue").val(PredicatesSelectorWidget.currentEditingItem.item.value.value);
             $("#editPredicate_propertyValue").val(PredicatesSelectorWidget.currentEditingItem.item.prop.value);
-            $("#editPredicate_objectValue").focus();
+            $("#editPredicate_objectValue") .trigger( "focus" );
             $("#editPredicate_savePredicateButton").click(function () {
                 PredicatesSelectorWidget.storeRecentPredicates();
 
@@ -1559,7 +1554,7 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
 
     self.setLargerObjectTextArea = function () {
         $("#editPredicate_objectValue").show();
-        $("#editPredicate_objectValue").focus();
+        $("#editPredicate_objectValue") .trigger( "focus" );
         $("#editPredicate_largerTextButton").hide();
         //  $("#editPredicate_objectValue").hide();
         $("#editPredicate_objectValue").css("width", "700px");

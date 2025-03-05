@@ -5412,7 +5412,7 @@ jQuery.event = {
 			trigger: function() {
 				if ( this !== safeActiveElement() && this.focus ) {
 					try {
-						this.focus();
+						this .focus();
 						return false;
 					} catch ( e ) {
 

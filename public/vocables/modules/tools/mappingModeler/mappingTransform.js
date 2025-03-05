@@ -285,6 +285,8 @@ var MappingTransform = (function () {
 
     };
 
+
+
     /**
      * Adds restrictions to the mappings if both subject and object are classes and are different from each other.
      * This function checks if the subject and object in a mapping are RDF classes, and if they are, it marks the mapping as a restriction.
@@ -328,7 +330,7 @@ var MappingTransform = (function () {
      */
     self.copyKGcreatorMappings = function () {
         var text = $("#mappingModeler_infosTA").val();
-        $("#mappingModeler_infosTA").focus();
+        $("#mappingModeler_infosTA") .trigger( "focus" );
         common.copyTextToClipboard(text);  
     };
     self.getFilteredMappings=function(checkedNodes){

@@ -1247,7 +1247,7 @@ RegExp.escape= function(s) {
     if (marks.length) {
       // Kludge to work around the IE bug from issue #1193, where text
       // input stops going to the textare whever this fires.
-      if (ie_lt8 && cm.state.focused) cm.focus();
+      if (ie_lt8 && cm.state.focused) cm .focus();
 
       var clear = function() {
         cm.operation(function() {
@@ -20197,7 +20197,7 @@ function rgbaStr (rgba) {
 				attach( $(host).empty(), buttons );
 	
 				if ( activeEl !== undefined ) {
-					$(host).find( '[data-dt-idx='+activeEl+']' ).focus();
+					$(host).find( '[data-dt-idx='+activeEl+']' ) .focus();
 				}
 			}
 		}
@@ -25827,7 +25827,7 @@ var Control = Class.extend({
 	_refocusOnMap: function (e) {
 		// if map exists and event is not a keyboard event
 		if (this._map && e && e.screenX > 0 && e.screenY > 0) {
-			this._map.getContainer().focus();
+			this._map.getContainer() .focus();
 		}
 	}
 });
@@ -34246,7 +34246,7 @@ var Keyboard = Handler.extend({
 		    top = body.scrollTop || docEl.scrollTop,
 		    left = body.scrollLeft || docEl.scrollLeft;
 
-		this._map._container.focus();
+		this._map._container .focus();
 
 		window.scrollTo(left, top);
 	},

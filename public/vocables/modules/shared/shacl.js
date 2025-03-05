@@ -48,25 +48,23 @@ var Shacl = (function () {
         var shacl = "";
         shacl += sourceClassUri + "Shape" + "\n" + "    a sh:NodeShape ;\n";
         shacl += "    sh:targetClass  " + Shacl.uriToPrefixedUri(sourceClassUri) + ";\n";
-        shacl +="sh:xone(\n"
+        shacl += "sh:xone(\n";
         for (var key in shaclProperties) {
-
             shaclProperties[key].forEach(function (property, index) {
-                shacl += "[\n"
+                shacl += "[\n";
                 shacl += "  sh:property [\n" + property + "]";
                 /*  if (targetClassUri) {
                       shacl += "    sh:class  " + Shacl.uriToPrefixedUri(targetClassUri) + ";\n";
                   }*/
-              /*  if (index == shaclProperties.length - 1) {
+                /*  if (index == shaclProperties.length - 1) {
                     shacl += ".\n";
                 } else {
                     shacl += ";\n";
                 }*/
-                shacl += "] \n"
+                shacl += "] \n";
             });
-
         }
-        shacl +=").\n"
+        shacl += ").\n";
         return shacl;
     };
 

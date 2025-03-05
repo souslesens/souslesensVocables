@@ -1,19 +1,18 @@
-<div style="width: 500px; height: 500px">
-    <div id="botTA" contenteditable="false" style="display: flex; flex-direction: column" class="w3-display-container">
-        <div id="bot_input" style="display: flex; flex-direction: column; border: none"></div>
-    </div>
-    <input id="botPromptInput" autocomplete="off" class="w3-input w3-border w3-padding" style="width: 80%; margin-left: 10px; display: none" />
+<div id="botContainerDiv" style="width: 400px; max-height: 700px">
+  
+
     <input type="hidden" id="botVarToFill" />
 
     <div id="BotUpperButtons" style="display: flex; margin-top: 29px; float: right; margin-right: 35px">
-        <button id="displayGraphBot" class="w3-button slsv-invisible-button" onclick="_botEngine.exportToGraph()" style="display: none" title="Graph">G</button>
+      <!--  <button id="displayGraphBot" class="w3-button slsv-invisible-button" onclick="_botEngine.exportToGraph()" style="display: none" title="Graph">G</button>-->
         <button id="previousButtonBot" class="w3-button slsv-invisible-button previousIcon" onclick="_botEngine.previousStep()" title="Previous"></button>
         <button id="resetButtonBot" class="w3-button slsv-invisible-button resetIcon" onclick="_botEngine.reset()" title="Reset"></button>
-        <button id="KGcreatorBot_exportToGraph" onclick="_botEngine.exportToGraph()">Graph</button>
+      <!--  <button id="KGcreatorBot_exportToGraph" onclick="_botEngine.exportToGraph()">Graph</button>-->
     </div>
     <div style="display: flex; flex-direction: column; justify-content: center; width: 100%; margin-bottom: 20px; margin-left: 10px">
         <!--<div id="botFilterProposalDiv">filter <input id="botFilterProposalInput" /></div>-->
-
+        <input id="botPromptInput" autocomplete="off" class="w3-input w3-border w3-padding" style="width: 80%; margin-left: 10px; display: none" />
+        <div id="botMessage" style="display: flex; flex-direction: column; border: none;color:#5f3f3f"></div>
         <div id="botFilterProposalDiv" class="input-group mb-3" style="width: 100%; margin-top: 20px">
             <div class="input-group-prepend">
                 <input
@@ -29,5 +28,9 @@
         </div>
 
         <select id="bot_resourcesProposalSelect" size="10"></select>
+    </div>
+
+    <div id="botTA" contenteditable="false" style="display: flex; flex-direction: column;max-height: 250px; overflow: auto;" class="w3-display-container">
+        <div id="bot_input" style="display: flex; flex-direction: column; border: none;"></div>
     </div>
 </div>

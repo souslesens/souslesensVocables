@@ -29,7 +29,7 @@ var Lineage_createResource = (function () {
             $("#LineagePopup").dialog("open");
             $("#editPredicate_mainDiv").remove();
             //AxiomEditor.init(Lineage_sources.activeSource)
-            // $("#lineageCreateResource_labelInput").focus();
+            // $("#lineageCreateResource_labelInput") .trigger( "focus" );
 
             PredicatesSelectorWidget.load("lineageCreateResource_objectDiv", self.currentSource, {}, function () {
                 $("#editPredicate_propertyDiv").css("display", "none");

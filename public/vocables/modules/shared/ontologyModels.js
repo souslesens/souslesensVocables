@@ -590,7 +590,7 @@ var OntologyModels = (function () {
             },
         });
     };
-    self.clearOntologyModelCache = function (source,callback) {
+    self.clearOntologyModelCache = function (source, callback) {
         const params = new URLSearchParams({
             source: source,
         });
@@ -602,18 +602,16 @@ var OntologyModels = (function () {
             success: function (data, _textStatus, _jqXHR) {
                 if (source) {
                     Config.ontologiesVocabularyModels[source] = null;
-                    OntologyModels.registerSourcesModel(source,{noCache:true},function(err,result){
-                        callback(null,"DONE")
+                    OntologyModels.registerSourcesModel(source, { noCache: true }, function (err, result) {
+                        callback(null, "DONE");
                     });
                 } else {
                     Config.ontologiesVocabularyModels = {};
-                    callback(null,"DONE")
+                    callback(null, "DONE");
                 }
-
-
             },
             error: function (err) {
-               callback(err);
+                callback(err);
             },
         });
     };
@@ -1283,10 +1281,16 @@ var OntologyModels = (function () {
         if (Config.sources[source].imports) {
             sources = sources.concat(Config.sources[source].imports);
         }
-        for (var vocab in Config.basicVocabularies) {
-            sources.push(vocab);
+        if (!options.excludeBasicVocabularies) {
+            for (var vocab in Config.basicVocabularies) {
+                sources.push(vocab);
+            }
         }
         var nonObjectPropertiesmap = {};
+        var filter = "";
+        if (options.filter) {
+            filter = options.filter;
+        }
         UI.message("loading KG nonObjectProperties", false, true);
         async.eachSeries(
             sources,
@@ -1307,6 +1311,7 @@ var OntologyModels = (function () {
                     "   ?s ?prop ?o.\n" +
                     "      bind ( datatype(?o) as ?datatype )\n" +
                     "    ?prop rdf:type ?type. filter (?type in (<http://www.w3.org/2002/07/owl#DatatypeProperty>,rdf:Property,owl:AnnotationProperty)&& ?prop not in (rdf:type,<http://purl.org/dc/terms/created>,<http://purl.org/dc/terms/creator>,<http://purl.org/dc/terms/source>))\n" +
+                    filter +
                     "}\n" +
                     "  UNION\n" +
                     "  {\n" +

@@ -3,7 +3,7 @@ import { IconButton, InputAdornment, TextField, TextFieldProps } from "@mui/mate
 
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 
-export const PasswordField = ({ disabled, error, helperText, id, label, onChange, required, value }: TextFieldProps) => {
+export const PasswordField = ({ disabled, error, helperText, id, label, onChange, required, value, InputProps, ...rest }: TextFieldProps) => {
     const [display, setDisplay] = useState(false);
 
     const handleClick = () => setDisplay(!display);
@@ -23,6 +23,7 @@ export const PasswordField = ({ disabled, error, helperText, id, label, onChange
                         </IconButton>
                     </InputAdornment>
                 ),
+                ...InputProps,
             }}
             id={id}
             label={label}
@@ -32,6 +33,7 @@ export const PasswordField = ({ disabled, error, helperText, id, label, onChange
             type={display ? "text" : "password"}
             value={value}
             helperText={helperText}
+            {...rest}
         />
     );
 };

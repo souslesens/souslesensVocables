@@ -5,7 +5,6 @@ create table if not exists user_data(
        data_label       text default '',
        data_comment     text default '',
        data_group       text default '',
-       data_content     json default '{}'::json,
        is_shared        boolean default false,
        shared_profiles  text[],
        shared_users     text[],

@@ -1,10 +1,26 @@
 import common from "../../shared/common.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
 
+/**
+ * Module for managing individual aggregate queries in the KGquery tool.
+ * Provides functionality to create and configure aggregate functions on query variables.
+ * @module IndividualAggregateWidget
+ */
 var IndividualAggregateWidget = (function () {
     var self = {};
     self.groupFunctions = ["COUNT", "SUM", "MAX", "MIN", "AVG", "concat"];
 
+    /**
+     * Displays the aggregate configuration dialog.
+     * @function
+     * @name showDialog
+     * @memberof IndividualAggregateWidget
+     * @param {string} [divId="smallDialogDiv"] - The ID of the dialog container element
+     * @param {Function} loadClassesFn - Function to load available classes for aggregation
+     * @param {Function} validateFn - Function to validate and process the aggregate configuration
+     * @param {string} [message] - Optional message to display in the dialog
+     * @returns {void}
+     */
     self.showDialog = function (divId, loadClassesFn, validateFn, message) {
         self.validateFn = validateFn;
         self.functionVarClasses = [];
@@ -55,6 +71,15 @@ var IndividualAggregateWidget = (function () {
         });
     };
 
+    /**
+     * Handles selection of group functions.
+     * Updates available variables based on the selected function.
+     * @function
+     * @name onGroupFunctionSelect
+     * @memberof IndividualAggregateWidget
+     * @param {string} fn - The selected group function
+     * @returns {void}
+     */
     self.onGroupFunctionSelect = function (fn) {
         var allVars = Object.keys(self.groupByClassesMap).concat(Object.keys(self.functionVarClassesMap));
         if (fn == "concat") {
@@ -66,6 +91,14 @@ var IndividualAggregateWidget = (function () {
         }
     };
 
+    /**
+     * Handles the OK button click in the dialog.
+     * Processes the selected aggregation settings and calls the validation function.
+     * @function
+     * @name onOKbutton
+     * @memberof IndividualAggregateWidget
+     * @returns {void}
+     */
     self.onOKbutton = function () {
         var groupByObj = self.groupByClassesMap[$("#individualAggregate_groupBySelect").val()];
         var groupFunctions = $("#individualAggregate_groupFunctionSelect").val();

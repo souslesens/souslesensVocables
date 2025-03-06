@@ -23,15 +23,41 @@ import KGquery_filter from "./KGquery_filter.js";
 
 import Containers_widget from "../containers/containers_widget.js";
 
+/**
+ * Main module for the KGquery tool.
+ * Manages query construction, execution, and result handling.
+ * @module KGquery
+ */
 var KGquery = (function () {
     var self = {};
-    self.querySets = { sets: [], groups: [], currentIndex: -1 };
+
+    /**
+     * Maximum number of optional predicates allowed in a query
+     * @constant {number}
+     */
+    self.maxOptionalPredicatesInQuery = 10;
+
+    /**
+     * Current query configuration and state
+     * @property {Object} querySets - Collection of query sets
+     * @property {string} currentSource - Current data source being queried
+     * @property {Object} currentQuerySet - Currently active query set
+     * @property {Object} currentQueryElement - Currently active query element
+     * @property {string} currentSparqlQuery - Current SPARQL query string
+     */
+    self.querySets = {
+        sets: [],
+    };
+    self.currentSource = null;
+    self.currentQuerySet = null;
+    self.currentQueryElement = null;
+    self.currentSparqlQuery = null;
+
     self.divsMap = {};
     self.classeMap = {};
     self.allPathEdges = {};
     self.isLoaded = false;
     self.maxResultSizeforLineageViz = 3000;
-    self.maxOptionalPredicatesInQuery = 10;
     self.pathEdgesColors = ["green", "blue", "orange", "grey", "yellow"];
 
     self.onLoaded = function () {
@@ -59,11 +85,23 @@ var KGquery = (function () {
         $("#lateralPanelDiv").empty();
     };
 
+    /**
+     * Initializes the query interface.
+     * @function
+     * @name init
+     * @memberof KGquery
+     */
     self.init = function () {
         KGquery_graph.drawVisjsModel("saved");
         SavedQueriesWidget.showDialog("STORED_KGQUERY_QUERIES", "KGquery_myQueriesDiv", self.currentSource, null, KGquery_myQueries.save, KGquery_myQueries.load);
     };
 
+    /**
+     * Initializes the output type selector with available tools.
+     * @function
+     * @name initOutputType
+     * @memberof KGquery
+     */
     self.initOutputType = function () {
         const KGquery_outputTypeSelectNode = $("#KGquery_outputTypeSelect");
         for (const toolName in Config.userTools.KGquery.toTools) {
@@ -121,6 +159,14 @@ var KGquery = (function () {
         return querySet;
     };
 
+    /**
+     * Adds a new query element to the specified query set.
+     * @function
+     * @name addQueryElementToQuerySet
+     * @memberof KGquery
+     * @param {Object} querySet - The query set to add the element to
+     * @returns {Object} The newly created query element
+     */
     self.addQueryElementToQuerySet = function (querySet) {
         //  $("#KGquery_SetsControlsDiv").show();
         var queryElementDivId = KGquery_controlPanel.addQueryElementToCurrentSet(querySet.divId);
@@ -141,6 +187,15 @@ var KGquery = (function () {
         return queryElement;
     };
 
+    /**
+     * Adds a node to a query element in a specific role.
+     * @function
+     * @name addNodeToQueryElement
+     * @memberof KGquery
+     * @param {Object} queryElement - The query element to add the node to
+     * @param {Object} node - The node to add
+     * @param {string} role - The role of the node ('fromNode' or 'toNode')
+     */
     self.addNodeToQueryElement = function (queryElement, node, role) {
         self.classeMap[node.id] = node;
         queryElement[role] = node;
@@ -156,12 +211,20 @@ var KGquery = (function () {
         self.divsMap[nodeDivId] = node;
     };
 
-    self.addNode = function (selectedNode, nodeEvent, callback) {
-        if (!selectedNode) {
+    /**
+     * Adds a new node to the current query.
+     * @function
+     * @name addNode
+     * @param {Object} node - The node to add
+     * @param {Object} [event] - Optional event data
+     * @param {Function} [callback] - Optional callback function
+     */
+    self.addNode = function (node, event, callback) {
+        if (!node) {
             return;
         }
 
-        var node = JSON.parse(JSON.stringify(selectedNode));
+        var node = JSON.parse(JSON.stringify(node));
 
         /* if existing path in queryFlement a new one is created
   with a from Node that is the nearest node from the existing Node of all previous element in the set*/
@@ -230,6 +293,15 @@ var KGquery = (function () {
         }
     };
 
+    /**
+     * Adds edge nodes to the current query set.
+     * @function
+     * @name addEdgeNodes
+     * @memberof KGquery
+     * @param {Object} fromNode - Source node of the edge
+     * @param {Object} toNode - Target node of the edge
+     * @param {Object} edge - Edge data connecting the nodes
+     */
     self.addEdgeNodes = function (fromNode, toNode, edge) {
         if (!self.currentQuerySet) {
             self.currentQuerySet = self.addQuerySet();
@@ -246,7 +318,14 @@ var KGquery = (function () {
         self.addQueryElementToQuerySet(self.currentQuerySet);
     };
 
-    self.addEdge = function (edge, evt) {
+    /**
+     * Adds an edge between nodes in the query.
+     * @function
+     * @name addEdge
+     * @param {Object} edge - The edge to add
+     * @param {Object} event - Event data
+     */
+    self.addEdge = function (edge, event) {
         var fromNode = KGquery_graph.KGqueryGraph.data.nodes.get(edge.from);
         fromNode = JSON.parse(JSON.stringify(fromNode));
 
@@ -358,6 +437,17 @@ var KGquery = (function () {
         });
     };
 
+    /**
+     * Executes the current path query.
+     * Processes the query sets and generates SPARQL query for execution.
+     * @function
+     * @name execPathQuery
+     * @memberof KGquery
+     * @param {Object} options - Query execution options
+     * @param {boolean} [options.dontExecute] - If true, returns query without executing
+     * @param {Function} callback - Callback function called with (error, result)
+     * @returns {void}
+     */
     self.execPathQuery = function (options, callback) {
         var optionalPredicatesSparql = "";
         var containerFiltersSparql = "";
@@ -637,6 +727,13 @@ var KGquery = (function () {
         });
     };
 
+    /**
+     * Displays query results in a table format.
+     * @function
+     * @name queryResultToTable
+     * @memberof KGquery
+     * @param {Object} result - Query result data to display
+     */
     self.queryResultToTable = function (result) {
         var data = result.results.bindings;
         //prepare columns
@@ -721,6 +818,11 @@ var KGquery = (function () {
         });
     };
 
+    /**
+     * Clears all query data and resets the interface.
+     * @function
+     * @name clearAll
+     */
     self.clearAll = function (exceptSetQueries) {
         self.querySets.sets.forEach(function (querySet) {
             querySet.classFiltersMap = {};
@@ -744,12 +846,26 @@ var KGquery = (function () {
         }
     };
 
+    /**
+     * Gets a variable name for a node.
+     * @function
+     * @name getVarName
+     * @param {Object} node - The node to get variable name for
+     * @param {boolean} [withoutQuestionMark] - Whether to omit the question mark
+     * @returns {string} The variable name
+     */
     self.getVarName = function (node, withoutQuestionMark) {
         var varName = (withoutQuestionMark ? "" : "?") + Sparql_common.formatStringForTriple(node.alias || node.label || Sparql_common.getLabelFromURI(node.id), true);
 
         return varName;
     };
 
+    /**
+     * Gets all classes used in the current query paths.
+     * @function
+     * @name getAllQueryPathClasses
+     * @returns {Array} Array of class objects used in query paths
+     */
     self.getAllQueryPathClasses = function () {
         var classes = [];
         self.querySets.sets.forEach(function (querySet) {
@@ -761,6 +877,13 @@ var KGquery = (function () {
         return classes;
     };
 
+    /**
+     * Displays a message in the UI and controls the wait image.
+     * @function
+     * @name message
+     * @param {string} message - Message to display
+     * @param {boolean} [stopWaitImg] - If true, hides the wait image
+     */
     self.message = function (message, stopWaitImg) {
         $("#KGquery_messageDiv").html(message);
         if (stopWaitImg) {
@@ -780,22 +903,47 @@ var KGquery = (function () {
         }
     };
 
-    self.onBooleanOperatorChange = function (querySetDivId, value) {
-        self.divsMap[querySetDivId].booleanOperator = value;
+    /**
+     * Handles changes in boolean operators between query sets.
+     * @function
+     * @name onBooleanOperatorChange
+     * @param {string} querySetDivId - ID of the query set div
+     * @param {string} operator - New boolean operator value
+     */
+    self.onBooleanOperatorChange = function (querySetDivId, operator) {
+        self.divsMap[querySetDivId].booleanOperator = operator;
     };
 
+    /**
+     * Removes a query element from the interface.
+     * @function
+     * @name removeQueryElement
+     * @param {string} queryElementDivId - ID of the element to remove
+     */
     self.removeQueryElement = function (queryElementDivId) {
         $("#" + queryElementDivId).remove();
         var queryElement = self.divsMap[queryElementDivId];
         self.querySets.sets[queryElement.setIndex].elements.splice(queryElement.index, 1);
     };
 
-    self.removeSet = function (querySetDivId) {
-        $("#" + querySetDivId).remove();
-        var set = self.divsMap[querySetDivId];
+    /**
+     * Removes a query set from the interface.
+     * @function
+     * @name removeSet
+     * @param {string} setDivId - ID of the set to remove
+     */
+    self.removeSet = function (setDivId) {
+        $("#" + setDivId).remove();
+        var set = self.divsMap[setDivId];
         self.querySets.sets.splice(set.index, 1);
     };
 
+    /**
+     * Handles output type selection changes.
+     * @function
+     * @name onOutputTypeSelect
+     * @param {string} output - Selected output type
+     */
     self.onOutputTypeSelect = function (output) {
         if (output == "") {
             return;
@@ -807,9 +955,19 @@ var KGquery = (function () {
     self.addOutputType = function () {
         $("KGquery_outputTypeSelect");
     };
+    /**
+     * Initializes the "My Queries" interface.
+     * @function
+     * @name initMyQuery
+     */
     self.initMyQuery = function () {
         SavedQueriesWidget.showDialog("STORED_KGQUERY_QUERIES", "tabs_myQueries", KGquery.currentSource, null, KGquery_myQueries.save, KGquery_myQueries.load);
     };
+    /**
+     * Initializes the Query tab interface.
+     * @function
+     * @name initQuery
+     */
     self.initQuery = function () {
         if ($("#tabs_Query").children().length == 0) {
             $("#tabs_Query").load("./modules/tools/KGquery/html/KGqueryQueryTab.html", function () {
@@ -817,6 +975,11 @@ var KGquery = (function () {
             });
         }
     };
+    /**
+     * Initializes the Graph tab interface.
+     * @function
+     * @name initGraph
+     */
     self.initGraph = function () {
         if ($("#tabs_Graph").children().length == 0) {
             $("#tabs_Graph").load("./modules/tools/KGquery/html/KGqueryGraphTab.html", function () {
@@ -826,6 +989,11 @@ var KGquery = (function () {
         }
     };
 
+    /**
+     * Checks query requirements against SHACL constraints.
+     * @function
+     * @name checkRequirements
+     */
     self.checkRequirements = function () {
         KGquery.queryKG("shacl");
     };

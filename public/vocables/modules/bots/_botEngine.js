@@ -1,3 +1,8 @@
+/**
+ * Core engine for managing bot-based interactions in SousLeSens.
+ * Handles workflow execution, user interactions, and dialog management.
+ * @module _botEngine
+ */
 var _botEngine = (function () {
     var self = {};
     self.firstLoad = true;
@@ -66,6 +71,15 @@ var _botEngine = (function () {
         });
     };
 
+    /**
+     * Processes the next step in the bot workflow.
+     * @function
+     * @name nextStep
+     * @memberof _botEngine
+     * @param {*} returnValue - Value returned from the previous step
+     * @param {string} [varToFill] - Variable to fill with the return value
+     * @returns {void}
+     */
     self.nextStep = function (returnValue, varToFill) {
         $("#botFilterProposalDiv").hide();
         self.history.workflowObjects.push(JSON.parse(JSON.stringify(self.currentObj)));
@@ -137,6 +151,13 @@ var _botEngine = (function () {
         }
     };
 
+    /**
+     * Returns to the previous step in the workflow.
+     * @function
+     * @name previousStep
+     * @memberof _botEngine
+     * @returns {void}
+     */
     self.previousStep = function () {
         /*
         if (message) {
@@ -194,6 +215,14 @@ var _botEngine = (function () {
         }
     };
 
+    /**
+     * Ends the current bot workflow.
+     * @function
+     * @name end
+     * @memberof _botEngine
+     * @param {boolean} [dontCallBack] - If true, skips calling the callback function
+     * @returns {void}
+     */
     self.end = function (dontCallBack) {
         self.currentBot.params.queryText = self.getQueryText();
         self.closeDialog();
@@ -202,6 +231,13 @@ var _botEngine = (function () {
         }
     };
 
+    /**
+     * Closes the bot dialog.
+     * @function
+     * @name closeDialog
+     * @memberof _botEngine
+     * @returns {void}
+     */
     self.closeDialog = function () {
         if (self.divId) {
             /*  var dialogWindow = $("#" + self.divId)
@@ -214,6 +250,14 @@ var _botEngine = (function () {
         }
     };
 
+    /**
+     * Sets the message for the current workflow step.
+     * @function
+     * @name setStepMessage
+     * @memberof _botEngine
+     * @param {string} step - The current step identifier
+     * @returns {void}
+     */
     self.setStepMessage = function (step) {
         if (self.currentBot.functionTitles) {
             var message = self.currentBot.functionTitles[step];
@@ -228,15 +272,38 @@ var _botEngine = (function () {
         }
     };
 
+    /**
+     * Displays a message in the bot interface.
+     * @function
+     * @name message
+     * @memberof _botEngine
+     * @param {string} message - Message to display
+     * @returns {void}
+     */
     self.message = function (message) {
         $("#botMessage").html(message);
     };
 
+    /**
+     * Aborts the current workflow with an error message.
+     * @function
+     * @name abort
+     * @memberof _botEngine
+     * @param {string} message - Error message to display
+     * @returns {void}
+     */
     self.abort = function (message) {
         alert(message);
         self.close();
     };
 
+    /**
+     * Resets the bot to its initial state.
+     * @function
+     * @name reset
+     * @memberof _botEngine
+     * @returns {void}
+     */
     self.reset = function () {
         if (self.startParams && self.startParams.length > 0) {
             self.currentBot.start(...self.startParams);
@@ -245,10 +312,29 @@ var _botEngine = (function () {
         }
     };
 
+    /**
+     * Closes the bot panel.
+     * @function
+     * @name close
+     * @memberof _botEngine
+     * @returns {void}
+     */
     self.close = function () {
         $("#botPanel").css("display", "none");
     };
 
+    /**
+     * Shows a list of options for user selection.
+     * @function
+     * @name showList
+     * @memberof _botEngine
+     * @param {Array} values - Array of values to display
+     * @param {string} [varToFill] - Variable to fill with selected value
+     * @param {*} [returnValue] - Value to return on selection
+     * @param {boolean} [sort] - Whether to sort the values
+     * @param {Function} [callback] - Callback function called with selected value
+     * @returns {void}
+     */
     self.showList = function (values, varToFill, returnValue, sort, callback) {
         values = common.StringArrayToIdLabelObjectArray(values);
         if (sort) {
@@ -308,6 +394,14 @@ var _botEngine = (function () {
             self.nextStep(returnValue || selectedValue);
         });
     };
+    /**
+     * Filters the current list based on user input.
+     * @function
+     * @name filterList
+     * @memberof _botEngine
+     * @param {Event} evt - Event object containing filter input
+     * @returns {void}
+     */
     self.filterList = function (evt) {
         //var str = $(this).val();
         var str = $(evt.currentTarget).val();
@@ -332,6 +426,19 @@ var _botEngine = (function () {
         $("#botPanel").scrollTop($("#botPanel")[0].scrollHeight);
     };
 
+    /**
+     * Prompts for a value with optional date picker.
+     * @function
+     * @name promptValue
+     * @memberof _botEngine
+     * @param {string} message - Prompt message
+     * @param {string} varToFill - Variable to fill with input
+     * @param {string} [defaultValue] - Default value for the input
+     * @param {Object} [options] - Configuration options
+     * @param {boolean} [options.datePicker] - Whether to show date picker
+     * @param {Function} [callback] - Callback function called with input value
+     * @returns {void}
+     */
     self.promptValue = function (message, varToFill, defaultValue, options, callback) {
         $("#bot_resourcesProposalSelect").hide();
 
@@ -377,6 +484,16 @@ var _botEngine = (function () {
         }
     };
 
+    /**
+     * Writes completed HTML to the bot interface.
+     * @function
+     * @name writeCompletedHtml
+     * @memberof _botEngine
+     * @param {string} str - HTML string to write
+     * @param {Object} [options] - Display options
+     * @param {boolean} [options.question] - Whether this is a question message
+     * @returns {void}
+     */
     self.writeCompletedHtml = function (str, options) {
         if (!str) {
             return;
@@ -414,6 +531,15 @@ var _botEngine = (function () {
         return;
     };
 
+    /**
+     * Shows alternative options for user selection.
+     * @function
+     * @name showAlternatives
+     * @memberof _botEngine
+     * @param {Object} alternatives - Alternative options to display
+     * @param {string} [varToFill] - Variable to fill with selection
+     * @returns {void}
+     */
     self.showAlternatives = function (alternatives, varToFill) {
         var choices = [];
         for (var key in alternatives) {
@@ -424,6 +550,13 @@ var _botEngine = (function () {
         self.setStepMessage();
     };
 
+    /**
+     * Gets the complete query text from bot tokens.
+     * @function
+     * @name getQueryText
+     * @memberof _botEngine
+     * @returns {string} The complete query text
+     */
     self.getQueryText = function () {
         var queryText = "";
         $(".bot-token").each(function () {
@@ -431,10 +564,24 @@ var _botEngine = (function () {
         });
         return queryText;
     };
+    /**
+     * Clears the proposal select list.
+     * @function
+     * @name clearProposalSelect
+     * @memberof _botEngine
+     * @returns {void}
+     */
     self.clearProposalSelect = function () {
         $("#bot_resourcesProposalSelect").find("option").remove().end();
     };
 
+    /**
+     * Exports the current workflow to a graph visualization.
+     * @function
+     * @name exportToGraph
+     * @memberof _botEngine
+     * @returns {void}
+     */
     self.exportToGraph = function () {
         var functionTitles = self.currentBot.functionTitles;
         var workflow = self.initialWorkflow;
@@ -508,6 +655,14 @@ var _botEngine = (function () {
             physics: { enabled: true },
         });
     };
+    /**
+     * Fills and processes start parameters for the bot.
+     * @function
+     * @name fillStartParams
+     * @memberof _botEngine
+     * @param {Array} params - Array of parameters to process
+     * @returns {Array} Processed parameters array
+     */
     self.fillStartParams = function (params) {
         var startParams = [];
         var param;

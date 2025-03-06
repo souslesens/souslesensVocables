@@ -6,10 +6,21 @@ import common from "../../shared/common.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import KGquery_nodeSelector from "./KGquery_nodeSelector.js";
 
+/**
+ * Module for managing the visual graph representation in the KG query interface.
+ * Handles graph initialization, visualization, and interaction.
+ * @module KGquery_graph
+ */
 var KGquery_graph = (function () {
     var self = {};
     self.visjsData = null;
 
+    /**
+     * Initializes the graph interface.
+     * Sets up tabs and populates color and shape selectors.
+     * @function
+     * @name init
+     */
     self.init = function () {
         $("#KGquery_leftPanelTabs").tabs();
 
@@ -18,6 +29,10 @@ var KGquery_graph = (function () {
         common.fillSelectOptions("KGquery_graph_nodeShapeSelect", shapes, true);
     };
 
+    /**
+     * Configuration options for the Visjs graph visualization.
+     * @property {Object} visjsOptions
+     */
     self.visjsOptions = {
         onclickFn: function (node, point, nodeEvent) {
             if (!node) {
@@ -51,12 +66,22 @@ var KGquery_graph = (function () {
         },
     };
 
+    /**
+     * Default options for nodes in the Visjs graph.
+     * @property {Object} visjsNodeOptions
+     */
     self.visjsNodeOptions = {
         shape: "box", //Lineage_whiteboard.defaultShape,
         //   size: Lineage_whiteboard.defaultShapeSize,
         color: "#ddd", //Lineage_whiteboard.getSourceColor(source)
     };
 
+    /**
+     * Draws the Visjs model based on specified mode.
+     * @function
+     * @name drawVisjsModel
+     * @param {string} mode - The drawing mode ('saved', 'inferred', etc.)
+     */
     self.drawVisjsModel = function (mode) {
         var display = "graph";
         var source = KGquery.currentSource;
@@ -268,6 +293,11 @@ var KGquery_graph = (function () {
         );
     };
 
+    /**
+     * Starts or stops the graph simulation.
+     * @function
+     * @name startStopSimulation
+     */
     self.startStopSimulation = function () {
         if (!self.simulationOn) {
             self.KGqueryGraph.network.startSimulation();
@@ -277,6 +307,11 @@ var KGquery_graph = (function () {
         self.simulationOn = !self.simulationOn;
     };
 
+    /**
+     * Draws a common graph for imports.
+     * @function
+     * @name DrawImportsCommonGraph
+     */
     self.DrawImportsCommonGraph = function () {
         var source = KGquery.currentSource;
         var sources = [source];
@@ -343,6 +378,13 @@ var KGquery_graph = (function () {
         );
     };
 
+    /**
+     * Gets inferred model data for Visjs visualization.
+     * @function
+     * @name getInferredModelVisjsData
+     * @param {string} source - The source to get model data from
+     * @param {Function} callback - Callback function called with (error, visjsData)
+     */
     self.getInferredModelVisjsData = function (source, callback) {
         KGquery_graph.message("creating graph");
 
@@ -511,10 +553,22 @@ var KGquery_graph = (function () {
         );
     };
 
+    /**
+     * Enables edge mode in the graph.
+     * @function
+     * @name setEdgeMode
+     */
     self.setEdgeMode = function () {
         self.KGqueryGraph.network.addEdgeMode();
     };
 
+    /**
+     * Sets an attribute for the current node.
+     * @function
+     * @name setNodeAttr
+     * @param {string} attr - The attribute to set
+     * @param {*} value - The value to set
+     */
     self.setNodeAttr = function (attr, value) {
         if (!self.currentGraphNode) {
             return;
@@ -527,6 +581,11 @@ var KGquery_graph = (function () {
         self.KGqueryGraph.data.nodes.update(newNode);
     };
 
+    /**
+     * Sets font size for all nodes.
+     * @function
+     * @name setAllNodesFontSize
+     */
     self.setAllNodesFontSize = function () {
         var fontSize = prompt("font size");
         if (!fontSize) {
@@ -535,6 +594,13 @@ var KGquery_graph = (function () {
         self.setAllNodesAttr("font", { size: parseInt(fontSize) });
     };
 
+    /**
+     * Sets an attribute for all nodes.
+     * @function
+     * @name setAllNodesAttr
+     * @param {string} attr - The attribute to set
+     * @param {*} value - The value to set
+     */
     self.setAllNodesAttr = function (attr, value) {
         var nodesId = self.KGqueryGraph.data.nodes.getIds();
         var newNodes = [];
@@ -547,6 +613,12 @@ var KGquery_graph = (function () {
         self.KGqueryGraph.data.nodes.update(newNodes);
     };
 
+    /**
+     * Resets Visjs nodes to their initial state.
+     * @function
+     * @name resetVisjNodes
+     * @param {Array} [nodes] - Optional array of nodes to reset
+     */
     self.resetVisjNodes = function (nodes) {
         if (!KGquery_graph.KGqueryGraph) {
             return;
@@ -574,6 +646,11 @@ var KGquery_graph = (function () {
         KGquery_graph.KGqueryGraph.data.nodes.update(newNodes);
     };
 
+    /**
+     * Resets Visjs edges to their initial state.
+     * @function
+     * @name resetVisjEdges
+     */
     self.resetVisjEdges = function () {
         if (!KGquery_graph.KGqueryGraph) {
             return;
@@ -592,6 +669,12 @@ var KGquery_graph = (function () {
         KGquery_graph.KGqueryGraph.data.edges.update(newVisjsEdges);
     };
 
+    /**
+     * Outlines a specific node in the graph.
+     * @function
+     * @name outlineNode
+     * @param {string} nodeId - ID of the node to outline
+     */
     self.outlineNode = function (nodeId) {
         if (!KGquery_graph.KGqueryGraph.data.nodes.update) {
             return;
@@ -601,11 +684,22 @@ var KGquery_graph = (function () {
         KGquery_graph.KGqueryGraph.data.nodes.update([{ id: nodeId, shape: "ellipse", color: "#b0f5f5" }]);
         },500)*/
     };
+    /**
+     * Saves the current Visjs model graph.
+     * @function
+     * @name saveVisjsModelGraph
+     */
     self.saveVisjsModelGraph = function () {
         var fileName = KGquery.currentSource + "_KGmodelGraph.json";
         self.KGqueryGraph.saveGraph(fileName, true);
         return;
     };
+    /**
+     * Adds an inter-graph property.
+     * @function
+     * @name addInterGraphProperty
+     * @param {Object} edgeData - Data for the edge to add
+     */
     self.addInterGraphProperty = function (edgeData) {
         var propertyId = prompt("enter property URI");
         if (!propertyId) {
@@ -632,9 +726,21 @@ var KGquery_graph = (function () {
         self.KGqueryGraph.data.edges.add(edge);
     };
 
+    /**
+     * Displays a message in the graph interface.
+     * @function
+     * @name message
+     * @param {string} message - The message to display
+     * @param {boolean} [stopWaitImage] - Whether to stop the wait image
+     */
     self.message = function (message, stopWaitImage) {
         $("#KGquery_graph_messageDiv").html(message);
     };
+    /**
+     * Generates common decoration for the graph.
+     * @function
+     * @name genereateCommonDecoration
+     */
     self.genereateCommonDecoration = function () {
         var source = KGquery.currentSource;
         var sources = [];

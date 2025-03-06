@@ -1,0 +1,49 @@
+---
+description: Documenting the code (adding jsdoc docstrings)
+globs: 
+alwaysApply: false
+---
+This project is called SousLeSens. It is an open-source management software used by TotalEnergies and other companies, to manipulate ontologies and triples according to the semantic web standards.
+
+For your information, SousLeSens has several tools, including: 
+- Lineage: Visualizes ontologies and their relationships.
+- MappingModeler: Maps data from standard database systems (e.g., SQL) to semantic models.
+- KGQuery: Queries triples from semantic data graphs.
+
+When asking you to generate docstrings, you will generate docstrings in the specified files for all modules, properties and functions.
+
+For functions for example, I would like that the docstrings have this format:
+
+    /**
+     * @function
+     * @name showColumnTechnicalMappingsDialog
+     * @memberof MappingsDetails
+     * Displays a dialog for configuring technical mappings for a specific column.
+     * This includes URI type, rdf:type, and rdfs:label, with options pre-filled based on the column's data.
+     * @param {string} divId - The ID of the HTML element where the dialog content will be rendered.
+     * @param {object} column - The column object containing the metadata (e.g., column label, rdfType, uriType).
+     * @param {function} callbackFn - A callback function to be executed after saving the mappings.
+     * @returns {void}
+     */
+
+And, when there is an "options" object in input, you will detail each key the options object can have, like so: 
+
+    /**
+     * Displays the detailed mappings tree for the current table.
+     * It populates the tree with nodes and mappings related to the selected table and columns. 
+     * The tree allows search and interaction with mapping nodes.
+     * @function
+     * @name showDetailedMappingsTree
+     * @memberof module:MappingsDetails
+     * @param {Object} [column] - Optional column data to filter the tree by.
+     * @param {string} [divId="detailedMappings_jsTreeDiv"] - The ID of the div to display the tree in. Default is "detailedMappings_jsTreeDiv".
+     * @param {Object} [_options={}] - Optional configuration options for the tree, such as context menu behavior.
+     * @param {boolean} [_options.withoutContextMenu=false] - If true, disables the context menu.
+     * @param {boolean} [_options.searchPlugin=true] - Enables or disables the search plugin.
+     * @param {boolean} [_options.openAll=true] - If true, expands all nodes by default.
+     * @param {Function} [_options.selectTreeNodeFn] - Callback function for when a tree node is selected.
+     * @returns {void}
+     */
+
+You will not forget the @memberof clause with the name of the module, and you will document each and every function of the module.
+

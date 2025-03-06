@@ -2,9 +2,23 @@ import KGquery from "./KGquery.js";
 import JstreeWidget from "../../uiWidgets/jstreeWidget.js";
 import KGquery_paths from "./KGquery_paths.js";
 
+/**
+ * Module for handling node selection and visualization in the KGquery interface.
+ * Provides functionality to display and interact with nodes in a tree structure.
+ * @module KGquery_nodeSelector
+ */
 var KGquery_nodeSelector = (function () {
     var self = {};
     self.jstreeData = [];
+
+    /**
+     * Displays the inferred model in a JSTree format.
+     * Converts the Visjs graph data into a tree structure and handles node visualization.
+     * @function
+     * @name showInferredModelInJstree
+     * @memberof KGquery_nodeSelector
+     * @param {Object} visjsData - The Visjs graph data containing nodes and edges
+     */
     self.showInferredModelInJstree = function (visjsData) {
         var jstreeData = [];
         self.graphVisjsdata = visjsData;
@@ -66,6 +80,14 @@ var KGquery_nodeSelector = (function () {
         });
     };
 
+    /**
+     * Handles node selection events in the tree.
+     * Processes the selected node and updates the query based on the selection.
+     * @function
+     * @name onSelectNode
+     * @memberof KGquery_nodeSelector
+     * @param {Object} node - The selected node object from the JSTree
+     */
     self.onSelectNode = function (node) {
         var targetNodes = KGquery_paths.getNodeLinkedNodes(node.id, 3);
         self.alowedNodes = targetNodes; //self.alowedNodes.concat(targetNodes)

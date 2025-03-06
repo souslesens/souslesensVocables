@@ -1,9 +1,23 @@
 import KGquery from "./KGquery.js";
 import SavedQueriesWidget from "../../uiWidgets/savedQueriesWidget.js";
 
+/**
+ * Module for managing saved queries in the KGquery interface.
+ * Handles saving and loading of query configurations.
+ * @module KGquery_myQueries
+ */
 var KGquery_myQueries = (function () {
     var self = {};
 
+    /**
+     * Saves the current query configuration.
+     * Stores both the query sets and the current SPARQL query.
+     * @function
+     * @name save
+     * @memberof KGquery_myQueries
+     * @param {Function} callback - Callback function called with (error, data)
+     * @returns {void}
+     */
     self.save = function (callback) {
         //   KGquery.execPathQuery({ dontExecute: true }, function (err, query) {
         var data = {
@@ -14,6 +28,16 @@ var KGquery_myQueries = (function () {
         //  });
     };
 
+    /**
+     * Loads a saved query configuration.
+     * Restores the query sets and rebuilds the query interface.
+     * @function
+     * @name load
+     * @memberof KGquery_myQueries
+     * @param {Error} err - Error object if loading fails
+     * @param {Object} result - The saved query configuration to load
+     * @returns {void}
+     */
     self.load = function (err, result) {
         // return; // ! not working correctly !!!!!!!!!!!!!!!!!!!!!!!!
         if (err) {

@@ -1,9 +1,24 @@
 import SQLquery_run from "./SQLquery_run.js";
 import KGcreator from "../KGcreator/KGcreator.js";
 
+/**
+ * Module for managing SQL query filters and data source configurations.
+ * Handles the creation and management of filters for SQL queries.
+ * @module SQLquery_filters
+ */
 var SQLquery_filters = (function () {
     var self = {};
 
+    /**
+     * Displays the filters dialog for query sets.
+     * Shows available filters based on data source configurations.
+     * @function
+     * @name showFiltersDialog
+     * @memberof SQLquery_filters
+     * @param {Object} querySets - The query sets to filter
+     * @param {string} slsvSource - The source identifier
+     * @returns {void}
+     */
     self.showFiltersDialog = function (querySets, slsvSource) {
         self.querySets = querySets;
         var paths = [];
@@ -55,6 +70,17 @@ var SQLquery_filters = (function () {
         );
     };
 
+    /**
+     * Retrieves JSTree data for a specific data source.
+     * @function
+     * @name getDataSourcejstreeData
+     * @memberof SQLquery_filters
+     * @param {Object} querySets - The query sets to process
+     * @param {string} slsvSource - The source identifier
+     * @param {string} dataSource - The data source to get tree data for
+     * @param {Function} callback - Callback function called with (error, jstreeData)
+     * @returns {void}
+     */
     self.getDataSourcejstreeData = function (querySets, slsvSource, dataSource, callback) {
         var jstreeData = [];
         var dataSourceMappings = {};
@@ -152,6 +178,15 @@ var SQLquery_filters = (function () {
         );
     };
 
+    /**
+     * Gets data source configurations for a given source.
+     * @function
+     * @name getSlsvSourcedataSourceConfigs
+     * @memberof SQLquery_filters
+     * @param {string} slsvSource - The source identifier
+     * @param {Function} callback - Callback function called with (error, configs)
+     * @returns {void}
+     */
     self.getSlsvSourcedataSourceConfigs = function (slsvSource, callback) {
         KGcreator.getSlsvSourceConfig(slsvSource, function (err, config) {
             if (err) {
@@ -161,6 +196,18 @@ var SQLquery_filters = (function () {
             callback(null, config.databaseSources);
         });
     };
+
+    /**
+     * Gets columns and tables information from query sets.
+     * @function
+     * @name getQuerySetsColumnAndTables
+     * @memberof SQLquery_filters
+     * @param {Object} querySets - The query sets to process
+     * @param {string} dataSource - The data source identifier
+     * @param {Object} dataSourcemappings - Mappings for the data source
+     * @param {Function} callback - Callback function called with (error, paths)
+     * @returns {void}
+     */
     self.getQuerySetsColumnAndTables = function (querySets, dataSource, dataSourcemappings, callback) {
         var paths = [];
         querySets.sets.forEach(function (querySet) {
@@ -197,6 +244,16 @@ var SQLquery_filters = (function () {
         callback(null, paths);
     };
 
+    /**
+     * Gets class to column mappings for a specific class URI.
+     * @function
+     * @name getClass2ColumnMapping
+     * @memberof SQLquery_filters
+     * @param {Object} mappings - The mappings object
+     * @param {string} datasource - The data source identifier
+     * @param {string} classUri - The class URI to find mappings for
+     * @returns {Array} Array of matching mappings
+     */
     self.getClass2ColumnMapping = function (mappings, datasource, classUri) {
         var matches = [];
         for (var table in mappings) {
@@ -214,6 +271,13 @@ var SQLquery_filters = (function () {
         return matches;
     };
 
+    /**
+     * Executes the query with current filters.
+     * @function
+     * @name runQuery
+     * @memberof SQLquery_filters
+     * @returns {void}
+     */
     self.runQuery = function () {
         return SQLquery_run.execPathQuery(self.querySets, self.currentSource, "lifex_dalia_db", {}, function (err, tableData) {
             if (err) {

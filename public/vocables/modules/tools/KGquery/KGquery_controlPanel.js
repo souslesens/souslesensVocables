@@ -2,10 +2,26 @@ import common from "../../shared/common.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import KGquery_filter from "./KGquery_filter.js";
 
+/**
+ * Module for managing the control panel interface of the KGquery tool.
+ * Handles the creation and management of query sets, elements, and nodes in the UI.
+ * @module KGquery_controlPanel
+ */
 var KGquery_controlPanel = (function () {
     var self = {};
     self.vicinityArray = [];
 
+    /**
+     * Adds a new query set to the interface.
+     * @function
+     * @name addQuerySet
+     * @memberof KGquery_controlPanel
+     * @param {string} toDivId - The ID of the container div
+     * @param {string} booleanOperator - The boolean operator for the query set ('Union' or 'Minus')
+     * @param {string} label - Label for the query set
+     * @param {string} color - Color for the query set visualization
+     * @returns {string} The ID of the created query set div
+     */
     self.addQuerySet = function (toDivId, booleanOperator, label, color) {
         var querySetDivId = "querySetDiv_" + common.getRandomHexaId(5);
         var booleanOperatorHtml = "";
@@ -42,6 +58,15 @@ var KGquery_controlPanel = (function () {
         return querySetDivId;
     };
 
+    /**
+     * Adds a query element to the current set.
+     * @function
+     * @name addQueryElementToCurrentSet
+     * @memberof KGquery_controlPanel
+     * @param {string} querySetDivId - The ID of the parent query set div
+     * @param {string} color - Color for the query element visualization
+     * @returns {string} The ID of the created query element div
+     */
     self.addQueryElementToCurrentSet = function (querySetDivId, color) {
         var queryElementDivId = "queryElementDiv_" + common.getRandomHexaId(5);
         var html =
@@ -60,6 +85,16 @@ var KGquery_controlPanel = (function () {
         return queryElementDivId;
     };
 
+    /**
+     * Adds a node to a query element div.
+     * @function
+     * @name addNodeToQueryElementDiv
+     * @memberof KGquery_controlPanel
+     * @param {string} queryElementDivId - The ID of the query element div
+     * @param {string} role - The role of the node in the query
+     * @param {string} label - Label for the node
+     * @returns {string} The ID of the created node div
+     */
     self.addNodeToQueryElementDiv = function (queryElementDivId, role, label) {
         $("#" + queryElementDivId).css("display", "block");
         var nodeDivId = "nodeDiv_" + common.getRandomHexaId(5);
@@ -84,12 +119,28 @@ var KGquery_controlPanel = (function () {
         return nodeDivId;
     };
 
+    /**
+     * Adds a predicate to a query element div.
+     * @function
+     * @name addPredicateToQueryElementDiv
+     * @memberof KGquery_controlPanel
+     * @param {string} queryElementDivId - The ID of the query element div
+     * @param {string} label - Label for the predicate
+     */
     self.addPredicateToQueryElementDiv = function (queryElementDivId, label) {
         $("#" + queryElementDivId)
             .find(".queryElement_predicate")
             .html(label);
     };
 
+    /**
+     * Gets the label for a query element's predicate.
+     * @function
+     * @name getQueryElementPredicateLabel
+     * @memberof KGquery_controlPanel
+     * @param {Object} queryElement - The query element containing paths
+     * @returns {string} The formatted predicate label
+     */
     self.getQueryElementPredicateLabel = function (queryElement) {
         var predicateLabel = "";
         queryElement.paths.forEach(function (path, index) {

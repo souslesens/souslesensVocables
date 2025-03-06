@@ -3,11 +3,26 @@ import KGquery from "./KGquery.js";
 import jstreeWidget from "../../uiWidgets/jstreeWidget.js";
 import KGquery_filter_bot from "../../bots/KGquery_filter_bot.js";
 
+/**
+ * Module for managing filters in the KGquery tool.
+ * Handles the creation, configuration and application of filters to query nodes.
+ * @module KGquery_filter
+ */
 var KGquery_filter = (function () {
     var self = {};
 
     self.containersFilterMap = {};
 
+    /**
+     * Selects optional predicates for query sets.
+     * @function
+     * @name selectOptionalPredicates
+     * @memberof KGquery_filter
+     * @param {Object} querySets - The query sets to process
+     * @param {Object} options - Configuration options
+     * @param {Function} callback - Callback function called with (error, optionalPredicatesSparql)
+     * @returns {void}
+     */
     self.selectOptionalPredicates = function (querySets, options, callback) {
         var queryNonObjectProperties = [];
         var uniqueProps = {};
@@ -189,6 +204,15 @@ var KGquery_filter = (function () {
         return callback(null, optionalPredicatesSparql);
     };
 
+    /**
+     * Gets optional predicates for aggregate filters.
+     * @function
+     * @name getAggregateFilterOptionalPredicates
+     * @memberof KGquery_filter
+     * @param {Object} querySet - The query set to process
+     * @param {string} filter - The filter string
+     * @returns {string} The generated SPARQL optional predicates
+     */
     self.getAggregateFilterOptionalPredicates = function (querySet, filter) {
         var filterStr = "";
         for (var key in querySet.classFiltersMap) {
@@ -203,6 +227,14 @@ var KGquery_filter = (function () {
         return filterStr;
     };
 
+    /**
+     * Gets aggregate predicates from groupBy predicates.
+     * @function
+     * @name getAggregatePredicates
+     * @memberof KGquery_filter
+     * @param {Object} groupByPredicates - The groupBy predicates to process
+     * @returns {string} The generated aggregate predicates SPARQL
+     */
     self.getAggregatePredicates = function (groupByPredicates) {
         var str = "";
         for (var key in groupByPredicates) {
@@ -213,6 +245,16 @@ var KGquery_filter = (function () {
         return str;
     };
 
+    /**
+     * Adds a filter to a node in the query.
+     * @function
+     * @name addNodeFilter
+     * @memberof KGquery_filter
+     * @param {string} classDivId - The ID of the class div
+     * @param {boolean} [addTojsTreeNode] - Whether to add to jsTree node
+     * @param {string} [propertyId] - ID of the property to filter on
+     * @returns {void}
+     */
     self.addNodeFilter = function (classDivId, addTojsTreeNode, propertyId) {
         var aClass = KGquery.divsMap[classDivId];
         var classSetIndex = aClass.data.setIndex;

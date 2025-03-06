@@ -1,9 +1,26 @@
 import KGcreator from "../KGcreator/KGcreator.js";
 import common from "../../shared/common.js";
 
+/**
+ * Module for executing SQL queries and processing results.
+ * Handles SQL query generation, execution, and result formatting.
+ * @module SQLquery_run
+ */
 var SQLquery_run = (function () {
     var self = {};
 
+    /**
+     * Executes a path query against a data source.
+     * @function
+     * @name execPathQuery
+     * @memberof SQLquery_run
+     * @param {Object} querySets - The query sets to execute
+     * @param {string} slsvSource - The source identifier
+     * @param {string} dataSource - The data source to query
+     * @param {Object} options - Query execution options
+     * @param {Function} callback - Callback function called with (error, result)
+     * @returns {void}
+     */
     self.execPathQuery = function (querySets, slsvSource, dataSource, options, callback) {
         if (!options) {
             options = {};
@@ -117,6 +134,15 @@ var SQLquery_run = (function () {
         );
     };
 
+    /**
+     * Gets the database model for a data source configuration.
+     * @function
+     * @name getDBmodel
+     * @memberof SQLquery_run
+     * @param {Object} dataSourceConfig - The data source configuration
+     * @param {Function} callback - Callback function called with (error, model)
+     * @returns {void}
+     */
     self.getDBmodel = function (dataSourceConfig, callback) {
         const params = new URLSearchParams({
             name: dataSourceConfig.name,
@@ -138,6 +164,15 @@ var SQLquery_run = (function () {
         });
     };
 
+    /**
+     * Generates the FROM clause of an SQL query.
+     * @function
+     * @name getFromSql
+     * @memberof SQLquery_run
+     * @param {Object} joinObj - The join configuration object
+     * @param {boolean} isOuterJoin - Whether to use outer joins
+     * @returns {string} The generated FROM clause
+     */
     self.getFromSql = function (joinObj, isOuterJoin) {
         var sql = "FROM "; //SELECT top 10 * from ";
 
@@ -160,6 +195,17 @@ var SQLquery_run = (function () {
         return sql;
     };
 
+    /**
+     * Executes an SQL query against a database.
+     * @function
+     * @name execSql
+     * @memberof SQLquery_run
+     * @param {string} sqlQuery - The SQL query to execute
+     * @param {string} dataSourceType - The type of data source
+     * @param {string} dbName - The database name
+     * @param {Function} callback - Callback function called with (error, result)
+     * @returns {void}
+     */
     self.execSql = function (sqlQuery, dataSourceType, dbName, callback) {
         const params = new URLSearchParams({
             type: dataSourceType,
@@ -185,6 +231,14 @@ var SQLquery_run = (function () {
         });
     };
 
+    /**
+     * Converts query results to a table format.
+     * @function
+     * @name queryResultToTable
+     * @memberof SQLquery_run
+     * @param {Array} data - The query result data
+     * @returns {Array} The formatted table data
+     */
     self.queryResultToTable = function (data) {
         data.forEach(function (item) {
             if (varName.length < 3) {

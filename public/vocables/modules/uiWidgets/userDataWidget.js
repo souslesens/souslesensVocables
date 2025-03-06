@@ -23,7 +23,7 @@ var UserDataWidget = (function () {
                     self.callbackFn(err);
                 }
                 
-                self.callbackFn(null, {label: label, data_path: data_path, data_content: self.jsonContent,insertedId:result.insertedId});
+                self.callbackFn(null, {label: label, data_path: data_path, data_content: self.jsonContent,insertedId:result.insertedId,data_group:group});
             });
         });
 
@@ -134,7 +134,7 @@ var UserDataWidget = (function () {
                     }
 
                     var jstreeData = [];
-                    var uniqueNodes = {};
+                    self.uniqueJstreeNodes = {};
                     if(self.options.filter && Object.keys(self.options.filter).length>0){
                         Object.keys(self.options.filter).forEach(function(key){
                             if(self.options.filter[key]){
@@ -157,8 +157,8 @@ var UserDataWidget = (function () {
                             // if (array.length > 0) {
                             if(array.length>0){
                                 array.forEach(function (group, index) {
-                                    if (!uniqueNodes[group]) {
-                                        uniqueNodes[group] = 1;
+                                    if (!self.uniqueJstreeNodes[group]) {
+                                        self.uniqueJstreeNodes[group] = 1;
                                         jstreeData.push({
                                             id: group,
                                             text: group,
@@ -169,7 +169,7 @@ var UserDataWidget = (function () {
                                 });
                                 if(parent=="#" ){
                                     var lastItem = array.at(-1);
-                                    if(uniqueNodes[lastItem]){
+                                    if(self.uniqueJstreeNodes[lastItem]){
                                         parent=lastItem;
                                     }
                                 }
@@ -178,8 +178,8 @@ var UserDataWidget = (function () {
                             
                         }
 
-                        if (!uniqueNodes[item.id]) {
-                            uniqueNodes[item.id] = 1;
+                        if (!self.uniqueJstreeNodes[item.id]) {
+                            self.uniqueJstreeNodes[item.id] = 1;
                             jstreeData.push({
                                 id: item.id,
                                 text: item.data_label,
@@ -200,7 +200,10 @@ var UserDataWidget = (function () {
                                
 
                                 if(obj.event.type=='click'){
-                                    $("#" + self.divId).dialog("close");
+                                    if(self.divId.includes('Dialog')){
+                                        $("#" + self.divId).dialog("close");
+                                    }
+                                    
                                     callbackFn(null, obj.node.data);
                                 }
                             
@@ -245,6 +248,9 @@ var UserDataWidget = (function () {
                     };
 
                     JstreeWidget.loadJsTree("userDataWidget_jstree", jstreeData, options);
+                    if(self.options.removeSaveDiv){
+                        $('#userDataWidget_saveDiv').remove();
+                    }
                 },
                 error(err) {
                     return callbackFn(err.responseText || err);

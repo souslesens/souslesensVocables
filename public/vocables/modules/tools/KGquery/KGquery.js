@@ -748,7 +748,7 @@ var KGquery = (function () {
                 KGquery_graph.drawVisjsModel("saved");
             }
             $("#KGquery_pathsDiv").html("");
-            $("#KGquery_SetsControlsDiv").hide();
+            //$("#KGquery_SetsControlsDiv").hide();
         }
     };
 

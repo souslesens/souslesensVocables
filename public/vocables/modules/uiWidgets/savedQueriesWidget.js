@@ -127,17 +127,15 @@ var SavedQueriesWidget = (function () {
 
         }
         var data_path = path+slsvSource;
-        UserDataWidget.listUserData(null, function (err, result) {
-            var storedQueries = [];
-            result.forEach(function (item) {
-                if (item.data_path.includes(data_path)) {
-                    storedQueries.push({ label: item.data_label, id: item.id });
-                }
-            });
-            if(storedQueries.length>0){
-                common.fillSelectOptions(targetSelect, storedQueries, false, "label", "id");
+        UserDataWidget.showListDialog('SavedQueriesComponent_itemsSelect',{filter:{data_path:data_path},removeSaveDiv:true},function(err,result){
+            
+
+            if(result.id){
+                self.loadItem(result.id);
             }
+            
         });
+       
     }
     self.loadItem = function (userDataId, options, callback) {
         UserDataWidget.loadUserDatabyId(userDataId, function (err, result) {
@@ -180,7 +178,32 @@ var SavedQueriesWidget = (function () {
                     //console.log(result);
                     $('#KGquery_messageDiv').text('saved query');
                     if(result?.insertedId?.length>0){ 
-                        $("#SavedQueriesComponent_itemsSelect").append("<option value='" + result.insertedId[0].id + "'>" + result.label + "</option>");
+                        var groups=result.data_group.split('/');
+                        var group_parent='#'
+                        if(groups.length>0){
+                            
+                        
+                            groups.forEach(function(group){
+                                if(!UserDataWidget.uniqueJstreeNodes[group]){
+                                    //add node
+                                    var node={id:group,text:group,parent:group_parent};
+                                    $('#userDataWidget_jstree').jstree(true).create_node(group_parent,node);
+
+                                }   
+                                group_parent=group;
+                               
+                            });
+
+                            
+                        }
+                        result.id=result.insertedId[0].id;
+                        result.data_label=label;
+                        var node={id:result.insertedId[0].id,text:result.label,parent:group_parent, data:result};
+                        $('#userDataWidget_jstree').jstree(true).create_node(group_parent,node);
+
+                        //$("#SavedQueriesComponent_itemsSelect").append("<option value='" + result.insertedId[0].id + "'>" + result.label + "</option>");
+                        //SavedQueriesWidget.showDialog("tabs_myQueries",self.currentSource,KGquery_myQueries.save, KGquery_myQueries.load,"KGquery/savedQueries/");
+
                     }
                     
                     

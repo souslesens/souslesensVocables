@@ -102,9 +102,9 @@ class UserDataModel {
             throw Error("The specified owned_by username do not exists", { cause: 404 });
         }
         data.owned_by = results.id;
-        results = await connection.insert(data).into("user_data");
+        const insertedId = await connection.insert(data).into("user_data").returning("id");
         cleanupConnection(connection);
-        return results[0];
+        return insertedId;
     };
 
     remove = async (identifier) => {

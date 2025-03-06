@@ -1,19 +1,11 @@
 [
   {
     "id": 1,
-    "data_path": "data1",
+    "data_path": "1-admin-xxx.json",
     "data_type": "",
     "data_label": "data1",
     "data_comment": "",
     "data_group": "",
-    "data_content": {
-      "sparqlServerUrl": "string",
-      "graphUri": "string",
-      "prefixes": {},
-      "lookups": {},
-      "databaseSources": {},
-      "cvsSources": {}
-    },
     "is_shared": false,
     "shared_profiles": [],
     "shared_users": [],
@@ -22,19 +14,11 @@
   },
   {
     "id": 3,
-    "data_path": "shared with owl_user user",
+    "data_path": "3-owl_user-xxx.json",
     "data_type": "",
     "data_label": "shared with owl_user user",
     "data_comment": "",
     "data_group": "",
-    "data_content": {
-      "sparqlServerUrl": "string",
-      "graphUri": "string",
-      "prefixes": {},
-      "lookups": {},
-      "databaseSources": {},
-      "cvsSources": {}
-    },
     "is_shared": true,
     "shared_profiles": [],
     "shared_users": [
@@ -45,19 +29,11 @@
   },
   {
     "id": 4,
-    "data_path": "shared with admin profile",
+    "data_path": "4-skos_user-xxx.json",
     "data_type": "",
     "data_label": "shared with admin profile",
     "data_comment": "",
     "data_group": "",
-    "data_content": {
-      "sparqlServerUrl": "string",
-      "graphUri": "string",
-      "prefixes": {},
-      "lookups": {},
-      "databaseSources": {},
-      "cvsSources": {}
-    },
     "is_shared": true,
     "shared_profiles": [
       "skos_only"
@@ -68,19 +44,11 @@
   },
   {
     "id": 5,
-    "data_path": "shared with owl_user and skos_user users",
+    "data_path": "5-admin-xxx.json",
     "data_type": "string",
     "data_label": "",
     "data_comment": "",
     "data_group": "",
-    "data_content": {
-      "sparqlServerUrl": "string",
-      "graphUri": "string",
-      "prefixes": {},
-      "lookups": {},
-      "databaseSources": {},
-      "cvsSources": {}
-    },
     "is_shared": false,
     "shared_profiles": [],
     "shared_users": [

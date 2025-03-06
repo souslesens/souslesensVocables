@@ -414,9 +414,6 @@ const apiDoc = {
                     type: "number",
                     minimum: 1,
                 },
-                data_path: {
-                    type: "string",
-                },
                 data_type: {
                     type: "string",
                 },
@@ -431,9 +428,6 @@ const apiDoc = {
                 data_group: {
                     type: "string",
                     default: "",
-                },
-                data_content: {
-                    $ref: "#/definitions/UserDataContent",
                 },
                 is_shared: {
                     type: "boolean",
@@ -453,14 +447,11 @@ const apiDoc = {
                     type: "string",
                 },
             },
-            required: ["data_path", "data_type"],
+            required: ["data_type"],
         },
         UserDataWithoutID: {
             type: "object",
             properties: {
-                data_path: {
-                    type: "string",
-                },
                 data_type: {
                     type: "string",
                 },
@@ -475,9 +466,6 @@ const apiDoc = {
                 data_group: {
                     type: "string",
                     default: "",
-                },
-                data_content: {
-                    $ref: "#/definitions/UserDataContent",
                 },
                 is_shared: {
                     type: "boolean",
@@ -494,7 +482,7 @@ const apiDoc = {
                     items: { type: "string" },
                 },
             },
-            required: ["data_path", "data_type"],
+            required: ["data_type"],
         },
         UserDataWithoutOwner: {
             type: "object",
@@ -503,9 +491,6 @@ const apiDoc = {
                     type: "number",
                     minimum: 1,
                 },
-                data_path: {
-                    type: "string",
-                },
                 data_type: {
                     type: "string",
                 },
@@ -520,9 +505,6 @@ const apiDoc = {
                 data_group: {
                     type: "string",
                     default: "",
-                },
-                data_content: {
-                    $ref: "#/definitions/UserDataContent",
                 },
                 is_shared: {
                     type: "boolean",
@@ -539,30 +521,7 @@ const apiDoc = {
                     items: { type: "string" },
                 },
             },
-            required: ["data_path", "data_type"],
-        },
-        UserDataContent: {
-            type: "object",
-            properties: {
-                sparqlServerUrl: {
-                    type: "string",
-                },
-                graphUri: {
-                    type: "string",
-                },
-                prefixes: {
-                    type: "object",
-                },
-                lookups: {
-                    type: "object",
-                },
-                databaseSources: {
-                    type: "object",
-                },
-                cvsSources: {
-                    type: "object",
-                },
-            },
+            required: ["data_type"],
         },
     },
     tags: [

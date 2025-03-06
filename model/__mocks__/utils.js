@@ -98,6 +98,7 @@ const getKnexConnection = (database) => {
         ...readSchema("011-profiles-view").map((data) => createDatabaseFromSchema(connection, data)),
         ...readSchema("020-users").map((data) => createDatabaseFromSchema(connection, data)),
         ...readSchema("030-user-data").map((data) => createDatabaseFromSchema(connection, data)),
+        ...readSchema("031-user-data-view").map((data) => createDatabaseFromSchema(connection, data)),
     ])
         .then(() => {})
         .catch((error) => {
@@ -126,7 +127,6 @@ const getKnexConnection = (database) => {
         connection("user_data").insert(
             userDataEntries.map((data) => ({
                 ...data,
-                data_content: JSON.stringify(data.data_content),
                 shared_profiles: JSON.stringify(data.shared_profiles),
                 shared_users: JSON.stringify(data.shared_users),
             })),

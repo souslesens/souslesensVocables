@@ -75,6 +75,8 @@ module.exports = () => {
     GET = async (req, res, _next) => {
         try {
             const data = await userDataModel.find(req.params.id);
+            data.data_content = await userDataModel.file(req.params.id, req.user);
+
             res.status(200).json(data);
         } catch (error) {
             if (error.cause !== undefined) {

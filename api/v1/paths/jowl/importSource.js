@@ -167,13 +167,13 @@ module.exports = function () {
                             },
                             function (err) {
                                 return callbackSeries(err);
-                            }
+                            },
                         );
                     },
                 ],
                 function (err) {
                     processResponse(res, err, { result: totalImportedTriples });
-                }
+                },
             );
         });
     }

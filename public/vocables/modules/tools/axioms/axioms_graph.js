@@ -355,7 +355,7 @@ var Axioms_graph = (function () {
                 if (callback) {
                     return callback(err);
                 }
-            }
+            },
         );
     };
 

@@ -119,7 +119,7 @@ var CreateRestriction_bot = (function () {
                     }
                     //add manchester to Axioms JSTree
                     _botEngine.end();
-                }
+                },
             );
         },
 
@@ -212,7 +212,7 @@ var CreateRestriction_bot = (function () {
             ],
             function (err, result) {
                 return callback(err);
-            }
+            },
         );
     };
 

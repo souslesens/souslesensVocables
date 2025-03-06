@@ -122,7 +122,7 @@ var UI = (function () {
                     KGcreator.ResetRunMappingTabWidth();
                 }
             },
-            true
+            true,
         );
 
         self.themeList();

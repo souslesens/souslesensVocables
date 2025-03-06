@@ -130,7 +130,7 @@ var SQLquery_run = (function () {
 
             function (err) {
                 return callback(err, data);
-            }
+            },
         );
     };
 

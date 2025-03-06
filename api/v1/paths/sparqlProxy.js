@@ -30,23 +30,20 @@ module.exports = function () {
                             if (err) {
                                 return processResponse(res, err, userSources);
                             }
-                            UserRequestFiltering.filterSparqlRequest(body.params.query, userSources, user, function(parsingError, filteredQuery) {
+                            UserRequestFiltering.filterSparqlRequest(body.params.query, userSources, user, function (parsingError, filteredQuery) {
                                 if (parsingError) {
                                     return processResponse(res, parsingError, null);
                                 }
                                 body.params.query = filteredQuery;
 
-                                httpProxy.post(req.body.url, body.headers, body.params, function(err, result) {
+                                httpProxy.post(req.body.url, body.headers, body.params, function (err, result) {
                                     processResponse(res, err, result);
                                 });
                             });
 
                             return;
-
-                        })
-                    })
-
-
+                        });
+                    });
                 } else {
                     httpProxy.post(req.body.url, body.headers, body.params, function (err, result) {
                         processResponse(res, err, result);
@@ -84,7 +81,7 @@ module.exports = function () {
     };
 
     function GET(req, res, next) {
-        var options = JSON.parse(req.query.options)
+        var options = JSON.parse(req.query.options);
 
         if (ConfigManager.config && req.query.url.indexOf(ConfigManager.config.sparql_server.url) == 0) {
             if (ConfigManager.config.sparql_server.user) {
@@ -106,17 +103,16 @@ module.exports = function () {
                         req.query.url = filteredQuery;
 
                         try {
-
                             httpProxy.get(req.query.url, options, function (err, result) {
                                 processResponse(res, err, result);
                             });
                         } catch (e) {
                             next(e);
                         }
-                    })
-                })
-            })
-            }
+                    });
+                });
+            });
+        }
     }
 
     return operations;

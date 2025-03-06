@@ -383,7 +383,7 @@ var Containers_tree = (function () {
                     return callback(null, visjsData);
                 }
                 return;
-            }
+            },
         );
     };
 

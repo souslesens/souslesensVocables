@@ -154,7 +154,7 @@ var MappingModeler = (function () {
                 if (err) {
                     return err;
                 }
-            }
+            },
         );
     };
     self.activateRightPanel = function (PanelLabel) {

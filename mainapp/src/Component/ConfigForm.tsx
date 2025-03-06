@@ -200,7 +200,7 @@ const ConfigForm = () => {
         },
         configRD,
         allProfilesRD,
-        allToolsRD
+        allToolsRD,
     );
 
     return SRD.match(
@@ -218,7 +218,7 @@ const ConfigForm = () => {
                 </Alert>
             ),
         },
-        renderRD
+        renderRD,
     );
 };
 

@@ -40,7 +40,7 @@ var SubGraph = (function () {
                     restrictions: allRestrictionProperties,
                     classesMap: classesMap,
                 });
-            }
+            },
         );
     };
 
@@ -272,7 +272,7 @@ var SubGraph = (function () {
                 }
 
                 return callback(null, result);
-            }
+            },
         );
     };
 

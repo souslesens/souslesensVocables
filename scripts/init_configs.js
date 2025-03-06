@@ -1,6 +1,8 @@
 const bcrypt = require("bcrypt");
 const fs = require("fs");
 const merge = require("lodash.merge");
+const { UserModel } = require("../model/users");
+const { profileModel } = require("../model/profiles");
 
 // create data/mapping dir if not exists
 fs.mkdirSync("data/mappings", { recursive: true });
@@ -30,7 +32,8 @@ if (!fs.existsSync(usersPath)) {
         },
     };
 
-    fs.writeFileSync("config/users/users.json", JSON.stringify(user_json, null, 2));
+    const userModel = new UserModel();
+    await userModel.addUserAccount(user_json);
 }
 
 // config/blenderSources.json
@@ -75,11 +78,15 @@ if (!fs.existsSync(mainConfigPath)) {
 
 // config/profiles.json
 const profilesPath = "config/profiles.json";
-const profilesTemplatePath = "config_templates/profiles.json.default";
 if (!fs.existsSync(profilesPath)) {
-    fs.readFile(profilesTemplatePath, (_err, data) => {
-        fs.writeFileSync(profilesPath, JSON.stringify(JSON.parse(data), null, 2));
-    });
+    const profile_json = {
+        label: "admin",
+        theme: "Sea Breeze",
+        allowedTools: ["admin", "ConfigEditor", "GraphManagement", "lineage", "KGcreator", "KGquery", "OntoCreator", "SourcesManagement", "Standardizer", "UserManagement"],
+        sourcesAccessControl: {},
+        schema_types: ["OWL", "SKOS"],
+    };
+    await profileModel.addProfile(profile_json);
 }
 
 // config/sources.json

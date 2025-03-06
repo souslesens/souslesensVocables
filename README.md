@@ -2,7 +2,6 @@
 
 [![Prettier](https://github.com/souslesens/souslesensVocables/actions/workflows/prettier.yaml/badge.svg)](https://github.com/souslesens/souslesensVocables/actions/workflows/prettier.yaml)
 [![Jest](https://github.com/souslesens/souslesensVocables/actions/workflows/jest.yaml/badge.svg)](https://github.com/souslesens/souslesensVocables/actions/workflows/jest.yaml)
-[![Cypress Tests](https://github.com/souslesens/souslesensVocables/actions/workflows/cypress.yaml/badge.svg)](https://github.com/souslesens/souslesensVocables/actions/workflows/cypress.yaml)
 [![Docker build and push](https://github.com/souslesens/souslesensVocables/actions/workflows/build-docker-images.yaml/badge.svg)](https://github.com/souslesens/souslesensVocables/actions/workflows/build-docker-images.yaml)
 
 ![sousLeSensVocables large](https://user-images.githubusercontent.com/1880078/130787939-adf887d3-0054-4aa7-9867-0fbcd5bfc7a2.png)

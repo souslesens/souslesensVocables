@@ -12,8 +12,8 @@ const ConfigSchema = z.object({
 
 export type ConfigType = z.infer<typeof ConfigSchema>;
 
-const UpdateConfigCommandSchema = ConfigSchema.omit({ auth: true });
-export type UpdateConfigCommand = z.infer<typeof UpdateConfigCommandSchema>;
+const _UpdateConfigCommandSchema = ConfigSchema.omit({ auth: true });
+export type UpdateConfigCommand = z.infer<typeof _UpdateConfigCommandSchema>;
 
 async function getConfig(): Promise<ConfigType> {
     const response = await fetch("/api/v1/config");

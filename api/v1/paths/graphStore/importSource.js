@@ -76,7 +76,7 @@ module.exports = function () {
                     ],
                     function (err) {
                         processResponse(res, err, "DONE");
-                    }
+                    },
                 );
             } else {
                 return res.status(403);

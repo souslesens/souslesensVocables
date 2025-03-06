@@ -45,7 +45,7 @@ class SourceModel {
             Object.entries(sources).map(([id, s]) => {
                 const newSource = { ...s, accessControl: "readwrite" };
                 return [id, newSource];
-            })
+            }),
         );
     };
 
@@ -80,7 +80,7 @@ class SourceModel {
      * @returns {Promise<Record<string, SourceWithAccessControl>>} a collection of sources
      */
     _getAllowedSources = async (sources, user) => {
-        const profiles = await this.profileModel._read();
+        const profiles = await this.profileModel.getAllProfiles();
         // convert objects to lists
         const profilesList = Object.entries(profiles);
         const sourcesList = Object.entries(sources);
@@ -150,7 +150,7 @@ class SourceModel {
                         return 1;
                     }
                     return 0;
-                })
+                }),
         );
 
         // filter sources with sortedAndReducedAllowedSources
@@ -207,7 +207,7 @@ class SourceModel {
                 if (source.owner == user.login) {
                     return [name, source];
                 }
-            })
+            }),
         );
         return ownedSources;
     };

@@ -472,7 +472,7 @@ var Lineage_whiteboard = (function () {
                 if (err) {
                     return alert(err), topConcepts;
                 }
-            }
+            },
         );
     };
 
@@ -669,7 +669,7 @@ var Lineage_whiteboard = (function () {
                 if (callback) {
                     return callback();
                 }
-            }
+            },
         );
     };
 
@@ -1475,7 +1475,7 @@ var Lineage_whiteboard = (function () {
                         },
                         function (err) {
                             callbackSeries(err);
-                        }
+                        },
                     );
                 },
 
@@ -1493,7 +1493,7 @@ var Lineage_whiteboard = (function () {
                 } else if (err) {
                     UI.message(err);
                 }
-            }
+            },
         );
     };
 
@@ -1644,7 +1644,7 @@ var Lineage_whiteboard = (function () {
                     callback(null, visjsData);
                 }
                 return UI.message("", true);
-            }
+            },
         );
     };
 
@@ -2147,72 +2147,72 @@ var Lineage_whiteboard = (function () {
         var visjsData = { nodes: [], edges: [] };
         var existingNodes = self.lineageVisjsGraph.getExistingIdsMap();
         self.currentExpandLevel += 1;
-        sparqlResults.forEach(function (
-            /** @type {{ range: { value?: any; range?: string; }; prop: { value: string; }; rangeLabel: { value: any; }; domain: { value: any; }; propLabel: { value: string; }; }} */ item
-        ) {
-            if (!item.range) {
-                item.range = { value: "?_" + item.prop.value };
-            }
-            if (!item.range.value.match(/.+:.+|http.+|_:+/)) {
-                return;
-            }
-            if (!item.rangeLabel) {
-                item.rangeLabel = { value: "?" };
-            }
-            if (!existingNodes[item.range.value]) {
-                existingNodes[item.range.value] = 1;
-                visjsData.nodes.push({
-                    id: item.range.value,
-                    label: item.rangeLabel.value,
-                    shadow: self.nodeShadow,
-                    shape: Lineage_whiteboard.defaultShape,
-                    size: Lineage_whiteboard.defaultShapeSize,
-                    color: self.getSourceColor(source, item.range.value),
-                    level: self.currentExpandLevel,
-                    data: {
-                        source: source,
+        sparqlResults.forEach(
+            function (/** @type {{ range: { value?: any; range?: string; }; prop: { value: string; }; rangeLabel: { value: any; }; domain: { value: any; }; propLabel: { value: string; }; }} */ item) {
+                if (!item.range) {
+                    item.range = { value: "?_" + item.prop.value };
+                }
+                if (!item.range.value.match(/.+:.+|http.+|_:+/)) {
+                    return;
+                }
+                if (!item.rangeLabel) {
+                    item.rangeLabel = { value: "?" };
+                }
+                if (!existingNodes[item.range.value]) {
+                    existingNodes[item.range.value] = 1;
+                    visjsData.nodes.push({
                         id: item.range.value,
                         label: item.rangeLabel.value,
-                        varName: "range",
-                    },
-                });
-            }
-            if (!item.domain) {
-                item.domain = { value: "?" };
-            }
-            if (!item.range) {
-                item.range = { range: "?" };
-            }
-
-            var edgeId = item.domain.value + "_" + item.range.value + "_" + item.prop.value;
-            var edgeIdInv = item.range.value + "_" + item.range.value + "_" + item.prop.value;
-            if (!existingNodes[edgeId]) {
-                existingNodes[edgeId] = 1;
-                if (!existingNodes[edgeIdInv]) {
-                    existingNodes[edgeIdInv] = 1;
-                    visjsData.edges.push({
-                        id: edgeId,
-                        from: item.range.value,
-                        to: item.domain.value,
-                        label: "<i>" + item.propLabel.value + "</i>",
-                        data: { propertyId: item.prop.value, source: source },
-                        font: { multi: true, size: 10 },
-                        // font: {align: "middle", ital: {color:Lineage_whiteboard.objectPropertyColor, mod: "italic", size: 10}},
-                        //   physics:false,
-                        arrows: {
-                            from: {
-                                enabled: true,
-                                type: "bar",
-                                scaleFactor: 0.5,
-                            },
+                        shadow: self.nodeShadow,
+                        shape: Lineage_whiteboard.defaultShape,
+                        size: Lineage_whiteboard.defaultShapeSize,
+                        color: self.getSourceColor(source, item.range.value),
+                        level: self.currentExpandLevel,
+                        data: {
+                            source: source,
+                            id: item.range.value,
+                            label: item.rangeLabel.value,
+                            varName: "range",
                         },
-                        physics: physics,
-                        // dashes: true,
-                        // color: Lineage_whiteboard.objectPropertyColor
                     });
                 }
-            }
-        });
+                if (!item.domain) {
+                    item.domain = { value: "?" };
+                }
+                if (!item.range) {
+                    item.range = { range: "?" };
+                }
+
+                var edgeId = item.domain.value + "_" + item.range.value + "_" + item.prop.value;
+                var edgeIdInv = item.range.value + "_" + item.range.value + "_" + item.prop.value;
+                if (!existingNodes[edgeId]) {
+                    existingNodes[edgeId] = 1;
+                    if (!existingNodes[edgeIdInv]) {
+                        existingNodes[edgeIdInv] = 1;
+                        visjsData.edges.push({
+                            id: edgeId,
+                            from: item.range.value,
+                            to: item.domain.value,
+                            label: "<i>" + item.propLabel.value + "</i>",
+                            data: { propertyId: item.prop.value, source: source },
+                            font: { multi: true, size: 10 },
+                            // font: {align: "middle", ital: {color:Lineage_whiteboard.objectPropertyColor, mod: "italic", size: 10}},
+                            //   physics:false,
+                            arrows: {
+                                from: {
+                                    enabled: true,
+                                    type: "bar",
+                                    scaleFactor: 0.5,
+                                },
+                            },
+                            physics: physics,
+                            // dashes: true,
+                            // color: Lineage_whiteboard.objectPropertyColor
+                        });
+                    }
+                }
+            },
+        );
         if (!self.lineageVisjsGraph.isGraphNotEmpty()) {
             self.drawNewGraph(visjsData);
         }
@@ -2271,7 +2271,7 @@ var Lineage_whiteboard = (function () {
                         return UI.message("No data found", true);
                     }
                     self.drawProperties(result);
-                }
+                },
             );
         }
 
@@ -2471,7 +2471,7 @@ var Lineage_whiteboard = (function () {
                                     shape: shape,
                                     color: color,
                                     rdfType: rdfType,
-                                })
+                                }),
                             );
                         }
                         if (options.skipLiterals && item.object.type && item.object.type.indexOf("literal") > -1) {
@@ -2525,7 +2525,7 @@ var Lineage_whiteboard = (function () {
                                     shape: shape,
                                     color: color,
                                     rdfType: rdfType,
-                                })
+                                }),
                             );
                         }
                         if (!options.OnlySubjects) {
@@ -2600,7 +2600,7 @@ var Lineage_whiteboard = (function () {
                     }
                 },
             ],
-            function (err) {}
+            function (err) {},
         );
     };
 
@@ -2736,130 +2736,132 @@ restrictionSource = Config.predicatesSource;
 }*/
 
                 var shape = Lineage_whiteboard.defaultShape;
-                result.forEach(function (
-                    /** @type {{ concept: { value: string; }; conceptLabel: { value: any; }; value: { value: any; }; prop: { value: string; }; valueLabel: { value: any; }; propLabel: { value: string; }; node: { value: any; }; }} */ item
-                ) {
-                    if (!existingNodes[item.subject.value]) {
-                        existingNodes[item.subject.value] = 1;
+                result.forEach(
+                    function (
+                        /** @type {{ concept: { value: string; }; conceptLabel: { value: any; }; value: { value: any; }; prop: { value: string; }; valueLabel: { value: any; }; propLabel: { value: string; }; node: { value: any; }; }} */ item,
+                    ) {
+                        if (!existingNodes[item.subject.value]) {
+                            existingNodes[item.subject.value] = 1;
 
-                        var predicateUri = options.inverse ? null : item.prop.value;
+                            var predicateUri = options.inverse ? null : item.prop.value;
 
-                        visjsData.nodes.push(VisjsUtil.getVisjsNode(source, item.subject.value, item.subjectLabel.value, predicateUri));
-                    }
-                    var color;
-                    var size = self.defaultShapeSize;
-                    if (!item.value) {
-                        color = "#ddd";
-                        item.value = { value: "?_" + item.prop.value };
-                        item.valueLabel = { value: "any" };
-                        shape = "text";
-                        size = 3;
-                    } else {
-                        color = self.getSourceColor(source, item.value.value);
-                    }
-                    if (!item.valueLabel) {
-                        item.valueLabel = { value: "" };
-                        size = 3;
-                    }
-
-                    if (item.propLabel.value == "sameAs") {
-                        shape = "hexagon";
-                        color = "#fdac00";
-                    }
-                    var label = item.valueLabel.value;
-                    if (Config.Lineage.logicalOperatorsMap[item.prop.value]) {
-                        label = Config.Lineage.logicalOperatorsMap[item.prop.value];
-                        shape = "hegagon";
-                        color = "#EEE";
-                    }
-
-                    if (item.value.type == "literal") {
-                        shape = "text";
-                        if (label.length > Config.whiteBoardMaxLabelLength) {
-                            label = label.substring(0, Config.whiteBoardMaxLabelLength) + "...";
+                            visjsData.nodes.push(VisjsUtil.getVisjsNode(source, item.subject.value, item.subjectLabel.value, predicateUri));
                         }
-                    }
+                        var color;
+                        var size = self.defaultShapeSize;
+                        if (!item.value) {
+                            color = "#ddd";
+                            item.value = { value: "?_" + item.prop.value };
+                            item.valueLabel = { value: "any" };
+                            shape = "text";
+                            size = 3;
+                        } else {
+                            color = self.getSourceColor(source, item.value.value);
+                        }
+                        if (!item.valueLabel) {
+                            item.valueLabel = { value: "" };
+                            size = 3;
+                        }
 
-                    if (!existingNodes[item.value.value]) {
-                        existingNodes[item.value.value] = 1;
-
-                        var predicateUri = options.inverse ? item.prop.value : null;
-                        visjsData.nodes.push(VisjsUtil.getVisjsNode(source, item.value.value, item.valueLabel.value, predicateUri));
-                    }
-                    var edgeId = item.node.value; //item.value.value + "_" + item.subject.value + "_" + item.prop.value;
-
-                    var cardinalitylabel = "";
-                    if (item.cardinalityType) {
-                        cardinalitylabel = common.getRestrictionCardinalityLabel(item.cardinalityType.value, item.cardinalityValue.value);
-                    }
-
-                    if (!existingNodes[edgeId]) {
-                        existingNodes[edgeId] = 1;
+                        if (item.propLabel.value == "sameAs") {
+                            shape = "hexagon";
+                            color = "#fdac00";
+                        }
+                        var label = item.valueLabel.value;
                         if (Config.Lineage.logicalOperatorsMap[item.prop.value]) {
                             label = Config.Lineage.logicalOperatorsMap[item.prop.value];
                             shape = "hegagon";
                             color = "#EEE";
                         }
 
-                        if (options.inverse) {
-                            visjsData.edges.push({
-                                id: edgeId,
-                                from: item.value.value,
-                                to: item.subject.value,
-                                //  label: "<i>" + item.propLabel.value + "</i>",
-                                label: item.propLabel.value + ":" + cardinalitylabel,
-                                font: { color: options.edgesColor || Lineage_whiteboard.restrictionColor, size: Lineage_whiteboard.restrictionFontSize },
-                                data: {
-                                    propertyId: item.prop.value,
-                                    bNodeId: item.node.value,
-                                    source: restrictionSource,
-                                    propertyLabel: item.propLabel.value,
-                                    subClassId: item.value.value,
-                                },
-
-                                arrows: {
-                                    from: {
-                                        enabled: true,
-                                        type: "solid",
-                                        scaleFactor: 0.5,
-                                    },
-                                },
-                                dashes: true,
-                                color: options.edgesColor || Lineage_whiteboard.restrictionColor,
-                                physics: physics,
-                                width: self.restrictionEdgeWidth,
-                            });
-                        } else if (!options.inverse) {
-                            visjsData.edges.push({
-                                id: edgeId,
-                                to: item.value.value,
-                                from: item.subject.value,
-                                //  label: "<i>" + item.propLabel.value + "</i>",
-                                label: item.propLabel.value,
-                                font: { color: options.edgesColor || Lineage_whiteboard.restrictionColor, size: Lineage_whiteboard.restrictionFontSize },
-                                data: {
-                                    propertyId: item.prop.value,
-                                    bNodeId: item.node.value,
-                                    source: restrictionSource,
-                                    propertyLabel: item.propLabel.value,
-                                    subClassId: item.subject.value,
-                                },
-
-                                arrows: {
-                                    to: {
-                                        enabled: true,
-                                        type: "solid",
-                                        scaleFactor: 0.5,
-                                    },
-                                },
-                                dashes: true,
-                                width: self.restrictionEdgeWidth,
-                                color: options.edgesColor || Lineage_whiteboard.restrictionColor,
-                                physics: physics,
-                            });
+                        if (item.value.type == "literal") {
+                            shape = "text";
+                            if (label.length > Config.whiteBoardMaxLabelLength) {
+                                label = label.substring(0, Config.whiteBoardMaxLabelLength) + "...";
+                            }
                         }
-                    }
-                });
+
+                        if (!existingNodes[item.value.value]) {
+                            existingNodes[item.value.value] = 1;
+
+                            var predicateUri = options.inverse ? item.prop.value : null;
+                            visjsData.nodes.push(VisjsUtil.getVisjsNode(source, item.value.value, item.valueLabel.value, predicateUri));
+                        }
+                        var edgeId = item.node.value; //item.value.value + "_" + item.subject.value + "_" + item.prop.value;
+
+                        var cardinalitylabel = "";
+                        if (item.cardinalityType) {
+                            cardinalitylabel = common.getRestrictionCardinalityLabel(item.cardinalityType.value, item.cardinalityValue.value);
+                        }
+
+                        if (!existingNodes[edgeId]) {
+                            existingNodes[edgeId] = 1;
+                            if (Config.Lineage.logicalOperatorsMap[item.prop.value]) {
+                                label = Config.Lineage.logicalOperatorsMap[item.prop.value];
+                                shape = "hegagon";
+                                color = "#EEE";
+                            }
+
+                            if (options.inverse) {
+                                visjsData.edges.push({
+                                    id: edgeId,
+                                    from: item.value.value,
+                                    to: item.subject.value,
+                                    //  label: "<i>" + item.propLabel.value + "</i>",
+                                    label: item.propLabel.value + ":" + cardinalitylabel,
+                                    font: { color: options.edgesColor || Lineage_whiteboard.restrictionColor, size: Lineage_whiteboard.restrictionFontSize },
+                                    data: {
+                                        propertyId: item.prop.value,
+                                        bNodeId: item.node.value,
+                                        source: restrictionSource,
+                                        propertyLabel: item.propLabel.value,
+                                        subClassId: item.value.value,
+                                    },
+
+                                    arrows: {
+                                        from: {
+                                            enabled: true,
+                                            type: "solid",
+                                            scaleFactor: 0.5,
+                                        },
+                                    },
+                                    dashes: true,
+                                    color: options.edgesColor || Lineage_whiteboard.restrictionColor,
+                                    physics: physics,
+                                    width: self.restrictionEdgeWidth,
+                                });
+                            } else if (!options.inverse) {
+                                visjsData.edges.push({
+                                    id: edgeId,
+                                    to: item.value.value,
+                                    from: item.subject.value,
+                                    //  label: "<i>" + item.propLabel.value + "</i>",
+                                    label: item.propLabel.value,
+                                    font: { color: options.edgesColor || Lineage_whiteboard.restrictionColor, size: Lineage_whiteboard.restrictionFontSize },
+                                    data: {
+                                        propertyId: item.prop.value,
+                                        bNodeId: item.node.value,
+                                        source: restrictionSource,
+                                        propertyLabel: item.propLabel.value,
+                                        subClassId: item.subject.value,
+                                    },
+
+                                    arrows: {
+                                        to: {
+                                            enabled: true,
+                                            type: "solid",
+                                            scaleFactor: 0.5,
+                                        },
+                                    },
+                                    dashes: true,
+                                    width: self.restrictionEdgeWidth,
+                                    color: options.edgesColor || Lineage_whiteboard.restrictionColor,
+                                    physics: physics,
+                                });
+                            }
+                        }
+                    },
+                );
                 if (callback && options.returnVisjsData) {
                     return callback(null, visjsData);
                 }
@@ -2880,7 +2882,7 @@ restrictionSource = Config.predicatesSource;
                 if (callback) {
                     return callback(null, result);
                 }
-            }
+            },
         );
     };
 
@@ -4192,7 +4194,7 @@ attrs.color=self.getSourceColor(superClassValue)
                 label: node.data.label,
                 source: node.data.source,
                 data: node.data,
-            }
+            },
             //  self.currentTreeNode.id + "_anchor"
         );
     };

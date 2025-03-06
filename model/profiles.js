@@ -4,12 +4,14 @@ const z = require("zod");
 
 const { readMainConfig } = require("./config");
 const { toolModel } = require("./tools");
+const { cleanupConnection, getKnexConnection } = require("./utils");
 
 /**
  * @typedef {import("./UserTypes").UserAccount} UserAccount
  * @typedef {import("./ProfileTypes").Profile} Profile
  */
 
+<<<<<<< HEAD
 const ProfileObject = z.object({
     id: z.string(),
     name: z.string(),
@@ -19,6 +21,19 @@ const ProfileObject = z.object({
     allowedTools: z.string().array().optional(),
     _type: z.string().default("profile"),
 }).strict();
+=======
+const ProfileObject = z
+    .object({
+        id: z.string(),
+        name: z.string(),
+        theme: z.string().default(""),
+        allowedSourceSchemas: z.enum(["OWL", "SKOS"]).array().optional(),
+        sourcesAccessControl: z.record(z.string(), z.string()).optional(),
+        allowedTools: z.string().array().optional(),
+        _type: z.string().default("profile"),
+    })
+    .strict();
+>>>>>>> origin/master
 
 class ProfileModel {
     /**
@@ -64,6 +79,7 @@ class ProfileModel {
      * @param {Profile} profile - the profile to convert
      * @returns {Profile} - the converted object with the correct fields
      */
+<<<<<<< HEAD
     _convertToLegacy = (profile) => [ profile.label, {
         id: profile.label,
         name: profile.label,
@@ -81,11 +97,25 @@ class ProfileModel {
     _getConnection = () => {
         return knex({ client: "pg", connection: this._mainConfig.database });
     };
+=======
+    _convertToLegacy = (profile) => [
+        profile.label,
+        {
+            id: profile.label,
+            name: profile.label,
+            theme: profile.theme,
+            allowedSourceSchemas: profile.schema_types,
+            allowedTools: profile.allowed_tools,
+            sourcesAccessControl: profile.access_control,
+        },
+    ];
+>>>>>>> origin/master
 
     /**
      * @returns {Promise<Record<string, Profile>>} a collection of profiles
      */
     getAllProfiles = async () => {
+<<<<<<< HEAD
         const conn = this._getConnection();
         const results = await conn.select("*").from("profiles_list");
         conn.destroy();
@@ -93,6 +123,13 @@ class ProfileModel {
         const profiles = Object.fromEntries(
             results.map((profile) => this._convertToLegacy(profile))
         );
+=======
+        const conn = getKnexConnection(this._mainConfig.database);
+        const results = await conn.select("*").from("profiles_list");
+        cleanupConnection(conn);
+
+        const profiles = Object.fromEntries(results.map((profile) => this._convertToLegacy(profile)));
+>>>>>>> origin/master
 
         if (profiles["admin"] === undefined) {
             profiles["admin"] = {
@@ -103,7 +140,11 @@ class ProfileModel {
                 allowedTools: this._mainConfig.tools_available,
                 sourcesAccessControl: {},
                 defaultSourceAccessControl: "readwrite",
+<<<<<<< HEAD
             }
+=======
+            };
+>>>>>>> origin/master
         }
 
         return profiles;
@@ -119,11 +160,15 @@ class ProfileModel {
             return allProfiles;
         }
 
+<<<<<<< HEAD
         return Object.fromEntries(
             Object.entries(allProfiles).filter(
                 ([profileName, _profile]) => user.groups.includes(profileName)
             )
         );
+=======
+        return Object.fromEntries(Object.entries(allProfiles).filter(([profileName, _profile]) => user.groups.includes(profileName)));
+>>>>>>> origin/master
     };
 
     /**
@@ -159,15 +204,26 @@ class ProfileModel {
      * @param {string} profileNameId -  a profile name or Id
      */
     deleteProfile = async (profileNameId) => {
+<<<<<<< HEAD
         const conn = this._getConnection();
         const results = await conn.select("label").from("profiles").where("label", profileNameId).first();
         if (results === undefined) {
             conn.destroy();
+=======
+        const conn = getKnexConnection(this._mainConfig.database);
+        const results = await conn.select("label").from("profiles").where("label", profileNameId).first();
+        if (results === undefined) {
+            cleanupConnection(conn);
+>>>>>>> origin/master
             return false;
         }
 
         await conn("profiles").where("label", profileNameId).del();
+<<<<<<< HEAD
         conn.destroy();
+=======
+        cleanupConnection(conn);
+>>>>>>> origin/master
         return true;
     };
 
@@ -178,15 +234,26 @@ class ProfileModel {
     updateProfile = async (profile) => {
         const data = this._checkProfile(profile);
 
+<<<<<<< HEAD
         const conn = this._getConnection();
         const results = await conn.select("label").from("profiles").where("label", data.name).first();
         if (results === undefined) {
             conn.destroy();
+=======
+        const conn = getKnexConnection(this._mainConfig.database);
+        const results = await conn.select("label").from("profiles").where("label", data.name).first();
+        if (results === undefined) {
+            cleanupConnection(conn);
+>>>>>>> origin/master
             return false;
         }
 
         await conn.update(this._convertToDatabase(data)).into("profiles").where("label", data.name);
+<<<<<<< HEAD
         conn.destroy();
+=======
+        cleanupConnection(conn);
+>>>>>>> origin/master
         return true;
     };
 
@@ -196,15 +263,26 @@ class ProfileModel {
     addProfile = async (profile) => {
         const data = this._checkProfile(profile);
 
+<<<<<<< HEAD
         const conn = this._getConnection();
         const results = await conn.select("label").from("profiles").where("label", data.name).first();
         if (results !== undefined) {
             conn.destroy();
+=======
+        const conn = getKnexConnection(this._mainConfig.database);
+        const results = await conn.select("label").from("profiles").where("label", data.name).first();
+        if (results !== undefined) {
+            cleanupConnection(conn);
+>>>>>>> origin/master
             throw Error("The profile already exists, try updating it");
         }
 
         await conn.insert(this._convertToDatabase(data)).into("profiles");
+<<<<<<< HEAD
         conn.destroy();
+=======
+        cleanupConnection(conn);
+>>>>>>> origin/master
     };
 
     /**
@@ -212,9 +290,15 @@ class ProfileModel {
      * @returns {string} the theme currently defined for this profile
      */
     getThemeFromProfile = async (profileName) => {
+<<<<<<< HEAD
         const conn = this._getConnection();
         const results = await conn.select("theme").from("profiles").where("label", profileName).first();
         conn.destroy();
+=======
+        const conn = getKnexConnection(this._mainConfig.database);
+        const results = await conn.select("theme").from("profiles").where("label", profileName).first();
+        cleanupConnection(conn);
+>>>>>>> origin/master
         if (results === undefined) {
             return this._mainConfig.theme.defaultTheme;
         }

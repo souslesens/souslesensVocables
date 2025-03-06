@@ -28,7 +28,7 @@ var MappingTransform = (function () {
 
         $("#mappingModeler_genericPanel").html(
             '<button class="w3-button nodesInfos-iconsButtons " style="font-size: 10px;margin-left:7px;" onclick=" MappingModeler.copyKGcreatorMappings()"><input type="image" src="./icons/CommonIcons/CopyIcon.png"></button>' +
-                ' <textarea id="mappingModeler_infosTA" style="display: block;width:80%;height: 700px;overflow: auto;"> </textarea>'
+                ' <textarea id="mappingModeler_infosTA" style="display: block;width:800px;height: 500px;overflow: auto;"> </textarea>',
         );
         //    $("#smallDialogDiv").dialog("open");
         $("#mappingModeler_infosTA").val(JSON.stringify(json, null, 2));
@@ -190,7 +190,7 @@ var MappingTransform = (function () {
                     object = self.nodeToKGcreatorColumnName(
                         Object.values(columnsMap).filter(function (node) {
                             return object == node.label;
-                        })[0].data
+                        })[0].data,
                     );
                 }
 

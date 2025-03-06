@@ -219,7 +219,7 @@ var Lineage_similars = (function () {
                 if (source) {
                     Lineage_sources.registerSource(source);
                 }
-            }
+            },
         );
     };
     self.getStartingNodes = function () {

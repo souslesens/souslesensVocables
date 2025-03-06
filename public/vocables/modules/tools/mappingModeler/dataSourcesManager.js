@@ -245,7 +245,7 @@ var DataSourceManager = (function () {
                 if (callback) {
                     return callback(err, self.currentConfig);
                 }
-            }
+            },
         );
     };
 
@@ -345,7 +345,7 @@ var DataSourceManager = (function () {
                 if (callback) {
                     return callback(null, columns);
                 }
-            }
+            },
         );
     };
 
@@ -425,7 +425,7 @@ var DataSourceManager = (function () {
                         if (callback) {
                             callback();
                         }
-                    }
+                    },
                 );
             });
         });

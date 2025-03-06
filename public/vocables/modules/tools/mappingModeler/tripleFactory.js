@@ -350,7 +350,7 @@ var TripleFactory = (function () {
                 if (err) {
                     $("#KGcreator_infosDiv").val("\nALL DONE");
                 }
-            }
+            },
         );
     };
 

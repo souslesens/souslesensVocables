@@ -324,7 +324,7 @@ var KGquery_paths = (function () {
                         nearestNodeId = key;
                     }
                 callback(null, nearestNodeId);
-            }
+            },
         );
     };
 
@@ -376,7 +376,7 @@ var KGquery_paths = (function () {
                             });
 
                             callbackEach();
-                        }
+                        },
                     );
                 }
             },
@@ -389,7 +389,7 @@ var KGquery_paths = (function () {
                 });
 
                 return callback(unambiguousPaths);
-            }
+            },
         );
     };
 

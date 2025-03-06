@@ -167,7 +167,7 @@ function MetadataTable({ metadata, prefixes, onSubmit, loading, isReadOnly }: Me
                     shortType: metadataToType(row),
                     ...row,
                 };
-            })
+            }),
         );
     }, [metadata]);
 
@@ -362,6 +362,7 @@ export function MetadataModal({ onClose, open, sourceName, isReadOnly = false }:
             setPrefixes(result);
         };
 
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
         Promise.all([fetchMetadata(), fetchPrefixCc()]).finally(() => {
             setLoading(false);
         });

@@ -863,7 +863,7 @@ var Sparql_OWL = (function () {
                 }
 
                 return callback(null, { hierarchies: hierarchies, rawResult: result.results.bindings });
-            }
+            },
         );
     };
 
@@ -917,7 +917,7 @@ var Sparql_OWL = (function () {
                     map[item.id.value] = item.types.value;
                 });
                 return callback(null, map);
-            }
+            },
         );
     };
 
@@ -1104,7 +1104,7 @@ var Sparql_OWL = (function () {
                         caller: "getFilteredTriples",
                     });
                     return callbackQuery(null, result.results.bindings);
-                }
+                },
             );
         }
 
@@ -1127,7 +1127,7 @@ var Sparql_OWL = (function () {
                 },
                 function (err) {
                     return callback(err, allResults);
-                }
+                },
             );
         } else if (objectIds) {
             slicedObjectIds = common.array.slice(objectIds, Sparql_generic.slicesSize);
@@ -1145,7 +1145,7 @@ var Sparql_OWL = (function () {
                 },
                 function (err) {
                     return callback(err, allResults);
-                }
+                },
             );
         } else {
             query(subjectIds, propertyIds, objectIds, function (err, result) {
@@ -1557,7 +1557,7 @@ var Sparql_OWL = (function () {
                     result2 = Sparql_generic.setBindingsOptionalProperties(result2, ["prop", "node", "subject", "value"], { source: sourceLabel });
                     return callback(null, result2);
                 });
-            }
+            },
         );
     };
 
@@ -1582,7 +1582,7 @@ var Sparql_OWL = (function () {
                     return callback(err);
                 }
                 return callback(null, result.results.bindings);
-            }
+            },
         );
     };
 
@@ -1701,7 +1701,7 @@ var Sparql_OWL = (function () {
             },
             function (err) {
                 return callback(err, allData);
-            }
+            },
         );
     };
     self.getNodesOwlTypeMap = function (source, ids, callback) {
@@ -1750,7 +1750,7 @@ var Sparql_OWL = (function () {
             },
             function (err) {
                 return callback(err, typesMap);
-            }
+            },
         );
     };
 
@@ -1976,7 +1976,7 @@ var Sparql_OWL = (function () {
             },
             function (err) {
                 callback(err, allData);
-            }
+            },
         );
     };
 
@@ -2082,7 +2082,7 @@ var Sparql_OWL = (function () {
                     return callback(err);
                 }
                 return callback(null, allResults);
-            }
+            },
         );
     };
 
@@ -2130,7 +2130,7 @@ var Sparql_OWL = (function () {
                         return callback(err);
                     }
                     callback(err, totalItems);
-                }
+                },
             );
         });
     };
@@ -2451,7 +2451,7 @@ var Sparql_OWL = (function () {
             },
             function (err) {
                 return callback(null, allResults);
-            }
+            },
         );
     };
 
@@ -2576,7 +2576,7 @@ var Sparql_OWL = (function () {
                         });
 
                         callbackWhilst(null, result.result);
-                    }
+                    },
                 );
             },
             function (err) {
@@ -2584,7 +2584,7 @@ var Sparql_OWL = (function () {
                     return callback(err);
                 }
                 return callback(null, prefixesStr + str);
-            }
+            },
         );
     };
 

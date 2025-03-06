@@ -515,7 +515,7 @@ tripleObj.objectIsSpecificUri = true;
                                     KGcreator.currentConfig.currentMappings,
                                     function (err, result) {
                                         KGcreator_mappings.showTableMappings(columnFromData.table);
-                                    }
+                                    },
                                 );
                             }
                         } else {
@@ -532,11 +532,11 @@ tripleObj.objectIsSpecificUri = true;
                                     KGcreator.currentConfig.currentMappings,
                                     function (err, result) {
                                         KGcreator_mappings.showTableMappings(columnFromData.table);
-                                    }
+                                    },
                                 );
                             }
                         }
-                    }
+                    },
                 );
             }
         });

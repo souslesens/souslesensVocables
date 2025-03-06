@@ -61,8 +61,6 @@ var SubGraph = (function () {
                                             "--" +
                                             (item.targetClass ? Sparql_common.getLabelFromURI(item.targetClass.value) : "")
                                     );*/
-                                            (item.targetClass ? Sparql_common.getLabelFromURI(item.targetClass.value) : ""),
-                                    );
 
                                     if (item.type.value.endsWith("Class")) {
                                         if (!allClasses[item.s.value]) {

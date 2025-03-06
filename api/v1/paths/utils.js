@@ -18,8 +18,8 @@ async function writeResource(pathToResource, newResource, _res) {
     try {
         const savedFile = await writeFile(pathToResource, JSON.stringify(newResource, null, 2)).then(async () => await readFile(pathToResource));
         return JSON.parse(savedFile);
-    } catch (error) {
-        throw "ERROR WHEN SAVING";
+    } catch (e) {
+        throw `ERROR WHEN SAVING: ${e}`;
     }
 }
 

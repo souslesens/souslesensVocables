@@ -1,9 +1,6 @@
 var fs = require("fs");
-var path = require("path");
-var csvCrawler = require("../_csvCrawler.");
 var async = require("async");
 const csv = require("csv-parser");
-const util = require("../util.");
 
 var CSVmatrixFormatter = {
     transform: function (filePath, columnsFields, callback) {
@@ -54,7 +51,7 @@ var CSVmatrixFormatter = {
             ],
             function (err) {
                 return callback(err);
-            }
+            },
         );
     },
     readCsv: function (filePath, separator, lines, callback) {
@@ -63,8 +60,6 @@ var CSVmatrixFormatter = {
         var headers = [];
         var jsonData = [];
         var jsonDataFetch = [];
-        var startId = 100000;
-        var linesCount = 0;
         fs.createReadStream(filePath).pipe(
             csv({
                 separator: separator,
@@ -101,7 +96,7 @@ var CSVmatrixFormatter = {
                 .on("error", function (error) {
                     var x = error;
                     return callback(error);
-                })
+                }),
         );
     },
 };

@@ -1,4 +1,5 @@
 const fs = require("fs");
+const { Lock } = require("async-await-mutex-lock");
 
 /**
  * @typedef {Object} BlenderSource
@@ -43,7 +44,8 @@ class BlenderSources {
         const blenderSources = JSON.parse(data.toString());
         return blenderSources;
     };
-    create = async () => {
+    create = async (newUserAccount) => {
+        const lock = new Lock();
         await lock.acquire("UsersThread");
         try {
             const userAccounts = await this._read();

@@ -10,10 +10,10 @@
 var fs = require("fs");
 
 var util = {
-    sliceArray: function(array, sliceSize) {
+    sliceArray: function (array, sliceSize) {
         var slices = [];
         var slice = [];
-        array.forEach(function(item) {
+        array.forEach(function (item) {
             if (slice.length >= sliceSize) {
                 slices.push(slice);
                 slice = [];
@@ -23,7 +23,7 @@ var util = {
         slices.push(slice);
         return slices;
     },
-    deconcatSQLTableColumn: function(str) {
+    deconcatSQLTableColumn: function (str) {
         if (str.indexOf(":") > -1) {
             return null;
         }
@@ -46,12 +46,12 @@ var util = {
      * @param length
      * @return {string}
      */
-    getRandomHexaId: function(length) {
+    getRandomHexaId: function (length) {
         const str = Math.floor(Math.random() * Math.pow(16, length)).toString(16);
         return "0".repeat(length - str.length) + str;
     },
 
-    getStringHash: function(str) {
+    getStringHash: function (str) {
         var hash = 5381,
             i = str.length;
 
@@ -64,7 +64,7 @@ var util = {
          * signed int to an unsigned by doing an unsigned bitshift. */
         return hash >>> 0;
     },
-    dateToRDFString: function(date, time) {
+    dateToRDFString: function (date, time) {
         var str = "";
         if (date instanceof Date && isFinite(date)) {
             var month = "" + (date.getMonth() + 1);
@@ -97,7 +97,7 @@ var util = {
         return str;
     },
 
-    prepareJsonForsource: function(obj) {
+    prepareJsonForsource: function (obj) {
         /*  if (!(typeof obj === "object"))
      obj = JSON.parse(obj);*/
 
@@ -131,20 +131,20 @@ var util = {
         return obj;
     },
 
-    hashCode: function(str) {
+    hashCode: function (str) {
         var hash = 0;
         for (var i = 0; i < str.length; i++) {
             hash = ~~((hash << 5) - hash + str.charCodeAt(i));
         }
         return hash;
     },
-    base64_encodeFile: function(file) {
+    base64_encodeFile: function (file) {
         // read binary data
         var bitmap = fs.readFileSync(file);
         // convert binary data to base64 encoded string
         return new Buffer(bitmap).toString("base64");
     },
-    convertNumStringToNumber: function(value) {
+    convertNumStringToNumber: function (value) {
         if (value.match && value.match(/.*[a-zA-Z/\\$].*/)) {
             return value;
         }
@@ -162,17 +162,17 @@ var util = {
         }
         return value;
     },
-    isNumber: function(n) {
+    isNumber: function (n) {
         return !isNaN(parseFloat(n)) && isFinite(n);
     },
-    isInt: function(value) {
+    isInt: function (value) {
         return /^-?[0-9]+$/.test("" + value);
     },
-    isFloat: function(value) {
+    isFloat: function (value) {
         return /^-?[0-9]+[.,]?[0-9]*$/.test("" + value);
     },
 
-    cleanFieldsForNeo: function(obj) {
+    cleanFieldsForNeo: function (obj) {
         var obj2 = {};
         for (var key in obj) {
             var key2 = key.replace(/-/g, "_");
@@ -221,24 +221,24 @@ var util = {
 
         return obj2;
     },
-    capitalizeFirstLetter: function(string) {
+    capitalizeFirstLetter: function (string) {
         return string.charAt(0).toUpperCase() + string.slice(1);
     },
 
-    formatStringForTriple: function(str, forUri) {
+    formatStringForTriple: function (str, forUri) {
         if (!str) {
             return str;
         }
         str = str.trim();
-        if (str.indexOf("http://") == 0 || str.indexOf("https://") == 0 ) {
+        if (str.indexOf("http://") == 0 || str.indexOf("https://") == 0) {
             return str;
         }
         if (!str || !str.replace) {
             return null;
         }
-        
+
         str = str.trim();
-       
+
         str = str.replace(/\\/gm, "_");
         str = str.replace(/\n/gm, "\\\\n");
 
@@ -250,7 +250,7 @@ var util = {
         str = str.replace(/—/gm, " ");
         str = str.replace(/:/gm, "");
         str = str.replace(/\:/gm, "");
-        str = str.replace(/"/gm, "\\\"");
+        str = str.replace(/"/gm, '\\"');
         if (forUri) {
             str = str.replace(/ /gm, "_");
 
@@ -260,17 +260,16 @@ var util = {
 
             str = str.replace(/[^a-zA-Z0-9-_]/g, "");
             //str = str.replace(/-/g, "_");
-
         }
 
         return str;
     },
-    getCsvFileSeparator: function(file, callback) {
+    getCsvFileSeparator: function (file, callback) {
         var readStream = fs.createReadStream(file, { start: 0, end: 5000, encoding: "utf8" });
         var line = "";
         var separators = ["\t", ";", ","];
         readStream
-            .on("data", function(chunk) {
+            .on("data", function (chunk) {
                 line += chunk;
 
                 var match = null;
@@ -292,18 +291,18 @@ var util = {
                     readStream.destroy();
                 }
             })
-            .on("end", function() {
+            .on("end", function () {
                 return;
             })
-            .on("close", function() {
+            .on("close", function () {
                 return;
             });
     },
 
-    normalizeHeader: function(headerArray, s) {
+    normalizeHeader: function (headerArray, s) {
         var r = s;
         r = r.replace(/[()'.]/g, "");
-        r = r.replace(/[\s-]+\w/g, function(txt) {
+        r = r.replace(/[\s-]+\w/g, function (txt) {
             return txt.charAt(txt.length - 1).toUpperCase();
         });
         r = r.replace(new RegExp("\\s", "g"), "");
@@ -323,21 +322,21 @@ var util = {
         return r;
     },
 
-    csvToJson: function(filePath) {
+    csvToJson: function (filePath) {
         var str = "" + fs.readFileSync(filePath);
         str = str.replace(/[\u{0080}-\u{FFFF}]/gu, ""); //charactrese vides
         var lines = str.split("\n");
         var pagesJson = [];
         var cols = [];
 
-        lines[0].split("\t").forEach(function(cell) {
+        lines[0].split("\t").forEach(function (cell) {
             cols.push(cell.trim());
         });
 
-        lines.forEach(function(line, lineIndex) {
+        lines.forEach(function (line, lineIndex) {
             var cells = line.trim().split("\t");
             var obj = {};
-            cells.forEach(function(cell, index) {
+            cells.forEach(function (cell, index) {
                 if (lineIndex == 0) {
                 } else {
                     // cols.push(cell.trim())
@@ -348,7 +347,7 @@ var util = {
         });
         return pagesJson;
     },
-    getFilesInDirRecursively: function(dirPath, options, callback) {
+    getFilesInDirRecursively: function (dirPath, options, callback) {
         var path = require("path");
         var dirsArray = [];
         var dirFilesMap = {};
@@ -397,7 +396,7 @@ var util = {
                         type: "file",
                         parent: parent,
                         name: files[i],
-                        infos: infos
+                        infos: infos,
                     });
                     // dirsArray.push({type: "file", parent: parent, name: files[i], infos: infos})
                 }
@@ -408,13 +407,13 @@ var util = {
 
         return callback(null, dirFilesMap);
     },
-    decapitalizeLabel: function(label) {
-        var altLabel = label.replace(/[A-Z]/g, function(maj) {
+    decapitalizeLabel: function (label) {
+        var altLabel = label.replace(/[A-Z]/g, function (maj) {
             return " " + maj;
         });
         return altLabel.trim();
     },
-    getSparqlDate: function(date) {
+    getSparqlDate: function (date) {
         if (!date) {
             date = new Date();
         }
@@ -422,7 +421,7 @@ var util = {
         return str + "^^xsd:dateTime ";
     },
 
-    convertFrDateStr2Date: function(dateStr) {
+    convertFrDateStr2Date: function (dateStr) {
         //try convert french date
         var array = dateStr.split("/");
         if (array.length == 3) {
@@ -433,27 +432,27 @@ var util = {
         return null;
     },
 
-    replaceSparqlPrefixByUri: function(str, prefixes) {
+    replaceSparqlPrefixByUri: function (str, prefixes) {
         for (var key in prefixes) {
             prefixes[key] = prefixes[key].replace("<", "");
             prefixes[key] = prefixes[key].replace(">", "");
             var regex = new RegExp(key + ":([\\S\\d]+)", "gm");
 
-            str = str.replace(regex, function(match, capture, offset) {
+            str = str.replace(regex, function (match, capture, offset) {
                 return "<" + prefixes[key] + capture + ">";
             });
         }
         return str;
     },
 
-    getDateFromSLSformat: function(formatCode, dateStr) {
+    getDateFromSLSformat: function (formatCode, dateStr) {
         var formats = {
-            "FR": "27/05/2024",
-            "ISO": "2024-05-27",
-            "USA": "05/27/2024",
-            "EUR": "27. 05. 2024",
-            "JIS": "2024-05-27",
-            "ISO-time": "2022-09-27 18:00:00.000"
+            FR: "27/05/2024",
+            ISO: "2024-05-27",
+            USA: "05/27/2024",
+            EUR: "27. 05. 2024",
+            JIS: "2024-05-27",
+            "ISO-time": "2022-09-27 18:00:00.000",
         };
 
         if (!dateStr) {
@@ -485,7 +484,7 @@ var util = {
             try {
                 var number = parseInt(str);
                 if (number < 1900) {
-                    return (2000 + number);
+                    return 2000 + number;
                 }
                 return number;
             } catch (err) {
@@ -502,7 +501,6 @@ var util = {
             day = getDay(array[0]);
             month = getMonth(array[1]);
             year = getYear(array[2]);
-
         } else if (formatCode == "ISO") {
             var array = dateStr.split("-");
             if (array.length < 3) {
@@ -511,7 +509,6 @@ var util = {
             day = getDay(array[2]);
             month = getMonth(array[1]);
             year = getYear(array[0]);
-
         } else if (formatCode == "USA") {
             var array = dateStr.split("/");
             if (array.length < 3) {
@@ -520,7 +517,6 @@ var util = {
             day = getDay(array[1]);
             month = getMonth(array[0]);
             year = getYear(array[2]);
-
         } else if (formatCode == "EUR") {
             var array = dateStr.split(".");
             if (array.length < 3) {
@@ -529,7 +525,6 @@ var util = {
             day = getDay(array[0].trim());
             month = getMonth(array[1].trim());
             year = getYear(array[2].trim());
-
         } else if (formatCode == "JIS") {
             var array = dateStr.split("-");
             if (array.length < 3) {
@@ -538,7 +533,6 @@ var util = {
             day = getDay(array[2]);
             month = getMonth(array[1]);
             year = getYear(array[0]);
-
         } else if (formatCode == "ISO-time") {
             try {
                 var date = new Date(dateStr);
@@ -546,9 +540,7 @@ var util = {
             } catch (e) {
                 return null;
             }
-
         }
-
 
         if (!year || (!month && month != 0) || !day) {
             return null;
@@ -557,33 +549,26 @@ var util = {
         var date = new Date(Date.UTC(year, month, day));
         return date.toISOString();
         // return date.toISOString()
-
-
     },
 
-    convertISOStringDateForTriple:function(isoStringdate){
-       // isoString 2022-12-31T230000.000Z
-      //  internal virtuoso date YYYY.MM.DD hh:mm.ss
-        var regex=/(\d{4})-(\d{2})-(\d{2})T(\d{2})(\d{2})(\d{2})/
-        var array=isoStringdate.match(regex)
-        if(!array)
-            return null;
-        var str=array[1]+"-"+array[2]+"-"+array[3]
+    convertISOStringDateForTriple: function (isoStringdate) {
+        // isoString 2022-12-31T230000.000Z
+        //  internal virtuoso date YYYY.MM.DD hh:mm.ss
+        var regex = /(\d{4})-(\d{2})-(\d{2})T(\d{2})(\d{2})(\d{2})/;
+        var array = isoStringdate.match(regex);
+        if (!array) return null;
+        var str = array[1] + "-" + array[2] + "-" + array[3];
 
-        if(array.length>4){
-            str+=" "+array[4]
+        if (array.length > 4) {
+            str += " " + array[4];
         }
-        if(array.length>5){
-            str+=":"+array[5]
+        if (array.length > 5) {
+            str += ":" + array[5];
         }
-        if(array.length>6){
-            str+=":"+array[6]
+        if (array.length > 6) {
+            str += ":" + array[6];
         }
-        return str
-
-
-
-
+        return str;
     },
 
     /** Retrieve the authorization scheme and token from the HTTP header
@@ -593,29 +578,26 @@ var util = {
      * @return {(Array|null)}
      *         The scheme and token from the header
      */
-    parseAuthorizationFromHeader: function(header) {
+    parseAuthorizationFromHeader: function (header) {
         const regex = new RegExp(/^(?<scheme>[^\s]+)\s+(?<token>[^$]+)/);
 
         const output = regex.exec(header);
         if (output !== null) {
             return [output.groups.scheme, output.groups.token];
         }
-    }
+    },
 
-      ,  getLabelFromURI: function (id) {
-            const p = id.lastIndexOf("#");
-            if (p > -1) {
-                return id.substring(p + 1);
-            } else {
-                const p = id.lastIndexOf("/");
-                return id.substring(p + 1);
-            }
-
+    getLabelFromURI: function (id) {
+        const p = id.lastIndexOf("#");
+        if (p > -1) {
+            return id.substring(p + 1);
+        } else {
+            const p = id.lastIndexOf("/");
+            return id.substring(p + 1);
+        }
     },
 };
 
 module.exports = util;
 
-util.convertISOStringDateForTriple("2022-12-31T230000.000Z")
-
-
+util.convertISOStringDateForTriple("2022-12-31T230000.000Z");

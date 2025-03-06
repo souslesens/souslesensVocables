@@ -495,7 +495,7 @@ str = str.replace(/%2F/gm, "/");*/
                 textArea.style.left = "-999999px";
                 textArea.style.top = "-999999px";
                 document.body.appendChild(textArea);
-                textArea .trigger( "focus" );
+                textArea.trigger("focus");
                 textArea.select();
                 return new Promise((res, rej) => {
                     // here the magic happens
@@ -582,7 +582,7 @@ if (callback) return callback(err);
                 textArea.style.left = "-999999px";
                 textArea.style.top = "-999999px";
                 document.body.appendChild(textArea);
-                textArea .trigger( "focus" );
+                textArea.trigger("focus");
                 try {
                     var successful = document.execCommand("paste");
                     var text = textArea.value;

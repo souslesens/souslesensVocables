@@ -1,4 +1,3 @@
-const userManager = require("../../../../bin/user.");
 const { userModel } = require("../../../../model/users");
 
 module.exports = function () {

@@ -2,8 +2,6 @@ const async = require("async");
 const httpProxy = require("./httpProxy.");
 const request = require("request");
 const fs = require("fs");
-const path = require("path");
-
 //const sources=require("../model/sources")
 
 var OntologyModel = {
@@ -226,7 +224,7 @@ var OntologyModel = {
                         return callbackSeries();
                     }
                         */
-                    if (!Config.sources[source] ) {
+                    if (!Config.sources[source]) {
                         return callbackSeries();
                     }
                     var constraints = ontologyModel.constraints;
@@ -374,7 +372,7 @@ Sparql_OWL.getDictionary(source, { lang: Config.default_lang, filter: filter }, 
             ],
             function (err) {
                 callbackEach(err);
-            }
+            },
         );
     },
 
@@ -418,19 +416,8 @@ Sparql_OWL.getDictionary(source, { lang: Config.default_lang, filter: filter }, 
             }
             //     var str = "?" + variable + " rdfs:label" + pred + " ?" + variable + "Label. filter( lang(?" + variable + "Label)= '" + Config.default_lang + "' || !lang(?" + variable + "Label))";
             var str =
-                "?" +
-                variable +
-                " rdfs:label" +
-                pred +
-                " ?" +
-                variable +
-                "Label. filter(regex( lang(?" +
-                variable +
-                "Label), '" +
-                OntologyModel.Config.default_lang || 'en' +
-                "') || !lang(?" +
-                variable +
-                "Label))";
+                "?" + variable + " rdfs:label" + pred + " ?" + variable + "Label. filter(regex( lang(?" + variable + "Label), '" + OntologyModel.Config.default_lang ||
+                "en" + "') || !lang(?" + variable + "Label))";
 
             if (optional) {
                 return " OPTIONAL {" + str + "} ";
@@ -461,7 +448,7 @@ Sparql_OWL.getDictionary(source, { lang: Config.default_lang, filter: filter }, 
             BFO: { uriPattern: "obo", prefix: "bfo", prefixtarget: "http://purl.obolibrary.org/obo/" },
             // "BFO-2020": { uriPattern: "obo", prefix: "bfo", prefixtarget: "http://purl.obolibrary.org/obo/" },
             // "bfo.owl": { uriPattern: "obo", prefix: "bfo", prefixtarget: "http://purl.obolibrary.org/obo/" },
-           
+
             DOLCE: { uriPattern: "dul", prefix: "dul", prefixtarget: "http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#" },
             //   LML: { uriPattern: "lml", prefix: "lml", prefixtarget: "http://souslesens.org/ontology/lml/" },
         };

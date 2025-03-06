@@ -11,6 +11,8 @@ declare global {
         Config: {
             slsvColorThemes: Array<Record<string, string>>;
             sources: Record<string, ServerSource>;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            ontologiesVocabularyModels: Record<string, any>;
             // There are more config properties but we only use this one in mainapp
         };
     }

@@ -24,7 +24,7 @@ var MappingsDetails = (function () {
         rdfsLabel: "#33ff36",
         transform: "#ffe333",
         otherPredicates: "#ca33ff",
-        lookup:"#eeff33"
+        lookup: "#eeff33",
     };
 
     /**
@@ -163,15 +163,15 @@ var MappingsDetails = (function () {
                         parent: node.id,
                     });
                 }
-                var currentLookupName=node.data.dataTable+'|'+node.data.label
-                if(DataSourceManager.currentConfig.lookups[currentLookupName]){
-                    var lookup=DataSourceManager.currentConfig.lookups[currentLookupName]
-                    if(lookup.name==currentLookupName){
+                var currentLookupName = node.data.dataTable + "|" + node.data.label;
+                if (DataSourceManager.currentConfig.lookups[currentLookupName]) {
+                    var lookup = DataSourceManager.currentConfig.lookups[currentLookupName];
+                    if (lookup.name == currentLookupName) {
                         jstreeData.push({
-                            id:  lookup.fileName + "|" + "lookup" ,
+                            id: lookup.fileName + "|" + "lookup",
                             text: "<span style='color: " + self.colorsMap["lookup"] + "'>" + "lookup" + "</span>  " + JSON.stringify(lookup),
                             parent: node.id,
-                            data:lookup
+                            data: lookup,
                         });
                     }
                 }
@@ -344,8 +344,6 @@ var MappingsDetails = (function () {
                 //delete lookup
             }
         }
-
-
 
         JstreeWidget.deleteNode("detailedMappings_jsTreeDiv", treeNode);
         self.drawDetailedMappingsGraph();

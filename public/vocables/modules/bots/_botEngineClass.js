@@ -413,7 +413,7 @@ const botEngineClass = function () {
         $("#botVarToFill").val(varToFill);
         $("#botPromptInput").val(defaultValue || "");
         $("#botPromptInput").css("display", "block");
-        $("#botPromptInput") .trigger( "focus" );
+        $("#botPromptInput").trigger("focus");
         if (!self.history.step.includes(self.history.currentIndex)) {
             self.history.step.push(self.history.currentIndex);
         }
@@ -448,7 +448,7 @@ const botEngineClass = function () {
         }
 
         $("#bot_input").val("");
-        $("#bot_input") .trigger( "focus" );
+        $("#bot_input").trigger("focus");
         if ($("#botDiv")[0].scrollHeight > 500) {
             $("#botPanel").scrollTop($("#botPanel")[0].scrollHeight);
         }

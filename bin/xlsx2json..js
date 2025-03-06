@@ -117,7 +117,7 @@ var xlsx2json = {
                     fs.writeFileSync(filePath.replace(/\.xlsx/i, "model.json"), str);
                     console.log("done");
                 } else return callback(null, { model: allModel, data: allData });
-            }
+            },
         );
     },
     getWorkbookModel: function (filePath, callback) {

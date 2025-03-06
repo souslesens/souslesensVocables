@@ -177,7 +177,7 @@ var CreateSLSVsource_bot = (function () {
                     return _botEngine.reset();
                 } else {
                     UI.message("imported triples :" + data.result, true);
-                    botEngine.nextStep();
+                    _botEngine.nextStep();
                 }
                 callback();
             })

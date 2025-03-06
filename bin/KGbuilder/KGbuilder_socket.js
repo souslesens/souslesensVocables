@@ -1,6 +1,6 @@
 const SocketManager = require("../socketManager.");
 
-KGbuilder_socket = {
+var KGbuilder_socket = {
     message: function (clientSocketId, content, isError) {
         if (clientSocketId) {
             SocketManager.message(clientSocketId, "KGcreator", content);

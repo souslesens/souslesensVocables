@@ -2643,31 +2643,44 @@ var Sparql_OWL = (function () {
         });
     };
 
-    self.getClassIndividuals = function (sourceLabel, classIds, options, callback) {
+    self.getIndividualsClass = function (sourceLabel, classIds, options, callback) {
         if (!options) {
             options = {};
         }
         var fromStr = Sparql_common.getFromStr(sourceLabel);
-        var filterStr = Sparql_common.setFilter("type", classIds);
 
-        var query =
-            "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
-            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
-            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
-            "SELECT distinct ?label ?id" +
-            fromStr +
-            "" +
-            " WHERE {{ ?id rdf:type ?type.?id rdf:type ?type2. " +
-            filterStr +
-            "  FILTER (?type2=owl:NamedIndividual) " +
-            "?id rdfs:label ?label  }} limit 10000";
-        var url = Config.sparql_server.url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, _result) {
-            if (err) {
-                return callback(err);
-            }
-            return callback(null, _result.results.bindings);
-        });
+        var slices = common.array.slice(classIds, 50);
+        var allBindings = [];
+        async.eachSeries(
+            slices,
+            function (ids, callbackEach) {
+                var filterStr = Sparql_common.setFilter("type", ids);
+                var query =
+                    "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
+                    "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+                    "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
+                    "SELECT distinct ?label ?id" +
+                    fromStr +
+                    "" +
+                    " WHERE {{ ?id rdf:type ?type.?id rdf:type ?type2. " +
+                    filterStr +
+                    "  FILTER (?type2=owl:NamedIndividual) " +
+                    "?id rdfs:label ?label  }} limit 10000";
+                var url = Config.sparql_server.url + "?format=json&query=";
+                Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, _result) {
+                    if (err) {
+                        return callbackEach();
+                    }
+                    allBindings = allBindings.concat(_result.results.bindings);
+                });
+            },
+            function (err) {
+                if (err) {
+                    return callback(err);
+                }
+                return callback(null, allBindings);
+            },
+        );
     };
 
     self.getLabelsMapFromLabelsGraph = function (ids, callback) {
@@ -2719,7 +2732,7 @@ var Sparql_OWL = (function () {
         });
     };
 
-    self.getClassIndividualsDistinctProperties = function (sourceLabel, classId, callback) {
+    self.getIndividualsClassDistinctProperties = function (sourceLabel, classId, callback) {
         var fromStr = Sparql_common.getFromStr(sourceLabel);
         self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
 

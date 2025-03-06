@@ -18,7 +18,7 @@
     "shared_profiles": [],
     "shared_users": [],
     "created_at": "2025-01-24T14:16:41.111Z",
-    "owned_by": "test"
+    "owned_by": 1
   },
   {
     "id": 3,
@@ -41,7 +41,7 @@
       "owl_user"
     ],
     "created_at": "2025-01-24T14:18:24.019Z",
-    "owned_by": "skos_user"
+    "owned_by": 2
   },
   {
     "id": 4,
@@ -64,7 +64,7 @@
     ],
     "shared_users": [],
     "created_at": "2025-01-24T14:18:53.409Z",
-    "owned_by": "owl_user"
+    "owned_by": 3
   },
   {
     "id": 5,
@@ -88,6 +88,6 @@
       "skos_user"
     ],
     "created_at": "2025-01-27T08:05:51.750Z",
-    "owned_by": "test"
+    "owned_by": 1
   }
 ]

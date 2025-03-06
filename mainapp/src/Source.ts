@@ -170,8 +170,9 @@ export const ServerSourceSchema = z.object({
         .string()
         .default("")
         .refine((val) => val.match(/^([a-z0-9][a-z0-9-]*){0,10}$/i), { message: "Can only contain alphanum and - chars" }),
+    baseUri: z.string().url().optional().or(z.literal("")),
     _type: z.string().optional(),
-    graphUri: z.string().optional(),
+    graphUri: z.string().url().optional().or(z.literal("")),
     sparql_server: SparqlServerSchema,
     controller: z.string().default("Sparql_OWL"),
     topClassFilter: z.string().default("?topConcept rdf:type owl:Class ."),
@@ -232,7 +233,8 @@ export const InputSourceSchemaCreate = z.object({
 
 export const sourceHelp = {
     name: "The source name can only contain alphanum and - or _ chars and must be unique",
-    prefix: "Prefix used for the GraphUri. Must contain lowercase alphanum chars and -",
+    prefix: "Prefix used for the Base URI. Must contain lowercase alphanum chars and -",
+    baseUri: "Base URI",
     graphUri: "Graph URI is mandatory when using the default SPARQL server",
     sparql_server: {
         url: "_default if using the default SPARQL server, else, the URL of the SPARQL server",

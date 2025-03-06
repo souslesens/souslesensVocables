@@ -16,7 +16,6 @@ module.exports = function () {
             }
             return res.status(200).json(result);
         };
-        var options = {};
         if (req.query.options) {
             options = JSON.parse(req.query.options);
         }

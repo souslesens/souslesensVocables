@@ -8,6 +8,7 @@ const { createTracker, MockClient } = require("knex-mock-client");
 
 const { cleanupConnection, getKnexConnection } = require("../model/utils");
 const { userModel } = require("../model/users");
+const { userDataModel } = require("../model/userData");
 
 jest.mock("../model/utils", () => {
     const knex = require("knex");
@@ -26,6 +27,8 @@ describe("UserModelJson", () => {
 
         dbUsers = JSON.parse(fs.readFileSync(path.join(__dirname, "data", "config", "users", "users.json")));
         dbPublicUsers = JSON.parse(fs.readFileSync(path.join(__dirname, "data", "config", "users", "users.public.json")));
+        dbUserData = JSON.parse(fs.readFileSync(path.join(__dirname, "data", "config", "users", "userData.json")));
+        dbUserDataList = JSON.parse(fs.readFileSync(path.join(__dirname, "data", "config", "users", "userData.list.json")));
     });
 
     afterEach(() => {
@@ -298,10 +301,13 @@ describe("UserModelJson", () => {
     });
 
     test("delete an existing user", async () => {
-        tracker.on.select("users").response(dbUsers[2]);
+        tracker.on.select("user_data_list").response(dbUserDataList);
+        tracker.on.select("user_data").response(dbUserData[2]);
+        tracker.on.delete("user_data").response();
         tracker.on.delete("users").response();
+        tracker.on.select("users").response(dbUsers[2]);
 
-        const result = await userModel.deleteUserAccount("owl_user");
+        const result = await userModel.deleteUserAccount("admin");
         expect(result).toBeTruthy();
     });
 

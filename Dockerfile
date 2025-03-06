@@ -1,4 +1,4 @@
-FROM node:18-alpine
+FROM node:22-alpine
 
 # Configure and install Java
 ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk

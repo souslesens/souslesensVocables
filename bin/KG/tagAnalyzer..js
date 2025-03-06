@@ -161,7 +161,7 @@ return callbackSeries()
             ],
             function (_err) {
                 /* XXX do nothing ? */
-            }
+            },
         );
     },
 
@@ -384,7 +384,7 @@ return callbackSeries()
             ],
             function (_err) {
                 /* XXX do nothing ? */
-            }
+            },
         );
     },
 };

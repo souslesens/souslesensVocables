@@ -1434,7 +1434,7 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
 
             $("#editPredicate_objectValue").val(PredicatesSelectorWidget.currentEditingItem.item.value.value);
             $("#editPredicate_propertyValue").val(PredicatesSelectorWidget.currentEditingItem.item.prop.value);
-            $("#editPredicate_objectValue") .trigger( "focus" );
+            $("#editPredicate_objectValue").trigger("focus");
             $("#editPredicate_savePredicateButton").click(function () {
                 PredicatesSelectorWidget.storeRecentPredicates();
 
@@ -1554,7 +1554,7 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
 
     self.setLargerObjectTextArea = function () {
         $("#editPredicate_objectValue").show();
-        $("#editPredicate_objectValue") .trigger( "focus" );
+        $("#editPredicate_objectValue").trigger("focus");
         $("#editPredicate_largerTextButton").hide();
         //  $("#editPredicate_objectValue").hide();
         $("#editPredicate_objectValue").css("width", "700px");

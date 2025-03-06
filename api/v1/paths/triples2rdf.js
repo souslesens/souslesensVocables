@@ -29,9 +29,10 @@ module.exports = function () {
                 },
             },
         ],
+        tags: ["RDF"],
     };
 
-    function POST(req, res, next) {
+    function POST(req, res, _next) {
         try {
             var triples = req.body.triples;
 
@@ -43,7 +44,7 @@ module.exports = function () {
         }
     }
 
-    function GET(req, res, next) {}
+    function GET(_req, _res, _next) {}
 
     GET.apiDoc = {
         security: [{ restrictLoggedUser: [] }],
@@ -68,6 +69,7 @@ module.exports = function () {
                 },
             },
         },
+        tags: ["RDF"],
     };
 
     return operations;

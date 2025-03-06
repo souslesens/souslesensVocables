@@ -1,28 +1,33 @@
 const bcrypt = require("bcrypt");
 const fs = require("fs");
+const os = require("os");
 const path = require("path");
 const tmp = require("tmp");
 
 const { cleanupConnection, getKnexConnection } = require("../model/utils");
-const { userDataModel } = require("../model/userData");
+const { UserDataModel } = require("../model/userData");
 
 jest.mock("../model/utils");
 
 
 describe("UserDataModel", () => {
-    let dbUsers;
-    let dbUserDataList;
+    let temporaryDirectory;
+    let userDataModel;
 
-    beforeAll(() => {
-        dbUserDataList = JSON.parse(fs.readFileSync(
-            path.join(__dirname, "data", "config", "users", "userData.list.json")
-        ));
-        dbUsers = JSON.parse(fs.readFileSync(
-            path.join(__dirname, "data", "config", "users", "users.json")
-        ));
-        dbProfiles = JSON.parse(fs.readFileSync(
-            path.join(__dirname, "data", "config", "profiles.json")
-        ));
+    beforeEach(() => {
+        // Hide the console methods from the checking function
+        jest.spyOn(console, "error").mockImplementation(() => {});
+
+        temporaryDirectory = fs.mkdtempSync(path.join(os.tmpdir(), "sls-"));
+        fs.mkdirSync(path.join(temporaryDirectory, "user_data"));
+
+        userDataModel = new UserDataModel(temporaryDirectory);
+    });
+
+    afterEach(() => {
+        if (fs.existsSync(temporaryDirectory)) {
+            fs.rmSync(temporaryDirectory, { recursive: true, force: true });
+        }
     });
 
     test("get unshared userData", async () => {
@@ -32,19 +37,12 @@ describe("UserDataModel", () => {
         expect(userData).toStrictEqual([
             {
                 "id": 1,
-                "data_path": "data1",
+                "data_path": "1-admin-xxx.json",
                 "data_type": "",
                 "data_label": "data1",
                 "data_comment": "",
                 "data_group": "",
-                "data_content": {
-                    "sparqlServerUrl": "string",
-                    "graphUri": "string",
-                    "prefixes": {},
-                    "lookups": {},
-                    "databaseSources": {},
-                    "cvsSources": {}
-                },
+                "data_content": {},
                 "is_shared": false,
                 "shared_profiles": [],
                 "shared_users": [],
@@ -53,19 +51,12 @@ describe("UserDataModel", () => {
             },
             {
                 "id": 5,
-                "data_path": "shared with owl_user and skos_user users",
+                "data_path": "5-admin-xxx.json",
                 "data_type": "string",
                 "data_label": "",
                 "data_comment": "",
                 "data_group": "",
-                "data_content": {
-                    "sparqlServerUrl": "string",
-                    "graphUri": "string",
-                    "prefixes": {},
-                    "lookups": {},
-                    "databaseSources": {},
-                    "cvsSources": {}
-                },
+                "data_content": {},
                 "is_shared": false,
                 "shared_profiles": [],
                 "shared_users": [
@@ -118,14 +109,57 @@ describe("UserDataModel", () => {
         }
     });
 
-    test("find userData", async () => {
+    test("get file from unknown identifier", async () => {
+        expect(async () => await userDataModel.file(10, { login: "admin" })).rejects.toThrow();
+    });
+
+    test("get file from unknown user", async () => {
+        expect(async () => await userDataModel.file(1, { login: "someone" })).rejects.toThrow();
+    });
+
+    test("get file for owner", async () => {
+        const data = { test: "hello" };
+
+        const filePath = path.join(temporaryDirectory, "user_data", "1-admin-xxx.json");
+        fs.writeFileSync(filePath, JSON.stringify(data));
+
+        const result = await userDataModel.file(1, { login: "admin" });
+        expect(result).toStrictEqual(data);
+    });
+
+    test("get file for unauthorized user", async () => {
+        const filePath = path.join(temporaryDirectory, "user_data", "1-admin-xxx.json");
+        fs.writeFileSync(filePath, JSON.stringify({ test: "hello" }));
+
+        expect(async () => await userDataModel.file(1, { login: "skos_user" })).rejects.toThrow();
+    });
+
+    test("get file with shared flag", async () => {
+        const data = { test: "hello" };
+
+        const filePath = path.join(temporaryDirectory, "user_data", "3-owl_user-xxx.json");
+        fs.writeFileSync(filePath, JSON.stringify(data));
+
+        const result = await userDataModel.file(3, { login: "skos_user" });
+        expect(result).toStrictEqual(data);
+    });
+
+    test("get file with unknown path", async () => {
+        const result = await userDataModel.file(1, { login: "admin" });
+        expect(result).toStrictEqual({});
+    });
+
+    test("get find userData", async () => {
         const userData = await userDataModel.find(1);
         expect(userData).toBeTruthy();
     });
 
+    test("find userData with unknown identifier", async () => {
+        expect(async () => await userDataModel.find(10)).rejects.toThrow();
+    });
+
     test("insert userData", async () => {
         const addUserData = {
-            data_path: "data_path",
             data_type: "data_type",
             owned_by: "skos_user",
         }
@@ -133,21 +167,104 @@ describe("UserDataModel", () => {
         expect(results).toStrictEqual(6);
     });
 
+    test("insert userData with unknown owner", async () => {
+        const addUserData = {
+            data_type: "data_type",
+            owned_by: "someone",
+        }
+        expect(async () => await userDataModel.insert(addUserData)).rejects.toThrow();
+    });
+
+    test("insert userData with data content", async () => {
+        const addUserData = {
+            data_content: { test: "test"},
+            data_type: "data_type",
+            owned_by: "admin",
+        }
+        await userDataModel.insert(addUserData);
+
+        const pattern = path.join(temporaryDirectory, "user_data", "6-admin-*.json");
+        expect(fs.globSync(pattern).length).toStrictEqual(1);
+    });
+
     test("remove userData", async () => {
         const result = await userDataModel.remove(1);
         expect(result).toBeTruthy();
     });
 
+    test("remove userData with unknown identifier", async () => {
+        expect(async () => await userDataModel.remove(10)).rejects.toThrow();
+    });
+
+    test("remove userData with file", async () => {
+        const filePath = path.join(temporaryDirectory, "user_data", "1-admin-xxx.json");
+        fs.writeFileSync(filePath, "test");
+
+        expect(fs.existsSync(filePath)).toBeTruthy();
+        const result = await userDataModel.remove(1);
+        expect(result).toBeTruthy();
+        expect(fs.existsSync(filePath)).toBeFalsy();
+    });
+
     test("update userData", async () => {
         const updateUserData = {
             id: 3,
-            data_path: "update",
             data_type: "data_type",
             owned_by: "owl_user",
         };
 
         const result = await userDataModel.update(updateUserData);
         expect(result).toBeTruthy();
+    });
+
+    test("update userData with created_at attribute", async () => {
+        const updateUserData = {
+            id: 3,
+            data_type: "data_type",
+            created_at: "xxx",
+            owned_by: "owl_user",
+        };
+
+        const result = await userDataModel.update(updateUserData);
+        expect(result).toBeTruthy();
+    });
+
+    test("update userData with unknown identifier", async () => {
+        const updateUserData = {
+            id: 10,
+            data_type: "data_type",
+            created_at: "xxx",
+            owned_by: "owl_user",
+        };
+
+        expect(async () => await userDataModel.update(updateUserData)).rejects.toThrow();
+    });
+
+    test("update userData with unknown owner", async () => {
+        const updateUserData = {
+            id: 1,
+            data_type: "data_type",
+            created_at: "xxx",
+            owned_by: "someone",
+        };
+
+        expect(async () => await userDataModel.update(updateUserData)).rejects.toThrow();
+    });
+
+    test("update userData with data_content", async () => {
+        const filePath = path.join(temporaryDirectory, "user_data", "4-skos_user-xxx.json");
+
+        const updateUserData = {
+            id: 4,
+            data_type: "data_type",
+            data_content: { test: "test" },
+            owned_by: "skos_user",
+        };
+
+        expect(fs.existsSync(filePath)).toBeFalsy();
+        const result = await userDataModel.update(updateUserData);
+        expect(result).toBeTruthy();
+        expect(fs.existsSync(filePath)).toBeTruthy();
     });
 
     test("test _convertToJSON", async () => {
@@ -169,5 +286,58 @@ describe("UserDataModel", () => {
                 "skos_user"
             ],
         });
+    });
+
+    test("test _convertToJSON with correct values", async () => {
+        const data = {
+            data_content: {"sparqlServerUrl": "string", "databaseSources": {}},
+            is_shared: true,
+            shared_profiles: [],
+            shared_users: ["owl_user", "skos_user"],
+        };
+        expect(userDataModel._convertToJSON(data)).toStrictEqual(data);
+    });
+
+    test("test _convertToJSON without values", async () => {
+        expect(userDataModel._convertToJSON({})).toStrictEqual({
+            data_content: {},
+            is_shared: false,
+            shared_profiles: [],
+            shared_users: [],
+        });
+    });
+
+    test("test _check", async () => {
+         data = userDataModel._check({ data_type: "text", owned_by: "admin" });
+    });
+
+    test("test _check with missing attributes", async () => {
+        expect(() => userDataModel._check({})).toThrow();
+        expect(() => userDataModel._check({ data_type: "text" })).toThrow();
+        expect(() => userDataModel._check({ owned_by: "admin" })).toThrow();
+    });
+
+    test("test _checkIdentifier", async () => {
+        userDataModel._checkIdentifier(1);
+    });
+
+    test("test _checkIdentifier with wrong value", async () => {
+        expect(() => userDataModel._checkIdentifier(-1)).toThrow();
+        expect(() => userDataModel._checkIdentifier(0)).toThrow();
+        expect(() => userDataModel._checkIdentifier("xxx")).toThrow();
+    });
+
+    test("test _getUser", async () => {
+        const user = { login: "admin", groups: ["admin"]};
+        expect(userDataModel._getUser(user)).toStrictEqual(user);
+    });
+
+    test("test _getUser with undefined user with authentication", async () => {
+        expect(userDataModel._getUser(undefined)).toStrictEqual(undefined);
+    });
+
+    test("test _getUser with undefined user without authentication", async () => {
+        userDataModel._mainConfig.auth = "disabled";
+        expect(userDataModel._getUser(undefined)).toStrictEqual({ login: "admin", groups: ["admin"] });
     });
 });

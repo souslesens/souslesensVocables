@@ -127,7 +127,6 @@ const getKnexConnection = (database) => {
         connection("user_data").insert(
             userDataEntries.map((data) => ({
                 ...data,
-                data_content: JSON.stringify(data.data_content),
                 shared_profiles: JSON.stringify(data.shared_profiles),
                 shared_users: JSON.stringify(data.shared_users),
             })),

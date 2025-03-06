@@ -1,18 +1,10 @@
 const { userDataModel } = require("../../../../model/userData");
-<<<<<<< HEAD
-
-module.exports = () => {
-    GET = async (_req, res, _next) => {
-        try {
-            const data = await userDataModel.all();
-=======
 const userManager = require("../../../../bin/user.");
 
 module.exports = () => {
     GET = async (req, res, _next) => {
         try {
             const data = await userDataModel.all(req.user);
->>>>>>> origin/master
             res.status(200).json(data);
         } catch (error) {
             console.error(error);
@@ -42,33 +34,15 @@ module.exports = () => {
                 },
             },
         },
-<<<<<<< HEAD
-        security: [{ restrictAdmin: [] }],
-=======
         security: [{ restrictLoggedUser: [] }],
->>>>>>> origin/master
         summary: "Retrieve the entire list of User Data",
         tags: ["UserData"],
     };
 
     POST = async (req, res, _next) => {
         try {
-<<<<<<< HEAD
-
-            // ------------temporaire CF//
-            if(typeof req.body.id=="string")
-                req.body.id=parseInt( req.body.id)
-            var str=req.body["is_shared"]
-            if(str=="false")
-                req.body.is_shared=false
-            else
-                req.body.is_shared=true
-
-            await userDataModel.insert(req.body);
-=======
             const userInfo = await userManager.getUser(req.user);
             await userDataModel.insert({ ...req.body, owned_by: userInfo.user.login });
->>>>>>> origin/master
             res.status(200).json({ message: "The resource has been inserted successfully" });
         } catch (error) {
             if (error.cause !== undefined) {
@@ -86,16 +60,9 @@ module.exports = () => {
                 in: "body",
                 name: "body",
                 schema: {
-<<<<<<< HEAD
-                    // ------------temporaire CF//
-                  $ref: "#/definitions/UserData",
-                },
-            }
-=======
                     $ref: "#/definitions/UserDataWithoutID",
                 },
             },
->>>>>>> origin/master
         ],
         responses: {
             200: {
@@ -142,9 +109,6 @@ module.exports = () => {
 
     PUT = async (req, res, _next) => {
         try {
-<<<<<<< HEAD
-            await userDataModel.update(req.body);
-=======
             // users can only update their own data
             const userInfo = await userManager.getUser(req.user);
             const existingData = await userDataModel.find(req.body.id);
@@ -154,7 +118,6 @@ module.exports = () => {
             }
 
             await userDataModel.update({ ...req.body, owned_by: userInfo.user.login });
->>>>>>> origin/master
             res.status(200).json({ message: "The resource has been updated successfully" });
         } catch (error) {
             if (error.cause !== undefined) {
@@ -171,11 +134,7 @@ module.exports = () => {
                 in: "body",
                 name: "body",
                 schema: {
-<<<<<<< HEAD
-                    $ref: "#/definitions/UserData",
-=======
                     $ref: "#/definitions/UserDataWithoutOwner",
->>>>>>> origin/master
                 },
             },
         ],

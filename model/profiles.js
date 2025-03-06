@@ -11,17 +11,6 @@ const { cleanupConnection, getKnexConnection } = require("./utils");
  * @typedef {import("./ProfileTypes").Profile} Profile
  */
 
-<<<<<<< HEAD
-const ProfileObject = z.object({
-    id: z.string(),
-    name: z.string(),
-    theme: z.string().default(""),
-    allowedSourceSchemas: z.enum(["OWL", "SKOS"]).array().optional(),
-    sourcesAccessControl: z.record(z.string(), z.string()).optional(),
-    allowedTools: z.string().array().optional(),
-    _type: z.string().default("profile"),
-}).strict();
-=======
 const ProfileObject = z
     .object({
         id: z.string(),
@@ -33,7 +22,6 @@ const ProfileObject = z
         _type: z.string().default("profile"),
     })
     .strict();
->>>>>>> origin/master
 
 class ProfileModel {
     /**

@@ -3,22 +3,6 @@ const { z } = require("zod");
 
 const { readMainConfig } = require("./config");
 
-<<<<<<< HEAD
-
-const UserDataObject = z.object({
-    id: z.number().positive().optional(),
-    data_path: z.string(),
-    data_type: z.string(),
-    data_label: z.string().default(""),
-    data_comment: z.string().default(""),
-    data_group: z.string().default(""),
-    data_content: z.record(z.string(), z.string()).default({}),
-    is_shared: z.boolean().default(false),
-    shared_profiles: z.string().array().default([]),
-    shared_users: z.string().array().default([]),
-    owned_by: z.string(),
-}).strict();
-=======
 const UserDataObject = z
     .object({
         id: z.number().positive().optional(),
@@ -34,7 +18,6 @@ const UserDataObject = z
         owned_by: z.string(),
     })
     .strict();
->>>>>>> origin/master
 
 class UserDataModel {
     constructor() {

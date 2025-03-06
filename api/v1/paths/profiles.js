@@ -23,7 +23,6 @@ module.exports = function () {
         operationId: "getProfilesCurrentUser",
         responses: responseSchema("Profiles", "GET"),
     };
-<<<<<<< HEAD
 
     ///// POST api/v1/profiles
     async function POST(req, res, next) {
@@ -48,7 +47,5 @@ module.exports = function () {
         responses: responseSchema("Profiles", "POST"),
     };
 
-=======
->>>>>>> origin/master
     return operations;
 };

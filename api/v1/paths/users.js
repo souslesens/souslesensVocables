@@ -40,7 +40,6 @@ module.exports = function () {
         responses: responseSchema("Users", "GET"),
     };
 
-<<<<<<< HEAD
     ///// PUT api/v1/users
     async function PUT(req, res, next) {
         try {
@@ -85,7 +84,5 @@ module.exports = function () {
         responses: responseSchema("Users", "POST"),
     };
 
-=======
->>>>>>> origin/master
     return operations;
 };

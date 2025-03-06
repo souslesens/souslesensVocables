@@ -453,9 +453,6 @@ const apiDoc = {
                     type: "string",
                 },
             },
-<<<<<<< HEAD
-            required: ["data_path", "data_type", "owned_by"],
-=======
             required: ["data_path", "data_type"],
         },
         UserDataWithoutID: {
@@ -543,7 +540,6 @@ const apiDoc = {
                 },
             },
             required: ["data_path", "data_type"],
->>>>>>> origin/master
         },
         UserDataContent: {
             type: "object",

@@ -82,24 +82,6 @@ var KGquery_graph = (function () {
                         self.visjsOptions,
                     );
 
-                    if (false) {
-                        UserDataWidget.listUserData(null, function (err, result) {
-                            if (err) {
-                                return alert(err || err.responseText);
-                            }
-                            result.forEach(function (item) {
-                                if (item.data_label == source + "_model") {
-                                    visjsData = item.data_content;
-                                    if (visjsData && visjsData.options && visjsData.options.output) {
-                                        display = visjsData.options.output;
-                                    }
-                                }
-                            });
-                            return callbackSeries();
-                        });
-
-                        return;
-                    }
 
                     var visjsGraphFileName = source + "_KGmodelGraph.json";
 

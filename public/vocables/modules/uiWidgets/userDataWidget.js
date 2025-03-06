@@ -73,6 +73,25 @@ var UserDataWidget = (function () {
             },
         });
     };
+
+    self.getUserdatabyLabel=function(label,callback){
+
+        self.listUserData  ("", function(err,result) {
+            if(err)
+                return callback(err)
+            var obj=null
+            result.forEach(function(item){
+                if(item.data_label==label)
+                    obj=item
+            })
+            if(!obj)
+                callback("not found")
+            callback(null,obj)
+        });
+
+    }
+
+
     self.listUserData = function (filter, callback) {
         $.ajax({
             type: "GET",

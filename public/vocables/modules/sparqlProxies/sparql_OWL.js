@@ -2643,7 +2643,47 @@ var Sparql_OWL = (function () {
         });
     };
 
-    self.getIndividualsClass = function (sourceLabel, classIds, options, callback) {
+    self.getIndividualsType = function (sourceLabel, allIds, options, callback) {
+        if (!options) {
+            options = {};
+        }
+        var fromStr = Sparql_common.getFromStr(sourceLabel);
+
+        var slices = common.array.slice(allIds, 50);
+        var allBindings = [];
+        async.eachSeries(
+            slices,
+            function (ids, callbackEach) {
+                var filterStr = Sparql_common.setFilter("id", ids);
+                var query =
+                    "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
+                    "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+                    "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
+                    "SELECT distinct ?type" +
+                    fromStr +
+                    "" +
+                    " WHERE { ?id rdf:type ?type. " +
+                    filterStr +
+                    "filter (?type!=owl:NamedIndividual)  } limit 10000";
+                var url = Config.sparql_server.url + "?format=json&query=";
+                Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, _result) {
+                    if (err) {
+                        return callbackEach(err);
+                    }
+                    allBindings = allBindings.concat(_result.results.bindings);
+                    callbackEach();
+                });
+            },
+            function (err) {
+                if (err) {
+                    return callback(err);
+                }
+                return callback(null, allBindings);
+            },
+        );
+    };
+
+    self.getIndividualsOfClass = function (sourceLabel, classIds, options, callback) {
         if (!options) {
             options = {};
         }
@@ -2669,9 +2709,10 @@ var Sparql_OWL = (function () {
                 var url = Config.sparql_server.url + "?format=json&query=";
                 Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, _result) {
                     if (err) {
-                        return callbackEach();
+                        return callbackEach(err);
                     }
                     allBindings = allBindings.concat(_result.results.bindings);
+                    callbackEach();
                 });
             },
             function (err) {
@@ -2732,7 +2773,7 @@ var Sparql_OWL = (function () {
         });
     };
 
-    self.getIndividualsClassDistinctProperties = function (sourceLabel, classId, callback) {
+    self.getIndividualsOfClassDistinctProperties = function (sourceLabel, classId, callback) {
         var fromStr = Sparql_common.getFromStr(sourceLabel);
         self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
 

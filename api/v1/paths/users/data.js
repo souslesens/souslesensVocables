@@ -11,6 +11,11 @@ module.exports = () => {
                     return data.data_group?.includes(req.query.data_group);
                 });
             }
+            if (req.query.data_type) {
+                userDatas = Object.values(userDatas).filter((data) => {
+                    return data.data_type?.includes(req.query.data_type);
+                });
+            }
             res.status(200).json(userDatas);
         } catch (error) {
             console.error(error);
@@ -25,6 +30,13 @@ module.exports = () => {
                 required: false,
                 name: "data_group",
                 description: "data_group filter",
+            },
+            {
+                in: "query",
+                type: "string",
+                required: false,
+                name: "data_type",
+                description: "data_type filter",
             },
         ],
         responses: {

@@ -90,9 +90,13 @@ var KGquery_graph = (function () {
                             if (err) {
                                 return alert(err || err.responseText);
                             }
+                            // order to get last saved instance of our graph in user_data
+                            result=result.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+                            //if graph loaded with loadSaved --> display=checkBox loadAsGraph else last instance graph
                             result.forEach(function (item) {
                                 if (item.data_label == source + "_model") {
                                     visjsData = item.data_content;
+                                    display='graph'
                                     if (visjsData && visjsData.options && visjsData.options.output) {
                                         display = visjsData.options.output;
                                     }
@@ -100,8 +104,14 @@ var KGquery_graph = (function () {
                             });
                             if(options.loadAsGraph){
                                 display='graph';
-                                self.loadAsGraph=false;
-
+                            }
+                            if(options.loadAsGraph==false){
+                                display='list';
+                            }
+                            if(display=='graph'){
+                                $('#KGquery_loadAsGraph').prop("checked", true);
+                            }else{
+                                $('#KGquery_loadAsGraph').prop("checked", false);
                             }
                             
                             return callbackSeries();
@@ -687,9 +697,11 @@ var KGquery_graph = (function () {
         var edges = KGquery_graph.KGqueryGraph.data.edges.get();
         var positions = KGquery_graph.KGqueryGraph.network.getPositions();
         var options = {};
+        $('#KGquery_loadAsGraph').prop("checked", true);
         if (KGquery_graph.KGqueryGraph.data.edges.get().length > 30) {
             if (confirm("many Edges: choose  list display mode?")) {
                 options.output = "list";
+                $('#KGquery_loadAsGraph').prop("checked", false);
             }
         }
 
@@ -806,9 +818,9 @@ var KGquery_graph = (function () {
             },
         );
     };
-    self.listToGraph=function(){
-        
-        self.drawVisjsModel('saved',{loadAsGraph:true});
+    self.loadSaved=function(){
+        var loadAsGraph=$('#KGquery_loadAsGraph').prop("checked");
+        self.drawVisjsModel('saved',{loadAsGraph:loadAsGraph});
 
     };
     

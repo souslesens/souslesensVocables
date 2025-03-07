@@ -407,19 +407,19 @@ var KGquery = (function () {
 
                     var whereStr = "";
                     var uniqueQueries = {};
-
+                    var querySetsWhereStr = [];
+                    var disctinctSetVars=[];
                     self.querySets.sets.forEach(function (querySet) {
+                        
                         if (querySet.elements.length == 0 || !querySet.elements[0].fromNode) {
                             return;
                         }
-                        if (querySet.booleanOperator) {
-                            whereStr += "\n " + querySet.booleanOperator + "\n ";
-                        }
-
+                        whereStr='';
+                        distinctTypesMap = {};
                         var predicateStr = "";
                         var filterStr = "";
                         var otherPredicatesStrs = "";
-
+                        
                         querySet.elements.forEach(function (queryElement, queryElementIndex) {
                             if (!queryElement.toNode) {
                                 return;
@@ -510,11 +510,50 @@ var KGquery = (function () {
                                 optionalPredicatesSparql = `?${querySet.elements[0].fromNode.label} rdf:type <${querySet.elements[0].fromNode.id}>.\n` + optionalPredicatesSparql;
                                 optionalPredicatesSparql = optionalPredicatesSparql.replace("OPTIONAL", "");
                             }
-
-                            whereStr += optionalPredicatesSparql;
+                            //optional predicates are filtered for each set or weird comportement for multiple set queries
+                            
+                            var querySetOptionalPredicates='';
+                            Object.keys(distinctTypesMap).forEach(function(type){
+                                var regex = new RegExp(`^\\s*OPTIONAL\\s*{\\${type}\\b.*?}$`, "gm");
+                                var matches=optionalPredicatesSparql.match(regex);
+                                if(matches.length>0){
+                                    querySetOptionalPredicates+=matches.join("\n");
+                                }
+                            });
+                            whereStr += querySetOptionalPredicates;
                         }
-                        //  whereStr = "{" + whereStr + "}";
+                        //whereStr = "{" + whereStr + "}";
+                        var regex = /\?[\w_]+/g;
+                        var variables = whereStr.match(regex);
+                        var uniqueVariables = [...new Set(variables)];
+                        //disctinctVarsMap=Object.fromEntries(uniqueVariables.map(v => [v,1]));
+                        disctinctSetVars.push(uniqueVariables);
+                        querySetsWhereStr.push(whereStr);
+                        
                     });
+                    whereStr='';
+                    if(querySetsWhereStr.length==0){
+                        return alert('no node selected');
+                    }
+                    if(querySetsWhereStr.length==1){
+                        whereStr=querySetsWhereStr[0];
+                    }
+                    if(querySetsWhereStr.length>1){
+                        querySetsWhereStr.forEach(function(querySetsWhereStr,index){
+                            var disctinctVarsStr=disctinctSetVars[index].join(' ');
+                            var querySetNumber=index+1;
+                            if (self.querySets.sets[index].booleanOperator) {
+                               
+                                whereStr += "\n " + self.querySets.sets[index].booleanOperator + "\n ";
+                                
+                            }
+                            whereStr += '{ SELECT '+ disctinctVarsStr + ' (("Query '+querySetNumber+'") AS ?querySet) ';
+                            whereStr +='{'+ querySetsWhereStr + '}';
+                            whereStr +='}'
+                            
+                        });
+                        
+                    }
 
                     var fromStr = Sparql_common.getFromStr(self.currentSource);
                     query =

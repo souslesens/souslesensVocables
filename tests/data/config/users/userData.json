@@ -6,6 +6,8 @@
     "data_label": "data1",
     "data_comment": "",
     "data_group": "",
+    "data_tool": "",
+    "data_source": "",
     "data_content": {
       "sparqlServerUrl": "string",
       "graphUri": "string",
@@ -27,6 +29,8 @@
     "data_label": "shared with owl_user user",
     "data_comment": "",
     "data_group": "",
+    "data_tool": "",
+    "data_source": "",
     "data_content": {
       "sparqlServerUrl": "string",
       "graphUri": "string",
@@ -50,6 +54,8 @@
     "data_label": "shared with admin profile",
     "data_comment": "",
     "data_group": "",
+    "data_tool": "",
+    "data_source": "",
     "data_content": {
       "sparqlServerUrl": "string",
       "graphUri": "string",
@@ -73,6 +79,8 @@
     "data_label": "",
     "data_comment": "",
     "data_group": "",
+    "data_tool": "tool",
+    "data_source": "source",
     "data_content": {
       "sparqlServerUrl": "string",
       "graphUri": "string",

@@ -547,7 +547,7 @@ var KGquery = (function () {
                                 whereStr += "\n " + self.querySets.sets[index].booleanOperator + "\n ";
                                 
                             }
-                            whereStr += '{ SELECT '+ disctinctVarsStr + ' (("Query '+querySetNumber+'") AS ?querySet) ';
+                            whereStr += '{SELECT '+ disctinctVarsStr + ' (("Query '+querySetNumber+'") AS ?querySet) ';
                             whereStr +='{'+ querySetsWhereStr + '}';
                             whereStr +='}'
                             

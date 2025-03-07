@@ -118,7 +118,7 @@ var KGquery = (function () {
 
         // self.addQueryElementToQuerySet(querySet);
         self.querySets.sets.push(querySet);
-        // self.currentQuerySet = querySet;
+        self.currentQuerySet = querySet;
         self.divsMap[querySetDivId] = querySet;
         return querySet;
     };

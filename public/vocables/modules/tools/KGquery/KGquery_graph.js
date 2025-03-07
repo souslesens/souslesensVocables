@@ -58,14 +58,17 @@ var KGquery_graph = (function () {
         //   size: Lineage_whiteboard.defaultShapeSize,
         color: "#ddd", //Lineage_whiteboard.getSourceColor(source)
     };
-
-    self.drawVisjsModel = function (mode) {
+    
+    self.drawVisjsModel = function (mode,options) {
         var display = "graph";
         var source = KGquery.currentSource;
         var visjsData = { nodes: [], edges: [] };
 
         //  KGquery.clearAll();
         $("#waitImg").css("display", "block");
+        if(!options){
+            options={}
+        }
         async.series(
             [
                 //saved visjgraphData
@@ -82,7 +85,7 @@ var KGquery_graph = (function () {
                         self.visjsOptions,
                     );
 
-                    if (false) {
+                    if (true) {
                         UserDataWidget.listUserData(null, function (err, result) {
                             if (err) {
                                 return alert(err || err.responseText);
@@ -95,6 +98,12 @@ var KGquery_graph = (function () {
                                     }
                                 }
                             });
+                            if(options.loadAsGraph){
+                                display='graph';
+                                self.loadAsGraph=false;
+
+                            }
+                            
                             return callbackSeries();
                         });
 
@@ -252,6 +261,9 @@ var KGquery_graph = (function () {
                 visjsData.nodes = newNodes;
                 self.visjsData = visjsData;
                 if (display == "list") {
+                    // Draw a empty graph to fit with the object self.KGqueryGraph that has no nodes and edges
+                   
+                    self.KGqueryGraph.draw(function () {});
                     return KGquery_nodeSelector.showInferredModelInJstree(visjsData);
                 }
                 /*self.visjsOptions.visjsOptions.physics={enabled: true,
@@ -289,6 +301,7 @@ var KGquery_graph = (function () {
                         scale: 1 / 0.9,
                     });
                     self.KGqueryGraph.onScaleChange();
+                  
                 });
 
                 //  KGquery.clearAll();
@@ -691,7 +704,9 @@ var KGquery_graph = (function () {
         var label = KGquery.currentSource + "_model";
         var group = "KGquery/models";
 
-        UserDataWidget.saveMetadata(label, null, data, group, function (err, result) {});
+        UserDataWidget.saveMetadata(label, null, data, group, function (err, result) {
+            $('#KGquery_messageDiv').text('saved graph');
+        });
         return;
         var fileName = KGquery.currentSource + "_KGmodelGraph.json";
         self.KGqueryGraph.saveGraph(fileName, true);
@@ -791,6 +806,12 @@ var KGquery_graph = (function () {
             },
         );
     };
+    self.listToGraph=function(){
+        
+        self.drawVisjsModel('saved',{loadAsGraph:true});
+
+    };
+    
     return self;
 })();
 

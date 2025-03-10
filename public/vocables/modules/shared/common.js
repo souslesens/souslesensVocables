@@ -287,6 +287,127 @@ var common = (function () {
                 array.unshift(first);
             }
         },
+        /*
+        fullOuterJoin:function(array1,array2,keys){
+
+            if(!keys || !array1 || !array2 ){
+                return 'parameter is missing'
+            }
+            if (!Array.isArray(keys)) {
+                keys = [keys]; 
+            }
+            if(array1.length==0 || array2.length==0){
+                return 'one dataset is empty'
+            }
+            var  currentKey;
+            var joinMap={};
+            var joinArray=[];
+            array1.forEach(function(item){
+                currentKey=''
+                keys.forEach(function(key){
+                    if(item[key]){
+                        if(item[key]?.value){
+                             currentKey+=item[key].value+'|'
+                        }else{
+                            currentKey+=item[key]+'|'
+                        }
+                        
+                    }
+                });
+                if(currentKey){
+                    joinMap[currentKey]=item;
+                }else{
+                    joinMap[common.getRandomHexaId(8)]=item;
+                }
+                
+                
+            });
+            array2.forEach(function(item){
+                currentKey=''
+                keys.forEach(function(key){
+                    if(item[key]){
+                        if(item[key]?.value){
+                             currentKey+=item[key].value+'|'
+                        }else{
+                            currentKey+=item[key]+'|'
+                        }
+                        
+                    }
+                });
+                if(joinMap[currentKey]){
+                    joinMap[currentKey]={ ...joinMap[currentKey], ...item};
+                }else if(!currentKey){
+                    joinMap[common.getRandomHexaId(8)]=item;
+                }
+                else{
+                    joinMap[currentKey]=item;
+                }
+            })
+
+            return Object.values(joinMap)
+        },*/
+         fullOuterJoin:function(array1, array2, keys) {
+            if (!keys || !array1 || !array2) {
+                return 'parameter is missing';
+            }
+            if (!Array.isArray(keys)) {
+                keys = [keys];
+            }
+            if (array1.length === 0 || array2.length === 0) {
+                return 'one dataset is empty';
+            }
+        
+            let joinMap1 = {}, joinMap2 = {}, result = [];
+        
+            function generateKey(item) {
+                return keys.map(key => item[key]?.value ?? item[key] ?? '').join('|');
+            }
+        
+            // Indexation des objets du premier dataset
+            array1.forEach(item => {
+                let key = generateKey(item);
+                if (!joinMap1[key]) joinMap1[key] = [];
+                joinMap1[key].push(item);
+            });
+        
+            // Indexation des objets du second dataset
+            array2.forEach(item => {
+                let key = generateKey(item);
+                if (!joinMap2[key]) joinMap2[key] = [];
+                joinMap2[key].push(item);
+            });
+        
+            let allUniqueKeys = new Set([...Object.keys(joinMap1), ...Object.keys(joinMap2)]);
+        
+            allUniqueKeys.forEach(key => {
+                let group1 = joinMap1[key] || [{}]; 
+                let group2 = joinMap2[key] || [{}]; 
+        
+                group1.forEach(obj1 => {
+                    group2.forEach(obj2 => {
+                        result.push({ ...obj1, ...obj2 });
+                    });
+                });
+            });
+        
+            return result;
+        },
+
+        arrayByCategory:function(array,column){
+            const groups = array.reduce((acc, item) => {
+                var key = item[column];
+                if(item[column]?.value){
+                    key=item[column].value;
+                }
+                if (!acc[key]) {
+                    acc[key] = [];
+                }
+                acc[key].push(item);
+                return acc;
+            }, {});
+        
+            return Object.values(groups); 
+        }
     };
 
     self.concatArraysWithoutDuplicate = function (array, addedArray, key) {

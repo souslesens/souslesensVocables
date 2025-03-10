@@ -45,7 +45,9 @@ var KGquery_myQueries = (function () {
                 index++;
                 var filters=set.classFiltersMap;
                 var elementIndex=-1;
-                
+                if(set.booleanOperator){
+                    KGquery.addQuerySet(set.booleanOperator);
+                }
                 async.eachSeries(
                     set.elements,
                     function (element, callbackEach2) {

@@ -366,6 +366,7 @@ var KGquery = (function () {
         var query = "";
         var distinctSetTypes=[];
         var isUnion=false;
+        var isJoin=false;
         var data;
         async.series(
             [
@@ -553,6 +554,7 @@ var KGquery = (function () {
                             if (self.querySets.sets[index].booleanOperator) {
                                
                                 whereStr += "\n " + self.querySets.sets[index].booleanOperator + "\n ";
+                                isJoin=true;
                                 if(self.querySets.sets[index].booleanOperator=='Union'){
                                     isUnion=true;
                                 }
@@ -632,6 +634,14 @@ var KGquery = (function () {
                     data.results.bindings=joinedData;
                     return callbackSeries();
                 },
+                //Delete querySet Variable
+                function(callbackSeries){
+                    if(isJoin){
+                        data.results.bindings=common.array.removeColumn(data.results.bindings,'querySet');
+                    }
+                    return callbackSeries();
+                }
+
             ],
             function (err) {
                 callback(err, data);

@@ -407,6 +407,21 @@ var common = (function () {
             }, {});
         
             return Object.values(groups); 
+        },
+        removeColumn:function(array,column){
+            if (array.length === 0 ) {
+                return ' dataset is empty';
+            }
+            if(!column){
+                return 'no column to supress'
+            }
+            array.forEach(function(item){
+                if(item[column]){
+                    delete item[column];
+                }
+            });
+            return array;
+
         }
     };
 

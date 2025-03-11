@@ -223,7 +223,9 @@ var _botEngine = (function () {
 
             self.nextStep(returnValue);
         } else {
-            self.reset();
+            self.history.currentIndex =-1
+            self.nextStep();
+           // self.reset();
         }
     };
 
@@ -278,6 +280,7 @@ var _botEngine = (function () {
         }
     };
 
+
     self.close = function () {
         $("#botPanel").css("display", "none");
     };
@@ -303,6 +306,7 @@ var _botEngine = (function () {
         self.currentList = values;
         if (values.length > 20) {
             $("#botFilterProposalDiv").show();
+            $("#botFilterProposalInput").trigger("focus")
         }
         common.fillSelectOptions("bot_resourcesProposalSelect", values, false, "label", "id");
         $("#bot_resourcesProposalSelect").unbind("click");

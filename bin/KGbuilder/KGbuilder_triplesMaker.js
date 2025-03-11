@@ -119,10 +119,12 @@ var KGbuilder_triplesMaker = {
                                 },
 
                                 function (callbackSeries) {
+
+
                                     if (mapping.isRestriction) {
                                         KGbuilder_triplesMaker.getRestrictionTriples(mapping, subjectStr, propertyStr, objectStr, function (err, restrictionTriples) {
                                             if (err) {
-                                                return callbackSeries(err);
+                                                return callbackSeries();
                                             }
                                             triples = triples.concat(restrictionTriples);
                                             return callbackSeries();
@@ -270,7 +272,7 @@ var KGbuilder_triplesMaker = {
             }
         }
 
-        if (!subjectStr) {
+        if (!subjectStr  || subjectStr == "null") {
             return callback("no mapping.subject in line " + JSON.stringify(line));
         }
 
@@ -285,6 +287,7 @@ var KGbuilder_triplesMaker = {
         } else {
             subjectStr = "<" + tableMappings.graphUri + util.formatStringForTriple(subjectStr, true) + ">";
         }
+
         return callback(null, subjectStr);
     },
 
@@ -516,6 +519,14 @@ var KGbuilder_triplesMaker = {
         return callback(null, propertyStr);
     },
     getRestrictionTriples: function (mapping, subjectStr, propertyStr, objectStr, callback) {
+
+        if (!subjectStr  || subjectStr == "null") {
+            return callback("no mapping.subject  null-"+propertyStr+" " + objectStr);
+        }
+        if (!objectStr  || objectStr == "null") {
+            return callback("no mapping.object  "+propertyStr+"<-" + subjectStr);
+        }
+
         var restrictionTriples = [];
         var blankNode = "<_:b" + util.getRandomHexaId(10) + ">";
 

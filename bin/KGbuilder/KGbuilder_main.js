@@ -279,7 +279,7 @@ var KGbuilder_main = {
             },
             function (err) {
                 if (err) {
-                    alert(err);
+                  console.log(err);
                 }
                 return callback(err, totalTriples);
             },

@@ -130,8 +130,8 @@ var Lineage_rules = (function () {
         $("#" + div).remove();
     };
 
-    self.getInferredModel = function () {
-        OntologyModels.getInferredModel(Lineage_sources.activeSource, null, function (err, result) {});
+    self.getImplicitModel = function () {
+        OntologyModels.getImplicitModel(Lineage_sources.activeSource, null, function (err, result) {});
 
         return;
     };

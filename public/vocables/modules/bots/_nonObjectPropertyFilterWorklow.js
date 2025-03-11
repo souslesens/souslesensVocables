@@ -11,6 +11,7 @@ class NonObjectPropertyFilterWorklow {
     listNonObjectPropertiesFn(callback) {
         self.callback = callback;
         var model = {}
+
         self.visjsDataModel.nodes.forEach(function (node) {
             if (node.data.nonObjectProperties) {
                 model[node.id] = node.data.nonObjectProperties
@@ -20,11 +21,17 @@ class NonObjectPropertyFilterWorklow {
         // OntologyModels.getKGnonObjectProperties(self.params.source, {}, function (err, model) {
         var currentClassId = self.params.currentClass;
         if (!model[currentClassId]) {
-            alert("no matching fact");
-            return self.botEngine.previousStep();
+           // alert("no matching fact");
+            return self.callback(null, "");
         }
         var nonObjectProperties = model[currentClassId];
+        nonObjectProperties.unshift({id:"any",label:"ANY"});
         self.botEngine.showList(nonObjectProperties, "property", null, null, function (value) {
+            if(value=="any"){
+                return self.callback(null, "");
+            }
+
+
             self.params.property = value;
             self.params.varName = "var_" + common.getRandomHexaId(3);
             self.params.propertyDatatype = "string";

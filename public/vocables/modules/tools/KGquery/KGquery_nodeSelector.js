@@ -5,7 +5,7 @@ import KGquery_paths from "./KGquery_paths.js";
 var KGquery_nodeSelector = (function () {
     var self = {};
     self.jstreeData = [];
-    self.showInferredModelInJstree = function (visjsData) {
+    self.showImplicitModelInJstree = function (visjsData) {
         var jstreeData = [];
         self.graphVisjsdata = visjsData;
         visjsData.nodes.forEach(function (visjsNode) {

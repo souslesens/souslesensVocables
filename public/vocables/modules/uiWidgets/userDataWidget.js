@@ -85,7 +85,7 @@ var UserDataWidget = (function () {
                     obj=item
             })
             if(!obj)
-                callback("not found")
+               return callback("not found")
             callback(null,obj)
         });
 

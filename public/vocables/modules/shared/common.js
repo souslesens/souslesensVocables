@@ -363,14 +363,14 @@ var common = (function () {
                 return keys.map(key => item[key]?.value ?? item[key] ?? '').join('|');
             }
         
-            // Indexation des objets du premier dataset
+            // Object Indexation
             array1.forEach(item => {
                 let key = generateKey(item);
                 if (!joinMap1[key]) joinMap1[key] = [];
                 joinMap1[key].push(item);
             });
         
-            // Indexation des objets du second dataset
+            
             array2.forEach(item => {
                 let key = generateKey(item);
                 if (!joinMap2[key]) joinMap2[key] = [];
@@ -378,7 +378,7 @@ var common = (function () {
             });
         
             let allUniqueKeys = new Set([...Object.keys(joinMap1), ...Object.keys(joinMap2)]);
-        
+            // Union of sets
             allUniqueKeys.forEach(key => {
                 let group1 = joinMap1[key] || [{}]; 
                 let group2 = joinMap2[key] || [{}]; 

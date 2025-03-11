@@ -9,7 +9,7 @@ var KGquery_filter_bot = (function () {
     self.title = "Filter Class";
     self.aBotEngine = _botEngine; //new botEngineClass()
     self.start = function (data, currentQuery, validateFn) {
-        //  self.aBotEngine.startParams = self.aBotEngine.fillStartParams(arguments);
+        self.aBotEngine.startParams = self.aBotEngine.fillStartParams(arguments);
 
         self.data = data;
         self.filter = "";
@@ -112,6 +112,7 @@ var KGquery_filter_bot = (function () {
         }
         self.aBotEngine.showList(choices, "property", null, null, function (value) {
             self.params.property = value;
+            self.aBotEngine.nextStep();
         });
     };
 

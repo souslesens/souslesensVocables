@@ -1,59 +1,44 @@
-import rdf from '@zazuko/env-node'
-import SHACLValidator from 'rdf-validate-shacl'
-import {writeFileSync,readFileSync}from 'fs'
+import rdf from "@zazuko/env-node";
+import SHACLValidator from "rdf-validate-shacl";
+import { writeFileSync, readFileSync } from "fs";
 //import N3Writer from "n3/lib/N3Writer.js";
-
 
 //const N3 =import('n3')
 
+export async function validateTriples(_shapes, _triples) {
+    // const shapes = await rdf.dataset().import(_shapes)
+    // const data = await rdf.dataset().import(_triples)
 
-
-
-
-export async function validateTriples(_shapes,_triples){
-
-
-   // const shapes = await rdf.dataset().import(_shapes)
-   // const data = await rdf.dataset().import(_triples)
-
-var shapesPath="D:\\myShapes.ttl"
-    var dataPath="D:\\myData.ttl"
+    var shapesPath = "D:\\myShapes.ttl";
+    var dataPath = "D:\\myData.ttl";
     try {
+        writeFileSync(shapesPath, _shapes);
+        writeFileSync(dataPath, _triples);
 
-    writeFileSync(shapesPath,_shapes)
-    writeFileSync(dataPath,_triples)
+        const shapes = await rdf.dataset().import(rdf.fromFile(shapesPath));
+        const data = await rdf.dataset().import(rdf.fromFile(dataPath));
 
-const shapes = await rdf.dataset().import(rdf.fromFile(shapesPath))
-const data = await rdf.dataset().import(rdf.fromFile(dataPath))
-
-        const validator = new SHACLValidator(shapes, {factory: rdf})
-        const report = await validator.validate(data)
+        const validator = new SHACLValidator(shapes, { factory: rdf });
+        const report = await validator.validate(data);
         for (const result of report.results) {
             // See https://www.w3.org/TR/shacl/#results-validation-result for details
             // about each property
-            console.log(result.message)
-            console.log(result.path)
-            console.log(result.focusNode)
-            console.log(result.severity)
-            console.log(result.sourceConstraintComponent)
-            console.log(result.sourceShape)
+            console.log(result.message);
+            console.log(result.path);
+            console.log(result.focusNode);
+            console.log(result.severity);
+            console.log(result.sourceConstraintComponent);
+            console.log(result.sourceShape);
         }
 
         // Validation report as RDF dataset
         // console.log(await report.dataset.serialize({ format: 'text/n3' }))
-        var result = await report.dataset.serialize({format: 'text/n3'})
-        return result
+        var result = await report.dataset.serialize({ format: "text/n3" });
+        return result;
+    } catch (e) {
+        console.log(e);
+        throw e;
     }
-    catch(e){
-    console.log(e)
-        throw(e)
-    }
-
-
-
-
-
-
 }
 
 
@@ -88,14 +73,10 @@ async function main(triples, callback) {
 
 //main();
 
-
-
-
-
-
 //https://docs.cambridgesemantics.com/graphlakehouse/v3.2/userdoc/shacl-constraints.htm
 
-var constraintsStr="type\tconstraint\tshapeType\tdataType\texample\tdescription\n" +
+var constraintsStr =
+    "type\tconstraint\tshapeType\tdataType\texample\tdescription\n" +
     "Cardinality Constraints\tsh:maxCount\tproperty\tint\tsh:property [ sh:path ex:lastName ; sh:maxCount 1; sh:datatype xsd:string; ]\tThis constraint sets a limit on the maximum number of values for a property. The following example limits the lastName property to one value\n" +
     "Cardinality Constraints\tsh:minCount\tproperty\tint\tsh:property [ sh:path ex:lastName ; sh:minCount 1; sh:maxCount 1; sh:datatype xsd:string ]\tThis constraint requires a minimum number of values for a property. The following example requires the lastName property to have one value.\n" +
     "Logical Constraints\tsh:or\tnode, property\tURI list\tsh:property [ sh:path ex:child ; sh:or (ex:biological ex:adopted) ]\tThis constraint requires a node or property to conform to at least one of the listed shapes. The following example requires the child property to contain a value that conforms to the biological or adopted shapes.\n" +

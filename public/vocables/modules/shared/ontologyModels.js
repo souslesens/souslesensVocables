@@ -1183,7 +1183,7 @@ var OntologyModels = (function () {
         return restrictions;
     };
 
-    self.getInferredModel = function (source, options, callback) {
+    self.getImplicitModel = function (source, options, callback) {
         if (!options) {
             options = {};
         }

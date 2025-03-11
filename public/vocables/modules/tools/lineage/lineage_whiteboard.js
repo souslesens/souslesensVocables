@@ -19,6 +19,7 @@ import KGquery_graph from "../KGquery/KGquery_graph.js";
 import Lineage_createRelation from "./lineage_createRelation.js";
 import NodeInfosAxioms from "../axioms/nodeInfosAxioms.js";
 import UserDataWidget from "../../uiWidgets/userDataWidget.js";
+import Containers_tree from "../containers/containers_tree.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -3402,7 +3403,7 @@ self.zoomGraphOnNode(node.data[0].id, false);
         if (!source) {
             source = Lineage_sources.activeSource;
         }
-        KGquery_graph.getInferredModelVisjsData(source, function (err, visjsData) {
+        KGquery_graph.getImplicitModelVisjsData(source, function (err, visjsData) {
             if (err) {
                 return alert(err.responseText);
             }
@@ -4430,9 +4431,9 @@ attrs.color=self.getSourceColor(superClassValue)
      */
     self.initQueryTab = function () {
         if ($("#queryTab").children().length == 0) {
-            $("#queryTab").html("<div id='queryTabDiv'></div>")
-            $("#botContainerDiv").css("width","100%")
-            SparqlQuery_bot.start({divId:"queryTabDiv"})
+            $("#queryTab").html("<div id='queryTabDiv'></div>");
+            $("#botContainerDiv").css("width", "100%");
+            SparqlQuery_bot.start({ divId: "queryTabDiv" });
         }
     };
 
@@ -4491,7 +4492,7 @@ attrs.color=self.getSourceColor(superClassValue)
      * @returns {void}
      */
     self.initContainersTab = function () {
-        if ($("#containersTab").children().length == 0) {
+        if ( true || $("#containersTab").children().length == 0) {
             $("#containersTab").load("./modules/tools//lineage/html/containersTab.html", function (s) {
                 Containers_tree.search("lineage_containers_containersJstree");
                 $("#containers_showparentContainersBtn").bind("click", function (e) {
@@ -4506,6 +4507,8 @@ attrs.color=self.getSourceColor(superClassValue)
                     html += '<span class="popupMenuItem" onclick="Containers_widget.execParentContainersSearch();">Load</span>';
                     PopupMenuWidget.initAndShow(html, "popupMenuWidgetDiv");
                 });
+
+
             });
         }
     };

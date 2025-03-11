@@ -2,14 +2,15 @@ var fs = require("fs");
 var path = require("path");
 var async = require("async");
 
+var csvCrawler = require("../_csvCrawler.");
 var util = require("../util.");
+var httpProxy = require("../httpProxy.");
 const ConfigManager = require("../configManager.");
 
 const SocketManager = require("../socketManager.");
 const KGbuilder_triplesMaker = require("./KGbuilder_triplesMaker");
 const KGbuilder_triplesWriter = require("./KGbuilder_triplesWriter");
 const KGbuilder_socket = require("./KGbuilder_socket");
-
 
 var KGbuilder_main = {
     /**
@@ -32,6 +33,7 @@ var KGbuilder_main = {
         var dataSourceConfig = {};
         var dataSourceMappings = {};
         var data = [];
+        var triples = [];
 
         KGbuilder_main.stopCreateTriples = false;
         if (options.clientSocketId) {
@@ -64,15 +66,13 @@ var KGbuilder_main = {
                                 }
                                  // filePath for CSV lookups
                                 var lookups = mappings.lookups;
-                                if(Object.keys(lookups).length>0){
-                                    Object.keys(lookups).forEach(function(key){
-                                        var lookup=lookups[key];
-                                        if(lookup.fileName && lookup.type=='csvSource'){
-                                            lookup.filePath=csvDir+lookup.fileName;
-                                            
+                                if (Object.keys(lookups).length > 0) {
+                                    Object.keys(lookups).forEach(function (key) {
+                                        var lookup = lookups[key];
+                                        if (lookup.fileName && lookup.type == "csvSource") {
+                                            lookup.filePath = csvDir + lookup.fileName;
                                         }
-                                        
-                                    })
+                                    });
                                 }
                                
                                 KGbuilder_triplesMaker.loadLookups(mappings, function(err, result) {

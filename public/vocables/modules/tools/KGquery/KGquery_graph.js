@@ -149,7 +149,7 @@ var KGquery_graph = (function () {
                         return callbackSeries();
                     }
                     KGquery_graph.message("generating tbox graph from abox graph");
-                    self.getInferredModelVisjsData(KGquery.currentSource, function (err, result2) {
+                    self.getImplicitModelVisjsData(KGquery.currentSource, function (err, result2) {
                         if (err) {
                             return alert(err);
                         }
@@ -395,13 +395,13 @@ var KGquery_graph = (function () {
         );
     };
 
-    self.getInferredModelVisjsData = function (source, callback) {
+    self.getImplicitModelVisjsData = function (source, callback) {
         KGquery_graph.message("creating graph");
 
         if (!source) {
             source = self.source;
         }
-        var inferredModel = [];
+        var implicitModel = [];
         var nonObjectProperties = {};
         var existingNodes = {};
         var visjsData = { nodes: [], edges: [] };
@@ -410,7 +410,7 @@ var KGquery_graph = (function () {
             sources = [];
         }
         sources.push(source);
-        var currentInferredModel;
+        var currentImplicitModel;
         async.eachSeries(
             sources,
             function (source, callbackEach) {
@@ -418,21 +418,21 @@ var KGquery_graph = (function () {
                     [
                         //get effective distinct ObjectProperties
                         function (callbackSeries) {
-                            KGquery_graph.message("getInferredModel");
-                            OntologyModels.getInferredModel(source, {}, function (err, result) {
+                            KGquery_graph.message("getImplicitModel");
+                            OntologyModels.getImplicitModel(source, {}, function (err, result) {
                                 if (err) {
                                     return callbackSeries(err);
                                 }
-                                //  inferredModel = inferredModel.concat(result);
+                                //  implicitModel = implicitModel.concat(result);
 
-                                currentInferredModel = result;
+                                currentImplicitModel = result;
                                 callbackSeries();
                             });
                         },
 
                         //get labels
                         function (callbackSeries) {
-                            KGquery_graph.message("getInferredModel");
+                            KGquery_graph.message("getImplicitModel");
                             var filter = "?id rdf:type ?type. FILTER (?type in(owl:Class,owl:ObjectProperty))";
                             Sparql_OWL.getDictionary(source, { filter: filter }, null, function (err, result) {
                                 if (err) {
@@ -445,15 +445,15 @@ var KGquery_graph = (function () {
                                     }
                                 });
 
-                                currentInferredModel.forEach(function (item) {
+                                currentImplicitModel.forEach(function (item) {
                                     item.sClassLabel = { value: labelsMap[item.sClass.value] || Sparql_common.getLabelFromURI(item.sClass.value) };
                                     item.oClassLabel = { value: labelsMap[item.oClass.value] || Sparql_common.getLabelFromURI(item.oClass.value) };
                                     item.propLabel = { value: labelsMap[item.prop.value] || Sparql_common.getLabelFromURI(item.prop.value) };
 
-                                    inferredModel.push(item);
+                                    implicitModel.push(item);
                                 });
 
-                                //   inferredModel = inferredModel.concat(result);
+                                //   implicitModel = implicitModel.concat(result);
 
                                 callbackSeries();
                             });
@@ -518,12 +518,12 @@ var KGquery_graph = (function () {
                 if (err) {
                     return callback();
                 }
-                if (inferredModel.length == 0) {
-                    callback("no inferred model for source " + source);
+                if (implicitModel.length == 0) {
+                   return callback("no inferred model for source " + source);
                 }
 
                 var reflexiveEdges = {};
-                inferredModel.forEach(function (item) {
+                implicitModel.forEach(function (item) {
                     item.sClass = item.sClass || item.sparent;
                     item.oClass = item.oClass || item.oparent;
 

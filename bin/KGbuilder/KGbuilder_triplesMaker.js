@@ -1,4 +1,5 @@
 const async = require("async");
+const sqlServerProxy = require("../KG/SQLserverConnector.");
 const util = require("../util.");
 const KGbuilder_socket = require("./KGbuilder_socket");
 const KGbuilder_triplesWriter = require("./KGbuilder_triplesWriter");
@@ -6,7 +7,6 @@ var csvCrawler = require("../_csvCrawler.");
 const dataController = require("../dataController.");
 const path = require("path");
 const { databaseModel } = require("../../model/databases");
-
 var KGbuilder_triplesMaker = {
     mappingFilePredicate: "http://souslesens.org/KGcreator#mappingFile",
     existingTriples: {},
@@ -79,8 +79,12 @@ var KGbuilder_triplesMaker = {
                         async.series(
                             [
                                 function (callbackSeries) {
-                                    if(mapping.p=="http://totalenergies/resources/tsf/onedata/dalia/planification/maximumPOB" && mapping.o=="maximunpob"&& line.jobcardphaseactivity=='CNT-DAL-MER-001029'){
-                                        console.log('here');
+                                    if (
+                                        mapping.p == "http://totalenergies/resources/tsf/onedata/dalia/planification/maximumPOB" &&
+                                        mapping.o == "maximunpob" &&
+                                        line.jobcardphaseactivity == "CNT-DAL-MER-001029"
+                                    ) {
+                                        console.log("here");
                                     }
 
                                     KGbuilder_triplesMaker.getTripleSubject(tableMappings, mapping, line, function (err, result) {
@@ -115,10 +119,12 @@ var KGbuilder_triplesMaker = {
                                 },
 
                                 function (callbackSeries) {
+
+
                                     if (mapping.isRestriction) {
                                         KGbuilder_triplesMaker.getRestrictionTriples(mapping, subjectStr, propertyStr, objectStr, function (err, restrictionTriples) {
                                             if (err) {
-                                                return callbackSeries(err);
+                                                return callbackSeries();
                                             }
                                             triples = triples.concat(restrictionTriples);
                                             return callbackSeries();
@@ -160,38 +166,6 @@ var KGbuilder_triplesMaker = {
 
 
 
-    getURIFromSpecificBaseUri:function(mappingValue,line,tableMappings,mapping){
-        var p=mappingValue.indexOf("]")
-        if(p>0 ){//specific baseURI
-            var  baseUri= mappingValue.substring(1,p)
-            var value=line[mappingValue.substring(p+1)]
-            // specific base URI can also have transforms and lookups 
-           if(value)
-                if(tableMappings.transform && tableMappings.transform[mappingValue]) {
-                    try {
-                       
-        
-                            return "<" +baseUri+ tableMappings.transform[mappingValue](util.formatStringForTriple(value, true), "s", mapping.p, line, mapping)+">";
-                        
-                        //   return callback(null,subjectStr);
-                    } catch (e) {
-                        return null;
-                    }
-                }
-                // lookup to do
-                else{
-                    return "<" +baseUri+ util.formatStringForTriple(value, true) + ">";
-                }
-              
-            else
-                return null
-
-        }else{
-            return null;
-        }
-
-    },
-
 
 
     getURIFromSpecificBaseUri:function(mappingValue,line,tableMappings,mapping){
@@ -203,42 +177,32 @@ var KGbuilder_triplesMaker = {
            if(value)
                 if(tableMappings.transform && tableMappings.transform[mappingValue]) {
                     try {
-                       
-        
-                            return "<" +baseUri+ tableMappings.transform[mappingValue](util.formatStringForTriple(value, true), "s", mapping.p, line, mapping)+">";
-                        
+                        return "<" + baseUri + tableMappings.transform[mappingValue](util.formatStringForTriple(value, true), "s", mapping.p, line, mapping) + ">";
+
                         //   return callback(null,subjectStr);
                     } catch (e) {
                         return null;
                     }
                 }
                 // lookup to do
-                else{
-                    return "<" +baseUri+ util.formatStringForTriple(value, true) + ">";
+                else {
+                    return "<" + baseUri + util.formatStringForTriple(value, true) + ">";
                 }
-              
-            else
-                return null
-
-        }else{
+            else return null;
+        } else {
             return null;
         }
-
     },
 
     getTripleSubject: function (tableMappings, mapping, line, callback) {
         //get value for Subject
-        var subjectStr = KGbuilder_triplesMaker.getURIFromSpecificBaseUri(mapping.s, line,tableMappings,mapping);
+        var subjectStr = KGbuilder_triplesMaker.getURIFromSpecificBaseUri(mapping.s, line, tableMappings, mapping);
         var isTransformLookUp = false;
         var missingLookups_s;
         var okLookups_s;
-        if(subjectStr){
-            
-            return callback(null,subjectStr);
+        if (subjectStr) {
+            return callback(null, subjectStr);
         }
-        
-
-
 
         if (mapping.subjectIsSpecificUri || mapping.s.endsWith("_#")) {
             subjectStr = mapping.s.replace("_#", "");
@@ -278,8 +242,7 @@ var KGbuilder_triplesMaker = {
                     // case when mapping is a lookup and a transform at same time
                     if (mapping.lookup_s) {
                         var lookupValue = KGbuilder_triplesMaker.getLookupValue(mapping.lookup_s, line[mapping.s]);
-                        if(lookupValue){
-                            
+                        if (lookupValue) {
                             subjectStr = tableMappings.transform[mapping.s](lookupValue, "s", mapping.p, line, mapping);
                             okLookups_s += 1;
                             isTransformLookUp = true;
@@ -302,7 +265,6 @@ var KGbuilder_triplesMaker = {
             subjectStr = line[mapping.s];
         }
         if (mapping.lookup_s && !isTransformLookUp) {
-           
             if (!lookUpsMap[mapping.lookup_s]) {
                 KGbuilder_socket.message((lineError = "no lookup named " + mapping.lookup_s));
             }
@@ -315,7 +277,7 @@ var KGbuilder_triplesMaker = {
             }
         }
 
-        if (!subjectStr) {
+        if (!subjectStr  || subjectStr == "null") {
             return callback("no mapping.subject in line " + JSON.stringify(line));
         }
 
@@ -336,17 +298,16 @@ var KGbuilder_triplesMaker = {
 
 
         }
+
         return callback(null, subjectStr);
     },
 
     getTripleObject: function (tableMappings, mapping, line, callback) {
-        
-        var objectStr = KGbuilder_triplesMaker.getURIFromSpecificBaseUri(mapping.o, line,tableMappings,mapping);
+        var objectStr = KGbuilder_triplesMaker.getURIFromSpecificBaseUri(mapping.o, line, tableMappings, mapping);
         var isTransformLookUp = false;
         var missingLookups_o;
         var okLookups_o;
-        if(objectStr)
-            return callback(null,objectStr)
+        if (objectStr) return callback(null, objectStr);
 
         //get value for Object
 
@@ -402,8 +363,7 @@ var KGbuilder_triplesMaker = {
                         isTransform = true;
                         if (mapping.lookup_o) {
                             var lookupValue = KGbuilder_triplesMaker.getLookupValue(mapping.lookup_o, value);
-                            if(lookupValue){
-                                
+                            if (lookupValue) {
                                 //objectStr = tableMappings.transform[mapping.o](lookupValue, "s", mapping.p, line, mapping);
                                 //okLookups_o += 1;
                                 isTransformLookUp = true;
@@ -491,33 +451,30 @@ var KGbuilder_triplesMaker = {
                 }
             }
 
-            if (mapping.lookup_o ) {
-               
+            if (mapping.lookup_o) {
                 if (!lookUpsMap[mapping.lookup_o]) {
                     return (lineError = "no lookup named " + mapping.lookup_o);
                 }
-                var lookupValue
-                if(mapping.dataType && str){
+                var lookupValue;
+                if (mapping.dataType && str) {
                     lookupValue = KGbuilder_triplesMaker.getLookupValue(mapping.lookup_o, str);
-                    if(lookupValue){
-                        if(isTransformLookUp){
-                            lookupValue=tableMappings.transform[mapping.o](util.formatStringForTriple(lookupValue, false), "o", mapping.p, line, mapping)
-                            lookupValue = "\"" + lookupValue + "\"^^" + mapping.dataType;
-                        }else{
-                            lookupValue = "\"" + lookupValue + "\"^^" + mapping.dataType;
+                    if (lookupValue) {
+                        if (isTransformLookUp) {
+                            lookupValue = tableMappings.transform[mapping.o](util.formatStringForTriple(lookupValue, false), "o", mapping.p, line, mapping);
+                            lookupValue = '"' + lookupValue + '"^^' + mapping.dataType;
+                        } else {
+                            lookupValue = '"' + lookupValue + '"^^' + mapping.dataType;
                         }
-                        
                     }
-                }else{
-                    if(isTransformLookUp){
+                } else {
+                    if (isTransformLookUp) {
                         lookupValue = KGbuilder_triplesMaker.getLookupValue(mapping.lookup_o, value);
-                        lookupValue=tableMappings.transform[mapping.o](util.formatStringForTriple(lookupValue, false), "o", mapping.p, line, mapping)
-                    }else{
+                        lookupValue = tableMappings.transform[mapping.o](util.formatStringForTriple(lookupValue, false), "o", mapping.p, line, mapping);
+                    } else {
                         lookupValue = KGbuilder_triplesMaker.getLookupValue(mapping.lookup_o, value);
                     }
-                    
                 }
-                
+
                 if (!lookupValue) {
                     missingLookups_o += 1;
                 } else {
@@ -547,9 +504,7 @@ var KGbuilder_triplesMaker = {
             } else if (mapping.isString) {
                 objectStr = "'" + util.formatStringForTriple(objectStr, false) + "'";
             } else {
-
-                    objectStr = "<" + tableMappings.graphUri + util.formatStringForTriple(objectStr, true) + ">";
-
+                objectStr = "<" + tableMappings.graphUri + util.formatStringForTriple(objectStr, true) + ">";
             }
         }
 
@@ -575,6 +530,14 @@ var KGbuilder_triplesMaker = {
         return callback(null, propertyStr);
     },
     getRestrictionTriples: function (mapping, subjectStr, propertyStr, objectStr, callback) {
+
+        if (!subjectStr  || subjectStr == "null") {
+            return callback("no mapping.subject  null-"+propertyStr+" " + objectStr);
+        }
+        if (!objectStr  || objectStr == "null") {
+            return callback("no mapping.object  "+propertyStr+"<-" + subjectStr);
+        }
+
         var restrictionTriples = [];
         var blankNode = "<_:b" + util.getRandomHexaId(10) + ">";
 
@@ -611,7 +574,6 @@ var KGbuilder_triplesMaker = {
             tableMappings.lookups,
             function (lookup, callbackEachLookup) {
                 if (tableMappings.csvDataFilePath) {
-                    
                     var lookupFilePath = lookup.filePath;
                     KGbuilder_triplesMaker.readCsv(lookupFilePath, null, function (err, result) {
                         if (err) {
@@ -626,7 +588,7 @@ var KGbuilder_triplesMaker = {
                         }*/
                         result.data.forEach(function (slice) {
                             var lookupLines = slice;
-                            
+
                             lookupLines.forEach(function (line, index) {
                                 if (![line[lookup.sourceColumn]] && line[lookup.targetColumn]) {
                                     return KGbuilder_socket.message(options.clientSocketId, "missing lookup line" + index + " " + lookupFilePath, true);
@@ -775,17 +737,15 @@ var KGbuilder_triplesMaker = {
     getLookupValue: function (lookupName, value, callback) {
         //var lookupArray = lookupName.split("|");
         var target = null;
-        if(lookUpsMap[lookupName])
-        target = lookUpsMap[lookupName].dictionary[value];
+        if (lookUpsMap[lookupName]) target = lookUpsMap[lookupName].dictionary[value];
         if (target && lookUpsMap[lookupName].transformFn) {
-                try {
-                    target = lookUpsMap[lookupName].transformFn(target,"s", mapping.p, line, mapping);
-                } catch (e) {
-                    return callback(e);
-                }
+            try {
+                target = lookUpsMap[lookupName].transformFn(target, "s", mapping.p, line, mapping);
+            } catch (e) {
+                return callback(e);
+            }
         }
-        
-       
+
         return target;
     },
     loadData: function (tableMappings, options, callback) {

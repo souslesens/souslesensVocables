@@ -599,7 +599,7 @@ var Lineage_relations = (function () {
                 },
                 //get effective distinct ObjectProperties
                 function (callbackSeries) {
-                    OntologyModels.getInferredModel(source, options, function (err, result) {
+                    OntologyModels.getImplicitModel(source, options, function (err, result) {
                         if (err) {
                             return callbackSeries(err);
                         }

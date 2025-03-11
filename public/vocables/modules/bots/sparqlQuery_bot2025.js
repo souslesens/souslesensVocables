@@ -296,7 +296,6 @@ var SparqlQuery_bot = (function () {
         },
     };
 
-
     self.processClassQuerySearch = function () {
         var outputType = self.params.outputType;
         var searchedSources = self.params.queryScope;

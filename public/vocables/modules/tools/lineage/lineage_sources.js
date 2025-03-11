@@ -169,6 +169,7 @@ var Lineage_sources = (function () {
                 UI.showHideRightPanel();
                 $("#lineage_allActions").css("visibility", "visible");
 
+
                 if (callback) {
                     return callback(err);
                 }
@@ -257,6 +258,7 @@ var Lineage_sources = (function () {
         });
 
         self.initSourcesSearchSelect();
+        SparqlQuery_bot.start({ divId: "queryTabDiv" });
     };
 
     /**

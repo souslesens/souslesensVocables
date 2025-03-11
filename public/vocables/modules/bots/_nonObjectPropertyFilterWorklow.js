@@ -25,7 +25,7 @@ class NonObjectPropertyFilterWorklow {
             return self.callback(null, "");
         }
         var nonObjectProperties = model[currentClassId];
-        nonObjectProperties.unshift({id:"any",label:"ANY"});
+        nonObjectProperties.unshift({id:"any",label:"any"});
         self.botEngine.showList(nonObjectProperties, "property", null, null, function (value) {
             if(value=="any"){
                 return self.callback(null, "");

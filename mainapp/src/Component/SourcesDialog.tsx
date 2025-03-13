@@ -171,7 +171,7 @@ export const SourcesDialog = ({ edit, me, onClose, onSubmit, open, selectedSourc
                 setSource(selectedSource);
             }
         }
-    }, [open]);
+    }, [open, me, selectedSource, sources]);
 
     const icon = <CheckBoxOutlineBlank fontSize="small" />;
     const checkedIcon = <CheckBox fontSize="small" />;

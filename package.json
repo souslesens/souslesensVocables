@@ -52,8 +52,6 @@
     },
     "dependencies": {
         "@elastic/elasticsearch": "^8.17.1",
-        "@mui/icons-material": "^5.16.14",
-        "@mui/material": "^5.16.14",
         "@sentry/node": "^9.0.0",
         "@zazuko/env-node": "^2.1.4",
         "antlr4": "^4.13.2",

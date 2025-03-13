@@ -349,6 +349,7 @@ var KGquery = (function () {
             });
             */
             if (output == "table") {
+                
                 self.queryResultToTable(result);
             } else if (output == "Graph") {
                 self.queryResultToVisjsGraph(result);
@@ -783,7 +784,13 @@ var KGquery = (function () {
 
         //$("#KGquery_dataTableDialogDiv").css("left", "10px");
         //$("#KGquery_dataTableDialogDiv").width("90vW");
+        if(tableData.length>10000){
+            var columns=tableCols.map(function(item){return item.title});
+            tableData.unshift(columns);
+            alert('to large results, it will be exported');
+            return Export.exportDataToCSV(tableData);
 
+        }
         Export.showDataTable("KGquery_dataTableDialogDiv", tableCols, tableData, null, { paging: true }, function (err, datatable) {
             $("#dataTableDivExport").on("click", "td", function () {
                 var table = $("#dataTableDivExport").DataTable();

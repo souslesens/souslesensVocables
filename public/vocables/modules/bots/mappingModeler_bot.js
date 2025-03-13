@@ -209,7 +209,7 @@ var MappingModeler_bot = (function () {
                     source: self.params.source,
                     datatypePropertyDomain: classId,
                 },
-                function (err, result) {},
+                function (err, result) {_botEngine.nextStep()},
             );
         },
         listDatatypePropertyRangeFn: function () {

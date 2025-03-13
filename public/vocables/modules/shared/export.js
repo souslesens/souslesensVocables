@@ -451,7 +451,21 @@ fixedColumns: true*/
             return callback(null, self.dataTable);
         }
     };
+    
+    self.exportDataToCSV=function(dataset){
+        let csvContent = "data:text/csv;charset=utf-8," + dataset.map(row => row.map(cell => `"${cell}"`).join(";")).join("\n");
+        let encodedUri = encodeURI(csvContent);
+        let link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "export_data.csv");
+        document.body.appendChild(link);
 
+        
+        link.click();
+
+        
+        
+    }
     return self;
 })();
 

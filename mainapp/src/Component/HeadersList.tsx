@@ -103,7 +103,7 @@ const HeadersDialog = ({ edit, open, onClose, onSubmit, selected }: HeadersDialo
         } else {
             setHeader(selected as HeaderType);
         }
-    }, [open]);
+    }, [open, selected]);
 
     const handleField = (key: string, value: string) => setHeader({ ...header, [key]: value });
 

@@ -31,6 +31,17 @@ class UserDataModel {
     }
 
     /**
+     * Check if the specified text if allowed by the backend
+     *
+     * @param {string} text - the text to check
+     * @returns {boolean} - true if the text is allowed, false otherwise
+     */
+    _allowedStringLength = (text) => {
+        const size = new TextEncoder().encode(text).length;
+        return size <= this._mainConfig.userData.maximumFileSize;
+    };
+
+    /**
      * Run zod to validate the received data
      *
      * @param {UserData} data - the user data to validate
@@ -172,6 +183,10 @@ class UserDataModel {
     insert = async (userData) => {
         const data = this._check(userData);
 
+        if (this._mainConfig.userData.location === "database" && !this._allowedStringLength(data.data_content)) {
+            throw Error(`The specified content is too large for the database`, { cause: 413 });
+        }
+
         const connection = getKnexConnection(this._mainConfig.database);
         const results = await connection.select("id").from("users").where("id", data.owned_by).first();
         if (results === undefined) {
@@ -248,6 +263,10 @@ class UserDataModel {
             delete userData.created_at;
         }
         const data = this._check(userData);
+
+        if (this._mainConfig.userData.location === "database" && !this._allowedStringLength(data.data_content)) {
+            throw Error(`The specified content is too large for the database`, { cause: 413 });
+        }
 
         const connection = getKnexConnection(this._mainConfig.database);
         const results = await connection.select("id", "data_path").from("user_data").where("id", data.id).first();

@@ -209,6 +209,19 @@ describe("UserDataModel", () => {
         expect(async () => await userDataModel.insert(addUserData)).rejects.toThrow();
     });
 
+    test("insert userData with too large file (database)", async () => {
+        userDataModel._mainConfig.userData = {
+            location: "database",
+            maximumFileSize: 4,
+        };
+
+        const addUserData = {
+            data_type: "data_type",
+            owned_by: "someone",
+        }
+        expect(async () => await userDataModel.insert(addUserData)).rejects.toThrow("The specified content is too large for the database");
+    });
+
     test("remove userData (database)", async () => {
         userDataModel._mainConfig.userData.location = "database";
         const result = await userDataModel.remove(1, { "id": 1, "login": "admin"});
@@ -298,6 +311,22 @@ describe("UserDataModel", () => {
         };
 
         expect(async () => await userDataModel.update(updateUserData)).rejects.toThrow("The specified owned_by do not exists");
+    });
+
+    test("update userData with too large file (database)", async () => {
+        userDataModel._mainConfig.userData = {
+            location: "database",
+            maximumFileSize: 4,
+        };
+
+        const updateUserData = {
+            id: 1,
+            data_type: "data_type",
+            data_content: { test: "test" },
+            owned_by: "someone",
+        };
+
+        expect(async () => await userDataModel.update(updateUserData)).rejects.toThrow("The specified content is too large for the database");
     });
 
     test("test _convertToJSON", async () => {

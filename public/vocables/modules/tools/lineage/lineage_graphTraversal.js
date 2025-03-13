@@ -10,7 +10,8 @@ import SearchWidget from "../../uiWidgets/searchWidget.js";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 
 /**
- * @namespace Lineage_graphTraversal
+ * @namespace lineage
+ * @category Lineage
  * @description Module for managing the shortest path search between nodes in the Lineage graph.
  */
 var Lineage_graphTraversal = (function () {

@@ -6,6 +6,14 @@ import Lineage_relations from "./lineage_relations.js";
 import DateWidget from "../../uiWidgets/dateWidget.js";
 import IndividualValueFilterWidget from "../../uiWidgets/individualValuefilterWidget.js";
 
+/**
+ * @module Lineage_relationIndividualsFilter
+ * @category Lineage
+ * This module provides functionalities for filtering individuals in the lineage tool.
+ * It includes functions for initializing the filter UI, searching for individuals,
+ * adding individual filters, and executing the current filter.
+ * @namespace lineage
+ */     
 var Lineage_relationIndividualsFilter = (function () {
     var self = {};
     self.filter = "";
@@ -16,7 +24,7 @@ var Lineage_relationIndividualsFilter = (function () {
      * Loads the dialog and sets up event listeners for filtering individuals.
      * @function
      * @name init
-     * @memberof Lineage_relationIndividualsFilter
+     * @memberof lineage.Lineage_relationIndividualsFilter
      * @returns {void}
      */
     self.init = function () {
@@ -51,7 +59,7 @@ var Lineage_relationIndividualsFilter = (function () {
      * Populates a tree structure with the matching individuals.
      * @function
      * @name searchClassIndividuals
-     * @memberof Lineage_relationIndividualsFilter
+     * @memberof lineage.Lineage_relationIndividualsFilter
      * @param {string} term - The search term used to filter individuals.
      * @returns {void}
      */
@@ -74,7 +82,7 @@ var Lineage_relationIndividualsFilter = (function () {
      * Updates the filter textarea with the generated SPARQL filter query.
      * @function
      * @name addIndividualFilter
-     * @memberof Lineage_relationIndividualsFilter
+     * @memberof lineage.Lineage_relationIndividualsFilter
      * @param {Object} event - The event object triggered by the selection.
      * @param {Object} obj - The selected individual node data.
      * @returns {void}
@@ -110,7 +118,7 @@ var Lineage_relationIndividualsFilter = (function () {
      * Closes the dialog after applying the filter.
      * @function
      * @name execFilter
-     * @memberof Lineage_relationIndividualsFilter
+     * @memberof lineage.Lineage_relationIndividualsFilter
      * @param {string} action - The action to execute after applying the filter.
      * @returns {void}
      */
@@ -126,7 +134,7 @@ var Lineage_relationIndividualsFilter = (function () {
      * Updates the internal filter value based on the selected conditions.
      * @function
      * @name addRangeAndDomainFilter
-     * @memberof Lineage_relationIndividualsFilter
+     * @memberof lineage.Lineage_relationIndividualsFilter
      * @returns {void}
      */
     self.addRangeAndDomainFilter = function () {
@@ -144,7 +152,7 @@ var Lineage_relationIndividualsFilter = (function () {
      * Allows users to choose between different filtering options.
      * @function
      * @name onFilterTypeSelect
-     * @memberof Lineage_relationIndividualsFilter
+     * @memberof lineage.Lineage_relationIndividualsFilter
      * @param {string} filterType - The type of filter selected (e.g., "searchLabel", "dateRange").
      * @returns {void}
      */
@@ -183,7 +191,7 @@ var Lineage_relationIndividualsFilter = (function () {
      * Updates the filter query based on the selected date and precision.
      * @function
      * @name setDateFilter
-     * @memberof Lineage_relationIndividualsFilter
+     * @memberof lineage.Lineage_relationIndividualsFilter
      * @param {string} precision - The level of precision for the date filter (e.g., "day", "month").
      * @returns {void}
      */

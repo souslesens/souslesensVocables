@@ -3,23 +3,32 @@ import common from "../../shared/common.js";
 self.lineageVisjsGraph;
 import PromptedSelectWidget from "../../uiWidgets/promptedSelectWidget.js";
 
+/**
+ * @module Lineage_relationFilter
+ * @category Lineage
+ * This module provides functionalities for filtering relations in the lineage tool.
+ * It includes functions for displaying the filter UI, handling role selection,
+ * and adding filters based on selected properties and values.
+ * @namespace lineage
+ */
 var Lineage_relationFilter = (function () {
     var self = {};
     var restrictions = null;
     var constraints = null;
 
     /**
-     * @function showAddFilterDiv
-     * @memberof Lineage_relationFilter
-     * @description Affiche l'interface utilisateur pour ajouter un filtre sur une relation.
-     * @param {boolean} clear - Indique si la propriété actuelle doit être réinitialisée.
+     * Displays the UI for adding a filter to a relation.
+     * @function
+     * @name showAddFilterDiv
+     * @memberof lineage.Lineage_relationFilter
+     * @param {boolean} clear - Indicates whether to reset the current property.
+     * @returns {void}
      */
     self.showAddFilterDiv = function (clear) {
         if (clear) {
             self.currentProperty = null;
         }
         $("#Lineage_relation_constraints").html("");
-        //  $("#lineage_relation_filterRoleSelect").val("");
         $("#Lineage_relation_filterTypeSelect").val("");
         $("#Lineage_relation_filterVocabularySelect").val("");
         $("#lineageQuery_uriValueDiv").css("display", "none");
@@ -27,10 +36,8 @@ var Lineage_relationFilter = (function () {
         $("#Lineage_relation_filterText").css("display", "none");
         $("#lineageQuery_addFilterButton").prop("disabled", true);
         var propStr = "";
-        ("");
         if (self.currentProperty) {
             propStr = self.currentProperty.vocabulary + "." + self.currentProperty.label + "<br>";
-        } else {
         }
         $("#lineageQuery_value").keypress(function (e) {
             if (e.which == 13) {
@@ -122,12 +129,13 @@ var Lineage_relationFilter = (function () {
         $("#Lineage_relation_property").html(propStr);
     };
 
-
     /**
-     * @function onSelectRoleType
-     * @memberof Lineage_relationFilter
-     * @description Gère la sélection d'un type de rôle (sujet ou objet) pour le filtre.
-     * @param {string} role - Le rôle sélectionné ("subject" ou "object").
+     * Handles the selection of a role type (subject or object) for the filter.
+     * @function
+     * @name onSelectRoleType
+     * @memberof lineage.Lineage_relationFilter
+     * @param {string} role - The selected role ("subject" or "object").
+     * @returns {void}
      */
     self.onSelectRoleType = function (role) {
         self.currentResourceFilterRole = role;
@@ -157,68 +165,13 @@ var Lineage_relationFilter = (function () {
         }
     };
 
-    /* self.onSelectResourceType = function(type) {
-    var role = self.currentResourceFilterRole;
-    $("#lineageQuery_value").datepicker("destroy");
-    $("#lineageQuery_value").val("");
-
-    $("#lineageQuery_literalValueDiv").css("display", "none");
-    $("#lineageQuery_literalValueDiv").css("display", "none");
-    $("#lineageQuery_addFilterButton").removeProp("disabled");
-
-    if (type == "String") {
-      $("#lineageQuery_literalValueDiv").css("display", "block");
-      common.fillSelectOptions("lineageQuery_operator", self.operators["String"]);
-      $("#lineageQuery_operator").val("contains");
-    }
-    else if (type == "Date") {
-      $("#lineageQuery_literalValueDiv").css("display", "block");
-      common.fillSelectOptions("lineageQuery_operator", self.operators["Number"]);
-      dateWidget.setDatePickerOnInput("lineageQuery_value");
-      $("#lineageQuery_operator").val(">=");
-    }
-    else if (type.indexOf("xsd:")==0) {
-
-      $("#lineageQuery_literalValueDiv").css("display", "block");
-      if(type=="xsd:string")
-      common.fillSelectOptions("lineageQuery_operator", self.operators["String"]);
-      else
-        common.fillSelectOptions("lineageQuery_operator", self.operators["Number"]);
-      $("#lineageQuery_operator").val(">=");
-    }
-    else if (type == "Number") {
-      $("#lineageQuery_literalValueDiv").css("display", "block");
-      common.fillSelectOptions("lineageQuery_operator", self.operators["Number"]);
-      $("#lineageQuery_operator").val(">=");
-    }
-    else if (self.currentProperty && restrictions[self.currentProperty.id]) {
-      $("#lineageQuery_uriValueDiv").css("display", "block");
-      common.fillSelectOptions("Lineage_relation_filterVocabularySelect", [], false);
-
-      common.fillSelectOptions("Lineage_relation_filterResourcesSelect", self.domain, true, "label", "id");
-    }
-    else {
-      $("#lineageQuery_uriValueDiv").css("display", "block");
-      var scopes = [];
-      if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
-        scopes.push("whiteBoardNodes");
-      }
-      scopes.push(Lineage_sources.activeSource);
-      var imports = Config.sources[Lineage_sources.activeSource].imports;
-      if (imports) {
-        scopes = scopes.concat(imports);
-      }
-
-      common.fillSelectOptions("Lineage_relation_filterVocabularySelect", scopes, true);
-    }
-  };*/
-
-
     /**
-     * @function onCommonUIWidgetSelectObjectValue
-     * @memberof Lineage_relationFilter
-     * @description Applique un formatage spécifique à la valeur sélectionnée en fonction de son type.
-     * @param {string} value - La valeur sélectionnée.
+     * Applies specific formatting to the selected value based on its type.
+     * @function
+     * @name onCommonUIWidgetSelectObjectValue
+     * @memberof lineage.Lineage_relationFilter
+     * @param {string} value - The selected value.
+     * @returns {void}
      */
     self.onCommonUIWidgetSelectObjectValue = function (value) {
         if (value.indexOf("xsd") == 0) {
@@ -227,16 +180,15 @@ var Lineage_relationFilter = (function () {
             } else {
                 $("#editPredicate_objectValue").val(value);
             }
-        } else {
         }
     };
 
-
-
     /**
-     * @function addFilter
-     * @memberof Lineage_relationFilter
-     * @description Ajoute un filtre basé sur la propriété et la valeur sélectionnées.
+     * Adds a filter based on the selected property and value.
+     * @function
+     * @name addFilter
+     * @memberof lineage.Lineage_relationFilter
+     * @returns {void}
      */
     self.addFilter = function () {
         var role = $("#lineage_relation_filterRoleSelect2").val();

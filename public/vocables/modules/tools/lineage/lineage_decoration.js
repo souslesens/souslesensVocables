@@ -9,6 +9,14 @@ import Containers_graph from "../containers/containers_graph.js";
 import Sparql_generic from "../../sparqlProxies/sparql_generic.js";
 
 //@typescript-eslint/no-unused-vars
+
+/**
+ * @module Lineage_decoration
+ * @category Lineage
+ * This module provides functionalities for decorating and managing the lineage graph.
+ * It includes functions for initializing the legend, drawing the legend, and decorating nodes.
+ * @namespace lineage
+ */
 var Lineage_decoration = (function () {
     var self = {};
     self.legendColorsMap = {};

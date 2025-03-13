@@ -9,6 +9,13 @@ import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
 import MainController from "../../shared/mainController.js";
 
+/**
+ * @namespace lineage
+ * @module Lineage_combine
+ * @category Lineage
+ * This module provides functionalities for combining ontology sources in a lineage graph.
+ * It includes functions for adding sources, merging nodes, and managing graph UI.
+ */
 var Lineage_combine = (function () {
     var self = {};
     self.currentSources = [];

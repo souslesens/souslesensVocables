@@ -9,6 +9,7 @@ For your information, SousLeSens has several tools, including:
 - Lineage: Visualizes ontologies and their relationships.
 - MappingModeler: Maps data from standard database systems (e.g., SQL) to semantic models.
 - KGQuery: Queries triples from semantic data graphs.
+- the plugin lifex_cost : made to display data for the Dalia Lifex project planning - helps planners show data on planning, and plan works on a FPSO.
 
 When asking you to generate docstrings, you will generate docstrings in the specified files for all modules, properties and functions.
 

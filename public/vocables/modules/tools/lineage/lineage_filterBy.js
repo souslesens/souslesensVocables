@@ -1,5 +1,12 @@
 import common from "../../shared/common.js";
 
+/**
+ * @module Lineage_filterBy
+ * @category Lineage
+ * This module provides functionalities for filtering and managing lineage query parameters.
+ * It includes functions for adding and removing filters, and managing the filter UI.
+ * @namespace lineage
+ */
 var Lineage_filterBy = (function () {
     var self = {};
     self.context = {};

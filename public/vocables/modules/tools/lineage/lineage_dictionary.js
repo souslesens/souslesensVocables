@@ -11,6 +11,9 @@ import Lineage_createRelation from "./lineage_createRelation.js";
  * Lineage Dictionary module
  * Manages the dictionary-related functionalities within the lineage tool.
  * @module Lineage_dictionary
+ * @category Lineage
+ * This module manages the dictionary-related functionalities within the lineage tool.
+ * @namespace lineage
  */
 var Lineage_dictionary = (function () {
     var self = {};

@@ -7,6 +7,14 @@ import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 import Lineage_sources from "./lineage_sources.js";
 import CreateRestriction_bot from "../../bots/createRestriction_bot.js";
 
+/**
+ * @module Lineage_createRelation
+ * @category Lineage
+ * This module provides functionalities for creating relations between ontology nodes.
+ * It includes functions for displaying the relation creation dialog, generating context menus,
+ * executing edge additions, and handling node information display.
+ * @namespace lineage
+ */
 var Lineage_createRelation = (function () {
     var self = {};
 
@@ -1171,3 +1179,4 @@ var Lineage_createRelation = (function () {
 
 export default Lineage_createRelation;
 window.Lineage_createRelation = Lineage_createRelation;
+                                                                                                                                                                                                                                                                                                                                      

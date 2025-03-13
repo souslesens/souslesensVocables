@@ -33,14 +33,7 @@ class UserDataModel {
     _check = (data) => {
         const check = UserDataObject.safeParse(data);
         if (!check.success) {
-<<<<<<< HEAD
-            throw Error(
-                `The user data do not follow the standard: ${JSON.stringify(check.error.issues)}`,
-                { cause: 400 },
-            );
-=======
             throw Error(`The user data do not follow the standard: ${JSON.stringify(check.error.issues)}`, { cause: 400 });
->>>>>>> origin/master
         }
         return check.data;
     };
@@ -61,13 +54,6 @@ class UserDataModel {
         return knex({ client: "pg", connection: this._mainConfig.database });
     };
 
-<<<<<<< HEAD
-    all = async () => {
-        const connection = this._getConnection();
-        const results = await connection.select("*").from("user_data_list");
-        connection.destroy();
-        return results;
-=======
     all = async (currentUser) => {
         const connection = this._getConnection();
         if ((currentUser === undefined) & (this._mainConfig.auth === "disabled")) {
@@ -84,22 +70,13 @@ class UserDataModel {
 
         connection.destroy();
         return currentUserData;
->>>>>>> origin/master
     };
 
     find = async (identifier) => {
         this._checkIdentifier(identifier);
 
         const connection = this._getConnection();
-<<<<<<< HEAD
-        const results = await connection
-            .select("*")
-            .from("user_data_list")
-            .where("id", identifier)
-            .first();
-=======
         const results = await connection.select("*").from("user_data_list").where("id", identifier).first();
->>>>>>> origin/master
         if (results === undefined) {
             connection.destroy();
             throw Error("The specified identifier do not exists", { cause: 404 });
@@ -113,15 +90,7 @@ class UserDataModel {
         const data = this._check(userData);
 
         const connection = this._getConnection();
-<<<<<<< HEAD
-        const results = await connection
-            .select("id")
-            .from("users")
-            .where("login", data.owned_by)
-            .first();
-=======
         const results = await connection.select("id").from("users").where("login", data.owned_by).first();
->>>>>>> origin/master
         if (results === undefined) {
             connection.destroy();
             throw Error("The specified owned_by username do not exists", { cause: 404 });
@@ -136,15 +105,7 @@ class UserDataModel {
         this._checkIdentifier(identifier);
 
         const connection = this._getConnection();
-<<<<<<< HEAD
-        const results = await connection
-            .select("id")
-            .from("user_data")
-            .where("id", identifier)
-            .first();
-=======
         const results = await connection.select("id").from("user_data").where("id", identifier).first();
->>>>>>> origin/master
         if (results === undefined) {
             connection.destroy();
             throw Error("The specified identifier do not exists", { cause: 404 });
@@ -158,43 +119,20 @@ class UserDataModel {
         const data = this._check(userData);
 
         const connection = this._getConnection();
-<<<<<<< HEAD
-        let results = await connection
-            .select("id")
-            .from("user_data")
-            .where("id", data.id)
-            .first();
-=======
         let results = await connection.select("id").from("user_data").where("id", data.id).first();
->>>>>>> origin/master
         if (results === undefined) {
             connection.destroy();
             throw Error("The specified identifier do not exists", { cause: 404 });
         }
 
-<<<<<<< HEAD
-        results = await connection
-            .select("id")
-            .from("users")
-            .where("login", data.owned_by)
-            .first();
-=======
         results = await connection.select("id").from("users").where("login", data.owned_by).first();
->>>>>>> origin/master
         if (results === undefined) {
             connection.destroy();
             throw Error("The specified owned_by do not exists", { cause: 404 });
         }
 
         data.owned_by = results.id;
-<<<<<<< HEAD
-        await connection
-            .update(data)
-            .into("user_data")
-            .where("id", data.id);
-=======
         await connection.update(data).into("user_data").where("id", data.id);
->>>>>>> origin/master
         connection.destroy();
     };
 }

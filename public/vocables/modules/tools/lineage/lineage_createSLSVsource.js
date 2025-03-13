@@ -2,6 +2,13 @@ import common from "../../shared/common.js";
 import Authentification from "../../shared/authentification.js";
 import CreateSLSVsource_bot from "../../bots/createSLSVsource_bot.js";
 
+/**
+ * @module Lineage_createSLSVsource
+ * @category Lineage
+ * This module provides functionalities for creating SLSV sources in the ontology.
+ * It includes functions for initializing the source creation module and starting the corresponding bot.
+ * @namespace lineage
+ */
 var Lineage_createSLSVsource = (function () {
     var self = {};
 

@@ -17,6 +17,16 @@ import Lineage_sources from "./lineage_sources.js";
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+
+/**
+ * @module Lineage_properties
+ * @category Lineage
+ * This module provides functionalities for managing and displaying properties within the lineage tool.
+ * It includes functions for initializing graph settings, displaying property information, and generating context menus.
+ * @namespace lineage
+ */
+
+
 var Lineage_properties = (function () {
     var self = {};
     var sourceColors = {};
@@ -26,22 +36,44 @@ var Lineage_properties = (function () {
     self.defaultShape = "text";
     self.defaultShapeSize = 8;
 
+    /**
+     * Initializes the graph settings.
+     * @function
+     * @name init
+     * @memberof Lineage_properties
+     * @returns {void}
+     */
     self.init = function () {
         self.graphInited = false;
     };
+
+    /**
+     * Displays property information in the graph.
+     * @function
+     * @name showPropInfos
+     * @memberof Lineage_properties
+     * @param {Object} _event - The event object.
+     * @param {Object} obj - The object containing node information.
+     * @returns {void}
+     */
     self.showPropInfos = function (_event, obj) {
         var id = obj.node.id;
         var html = JSON.stringify(self.properties[id]);
         $("#graphDiv").html(html);
     };
 
+    /**
+     * Generates the context menu for jsTree nodes.
+     * @function
+     * @name jstreeContextMenu
+     * @memberof Lineage_properties
+     * @returns {Object} The context menu items.
+     */
     self.jstreeContextMenu = function () {
         var items = {
             nodeInfos: {
                 label: "Property infos",
                 action: function (_e) {
-                    // pb avec source
-
                     NodeInfosWidget.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode, "mainDialogDiv", { resetVisited: 1 }, function (_err, _result) {
                         // pass
                     });
@@ -52,24 +84,18 @@ var Lineage_properties = (function () {
             items.restrictions = {
                 label: "Restrictions",
                 action: function (_e) {
-                    // pb avec source
-
                     Lineage_properties.drawObjectPropertiesRestrictions(Lineage_sources.activeSource, null, [self.currentTreeNode.data.id], { withoutImports: true });
                 },
             };
             items.rangeAndDomain = {
                 label: "ranges and domains",
                 action: function (_e) {
-                    // pb avec source
                     self.drawRangeAndDomainsGraph(Lineage_sources.activeSource, null, { withoutImports: true }, [self.currentTreeNode.data.id]);
-                    //Lineage_properties.drawObjectPropertiesRestrictions(Lineage_sources.activeSource,null , [self.currentTreeNode.data.id], { withoutImports: true });
                 },
             };
             items.copyNodeToClipboard = {
                 label: "copy to Clipboard",
                 action: function (_e) {
-                    // pb avec source
-
                     Lineage_common.copyNodeToClipboard(self.currentTreeNode.data);
                 },
             };
@@ -77,24 +103,24 @@ var Lineage_properties = (function () {
                 items.pasteNodeFromClipboard = {
                     label: "paste from Clipboard",
                     action: function (_e) {
-                        // pb avec source
-
                         Lineage_common.pasteNodeFromClipboard(self.currentTreeNode);
                     },
                 };
-                /* items.deleteProperty = {
-            label: "delete property",
-            action: function (_e) {
-                // pb avec source
-
-                JstreeWidget.deleteNode(self.currentTreeNode, "Lineage_propertiesTree");
-            },
-        };*/
             }
         }
 
         return items;
     };
+
+    /**
+     * Handles the click event on a tree node.
+     * @function
+     * @name onTreeNodeClick
+     * @memberof Lineage_properties
+     * @param {Object} _event - The event object.
+     * @param {Object} obj - The object containing node information.
+     * @returns {void}
+     */
     self.onTreeNodeClick = function (_event, obj) {
         if (!obj || !obj.node) {
             return;
@@ -103,13 +129,19 @@ var Lineage_properties = (function () {
         if (obj.node.children && obj.node.children.length > 0) {
             return;
         }
-        //  self.openNode(obj.node);
     };
 
+    /**
+     * Opens a node and retrieves its properties.
+     * @function
+     * @name openNode
+     * @memberof Lineage_properties
+     * @param {Object} node - The node to open.
+     * @returns {void}
+     */
     self.openNode = function (node) {
         var options = { subPropIds: node.data.id };
         UI.message("searching in " + node.data.source);
-        // @ts-ignore
         Sparql_OWL.getObjectPropertiesDomainAndRange(node.data.source, null, options, function (err, result) {
             if (err) {
                 return UI.message(err);
@@ -145,15 +177,16 @@ var Lineage_properties = (function () {
     };
 
     /**
-     *
-     *  generate jstree data with ObjectProperties
-     *
-     * @param source
-     * @param ids
-     * @param words
-     * @param options
-     *  - searchType:filters properties on words  present in  predicate or subject or object label
-     * @param callback
+     * Generates jsTree data with ObjectProperties.
+     * @function
+     * @name getPropertiesjsTreeData
+     * @memberof Lineage_properties
+     * @param {string} source - The source of the properties.
+     * @param {Array} ids - The IDs of the properties.
+     * @param {string} words - The words to filter properties.
+     * @param {Object} options - Additional options for filtering.
+     * @param {Function} callback - The callback function.
+     * @returns {void}
      */
     self.getPropertiesjsTreeData = function (source, ids, words, options, callback) {
         if (!options) {
@@ -179,10 +212,6 @@ var Lineage_properties = (function () {
                                 distinctIds[item.prop.value] = 1;
 
                                 var parent = source;
-                                /*
-                                if (item.subProp) {
-                                    parent = item.subProp.value;
-                                }*/
                                 var superProp = Config.ontologiesVocabularyModels[source].properties[item.prop.value].superProp;
                                 if (superProp != null) {
                                     parent = superProp;
@@ -244,16 +273,16 @@ var Lineage_properties = (function () {
     };
 
     /**
-     *
-     * draws subject propert object graph
-     *
-     *
-     *
-     * @param source
-     * @param nodes
-     * @param nodeData
+     * Draws a graph of subject-property-object relationships.
+     * @function
+     * @name drawObjectPropertiesRestrictions
+     * @memberof Lineage_properties
+     * @param {string} source - The source of the properties.
+     * @param {Array} nodeIds - The IDs of the nodes.
+     * @param {Array} properties - The properties to include.
+     * @param {Object} options - Additional options for filtering.
+     * @returns {void}
      */
-
     self.drawObjectPropertiesRestrictions = function (source, nodeIds, properties, options) {
         if (!options) {
             options = {};
@@ -277,7 +306,6 @@ var Lineage_properties = (function () {
             }
 
             var color = Lineage_whiteboard.getSourceColor(source);
-            //  console.log(JSON.stringify(result, null, 2))
             result.forEach(function (item) {
                 if (true && !existingNodes[item.prop.value]) {
                     existingNodes[item.prop.value] = 1;
@@ -303,8 +331,6 @@ var Lineage_properties = (function () {
                         label: item.sourceClassLabel.value + (item.targetClassLabel ? " -> " + item.targetClassLabel.value : " -> any"),
                         shape: "box",
                         font: { background: "#ddd" },
-                        //  size: Lineage_whiteboard.defaultShapeSize,
-                        // color: color,
                         data: {
                             source: source,
                             id: item.sourceClass.value,
@@ -370,6 +396,14 @@ var Lineage_properties = (function () {
         });
     };
 
+    /**
+     * Exports the range and domains graph to a text format.
+     * @function
+     * @name exportRangeAndDomainsGraph
+     * @memberof Lineage_properties
+     * @param {string} property - The property to export.
+     * @returns {void}
+     */
     self.exportRangeAndDomainsGraph = function (property) {
         var source = Lineage_sources.activeSource;
         var targetnodes = null;
@@ -412,7 +446,6 @@ var Lineage_properties = (function () {
                 str += (item.inverseProperty ? item.inverseProperty.value : "") + "\t";
                 str += item.range ? item.range.value : "";
 
-                // needs to remove duplicates why ??
                 if (!uniqueLines[str]) {
                     uniqueLines[str] = 1;
                     strAll += str + "\n";
@@ -422,13 +455,17 @@ var Lineage_properties = (function () {
             common.copyTextToClipboard(strAll);
         });
     };
+
     /**
-     *
-     * draws  graph of properties ranges and domains depending on
-     *    $("#LineagePropertie_nodesSelectionSelect").val()  to filter the drawned objects
-     *    the property to filter the query
-     *
-     * @param property : a specific property uri or null (all)
+     * Draws a graph of properties ranges and domains.
+     * @function
+     * @name drawRangeAndDomainsGraph
+     * @memberof Lineage_properties
+     * @param {string} source - The source of the properties.
+     * @param {Array} targetnodes - The target nodes to include.
+     * @param {Object} options - Additional options for filtering.
+     * @param {string} property - The property to filter.
+     * @returns {void}
      */
     self.drawRangeAndDomainsGraph = function (source, targetnodes, options, property) {
         self.getPropertiesRangeAndDomain(source, property, options, function (err, result) {
@@ -436,7 +473,6 @@ var Lineage_properties = (function () {
                 return alert(err.responseText);
             }
 
-            //set invers properties
             var inversePropsItems = [];
             result.forEach(function (item) {
                 if (item.inverseProperty && item.inverseProperty.value) {
@@ -771,29 +807,20 @@ var Lineage_properties = (function () {
             }
             Lineage_decoration.decorateNodeAndDrawLegend(allNodeIds, null);
             GraphDisplayLegend.drawLegend("RangesAndDomains", "LineageVisjsLegendCanvas", false);
-            /*  Lineage_whiteboard.lineageVisjsGraph.network.fit();
-
-*/
             self.graphInited = true;
         });
     };
 
     /**
-     *
-     *
-     * @param property  a specific property uri or null (all)
-     *
-     * @param callback returns an array of object witeh all characterisitcs of objectProperties
-     *            item.property
-     *           item.propertyLabel
-     *           item.domain
-     *           item.domainLabel
-     *           item.range
-     *           item.rangeLabel
-     *           item.subProperty
-     *           item.subPropertyLabel
-     *           item.inverseProperty
-     *           item.subProperties
+     * Retrieves properties range and domain information.
+     * @function
+     * @name getPropertiesRangeAndDomain
+     * @memberof Lineage_properties
+     * @param {string} source - The source of the properties.
+     * @param {Array} properties - The properties to retrieve.
+     * @param {Object} options - Additional options for filtering.
+     * @param {Function} callback - The callback function.
+     * @returns {void}
      */
     self.getPropertiesRangeAndDomain = function (source, properties, options, callback) {
         if (Config.sources[source].schemaType == "OWL") {
@@ -818,7 +845,6 @@ var Lineage_properties = (function () {
                 var allProps = [];
                 if (Object.keys(allProps).length == 0) {
                 }
-                //  UI.message("No data found",true)
 
                 UI.message("drawing...");
                 for (var propId in result) {
@@ -874,15 +900,49 @@ var Lineage_properties = (function () {
         }
     };
 
+    /**
+     * Actions related to graph manipulation.
+     * @namespace
+     * @memberof Lineage_properties
+     */
     self.graphActions = {
+        /**
+         * Expands a node in the graph.
+         * @function
+         * @name expandNode
+         * @memberof Lineage_properties.graphActions
+         * @param {Object} node - The node to expand.
+         * @param {Object} _point - The point of interaction.
+         * @param {Object} _event - The event object.
+         * @returns {void}
+         */
         expandNode: function (node, _point, _event) {
             self.drawGraph(node);
         },
+
+        /**
+         * Shows information about a node.
+         * @function
+         * @name showNodeInfos
+         * @memberof Lineage_properties.graphActions
+         * @returns {void}
+         */
         showNodeInfos: function () {
             NodeInfosWidget.showNodeInfos(self.currentGraphNode.data.source, self.currentGraphNode, "mainDialogDiv");
         },
     };
 
+    /**
+     * Searches for a term in sources.
+     * @function
+     * @name searchTermInSources
+     * @memberof Lineage_properties
+     * @param {string} term - The term to search for.
+     * @param {boolean} inCurrentSource - Whether to search in the current source.
+     * @param {boolean} exactMatch - Whether to search for an exact match.
+     * @param {string} searchType - The type of search to perform.
+     * @returns {void}
+     */
     self.searchTermInSources = function (term, inCurrentSource, exactMatch, searchType) {
         if (!term) term = $("#LineageProperties_searchAllSourcesTermInput").val();
         if (!exactMatch) {
@@ -945,7 +1005,6 @@ var Lineage_properties = (function () {
                         result.forEach(function (item) {
                             if (!uniqueIds[item.id]) {
                                 uniqueIds[item.id] = 1;
-                                //item.parent = sourceLabel;
                                 if (item.parent != sourceLabel) {
                                     if (result.filter((node) => node.id == item.parent).length == 0) {
                                         item.parent = sourceLabel;
@@ -993,12 +1052,19 @@ var Lineage_properties = (function () {
         );
     };
 
+    /**
+     * Draws a matrix of properties ranges and domains.
+     * @function
+     * @name drawPropsRangeAndDomainMatrix
+     * @memberof Lineage_properties
+     * @param {string} source - The source of the properties.
+     * @returns {void}
+     */
     self.drawPropsRangeAndDomainMatrix = function (source) {
         var classes = [];
         var matrixMap = {};
         async.series(
             [
-                //list classes and init matrixMap
                 function (callbackSeries) {
                     Sparql_OWL.getDictionary(source, null, null, function (err, result) {
                         if (err) {
@@ -1017,7 +1083,6 @@ var Lineage_properties = (function () {
                         return callbackSeries();
                     });
                 },
-                //get props ranges and domains
                 function (callbackSeries) {
                     Sparql_OWL.getInferredPropertiesDomainsAndRanges(source, {}, function (err, result) {
                         if (err) {
@@ -1036,7 +1101,6 @@ var Lineage_properties = (function () {
                         return callbackSeries();
                     });
                 },
-                //draw matrix
                 function (callbackSeries) {
                     var cols = [];
                     var dataSet = [];
@@ -1083,6 +1147,15 @@ var Lineage_properties = (function () {
         );
     };
 
+    /**
+     * Handles property action clicks.
+     * @function
+     * @name onPropertyActionClick
+     * @memberof Lineage_properties
+     * @param {string} action - The action to perform.
+     * @param {string} target - The target of the action.
+     * @returns {void}
+     */
     self.onPropertyActionClick = function (action, target) {
         var properties = null;
         if ($("#Lineage_propertiesTree").jstree().get_checked) {
@@ -1129,7 +1202,6 @@ var Lineage_properties = (function () {
             if (target == "visj") {
                 Lineage_whiteboard.drawPredicatesGraph(source, nodeIds, properties, { withoutImports: true });
             } else if (target == "table") {
-                //  Lineage_whiteboard.graphNodeNeighborhood(data, "outcoming", function(err, result) {
             }
         } else if (action == "restrictions") {
             if (target == "visj") {
@@ -1145,6 +1217,15 @@ var Lineage_properties = (function () {
             }
         }
     };
+
+    /**
+     * Changes the icon for properties graph action.
+     * @function
+     * @name changeIconForPropertiesGraphAction
+     * @memberof Lineage_properties
+     * @param {Object} div - The div containing the icon.
+     * @returns {void}
+     */
     self.changeIconForPropertiesGraphAction = function (div) {
         var icon = $(div).children().attr("class");
         if (icon == "allPropertyIcon slsv-invisible-button" || icon == "slsv-invisible-button allPropertyIcon") {
@@ -1155,6 +1236,7 @@ var Lineage_properties = (function () {
             $(div).children().addClass("allPropertyIcon");
         }
     };
+
     return self;
 })();
 

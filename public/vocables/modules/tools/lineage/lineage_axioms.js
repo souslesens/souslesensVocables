@@ -1,4 +1,11 @@
 import NodeInfosAxioms from "../axioms/nodeInfosAxioms.js";
+/**
+ * @module Lineage_axioms
+ * @category Lineage
+ * This module provides functionalities to draw and manage lineage axioms in a visual graph representation.
+ * It interacts with various sources to retrieve and visualize axioms using Vis.js.
+ * @namespace lineage
+ */
 
 var Lineage_axioms = (function () {
     var self = {};

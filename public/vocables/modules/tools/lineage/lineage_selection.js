@@ -1,7 +1,25 @@
+
+
+/**
+ * @module Lineage_selection
+ * @category Lineage
+ * This module provides functionalities for managing and updating the selection of nodes in the lineage tool.
+ * It includes functions for adding nodes to the selection, clearing the selection, and updating the UI.
+ * @namespace lineage
+ */
+
 var Lineage_selection = (function () {
     var self = {};
     self.selectedNodes = [];
 
+    /**
+     * Adds a node to the current selection and updates the UI.
+     * @function
+     * @name addNodeToSelection
+     * @memberof lineage
+     * @param {Object} node - The node to add to the selection.
+     * @returns {void}
+     */
     self.addNodeToSelection = function (node) {
         Lineage_selection.selectedNodes.push(node);
         $("#Lineageclasses_selectedNodesCount").html(Lineage_selection.selectedNodes.length);
@@ -9,6 +27,14 @@ var Lineage_selection = (function () {
         $("#Lineage_combine_mergeNodesDialogButton").css("display", "block");
     };
 
+    /**
+     * Clears the current selection of nodes, optionally filtering by specific IDs.
+     * @function
+     * @name clearNodesSelection
+     * @memberof lineage
+     * @param {Array|string} [ids] - Optional array of node IDs to clear from the selection.
+     * @returns {void}
+     */
     self.clearNodesSelection = function (ids) {
         if (ids && !Array.isArray(ids)) {
             ids = [ids];
@@ -28,6 +54,14 @@ var Lineage_selection = (function () {
         $("#Lineageclasses_selectedNodesCount").html(Lineage_selection.selectedNodes.length);
         $("#Lineage_combine_mergeNodesDialogButton").css("display", "none");
     };
+
+    /**
+     * Retrieves the selected nodes as a jsTree data structure.
+     * @function
+     * @name getSelectedNodesTree
+     * @memberof lineage
+     * @returns {Array<Object>} The jsTree data structure representing selected nodes.
+     */
     self.getSelectedNodesTree = function () {
         var jstreeData = [];
         var distinctNodes = {};
@@ -53,6 +87,14 @@ var Lineage_selection = (function () {
         return jstreeData;
     };
 
+    /**
+     * Displays the selection dialog, optionally including all graph nodes.
+     * @function
+     * @name showSelectionDialog
+     * @memberof lineage
+     * @param {boolean} allGraphNodes - Whether to include all graph nodes in the selection.
+     * @returns {void}
+     */
     self.showSelectionDialog = function (allGraphNodes) {
         if (allGraphNodes) {
             Lineage_selection.selectedNodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
@@ -78,6 +120,16 @@ var Lineage_selection = (function () {
         });
     };
 
+    /**
+     * Selects or clears nodes on hover based on key combinations.
+     * @function
+     * @name selectNodesOnHover
+     * @memberof lineage
+     * @param {Object} node - The node being hovered over.
+     * @param {Object} point - The point of interaction.
+     * @param {Object} options - Options containing key states (e.g., ctrlKey, altKey).
+     * @returns {void}
+     */
     self.selectNodesOnHover = function (node, point, options) {
         if (options.ctrlKey && options.altKey) {
             Lineage_selection.addNodeToSelection(node);
@@ -86,6 +138,15 @@ var Lineage_selection = (function () {
         }
     };
 
+    /**
+     * Handles click events on selected nodes in the tree.
+     * @function
+     * @name onSelectedNodeTreeclick
+     * @memberof lineage
+     * @param {Object} event - The event object triggered by the click.
+     * @param {Object} obj - The jsTree node object.
+     * @returns {void}
+     */
     self.onSelectedNodeTreeclick = function (event, obj) {
         var node = obj.node;
         if (node.parent == "#") {
@@ -94,6 +155,14 @@ var Lineage_selection = (function () {
         NodeInfosWidget.showNodeInfos(node.data.source, node, "lineage_selection_rightPanel");
     };
 
+    /**
+     * Retrieves the selected nodes, optionally returning only their IDs.
+     * @function
+     * @name getSelectedNodes
+     * @memberof lineage
+     * @param {boolean} onlyIds - If true, returns only the node IDs.
+     * @returns {Array} The selected nodes or their IDs.
+     */
     self.getSelectedNodes = function (onlyIds) {
         var selection = [];
         var nodes = $("#lineage_selection_selectedNodesTreeDiv").jstree(true).get_checked(true);
@@ -108,6 +177,16 @@ var Lineage_selection = (function () {
         });
         return selection;
     };
+
+    /**
+     * Executes an action based on the current selection and specified action type.
+     * @function
+     * @name onSelectionExecuteAction
+     * @memberof lineage
+     * @param {string} action - The action to execute (e.g., "filterBy", "decorate").
+     * @param {boolean} checkSelected - Whether to check if nodes are selected before executing.
+     * @returns {void}
+     */
     self.onSelectionExecuteAction = function (action, checkSelected) {
         if (action == "filterBy") {
             self.filterBy.showDialog();
@@ -468,6 +547,13 @@ var Lineage_selection = (function () {
         },
     };
 
+    /**
+     * Retrieves a SPARQL filter string based on the selected nodes.
+     * @function
+     * @name getSparqlFilter
+     * @memberof lineage
+     * @returns {void}
+     */
     self.getSparqlFilter = function () {
         var nodeIds = self.getSelectedNodes(true);
         if (nodeIds.length == 0) {
@@ -477,6 +563,13 @@ var Lineage_selection = (function () {
         alert(filterStr);
     };
 
+    /**
+     * Selects the top nodes in the whiteboard graph.
+     * @function
+     * @name selectWhiteboardTopNodes
+     * @memberof lineage
+     * @returns {void}
+     */
     self.selectWhiteboardTopNodes = function () {
         var edges = Lineage_whiteboard.lineageVisjsGraph.data.edges.get();
         var nodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();

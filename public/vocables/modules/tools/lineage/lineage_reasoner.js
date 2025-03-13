@@ -6,6 +6,13 @@ import Lineage_whiteboard from "./lineage_whiteboard.js";
 import Lineage_sources from "./lineage_sources.js";
 import sparql_common from "../../sparqlProxies/sparql_common.js";
 
+/**
+ * @module Lineage_reasoner
+ * @category Lineage
+ * This module provides functionalities for reasoning on the ontology.
+ * It includes functions for running consistency, unsatisfiability, and inference checks.
+ * @namespace lineage
+ */
 var Lineage_reasoner = (function () {
     var self = {};
     self.inferenceTriples = [];
@@ -14,6 +21,14 @@ var Lineage_reasoner = (function () {
     self.ontologyAccessType = "externalUrl";
     self.loaded = false;
     self.currentSource;
+
+    /**
+     * Displays the reasoner dialog.
+     * @function
+     * @name showReasonerDialog
+     * @memberof Lineage_reasoner
+     * @returns {void}
+     */
     self.showReasonerDialog = function () {
         $("#smallDialogDiv").dialog("option", "title", "Reasoner");
         self.currentSource = Lineage_sources.activeSource;
@@ -26,11 +41,17 @@ var Lineage_reasoner = (function () {
         });
     };
 
+    /**
+     * Runs a specified operation (Inference, Consistency, Unsatisfiable).
+     * @function
+     * @name runOperation
+     * @memberof Lineage_reasoner
+     * @param {string} operation - The operation to run.
+     * @returns {void}
+     */
     self.runOperation = function (operation) {
         self.currentOperation = operation;
-        //  $("#lineage_reasoner_outputDiv").css("display", "none");
         $("#lineage_reasoner_operationSelect").val("");
-        // $("#lineage_reasoner_outputDiv").css("display", "none");
         $("#lineage_reasoner_infosDiv").html("<span style='color:green;font-style:italic'>Processing " + Lineage_sources.activeSource + "...</span>");
         if (operation == "Inference") {
             self.showInferencePredicates();
@@ -41,6 +62,13 @@ var Lineage_reasoner = (function () {
         }
     };
 
+    /**
+     * Runs a consistency check on the current source.
+     * @function
+     * @name runConsistency
+     * @memberof Lineage_reasoner
+     * @returns {void}
+     */
     self.runConsistency = function () {
         var fromStr = Sparql_common.getFromStr(Lineage_sources.activeSource, false, false);
         var describeQuery = "DESCRIBE ?s ?p ?o  " + fromStr + "  WHERE {  ?s ?p ?o    } ";
@@ -68,6 +96,13 @@ var Lineage_reasoner = (function () {
         });
     };
 
+    /**
+     * Runs an unsatisfiability check on the current source.
+     * @function
+     * @name runUnsatisfiable
+     * @memberof Lineage_reasoner
+     * @returns {void}
+     */
     self.runUnsatisfiable = function () {
         var fromStr = Sparql_common.getFromStr(Lineage_sources.activeSource, false, false);
         var describeQuery = "DESCRIBE ?s ?p ?o  " + fromStr + "  WHERE {  ?s ?p ?o    } ";
@@ -94,6 +129,13 @@ var Lineage_reasoner = (function () {
         });
     };
 
+    /**
+     * Displays inference predicates.
+     * @function
+     * @name showInferencePredicates
+     * @memberof Lineage_reasoner
+     * @returns {void}
+     */
     self.showInferencePredicates = function () {
         $("#lineage_reasoner_infosDiv").html("getting ListInferenceParams ...");
 
@@ -128,6 +170,15 @@ var Lineage_reasoner = (function () {
         });
     };
 
+    /**
+     * Runs inference on the specified predicates.
+     * @function
+     * @name runInference
+     * @memberof Lineage_reasoner
+     * @param {Array} predicates - The predicates to run inference on.
+     * @param {Function} callback - The callback function.
+     * @returns {void}
+     */
     self.runInference = function (predicates, callback) {
         var operation = $("#lineage_reasoner_operationSelect").val();
 
@@ -137,9 +188,7 @@ var Lineage_reasoner = (function () {
         const params = new URLSearchParams({
             operation: "inference",
             graphName: Config.sources[Lineage_sources.activeSource].graphUri,
-            //  type: self.ontologyAccessType,
             predicates: JSON.stringify(predicates),
-            //  describeSparqlQuery: describeQuery,
         });
         $("#lineage_reasoner_infosDiv").html("<span style='color:green;font-style:italic'>Processing " + Lineage_sources.activeSource + "...</span>");
 
@@ -178,6 +227,13 @@ var Lineage_reasoner = (function () {
         });
     };
 
+    /**
+     * Executes the current operation.
+     * @function
+     * @name execute
+     * @memberof Lineage_reasoner
+     * @returns {void}
+     */
     self.execute = function () {
         $("#lineage_reasoner_outputDiv").css("display", "block");
         if (self.currentOperation == "Inference") {
@@ -189,7 +245,6 @@ var Lineage_reasoner = (function () {
                 }
                 self.inferenceData = result;
                 self.listInferenceSubjects();
-                // self.displayInference();
             });
         } else if (self.currentOperation == "Consistency") {
             self.displayConsistency();
@@ -198,10 +253,31 @@ var Lineage_reasoner = (function () {
         }
     };
 
+    /**
+     * Displays consistency results.
+     * @function
+     * @name displayConsistency
+     * @memberof Lineage_reasoner
+     * @returns {void}
+     */
     self.displayConsistency = function () {};
 
+    /**
+     * Displays unsatisfiability results.
+     * @function
+     * @name displayUnsatisfiable
+     * @memberof Lineage_reasoner
+     * @returns {void}
+     */
     self.displayUnsatisfiable = function () {};
 
+    /**
+     * Lists inference subjects.
+     * @function
+     * @name listInferenceSubjects
+     * @memberof Lineage_reasoner
+     * @returns {void}
+     */
     self.listInferenceSubjects = function () {
         var uniqueSubjects = {};
         var jstreeData = [
@@ -233,6 +309,13 @@ var Lineage_reasoner = (function () {
         JstreeWidget.loadJsTree("reasonerSubjectsDiv", jstreeData, options);
     };
 
+    /**
+     * Displays inference results.
+     * @function
+     * @name displayInference
+     * @memberof Lineage_reasoner
+     * @returns {void}
+     */
     self.displayInference = function () {
         var output = $("#lineage_reasoner_outputSelect").val();
 
@@ -315,6 +398,15 @@ var Lineage_reasoner = (function () {
         }
     };
 
+    /**
+     * Filters Visjs data path based on node IDs.
+     * @function
+     * @name filterVisjsDataPath
+     * @memberof Lineage_reasoner
+     * @param {Array} nodeIds - The node IDs to filter.
+     * @param {Object} visjsData - The Visjs data to filter.
+     * @returns {Object} The filtered Visjs data.
+     */
     self.filterVisjsDataPath = function (nodeIds, visjsData) {
         var path = [];
         var visited = {};
@@ -354,6 +446,14 @@ var Lineage_reasoner = (function () {
         return visjsData2;
     };
 
+    /**
+     * Converts Hermit functional style syntax to JSON.
+     * @function
+     * @name HermitFunctionalStyleSyntaxToJson
+     * @memberof Lineage_reasoner
+     * @param {string} functionalStyleStr - The functional style string to convert.
+     * @returns {Array} The converted JSON array.
+     */
     self.HermitFunctionalStyleSyntaxToJson = function (functionalStyleStr) {
         var regex = /SubClassOf\(<([^()]*)> ([^()]*)\)/gm;
 
@@ -373,6 +473,14 @@ var Lineage_reasoner = (function () {
         return subClasses;
     };
 
+    /**
+     * Converts functional style syntax to JSON.
+     * @function
+     * @name FunctionalStyleSyntaxToJson
+     * @memberof Lineage_reasoner
+     * @param {Array|string} functionalStyleStrArray - The functional style string(s) to convert.
+     * @returns {Array} The converted JSON array.
+     */
     self.FunctionalStyleSyntaxToJson = function (functionalStyleStrArray) {
         function getUri(str) {
             if (!str) {
@@ -381,14 +489,7 @@ var Lineage_reasoner = (function () {
             return str.replace(/[<>]/g, "");
         }
 
-        /*    var regex = /([A-z]+)\(([^\)]+)\)/gm;
-
-var regexNested = /<([^>]+)> ([^\(]+)\(<([^>]+)> <([^>]+)>/gm;
-
-
-//  var regexNested = /([^<]+)\(<([^>]+)> <([^>]+)>\)/*/
-
-        var regex = /([A-z]+)\(([^\)]+)\)/gm;
+        var regex = /([A-z]+)\(([^")]+)\)/gm;
         var regexNested = /([^\(^"]+)\(<([^>]+)> ([^\(]+)\(<([^>]+)> <([^>]+)>/; //nested expression
 
         var array = [];
@@ -396,7 +497,6 @@ var regexNested = /<([^>]+)> ([^\(]+)\(<([^>]+)> <([^>]+)>/gm;
 
         function cleanJenaUris(uri) {
             return uri.replace("file:/", "");
-            //  return uri.replace("file:/", "_:");
         }
 
         self.subjects = [];
@@ -405,7 +505,6 @@ var regexNested = /<([^>]+)> ([^\(]+)\(<([^>]+)> <([^>]+)>/gm;
         }
         functionalStyleStrArray.forEach(function (functionalStyleStr) {
             if ((array = regexNested.exec(functionalStyleStr)) != null) {
-                //nested expression
                 var subject = cleanJenaUris(array[2]);
                 var predicate = array[3];
                 var object1 = cleanJenaUris(array[4]);
@@ -428,6 +527,16 @@ var regexNested = /<([^>]+)> ([^\(]+)\(<([^>]+)> <([^>]+)>/gm;
         return json;
     };
 
+    /**
+     * Sets labels for inference triples.
+     * @function
+     * @name setInferenceTripleLabels
+     * @memberof Lineage_reasoner
+     * @param {string} source - The source of the triples.
+     * @param {Object} inferencesMap - The map of inferences.
+     * @param {Function} callback - The callback function.
+     * @returns {void}
+     */
     self.setInferenceTripleLabels = function (source, inferencesMap, callback) {
         for (var pred in inferencesMap) {
             var urisMap = {};

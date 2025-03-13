@@ -12,6 +12,14 @@ import Lineage_relationIndividualsFilter from "./lineage_relationIndividualsFilt
 import GraphDecorationWidget from "../../uiWidgets/graphDecorationWidget.js";
 
 // eslint-disable-next-line no-global-assign
+
+/**
+ * @module Lineage_relations
+ * @category Lineage
+ * This module provides functionalities for managing and displaying relations in the lineage tool.
+ * It includes functions for drawing relations, managing query parameters, and handling UI events.
+ * @namespace lineage
+ */
 var Lineage_relations = (function () {
     var self = {};
     self.currentQueryInfos = {};
@@ -753,3 +761,5 @@ var Lineage_relations = (function () {
 export default Lineage_relations;
 
 window.Lineage_relations = Lineage_relations;
+
+/** @namespace lineage */

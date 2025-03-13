@@ -6,6 +6,15 @@ import OntologyModels from "../../shared/ontologyModels.js";
 import Lineage_createRelation from "./lineage_createRelation.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
 
+
+/**
+ * @module Lineage_createResource
+ * @category Lineage
+ * This module provides functionalities for creating new resources in the ontology.
+ * It includes functions for displaying the resource creation dialog, generating RDF triples,
+ * and writing resources to the backend.
+ * @namespace lineage
+ */
 var Lineage_createResource = (function () {
     var self = {};
 
@@ -422,6 +431,14 @@ var Lineage_createResource = (function () {
         $("#lineageCreateResource_predicateDiv").html("");
     };
 
+    /**
+     * Draws the axioms associated with a node in the ontology graph.
+     * This function is currently a placeholder and needs implementation.
+     * @function
+     * @name drawNodeAxioms
+     * @memberof Lineage_createResource
+     * @returns {void}
+     */
     self.drawNodeAxioms = function () {};
 
     /**

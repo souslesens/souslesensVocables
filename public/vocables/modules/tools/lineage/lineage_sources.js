@@ -16,6 +16,13 @@ import SearchWidget from "../../uiWidgets/searchWidget.js";
 import Authentification from "../../shared/authentification.js";
 import UI from "../../../modules/shared/UI.js";
 
+/**
+ * @module Lineage_sources
+ * @category Lineage
+ * This module provides functionalities for managing and displaying ontology sources in the lineage tool.
+ * It includes functions for initializing the sources module, loading sources, and setting the current source.
+ * @namespace lineage
+ */
 var Lineage_sources = (function () {
     var self = {};
     self.activeSource = null;
@@ -906,6 +913,14 @@ sourceDivId +
         },
     };
 
+    /**
+     * Checks if a source is owned by the current user.
+     * @function
+     * @name isSourceOwnedByUser
+     * @memberof module:Lineage_sources
+     * @param {string} sourceName - The name of the source to check.
+     * @returns {boolean} True if the source is owned by the user, false otherwise.
+     */
     self.isSourceOwnedByUser = function (sourceName) {
         const source = Config.sources[sourceName];
         if (!source) {
@@ -919,6 +934,14 @@ sourceDivId +
         return false;
     };
 
+    /**
+     * Checks if a source is editable for the current user.
+     * @function
+     * @name isSourceEditableForUser
+     * @memberof module:Lineage_sources
+     * @param {string} source - The source to check for editability.
+     * @returns {boolean} True if the source is editable, false otherwise.
+     */
     self.isSourceEditableForUser = function (source) {
         if (!Config.sources[source]) {
             return false; // console.log("no source " + source);
@@ -943,6 +966,14 @@ sourceDivId +
         });
     };
 
+    /**
+     * Clears the specified source from the whiteboard graph.
+     * @function
+     * @name clearSource
+     * @memberof module:Lineage_sources
+     * @param {string} source - The source to clear from the graph.
+     * @returns {void}
+     */
     self.clearSource = function (source) {
         if (!source) {
             source = self.activeSource;
@@ -959,6 +990,15 @@ sourceDivId +
         }
     };
 
+    /**
+     * Sets the theme for the whiteboard graph.
+     * Adjusts the background color and font colors based on the theme.
+     * @function
+     * @name setTheme
+     * @memberof module:Lineage_sources
+     * @param {string} theme - The theme to set ('white' or 'dark').
+     * @returns {void}
+     */
     self.setTheme = function (theme) {
         var backgroundColor;
 
@@ -991,6 +1031,15 @@ Lineage_whiteboard.lineageVisjsGraph.network.options.edges.font = { color: self.
             Lineage_whiteboard.lineageVisjsGraph.data.edges.update(newEdges);
         }
     };
+    /**
+     * Retrieves the classes available in the specified source.
+     * @function
+     * @name getSourcesClasses
+     * @memberof module:Lineage_sources
+     * @param {string} source - The source to retrieve classes from.
+     * @param {function} callback - The callback function to execute with the result.
+     * @returns {void}
+     */
     self.getSourcesClasses = function (source, callback) {
         Sparql_OWL.getDictionary(
             self.activeSource,
@@ -1033,6 +1082,13 @@ Lineage_whiteboard.lineageVisjsGraph.network.options.edges.font = { color: self.
         );
     };
 
+    /**
+     * Tests the 3D visualization of the lineage graph.
+     * @function
+     * @name test3D
+     * @memberof module:Lineage_sources
+     * @returns {void}
+     */
     self.test3D = function () {
         //return Lineage_3D.testThree()
         // Random tree

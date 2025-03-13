@@ -29,6 +29,13 @@ import NodeInfosAxioms from "../axioms/nodeInfosAxioms.js";
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+/**
+ * @module Lineage_whiteboard
+ * @category Lineage
+ * This module provides functionalities for managing and displaying the lineage tool.
+ * It includes functions for initializing the whiteboard, loading sources, and handling UI events.
+ * @namespace lineage
+ */
 var Lineage_whiteboard = (function () {
     var sourceColors = {};
 
@@ -1064,7 +1071,7 @@ var Lineage_whiteboard = (function () {
         var labels = [];
         var ids = null;
         var labelsMap = {};
-        nodes.forEach(function (/** @type {{ data: { label: string | number; }; }} */ node) {
+        nodes.forEach(function (/** @type {{ data: { label: (string|number) }; }} */ node) {
             if (node.data && node.data.label) {
                 labels.push(node.data.label);
             }
@@ -3130,11 +3137,11 @@ restrictionSource = Config.predicatesSource;
         });
 
         /**
-         * @type {{ id: any; size: any; shadow: any; shape: any; font: { color: string; }; }[]}
+         * @type {{ id: any, size: any, shadow: any, shape: any, font: { color: string } }[]}
          */
         var newNodes = [];
         nodes = self.lineageVisjsGraph.data.nodes.get();
-        nodes.forEach(function (/** @type {{ data: { initialParams: { size: any; shape: any; shadow?: any; }; }; shape: any; size: any; id: any; }} */ node) {
+        nodes.forEach(function (/** @type {{ data: { initialParams: { size: any, shape: any, shadow?: any } }, shape: any, size: any, id: any }} */ node) {
             if (!node.data) {
                 return;
             }
@@ -3243,7 +3250,7 @@ restrictionSource = Config.predicatesSource;
                 }
             });
 
-            result.forEach(function (/** @type {{ [x: string]: { value: any; }; concept: { value: string | number; }; conceptLabel: { value: any; }; }} */ item) {
+            result.forEach(function (/** @type {{ [x: string]: { value: any }, concept: { value: string | number }, conceptLabel: { value: any } }} */ item) {
                 var shape = conceptType == "NamedIndividual" ? self.namedIndividualShape : self.defaultShape;
                 if (options.shape) {
                     shape = options.shape;

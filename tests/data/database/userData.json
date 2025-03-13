@@ -1,7 +1,7 @@
 [
   {
     "id": 1,
-    "data_path": "data1",
+    "data_path": "1-1-xxx.json",
     "data_type": "",
     "data_label": "data1",
     "data_comment": "",
@@ -24,7 +24,7 @@
   },
   {
     "id": 3,
-    "data_path": "shared with owl_user user",
+    "data_path": "3-2-xxx.json",
     "data_type": "",
     "data_label": "shared with owl_user user",
     "data_comment": "",
@@ -49,7 +49,7 @@
   },
   {
     "id": 4,
-    "data_path": "shared with admin profile",
+    "data_path": "4-3-xxx.json",
     "data_type": "",
     "data_label": "shared with admin profile",
     "data_comment": "",
@@ -74,21 +74,13 @@
   },
   {
     "id": 5,
-    "data_path": "shared with owl_user and skos_user users",
+    "data_path": "5-1-xxx.json",
     "data_type": "string",
     "data_label": "",
     "data_comment": "",
     "data_tool": "tool",
     "data_source": "source",
     "data_group": "",
-    "data_content": {
-      "sparqlServerUrl": "string",
-      "graphUri": "string",
-      "prefixes": {},
-      "lookups": {},
-      "databaseSources": {},
-      "cvsSources": {}
-    },
     "is_shared": false,
     "shared_profiles": [],
     "shared_users": [

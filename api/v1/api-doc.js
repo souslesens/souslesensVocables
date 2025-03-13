@@ -414,9 +414,6 @@ const apiDoc = {
                     type: "number",
                     minimum: 1,
                 },
-                data_path: {
-                    type: "string",
-                },
                 data_type: {
                     type: "string",
                 },
@@ -464,14 +461,11 @@ const apiDoc = {
                     type: "string",
                 },
             },
-            required: ["data_path", "data_type"],
+            required: ["data_type"],
         },
         UserDataWithoutID: {
             type: "object",
             properties: {
-                data_path: {
-                    type: "string",
-                },
                 data_type: {
                     type: "string",
                 },
@@ -513,7 +507,7 @@ const apiDoc = {
                     items: { type: "string" },
                 },
             },
-            required: ["data_path", "data_type"],
+            required: ["data_type"],
         },
         UserDataWithoutOwner: {
             type: "object",
@@ -521,9 +515,6 @@ const apiDoc = {
                 id: {
                     type: "number",
                     minimum: 1,
-                },
-                data_path: {
-                    type: "string",
                 },
                 data_type: {
                     type: "string",
@@ -569,7 +560,6 @@ const apiDoc = {
                     type: "string",
                 },
             },
-            required: ["data_path", "data_type"],
         },
         UserDataContent: {
             type: "object",

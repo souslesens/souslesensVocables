@@ -80,5 +80,9 @@
         "database": "slsv",
         "user": "slsv",
         "password": "slsv"
+    },
+    "userData": {
+        "location": "database",
+        "maximumFileSize": 1000000
     }
 }

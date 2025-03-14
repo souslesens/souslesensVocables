@@ -86,8 +86,8 @@ function LogsTableComponent({ logFiles }: { logFiles: LogFiles }) {
         setSelectedPeriod(logFilesData.find((log) => log.current)?.date);
     }
 
-    const sortedLogs = () =>
-        selectedLogs
+    const memoizedLogs = useMemo(() => {
+        return selectedLogs
             .map((item, index) => ({ ...item, key: index.toString() }))
             .slice()
             .sort((a: Log, b: Log) => {
@@ -98,8 +98,7 @@ function LogsTableComponent({ logFiles }: { logFiles: LogFiles }) {
                 }
                 return order === "asc" ? left.localeCompare(right) : right.localeCompare(left);
             });
-
-    const memoizedLogs = useMemo(() => sortedLogs(), [selectedLogs, orderBy, order]);
+    }, [order, orderBy, selectedLogs]);
 
     if (logFiles.status === 500) {
         return (

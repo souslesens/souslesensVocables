@@ -364,7 +364,7 @@ const PluginsRepositoryDialog = ({ onClose, onSubmit, open, edit, selectedReposi
         setPluginsEnabled([]);
         setTags([]);
 
-        if (selectedRepository !== null && selectedRepository !== undefined) {
+        if (repositories && selectedRepository !== null && selectedRepository !== undefined) {
             const data = repositories[selectedRepository];
             setRepository({ identifier: selectedRepository, data: data });
             setPluginsEnabled(data.plugins || []);
@@ -385,7 +385,7 @@ const PluginsRepositoryDialog = ({ onClose, onSubmit, open, edit, selectedReposi
         } else {
             setRepository(emptyRepository);
         }
-    }, [selectedRepository]);
+    }, [selectedRepository, repositories]);
 
     return (
         <Dialog fullWidth maxWidth="md" onClose={onClose} open={open} PaperProps={{ component: "form", onSubmit: handleSubmit }}>

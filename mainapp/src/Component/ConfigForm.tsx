@@ -105,7 +105,7 @@ const ConfigForm = () => {
             .then((profiles) => setAllProfilesRD(success(profiles)))
             .catch(() => setAllProfilesRD(failure("Couln't load profiles")));
         loadConfig();
-    }, []);
+    }, [loadConfig]);
 
     const zo = useZorm("general-config", ConfigFormSchema, {
         onValidSubmit(event) {

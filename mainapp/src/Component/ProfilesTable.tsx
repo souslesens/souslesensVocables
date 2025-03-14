@@ -1,4 +1,4 @@
-import { useState, useMemo, useReducer, useEffect, ChangeEvent, forwardRef, Ref, Dispatch, MouseEventHandler } from "react";
+import { useState, useMemo, useReducer, ChangeEvent, forwardRef, Ref, Dispatch, MouseEventHandler } from "react";
 import {
     Alert,
     Box,
@@ -313,9 +313,6 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
     );
     const [profileModel, update] = useReducer(updateProfile, { modal: false, profileForm: profile });
 
-    useEffect(() => {
-        update({ type: Type.ResetProfile, payload: profile });
-    }, [profileModel.modal]);
     const handleOpen = () => update({ type: Type.UserClickedModal, payload: true });
     const handleClose = () => {
         setNodeToExpand([]);

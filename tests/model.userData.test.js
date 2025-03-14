@@ -123,8 +123,8 @@ describe("UserDataModel", () => {
         expect(results[0].id).toStrictEqual(6);
     });
 
-    test("remove userData", async () => {
-        const result = await userDataModel.remove(1);
+    test("remove userData by admin", async () => {
+        const result = await userDataModel.remove(1, "admin");
         expect(result).toBeTruthy();
     });
 

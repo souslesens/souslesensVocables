@@ -109,14 +109,20 @@ class UserDataModel {
         return results;
     };
 
-    remove = async (identifier) => {
+    remove = async (identifier, user) => {
         this._checkIdentifier(identifier);
 
         const connection = getKnexConnection(this._mainConfig.database);
         const results = await connection.select("id").from("user_data").where("id", identifier).first();
+
         if (results === undefined) {
             cleanupConnection(connection);
             throw Error("The specified identifier do not exists", { cause: 404 });
+        }
+
+        if (user.login !== "admin" && user.id != results.owned_by) {
+            cleanupConnection(connection);
+            throw Error(`The resources is not owned by ${user.login}`, { cause: 404 });
         }
 
         // using select here allows mocking in tests

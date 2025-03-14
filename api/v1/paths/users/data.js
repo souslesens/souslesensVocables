@@ -6,6 +6,11 @@ module.exports = () => {
     GET = async (req, res, _next) => {
         try {
             let userDatas = await userDataModel.all(req.user);
+            if (req.query.data_label) {
+                userDatas = Object.values(userDatas).filter((data) => {
+                    return data.data_label?.includes(req.query.data_label);
+                });
+            }
             if (req.query.data_group) {
                 userDatas = Object.values(userDatas).filter((data) => {
                     return data.data_group?.includes(req.query.data_group);
@@ -14,6 +19,16 @@ module.exports = () => {
             if (req.query.data_type) {
                 userDatas = Object.values(userDatas).filter((data) => {
                     return data.data_type?.includes(req.query.data_type);
+                });
+            }
+            if (req.query.data_tool) {
+                userDatas = Object.values(userDatas).filter((data) => {
+                    return data.data_tool?.includes(req.query.data_tool);
+                });
+            }
+            if (req.query.data_source) {
+                userDatas = Object.values(userDatas).filter((data) => {
+                    return data.data_source?.includes(req.query.data_source);
                 });
             }
             res.status(200).json(userDatas);
@@ -28,6 +43,13 @@ module.exports = () => {
                 in: "query",
                 type: "string",
                 required: false,
+                name: "data_label",
+                description: "data_group filter",
+            },
+            {
+                in: "query",
+                type: "string",
+                required: false,
                 name: "data_group",
                 description: "data_group filter",
             },
@@ -36,6 +58,20 @@ module.exports = () => {
                 type: "string",
                 required: false,
                 name: "data_type",
+                description: "data_type filter",
+            },
+            {
+                in: "query",
+                type: "string",
+                required: false,
+                name: "data_tool",
+                description: "data_group filter",
+            },
+            {
+                in: "query",
+                type: "string",
+                required: false,
+                name: "data_source",
                 description: "data_type filter",
             },
         ],

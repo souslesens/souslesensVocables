@@ -42,9 +42,9 @@ var SparqlQuery_bot = (function () {
         self.workflow = {
             chooseResourceTypeFn: {
 
-                    _OR: {
-                        "Facts": {
-                            afterChooseQueryType: {
+                _OR: {
+                    "Facts": {
+                        afterChooseQueryType: {
                             chooseQueryScopeFn: {
                                 _OR: {
                                     whiteboardNodes: {
@@ -157,7 +157,7 @@ var SparqlQuery_bot = (function () {
         self.functions = {
             chooseResourceTypeFn: function () {
                 var choices = ["Facts", "Constraints"];
-                if ( self.noFacts) {
+                if (self.noFacts) {
                     choices = ["Constraints"];
 
                 }
@@ -171,10 +171,11 @@ var SparqlQuery_bot = (function () {
                     self.loadImplicitModel(Lineage_sources.activeSource, false, function (err, result) {
                         if (err) {
                             myBotEngine.message("No  implicitModel available: probably no NamedIndividuals with type and/or ObjectProperty predicates")
-                            self.noFacts=true
+                            self.noFacts = true
                             myBotEngine.reset()
                         } else {
-
+                            myBotEngine.message("");
+                            self.implicitModel = result;
                             myBotEngine.nextStep()
                         }
 
@@ -555,7 +556,7 @@ var SparqlQuery_bot = (function () {
                 var constraintType = self.params.constraintType;
                 if (constraintType.indexOf("Restriction") > -1) {
                     if (self.params.constraintClass && self.params.constraintClass != "any") {
-                        if ( constraintType == " subClassOfRestriction") {
+                        if (constraintType == " subClassOfRestriction") {
                             filter = "FILTER (?subject=<" + self.params.constraintClass + "> )";
                         } else {
                             filter = "FILTER (?object=<" + self.params.constraintClass + "> )";
@@ -735,7 +736,8 @@ var SparqlQuery_bot = (function () {
                 var labelsMap = {};
 
                 if (result.results.bindings.length == 0) {
-                    return callback("no result");
+                    alert("no result");
+                    return self.editSparql();
                 }
 
                 UI.message(result.results.bindings.length + " items found");

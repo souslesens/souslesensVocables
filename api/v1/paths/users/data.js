@@ -69,7 +69,7 @@ module.exports = () => {
         try {
             const userData = await cleanUserData.clean(req.body);
             const userInfo = await userManager.getUser(req.user);
-            const results = await userDataModel.insert({ ...userData, owned_by: userInfo.user.login });
+            const results = await userDataModel.insert({ ...userData, owned_by: userInfo.user.id });
             if (results.length === 1) {
                 res.status(200).json({ message: "The resource has been inserted successfully", id: results[0].id });
             } else {
@@ -159,12 +159,11 @@ module.exports = () => {
             // users can only update their own data
             const userInfo = await userManager.getUser(req.user);
             const existingData = await userDataModel.find(req.body.id);
-
-            if (userInfo.user.login != existingData.owned_by) {
-                res.status(403).json({ message: `The resources is not owned by ${userInfo.user.login}` });
+            if (userInfo.user.id != existingData.owned_by) {
+                throw Error(`The resources is not owned by ${userInfo.user.login}`, { cause: 403 });
             }
             const userData = await cleanUserData.clean(req.body);
-            await userDataModel.update({ ...userData, owned_by: userInfo.user.login });
+            await userDataModel.update({ ...userData, owned_by: userInfo.user.id });
             res.status(200).json({ message: "The resource has been updated successfully" });
         } catch (error) {
             if (error.cause !== undefined) {

@@ -17,7 +17,7 @@ const user = {
         if (config.auth === "disabled") {
             result = {
                 logged: true,
-                user: { login: "admin", id: "admin", source: "disabled", name: "admin", groups: ["admin"], token: "admin", allowSourceCreation: true, maxNumberCreatedSource: 999 },
+                user: { login: "admin", id: 1, source: "disabled", name: "admin", groups: ["admin"], token: "admin", allowSourceCreation: true, maxNumberCreatedSource: 999 },
                 authSource: "json",
                 auth: {},
             };
@@ -28,7 +28,7 @@ const user = {
             }
             result = {
                 logged: true,
-                user: { login: findUser.login, groups: findUser.groups, token: findUser.token },
+                user: { id: findUser.id, login: findUser.login, groups: findUser.groups, token: findUser.token },
                 authSource: config.auth,
                 allowSourceCreation: findUser.allowSourceCreation,
                 maxNumberCreatedSource: findUser.maxNumberCreatedSource,

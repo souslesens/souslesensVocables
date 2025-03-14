@@ -460,6 +460,9 @@ const apiDoc = {
                 owned_by: {
                     type: "string",
                 },
+                created_at: {
+                    type: "string",
+                },
             },
             required: ["data_path", "data_type"],
         },
@@ -481,6 +484,14 @@ const apiDoc = {
                     default: "",
                 },
                 data_group: {
+                    type: "string",
+                    default: "",
+                },
+                data_tool: {
+                    type: "string",
+                    default: "",
+                },
+                data_source: {
                     type: "string",
                     default: "",
                 },
@@ -529,6 +540,14 @@ const apiDoc = {
                     type: "string",
                     default: "",
                 },
+                data_tool: {
+                    type: "string",
+                    default: "",
+                },
+                data_source: {
+                    type: "string",
+                    default: "",
+                },
                 data_content: {
                     $ref: "#/definitions/UserDataContent",
                 },
@@ -545,6 +564,9 @@ const apiDoc = {
                     type: "array",
                     default: [],
                     items: { type: "string" },
+                },
+                created_at: {
+                    type: "string",
                 },
             },
             required: ["data_path", "data_type"],

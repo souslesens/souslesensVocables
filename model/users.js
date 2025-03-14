@@ -14,7 +14,7 @@ const z = require("zod");
 
 const UserObject = z
     .object({
-        id: z.string().default(""), // Support for the ULID legacy system
+        id: z.number().optional(),
         login: z.string(),
         password: z.string().optional(),
         groups: z.string().array().optional(),
@@ -78,7 +78,7 @@ class UserModel {
     _convertToLegacy = (user) => [
         user.login,
         {
-            id: `${user.id}`,
+            id: user.id,
             login: user.login,
             password: user.password || "",
             token: user.token || "",
@@ -189,6 +189,7 @@ class UserModel {
      * @returns {number} the index in the database of the new user
      */
     addUserAccount = async (user) => {
+        user.id = 0;
         const data = this._checkUser(user);
         data.password = this._hashPassword(data.password);
         data.token = this._genToken(data.login);

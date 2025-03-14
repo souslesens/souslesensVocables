@@ -24,7 +24,7 @@ describe("UserModelJson", () => {
         const users = await userModel.getUserAccounts();
         expect(users).toStrictEqual({
             admin: {
-                id: "1",
+                id: 1,
                 login: "admin",
                 password: "",
                 token: "",
@@ -34,7 +34,7 @@ describe("UserModelJson", () => {
                 source: "database",
             },
             owl_user: {
-                id: "2",
+                id: 2,
                 login: "owl_user",
                 password: "",
                 token: "",
@@ -44,7 +44,7 @@ describe("UserModelJson", () => {
                 source: "database",
             },
             skos_user: {
-                id: "3",
+                id: 3,
                 login: "skos_user",
                 password: "",
                 token: "",
@@ -54,7 +54,7 @@ describe("UserModelJson", () => {
                 source: "keycloak",
             },
             not_admin: {
-                id: "4",
+                id: 4,
                 login: "not_admin",
                 password: "",
                 token: "",
@@ -69,7 +69,7 @@ describe("UserModelJson", () => {
     test("get an user account from the login", async () => {
         const [login, user] = await userModel.getUserAccount("owl_user");
         expect(login).toStrictEqual("owl_user");
-        expect(user.id).toStrictEqual("2");
+        expect(user.id).toStrictEqual(2);
         expect(user.login).toStrictEqual(login);
     });
 
@@ -81,7 +81,7 @@ describe("UserModelJson", () => {
     test("find an user from an existing login", async () => {
         const [login, user] = await userModel.findUserAccount("admin");
         expect(login).toStrictEqual("admin");
-        expect(user.id).toStrictEqual("1");
+        expect(user.id).toStrictEqual(1);
         expect(user.login).toStrictEqual(login);
         expect(user.password).toStrictEqual("$2b$10$LhdaXF3tHrvA8b8fKMvNmeOSyogCBgN/L9XLN/vqjz6tgN5rSxMyy");
     });
@@ -99,7 +99,7 @@ describe("UserModelJson", () => {
     test("find an user from the corresponding token", async () => {
         const [login, user] = await userModel.findUserAccountFromToken("skos-token");
         expect(login).toStrictEqual("skos_user");
-        expect(user.id).toStrictEqual("3");
+        expect(user.id).toStrictEqual(3);
         expect(user.token).toStrictEqual("skos-token");
     });
 
@@ -140,7 +140,7 @@ describe("UserModelJson", () => {
 
     test("add a new user", async () => {
         const addedUser = {
-            id: "42",
+            id: 42,
             login: "login",
             password: "pass",
             groups: [],
@@ -166,7 +166,7 @@ describe("UserModelJson", () => {
     });
 
     test("add a new user with an invalid user", async () => {
-        await expect(userModel.addUserAccount("skos_user")).rejects.toThrow("The user do not follow the standard");
+        await expect(userModel.addUserAccount({key: "skos_user"})).rejects.toThrow("The user do not follow the standard");
     });
 
     test("generate a new token for existing user", async () => {
@@ -256,7 +256,7 @@ describe("UserModelJson", () => {
         expect(userModel._convertToLegacy({ id: 1, login: "test" })).toStrictEqual([
             "test",
             {
-                id: "1",
+                id: 1,
                 login: "test",
                 password: "",
                 token: "",

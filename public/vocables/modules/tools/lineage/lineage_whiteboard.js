@@ -18,6 +18,7 @@ import PopupMenuWidget from "../../uiWidgets/popupMenuWidget.js";
 import KGquery_graph from "../KGquery/KGquery_graph.js";
 import Lineage_createRelation from "./lineage_createRelation.js";
 import NodeInfosAxioms from "../axioms/nodeInfosAxioms.js";
+import UserDataWidget from "../../uiWidgets/userDataWidget.js";
 import Containers_tree from "../containers/containers_tree.js";
 
 /** The MIT License
@@ -4272,44 +4273,115 @@ attrs.color=self.getSourceColor(superClassValue)
          * @function
          * @name saveWhiteboard
          * @memberof module:graphActions.graph
-         * Saves the current whiteboard (graph visualization) to a file.
-         * The file name is provided by the user through a prompt.
+         * 
+         * 
+         * Saves the current whiteboard (graph visualization) as json in user_data database 
+         * The data_label  is provided by the user through a prompt.
          * @returns {void}
          */
+       
         saveWhiteboard: function () {
-            var visjsFileName = prompt("file name");
-            if (!visjsFileName) {
-                return;
-            }
-            Lineage_whiteboard.lineageVisjsGraph.saveGraph(visjsFileName);
-        },
+           
+            if(Lineage_whiteboard.lineageVisjsGraph.data && Lineage_whiteboard.lineageVisjsGraph.data.nodes.get().length > 0){
+                var nodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
+                var positions = Lineage_whiteboard.lineageVisjsGraph.network.getPositions();
+                var data = {
+                    nodes: nodes,
+                    edges: Lineage_whiteboard.lineageVisjsGraph.data.edges.get(),
+                    context: Lineage_whiteboard.lineageVisjsGraph.currentContext,
+                    positions: positions,
+                };
+                var data_path= "Lineage/savedWhiteboards/" + MainController.currentSource;
+                UserDataWidget.currentTreeNode=null;
+                UserDataWidget.showSaveDialog(data_path,data,null,function(err,result){
+                    if(err){
+                        return alert(err.responseText);
+                    }
+                    UI.message("Graph saved successfully");
+                })
+               
 
+
+
+                //Lineage_whiteboard.lineageVisjsGraph.saveGraph(visjsFileName);
+            }
+            else{
+                alert("No Whiteboard to save");
+            }
+        },
         /**
          * @function
-         * @name loadSavedGraph
+         * @name loadSavedWhiteboard
          * @memberof module:graphActions.graph
-         * Loads a previously saved graph file and renders it in the current workspace.
-         * The user is prompted to enter the file name.
+         * Select a previously saved graph on userData and renders it in the current workspace.
+         * 
          * @returns {void}
          */
-        loadSavedGraph: function () {
-            var visjsFileName = prompt("file name");
-            if (!visjsFileName) {
-                return;
-            }
-            try {
-                Lineage_whiteboard.lineageVisjsGraph.loadGraph(visjsFileName, false, function (err, visjsData) {
-                    if (err) {
-                        return alert(err.responseText || err);
-                    }
-                    Lineage_whiteboard.drawNewGraph(visjsData, "graphDiv");
-                });
-            } catch (e) {
-                alert("file not found");
-            }
-        },
+    
+        loadSavedWhiteboard: function () {
+            UserDataWidget.showListDialog(null,{filter:{data_path:"Lineage/savedWhiteboards/"+MainController.currentSource}},function(err,result){
+                if(err){
+                    return alert(err.responseText);
+                }
+                if(result?.data_content){
+                   self.loadGraphFromJSON(result.data_content);
+                   
+                }
+               
+            });
+        }
     };
+    /**
+     * @function
+     * @name loadGraphFromJSON
+     * @memberof module:graphActions
+     * Initializes the whiteboard tab in the UI from a JSON object.
+     * 
+     * @returns {void}
+     */
 
+    self.loadGraphFromJSON = function (json) {
+        var data=json;
+        var positions = data.positions;
+        var options = data.context.options;
+        var visjsData = { nodes: [], edges: [] };
+        visjsData.options = data.options;
+        var existingNodes = {};
+        
+        existingNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
+        
+        data.nodes.forEach(function (node) {
+            if (!existingNodes[node.id]) {
+                existingNodes[node.id] = 1;
+                if (positions[node.id]) {
+                    node.x = positions[node.id].x;
+                    node.y = positions[node.id].y;
+                }
+                visjsData.nodes.push(node);
+            }
+        });
+
+        data.edges.forEach(function (/** @type {{ id: string | number; }} */ edge) {
+            if (!existingNodes[edge.id]) {
+                existingNodes[edge.id] = 1;
+                visjsData.edges.push(edge);
+            }
+        });
+        
+        if (Lineage_whiteboard.lineageVisjsGraph?.data?.nodes ||  Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
+            Lineage_whiteboard.lineageVisjsGraph.data.edges.add(visjsData.edges);
+            Lineage_whiteboard.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
+
+            Lineage_whiteboard.lineageVisjsGraph.network.fit();
+            
+        } else {
+            Lineage_whiteboard.lineageVisjsGraph.data = visjsData;
+            Lineage_whiteboard.lineageVisjsGraph.draw(function () {
+                Lineage_whiteboard.lineageVisjsGraph.network.fit();
+                
+            });
+        }
+    }
     /**
      * @function
      * @name initWhiteboardTab

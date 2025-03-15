@@ -320,8 +320,7 @@ var _botEngine = (function () {
                 return;
             }
             self.writeCompletedHtml(text + ":");
-            //voir avec Claude
-            //Donne une liste pour cet élement de façon inconnue
+       
             var selectedValue = $(this).val();
             if (Array.isArray(selectedValue)) {
                 selectedValue = selectedValue[0];
@@ -329,17 +328,19 @@ var _botEngine = (function () {
             if (evt.ctrlKey) {
                 return;
             }
-            if (callback) {
-                return callback(selectedValue);
-            }
+           
             if (varToFill) {
-                //Il faut attribuer l'objet aux bon numéro de currentObject
+                
                 self.history.VarFilling[self.history.currentIndex] = { VarFilled: varToFill, valueFilled: selectedValue };
                 if (Array.isArray(self.currentBot.params[varToFill])) {
                     self.currentBot.params[varToFill].push(selectedValue);
                 } else {
                     self.currentBot.params[varToFill] = selectedValue;
                 }
+            }
+            
+            if (callback) {
+                return callback(selectedValue);
             }
 
             self.nextStep(returnValue || selectedValue);

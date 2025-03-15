@@ -52,10 +52,9 @@ var KGbuilder_main = {
             if (tableMappingsToProcess.length == 0) {
                 return callback(" no mappings to process");
             }
-
-            async.eachSeries(
-                tableMappingsToProcess,
-                function (mappings, callbackEach) {
+            
+            
+            async.eachSeries(tableMappingsToProcess, function(mappings, callbackEach) {
                     async.series(
                         [
                             //set dataSourceMappings config
@@ -65,7 +64,7 @@ var KGbuilder_main = {
                                 if (!mappings.lookups || mappings.lookups.length == 0) {
                                     return callbackSeries();
                                 }
-                                // filePath for CSV lookups
+                                 // filePath for CSV lookups
                                 var lookups = mappings.lookups;
                                 if (Object.keys(lookups).length > 0) {
                                     Object.keys(lookups).forEach(function (key) {
@@ -75,8 +74,8 @@ var KGbuilder_main = {
                                         }
                                     });
                                 }
-
-                                KGbuilder_triplesMaker.loadLookups(mappings, function (err, result) {
+                               
+                                KGbuilder_triplesMaker.loadLookups(mappings, function(err, result) {
                                     if (err) {
                                         return callbackSeries(err);
                                     }
@@ -268,23 +267,21 @@ var KGbuilder_main = {
                                 totalTriples += result;
                                 KGbuilder_socket.message(options.clientSocketId, "table " + mappings.table + " : writen triples:" + totalTriples);
 
-                                callbackSeries();
-                            });
-                        },
-                    ],
-                    function (err) {
-                        callbackEach(err);
-                    },
-                );
-            },
-            function (err) {
-                if (err) {
-                  console.log(err);
-                }
-                return callback(err, totalTriples);
-            },
-        );
-    },
+                        callbackSeries();
+                    });
+                }],
+                function(err) {
+                callbackEach(err)
+            })
+        }, function(err) {
+           
+            return callback(err, totalTriples);
+        });
+
+    }
+
+
+    ,
 
     getSourceConfig: function (source, callback) {
         // var sourceMappingsDir = path.join(__dirname, "../../data/mappings/" + source + "/");

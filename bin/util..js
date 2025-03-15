@@ -168,7 +168,7 @@ var util = {
     isInt: function (value) {
         return /^-?[0-9]+$/.test("" + value);
     },
-    isFloat: function (value) {
+    isFloat: function(value) {
         return /^-?[0-9]+[.,]?[0-9]*$/.test("" + value);
     },
 

@@ -22,8 +22,8 @@ var UserDataWidget = (function () {
                 if (err) {
                     self.callbackFn(err);
                 }
-
-                self.callbackFn(null, { label: label, data_path: data_path, data_content: self.jsonContent });
+                
+                self.callbackFn(null, {label: label, data_path: data_path, data_content: self.jsonContent,insertedId:result.insertedId,data_group:group});
             });
         });
 
@@ -46,6 +46,7 @@ var UserDataWidget = (function () {
         var type = "POST";
         if (self.currentTreeNode) {
             type = "PUT";
+            payload.id = self.currentTreeNode.id;
         }
         payload = JSON.stringify(payload);
         $.ajax({
@@ -55,20 +56,20 @@ var UserDataWidget = (function () {
             //dataType: "json",
             contentType: "application/json",
             success: function (_result, _textStatus, _jqXHR) {
-                callback(null, "graph saved");
+                callback(null, _result);
             },
             error(err) {
                 return callback(err);
             },
         });
     };
-    self.loadUserDatabyId = function (id) {
+    self.loadUserDatabyId = function (id,callback) {
         $.ajax({
             type: "GET",
             url: `${Config.apiUrl}/users/data/` + "" + id,
             dataType: "json",
             success: function (_result, _textStatus, _jqXHR) {
-                callback(null, "graph saved");
+                callback(null, _result);
             },
             error(err) {
                 return callback(err);
@@ -134,9 +135,13 @@ var UserDataWidget = (function () {
         self.showDialog(divId, "save");
     };
 
-    self.showListDialog = function (divId, callbackFn) {
+    self.showListDialog = function (divId,options, callbackFn) {
         self.callbackFn = callbackFn;
         self.currentTreeNode = null;
+        if(!options){
+            options={};
+        }
+        self.options=options;
         self.showDialog(divId, "list", function () {
             $.ajax({
                 type: "GET",
@@ -150,7 +155,20 @@ var UserDataWidget = (function () {
                     }
 
                     var jstreeData = [];
-                    var uniqueNodes = {};
+                    self.uniqueJstreeNodes = {};
+                    if(self.options.filter && Object.keys(self.options.filter).length>0){
+                        Object.keys(self.options.filter).forEach(function(key){
+                            if(self.options.filter[key]){
+                                data=data.filter(function(item){return item[key].includes(self.options.filter[key])});
+                            }
+                        });
+                        
+                    }
+                    // check data after filters
+                    if (data.length == 0) {
+                        $("#userDataWidget_jstree").html("nothing to load");
+                    }
+
 
                     data.forEach(function (item) {
                         var parent = "#";
@@ -158,22 +176,31 @@ var UserDataWidget = (function () {
                             var array = item.data_group.split("/");
 
                             // if (array.length > 0) {
-
-                            array.forEach(function (group, index) {
-                                if (!uniqueNodes[group]) {
-                                    uniqueNodes[group] = 1;
-                                    jstreeData.push({
-                                        id: group,
-                                        text: group,
-                                        parent: parent,
-                                    });
-                                    parent = group;
+                            if(array.length>0){
+                                array.forEach(function (group, index) {
+                                    if (!self.uniqueJstreeNodes[group]) {
+                                        self.uniqueJstreeNodes[group] = 1;
+                                        jstreeData.push({
+                                            id: group,
+                                            text: group,
+                                            parent: parent,
+                                        });
+                                        parent = group;
+                                    }
+                                });
+                                if(parent=="#" ){
+                                    var lastItem = array.at(-1);
+                                    if(self.uniqueJstreeNodes[lastItem]){
+                                        parent=lastItem;
+                                    }
                                 }
-                            });
+                                   
+                            }
+                            
                         }
 
-                        if (!uniqueNodes[item.id]) {
-                            uniqueNodes[item.id] = 1;
+                        if (!self.uniqueJstreeNodes[item.id]) {
+                            self.uniqueJstreeNodes[item.id] = 1;
                             jstreeData.push({
                                 id: item.id,
                                 text: item.data_label,
@@ -185,15 +212,25 @@ var UserDataWidget = (function () {
 
                     var options = {
                         selectTreeNodeFn: function (event, obj) {
-                            if (obj.event.ctrlKey) {
+                            
                                 self.currentTreeNode = obj.node;
                                 if (!obj.node.data) {
+                                    $("#userDataWidget_jstree").jstree().open_node(obj.node.id);
                                     return;
                                 } // refuse groups
-                                $("#" + self.divId).dialog("close");
+                               
 
-                                callbackFn(null, obj.node.data);
-                            }
+                                if(obj.event.type=='click'){
+                                    if(self.divId.includes('Dialog')){
+                                        $("#" + self.divId).dialog("close");
+                                    }
+                                    
+                                    callbackFn(null, obj.node.data);
+                                }
+                            
+                            
+                               
+                            
                         },
                         contextMenu: function (node) {
                             var items = {};
@@ -232,6 +269,9 @@ var UserDataWidget = (function () {
                     };
 
                     JstreeWidget.loadJsTree("userDataWidget_jstree", jstreeData, options);
+                    if(self.options.removeSaveDiv){
+                        $('#userDataWidget_saveDiv').remove();
+                    }
                 },
                 error(err) {
                     return callbackFn(err.responseText || err);

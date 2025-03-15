@@ -2,6 +2,9 @@ import Sparql_OWL from "../sparqlProxies/sparql_OWL.js";
 import common from "../shared/common.js";
 import Lineage_createRelation from "../tools/lineage/lineage_createRelation.js";
 import Sparql_generic from "../sparqlProxies/sparql_generic.js";
+import UI from "../shared/UI.js";
+import UserDataWidget from "./userDataWidget.js";
+
 
 var SavedQueriesWidget = (function () {
     var self = {};
@@ -9,7 +12,7 @@ var SavedQueriesWidget = (function () {
     self.contentPredicate = "hasContent";
     self.scopePredicate = "hasScope";
     self.sourcePredicate = "hasSource";
-
+    /*
     self.init = function (CRUDsource) {
         if (false && self.currentCRUDsourceLabel) {
             return;
@@ -21,23 +24,23 @@ var SavedQueriesWidget = (function () {
         }
         Config.sources[CRUDsource] = self.currentCRUDsourceObject;
     };
-
-    self.showDialog = function (CRUDsource, targetDiv, slsvSource, scope, saveQueryFn, loadQueryFn) {
-        self.init(CRUDsource);
+    */
+    self.showDialog = function ( targetDiv, slsvSource, saveQueryFn, loadQueryFn,path) {
+        //self.init(CRUDsource);
         self.saveQueryFn = saveQueryFn;
         self.loadQueryFn = loadQueryFn;
         self.slsvSource = slsvSource;
-
+        self.path=path;
         $("#" + targetDiv).load("./modules/uiWidgets/html/savedQueriesWidget.html", function () {
             if (targetDiv.indexOf("Dialog") > -1) {
                 $("#" + targetDiv).dialog("open");
             }
             if (slsvSource) {
-                self.list(CRUDsource, slsvSource, scope);
+                self.list( slsvSource,null,path);
             }
         });
     };
-
+    /*
     self.list = function (CRUDsource, slsvSource, scope, targetSelect, callback) {
         self.init(CRUDsource);
         self.currentCRUDsourceLabel;
@@ -87,6 +90,7 @@ var SavedQueriesWidget = (function () {
         });
     };
 
+
     self.loadItem = function (uri, options, callback) {
         var filter = "FILTER (?s =<" + uri + ">) ";
         var options = {
@@ -112,6 +116,39 @@ var SavedQueriesWidget = (function () {
         });
     };
 
+    */
+   
+    self.list = function ( slsvSource, targetSelect,path ,callback) {
+        if (!targetSelect) {
+            targetSelect = "SavedQueriesComponent_itemsSelect";
+        }
+        if (!slsvSource) {
+            slsvSource = MainController.currentSource;
+
+        }
+        var data_path = path+slsvSource;
+        UserDataWidget.showListDialog('SavedQueriesComponent_itemsSelect',{filter:{data_path:data_path},removeSaveDiv:true},function(err,result){
+            
+
+            if(result.id){
+                self.loadItem(result.id);
+            }
+            
+        });
+       
+    }
+    self.loadItem = function (userDataId, options, callback) {
+        UserDataWidget.loadUserDatabyId(userDataId, function (err, result) {
+            if (err) {
+                return alert(err);
+            }
+            if(result && result?.data_content?.sparqlQuery && self.loadQueryFn){
+                self.loadQueryFn(null, result.data_content);
+            }
+          
+        });
+    };
+    
     self.save = function (slsvSource, scope, callback) {
         self.saveQueryFn(function (err, result) {
             if (err) {
@@ -122,33 +159,60 @@ var SavedQueriesWidget = (function () {
                 return alert(" nothing to save");
             }
 
-            var label = prompt("query name");
-            if (!label) {
-                return;
-            }
-            if (!scope) {
-                scope = $("#SavedQueriesComponent_scope").val();
-            }
+           
+            
             if (!slsvSource) {
+                if(!self.slsvSource){
+                    return alert("no source");
+                }
                 slsvSource = self.slsvSource;
+               
             }
-            if (!confirm("save query " + label + "with scope " + scope + " in source " + self.currentCRUDsourceLabel + " ?")) {
-                return;
-            }
-            if (scope == "private") {
-                scope = authentication.currentUser.login;
-            }
-            var queryUri = self.currentCRUDsourceObject.graphUri + common.getRandomHexaId(10);
-            const getCircularReplacer = () => {
-                return (key, value) => {
-                    if (key == "queryElement") {
-                        value = value["divId"];
+            var data_path =  self.path+slsvSource ;
+            UserDataWidget.currentTreeNode=null;
+            UserDataWidget.showSaveDialog(data_path,data,null, function (err, result) {
+               
+                    if(err){
+                        return alert(err);
                     }
-                    return value;
-                };
-            };
+                    //console.log(result);
+                    $('#KGquery_messageDiv').text('saved query');
+                    if(result?.insertedId?.length>0){ 
+                        var groups=result.data_group.split('/');
+                        var group_parent='#'
+                        if(groups.length>0){
+                            
+                        
+                            groups.forEach(function(group){
+                                if(!UserDataWidget.uniqueJstreeNodes[group]){
+                                    //add node
+                                    var node={id:group,text:group,parent:group_parent};
+                                    $('#userDataWidget_jstree').jstree(true).create_node(group_parent,node);
 
-            var content64 = btoa(JSON.stringify(data, getCircularReplacer()));
+                                }   
+                                group_parent=group;
+                               
+                            });
+
+                            
+                        }
+                        result.id=result.insertedId[0].id;
+                        result.data_label=result.label;
+                        var node={id:result.insertedId[0].id,text:result.label,parent:group_parent, data:result};
+                        $('#userDataWidget_jstree').jstree(true).create_node(group_parent,node);
+
+                        //$("#SavedQueriesComponent_itemsSelect").append("<option value='" + result.insertedId[0].id + "'>" + result.label + "</option>");
+                        //SavedQueriesWidget.showDialog("tabs_myQueries",self.currentSource,KGquery_myQueries.save, KGquery_myQueries.load,"KGquery/savedQueries/");
+
+                    }
+                    
+                    
+    
+                });
+            });
+
+            
+            /*
             var triples = [];
             triples.push({
                 subject: queryUri,
@@ -191,27 +255,29 @@ var SavedQueriesWidget = (function () {
                 }
                 $("#SavedQueriesComponent_itemsSelect").append("<option value='" + queryUri + "'>" + label + "</option>");
             });
-        });
+            */
+        
     };
 
-    self.delete = function (uri, callback) {
-        if (!uri) {
-            uri = $("#SavedQueriesComponent_itemsSelect").val();
+    self.delete = function (userDataId, callback) {
+        if (!userDataId) {
+            userDataId = $("#SavedQueriesComponent_itemsSelect").val();
+            var userDataLabel= $("#SavedQueriesComponent_itemsSelect option:selected").text();
         }
-        if (!uri) {
+        if (!userDataId) {
             return alert(" nothing to delete");
         }
-        if (confirm("delete selected query")) {
-            var CRUDsource = self.currentCRUDsourceLabel;
-            Sparql_generic.deleteTriples(CRUDsource, uri, null, null, function (err, result) {
-                $("#SavedQueriesComponent_itemsSelect option[value='" + uri + "']").remove();
-                if (callback) {
-                    return callback();
-                }
-            });
-        }
-    };
 
+         var node= {id: userDataId, data_label: userDataLabel};
+        UserDataWidget.deleteItem(node, function (err, result) {
+            if (err) {
+                return alert(err.responseText || err);
+            }
+            $('#KGquery_messageDiv').text('deleted query');
+            $("#SavedQueriesComponent_itemsSelect").find("option[value='" + userDataId + "']").remove();
+          
+        });
+    };
     return self;
 })();
 

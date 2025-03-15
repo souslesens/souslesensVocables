@@ -34,6 +34,8 @@ var UserDataWidget = (function () {
             data_label: label,
             data_comment: "",
             data_group: group || "",
+            data_tool: tool || "",
+            data_source: source || "",
             data_content: jsonContent || {},
             is_shared: false,
             shared_profiles: [],

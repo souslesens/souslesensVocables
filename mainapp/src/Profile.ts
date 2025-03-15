@@ -88,6 +88,7 @@ type ProfileJson = {
     allowedSourceSchemas: string[];
     sourcesAccessControl: Record<string, SourceAccessControl>;
     allowedTools: string[];
+    isShared: boolean;
     theme?: string;
 };
 
@@ -99,6 +100,7 @@ const decodeProfile = (key: string, profile: ProfileJson): Profile => {
         allowedSourceSchemas: profile.allowedSourceSchemas,
         sourcesAccessControl: profile.sourcesAccessControl,
         allowedTools: profile.allowedTools,
+        isShared: profile.isShared,
         theme: profile.theme,
     };
 };
@@ -117,6 +119,7 @@ const ProfileSchema = z.object({
         .transform((a) => (a ?? []).flatMap((item) => (item ? item : []))),
     sourcesAccessControl: z.record(SourceAccessControlSchema).default({}),
     allowedTools: z.array(z.string()).default([]),
+    isShared: z.boolean().default(true),
     id: z.string().default(ulid()),
 });
 
@@ -139,6 +142,7 @@ export const defaultProfile = (uuid: string): Profile => {
         allowedSourceSchemas: [],
         sourcesAccessControl: {},
         allowedTools: [],
+        isShared: true,
         theme: "",
     };
 };

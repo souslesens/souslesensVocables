@@ -9,10 +9,9 @@ module.exports = function () {
     };
 
     ///// GET api/v1/profiles
-    async function GET(req, res, next) {
+    async function GET(_req, res, _next) {
         try {
-            const userInfo = await userManager.getUser(req.user);
-            const profiles = await profileModel.getUserProfiles(userInfo.user);
+            const profiles = await profileModel.getAllProfiles();
             resourceFetched(res, profiles);
         } catch (error) {
             res.status(500).json({ message: error.toString() });
@@ -27,7 +26,7 @@ module.exports = function () {
     };
 
     ///// POST api/v1/profiles
-    async function POST(req, res, next) {
+    async function POST(req, res, _next) {
         try {
             const newProfile = req.body;
             await Promise.all(

@@ -149,14 +149,13 @@ const DatabaseFormDialog = ({ database = defaultDatabase(ulid()), create = false
                 <DialogContent sx={{ marginTop: "1em" }}>
                     <Stack spacing={4}>
                         <TextField
-                            defaultValue={databaseModel.form.id}
+                            value={databaseModel.form.name}
                             error={currentErrors.name !== undefined}
                             fullWidth
                             helperText={currentErrors.name}
                             id="name"
                             label="Name"
                             onChange={handleFieldUpdate("name")}
-                            value={databaseModel.form.name}
                         />
                         <TextField
                             defaultValue={databaseModel.form.driver}
@@ -300,7 +299,7 @@ const DatabasesTable = () => {
                             </Alert>
                         </Snackbar>
                         <TextField
-                            inputProps={{ autocomplete: "off" }}
+                            inputProps={{ autoComplete: "off" }}
                             label="Search Databases by name"
                             id="filter databases"
                             onChange={(event) => {

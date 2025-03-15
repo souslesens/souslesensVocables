@@ -79,6 +79,11 @@ Edit the `.env` file:
 | `DATABASE_NAME`                | Database name of used to store SousLeSens users, profiles and usersData                  | `souslesens`          |
 | `DATABASE_USER`                | Database role used to connect to Postgresql database                                     | `souslesens`          |
 | `DATABASE_PASSWORD`            | Database password used to connect to Postgresql database                                 | `changeme`            |
+| `VIRT_NBUFFERS`                | Virtuoso configuration for memory (see [doc][1])                                         | `340000`              |
+| `VIRT_MAXDBUFFERS`             | Virtuoso configuration for memory (see [doc][1])                                         | `250000`              |
+| `VIRT_QUERYEXECTIME`           | Query exec timeout for Virtuoso                                                          | `20000`               |
+
+[1]: https://github.com/askomics/flaskomics-docker-compose/tree/master?tab=readme-ov-file#configure-virtuoso
 
 ## Build the container images
 

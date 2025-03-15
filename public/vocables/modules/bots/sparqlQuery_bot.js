@@ -691,13 +691,12 @@ var SparqlQuery_bot = (function () {
             query += "} limit " + limit;
 
             UI.message("");
-
+            self.params.currentSparql = query;
             if (options.returnSparql) {
                 return callback(null, query);
             }
         }
 
-        self.params.currentSparql = query;
         Sparql_proxy.querySPARQL_GET_proxy(sparql_url, query, null, null, function (err, result) {
             if (err) {
                 return callback(err);

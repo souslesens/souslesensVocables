@@ -885,7 +885,7 @@ var SparqlQuery_bot = (function () {
         }
     };
 
-    self.drawDataTableQueryResult = function (queryResult, callbacl) {
+    self.drawDataTableQueryResult = function (queryResult) {
         var cols = [];
         var dataset = [];
         cols.push(
@@ -906,9 +906,11 @@ var SparqlQuery_bot = (function () {
                 dataset.push([labelsMap[item.subject], labelsMap[item.predicate], labelsMap[item.object], item.subject, item.predicate, item.object]);
             }
         });
+
+        Export.showDataTable("mainDailogDiv", cols, dataset);
     };
 
-    self.exportResultToCSV = function (queryResult, callbacl) {
+    self.exportResultToCSV = function (queryResult) {
         var str = "";
         var sep = ";";
         str += "subject" + sep + "predicate" + sep + "object" + sep + "subjectURI" + sep + "predicateURI" + sep + "objectURI" + "\n";
@@ -929,6 +931,7 @@ var SparqlQuery_bot = (function () {
             }
         });
         download(str, "SLS_QueryExport.csv", "text/csv");
+        myBotEngine.message("CSV export done in download dir");
     };
 
     self.editSparql = function () {

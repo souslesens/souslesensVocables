@@ -27,8 +27,9 @@ var UserDataWidget = (function () {
             });
         });
 
-    self.saveMetadata = function (label, data_path, jsonContent, group, tool, callback) {
+    self.saveMetadata = function (label, data_path, jsonContent, group, callback) {
         var tool = MainController.currentTool || "?";
+        var source = MainController.currentSource || "?";
         var payload = {
             data_path: data_path || "",
             data_type: "string",

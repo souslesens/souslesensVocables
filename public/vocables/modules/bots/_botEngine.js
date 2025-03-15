@@ -223,9 +223,9 @@ var _botEngine = (function () {
 
             self.nextStep(returnValue);
         } else {
-            self.history.currentIndex =-1
+            self.history.currentIndex = -1;
             self.nextStep();
-           // self.reset();
+            // self.reset();
         }
     };
 
@@ -280,7 +280,6 @@ var _botEngine = (function () {
         }
     };
 
-
     self.close = function () {
         $("#botPanel").css("display", "none");
     };
@@ -306,7 +305,7 @@ var _botEngine = (function () {
         self.currentList = values;
         if (values.length > 20) {
             $("#botFilterProposalDiv").show();
-            $("#botFilterProposalInput").trigger("focus")
+            $("#botFilterProposalInput").trigger("focus");
         }
         common.fillSelectOptions("bot_resourcesProposalSelect", values, false, "label", "id");
         $("#bot_resourcesProposalSelect").unbind("click");
@@ -320,7 +319,7 @@ var _botEngine = (function () {
                 return;
             }
             self.writeCompletedHtml(text + ":");
-       
+
             var selectedValue = $(this).val();
             if (Array.isArray(selectedValue)) {
                 selectedValue = selectedValue[0];
@@ -328,9 +327,8 @@ var _botEngine = (function () {
             if (evt.ctrlKey) {
                 return;
             }
-           
+
             if (varToFill) {
-                
                 self.history.VarFilling[self.history.currentIndex] = { VarFilled: varToFill, valueFilled: selectedValue };
                 if (Array.isArray(self.currentBot.params[varToFill])) {
                     self.currentBot.params[varToFill].push(selectedValue);
@@ -338,7 +336,7 @@ var _botEngine = (function () {
                     self.currentBot.params[varToFill] = selectedValue;
                 }
             }
-            
+
             if (callback) {
                 return callback(selectedValue);
             }

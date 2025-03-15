@@ -5,7 +5,6 @@ import Sparql_generic from "../sparqlProxies/sparql_generic.js";
 import UI from "../shared/UI.js";
 import UserDataWidget from "./userDataWidget.js";
 
-
 var SavedQueriesWidget = (function () {
     var self = {};
 
@@ -25,18 +24,18 @@ var SavedQueriesWidget = (function () {
         Config.sources[CRUDsource] = self.currentCRUDsourceObject;
     };
     */
-    self.showDialog = function ( targetDiv, slsvSource, saveQueryFn, loadQueryFn,path) {
+    self.showDialog = function (targetDiv, slsvSource, saveQueryFn, loadQueryFn, path) {
         //self.init(CRUDsource);
         self.saveQueryFn = saveQueryFn;
         self.loadQueryFn = loadQueryFn;
         self.slsvSource = slsvSource;
-        self.path=path;
+        self.path = path;
         $("#" + targetDiv).load("./modules/uiWidgets/html/savedQueriesWidget.html", function () {
             if (targetDiv.indexOf("Dialog") > -1) {
                 $("#" + targetDiv).dialog("open");
             }
             if (slsvSource) {
-                self.list( slsvSource,null,path);
+                self.list(slsvSource, null, path);
             }
         });
     };
@@ -117,38 +116,32 @@ var SavedQueriesWidget = (function () {
     };
 
     */
-   
-    self.list = function ( slsvSource, targetSelect,path ,callback) {
+
+    self.list = function (slsvSource, targetSelect, path, callback) {
         if (!targetSelect) {
             targetSelect = "SavedQueriesComponent_itemsSelect";
         }
         if (!slsvSource) {
             slsvSource = MainController.currentSource;
-
         }
-        var data_path = path+slsvSource;
-        UserDataWidget.showListDialog('SavedQueriesComponent_itemsSelect',{filter:{data_path:data_path},removeSaveDiv:true},function(err,result){
-            
-
-            if(result.id){
+        var data_path = path + slsvSource;
+        UserDataWidget.showListDialog("SavedQueriesComponent_itemsSelect", { filter: { data_path: data_path }, removeSaveDiv: true }, function (err, result) {
+            if (result.id) {
                 self.loadItem(result.id);
             }
-            
         });
-       
-    }
+    };
     self.loadItem = function (userDataId, options, callback) {
         UserDataWidget.loadUserDatabyId(userDataId, function (err, result) {
             if (err) {
                 return alert(err);
             }
-            if(result && result?.data_content?.sparqlQuery && self.loadQueryFn){
+            if (result && result?.data_content?.sparqlQuery && self.loadQueryFn) {
                 self.loadQueryFn(null, result.data_content);
             }
-          
         });
     };
-    
+
     self.save = function (slsvSource, scope, callback) {
         self.saveQueryFn(function (err, result) {
             if (err) {
@@ -159,60 +152,45 @@ var SavedQueriesWidget = (function () {
                 return alert(" nothing to save");
             }
 
-           
-            
             if (!slsvSource) {
-                if(!self.slsvSource){
+                if (!self.slsvSource) {
                     return alert("no source");
                 }
                 slsvSource = self.slsvSource;
-               
             }
-            var data_path =  self.path+slsvSource ;
-            UserDataWidget.currentTreeNode=null;
-            UserDataWidget.showSaveDialog(data_path,data,null, function (err, result) {
-               
-                    if(err){
-                        return alert(err);
+            var data_path = self.path + slsvSource;
+            UserDataWidget.currentTreeNode = null;
+            UserDataWidget.showSaveDialog(data_path, data, null, function (err, result) {
+                if (err) {
+                    return alert(err);
+                }
+                //console.log(result);
+                $("#KGquery_messageDiv").text("saved query");
+                if (result?.insertedId?.length > 0) {
+                    var groups = result.data_group.split("/");
+                    var group_parent = "#";
+                    if (groups.length > 0) {
+                        groups.forEach(function (group) {
+                            if (!UserDataWidget.uniqueJstreeNodes[group]) {
+                                //add node
+                                var node = { id: group, text: group, parent: group_parent };
+                                $("#userDataWidget_jstree").jstree(true).create_node(group_parent, node);
+                            }
+                            group_parent = group;
+                        });
                     }
-                    //console.log(result);
-                    $('#KGquery_messageDiv').text('saved query');
-                    if(result?.insertedId?.length>0){ 
-                        var groups=result.data_group.split('/');
-                        var group_parent='#'
-                        if(groups.length>0){
-                            
-                        
-                            groups.forEach(function(group){
-                                if(!UserDataWidget.uniqueJstreeNodes[group]){
-                                    //add node
-                                    var node={id:group,text:group,parent:group_parent};
-                                    $('#userDataWidget_jstree').jstree(true).create_node(group_parent,node);
+                    result.id = result.insertedId[0].id;
+                    result.data_label = result.label;
+                    var node = { id: result.insertedId[0].id, text: result.label, parent: group_parent, data: result };
+                    $("#userDataWidget_jstree").jstree(true).create_node(group_parent, node);
 
-                                }   
-                                group_parent=group;
-                               
-                            });
-
-                            
-                        }
-                        result.id=result.insertedId[0].id;
-                        result.data_label=result.label;
-                        var node={id:result.insertedId[0].id,text:result.label,parent:group_parent, data:result};
-                        $('#userDataWidget_jstree').jstree(true).create_node(group_parent,node);
-
-                        //$("#SavedQueriesComponent_itemsSelect").append("<option value='" + result.insertedId[0].id + "'>" + result.label + "</option>");
-                        //SavedQueriesWidget.showDialog("tabs_myQueries",self.currentSource,KGquery_myQueries.save, KGquery_myQueries.load,"KGquery/savedQueries/");
-
-                    }
-                    
-                    
-    
-                });
+                    //$("#SavedQueriesComponent_itemsSelect").append("<option value='" + result.insertedId[0].id + "'>" + result.label + "</option>");
+                    //SavedQueriesWidget.showDialog("tabs_myQueries",self.currentSource,KGquery_myQueries.save, KGquery_myQueries.load,"KGquery/savedQueries/");
+                }
             });
+        });
 
-            
-            /*
+        /*
             var triples = [];
             triples.push({
                 subject: queryUri,
@@ -256,26 +234,26 @@ var SavedQueriesWidget = (function () {
                 $("#SavedQueriesComponent_itemsSelect").append("<option value='" + queryUri + "'>" + label + "</option>");
             });
             */
-        
     };
 
     self.delete = function (userDataId, callback) {
         if (!userDataId) {
             userDataId = $("#SavedQueriesComponent_itemsSelect").val();
-            var userDataLabel= $("#SavedQueriesComponent_itemsSelect option:selected").text();
+            var userDataLabel = $("#SavedQueriesComponent_itemsSelect option:selected").text();
         }
         if (!userDataId) {
             return alert(" nothing to delete");
         }
 
-         var node= {id: userDataId, data_label: userDataLabel};
+        var node = { id: userDataId, data_label: userDataLabel };
         UserDataWidget.deleteItem(node, function (err, result) {
             if (err) {
                 return alert(err.responseText || err);
             }
-            $('#KGquery_messageDiv').text('deleted query');
-            $("#SavedQueriesComponent_itemsSelect").find("option[value='" + userDataId + "']").remove();
-          
+            $("#KGquery_messageDiv").text("deleted query");
+            $("#SavedQueriesComponent_itemsSelect")
+                .find("option[value='" + userDataId + "']")
+                .remove();
         });
     };
     return self;

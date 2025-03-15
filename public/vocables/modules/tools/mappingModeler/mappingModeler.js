@@ -16,6 +16,7 @@ import MappingsDetails from "./mappingsDetails.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import DataSourceManager from "./dataSourcesManager.js";
 import UIcontroller from "./uiController.js";
+import PlantUmlTransformer from "../../graph/plantUmlTransformer.js";
 
 /**
  * MappingModeler module.
@@ -1230,6 +1231,16 @@ var MappingModeler = (function () {
         } else if (DataSourceManager.currentConfig.currentDataSource.type == "csvSource") {
             alert("Comming Soon...");
         }
+    };
+
+    self.visjsDataToClassDiagram = function (visjsData) {
+        if (!visjsData) {
+            visjsData = {
+                nodes: MappingColumnsGraph.visjsGraph.data.nodes.get(),
+                edges: MappingColumnsGraph.visjsGraph.data.edges.get(),
+            };
+        }
+        PlantUmlTransformer.visjsDataToClassDiagram(visjsData);
     };
 
     return self;

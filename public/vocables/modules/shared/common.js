@@ -346,58 +346,59 @@ var common = (function () {
 
             return Object.values(joinMap)
         },*/
-         fullOuterJoin:function(array1, array2, keys) {
+        fullOuterJoin: function (array1, array2, keys) {
             if (!keys || !array1 || !array2) {
-                return 'parameter is missing';
+                return "parameter is missing";
             }
             if (!Array.isArray(keys)) {
                 keys = [keys];
             }
             if (array1.length === 0 || array2.length === 0) {
-                return 'one dataset is empty';
+                return "one dataset is empty";
             }
-        
-            let joinMap1 = {}, joinMap2 = {}, result = [];
-        
+
+            let joinMap1 = {},
+                joinMap2 = {},
+                result = [];
+
             function generateKey(item) {
-                return keys.map(key => item[key]?.value ?? item[key] ?? '').join('|');
+                return keys.map((key) => item[key]?.value ?? item[key] ?? "").join("|");
             }
-        
+
             // Object Indexation
-            array1.forEach(item => {
+            array1.forEach((item) => {
                 let key = generateKey(item);
                 if (!joinMap1[key]) joinMap1[key] = [];
                 joinMap1[key].push(item);
             });
-        
-            
-            array2.forEach(item => {
+
+            array2.forEach((item) => {
                 let key = generateKey(item);
                 if (!joinMap2[key]) joinMap2[key] = [];
                 joinMap2[key].push(item);
             });
-        
+
             let allUniqueKeys = new Set([...Object.keys(joinMap1), ...Object.keys(joinMap2)]);
             // Union of sets
-            allUniqueKeys.forEach(key => {
-                let group1 = joinMap1[key] || [{}]; 
-                let group2 = joinMap2[key] || [{}]; 
-        
-                group1.forEach(obj1 => {
-                    group2.forEach(obj2 => {
+            allUniqueKeys.forEach((key) => {
+                let group1 = joinMap1[key] || [{}];
+                let group2 = joinMap2[key] || [{}];
+
+                group1.forEach((obj1) => {
+                    group2.forEach((obj2) => {
                         result.push({ ...obj1, ...obj2 });
                     });
                 });
             });
-        
+
             return result;
         },
 
-        arrayByCategory:function(array,column){
+        arrayByCategory: function (array, column) {
             const groups = array.reduce((acc, item) => {
                 var key = item[column];
-                if(item[column]?.value){
-                    key=item[column].value;
+                if (item[column]?.value) {
+                    key = item[column].value;
                 }
                 if (!acc[key]) {
                     acc[key] = [];
@@ -405,24 +406,23 @@ var common = (function () {
                 acc[key].push(item);
                 return acc;
             }, {});
-        
-            return Object.values(groups); 
+
+            return Object.values(groups);
         },
-        removeColumn:function(array,column){
-            if (array.length === 0 ) {
-                return ' dataset is empty';
+        removeColumn: function (array, column) {
+            if (array.length === 0) {
+                return " dataset is empty";
             }
-            if(!column){
-                return 'no column to supress'
+            if (!column) {
+                return "no column to supress";
             }
-            array.forEach(function(item){
-                if(item[column]){
+            array.forEach(function (item) {
+                if (item[column]) {
                     delete item[column];
                 }
             });
             return array;
-
-        }
+        },
     };
 
     self.concatArraysWithoutDuplicate = function (array, addedArray, key) {

@@ -62,8 +62,7 @@ var KGquery = (function () {
     self.init = function () {
         KGquery_graph.drawVisjsModel("saved");
         //SavedQueriesWidget.list();
-        SavedQueriesWidget.showDialog("tabs_myQueries",self.currentSource,KGquery_myQueries.save, KGquery_myQueries.load,"KGquery/savedQueries/");
-        
+        SavedQueriesWidget.showDialog("tabs_myQueries", self.currentSource, KGquery_myQueries.save, KGquery_myQueries.load, "KGquery/savedQueries/");
     };
 
     self.initOutputType = function () {
@@ -349,7 +348,6 @@ var KGquery = (function () {
             });
             */
             if (output == "table") {
-                
                 self.queryResultToTable(result);
             } else if (output == "Graph") {
                 self.queryResultToVisjsGraph(result);
@@ -365,9 +363,9 @@ var KGquery = (function () {
         var optionalPredicatesSparql = "";
         var containerFiltersSparql = "";
         var query = "";
-        var distinctSetTypes=[];
-        var isUnion=false;
-        var isJoin=false;
+        var distinctSetTypes = [];
+        var isUnion = false;
+        var isJoin = false;
         var data;
         async.series(
             [
@@ -376,7 +374,7 @@ var KGquery = (function () {
                     if (options.aggregate) {
                         return callbackSeries();
                     }
-                    if(KGquery_myQueries.currentOptionalPredicatesSparql){
+                    if (KGquery_myQueries.currentOptionalPredicatesSparql) {
                         optionalPredicatesSparql = KGquery_myQueries.currentOptionalPredicatesSparql;
                         KGquery_myQueries.currentOptionalPredicatesSparql = null;
                         return callbackSeries();
@@ -412,19 +410,18 @@ var KGquery = (function () {
                     var whereStr = "";
                     var uniqueQueries = {};
                     var querySetsWhereStr = [];
-                    var disctinctSetVars=[];
-                    
+                    var disctinctSetVars = [];
+
                     self.querySets.sets.forEach(function (querySet) {
-                        
                         if (querySet.elements.length == 0 || !querySet.elements[0].fromNode) {
                             return;
                         }
-                        whereStr='';
+                        whereStr = "";
                         distinctTypesMap = {};
                         var predicateStr = "";
                         var filterStr = "";
                         var otherPredicatesStrs = "";
-                        
+
                         querySet.elements.forEach(function (queryElement, queryElementIndex) {
                             if (!queryElement.toNode) {
                                 return;
@@ -493,7 +490,6 @@ var KGquery = (function () {
                                     predicateStr += basicPredicate;
                                 }
                             });
-
                         });
 
                         for (var key in querySet.classFiltersMap) {
@@ -509,24 +505,22 @@ var KGquery = (function () {
                         } else {
                         }
 
-                      
                         if (!predicateStr) {
-                            // when only one class 
-                            predicateStr = '?'+querySet.elements[0].fromNode.label+ ' rdf:type '+ '<'+querySet.elements[0].fromNode.id+'>.\n' ;
-                            distinctTypesMap['?'+querySet.elements[0].fromNode.label]=1;
+                            // when only one class
+                            predicateStr = "?" + querySet.elements[0].fromNode.label + " rdf:type " + "<" + querySet.elements[0].fromNode.id + ">.\n";
+                            distinctTypesMap["?" + querySet.elements[0].fromNode.label] = 1;
                             //predicateStr = optionalPredicatesSparql.replace("OPTIONAL", "");
                         }
                         whereStr += predicateStr + "\n" + "" + "\n" + filterStr + "\n" + otherPredicatesStrs;
                         if (optionalPredicatesSparql) {
-                         
                             //optional predicates are filtered for each set or weird comportement for multiple set queries
-                            
-                            var querySetOptionalPredicates='';
-                            Object.keys(distinctTypesMap).forEach(function(type){
+
+                            var querySetOptionalPredicates = "";
+                            Object.keys(distinctTypesMap).forEach(function (type) {
                                 var regex = new RegExp(`^\\s*OPTIONAL\\s*{\\${type}\\b.*?}$`, "gm");
-                                var matches=optionalPredicatesSparql.match(regex);
-                                if(matches?.length>0){
-                                    querySetOptionalPredicates+=matches.join("\n");
+                                var matches = optionalPredicatesSparql.match(regex);
+                                if (matches?.length > 0) {
+                                    querySetOptionalPredicates += matches.join("\n");
                                 }
                             });
                             whereStr += querySetOptionalPredicates;
@@ -539,34 +533,29 @@ var KGquery = (function () {
                         disctinctSetVars.push(uniqueVariables);
                         querySetsWhereStr.push(whereStr);
                         distinctSetTypes.push(distinctTypesMap);
-                        
                     });
-                    whereStr='';
-                    if(querySetsWhereStr.length==0){
-                        return alert('no node selected');
+                    whereStr = "";
+                    if (querySetsWhereStr.length == 0) {
+                        return alert("no node selected");
                     }
-                    if(querySetsWhereStr.length==1){
-                        whereStr=querySetsWhereStr[0];
+                    if (querySetsWhereStr.length == 1) {
+                        whereStr = querySetsWhereStr[0];
                     }
-                    if(querySetsWhereStr.length>1){
-                        querySetsWhereStr.forEach(function(querySetsWhereStr,index){
-                            var disctinctVarsStr=disctinctSetVars[index].join(' ');
-                            var querySetNumber=index+1;
+                    if (querySetsWhereStr.length > 1) {
+                        querySetsWhereStr.forEach(function (querySetsWhereStr, index) {
+                            var disctinctVarsStr = disctinctSetVars[index].join(" ");
+                            var querySetNumber = index + 1;
                             if (self.querySets.sets[index].booleanOperator) {
-                               
                                 whereStr += "\n " + self.querySets.sets[index].booleanOperator + "\n ";
-                                isJoin=true;
-                                if(self.querySets.sets[index].booleanOperator=='Union'){
-                                    isUnion=true;
+                                isJoin = true;
+                                if (self.querySets.sets[index].booleanOperator == "Union") {
+                                    isUnion = true;
                                 }
-                                
                             }
-                            whereStr += '{SELECT '+ disctinctVarsStr + ' (("Query '+querySetNumber+'") AS ?querySet) ';
-                            whereStr +='{'+ querySetsWhereStr + '}';
-                            whereStr +='}'
-                            
+                            whereStr += "{SELECT " + disctinctVarsStr + ' (("Query ' + querySetNumber + '") AS ?querySet) ';
+                            whereStr += "{" + querySetsWhereStr + "}";
+                            whereStr += "}";
                         });
-                        
                     }
 
                     var fromStr = Sparql_common.getFromStr(self.currentSource);
@@ -584,7 +573,7 @@ var KGquery = (function () {
                     query += queryType + " " + selectStr + "  " + fromStr + " where {" + whereStr + "}";
 
                     query += " " + groupByStr + " limit 10000";
-                    
+
                     callbackSeries();
                 },
 
@@ -603,7 +592,7 @@ var KGquery = (function () {
                         source: self.currentSource,
                     };
                     // query = Sparql_common.setPrefixesInSelectQuery(query);
-                    
+
                     Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: self.currentSource, caller: "getObjectRestrictions" }, function (err, result) {
                         if (err) {
                             return callbackSeries(err);
@@ -612,37 +601,35 @@ var KGquery = (function () {
                         callbackSeries(null, result);
                     });
                 },
-                // Union Joins 
+                // Union Joins
                 function (callbackSeries) {
-                    if(!isUnion || !data || data?.results?.bindings.length==0){
+                    if (!isUnion || !data || data?.results?.bindings.length == 0) {
                         return callbackSeries();
                     }
-                    var results=data?.results?.bindings;
-                    var dataByQuerySet=common.array.arrayByCategory(results,'querySet');
+                    var results = data?.results?.bindings;
+                    var dataByQuerySet = common.array.arrayByCategory(results, "querySet");
                     var joinedData;
 
-                    dataByQuerySet.forEach(function(setData,index){
-                        if(joinedData){
-                            var commonKeys=Object.keys(distinctSetTypes[index]).filter(key => key in distinctSetTypes[index-1]);
-                            commonKeys=commonKeys.map(str => str.replace(/\?/g, ''));
-                            joinedData=common.array.fullOuterJoin(joinedData,setData,commonKeys);
-                        }else{
-                            joinedData=setData
+                    dataByQuerySet.forEach(function (setData, index) {
+                        if (joinedData) {
+                            var commonKeys = Object.keys(distinctSetTypes[index]).filter((key) => key in distinctSetTypes[index - 1]);
+                            commonKeys = commonKeys.map((str) => str.replace(/\?/g, ""));
+                            joinedData = common.array.fullOuterJoin(joinedData, setData, commonKeys);
+                        } else {
+                            joinedData = setData;
                         }
-                        
                     });
-                    
-                    data.results.bindings=joinedData;
+
+                    data.results.bindings = joinedData;
                     return callbackSeries();
                 },
                 //Delete querySet Variable
-                function(callbackSeries){
-                    if(isJoin){
-                        data.results.bindings=common.array.removeColumn(data.results.bindings,'querySet');
+                function (callbackSeries) {
+                    if (isJoin) {
+                        data.results.bindings = common.array.removeColumn(data.results.bindings, "querySet");
                     }
                     return callbackSeries();
-                }
-
+                },
             ],
             function (err) {
                 callback(err, data);
@@ -784,12 +771,13 @@ var KGquery = (function () {
 
         //$("#KGquery_dataTableDialogDiv").css("left", "10px");
         //$("#KGquery_dataTableDialogDiv").width("90vW");
-        if(tableData.length>10000){
-            var columns=tableCols.map(function(item){return item.title});
+        if (tableData.length > 10000) {
+            var columns = tableCols.map(function (item) {
+                return item.title;
+            });
             tableData.unshift(columns);
-            alert('to large results, it will be exported');
+            alert("to large results, it will be exported");
             return Export.exportDataToCSV(tableData);
-
         }
         Export.showDataTable("KGquery_dataTableDialogDiv", tableCols, tableData, null, { paging: true }, function (err, datatable) {
             $("#dataTableDivExport").on("click", "td", function () {
@@ -882,56 +870,50 @@ var KGquery = (function () {
     self.removeQueryElement = function (queryElementDivId) {
         //$("#" + queryElementDivId).remove();
         var queryElement = self.divsMap[queryElementDivId];
-        var elementLength=self.querySets.sets[queryElement.setIndex].elements.length;
-        var classFiltersMap=self.querySets.sets[queryElement.setIndex].classFiltersMap
-        if(elementLength>0){
-            for (let i = elementLength-1; i >= queryElement.index; i--) {
-                var element=self.querySets.sets[queryElement.setIndex].elements[i];
+        var elementLength = self.querySets.sets[queryElement.setIndex].elements.length;
+        var classFiltersMap = self.querySets.sets[queryElement.setIndex].classFiltersMap;
+        if (elementLength > 0) {
+            for (let i = elementLength - 1; i >= queryElement.index; i--) {
+                var element = self.querySets.sets[queryElement.setIndex].elements[i];
                 //delete filters
-                if(element?.fromNode?.data?.nodeDivId && classFiltersMap[element?.fromNode?.data?.nodeDivId]){
-                    delete classFiltersMap[element?.fromNode?.data?.nodeDivId]
+                if (element?.fromNode?.data?.nodeDivId && classFiltersMap[element?.fromNode?.data?.nodeDivId]) {
+                    delete classFiltersMap[element?.fromNode?.data?.nodeDivId];
                 }
-                if(element?.toNode?.data?.nodeDivId && classFiltersMap[element?.toNode?.data?.nodeDivId]){
-                    delete classFiltersMap[element?.toNode?.data?.nodeDivId]
+                if (element?.toNode?.data?.nodeDivId && classFiltersMap[element?.toNode?.data?.nodeDivId]) {
+                    delete classFiltersMap[element?.toNode?.data?.nodeDivId];
                 }
-                $('#'+element.divId).remove();
+                $("#" + element.divId).remove();
                 // Restore color of nodes
-                if(element?.fromNode?.color){
-                    KGquery_graph.KGqueryGraph.data.nodes.update([{id: element.fromNode.id, color: element.fromNode.color}]);
+                if (element?.fromNode?.color) {
+                    KGquery_graph.KGqueryGraph.data.nodes.update([{ id: element.fromNode.id, color: element.fromNode.color }]);
                 }
-                if(element?.toNode?.color){
-                    KGquery_graph.KGqueryGraph.data.nodes.update([{id: element.toNode.id, color: element.toNode.color}]);
+                if (element?.toNode?.color) {
+                    KGquery_graph.KGqueryGraph.data.nodes.update([{ id: element.toNode.id, color: element.toNode.color }]);
                 }
-                
             }
-            
-            self.querySets.sets[queryElement.setIndex].elements.splice(queryElement.index, elementLength-queryElement.index);
-            self.querySets.sets[queryElement.setIndex].elements.forEach(function(item){
-                if(item?.fromNode?.id){
-                    KGquery_graph.outlineNode(item?.fromNode?.id)
-                }
-                if(item?.toNode?.id){
-                    KGquery_graph.outlineNode(item?.toNode?.id)
-                }
 
-            })
-            
-        }
-        else{
+            self.querySets.sets[queryElement.setIndex].elements.splice(queryElement.index, elementLength - queryElement.index);
+            self.querySets.sets[queryElement.setIndex].elements.forEach(function (item) {
+                if (item?.fromNode?.id) {
+                    KGquery_graph.outlineNode(item?.fromNode?.id);
+                }
+                if (item?.toNode?.id) {
+                    KGquery_graph.outlineNode(item?.toNode?.id);
+                }
+            });
+        } else {
             KGquery.clearAll();
             KGquery.switchRightPanel(true);
         }
-       
-        //self.querySets.sets[queryElement.setIndex].classFiltersMap[]
 
+        //self.querySets.sets[queryElement.setIndex].classFiltersMap[]
     };
 
     self.removeSet = function (querySetDivId) {
         $("#" + querySetDivId).remove();
         var set = self.divsMap[querySetDivId];
         self.querySets.sets.splice(set.index, 1);
-        self.currentQuerySet= self.querySets.sets.at(-1);
-
+        self.currentQuerySet = self.querySets.sets.at(-1);
     };
 
     self.onOutputTypeSelect = function (output) {
@@ -947,8 +929,7 @@ var KGquery = (function () {
     };
     self.initMyQuery = function () {
         //SavedQueriesWidget.list();
-        SavedQueriesWidget.showDialog("tabs_myQueries",self.currentSource,KGquery_myQueries.save, KGquery_myQueries.load,"KGquery/savedQueries/");
-        
+        SavedQueriesWidget.showDialog("tabs_myQueries", self.currentSource, KGquery_myQueries.save, KGquery_myQueries.load, "KGquery/savedQueries/");
     };
     self.initQuery = function () {
         if ($("#tabs_Query").children().length == 0) {

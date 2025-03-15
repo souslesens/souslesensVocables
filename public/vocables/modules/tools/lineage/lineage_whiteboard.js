@@ -4273,16 +4273,15 @@ attrs.color=self.getSourceColor(superClassValue)
          * @function
          * @name saveWhiteboard
          * @memberof module:graphActions.graph
-         * 
-         * 
-         * Saves the current whiteboard (graph visualization) as json in user_data database 
+         *
+         *
+         * Saves the current whiteboard (graph visualization) as json in user_data database
          * The data_label  is provided by the user through a prompt.
          * @returns {void}
          */
-       
+
         saveWhiteboard: function () {
-           
-            if(Lineage_whiteboard.lineageVisjsGraph.data && Lineage_whiteboard.lineageVisjsGraph.data.nodes.get().length > 0){
+            if (Lineage_whiteboard.lineageVisjsGraph.data && Lineage_whiteboard.lineageVisjsGraph.data.nodes.get().length > 0) {
                 var nodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
                 var positions = Lineage_whiteboard.lineageVisjsGraph.network.getPositions();
                 var data = {
@@ -4291,21 +4290,17 @@ attrs.color=self.getSourceColor(superClassValue)
                     context: Lineage_whiteboard.lineageVisjsGraph.currentContext,
                     positions: positions,
                 };
-                var data_path= "Lineage/savedWhiteboards/" + MainController.currentSource;
-                UserDataWidget.currentTreeNode=null;
-                UserDataWidget.showSaveDialog(data_path,data,null,function(err,result){
-                    if(err){
+                var data_path = "Lineage/savedWhiteboards/" + MainController.currentSource;
+                UserDataWidget.currentTreeNode = null;
+                UserDataWidget.showSaveDialog(data_path, data, null, function (err, result) {
+                    if (err) {
                         return alert(err.responseText);
                     }
                     UI.message("Graph saved successfully");
-                })
-               
-
-
+                });
 
                 //Lineage_whiteboard.lineageVisjsGraph.saveGraph(visjsFileName);
-            }
-            else{
+            } else {
                 alert("No Whiteboard to save");
             }
         },
@@ -4314,42 +4309,40 @@ attrs.color=self.getSourceColor(superClassValue)
          * @name loadSavedWhiteboard
          * @memberof module:graphActions.graph
          * Select a previously saved graph on userData and renders it in the current workspace.
-         * 
+         *
          * @returns {void}
          */
-    
+
         loadSavedWhiteboard: function () {
-            UserDataWidget.showListDialog(null,{filter:{data_path:"Lineage/savedWhiteboards/"+MainController.currentSource}},function(err,result){
-                if(err){
+            UserDataWidget.showListDialog(null, { filter: { data_path: "Lineage/savedWhiteboards/" + MainController.currentSource } }, function (err, result) {
+                if (err) {
                     return alert(err.responseText);
                 }
-                if(result?.data_content){
-                   self.loadGraphFromJSON(result.data_content);
-                   
+                if (result?.data_content) {
+                    self.loadGraphFromJSON(result.data_content);
                 }
-               
             });
-        }
+        },
     };
     /**
      * @function
      * @name loadGraphFromJSON
      * @memberof module:graphActions
      * Initializes the whiteboard tab in the UI from a JSON object.
-     * 
+     *
      * @returns {void}
      */
 
     self.loadGraphFromJSON = function (json) {
-        var data=json;
+        var data = json;
         var positions = data.positions;
         var options = data.context.options;
         var visjsData = { nodes: [], edges: [] };
         visjsData.options = data.options;
         var existingNodes = {};
-        
+
         existingNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
-        
+
         data.nodes.forEach(function (node) {
             if (!existingNodes[node.id]) {
                 existingNodes[node.id] = 1;
@@ -4367,21 +4360,19 @@ attrs.color=self.getSourceColor(superClassValue)
                 visjsData.edges.push(edge);
             }
         });
-        
-        if (Lineage_whiteboard.lineageVisjsGraph?.data?.nodes ||  Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
+
+        if (Lineage_whiteboard.lineageVisjsGraph?.data?.nodes || Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
             Lineage_whiteboard.lineageVisjsGraph.data.edges.add(visjsData.edges);
             Lineage_whiteboard.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
 
             Lineage_whiteboard.lineageVisjsGraph.network.fit();
-            
         } else {
             Lineage_whiteboard.lineageVisjsGraph.data = visjsData;
             Lineage_whiteboard.lineageVisjsGraph.draw(function () {
                 Lineage_whiteboard.lineageVisjsGraph.network.fit();
-                
             });
         }
-    }
+    };
     /**
      * @function
      * @name initWhiteboardTab
@@ -4492,7 +4483,7 @@ attrs.color=self.getSourceColor(superClassValue)
      * @returns {void}
      */
     self.initContainersTab = function () {
-        if ( true || $("#containersTab").children().length == 0) {
+        if (true || $("#containersTab").children().length == 0) {
             $("#containersTab").load("./modules/tools//lineage/html/containersTab.html", function (s) {
                 Containers_tree.search("lineage_containers_containersJstree");
                 $("#containers_showparentContainersBtn").bind("click", function (e) {
@@ -4507,8 +4498,6 @@ attrs.color=self.getSourceColor(superClassValue)
                     html += '<span class="popupMenuItem" onclick="Containers_widget.execParentContainersSearch();">Load</span>';
                     PopupMenuWidget.initAndShow(html, "popupMenuWidgetDiv");
                 });
-
-
             });
         }
     };

@@ -41,9 +41,6 @@ export async function validateTriples(_shapes, _triples) {
     }
 }
 
-
-
-
 async function main(triples, callback) {
     const shapes = await rdf.dataset().import(rdf.fromFile("D:\\projects\\sls-shacl\\rdf\\exampleShapes.ttl"));
     const data = await rdf.dataset().import(rdf.fromFile("D:\\projects\\sls-shacl\\rdf\\exampleData.ttl"));

@@ -22,8 +22,8 @@ var UserDataWidget = (function () {
                 if (err) {
                     self.callbackFn(err);
                 }
-                
-                self.callbackFn(null, {label: label, data_path: data_path, data_content: self.jsonContent,insertedId:result.insertedId,data_group:group});
+
+                self.callbackFn(null, { label: label, data_path: data_path, data_content: self.jsonContent, insertedId: result.insertedId, data_group: group });
             });
         });
 
@@ -63,7 +63,7 @@ var UserDataWidget = (function () {
             },
         });
     };
-    self.loadUserDatabyId = function (id,callback) {
+    self.loadUserDatabyId = function (id, callback) {
         $.ajax({
             type: "GET",
             url: `${Config.apiUrl}/users/data/` + "" + id,
@@ -77,23 +77,17 @@ var UserDataWidget = (function () {
         });
     };
 
-    self.getUserdatabyLabel=function(label,callback){
-
-        self.listUserData  ("", function(err,result) {
-            if(err)
-                return callback(err)
-            var obj=null
-            result.forEach(function(item){
-                if(item.data_label==label)
-                    obj=item
-            })
-            if(!obj)
-               return callback("not found")
-            callback(null,obj)
+    self.getUserdatabyLabel = function (label, callback) {
+        self.listUserData("", function (err, result) {
+            if (err) return callback(err);
+            var obj = null;
+            result.forEach(function (item) {
+                if (item.data_label == label) obj = item;
+            });
+            if (!obj) return callback("not found");
+            callback(null, obj);
         });
-
-    }
-
+    };
 
     self.listUserData = function (filter, callback) {
         $.ajax({
@@ -135,13 +129,13 @@ var UserDataWidget = (function () {
         self.showDialog(divId, "save");
     };
 
-    self.showListDialog = function (divId,options, callbackFn) {
+    self.showListDialog = function (divId, options, callbackFn) {
         self.callbackFn = callbackFn;
         self.currentTreeNode = null;
-        if(!options){
-            options={};
+        if (!options) {
+            options = {};
         }
-        self.options=options;
+        self.options = options;
         self.showDialog(divId, "list", function () {
             $.ajax({
                 type: "GET",
@@ -156,19 +150,19 @@ var UserDataWidget = (function () {
 
                     var jstreeData = [];
                     self.uniqueJstreeNodes = {};
-                    if(self.options.filter && Object.keys(self.options.filter).length>0){
-                        Object.keys(self.options.filter).forEach(function(key){
-                            if(self.options.filter[key]){
-                                data=data.filter(function(item){return item[key].includes(self.options.filter[key])});
+                    if (self.options.filter && Object.keys(self.options.filter).length > 0) {
+                        Object.keys(self.options.filter).forEach(function (key) {
+                            if (self.options.filter[key]) {
+                                data = data.filter(function (item) {
+                                    return item[key].includes(self.options.filter[key]);
+                                });
                             }
                         });
-                        
                     }
                     // check data after filters
                     if (data.length == 0) {
                         $("#userDataWidget_jstree").html("nothing to load");
                     }
-
 
                     data.forEach(function (item) {
                         var parent = "#";
@@ -176,7 +170,7 @@ var UserDataWidget = (function () {
                             var array = item.data_group.split("/");
 
                             // if (array.length > 0) {
-                            if(array.length>0){
+                            if (array.length > 0) {
                                 array.forEach(function (group, index) {
                                     if (!self.uniqueJstreeNodes[group]) {
                                         self.uniqueJstreeNodes[group] = 1;
@@ -188,15 +182,13 @@ var UserDataWidget = (function () {
                                         parent = group;
                                     }
                                 });
-                                if(parent=="#" ){
+                                if (parent == "#") {
                                     var lastItem = array.at(-1);
-                                    if(self.uniqueJstreeNodes[lastItem]){
-                                        parent=lastItem;
+                                    if (self.uniqueJstreeNodes[lastItem]) {
+                                        parent = lastItem;
                                     }
                                 }
-                                   
                             }
-                            
                         }
 
                         if (!self.uniqueJstreeNodes[item.id]) {
@@ -212,25 +204,19 @@ var UserDataWidget = (function () {
 
                     var options = {
                         selectTreeNodeFn: function (event, obj) {
-                            
-                                self.currentTreeNode = obj.node;
-                                if (!obj.node.data) {
-                                    $("#userDataWidget_jstree").jstree().open_node(obj.node.id);
-                                    return;
-                                } // refuse groups
-                               
+                            self.currentTreeNode = obj.node;
+                            if (!obj.node.data) {
+                                $("#userDataWidget_jstree").jstree().open_node(obj.node.id);
+                                return;
+                            } // refuse groups
 
-                                if(obj.event.type=='click'){
-                                    if(self.divId.includes('Dialog')){
-                                        $("#" + self.divId).dialog("close");
-                                    }
-                                    
-                                    callbackFn(null, obj.node.data);
+                            if (obj.event.type == "click") {
+                                if (self.divId.includes("Dialog")) {
+                                    $("#" + self.divId).dialog("close");
                                 }
-                            
-                            
-                               
-                            
+
+                                callbackFn(null, obj.node.data);
+                            }
                         },
                         contextMenu: function (node) {
                             var items = {};
@@ -269,8 +255,8 @@ var UserDataWidget = (function () {
                     };
 
                     JstreeWidget.loadJsTree("userDataWidget_jstree", jstreeData, options);
-                    if(self.options.removeSaveDiv){
-                        $('#userDataWidget_saveDiv').remove();
+                    if (self.options.removeSaveDiv) {
+                        $("#userDataWidget_saveDiv").remove();
                     }
                 },
                 error(err) {

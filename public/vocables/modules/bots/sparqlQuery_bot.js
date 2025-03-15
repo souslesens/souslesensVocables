@@ -117,6 +117,13 @@ var SparqlQuery_bot = (function () {
                                         }
                                     }
                                 },
+                                "Whiteboard nodes": {
+                                    chooseConstraintTypeFn: {
+                                        chooseOutputTypeFn: {
+                                            buildConstraintResult: {}
+                                        }
+                                    }
+                                }
 
                             }
 
@@ -483,6 +490,9 @@ var SparqlQuery_bot = (function () {
             chooseConstraintRoleFn: function () {
                 //  var choices = ["subCLassOfRestriction", "propertyOfRestriction", "targetClassOfRestriction", "objectPropertyConstraints", "classDomainOfProperty", "classRangeOfProperty"];
                 var choices = ["Class", "ObjectProperty"]
+                if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
+                    choices.splice(0, 0, "Whiteboard nodes");
+                }
                 myBotEngine.showList(choices, "constraintObject")
             },
 
@@ -546,16 +556,22 @@ var SparqlQuery_bot = (function () {
 
             buildConstraintResult: function () {
                 var filter = ""
-                if (self.params.constraintClass && self.params.constraintClass != "any") {
-                    filter += "FILTER (?subject=<" + self.params.constraintClass + "> )";//|| ?object=<" + self.params.constraintClass + ">)"
-                } else if (self.params.constraintObjectProperty && self.params.constraintObjectProperty != "any") {
-                    filter += "FILTER (?predicate=<" + self.params.constraintObjectProperty + ">)"
-                }
+
 
 
                 var constraintType = self.params.constraintType;
                 if (constraintType.indexOf("Restriction") > -1) {
-                    if (self.params.constraintClass && self.params.constraintClass != "any") {
+
+                    if (self.params.constraintObject == "Whiteboard nodes") {
+                        var nodeIds = Lineage_whiteboard.lineageVisjsGraph.data.nodes.getIds();
+                        if (constraintType == " subClassOfRestriction") {
+                            filter = Sparql_common.setFilter("subject",nodeIds)
+                        } else {
+                            filter = Sparql_common.setFilter("object",nodeIds)
+                        }
+
+                    }
+                    else if (self.params.constraintClass && self.params.constraintClass != "any") {
                         if (constraintType == " subClassOfRestriction") {
                             filter = "FILTER (?subject=<" + self.params.constraintClass + "> )";
                         } else {
@@ -573,6 +589,17 @@ var SparqlQuery_bot = (function () {
                     })
 
                 } else {
+
+                    if (self.params.constraintObject == "Whiteboard nodes") {
+                      var  nodeIds = Lineage_whiteboard.lineageVisjsGraph.data.nodes.getIds();
+                        filter +=Sparql_common.setFilter("subject",nodeIds)
+                    } else if (self.params.constraintClass && self.params.constraintClass != "any") {
+                        filter += "FILTER (?subject=<" + self.params.constraintClass + "> )";//|| ?object=<" + self.params.constraintClass + ">)"
+                    } else if (self.params.constraintObjectProperty && self.params.constraintObjectProperty != "any") {
+                        filter += "FILTER (?predicate=<" + self.params.constraintObjectProperty + ">)"
+                    }
+
+
                     var map = {
                         " domain": "rdfs:domain",
                         "range": "rdfs:range",

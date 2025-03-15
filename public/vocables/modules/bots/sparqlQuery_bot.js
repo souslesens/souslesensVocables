@@ -275,7 +275,7 @@ var SparqlQuery_bot = (function () {
         },
 
         onValidateSparqlQuery: function () {
-            var sparql = $("#sparqlQueryBot_textArea").text();
+            var sparql = $("#sparqlQueryBot_textArea").val();
             self.params.outputType = $("#sparqlQueryBot_outputTypeSelect").val();
             self.params.sparqlQuery = sparql;
             $("#smallDialogDiv").dialog("close");

@@ -2441,6 +2441,9 @@ var Lineage_whiteboard = (function () {
                     }
                     var rdfType;
                     data.forEach(function (item) {
+                        // filter blanknodes
+                        if (!item.subject.startsWith("http") || !item.object.startsWith("http")) return;
+
                         if (!existingNodes[item.subject.value]) {
                             existingNodes[item.subject.value] = 1;
 
@@ -2742,6 +2745,9 @@ restrictionSource = Config.predicatesSource;
                     function (
                         /** @type {{ concept: { value: string; }; conceptLabel: { value: any; }; value: { value: any; }; prop: { value: string; }; valueLabel: { value: any; }; propLabel: { value: string; }; node: { value: any; }; }} */ item,
                     ) {
+                        // filter blanknodes
+                        if (!item.subject.value.startsWith("http") || !item.value.value.startsWith("http")) return;
+
                         if (!existingNodes[item.subject.value]) {
                             existingNodes[item.subject.value] = 1;
 

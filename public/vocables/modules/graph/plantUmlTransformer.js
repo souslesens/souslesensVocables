@@ -79,15 +79,36 @@ var PlantUmlTransformer = (function () {
         }
         var nodesMap = {};
         visjsData.nodes.forEach(function (node) {
-            nodesMap[node.id] = node;
+            if (node.label) {
+                var nodeLabel = node.label.replace(/[ -\(\):\/]/g, "_");
+                nodesMap[node.id] = nodeLabel;
+            }
         });
 
         var str = "@startuml\r\n";
 
+        visjsData.nodes.forEach(function (node) {
+            if (node.shape == "dot" || node.data.type == "Class") {
+                str += "class " + nodesMap[node.id] + "\r\n";
+            } else {
+                str += "object " + nodesMap[node.id] + "\r\n";
+            }
+        });
+
         visjsData.edges.forEach(function (edge) {
-            var nodeTo = nodesMap[edge.to].label.replace(/[ -\(\):\/]/g, "_");
-            var nodeFrom = nodesMap[edge.from].label.replace(/[ -\(\):\/]/g, "_");
-            str += nodeTo + " <|-- " + nodeFrom + "\r\n";
+            var relation = "<--";
+            if (!edge.label)
+                //subClass
+                relation = "<|--";
+            var label = "";
+            if (edge.label) label = " : " + edge.label;
+
+            if (nodesMap[edge.to].startsWith("class")) {
+                relation = "<|--";
+                label = "";
+            }
+
+            str += nodesMap[edge.to] + " " + relation + " " + nodesMap[edge.from] + label + "\r\n";
         });
         str += "@enduml";
 

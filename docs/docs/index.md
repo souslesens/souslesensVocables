@@ -77,6 +77,7 @@ Learn how to use SousLeSens.
 ```{toctree}
 :maxdepth: 1
 tutorials/mappingmodeler.md
+tutorials/KGQuery.md
 ```
 
 ### Code documentation

@@ -1,6 +1,6 @@
 # Architecture
 
-SousLeSens is a built around microservices that communicate with each other.
+SousLeSens is built around microservices that communicate with each other.
 
 ![image](../images/architecture.png)
 

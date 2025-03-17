@@ -78,15 +78,15 @@ class MyPlugin {
 export default new MyPlugin();
 ```
 
-Once it done, don't forget to add the plugin's name to `mainConfig.tools_available`.
-If you still don't see the plugin in the jsTree, check that your user's profile allows to see this plugin.
+Once it's done, don't forget to add the plugin's name to `mainConfig.tools_available`.
+If you still don't see the plugin in the jsTree, check that your user's profile allows seeing this plugin.
 The function onLoaded is loaded when you select the tool.
 
 ### Plugin repositories
 
 Plugins can be stored in an external Git repository and used by SLS, to allow versionning and simpler management.
 
-The remote repository must contains, at least, one plugin in a dedicated directory:
+The remote repository must contain, at least, one plugin in a dedicated directory:
 
 ```
 external-plugins
@@ -142,14 +142,14 @@ SousLesens modules can be imported form plugins using `import`. For example:
 import common from "/vocables/modules/shared/common.js";
 ```
 
-The following Github Repository contains all the plugins of SLS and give more informations about them :
+The following Github Repository contains all the plugins of SLS and gives more information about them :
 https://github.com/souslesens/slsv-plugins/
 
 ## Authentication
 
 The authentication system used by SLS can be set in the `mainConfig.json` file, by editing the `auth` option.
 
-This option can used these values:
+This option can use these values:
 
 | Name     | Description                                                |
 | -------- | ---------------------------------------------------------- |

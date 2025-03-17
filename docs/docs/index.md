@@ -15,12 +15,24 @@ Annotate tool allows annotate textual corpus with several registered lexical res
 
 ## User documentation
 
+Learn how to use SousLeSens.
+
+### Overview
+
 ```{toctree}
 :maxdepth: 1
 userdoc/index.md
 userdoc/lineage.md
 userdoc/mappingmodeler.md
 userdoc/kgquery.md
+```
+
+### Tutorials
+
+```{toctree}
+:maxdepth: 1
+tutorials/mappingmodeler.md
+tutorials/KGQuery.md
 ```
 
 ## Admin documentation
@@ -68,16 +80,6 @@ How to install a development instance and to contribute to the code.
 ```{toctree}
 :maxdepth: 1
 contribute/contribute-to-development.md
-```
-
-### Tutorials
-
-Learn how to use SousLeSens.
-
-```{toctree}
-:maxdepth: 1
-tutorials/mappingmodeler.md
-tutorials/KGQuery.md
 ```
 
 ### Code documentation

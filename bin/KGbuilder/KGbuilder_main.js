@@ -377,7 +377,7 @@ var KGbuilder_main = {
             ],
             function (err) {
                 return callback(err, tableMappingsToProcess);
-                return callback(err, tableMappingsToProcess);
+                
             },
         );
     },

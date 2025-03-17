@@ -274,7 +274,7 @@ var KGquery_graph = (function () {
                     // Draw a empty graph to fit with the object self.KGqueryGraph that has no nodes and edges
 
                     self.KGqueryGraph.draw(function () {});
-                    return KGquery_nodeSelector.showInferredModelInJstree(visjsData);
+                    return KGquery_nodeSelector.showImplicitModelInJstree(visjsData);
                 }
                 /*self.visjsOptions.visjsOptions.physics={enabled: true,
                 stabilization: {
@@ -329,7 +329,7 @@ var KGquery_graph = (function () {
 
     self.DrawImportsCommonGraph = function () {
         var source = KGquery.currentSource;
-        var sources = [source];
+        var sources = [];
         var imports = Config.sources[source].imports;
         if (imports) {
             sources = sources.concat(imports);
@@ -343,7 +343,7 @@ var KGquery_graph = (function () {
             sources,
 
             function (source, callbackEach) {
-                var visjsGraphFileName = source + "_KGmodelGraph.json";
+                /*var visjsGraphFileName = source + "_KGmodelGraph.json";
 
                 KGquery_graph.message("loading graph display");
                 self.KGqueryGraph.loadGraph(
@@ -371,7 +371,43 @@ var KGquery_graph = (function () {
                         callbackEach();
                     },
                     true,
-                );
+                );*/
+                var visjsDataSource={ nodes: [], edges: [] };
+                UserDataWidget.listUserData(null, function (err, result) {
+                    if (err) {
+                        return alert(err || err.responseText);
+                    }
+                    // order to get last saved instance of our graph in user_data
+                    result=result.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+                    //if graph loaded with loadSaved --> display=checkBox loadAsGraph else last instance graph
+                    result.forEach(function (item) {
+                        if (item.data_label == source + "_model") {
+                            visjsDataSource = item.data_content;
+                            
+                           
+                        }
+                    });
+                    if (!err && visjsDataSource.nodes) {
+                        visjsDataSource.nodes.forEach(function (node) {
+                            if (!uniqueNodes[node.id]) {
+                                uniqueNodes[node.id] = 1;
+                                node.x = null;
+                                node.y = null;
+                                //node.fixed = false;
+                                visjsData.nodes.push(node);
+                            }
+                        });
+                        visjsDataSource.edges.forEach(function (edge) {
+                            if (!uniqueNodes[edge.id]) {
+                                uniqueNodes[edge.id] = 1;
+                                visjsData.edges.push(edge);
+                            }
+                        });
+                    }
+                    
+                    
+                    callbackEach();
+                });
             },
             function (err) {
                 if (err) {
@@ -711,7 +747,12 @@ var KGquery_graph = (function () {
             positions: positions,
             options: options,
         };
-
+        data.nodes.forEach(function(node){
+            if(data.positions[node.id]){
+                node.x=data.positions[node.id].x;
+                node.y=data.positions[node.id].y;
+            }
+        });
         var label = KGquery.currentSource + "_model";
         var group = "KGquery/models";
 

@@ -1,2 +1,2 @@
-# Code Documentation
+# Code documentation
 

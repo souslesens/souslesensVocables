@@ -139,7 +139,7 @@ This mean that the `KGquery` tool will be able to communicate with the plugin us
 SousLesens modules can be imported form plugins using `import`. For example:
 
 ```js
-import common from "/vocables/modules/shared/common.js;
+import common from "/vocables/modules/shared/common.js";
 ```
 
 The following Github Repository contains all the plugins of SLS and give more informations about them :

@@ -23,7 +23,7 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = "sphinx_book_theme"
-html_static_path = ["_static"]
+# html_static_path = ["_static"]
 html_theme_options = {
     # "home_page_in_toc": True,
     # "show_navbar_depth": 1,

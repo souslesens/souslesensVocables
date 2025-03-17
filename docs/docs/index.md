@@ -85,5 +85,5 @@ The following docs is generated from Javascript docstrings.
 
 ```{toctree}
 :maxdepth: 1
-jsdoc/index.md
+code documentation/codeDocumentation.md
 ```

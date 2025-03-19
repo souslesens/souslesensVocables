@@ -534,45 +534,57 @@ var MappingColumnsGraph = (function () {
                     }
                 }
 
-                var map = {};
-                var index = 0;
-                var dataTables = self.getDatasourceTablesFromVisjsGraph();
+                
+                self.createDataSourcesClusters();
 
-                for (var tableIndex in dataTables) {
-                    var table = dataTables[tableIndex];
-
-                    var clusterOptionsByData = {
-                        joinCondition: function (node) {
-                            if (node.data && node.data.dataTable == table && table != MappingModeler?.currentTable?.name) {
-                                if (!map[node.id]) {
-                                    map[node.id] = 1;
-                                    return true;
-                                }
-                            }
-                            return false;
-                        },
-
-                        clusterNodeProperties: {
-                            id: "cluster_" + table,
-                            borderWidth: 3,
-                            shape: "ellipse",
-                            color: "#ddd",
-                            label: table,
-                            y: -200,
-                            x: index++ * 250 - 400,
-                            fixed: { x: true, y: true },
-                            data: { table: table },
-                        },
-                    };
-
-                    self.visjsGraph.network.clustering.cluster(clusterOptionsByData);
-                }
                 if (callback) {
                     return callback();
                 }
             });
         }, 500);
     };
+    /**Create the clusters from the different datasources used in the graph
+     * @function
+     * @name createDataSourcesClusters
+     * @param {function} [] 
+     * @returns {void}
+     */
+    self.createDataSourcesClusters = function () {
+        var map = {};
+        var index=0;
+        var dataTables = self.getDatasourceTablesFromVisjsGraph();
+
+        for (var tableIndex in dataTables) {
+            var table = dataTables[tableIndex];
+
+            var clusterOptionsByData = {
+                joinCondition: function (node) {
+                    if (node.data && node.data.dataTable == table && table != MappingModeler?.currentTable?.name) {
+                        if (!map[node.id]) {
+                            map[node.id] = 1;
+                            return true;
+                        }
+                    }
+                    return false;
+                },
+
+                clusterNodeProperties: {
+                    id: "cluster_" + table,
+                    borderWidth: 3,
+                    shape: "ellipse",
+                    color: "#ddd",
+                    label: table,
+                    y: -200,
+                    x: index++ * 250 - 400,
+                    fixed: { x: true, y: true },
+                    data: { table: table },
+                },
+            };
+
+            self.visjsGraph.network.clustering.cluster(clusterOptionsByData);
+        }
+    }
+
 
     /**
      * Saves the current Vis.js graph to a JSON file.

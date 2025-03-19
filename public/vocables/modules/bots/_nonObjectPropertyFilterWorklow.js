@@ -2,7 +2,7 @@ import OntologyModels from "../shared/ontologyModels.js";
 
 class NonObjectPropertyFilterWorklow {
     constructor(visjsDataModel, params, botEngine) {
-        self.visjsDataModel = visjsDataModel
+        self.visjsDataModel = visjsDataModel;
         self.params = params;
         self.botEngine = botEngine;
     }
@@ -10,27 +10,26 @@ class NonObjectPropertyFilterWorklow {
     //     functions called in KGquery_filter_bot
     listNonObjectPropertiesFn(callback) {
         self.callback = callback;
-        var model = {}
+        var model = {};
 
         self.visjsDataModel.nodes.forEach(function (node) {
             if (node.data.nonObjectProperties) {
-                model[node.id] = node.data.nonObjectProperties
+                model[node.id] = node.data.nonObjectProperties;
             }
-        })
+        });
 
         // OntologyModels.getKGnonObjectProperties(self.params.source, {}, function (err, model) {
         var currentClassId = self.params.currentClass;
         if (!model[currentClassId]) {
-           // alert("no matching fact");
+            // alert("no matching fact");
             return self.callback(null, "");
         }
         var nonObjectProperties = model[currentClassId];
-        nonObjectProperties.unshift({id:"any",label:"ANY"});
+        nonObjectProperties.unshift({ id: "any", label: "any" });
         self.botEngine.showList(nonObjectProperties, "property", null, null, function (value) {
-            if(value=="any"){
+            if (value == "any") {
                 return self.callback(null, "");
             }
-
 
             self.params.property = value;
             self.params.varName = "var_" + common.getRandomHexaId(3);
@@ -59,13 +58,13 @@ class NonObjectPropertyFilterWorklow {
         } else if (!self.params.propertyDatatype || self.params.propertyDatatype.indexOf("http://www.w3.org/2001/XMLSchema#date") > -1) {
             if (self.params.propertyOperator == "range") {
                 DateWidget.showDateRangePicker("widgetGenericDialogDiv", null, null, function (minDate, maxDate) {
-                    self.params.dateValueRange = {minDate: minDate, maxDate: maxDate};
+                    self.params.dateValueRange = { minDate: minDate, maxDate: maxDate };
                     // self.setSparqlQueryFilterFn()
                     //   botEngine.nextStep();
                     NonObjectPropertyFilterWorklow.listLogicalOperatorFn();
                 });
             } else {
-                self.botEngine.promptValue("enter value", "propertyValue", null, {datePicker: 1}, function (minDate, maxDate) {
+                self.botEngine.promptValue("enter value", "propertyValue", null, { datePicker: 1 }, function (minDate, maxDate) {
                     self.params.propertyValue = minDate;
                     NonObjectPropertyFilterWorklow.listLogicalOperatorFn();
                 });
@@ -101,7 +100,7 @@ class NonObjectPropertyFilterWorklow {
         self.params.PropertyfilterItem += booleanOp + self.params.filterText + " ";
 
         if (true || booleanOperator == "end") {
-           var filter = "?subject <" + self.params.property + "> ?" + self.params.varName + ".FILTER(" + self.params.PropertyfilterItem + ").";
+            var filter = "?subject <" + self.params.property + "> ?" + self.params.varName + ".FILTER(" + self.params.PropertyfilterItem + ").";
             return self.callback(null, filter);
         } /*else {
             return  NonObjectPropertyFilterWorklow.lisNonObjectPropertiesFn()
@@ -235,8 +234,8 @@ class NonObjectPropertyFilterWorklow {
 
     listFilterTypes() {
         var choices = [
-            {id: "label", label: "rdfs:label contains"},
-            {id: "labelsList", label: "Choose rdfs:label"},
+            { id: "label", label: "rdfs:label contains" },
+            { id: "labelsList", label: "Choose rdfs:label" },
         ];
         self.botEngine.showList(choices, "individualsFilterType");
     }

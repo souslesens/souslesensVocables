@@ -58,16 +58,16 @@ var KGquery_graph = (function () {
         //   size: Lineage_whiteboard.defaultShapeSize,
         color: "#ddd", //Lineage_whiteboard.getSourceColor(source)
     };
-    
-    self.drawVisjsModel = function (mode,options) {
+
+    self.drawVisjsModel = function (mode, options) {
         var display = "graph";
         var source = KGquery.currentSource;
         var visjsData = { nodes: [], edges: [] };
 
         //  KGquery.clearAll();
         $("#waitImg").css("display", "block");
-        if(!options){
-            options={}
+        if (!options) {
+            options = {};
         }
         async.series(
             [
@@ -91,29 +91,29 @@ var KGquery_graph = (function () {
                                 return alert(err || err.responseText);
                             }
                             // order to get last saved instance of our graph in user_data
-                            result=result.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+                            result = result.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
                             //if graph loaded with loadSaved --> display=checkBox loadAsGraph else last instance graph
                             result.forEach(function (item) {
                                 if (item.data_label == source + "_model") {
                                     visjsData = item.data_content;
-                                    display='graph'
+                                    display = "graph";
                                     if (visjsData && visjsData.options && visjsData.options.output) {
                                         display = visjsData.options.output;
                                     }
                                 }
                             });
-                            if(options.loadAsGraph){
-                                display='graph';
+                            if (options.loadAsGraph) {
+                                display = "graph";
                             }
-                            if(options.loadAsGraph==false){
-                                display='list';
+                            if (options.loadAsGraph == false) {
+                                display = "list";
                             }
-                            if(display=='graph'){
-                                $('#KGquery_loadAsGraph').prop("checked", true);
-                            }else{
-                                $('#KGquery_loadAsGraph').prop("checked", false);
+                            if (display == "graph") {
+                                $("#KGquery_loadAsGraph").prop("checked", true);
+                            } else {
+                                $("#KGquery_loadAsGraph").prop("checked", false);
                             }
-                            
+
                             return callbackSeries();
                         });
 
@@ -272,7 +272,7 @@ var KGquery_graph = (function () {
                 self.visjsData = visjsData;
                 if (display == "list") {
                     // Draw a empty graph to fit with the object self.KGqueryGraph that has no nodes and edges
-                   
+
                     self.KGqueryGraph.draw(function () {});
                     return KGquery_nodeSelector.showImplicitModelInJstree(visjsData);
                 }
@@ -311,7 +311,6 @@ var KGquery_graph = (function () {
                         scale: 1 / 0.9,
                     });
                     self.KGqueryGraph.onScaleChange();
-                  
                 });
 
                 //  KGquery.clearAll();
@@ -555,7 +554,7 @@ var KGquery_graph = (function () {
                     return callback();
                 }
                 if (implicitModel.length == 0) {
-                   return callback("no inferred model for source " + source);
+                    return callback("no inferred model for source " + source);
                 }
 
                 var reflexiveEdges = {};
@@ -733,11 +732,11 @@ var KGquery_graph = (function () {
         var edges = KGquery_graph.KGqueryGraph.data.edges.get();
         var positions = KGquery_graph.KGqueryGraph.network.getPositions();
         var options = {};
-        $('#KGquery_loadAsGraph').prop("checked", true);
+        $("#KGquery_loadAsGraph").prop("checked", true);
         if (KGquery_graph.KGqueryGraph.data.edges.get().length > 30) {
             if (confirm("many Edges: choose  list display mode?")) {
                 options.output = "list";
-                $('#KGquery_loadAsGraph').prop("checked", false);
+                $("#KGquery_loadAsGraph").prop("checked", false);
             }
         }
 
@@ -758,7 +757,7 @@ var KGquery_graph = (function () {
         var group = "KGquery/models";
 
         UserDataWidget.saveMetadata(label, null, data, group, function (err, result) {
-            $('#KGquery_messageDiv').text('saved graph');
+            $("#KGquery_messageDiv").text("saved graph");
         });
         return;
         var fileName = KGquery.currentSource + "_KGmodelGraph.json";
@@ -859,12 +858,11 @@ var KGquery_graph = (function () {
             },
         );
     };
-    self.loadSaved=function(){
-        var loadAsGraph=$('#KGquery_loadAsGraph').prop("checked");
-        self.drawVisjsModel('saved',{loadAsGraph:loadAsGraph});
-
+    self.loadSaved = function () {
+        var loadAsGraph = $("#KGquery_loadAsGraph").prop("checked");
+        self.drawVisjsModel("saved", { loadAsGraph: loadAsGraph });
     };
-    
+
     return self;
 })();
 

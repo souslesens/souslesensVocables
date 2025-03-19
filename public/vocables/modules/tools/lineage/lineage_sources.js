@@ -214,7 +214,7 @@ var Lineage_sources = (function () {
             display = "block";
         }
         $("#lineage_createResourceBtn").css("display", display);
-        $("#containersTab").html()
+        $("#containersTab").html();
         JstreeWidget.clear("lineage_containers_containersJstree");
         var editable = Lineage_sources.isSourceEditableForUser(source);
         var display = editable ? "block" : "none";
@@ -257,6 +257,7 @@ var Lineage_sources = (function () {
         });
 
         self.initSourcesSearchSelect();
+        SparqlQuery_bot.start({ divId: "queryTabDiv" });
     };
 
     /**

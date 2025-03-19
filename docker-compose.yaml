@@ -40,7 +40,7 @@ services:
             VIRT_SPARQL_ResultSetMaxRows: 1000000000
             VIRT_SPARQL_MaxDataSourceSize: 1000000000
             VIRT_SPARQL_MaxQueryCostEstimationTime: 0
-            VIRT_SPARQL_MaxQueryExecutionTime: 0
+            VIRT_SPARQL_MaxQueryExecutionTime: ${VIRT_QUERYEXECTIME:-20000}
 
         volumes:
             - "${DATA_ROOT_DIR:-/tmp}/souslesens/virtuoso/data:\

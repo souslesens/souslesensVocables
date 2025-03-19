@@ -77,7 +77,7 @@ export default function GraphManagement() {
                     return order === "asc" ? left.localeCompare(right) : right.localeCompare(left);
                 }
             }),
-        [sources, orderBy, order],
+        [sources, orderBy, order, graphs],
     );
 
     return (

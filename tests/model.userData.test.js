@@ -34,17 +34,12 @@ describe("UserDataModel", () => {
                 "id": 1,
                 "data_path": "data1",
                 "data_type": "",
+                "data_source": "",
+                "data_tool": "",
                 "data_label": "data1",
                 "data_comment": "",
                 "data_group": "",
-                "data_content": {
-                    "sparqlServerUrl": "string",
-                    "graphUri": "string",
-                    "prefixes": {},
-                    "lookups": {},
-                    "databaseSources": {},
-                    "cvsSources": {}
-                },
+                "data_content": {},
                 "is_shared": false,
                 "shared_profiles": [],
                 "shared_users": [],
@@ -55,17 +50,12 @@ describe("UserDataModel", () => {
                 "id": 5,
                 "data_path": "shared with owl_user and skos_user users",
                 "data_type": "string",
+                "data_source": "source",
+                "data_tool": "tool",
                 "data_label": "",
                 "data_comment": "",
                 "data_group": "",
-                "data_content": {
-                    "sparqlServerUrl": "string",
-                    "graphUri": "string",
-                    "prefixes": {},
-                    "lookups": {},
-                    "databaseSources": {},
-                    "cvsSources": {}
-                },
+                "data_content": {},
                 "is_shared": false,
                 "shared_profiles": [],
                 "shared_users": [
@@ -130,7 +120,7 @@ describe("UserDataModel", () => {
             owned_by: "skos_user",
         }
         const results = await userDataModel.insert(addUserData);
-        expect(results).toStrictEqual(6);
+        expect(results.id).toStrictEqual(6);
     });
 
     test("remove userData", async () => {

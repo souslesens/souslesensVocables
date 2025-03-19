@@ -10,6 +10,8 @@ const UserDataObject = z
         data_label: z.string().default(""),
         data_comment: z.string().default(""),
         data_group: z.string().default(""),
+        data_tool: z.string().default(""),
+        data_source: z.string().default(""),
         data_content: z.record(z.string(), z.any()).default({}),
         is_shared: z.boolean().default(false),
         shared_profiles: z.string().array().default([]),
@@ -82,7 +84,7 @@ class UserDataModel {
         this._checkIdentifier(identifier);
 
         const connection = getKnexConnection(this._mainConfig.database);
-        const results = await connection.select("*").from("user_data_list").where("id", identifier).first();
+        const results = await connection.select("*").from("user_data").where("id", identifier).first();
         if (results === undefined) {
             cleanupConnection(connection);
             throw Error("The specified identifier do not exists", { cause: 404 });
@@ -102,7 +104,7 @@ class UserDataModel {
             throw Error("The specified owned_by username do not exists", { cause: 404 });
         }
         data.owned_by = results.id;
-        const insertedId = await connection.insert(data).into("user_data").returning("id");
+        results = await connection.insert(data, ["id"]).into("user_data");
         cleanupConnection(connection);
         return insertedId;
     };

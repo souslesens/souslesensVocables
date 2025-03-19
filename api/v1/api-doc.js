@@ -432,6 +432,14 @@ const apiDoc = {
                     type: "string",
                     default: "",
                 },
+                data_tool: {
+                    type: "string",
+                    default: "",
+                },
+                data_source: {
+                    type: "string",
+                    default: "",
+                },
                 data_content: {
                     $ref: "#/definitions/UserDataContent",
                 },

@@ -5,15 +5,40 @@ const userManager = require("../../../../bin/user.");
 module.exports = () => {
     GET = async (req, res, _next) => {
         try {
-            const data = await userDataModel.all(req.user);
-            res.status(200).json(data);
+            let userDatas = await userDataModel.all(req.user);
+            if (req.query.data_group) {
+                userDatas = Object.values(userDatas).filter((data) => {
+                    return data.data_group?.includes(req.query.data_group);
+                });
+            }
+            if (req.query.data_type) {
+                userDatas = Object.values(userDatas).filter((data) => {
+                    return data.data_type?.includes(req.query.data_type);
+                });
+            }
+            res.status(200).json(userDatas);
         } catch (error) {
             console.error(error);
             res.status(500).json({ message: "An error occurs on the server" });
         }
     };
     GET.apiDoc = {
-        parameters: [],
+        parameters: [
+            {
+                in: "query",
+                type: "string",
+                required: false,
+                name: "data_group",
+                description: "data_group filter",
+            },
+            {
+                in: "query",
+                type: "string",
+                required: false,
+                name: "data_type",
+                description: "data_type filter",
+            },
+        ],
         responses: {
             200: {
                 description: "Retrieve the entire list of User Data",
@@ -44,8 +69,12 @@ module.exports = () => {
         try {
             const userData = await cleanUserData.clean(req.body);
             const userInfo = await userManager.getUser(req.user);
-            const insertedId = await userDataModel.insert({ ...userData, owned_by: userInfo.user.login });
-            res.status(200).json({ message: "The resource has been inserted successfully" ,"insertedId": insertedId});
+            const results = await userDataModel.insert({ ...userData, owned_by: userInfo.user.login });
+            if (results.length === 1) {
+                res.status(200).json({ message: "The resource has been inserted successfully", id: results[0].id });
+            } else {
+                res.status(422).json({ message: "The resource cannot be insert in the database" });
+            }
         } catch (error) {
             if (error.cause !== undefined) {
                 res.status(error.cause).json({ message: error.message });
@@ -76,6 +105,10 @@ module.exports = () => {
                             type: "string",
                             default: "The resource has been inserted successfully",
                         },
+                        id: {
+                            type: "number",
+                            default: 1,
+                        },
                     },
                 },
             },
@@ -87,6 +120,18 @@ module.exports = () => {
                         message: {
                             type: "string",
                             default: "The specified owned_by username do not exists",
+                        },
+                    },
+                },
+            },
+            422: {
+                description: "The resource cannot be insert in the database",
+                schema: {
+                    type: "object",
+                    properties: {
+                        message: {
+                            type: "string",
+                            default: "The resource cannot be insert in the database",
                         },
                     },
                 },

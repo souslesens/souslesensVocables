@@ -30,7 +30,7 @@ html_theme_options = {
     "repository_url": "https://github.com/souslesens/souslesensVocables",
     "use_repository_button": True,
     "logo": {
-        "text": "Sous Le Sens Vocable",
+        "text": "Sous Le Sens",
     },
 }
 html_logo = "logo.png"

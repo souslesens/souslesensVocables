@@ -98,15 +98,10 @@ class UserDataModel {
         const data = this._check(userData);
 
         const connection = getKnexConnection(this._mainConfig.database);
-        let results = await connection.select("id").from("users").where("login", data.owned_by).first();
-        if (results === undefined) {
-            cleanupConnection(connection);
-            throw Error("The specified owned_by username do not exists", { cause: 404 });
-        }
-        data.owned_by = results.id;
-        results = await connection.insert(data, ["id"]).into("user_data");
+        data.owned_by = parseInt(data.owned_by);
+        const results = await connection.insert(data, ["id"]).into("user_data");
         cleanupConnection(connection);
-        return results[0];
+        return results;
     };
 
     remove = async (identifier) => {

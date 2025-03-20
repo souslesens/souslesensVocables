@@ -117,10 +117,10 @@ describe("UserDataModel", () => {
         const addUserData = {
             data_path: "data_path",
             data_type: "data_type",
-            owned_by: "skos_user",
+            owned_by: "3",
         }
         const results = await userDataModel.insert(addUserData);
-        expect(results.id).toStrictEqual(6);
+        expect(results[0].id).toStrictEqual(6);
     });
 
     test("remove userData", async () => {

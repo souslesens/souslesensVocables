@@ -124,7 +124,7 @@ describe("UserDataModel", () => {
     });
 
     test("remove userData", async () => {
-        const result = await userDataModel.remove(1);
+        const result = await userDataModel.remove(1, {id: "1", login: "admin"});
         expect(result).toBeTruthy();
     });
 

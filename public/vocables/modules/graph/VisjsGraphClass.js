@@ -1126,7 +1126,9 @@ const VisjsGraphClass = function (graphDiv, data, options) {
 
     self.showGraphConfig = function () {
         $("#graphDisplay_theme").remove();
-        //$("#visjsConfigureDiv").parent().css("left", "20%");
+        $("#visjsConfigureDiv").parent().css("left", "20%");
+        $("#visjsConfigureDiv").parent().css("overflow-y", "auto !important");
+        $("#visjsConfigureDiv").parent().css("height", "550px !important");
         $("#visjsConfigureDiv").prepend(
             "<div id='graphDisplay_theme' class='div.vis-configuration.vis-config-item '>theme" +
                 "<select onchange='Lineage_sources.setTheme($(this).val())' >" +
@@ -1152,6 +1154,10 @@ const VisjsGraphClass = function (graphDiv, data, options) {
             modal: false,
             title: "Graph parameters",
         });
+        setTimeout(function () {
+            $("#visjsConfigureDiv").css("overflow-y", "auto !important");
+            $("#visjsConfigureDiv").css("height", "550px !important");
+        }, 2000);
     };
 };
 export default VisjsGraphClass;

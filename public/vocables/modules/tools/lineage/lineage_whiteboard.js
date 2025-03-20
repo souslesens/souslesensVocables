@@ -4412,7 +4412,7 @@ attrs.color=self.getSourceColor(superClassValue)
                     maxWidth: $(window).width() - 100,
                     minWidth: 150,
                     stop: function (event, ui) {
-                        UI.resetWindowHeight();
+                        UI.resetWindowSize();
                     },
                 });
             });
@@ -4456,7 +4456,7 @@ attrs.color=self.getSourceColor(superClassValue)
                         maxWidth: 435,
                         minWidth: 150,
                         stop: function (event, ui) {
-                            UI.resetWindowHeight();
+                            UI.resetWindowSize();
                         },
                     });*/
                 //});

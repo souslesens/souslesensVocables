@@ -83,7 +83,7 @@ var KGquery = (function () {
                     UI.disableEditButtons();
                     KGquery_graph.drawVisjsModel("saved");
                     UI.openTab("lineage-tab", "tabs_Query", KGquery.initQuery, "#QueryTabButton");
-                    UI.resetWindowHeight();
+                    UI.resetWindowSize();
                     self.clearAll();
                     if (Config.clientCache.KGquery) {
                         setTimeout(function () {

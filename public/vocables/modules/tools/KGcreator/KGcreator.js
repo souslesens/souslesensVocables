@@ -79,7 +79,7 @@ var KGcreator = (function () {
                     self.currentSlsvSource = MainController.currentSource;
                     UI.openTab("lineage-tab", "KGcreator_source_tab", KGcreator.initLinkTab, "#MapButton");
                     self.initSource();
-                    UI.resetWindowHeight();
+                    UI.resetWindowSize();
                     $("#KGcreator_dialogDiv").dialog({
                         autoOpen: false,
                     });

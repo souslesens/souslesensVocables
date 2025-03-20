@@ -1,9 +1,11 @@
 const { userDataModel } = require("../../../../../model/userData");
+const userManager = require("../../../../../bin/user.");
 
 module.exports = () => {
     DELETE = async (req, res, _next) => {
         try {
-            await userDataModel.remove(req.params.id);
+            const userInfo = await userManager.getUser(req.user);
+            await userDataModel.remove(req.params.id, userInfo.user);
             res.status(200).json({ message: "The resource has been removed successfully" });
         } catch (error) {
             if (error.cause !== undefined) {

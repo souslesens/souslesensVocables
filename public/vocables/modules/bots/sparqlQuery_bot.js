@@ -189,6 +189,7 @@ var SparqlQuery_bot = (function () {
                 myBotEngine.showList(choices, "queryScope");
             } else {
                 self.params.queryScope = "activeSource";
+                //myBotEngine.deleteLastMessages();
                 return myBotEngine.nextStep("activeSource");
             }
         },

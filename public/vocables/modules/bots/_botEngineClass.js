@@ -264,9 +264,9 @@ const botEngineClass = function () {
             if ($(last_message).attr("class") == "chat-left") {
                 last_message.remove();
             }
-            self.writeCompletedHtml(message || "select an option", { question: true });
+            self.insertBotMessage(message || "select an option", { isQuestion: true });
         } else {
-            self.writeCompletedHtml("select an option", { question: true });
+            self.insertBotMessage("select an option", { isQuestion: true });
         }
     };
 
@@ -324,7 +324,7 @@ const botEngineClass = function () {
             if (text == "") {
                 return;
             }
-            self.writeCompletedHtml(text + ":");
+            self.insertBotMessage(text + ":");
             //voir avec Claude
             //Donne une liste pour cet élement de façon inconnue
             var selectedValue = $(this).val();
@@ -400,7 +400,7 @@ const botEngineClass = function () {
                 self.history.VarFilling[self.history.currentIndex] = { VarFilled: varToFill, valueFilled: value.trim() };
 
                 self.currentBot.params[varToFill] = value.trim();
-                self.writeCompletedHtml(value);
+                self.insertBotMessage(value);
                 $("#botPromptInput").off();
                 if (callback) {
                     return callback(value);
@@ -419,7 +419,7 @@ const botEngineClass = function () {
         }
     };
 
-    self.writeCompletedHtml = function (str, options) {
+    self.insertBotMessage = function (str, options) {
         if (!str) {
             return;
         }

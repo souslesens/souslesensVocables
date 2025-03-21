@@ -12,11 +12,11 @@ var UserDataWidget = (function () {
                 return alert("label is mandatory");
             }
 
-            var data_path = self.data_dir + "/" + label + ".json";
+            var data_type = self.data_type;
 
             var group = $("#userDataWidget_group").val();
 
-            self.saveMetadata(label, data_path, self.jsonContent, group, function (err, result) {
+            self.saveMetadata(label, data_type, self.jsonContent, group, function (err, result) {
                 $("#" + self.divId).dialog("close");
                 UI.message(err || result);
                 if (err) {
@@ -124,8 +124,8 @@ var UserDataWidget = (function () {
         }
     };
 
-    self.showSaveDialog = function (data_dir, jsonContent, divId, callbackFn) {
-        self.data_dir = data_dir;
+    self.showSaveDialog = function (data_type, jsonContent, divId, callbackFn) {
+        self.data_type = data_type;
         self.jsonContent = jsonContent;
         self.callbackFn = callbackFn;
         self.showDialog(divId, "save");

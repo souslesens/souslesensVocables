@@ -4300,7 +4300,7 @@ attrs.color=self.getSourceColor(superClassValue)
                     context: Lineage_whiteboard.lineageVisjsGraph.currentContext,
                     positions: positions,
                 };
-                var data_path = "Lineage/savedWhiteboards/" + MainController.currentSource;
+                var data_path = "savedWhiteboards";
                 UserDataWidget.currentTreeNode = null;
                 UserDataWidget.showSaveDialog(data_path, data, null, function (err, result) {
                     if (err) {

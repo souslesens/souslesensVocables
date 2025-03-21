@@ -23,13 +23,6 @@ userdoc/mappingmodeler.md
 userdoc/kgquery.md
 ```
 
-```{toctree}
-:caption: User Tutorials
-:maxdepth: 1
-tutorials/mappingmodeler.md
-tutorials/KGQuery.md
-```
-
 # Admin documentation
 
 How to install, configure and manage your own SousLeSens instance.
@@ -72,11 +65,8 @@ How to install a development instance and to contribute to the code.
 contribute/contribute-to-development.md
 ```
 
-# Code documentation
-
-The following docs is generated from Javascript docstrings.
-
 ```{toctree}
+:caption: code
 :maxdepth: 1
 code documentation/codeDocumentation.md
 ```

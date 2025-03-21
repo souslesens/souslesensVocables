@@ -4324,7 +4324,7 @@ attrs.color=self.getSourceColor(superClassValue)
          */
 
         loadSavedWhiteboard: function () {
-            UserDataWidget.showListDialog(null, { filter: { data_path: "Lineage/savedWhiteboards/" + MainController.currentSource } }, function (err, result) {
+            UserDataWidget.showListDialog(null, { filter: { data_type: "savedWhiteboards" ,data_source: MainController.currentSource,data_tool:'lineage' } }, function (err, result) {
                 if (err) {
                     return alert(err.responseText);
                 }

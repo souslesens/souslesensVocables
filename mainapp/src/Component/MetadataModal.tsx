@@ -366,7 +366,7 @@ export function MetadataModal({ onClose, open, sourceName, isReadOnly = false }:
         Promise.all([fetchMetadata(), fetchPrefixCc()]).finally(() => {
             setLoading(false);
         });
-    }, []);
+    }, [sourceName]);
 
     async function onSubmit(newMetadata: Metadata[], addedData: Metadata[], removedData: Metadata[]) {
         setLoading(true);

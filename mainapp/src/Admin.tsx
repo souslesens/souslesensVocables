@@ -103,7 +103,7 @@ const Admin = () => {
             const p = params.get("tab") as EditionTab | null;
             model.currentEditionTab = p ?? "settings";
         }
-    }, []);
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
         Promise.all([getMe(), getSources(), getIndices(), getGraphs(), getProfiles(), getUsers(), getConfig(), getDatabases(), getLogFiles(), readConfig(), getEnabledPlugins(), readRepositories()])

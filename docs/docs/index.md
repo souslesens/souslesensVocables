@@ -16,18 +16,8 @@ Annotate tool allows annotate textual corpus with several registered lexical res
 Learn how to use SousLeSens.
 
 ```{toctree}
-:caption: User Documentation
-:maxdepth: 1
-userdoc/lineage.md
-userdoc/mappingmodeler.md
-userdoc/kgquery.md
-```
-
-```{toctree}
-:caption: User Tutorials
-:maxdepth: 1
-tutorials/mappingmodeler.md
-tutorials/KGQuery.md
+:maxdepth: 2
+userdoc/index.md
 ```
 
 # Admin documentation
@@ -35,31 +25,8 @@ tutorials/KGQuery.md
 How to install, configure and manage your own SousLeSens instance.
 
 ```{toctree}
-:caption: Architecture
-:maxdepth: 1
-architecture/index.md
-architecture/docker.md
-```
-
-```{toctree}
-:caption: Installation
-:maxdepth: 1
-installation/deploy-a-production-instance.md
-installation/install-a-development-instance.md
-```
-
-```{toctree}
-:caption: configuration
-:maxdepth: 1
-configuration/souslesens.md
-configuration/sls-py-api.md
-configuration/jowl.md
-```
-
-
-```{toctree}
-:maxdepth: 1
-migrations/migrate-to-v2.md
+:maxdepth: 2
+admindoc/index.md
 ```
 
 # Developper documentation
@@ -67,16 +34,6 @@ migrations/migrate-to-v2.md
 How to install a development instance and to contribute to the code.
 
 ```{toctree}
-:caption: contributing
-:maxdepth: 1
-contribute/contribute-to-development.md
-```
-
-# Code documentation
-
-The following docs is generated from Javascript docstrings.
-
-```{toctree}
-:maxdepth: 1
-code documentation/codeDocumentation.md
+:maxdepth: 2
+devdoc/index.md
 ```

@@ -28,14 +28,24 @@ var UI = (function () {
     self.setCredits = function () {
         var LateralPanelWidth = $("#lateralPanelDiv").width();
         var gifStart = $(window).width() / 2 - LateralPanelWidth + 100;
-        var html =
-            "<div style='position:absolute;left:" +
-            gifStart +
-            "px'>" +
-            " " +
-            " <img  src=\"images/souslesensVocables.gif\" style='background:url('images/circulargraph.png');background-repeat: no-repeat;display: block; '>" +
-            "</div>";
-        $("#graphDiv").html(html);
+        // Load image only when it is ready to has useful resetWindowSize
+        /*"<img>", {
+            src: "images/souslesensVocables.gif",
+            css: {
+                
+                display: "block"
+            }
+        }*/
+        
+        var gif = $(`<img  src=\"images/souslesensVocables.gif\" >`).on("load", function () {
+            
+            $("#graphDiv").html(
+                "<div style='position:absolute;left:" + gifStart + "px'>" +
+                $(this).prop("outerHTML") + 
+                "</div>"
+            );
+            UI.resetWindowSize();
+        });
     };
     self.cleanPage = function () {
         $("#graphDiv").empty();
@@ -164,7 +174,7 @@ var UI = (function () {
             }
             self.smartPhoneScreen = false;
             $("#graphDivContainer").css("width", $(window).width() - LateralPanelWidth - 10);
-            $("#graphDiv").css("width", $(window).width() - LateralPanelWidth - rightControlPanelWidth - 20);
+            $("#graphDiv").css("width", $(window).width() - LateralPanelWidth - rightControlPanelWidth );
             $("#lateralPanelDiv").css("width", LateralPanelWidth);
         }
 

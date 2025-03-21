@@ -118,6 +118,7 @@ var Lineage_whiteboard = (function () {
         $("KGquery_waitImg").attr("id", "waitImg");
 
         self.resetVisjsGraph();
+        $('#rightControlPanelDiv').load("./modules/tools/lineage/html/whiteBoardButtons.html");
         
     };
 

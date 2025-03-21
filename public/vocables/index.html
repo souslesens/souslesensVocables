@@ -119,11 +119,11 @@
         <script type="module" src="modules/tools/UploadGraphModal/UploadGraphModal.js"></script>
 
         <!--
-        <script type="module" src="modules/tools/KGcreator/KGcreator.js"></script>
-        <script type="module" src="modules/tools/KGcreator/KGcreator_mappings.js"></script>
-        <script type="module" src="modules/tools/KGcreator/KGcreator_graph.js"></script>
-        <script type="module" src="modules/tools/KGcreator/KGcreator_run.js"></script>
-        -->
+    <script type="module" src="modules/tools/KGcreator/KGcreator.js"></script>
+    <script type="module" src="modules/tools/KGcreator/KGcreator_mappings.js"></script>
+    <script type="module" src="modules/tools/KGcreator/KGcreator_graph.js"></script>
+    <script type="module" src="modules/tools/KGcreator/KGcreator_run.js"></script>
+    -->
 
         <script type="module" src="modules/tools/mappingModeler/mappingModeler.js"></script>
         <script type="module" src="modules/tools/mappingModeler/tripleFactory.js"></script>
@@ -365,9 +365,9 @@
                                         window.open(id, "_blank");
                                     }
                                     /*
-                                    if (NodeInfosAxioms.nodeInfosAxiomsLoaded) {
-                                        NodeInfosAxioms.reduceNodeInfoAxioms();
-                                    }*/
+                                if (NodeInfosAxioms.nodeInfosAxiomsLoaded) {
+                                    NodeInfosAxioms.reduceNodeInfoAxioms();
+                                }*/
                                 });
                             }
                         });
@@ -481,9 +481,20 @@
         <div id="graphAndCommandScreen" class="w3-container" style="height: 92.5dvh">
             <div class="w3-container w3-col l3 slsv-bg-pale w3-display-container" style="width: 435px; height: 99%" id="lateralPanelDiv"></div>
 
-            <div id="graphDivContainer" class="w3-container w3-col l9" style="height: 100%; width: 0px">
+            <div id="graphDivContainer" class="w3-container w3-col l9" style="height: 100%; display: flex; flex-direction: row">
                 <div id="graphDiv" class="w3-container" style="height: 100%"></div>
-             
+
+                <div id="rightControlPanelDiv" style="height: 100%; width: 50px; width: 50px; display: flex; align-content: flex-start; flex-direction: column">
+                    <button class="w3-button slsv-button-2" style="font-weight: bold" onclick="Lineage_whiteboard.initUI()" title="Clear all">
+                        <img src="./icons/CommonIcons/ClearAllIcon.png" />
+                    </button>
+                    <button class="w3-button slsv-button-3" onclick="Lineage_whiteboard.graph.showGraphConfig()">Display</button>
+                    <button class="w3-button slsv-button-3" onclick="Lineage_whiteboard.graph.saveWhiteboard()">save</button>
+                    <button class="w3-button slsv-button-3" onclick="Lineage_whiteboard.graph.loadSavedWhiteboard()">load</button>
+                    <button class="w3-button slsv-button-3" onclick="Lineage_whiteboard.graph.toGraphMl()">graphML</button>
+                    <button class="w3-button slsv-button-3" onclick="Lineage_whiteboard.graph.toSVG()">SVG</button>
+                    <button class="w3-button slsv-button-3" onclick="PlantUmlTransformer.visjsDataToClassDiagram()">PlantUml</button>
+                </div>
             </div>
         </div>
 

@@ -117,7 +117,7 @@ var UI = (function () {
         window.addEventListener(
             "resize",
             function (event) {
-                self.resetWindowHeight();
+                self.resetWindowSize();
                 if (MainController.currentTool == "KGcreator") {
                     KGcreator.ResetRunMappingTabWidth();
                 }
@@ -127,7 +127,7 @@ var UI = (function () {
 
         self.themeList();
 
-        UI.resetWindowHeight();
+        UI.resetWindowSize();
     };
     // keep
 
@@ -149,9 +149,10 @@ var UI = (function () {
     };
 
     // Keep Here
-    self.resetWindowHeight = function () {
+    self.resetWindowSize = function () {
         var MenuBarHeight = $("#MenuBar").height();
         var LateralPanelWidth = $("#lateralPanelDiv").width();
+        var rightControlPanelWidth = $("#rightControlPanelDiv").width();
         // Mobile format graph div reset
         if ($(window).width() <= 500) {
             $("#graphDiv").css("width", $(window).width());
@@ -162,8 +163,8 @@ var UI = (function () {
                 LateralPanelWidth = 435;
             }
             self.smartPhoneScreen = false;
-
-            $("#graphDiv").css("width", $(window).width() - LateralPanelWidth - 10);
+            $("#graphDivContainer").css("width", $(window).width() - LateralPanelWidth - 10);
+            $("#graphDiv").css("width", $(window).width() - LateralPanelWidth - rightControlPanelWidth - 20);
             $("#lateralPanelDiv").css("width", LateralPanelWidth);
         }
 
@@ -174,7 +175,7 @@ var UI = (function () {
                 maxWidth: $(window).width() - 100,
                 minWidth: 150,
                 stop: function (event, ui) {
-                    UI.resetWindowHeight();
+                    UI.resetWindowSize();
                 },
             });
         }
@@ -265,13 +266,13 @@ var UI = (function () {
         if (self.menuBarShowed) {
             $("#MenuBarFooter").hide();
             $("#MenuBar").css("height", "21px");
-            UI.resetWindowHeight();
+            UI.resetWindowSize();
             self.menuBarShowed = false;
             $(button).children().attr("src", "./icons/CommonIcons/ArrowMenuBarShow.png");
         } else {
             $("#MenuBarFooter").show();
             $("#MenuBar").css("height", "90px");
-            UI.resetWindowHeight();
+            UI.resetWindowSize();
             self.menuBarShowed = true;
             $(button).children().attr("src", "./icons/CommonIcons/ArrowMenuBar.png");
         }
@@ -286,7 +287,7 @@ var UI = (function () {
             $(button).parent().hide();
             $("#lateralPanelDiv").css("width", "21px");
             $("#lateralPanelDiv").removeClass("ui-resizable");
-            UI.resetWindowHeight();
+            UI.resetWindowSize();
             self.LateralPanelShowed = false;
             var buttonclone = button.cloneNode(true);
             $("#lateralPanelDiv").append(buttonclone);
@@ -297,7 +298,7 @@ var UI = (function () {
             $("#lineage-tab-buttons").show();
             $("#WhiteboardContent").show();
             $("#lateralPanelDiv").css("width", "435px");
-            UI.resetWindowHeight();
+            UI.resetWindowSize();
             self.LateralPanelShowed = true;
             var currentTabId = $(".slsv-selectedTabDiv").attr("title").toLowerCase() + "Tab";
             $("#" + currentTabId)
@@ -329,7 +330,7 @@ var UI = (function () {
                     Lineage_sources.showHideEditButtons(MainController.currentSource);
                 }
             }
-            UI.resetWindowHeight();
+            UI.resetWindowSize();
         }
     };
     //keep

@@ -148,13 +148,19 @@ var Axioms_graph = (function () {
 
                     function recurse(nodeId) {
                         var node = nodesMap[nodeId];
-                        if (!node) return;
-                        if (!node.predicates) return;
+                        if (!node) {
+                            return;
+                        }
+                        if (!node.predicates) {
+                            return;
+                        }
                         node.predicates.forEach(function (predicate, index) {
                             // if(nodeId.indexOf("http")<0 && predicate.o.indexOf("http")<0){
                             if (predicate.p == "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest") {
                                 var predicateObject = nodesMap[predicate.o];
-                                if (!predicateObject.predicates) return;
+                                if (!predicateObject.predicates) {
+                                    return;
+                                }
 
                                 predicateObject.predicates.forEach(function (nextPredicate) {
                                     if (nextPredicate.p == "http://www.w3.org/1999/02/22-rdf-syntax-ns#first") {
@@ -346,6 +352,7 @@ var Axioms_graph = (function () {
                     } else {
                         self.drawGraph(visjsData, divId, options);
                         self.currentVisjsData = visjsData;
+                        self.switchToHierarchicalLayout(false);
                     }
                     return callbackSeries();
                 },
@@ -460,6 +467,9 @@ enabled:true},*/
             self.axiomsVisjsGraph.data.edges.remove(edges);
             self.axiomsVisjsGraph.data.nodes.remove(self.currentGraphNode.id);
         }
+    };
+    self.showGraphDisplay = function () {
+        self.axiomsVisjsGraph.showGraphConfig();
     };
 
     return self;

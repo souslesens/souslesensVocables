@@ -322,7 +322,7 @@ var SourceSelectorWidget = (function () {
             if (err) {
                 return alert(err.responseText);
             }
-            UI.resetWindowHeight();
+            UI.resetWindowSize();
         });
     };
 

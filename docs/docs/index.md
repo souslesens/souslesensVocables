@@ -16,7 +16,7 @@ Annotate tool allows annotate textual corpus with several registered lexical res
 Learn how to use SousLeSens.
 
 ```{toctree}
-:maxdepth: 1
+:maxdepth: 2
 userdoc/index.md
 ```
 
@@ -25,7 +25,7 @@ userdoc/index.md
 How to install, configure and manage your own SousLeSens instance.
 
 ```{toctree}
-:maxdepth: 1
+:maxdepth: 2
 admindoc/index.md
 ```
 
@@ -34,6 +34,6 @@ admindoc/index.md
 How to install a development instance and to contribute to the code.
 
 ```{toctree}
-:maxdepth: 1
+:maxdepth: 2
 devdoc/index.md
 ```

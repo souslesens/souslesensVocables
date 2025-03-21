@@ -11,17 +11,18 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    container:
-      image: python:3.11
+    strategy:
+      matrix:
+        node-version: [22.x]
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Install
-        run: |
-          apt-get update && apt-get install -y npm nodejs
-          npm ci
-          mkdir -p docs/docs/jsdoc
-          npm run --silent tools:jsdoc2md -- -c jsdoc.json > docs/docs/jsdoc/index.md
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "npm"
+      - run: npm ci
+      - run: |
           cd docs
           python3 -m venv venv
           . ./venv/bin/activate

@@ -2,10 +2,8 @@
     "source": {
       "include": [
         "public/vocables/modules/tools/mappingModeler",
-        "public/vocables/modules/tools/KGquery",
-        "public/vocables/modules/tools/lineage",
-        "plugins/Lifex_cost"
-      ],
+        "public/vocables/modules/tools/KGquery"
+        ],
       "includePattern": ".+\\.js(doc)?$",
       "excludePattern": "(^|\\/|\\\\)_"
     },

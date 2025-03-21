@@ -29,5 +29,5 @@ poetry install
 ## Autobuild
 
 ```bash
-poetry run sphinx-autobuild docs docs/_build/html
+make html
 ```

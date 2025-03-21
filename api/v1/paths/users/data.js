@@ -45,7 +45,7 @@ module.exports = () => {
                 type: "string",
                 required: false,
                 name: "data_label",
-                description: "data_group filter",
+                description: "data_label filter",
             },
             {
                 in: "query",
@@ -66,14 +66,14 @@ module.exports = () => {
                 type: "string",
                 required: false,
                 name: "data_tool",
-                description: "data_group filter",
+                description: "data_tool filter",
             },
             {
                 in: "query",
                 type: "string",
                 required: false,
                 name: "data_source",
-                description: "data_type filter",
+                description: "data_source filter",
             },
         ],
         responses: {

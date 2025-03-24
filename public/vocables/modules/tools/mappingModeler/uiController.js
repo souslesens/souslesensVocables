@@ -28,6 +28,7 @@ var UIcontroller = (function () {
             MappingModeler.loadSuggestionSelectJstree(MappingModeler.currentTable.columns, "Columns");
             $("#MappingModeler_currentDataSource").html(DataSourceManager.currentConfig.currentDataSource.name);
             try {
+                MappingColumnsGraph.createDataSourcesClusters();
                 MappingColumnsGraph.visjsGraph.network.openCluster("cluster_" + MappingModeler.currentTable.name);
             } catch (e) {}
         } else if (tabId == "MappingModeler_technicalDatailTab") {

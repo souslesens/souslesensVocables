@@ -363,6 +363,7 @@ var Config = (function () {
         "@lineage-logo": "lineageLogo",
         "@KGquery-logo": "Kgquery",
         "@KGcreator-logo": "Kgcreator",
+        "@MappingModeler-logo":'Kgcreator',
         "@SPARQL-logo": "SPARQL",
         "@admin-logo": "Admin",
         "@ConfigEditor-logo": "ConfigEditor",

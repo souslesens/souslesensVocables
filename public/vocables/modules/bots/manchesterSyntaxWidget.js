@@ -87,7 +87,7 @@ var ManchesterSyntaxWidget = (function () {
             }
         } else if (self.keywordsMap[lastToken]) {
             var tokenObj = self.keywordsMap[lastToken];
-            self.writeCompletedHtml(tokenObj);
+            self.insertBotMessage(tokenObj);
         }
     };
 
@@ -98,12 +98,12 @@ var ManchesterSyntaxWidget = (function () {
         }
         var key = id.split("|")[1].toLowerCase();
         var tokenObj = self.keywordsMap[key];
-        self.writeCompletedHtml(tokenObj);
+        self.insertBotMessage(tokenObj);
         $("#bot_resourcesProposalSelect").empty();
         $("#bot_resourcesProposalSelect").css("display", "none");
     };
 
-    self.writeCompletedHtml = function (selectedToken) {
+    self.insertBotMessage = function (selectedToken) {
         if (!selectedToken) {
             return;
         }

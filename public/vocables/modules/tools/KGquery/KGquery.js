@@ -47,6 +47,9 @@ var KGquery = (function () {
         self.clearAll();
         $("#messageDiv").attr("id", "KGquery_messageDiv");
         $("#waitImg").attr("id", "KGquery_waitImg");
+        $('#rightControlPanelDiv').load("./modules/tools/lineage/html/whiteBoardButtons.html",function(){
+            UI.resetWindowSize();
+        });
     };
     self.unload = function () {
         Lineage_sources.registerSource = UI.oldRegisterSource;

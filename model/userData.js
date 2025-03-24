@@ -14,7 +14,9 @@ const UserDataObject = z
         is_shared: z.boolean().default(false),
         shared_profiles: z.string().array().default([]),
         shared_users: z.string().array().default([]),
-        owned_by: z.string(),
+        owned_by: z.number().positive().optional(),
+        data_tool: z.string().default(""),
+        data_source: z.string().default(""),
     })
     .strict();
 
@@ -96,25 +98,24 @@ class UserDataModel {
         const data = this._check(userData);
 
         const connection = getKnexConnection(this._mainConfig.database);
-        let results = await connection.select("id").from("users").where("login", data.owned_by).first();
-        if (results === undefined) {
-            cleanupConnection(connection);
-            throw Error("The specified owned_by username do not exists", { cause: 404 });
-        }
-        data.owned_by = results.id;
-        const insertedId = await connection.insert(data).into("user_data").returning("id");
+        data.owned_by = parseInt(data.owned_by);
+        const results = await connection.insert(data, ["id"]).into("user_data");
         cleanupConnection(connection);
-        return insertedId;
+        return results;
     };
 
-    remove = async (identifier) => {
+    remove = async (identifier, user) => {
         this._checkIdentifier(identifier);
 
         const connection = getKnexConnection(this._mainConfig.database);
-        const results = await connection.select("id").from("user_data").where("id", identifier).first();
-        if (results === undefined) {
+        const result = await connection.select("*").from("user_data").where("id", identifier).first();
+        if (result === undefined) {
             cleanupConnection(connection);
             throw Error("The specified identifier do not exists", { cause: 404 });
+        }
+        if (user.login !== "admin" && user.id.toString() !== result.owned_by.toString()) {
+            cleanupConnection(connection);
+            throw Error(`The resources is not owned by ${user.login}`, { cause: 404 });
         }
 
         // using select here allows mocking in tests

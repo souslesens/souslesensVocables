@@ -1,4 +1,4 @@
-import { useState, useMemo, useReducer, useEffect, ChangeEvent, forwardRef, Ref, Dispatch, MouseEventHandler } from "react";
+import { useState, useMemo, useReducer, ChangeEvent, forwardRef, Ref, Dispatch, MouseEventHandler } from "react";
 import {
     Alert,
     Box,
@@ -222,7 +222,6 @@ const enum Type {
     UserClickedModal,
     UserUpdatedField,
     UserUpdatedSourceAccessControl,
-    ResetProfile,
     UserClickedCheckAll,
 }
 
@@ -232,10 +231,9 @@ const enum Mode {
 }
 
 export type Msg_ =
-    | { type: Type.UserClickedModal; payload: boolean }
+    | { type: Type.UserClickedModal; payload: { modal: boolean; profileForm?: Profile } }
     | { type: Type.UserUpdatedField; payload: { fieldname: string; newValue: string | string[] | boolean } }
     | { type: Type.UserUpdatedSourceAccessControl; payload: { treeStr: string; newValue: SourceAccessControl | null } }
-    | { type: Type.ResetProfile; payload: Profile }
     | { type: Type.UserClickedCheckAll; payload: { fieldname: string; value: boolean } };
 
 const updateProfile = (profileEditionState: ProfileEditionState, msg: Msg_): ProfileEditionState => {
@@ -243,8 +241,11 @@ const updateProfile = (profileEditionState: ProfileEditionState, msg: Msg_): Pro
 
     switch (msg.type) {
         case Type.UserClickedModal:
-            return { ...profileEditionState, modal: msg.payload };
-
+            if (msg.payload.profileForm) {
+                return { ...profileEditionState, modal: msg.payload.modal, profileForm: msg.payload.profileForm };
+            } else {
+                return { ...profileEditionState, modal: msg.payload.modal };
+            }
         case Type.UserUpdatedField:
             return { ...profileEditionState, profileForm: { ...profileEditionState.profileForm, [fieldToUpdate]: msg.payload.newValue } };
 
@@ -273,9 +274,6 @@ const updateProfile = (profileEditionState: ProfileEditionState, msg: Msg_): Pro
         }
         case Type.UserClickedCheckAll:
             return { ...profileEditionState, profileForm: { ...profileEditionState.profileForm, [fieldToUpdate]: msg.payload.value ? "ALL" : [] } };
-
-        case Type.ResetProfile:
-            return { ...profileEditionState, profileForm: msg.payload };
     }
 };
 
@@ -313,13 +311,10 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
     );
     const [profileModel, update] = useReducer(updateProfile, { modal: false, profileForm: profile });
 
-    useEffect(() => {
-        update({ type: Type.ResetProfile, payload: profile });
-    }, [profileModel.modal]);
-    const handleOpen = () => update({ type: Type.UserClickedModal, payload: true });
+    const handleOpen = () => update({ type: Type.UserClickedModal, payload: { modal: true, profileForm: profile } });
     const handleClose = () => {
         setNodeToExpand([]);
-        update({ type: Type.UserClickedModal, payload: false });
+        update({ type: Type.UserClickedModal, payload: { modal: false } });
     };
     const handleFieldUpdate = (fieldname: string) => (event: ChangeEvent<HTMLTextAreaElement | HTMLInputElement> | SelectChangeEvent<string[]>) => {
         if (fieldname === "isShared") {

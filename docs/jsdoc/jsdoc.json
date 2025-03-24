@@ -1,0 +1,16 @@
+{
+    "source": {
+      "include": [
+        "public/vocables/modules/tools/mappingModeler",
+        "public/vocables/modules/tools/KGquery",
+        "public/vocables/modules/tools/lineage",
+        "plugins/Lifex_cost"
+      ],
+      "includePattern": ".+\\.js(doc)?$",
+      "excludePattern": "(^|\\/|\\\\)_"
+    },
+    "opts": {
+      "destination": "./docs/docs/developer-docs",
+      "recurse": true
+    }
+}

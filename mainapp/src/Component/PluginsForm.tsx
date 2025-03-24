@@ -385,7 +385,7 @@ const PluginsRepositoryDialog = ({ onClose, onSubmit, open, edit, selectedReposi
         } else {
             setRepository(emptyRepository);
         }
-    }, [selectedRepository]);
+    }, [selectedRepository, repositories]);
 
     return (
         <Dialog fullWidth maxWidth="md" onClose={onClose} open={open} PaperProps={{ component: "form", onSubmit: handleSubmit }}>

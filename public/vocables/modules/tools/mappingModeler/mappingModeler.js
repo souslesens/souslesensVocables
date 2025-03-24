@@ -145,6 +145,9 @@ var MappingModeler = (function () {
                         DataSourceManager.loaDataSourcesJstree(self.jstreeDivId, function (err) {
                             return callbackSeries();
                         });
+                        $('#rightControlPanelDiv').load("./modules/tools/lineage/html/whiteBoardButtons.html",function(){
+                            UI.resetWindowSize();
+                        });
                     });
                 },
             ],

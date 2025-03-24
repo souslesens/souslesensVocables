@@ -12,27 +12,27 @@ var UserDataWidget = (function () {
                 return alert("label is mandatory");
             }
 
-            var data_path = self.data_dir + "/" + label + ".json";
+            var data_type = self.data_type;
 
             var group = $("#userDataWidget_group").val();
 
-            self.saveMetadata(label, data_path, self.jsonContent, group, function (err, result) {
+            self.saveMetadata(label, data_type, self.jsonContent, group, function (err, result) {
                 $("#" + self.divId).dialog("close");
                 UI.message(err || result);
                 if (err) {
                     self.callbackFn(err);
                 }
 
-                self.callbackFn(null, { label: label, data_path: data_path, data_content: self.jsonContent, insertedId: result.insertedId, data_group: group });
+                self.callbackFn(null, { label: label, data_path: data_path, data_content: self.jsonContent, insertedId: result.id, data_group: group });
             });
         });
 
-    self.saveMetadata = function (label, data_path, jsonContent, group, callback) {
+    self.saveMetadata = function (label, data_type, jsonContent, group, callback) {
         var tool = MainController.currentTool || "?";
         var source = MainController.currentSource || "?";
         var payload = {
-            data_path: data_path || "",
-            data_type: "string",
+            data_path:  "",
+            data_type: data_type,
             data_label: label,
             data_comment: "",
             data_group: group || "",
@@ -124,8 +124,8 @@ var UserDataWidget = (function () {
         }
     };
 
-    self.showSaveDialog = function (data_dir, jsonContent, divId, callbackFn) {
-        self.data_dir = data_dir;
+    self.showSaveDialog = function (data_type, jsonContent, divId, callbackFn) {
+        self.data_type = data_type;
         self.jsonContent = jsonContent;
         self.callbackFn = callbackFn;
         self.showDialog(divId, "save");
@@ -138,10 +138,19 @@ var UserDataWidget = (function () {
             options = {};
         }
         self.options = options;
+        var parameters = {};
+        if (self.options.filter && Object.keys(self.options.filter).length > 0) {
+            Object.keys(self.options.filter).forEach(function (key) {
+                if (self.options.filter[key]) {
+                    parameters[key] = self.options.filter[key];
+                }
+            });
+        }
         self.showDialog(divId, "list", function () {
             $.ajax({
                 type: "GET",
                 url: `${Config.apiUrl}/users/data`,
+                data: parameters,
                 dataType: "json",
                 success: function (_result, _textStatus, _jqXHR) {
                     var data = _result;
@@ -152,15 +161,7 @@ var UserDataWidget = (function () {
 
                     var jstreeData = [];
                     self.uniqueJstreeNodes = {};
-                    if (self.options.filter && Object.keys(self.options.filter).length > 0) {
-                        Object.keys(self.options.filter).forEach(function (key) {
-                            if (self.options.filter[key]) {
-                                data = data.filter(function (item) {
-                                    return item[key].includes(self.options.filter[key]);
-                                });
-                            }
-                        });
-                    }
+                    
                     // check data after filters
                     if (data.length == 0) {
                         $("#userDataWidget_jstree").html("nothing to load");

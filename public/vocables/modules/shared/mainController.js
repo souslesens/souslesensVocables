@@ -288,19 +288,21 @@ var MainController = (function () {
         }
         $("#currentToolTitle").html("");
         if (UI.currentTheme["@" + toolId + "-logo"]) {
-            $("#currentToolTitle").prepend(`<button class="${toolId}-logo slsv-invisible-button" style="height:41px;width:41px;">`);
+            $("#currentToolTitle").prepend(`<button class="${toolId}-logo slsv-invisible-button" style="height:41px;width:41px;"> </button> <div style='margin-bottom:5px;'>${toolId} </div>`);
         } else {
             $("#currentToolTitle").html(toolId);
         }
         MainController.currentTool = toolId;
 
         if (!Config.userTools[toolId].noSource) {
+            $('#rightControlPanelDiv').show();
             if (self.currentSource == null) {
                 SourceSelectorWidget.showSourceDialog(true);
             } else {
                 SourceSelectorWidget.initSource(self.currentSource);
             }
         } else {
+            $('#rightControlPanelDiv').hide();
             UI.cleanPage();
             self.initTool(toolId);
             var homePageOptions = {};

@@ -311,6 +311,15 @@ var KGquery_graph = (function () {
                         scale: 1 / 0.9,
                     });
                     self.KGqueryGraph.onScaleChange();
+                    var nodes_fonts = [];
+                    visjsData.nodes.forEach(function (node) {
+                        //delete node.x;
+                        //delete node.y;
+                        if (node.font) {
+                            nodes_fonts.push({id:node.id,font:node.font});
+                        }
+                    });
+                    self.KGqueryGraph.data.nodes.update(nodes_fonts);
                 });
 
                 //  KGquery.clearAll();
@@ -660,7 +669,15 @@ var KGquery_graph = (function () {
         }
         self.setAllNodesAttr("font", { size: parseInt(fontSize) });
     };
+    self.setAllNodesSizes = function () {
+        var size = prompt(" size");
+        if (!size) {
+            return;
+        }
+        self.setAllNodesAttr("size",  parseInt(size) );
+        self.KGqueryGraph.onScaleChange();
 
+    };
     self.setAllNodesAttr = function (attr, value) {
         var nodesId = self.KGqueryGraph.data.nodes.getIds();
         var newNodes = [];
@@ -759,7 +776,7 @@ var KGquery_graph = (function () {
         UserDataWidget.saveMetadata(label, null, data, group, function (err, result) {
             $("#KGquery_messageDiv").text("saved graph");
         });
-        return;
+        //return;
         var fileName = KGquery.currentSource + "_KGmodelGraph.json";
         self.KGqueryGraph.saveGraph(fileName, true);
         return;

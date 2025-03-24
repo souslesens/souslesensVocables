@@ -21,6 +21,7 @@ const UserDataObject = z
         owned_by: z.number().positive().optional(),
         data_tool: z.string().default(""),
         data_source: z.string().default(""),
+        data_path: z.string().default(""),
     })
     .strict();
 

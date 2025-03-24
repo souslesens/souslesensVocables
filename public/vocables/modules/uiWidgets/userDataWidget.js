@@ -23,7 +23,7 @@ var UserDataWidget = (function () {
                     self.callbackFn(err);
                 }
 
-                self.callbackFn(null, { label: label, data_path: data_path, data_content: self.jsonContent, insertedId: result.id, data_group: group });
+                self.callbackFn(null, { label: label, data_type: data_type, data_content: self.jsonContent, insertedId: result.id, data_group: group });
             });
         });
 

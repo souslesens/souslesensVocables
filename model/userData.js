@@ -1,11 +1,15 @@
+const fs = require("fs");
+const path = require("path");
+
+const ULID = require("ulid");
 const { z } = require("zod");
+
 const { cleanupConnection, getKnexConnection } = require("./utils");
 const { readMainConfig } = require("./config");
 
 const UserDataObject = z
     .object({
         id: z.number().positive().optional(),
-        data_path: z.string(),
         data_type: z.string(),
         data_label: z.string().default(""),
         data_comment: z.string().default(""),
@@ -21,9 +25,21 @@ const UserDataObject = z
     .strict();
 
 class UserDataModel {
-    constructor() {
+    constructor(dataPath = "data") {
+        this._dataPath = dataPath;
         this._mainConfig = readMainConfig();
     }
+
+    /**
+     * Check if the specified text if allowed by the backend
+     *
+     * @param {string} text - the text to check
+     * @returns {boolean} - true if the text is allowed, false otherwise
+     */
+    _allowedStringLength = (text) => {
+        const size = new TextEncoder().encode(text).length;
+        return size <= this._mainConfig.userData.maximumFileSize;
+    };
 
     /**
      * Run zod to validate the received data
@@ -60,11 +76,32 @@ class UserDataModel {
         shared_users: (typeof data.shared_users === "string" ? JSON.parse(data.shared_users) : data.shared_users) || [],
     });
 
-    all = async (currentUser) => {
-        const connection = getKnexConnection(this._mainConfig.database);
-        if ((currentUser === undefined) & (this._mainConfig.auth === "disabled")) {
-            currentUser = { login: "admin", groups: ["admin"] };
+    /**
+     * Helper to retrieve the path to the data files storage
+     *
+     * @param {String} filename - the name of the file
+     * @returns {String} - the absolute path to the file in the storage
+     */
+    _getStorage = (filename) => {
+        return path.resolve(this._dataPath, "user_data", filename);
+    };
+
+    /**
+     * Helper to have the admin user if the authentication was disabled
+     *
+     * @param {User} user – the user received from the request content
+     * @returns {User} – the user from the request, an admin account otherwise
+     */
+    _getUser = (user) => {
+        if ((user === undefined) & (this._mainConfig.auth === "disabled")) {
+            return { login: "admin", groups: ["admin"] };
         }
+        return user;
+    };
+
+    all = async (user) => {
+        const connection = getKnexConnection(this._mainConfig.database);
+        const currentUser = this._getUser(user);
         let currentUserData = await connection.select("*").from("user_data_list").where("owned_by", currentUser.login).orWhere("is_shared", true);
 
         currentUserData = currentUserData
@@ -78,6 +115,55 @@ class UserDataModel {
 
         cleanupConnection(connection);
         return currentUserData;
+    };
+
+    file = async (identifier, user) => {
+        if (this._mainConfig.userData.location === "database") {
+            throw Error("This function can only be used with the 'file' system", { cause: 405 });
+        }
+
+        this._checkIdentifier(identifier);
+
+        const connection = getKnexConnection(this._mainConfig.database);
+        let results = await connection.select("*").from("user_data_list").where("id", identifier).first();
+        if (results === undefined) {
+            cleanupConnection(connection);
+            throw Error("The specified identifier do not exists", { cause: 404 });
+        }
+
+        results = await connection.select("*").from("users").where("login", user.login).first();
+        if (results === undefined) {
+            cleanupConnection(connection);
+            throw Error("The specified owned_by do not exists", { cause: 404 });
+        }
+
+        const response = await connection
+            .select("user_data.data_path")
+            .from("user_data")
+            .join("users", "users.id", "=", "user_data.owned_by")
+            .where({
+                "user_data.id": identifier,
+                "users.login": this._getUser(user).login,
+            })
+            .orWhere({
+                "user_data.id": identifier,
+                "user_data.is_shared": true,
+            })
+            .first();
+        if (response === undefined) {
+            cleanupConnection(connection);
+            throw Error("You are not allowed to see this file", { cause: 403 });
+        }
+
+        cleanupConnection(connection);
+
+        const filePath = this._getStorage(response.data_path);
+        if (fs.existsSync(filePath)) {
+            return JSON.parse(fs.readFileSync(filePath));
+        } else {
+            console.error(`The file ${filePath} was not found on the file system`);
+            return {};
+        }
     };
 
     find = async (identifier) => {
@@ -97,29 +183,77 @@ class UserDataModel {
     insert = async (userData) => {
         const data = this._check(userData);
 
+        if (this._mainConfig.userData.location === "database" && !this._allowedStringLength(data.data_content)) {
+            throw Error(`The specified content is too large for the database`, { cause: 413 });
+        }
+
         const connection = getKnexConnection(this._mainConfig.database);
-        data.owned_by = parseInt(data.owned_by);
-        const results = await connection.insert(data, ["id"]).into("user_data");
+        const results = await connection.select("id").from("users").where("id", data.owned_by).first();
+        if (results === undefined) {
+            cleanupConnection(connection);
+            throw Error("The specified owned_by username do not exists", { cause: 404 });
+        }
+        data.owned_by = results.id;
+
+        // Store this value to write it later in a dedicated file
+        const dataContent = data.data_content;
+
+        // These attributes will be managed by the backend
+        delete data.id;
+        delete data.data_path;
+
+        if (this._mainConfig.userData.location === "file") {
+            delete data.data_content;
+        }
+
+        const insertedData = await connection.insert([data], ["id"]).into("user_data");
+        const identifier = insertedData[0].id;
+
+        if (this._mainConfig.userData.location === "file") {
+            const fileName = `${identifier}-${results.id}-${ULID.ulid()}.json`;
+            const filePath = this._getStorage(fileName);
+
+            if (dataContent !== undefined) {
+                if (!fs.existsSync(filePath)) {
+                    // Create the data file in the storage directory
+                    fs.writeFileSync(filePath, JSON.stringify(dataContent, null, 2));
+                    // Update the data_path for the entry
+                } else {
+                    console.error(`The file ${filePath} exists, but this is a new entry`);
+                }
+            }
+
+            await connection("user_data").where("id", identifier).update({ data_path: fileName });
+        }
+
         cleanupConnection(connection);
-        return results;
+        return identifier;
     };
 
     remove = async (identifier, user) => {
         this._checkIdentifier(identifier);
 
         const connection = getKnexConnection(this._mainConfig.database);
-        const result = await connection.select("*").from("user_data").where("id", identifier).first();
-        if (result === undefined) {
+        const results = await connection.select("*").from("user_data").where("id", identifier).first();
+        if (results === undefined) {
             cleanupConnection(connection);
             throw Error("The specified identifier do not exists", { cause: 404 });
         }
-        if (user.login !== "admin" && user.id.toString() !== result.owned_by.toString()) {
+        if (user.login !== "admin" && user.id.toString() !== results.owned_by.toString()) {
             cleanupConnection(connection);
             throw Error(`The resources is not owned by ${user.login}`, { cause: 404 });
         }
 
-        // using select here allows mocking in tests
-        await connection.select("*").from("user_data").where("id", identifier).del();
+        if (this._mainConfig.userData.location === "file") {
+            const filePath = this._getStorage(results.data_path);
+            if (fs.existsSync(filePath)) {
+                fs.rmSync(filePath);
+            } else {
+                console.error(`The file ${filePath} was not found for the entry ${identifier}`);
+            }
+        }
+
+        await connection.from("user_data").where("id", identifier).del();
         cleanupConnection(connection);
         return true;
     };
@@ -130,20 +264,41 @@ class UserDataModel {
         }
         const data = this._check(userData);
 
+        if (this._mainConfig.userData.location === "database" && !this._allowedStringLength(data.data_content)) {
+            throw Error(`The specified content is too large for the database`, { cause: 413 });
+        }
+
         const connection = getKnexConnection(this._mainConfig.database);
-        let results = await connection.select("id").from("user_data").where("id", data.id).first();
+        const results = await connection.select("id", "data_path").from("user_data").where("id", data.id).first();
         if (results === undefined) {
             cleanupConnection(connection);
             throw Error("The specified identifier do not exists", { cause: 404 });
         }
 
-        results = await connection.select("*").from("users").where("login", data.owned_by).first();
-        if (results === undefined) {
+        const dataPath = results.data_path;
+
+        const user = await connection.select("*").from("users").where("id", data.owned_by).first();
+        if (user === undefined) {
             cleanupConnection(connection);
             throw Error("The specified owned_by do not exists", { cause: 404 });
         }
-        data.owned_by = results.id;
+        data.owned_by = user.id;
+
+        if (this._mainConfig.userData.location === "file") {
+            // Only update the data content when the attribute is in the request
+            if (data.data_content !== undefined) {
+                const filePath = this._getStorage(dataPath);
+                fs.writeFileSync(filePath, JSON.stringify(userData.data_content, null, 2));
+            }
+
+            delete data.data_content;
+        }
+
+        // This attribute cannot be updated manually!
+        delete data.data_path;
+
         await connection.update(data).into("user_data").where("id", data.id);
+
         cleanupConnection(connection);
         return true;
     };

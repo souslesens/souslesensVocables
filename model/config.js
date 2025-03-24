@@ -122,6 +122,12 @@ const MainConfigObject = z
             })
             .strict()
             .optional(),
+        userData: z
+            .object({
+                location: z.enum(["database", "file"]),
+                maximumFileSize: z.number().positive(),
+            })
+            .strict(),
     })
     .strict();
 

@@ -21,10 +21,8 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: "npm"
+      - run: npm ci
       - run: |
-          npm ci
-          mkdir -p docs/docs/jsdoc
-          npm run --silent tools:jsdoc2md -- -c jsdoc.json > docs/docs/jsdoc/index.md
           cd docs
           python3 -m venv venv
           . ./venv/bin/activate

@@ -70,7 +70,7 @@ var MappingColumnsGraph = (function () {
      * @param {Object} newResource - The resource to be added to the graph.
      * @returns {void}
      */
-    self.drawResource = function (newResource,callback) {
+    self.drawResource = function (newResource) {
         self.graphDivWidth = $("#mappingModeler_graphDiv").width();
         minX = -self.graphDivWidth / 2 + stepX;
         var arrows = {
@@ -80,17 +80,7 @@ var MappingColumnsGraph = (function () {
             },
         };
         var edgeColor = "#ccc";
-
-
-        if (self.currentGraphNode && newResource.data.type == "Class") {
-            newResource.level=3
-        }
-        else  if (self.currentGraphNode && newResource.data.type == "Table") {
-            newResource.level=1
-        } else{
-            newResource.level=2
-        }
-    /*    self.initOffsets();
+        self.initOffsets();
         if (self.currentGraphNode && newResource.data.type == "Class") {
             newResource.x = self.currentGraphNode.x;
             newResource.y = self.currentGraphNode.y - 100;
@@ -102,7 +92,7 @@ var MappingColumnsGraph = (function () {
             }
             newResource.y = self.currentOffset.y;
         }
-     newResource.fixed = { x: true, y: true };*/
+        newResource.fixed = { x: true, y: true };
 
         var visjsData = { nodes: [], edges: [] };
         var visjsNode = newResource;
@@ -139,8 +129,6 @@ var MappingColumnsGraph = (function () {
                         data: { type: type },
                         arrows: arrows,
                         color: edgeColor,
-
-
                     });
 
                     //  self.updateCurrentGraphNode(visjsNode);
@@ -159,8 +147,6 @@ var MappingColumnsGraph = (function () {
         //$('#suggestionsSelectJstreeDiv').jstree().destroy();
 
         self.currentGraphNode = newResource;
-        if(callback)
-            callback()
     };
 
     /**
@@ -216,22 +202,15 @@ var MappingColumnsGraph = (function () {
 
             visjsOptions: {
                 edges: {
-                    smooth: true
+                    smooth: {
+                        type: "cubicBezier",
+                        // type: "diagonalCross",
+                        forceDirection: "horizontal",
+                        roundness: 0.4,
+                    },
                 },
             },
 
-           layoutHierarchical : {
-                direction: "LR",
-                sortMethod: "hubsize",
-                levelSeparation: 350,
-                // parentCentralization: false,
-                shakeTowards: "roots",
-                blockShifting: true,
-                edgeMinimization: true,
-                parentCentralization: true,
-
-                nodeSpacing: 100,
-            },
             onclickFn: MappingColumnsGraph.onVisjsGraphClick,
             onRightClickFn: MappingColumnsGraph.showGraphPopupMenu,
         };
@@ -527,7 +506,6 @@ var MappingColumnsGraph = (function () {
      */
     self.loadVisjsGraph = function (callback) {
         MappingModeler.clearMappings();
-     //   return callback()
         setTimeout(function () {
             self.visjsGraph.loadGraph("mappings_" + MappingModeler.currentSLSsource + "_ALL" + ".json", false, function (err, result) {
                 if (result?.options?.config) {
@@ -556,7 +534,7 @@ var MappingColumnsGraph = (function () {
                     }
                 }
 
-                if(false && result?.nodes){
+                if(result?.nodes){
                     self.createDataSourcesClusters();
                 }
                 
@@ -881,11 +859,7 @@ var MappingColumnsGraph = (function () {
         if (!edge) {
             return;
         }
-        try {
-            self.visjsGraph.data.edges.add(edge);
-        }catch(e){
-            console.log(e);
-        }
+        self.visjsGraph.data.edges.add(edge);
         self.saveVisjsGraph();
     };
 

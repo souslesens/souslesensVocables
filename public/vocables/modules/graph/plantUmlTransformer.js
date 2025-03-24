@@ -88,6 +88,7 @@ var PlantUmlTransformer = (function () {
         var str = "@startuml\r\n";
 
         visjsData.nodes.forEach(function (node) {
+            if (!nodesMap[node.id]) return;
             if (node.shape == "dot" || node.data.type == "Class") {
                 str += "class " + nodesMap[node.id] + "\r\n";
             } else {
@@ -102,7 +103,7 @@ var PlantUmlTransformer = (function () {
                 relation = "<|--";
             var label = "";
             if (edge.label) label = " : " + edge.label;
-
+            if (!nodesMap[edge.to]) return;
             if (nodesMap[edge.to].startsWith("class")) {
                 relation = "<|--";
                 label = "";
@@ -114,7 +115,7 @@ var PlantUmlTransformer = (function () {
 
         console.log(str);
 
-        $("#smallDialogDiv").html("<div id='plantUmlImg' style='width:500px;height: 500px' />");
+        $("#smallDialogDiv").html("<div id='plantUmlImg' style='width:80%;height: 500px' />");
         $("#smallDialogDiv").dialog("open");
         self.getImage(str, "plantUmlImg");
     };

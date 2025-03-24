@@ -372,19 +372,17 @@ var KGquery_graph = (function () {
                     },
                     true,
                 );*/
-                var visjsDataSource={ nodes: [], edges: [] };
+                var visjsDataSource = { nodes: [], edges: [] };
                 UserDataWidget.listUserData(null, function (err, result) {
                     if (err) {
                         return alert(err || err.responseText);
                     }
                     // order to get last saved instance of our graph in user_data
-                    result=result.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+                    result = result.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
                     //if graph loaded with loadSaved --> display=checkBox loadAsGraph else last instance graph
                     result.forEach(function (item) {
                         if (item.data_label == source + "_model") {
                             visjsDataSource = item.data_content;
-                            
-                           
                         }
                     });
                     if (!err && visjsDataSource.nodes) {
@@ -404,8 +402,7 @@ var KGquery_graph = (function () {
                             }
                         });
                     }
-                    
-                    
+
                     callbackEach();
                 });
             },
@@ -747,10 +744,10 @@ var KGquery_graph = (function () {
             positions: positions,
             options: options,
         };
-        data.nodes.forEach(function(node){
-            if(data.positions[node.id]){
-                node.x=data.positions[node.id].x;
-                node.y=data.positions[node.id].y;
+        data.nodes.forEach(function (node) {
+            if (data.positions[node.id]) {
+                node.x = data.positions[node.id].x;
+                node.y = data.positions[node.id].y;
             }
         });
         var label = KGquery.currentSource + "_model";

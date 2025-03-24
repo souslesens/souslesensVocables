@@ -163,8 +163,8 @@ var UI = (function () {
                 LateralPanelWidth = 435;
             }
             self.smartPhoneScreen = false;
-            $("#graphDivContainer").css("width", $(window).width() - LateralPanelWidth - 10);
-            $("#graphDiv").css("width", $(window).width() - LateralPanelWidth - rightControlPanelWidth - 20);
+            $("#graphDivContainer").css("width", $(window).width() - LateralPanelWidth - 20);
+            $("#graphDiv").css("width", $(window).width() - LateralPanelWidth - rightControlPanelWidth - 30);
             $("#lateralPanelDiv").css("width", LateralPanelWidth);
         }
 

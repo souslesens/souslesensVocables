@@ -8,7 +8,7 @@ var Axioms_graph = (function () {
         var color = "#ddd";
         var shape = "box";
         var label = node.symbol || node.label || "";
-        var size = 8;
+        var size = 12;
         var font = null;
         if (node.symbol) {
             shape = "circle";
@@ -20,19 +20,23 @@ var Axioms_graph = (function () {
             }
         } else if (node.type && node.type.indexOf("Class") > -1) {
             color = "#00afef";
-            shape = "dot";
-            font = { bold: true, color: color };
+
+            // shape = "dot";
+            shape = "box";
+            //  font = {bold: false, color: "#fff"};
         } else if (node.type && node.type.indexOf("ObjectProperty") > -1) {
             color = "#f5ef39";
         } else if (node.type && node.type.indexOf("Restriction") > -1) {
+            shape = "text";
             label = node.label;
             node.predicates.forEach(function (predicate) {
+                level = level - 1;
                 if (predicate.p.indexOf("someValuesFrom") > -1) {
-                    label = "some";
+                    label = "«some»";
                 } else if (predicate.p.indexOf("allValuesFrom") > -1) {
-                    label = "only";
+                    label = "«only»";
                 } else if (predicate.p.indexOf("hasValue") > -1) {
-                    label = "value";
+                    label = "«value»";
                 } else {
                     if (predicate.p.indexOf("http://www.w3.org/2002/07/owl#onProperty") < 0) {
                         label = predicate.p.replace("http://www.w3.org/2002/07/owl#", "");
@@ -43,7 +47,7 @@ var Axioms_graph = (function () {
             color = "#cb9801";
         } else {
             shape = "dot";
-            size = 0.2;
+            size = 2; //0.2;
             color = "#70ac47";
         }
 
@@ -265,6 +269,7 @@ var Axioms_graph = (function () {
                                         to: childNode.id,
                                         label: edgeLabel,
                                         arrows: arrows,
+                                        color: "#222",
                                         data: {
                                             id: edgeId,
                                             from: node.id,
@@ -339,6 +344,34 @@ var Axioms_graph = (function () {
 
                     return callbackSeries();
                 },
+
+                //process inversion of some and property
+                function (callbackSeries) {
+                    var nodesMap = {};
+                    visjsData.nodes.forEach(function (node) {
+                        nodesMap[node.id] = node;
+                    });
+                    var nodesToDelete = [];
+                    visjsData.edges.forEach(function (edge, index) {
+                        var x = nodesMap[edge.from].label;
+                        if (nodesMap[edge.from].color == "#cb9801") {
+                            if (nodesMap[edge.to].data.type == "http://www.w3.org/2002/07/owl#ObjectProperty") {
+                                nodesMap[edge.from].label = nodesMap[edge.to].label + "\n" + nodesMap[edge.from].label + "";
+                                (nodesMap[edge.from].color = "#f5ef39"), (nodesMap[edge.from].font = { size: 14 }), (visjsData.edges[index].length = 120);
+                                nodesToDelete.push(edge.to);
+                            }
+                        }
+                    });
+                    var nodesToKeep = [];
+                    visjsData.nodes.forEach(function (node) {
+                        if (nodesToDelete.indexOf(node.id) < 0) {
+                            nodesToKeep.push(node);
+                        }
+                    });
+                    visjsData.nodes = nodesToKeep;
+
+                    return callbackSeries();
+                },
                 //draw graph
                 function (callbackSeries) {
                     if (options.addToGraph && self.axiomsVisjsGraph) {
@@ -367,8 +400,8 @@ var Axioms_graph = (function () {
     };
 
     self.drawGraph = function (visjsData, graphDiv, options) {
-        var xOffset = 80;
-        var yOffset = 80;
+        var xOffset = 90;
+        var yOffset = 85;
         //    xOffset = parseInt($("#axiomsDraw_xOffset").val());
         //   yOffset = parseInt($("#axiomsDraw_yOffset").val());
 
@@ -470,6 +503,20 @@ enabled:true},*/
     };
     self.showGraphDisplay = function () {
         self.axiomsVisjsGraph.showGraphConfig();
+    };
+
+    self.toGraphMl = function () {
+        self.axiomsVisjsGraph.toGraphMl();
+    };
+    self.toSVG = function () {
+        self.axiomsVisjsGraph.toSVG();
+    };
+    self.visjsDataToClassDiagram = function () {
+        var visjsData = {
+            nodes: self.axiomsVisjsGraph.data.nodes.get(),
+            edges: self.axiomsVisjsGraph.data.edges.get(),
+        };
+        PlantUmlTransformer.visjsDataToClassDiagram(visjsData);
     };
 
     return self;

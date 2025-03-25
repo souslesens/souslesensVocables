@@ -44,7 +44,7 @@ var KGquery = (function () {
         if (Config.clientCache.KGquery) {
             KGquery_myQueries.load(null, Config.clientCache.KGquery);
         }
-        self.clearAll();
+        //self.clearAll();
         $("#messageDiv").attr("id", "KGquery_messageDiv");
         $("#waitImg").attr("id", "KGquery_waitImg");
         $('#rightControlPanelDiv').load("./modules/tools/lineage/html/whiteBoardButtons.html",function(){
@@ -84,7 +84,7 @@ var KGquery = (function () {
             $("#graphDiv").load("./modules/tools/KGquery/html/KGquery_centralPanel.html", function () {
                 $("#lateralPanelDiv").load("./modules/tools/KGquery/html/KGquery_leftPanel.html", function () {
                     UI.disableEditButtons();
-                    KGquery_graph.drawVisjsModel("saved");
+                    //KGquery_graph.drawVisjsModel("saved");
                     UI.openTab("lineage-tab", "tabs_Query", KGquery.initQuery, "#QueryTabButton");
                     UI.resetWindowSize();
                     self.clearAll();

@@ -144,14 +144,14 @@ module.exports = () => {
                     },
                 },
             },
-            404: {
-                description: "The specified owned_by username do not exists",
+            422: {
+                description: "The resource cannot be insert in the database",
                 schema: {
                     type: "object",
                     properties: {
                         message: {
                             type: "string",
-                            default: "The specified owned_by username do not exists",
+                            default: "The resource cannot be insert in the database",
                         },
                     },
                 },

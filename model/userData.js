@@ -94,7 +94,7 @@ class UserDataModel {
      */
     _getUser = (user) => {
         if ((user === undefined) & (this._mainConfig.auth === "disabled")) {
-            return { login: "admin", groups: ["admin"] };
+            return { id: "1", login: "admin", groups: ["admin"] };
         }
         return user;
     };
@@ -102,17 +102,15 @@ class UserDataModel {
     all = async (user) => {
         const connection = getKnexConnection(this._mainConfig.database);
         const currentUser = this._getUser(user);
-        let currentUserData = await connection.select("*").from("user_data_list").where("owned_by", currentUser.login).orWhere("is_shared", true);
-
+        let currentUserData = await connection.select("*").from("user_data").where("owned_by", parseInt(currentUser.id)).orWhere("is_shared", true);
         currentUserData = currentUserData
             .map((data) => this._convertToJSON(data))
             .filter((data) => {
-                const isOwner = data.owned_by === currentUser.login;
+                const isOwner = data.owned_by === parseInt(currentUser.id);
                 const isSharedWithUser = data.is_shared && data.shared_users.includes(currentUser.login);
                 const isSharedWithGroup = data.is_shared && new Set(currentUser.groups.filter((grp) => new Set(data.shared_profiles).has(grp))).size;
                 return isOwner || isSharedWithUser || isSharedWithGroup;
             });
-
         cleanupConnection(connection);
         return currentUserData;
     };

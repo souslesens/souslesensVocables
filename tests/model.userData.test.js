@@ -31,7 +31,7 @@ describe("UserDataModel", () => {
     });
 
     test("get unshared userData", async () => {
-        const adminUser = {login: "admin", groups: []};
+        const adminUser = {id: "1", login: "admin", groups: []};
         const userData = await userDataModel.all(adminUser);
         expect(Array.from(userData).length).toBe(2);
         expect(userData).toStrictEqual([
@@ -44,12 +44,19 @@ describe("UserDataModel", () => {
                 "data_label": "data1",
                 "data_comment": "",
                 "data_group": "",
-                "data_content": {},
+                "data_content": {
+                    "sparqlServerUrl":"string",
+                    "graphUri":"string",
+                    "prefixes":{},
+                    "lookups":{},
+                    "databaseSources":{},
+                    "cvsSources":{}
+                },
                 "is_shared": false,
                 "shared_profiles": [],
                 "shared_users": [],
                 "created_at": "2025-01-24T14:16:41.111Z",
-                "owned_by": "admin"
+                "owned_by": 1
             },
             {
                 "id": 5,
@@ -68,7 +75,7 @@ describe("UserDataModel", () => {
                     "skos_user"
                 ],
                 "created_at": "2025-01-27T08:05:51.750Z",
-                "owned_by": "admin"
+                "owned_by": 1
             }
         ])
     });
@@ -323,7 +330,7 @@ describe("UserDataModel", () => {
             id: 1,
             data_type: "data_type",
             data_content: { test: "test" },
-            owned_by: "someone",
+            owned_by: "2",
         };
 
         expect(async () => await userDataModel.update(updateUserData)).rejects.toThrow("The specified content is too large for the database");
@@ -399,6 +406,6 @@ describe("UserDataModel", () => {
 
     test("test _getUser with undefined user without authentication", async () => {
         userDataModel._mainConfig.auth = "disabled";
-        expect(userDataModel._getUser(undefined)).toStrictEqual({ login: "admin", groups: ["admin"] });
+        expect(userDataModel._getUser(undefined)).toStrictEqual({ "id": "1", login: "admin", groups: ["admin"] });
     });
 });

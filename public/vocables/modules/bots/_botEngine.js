@@ -26,7 +26,7 @@ var _botEngine = (function () {
             self.divId = options.divId;
         } else {
             divId = "botDiv";
-
+            self.divId =null;
             $($("#botPanel").parent()[0]).on("dialogclose", function (event) {
                 self.firstLoad = false;
             });

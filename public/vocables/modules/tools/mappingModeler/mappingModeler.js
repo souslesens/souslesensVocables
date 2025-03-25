@@ -48,10 +48,11 @@ var MappingModeler = (function () {
      */
     self.legendItemsArray = [
         //{ label: "Table", color: "#a8da83", shape: "ellipse" },
-        {label: "Column", color: "#cb9801", shape: "ellipse", size: 14},
+        {label: "Column", color: "#cb9801", shape: "box", size: 14},
         {label: "RowIndex", color: "#cb9801", shape: "triangle"},
         {label: "VirtualColumn", color: "#cb9801", shape: "square"},
         {label: "URI", color: "#bc7dec", shape: "square"},
+
 
         {label: "Class", color: "#00afef", shape: "box"},
     ];
@@ -333,7 +334,7 @@ var MappingModeler = (function () {
             hiddenNodes.push("Class");
             hiddenNodes.push("Connective");
         }
-        Axiom_activeLegend.hideLegendItems(hiddenNodes);
+       self.hideLegendItems(hiddenNodes);
     };
 
     /**
@@ -384,6 +385,7 @@ var MappingModeler = (function () {
                 var edge = {
                     to: id,
                     from: self.currentTable.name,
+                    color:"#8f8a8c"
                 }
                 MappingColumnsGraph.visjsGraph.data.edges.add(edge);
             });
@@ -477,28 +479,16 @@ var MappingModeler = (function () {
                     self.currentRelation.label = resourceUri;
                     color = "#333";
                 }
-                var edge = {
-                    from: self.currentRelation.from.id,
-                    to: self.currentRelation.to.id,
-                    label: self.currentRelation.label,
-                    arrows: {
-                        to: {
-                            enabled: true,
-                            type: arrowType,
-                        },
-                    },
-                    "smooth": {
-                        "type": "curvedCW",
-                        "forceDirection": "vertical",
-                        "roundness": 0.65
-                    },
-                    data: {
-                        id: resourceUri,
-                        type: resourceUri,
-                        source: property ? property.source : null,
-                    },
-                    color: color,
-                };
+               var edge= MappingColumnsGraph.getVisjsObjectPropertyEdge(self.currentRelation.from.id,
+                    self.currentRelation.to.id,
+                    self.currentRelation.label,
+                   arrowType,
+                   property,
+                  resourceUri,
+                   color
+
+                )
+
                 MappingColumnsGraph.addEdge([edge]);
 
                 self.currentRelation = null;
@@ -564,7 +554,7 @@ var MappingModeler = (function () {
             self.loadSuggestionSelectJstree(self.currentTable.columns, "Columns");
             //common.fillSelectOptions("axioms_legend_suggestionsSelect", self.currentTable.columns, false);
         } else if (self.currentResourceType == "Class") {
-            //   self.hideLegendItems();
+
             var newObject = {id: "createClass", label: "_Create new Class_"};
             self.getAllClasses(MappingModeler.currentSLSsource, function (err, classes) {
                 if (err) {
@@ -576,7 +566,7 @@ var MappingModeler = (function () {
                 self.loadSuggestionSelectJstree(classesCopy, "Classes");
             });
         } else if (self.currentResourceType == "ObjectProperty") {
-            //   self.hideLegendItems();
+
             var newObjects = [
                 {id: "createObjectProperty", label: "_Create new ObjectProperty_"},
                 {id: "function", label: "function"},

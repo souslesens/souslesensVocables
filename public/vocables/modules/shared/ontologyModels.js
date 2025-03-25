@@ -984,6 +984,9 @@ var OntologyModels = (function () {
                 },
                 //add subProperties with superProporties constaints
                 function (callbackSeries) {
+                if(! Config.ontologiesVocabularyModels[source])
+                    return callbackSeries()
+
                     for (var key in validConstraints) {
                         var subPropConstraints = {};
                         var constraints = validConstraints[key];

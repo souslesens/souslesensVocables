@@ -487,19 +487,10 @@ var DataSourceManager = (function () {
             var table = obj.node.data.id;
             $("#MappingModeler_currentDataSource").html(table);
 
+            MappingColumnsGraph.zoomOnTable(table)
             if(! MappingColumnsGraph.visjsGraph.data.nodes.get(table)){
-                var newRessource={
-                    id:table,
-                    label:table,
-                    shape :"ellipse",
-                    data:{ id:table,
-                        label:table,
-                        type:"Table"
-                    }
-
-
-                }
-                MappingColumnsGraph.drawResource(newRessource)
+               var tableNode= MappingColumnsGraph.getVisjsTableNode(table)
+                MappingColumnsGraph.drawResource(tableNode)
 
             }
         }

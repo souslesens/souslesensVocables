@@ -690,6 +690,7 @@ var KGquery_graph = (function () {
         }
         self.setAllNodesAttr("size",  parseInt(size) );
         self.KGqueryGraph.onScaleChange();
+        self.setDecorationAttr("size", parseInt(size));
 
     };
     self.setAllNodesAttr = function (attr, value) {
@@ -703,7 +704,9 @@ var KGquery_graph = (function () {
         });
         self.KGqueryGraph.data.nodes.update(newNodes);
     };
-
+    self.setDecorationAttr= function(){
+        
+    }
     self.resetVisjNodes = function (nodes) {
         if (!KGquery_graph.KGqueryGraph) {
             return;

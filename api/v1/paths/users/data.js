@@ -5,7 +5,8 @@ const userManager = require("../../../../bin/user.");
 module.exports = () => {
     GET = async (req, res, _next) => {
         try {
-            let userDatas = await userDataModel.all(req.user);
+            const userInfo = await userManager.getUser(req.user);
+            let userDatas = await userDataModel.all(userInfo.user);
             if (req.query.data_label) {
                 userDatas = Object.values(userDatas).filter((data) => {
                     return data.data_label?.includes(req.query.data_label);

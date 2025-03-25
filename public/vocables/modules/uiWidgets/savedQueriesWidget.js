@@ -179,7 +179,7 @@ var SavedQueriesWidget = (function () {
                     }
                     result.id = result.id;
                     result.data_label = result.label;
-                    var node = { id: result.insertedId[0].id, text: result.label, parent: group_parent, data: result };
+                    var node = { id: result.id, text: result.label, parent: group_parent, data: result };
                     $("#userDataWidget_jstree").jstree(true).create_node(group_parent, node);
 
                     //$("#SavedQueriesComponent_itemsSelect").append("<option value='" + result.insertedId[0].id + "'>" + result.label + "</option>");

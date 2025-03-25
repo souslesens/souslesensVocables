@@ -7,6 +7,7 @@ import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import KGquery_nodeSelector from "./KGquery_nodeSelector.js";
 import UserDataWidget from "../../uiWidgets/userDataWidget.js";
 import DataSourceManager from "../mappingModeler/dataSourcesManager.js";
+import MainController from "../../shared/mainController.js";
 
 var KGquery_graph = (function () {
     var self = {};
@@ -85,8 +86,8 @@ var KGquery_graph = (function () {
                         self.visjsOptions,
                     );
 
-                    if (false) {
-                        UserDataWidget.listUserData(null, function (err, result) {
+                    if (true) {
+                        UserDataWidget.listUserData({data_type:'KGmodelGraph',data_tool:'KGquery',data_source:MainController.currentSource}, function (err, result) {
                             if (err) {
                                 return alert(err || err.responseText);
                             }
@@ -769,11 +770,11 @@ var KGquery_graph = (function () {
         });
         var label = KGquery.currentSource + "_model";
         var group = "KGquery/models";
-
-        UserDataWidget.saveMetadata(label, null, data, group, function (err, result) {
+        var data_type='KGmodelGraph'
+        UserDataWidget.saveMetadata(label, data_type, data, group, function (err, result) {
             $("#KGquery_messageDiv").text("saved graph");
         });
-        //return;
+        return;
         var fileName = KGquery.currentSource + "_KGmodelGraph.json";
         self.KGqueryGraph.saveGraph(fileName, true);
         return;

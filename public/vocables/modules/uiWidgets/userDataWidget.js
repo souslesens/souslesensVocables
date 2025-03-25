@@ -23,7 +23,7 @@ var UserDataWidget = (function () {
                     self.callbackFn(err);
                 }
 
-                self.callbackFn(null, { label: label, data_type: data_type, data_content: self.jsonContent, insertedId: result.id, data_group: group });
+                self.callbackFn(null, { label: label, data_type: data_type, data_content: self.jsonContent, id: result.id, data_group: group });
             });
         });
 
@@ -92,9 +92,12 @@ var UserDataWidget = (function () {
     };
 
     self.listUserData = function (filter, callback) {
+        if(!filter) filter = {};
+        
         $.ajax({
             type: "GET",
             url: `${Config.apiUrl}/users/data`,
+            data: filter,
             dataType: "json",
             success: function (_result, _textStatus, _jqXHR) {
                 callback(null, _result);

@@ -157,7 +157,7 @@ var Lineage_whiteboard = (function () {
      * Handles errors and sets up the lateral panel with the required elements.
      * @returns {void}
      */
-    self.loadSources = function () {
+    self.loadSources = function (options) {
         Lineage_sources.loadSources(MainController.currentSource, function (err) {
             if (err) {
                 return alert(err.responseText);

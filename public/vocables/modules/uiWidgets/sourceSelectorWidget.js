@@ -337,7 +337,12 @@ var SourceSelectorWidget = (function () {
         MainController.currentSource = obj.node.data.id;
         $("#selectedSource").html(MainController.currentSource);
         //  $("#mainDialogDiv").parent().hide();
-        Lineage_whiteboard.loadSources();
+        Lineage_sources.loadSources(MainController.currentSource, function (err) {
+            if (err) {
+                return alert(err.responseText);
+            }
+        });
+       
     };
 
     self.getJstreeConceptsContextMenu = function () {

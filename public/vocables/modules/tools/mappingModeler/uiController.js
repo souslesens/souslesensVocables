@@ -27,10 +27,10 @@ var UIcontroller = (function () {
             MappingModeler.initActiveLegend(self.legendGraphDivId);
             MappingModeler.loadSuggestionSelectJstree(MappingModeler.currentTable.columns, "Columns");
             $("#MappingModeler_currentDataSource").html(DataSourceManager.currentConfig.currentDataSource.name);
-            try {
+         /*   try {
                 MappingColumnsGraph.createDataSourcesClusters();
                 MappingColumnsGraph.visjsGraph.network.openCluster("cluster_" + MappingModeler.currentTable.name);
-            } catch (e) {}
+            } catch (e) {}*/
         } else if (tabId == "MappingModeler_technicalDatailTab") {
             MappingsDetails.showDetailsDialog();
         } else if (tabId == "MappingModeler_tripleFactoryTab") {

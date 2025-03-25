@@ -46,6 +46,10 @@ var DataSourceManager = (function () {
             dir: mappingsDir + "/" + source,
             fileName: "main.json",
         };
+        var payload = {
+            dir: mappingsDir + "/" + source,
+            fileName: "main.json",
+        };
         $.ajax({
             type: "GET",
             url: Config.apiUrl + "/data/file",
@@ -477,8 +481,27 @@ var DataSourceManager = (function () {
             UIcontroller.onActivateLeftPanelTab("MappingModeler_columnsTab");
         }
 
-        if (obj.node.data.type == "table") {
-            $("#MappingModeler_currentDataSource").html(DataSourceManager.currentConfig.currentDataSource.currentTable);
+
+
+        if (obj.node.data.type == "table" || obj.node.data.type == "csvSource" ) {
+            var table = obj.node.data.id;
+            $("#MappingModeler_currentDataSource").html(table);
+
+            if(! MappingColumnsGraph.visjsGraph.data.nodes.get(table)){
+                var newRessource={
+                    id:table,
+                    label:table,
+                    shape :"ellipse",
+                    data:{ id:table,
+                        label:table,
+                        type:"Table"
+                    }
+
+
+                }
+                MappingColumnsGraph.drawResource(newRessource)
+
+            }
         }
     };
 

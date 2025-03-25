@@ -244,7 +244,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
 
                     var newNodes = [];
                     self.data.nodes.get().forEach(function (node) {
-                        if (node.group == startNode.group && startNode.id != node.id) {
+                        if (node.group.indexOf(startNode.group) > -1 && startNode.id != node.id) {
                             var position = self.network.getPosition(node.id);
                             newNodes.push({
                                 id: node.id,

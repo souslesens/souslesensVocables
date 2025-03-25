@@ -1,11 +1,10 @@
 <style></style>
 
-<div style="display: flex; flex-direction: column; min-height: 650px">
+<div style="display: flex; flex-direction: column; min-height: 650px;max-width:80VW">
     <div style="width: 100%; height: 25%; overflow: auto">
         <div>
             <div id="nodeInfosAxioms_infosDiv" style="color: #278ecc"></div>
             <div id="nodeInfosAxioms_axiomsJstreeDiv"></div>
-            <button class="w3-button slsv-button-3" onclick="Axioms_graph.showGraphDisplay()">Display</button>
         </div>
         <!--
     <div style="display: flex  ;flex-direction: column;width:100%">
@@ -48,6 +47,9 @@
 
     <div id="nodeInfosAxioms_manchesterDiv" style="display: block">
         <button class="w3-button slsv-button-3" onclick="Axiom_activeLegend.axiomTriplesToManchester()">toManchester</button>
+        <button class="w3-button slsv-button-3" onclick="Axioms_graph.toGraphMl()">graphML</button>
+        <button class="w3-button slsv-button-3" onclick="Axioms_graph.toSVG()">SVG</button>
+        <!-- <button class="w3-button slsv-button-3" onclick="Axioms_graph.visjsDataToClassDiagram()">Uml</button>-->
         <span id="axiomsEditor_textDiv" style="width: 80%; height: 50px; background-color: #ddd"></span>
     </div>
 </div>

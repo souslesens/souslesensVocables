@@ -1,6 +1,11 @@
 <!doctype html>
 <html>
     <head>
+      <style>
+           #mainDialogDiv {
+                max-width: 80% !important;
+            }
+        </style>
         <meta charset="utf-8" />
         <title>SouslesensVocables</title>
 
@@ -327,6 +332,9 @@
                             width: "auto",
                             modal: false,
                             position: { my: "center", at: "center", of: window },
+                            open: function( event, ui ) {
+                              //  $("#mainDialogDiv").css("width","80%")
+                            }
                         });
 
                         $("#smallDialogDiv").dialog({

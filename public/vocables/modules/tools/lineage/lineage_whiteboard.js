@@ -2446,7 +2446,7 @@ var Lineage_whiteboard = (function () {
                     var rdfType;
                     data.forEach(function (item) {
                         // filter blanknodes
-                        if (!item.subject.startsWith("http") || !item.object.startsWith("http")) return;
+                        if (item.subject.startsWith && item.object.startsWith && (!item.subject.startsWith("http") || !item.object.startsWith("http"))) return;
 
                         if (!existingNodes[item.subject.value]) {
                             existingNodes[item.subject.value] = 1;

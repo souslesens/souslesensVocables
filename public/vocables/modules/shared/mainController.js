@@ -287,6 +287,7 @@ var MainController = (function () {
             $("#Lineage_graphEditionButtons").hide();
         }
         $("#currentToolTitle").html("");
+        $("#rightControlPanelDiv").html("");
         if (UI.currentTheme["@" + toolId + "-logo"]) {
             $("#currentToolTitle").prepend(`<button class="${toolId}-logo slsv-invisible-button" style="height:41px;width:41px;"> </button> <div style='margin-bottom:5px;'>${toolId} </div>`);
         } else {
@@ -295,14 +296,14 @@ var MainController = (function () {
         MainController.currentTool = toolId;
 
         if (!Config.userTools[toolId].noSource) {
-            $('#rightControlPanelDiv').show();
+            $("#rightControlPanelDiv").show();
             if (self.currentSource == null) {
                 SourceSelectorWidget.showSourceDialog(true);
             } else {
                 SourceSelectorWidget.initSource(self.currentSource);
             }
         } else {
-            $('#rightControlPanelDiv').hide();
+            $("#rightControlPanelDiv").hide();
             UI.cleanPage();
             self.initTool(toolId);
             var homePageOptions = {};

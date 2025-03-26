@@ -31,7 +31,7 @@ var UserDataWidget = (function () {
         var tool = MainController.currentTool || "?";
         var source = MainController.currentSource || "?";
         var payload = {
-            data_path:  "",
+            data_path: "",
             data_type: data_type,
             data_label: label,
             data_comment: "",
@@ -161,7 +161,7 @@ var UserDataWidget = (function () {
 
                     var jstreeData = [];
                     self.uniqueJstreeNodes = {};
-                    
+
                     // check data after filters
                     if (data.length == 0) {
                         $("#userDataWidget_jstree").html("nothing to load");

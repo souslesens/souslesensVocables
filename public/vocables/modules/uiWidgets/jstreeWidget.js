@@ -286,8 +286,7 @@ var JstreeWidget = (function () {
                         .jstree(true)
                         .get_node("#").children,
                 );
-        }
-        catch(e){
+        } catch (e) {
             console.log(e);
         }
     };

@@ -36,14 +36,9 @@ var UI = (function () {
                 display: "block"
             }
         }*/
-        
+
         var gif = $(`<img  src=\"images/souslesensVocables.gif\" >`).on("load", function () {
-            
-            $("#graphDiv").html(
-                "<div style='position:absolute;left:" + gifStart + "px'>" +
-                $(this).prop("outerHTML") + 
-                "</div>"
-            );
+            $("#graphDiv").html("<div style='position:absolute;left:" + gifStart + "px'>" + $(this).prop("outerHTML") + "</div>");
             UI.resetWindowSize();
         });
     };
@@ -174,7 +169,7 @@ var UI = (function () {
             }
             self.smartPhoneScreen = false;
             $("#graphDivContainer").css("width", $(window).width() - LateralPanelWidth - 25);
-            $("#graphDiv").css("width", $(window).width() - LateralPanelWidth - rightControlPanelWidth -20);
+            $("#graphDiv").css("width", $(window).width() - LateralPanelWidth - rightControlPanelWidth - 20);
             $("#lateralPanelDiv").css("width", LateralPanelWidth);
         }
 

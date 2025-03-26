@@ -26,7 +26,7 @@ var _botEngine = (function () {
             self.divId = options.divId;
         } else {
             divId = "botDiv";
-            self.divId =null;
+            self.divId = null;
             $($("#botPanel").parent()[0]).on("dialogclose", function (event) {
                 self.firstLoad = false;
             });
@@ -170,11 +170,9 @@ var _botEngine = (function () {
     };
 
     self.previousStep = function () {
-       
         if (self.history.currentIndex > 0) {
             $("#botPromptInput").css("display", "none");
 
-            
             var lastStepIndex = self.history.step[self.history.step.length - 2];
             if (lastStepIndex == 0) {
                 return self.reset();
@@ -182,12 +180,10 @@ var _botEngine = (function () {
             self.currentObj = self.history.workflowObjects[lastStepIndex];
             var returnValue = self.history.returnValues[lastStepIndex];
 
-            
-
             self.deleteLastMessages(2);
 
             // cancel var filled concerned by the reverse
-         
+
             var VarFillingKeys = Object.keys(self.history.VarFilling);
             var VarToUnfill = VarFillingKeys.filter((key) => key >= lastStepIndex);
             if (VarToUnfill.length > 0) {
@@ -249,23 +245,20 @@ var _botEngine = (function () {
             var message = self.currentBot.functionTitles[step];
             // In case 2 questions are asked consecutively erase the last one
             var messageDivs = $("#botTA").children();
-            if(messageDivs.length>0){
-                var lastMessages=$(messageDivs[0]).children().filter('span');
-                if(lastMessages.length==1){
+            if (messageDivs.length > 0) {
+                var lastMessages = $(messageDivs[0]).children().filter("span");
+                if (lastMessages.length == 1) {
                     self.deleteLastMessages();
                 }
-                
-                
             }
-            
-            if(message){
-                self.insertBotMessage(message , { isQuestion: true });
-            }else{
-                self.insertBotMessage('select an option' , { isQuestion: true });
-            }
-        } 
-    };
 
+            if (message) {
+                self.insertBotMessage(message, { isQuestion: true });
+            } else {
+                self.insertBotMessage("select an option", { isQuestion: true });
+            }
+        }
+    };
 
     self.abort = function (message) {
         alert(message);
@@ -330,7 +323,7 @@ var _botEngine = (function () {
             if (evt.ctrlKey) {
                 return;
             }
-            
+
             if (varToFill) {
                 self.history.VarFilling[self.history.currentIndex] = { VarFilled: varToFill, valueFilled: selectedValue };
                 if (Array.isArray(self.currentBot.params[varToFill])) {
@@ -441,7 +434,7 @@ var _botEngine = (function () {
         if (chat_class == "chat-right") {
             $(html).insertAfter("#" + self.lastTokenId);
         } else {
-            $('#botTA').prepend(html);
+            $("#botTA").prepend(html);
             //$(html).insertBefore("#bot_input");
         }
 
@@ -463,7 +456,7 @@ var _botEngine = (function () {
         self.showList(choices, varToFill);
         self.setStepMessage();
     };
-    
+
     self.getQueryText = function () {
         var queryText = "";
         $(".bot-token").each(function () {
@@ -565,28 +558,23 @@ var _botEngine = (function () {
         }
         return startParams;
     };
-    self.deleteLastMessages=function(numberOfMessagesToRemove){
-        if(!numberOfMessagesToRemove){
-            numberOfMessagesToRemove=1;
+    self.deleteLastMessages = function (numberOfMessagesToRemove) {
+        if (!numberOfMessagesToRemove) {
+            numberOfMessagesToRemove = 1;
         }
-         for (var i = 0; i < numberOfMessagesToRemove; i++) {
+        for (var i = 0; i < numberOfMessagesToRemove; i++) {
             var messageDivs = $("#botTA").children();
-            if(messageDivs.length>0){
-                var lastMessageDiv=$(messageDivs[0])
-                var lastMessages=$(lastMessageDiv).children().filter('span');
-                if(lastMessages.length==1 ){
+            if (messageDivs.length > 0) {
+                var lastMessageDiv = $(messageDivs[0]);
+                var lastMessages = $(lastMessageDiv).children().filter("span");
+                if (lastMessages.length == 1) {
                     $(lastMessageDiv).remove();
-                }else{
+                } else {
                     $(lastMessages[1]).remove();
                 }
-                
-                
             }
-           
         }
-         
-
-    }
+    };
 
     return self;
 })();

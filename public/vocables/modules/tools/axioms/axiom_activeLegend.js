@@ -407,8 +407,7 @@ var Axiom_activeLegend = (function () {
         //  });
     };
     self.hideLegendItems = function (hiddenNodes) {
-        if(!self.axiomsLegendVisjsGraph)
-            return;
+        if (!self.axiomsLegendVisjsGraph) return;
         var legendNodes = self.axiomsLegendVisjsGraph.data.nodes.getIds();
         var newNodes = [];
         legendNodes.forEach(function (nodeId) {

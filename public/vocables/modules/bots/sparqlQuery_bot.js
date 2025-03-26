@@ -158,7 +158,7 @@ var SparqlQuery_bot = (function () {
                     id: "Facts",
                     label: "SKG Facts",
                 },
-                { id: "Constraints", label: "Ontology onstraints" },
+                { id: "Constraints", label: "Ontology Constraints" },
             ];
             if (self.noFacts) {
                 choices = ["Constraints"];

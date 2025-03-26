@@ -17,5 +17,5 @@ help:
 # Catch-all target: route all unknown targets to Sphinx using the new
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
 %: Makefile
-	../node_modules/jsdoc-to-markdown/bin/cli.js -c jsdoc/jsdoc.json --template jsdoc/jsdoc.hbs > docs/devdoc/codedoc/jsdoc.md
+	npm run tools:jsdoc2md > docs/devdoc/codedoc/jsdoc.md
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)

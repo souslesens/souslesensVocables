@@ -21,14 +21,19 @@
     </div>
 
     <div class="w3-panel w3-border w3-round-small lateralPanelSection-width">
-        <div class="titleboxButtons font-button2-color">Sets</div>
+        <div class="titleboxButtons font-button2-color">Decorations</div>
         <button class="slsv-button-2" onclick="KGquery_graph.setAllNodesFontSize()">AllNodesFontSize</button>
-
-        Node Color
-        <select class="select-bar-theme2" id="KGquery_graph_nodeColorSelect" onclick="KGquery_graph.setNodeAttr('color',$(this).val())"></select>
-        <div>
-            <br />Node Shape
-            <select class="select-bar-theme2" id="KGquery_graph_nodeShapeSelect" onclick="KGquery_graph.setNodeAttr('shape',$(this).val())"></select>
+        <button class="slsv-button-2" onclick="KGquery_graph.setAllNodesSizes()">AllNodesSize</button>
+        <div style="margin-top: 5px;">
+            Node Color
+            <select class="select-bar-theme2" id="KGquery_graph_nodeColorSelect" onclick="KGquery_graph.setNodeAttr('color',$(this).val())"></select>
+            <div>
+                <br />Node Shape
+                <select class="select-bar-theme2" id="KGquery_graph_nodeShapeSelect" onclick="KGquery_graph.setNodeAttr('shape',$(this).val())"></select>
+            </div>
         </div>
+        <button class="w3-button slsv-button-2" id="lineage_actionDiv_selectedNodesDialog" onclick="Lineage_selection.showSelectionDialog()" title="Selection">
+            <img src="./icons/CommonIcons/Query.png" />
+        </button>
     </div>
 </div>

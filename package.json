@@ -1,6 +1,6 @@
 {
     "name": "souslesensvocables",
-    "version": "2.2.1",
+    "version": "2.3.0",
     "private": true,
     "workspaces": [
         "mainapp"
@@ -19,6 +19,8 @@
         "tools:ncu": "ncu",
         "tools:tsc": "tsc",
         "tools:eslint": "eslint mainapp/src",
+        "tools:jsdoc": "jsdoc",
+        "tools:jsdoc2md": "jsdoc2md -c docs/jsdoc/jsdoc.json -t docs/jsdoc/jsdoc.hbs",
         "release:patch": "standard-version --skip.tag --skip.commit -t '' -r patch",
         "release:minor": "standard-version --skip.tag --skip.commit -t '' -r minor",
         "release:major": "standard-version --skip.tag --skip.commit -t '' -r major",

@@ -5,7 +5,8 @@ const userManager = require("../../../../bin/user.");
 module.exports = () => {
     GET = async (req, res, _next) => {
         try {
-            let userDatas = await userDataModel.all(req.user);
+            const userInfo = await userManager.getUser(req.user);
+            let userDatas = await userDataModel.all(userInfo.user);
             if (req.query.data_label) {
                 userDatas = Object.values(userDatas).filter((data) => {
                     return data.data_label?.includes(req.query.data_label);
@@ -105,9 +106,9 @@ module.exports = () => {
         try {
             const userData = await cleanUserData.clean(req.body);
             const userInfo = await userManager.getUser(req.user);
-            const results = await userDataModel.insert({ ...userData, owned_by: userInfo.user.id });
-            if (results.length === 1) {
-                res.status(200).json({ message: "The resource has been inserted successfully", id: results[0].id });
+            const identifier = await userDataModel.insert({ ...userData, owned_by: parseInt(userInfo.user.id)});
+            if (identifier !== undefined) {
+                res.status(200).json({ message: "The resource has been inserted successfully", id: identifier });
             } else {
                 res.status(422).json({ message: "The resource cannot be insert in the database" });
             }
@@ -144,14 +145,14 @@ module.exports = () => {
                     },
                 },
             },
-            404: {
-                description: "The specified owned_by username do not exists",
+            422: {
+                description: "The resource cannot be insert in the database",
                 schema: {
                     type: "object",
                     properties: {
                         message: {
                             type: "string",
-                            default: "The specified owned_by username do not exists",
+                            default: "The resource cannot be insert in the database",
                         },
                     },
                 },
@@ -184,7 +185,7 @@ module.exports = () => {
                 throw Error(`The resources is not owned by ${userInfo.user.login}`, { cause: 403 });
             }
             const userData = await cleanUserData.clean(req.body);
-            await userDataModel.update({ ...userData, owned_by: userInfo.user.login });
+            await userDataModel.update({ ...userData, owned_by: `${userInfo.user.id}` });
             res.status(200).json({ message: "The resource has been updated successfully" });
         } catch (error) {
             if (error.cause !== undefined) {

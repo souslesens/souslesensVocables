@@ -7,6 +7,7 @@ import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import KGquery_nodeSelector from "./KGquery_nodeSelector.js";
 import UserDataWidget from "../../uiWidgets/userDataWidget.js";
 import DataSourceManager from "../mappingModeler/dataSourcesManager.js";
+import MainController from "../../shared/mainController.js";
 
 var KGquery_graph = (function () {
     var self = {};
@@ -69,9 +70,10 @@ var KGquery_graph = (function () {
         if (!options) {
             options = {};
         }
+        var savedGraphLocation='UserData';
         async.series(
             [
-                //saved visjgraphData
+                //saved visjgraphData default saved in user_data
                 function (callbackSeries) {
                     if (mode.indexOf("saved") < 0) {
                         return callbackSeries();
@@ -85,41 +87,54 @@ var KGquery_graph = (function () {
                         self.visjsOptions,
                     );
 
-                    if (true) {
-                        UserDataWidget.listUserData(null, function (err, result) {
-                            if (err) {
-                                return alert(err || err.responseText);
-                            }
-                            // order to get last saved instance of our graph in user_data
-                            result = result.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-                            //if graph loaded with loadSaved --> display=checkBox loadAsGraph else last instance graph
-                            result.forEach(function (item) {
-                                if (item.data_label == source + "_model") {
-                                    visjsData = item.data_content;
-                                    display = "graph";
-                                    if (visjsData && visjsData.options && visjsData.options.output) {
-                                        display = visjsData.options.output;
-                                    }
-                                }
-                            });
-                            if (options.loadAsGraph) {
+                
+                    UserDataWidget.listUserData({data_type:'KGmodelGraph',data_tool:'KGquery',data_source:MainController.currentSource}, function (err, result) {
+                        if (err) {
+                            return alert(err || err.responseText);
+                        }
+                        if(result.length==0){
+                            savedGraphLocation='file';
+                        }
+                        // order to get last saved instance of our graph in user_data
+                        result = result.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+                        //if graph loaded with loadSaved --> display=checkBox loadAsGraph else last instance graph
+                        result.forEach(function (item) {
+                            if (item.data_label == source + "_model") {
+                                visjsData = item.data_content;
                                 display = "graph";
+                                if (visjsData && visjsData.options && visjsData.options.output) {
+                                    display = visjsData.options.output;
+                                }
                             }
-                            if (options.loadAsGraph == false) {
-                                display = "list";
-                            }
-                            if (display == "graph") {
-                                $("#KGquery_loadAsGraph").prop("checked", true);
-                            } else {
-                                $("#KGquery_loadAsGraph").prop("checked", false);
-                            }
-
-                            return callbackSeries();
                         });
+                        if (options.loadAsGraph) {
+                            display = "graph";
+                        }
+                        if (options.loadAsGraph == false) {
+                            display = "list";
+                        }
+                        if (display == "graph") {
+                            $("#KGquery_loadAsGraph").prop("checked", true);
+                        } else {
+                            $("#KGquery_loadAsGraph").prop("checked", false);
+                        }
 
-                        return;
+                        return callbackSeries();
+                    });
+
+                        
+                    
+
+                   
+                },
+                // get from file if the transition to userData is not done
+                function (callbackSeries) {
+                    if (mode.indexOf("saved") < 0) {
+                        return callbackSeries();
                     }
-
+                    if(savedGraphLocation!='file'){
+                        return callbackSeries();
+                    }
                     var visjsGraphFileName = source + "_KGmodelGraph.json";
 
                     KGquery_graph.message("loading graph display");
@@ -130,8 +145,6 @@ var KGquery_graph = (function () {
                             if (err) {
                                 return callbackSeries("notFound");
 
-                                //self.DrawImportsCommonGraph(source);
-                                ///  return callbackSeries("generate commonGraph");
                             }
                             visjsData = result;
                             if (result && result.options && result.options.output) {
@@ -142,6 +155,7 @@ var KGquery_graph = (function () {
                         },
                         true,
                     );
+
                 },
                 //inferred
                 function (callbackSeries) {
@@ -311,6 +325,18 @@ var KGquery_graph = (function () {
                         scale: 1 / 0.9,
                     });
                     self.KGqueryGraph.onScaleChange();
+                    var nodes_fonts = [];
+                    visjsData.nodes.forEach(function (node) {
+                        //delete node.x;
+                        //delete node.y;
+                        if (node.font) {
+                            nodes_fonts.push({id:node.id,font:node.font});
+                        }
+                    });
+                    self.KGqueryGraph.data.nodes.update(nodes_fonts);
+                    if(savedGraphLocation=='file'){
+                        self.saveVisjsModelGraph();
+                    }
                 });
 
                 //  KGquery.clearAll();
@@ -657,7 +683,16 @@ var KGquery_graph = (function () {
         }
         self.setAllNodesAttr("font", { size: parseInt(fontSize) });
     };
+    self.setAllNodesSizes = function () {
+        var size = prompt(" size");
+        if (!size) {
+            return;
+        }
+        self.setAllNodesAttr("size",  parseInt(size) );
+        self.KGqueryGraph.onScaleChange();
+        self.setDecorationAttr("size", parseInt(size));
 
+    };
     self.setAllNodesAttr = function (attr, value) {
         var nodesId = self.KGqueryGraph.data.nodes.getIds();
         var newNodes = [];
@@ -669,7 +704,9 @@ var KGquery_graph = (function () {
         });
         self.KGqueryGraph.data.nodes.update(newNodes);
     };
-
+    self.setDecorationAttr= function(){
+        
+    }
     self.resetVisjNodes = function (nodes) {
         if (!KGquery_graph.KGqueryGraph) {
             return;
@@ -752,8 +789,8 @@ var KGquery_graph = (function () {
         });
         var label = KGquery.currentSource + "_model";
         var group = "KGquery/models";
-
-        UserDataWidget.saveMetadata(label, null, data, group, function (err, result) {
+        var data_type='KGmodelGraph'
+        UserDataWidget.saveMetadata(label, data_type, data, group, function (err, result) {
             $("#KGquery_messageDiv").text("saved graph");
         });
         return;

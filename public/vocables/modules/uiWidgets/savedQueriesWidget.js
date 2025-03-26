@@ -4,6 +4,7 @@ import Lineage_createRelation from "../tools/lineage/lineage_createRelation.js";
 import Sparql_generic from "../sparqlProxies/sparql_generic.js";
 import UI from "../shared/UI.js";
 import UserDataWidget from "./userDataWidget.js";
+import MainController from "../shared/mainController.js";
 
 var SavedQueriesWidget = (function () {
     var self = {};
@@ -121,11 +122,8 @@ var SavedQueriesWidget = (function () {
         if (!targetSelect) {
             targetSelect = "SavedQueriesComponent_itemsSelect";
         }
-        if (!slsvSource) {
-            slsvSource = MainController.currentSource;
-        }
-        var data_path = path + slsvSource;
-        UserDataWidget.showListDialog("SavedQueriesComponent_itemsSelect", { filter: { data_path: data_path }, removeSaveDiv: true }, function (err, result) {
+      
+        UserDataWidget.showListDialog("SavedQueriesComponent_itemsSelect", { filter: { data_type: 'savedQueries',data_tool:'KGquery',data_source:MainController.currentSource }, removeSaveDiv: true }, function (err, result) {
             if (result.id) {
                 self.loadItem(result.id);
             }
@@ -158,15 +156,15 @@ var SavedQueriesWidget = (function () {
                 }
                 slsvSource = self.slsvSource;
             }
-            var data_path = self.path + slsvSource;
+           
             UserDataWidget.currentTreeNode = null;
-            UserDataWidget.showSaveDialog(data_path, data, null, function (err, result) {
+            UserDataWidget.showSaveDialog('savedQueries', data, null, function (err, result) {
                 if (err) {
                     return alert(err);
                 }
                 //console.log(result);
                 $("#KGquery_messageDiv").text("saved query");
-                if (result?.insertedId?.length > 0) {
+                if (result?.id) {
                     var groups = result.data_group.split("/");
                     var group_parent = "#";
                     if (groups.length > 0) {
@@ -179,9 +177,9 @@ var SavedQueriesWidget = (function () {
                             group_parent = group;
                         });
                     }
-                    result.id = result.insertedId[0].id;
+                    result.id = result.id;
                     result.data_label = result.label;
-                    var node = { id: result.insertedId[0].id, text: result.label, parent: group_parent, data: result };
+                    var node = { id: result.id, text: result.label, parent: group_parent, data: result };
                     $("#userDataWidget_jstree").jstree(true).create_node(group_parent, node);
 
                     //$("#SavedQueriesComponent_itemsSelect").append("<option value='" + result.insertedId[0].id + "'>" + result.label + "</option>");

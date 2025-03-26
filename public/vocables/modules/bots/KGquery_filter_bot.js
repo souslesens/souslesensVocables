@@ -204,7 +204,7 @@ var KGquery_filter_bot = (function () {
         } else if (propertyValue) {
             if (self.params.propertyDatatype.indexOf("http://www.w3.org/2001/XMLSchema#date") > -1) {
                 var dateStr = new Date(propertyValue).toISOString();
-                dateStr = common.ISODateStrToRDFString(dateStr).split(' ')[0];
+                dateStr = common.ISODateStrToRDFString(dateStr).split(" ")[0];
                 self.filterItems.push(filterBooleanOperator + "?" + varName + "_" + propLabel + " " + propertyOperator + ' "' + dateStr + '"^^xsd:dateTime');
             } else if (self.params.propertyDatatype == "http://www.w3.org/2001/XMLSchema#int") {
                 self.filterItems.push(filterBooleanOperator + "?" + varName + "_" + propLabel + " " + propertyOperator + ' "' + propertyValue + '"^^xsd:int ');

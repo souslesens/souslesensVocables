@@ -118,10 +118,9 @@ var Lineage_whiteboard = (function () {
         $("KGquery_waitImg").attr("id", "waitImg");
 
         self.resetVisjsGraph();
-        $('#rightControlPanelDiv').load("./modules/tools/lineage/html/whiteBoardButtons.html",function(){
+        $("#rightControlPanelDiv").load("./modules/tools/lineage/html/whiteBoardButtons.html", function () {
             UI.resetWindowSize();
         });
-        
     };
 
     /**
@@ -4324,7 +4323,7 @@ attrs.color=self.getSourceColor(superClassValue)
          */
 
         loadSavedWhiteboard: function () {
-            UserDataWidget.showListDialog(null, { filter: { data_type: "savedWhiteboards" ,data_source: MainController.currentSource,data_tool:'lineage' } }, function (err, result) {
+            UserDataWidget.showListDialog(null, { filter: { data_type: "savedWhiteboards", data_source: MainController.currentSource, data_tool: "lineage" } }, function (err, result) {
                 if (err) {
                     return alert(err.responseText);
                 }

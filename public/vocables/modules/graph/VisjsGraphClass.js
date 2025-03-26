@@ -980,7 +980,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         $("#VisJsGraph_message").html(message);
     };
 
-    self.loadGraph = function (fileName, add, callback, dontDraw) {
+    self.loadGraph = function (fileName, add, callback, dontDraw, dataProcessorFn) {
         if (!fileName) {
             fileName = $("#visjsGraph_savedGraphsSelect").val();
         }
@@ -1003,6 +1003,9 @@ const VisjsGraphClass = function (graphDiv, data, options) {
             dataType: "json",
             success: function (result, _textStatus, _jqXHR) {
                 var data = JSON.parse(result);
+                if (dataProcessorFn) {
+                    data = dataProcessorFn(data);
+                }
                 var positions = data.positions;
                 var options = data.context.options;
                 var visjsData = { nodes: [], edges: [] };

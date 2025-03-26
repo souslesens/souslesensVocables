@@ -278,13 +278,17 @@ var JstreeWidget = (function () {
             .empty();
     };
     self.empty = function (jstreeDiv) {
-        $("#" + jstreeDiv)
-            .jstree(true)
-            .delete_node(
-                $("#" + jstreeDiv)
-                    .jstree(true)
-                    .get_node("#").children,
-            );
+        try {
+            $("#" + jstreeDiv)
+                .jstree(true)
+                .delete_node(
+                    $("#" + jstreeDiv)
+                        .jstree(true)
+                        .get_node("#").children,
+                );
+        } catch (e) {
+            console.log(e);
+        }
     };
     self.addNodesToJstree = function (jstreeDiv, parentNodeId_, jstreeData, options, callback) {
         if (!jstreeDiv) {

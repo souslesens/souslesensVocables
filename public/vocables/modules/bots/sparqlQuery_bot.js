@@ -153,7 +153,13 @@ var SparqlQuery_bot = (function () {
 
     self.functions = {
         chooseResourceTypeFn: function () {
-            var choices = ["Facts", "Constraints"];
+            var choices = [
+                {
+                    id: "Facts",
+                    label: "SKG Facts",
+                },
+                { id: "Constraints", label: "Ontology Constraints" },
+            ];
             if (self.noFacts) {
                 choices = ["Constraints"];
             }

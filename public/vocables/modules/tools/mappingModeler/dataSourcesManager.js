@@ -440,7 +440,7 @@ var DataSourceManager = (function () {
      * @param {Object} obj - The Jstree node object containing details about the selected node.
      * @returns {void}
      */
-    self.onDataSourcesJstreeSelect = function (event, obj) {
+    self.onDataSourcesJstreeSelect = function (event, obj, callback) {
         MappingModeler.currentTreeNode = obj.node;
         var isRightClick = false;
         if (obj.event.which == 3) {
@@ -481,28 +481,17 @@ var DataSourceManager = (function () {
             UIcontroller.onActivateLeftPanelTab("MappingModeler_columnsTab");
         }
 
-
-
-        if (obj.node.data.type == "table" || obj.node.data.type == "csvSource" ) {
+        if (obj.node.data.type == "table" || obj.node.data.type == "csvSource") {
             var table = obj.node.data.id;
             $("#MappingModeler_currentDataSource").html(table);
 
-            if(! MappingColumnsGraph.visjsGraph.data.nodes.get(table)){
-                var newRessource={
-                    id:table,
-                    label:table,
-                    shape :"ellipse",
-                    data:{ id:table,
-                        label:table,
-                        type:"Table"
-                    }
-
-
-                }
-                MappingColumnsGraph.drawResource(newRessource)
-
+            MappingColumnsGraph.zoomOnTable(table);
+            if (!MappingColumnsGraph.visjsGraph.data.nodes.get(table)) {
+                var tableNode = MappingColumnsGraph.getVisjsTableNode(table);
+                MappingColumnsGraph.drawResource(tableNode);
             }
         }
+        if (callback) callback();
     };
 
     /**

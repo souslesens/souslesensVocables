@@ -24,10 +24,11 @@ const { readMainConfig } = require("../model/config");
 const config = readMainConfig();
 
 const getUserAccount = async (source, username) => {
-    let [_name, account] = await userModel.findUserAccount(username);
+    const userAccount = await userModel.findUserAccount(username);
+    let account;
 
     // create a new account if the username was not found in the database
-    if (!account) {
+    if (!userAccount) {
         account = {
             _type: "user",
             allowSourceCreation: false,
@@ -39,12 +40,14 @@ const getUserAccount = async (source, username) => {
             source: source,
         };
         await userModel.addUserAccount(account);
-    }
-    // Replace the password with an empty one if the user was not related to
-    // the specified source
-    else if (account.source !== source) {
-        account = { ...account, password: "", source: source };
-        userModel.updateUserAccount(account);
+    } else {
+        account = userAccount[1];
+        // Replace the password with an empty one if the user was not related to
+        // the specified source
+        if (account.source !== source) {
+            account = { ...account, password: "", source: source };
+            userModel.updateUserAccount(account);
+        }
     }
 
     // Do not disclose _type

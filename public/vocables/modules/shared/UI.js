@@ -169,7 +169,7 @@ var UI = (function () {
             }
             self.smartPhoneScreen = false;
             $("#graphDivContainer").css("width", $(window).width() - LateralPanelWidth - 25);
-            $("#graphDiv").css("width", $(window).width() - LateralPanelWidth - rightControlPanelWidth - 20);
+            $("#graphDiv").css("width", $(window).width() - LateralPanelWidth - rightControlPanelWidth - 25);
             $("#lateralPanelDiv").css("width", LateralPanelWidth);
         }
 

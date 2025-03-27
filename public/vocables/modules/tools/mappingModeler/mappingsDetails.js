@@ -234,7 +234,9 @@ var MappingsDetails = (function () {
             options[key] = _options[key];
         }
 
-        JstreeWidget.loadJsTree(divId, jstreeData, options);
+        JstreeWidget.loadJsTree(divId, jstreeData, options, function () {
+            $('#detailedMappings_treeContainer').css('overflow', 'unset');
+        });
     };
 
     /**

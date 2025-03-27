@@ -115,6 +115,12 @@ var MappingModeler = (function () {
                         return callbackSeries();
                     });
                 },
+                 //load visjs mapping graph
+                 function (callbackSeries) {
+                    $('#rightControlPanelDiv').load("./modules/tools/mappingModeler/html/mappingsGraphButtons.html", function (err) {
+                        return callbackSeries();
+                    });
+                },
                 function (callbackSeries) {
                     DataSourceManager.currentSlsvSource = MappingModeler.currentSLSsource;
                     DataSourceManager.getSlsvSourceConfig(MappingModeler.currentSLSsource, function (err, result) {

@@ -27,7 +27,7 @@ var UIcontroller = (function () {
             MappingModeler.initActiveLegend(self.legendGraphDivId);
             MappingModeler.loadSuggestionSelectJstree(MappingModeler.currentTable.columns, "Columns");
             $("#MappingModeler_currentDataSource").html(DataSourceManager.currentConfig.currentDataSource.name);
-        } else if (tabId == "MappingModeler_technicalDatailTab") {
+        } else if (tabId == "MappingModeler_technicalDetailTab") {
             MappingsDetails.showDetailsDialog();
         } else if (tabId == "MappingModeler_tripleFactoryTab") {
         }

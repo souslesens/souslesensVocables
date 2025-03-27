@@ -180,12 +180,15 @@ var MappingTransform = (function () {
             var connections = MappingColumnsGraph.visjsGraph.getFromNodeEdgesAndToNodes(nodeId);
 
             connections.forEach(function (connection) {
-                if (connection.edge.data.type == "tableToColumn") {
+                if (connection.edge?.data?.type == "tableToColumn") {
                     return;
                 }
-                var property = connection.edge.data.id;
+                var property = connection.edge?.data?.id;
                 if (!property) {
-                    property = connection.edge.data.type;
+                    property = connection?.edge?.data?.type;
+                }
+                if (!property) {
+                    return;
                 }
                 var object = connection.toNode.data.id;
                 if (columnsMapLabels.includes(object)) {

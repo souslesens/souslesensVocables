@@ -6,6 +6,7 @@ import MappingModeler from "./mappingModeler.js";
 import Export from "../../shared/export.js";
 import UIcontroller from "./uiController.js";
 import DataSourceManager from "./dataSourcesManager.js";
+import OntologyModels from "../../shared/ontologyModels.js";
 
 /**
  * The TripleFactory module handles the creation, filtering, and writing of RDF triples.
@@ -222,6 +223,8 @@ var TripleFactory = (function () {
             data: payload,
             dataType: "json",
             success: function (result, _textStatus, _jqXHR) {
+
+                MappingModeler.clearSourceClasses(DataSourceManager.currentSlsvSource)
                 if (callback) {
                     return callback();
                 }

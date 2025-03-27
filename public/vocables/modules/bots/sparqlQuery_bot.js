@@ -37,7 +37,37 @@ var SparqlQuery_bot = (function () {
 
     self.workflow = {
         chooseResourceTypeFn: {
-            _OR: {
+            _OR: { Constraints: {
+                    chooseConstraintRoleFn: {
+                        _OR: {
+                            Class: {
+                                chooseConstraintClassFn: {
+                                    chooseConstraintTypeFn: {
+                                        chooseOutputTypeFn: {
+                                            buildConstraintResult: {},
+                                        },
+                                    },
+                                },
+                            },
+                            ObjectProperty: {
+                                chooseConstraintPropertyFn: {
+                                    chooseConstraintTypeFn: {
+                                        chooseOutputTypeFn: {
+                                            buildConstraintResult: {},
+                                        },
+                                    },
+                                },
+                            },
+                            "Whiteboard nodes": {
+                                chooseConstraintTypeFn: {
+                                    chooseOutputTypeFn: {
+                                        buildConstraintResult: {},
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
                 Facts: {
                     afterChooseQueryType: {
                         chooseQueryScopeFn: {
@@ -90,37 +120,7 @@ var SparqlQuery_bot = (function () {
                         },
                     },
                 },
-                Constraints: {
-                    chooseConstraintRoleFn: {
-                        _OR: {
-                            Class: {
-                                chooseConstraintClassFn: {
-                                    chooseConstraintTypeFn: {
-                                        chooseOutputTypeFn: {
-                                            buildConstraintResult: {},
-                                        },
-                                    },
-                                },
-                            },
-                            ObjectProperty: {
-                                chooseConstraintPropertyFn: {
-                                    chooseConstraintTypeFn: {
-                                        chooseOutputTypeFn: {
-                                            buildConstraintResult: {},
-                                        },
-                                    },
-                                },
-                            },
-                            "Whiteboard nodes": {
-                                chooseConstraintTypeFn: {
-                                    chooseOutputTypeFn: {
-                                        buildConstraintResult: {},
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
+
             },
         },
     };
@@ -130,7 +130,8 @@ var SparqlQuery_bot = (function () {
         chooseConstraintRoleFn: "chooseConstraintRoleFn",
         listObjectPropertiesFn: "listObjectPropertiesFn",
         chooseQueryScopeFn: "choose query scope",
-        chooseObjectPropertyClass: "chooseObjectPropertyClass",
+        chooseObjectPropertyClass: "chooseObjectProperty class",
+        chooseConstraintClassFn:"choose constraint class",
 
         promptKeywordFn: "enter a keyword or enter for any ",
 
@@ -154,11 +155,13 @@ var SparqlQuery_bot = (function () {
     self.functions = {
         chooseResourceTypeFn: function () {
             var choices = [
+                {id: "Constraints",
+                    label: "Ontology Constraints"},
                 {
                     id: "Facts",
                     label: "SKG Facts",
                 },
-                { id: "Constraints", label: "Ontology Constraints" },
+
             ];
             if (self.noFacts) {
                 choices = ["Constraints"];

@@ -287,7 +287,7 @@ var MainController = (function () {
             $("#Lineage_graphEditionButtons").hide();
         }
         $("#currentToolTitle").html("");
-        $("#rightControlPanelDiv").html("");
+
         if (UI.currentTheme["@" + toolId + "-logo"]) {
             $("#currentToolTitle").prepend(`<button class="${toolId}-logo slsv-invisible-button" style="height:41px;width:41px;"> </button> <div style='margin-bottom:5px;'>${toolId} </div>`);
         } else {

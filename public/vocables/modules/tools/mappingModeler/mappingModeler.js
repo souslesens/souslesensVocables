@@ -680,6 +680,17 @@ var MappingModeler = (function () {
         }
     };
 
+    self.clearSourceClasses = function (source, callback) {
+        OntologyModels.clearOntologyModelCache(MappingModeler.currentSLSsource)
+        var newClasses=[]
+    self.allClasses.forEach(function(item){
+        if(item.source!=source)
+            newClasses.push(item)
+
+    })
+        self.allClasses=newClasses
+    }
+
     /**
      * Retrieves all object properties from the specified source or the current source if none is provided.
      * Caches the result to avoid redundant API calls.

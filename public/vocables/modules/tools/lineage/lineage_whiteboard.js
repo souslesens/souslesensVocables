@@ -4628,6 +4628,13 @@ attrs.color=self.getSourceColor(superClassValue)
         });
     };
 
+    self.showExportPopUp = function(){
+        var html = '<span class="popupMenuItem" onclick="Lineage_whiteboard.graph.exportGraphToDataTable();">CSV</span>';
+        html += '<span class="popupMenuItem" onclick="Lineage_whiteboard.graph.toSVG()">SVG</span>';
+        html += '<span class="popupMenuItem" onclick="Lineage_whiteboard.graph.toGraphMl();">Graph ML </span>';
+        PopupMenuWidget.initAndShow(html, "popupMenuWidgetDiv");
+    }
+
     return self;
 })();
 

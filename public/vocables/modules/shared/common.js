@@ -851,7 +851,7 @@ if (callback) return callback(err);
         return /-?[0-9]+[.,]+[0-9]?/.test("" + value);
     };
     self.palette = [
-        "#b96af4",
+        "#d0aeea",
         "#00ae8d",
         "#799b79",
         "#fbb27b",
@@ -876,7 +876,7 @@ if (callback) return callback(err);
     ];
 
     self.paletteIntense = [
-        "#8f52a0",
+        "#e0c5e8",
         "#00ae8d",
         "#799b79",
         "#fbb27b",
@@ -901,7 +901,7 @@ if (callback) return callback(err);
     ];
 
     self.paletteIntense = [
-        "#8f52a0",
+        "#ead5ef",
         "#00ae8d",
         "#799b79",
         "#fbb27b",

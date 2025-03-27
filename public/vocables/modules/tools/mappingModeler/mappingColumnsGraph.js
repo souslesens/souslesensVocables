@@ -81,8 +81,15 @@ var MappingColumnsGraph = (function () {
         parentCentralization: true,
         treeSpacing: 200,
         nodeSpacing: 200,
+        levelSeparation: 200,
     };
-
+    self.physicsHierarchical =  {
+        enabled:true,
+        hierarchicalRepulsion: {
+            centralGravity: 0.3,
+            nodeDistance: 200,
+        }
+    },
     self.getVisjsTableNode = function (table) {
         var newRessource = {
             id: table,
@@ -264,7 +271,7 @@ var MappingColumnsGraph = (function () {
         });
         return exists;
     };
-
+    // 
     /**
      * Draws the graph canvas using Vis.js with specified options.
      * Configures the graph's visual settings and event handlers.
@@ -277,10 +284,10 @@ var MappingColumnsGraph = (function () {
      * @returns {void}
      */
     self.drawGraphCanvas = function (graphDiv, visjsData, callback) {
+        
         self.graphOptions = {
             keepNodePositionOnDrag: true,
-            /* physics: {
-    enabled:true},*/
+             physics:self.physicsHierarchical,
 
             visjsOptions: {
                 edges: {
@@ -682,8 +689,9 @@ var MappingColumnsGraph = (function () {
                         if (false && result?.nodes) {
                             self.createDataSourcesClusters();
                         }
+                        MappingColumnsGraph.visjsGraph.network.setOptions({physics:self.physicsHierarchical});
                         UI.resetWindowSize();
-                        //MappingColumnsGraph.visjsGraph.network.setOptions({physics:self.physicsHierarchical});
+                        
                         if (callback) {
                             return callback();
                         }
@@ -794,6 +802,7 @@ var MappingColumnsGraph = (function () {
             };
             DataSourceManager.rawConfig = newJson;
         }
+        nodes=self.sortVisjsColumns(nodes);
         var config = JSON.parse(JSON.stringify(DataSourceManager.rawConfig));
         delete config.currentDataSource;
         var data = {
@@ -908,7 +917,9 @@ var MappingColumnsGraph = (function () {
             return;
         }
         self.visjsGraph.data.nodes.add(node);
-        self.saveVisjsGraph();
+        self.saveVisjsGraph(function(){
+            self.loadVisjsGraph();
+        });
     };
 
     /**

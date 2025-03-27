@@ -859,7 +859,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
 
     self.toSVG = function () {
         SVGexport.toSVG(self.network);
-        self.redraw();
+        //self.redraw();
     };
 
     self.toGraphMl = function () {

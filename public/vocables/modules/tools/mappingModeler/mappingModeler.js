@@ -17,6 +17,8 @@ import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import DataSourceManager from "./dataSourcesManager.js";
 import UIcontroller from "./uiController.js";
 import PlantUmlTransformer from "../../graph/plantUmlTransformer.js";
+import mappingModeler from "./mappingModeler.js";
+import mappingColumnsGraph from "./mappingColumnsGraph.js";
 
 /**
  * MappingModeler module.
@@ -879,6 +881,11 @@ var MappingModeler = (function () {
      * self.clearMappings();
      */
     self.clearMappings = function () {
+
+     if(mappingColumnsGraph.visjsGraph.isGraphNotEmpty()) {
+        if(! confirm("Warning ! if you continue all mappings for this source will be permanently  lost"))
+            return;
+     }
         $("#" + MappingColumnsGraph.graphDivId).html("");
         MappingColumnsGraph.clearGraph();
     };

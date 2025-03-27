@@ -74,39 +74,38 @@ var MappingColumnsGraph = (function () {
     self.layoutHierarchical = {
         direction: "DU",
         sortMethod: "hubsize",
-        levelSeparation: 200,
         shakeTowards: "roots",
         blockShifting: true,
         edgeMinimization: true,
         parentCentralization: true,
         treeSpacing: 200,
         nodeSpacing: 200,
-        levelSeparation: 200,
+        levelSeparation:300,
     };
-    self.physicsHierarchical =  {
-        enabled:true,
+    self.physicsHierarchical = {
+        enabled: true,
         hierarchicalRepulsion: {
             centralGravity: 0.3,
             nodeDistance: 200,
         }
     },
-    self.getVisjsTableNode = function (table) {
-        var newRessource = {
-            id: table,
-            label: table,
-
-            shape: "box",
-            color: "#d8cacd",
-            level: 1,
-            data: {
+        self.getVisjsTableNode = function (table) {
+            var newRessource = {
                 id: table,
                 label: table,
-                type: "Table",
-                dataTable: table,
-            },
+
+                shape: "box",
+                color: "#d8cacd",
+                level: 1,
+                data: {
+                    id: table,
+                    label: table,
+                    type: "Table",
+                    dataTable: table,
+                },
+            };
+            return newRessource;
         };
-        return newRessource;
-    };
 
     /**
      * return a visJsEdge
@@ -122,6 +121,7 @@ var MappingColumnsGraph = (function () {
             from: from,
             to: to,
             label: label,
+            width: 4,
             arrows: {
                 to: {
                     enabled: true,
@@ -131,7 +131,7 @@ var MappingColumnsGraph = (function () {
             smooth: {
                 type: "curvedCW",
                 forceDirection: "vertical",
-                roundness: 0.85,
+                roundness: 0.65,
             },
             data: {
                 id: uri,
@@ -183,7 +183,7 @@ var MappingColumnsGraph = (function () {
             }
          newResource.fixed = { x: true, y: true };*/
 
-        var visjsData = { nodes: [], edges: [] };
+        var visjsData = {nodes: [], edges: []};
         var visjsNode = newResource;
         if (newResource.data.type == "Class") {
             if (!self.objectIdExistsInGraph(newResource.data.id)) {
@@ -214,8 +214,8 @@ var MappingColumnsGraph = (function () {
                         from: self.currentGraphNode.id,
                         label: label,
                         to: newResource.id,
-                        width: 2,
-                        data: { type: type },
+                        width: 3,
+                        data: {type: type},
                         arrows: arrows,
                         color: edgeColor,
                     });
@@ -248,7 +248,7 @@ var MappingColumnsGraph = (function () {
      */
     self.initOffsets = function () {
         if (!self.currentOffset) {
-            self.currentOffset = { x: -self.graphDivWidth / 2, y: 0 };
+            self.currentOffset = {x: -self.graphDivWidth / 2, y: 0};
         }
     };
 
@@ -284,10 +284,10 @@ var MappingColumnsGraph = (function () {
      * @returns {void}
      */
     self.drawGraphCanvas = function (graphDiv, visjsData, callback) {
-        
+
         self.graphOptions = {
             keepNodePositionOnDrag: true,
-             physics:self.physicsHierarchical,
+            physics: self.physicsHierarchical,
 
             visjsOptions: {
                 edges: {
@@ -350,7 +350,7 @@ var MappingColumnsGraph = (function () {
 
             if (!MappingModeler.currentRelation) {
                 MappingModeler.currentRelation = {
-                    from: { id: node.id, classId: getColumnClass(node), dataTable: node.data.dataTable },
+                    from: {id: node.id, classId: getColumnClass(node), dataTable: node.data.dataTable},
                     to: null,
                     type: node.data.type,
                 };
@@ -359,24 +359,26 @@ var MappingColumnsGraph = (function () {
                     MappingModeler.currentRelation = null;
                     return alert("Relations between Columns from different datbels are not possible");
                 }
-                MappingModeler.currentRelation.to = { id: node.id, classId: getColumnClass(node) };
+                MappingModeler.currentRelation.to = {id: node.id, classId: getColumnClass(node)};
                 if (MappingModeler.currentRelation.type != "Class" && node.data.type == "Class") {
                     self.graphActions.drawColumnToClassEdge(MappingModeler.currentRelation);
                 } else if (MappingModeler.currentRelation.from.type != "Class" && node.data.type != "Class") {
-                    MappingModeler.onLegendNodeClick({ id: "ObjectProperty" });
+                    MappingModeler.onLegendNodeClick({id: "ObjectProperty"});
                 }
             }
         } else {
             if (node.data && node.data.type == "Table") {
                 var tableSourceType = node.id.indexOf(".") > -1 ? "csvSource" : "table";
 
-                if (tableSourceType == "table" && !DataSourceManager.currentConfig.currentDataSource) return alert("choose a data source first");
+                if (tableSourceType == "table" && !DataSourceManager.currentConfig.currentDataSource) {
+                    return alert("choose a data source first");
+                }
 
                 var obj = {
                     event: "xx",
                     node: {
                         id: node.id,
-                        data: { type: tableSourceType, id: node.id, label: node.id },
+                        data: {type: tableSourceType, id: node.id, label: node.id},
                     },
                 };
                 DataSourceManager.onDataSourcesJstreeSelect(null, obj);
@@ -444,8 +446,8 @@ var MappingColumnsGraph = (function () {
          * @returns {void}
          */
         outlineNode: function (nodeId) {
-            self.visjsGraph.decorateNodes(null, { borderWidth: 1 });
-            self.visjsGraph.decorateNodes(nodeId, { borderWidth: 5 });
+            self.visjsGraph.decorateNodes(null, {borderWidth: 1});
+            self.visjsGraph.decorateNodes(nodeId, {borderWidth: 5});
         },
 
         /**
@@ -531,15 +533,15 @@ var MappingColumnsGraph = (function () {
                     from: MappingModeler.currentRelation.from.id,
                     to: MappingModeler.currentRelation.to.id,
                     label: "",
-                    color: "ddd",
-                    width: 2,
+                    color: "#00afef",
+                    width: 3,
                     arrows: {
                         to: {
                             enabled: true,
                             type: "arrow",
                         },
                     },
-                    data: { type: "rdf:type" },
+                    data: {type: "rdf:type"},
                 },
             ];
 
@@ -608,23 +610,28 @@ var MappingColumnsGraph = (function () {
      * @returns {void}
      */
 
-    self.addNodesByDataTableBatch = function (nodes,callback) {
-        var dataTables=nodes.map(function(node){return node.data.dataTable});
-        dataTables=common.array.distinctValues(dataTables);
-        dataTables=dataTables.filter(function(item){return item!=undefined});
-        var index=0;
+    self.addNodesByDataTableBatch = function (nodes, callback) {
+        var dataTables = nodes.map(function (node) {
+            return node.data.dataTable
+        });
+        dataTables = common.array.distinctValues(dataTables);
+        dataTables = dataTables.filter(function (item) {
+            return item != undefined
+        });
+        var index = 0;
         async.eachSeries(
-            
             dataTables,
-            function(table, callbackEach) {
-                var tableNodes = nodes.filter(function (node) { return node.data.dataTable == table; });
-                if(index==0){
-                    MappingColumnsGraph.visjsGraph.data.nodes=tableNodes;
+            function (table, callbackEach) {
+                var tableNodes = nodes.filter(function (node) {
+                    return node.data.dataTable == table;
+                });
+                if (index == 0) {
+                    MappingColumnsGraph.visjsGraph.data.nodes = tableNodes;
                     MappingColumnsGraph.visjsGraph.draw(function () {
                         MappingColumnsGraph.visjsGraph.network.fit();
                         callbackEach();
                     });
-                }else{
+                } else {
                     MappingColumnsGraph.visjsGraph.data.nodes.add(tableNodes);
                     MappingColumnsGraph.visjsGraph.network.fit();
                     callbackEach();
@@ -635,15 +642,17 @@ var MappingColumnsGraph = (function () {
                 if (err) {
                     return alert(err);
                 }
-                var classNodes = nodes.filter(function (node) { return node.data.type == 'Class'; });
+                var classNodes = nodes.filter(function (node) {
+                    return node.data.type == 'Class';
+                });
                 MappingColumnsGraph.visjsGraph.data.nodes.add(classNodes);
                 MappingColumnsGraph.visjsGraph.network.fit();
-                if(callback){
+                if (callback) {
                     callback();
                 }
             }
         );
-       
+
     }
     /**
      * Loads the Vis.js graph for the current mapping source.
@@ -667,9 +676,9 @@ var MappingColumnsGraph = (function () {
                         DataSourceManager.rawConfig = result.options.config;
                         DataSourceManager.currentConfig = result.options.config;
                     }
-                    MappingColumnsGraph.visjsGraph.data=result;
+                    MappingColumnsGraph.visjsGraph.data = result;
                     // Draw graph by DataTable batches 
-                    self.addNodesByDataTableBatch(result.nodes,function(){
+                    self.addNodesByDataTableBatch(result.nodes, function () {
                         if (true) {
                             self.visjsGraph.data.nodes.get().forEach(function (node) {
                                 if (node.data.type == "Class") {
@@ -686,48 +695,22 @@ var MappingColumnsGraph = (function () {
                                 }
                             });
                         }
-                        if (false && result?.nodes) {
-                            self.createDataSourcesClusters();
-                        }
-                        MappingColumnsGraph.visjsGraph.network.setOptions({physics:self.physicsHierarchical});
+
+                        MappingColumnsGraph.visjsGraph.network.setOptions({physics: self.physicsHierarchical});
                         UI.resetWindowSize();
-                        
+
                         if (callback) {
                             return callback();
                         }
                     });
 
-                   
-                    if (false) {
-                        //  self.addDataSourceNode();
-                        self.visjsGraph.network.fit();
-                        var maxX = 0;
-                        var maxY = 0;
-                        self.visjsGraph.data.nodes.get().forEach(function (node) {
-                            maxX = Math.max(node.x, maxX);
-                            maxY = Math.max(node.y, maxY);
-                        });
-                        if (maxX + stepX > self.graphDivWidth) {
-                            self.currentOffset = {
-                                x: minX,
-                                y: maxY + stepY,
-                            };
-                        } else {
-                            self.currentOffset = {
-                                x: maxX + stepX,
-                                y: maxY,
-                            };
-                        }
-                    }
-
-                   
 
                 },
                 true,
                 self.migrateToHierarchicalGraphFn,
             );
-        }, 500); 
-        
+        }, 500);
+
     };
     /**
      * Creates clusters from the different data sources used in the graph.
@@ -764,8 +747,8 @@ var MappingColumnsGraph = (function () {
                     label: table,
                     y: -200,
                     x: index++ * 250 - 400,
-                    fixed: { x: true, y: true },
-                    data: { table: table },
+                    fixed: {x: true, y: true},
+                    data: {table: table},
                     allowSingleNodeCluster: true,
                 },
             };
@@ -802,7 +785,7 @@ var MappingColumnsGraph = (function () {
             };
             DataSourceManager.rawConfig = newJson;
         }
-        nodes=self.sortVisjsColumns(nodes);
+        nodes = self.sortVisjsColumns(nodes);
         var config = JSON.parse(JSON.stringify(DataSourceManager.rawConfig));
         delete config.currentDataSource;
         var data = {
@@ -810,7 +793,7 @@ var MappingColumnsGraph = (function () {
             edges: graph.data.edges.get(),
             context: graph.currentContext,
             positions: positions,
-            options: { config: config },
+            options: {config: config},
         };
         if (!fileName) {
             fileName = prompt("graph name");
@@ -917,8 +900,8 @@ var MappingColumnsGraph = (function () {
             return;
         }
         self.visjsGraph.data.nodes.add(node);
-        self.saveVisjsGraph(function(){
-            self.loadVisjsGraph();
+        self.saveVisjsGraph(function () {
+         //   self.loadVisjsGraph();
         });
     };
 
@@ -953,7 +936,7 @@ var MappingColumnsGraph = (function () {
         self.visjsGraph.data.edges.remove(edge);
         self.saveVisjsGraph();
     };
-    
+
     /**
      * Adds a new edge to the Vis.js graph and saves the updated graph.
      * @function
@@ -965,23 +948,22 @@ var MappingColumnsGraph = (function () {
     self.sortVisjsColumns = function (nodes) {
         //var typesWithDataTable = ["Table", "Column", "RowIndex", "VirtualColumn"];
         nodes.sort(function (a, b) {
-            if(!a.data.dataTable && !b.data.dataTable){
+            if (!a.data.dataTable && !b.data.dataTable) {
                 return 0
             }
-            if(!a.data.dataTable){
+            if (!a.data.dataTable) {
                 return -1
             }
-            if(!b.data.dataTable){
+            if (!b.data.dataTable) {
                 return 1
             }
-            if(a.data.dataTable<b.data.dataTable){
-                   return -1
-            }
-            else if(a.data.dataTable>b.data.dataTable){
-                    return 1
+            if (a.data.dataTable < b.data.dataTable) {
+                return -1
+            } else if (a.data.dataTable > b.data.dataTable) {
+                return 1
             }
             return 0
-            
+
         });
         return nodes;
     }
@@ -1030,7 +1012,7 @@ var MappingColumnsGraph = (function () {
         var currentDataSource = DataSourceManager.currentConfig.currentDataSource;
         MappingColumnsGraph.visjsGraph.clearGraph();
         MappingColumnsGraph.visjsGraph = null;
-        var visjsData = { nodes: [], edges: [] };
+        var visjsData = {nodes: [], edges: []};
         MappingColumnsGraph.drawGraphCanvas(MappingColumnsGraph.graphDiv, visjsData, function () {
             DataSourceManager.currentConfig.currentDataSource = currentDataSource;
         });
@@ -1044,7 +1026,7 @@ var MappingColumnsGraph = (function () {
     self.zoomOnTable = function (table) {
         self.visjsGraph.network.focus(table, {
             scale: 1,
-            offset: { x: 10, y: 200 },
+            offset: {x: 10, y: 200},
             locked: false,
             animation: true,
         });
@@ -1058,6 +1040,7 @@ var MappingColumnsGraph = (function () {
         var visjsOptions = data.context.options.visjsOptions;
         data.positions = {};
         var isHierarchical = visjsOptions.layout && visjsOptions.layout.hierarchical;
+        var distinctEdges = {}
         var dataTables = self.getDatasourceTablesFromVisjsGraph();
         if (true || !isHierarchical) {
             var tables = {};
@@ -1072,47 +1055,61 @@ var MappingColumnsGraph = (function () {
                 node.color = oldNode.color;
                 node.size = 18;
 
+
                 if (oldNode.data.type == "Class") {
                     node.level = 3;
                 } else if (oldNode.data.type == "Table") {
                     node.color = "#d8cacd";
                     node.level = 1;
-                    node.data.dataTable=node.id;
+                    node.data.dataTable = node.id;
                 } else {
                     node.level = 2;
 
                     if (node.data.dataTable) {
-                        var dataTableToNodeEdges = data.edges.filter(function (edge) { return edge.to == node.id && edge.from==node.data.dataTable });
-                        if(dataTableToNodeEdges.length==0){
-                            data.edges.push({
-                                id: common.getRandomHexaId(5),
-                                to: node.id,
-                                from: node.data.dataTable,
-                                color: "#ef4270",
-                            });
+                        var dataTableToNodeEdges = data.edges.filter(function (edge) {
+                            return edge.to == node.id && edge.from == node.data.dataTable
+                        });
+                        if (dataTableToNodeEdges.length == 0) {
+                            var edgeKey = node.data.dataTable + node.id
+                            if (!distinctEdges[edgeKey]) {
+                                distinctEdges[edgeKey] = 1
+                                data.edges.push({
+                                    id: common.getRandomHexaId(5),
+                                    to: node.id,
+                                    from: node.data.dataTable,
+                                    color: "#ef4270",
+                                    width:2
+                                });
+                            }
                         }
                         if (!tables[node.data.dataTable]) {
                             tables[node.data.dataTable] = 1;
                         }
                     }
                 }
-                
+
                 nodesMap[node.id] = node;
                 newNodes.push(node);
             });
             //newNodes=self.sortVisjsColumns(newNodes);
             data.nodes = newNodes;
-            
+
             data.edges.forEach(function (edge) {
-                if (edge.smooth === null) {
-                    edge.smooth = {
-                        type: "curvedCW",
-                        forceDirection: "vertical",
-                        roundness: 0.85,
-                    };
-                }
-                //  delete  edge.arrows
+
+                edge.width= 3
+
+                    if (edge.smooth === null) {
+                        newEdge.smooth = {
+                            type: "curvedCW",
+                            forceDirection: "vertical",
+                            roundness: 0.45,
+                        };
+                    }
+
+
             });
+
+
 
             for (var table in tables) {
                 if (!nodesMap[table]) {
@@ -1121,7 +1118,7 @@ var MappingColumnsGraph = (function () {
                 }
             }
             data.context.options.layoutHierarchical = self.layoutHierarchical;
-            data.nodes=self.sortVisjsColumns(data.nodes);
+            data.nodes = self.sortVisjsColumns(data.nodes);
         }
 
         return data;

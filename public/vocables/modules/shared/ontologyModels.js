@@ -194,7 +194,7 @@ var OntologyModels = (function () {
                                         }
 
                                         result.results.bindings.forEach(function (item) {
-                                            if (item.sub.value == "http://souslesens.org/resources/ontology/cfihos-s-v01/Pressure") {
+                                            if (item.sub.value == "http://purl.obolibrary.org/obo/IAO_0000030") {
                                                 var x = 3;
                                             }
 
@@ -1500,9 +1500,13 @@ var OntologyModels = (function () {
                 return;
             }
             for (var key in Config.ontologiesVocabularyModels[source].classes) {
-                var item = Config.ontologiesVocabularyModels[source].classes[key];
+                var item = JSON.parse(JSON.stringify(Config.ontologiesVocabularyModels[source].classes[key]));
                 if (classes[key]) {
-                    classes[key].superClass = item.superClass;
+                    if(item.superClass){
+                        classes[key].superClass = item.superClass;
+                        classes[key].superClassLabel = item.superClassLabel;
+                    }
+                    
                 } else {
                     classes[key] = item;
                 }

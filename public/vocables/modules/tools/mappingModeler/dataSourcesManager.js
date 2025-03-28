@@ -225,18 +225,22 @@ var DataSourceManager = (function () {
                 }
 
                 //underline CSV with mappings
-                var dataSources = MappingColumnsGraph.visjsGraph.data.nodes.get().map(function (node) {
-                    return node?.data?.datasource;
-                });
-                if (dataSources.length > 0) {
-                    dataSources = common.array.distinctValues(dataSources);
-                    dataSources = dataSources.filter(function (item) {
-                        return item != undefined;
+                if(self?.visjsGraph?.data?.nodes?.length == 0){
+                   
+                    
+                    var dataSources = MappingColumnsGraph.visjsGraph.data.nodes.get().map(function (node) {
+                        return node?.data?.datasource;
                     });
-                }
-                for (var node in jstreeData) {
-                    if (dataSources.includes(jstreeData[node].id)) {
-                        jstreeData[node].text = "<span style='color:blue'>" + jstreeData[node].text + "</span>";
+                    if (dataSources.length > 0) {
+                        dataSources = common.array.distinctValues(dataSources);
+                        dataSources = dataSources.filter(function (item) {
+                            return item != undefined;
+                        });
+                    }
+                    for (var node in jstreeData) {
+                        if (dataSources.includes(jstreeData[node].id)) {
+                            jstreeData[node].text = "<span style='color:blue'>" + jstreeData[node].text + "</span>";
+                        }
                     }
                 }
 

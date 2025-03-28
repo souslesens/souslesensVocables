@@ -658,8 +658,8 @@ var MappingColumnsGraph = (function () {
                 "mappings_" + MappingModeler.currentSLSsource + "_ALL" + ".json",
                 false,
                 function (err, result) {
-                    if(err){
-                        if(callback){
+                    if (err) {
+                        if (callback) {
                             return callback(err);
                         }
                         return err;
@@ -669,9 +669,9 @@ var MappingColumnsGraph = (function () {
                         DataSourceManager.currentConfig = result.options.config;
                     }
                     MappingColumnsGraph.visjsGraph.data = result;
-                    if(result.nodes.length == 0){
+                    if (result.nodes.length == 0) {
                         MappingColumnsGraph.visjsGraph.draw(function () {
-                            if(callback){
+                            if (callback) {
                                 return callback();
                             }
                         });
@@ -765,14 +765,14 @@ var MappingColumnsGraph = (function () {
     self.saveVisjsGraph = function (callback) {
         var fileName = "mappings_" + MappingModeler.currentSLSsource + "_ALL" + ".json";
         var graph = MappingColumnsGraph.visjsGraph;
-        if( graph.data?.nodes?.length == 0){
+        if (graph.data?.nodes?.length == 0) {
             nodes = [];
-        }else{  
+        } else {
             var nodes = graph.data.nodes.get();
         }
-        if( graph.data?.edges?.length == 0){
+        if (graph.data?.edges?.length == 0) {
             edges = [];
-        }else{  
+        } else {
             var edges = graph.data.edges.get();
         }
         //var nodes = graph.data.nodes.get();
@@ -847,7 +847,7 @@ var MappingColumnsGraph = (function () {
      * @returns {Array<string>} List of unique data table names.
      */
     self.getDatasourceTablesFromVisjsGraph = function () {
-        if(self?.visjsGraph?.data?.nodes?.length == 0){
+        if (self?.visjsGraph?.data?.nodes?.length == 0) {
             return [];
         }
         var tables = self.visjsGraph.data.nodes.get().map(function (node) {
@@ -1121,33 +1121,32 @@ var MappingColumnsGraph = (function () {
             data.context.options.layoutHierarchical = self.layoutHierarchical;
             data.nodes = self.sortVisjsColumns(data.nodes);
         }
-           /**
-             * Exports the current mappings from the Vis.js graph to a JSON file.
-             * Saves the graph data before exporting
-             * Handles errors during the export process and displays appropriate messages.
-             *
-             * @function
-             * @name exportMappings
-             * @memberof module:MappingColumnsGraph
-             * @returns {void}
-             */
-        self.exportMappings = function(){
+        /**
+         * Exports the current mappings from the Vis.js graph to a JSON file.
+         * Saves the graph data before exporting
+         * Handles errors during the export process and displays appropriate messages.
+         *
+         * @function
+         * @name exportMappings
+         * @memberof module:MappingColumnsGraph
+         * @returns {void}
+         */
+        self.exportMappings = function () {
             self.saveVisjsGraph(function (err) {
-                var fileName="mappings_" + MappingModeler.currentSLSsource + "_ALL" + ".json";
+                var fileName = "mappings_" + MappingModeler.currentSLSsource + "_ALL" + ".json";
                 var payload = {
                     dir: "graphs/",
                     fileName: fileName,
                 };
-               
+
                 $.ajax({
                     type: "GET",
                     url: `${Config.apiUrl}/data/file`,
                     data: payload,
                     dataType: "json",
                     success: function (result, _textStatus, _jqXHR) {
-                        var data=JSON.parse(result);
+                        var data = JSON.parse(result);
                         Export.downloadJSON(data, fileName);
-
                     },
                     error(err) {
                         if (callback) {
@@ -1158,28 +1157,26 @@ var MappingColumnsGraph = (function () {
                         }
                         return alert(err);
                     },
-                });    
+                });
             });
-         
         };
-      
-        self.importMappingsFromJSONFile=function(){
-            ImportFileWidget.showImportDialog(function(err,result){
-                if(err){
+
+        self.importMappingsFromJSONFile = function () {
+            ImportFileWidget.showImportDialog(function (err, result) {
+                if (err) {
                     return alert(err);
                 }
-                var data=JSON.parse(result);
-                if(data.nodes.length==0){
+                var data = JSON.parse(result);
+                if (data.nodes.length == 0) {
                     return alert("no nodes in file");
                 }
-                var fileName="mappings_" + MappingModeler.currentSLSsource + "_ALL" + ".json";
+                var fileName = "mappings_" + MappingModeler.currentSLSsource + "_ALL" + ".json";
                 var payload = {
                     dir: "graphs/",
                     fileName: fileName,
                     data: JSON.stringify(data, null, 2),
                 };
-        
-               
+
                 $.ajax({
                     type: "POST",
                     url: `${Config.apiUrl}/data/file`,
@@ -1187,17 +1184,13 @@ var MappingColumnsGraph = (function () {
                     dataType: "json",
                     success: function (result, _textStatus, _jqXHR) {
                         MappingModeler.onLoaded();
-
                     },
                     error(err) {
                         return alert(err);
                     },
-                }); 
-
-
-
+                });
             });
-        }
+        };
 
         return data;
     };

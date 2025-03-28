@@ -225,9 +225,7 @@ var DataSourceManager = (function () {
                 }
 
                 //underline CSV with mappings
-                if(self?.visjsGraph?.data?.nodes?.length == 0){
-                   
-                    
+                if (self?.visjsGraph?.data?.nodes?.length == 0) {
                     var dataSources = MappingColumnsGraph.visjsGraph.data.nodes.get().map(function (node) {
                         return node?.data?.datasource;
                     });

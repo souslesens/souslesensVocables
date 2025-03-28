@@ -468,11 +468,10 @@ fixedColumns: true*/
         var html = `<span class="popupMenuItem" onclick="${visjsGraph}.toGraphMl();">Graph ML </span>`;
         html += `<span class="popupMenuItem" onclick="${visjsGraph}.toSVG()">SVG</span>`;
         html += `<span class="popupMenuItem" onclick="Export.exportGraphToDataTable(${visjsGraph});">CSV</span>`;
-        if(visjsGraph == "MappingColumnsGraph.visjsGraph"){
+        if (visjsGraph == "MappingColumnsGraph.visjsGraph") {
             html += `<span class="popupMenuItem" onclick="MappingColumnsGraph.exportMappings();">JSON</span>`;
         }
-        
-        
+
         PopupMenuWidget.initAndShow(html, "popupMenuWidgetDiv");
     };
     /**
@@ -486,7 +485,7 @@ fixedColumns: true*/
      * @param {string} fileName - The name of the file to be downloaded.
      * @returns {void}
      */
-    self.downloadJSON=function(data,fileName){
+    self.downloadJSON = function (data, fileName) {
         const jsonString = JSON.stringify(data, null, 2);
         const blob = new Blob([jsonString], { type: "application/json" });
         const link = document.createElement("a");
@@ -496,7 +495,7 @@ fixedColumns: true*/
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-    }
+    };
     return self;
 })();
 

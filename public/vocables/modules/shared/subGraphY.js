@@ -276,22 +276,6 @@ var SubGraph = (function () {
         );
     };
 
-    self.getSubGraphTurtles = function (sourceLabel, options, classUri) {
-        if (!classUri) {
-            classUri = "http://tsf/resources/ontology/DEXPIProcess_gfi_2/TransportingFluidsActivity";
-        }
-
-        self.instantiateSubGraph(sourceLabel, classUri, function (err, result) {});
-
-        return;
-        self.getSubGraphResources(sourceLabel, classUri, options, function (err, result) {
-            var resources = result.classes.concat(result.restrictions);
-            self.getResourcesPredicates(sourceLabel, resources, "SELECT", null, function (err, result) {
-                console.log(result);
-            });
-        });
-    };
-
     return self;
 })();
 

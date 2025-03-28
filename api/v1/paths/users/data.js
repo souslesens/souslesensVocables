@@ -106,7 +106,7 @@ module.exports = () => {
         try {
             const userData = await cleanUserData.clean(req.body);
             const userInfo = await userManager.getUser(req.user);
-            const identifier = await userDataModel.insert({ ...userData, owned_by: `${userInfo.user.id}` });
+            const identifier = await userDataModel.insert({ ...userData, owned_by: parseInt(userInfo.user.id) });
             if (identifier !== undefined) {
                 res.status(200).json({ message: "The resource has been inserted successfully", id: identifier });
             } else {
@@ -141,22 +141,6 @@ module.exports = () => {
                         message: {
                             type: "string",
                             default: "The resource has been inserted successfully",
-                        },
-                        id: {
-                            type: "number",
-                            default: 1,
-                        },
-                    },
-                },
-            },
-            404: {
-                description: "The specified owned_by username do not exists",
-                schema: {
-                    type: "object",
-                    properties: {
-                        message: {
-                            type: "string",
-                            default: "The specified owned_by username do not exists",
                         },
                     },
                 },

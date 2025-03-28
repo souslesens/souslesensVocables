@@ -43,7 +43,7 @@
             SearchWidget.searchTermInSources();
         }
     });
-    $("#searchWidget_searchTermInput").focus();
+    $("#searchWidget_searchTermInput") .trigger( "focus" );
     $("#sourcesSelectionDialogdiv").dialog({
         autoOpen: false,
         height: 750,

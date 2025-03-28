@@ -452,6 +452,22 @@ fixedColumns: true*/
         }
     };
 
+    self.exportDataToCSV = function (dataset) {
+        let csvContent = "data:text/csv;charset=utf-8," + dataset.map((row) => row.map((cell) => `"${cell}"`).join(";")).join("\n");
+        let encodedUri = encodeURI(csvContent);
+        let link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "export_data.csv");
+        document.body.appendChild(link);
+
+        link.click();
+    };
+    self.showExportPopUp = function (visjsGraph) {
+        var html = `<span class="popupMenuItem" onclick="Export.exportGraphToDataTable(${visjsGraph});">CSV</span>`;
+        html += `<span class="popupMenuItem" onclick="${visjsGraph}.toSVG()">SVG</span>`;
+        html += `<span class="popupMenuItem" onclick="${visjsGraph}.toGraphMl();">Graph ML </span>`;
+        PopupMenuWidget.initAndShow(html, "popupMenuWidgetDiv");
+    };
     return self;
 })();
 

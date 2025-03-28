@@ -95,7 +95,7 @@ var CreateResource_bot = (function () {
         promptResourceLabelFn: function () {
             _botEngine.promptValue("resource label ", "resourceLabel");
             /*  self.params.resourceLabel = prompt("resource label ");
-            _botEngine.writeCompletedHtml(self.params.resourceLabel);
+            _botEngine.insertBotMessage(self.params.resourceLabel);
             _botEngine.nextStep();*/
         },
 

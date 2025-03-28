@@ -7,7 +7,7 @@ var ManchesterSyntaxWidget = (function () {
     self.init = function (divId, sourceLabel, specificKeywordsMap, basicVocabularies, callback) {
         //  $("#"+divId).before(self.getCss(self.getCss()))
         $("#" + divId).html(self.getHtml());
-        $("#bot_input").focus();
+        $("#bot_input").trigger("focus");
         $("#bot_resourcesProposalSelect").css("display", "none");
 
         self.initKeywords(sourceLabel, specificKeywordsMap, basicVocabularies, callback);
@@ -87,7 +87,7 @@ var ManchesterSyntaxWidget = (function () {
             }
         } else if (self.keywordsMap[lastToken]) {
             var tokenObj = self.keywordsMap[lastToken];
-            self.writeCompletedHtml(tokenObj);
+            self.insertBotMessage(tokenObj);
         }
     };
 
@@ -98,12 +98,12 @@ var ManchesterSyntaxWidget = (function () {
         }
         var key = id.split("|")[1].toLowerCase();
         var tokenObj = self.keywordsMap[key];
-        self.writeCompletedHtml(tokenObj);
+        self.insertBotMessage(tokenObj);
         $("#bot_resourcesProposalSelect").empty();
         $("#bot_resourcesProposalSelect").css("display", "none");
     };
 
-    self.writeCompletedHtml = function (selectedToken) {
+    self.insertBotMessage = function (selectedToken) {
         if (!selectedToken) {
             return;
         }
@@ -115,7 +115,7 @@ var ManchesterSyntaxWidget = (function () {
         html += "<span>&nbsp;</span>";
         $(html).insertBefore("#bot_inputContainer");
         $("#bot_input").val("");
-        $("#bot_input").focus();
+        $("#bot_input").trigger("focus");
 
         return;
     };

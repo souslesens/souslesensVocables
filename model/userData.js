@@ -14,13 +14,14 @@ const UserDataObject = z
         data_label: z.string().default(""),
         data_comment: z.string().default(""),
         data_group: z.string().default(""),
-        data_tool: z.string().default(""),
-        data_source: z.string().default(""),
         data_content: z.record(z.string(), z.any()).default({}),
         is_shared: z.boolean().default(false),
         shared_profiles: z.string().array().default([]),
         shared_users: z.string().array().default([]),
-        owned_by: z.string().optional(),
+        owned_by: z.number().positive().optional(),
+        data_tool: z.string().default(""),
+        data_source: z.string().default(""),
+        data_path: z.string().default(""),
     })
     .strict();
 

@@ -44,7 +44,7 @@ var IndividualValueFilterWidget = (function () {
             }
 
             $("#individualValueFilter_propertySelect option").eq(0).prop("selected", true);
-            $("#individualValueFilter_objectValue").focus();
+            $("#individualValueFilter_objectValue").trigger("focus");
         });
     };
 
@@ -87,7 +87,7 @@ var IndividualValueFilterWidget = (function () {
     };
 
     self.onSelectOperator = function (value) {
-        $("#individualValueFilter_objectValue").focus();
+        $("#individualValueFilter_objectValue").trigger("focus");
     };
     self.onSelectObject = function (value) {
         self.useLabelsList = false;

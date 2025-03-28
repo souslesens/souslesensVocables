@@ -5,6 +5,8 @@ import MappingTransform from "./mappingTransform.js";
 import MappingModeler from "./mappingModeler.js";
 import Export from "../../shared/export.js";
 import UIcontroller from "./uiController.js";
+import DataSourceManager from "./dataSourcesManager.js";
+import OntologyModels from "../../shared/ontologyModels.js";
 
 /**
  * The TripleFactory module handles the creation, filtering, and writing of RDF triples.
@@ -79,6 +81,7 @@ var TripleFactory = (function () {
             //  $("#mainDialogDiv").dialog("option", "title", "Filter mappings : table " + MappingModeler.currentTable.name);
             // $("#mainDialogDiv").dialog("open");
             var options = { withCheckboxes: true, withoutContextMenu: true, openAll: true, check_all: true };
+
             MappingsDetails.showDetailedMappingsTree(null, "detailedMappings_filterMappingsTree", options);
         });
     };
@@ -92,50 +95,31 @@ var TripleFactory = (function () {
      */
     self.runSlsFilteredMappings = function () {
         var checkedNodes = JstreeWidget.getjsTreeCheckedNodes("detailedMappings_filterMappingsTree");
-        var filteredMappings = [];
-        var columnsSelection = {};
-        var checkedNodeAttrs = [];
-
-        checkedNodes.forEach(function (node) {
-            if (node.parents.length == 3) {
-                // attrs
-                checkedNodeAttrs.push(node.id);
-                columnsSelection[node.id] = MappingColumnsGraph.visjsGraph.data.nodes.get(node.parent);
-            } else if (node.data && node.data.type == "Column") {
-                // filter only mapping nodes
-                columnsSelection[node.id] = MappingColumnsGraph.visjsGraph.data.nodes.get(node.id);
-            } else if (node.data && node.data.type == "VirtualColumn") {
-                columnsSelection[node.id] = MappingColumnsGraph.visjsGraph.data.nodes.get(node.id);
-            } else if (node.data && node.data.type == "RowIndex") {
-                columnsSelection[node.id] = MappingColumnsGraph.visjsGraph.data.nodes.get(node.id);
-            }
-        });
-        var mappings = MappingTransform.mappingsToKGcreatorJson(columnsSelection);
-        var uniqueFilteredMappings = {};
-        var transforms = {};
-        // checkedNodeAttrs work only for technical mappings we need to also add structural column mappings
-        mappings.forEach(function (mapping) {
-            checkedNodeAttrs.forEach(function (treeNodeId) {
-                if (treeNodeId.indexOf(mapping.o) > -1) {
-                    if (treeNodeId.indexOf("transform") > -1 && mapping.p == "transform") {
-                        transforms[mapping.s] = mapping.o;
-                    } else if (!uniqueFilteredMappings[mapping.s + "|" + mapping.o]) {
-                        uniqueFilteredMappings[mapping.s + "|" + mapping.o] = 1;
-                        filteredMappings.push(mapping);
+        // sometimes parent are not selected, need them to get connections
+        var parentNodes = [];
+        if (checkedNodes.length > 0) {
+            checkedNodes.forEach(function (node) {
+                var parent = $("#" + "detailedMappings_filterMappingsTree")
+                    .jstree()
+                    .get_parent(node.id);
+                if (parent) {
+                    parent = $("#" + "detailedMappings_filterMappingsTree")
+                        .jstree()
+                        .get_node(parent);
+                    var parentInCheckedNode = checkedNodes.filter(function (item) {
+                        item.id == parent.id;
+                    });
+                    if (parentInCheckedNode.length == 0) {
+                        parentNodes.push(parent);
                     }
                 }
             });
-        });
-        var columnMappings = MappingTransform.mappingsToKGcreatorJson(columnsSelection, { getColumnMappingsOnly: true });
-        // selection isn't concerned for column mappings select all
-        filteredMappings = filteredMappings.concat(columnMappings);
-        var table = MappingModeler.currentTable.name;
-
-        filteredMappings = { [table]: { tripleModels: filteredMappings, transform: transforms } };
-
+        }
+        checkedNodes = checkedNodes.concat(parentNodes);
+        var filteredMappings = MappingTransform.getFilteredMappings(checkedNodes);
         TripleFactory.createTriples(self.filterMappingIsSample, MappingModeler.currentTable.name, { filteredMappings: filteredMappings }, function (err, result) {
             if (err) {
-                return alert(err.responseText);
+                alert(err.responseText || err);
             } else {
                 UI.message("Done", true);
                 if (!self.filterMappingIsSample) {
@@ -239,6 +223,7 @@ var TripleFactory = (function () {
             data: payload,
             dataType: "json",
             success: function (result, _textStatus, _jqXHR) {
+                MappingModeler.clearSourceClasses(DataSourceManager.currentSlsvSource);
                 if (callback) {
                     return callback();
                 }
@@ -402,6 +387,9 @@ var TripleFactory = (function () {
      */
     self.showTriplesInDataTable = function (data, div) {
         var escapeMarkup = function (str) {
+            if (!str) {
+                return "";
+            }
             var str2 = str.replace(/</g, "&lt;");
             var str2 = str2.replace(/>/g, "&gt;");
             return str2;

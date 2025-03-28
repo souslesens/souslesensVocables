@@ -32,7 +32,7 @@
     height: 30px;
 }
 .MappingModeler-logo {
-    background-image: url(@KGquery-logo);
+    background-image: url(@MappingModeler-logo);
     background-repeat: no-repeat;
     height: 30px;
 }
@@ -123,6 +123,13 @@
 
 .classesIcon {
     background-image: url(@classesIcon);
+    background-repeat: no-repeat;
+    height: 50px;
+    width: 40px;
+    margin-top: 10px;
+}
+.queryIcon {
+    background-image: url(@queryIcon);
     background-repeat: no-repeat;
     height: 50px;
     width: 40px;

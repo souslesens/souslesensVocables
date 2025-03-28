@@ -16,6 +16,9 @@ import MappingsDetails from "./mappingsDetails.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import DataSourceManager from "./dataSourcesManager.js";
 import UIcontroller from "./uiController.js";
+import PlantUmlTransformer from "../../graph/plantUmlTransformer.js";
+import mappingModeler from "./mappingModeler.js";
+import mappingColumnsGraph from "./mappingColumnsGraph.js";
 
 /**
  * MappingModeler module.
@@ -47,7 +50,7 @@ var MappingModeler = (function () {
      */
     self.legendItemsArray = [
         //{ label: "Table", color: "#a8da83", shape: "ellipse" },
-        { label: "Column", color: "#cb9801", shape: "ellipse", size: 14 },
+        { label: "Column", color: "#cb9801", shape: "box", size: 14 },
         { label: "RowIndex", color: "#cb9801", shape: "triangle" },
         { label: "VirtualColumn", color: "#cb9801", shape: "square" },
         { label: "URI", color: "#bc7dec", shape: "square" },
@@ -114,6 +117,12 @@ var MappingModeler = (function () {
                         return callbackSeries();
                     });
                 },
+                //load visjs mapping graph
+                function (callbackSeries) {
+                    $("#rightControlPanelDiv").load("./modules/tools/mappingModeler/html/mappingsGraphButtons.html", function (err) {
+                        return callbackSeries();
+                    });
+                },
                 function (callbackSeries) {
                     DataSourceManager.currentSlsvSource = MappingModeler.currentSLSsource;
                     DataSourceManager.getSlsvSourceConfig(MappingModeler.currentSLSsource, function (err, result) {
@@ -144,6 +153,9 @@ var MappingModeler = (function () {
                         DataSourceManager.loaDataSourcesJstree(self.jstreeDivId, function (err) {
                             return callbackSeries();
                         });
+                        /*  $('#rightControlPanelDiv').load("./modules/tools/lineage/html/whiteBoardButtons.html", function () {
+                            UI.resetWindowSize();
+                        });*/
                     });
                 },
             ],
@@ -327,7 +339,7 @@ var MappingModeler = (function () {
             hiddenNodes.push("Class");
             hiddenNodes.push("Connective");
         }
-        Axiom_activeLegend.hideLegendItems(hiddenNodes);
+        self.hideLegendItems(hiddenNodes);
     };
 
     /**
@@ -339,7 +351,9 @@ var MappingModeler = (function () {
      * @param {Object} obj - The selected tree node object.
      */
     self.onSuggestionsSelect = function (event, obj) {
-        if (!DataSourceManager.currentConfig.currentDataSource) return alert("Select a data source");
+        if (!DataSourceManager.currentConfig.currentDataSource) {
+            return alert("Select a data source");
+        }
         var resourceUri = obj.node.id;
         var newResource = null;
         var id = common.getRandomHexaId(8);
@@ -372,7 +386,15 @@ var MappingModeler = (function () {
                     datasource: DataSourceManager.currentConfig.currentDataSource.id,
                 },
             };
-            MappingColumnsGraph.drawResource(newResource);
+            MappingColumnsGraph.drawResource(newResource, function () {
+                var edge = {
+                    to: id,
+                    from: self.currentTable.name,
+                    color: "#8f8a8c",
+                };
+                MappingColumnsGraph.visjsGraph.data.edges.add(edge);
+            });
+
             //  MappingColumnsGraph.graphActions. showColumnDetails(newResource)
             setTimeout(function () {
                 self.onLegendNodeClick({ id: "Class" });
@@ -433,7 +455,13 @@ var MappingModeler = (function () {
                     datasource: self.currentDataSource,
                 },
             };
-            MappingColumnsGraph.drawResource(newResource);
+            MappingColumnsGraph.drawResource(newResource, function (err) {
+                var edge = {
+                    to: id,
+                    from: self.currentTable.name,
+                };
+                MappingColumnsGraph.visjsGraph.data.edges.add(edge);
+            });
             setTimeout(function () {
                 self.onLegendNodeClick({ id: "Class" });
             }, 500);
@@ -455,24 +483,16 @@ var MappingModeler = (function () {
                     self.currentRelation.label = resourceUri;
                     color = "#333";
                 }
-                var edge = {
-                    from: self.currentRelation.from.id,
-                    to: self.currentRelation.to.id,
-                    label: self.currentRelation.label,
-                    arrows: {
-                        to: {
-                            enabled: true,
-                            type: arrowType,
-                        },
-                    },
-                    smooth: smooth,
-                    data: {
-                        id: resourceUri,
-                        type: resourceUri,
-                        source: property ? property.source : null,
-                    },
-                    color: color,
-                };
+                var edge = MappingColumnsGraph.getVisjsObjectPropertyEdge(
+                    self.currentRelation.from.id,
+                    self.currentRelation.to.id,
+                    self.currentRelation.label,
+                    arrowType,
+                    property,
+                    resourceUri,
+                    color,
+                );
+
                 MappingColumnsGraph.addEdge([edge]);
 
                 self.currentRelation = null;
@@ -538,7 +558,6 @@ var MappingModeler = (function () {
             self.loadSuggestionSelectJstree(self.currentTable.columns, "Columns");
             //common.fillSelectOptions("axioms_legend_suggestionsSelect", self.currentTable.columns, false);
         } else if (self.currentResourceType == "Class") {
-            //   self.hideLegendItems();
             var newObject = { id: "createClass", label: "_Create new Class_" };
             self.getAllClasses(MappingModeler.currentSLSsource, function (err, classes) {
                 if (err) {
@@ -550,7 +569,6 @@ var MappingModeler = (function () {
                 self.loadSuggestionSelectJstree(classesCopy, "Classes");
             });
         } else if (self.currentResourceType == "ObjectProperty") {
-            //   self.hideLegendItems();
             var newObjects = [
                 { id: "createObjectProperty", label: "_Create new ObjectProperty_" },
                 { id: "function", label: "function" },
@@ -668,6 +686,15 @@ var MappingModeler = (function () {
             }
             return self.allClasses;
         }
+    };
+
+    self.clearSourceClasses = function (source, callback) {
+        OntologyModels.clearOntologyModelCache(MappingModeler.currentSLSsource);
+        var newClasses = [];
+        self.allClasses.forEach(function (item) {
+            if (item.source != source) newClasses.push(item);
+        });
+        self.allClasses = newClasses;
     };
 
     /**
@@ -852,6 +879,9 @@ var MappingModeler = (function () {
      * self.clearMappings();
      */
     self.clearMappings = function () {
+        if (mappingColumnsGraph.visjsGraph.isGraphNotEmpty()) {
+            if (!confirm("Warning ! if you continue all mappings for this source will be permanently  lost")) return;
+        }
         $("#" + MappingColumnsGraph.graphDivId).html("");
         MappingColumnsGraph.clearGraph();
     };
@@ -1080,7 +1110,7 @@ var MappingModeler = (function () {
                     type: "diamond",
                 },
             },
-            smooth: { type: "curvedCW" },
+
             data: {
                 id: "function{" + $("#MappingModeler_fnBody").val() + "}",
                 type: "function",
@@ -1230,6 +1260,16 @@ var MappingModeler = (function () {
         } else if (DataSourceManager.currentConfig.currentDataSource.type == "csvSource") {
             alert("Comming Soon...");
         }
+    };
+
+    self.visjsDataToClassDiagram = function (visjsData) {
+        if (!visjsData) {
+            visjsData = {
+                nodes: MappingColumnsGraph.visjsGraph.data.nodes.get(),
+                edges: MappingColumnsGraph.visjsGraph.data.edges.get(),
+            };
+        }
+        PlantUmlTransformer.visjsDataToClassDiagram(visjsData);
     };
 
     return self;

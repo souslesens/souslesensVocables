@@ -46,6 +46,10 @@ var DataSourceManager = (function () {
             dir: mappingsDir + "/" + source,
             fileName: "main.json",
         };
+        var payload = {
+            dir: mappingsDir + "/" + source,
+            fileName: "main.json",
+        };
         $.ajax({
             type: "GET",
             url: Config.apiUrl + "/data/file",
@@ -436,7 +440,7 @@ var DataSourceManager = (function () {
      * @param {Object} obj - The Jstree node object containing details about the selected node.
      * @returns {void}
      */
-    self.onDataSourcesJstreeSelect = function (event, obj) {
+    self.onDataSourcesJstreeSelect = function (event, obj, callback) {
         MappingModeler.currentTreeNode = obj.node;
         var isRightClick = false;
         if (obj.event.which == 3) {
@@ -477,9 +481,17 @@ var DataSourceManager = (function () {
             UIcontroller.onActivateLeftPanelTab("MappingModeler_columnsTab");
         }
 
-        if (obj.node.data.type == "table") {
-            $("#MappingModeler_currentDataSource").html(DataSourceManager.currentConfig.currentDataSource.currentTable);
+        if (obj.node.data.type == "table" || obj.node.data.type == "csvSource") {
+            var table = obj.node.data.id;
+            $("#MappingModeler_currentDataSource").html(table);
+
+            MappingColumnsGraph.zoomOnTable(table);
+            if (!MappingColumnsGraph.visjsGraph.data.nodes.get(table)) {
+                var tableNode = MappingColumnsGraph.getVisjsTableNode(table);
+                MappingColumnsGraph.drawResource(tableNode);
+            }
         }
+        if (callback) callback();
     };
 
     /**

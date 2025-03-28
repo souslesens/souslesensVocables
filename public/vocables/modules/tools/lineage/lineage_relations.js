@@ -389,7 +389,10 @@ var Lineage_relations = (function () {
                     source = Config.dictionarySource;
                     options.includeSources = Config.dictionarySource;
 
-                    data = Lineage_whiteboard.lineageVisjsGraph.data.nodes.getIds();
+                    //  data = Lineage_whiteboard.lineageVisjsGraph.data.nodes.getIds();
+
+                    data = Lineage_whiteboard.getGraphIdsFromSource(source);
+
                     options.filter = "FILTER (?prop in (owl:sameAs,owl:equivalentClass))";
                     Lineage_sources.registerSource(Config.dictionarySource);
 
@@ -596,7 +599,7 @@ var Lineage_relations = (function () {
                 },
                 //get effective distinct ObjectProperties
                 function (callbackSeries) {
-                    OntologyModels.getInferredModel(source, options, function (err, result) {
+                    OntologyModels.getImplicitModel(source, options, function (err, result) {
                         if (err) {
                             return callbackSeries(err);
                         }

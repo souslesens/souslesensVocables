@@ -71,30 +71,6 @@ var RDF_IO = {
                 }
 
                 return output;
-
-                if (elt.match(/^_:b\d+$/)) {
-                    return dataFactory.blankNode(elt);
-                } else if (elt.indexOf("_:b") == 0) {
-                    return dataFactory.blankNode(elt);
-                } else if (elt.indexOf("_:") == 0) {
-                    return dataFactory.blankNode(elt);
-                } else if (elt.indexOf("http") == 0 || elt.valueType == "uri") {
-                    addPrefix(elt);
-                    return dataFactory.namedNode(elt);
-                } else if ((p = elt.indexOf("^^")) > 0) {
-                    //xsd type
-                    var string_number_version = +elt.substring(0, p).replace(/'/gm, "");
-                    if (!isNaN(string_number_version)) {
-                        return dataFactory.literal(elt, rdf.xsdns("decimal"));
-                    }
-                    if (elt.split("^^")[1] == "xsd:dateTime") {
-                        return dataFactory.literal(elt, rdf.xsdns("date"));
-                    } else {
-                        return dataFactory.literal(elt);
-                    }
-                } else {
-                    return dataFactory.literal(elt);
-                }
             }
 
             var quads = [];
@@ -108,77 +84,12 @@ var RDF_IO = {
             });
 
             writer.end((error, result) => {
-                console.log(result);
+                // console.log(result)
                 return callback(null, result);
             });
-
-            return;
-
-            var graph = new rdf.Graph();
-
-            slsTriples.forEach(function (triple) {
-                graph.add(getRdfElement.triple.subject, getRdfElement.triple.predicate, getRdfElement.triple.object);
-            });
-            var profile = rdf.environment.createProfile();
-            for (var key in prefixes) {
-                profile.setPrefix(key, prefixes[key]);
-            }
-
-            const turtle = graph
-                .toArray()
-                .sort(function (a, b) {
-                    return a.compare(b);
-                })
-                .map(function (stmt) {
-                    return stmt.toTurtle(profile);
-                });
-
-            console.log(turtle.join("\n"));
-
-            return turtle;
         } catch (e) {
-            return e;
+            return callback(e);
         }
-
-        return;
-
-        const writer = new N3.Writer({
-            prefixes: {
-                c: "http://example.org/cartoons#",
-                foaf: "http://xmlns.com/foaf/0.1/",
-            },
-        });
-        var dataFactory = N3.DataFactory;
-        writer.addQuad(
-            writer.blank(dataFactory.namedNode("http://xmlns.com/foaf/0.1/givenName"), dataFactory.literal("Tom", "en")),
-            dataFactory.namedNode("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"),
-            dataFactory.namedNode("http://example.org/cartoons#Cat"),
-        );
-        writer.addQuad(
-            dataFactory.quad(
-                dataFactory.namedNode("http://example.org/cartoons#Jerry"),
-                dataFactory.namedNode("http://xmlns.com/foaf/0.1/knows"),
-                writer.blank([
-                    {
-                        predicate: dataFactory.namedNode("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"),
-                        object: dataFactory.namedNode("http://example.org/cartoons#Cat"),
-                    },
-                    {
-                        predicate: dataFactory.namedNode("http://xmlns.com/foaf/0.1/givenName"),
-                        object: dataFactory.literal("Tom", "en"),
-                    },
-                ]),
-            ),
-        );
-        writer.addQuad(
-            dataFactory.namedNode("http://example.org/cartoons#Mammy"),
-            dataFactory.namedNode("http://example.org/cartoons#hasPets"),
-            writer.list([dataFactory.namedNode("http://example.org/cartoons#Tom"), dataFactory.namedNode("http://example.org/cartoons#Jerry")]),
-        );
-        writer.end((error, result) => {
-            // console.log(result)
-            return callback(null, result);
-        });
     },
 
     getGraphUri: function (sourceLabel) {

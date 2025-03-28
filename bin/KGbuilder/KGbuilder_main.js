@@ -2,7 +2,9 @@ var fs = require("fs");
 var path = require("path");
 var async = require("async");
 
+var csvCrawler = require("../_csvCrawler.");
 var util = require("../util.");
+var httpProxy = require("../httpProxy.");
 const ConfigManager = require("../configManager.");
 
 const SocketManager = require("../socketManager.");
@@ -23,7 +25,15 @@ var KGbuilder_main = {
     importTriplesFromCsvOrTable: function (source, datasource, tables, options, callback) {
         //  var sparqlServerUrl;
         var output = "";
+        var clientSocketId = options.clientSocketId;
+        var tableMappingsToProcess = [];
+        var sourceMappingsDir = path.join(__dirname, "../../data/mappings/" + source + "/");
+        var csvDir = path.join(__dirname, "../../data/CSV/" + source + "/");
+        var sourceMainJson = {};
+        var dataSourceConfig = {};
+        var dataSourceMappings = {};
         var data = [];
+        var triples = [];
 
         KGbuilder_main.stopCreateTriples = false;
         if (options.clientSocketId) {
@@ -42,6 +52,7 @@ var KGbuilder_main = {
             if (tableMappingsToProcess.length == 0) {
                 return callback(" no mappings to process");
             }
+
             async.eachSeries(
                 tableMappingsToProcess,
                 function (mappings, callbackEach) {
@@ -54,6 +65,17 @@ var KGbuilder_main = {
                                 if (!mappings.lookups || mappings.lookups.length == 0) {
                                     return callbackSeries();
                                 }
+                                // filePath for CSV lookups
+                                var lookups = mappings.lookups;
+                                if (Object.keys(lookups).length > 0) {
+                                    Object.keys(lookups).forEach(function (key) {
+                                        var lookup = lookups[key];
+                                        if (lookup.fileName && lookup.type == "csvSource") {
+                                            lookup.filePath = csvDir + lookup.fileName;
+                                        }
+                                    });
+                                }
+
                                 KGbuilder_triplesMaker.loadLookups(mappings, function (err, result) {
                                     if (err) {
                                         return callbackSeries(err);
@@ -354,7 +376,6 @@ var KGbuilder_main = {
                 },
             ],
             function (err) {
-                return callback(err, tableMappingsToProcess);
                 return callback(err, tableMappingsToProcess);
             },
         );

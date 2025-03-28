@@ -61,18 +61,27 @@ var SVGexport = (function () {
                     },
                 },
                 edges: {
-                    color: "lightgray",
+                    color: "yellow",
                 },
             };
-            network.setOptions(svgOptions);
+            //network.setOptions(svgOptions);
+
             network.redraw();
-            network.setOptions(options);
+
+            //network.setOptions(options);
             canvasProto.getContext = currentGetContext;
             ctx.waitForComplete(function () {
                 var svg = ctx.getSerializedSvg();
                 showSvg(svg);
             });
         }
+        /*
+       function exportSvg() {
+            var canvas = $('#graphDiv').find('canvas')[0];
+            const ctx = canvas.getContext("2d");
+            const c2s = new C2S(canvas.width, canvas.height);
+
+       }*/
 
         function showSvg(svg) {
             var svgBlob = new Blob([svg], { type: "image/svg+xml" });

@@ -4,7 +4,16 @@ import Shacl from "./shacl.js";
 
 var SubGraph = (function () {
     var self = {};
-
+    /**
+     * recursively extracts restrictions associated to a node
+     * iterates to superclass restrictions of each target node
+     *
+     *
+     * @param sourceLabel
+     * @param baseClassId
+     * @param options
+     * @param callback
+     */
     self.getSubGraphResources = function (sourceLabel, baseClassId, options, callback) {
         if (!options) {
             options = {};
@@ -105,7 +114,9 @@ var SubGraph = (function () {
                                                 currentClasses.push(item.targetClass.value);
                                             }
                                         }
-
+                                        if (obj.property == "http://totalenergies/resources/tsf/ontology/dexpi-process/generic/hasPortIn") {
+                                            var x = 3;
+                                        }
                                         if (!allRestrictions[item.s.value][obj.property]) {
                                             allRestrictions[item.s.value][obj.property] = [];
                                         }
@@ -127,7 +138,7 @@ var SubGraph = (function () {
                         },
                     );
                 },
-
+                //getClass Labels
                 function (callbackSeries) {
                     var uris = Object.keys(allClasses).concat(Object.keys(allRestrictions));
                     var filter = Sparql_common.setFilter("s", uris);
@@ -149,6 +160,24 @@ var SubGraph = (function () {
                         });
                         return callbackSeries();
                     });
+                },
+                //delete targetClass that are superClassOf other previous targetClass for this property
+                function (callbackSeries) {
+                    for (var classUri in allRestrictions) {
+                        for (var key in allRestrictions[classUri]) {
+                            var props = allRestrictions[classUri][key];
+
+                            var previousClass = null;
+                            props.forEach(function (item, index) {
+                                var classObj = allClasses[item.targetClass];
+                                if (classObj.ancestors.indexOf(previousClass) > -1) {
+                                    props.slice(index, 1);
+                                }
+                                previousClass = item.targetClass;
+                            });
+                        }
+                    }
+                    return callbackSeries();
                 },
             ],
             function (err) {
@@ -234,7 +263,7 @@ var SubGraph = (function () {
             if (uniqueResources[classUri]) {
                 return uniqueResources[classUri];
             }
-            var uri = classUri + "#" + common.getRandomHexaId(10);
+            var uri = classUri + "_" + common.getRandomHexaId(10);
             uniqueResources[classUri] = uri;
             triples.push({
                 subject: uri,
@@ -299,7 +328,7 @@ var SubGraph = (function () {
         });
     };
 
-    self.getSubGraphShaclTriplesXXX = function (sourceLabel, _classUri, options, callback) {
+    self.getSubGraphShaclNtTriples = function (sourceLabel, _classUri, options, callback) {
         if (!options) {
             options = {};
         }
@@ -332,6 +361,7 @@ var SubGraph = (function () {
 
                 var classRestrictions = restrictionsMap[classUri2];
                 var shaclProperties = [];
+                var triples = [];
                 if (classRestrictions) {
                     for (var property in classRestrictions) {
                         classRestrictions[property].forEach(function (restriction) {
@@ -339,9 +369,10 @@ var SubGraph = (function () {
                                 return;
                             }
 
-                            var propStr = Shacl.uriToPrefixedUri(restriction.property);
-                            var rangeStr = Shacl.uriToPrefixedUri(restriction.targetClass);
-                            var property = " sh:path " + propStr + " ;\n";
+                            var propStr = restriction.property;
+                            var rangeStr = restriction.targetClass;
+                            triples.push("sh:path> " + propStr);
+                            //  var property = " sh:path " + propStr + " ;\n";
 
                             //  "        sh:maxCount " + count + " ;" +
                             property += "        sh:node " + rangeStr + " ;";
@@ -400,27 +431,29 @@ var SubGraph = (function () {
                 var item = classesMap[classUri2];
 
                 var classRestrictions = restrictionsMap[classUri2];
-                var shaclProperties = [];
+                var shaclProperties = {};
                 if (classRestrictions) {
-                    for (var property in classRestrictions) {
-                        classRestrictions[property].forEach(function (restriction) {
+                    for (var propertyUri in classRestrictions) {
+                        shaclProperties[propertyUri] = [];
+
+                        classRestrictions[propertyUri].forEach(function (restriction) {
                             if (!restriction.property || !restriction.targetClass) {
                                 return;
                             }
 
                             var propStr = Shacl.uriToPrefixedUri(restriction.property);
                             var rangeStr = Shacl.uriToPrefixedUri(restriction.targetClass);
-                            var property = " sh:path " + propStr + " ;\n";
+                            var shproperty = " sh:path " + propStr + " ;\n";
 
                             //  "        sh:maxCount " + count + " ;" +
-                            property += "        sh:node " + rangeStr + " ;";
-                            property += Shacl.getCardinalityProperty(restriction);
+                            shproperty += "        sh:class " + rangeStr + " ;\n";
+                            shproperty += Shacl.getCardinalityProperty(restriction);
 
-                            shaclProperties.push(property);
+                            shaclProperties[propertyUri].push(shproperty);
                         });
                     }
                     var domain = Shacl.uriToPrefixedUri(classUri2);
-                    if (shaclProperties.length > 0) {
+                    if (Object.keys(shaclProperties).length > 0) {
                         var shaclStr = Shacl.getShacl(domain, null, shaclProperties);
                         allSahcls += shaclStr;
                     }
@@ -532,7 +565,7 @@ var SubGraph = (function () {
                 contentType: "application/json",
                 dataType: "json",
                 success: function (data, _textStatus, _jqXHR) {
-                    return data.output;
+                    return callback(null, data.output);
                 },
                 error(err) {
                     UI.message("", true);
@@ -541,6 +574,8 @@ var SubGraph = (function () {
             });
         });
     };
+
+    self.validateShalcRules = function (sourceLabel, processClass, options, callback) {};
 
     self.getSubGraphVisjsData = function (sourceLabel, processClass, options, callback) {
         self.graphDiv = options.graphDiv;
@@ -576,7 +611,7 @@ var SubGraph = (function () {
             var uniqueIds = {};
 
             var getLevel = function (uri) {
-                var classUri = uri.substring(0, uri.lastIndexOf("#"));
+                var classUri = uri.substring(0, uri.lastIndexOf("_"));
                 var level = 0;
                 if (classUri == processClass) {
                     return 0;
@@ -719,7 +754,9 @@ var SubGraph = (function () {
         });
         visjsData.edges.forEach(function (edge) {
             edgesToMap[edge.to] = nodesMap[edge.from];
-            if (!edgesFromMap[edge.to]) edgesFromMap[edge.from] = [];
+            if (!edgesFromMap[edge.to]) {
+                edgesFromMap[edge.from] = [];
+            }
             edgesFromMap[edge.from].push(edge.to);
         });
 

@@ -127,6 +127,9 @@ query=query.replace(/GRAPH ?[a-zA-Z0-9]+\{/,"{")
                 console.log(query);
                 Config.logQueries = false;
             }
+            if ($("#developerControls_logQueriesCBX").prop("checked")) {
+                console.log(query);
+            }
 
             if (options.caller) {
                 if (!self.queriesHistory[options.caller]) {

@@ -8,7 +8,7 @@ var SourceSelectorWidget = (function () {
     self.currentTreeDiv = null;
 
     self.showSourceDialog = function (resetAll) {
-        $("#sourceSelector_searchInput").focus();
+        $("#sourceSelector_searchInput").trigger("focus");
         var onSourceSelect;
         if (resetAll) {
             Lineage_sources.loadedSources = {};
@@ -45,7 +45,7 @@ var SourceSelectorWidget = (function () {
                 $("#" + targetDivId).dialog("open");
             } catch (e) {}
             self.loadSourcesTreeDiv("sourceSelector_jstreeDiv", jsTreeOptions);
-            $("#sourceSelector_searchInput").focus();
+            $("#sourceSelector_searchInput").trigger("focus");
             //  $("#sourceSelector_SearchSourceInput");
             $("#sourceSelector_validateButton").bind("click", function () {
                 okButtonValidateFn();
@@ -322,7 +322,7 @@ var SourceSelectorWidget = (function () {
             if (err) {
                 return alert(err.responseText);
             }
-            UI.resetWindowHeight();
+            UI.resetWindowSize();
         });
     };
 
@@ -337,7 +337,11 @@ var SourceSelectorWidget = (function () {
         MainController.currentSource = obj.node.data.id;
         $("#selectedSource").html(MainController.currentSource);
         //  $("#mainDialogDiv").parent().hide();
-        Lineage_whiteboard.loadSources();
+        Lineage_sources.loadSources(MainController.currentSource, function (err) {
+            if (err) {
+                return alert(err.responseText);
+            }
+        });
     };
 
     self.getJstreeConceptsContextMenu = function () {

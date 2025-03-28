@@ -6,6 +6,7 @@ import MappingModeler from "./mappingModeler.js";
 import TripleFactory from "./tripleFactory.js";
 import MappingTransform from "./mappingTransform.js";
 import UIcontroller from "./uiController.js";
+import DataSourceManager from "./dataSourcesManager.js";
 
 /**
  * MappingsDetails manages technical mappings (non structural mappings)
@@ -23,6 +24,7 @@ var MappingsDetails = (function () {
         rdfsLabel: "#33ff36",
         transform: "#ffe333",
         otherPredicates: "#ca33ff",
+        lookup: "#eeff33",
     };
 
     /**
@@ -161,6 +163,18 @@ var MappingsDetails = (function () {
                         parent: node.id,
                     });
                 }
+                var currentLookupName = node.data.dataTable + "|" + node.data.label;
+                if (DataSourceManager.currentConfig.lookups[currentLookupName]) {
+                    var lookup = DataSourceManager.currentConfig.lookups[currentLookupName];
+                    if (lookup.name == currentLookupName) {
+                        jstreeData.push({
+                            id: lookup.fileName + "|" + "lookup",
+                            text: "<span style='color: " + self.colorsMap["lookup"] + "'>" + "lookup" + "</span>  " + JSON.stringify(lookup),
+                            parent: node.id,
+                            data: lookup,
+                        });
+                    }
+                }
             }
         });
 
@@ -182,6 +196,36 @@ var MappingsDetails = (function () {
                         },
                     };
                 }
+                if (node.id.split("|")[1] == "transform") {
+                    items["edit transform"] = {
+                        label: "edit transform",
+                        action: function (_e) {
+                            var column = MappingColumnsGraph.visjsGraph.data.nodes.get(node.id.split("|")[0]);
+                            var columnLabel = column.label;
+                            var transformValue = column.data.transform;
+                            if (transformValue) {
+                                transformValue = transformValue.match(/function{(.*)}/s)[1];
+                                MappingsDetails.transform.showTansformDialog(columnLabel, function () {
+                                    $("#MappingModeler_fnBody").val(transformValue);
+                                });
+                            }
+                        },
+                    };
+                }
+                if (node.id.split("|")[1] == "lookup") {
+                    items["edit lookup"] = {
+                        label: "edit lookup",
+                        action: function (_e) {
+                            MappingColumnsGraph.currentGraphNode = MappingColumnsGraph.visjsGraph.data.nodes.get(node.parent);
+                            Lookups_bot.start(Lookups_bot.lookUpWorkflow, {}, function (err, result) {
+                                if (err) {
+                                    return alert(err);
+                                }
+                            });
+                        },
+                    };
+                }
+
                 return items;
             },
         };
@@ -190,7 +234,9 @@ var MappingsDetails = (function () {
             options[key] = _options[key];
         }
 
-        JstreeWidget.loadJsTree(divId, jstreeData, options);
+        JstreeWidget.loadJsTree(divId, jstreeData, options, function () {
+            $("#detailedMappings_treeContainer").css("overflow", "unset");
+        });
     };
 
     /**
@@ -207,7 +253,9 @@ var MappingsDetails = (function () {
     self.showColumnTechnicalMappingsDialog = function (divId, column, callbackFn) {
         self.afterSaveColumnTechnicalMappingsDialog = callbackFn;
         var html = `<tr><td>Table column</td><td><span id='class-column' ><b> ${column.text || column.label} </b></span> </td></tr>`;
+        html += `<tr><td>Base URI</td><td><input id='columnDetails-baseUri' style='width:600px;    background-color: #eee;'> </input>  </td></tr>`;
         html += `<tr><td>URI syntax*</td><td><select id='columnDetails-UriType' style='padding:6px 6px'> </select>  </td></tr>`;
+
         html += `<tr><td>rdf:type*</td><td><select id='columnDetails-rdfType' style='padding:6px 6px'> </select> </td></tr> `;
 
         html += `<tr><td>rdfs:label column</td><td><select id='columnDetails-rdfsLabel' style='padding:6px 6px'> </select> </td></tr>`;
@@ -244,6 +292,94 @@ var MappingsDetails = (function () {
         common.fillSelectOptions(`columnDetails-rdfsLabel`, columns, false);
         common.fillSelectOptions(`columnDetails-rdfType`, rdfObjectsType, false);
         common.fillSelectOptions(`columnDetails-UriType`, URITType, false);
+
+        var sourceObj = Config.sources[MappingModeler.currentSLSsource];
+
+        $("#columnDetails-baseUri").val(column.data.baseURI || "");
+    };
+
+    /**
+     * Saves the mapping details to the Vis.js graph for a specific column.
+     * It updates the column's URI type, RDF type, and rdfs:label based on the user's selection,
+     * then saves the updated data to the graph and triggers any necessary transformations.
+     * @function
+     * @name saveMappingsDetailsToVisjsGraph
+     * @memberof module:MappingsDetails
+     * @param {string} columnId - The ID of the column whose mapping details are to be saved.
+     * @returns {void}
+     */
+    self.saveMappingsDetailsToVisjsGraph = function (columnId) {
+        var currentGraphNode = MappingColumnsGraph.visjsGraph.data.nodes.get(columnId);
+        if (!currentGraphNode) {
+            return alert("no current graphNode ");
+        }
+        currentGraphNode.data.uriType = $("#columnDetails-UriType").val();
+        currentGraphNode.data.rdfsLabel = $("#columnDetails-rdfsLabel").val();
+        currentGraphNode.data.rdfType = $("#columnDetails-rdfType").val();
+
+        var baseUri = (currentGraphNode.data.baseURI = $("#columnDetails-baseUri").val());
+        var sourceObj = Config.sources[MappingModeler.currentSLSsource];
+        var sourceBaseUri = sourceObj.baseUri || sourceObj.graphUri;
+        if (baseUri && baseUri != sourceBaseUri) {
+            currentGraphNode.data.baseURI = $("#columnDetails-baseUri").val();
+        } else {
+            if (currentGraphNode.data.baseURI) {
+                delete currentGraphNode.data.baseURI;
+            }
+        }
+
+        MappingColumnsGraph.updateNode(currentGraphNode);
+        self.switchTypeToSubclass(currentGraphNode);
+        // });
+        MappingColumnsGraph.saveVisjsGraph();
+    };
+
+    /**
+     * Deletes a specific mapping from the Vis.js graph node.
+     * It identifies the mapping based on the node's ID and removes the corresponding property
+     * or predicate from the node's data. After deletion, the tree is updated and the graph is re-rendered.
+     * @function
+     * @name deleteMappingInVisjsNode
+     * @memberof module:MappingsDetails
+     * @param {Object} treeNode - The tree node representing the mapping to be deleted.
+     * @returns {void}
+     */
+    self.deleteMappingInVisjsNode = function (treeNode) {
+        var array = treeNode.id.split("|");
+
+        var graphNode = MappingColumnsGraph.visjsGraph.data.nodes.get(array[0]);
+
+        if (array.length == 3) {
+            for (var key in graphNode.data) {
+                if (key == array[1] && graphNode.data[key] === array[2]) {
+                    delete graphNode.data[key];
+                }
+            }
+        } else if (array.length == 4) {
+            //otherPredicates
+            graphNode.data.otherPredicates.forEach(function (item, index) {
+                if (item.property == array[2] && item.object == array[3]) {
+                    graphNode.data.otherPredicates.splice(index, 1);
+                }
+            });
+        }
+        //transform gestion
+        if (array.length >= 2 && array[1] == "transform") {
+            if (graphNode.data.transform) {
+                delete graphNode.data.transform;
+            }
+        }
+        // lookup gestion
+        if (array.length >= 2 && array[1] == "lookup") {
+            if (treeNode?.data?.name) {
+                delete DataSourceManager.currentConfig.lookups[treeNode.data.name];
+                //delete lookup
+            }
+        }
+
+        JstreeWidget.deleteNode("detailedMappings_jsTreeDiv", treeNode);
+        self.drawDetailedMappingsGraph();
+        MappingColumnsGraph.saveVisjsGraph();
     };
 
     /**
@@ -301,76 +437,12 @@ var MappingsDetails = (function () {
                 MappingColumnsGraph.updateNode({ id: MappingColumnsGraph.currentGraphNode.id, data: data });
                 MappingColumnsGraph.saveVisjsGraph();
             }
-            if (MappingsDetails.afterSaveColumnTechnicalMappingsDialog) MappingsDetails.afterSaveColumnTechnicalMappingsDialog();
+            if (MappingsDetails.afterSaveColumnTechnicalMappingsDialog) {
+                MappingsDetails.afterSaveColumnTechnicalMappingsDialog();
+            }
             // self.showDetailsDialog();
         });
     };
-
-    /**
-     * Saves the mapping details to the Vis.js graph for a specific column.
-     * It updates the column's URI type, RDF type, and rdfs:label based on the user's selection,
-     * then saves the updated data to the graph and triggers any necessary transformations.
-     * @function
-     * @name saveMappingsDetailsToVisjsGraph
-     * @memberof module:MappingsDetails
-     * @param {string} columnId - The ID of the column whose mapping details are to be saved.
-     * @returns {void}
-     */
-    self.saveMappingsDetailsToVisjsGraph = function (columnId) {
-        var currentGraphNode = MappingColumnsGraph.visjsGraph.data.nodes.get(columnId);
-        if (!currentGraphNode) {
-            return alert("no current graphNode ");
-        }
-        currentGraphNode.data.uriType = $("#columnDetails-UriType").val();
-        currentGraphNode.data.rdfsLabel = $("#columnDetails-rdfsLabel").val();
-        currentGraphNode.data.rdfType = $("#columnDetails-rdfType").val();
-        MappingColumnsGraph.updateNode(currentGraphNode);
-        self.switchTypeToSubclass(currentGraphNode);
-        // });
-        MappingColumnsGraph.saveVisjsGraph();
-    };
-
-    /**
-     * Deletes a specific mapping from the Vis.js graph node.
-     * It identifies the mapping based on the node's ID and removes the corresponding property
-     * or predicate from the node's data. After deletion, the tree is updated and the graph is re-rendered.
-     * @function
-     * @name deleteMappingInVisjsNode
-     * @memberof module:MappingsDetails
-     * @param {Object} treeNode - The tree node representing the mapping to be deleted.
-     * @returns {void}
-     */
-    self.deleteMappingInVisjsNode = function (treeNode) {
-        var array = treeNode.id.split("|");
-
-        var graphNode = MappingColumnsGraph.visjsGraph.data.nodes.get(array[0]);
-
-        if (array.length == 3) {
-            for (var key in graphNode.data) {
-                if (key == array[1] && graphNode.data[key] === array[2]) {
-                    delete graphNode.data[key];
-                }
-            }
-        } else if (array.length == 4) {
-            //otherPredicates
-            graphNode.data.otherPredicates.forEach(function (item, index) {
-                if (item.property == array[2] && item.object == array[3]) {
-                    graphNode.data.otherPredicates.splice(index, 1);
-                }
-            });
-        }
-        //transform gestion
-        if (array.length >= 2 && array[1] == "transform") {
-            if (graphNode.data.transform) {
-                delete graphNode.data.transform;
-            }
-        }
-
-        JstreeWidget.deleteNode("detailedMappings_jsTreeDiv", treeNode);
-        self.drawDetailedMappingsGraph();
-        MappingColumnsGraph.saveVisjsGraph();
-    };
-
     /**
      * Handles the selection of a tree node and displays the corresponding column's technical details.
      * If the selected node is a column node, it opens the column technical mappings dialog.
@@ -444,6 +516,7 @@ var MappingsDetails = (function () {
             });
             return role;
         }
+
         var predicates = {
             "rdf:type": "rdfType",
             "rdfs:label": "rdfsLabel",
@@ -455,6 +528,7 @@ var MappingsDetails = (function () {
             if (item.p == "transform") {
                 item.o = "transform";
             }
+
             function getNodeAttrs(str) {
                 if (str.indexOf("http") > -1) {
                     return { type: "Class", color: "#00afef", shape: "box", size: 30 };
@@ -662,7 +736,7 @@ var MappingsDetails = (function () {
          * @param {string} [column] - The column to transform (optional).
          * @returns {void}
          */
-        showTansformDialog: function (column) {
+        showTansformDialog: function (column, callback) {
             // return if  virtuals and rowIndex
             if (!column) {
                 column = MappingColumnsGraph.currentGraphNode.label;
@@ -671,6 +745,9 @@ var MappingsDetails = (function () {
                 $("#smallDialogDiv").dialog("open");
                 $("#smallDialogDiv").dialog("option", "title", "Transform for " + column);
                 self.transformColumn = column;
+                if (callback) {
+                    callback();
+                }
             });
         },
 

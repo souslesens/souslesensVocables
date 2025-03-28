@@ -56,7 +56,7 @@ var Lineage_queryBuilder = (function () {
         $("#bot_resourcesProposalSelect").unbind("change");
         $("#bot_resourcesProposalSelect").bind("change", function () {
             var text = $("#bot_resourcesProposalSelect option:selected").text();
-            self.writeCompletedHtml(text + ":");
+            self.insertBotMessage(text + ":");
 
             var selectedValue = $(this).val();
             if (varToFill) {
@@ -66,7 +66,7 @@ var Lineage_queryBuilder = (function () {
         });
     };
 
-    self.writeCompletedHtml = function (str) {
+    self.insertBotMessage = function (str) {
         if (!str) {
             return;
         }
@@ -75,7 +75,7 @@ var Lineage_queryBuilder = (function () {
         html += "<span>&nbsp;</span>";
         $(html).insertBefore("#bot_input");
         $("#bot_input").val("");
-        $("#bot_input").focus();
+        $("#bot_input") .trigger( "focus" );
         return;
     };
 
@@ -256,7 +256,7 @@ var Lineage_queryBuilder = (function () {
                     self.currentQuery.path = $(this).val();
                     return "ok";
                     var text = $("#bot_resourcesProposalSelect option:selected").text();
-                    writeCompletedHtml(text + ":");
+                    insertBotMessage(text + ":");
                     listIndividualFilterType();
                 });
             });
@@ -273,7 +273,7 @@ var Lineage_queryBuilder = (function () {
 
             showList(choices, function () {
                 var currentChoice = $(this).val();
-                writeCompletedHtml(currentChoice + ":");
+                insertBotMessage(currentChoice + ":");
                 if (currentChoice == "all") {
                     self.currentQuery.individualsFilterRole = null;
                     listWhiteBoardFilterType();
@@ -296,7 +296,7 @@ var Lineage_queryBuilder = (function () {
             return;
             showList(choices, function () {
                 var currentChoice = $(this).val();
-                writeCompletedHtml(currentChoice + ":");
+                insertBotMessage(currentChoice + ":");
                 self.currentQuery.individualsFilterType = currentChoice;
                 if (currentChoice == "label") {
                     self.currentQuery.individualsFilterValue = prompt("label contains ");
@@ -326,7 +326,7 @@ var Lineage_queryBuilder = (function () {
 
                 showList(individuals, function () {
                     var individual = $(this).val();
-                    writeCompletedHtml(individual + ":");
+                    insertBotMessage(individual + ":");
                     self.currentQuery.individualsFilterValue = individual;
                     listWhiteBoardFilterType();
                 });

@@ -1,4 +1,5 @@
 import common from "../../shared/common.js";
+import DataSourceManager from "./dataSourcesManager.js";
 import MappingModeler from "./mappingModeler.js";
 import UIcontroller from "./uiController.js";
 
@@ -95,19 +96,16 @@ var MappingTransform = (function () {
      * @returns {string} The generated column name in KGcreator format.
      */
     self.nodeToKGcreatorColumnName = function (data) {
-        var colname = null;
-        // if (data.uriType == "blankNode" || !data.rdfsLabel) {
-        if (data.uriType == "blankNode") {
-            colname = data.id + "_$";
-        } else if (data.uriType == "randomIdentifier") {
-            colname = data.id + "_£";
-        } else {
-            colname = data.id;
+        var colname = data.id;
+        if (data.baseURI) {
+            colname = "[" + data.baseURI + "]" + colname;
         }
-        /*
-        else if (data.uriType == "fromLabel") {
-            colname = data.id;
-        }*/
+
+        if (data.uriType == "blankNode") {
+            colname = colname + "_$";
+        } else if (data.uriType == "randomIdentifier") {
+            colname = colname + "_£";
+        }
 
         if (colname && data.type == "VirtualColumn") {
             colname = "@" + colname + "_$";
@@ -182,12 +180,15 @@ var MappingTransform = (function () {
             var connections = MappingColumnsGraph.visjsGraph.getFromNodeEdgesAndToNodes(nodeId);
 
             connections.forEach(function (connection) {
-                if (connection.edge.data.type == "tableToColumn") {
+                if (connection.edge?.data?.type == "tableToColumn") {
                     return;
                 }
-                var property = connection.edge.data.id;
+                var property = connection.edge?.data?.id;
                 if (!property) {
-                    property = connection.edge.data.type;
+                    property = connection?.edge?.data?.type;
+                }
+                if (!property) {
+                    return;
                 }
                 var object = connection.toNode.data.id;
                 if (columnsMapLabels.includes(object)) {
@@ -233,7 +234,48 @@ var MappingTransform = (function () {
         }
 
         allMappings = self.addMappingsRestrictions(allMappings);
+        // allMappings add lookups_s and lookups_o for each mapping if there is lookup
+        allMappings = self.addLookupsToMappings(allMappings, columnsMap);
 
+        return allMappings;
+    };
+    self.addLookupsToMappings = function (allMappings, columnsMap) {
+        if (Object.keys(DataSourceManager.currentConfig.lookups).length == 0) {
+            return allMappings;
+        }
+
+        Object.keys(DataSourceManager.currentConfig.lookups).forEach(function (lookup) {
+            if (lookup.split("|")[0] == DataSourceManager.currentConfig.currentDataSource.currentTable && columnsMap[lookup.split("|")[0] + "|lookup"]) {
+                var lookupObj = DataSourceManager.currentConfig.lookups[lookup];
+                var lookupColumn = lookupObj.name.split("|")[1];
+                var is_object_lookup = false;
+                var is_subject_lookup = false;
+                if (lookupObj.targetMapping == "both") {
+                    is_object_lookup = true;
+                    is_subject_lookup = true;
+                }
+                if (lookupObj.targetMapping == "object") {
+                    is_object_lookup = true;
+                }
+                if (lookupObj.targetMapping == "subject") {
+                    is_subject_lookup = true;
+                }
+                /* 
+                allMappings.push({
+                    s:lookupColumn,
+                    p:'lookup',
+                    o:JSON.stringify(lookupObj)
+                });*/
+                allMappings.forEach(function (mapping) {
+                    if (mapping.s == lookupColumn && is_subject_lookup) {
+                        mapping.lookup_s = lookupObj.name;
+                    }
+                    if (mapping.o == lookupColumn && is_object_lookup) {
+                        mapping.lookup_o = lookupObj.name;
+                    }
+                });
+            }
+        });
         return allMappings;
     };
 
@@ -260,7 +302,7 @@ var MappingTransform = (function () {
         };
         allMappings.forEach(function (mapping) {
             if (!mapping.p.startsWith("http")) return;
-            if (isClass(mapping.s) && isClass(mapping.o)) {
+            if (isClass(mapping.s) && isClass(mapping.o) && mapping.p != "rdfs:subClassOf" && mapping.p != "rdf:member") {
                 if (mapping.s != mapping.o) {
                     mapping.isRestriction = true;
                 }
@@ -280,10 +322,71 @@ var MappingTransform = (function () {
      */
     self.copyKGcreatorMappings = function () {
         var text = $("#mappingModeler_infosTA").val();
-        $("#mappingModeler_infosTA").focus();
+        $("#mappingModeler_infosTA").trigger("focus");
         common.copyTextToClipboard(text);
     };
+    self.getFilteredMappings = function (checkedNodes) {
+        var filteredMappings = [];
+        var columnsSelection = {};
+        var checkedNodeAttrs = [];
 
+        checkedNodes.forEach(function (node) {
+            if (node.parents.length == 3) {
+                // attrs
+                checkedNodeAttrs.push(node.id);
+                columnsSelection[node.id] = MappingColumnsGraph.visjsGraph.data.nodes.get(node.parent);
+            } else if (node.data && node.data.type == "Column") {
+                // filter only mapping nodes
+                columnsSelection[node.id] = MappingColumnsGraph.visjsGraph.data.nodes.get(node.id);
+            } else if (node.data && node.data.type == "VirtualColumn") {
+                columnsSelection[node.id] = MappingColumnsGraph.visjsGraph.data.nodes.get(node.id);
+            } else if (node.data && node.data.type == "RowIndex") {
+                columnsSelection[node.id] = MappingColumnsGraph.visjsGraph.data.nodes.get(node.id);
+            }
+        });
+        var mappings = MappingTransform.mappingsToKGcreatorJson(columnsSelection);
+        var columnMappings = MappingTransform.mappingsToKGcreatorJson(columnsSelection, { getColumnMappingsOnly: true });
+        var uniqueFilteredMappings = {};
+        var transforms = {};
+        // checkedNodeAttrs work only for technical mappings we need to also add structural column mappings
+        mappings.forEach(function (mapping) {
+            // columnsMapping
+            var mappingInColumnMapping = columnMappings.filter(function (item) {
+                return item.s == mapping.s && item.p == mapping.p && item.o == mapping.o;
+            });
+            if (mappingInColumnMapping.length > 0) {
+                filteredMappings.push(mapping);
+            } else {
+                checkedNodeAttrs.forEach(function (treeNodeId) {
+                    if (treeNodeId.indexOf(mapping.o) > -1) {
+                        if (treeNodeId.indexOf("transform") > -1 && mapping.p == "transform") {
+                            transforms[mapping.s] = mapping.o;
+                        } else if (!uniqueFilteredMappings[mapping.s + "|" + mapping.p + "|" + mapping.o]) {
+                            uniqueFilteredMappings[mapping.s + "|" + mapping.p + "|" + mapping.o] = 1;
+                            filteredMappings.push(mapping);
+                        }
+                    }
+                });
+            }
+        });
+
+        // selection isn't concerned for column mappings select all
+        //filteredMappings=filteredMappings.concat(columnMappings);
+        var table = MappingModeler.currentTable.name;
+
+        filteredMappings = { [table]: { tripleModels: filteredMappings, transform: transforms, lookups: {} } };
+        if (Object.keys(DataSourceManager.currentConfig.lookups)) {
+            Object.keys(DataSourceManager.currentConfig.lookups).forEach(function (lookup) {
+                var checkedLookup = checkedNodes.filter(function (item) {
+                    return item?.data?.name == lookup;
+                });
+                if (checkedLookup.length > 0) {
+                    filteredMappings[table].lookups[lookup] = DataSourceManager.currentConfig.lookups[lookup];
+                }
+            });
+        }
+        return filteredMappings;
+    };
     return self;
 })();
 export default MappingTransform;

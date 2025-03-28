@@ -1,6 +1,11 @@
 <!doctype html>
 <html>
     <head>
+        <!--  <style>
+            #mainDialogDiv {
+               // max-width: 80% !important;
+            }
+        </style>-->
         <meta charset="utf-8" />
         <title>SouslesensVocables</title>
 
@@ -26,6 +31,8 @@
         <script src="js/external/sunburst.js"></script>
         <script src="js/external/d3/d3.js"></script>
 
+        <script src="js/external/deflate.js"></script>
+
         <script src="https://cdn.socket.io/4.6.0/socket.io.min.js" integrity="sha384-c79GN5VsunZvi+Q/WObgk2in0CbZsHnjEqvFxC5DxHn9lTfNce2WW6h2pH6u/kF+" crossorigin="anonymous"></script>
 
         <!-- <script src="js/socketIoProxy.js"></script>-->
@@ -36,6 +43,7 @@
         <script src="modules/graph/canvas2svg.js"></script>
         <script type="module" src="modules/graph/SVGexport.js"></script>
         <script type="module" src="modules/graph/graphMLexport.js"></script>
+        <script type="module" src="modules/graph/plantUmlTransformer.js"></script>
 
         <script type="module" src="modules/shared/mainController.js"></script>
 
@@ -89,6 +97,8 @@
         <script type="module" src="modules/uiWidgets/sourceSelectorWidget.js"></script>
         <script type="module" src="modules/uiWidgets/jstreeWidget.js"></script>
         <script type="module" src="modules/uiWidgets/nodeInfosWidget.js"></script>
+        <script type="module" src="modules/uiWidgets/nodeRelationsWidget.js"></script>
+
         <script type="module" src="modules/uiWidgets/searchWidget.js"></script>
         <script type="module" src="modules/uiWidgets/graphDecorationWidget.js"></script>
         <script type="module" src="modules/uiWidgets/legendWidget.js"></script>
@@ -114,11 +124,11 @@
         <script type="module" src="modules/tools/UploadGraphModal/UploadGraphModal.js"></script>
 
         <!--
-        <script type="module" src="modules/tools/KGcreator/KGcreator.js"></script>
-        <script type="module" src="modules/tools/KGcreator/KGcreator_mappings.js"></script>
-        <script type="module" src="modules/tools/KGcreator/KGcreator_graph.js"></script>
-        <script type="module" src="modules/tools/KGcreator/KGcreator_run.js"></script>
-        -->
+    <script type="module" src="modules/tools/KGcreator/KGcreator.js"></script>
+    <script type="module" src="modules/tools/KGcreator/KGcreator_mappings.js"></script>
+    <script type="module" src="modules/tools/KGcreator/KGcreator_graph.js"></script>
+    <script type="module" src="modules/tools/KGcreator/KGcreator_run.js"></script>
+    -->
 
         <script type="module" src="modules/tools/mappingModeler/mappingModeler.js"></script>
         <script type="module" src="modules/tools/mappingModeler/tripleFactory.js"></script>
@@ -156,6 +166,8 @@
 
         <script type="module" src="modules/bots/createRestriction_bot.js"></script>
         <script type="module" src="modules/bots/mappingModeler_bot.js"></script>
+        <script type="module" src="modules/bots/mappingModeler_lookups_bot.js"></script>
+        <script type="module" src="modules/bots/_nonObjectPropertyFilterWorklow.js"></script>
         <!--   <script type="module" src="modules/sparqlProxies/sparql_INDIVIDUALS.js"></script>-->
 
         <script type="module" src="modules/sparqlProxies/sparql_common.js"></script>
@@ -320,6 +332,9 @@
                             width: "auto",
                             modal: false,
                             position: { my: "center", at: "center", of: window },
+                            open: function (event, ui) {
+                                //  $("#mainDialogDiv").css("width","80%")
+                            },
                         });
 
                         $("#smallDialogDiv").dialog({
@@ -358,9 +373,9 @@
                                         window.open(id, "_blank");
                                     }
                                     /*
-                                    if (NodeInfosAxioms.nodeInfosAxiomsLoaded) {
-                                        NodeInfosAxioms.reduceNodeInfoAxioms();
-                                    }*/
+                                if (NodeInfosAxioms.nodeInfosAxiomsLoaded) {
+                                    NodeInfosAxioms.reduceNodeInfoAxioms();
+                                }*/
                                 });
                             }
                         });
@@ -394,6 +409,8 @@
                     </button>
 
                     <div id="SouslesensVocables_Github" class="w3-display-topright" style="font-size: 12px; margin-right: 10px">
+                        <input type="checkbox" style="display: none" id="developerControls_logQueriesCBX" />logQueries
+
                         <a target="_blank noreferrer" href="/api/v1"><img src="/api/v1/favicon-16x16.png" style="margin-bottom: 3px; margin-right: 3px" /></a>
                         Swagger API
                         <a target="_blank noreferrer" href="https://github.com/souslesens/souslesensVocables"
@@ -458,6 +475,7 @@
                     <div class="w3-bar-item w3-right">
                         <button class="w3-button slsv-right-top-bar-button" id="copyQueryBtn">Copy Query</button>
                     </div>
+
                     <div class="w3-bar-item w3-dropdown-hover slsv-bg-intense slsv-top-menu-Button w3-right">
                         <button style="display: none" id="theme-selector-btn" class="w3-button slsv-right-top-bar-button">Themes</button>
                         <div class="w3-dropdown-content Lineage_PopUpStyle PopUpBorder">
@@ -471,8 +489,10 @@
         <div id="graphAndCommandScreen" class="w3-container" style="height: 92.5dvh">
             <div class="w3-container w3-col l3 slsv-bg-pale w3-display-container" style="width: 435px; height: 99%" id="lateralPanelDiv"></div>
 
-            <div id="graphDivContainer" class="w3-container w3-col l9" style="height: 100%; width: 0px">
+            <div id="graphDivContainer" class="w3-container w3-col l9" style="height: 100%; display: flex; flex-direction: row">
                 <div id="graphDiv" class="w3-container" style="height: 100%"></div>
+
+                <div id="rightControlPanelDiv" style="height: 100%; width: 40px; display: flex; align-content: flex-start; flex-direction: column"></div>
             </div>
         </div>
 
@@ -484,7 +504,7 @@
 
         <div id="LineagePopup"></div>
         <div id="popupMenuWidgetDiv" onclick="PopupMenuWidget.hidePopup('popupMenuWidgetDiv');"></div>
-        <div id="botPanel">
+        <div id="botPanel" style="overflow-x: hidden">
             <div id="botDiv"></div>
         </div>
         <canvas id="LineageVisjsLegendCanvas" height="300"></canvas>

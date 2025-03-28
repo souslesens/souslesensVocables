@@ -345,6 +345,12 @@ var Config = (function () {
             "http://rds.posccaesar.org/ontology/lis14/rdl/Quality": "#a9e87b",
             "http://rds.posccaesar.org/ontology/lis14/rdl/Temporal": "#b96af4",
         },
+        "IDO-4": {
+            "http://rds.posccaesar.org/ontology/lis14/rdl/Object": "#00B5EC",
+            "http://rds.posccaesar.org/ontology/lis14/rdl/Potential": "#efbf00",
+            "http://rds.posccaesar.org/ontology/lis14/rdl/Quality": "#a9e87b",
+            "http://rds.posccaesar.org/ontology/lis14/rdl/Temporal": "#b96af4",
+        },
 
         EMMO: {
             "http://emmo.info/emmo#EMMO_90ae56e4_d197_49b6_be1a_0049e4756606": "#00B5EC",
@@ -357,6 +363,7 @@ var Config = (function () {
         "@lineage-logo": "lineageLogo",
         "@KGquery-logo": "Kgquery",
         "@KGcreator-logo": "Kgcreator",
+        "@MappingModeler-logo": "Kgcreator",
         "@SPARQL-logo": "SPARQL",
         "@admin-logo": "Admin",
         "@ConfigEditor-logo": "ConfigEditor",
@@ -374,6 +381,7 @@ var Config = (function () {
         "@propertiesIcon": "PropertiesIcon",
         "@containersIcon": "ContainerIcon",
         "@classesIcon": "ClassesIcon",
+        "@queryIcon": "SPARQL",
     };
 
     self.slsvColorThemes = {

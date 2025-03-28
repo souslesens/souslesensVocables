@@ -214,7 +214,7 @@ var Lineage_sources = (function () {
             display = "block";
         }
         $("#lineage_createResourceBtn").css("display", display);
-
+        $("#containersTab").html();
         JstreeWidget.clear("lineage_containers_containersJstree");
         var editable = Lineage_sources.isSourceEditableForUser(source);
         var display = editable ? "block" : "none";
@@ -257,6 +257,7 @@ var Lineage_sources = (function () {
         });
 
         self.initSourcesSearchSelect();
+        SparqlQuery_bot.start({ divId: "queryTabDiv" });
     };
 
     /**
@@ -1008,7 +1009,7 @@ Lineage_whiteboard.lineageVisjsGraph.network.options.edges.font = { color: self.
                 result.forEach(function (item) {
                     if (item.label) {
                         var prefix = "";
-                        if (Config.currentTopLevelOntology && item.g.value.indexOf(Config.topLevelOntologies[Config.currentTopLevelOntology].uriPattern) > -1) {
+                        if (item.g && Config.currentTopLevelOntology && item.g.value.indexOf(Config.topLevelOntologies[Config.currentTopLevelOntology].uriPattern) > -1) {
                             prefix = "_" + Config.topLevelOntologies[Config.currentTopLevelOntology].prefix + ":";
                         }
                         sourceObjects.push({ label: prefix + item.label.value, id: item.id.value, type: "Class" });

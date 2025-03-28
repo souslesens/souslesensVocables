@@ -57,6 +57,9 @@ var MappingModeler_bot = (function () {
                 "create  datatypeProperty": {
                     createDatatypePropertyFn: {},
                 },
+                "add LookUp": {
+                    addLookUpFn: {},
+                },
 
                 end: {},
             },
@@ -114,7 +117,7 @@ var MappingModeler_bot = (function () {
             _botEngine.showList(choices, "URItype");
         },
         rdfTypeFn: function () {
-            var choices = ["owl:NamedIndividual", "rdf:Bag", "owl:Class"];
+            var choices = ["owl:NamedIndividual", "owl:Class"];
             self.params.addingType = true;
             _botEngine.showList(choices, "rdfType");
         },
@@ -207,8 +210,7 @@ var MappingModeler_bot = (function () {
                     datatypePropertyDomain: classId,
                 },
                 function (err, result) {
-                    alert("under development");
-                    MappingModeler.mappingColumnInfo.startOtherPredicatesBot();
+                    _botEngine.nextStep();
                 },
             );
         },
@@ -230,6 +232,13 @@ var MappingModeler_bot = (function () {
         setSubClassOfFn: function () {
             self.params.addingSubClassOf = self.params.superClassId;
             _botEngine.nextStep();
+        },
+        addLookUpFn: function () {
+            Lookups_bot.start(Lookups_bot.lookUpWorkflow, {}, function (err, result) {
+                if (err) {
+                    return alert(err);
+                }
+            });
         },
     };
 

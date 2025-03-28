@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: uiController.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: uiController.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import MappingsDetails from "./mappingsDetails.js";
+import DataSourceManager from "./dataSourcesManager.js";
+
+
+/**
+ * UIcontroller module manages the display of panels in the mapping modeler interface,
+ * handling tab activation and panel visibility for data sources, column mappings, technical mappings, and triples.
+ * @module UIcontroller
+ * @see [Tutorial: Overview]{@tutorial overview}
+ */
+var UIcontroller=(function(){
+
+    var self={}
+
+
+    /**
+     * Handles the activation of left panel tabs in the UI based on the provided tab ID.
+     * It shows or hides the corresponding panels based on the selected tab.
+     * @function
+     * @name onActivateLeftPanelTab
+     * @param {string} tabId - The ID of the tab to activate.
+     * @memberof module:UIcontroller
+     */
+    self.onActivateLeftPanelTab=function(tabId){
+        $(".mappingModeler_rightPanel").css("display", "none");
+     if(tabId=="MappingModeler_dataSourcesTab" ){
+         $("#mappingModeler_structuralPanel").css("display", "block");
+
+
+    }
+      else  if(tabId=="MappingModeler_columnsTab" ){
+         $("#mappingModeler_structuralPanel").css("display", "block");
+         MappingModeler.initActiveLegend(self.legendGraphDivId);
+         MappingModeler.loadSuggestionSelectJstree(MappingModeler.currentTable.columns, "Columns");
+         $("#MappingModeler_currentDataSource").html(DataSourceManager.currentConfig.currentDataSource.name);
+         try {
+             MappingColumnsGraph.visjsGraph.network.openCluster("cluster_" + MappingModeler.currentTable.name);
+         }
+         catch(e){
+
+         }
+
+
+     }
+     else  if(tabId=="MappingModeler_technicalDetailTab" ){
+         MappingsDetails.showDetailsDialog()
+
+     }
+     else  if(tabId=="MappingModeler_tripleFactoryTab" ){
+
+     }
+
+
+    }
+
+
+    /**
+     * Switches the active left panel tab to the target tab.
+     * It also performs necessary UI updates based on the target tab, such as loading columns or technical mappings.
+     * 
+     * @function
+     * @name switchLeftPanel
+     * @param {string} target - The name of the target tab to activate.
+     * @memberof module:UIcontroller
+     */
+    self.switchLeftPanel = function (target) {
+        var tabsArray = ["dataSource", "mappings", "triples"];
+        if (target == "Column Mappings") {
+            MappingModeler.initActiveLegend(self.legendGraphDivId);
+
+        }
+        else if (target == "Technical Mappings") {
+            MappingsDetails.showDetailsDialog()
+        }
+        if (target == "triples") {
+        }
+
+        $("#MappingModeler_leftTabs").tabs("option", "active", tabsArray.indexOf(target));
+    };
+
+    /**
+     * Activates the specified right panel based on the provided panel label.
+     * It controls the visibility of different right panels like "Data Sources", "Column Mappings", and "Technical Mappings".
+     * 
+     * @function
+     * @name activateRightPanel
+     * @param {string} PanelLabel - The label of the right panel to activate.
+     * @memberof module:UIcontroller
+     */
+    self.activateRightPanel = function (PanelLabel) {
+        $(".mappingModeler_rightPanel").css("display", "none");
+
+        if (PanelLabel == "Data Sources") {
+            $("#mappingModeler_structuralPanel").css("display", "block");
+        } else if (PanelLabel == "Column Mappings") {
+            // $("#mappingModeler_mappingsPanel").css("display","block")
+            $("#mappingModeler_structuralPanel").css("display", "block");
+
+
+        } else if (PanelLabel == "Technical Mappings") {
+            // $("#mappingModeler_mappingsPanel").css("display","block")
+            //   $("#mappingModeler_structuralPanel").css("display", "block");
+            MappingsDetails.showDetailsDialog()
+
+
+        }
+        else if (PanelLabel == "Triples") {
+            $("#mappingModeler_genericPanel").css("display", "block");
+        } else {
+            $("#mappingModeler_genericPanel").css("display", "block");
+        }
+    };
+
+
+
+
+
+
+    return self
+
+
+
+
+})()
+
+export default UIcontroller;
+window.UIcontroller=UIcontroller</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-DataSourceManager.html">DataSourceManager</a></li><li><a href="module-MappingColumnsGraph.html">MappingColumnsGraph</a></li><li><a href="module-MappingModeler.html">MappingModeler</a></li><li><a href="module-MappingTransform.html">MappingTransform</a></li><li><a href="module-MappingsDetails.html">MappingsDetails</a></li><li><a href="module-TripleFactory.html">TripleFactory</a></li><li><a href="module-UIcontroller.html">UIcontroller</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-MappingsDetails.transform.html">transform</a></li></ul><h3>Tutorials</h3><ul><li><a href="tutorial-overview.html">overview</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Thu Feb 06 2025 10:18:48 GMT+0100 (heure normale d’Europe centrale)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

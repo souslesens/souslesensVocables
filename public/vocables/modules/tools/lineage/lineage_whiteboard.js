@@ -18,6 +18,8 @@ import PopupMenuWidget from "../../uiWidgets/popupMenuWidget.js";
 import KGquery_graph from "../KGquery/KGquery_graph.js";
 import Lineage_createRelation from "./lineage_createRelation.js";
 import NodeInfosAxioms from "../axioms/nodeInfosAxioms.js";
+import UserDataWidget from "../../uiWidgets/userDataWidget.js";
+import Containers_tree from "../containers/containers_tree.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -116,6 +118,9 @@ var Lineage_whiteboard = (function () {
         $("KGquery_waitImg").attr("id", "waitImg");
 
         self.resetVisjsGraph();
+        $("#rightControlPanelDiv").load("./modules/tools/lineage/html/whiteBoardButtons.html", function () {
+            UI.resetWindowSize();
+        });
     };
 
     /**
@@ -151,7 +156,7 @@ var Lineage_whiteboard = (function () {
      * Handles errors and sets up the lateral panel with the required elements.
      * @returns {void}
      */
-    self.loadSources = function () {
+    self.loadSources = function (options) {
         Lineage_sources.loadSources(MainController.currentSource, function (err) {
             if (err) {
                 return alert(err.responseText);
@@ -776,7 +781,7 @@ var Lineage_whiteboard = (function () {
                             var node = self.lineageVisjsGraph.data.nodes.get(_properties.items[0]);
                             Lineage_sources.activeSource = node.data.source;
                         }
-                        if (true) {
+                        if (!options.skipDrawLegend) {
                             var nodes = self.lineageVisjsGraph.data.nodes.get(_properties.items);
                             if (nodes) {
                                 Lineage_decoration.decorateNodeAndDrawLegend(nodes, _options.legendType);
@@ -898,7 +903,7 @@ var Lineage_whiteboard = (function () {
         var sourceNodes = [];
         existingNodes.forEach(function (/** @type {{ id: string; data: { source: any; id: any; }; }} */ item) {
             if (item.id != "#" && item.data && item.data.source == source) {
-                sourceNodes.push(item.data.id || item.id);
+                if (item.id.indexOf(" ") < 0) sourceNodes.push(item.data.id || item.id);
             }
         });
         return sourceNodes;
@@ -1526,6 +1531,7 @@ var Lineage_whiteboard = (function () {
         }
         options.selectGraph = 1;
         var existingNodes = self.lineageVisjsGraph.getExistingIdsMap();
+
         var visjsData = { nodes: [], edges: [] };
         async.eachSeries(
             slices,
@@ -1617,8 +1623,12 @@ var Lineage_whiteboard = (function () {
                     });
 
                     if (self.lineageVisjsGraph.isGraphNotEmpty()) {
-                        self.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
-                        self.lineageVisjsGraph.data.edges.add(visjsData.edges);
+                        try {
+                            self.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
+                            self.lineageVisjsGraph.data.edges.add(visjsData.edges);
+                        } catch (e) {
+                            console.log(e);
+                        }
                     } else {
                         Lineage_whiteboard.drawNewGraph(visjsData);
                     }
@@ -2434,6 +2444,9 @@ var Lineage_whiteboard = (function () {
                     }
                     var rdfType;
                     data.forEach(function (item) {
+                        // filter blanknodes
+                        if (item.subject.startsWith && item.object.startsWith && (!item.subject.startsWith("http") || !item.object.startsWith("http"))) return;
+
                         if (!existingNodes[item.subject.value]) {
                             existingNodes[item.subject.value] = 1;
 
@@ -2735,6 +2748,9 @@ restrictionSource = Config.predicatesSource;
                     function (
                         /** @type {{ concept: { value: string; }; conceptLabel: { value: any; }; value: { value: any; }; prop: { value: string; }; valueLabel: { value: any; }; propLabel: { value: string; }; node: { value: any; }; }} */ item,
                     ) {
+                        // filter blanknodes
+                        if (!item.subject.value.startsWith("http") || !item.value.value.startsWith("http")) return;
+
                         if (!existingNodes[item.subject.value]) {
                             existingNodes[item.subject.value] = 1;
 
@@ -3396,7 +3412,7 @@ self.zoomGraphOnNode(node.data[0].id, false);
         if (!source) {
             source = Lineage_sources.activeSource;
         }
-        KGquery_graph.getInferredModelVisjsData(source, function (err, visjsData) {
+        KGquery_graph.getImplicitModelVisjsData(source, function (err, visjsData) {
             if (err) {
                 return alert(err.responseText);
             }
@@ -4266,44 +4282,106 @@ attrs.color=self.getSourceColor(superClassValue)
          * @function
          * @name saveWhiteboard
          * @memberof module:graphActions.graph
-         * Saves the current whiteboard (graph visualization) to a file.
-         * The file name is provided by the user through a prompt.
+         *
+         *
+         * Saves the current whiteboard (graph visualization) as json in user_data database
+         * The data_label  is provided by the user through a prompt.
          * @returns {void}
          */
-        saveWhiteboard: function () {
-            var visjsFileName = prompt("file name");
-            if (!visjsFileName) {
-                return;
-            }
-            Lineage_whiteboard.lineageVisjsGraph.saveGraph(visjsFileName);
-        },
 
+        saveWhiteboard: function () {
+            if (Lineage_whiteboard.lineageVisjsGraph.data && Lineage_whiteboard.lineageVisjsGraph.data.nodes.get().length > 0) {
+                var nodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
+                var positions = Lineage_whiteboard.lineageVisjsGraph.network.getPositions();
+                var data = {
+                    nodes: nodes,
+                    edges: Lineage_whiteboard.lineageVisjsGraph.data.edges.get(),
+                    context: Lineage_whiteboard.lineageVisjsGraph.currentContext,
+                    positions: positions,
+                };
+                var data_path = "savedWhiteboards";
+                UserDataWidget.currentTreeNode = null;
+                UserDataWidget.showSaveDialog(data_path, data, null, function (err, result) {
+                    if (err) {
+                        return alert(err.responseText);
+                    }
+                    UI.message("Graph saved successfully");
+                });
+
+                //Lineage_whiteboard.lineageVisjsGraph.saveGraph(visjsFileName);
+            } else {
+                alert("No Whiteboard to save");
+            }
+        },
         /**
          * @function
-         * @name loadSavedGraph
+         * @name loadSavedWhiteboard
          * @memberof module:graphActions.graph
-         * Loads a previously saved graph file and renders it in the current workspace.
-         * The user is prompted to enter the file name.
+         * Select a previously saved graph on userData and renders it in the current workspace.
+         *
          * @returns {void}
          */
-        loadSavedGraph: function () {
-            var visjsFileName = prompt("file name");
-            if (!visjsFileName) {
-                return;
-            }
-            try {
-                Lineage_whiteboard.lineageVisjsGraph.loadGraph(visjsFileName, false, function (err, visjsData) {
-                    if (err) {
-                        return alert(err.responseText || err);
-                    }
-                    Lineage_whiteboard.drawNewGraph(visjsData, "graphDiv");
-                });
-            } catch (e) {
-                alert("file not found");
-            }
+
+        loadSavedWhiteboard: function () {
+            UserDataWidget.showListDialog(null, { filter: { data_type: "savedWhiteboards", data_source: MainController.currentSource, data_tool: "lineage" } }, function (err, result) {
+                if (err) {
+                    return alert(err.responseText);
+                }
+                if (result?.data_content) {
+                    self.loadGraphFromJSON(result.data_content);
+                }
+            });
         },
     };
+    /**
+     * @function
+     * @name loadGraphFromJSON
+     * @memberof module:graphActions
+     * Initializes the whiteboard tab in the UI from a JSON object.
+     *
+     * @returns {void}
+     */
 
+    self.loadGraphFromJSON = function (json) {
+        var data = json;
+        var positions = data.positions;
+        var options = data.context.options;
+        var visjsData = { nodes: [], edges: [] };
+        visjsData.options = data.options;
+        var existingNodes = {};
+
+        existingNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
+
+        data.nodes.forEach(function (node) {
+            if (!existingNodes[node.id]) {
+                existingNodes[node.id] = 1;
+                if (positions[node.id]) {
+                    node.x = positions[node.id].x;
+                    node.y = positions[node.id].y;
+                }
+                visjsData.nodes.push(node);
+            }
+        });
+
+        data.edges.forEach(function (/** @type {{ id: string | number; }} */ edge) {
+            if (!existingNodes[edge.id]) {
+                existingNodes[edge.id] = 1;
+                visjsData.edges.push(edge);
+            }
+        });
+
+        if (Lineage_whiteboard.lineageVisjsGraph?.data?.nodes || Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
+            Lineage_whiteboard.lineageVisjsGraph.data.edges.add(visjsData.edges);
+            Lineage_whiteboard.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
+
+            Lineage_whiteboard.lineageVisjsGraph.network.fit();
+        } else {
+            Lineage_whiteboard.lineageVisjsGraph.data = visjsData;
+            Lineage_whiteboard.lineageVisjsGraph.draw(function () {
+                Lineage_whiteboard.lineageVisjsGraph.network.fit();
+            });
+        }
+    };
     /**
      * @function
      * @name initWhiteboardTab
@@ -4337,10 +4415,25 @@ attrs.color=self.getSourceColor(superClassValue)
                     maxWidth: $(window).width() - 100,
                     minWidth: 150,
                     stop: function (event, ui) {
-                        UI.resetWindowHeight();
+                        UI.resetWindowSize();
                     },
                 });
             });
+        }
+    };
+
+    /**
+     * @function
+     * @name initQueryTab
+     * @memberof module:graphActions
+     * Initializes the classes tab in the UI by loading relevant content and actions related to the classes.
+     * @returns {void}
+     */
+    self.initQueryTab = function () {
+        if ($("#queryTab").children().length == 0) {
+            $("#queryTab").html("<div id='queryTabDiv'></div>");
+            $("#botContainerDiv").css("width", "100%");
+            SparqlQuery_bot.start({ divId: "queryTabDiv" });
         }
     };
 
@@ -4366,7 +4459,7 @@ attrs.color=self.getSourceColor(superClassValue)
                         maxWidth: 435,
                         minWidth: 150,
                         stop: function (event, ui) {
-                            UI.resetWindowHeight();
+                            UI.resetWindowSize();
                         },
                     });*/
                 //});
@@ -4399,7 +4492,7 @@ attrs.color=self.getSourceColor(superClassValue)
      * @returns {void}
      */
     self.initContainersTab = function () {
-        if ($("#containersTab").children().length == 0) {
+        if (true || $("#containersTab").children().length == 0) {
             $("#containersTab").load("./modules/tools//lineage/html/containersTab.html", function (s) {
                 Containers_tree.search("lineage_containers_containersJstree");
                 $("#containers_showparentContainersBtn").bind("click", function (e) {

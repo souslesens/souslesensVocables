@@ -1,11 +1,7 @@
 <div style="width: 100%">
     <div style="display: flex; align-items: flex-start; margin-top: 20px">
-        <select id="SavedQueriesComponent_scope" class="select-bar-theme1">
-            <option>private</option>
-            <option>public</option>
-        </select>
-        <button class="slsv-invisible-button deleteIcon" style="margin-left: 10px" onclick="SavedQueriesWidget.delete()"></button>
-        <button class="slsv-invisible-button saveIcon" style="margin-left: 10px" onclick="SavedQueriesWidget.save()"></button>
+        <button title="Delete selected MyQuery" class="slsv-invisible-button deleteIcon" style="margin-left: 10px" onclick="SavedQueriesWidget.delete()"></button>
+        <button title="Save current Query" class="slsv-invisible-button saveIcon" style="margin-left: 10px" onclick="SavedQueriesWidget.save()"></button>
     </div>
-    <select id="SavedQueriesComponent_itemsSelect" size="10" ondblclick="SavedQueriesWidget.loadItem($(this).val())"></select>
+    <div id="SavedQueriesComponent_itemsSelect"></div>
 </div>

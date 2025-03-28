@@ -57,9 +57,15 @@ var Lineage_selection = (function () {
         if (allGraphNodes) {
             Lineage_selection.selectedNodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
         }
-
-        if (Lineage_selection.selectedNodes.length == 0) {
-            Lineage_selection.selectedNodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
+        if (MainController.currentTool == "lineage") {
+            if (Lineage_selection.selectedNodes.length == 0) {
+                Lineage_selection.selectedNodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
+            }
+        }
+        if (MainController.currentTool == "KGquery") {
+            if (Lineage_selection.selectedNodes.length == 0) {
+                Lineage_selection.selectedNodes = KGquery_graph.KGqueryGraph.data.nodes.get();
+            }
         }
         var jstreeData = Lineage_selection.getSelectedNodesTree();
         var options = {
@@ -71,7 +77,11 @@ var Lineage_selection = (function () {
         $("#smallDialogDiv").load("modules/tools/lineage/html/selection/lineageSelectionDialog.html", function () {
             $("#smallDialogDiv").dialog("open");
             try {
-                JstreeWidget.loadJsTree("lineage_selection_selectedNodesTreeDiv", jstreeData, options, function (err, result) {});
+                JstreeWidget.loadJsTree("lineage_selection_selectedNodesTreeDiv", jstreeData, options, function (err, result) {
+                    if (MainController.currentTool == "KGquery") {
+                        $("#selectionActionsDiv").children(":not(#classDecorateButton)").hide();
+                    }
+                });
             } catch (e) {
                 var x = e;
             }
@@ -320,6 +330,9 @@ var Lineage_selection = (function () {
                 function (err) {
                     if (err) {
                         return err;
+                    }
+                    if (MainController.currentTool == "KGquery") {
+                        KGquery.clearAll();
                     }
                 },
             );

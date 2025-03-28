@@ -9,6 +9,7 @@ import Sparql_SKOS from "../sparqlProxies/sparql_SKOS.js";
 import SourceSelectorWidget from "../uiWidgets/sourceSelectorWidget.js";
 import GraphLoader from "./graphLoader.js";
 import UI from "../../modules/shared/UI.js";
+import Authentification from "./authentification.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -127,9 +128,11 @@ var MainController = (function () {
             },
         });
     };
+
     function groupWithinCurrentProfile(valueCheckedAgainst) {
         return Object.entries(Config.profiles).filter(([_key, val]) => val.name === valueCheckedAgainst);
     }
+
     self.onAfterLogin = function (callback) {
         if (!authentication.currentUser) {
             return alert(" no user identified");
@@ -193,7 +196,16 @@ var MainController = (function () {
                             callbackSeries();
                         });
                     },
+
+                    function (callbackSeries) {
+                        // show special controls to admin profiles
+                        if (Authentification.currentUser.groupes.indexOf("admin") > -1) {
+                            $("#developerControls_logQueriesCBX").css("display", "inline");
+                        }
+                        callbackSeries();
+                    },
                 ],
+
                 function (_err) {},
             );
             callback(_err);
@@ -217,7 +229,7 @@ var MainController = (function () {
         Clipboard.clear();
         Lineage_sources.loadedSources = {};
         /*  if(!Config.userTools[toolId].controller)
-            Config.userTools[toolId].controller= window[toolId]*/
+                Config.userTools[toolId].controller= window[toolId]*/
         if (Config.userTools[toolId].controller.onLoaded) {
             Config.userTools[toolId].controller.onLoaded();
         } else {
@@ -275,20 +287,23 @@ var MainController = (function () {
             $("#Lineage_graphEditionButtons").hide();
         }
         $("#currentToolTitle").html("");
+
         if (UI.currentTheme["@" + toolId + "-logo"]) {
-            $("#currentToolTitle").prepend(`<button class="${toolId}-logo slsv-invisible-button" style="height:41px;width:41px;">`);
+            $("#currentToolTitle").prepend(`<button class="${toolId}-logo slsv-invisible-button" style="height:41px;width:41px;"> </button> <div style='margin-bottom:5px;'>${toolId} </div>`);
         } else {
             $("#currentToolTitle").html(toolId);
         }
         MainController.currentTool = toolId;
 
         if (!Config.userTools[toolId].noSource) {
+            $("#rightControlPanelDiv").show();
             if (self.currentSource == null) {
                 SourceSelectorWidget.showSourceDialog(true);
             } else {
                 SourceSelectorWidget.initSource(self.currentSource);
             }
         } else {
+            $("#rightControlPanelDiv").hide();
             UI.cleanPage();
             self.initTool(toolId);
             var homePageOptions = {};
@@ -346,13 +361,9 @@ var MainController = (function () {
                     self.currentSource = source;
                 }
                 MainController.onToolSelect(tool);
-                /*
-                if (window.history.pushState && url.indexOf("localhost") < 0) {
-                    var url = url.substring(0, url.indexOf("?"));
-                    window.history.pushState({}, "SLS", url);
-                }*/
             }
-        } else {
+        }
+        if (callback) {
             callback();
         }
     };

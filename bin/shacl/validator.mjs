@@ -1,30 +1,44 @@
 import rdf from "@zazuko/env-node";
 import SHACLValidator from "rdf-validate-shacl";
+import { writeFileSync, readFileSync } from "fs";
 //import N3Writer from "n3/lib/N3Writer.js";
 
-const N3 = import("n3");
+//const N3 =import('n3')
 
-export async function validateTriples(triples) {
-    const shapes = await rdf.dataset().import(rdf.fromFile("D:\\projects\\sls-shacl\\rdf\\exampleShapes.ttl"));
-    const data = await rdf.dataset().import(rdf.fromFile("D:\\projects\\sls-shacl\\rdf\\exampleData.ttl"));
+export async function validateTriples(_shapes, _triples) {
+    // const shapes = await rdf.dataset().import(_shapes)
+    // const data = await rdf.dataset().import(_triples)
 
-    const validator = new SHACLValidator(shapes, { factory: rdf });
-    const report = await validator.validate(data);
-    for (const result of report.results) {
-        // See https://www.w3.org/TR/shacl/#results-validation-result for details
-        // about each property
-        console.log(result.message);
-        console.log(result.path);
-        console.log(result.focusNode);
-        console.log(result.severity);
-        console.log(result.sourceConstraintComponent);
-        console.log(result.sourceShape);
+    var shapesPath = "D:\\myShapes.ttl";
+    var dataPath = "D:\\myData.ttl";
+    try {
+        writeFileSync(shapesPath, _shapes);
+        writeFileSync(dataPath, _triples);
+
+        const shapes = await rdf.dataset().import(rdf.fromFile(shapesPath));
+        const data = await rdf.dataset().import(rdf.fromFile(dataPath));
+
+        const validator = new SHACLValidator(shapes, { factory: rdf });
+        const report = await validator.validate(data);
+        for (const result of report.results) {
+            // See https://www.w3.org/TR/shacl/#results-validation-result for details
+            // about each property
+            console.log(result.message);
+            console.log(result.path);
+            console.log(result.focusNode);
+            console.log(result.severity);
+            console.log(result.sourceConstraintComponent);
+            console.log(result.sourceShape);
+        }
+
+        // Validation report as RDF dataset
+        // console.log(await report.dataset.serialize({ format: 'text/n3' }))
+        var result = await report.dataset.serialize({ format: "text/n3" });
+        return result;
+    } catch (e) {
+        console.log(e);
+        throw e;
     }
-
-    // Validation report as RDF dataset
-    // console.log(await report.dataset.serialize({ format: 'text/n3' }))
-    var result = await report.dataset.serialize({ format: "text/n3" });
-    return result;
 }
 
 async function main(triples, callback) {
@@ -55,6 +69,8 @@ async function main(triples, callback) {
 }
 
 //main();
+
+//https://docs.cambridgesemantics.com/graphlakehouse/v3.2/userdoc/shacl-constraints.htm
 
 var constraintsStr =
     "type\tconstraint\tshapeType\tdataType\texample\tdescription\n" +

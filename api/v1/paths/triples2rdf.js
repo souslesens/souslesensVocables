@@ -2,11 +2,6 @@ const { processResponse } = require("./utils");
 const rdf = require("../../../bin/RDF_IO..js");
 const { NamedNode, BlankNode, Literal, Graph } = rdf;
 
-var Validator = null;
-import("../../../bin/shacl/validator.mjs").then((mod) => {
-    Validator = mod; // true
-});
-
 module.exports = function () {
     let operations = {
         GET,
@@ -41,12 +36,8 @@ module.exports = function () {
         try {
             var triples = req.body.triples;
 
-            var turtle = rdf.triples2turtle(triples);
-            return processResponse(res, null, turtle);
-
-            rdf.triples2turtle(triples, function (err, result) {
-                const report = Validator.triples2turtle(result);
-                return processResponse(res, null, report);
+            rdf.triples2turtle(triples, function (err, turtle) {
+                return processResponse(res, null, { output: turtle });
             });
         } catch (e) {
             return processResponse(res, e);

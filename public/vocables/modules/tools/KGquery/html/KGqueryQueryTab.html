@@ -9,17 +9,19 @@
             <!-- <button onclick="KGquery.queryKG('vijsGraph')">Graph</button>-->
             <button class="slsv-button-1" onclick="KGquery.aggregateQuery()">Aggregate</button>
             <button class="slsv-button-1" onclick="KGquery.checkRequirements()">check</button>
-            <!--  <button class="slsv-button-1" onclick="KGquery_nodeSelector.showInferredModelInJstree()">+</button>-->
+            <!--  <button class="slsv-button-1" onclick="KGquery_nodeSelector.showImplicitModelInJstree()">+</button>-->
             <select id="KGquery_outputTypeSelect" onchange="KGquery.onOutputTypeSelect($(this).val());">
                 <option selected disabled>Select tool</option>
                 <option>Graph</option>
             </select>
+            <button class="slsv-button-1" onclick=" KGquery_nodeSelector.showImplicitModelInJstree(KGquery_graph.visjsData);">+</button>
+
             <!-- <button onclick="KGquery.queryKG('table',null,true)">Query database</button>-->
 
             <!--<button onclick="TimeLineWidget.init()">TimeLine</button>-->
         </div>
     </div>
-    <div class="w3-panel w3-border w3-round-small lateralPanelSection-width" style="align-items: baseline; display: none" id="KGquery_SetsControlsDiv">
+    <div class="w3-panel w3-border w3-round-small lateralPanelSection-width" style="align-items: baseline" id="KGquery_SetsControlsDiv">
         <div class="titleboxButtons font-button2-color">Joins</div>
         <button class="slsv-button-2" onclick="KGquery.addQuerySet('Minus');KGquery.switchRightPanel(true)"><img src="icons/CommonIcons/MinusIcon.png" height="15px" />Minus</button>
         <button class="slsv-button-2" onclick="KGquery.addQuerySet('Union');KGquery.switchRightPanel(true)"><img src="icons/CommonIcons/UnionIcon.png" height="15px" />Union</button>

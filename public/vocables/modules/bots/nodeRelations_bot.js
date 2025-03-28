@@ -289,9 +289,9 @@ var NodeRelations_bot = (function () {
         },
     };
 
-    self.getSourceInferredModelVisjsData = function (sourceLabel, callback) {
-        if (self.params.currentSourceInferredModelVijsData) {
-            return callback(null, self.params.currentSourceInferredModelVijsData);
+    self.getSourceImplicitModelVisjsData = function (sourceLabel, callback) {
+        if (self.params.currentSourceImplicitModelVijsData) {
+            return callback(null, self.params.currentSourceImplicitModelVijsData);
         }
         var visjsGraphFileName = self.params.source + "_KGmodelGraph.json";
         $.ajax({
@@ -299,8 +299,8 @@ var NodeRelations_bot = (function () {
             url: `${Config.apiUrl}/data/file?dir=graphs&fileName=${visjsGraphFileName}`,
             dataType: "json",
             success: function (result, _textStatus, _jqXHR) {
-                self.params.currentSourceInferredModelVijsData = JSON.parse(result);
-                return callback(null, self.params.currentSourceInferredModelVijsData);
+                self.params.currentSourceImplicitModelVijsData = JSON.parse(result);
+                return callback(null, self.params.currentSourceImplicitModelVijsData);
             },
             error: function (err) {
                 return callback(err);

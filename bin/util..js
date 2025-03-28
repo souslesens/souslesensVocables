@@ -169,7 +169,7 @@ var util = {
         return /^-?[0-9]+$/.test("" + value);
     },
     isFloat: function (value) {
-        return /^-?[0-9]+[.,]?[0-9]+$/.test("" + value);
+        return /^-?[0-9]+[.,]?[0-9]*$/.test("" + value);
     },
 
     cleanFieldsForNeo: function (obj) {

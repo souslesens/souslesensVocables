@@ -22,16 +22,16 @@ var UIcontroller = (function () {
         $(".mappingModeler_rightPanel").css("display", "none");
         if (tabId == "MappingModeler_dataSourcesTab") {
             $("#mappingModeler_structuralPanel").css("display", "block");
+            $("#rightControlPanelDiv").load("./modules/tools/mappingModeler/html/mappingsGraphButtons.html", function (err) {});
         } else if (tabId == "MappingModeler_columnsTab") {
             $("#mappingModeler_structuralPanel").css("display", "block");
             MappingModeler.initActiveLegend(self.legendGraphDivId);
             MappingModeler.loadSuggestionSelectJstree(MappingModeler.currentTable.columns, "Columns");
             $("#MappingModeler_currentDataSource").html(DataSourceManager.currentConfig.currentDataSource.name);
-            try {
-                MappingColumnsGraph.visjsGraph.network.openCluster("cluster_" + MappingModeler.currentTable.name);
-            } catch (e) {}
-        } else if (tabId == "MappingModeler_technicalDatailTab") {
+            $("#rightControlPanelDiv").load("./modules/tools/mappingModeler/html/mappingsGraphButtons.html", function (err) {});
+        } else if (tabId == "MappingModeler_technicalDetailTab") {
             MappingsDetails.showDetailsDialog();
+            $("#rightControlPanelDiv").load("./modules/tools/mappingModeler/html/detailsGraphButtons.html", function (err) {});
         } else if (tabId == "MappingModeler_tripleFactoryTab") {
         }
     };

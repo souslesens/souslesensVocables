@@ -34,7 +34,7 @@ var Weaver = (function () {
                 Lineage_whiteboard.initWhiteboardTab();
                 Lineage_whiteboard.initUI();
                 self.loadTopClasses();
-                $("#weaver_searchTermInput").focus();
+                $("#weaver_searchTermInput").trigger("focus");
                 $("#weaver_modelBtn").bind("click", function (e) {
                     Lineage_whiteboard.drawModel(null, null, { inverse: e.ctrlKey });
                 });

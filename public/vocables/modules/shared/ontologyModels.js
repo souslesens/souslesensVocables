@@ -2,6 +2,7 @@ import Sparql_common from "../sparqlProxies/sparql_common.js";
 import Sparql_OWL from "../sparqlProxies/sparql_OWL.js";
 import Sparql_proxy from "../sparqlProxies/sparql_proxy.js";
 import Sparql_generic from "../sparqlProxies/sparql_generic.js";
+import SourceSelectorWidget from "../uiWidgets/sourceSelectorWidget.js";
 //import fflate from "fflate";
 
 // eslint-disable-next-line no-global-assign
@@ -589,6 +590,32 @@ var OntologyModels = (function () {
             },
         });
     };
+    self.clearOntologyModelCache = function (source, callback) {
+        if (!callback) callback = function () {};
+        const params = new URLSearchParams({
+            source: source,
+        });
+        $.ajax({
+            type: "DELETE",
+            url: Config.apiUrl + "/ontologyModels?" + params.toString(),
+            dataType: "json",
+
+            success: function (data, _textStatus, _jqXHR) {
+                if (source) {
+                    Config.ontologiesVocabularyModels[source] = null;
+                    OntologyModels.registerSourcesModel(source, { noCache: true }, function (err, result) {
+                        callback(null, "DONE");
+                    });
+                } else {
+                    Config.ontologiesVocabularyModels = {};
+                    callback(null, "DONE");
+                }
+            },
+            error: function (err) {
+                callback(err);
+            },
+        });
+    };
 
     self.updateModel = function (source, data, options, callback) {
         if (!options) {
@@ -958,6 +985,8 @@ var OntologyModels = (function () {
                 },
                 //add subProperties with superProporties constaints
                 function (callbackSeries) {
+                    if (!Config.ontologiesVocabularyModels[source]) return callbackSeries();
+
                     for (var key in validConstraints) {
                         var subPropConstraints = {};
                         var constraints = validConstraints[key];
@@ -1157,7 +1186,7 @@ var OntologyModels = (function () {
         return restrictions;
     };
 
-    self.getInferredModel = function (source, options, callback) {
+    self.getImplicitModel = function (source, options, callback) {
         if (!options) {
             options = {};
         }
@@ -1255,10 +1284,16 @@ var OntologyModels = (function () {
         if (Config.sources[source].imports) {
             sources = sources.concat(Config.sources[source].imports);
         }
-        for (var vocab in Config.basicVocabularies) {
-            sources.push(vocab);
+        if (!options.excludeBasicVocabularies) {
+            for (var vocab in Config.basicVocabularies) {
+                sources.push(vocab);
+            }
         }
         var nonObjectPropertiesmap = {};
+        var filter = "";
+        if (options.filter) {
+            filter = options.filter;
+        }
         UI.message("loading KG nonObjectProperties", false, true);
         async.eachSeries(
             sources,
@@ -1279,6 +1314,7 @@ var OntologyModels = (function () {
                     "   ?s ?prop ?o.\n" +
                     "      bind ( datatype(?o) as ?datatype )\n" +
                     "    ?prop rdf:type ?type. filter (?type in (<http://www.w3.org/2002/07/owl#DatatypeProperty>,rdf:Property,owl:AnnotationProperty)&& ?prop not in (rdf:type,<http://purl.org/dc/terms/created>,<http://purl.org/dc/terms/creator>,<http://purl.org/dc/terms/source>))\n" +
+                    filter +
                     "}\n" +
                     "  UNION\n" +
                     "  {\n" +

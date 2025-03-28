@@ -144,6 +144,7 @@ var KGquery_filter = (function () {
     };
     self.getOptionalPredicates = function (propertyNodes, callback) {
         var selectedPropertyNodes = [];
+        var selectClauseSparql = "";
         if (!propertyNodes || propertyNodes.length == 0) {
             alert("no properties selected");
             return callback("no properties selected");
@@ -151,6 +152,7 @@ var KGquery_filter = (function () {
         propertyNodes.forEach(function (node) {
             if (node.parents.length == 2) {
                 selectedPropertyNodes.push(node);
+                selectClauseSparql += " ?" + node.id;
             }
         });
 
@@ -186,7 +188,7 @@ var KGquery_filter = (function () {
             optionalPredicatesSparql = addToStringIfNotExists(str, optionalPredicatesSparql);
         });
         KGquery.currentSelectedPredicates = selectedPropertyNodes;
-        return callback(null, optionalPredicatesSparql);
+        return callback(null, { optionalPredicatesSparql: optionalPredicatesSparql, selectClauseSparql: selectClauseSparql });
     };
 
     self.getAggregateFilterOptionalPredicates = function (querySet, filter) {

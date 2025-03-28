@@ -8,6 +8,8 @@ import Export from "../../shared/export.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import SparqlQueryUI from "../sparqlQueryUI.js";
 import SourceSelectorWidget from "../../uiWidgets/sourceSelectorWidget.js";
+import OntologyModels from "../../shared/ontologyModels.js";
+import UIcontroller from "../mappingModeler/uiController.js";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 var Admin = (function () {
@@ -236,7 +238,7 @@ $("#sourceDivControlPanelDiv").html(html);*/
         if (propId && inversePropId) {
             Sparql_OWL.generateInverseRestrictions(source, propId, inversePropId, function (err, result) {
                 if (err) {
-                    return alert(err);
+                    return alert(err.responseText || err);
                 }
                 UI.message(result + " restrictions created");
             });
@@ -245,40 +247,22 @@ $("#sourceDivControlPanelDiv").html(html);*/
         }
     };
 
-    self.clearOntologyModelCache = function () {
-        var sources = SourceSelectorWidget.getCheckedSources();
-        var source;
-        if (sources.length == 0) {
-            return alert("select a source");
-            /* if (!confirm("clear all ontologyModel cache")) {
-                return;
+    self.clearOntologyModelCache = function (source) {
+        if (!source) {
+            var sources = SourceSelectorWidget.getCheckedSources();
+
+            if (sources.length == 0) {
+                return alert("select a source");
             } else {
-                source = null;
-            }*/
-        } else {
-            source = sources[0];
+                source = sources[0];
+            }
         }
-        const params = new URLSearchParams({
-            source: source,
-        });
+        OntologyModels.clearOntologyModelCache(source, function (err, result) {
+            if (err) {
+                return alert(err.responseText || err);
+            }
 
-        $.ajax({
-            type: "DELETE",
-            url: Config.apiUrl + "/ontologyModels?" + params.toString(),
-            dataType: "json",
-
-            success: function (data, _textStatus, _jqXHR) {
-                if (source) {
-                    Config.ontologiesVocabularyModels[source] = null;
-                    OntologyModels.registerSourcesModel(source);
-                } else {
-                    Config.ontologiesVocabularyModels = {};
-                }
-                return UI.message("DONE");
-            },
-            error: function (err) {
-                return alert(err);
-            },
+            UI.message("DONE");
         });
     };
 

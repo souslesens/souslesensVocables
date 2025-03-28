@@ -1,6 +1,3 @@
-
-
-
 var Lineage_selection = (function () {
     var self = {};
     self.selectedNodes = [];
@@ -60,12 +57,12 @@ var Lineage_selection = (function () {
         if (allGraphNodes) {
             Lineage_selection.selectedNodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
         }
-        if(MainController.currentTool == "lineage"){
+        if (MainController.currentTool == "lineage") {
             if (Lineage_selection.selectedNodes.length == 0) {
                 Lineage_selection.selectedNodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
             }
         }
-        if(MainController.currentTool == "KGquery"){
+        if (MainController.currentTool == "KGquery") {
             if (Lineage_selection.selectedNodes.length == 0) {
                 Lineage_selection.selectedNodes = KGquery_graph.KGqueryGraph.data.nodes.get();
             }
@@ -81,7 +78,7 @@ var Lineage_selection = (function () {
             $("#smallDialogDiv").dialog("open");
             try {
                 JstreeWidget.loadJsTree("lineage_selection_selectedNodesTreeDiv", jstreeData, options, function (err, result) {
-                    if(MainController.currentTool == 'KGquery'){
+                    if (MainController.currentTool == "KGquery") {
                         $("#selectionActionsDiv").children(":not(#classDecorateButton)").hide();
                     }
                 });
@@ -334,7 +331,7 @@ var Lineage_selection = (function () {
                     if (err) {
                         return err;
                     }
-                    if(MainController.currentTool == 'KGquery'){
+                    if (MainController.currentTool == "KGquery") {
                         KGquery.clearAll();
                     }
                 },

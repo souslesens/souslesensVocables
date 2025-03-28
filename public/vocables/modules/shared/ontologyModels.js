@@ -591,8 +591,7 @@ var OntologyModels = (function () {
         });
     };
     self.clearOntologyModelCache = function (source, callback) {
-        if(!callback)
-            callback=function(){}
+        if (!callback) callback = function () {};
         const params = new URLSearchParams({
             source: source,
         });

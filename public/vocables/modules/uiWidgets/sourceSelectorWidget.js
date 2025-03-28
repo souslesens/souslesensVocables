@@ -342,7 +342,6 @@ var SourceSelectorWidget = (function () {
                 return alert(err.responseText);
             }
         });
-       
     };
 
     self.getJstreeConceptsContextMenu = function () {

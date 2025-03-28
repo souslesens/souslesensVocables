@@ -26,9 +26,11 @@ class NonObjectPropertyFilterWorklow {
         }
         var nonObjectProperties = model[currentClassId];
         nonObjectProperties = common.removeDuplicatesFromArray(nonObjectProperties, "id");
-        var anyObject=nonObjectProperties.filter(function (item) {return item.id == 'any'});
+        var anyObject = nonObjectProperties.filter(function (item) {
+            return item.id == "any";
+        });
 
-        if(anyObject.length==0){
+        if (anyObject.length == 0) {
             nonObjectProperties.unshift({ id: "any", label: "any" });
         }
         self.botEngine.showList(nonObjectProperties, "property", null, null, function (value) {

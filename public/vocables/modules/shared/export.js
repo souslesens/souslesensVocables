@@ -462,13 +462,12 @@ fixedColumns: true*/
 
         link.click();
     };
-    self.showExportPopUp = function(visjsGraph) {
-        
+    self.showExportPopUp = function (visjsGraph) {
         var html = `<span class="popupMenuItem" onclick="Export.exportGraphToDataTable(${visjsGraph});">CSV</span>`;
         html += `<span class="popupMenuItem" onclick="${visjsGraph}.toSVG()">SVG</span>`;
         html += `<span class="popupMenuItem" onclick="${visjsGraph}.toGraphMl();">Graph ML </span>`;
         PopupMenuWidget.initAndShow(html, "popupMenuWidgetDiv");
-    }
+    };
     return self;
 })();
 

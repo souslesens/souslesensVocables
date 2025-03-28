@@ -235,7 +235,7 @@ var MappingsDetails = (function () {
         }
 
         JstreeWidget.loadJsTree(divId, jstreeData, options, function () {
-            $('#detailedMappings_treeContainer').css('overflow', 'unset');
+            $("#detailedMappings_treeContainer").css("overflow", "unset");
         });
     };
 

@@ -70,7 +70,7 @@ var KGquery_graph = (function () {
         if (!options) {
             options = {};
         }
-        var savedGraphLocation='UserData';
+        var savedGraphLocation = "UserData";
         async.series(
             [
                 //saved visjgraphData default saved in user_data
@@ -87,13 +87,12 @@ var KGquery_graph = (function () {
                         self.visjsOptions,
                     );
 
-                
-                    UserDataWidget.listUserData({data_type:'KGmodelGraph',data_tool:'KGquery',data_source:MainController.currentSource}, function (err, result) {
+                    UserDataWidget.listUserData({ data_type: "KGmodelGraph", data_tool: "KGquery", data_source: MainController.currentSource }, function (err, result) {
                         if (err) {
                             return alert(err || err.responseText);
                         }
-                        if(result.length==0){
-                            savedGraphLocation='file';
+                        if (result.length == 0) {
+                            savedGraphLocation = "file";
                         }
                         // order to get last saved instance of our graph in user_data
                         result = result.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
@@ -121,18 +120,13 @@ var KGquery_graph = (function () {
 
                         return callbackSeries();
                     });
-
-                        
-                    
-
-                   
                 },
                 // get from file if the transition to userData is not done
                 function (callbackSeries) {
                     if (mode.indexOf("saved") < 0) {
                         return callbackSeries();
                     }
-                    if(savedGraphLocation!='file'){
+                    if (savedGraphLocation != "file") {
                         return callbackSeries();
                     }
                     var visjsGraphFileName = source + "_KGmodelGraph.json";
@@ -144,7 +138,6 @@ var KGquery_graph = (function () {
                         function (err, result) {
                             if (err) {
                                 return callbackSeries("notFound");
-
                             }
                             visjsData = result;
                             if (result && result.options && result.options.output) {
@@ -155,7 +148,6 @@ var KGquery_graph = (function () {
                         },
                         true,
                     );
-
                 },
                 //inferred
                 function (callbackSeries) {
@@ -330,11 +322,11 @@ var KGquery_graph = (function () {
                         //delete node.x;
                         //delete node.y;
                         if (node.font) {
-                            nodes_fonts.push({id:node.id,font:node.font});
+                            nodes_fonts.push({ id: node.id, font: node.font });
                         }
                     });
                     self.KGqueryGraph.data.nodes.update(nodes_fonts);
-                    if(savedGraphLocation=='file'){
+                    if (savedGraphLocation == "file") {
                         self.saveVisjsModelGraph();
                     }
                 });
@@ -688,10 +680,9 @@ var KGquery_graph = (function () {
         if (!size) {
             return;
         }
-        self.setAllNodesAttr("size",  parseInt(size) );
+        self.setAllNodesAttr("size", parseInt(size));
         self.KGqueryGraph.onScaleChange();
         self.setDecorationAttr("size", parseInt(size));
-
     };
     self.setAllNodesAttr = function (attr, value) {
         var nodesId = self.KGqueryGraph.data.nodes.getIds();
@@ -704,9 +695,7 @@ var KGquery_graph = (function () {
         });
         self.KGqueryGraph.data.nodes.update(newNodes);
     };
-    self.setDecorationAttr= function(){
-        
-    }
+    self.setDecorationAttr = function () {};
     self.resetVisjNodes = function (nodes) {
         if (!KGquery_graph.KGqueryGraph) {
             return;
@@ -789,7 +778,7 @@ var KGquery_graph = (function () {
         });
         var label = KGquery.currentSource + "_model";
         var group = "KGquery/models";
-        var data_type='KGmodelGraph'
+        var data_type = "KGmodelGraph";
         UserDataWidget.saveMetadata(label, data_type, data, group, function (err, result) {
             $("#KGquery_messageDiv").text("saved graph");
         });

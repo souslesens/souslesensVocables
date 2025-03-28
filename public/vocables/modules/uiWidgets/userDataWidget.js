@@ -92,8 +92,8 @@ var UserDataWidget = (function () {
     };
 
     self.listUserData = function (filter, callback) {
-        if(!filter) filter = {};
-        
+        if (!filter) filter = {};
+
         $.ajax({
             type: "GET",
             url: `${Config.apiUrl}/users/data`,

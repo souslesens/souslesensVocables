@@ -47,14 +47,9 @@ var KGquery = (function () {
         //self.clearAll();
         $("#messageDiv").attr("id", "KGquery_messageDiv");
         $("#waitImg").attr("id", "KGquery_waitImg");
-        /*  $('#rightControlPanelDiv').load("./modules/tools/lineage/html/whiteBoardButtons.html",function(){
-            UI.resetWindowSize();
-        });*/
     };
     self.unload = function () {
         Lineage_sources.registerSource = UI.oldRegisterSource;
-        //Lineage_sources.showHideEditButtons = self.oldshowHideEditButtons;
-        //reapply changed DOM
 
         $("#KGquery_messageDiv").attr("id", "messageDiv");
         $("#KGquery_waitImg").attr("id", "waitImg");
@@ -345,11 +340,7 @@ var KGquery = (function () {
                 if (result.results.bindings.length == 0) return alert("no result");
                 self.message("found items :" + result.results.bindings.length);
             }
-            /*
-            KGquery_myQueries.save(function (err, query) {
-                Config.clientCache.KGquery = query;
-            });
-            */
+
             if (output == "table") {
                 self.queryResultToTable(result);
             } else if (output == "Graph") {
@@ -364,6 +355,7 @@ var KGquery = (function () {
 
     self.execPathQuery = function (options, callback) {
         var optionalPredicatesSparql = "";
+        var selectClauseSparql = [];
         var containerFiltersSparql = "";
         var query = "";
         var distinctSetTypes = [];
@@ -388,7 +380,8 @@ var KGquery = (function () {
                             UI.message(err, true);
                             callbackSeries(err);
                         }
-                        optionalPredicatesSparql = result;
+                        optionalPredicatesSparql = result.optionalPredicatesSparql;
+                        selectClauseSparql = result.selectClauseSparql;
                         KGquery.currentOptionalPredicatesSparql = optionalPredicatesSparql;
                         callbackSeries();
                     });
@@ -402,13 +395,6 @@ var KGquery = (function () {
 
                     var distinctTypesMap = {};
                     var uniqueBasicPredicatesMap = {};
-
-                    var selectStr = "distinct *";
-                    var groupByStr = "";
-                    if (options.aggregate) {
-                        selectStr = options.aggregate.select;
-                        groupByStr = " GROUP BY " + options.aggregate.groupBy;
-                    }
 
                     var whereStr = "";
                     var uniqueQueries = {};
@@ -567,6 +553,15 @@ var KGquery = (function () {
                         "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
                         "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
                         "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>";
+
+                    var selectStr = " DISTINCT ";
+                    var groupByStr = "";
+                    if (options.aggregate) {
+                        selectStr = options.aggregate.select;
+                        groupByStr = " GROUP BY " + options.aggregate.groupBy;
+                    } else {
+                        selectStr += selectClauseSparql;
+                    }
 
                     var queryType = "SELECT";
                     if (options.output == "shacl") {

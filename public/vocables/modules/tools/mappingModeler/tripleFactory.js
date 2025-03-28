@@ -223,8 +223,7 @@ var TripleFactory = (function () {
             data: payload,
             dataType: "json",
             success: function (result, _textStatus, _jqXHR) {
-
-                MappingModeler.clearSourceClasses(DataSourceManager.currentSlsvSource)
+                MappingModeler.clearSourceClasses(DataSourceManager.currentSlsvSource);
                 if (callback) {
                     return callback();
                 }

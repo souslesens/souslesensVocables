@@ -106,7 +106,7 @@ module.exports = () => {
         try {
             const userData = await cleanUserData.clean(req.body);
             const userInfo = await userManager.getUser(req.user);
-            const identifier = await userDataModel.insert({ ...userData, owned_by: parseInt(userInfo.user.id)});
+            const identifier = await userDataModel.insert({ ...userData, owned_by: parseInt(userInfo.user.id) });
             if (identifier !== undefined) {
                 res.status(200).json({ message: "The resource has been inserted successfully", id: identifier });
             } else {

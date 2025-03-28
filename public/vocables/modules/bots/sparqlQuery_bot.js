@@ -37,7 +37,8 @@ var SparqlQuery_bot = (function () {
 
     self.workflow = {
         chooseResourceTypeFn: {
-            _OR: { Constraints: {
+            _OR: {
+                Constraints: {
                     chooseConstraintRoleFn: {
                         _OR: {
                             Class: {
@@ -120,7 +121,6 @@ var SparqlQuery_bot = (function () {
                         },
                     },
                 },
-
             },
         },
     };
@@ -131,7 +131,7 @@ var SparqlQuery_bot = (function () {
         listObjectPropertiesFn: "listObjectPropertiesFn",
         chooseQueryScopeFn: "choose query scope",
         chooseObjectPropertyClass: "chooseObjectProperty class",
-        chooseConstraintClassFn:"choose constraint class",
+        chooseConstraintClassFn: "choose constraint class",
 
         promptKeywordFn: "enter a keyword or enter for any ",
 
@@ -155,13 +155,11 @@ var SparqlQuery_bot = (function () {
     self.functions = {
         chooseResourceTypeFn: function () {
             var choices = [
-                {id: "Constraints",
-                    label: "Ontology Constraints"},
+                { id: "Constraints", label: "Ontology Constraints" },
                 {
                     id: "Facts",
                     label: "SKG Facts",
                 },
-
             ];
             if (self.noFacts) {
                 choices = ["Constraints"];

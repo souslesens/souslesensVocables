@@ -20,7 +20,7 @@ var SVGexport = (function () {
         C2S.prototype.arrowEndpoint = CanvasRenderingContext2D.prototype.arrowEndpoint;
         C2S.prototype.circleEndpoint = CanvasRenderingContext2D.prototype.circleEndpoint;
         C2S.prototype.dashedLine = CanvasRenderingContext2D.prototype.dashedLine;
-        
+
         function exportSvg() {
             var networkContainer = network.body.container;
             var ctx = new C2S({
@@ -46,7 +46,7 @@ var SVGexport = (function () {
                     scaling: { label: { drawThreshold: 0 } },
                 },
             };
-            
+
             var options = {
                 nodes: {
                     borderWidth: 4,
@@ -67,16 +67,15 @@ var SVGexport = (function () {
             //network.setOptions(svgOptions);
 
             network.redraw();
-            
+
             //network.setOptions(options);
             canvasProto.getContext = currentGetContext;
             ctx.waitForComplete(function () {
-                    var svg = ctx.getSerializedSvg();
-                    showSvg(svg);
+                var svg = ctx.getSerializedSvg();
+                showSvg(svg);
             });
-            
         }
-       /*
+        /*
        function exportSvg() {
             var canvas = $('#graphDiv').find('canvas')[0];
             const ctx = canvas.getContext("2d");

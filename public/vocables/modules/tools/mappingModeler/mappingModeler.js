@@ -117,9 +117,9 @@ var MappingModeler = (function () {
                         return callbackSeries();
                     });
                 },
-                 //load visjs mapping graph
-                 function (callbackSeries) {
-                    $('#rightControlPanelDiv').load("./modules/tools/mappingModeler/html/mappingsGraphButtons.html", function (err) {
+                //load visjs mapping graph
+                function (callbackSeries) {
+                    $("#rightControlPanelDiv").load("./modules/tools/mappingModeler/html/mappingsGraphButtons.html", function (err) {
                         return callbackSeries();
                     });
                 },
@@ -689,15 +689,13 @@ var MappingModeler = (function () {
     };
 
     self.clearSourceClasses = function (source, callback) {
-        OntologyModels.clearOntologyModelCache(MappingModeler.currentSLSsource)
-        var newClasses=[]
-    self.allClasses.forEach(function(item){
-        if(item.source!=source)
-            newClasses.push(item)
-
-    })
-        self.allClasses=newClasses
-    }
+        OntologyModels.clearOntologyModelCache(MappingModeler.currentSLSsource);
+        var newClasses = [];
+        self.allClasses.forEach(function (item) {
+            if (item.source != source) newClasses.push(item);
+        });
+        self.allClasses = newClasses;
+    };
 
     /**
      * Retrieves all object properties from the specified source or the current source if none is provided.
@@ -881,11 +879,9 @@ var MappingModeler = (function () {
      * self.clearMappings();
      */
     self.clearMappings = function () {
-
-     if(mappingColumnsGraph.visjsGraph.isGraphNotEmpty()) {
-        if(! confirm("Warning ! if you continue all mappings for this source will be permanently  lost"))
-            return;
-     }
+        if (mappingColumnsGraph.visjsGraph.isGraphNotEmpty()) {
+            if (!confirm("Warning ! if you continue all mappings for this source will be permanently  lost")) return;
+        }
         $("#" + MappingColumnsGraph.graphDivId).html("");
         MappingColumnsGraph.clearGraph();
     };

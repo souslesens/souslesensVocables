@@ -4628,8 +4628,6 @@ attrs.color=self.getSourceColor(superClassValue)
         });
     };
 
-  
-
     return self;
 })();
 

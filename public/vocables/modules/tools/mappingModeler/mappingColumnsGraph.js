@@ -670,9 +670,11 @@ var MappingColumnsGraph = (function () {
                     }
                     MappingColumnsGraph.visjsGraph.data = result;
                     if(result.nodes.length == 0){
-                        if(callback){
-                            return callback();
-                        }
+                        MappingColumnsGraph.visjsGraph.draw(function () {
+                            if(callback){
+                                return callback();
+                            }
+                        });
                     }
                     // Draw graph by DataTable batches
                     self.addNodesByDataTableBatch(result.nodes, function () {
@@ -763,7 +765,17 @@ var MappingColumnsGraph = (function () {
     self.saveVisjsGraph = function (callback) {
         var fileName = "mappings_" + MappingModeler.currentSLSsource + "_ALL" + ".json";
         var graph = MappingColumnsGraph.visjsGraph;
-        var nodes = graph.data.nodes.get();
+        if( graph.data?.nodes?.length == 0){
+            nodes = [];
+        }else{  
+            var nodes = graph.data.nodes.get();
+        }
+        if( graph.data?.edges?.length == 0){
+            edges = [];
+        }else{  
+            var edges = graph.data.edges.get();
+        }
+        //var nodes = graph.data.nodes.get();
         //var positions = {};
         var positions = graph.network.getPositions();
         // Initialisation of Config if there isn't
@@ -784,7 +796,7 @@ var MappingColumnsGraph = (function () {
         delete config.currentDataSource;
         var data = {
             nodes: nodes,
-            edges: graph.data.edges.get(),
+            edges: edges,
             context: graph.currentContext,
             positions: positions,
             options: { config: config },

@@ -185,7 +185,7 @@ describe("UserDataModel", () => {
         const addUserData = {
             data_type: "data_type",
             data_content: {"test": "some content"},
-            owned_by: "3",
+            owned_by: 3,
         }
         const results = await userDataModel.insert(addUserData);
         expect(results).toStrictEqual(6);
@@ -199,7 +199,7 @@ describe("UserDataModel", () => {
         const addUserData = {
             data_type: "data_type",
             data_content: {"test": "some content"},
-            owned_by: "3",
+            owned_by: 3,
         }
         const results = await userDataModel.insert(addUserData);
         expect(results).toStrictEqual(6);
@@ -211,7 +211,7 @@ describe("UserDataModel", () => {
     test("insert userData with unknown owner", async () => {
         const addUserData = {
             data_type: "data_type",
-            owned_by: "5",
+            owned_by: 5,
         }
         expect(async () => await userDataModel.insert(addUserData)).rejects.toThrow();
     });
@@ -224,7 +224,7 @@ describe("UserDataModel", () => {
 
         const addUserData = {
             data_type: "data_type",
-            owned_by: "someone",
+            owned_by: 5,
         }
         expect(async () => await userDataModel.insert(addUserData)).rejects.toThrow("The specified content is too large for the database");
     });
@@ -258,7 +258,7 @@ describe("UserDataModel", () => {
             id: 3,
             data_type: "data_type",
             data_content: { test: "test" },
-            owned_by: "2",
+            owned_by: 2,
         };
 
         expect(fs.existsSync(filePath)).toBeFalsy();
@@ -275,7 +275,7 @@ describe("UserDataModel", () => {
             id: 4,
             data_type: "data_type",
             data_content: { test: "test" },
-            owned_by: "3",
+            owned_by: 3,
         };
 
         expect(fs.existsSync(filePath)).toBeFalsy();
@@ -291,7 +291,7 @@ describe("UserDataModel", () => {
             data_type: "data_type",
             data_content: { test: "test" },
             created_at: "xxx",
-            owned_by: "2",
+            owned_by: 2,
         };
 
         const result = await userDataModel.update(updateUserData);
@@ -303,7 +303,7 @@ describe("UserDataModel", () => {
             id: 10,
             data_type: "data_type",
             data_content: { test: "test" },
-            owned_by: "2",
+            owned_by: 2,
         };
 
         expect(async () => await userDataModel.update(updateUserData)).rejects.toThrow("The specified identifier do not exists");
@@ -314,7 +314,7 @@ describe("UserDataModel", () => {
             id: 1,
             data_type: "data_type",
             data_content: { test: "test" },
-            owned_by: "5",
+            owned_by: 5,
         };
 
         expect(async () => await userDataModel.update(updateUserData)).rejects.toThrow("The specified owned_by do not exists");
@@ -330,7 +330,7 @@ describe("UserDataModel", () => {
             id: 1,
             data_type: "data_type",
             data_content: { test: "test" },
-            owned_by: "2",
+            owned_by: 2,
         };
 
         expect(async () => await userDataModel.update(updateUserData)).rejects.toThrow("The specified content is too large for the database");
@@ -377,12 +377,12 @@ describe("UserDataModel", () => {
     });
 
     test("test _check", async () => {
-         data = userDataModel._check({ data_type: "text", owned_by: "1" });
+         data = userDataModel._check({ data_type: "text", owned_by: 1 });
     });
 
     test("test _check with missing attributes", async () => {
         expect(() => userDataModel._check({})).toThrow();
-        expect(() => userDataModel._check({ owned_by: "1" })).toThrow();
+        expect(() => userDataModel._check({ owned_by: 1 })).toThrow();
     });
 
     test("test _checkIdentifier", async () => {

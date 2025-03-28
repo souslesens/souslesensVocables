@@ -4,6 +4,7 @@ import VisjsGraphClass from "../../graph/VisjsGraphClass.js";
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 import MappingsDetails from "./mappingsDetails.js";
 import DataSourceManager from "./dataSourcesManager.js";
+import MappingModeler from "./mappingModeler.js";
 
 /**
  * MappingColumnsGraph module.
@@ -83,7 +84,7 @@ var MappingColumnsGraph = (function () {
         levelSeparation: 300,
     };
     self.physicsHierarchical = {
-        enabled: true,
+        enabled: false,
         hierarchicalRepulsion: {
             centralGravity: 0.3,
             nodeDistance: 200,
@@ -659,7 +660,7 @@ var MappingColumnsGraph = (function () {
                 function (err, result) {
                     if(err){
                         if(callback){
-                            return callback();
+                            return callback(err);
                         }
                         return err;
                     }
@@ -668,7 +669,11 @@ var MappingColumnsGraph = (function () {
                         DataSourceManager.currentConfig = result.options.config;
                     }
                     MappingColumnsGraph.visjsGraph.data = result;
-                    
+                    if(result.nodes.length == 0){
+                        if(callback){
+                            return callback();
+                        }
+                    }
                     // Draw graph by DataTable batches
                     self.addNodesByDataTableBatch(result.nodes, function () {
                         if (true) {
@@ -830,6 +835,9 @@ var MappingColumnsGraph = (function () {
      * @returns {Array<string>} List of unique data table names.
      */
     self.getDatasourceTablesFromVisjsGraph = function () {
+        if(self?.visjsGraph?.data?.nodes?.length == 0){
+            return [];
+        }
         var tables = self.visjsGraph.data.nodes.get().map(function (node) {
             return node?.data?.dataTable;
         });
@@ -1100,6 +1108,83 @@ var MappingColumnsGraph = (function () {
             }
             data.context.options.layoutHierarchical = self.layoutHierarchical;
             data.nodes = self.sortVisjsColumns(data.nodes);
+        }
+           /**
+             * Exports the current mappings from the Vis.js graph to a JSON file.
+             * Saves the graph data before exporting
+             * Handles errors during the export process and displays appropriate messages.
+             *
+             * @function
+             * @name exportMappings
+             * @memberof module:MappingColumnsGraph
+             * @returns {void}
+             */
+        self.exportMappings = function(){
+            self.saveVisjsGraph(function (err) {
+                var fileName="mappings_" + MappingModeler.currentSLSsource + "_ALL" + ".json";
+                var payload = {
+                    dir: "graphs/",
+                    fileName: fileName,
+                };
+               
+                $.ajax({
+                    type: "GET",
+                    url: `${Config.apiUrl}/data/file`,
+                    data: payload,
+                    dataType: "json",
+                    success: function (result, _textStatus, _jqXHR) {
+                        var data=JSON.parse(result);
+                        Export.downloadJSON(data, fileName);
+
+                    },
+                    error(err) {
+                        if (callback) {
+                            return callback(err);
+                        }
+                        if (err.responseJSON == "file does not exist") {
+                            return;
+                        }
+                        return alert(err);
+                    },
+                });    
+            });
+         
+        };
+      
+        self.importMappingsFromJSONFile=function(){
+            ImportFileWidget.showImportDialog(function(err,result){
+                if(err){
+                    return alert(err);
+                }
+                var data=JSON.parse(result);
+                if(data.nodes.length==0){
+                    return alert("no nodes in file");
+                }
+                var fileName="mappings_" + MappingModeler.currentSLSsource + "_ALL" + ".json";
+                var payload = {
+                    dir: "graphs/",
+                    fileName: fileName,
+                    data: JSON.stringify(data, null, 2),
+                };
+        
+               
+                $.ajax({
+                    type: "POST",
+                    url: `${Config.apiUrl}/data/file`,
+                    data: payload,
+                    dataType: "json",
+                    success: function (result, _textStatus, _jqXHR) {
+                        MappingModeler.onLoaded();
+
+                    },
+                    error(err) {
+                        return alert(err);
+                    },
+                }); 
+
+
+
+            });
         }
 
         return data;

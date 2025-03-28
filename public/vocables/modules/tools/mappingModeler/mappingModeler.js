@@ -112,7 +112,7 @@ var MappingModeler = (function () {
                 function (callbackSeries) {
                     MappingColumnsGraph.loadVisjsGraph(function (err) {
                         if (err) {
-                            return callbackSeries(err);
+                            return callbackSeries();
                         }
                         return callbackSeries();
                     });

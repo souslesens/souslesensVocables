@@ -657,11 +657,18 @@ var MappingColumnsGraph = (function () {
                 "mappings_" + MappingModeler.currentSLSsource + "_ALL" + ".json",
                 false,
                 function (err, result) {
+                    if(err){
+                        if(callback){
+                            return callback();
+                        }
+                        return err;
+                    }
                     if (result?.options?.config) {
                         DataSourceManager.rawConfig = result.options.config;
                         DataSourceManager.currentConfig = result.options.config;
                     }
                     MappingColumnsGraph.visjsGraph.data = result;
+                    
                     // Draw graph by DataTable batches
                     self.addNodesByDataTableBatch(result.nodes, function () {
                         if (true) {

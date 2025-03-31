@@ -1121,9 +1121,6 @@ var MappingColumnsGraph = (function () {
             data.context.options.layoutHierarchical = self.layoutHierarchical;
             data.nodes = self.sortVisjsColumns(data.nodes);
         }
-        
-
-        
 
         return data;
     };
@@ -1168,15 +1165,15 @@ var MappingColumnsGraph = (function () {
     };
 
     /**
-         * Exports the current mappings from the Vis.js graph to a JSON file.
-         * Saves the graph data before exporting
-         * 
-         *
-         * @function
-         * @name exportMappings
-         * @memberof module:MappingColumnsGraph
-         * @returns {void}
-         */
+     * Exports the current mappings from the Vis.js graph to a JSON file.
+     * Saves the graph data before exporting
+     *
+     *
+     * @function
+     * @name exportMappings
+     * @memberof module:MappingColumnsGraph
+     * @returns {void}
+     */
     self.exportMappings = function () {
         self.saveVisjsGraph(function (err) {
             var fileName = "mappings_" + MappingModeler.currentSLSsource + "_ALL" + ".json";

@@ -254,23 +254,11 @@ var KGquery_graph = (function () {
                     return callbackSeries();
                 },
 
-
                 function (callbackSeries) {
-
-
                     callbackSeries();
                 },
             ],
             function (err) {
-
-
-
-
-
-
-
-
-
                 if (err && err != "no decoration") {
                     if (err == "notFound") {
                         return self.drawVisjsModel("inferred");
@@ -305,21 +293,20 @@ var KGquery_graph = (function () {
                     return KGquery_nodeSelector.showImplicitModelInJstree(visjsData);
                 }
 
-
                 //patch to remove duplicate nonObjectProperties
                 self.visjsData.nodes.forEach(function (item) {
                     if (item.data && item.data.nonObjectProperties) {
-                        var uniques = {}
-                        var newProperties = []
+                        var uniques = {};
+                        var newProperties = [];
                         item.data.nonObjectProperties.forEach(function (prop) {
                             if (!uniques[prop.id]) {
-                                uniques[prop.id] = 1
-                                newProperties.push(prop)
+                                uniques[prop.id] = 1;
+                                newProperties.push(prop);
                             }
-                        })
-                        item.data.nonObjectProperties=newProperties
+                        });
+                        item.data.nonObjectProperties = newProperties;
                     }
-                })
+                });
 
                 /*self.visjsOptions.visjsOptions.physics={enabled: true,
                 stabilization: {

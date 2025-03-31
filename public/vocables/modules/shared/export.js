@@ -2,6 +2,8 @@ import common from "./common.js";
 import SearchUtil from "../search/searchUtil.js";
 import Sparql_common from "../sparqlProxies/sparql_common.js";
 
+import MainController from "./mainController.js";
+
 var Export = (function () {
     var self = {};
     self.context = null;
@@ -463,10 +465,36 @@ fixedColumns: true*/
         link.click();
     };
     self.showExportPopUp = function (visjsGraph) {
-        var html = `<span class="popupMenuItem" onclick="Export.exportGraphToDataTable(${visjsGraph});">CSV</span>`;
+        var html = `<span class="popupMenuItem" onclick="${visjsGraph}.toGraphMl();">Graph ML </span>`;
         html += `<span class="popupMenuItem" onclick="${visjsGraph}.toSVG()">SVG</span>`;
-        html += `<span class="popupMenuItem" onclick="${visjsGraph}.toGraphMl();">Graph ML </span>`;
+        html += `<span class="popupMenuItem" onclick="Export.exportGraphToDataTable(${visjsGraph});">CSV</span>`;
+        if (visjsGraph == "MappingColumnsGraph.visjsGraph") {
+            html += `<span class="popupMenuItem" onclick="MappingColumnsGraph.exportMappings();">JSON</span>`;
+        }
+
         PopupMenuWidget.initAndShow(html, "popupMenuWidgetDiv");
+    };
+    /**
+     * Downloads a JSON object as a file.
+     * Converts the provided data into a JSON string, creates a downloadable file, and triggers the download.
+     *
+     * @function
+     * @name downloadJSON
+     * @memberof module:Export
+     * @param {Object} data - The JSON object to be downloaded.
+     * @param {string} fileName - The name of the file to be downloaded.
+     * @returns {void}
+     */
+    self.downloadJSON = function (data, fileName) {
+        const jsonString = JSON.stringify(data, null, 2);
+        const blob = new Blob([jsonString], { type: "application/json" });
+        const link = document.createElement("a");
+
+        link.href = URL.createObjectURL(blob);
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     };
     return self;
 })();

@@ -19,6 +19,7 @@ import UIcontroller from "./uiController.js";
 import PlantUmlTransformer from "../../graph/plantUmlTransformer.js";
 import mappingModeler from "./mappingModeler.js";
 import mappingColumnsGraph from "./mappingColumnsGraph.js";
+import Lineage_sources from "../lineage/lineage_sources.js";
 
 /**
  * MappingModeler module.
@@ -87,6 +88,7 @@ var MappingModeler = (function () {
                 },
                 function (callbackSeries) {
                     MappingModeler.currentSLSsource = MainController.currentSource;
+                    Lineage_sources.loadedSources = {};
                     UI.initMenuBar(function () {
                         self.loadSource(function () {
                             self.initResourcesMap(MappingModeler.currentSLSsource);
@@ -112,7 +114,7 @@ var MappingModeler = (function () {
                 function (callbackSeries) {
                     MappingColumnsGraph.loadVisjsGraph(function (err) {
                         if (err) {
-                            return callbackSeries(err);
+                            return callbackSeries();
                         }
                         return callbackSeries();
                     });

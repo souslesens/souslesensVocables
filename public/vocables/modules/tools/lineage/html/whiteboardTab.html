@@ -4,10 +4,18 @@
     </button>
     <div id="sourcesActionsSection" class="w3-panel w3-border w3-round-small lateralPanelSection-width">
         <div id="Title1" class="titleboxButtons font-button1-color"></div>
-        <button class="w3-button slsv-button-1" id="lineageWhiteboard_modelBtn" title="Relations"><img src="./icons/CommonIcons/show_relations.png" /></button>
-        <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.drawTopConcepts()" title="Main classes"><img src="./icons/CommonIcons/show_main_classes.png" /></button>
-        <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.addChildrenToGraph()" title="Childrens"><img src="./icons/CommonIcons/show_children.png" /></button>
-        <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.addNodesAndParentsToGraph()" title="Parents"><img src="./icons/CommonIcons/show_parents.png" /></button>
+        <button class="w3-button slsv-button-1" id="lineageWhiteboard_modelBtn" title="Relations" style="padding: 5px 8px">
+            <img src="./icons/CommonIcons/show_relations.png" style="width: 33px; height: 33px" />
+        </button>
+        <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.drawTopConcepts()" title="Main classes" style="padding: 5px 8px">
+            <img src="./icons/CommonIcons/show_main_classes.png" style="width: 33px; height: 33px" />
+        </button>
+        <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.addChildrenToGraph()" title="Childrens" style="padding: 5px 8px">
+            <img src="./icons/CommonIcons/show_children.png" style="width: 33px; height: 33px" />
+        </button>
+        <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.addNodesAndParentsToGraph()" title="Parents" style="padding: 5px 8px">
+            <img src="./icons/CommonIcons/show_parents.png" style="width: 33px; height: 33px" />
+        </button>
         <!-- <button class="w3-button slsv-button-1" onclick="SparqlQuery_bot.start()" title="Query"><img src="./icons/CommonIcons/Query.png" /></button>-->
         <button class="w3-button slsv-button-1" onclick="Lineage_axioms.drawClassesWithAxioms()" title="Axioms">A</button>
     </div>

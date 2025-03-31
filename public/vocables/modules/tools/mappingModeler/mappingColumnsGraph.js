@@ -4,6 +4,7 @@ import VisjsGraphClass from "../../graph/VisjsGraphClass.js";
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 import MappingsDetails from "./mappingsDetails.js";
 import DataSourceManager from "./dataSourcesManager.js";
+import MappingModeler from "./mappingModeler.js";
 
 /**
  * MappingColumnsGraph module.
@@ -657,11 +658,24 @@ var MappingColumnsGraph = (function () {
                 "mappings_" + MappingModeler.currentSLSsource + "_ALL" + ".json",
                 false,
                 function (err, result) {
+                    if (err) {
+                        if (callback) {
+                            return callback(err);
+                        }
+                        return err;
+                    }
                     if (result?.options?.config) {
                         DataSourceManager.rawConfig = result.options.config;
                         DataSourceManager.currentConfig = result.options.config;
                     }
                     MappingColumnsGraph.visjsGraph.data = result;
+                    if (result.nodes.length == 0) {
+                        MappingColumnsGraph.visjsGraph.draw(function () {
+                            if (callback) {
+                                return callback();
+                            }
+                        });
+                    }
                     // Draw graph by DataTable batches
                     self.addNodesByDataTableBatch(result.nodes, function () {
                         if (true) {
@@ -751,7 +765,17 @@ var MappingColumnsGraph = (function () {
     self.saveVisjsGraph = function (callback) {
         var fileName = "mappings_" + MappingModeler.currentSLSsource + "_ALL" + ".json";
         var graph = MappingColumnsGraph.visjsGraph;
-        var nodes = graph.data.nodes.get();
+        if (graph.data?.nodes?.length == 0) {
+            nodes = [];
+        } else {
+            var nodes = graph.data.nodes.get();
+        }
+        if (graph.data?.edges?.length == 0) {
+            edges = [];
+        } else {
+            var edges = graph.data.edges.get();
+        }
+        //var nodes = graph.data.nodes.get();
         //var positions = {};
         var positions = graph.network.getPositions();
         // Initialisation of Config if there isn't
@@ -772,7 +796,7 @@ var MappingColumnsGraph = (function () {
         delete config.currentDataSource;
         var data = {
             nodes: nodes,
-            edges: graph.data.edges.get(),
+            edges: edges,
             context: graph.currentContext,
             positions: positions,
             options: { config: config },
@@ -823,6 +847,9 @@ var MappingColumnsGraph = (function () {
      * @returns {Array<string>} List of unique data table names.
      */
     self.getDatasourceTablesFromVisjsGraph = function () {
+        if (self?.visjsGraph?.data?.nodes?.length == 0) {
+            return [];
+        }
         var tables = self.visjsGraph.data.nodes.get().map(function (node) {
             return node?.data?.dataTable;
         });
@@ -1094,10 +1121,91 @@ var MappingColumnsGraph = (function () {
             data.context.options.layoutHierarchical = self.layoutHierarchical;
             data.nodes = self.sortVisjsColumns(data.nodes);
         }
+        
+
+        
 
         return data;
     };
+    /**
+     * Imports mappings from a JSON file into the Vis.js graph file.
+     * Opens a file import dialog, parses the JSON content, and uploads the data to the graphs in instance data repository.
+     *
+     * @function
+     * @name importMappingsFromJSONFile
+     * @memberof module:MappingColumnsGraph
+     * @returns {void}
+     */
+    self.importMappingsFromJSONFile = function () {
+        ImportFileWidget.showImportDialog(function (err, result) {
+            if (err) {
+                return alert(err);
+            }
+            var data = JSON.parse(result);
+            if (data.nodes.length == 0) {
+                return alert("no nodes in file");
+            }
+            var fileName = "mappings_" + MappingModeler.currentSLSsource + "_ALL" + ".json";
+            var payload = {
+                dir: "graphs/",
+                fileName: fileName,
+                data: JSON.stringify(data, null, 2),
+            };
 
+            $.ajax({
+                type: "POST",
+                url: `${Config.apiUrl}/data/file`,
+                data: payload,
+                dataType: "json",
+                success: function (result, _textStatus, _jqXHR) {
+                    MappingModeler.onLoaded();
+                },
+                error(err) {
+                    return alert(err);
+                },
+            });
+        });
+    };
+
+    /**
+         * Exports the current mappings from the Vis.js graph to a JSON file.
+         * Saves the graph data before exporting
+         * 
+         *
+         * @function
+         * @name exportMappings
+         * @memberof module:MappingColumnsGraph
+         * @returns {void}
+         */
+    self.exportMappings = function () {
+        self.saveVisjsGraph(function (err) {
+            var fileName = "mappings_" + MappingModeler.currentSLSsource + "_ALL" + ".json";
+            var payload = {
+                dir: "graphs/",
+                fileName: fileName,
+            };
+
+            $.ajax({
+                type: "GET",
+                url: `${Config.apiUrl}/data/file`,
+                data: payload,
+                dataType: "json",
+                success: function (result, _textStatus, _jqXHR) {
+                    var data = JSON.parse(result);
+                    Export.downloadJSON(data, fileName);
+                },
+                error(err) {
+                    if (callback) {
+                        return callback(err);
+                    }
+                    if (err.responseJSON == "file does not exist") {
+                        return;
+                    }
+                    return alert(err);
+                },
+            });
+        });
+    };
     return self;
 })();
 

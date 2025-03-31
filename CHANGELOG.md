@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.4.0](https://github.com/souslesens/souslesensVocables/compare/2.3.0...2.4.0) (2025-03-28)
+
+
+### Bug Fixes
+
+* **authentication:** create use account if not exists when first login with keycloak ([3338e3e](https://github.com/souslesens/souslesensVocables/commit/3338e3e8b9f02bb3fed410497b91c4714fd5edf5))
+* return the data_content with userData ([2a54da4](https://github.com/souslesens/souslesensVocables/commit/2a54da4fffcf9d4238079119b08268135f7c71d8))
+
 ## [2.3.0](https://github.com/souslesens/souslesensVocables/compare/2.2.1...2.3.0) (2025-03-24)
 
 > [!IMPORTANT]

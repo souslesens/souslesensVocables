@@ -13,6 +13,8 @@ var KGquery_graph = (function () {
     var self = {};
     self.visjsData = null;
 
+    self.labelsMap = {};
+
     self.init = function () {
         $("#KGquery_leftPanelTabs").tabs();
 
@@ -252,7 +254,6 @@ var KGquery_graph = (function () {
                     return callbackSeries();
                 },
 
-                //change shape of nodes without nonObjectProperties
                 function (callbackSeries) {
                     callbackSeries();
                 },
@@ -276,12 +277,37 @@ var KGquery_graph = (function () {
                 });
                 visjsData.nodes = newNodes;
                 self.visjsData = visjsData;
+
+                self.visjsData.nodes.forEach(function (item) {
+                    self.labelsMap[item.id] = item.label || item.id;
+                });
+
+                self.visjsData.edges.forEach(function (item) {
+                    self.labelsMap[item.id] = item.label || item.id;
+                });
+
                 if (display == "list") {
                     // Draw a empty graph to fit with the object self.KGqueryGraph that has no nodes and edges
 
                     self.KGqueryGraph.draw(function () {});
                     return KGquery_nodeSelector.showImplicitModelInJstree(visjsData);
                 }
+
+                //patch to remove duplicate nonObjectProperties
+                self.visjsData.nodes.forEach(function (item) {
+                    if (item.data && item.data.nonObjectProperties) {
+                        var uniques = {};
+                        var newProperties = [];
+                        item.data.nonObjectProperties.forEach(function (prop) {
+                            if (!uniques[prop.id]) {
+                                uniques[prop.id] = 1;
+                                newProperties.push(prop);
+                            }
+                        });
+                        item.data.nonObjectProperties = newProperties;
+                    }
+                });
+
                 /*self.visjsOptions.visjsOptions.physics={enabled: true,
                 stabilization: {
                   enabled: true,

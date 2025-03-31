@@ -1145,6 +1145,9 @@ var MappingColumnsGraph = (function () {
             if (data.nodes.length == 0) {
                 return alert("no nodes in file");
             }
+            if(data?.options?.config?.graphUri!=Config.sources[MainController.currentSource].graphUri){
+                return alert("graphUri in file is not the same as the current graphUri, update graphURI in JSON file");
+            }
             var fileName = "mappings_" + MappingModeler.currentSLSsource + "_ALL" + ".json";
             var payload = {
                 dir: "graphs/",

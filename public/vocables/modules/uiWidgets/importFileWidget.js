@@ -1,7 +1,9 @@
 var ImportFileWidget = (function () {
     var self = {};
 
+
     self.showImportDialog = function (onValidateFn) {
+
         $("#smallDialogDiv").load("modules/uiWidgets/html/importDialog.html", function () {
             $("#smallDialogDiv").dialog("open");
             $("#importFileButton").on("click", function () {
@@ -16,6 +18,7 @@ var ImportFileWidget = (function () {
                 reader.onload = function (e) {
                     var fileContent = e.target.result;
                     $("#smallDialogDiv").dialog("close");
+
                     if (onValidateFn) {
                         onValidateFn(null, fileContent);
                     }

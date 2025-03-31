@@ -299,7 +299,10 @@ var MappingModeler = (function () {
             }
         }
 
-        JstreeWidget.loadJsTree("suggestionsSelectJstreeDiv", jstreeData, options, function () {});
+        JstreeWidget.loadJsTree("suggestionsSelectJstreeDiv", jstreeData, options, function () {
+
+            $('#suggestionsSelectJstreeDiv').css('overflow', 'unset');
+        });
     };
 
     /**

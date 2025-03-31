@@ -83,7 +83,7 @@ var MappingColumnsGraph = (function () {
         levelSeparation: 300,
     };
     self.physicsHierarchical = {
-        enabled: true,
+        enabled: false,
         hierarchicalRepulsion: {
             centralGravity: 0.3,
             nodeDistance: 200,

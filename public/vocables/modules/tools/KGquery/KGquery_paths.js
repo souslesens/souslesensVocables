@@ -26,29 +26,8 @@ var KGquery_paths = (function () {
 
     self.substituteClassIdToVarNameInPath = function (queryElement, path) {
         path.forEach(function (item, index) {
-            if (item[0] == queryElement.fromNode.id) {
-                item[0] = KGquery.getVarName(queryElement.fromNode);
-                if (item[1] == queryElement.toNode.id) {
-                    item[1] = KGquery.getVarName(queryElement.toNode);
-                } else {
-                    item[1] = "?" + Sparql_common.getLabelFromURI(item[1]);
-                }
-            }
-
-            if (item[1] == queryElement.fromNode.id) {
-                item[1] = KGquery.getVarName(queryElement.fromNode);
-                if (item[0] == queryElement.toNode.id) {
-                    item[0] = KGquery.getVarName(queryElement.toNode);
-                } else {
-                    item[0] = "?" + Sparql_common.getLabelFromURI(item[0]);
-                }
-            }
-            if (item[0].indexOf("?") < 0) {
-                item[0] = "?" + Sparql_common.getLabelFromURI(item[0]);
-            }
-            if (item[1].indexOf("?") < 0) {
-                item[1] = "?" + Sparql_common.getLabelFromURI(item[1]);
-            }
+            item[0] = "?" + Sparql_common.formatStringForTriple(KGquery_graph.labelsMap[item[0]], true);
+            item[1] = "?" + Sparql_common.formatStringForTriple(KGquery_graph.labelsMap[item[1]], true);
         });
         return path;
     };

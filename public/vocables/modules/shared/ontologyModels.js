@@ -1502,11 +1502,10 @@ var OntologyModels = (function () {
             for (var key in Config.ontologiesVocabularyModels[source].classes) {
                 var item = JSON.parse(JSON.stringify(Config.ontologiesVocabularyModels[source].classes[key]));
                 if (classes[key]) {
-                    if(item.superClass){
+                    if (item.superClass) {
                         classes[key].superClass = item.superClass;
                         classes[key].superClassLabel = item.superClassLabel;
                     }
-                    
                 } else {
                     classes[key] = item;
                 }

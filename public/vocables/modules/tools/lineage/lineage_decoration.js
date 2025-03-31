@@ -164,7 +164,7 @@ var Lineage_decoration = (function () {
                     var classes = Object.keys(distinctNodeClassesMap);
 
                     for (var classUri in distinctNodeClassesMap) {
-                        if(classUri=="http://purl.obolibrary.org/obo/IAO_0000706"){
+                        if (classUri == "http://purl.obolibrary.org/obo/IAO_0000706") {
                             console.log("here");
                         }
                         var ancestors = OntologyModels.getClassHierarchyTreeData(Lineage_sources.activeSource, classUri, "ancestors");

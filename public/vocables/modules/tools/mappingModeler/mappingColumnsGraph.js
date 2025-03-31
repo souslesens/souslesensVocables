@@ -1121,9 +1121,76 @@ var MappingColumnsGraph = (function () {
             data.context.options.layoutHierarchical = self.layoutHierarchical;
             data.nodes = self.sortVisjsColumns(data.nodes);
         }
-        
+        /**
+         * Exports the current mappings from the Vis.js graph to a JSON file.
+         * Saves the graph data before exporting
+         * Handles errors during the export process and displays appropriate messages.
+         *
+         * @function
+         * @name exportMappings
+         * @memberof module:MappingColumnsGraph
+         * @returns {void}
+         */
+        self.exportMappings = function () {
+            self.saveVisjsGraph(function (err) {
+                var fileName = "mappings_" + MappingModeler.currentSLSsource + "_ALL" + ".json";
+                var payload = {
+                    dir: "graphs/",
+                    fileName: fileName,
+                };
 
-        
+                $.ajax({
+                    type: "GET",
+                    url: `${Config.apiUrl}/data/file`,
+                    data: payload,
+                    dataType: "json",
+                    success: function (result, _textStatus, _jqXHR) {
+                        var data = JSON.parse(result);
+                        Export.downloadJSON(data, fileName);
+                    },
+                    error(err) {
+                        if (callback) {
+                            return callback(err);
+                        }
+                        if (err.responseJSON == "file does not exist") {
+                            return;
+                        }
+                        return alert(err);
+                    },
+                });
+            });
+        };
+
+        self.importMappingsFromJSONFile = function () {
+            ImportFileWidget.showImportDialog(function (err, result) {
+                if (err) {
+                    return alert(err);
+                }
+                var data = JSON.parse(result);
+                if (data.nodes.length == 0) {
+                    return alert("no nodes in file");
+                }
+                var fileName = "mappings_" + MappingModeler.currentSLSsource + "_ALL" + ".json";
+                var payload = {
+                    dir: "graphs/",
+                    fileName: fileName,
+                    data: JSON.stringify(data, null, 2),
+                };
+
+                $.ajax({
+                    type: "POST",
+                    url: `${Config.apiUrl}/data/file`,
+                    data: payload,
+                    dataType: "json",
+                    success: function (result, _textStatus, _jqXHR) {
+                        MappingModeler.onLoaded();
+                    },
+                    error(err) {
+                        return alert(err);
+                    },
+                });
+            });
+        };
 
         return data;
     };
@@ -1171,15 +1238,15 @@ var MappingColumnsGraph = (function () {
     };
 
     /**
-         * Exports the current mappings from the Vis.js graph to a JSON file.
-         * Saves the graph data before exporting
-         * 
-         *
-         * @function
-         * @name exportMappings
-         * @memberof module:MappingColumnsGraph
-         * @returns {void}
-         */
+     * Exports the current mappings from the Vis.js graph to a JSON file.
+     * Saves the graph data before exporting
+     *
+     *
+     * @function
+     * @name exportMappings
+     * @memberof module:MappingColumnsGraph
+     * @returns {void}
+     */
     self.exportMappings = function () {
         self.saveVisjsGraph(function (err) {
             var fileName = "mappings_" + MappingModeler.currentSLSsource + "_ALL" + ".json";

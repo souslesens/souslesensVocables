@@ -1,6 +1,7 @@
 <div id="KGquery_queryTab" style="display: flex; flex-direction: column; margin-top: 20px">
     <div class="w3-panel w3-border w3-round-small lateralPanelSection-width" style="display: flex; flex-direction: column">
         <div class="titleboxButtons font-button1-color">Query Actions</div>
+
         <div style="display: flex; flex-direction: row; justify-content: flex-start; align-items: center">
             <!-- <button class="slsv-button-1" onclick="KGquery.switchRightPanel(true)">Graph</button>-->
             <button class="slsv-button-1" onclick="KGquery.clearAll();KGquery.switchRightPanel(true)">Clear</button>
@@ -19,6 +20,9 @@
             <!-- <button onclick="KGquery.queryKG('table',null,true)">Query database</button>-->
 
             <!--<button onclick="TimeLineWidget.init()">TimeLine</button>-->
+        </div>
+        <div> <input type="checkbox" id="KGquery_displayGraphInList" onchange="KGquery_graph.onDisplayGraphInListCBXchange()"/>
+            Select nodes in list
         </div>
     </div>
     <div class="w3-panel w3-border w3-round-small lateralPanelSection-width" style="align-items: baseline" id="KGquery_SetsControlsDiv">

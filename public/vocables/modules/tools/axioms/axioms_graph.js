@@ -15,7 +15,7 @@ var Axioms_graph = (function () {
             color = "#70ac47";
             if (node.symbol == "^") {
                 shape = "ellipse";
-                font = { bold: true };
+                font = {bold: true};
                 color = "#f5ef39";
             }
         } else if (node.type && node.type.indexOf("Class") > -1) {
@@ -75,7 +75,7 @@ var Axioms_graph = (function () {
         }
         self.graphDivId = divId;
         var nodesMap = {};
-        var visjsData = { nodes: [], edges: [] };
+        var visjsData = {nodes: [], edges: []};
         var edgesToRemove = {};
         var disjointClassesAxiomRoot = null;
         async.series(
@@ -96,7 +96,7 @@ var Axioms_graph = (function () {
                         }
 
                         if (!nodesMap[s]) {
-                            nodesMap[s] = { id: s };
+                            nodesMap[s] = {id: s};
                             if (s.indexOf("http") == 0) {
                                 var obj = Axiom_manager.allResourcesMap[s];
                                 nodesMap[s].label = obj ? obj.label.replace(/_/g, " ") : null;
@@ -347,20 +347,41 @@ var Axioms_graph = (function () {
 
                 //process inversion of some and property
                 function (callbackSeries) {
+                    //    return callbackSeries()
                     var nodesMap = {};
                     visjsData.nodes.forEach(function (node) {
                         nodesMap[node.id] = node;
                     });
                     var nodesToDelete = [];
                     visjsData.edges.forEach(function (edge, index) {
+
+                        if(edge.to=="http://purl.obolibrary.org/obo/BFO_0000023"){
+                            console.log(JSON.stringify(nodesMap[edge.from]))
+                        }
+
+
                         var x = nodesMap[edge.from].label;
-                        if (nodesMap[edge.from].color == "#cb9801") {
+                        if (nodesMap[edge.from].data.type == "inverseOf") {//concat inverse and exists
+                            nodesMap[edge.from].label += nodesMap[edge.to].label + "";
+                            nodesToDelete.push(edge.to);
+                        }
+
+                        if (nodesMap[edge.from].color == "#cb9801") {//restrcition
                             if (nodesMap[edge.to].data.type == "http://www.w3.org/2002/07/owl#ObjectProperty") {
                                 nodesMap[edge.from].label = nodesMap[edge.to].label + "\n" + nodesMap[edge.from].label + "";
-                                (nodesMap[edge.from].color = "#f5ef39"), (nodesMap[edge.from].font = { size: 14 }), (visjsData.edges[index].length = 120);
+                             //   nodesMap[edge.from].color = "#f5ef39"
+                                nodesMap[edge.from].font = {size: 18,color:"#cb9801"}
+                                visjsData.edges[index].length = 120;
+                                nodesToDelete.push(edge.to);
+                            } else if (nodesMap[edge.to].data.type == "inverseOf") {
+                                nodesMap[edge.from].label = nodesMap[edge.to].label
+                              //  nodesMap[edge.from].color = "#f5ef39"
+                                nodesMap[edge.from].font = {size: 18,color:"#cb9801"}
+                              //  visjsData.edges[index].length = 120;
                                 nodesToDelete.push(edge.to);
                             }
                         }
+
                     });
                     var nodesToKeep = [];
                     visjsData.nodes.forEach(function (node) {
@@ -491,8 +512,8 @@ enabled:true},*/
 
     self.outlineNode = function (nodeId) {
         var newNodes = [];
-        self.axiomsVisjsGraph.decorateNodes(null, { borderWidth: 1 });
-        self.axiomsVisjsGraph.decorateNodes(nodeId, { borderWidth: 5 });
+        self.axiomsVisjsGraph.decorateNodes(null, {borderWidth: 1});
+        self.axiomsVisjsGraph.decorateNodes(nodeId, {borderWidth: 5});
     };
     self.removeNodeFromGraph = function () {
         if (confirm("delete node")) {

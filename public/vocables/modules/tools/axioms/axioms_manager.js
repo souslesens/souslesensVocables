@@ -1,4 +1,5 @@
 import CommonBotFunctions from "../../bots/_commonBotFunctions.js";
+import NodeInfosAxioms from "./nodeInfosAxioms.js";
 
 var Axioms_manager = (function () {
     var self = {};
@@ -93,6 +94,10 @@ var Axioms_manager = (function () {
     };
 
     self.getManchesterAxiomsFromTriples = function (source, triples, callback) {
+
+        if(!source){
+            source=NodeInfosAxioms.currentSource
+        }
         var rawManchesterStr = "";
 
         const params = new URLSearchParams({

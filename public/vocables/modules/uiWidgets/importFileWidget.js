@@ -16,6 +16,7 @@ var ImportFileWidget = (function () {
                 reader.onload = function (e) {
                     var fileContent = e.target.result;
                     $("#smallDialogDiv").dialog("close");
+
                     if (onValidateFn) {
                         onValidateFn(null, fileContent);
                     }

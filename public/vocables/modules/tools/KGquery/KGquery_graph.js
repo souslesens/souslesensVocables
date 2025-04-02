@@ -622,6 +622,9 @@ var KGquery_graph = (function () {
             var label = KGquery.currentSource + "_model";
             var group = "KGquery/models";
             var data_type = "KGmodelGraph";
+            if(self.currentUserDataModel && self.currentUserDataModel.id){ 
+                UserDataWidget.currentTreeNode={id:self.currentUserDataModel.id}
+            }
             UserDataWidget.saveMetadata(label, data_type, data, group, function (err, result) {
                 $("#KGquery_messageDiv").text("saved graph");
             });
@@ -763,8 +766,8 @@ var KGquery_graph = (function () {
                     if (result.length > 0 && result[0].data_content) {// new method in userData
                         // order to get last saved instance of our graph in user_data
                         result = result.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-                        //if graph loaded with loadSaved --> display=checkBox displayGraphInList else last instance graph
                         self.visjsData = result[0].data_content;
+                        self.currentUserDataModel = result[0]; 
                         return callback(null, self.visjsData)
 
                     } else {  // get from file if the transition to userData is not done

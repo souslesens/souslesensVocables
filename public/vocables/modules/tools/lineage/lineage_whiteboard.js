@@ -814,7 +814,7 @@ var Lineage_whiteboard = (function () {
         } else if (Lineage_sources.isSourceEditableForUser(Lineage_sources.activeSource)) {
             // if (authentication.currentUser.groupes.indexOf("admin") > -1 && Config.sources[Lineage_sources.activeSource] && Config.sources[Lineage_sources.activeSource].editable) {
             options.visjsOptions.manipulation = {
-                enabled: true,
+                enabled: false,
                 initiallyActive: true,
                 deleteNode: false,
                 deleteEdge: false,

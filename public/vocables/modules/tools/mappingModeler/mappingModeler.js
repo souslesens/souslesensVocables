@@ -20,6 +20,7 @@ import PlantUmlTransformer from "../../graph/plantUmlTransformer.js";
 import mappingModeler from "./mappingModeler.js";
 import mappingColumnsGraph from "./mappingColumnsGraph.js";
 import Lineage_sources from "../lineage/lineage_sources.js";
+import MainController from "../../shared/mainController.js";
 
 /**
  * MappingModeler module.
@@ -212,6 +213,27 @@ var MappingModeler = (function () {
                         },
                     };
                 }
+                if(self.currentResourceType == "Class"){
+                    items.showSampleData = {
+                        label: "deleteClass",
+                        action: function (_e) {
+                            NodeInfosWidget.currentNode = node;
+                            NodeInfosWidget.currentNodeId = node.id;
+                            NodeInfosWidget.currentNode.data.source = MainController.currentSource;
+                            NodeInfosWidget.currentSource = MainController.currentSource;
+                            NodeInfosWidget.deleteNode(function(){
+                                NodeInfosWidget.currentNode = null;
+                                NodeInfosWidget.currentNodeId = null;
+                                NodeInfosWidget.currentSource = null;
+                                $('#suggestionsSelectJstreeDiv').jstree('delete_node',node.id);
+                                if(self.allClasses[node.id]){
+                                    delete self.allClasses[node.id];
+                                }
+
+                            });
+                        },
+                    };
+                }
                 return items;
             },
             selectTreeNodeFn: self.onSuggestionsSelect,
@@ -299,7 +321,10 @@ var MappingModeler = (function () {
             }
         }
 
-        JstreeWidget.loadJsTree("suggestionsSelectJstreeDiv", jstreeData, options, function () {});
+        JstreeWidget.loadJsTree("suggestionsSelectJstreeDiv", jstreeData, options, function () {
+
+            $('#suggestionsSelectJstreeDiv').css('overflow', 'unset');
+        });
     };
 
     /**
@@ -353,6 +378,9 @@ var MappingModeler = (function () {
      * @param {Object} obj - The selected tree node object.
      */
     self.onSuggestionsSelect = function (event, obj) {
+        if(obj.event.type=="contextmenu"){
+            return;
+        }
         if (!DataSourceManager.currentConfig.currentDataSource) {
             return alert("Select a data source");
         }

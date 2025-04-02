@@ -368,6 +368,9 @@ var KGbuilder_main = {
                             tablemappings.prefixes = sourceMainJson.prefixes;
                             tablemappings.graphUri = sourceMainJson.graphUri;
                             tablemappings.sparqlServerUrl = sourceMainJson.sparqlServerUrl;
+                            if(tablemappings.sparqlServerUrl=='default'){
+                             tablemappings.sparqlServerUrl =ConfigManager.config.sparql_server.url;
+                            }
 
                             tableMappingsToProcess.push(tablemappings);
                         }

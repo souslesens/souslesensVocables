@@ -16,6 +16,7 @@ import KGquery_myQueries from "./KGquery_myQueries.js";
 import SQLquery_filters from "./SQLquery_filters.js";
 import KGquery_controlPanel from "./KGquery_controlPanel.js";
 import KGquery_paths from "./KGquery_paths.js";
+import GanttWidget from "../../uiWidgets/ganttWidget.js";
 
 import UI from "../../../modules/shared/UI.js";
 
@@ -347,7 +348,13 @@ var KGquery = (function () {
                 self.queryResultToVisjsGraph(result);
             } else if (output == "shacl") {
                 //  KGconstraints_validator.process(result);
-            } else {
+            } else if (output == "gantt") {
+                self.queryResultToGantt(result);
+            }
+
+
+
+            else {
                 Config.userTools.KGquery.toTools[output](result);
             }
         });
@@ -947,6 +954,10 @@ var KGquery = (function () {
 
     self.checkRequirements = function () {
         KGquery.queryKG("shacl");
+    };
+
+    self.queryResultToGantt= function (result) {
+
     };
 
     return self;

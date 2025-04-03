@@ -957,6 +957,10 @@ var KGquery = (function () {
     };
 
     self.queryResultToGantt= function (result) {
+var implicitModel=KGquery_graph.visjsData
+        GanttWidget.showDialog (null,implicitModel, result, function(err, result){
+
+    })
 
     };
 

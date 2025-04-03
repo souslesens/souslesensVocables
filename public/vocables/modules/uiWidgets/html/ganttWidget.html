@@ -1,25 +1,35 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <title>Title</title>
-    </head>
-    <body>
-        <div style="display: flex; flex-direction: column">
-            <div>
-                <div style="display: none">groups<select id="timeLineWidget_groupSelect" size="5" onchange="TimeLineWidget.onGroupSelectChange($(this).val())"></select></div>
-                <div style="background-color: #ccc" id="timeLineWidget_messageDiv"></div>
+<div style="">
 
-                <div id="timeLineDiv" style="width: 100%"></div>
+    <div style="display: flex; flex-direction: row">
+        <div>
+            <div style="">Time Axis
+                <select id="ganttWidget_dateVarsSelect"
+                        onchange="GanttWidget.onDateVarsSelectChange($(this).val())"></select>
             </div>
+            <div style="">Group
+                <select id="ganttWidget_groupVarsSelect"
+                        onchange="GanttWidget.onGroupVarsSelectChange($(this).val())"></select>
+            </div>
+            <div style="">Value
+                <select id="ganttWidget_valueVarsSelect"
+                        onchange="GanttWidget.onGroupVarsSelectChange($(this).val())"></select>
+            </div>
+            <button onclick="GanttWidget.runGantt(null)">OK</button>
+            <div style="background-color: #ccc" id="ganttWidget_messageDiv"></div>
+
+
         </div>
+        <div id="ganttDiv" style="width: 800px;height: 600px;overflow: auto"></div>
+    </div>
 
         <div
-            id="timeLineWidget_popupDiv"
-            style="background-color: #eee; border: brown solid 1px; width: 1000px; height: 800px; overflow: auto; position: absolute; display: none; z-index: 20; top: 0px; left: 200px"
+                id="ganttWidget_popupDiv"
+                style="background-color: #eee; border: brown solid 1px; width: 1000px; height: 800px; overflow: auto; position: absolute; display: none; z-index: 20; top: 0px; left: 200px"
         >
-            <button onclick="TimeLine.hidePopup();">X</button>
-            <div id="timeLineWidget_infosDiv"></div>
+
+            <div id="ganttWidget_infosDiv"></div>
         </div>
-    </body>
-</html>
+
+
+
+</div>

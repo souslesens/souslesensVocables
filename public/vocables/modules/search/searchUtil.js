@@ -594,12 +594,12 @@ indexes.push(source.toLowerCase());
                                     var parent;
                                     var parents;
 
-                                    if (taxonomyClassesIdsMap[item.type2.value]) {
-                                        parent = item.type2.value;
-                                        parents = taxonomyClassesIdsMap[item.type2.value].parents.concat(item.type2.value);
+                                    if (taxonomyClassesIdsMap[item.type.value]) {
+                                        parent = item.type.value;
+                                        parents = taxonomyClassesIdsMap[item.type.value].parents.concat(item.type.value);
                                     } else {
-                                        parent = item.type2.value;
-                                        parents = [sourceLabel, item.type2.value];
+                                        parent = item.type.value;
+                                        parents = [sourceLabel, item.type.value];
                                     }
 
                                     var skosLabel = item.skosPrefLabel ? item.skosPrefLabel.value : null;
@@ -631,7 +631,9 @@ indexes.push(source.toLowerCase());
                                 });
                             };
 
-                            var filter = "?id rdf:type ?type2. filter (?type= owl:NamedIndividual && ?type2!=?type)";
+                            //var filter = "?id rdf:type ?type2. filter (?type= owl:NamedIndividual && ?type2!=?type)";
+                            //Filter on individuals = entities that are  type of a class 
+                            var filter = "?id rdf:type ?type.?type rdf:type owl:Class";
                             //  filter+="?id <http://souslesens.org/KGcreator#mappingFile> 'dbo.V_jobcard'"
                             Sparql_OWL.getDictionary(sourceLabel, { filter: filter, processorFectchSize: 100, skosPrefLabel: true }, processor, function (err, result) {
                                 if (err) console.log(err.responseText);

@@ -40,6 +40,7 @@ var KGquery = (function () {
         //self.oldshowHideEditButtons=Lineage_sources.showHideEditButtons;
         //Lineage_sources.showHideEditButtons = UI.disableEditButtons;
         UI.initMenuBar(KGquery.loadSource);
+        KGquery_graph.visjsData=null;
         //KGquery.clearAll();
         UI.disableEditButtons();
         if (Config.clientCache.KGquery) {
@@ -568,6 +569,9 @@ var KGquery = (function () {
                         groupByStr = " GROUP BY " + options.aggregate.groupBy;
                     } else {
                         selectStr += selectClauseSparql;
+                        Object.keys(distinctTypesMap).forEach(function(type){
+                            selectStr+=' '+type;
+                        });
                     }
 
                     var queryType = "SELECT";

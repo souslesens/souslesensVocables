@@ -447,11 +447,10 @@ var util = {
 
     getDateFromSLSformat: function (formatCode, dateStr) {
         var formats = {
-            FR: "27/05/2024",
-            ISO: "2024-05-27",
-            USA: "05/27/2024",
-            EUR: "27. 05. 2024",
-            JIS: "2024-05-27",
+            FR: "27/05/2024 18:25:37",
+            ISO: "2024-05-27T18:25:37Z",
+            USA: "05/27/2024 18:25:37",
+            EUR: "27.05.2024 18:25:37",
             "ISO-time": "2022-09-27 18:00:00.000",
         };
 
@@ -462,8 +461,15 @@ var util = {
         function getMonth(str) {
             try {
                 var number = parseInt(str);
+                // parseInt can retrun NaN 
+                if(!number){
+                    return null;
+                }
                 number -= 1;
-
+                if(number>11 || number<0 ){
+                    return null
+                }
+                
                 return number;
             } catch (err) {
                 return null;
@@ -473,7 +479,12 @@ var util = {
         function getDay(str) {
             try {
                 var number = parseInt(str);
-
+                if(!number){
+                    return null;
+                }
+                if(number>31 || number<0 ){
+                    return null
+                }
                 return number;
             } catch (err) {
                 return null;
@@ -483,16 +494,64 @@ var util = {
         function getYear(str) {
             try {
                 var number = parseInt(str);
-                if (number < 1900) {
-                    return 2000 + number;
+                if(!number){
+                    return null;
                 }
+                // why??
+                /*if (number < 1900) {
+                    return 2000 + number;
+                }*/
                 return number;
             } catch (err) {
                 return null;
             }
         }
-
-        var day, mont, year;
+        function getHours(str){
+            try {
+                var number = parseInt(str);
+                if(!number){
+                    return null;
+                }
+                if(number>23 || number<0 ){
+                    return null
+                }
+                
+                return number;
+            } catch (err) {
+                return null;
+            }
+        }
+        function getMinutes(str){
+            try {
+                var number = parseInt(str);
+                if(!number){
+                    return null;
+                }
+                if(number>59 || number<0 ){
+                    return null
+                }
+               
+                return number;
+            } catch (err) {
+                return null;
+            }
+        }
+        function getSeconds(str){
+            try {
+                var number = parseInt(str);
+                if(!number){
+                    return null;
+                }
+                if(number>59 || number<0 ){
+                    return null
+                }
+               
+                return number;
+            } catch (err) {
+                return null;
+            }
+        }
+        var day, mont, year,hours,minutes,seconds;
         if (formatCode == "FR") {
             var array = dateStr.split("/");
             if (array.length != 3) {
@@ -500,23 +559,68 @@ var util = {
             }
             day = getDay(array[0]);
             month = getMonth(array[1]);
-            year = getYear(array[2]);
+            
+            var hoursArray=array[2].split(" ");
+            if(hoursArray.length>1){
+                year=getYear(hoursArray[0]);
+                hoursArray=hoursArray[1]
+                hoursArray=hoursArray.split(":");
+                hours=getHours(hoursArray[0]);
+                minutes=getMinutes(hoursArray[1]);
+                seconds=getSeconds(hoursArray[2]);
+
+            }else{
+                year = getYear(array[2]);
+            }
+            
+            
+            
         } else if (formatCode == "ISO") {
             var array = dateStr.split("-");
             if (array.length < 3) {
                 return null;
             }
-            day = getDay(array[2]);
+            
             month = getMonth(array[1]);
             year = getYear(array[0]);
+
+            var hoursArray=array[2].split("T");
+            if(hoursArray.length>1){
+                day=getDay(hoursArray[0]);
+                hoursArray=hoursArray[1]
+                hoursArray=hoursArray.split(":");
+                hours=getHours(hoursArray[0]);
+                minutes=getMinutes(hoursArray[1]);
+                seconds=getSeconds(hoursArray[2]);
+
+            }else{
+                day = getDay(array[2]);
+            }
+            
         } else if (formatCode == "USA") {
             var array = dateStr.split("/");
             if (array.length < 3) {
                 return null;
             }
+
+            
             day = getDay(array[1]);
             month = getMonth(array[0]);
-            year = getYear(array[2]);
+            
+
+            var hoursArray=array[2].split(" ");
+            if(hoursArray.length>1){
+                year = getYear(hoursArray[0]);
+                
+                hoursArray=hoursArray[1]
+                hoursArray=hoursArray.split(":");
+                hours=getHours(hoursArray[0]);
+                minutes=getMinutes(hoursArray[1]);
+                seconds=getSeconds(hoursArray[2]);
+
+            }else{
+                year = getYear(array[2]);
+            }
         } else if (formatCode == "EUR") {
             var array = dateStr.split(".");
             if (array.length < 3) {
@@ -524,15 +628,21 @@ var util = {
             }
             day = getDay(array[0].trim());
             month = getMonth(array[1].trim());
-            year = getYear(array[2].trim());
-        } else if (formatCode == "JIS") {
-            var array = dateStr.split("-");
-            if (array.length < 3) {
-                return null;
+           
+            var hoursArray=array[2].split(" ");
+            if(hoursArray.length>1){
+                year = getYear(hoursArray[0].trim());
+                
+                hoursArray=hoursArray[1]
+                hoursArray=hoursArray.split(":");
+                hours=getHours(hoursArray[0]);
+                minutes=getMinutes(hoursArray[1]);
+                seconds=getSeconds(hoursArray[2]);
+
+            }else{
+                year = getYear(array[2].trim());
             }
-            day = getDay(array[2]);
-            month = getMonth(array[1]);
-            year = getYear(array[0]);
+            
         } else if (formatCode == "ISO-time") {
             try {
                 var date = new Date(dateStr);
@@ -545,8 +655,15 @@ var util = {
         if (!year || (!month && month != 0) || !day) {
             return null;
         }
-
-        var date = new Date(Date.UTC(year, month, day));
+        if(!hours && hours != 0){
+            hours=null;
+            minutes=null;
+            seconds=null;
+        }
+        if(!minutes && minutes != 0){
+            seconds=null;
+        }
+        var date = new Date(Date.UTC(year, month, day,hours,minutes,seconds));
         return date.toISOString();
         // return date.toISOString()
     },

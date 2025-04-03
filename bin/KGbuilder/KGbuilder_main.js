@@ -291,7 +291,7 @@ var KGbuilder_main = {
             var mainJsonPath = path.join(__dirname, "../../data/graphs/mappings_" + source + "_ALL" + ".json");
             var visjsMappingsJson = JSON.parse("" + fs.readFileSync(mainJsonPath));
             var sourceMainJson = visjsMappingsJson.options.config;
-            if (sourceMainJson.sparqlServerUrl == "_default") {
+            if (sourceMainJson.sparqlServerUrl == "default") {
                 sourceMainJson.sparqlServerUrl = ConfigManager.config.sparql_server.url;
             }
         } catch (e) {
@@ -368,9 +368,7 @@ var KGbuilder_main = {
                             tablemappings.prefixes = sourceMainJson.prefixes;
                             tablemappings.graphUri = sourceMainJson.graphUri;
                             tablemappings.sparqlServerUrl = sourceMainJson.sparqlServerUrl;
-                            if(tablemappings.sparqlServerUrl=='default'){
-                             tablemappings.sparqlServerUrl =ConfigManager.config.sparql_server.url;
-                            }
+                           
 
                             tableMappingsToProcess.push(tablemappings);
                         }

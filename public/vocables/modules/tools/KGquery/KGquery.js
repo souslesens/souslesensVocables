@@ -562,6 +562,9 @@ var KGquery = (function () {
                         groupByStr = " GROUP BY " + options.aggregate.groupBy;
                     } else {
                         selectStr += selectClauseSparql;
+                        Object.keys(distinctTypesMap).forEach(function(type){
+                            selectStr+=' '+type;
+                        });
                     }
 
                     var queryType = "SELECT";

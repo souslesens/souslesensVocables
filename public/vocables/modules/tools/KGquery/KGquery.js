@@ -39,6 +39,7 @@ var KGquery = (function () {
         //self.oldshowHideEditButtons=Lineage_sources.showHideEditButtons;
         //Lineage_sources.showHideEditButtons = UI.disableEditButtons;
         UI.initMenuBar(KGquery.loadSource);
+        KGquery_graph.visjsData=null;
         //KGquery.clearAll();
         UI.disableEditButtons();
         if (Config.clientCache.KGquery) {

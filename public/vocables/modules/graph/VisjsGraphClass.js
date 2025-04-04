@@ -1,5 +1,6 @@
 import common from "../shared/common.js";
-import SVGexport from "./SVGexport.js";
+import SVGexport2 from "./SVGexport2.js";
+
 import GraphMlExport from "./graphMLexport.js";
 
 const VisjsGraphClass = function (graphDiv, data, options) {
@@ -858,7 +859,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
     };
 
     self.toSVG = function () {
-        SVGexport.toSVG(self.network);
+        SVGexport2.toSVG(self);
         //self.redraw();
     };
 

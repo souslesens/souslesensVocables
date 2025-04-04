@@ -154,7 +154,7 @@ var SVGexport2 = (function () {
      */
     self.transformCoordinates=function (network,ctx,x, y) {
         var transform = {};
-        transform.scale = network.getScale(); // Récupère le facteur de zoom
+        transform.scale = network.getScale(); 
         transform.position = network.getViewPosition();
         var newX = (x - transform.position.x) * transform.scale + ctx.canvas.width / 2;
         var newY = (y - transform.position.y) * transform.scale + ctx.canvas.height / 2;
@@ -173,7 +173,7 @@ var SVGexport2 = (function () {
     self.adjustSVGViewBox =function (svg) {
         let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
 
-        // Récupérer tous les éléments du SVG (cercles, lignes, textes...)
+        
         svg.childNodes.forEach(el => {
             if (el.tagName === "circle" || el.tagName === "text") {
                 let cx = parseFloat(el.getAttribute("cx") || el.getAttribute("x"));
@@ -195,14 +195,14 @@ var SVGexport2 = (function () {
             }
         });
 
-        // Ajouter une marge pour éviter les coupures
+        
         let margin = 20;
         minX -= margin;
         minY -= margin;
         maxX += margin;
         maxY += margin;
 
-        // Appliquer le viewBox
+        
         let width = maxX - minX;
         let height = maxY - minY;
         svg.setAttribute("viewBox", `${minX} ${minY} ${width} ${height}`);

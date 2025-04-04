@@ -4271,11 +4271,12 @@ attrs.color=self.getSourceColor(superClassValue)
          * @function
          * @name exportGraphToDataTable
          * @memberof module:graphActions.graph
+         * *@param {boolean} exportData - If true, exports visjsGraph elements directy without using dataTable
          * Exports the graph data to a tabular format (data table) for easier inspection and manipulation.
          * @returns {void}
          */
-        exportGraphToDataTable: function () {
-            Export.exportGraphToDataTable(self.lineageVisjsGraph);
+        exportGraphToDataTable: function (exportData) {
+            Export.exportGraphToDataTable(self.lineageVisjsGraph,null,null,null,exportData);
         },
 
         /**

@@ -1163,6 +1163,17 @@ const VisjsGraphClass = function (graphDiv, data, options) {
             $("#visjsConfigureDiv").css("height", "550px !important");
         }, 2000);
     };
+    /**
+         * @function
+         * @name exportGraphToDataTable
+         * @memberof module:graphActions.graph
+         * *@param {boolean} exportData - If true, exports visjsGraph elements directy without using dataTable
+         * Exports the graph data to a tabular format (data table) for easier inspection and manipulation.
+         * @returns {void}
+         */
+    self.exportGraphToDataTable=function (exportData) {
+        Export.exportGraphToDataTable(self,null,null,null,exportData);
+    }
 };
 export default VisjsGraphClass;
 window.VisjsGraphClass = VisjsGraphClass;

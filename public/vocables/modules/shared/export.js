@@ -11,7 +11,7 @@ var Export = (function () {
     self.currentSource = null;
     self.dataTable;
 
-    self.exportGraphToDataTable = function (graphInstance, divId, nodes, edges) {
+    self.exportGraphToDataTable = function (graphInstance, divId, nodes, edges,exportData) {
         if (!nodes && !edges) {
             nodes = graphInstance.data.nodes.get();
             edges = graphInstance.data.edges.get();
@@ -41,44 +41,56 @@ var Export = (function () {
         });
 
         var header = "fromLabel\tedgeLabel\ttoLabel\tfromURI\tedgeURI\ttoURI\n";
-        if (nodesFromArray.length < Config.dataTableOutputLimit) {
-            var cols = [];
-            var dataset = [];
-            header
-                .trim()
-                .split("\t")
-                .forEach(function (colName, index) {
-                    var width = "100";
-                    if (index < 3) {
-                        width = "200";
-                    }
-                    cols.push({ title: colName, defaultContent: "" });
-                });
-
-            nodesFromArray.forEach(function (nodeFromId, index) {
-                nodesFromMap[nodeFromId].forEach(function (edge) {
-                    if (!allNodesMap[nodeFromId] || !allNodesMap[edge.to]) {
-                        return;
-                    }
-                    var line = [allNodesMap[nodeFromId].data.label, edge.label || "", allNodesMap[edge.to].data ? allNodesMap[edge.to].data.label : "?", nodeFromId, edge.id, edge.to];
-                    dataset.push(line);
-                });
+        
+        var cols = [];
+        var dataset = [];
+        header
+            .trim()
+            .split("\t")
+            .forEach(function (colName, index) {
+                var width = "100";
+                if (index < 3) {
+                    width = "200";
+                }
+                cols.push({ title: colName, defaultContent: "" });
             });
 
-            //nodes without edges
-
-            nodes.forEach(function (node) {
-                if (linkedNodes[node.id]) {
+        nodesFromArray.forEach(function (nodeFromId, index) {
+            nodesFromMap[nodeFromId].forEach(function (edge) {
+                if (!allNodesMap[nodeFromId] || !allNodesMap[edge.to]) {
                     return;
                 }
-                var line = [node.label, "", "", node.id, "", ""];
+                var line = [allNodesMap[nodeFromId].data.label, edge.label || "", allNodesMap[edge.to].data ? allNodesMap[edge.to].data.label : "?", nodeFromId, edge.id, edge.to];
                 dataset.push(line);
             });
+        });
 
-            UI.message("", true);
-            var columnDefs = [{ width: 200, targets: [0, 1, 2] }];
+        //nodes without edges
+
+        nodes.forEach(function (node) {
+            if (linkedNodes[node.id]) {
+                return;
+            }
+            var line = [node.label, "", "", node.id, "", ""];
+            dataset.push(line);
+        });
+
+        UI.message("", true);
+        var columnDefs = [{ width: 200, targets: [0, 1, 2] }];
+        if (nodesFromArray.length < Config.dataTableOutputLimit && !exportData) {
             Export.showDataTable(divId, cols, dataset, null, { fixedColumns: 1, columnDefs: columnDefs });
-        } else {
+        }else{
+            var columns = cols.map(function (item) {
+                return item.title;
+            });
+            dataset.unshift(columns);
+            if(!exportData){
+                alert("to large results, it will be exported");
+            }
+            return Export.exportDataToCSV(dataset);
+        }
+        
+        /*else {
             var str = header;
             nodesFromArray.forEach(function (nodeFromId, index) {
                 nodesFromMap[nodeFromId].forEach(function (edge) {
@@ -96,7 +108,7 @@ var Export = (function () {
             });
 
             common.copyTextToClipboard(str);
-        }
+        }*/
     };
 
     self.exportGraphToDataTableOld = function () {
@@ -463,11 +475,12 @@ fixedColumns: true*/
         document.body.appendChild(link);
 
         link.click();
+        document.body.removeChild(link);
     };
     self.showExportPopUp = function (visjsGraph) {
         var html = `<span class="popupMenuItem" onclick="${visjsGraph}.toGraphMl();">Graph ML </span>`;
         html += `<span class="popupMenuItem" onclick="${visjsGraph}.toSVG()">SVG</span>`;
-        html += `<span class="popupMenuItem" onclick="Export.exportGraphToDataTable(${visjsGraph});">CSV</span>`;
+        html += `<span class="popupMenuItem" onclick="${visjsGraph}.exportGraphToDataTable(true);">CSV</span>`;
         if (visjsGraph == "MappingColumnsGraph.visjsGraph") {
             html += `<span class="popupMenuItem" onclick="MappingColumnsGraph.exportMappings();">JSON</span>`;
         }

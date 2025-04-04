@@ -48,7 +48,7 @@
         "sqlite3": "^5.1.7",
         "standard-version": "^9.5.0",
         "typescript": "^5.8.2",
-        "vite": "6.2.1"
+        "vite": "6.2.5"
     },
     "dependencies": {
         "@elastic/elasticsearch": "^8.17.1",

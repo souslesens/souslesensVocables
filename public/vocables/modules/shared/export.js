@@ -481,6 +481,7 @@ fixedColumns: true*/
         var html = `<span class="popupMenuItem" onclick="${visjsGraph}.toGraphMl();">Graph ML </span>`;
         html += `<span class="popupMenuItem" onclick="${visjsGraph}.toSVG()">SVG</span>`;
         html += `<span class="popupMenuItem" onclick="${visjsGraph}.exportGraphToDataTable(true);">CSV</span>`;
+        html +=  `<span class="popupMenuItem" onclick="${visjsGraph}.toPlantUML(true);">Plant UML</span>`;
         if (visjsGraph == "MappingColumnsGraph.visjsGraph") {
             html += `<span class="popupMenuItem" onclick="MappingColumnsGraph.exportMappings();">JSON</span>`;
         }
@@ -509,6 +510,51 @@ fixedColumns: true*/
         link.click();
         document.body.removeChild(link);
     };
+
+    /**
+     * Exports a PlantUML diagram string to a file.
+     * Supports multiple output formats based on the PlantUML syntax.
+     *
+     * @function
+     * @name exportPlantUML
+     * @memberof module:Export
+     * @param {string} plantUMLString - The PlantUML diagram string content
+     * @param {string} [fileName='diagram'] - The name of the file without extension
+     * @param {string} [format='puml'] - The output format ('puml', 'svg', 'png', etc.)
+     * @returns {void}
+     * 
+     * @example
+     * // Export as .puml file
+     * Export.exportPlantUML('@startuml\nclass A\n@enduml', 'myDiagram', 'puml');
+     */
+    self.exportPlantUML = function (plantUMLString, fileName, format) {
+        if (!fileName) {
+            fileName = 'diagram';
+        }
+        if (!format) {
+            format = 'puml';
+        }
+
+        // Ensure the PlantUML string has the proper start/end tags
+        if (!plantUMLString.trim().startsWith('@startuml')) {
+            plantUMLString = '@startuml\n' + plantUMLString;
+        }
+        if (!plantUMLString.trim().endsWith('@enduml')) {
+            plantUMLString = plantUMLString + '\n@enduml';
+        }
+
+        // Create the file content
+        const blob = new Blob([plantUMLString], { type: 'text/plain;charset=utf-8' });
+        const link = document.createElement('a');
+        
+        link.href = URL.createObjectURL(blob);
+        link.download = `${fileName}.${format}`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(link.href);
+    };
+
     return self;
 })();
 

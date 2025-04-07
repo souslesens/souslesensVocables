@@ -4266,7 +4266,16 @@ attrs.color=self.getSourceColor(superClassValue)
         toGraphMl: function () {
             self.lineageVisjsGraph.toGraphMl();
         },
-
+         /**
+         * @function
+         * @name toGraphMl
+         * @memberof module:graphActions.graph
+         * Exports the graph to the GraphML format, which can be used for further analysis or visualization in compatible tools.
+         * @returns {void}
+         */
+         toPlantUML: function () {
+            self.lineageVisjsGraph.toPlantUML(true);
+        },
         /**
          * @function
          * @name exportGraphToDataTable

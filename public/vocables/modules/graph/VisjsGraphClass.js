@@ -1174,6 +1174,35 @@ const VisjsGraphClass = function (graphDiv, data, options) {
     self.exportGraphToDataTable=function (exportData) {
         Export.exportGraphToDataTable(self,null,null,null,exportData);
     }
+    
+    /**
+     * Converts the current graph to PlantUML format.
+     * 
+     * @function
+     * @name toPlantUML
+     * @memberof VisjsGraphClass
+     * @param {boolean} [exportToFile] - If true, exports to a file; if false, returns the PlantUML string
+     * @param {string} [fileName] - Name of the file to export (only used if exportToFile is true)
+     * @returns {string|void} Returns the PlantUML string if exportToFile is false, otherwise exports to file
+     */
+    self.toPlantUML = function(exportToFile, fileName) {
+        
+        var visjsData = {
+            nodes: self.data.nodes.get(),
+            edges: self.data.edges.get()
+        };
+
+        var plantUMLString = PlantUmlTransformer.visjsDataToClassDiagram(visjsData,exportToFile);
+
+       
+        if (exportToFile) {
+            if (!fileName) {
+                fileName = 'diagram';
+            }
+            Export.exportPlantUML(plantUMLString, fileName);
+        } 
+    };
+
 };
 export default VisjsGraphClass;
 window.VisjsGraphClass = VisjsGraphClass;

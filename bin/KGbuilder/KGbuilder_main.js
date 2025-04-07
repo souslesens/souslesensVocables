@@ -291,7 +291,7 @@ var KGbuilder_main = {
             var mainJsonPath = path.join(__dirname, "../../data/graphs/mappings_" + source + "_ALL" + ".json");
             var visjsMappingsJson = JSON.parse("" + fs.readFileSync(mainJsonPath));
             var sourceMainJson = visjsMappingsJson.options.config;
-            if (sourceMainJson.sparqlServerUrl == "default") {
+            if (sourceMainJson.sparqlServerUrl == "_default") {
                 sourceMainJson.sparqlServerUrl = ConfigManager.config.sparql_server.url;
             }
         } catch (e) {

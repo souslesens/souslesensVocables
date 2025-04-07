@@ -35,9 +35,9 @@ var SavedQueriesWidget = (function () {
             if (targetDiv.indexOf("Dialog") > -1) {
                 $("#" + targetDiv).dialog("open");
             }
-            if (slsvSource) {
+            /*if (slsvSource) {
                 self.list(slsvSource, null, path);
-            }
+            }*/
         });
     };
     /*
@@ -124,7 +124,7 @@ var SavedQueriesWidget = (function () {
         }
 
         UserDataWidget.showListDialog(
-            "SavedQueriesComponent_itemsSelect",
+            null,
             { filter: { data_type: "savedQueries", data_tool: "KGquery", data_source: MainController.currentSource }, removeSaveDiv: true },
             function (err, result) {
                 if (result.id) {

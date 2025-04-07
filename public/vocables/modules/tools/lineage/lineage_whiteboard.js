@@ -20,6 +20,7 @@ import Lineage_createRelation from "./lineage_createRelation.js";
 import NodeInfosAxioms from "../axioms/nodeInfosAxioms.js";
 import UserDataWidget from "../../uiWidgets/userDataWidget.js";
 import Containers_tree from "../containers/containers_tree.js";
+import Export from "../../shared/export.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -4342,6 +4343,56 @@ attrs.color=self.getSourceColor(superClassValue)
                 }
             });
         },
+        /**
+         * Exports the current whiteboard graph to a JSON file.
+         *
+         * @function
+         * @name exportWhiteboard
+         * @memberof module:graphActions.graph
+         * @returns {void}
+         * 
+         * @example
+         */
+        exportWhiteboard: function () {
+            if (Lineage_whiteboard.lineageVisjsGraph.data && Lineage_whiteboard.lineageVisjsGraph.data.nodes.get().length > 0) {
+                var nodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
+                var positions = Lineage_whiteboard.lineageVisjsGraph.network.getPositions();
+                var data = {
+                    nodes: nodes,
+                    edges: Lineage_whiteboard.lineageVisjsGraph.data.edges.get(),
+                    context: Lineage_whiteboard.lineageVisjsGraph.currentContext,
+                    positions: positions,
+                };
+                var fileName=MainController.currentSource+'_whiteBoard.json'
+                Export.downloadJSON(data,fileName);
+            } else {
+                alert("No Whiteboard to save");
+            }
+        },
+        /**
+         * Display a whiteboard graph from a JSON file.
+         * 
+         * @function
+         * @name importWhiteboard
+         * @memberof module:graphActions.graph
+         * @returns {void}
+         * 
+         */
+        importWhiteboard: function(){
+            
+            ImportFileWidget.showImportDialog(function (err, result) {
+                if (err) {
+                    return alert(err);
+                }
+                var data = JSON.parse(result);
+                if (data.nodes.length == 0) {
+                    return alert("no nodes in file");
+                }
+                self.loadGraphFromJSON(data);
+               
+
+            });
+        }
     };
     /**
      * @function
@@ -4637,6 +4688,8 @@ attrs.color=self.getSourceColor(superClassValue)
             var userPrefs = localStorage.getItem("whiteboardPreferences");
         });
     };
+
+   
 
     return self;
 })();

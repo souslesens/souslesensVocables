@@ -485,7 +485,12 @@ fixedColumns: true*/
         if (visjsGraph == "MappingColumnsGraph.visjsGraph") {
             html += `<span class="popupMenuItem" onclick="MappingColumnsGraph.exportMappings();">JSON</span>`;
         }
-
+        if(visjsGraph == "KGquery_graph.KGqueryGraph"){
+            html += `<span class="popupMenuItem" onclick="KGquery_graph.exportVisjsGraph();">JSON</span>`;
+        }
+        if(visjsGraph == "Lineage_whiteboard.graph"){
+            html += `<span class="popupMenuItem" onclick="Lineage_whiteboard.graph.exportWhiteboard();">JSON</span>`;
+        }
         PopupMenuWidget.initAndShow(html, "popupMenuWidgetDiv");
     };
     /**

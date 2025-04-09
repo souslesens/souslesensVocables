@@ -25,6 +25,7 @@ var KGquery_paths = (function () {
     };
 
     self.substituteClassIdToVarNameInPath = function (queryElement, path) {
+
         path.forEach(function (item, index) {
             item[0] = "?" + Sparql_common.formatStringForTriple(KGquery_graph.labelsMap[item[0]], true);
             item[1] = "?" + Sparql_common.formatStringForTriple(KGquery_graph.labelsMap[item[1]], true);

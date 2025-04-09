@@ -163,7 +163,7 @@ var Lineage_selection = (function () {
 
                 common.fillSelectWithColorPalette("lineage_selection_decorate_colorSelect");
 
-                var shapes = ["ellipse", " circle", " database", " box", " text", "diamond", " dot", " star", " triangle", " triangleDown", " hexagon", " square"];
+                var shapes = ["ellipse", "circle", "database", "box", "text", "diamond", "dot", "star", "triangle", "triangleDown", "hexagon", "square"];
                 common.fillSelectOptions("lineage_selection_decorate_shapeSelect", shapes, true);
             });
         },

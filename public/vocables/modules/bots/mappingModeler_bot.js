@@ -153,12 +153,11 @@ var MappingModeler_bot = (function () {
                 return _botEngine.nextStep();
             } else {
                 var choices = [
-                    { id: "FR", label: "FR : DD/MM/YYYY" },
-                    { id: "ISO", label: "ISO : YYYY-MM-DD" },
-                    { id: "USA", label: "USA : MM/DD/YYYY" },
-                    { id: "EUR", label: "EUR : DD. MM. YYYY" },
-                    { id: "JIS", label: "JIS : YYYY-MM-DD" },
-                    { id: "ISO-time", label: "ISO-time : 2022-09-27 18:00:00.000" },
+                    { id: "FR", label: "FR : DD/MM/YYYY hh:mm:ss" },
+                    { id: "ISO", label: "ISO : YYYY-MM-DDThh:mm:ssZ" },
+                    { id: "USA", label: "USA : MM/DD/YYYY hh:mm:ss" },
+                    { id: "EUR", label: "EUR : DD.MM.YYYY hh:mm:ss" },
+                    { id: "ISO-time", label: "ISO-time : YYYY-MM-DD hh:mm:ss" },
                     { id: "other", label: "other" },
                 ];
                 _botEngine.showList(choices, "nonObjectPropertyDateFormat", null, false, function (result) {

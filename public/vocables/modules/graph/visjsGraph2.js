@@ -1,6 +1,6 @@
 import common from "../shared/common.js";
 import Lineage_sources from "../tools/lineage/lineage_sources.js";
-import SVGexport from "./SVGexport.js";
+import SVGexport from "./SVGexport2.js";
 import GraphMlExport from "./graphMLexport.js";
 
 /**

@@ -217,6 +217,8 @@ var Lineage_decoration = (function () {
                     var newVisJsNodes = [];
                     // get source decoration data
 
+
+
                     Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(newVisJsNodes);
                     for (var key in distinctNodeClassesMap) {
                         distinctNodeClassesMap[key].forEach(function (node) {

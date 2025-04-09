@@ -39,7 +39,6 @@ var KGquery = (function () {
         //self.oldshowHideEditButtons=Lineage_sources.showHideEditButtons;
         //Lineage_sources.showHideEditButtons = UI.disableEditButtons;
         UI.initMenuBar(KGquery.loadSource);
-        KGquery_graph.visjsData = null;
         //KGquery.clearAll();
         UI.disableEditButtons();
         if (Config.clientCache.KGquery) {
@@ -48,7 +47,6 @@ var KGquery = (function () {
         //self.clearAll();
         $("#messageDiv").attr("id", "KGquery_messageDiv");
         $("#waitImg").attr("id", "KGquery_waitImg");
-        KGquery.initMyQuery();
     };
     self.unload = function () {
         Lineage_sources.registerSource = UI.oldRegisterSource;
@@ -90,7 +88,6 @@ var KGquery = (function () {
                             KGquery_myQueries.load(null, Config.clientCache.KGquery);
                         }, 1000);
                     }
-                    $("#rightControlPanelDiv").load("./modules/tools/KGquery/html/KGqueryGraphButtons.html", function () {});
                 });
                 $("#KGquery_dataTableDialogDiv").dialog({
                     autoOpen: false,
@@ -358,7 +355,7 @@ var KGquery = (function () {
 
     self.execPathQuery = function (options, callback) {
         var optionalPredicatesSparql = "";
-        KGquery.selectClauseSparql = [];
+        var selectClauseSparql = [];
         var containerFiltersSparql = "";
         var query = "";
         var distinctSetTypes = [];
@@ -375,8 +372,6 @@ var KGquery = (function () {
                     if (KGquery_myQueries.currentOptionalPredicatesSparql) {
                         optionalPredicatesSparql = KGquery_myQueries.currentOptionalPredicatesSparql;
                         KGquery_myQueries.currentOptionalPredicatesSparql = null;
-                        KGquery.selectClauseSparql = KGquery_myQueries.selectClauseSparql;
-                        KGquery_myQueries.selectClauseSparql = null;
                         return callbackSeries();
                     }
 
@@ -386,7 +381,7 @@ var KGquery = (function () {
                             callbackSeries(err);
                         }
                         optionalPredicatesSparql = result.optionalPredicatesSparql;
-                        KGquery.selectClauseSparql = result.selectClauseSparql;
+                        selectClauseSparql = result.selectClauseSparql;
                         KGquery.currentOptionalPredicatesSparql = optionalPredicatesSparql;
                         callbackSeries();
                     });
@@ -565,10 +560,7 @@ var KGquery = (function () {
                         selectStr = options.aggregate.select;
                         groupByStr = " GROUP BY " + options.aggregate.groupBy;
                     } else {
-                        selectStr += KGquery.selectClauseSparql;
-                        Object.keys(distinctTypesMap).forEach(function (type) {
-                            selectStr += " " + type;
-                        });
+                        selectStr += selectClauseSparql;
                     }
 
                     var queryType = "SELECT";

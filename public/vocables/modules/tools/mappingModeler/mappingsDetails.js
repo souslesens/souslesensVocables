@@ -762,12 +762,12 @@ var MappingsDetails = (function () {
          * @returns {void}
          */
         createPrefixTransformFn: function () {
-            /*if (!MappingModeler.currentTreeNode) {
-                var column_selected = '';
+            if (!MappingModeler.currentTreeNode) {
+                var column_selected = $("#KGcreator_transformColumnSelect").val();
             } else {
-                var column_selected = MappingColumnsGraph.currentGraphNode.label;
-            }*/
-            var prefix = prompt("Enter Prefix");
+                var column_selected = MappingModeler.currentTreeNode.data.id;
+            }
+            var prefix = prompt("Enter Prefix", column_selected);
             if (!prefix) {
                 return;
             }

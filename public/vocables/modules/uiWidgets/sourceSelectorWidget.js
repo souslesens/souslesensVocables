@@ -304,10 +304,6 @@ var SourceSelectorWidget = (function () {
     };
 
     self.onSourceSelect = function (event, obj) {
-        if (obj.node.type == "Folder") {
-            $("#sourceSelector_jstreeDiv").jstree(true).open_node(obj.node.id);
-            return;
-        }
         $("#" + self.currentTreeDiv).dialog("close");
         self.initSource(obj.node.data.id);
     };
@@ -332,10 +328,6 @@ var SourceSelectorWidget = (function () {
 
     // MainController or in Lineage_r ?
     self.onSourceSelect_AddSource = function (evt, obj) {
-        if (obj.node.type == "Folder") {
-            $("#sourceSelector_jstreeDiv").jstree(true).open_node(obj.node.id);
-            return;
-        }
         $("#" + self.currentTreeDiv).dialog("close");
         //  if (!MainController.currentTool) return self.alert("select a tool first");
         if (!obj.node.data || obj.node.data.type != "source") {

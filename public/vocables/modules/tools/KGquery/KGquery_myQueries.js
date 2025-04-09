@@ -12,7 +12,6 @@ var KGquery_myQueries = (function () {
             querySets: KGquery.querySets,
             sparqlQuery: KGquery.currentSparqlQuery,
             optionalPredicatesSparql: KGquery.currentOptionalPredicatesSparql,
-            selectClauseSparql: KGquery.selectClauseSparql,
         };
         if (data.sparqlQuery == null) {
             return alert("No query to save");
@@ -36,9 +35,6 @@ var KGquery_myQueries = (function () {
         var index = -1;
         if (result.optionalPredicatesSparql) {
             self.currentOptionalPredicatesSparql = result.optionalPredicatesSparql;
-        }
-        if (result.selectClauseSparql) {
-            self.selectClauseSparql = result.selectClauseSparql;
         }
         var isSkippedElement = false;
         async.eachSeries(

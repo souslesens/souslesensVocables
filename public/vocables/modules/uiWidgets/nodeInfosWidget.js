@@ -1190,7 +1190,7 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
         }
     };
 
-    self.deleteNode = function (callback) {
+    self.deleteNode = function () {
         if (confirm("delete node " + self.currentNodeId)) {
             var concernedRestrictions = [];
             async.series(
@@ -1302,9 +1302,6 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
                     }
                     $("#" + self.divId).dialog("close");
                     UI.message("node deleted");
-                    if (callback) {
-                        callback();
-                    }
                 },
             );
         }

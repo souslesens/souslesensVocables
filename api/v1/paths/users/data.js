@@ -185,7 +185,7 @@ module.exports = () => {
                 throw Error(`The resources is not owned by ${userInfo.user.login}`, { cause: 403 });
             }
             const userData = await cleanUserData.clean(req.body);
-            await userDataModel.update({ ...userData, owned_by: userInfo.user.id });
+            await userDataModel.update({ ...userData, owned_by: `${userInfo.user.id}` });
             res.status(200).json({ message: "The resource has been updated successfully" });
         } catch (error) {
             if (error.cause !== undefined) {

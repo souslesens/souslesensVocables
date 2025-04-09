@@ -11,7 +11,7 @@ var Export = (function () {
     self.currentSource = null;
     self.dataTable;
 
-    self.exportGraphToDataTable = function (graphInstance, divId, nodes, edges, exportData) {
+    self.exportGraphToDataTable = function (graphInstance, divId, nodes, edges) {
         if (!nodes && !edges) {
             nodes = graphInstance.data.nodes.get();
             edges = graphInstance.data.edges.get();
@@ -41,56 +41,44 @@ var Export = (function () {
         });
 
         var header = "fromLabel\tedgeLabel\ttoLabel\tfromURI\tedgeURI\ttoURI\n";
+        if (nodesFromArray.length < Config.dataTableOutputLimit) {
+            var cols = [];
+            var dataset = [];
+            header
+                .trim()
+                .split("\t")
+                .forEach(function (colName, index) {
+                    var width = "100";
+                    if (index < 3) {
+                        width = "200";
+                    }
+                    cols.push({ title: colName, defaultContent: "" });
+                });
 
-        var cols = [];
-        var dataset = [];
-        header
-            .trim()
-            .split("\t")
-            .forEach(function (colName, index) {
-                var width = "100";
-                if (index < 3) {
-                    width = "200";
-                }
-                cols.push({ title: colName, defaultContent: "" });
+            nodesFromArray.forEach(function (nodeFromId, index) {
+                nodesFromMap[nodeFromId].forEach(function (edge) {
+                    if (!allNodesMap[nodeFromId] || !allNodesMap[edge.to]) {
+                        return;
+                    }
+                    var line = [allNodesMap[nodeFromId].data.label, edge.label || "", allNodesMap[edge.to].data ? allNodesMap[edge.to].data.label : "?", nodeFromId, edge.id, edge.to];
+                    dataset.push(line);
+                });
             });
 
-        nodesFromArray.forEach(function (nodeFromId, index) {
-            nodesFromMap[nodeFromId].forEach(function (edge) {
-                if (!allNodesMap[nodeFromId] || !allNodesMap[edge.to]) {
+            //nodes without edges
+
+            nodes.forEach(function (node) {
+                if (linkedNodes[node.id]) {
                     return;
                 }
-                var line = [allNodesMap[nodeFromId].data.label, edge.label || "", allNodesMap[edge.to].data ? allNodesMap[edge.to].data.label : "?", nodeFromId, edge.id, edge.to];
+                var line = [node.label, "", "", node.id, "", ""];
                 dataset.push(line);
             });
-        });
 
-        //nodes without edges
-
-        nodes.forEach(function (node) {
-            if (linkedNodes[node.id]) {
-                return;
-            }
-            var line = [node.label, "", "", node.id, "", ""];
-            dataset.push(line);
-        });
-
-        UI.message("", true);
-        var columnDefs = [{ width: 200, targets: [0, 1, 2] }];
-        if (nodesFromArray.length < Config.dataTableOutputLimit && !exportData) {
+            UI.message("", true);
+            var columnDefs = [{ width: 200, targets: [0, 1, 2] }];
             Export.showDataTable(divId, cols, dataset, null, { fixedColumns: 1, columnDefs: columnDefs });
         } else {
-            var columns = cols.map(function (item) {
-                return item.title;
-            });
-            dataset.unshift(columns);
-            if (!exportData) {
-                alert("to large results, it will be exported");
-            }
-            return Export.exportDataToCSV(dataset);
-        }
-
-        /*else {
             var str = header;
             nodesFromArray.forEach(function (nodeFromId, index) {
                 nodesFromMap[nodeFromId].forEach(function (edge) {
@@ -108,7 +96,7 @@ var Export = (function () {
             });
 
             common.copyTextToClipboard(str);
-        }*/
+        }
     };
 
     self.exportGraphToDataTableOld = function () {
@@ -475,22 +463,15 @@ fixedColumns: true*/
         document.body.appendChild(link);
 
         link.click();
-        document.body.removeChild(link);
     };
     self.showExportPopUp = function (visjsGraph) {
         var html = `<span class="popupMenuItem" onclick="${visjsGraph}.toGraphMl();">Graph ML </span>`;
         html += `<span class="popupMenuItem" onclick="${visjsGraph}.toSVG()">SVG</span>`;
-        html += `<span class="popupMenuItem" onclick="${visjsGraph}.exportGraphToDataTable(true);">CSV</span>`;
-        html += `<span class="popupMenuItem" onclick="${visjsGraph}.toPlantUML(true);">Plant UML</span>`;
+        html += `<span class="popupMenuItem" onclick="Export.exportGraphToDataTable(${visjsGraph});">CSV</span>`;
         if (visjsGraph == "MappingColumnsGraph.visjsGraph") {
             html += `<span class="popupMenuItem" onclick="MappingColumnsGraph.exportMappings();">JSON</span>`;
         }
-        if (visjsGraph == "KGquery_graph.KGqueryGraph") {
-            html += `<span class="popupMenuItem" onclick="KGquery_graph.exportVisjsGraph();">JSON</span>`;
-        }
-        if (visjsGraph == "Lineage_whiteboard.graph") {
-            html += `<span class="popupMenuItem" onclick="Lineage_whiteboard.graph.exportWhiteboard();">JSON</span>`;
-        }
+
         PopupMenuWidget.initAndShow(html, "popupMenuWidgetDiv");
     };
     /**
@@ -515,51 +496,6 @@ fixedColumns: true*/
         link.click();
         document.body.removeChild(link);
     };
-
-    /**
-     * Exports a PlantUML diagram string to a file.
-     * Supports multiple output formats based on the PlantUML syntax.
-     *
-     * @function
-     * @name exportPlantUML
-     * @memberof module:Export
-     * @param {string} plantUMLString - The PlantUML diagram string content
-     * @param {string} [fileName='diagram'] - The name of the file without extension
-     * @param {string} [format='puml'] - The output format ('puml', 'svg', 'png', etc.)
-     * @returns {void}
-     *
-     * @example
-     * // Export as .puml file
-     * Export.exportPlantUML('@startuml\nclass A\n@enduml', 'myDiagram', 'puml');
-     */
-    self.exportPlantUML = function (plantUMLString, fileName, format) {
-        if (!fileName) {
-            fileName = "diagram";
-        }
-        if (!format) {
-            format = "puml";
-        }
-
-        // Ensure the PlantUML string has the proper start/end tags
-        if (!plantUMLString.trim().startsWith("@startuml")) {
-            plantUMLString = "@startuml\n" + plantUMLString;
-        }
-        if (!plantUMLString.trim().endsWith("@enduml")) {
-            plantUMLString = plantUMLString + "\n@enduml";
-        }
-
-        // Create the file content
-        const blob = new Blob([plantUMLString], { type: "text/plain;charset=utf-8" });
-        const link = document.createElement("a");
-
-        link.href = URL.createObjectURL(blob);
-        link.download = `${fileName}.${format}`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(link.href);
-    };
-
     return self;
 })();
 

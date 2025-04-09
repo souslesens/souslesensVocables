@@ -24,7 +24,6 @@ pip install poetry
 
 ```bash
 poetry install
-
 ```
 
 ## Autobuild

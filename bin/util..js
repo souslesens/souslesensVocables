@@ -461,15 +461,15 @@ var util = {
         function getMonth(str) {
             try {
                 var number = parseInt(str);
-                // parseInt can retrun NaN 
-                if(!number){
+                // parseInt can retrun NaN
+                if (!number) {
                     return null;
                 }
                 number -= 1;
-                if(number>11 || number<0 ){
-                    return null
+                if (number > 11 || number < 0) {
+                    return null;
                 }
-                
+
                 return number;
             } catch (err) {
                 return null;
@@ -479,11 +479,11 @@ var util = {
         function getDay(str) {
             try {
                 var number = parseInt(str);
-                if(!number){
+                if (!number) {
                     return null;
                 }
-                if(number>31 || number<0 ){
-                    return null
+                if (number > 31 || number < 0) {
+                    return null;
                 }
                 return number;
             } catch (err) {
@@ -494,7 +494,7 @@ var util = {
         function getYear(str) {
             try {
                 var number = parseInt(str);
-                if(!number){
+                if (!number) {
                     return null;
                 }
                 // why??
@@ -506,52 +506,52 @@ var util = {
                 return null;
             }
         }
-        function getHours(str){
+        function getHours(str) {
             try {
                 var number = parseInt(str);
-                if(!number){
+                if (!number) {
                     return null;
                 }
-                if(number>23 || number<0 ){
-                    return null
+                if (number > 23 || number < 0) {
+                    return null;
                 }
-                
+
                 return number;
             } catch (err) {
                 return null;
             }
         }
-        function getMinutes(str){
+        function getMinutes(str) {
             try {
                 var number = parseInt(str);
-                if(!number){
+                if (!number) {
                     return null;
                 }
-                if(number>59 || number<0 ){
-                    return null
+                if (number > 59 || number < 0) {
+                    return null;
                 }
-               
+
                 return number;
             } catch (err) {
                 return null;
             }
         }
-        function getSeconds(str){
+        function getSeconds(str) {
             try {
                 var number = parseInt(str);
-                if(!number){
+                if (!number) {
                     return null;
                 }
-                if(number>59 || number<0 ){
-                    return null
+                if (number > 59 || number < 0) {
+                    return null;
                 }
-               
+
                 return number;
             } catch (err) {
                 return null;
             }
         }
-        var day, mont, year,hours,minutes,seconds;
+        var day, mont, year, hours, minutes, seconds;
         if (formatCode == "FR") {
             var array = dateStr.split("/");
             if (array.length != 3) {
@@ -559,66 +559,57 @@ var util = {
             }
             day = getDay(array[0]);
             month = getMonth(array[1]);
-            
-            var hoursArray=array[2].split(" ");
-            if(hoursArray.length>1){
-                year=getYear(hoursArray[0]);
-                hoursArray=hoursArray[1]
-                hoursArray=hoursArray.split(":");
-                hours=getHours(hoursArray[0]);
-                minutes=getMinutes(hoursArray[1]);
-                seconds=getSeconds(hoursArray[2]);
 
-            }else{
+            var hoursArray = array[2].split(" ");
+            if (hoursArray.length > 1) {
+                year = getYear(hoursArray[0]);
+                hoursArray = hoursArray[1];
+                hoursArray = hoursArray.split(":");
+                hours = getHours(hoursArray[0]);
+                minutes = getMinutes(hoursArray[1]);
+                seconds = getSeconds(hoursArray[2]);
+            } else {
                 year = getYear(array[2]);
             }
-            
-            
-            
         } else if (formatCode == "ISO") {
             var array = dateStr.split("-");
             if (array.length < 3) {
                 return null;
             }
-            
+
             month = getMonth(array[1]);
             year = getYear(array[0]);
 
-            var hoursArray=array[2].split("T");
-            if(hoursArray.length>1){
-                day=getDay(hoursArray[0]);
-                hoursArray=hoursArray[1]
-                hoursArray=hoursArray.split(":");
-                hours=getHours(hoursArray[0]);
-                minutes=getMinutes(hoursArray[1]);
-                seconds=getSeconds(hoursArray[2]);
-
-            }else{
+            var hoursArray = array[2].split("T");
+            if (hoursArray.length > 1) {
+                day = getDay(hoursArray[0]);
+                hoursArray = hoursArray[1];
+                hoursArray = hoursArray.split(":");
+                hours = getHours(hoursArray[0]);
+                minutes = getMinutes(hoursArray[1]);
+                seconds = getSeconds(hoursArray[2]);
+            } else {
                 day = getDay(array[2]);
             }
-            
         } else if (formatCode == "USA") {
             var array = dateStr.split("/");
             if (array.length < 3) {
                 return null;
             }
 
-            
             day = getDay(array[1]);
             month = getMonth(array[0]);
-            
 
-            var hoursArray=array[2].split(" ");
-            if(hoursArray.length>1){
+            var hoursArray = array[2].split(" ");
+            if (hoursArray.length > 1) {
                 year = getYear(hoursArray[0]);
-                
-                hoursArray=hoursArray[1]
-                hoursArray=hoursArray.split(":");
-                hours=getHours(hoursArray[0]);
-                minutes=getMinutes(hoursArray[1]);
-                seconds=getSeconds(hoursArray[2]);
 
-            }else{
+                hoursArray = hoursArray[1];
+                hoursArray = hoursArray.split(":");
+                hours = getHours(hoursArray[0]);
+                minutes = getMinutes(hoursArray[1]);
+                seconds = getSeconds(hoursArray[2]);
+            } else {
                 year = getYear(array[2]);
             }
         } else if (formatCode == "EUR") {
@@ -628,21 +619,19 @@ var util = {
             }
             day = getDay(array[0].trim());
             month = getMonth(array[1].trim());
-           
-            var hoursArray=array[2].split(" ");
-            if(hoursArray.length>1){
-                year = getYear(hoursArray[0].trim());
-                
-                hoursArray=hoursArray[1]
-                hoursArray=hoursArray.split(":");
-                hours=getHours(hoursArray[0]);
-                minutes=getMinutes(hoursArray[1]);
-                seconds=getSeconds(hoursArray[2]);
 
-            }else{
+            var hoursArray = array[2].split(" ");
+            if (hoursArray.length > 1) {
+                year = getYear(hoursArray[0].trim());
+
+                hoursArray = hoursArray[1];
+                hoursArray = hoursArray.split(":");
+                hours = getHours(hoursArray[0]);
+                minutes = getMinutes(hoursArray[1]);
+                seconds = getSeconds(hoursArray[2]);
+            } else {
                 year = getYear(array[2].trim());
             }
-            
         } else if (formatCode == "ISO-time") {
             try {
                 var date = new Date(dateStr);
@@ -655,15 +644,15 @@ var util = {
         if (!year || (!month && month != 0) || !day) {
             return null;
         }
-        if(!hours && hours != 0){
-            hours=null;
-            minutes=null;
-            seconds=null;
+        if (!hours && hours != 0) {
+            hours = null;
+            minutes = null;
+            seconds = null;
         }
-        if(!minutes && minutes != 0){
-            seconds=null;
+        if (!minutes && minutes != 0) {
+            seconds = null;
         }
-        var date = new Date(Date.UTC(year, month, day,hours,minutes,seconds));
+        var date = new Date(Date.UTC(year, month, day, hours, minutes, seconds));
         return date.toISOString();
         // return date.toISOString()
     },

@@ -37,7 +37,7 @@ var KGquery_myQueries = (function () {
         if (result.optionalPredicatesSparql) {
             self.currentOptionalPredicatesSparql = result.optionalPredicatesSparql;
         }
-        if(result.selectClauseSparql) {
+        if (result.selectClauseSparql) {
             self.selectClauseSparql = result.selectClauseSparql;
         }
         var isSkippedElement = false;

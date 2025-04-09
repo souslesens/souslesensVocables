@@ -4267,14 +4267,14 @@ attrs.color=self.getSourceColor(superClassValue)
         toGraphMl: function () {
             self.lineageVisjsGraph.toGraphMl();
         },
-         /**
+        /**
          * @function
          * @name toGraphMl
          * @memberof module:graphActions.graph
          * Exports the graph to the GraphML format, which can be used for further analysis or visualization in compatible tools.
          * @returns {void}
          */
-         toPlantUML: function () {
+        toPlantUML: function () {
             self.lineageVisjsGraph.toPlantUML(true);
         },
         /**
@@ -4286,7 +4286,7 @@ attrs.color=self.getSourceColor(superClassValue)
          * @returns {void}
          */
         exportGraphToDataTable: function (exportData) {
-            Export.exportGraphToDataTable(self.lineageVisjsGraph,null,null,null,exportData);
+            Export.exportGraphToDataTable(self.lineageVisjsGraph, null, null, null, exportData);
         },
 
         /**
@@ -4350,7 +4350,7 @@ attrs.color=self.getSourceColor(superClassValue)
          * @name exportWhiteboard
          * @memberof module:graphActions.graph
          * @returns {void}
-         * 
+         *
          * @example
          */
         exportWhiteboard: function () {
@@ -4363,23 +4363,22 @@ attrs.color=self.getSourceColor(superClassValue)
                     context: Lineage_whiteboard.lineageVisjsGraph.currentContext,
                     positions: positions,
                 };
-                var fileName=MainController.currentSource+'_whiteBoard.json'
-                Export.downloadJSON(data,fileName);
+                var fileName = MainController.currentSource + "_whiteBoard.json";
+                Export.downloadJSON(data, fileName);
             } else {
                 alert("No Whiteboard to save");
             }
         },
         /**
          * Display a whiteboard graph from a JSON file.
-         * 
+         *
          * @function
          * @name importWhiteboard
          * @memberof module:graphActions.graph
          * @returns {void}
-         * 
+         *
          */
-        importWhiteboard: function(){
-            
+        importWhiteboard: function () {
             ImportFileWidget.showImportDialog(function (err, result) {
                 if (err) {
                     return alert(err);
@@ -4389,10 +4388,8 @@ attrs.color=self.getSourceColor(superClassValue)
                     return alert("no nodes in file");
                 }
                 self.loadGraphFromJSON(data);
-               
-
             });
-        }
+        },
     };
     /**
      * @function
@@ -4688,8 +4685,6 @@ attrs.color=self.getSourceColor(superClassValue)
             var userPrefs = localStorage.getItem("whiteboardPreferences");
         });
     };
-
-   
 
     return self;
 })();

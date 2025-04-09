@@ -632,7 +632,7 @@ indexes.push(source.toLowerCase());
                             };
 
                             //var filter = "?id rdf:type ?type2. filter (?type= owl:NamedIndividual && ?type2!=?type)";
-                            //Filter on individuals = entities that are  type of a class 
+                            //Filter on individuals = entities that are  type of a class
                             var filter = "?id rdf:type ?type.?type rdf:type owl:Class";
                             //  filter+="?id <http://souslesens.org/KGcreator#mappingFile> 'dbo.V_jobcard'"
                             Sparql_OWL.getDictionary(sourceLabel, { filter: filter, processorFectchSize: 100, skosPrefLabel: true }, processor, function (err, result) {

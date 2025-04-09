@@ -11,7 +11,7 @@ var Export = (function () {
     self.currentSource = null;
     self.dataTable;
 
-    self.exportGraphToDataTable = function (graphInstance, divId, nodes, edges,exportData) {
+    self.exportGraphToDataTable = function (graphInstance, divId, nodes, edges, exportData) {
         if (!nodes && !edges) {
             nodes = graphInstance.data.nodes.get();
             edges = graphInstance.data.edges.get();
@@ -41,7 +41,7 @@ var Export = (function () {
         });
 
         var header = "fromLabel\tedgeLabel\ttoLabel\tfromURI\tedgeURI\ttoURI\n";
-        
+
         var cols = [];
         var dataset = [];
         header
@@ -79,17 +79,17 @@ var Export = (function () {
         var columnDefs = [{ width: 200, targets: [0, 1, 2] }];
         if (nodesFromArray.length < Config.dataTableOutputLimit && !exportData) {
             Export.showDataTable(divId, cols, dataset, null, { fixedColumns: 1, columnDefs: columnDefs });
-        }else{
+        } else {
             var columns = cols.map(function (item) {
                 return item.title;
             });
             dataset.unshift(columns);
-            if(!exportData){
+            if (!exportData) {
                 alert("to large results, it will be exported");
             }
             return Export.exportDataToCSV(dataset);
         }
-        
+
         /*else {
             var str = header;
             nodesFromArray.forEach(function (nodeFromId, index) {
@@ -481,14 +481,14 @@ fixedColumns: true*/
         var html = `<span class="popupMenuItem" onclick="${visjsGraph}.toGraphMl();">Graph ML </span>`;
         html += `<span class="popupMenuItem" onclick="${visjsGraph}.toSVG()">SVG</span>`;
         html += `<span class="popupMenuItem" onclick="${visjsGraph}.exportGraphToDataTable(true);">CSV</span>`;
-        html +=  `<span class="popupMenuItem" onclick="${visjsGraph}.toPlantUML(true);">Plant UML</span>`;
+        html += `<span class="popupMenuItem" onclick="${visjsGraph}.toPlantUML(true);">Plant UML</span>`;
         if (visjsGraph == "MappingColumnsGraph.visjsGraph") {
             html += `<span class="popupMenuItem" onclick="MappingColumnsGraph.exportMappings();">JSON</span>`;
         }
-        if(visjsGraph == "KGquery_graph.KGqueryGraph"){
+        if (visjsGraph == "KGquery_graph.KGqueryGraph") {
             html += `<span class="popupMenuItem" onclick="KGquery_graph.exportVisjsGraph();">JSON</span>`;
         }
-        if(visjsGraph == "Lineage_whiteboard.graph"){
+        if (visjsGraph == "Lineage_whiteboard.graph") {
             html += `<span class="popupMenuItem" onclick="Lineage_whiteboard.graph.exportWhiteboard();">JSON</span>`;
         }
         PopupMenuWidget.initAndShow(html, "popupMenuWidgetDiv");
@@ -527,31 +527,31 @@ fixedColumns: true*/
      * @param {string} [fileName='diagram'] - The name of the file without extension
      * @param {string} [format='puml'] - The output format ('puml', 'svg', 'png', etc.)
      * @returns {void}
-     * 
+     *
      * @example
      * // Export as .puml file
      * Export.exportPlantUML('@startuml\nclass A\n@enduml', 'myDiagram', 'puml');
      */
     self.exportPlantUML = function (plantUMLString, fileName, format) {
         if (!fileName) {
-            fileName = 'diagram';
+            fileName = "diagram";
         }
         if (!format) {
-            format = 'puml';
+            format = "puml";
         }
 
         // Ensure the PlantUML string has the proper start/end tags
-        if (!plantUMLString.trim().startsWith('@startuml')) {
-            plantUMLString = '@startuml\n' + plantUMLString;
+        if (!plantUMLString.trim().startsWith("@startuml")) {
+            plantUMLString = "@startuml\n" + plantUMLString;
         }
-        if (!plantUMLString.trim().endsWith('@enduml')) {
-            plantUMLString = plantUMLString + '\n@enduml';
+        if (!plantUMLString.trim().endsWith("@enduml")) {
+            plantUMLString = plantUMLString + "\n@enduml";
         }
 
         // Create the file content
-        const blob = new Blob([plantUMLString], { type: 'text/plain;charset=utf-8' });
-        const link = document.createElement('a');
-        
+        const blob = new Blob([plantUMLString], { type: "text/plain;charset=utf-8" });
+        const link = document.createElement("a");
+
         link.href = URL.createObjectURL(blob);
         link.download = `${fileName}.${format}`;
         document.body.appendChild(link);

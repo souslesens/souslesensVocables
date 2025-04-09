@@ -39,7 +39,7 @@ var KGquery = (function () {
         //self.oldshowHideEditButtons=Lineage_sources.showHideEditButtons;
         //Lineage_sources.showHideEditButtons = UI.disableEditButtons;
         UI.initMenuBar(KGquery.loadSource);
-        KGquery_graph.visjsData=null;
+        KGquery_graph.visjsData = null;
         //KGquery.clearAll();
         UI.disableEditButtons();
         if (Config.clientCache.KGquery) {
@@ -90,9 +90,7 @@ var KGquery = (function () {
                             KGquery_myQueries.load(null, Config.clientCache.KGquery);
                         }, 1000);
                     }
-                    $('#rightControlPanelDiv').load('./modules/tools/KGquery/html/KGqueryGraphButtons.html', function () {
-                        
-                    });
+                    $("#rightControlPanelDiv").load("./modules/tools/KGquery/html/KGqueryGraphButtons.html", function () {});
                 });
                 $("#KGquery_dataTableDialogDiv").dialog({
                     autoOpen: false,
@@ -568,8 +566,8 @@ var KGquery = (function () {
                         groupByStr = " GROUP BY " + options.aggregate.groupBy;
                     } else {
                         selectStr += KGquery.selectClauseSparql;
-                        Object.keys(distinctTypesMap).forEach(function(type){
-                            selectStr+=' '+type;
+                        Object.keys(distinctTypesMap).forEach(function (type) {
+                            selectStr += " " + type;
                         });
                     }
 

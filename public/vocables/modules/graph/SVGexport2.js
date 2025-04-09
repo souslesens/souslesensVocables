@@ -165,11 +165,13 @@ var SVGexport2 = (function () {
      * @memberof SVGexport2
      * @param {SVGElement} svg - The SVG element to adjust.
      */
-    self.adjustSVGViewBox =function (svg) {
-        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    self.adjustSVGViewBox = function (svg) {
+        let minX = Infinity,
+            minY = Infinity,
+            maxX = -Infinity,
+            maxY = -Infinity;
 
-        
-        svg.childNodes.forEach(el => {
+        svg.childNodes.forEach((el) => {
             if (el.tagName === "circle" || el.tagName === "text") {
                 let cx = parseFloat(el.getAttribute("cx") || el.getAttribute("x"));
                 let cy = parseFloat(el.getAttribute("cy") || el.getAttribute("y"));
@@ -190,20 +192,18 @@ var SVGexport2 = (function () {
             }
         });
 
-        
         let margin = 20;
         minX -= margin;
         minY -= margin;
         maxX += margin;
         maxY += margin;
 
-        
         let width = maxX - minX;
         let height = maxY - minY;
         svg.setAttribute("viewBox", `${minX} ${minY} ${width} ${height}`);
         svg.setAttribute("width", width);
         svg.setAttribute("height", height);
-    }   
+    };
 
     return self;
 })();
@@ -211,4 +211,3 @@ var SVGexport2 = (function () {
 export default SVGexport2;
 
 window.SVGexport = SVGexport2;
-

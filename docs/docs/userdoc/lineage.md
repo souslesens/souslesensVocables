@@ -1,4 +1,6 @@
-## Overview
+# Lineage
+
+
 
 The Lineage tool is one of the core components of SousLeSens, a web
 application for managing ontologies and knowledge graphs, built on the
@@ -11,22 +13,10 @@ visualized and interactively manipulated.
 
 ## Contents
 
-[Overview [1](#overview)](#overview)
+```{contents} Table of Contents
+:depth: 3
+```
 
-[UI Overview [2](#ui-overview)](#ui-overview)
-
-[Left panel: Whiteboard Tab
-[3](#left-panel-whiteboard-tab)](#left-panel-whiteboard-tab)
-
-[Left panel: Classes Tab
-[6](#left-panel-classes-tab)](#left-panel-classes-tab)
-
-[Left panel: Properties Tab
-[7](#left-panel-properties-tab)](#left-panel-properties-tab)
-
-[Left panel : Containers Tab [8](#_Toc194314199)](#_Toc194314199)
-
-[Tutorial [9](#tutorial)](#tutorial)
 
 ## UI Overview
 
@@ -52,32 +42,32 @@ top panel is comprehensive in this section.
 
 ![](images/media/image2.png)
 
-1.  **SousLeSens logo** : Redirects to the home page
+a.  **SousLeSens logo** : Redirects to the home page
 
-2.  **Current tool** : Switch to another tool
+b.  **Current tool** : Switch to another tool
 
-3.  **Change source** : Switch to a different graph
+c.  **Change source** : Switch to a different graph
 
-4.  **Add source** : Add an additional graph to explore without
+d.  **Add source** : Add an additional graph to explore without
     replacing the current one
 
-5.  **All** : Select all panel sources as current sources
+e.  **All** : Select all panel sources as current sources
 
-6.  **Current sources pannel :**
+f.  **Current sources pannel :**
 
-> This panel displays all loaded sources. By default, the selected
-> source is loaded along with its imports. In some tools, imports are
-> not shown in the panel.  
-> The currently selected sources are highlighted in blue. Click on
-> another source to change it.  
-> All actions and buttons of the tool will be applied to the current
-> source.  
-> You can add sources to this panel using (d) and select all sources
-> using (e).  
-> Using (c) to change the source will clear the panel and reload it with
-> the selected source and its imports.
+This panel displays all loaded sources. By default, the selected
+source is loaded along with its imports. In some tools, imports are
+not shown in the panel.  
+The currently selected sources are highlighted in blue. Click on
+another source to change it.  
+All actions and buttons of the tool will be applied to the current
+source.  
+You can add sources to this panel using (d) and select all sources
+using (e).  
+Using (c) to change the source will clear the panel and reload it with
+the selected source and its imports.
 
-1.  **Source popup :** Clicking this button opens a popup with several
+g.  **Source popup :** Clicking this button opens a popup with several
     options for the source, such as adjusting node opacity, removing it
     from the panel, grouping nodes belonging to the source, copying the
     graph URI, or downloading it in a triple format (e.g., Turtle,
@@ -88,28 +78,28 @@ top panel is comprehensive in this section.
 
 > ![](images/media/image3.png)
 
-1.  **Add resource :** (Lineage only) Adds a new resource. Covered in a
+h.  **Add resource :** (Lineage only) Adds a new resource. Covered in a
     dedicated tutorial section
 
-2.  **Add Relation** : (Lineage only) Adds a new resource. Covered in a
+i.  **Add Relation** : (Lineage only) Adds a new resource. Covered in a
     dedicated tutorial section
 
-3.  **Change Theme** : Changes the color theme of SousLeSens.
+j.  **Change Theme** : Changes the color theme of SousLeSens.
     Administrators can lock a specific theme, in which case this button
     will not appear
 
-4.  **Copy Query** : Copies the most recent SPARQL query to the
+k.  **Copy Query** : Copies the most recent SPARQL query to the
     clipboard
 
-5.  **Account button :** Displays the logged-in user and allows logout
+l.  **Account button :** Displays the logged-in user and allows logout
 
-6.  **Logqueries checkbox :** When checked, all performed queries are
+m.  **Logqueries checkbox :** When checked, all performed queries are
     logged in the browser console
 
-7.  **Swagger link :** Opens the SousLeSens Swagger UI to view and
+n.  **Swagger link :** Opens the SousLeSens Swagger UI to view and
     access all available user API routes
 
-8.  **GitHub link :** Opens the SousLeSens GitHub repository for
+o.  **GitHub link :** Opens the SousLeSens GitHub repository for
     contributing and read the documentation
 
 ### Left panel: Whiteboard Tab 
@@ -130,7 +120,7 @@ Source section:
 
 > ![](images/media/image5.png)
 
-1.  **Main classes button :** Displays the main classes on the
+2.  **Main classes button :** Displays the main classes on the
     whiteboard. The main classes are those that meet the top classes
     filter condition (by default, all owl:Class).
 
@@ -141,7 +131,7 @@ creator.
 
 ![](images/media/image7.png)
 
-1.  **Children button** – Adds all children of the classes currently
+3.  **Children button** – Adds all children of the classes currently
     displayed on the whiteboard.
 
 Children are the elements linked to the current node via taxonomy
@@ -149,17 +139,17 @@ predicate properties.
 
 ![](images/media/image7.png)
 
-> For example, if a node is displayed, clicking on "Children" will show
-> on the whiteboard all nodes that are linked to it via rdf:type or
-> rdfs:subclass properties.
+ For example, if a node is displayed, clicking on "Children" will show
+ on the whiteboard all nodes that are linked to it via rdf:type or
+ rdfs:subclass properties.
 
-1.  **Parents button** – Adds all parents of the nodes currently
+4.  **Parents button** – Adds all parents of the nodes currently
     displayed on the whiteboard.
 
-> A parent is defined by taxonomy predicates as well, but the
-> relationship is reversed.
+ A parent is defined by taxonomy predicates as well, but the
+ relationship is reversed.
 
-1.  **Axioms button**
+5.  **Axioms button**
 
 Displays on the whiteboard all nodes related to an axiom, grouped by
 axiom category (e.g., **SubClassOf**, **EquivalentClasses**, or
@@ -167,141 +157,140 @@ axiom category (e.g., **SubClassOf**, **EquivalentClasses**, or
 
 **Whiteboard section**
 
-1.  **Whiteboard search bar :** Searches for a node that is present on
+6.  **Whiteboard search bar :** Searches for a node that is present on
     the whiteboard.
 
-2.  **Clear all button** – Clears the whiteboard
+7.  **Clear all button** – Clears the whiteboard
 
-3.  **Clear last button** – Clears all nodes on the whiteboard, except
+8.  **Clear last button** – Clears all nodes on the whiteboard, except
     for those added by the most recent action.
 
-4.  **Only last button** – Clears all nodes on the whiteboard, except
+9.  **Only last button** – Clears all nodes on the whiteboard, except
     for those added by the most recent action.
 
-5.  **Selection button :** Displays a menu with a tree of all classes on
+10.  **Selection button :** Displays a menu with a tree of all classes on
     the whiteboard. This menu primarily handles node decoration and icon
     management.
 
 ![](images/media/image8.png)
 
-1.  **CSV export button :** Displays the whiteboard in a table format,
+11.  **CSV export button :** Displays the whiteboard in a table format,
     which can be exported to a CSV file.
 
-2.  **More actions button**. Displays an additional set of buttons for
+12.  **More actions button**. Displays an additional set of buttons for
     using advanced features (see below).
 
-> ![](images/media/image9.png)
->
-> *Extra features are revealed when the “More Actions” button is
-> clicked*
->
-> • **Implicit Model**: Draws the current source’s implicit model on the
-> whiteboard, which represents the knowledge graph facts.  
-> • **Similars**: Displays a menu to show nodes on the whiteboard that
-> have similar labels to the currently displayed nodes.  
-> • **Paths**: Retrieves the shortest path between two nodes in the
-> source.  
-> • **PlantUML**: Displays the whiteboard in a PlantUML view.  
-> • **Show/Hide Individuals**: Toggles the visibility of individuals on
-> the whiteboard.  
-> • **Reasoner**: Uses a reasoner on the current source to perform
-> inference, consistency, or unsatisfiable operations, and displays the
-> results on the whiteboard.
+ ![](images/media/image9.png)
 
-1.  **Query legend**: Explains the color codes used on the graph. Colors
+ *Extra features are revealed when the "More Actions" button is
+ clicked*
+
+ • **Implicit Model**: Draws the current source's implicit model on the
+ whiteboard, which represents the knowledge graph facts.  
+ • **Similars**: Displays a menu to show nodes on the whiteboard that
+ have similar labels to the currently displayed nodes.  
+ • **Paths**: Retrieves the shortest path between two nodes in the
+ source.  
+ • **PlantUML**: Displays the whiteboard in a PlantUML view.  
+ • **Show/Hide Individuals**: Toggles the visibility of individuals on
+ the whiteboard.  
+ • **Reasoner**: Uses a reasoner on the current source to perform
+ inference, consistency, or unsatisfiable operations, and displays the
+ results on the whiteboard.
+
+13.  **Query legend**: Explains the color codes used on the graph. Colors
     are selected based on the top-level ontology.
 
 ### Left panel: Classes Tab
 
 ![](images/media/image10.png)
 
-1.  **Classes Search Bar** – Search for classes within the current
+14.  **Classes Search Bar** – Search for classes within the current
     source.
 
-2.  **Reset Search Results Panel** – Resets the search results panel.
+15.  **Reset Search Results Panel** – Resets the search results panel.
 
-3.  **Export Search Results Button** – Exports the search results.
+16.  **Export Search Results Button** – Exports the search results.
 
-4.  **Hide Options Panel Button** – Hides the options panel.
+17.  **Hide Options Panel Button** – Hides the options panel.
 
-5.  **Options Panel: Exact Match Option** – If the exact match option is
+18.  **Options Panel: Exact Match Option** – If the exact match option is
     checked, the results must be strictly equal; otherwise, a node
     containing the search term is sufficient.
 
-6.  **Options Panel: Scope Option** – By default, the search is
+19.  **Options Panel: Scope Option** – By default, the search is
     performed on the current source. You can also search within the
     imported sources or all available sources.
 
-7.  **Search Results Panel** – Results are displayed in a tree format.
+20.  **Search Results Panel** – Results are displayed in a tree format.
 
 ### Left panel: Properties Tab
 
 ![](images/media/image11.png)
 
-1.  **Properties search bar** – search for properties
+21.  **Properties search bar** – search for properties
 
-2.  **Export search results button**
+22.  **Export search results button**
 
-3.  **Hide options panel button**
+23.  **Hide options panel button**
 
-4.  **Options panel: Term type option -** Allows you to filter by term
+24.  **Options panel: Term type option -** Allows you to filter by term
     type.
 
-5.  **Options panel: Exact match option -** If enabled, only exact
+25.  **Options panel: Exact match option -** If enabled, only exact
     matches will be shown.
 
-6.  **Options panel: All sources option -** Search across all available
+26.  **Options panel: All sources option -** Search across all available
     sources.
 
-7.  **Actions panel: Relations button -** Displays predicates and
+27.  **Actions panel: Relations button -** Displays predicates and
     restrictions.
 
-8.  **Actions panel: Predicates button**
+28.  **Actions panel: Predicates button**
 
-9.  **Actions panel: Restriction button**
+29.  **Actions panel: Restriction button**
 
-10. **Actions panel: Ranges and Domains -** Displays all ranges and
+30. **Actions panel: Ranges and Domains -** Displays all ranges and
     domains for a source. See Ranges and Domains tutorial section
 
-11. **Search results panel**
+31. **Search results panel**
 
 ### Left panel : SPARQL
 
-See SPARQL tutorial<span id="_Toc194314199" class="anchor"></span>
-section
+See SPARQL tutorial section
 
 ### Left panel : Containers Tab
 
 ![](images/media/image12.png)
 
-1.  **Container search bar –** Search for rdfs:Container
+32.  **Container search bar –** Search for rdfs:Container
 
-2.  **Parent containers button :** Displays all parent containers on the
+33.  **Parent containers button :** Displays all parent containers on the
     whiteboard
 
-3.  **Create container button**
+34.  **Create container button**
 
-4.  **Export containers button**
+35.  **Export containers button**
 
-5.  **Search results panel**
+36.  **Search results panel**
 
 ### Right Panel : whiteboard buttons
 
 ![](images/media/image13.png)
 
-1.  **Clear all button :** Clears the whiteboard
+37.  **Clear all button :** Clears the whiteboard
 
-2.  **Display :** Opens a menu to modify the graph display parameters,
+38.  **Display :** Opens a menu to modify the graph display parameters,
     such as spatialization algorithms, node distance, etc.
 
-3.  **Save whiteboard** : Saves the current whiteboard for later reuse.
+39.  **Save whiteboard** : Saves the current whiteboard for later reuse.
 
-4.  **Load saved graph** : Load a previously saved whiteboard.
+40.  **Load saved graph** : Load a previously saved whiteboard.
 
-5.  **Export whiteboard** : Exports the current whiteboard in various
+41.  **Export whiteboard** : Exports the current whiteboard in various
     formats (GraphML, SVG, CSV, PlantUML, JSON).
 
-6.  Import whiteboard : Imports and displays a whiteboard from a JSON
+42.  Import whiteboard : Imports and displays a whiteboard from a JSON
     file provided by the SousLeSens JSON export (supports JSON following
     vis.js network format:
     <https://visjs.github.io/vis-network/docs/network/>).
@@ -313,9 +302,7 @@ Right-clicking on a node triggers a menu with several options.
 **Expand and Parents** – These options are equivalent to the
 children/parent buttons but apply only to the current node.  
 **Collapse** – Removes all child nodes of the current node from the
-whiteboard.
-
-### ![](images/media/image14.png) 
+whiteboard.![](images/media/image14.png)
 
 Right-clicking on a search result triggers a popup menu with different
 options, depending on the current tab and the node that is clicked.
@@ -331,7 +318,7 @@ action will be applied to all selected nodes.
 
 ## Tutorial
 
-Let’s open the Lineage tool in SousLeSens, and select the source
+Let's open the Lineage tool in SousLeSens, and select the source
 **HR\_MODEL\_ACADEMIC\_TP** source.
 
 ![A screenshot of a phone AI-generated content may be
@@ -382,10 +369,10 @@ be incorrect.](images/media/image22.png)
 By clicking on the **Add Relation** button in the top toolbar, you can
 add a relation between two classes.  
 A relation is a semantic link between two classes. For example, if there
-are two classes, **“Worker”** and **“Project”**, you can define the
-relation **“works on”** between **“Worker”** and **“Project”**.  
-In this case, **“Worker”** is the subject or range of the relation, and
-**“Project”** is the object or domain of the relation. A relation always
+are two classes, **"Worker"** and **"Project"**, you can define the
+relation **"works on"** between **"Worker"** and **"Project"**.  
+In this case, **"Worker"** is the subject or range of the relation, and
+**"Project"** is the object or domain of the relation. A relation always
 goes from subject to object (from range to domain).  
 To create a relation, simply drag and drop one class onto another.
 
@@ -413,7 +400,7 @@ this, click the **CSV** button (12). A window will then open:
 
 ![](images/media/image25.png)
 
-Then click the “Export CSV” button. All data displayed will be saved in
+Then click the "Export CSV" button. All data displayed will be saved in
 CSV format.
 
 You can also <u>export lists of classes and properties</u>, in the
@@ -466,8 +453,8 @@ ranges and domains of IDO.
 
 ![](images/media/image30.png)
 
-For the **‘hasQuality’** property, this means that every time
-**‘hasQuality’** is used, the domain (starting point) of this property
+For the **'hasQuality'** property, this means that every time
+**'hasQuality'** is used, the domain (starting point) of this property
 should be an **Object** or a subclass of **Object**, and the range
 (target) should be a **Quality** or a subclass of **Quality**.
 
@@ -502,7 +489,7 @@ the property domain.
 ![](images/media/image33.png)
 
 For example, **Person** has **Object** as an ancestor, so we can use the
-property **‘hasQuality’** from the **Person** node to link to a node
+property **'hasQuality'** from the **Person** node to link to a node
 with **Quality** as an ancestor.  
 The **MetaData** tab displays the SousLeSens metadata triples. These are
 automatically created when you add a new resource through SousLeSens
@@ -529,9 +516,9 @@ The concerned properties are listed below:
 
 The **SPARQL** tab, when clicked, launches a bot that guides you in
 building a SPARQL query, which will then be displayed on the whiteboard.
-The bot’s questions are influenced by the content already present on the
+The bot's questions are influenced by the content already present on the
 whiteboard. This feature is useful for exploring and visualizing
-individuals. The bot’s questions filter the individuals to prevent an
+individuals. The bot's questions filter the individuals to prevent an
 overwhelming display of results and to keep the results understandable.
 You can choose to start from a property or a class to see the
 individuals related to your selection.
@@ -542,7 +529,7 @@ Choose Class
 
 ![](images/media/image35.png)
 
-Click on Person , then any
+Click on Person , then any
 
 ![](images/media/image36.png)![](images/media/image37.png)
 

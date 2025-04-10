@@ -1,3 +1,10 @@
+/**
+ * KGquery_graph Module
+ * Handles graph visualization and manipulation for knowledge graph queries.
+ * Provides functionality for drawing, saving, and loading graph visualizations.
+ * @module KGquery_graph
+ */
+
 import VisjsGraphClass from "../../graph/VisjsGraphClass.js";
 import KGquery from "./KGquery.js";
 import Lineage_whiteboard from "../lineage/lineage_whiteboard.js";
@@ -63,6 +70,27 @@ var KGquery_graph = (function () {
         color: "#ddd", //Lineage_whiteboard.getSourceColor(source)
     };
 
+    /**
+     * Initializes the graph module.
+     * Sets up UI components and color options.
+     * @function
+     * @name init
+     */
+    self.init = function () {
+        $("#KGquery_leftPanelTabs").tabs();
+
+        common.fillSelectWithColorPalette("KGquery_graph_nodeColorSelect");
+        var shapes = ["dot", "square", "box", "text", "diamond", "star", "triangle", "ellipse", "circle", "database", "triangleDown", "hexagon"];
+        common.fillSelectOptions("KGquery_graph_nodeShapeSelect", shapes, true);
+    };
+
+    /**
+     * Draws a new Vis.js model based on the specified mode.
+     * @function
+     * @name drawVisjsModel
+     * @param {string} mode - The drawing mode ('saved', 'inferred', etc.)
+     * @param {Object} [options] - Additional drawing options
+     */
     self.drawVisjsModel = function (mode, options) {
         var source = KGquery.currentSource;
         var visjsData = { nodes: [], edges: [] };
@@ -495,6 +523,12 @@ var KGquery_graph = (function () {
             KGquery_graph.KGqueryGraph.data.nodes.update([{ id: nodeId, shape: "ellipse", color: "#b0f5f5" }]);
             },500)*/
     };
+    /**
+     * Saves the current Vis.js graph model.
+     * @function
+     * @name saveVisjsModelGraph
+     * @param {Function} [callback] - Callback function called after saving
+     */
     self.saveVisjsModelGraph = function (callback) {
         var nodes = KGquery_graph.KGqueryGraph.data.nodes.get();
         var edges = KGquery_graph.KGqueryGraph.data.edges.get();
@@ -648,6 +682,13 @@ var KGquery_graph = (function () {
         }
     };
 
+    /**
+     * Downloads a previously saved Vis.js graph.
+     * @function
+     * @name downloadVisjsGraph
+     * @param {string} source - The source identifier
+     * @param {Function} callback - Callback function to handle the downloaded graph
+     */
     self.downloadVisjsGraph = function (source, callback) {
         self.KGqueryGraph = new VisjsGraphClass(
             "KGquery_graphDiv",

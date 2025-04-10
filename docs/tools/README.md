@@ -1,4 +1,7 @@
 # Convert docx to markdown
+Install pandadoc
+
+Put in.docx in docs/tools
 
 Convert with pandoc
 

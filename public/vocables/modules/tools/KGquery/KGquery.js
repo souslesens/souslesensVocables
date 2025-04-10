@@ -1,3 +1,10 @@
+/**
+ * KGquery Module
+ * Module for querying and visualizing knowledge graphs.
+ * Provides functionality to build and execute queries on knowledge graphs.
+ * @module KGquery
+ */
+
 import Lineage_sources from "../lineage/lineage_sources.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
 
@@ -34,6 +41,12 @@ var KGquery = (function () {
     self.maxOptionalPredicatesInQuery = 10;
     self.pathEdgesColors = ["green", "blue", "orange", "grey", "yellow"];
 
+    /**
+     * Called when the module is loaded.
+     * Initializes the user interface and loads saved queries.
+     * @function
+     * @name onLoaded
+     */
     self.onLoaded = function () {
         //Lineage_sources.showHideEditButtons = UI.disableEditButtons;
         //self.oldshowHideEditButtons=Lineage_sources.showHideEditButtons;
@@ -102,6 +115,13 @@ var KGquery = (function () {
         });
     };
 
+    /**
+     * Adds a new query set with a boolean operator.
+     * @function
+     * @name addQuerySet
+     * @param {string} booleanOperator - The boolean operator to use
+     * @returns {Object} The newly created query set
+     */
     self.addQuerySet = function (booleanOperator) {
         var label = "";
         var color = self.pathEdgesColors[self.querySets.sets.length];
@@ -123,6 +143,13 @@ var KGquery = (function () {
         return querySet;
     };
 
+    /**
+     * Adds a query element to a query set.
+     * @function
+     * @name addQueryElementToQuerySet
+     * @param {Object} querySet - The query set to add the element to
+     * @returns {Object} The newly created query element
+     */
     self.addQueryElementToQuerySet = function (querySet) {
         //  $("#KGquery_SetsControlsDiv").show();
         var queryElementDivId = KGquery_controlPanel.addQueryElementToCurrentSet(querySet.divId);
@@ -143,6 +170,14 @@ var KGquery = (function () {
         return queryElement;
     };
 
+    /**
+     * Adds a node to a query element.
+     * @function
+     * @name addNodeToQueryElement
+     * @param {Object} queryElement - The query element to add the node to
+     * @param {Object} node - The node to add
+     * @param {string} role - The role of the node (fromNode or toNode)
+     */
     self.addNodeToQueryElement = function (queryElement, node, role) {
         self.classeMap[node.id] = node;
         queryElement[role] = node;
@@ -158,6 +193,14 @@ var KGquery = (function () {
         self.divsMap[nodeDivId] = node;
     };
 
+    /**
+     * Adds a node to the graph.
+     * @function
+     * @name addNode
+     * @param {Object} selectedNode - The node to add
+     * @param {Object} nodeEvent - The event that triggered the addition
+     * @param {Function} [callback] - Optional callback after adding
+     */
     self.addNode = function (selectedNode, nodeEvent, callback) {
         if (!selectedNode) {
             return;
@@ -318,6 +361,16 @@ var KGquery = (function () {
         );
     };
 
+    /**
+     * Executes a query on the knowledge graph.
+     * @function
+     * @name queryKG
+     * @param {string} output - The desired output format ('table', 'Graph', 'shacl')
+     * @param {Object} options - Additional query options
+     * @param {Object} [options.aggregate] - Aggregation settings
+     * @param {boolean} isVirtualSQLquery - Whether this is a virtual SQL query
+     * @throws {Error} If the query execution fails
+     */
     self.queryKG = function (output, options, isVirtualSQLquery) {
         if (!options) {
             options = {};
@@ -356,6 +409,14 @@ var KGquery = (function () {
         });
     };
 
+    /**
+     * Executes a path query on the knowledge graph.
+     * @function
+     * @name execPathQuery
+     * @param {Object} options - Query options
+     * @param {Object} [options.aggregate] - Aggregation settings
+     * @param {Function} callback - Callback function to handle results
+     */
     self.execPathQuery = function (options, callback) {
         var optionalPredicatesSparql = "";
         KGquery.selectClauseSparql = [];
@@ -643,6 +704,13 @@ var KGquery = (function () {
         );
     };
 
+    /**
+     * Converts query results to a Vis.js graph.
+     * @function
+     * @name queryResultToVisjsGraph
+     * @param {Object} result - The query results
+     * @throws {Error} If result size exceeds maxResultSizeforLineageViz
+     */
     self.queryResultToVisjsGraph = function (result) {
         var classNodes = self.getAllQueryPathClasses();
 
@@ -719,6 +787,14 @@ var KGquery = (function () {
         });
     };
 
+    /**
+     * Converts query results to a table format.
+     * @function
+     * @name queryResultToTable
+     * @param {Object} result - The query results
+     * @param {Array} result.results.bindings - The query result bindings
+     * @param {Array} result.head.vars - The query result variables
+     */
     self.queryResultToTable = function (result) {
         var data = result.results.bindings;
         //prepare columns
@@ -833,6 +909,14 @@ var KGquery = (function () {
         }
     };
 
+    /**
+     * Gets the variable name for a node.
+     * @function
+     * @name getVarName
+     * @param {Object} node - The node to get variable name for
+     * @param {boolean} [withoutQuestionMark] - Whether to omit the question mark prefix
+     * @returns {string} The variable name
+     */
     self.getVarName = function (node, withoutQuestionMark) {
         var varName = (withoutQuestionMark ? "" : "?") + Sparql_common.formatStringForTriple(node.alias || node.label || Sparql_common.getLabelFromURI(node.id), true);
 

@@ -2,7 +2,8 @@
     "source": {
       "include": [
         "public/vocables/modules/tools/mappingModeler",
-        "public/vocables/modules/tools/KGquery"
+        "public/vocables/modules/tools/KGquery",
+        "public/vocables/modules/tools/lineage"
         ],
       "includePattern": ".+\\.js(doc)?$",
       "excludePattern": "(^|\\/|\\\\)_"

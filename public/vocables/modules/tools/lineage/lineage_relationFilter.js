@@ -3,16 +3,31 @@ import common from "../../shared/common.js";
 self.lineageVisjsGraph;
 import PromptedSelectWidget from "../../uiWidgets/promptedSelectWidget.js";
 
+/**
+ * @module Lineage_relationFilter
+ * @description Module for filtering and managing relationships between ontology nodes.
+ * Provides functionality for:
+ * - Creating and applying filters on node relationships
+ * - Managing property restrictions and constraints
+ * - Supporting different filter types (string, date, number)
+ * - Handling domain and range filters
+ * - Managing filter roles (subject/object)
+ * - Supporting complex filter conditions
+ * - Validating filter inputs
+ */
+
 var Lineage_relationFilter = (function () {
     var self = {};
     var restrictions = null;
     var constraints = null;
 
     /**
-     * @function showAddFilterDiv
-     * @memberof Lineage_relationFilter
-     * @description Affiche l'interface utilisateur pour ajouter un filtre sur une relation.
-     * @param {boolean} clear - Indique si la propriété actuelle doit être réinitialisée.
+     * Displays the user interface for adding a filter on a relation.
+     * @function
+     * @name showAddFilterDiv
+     * @memberof module:Lineage_relationFilter
+     * @param {boolean} clear - Indicates if the current property should be reset.
+     * @returns {void}
      */
     self.showAddFilterDiv = function (clear) {
         if (clear) {
@@ -123,10 +138,12 @@ var Lineage_relationFilter = (function () {
     };
 
     /**
-     * @function onSelectRoleType
-     * @memberof Lineage_relationFilter
-     * @description Gère la sélection d'un type de rôle (sujet ou objet) pour le filtre.
-     * @param {string} role - Le rôle sélectionné ("subject" ou "object").
+     * Handles the selection of a role type (subject or object) for the filter.
+     * @function
+     * @name onSelectRoleType
+     * @memberof module:Lineage_relationFilter
+     * @param {string} role - The selected role ("subject" or "object").
+     * @returns {void}
      */
     self.onSelectRoleType = function (role) {
         self.currentResourceFilterRole = role;
@@ -213,10 +230,12 @@ var Lineage_relationFilter = (function () {
   };*/
 
     /**
-     * @function onCommonUIWidgetSelectObjectValue
-     * @memberof Lineage_relationFilter
-     * @description Applique un formatage spécifique à la valeur sélectionnée en fonction de son type.
-     * @param {string} value - La valeur sélectionnée.
+     * Applies specific formatting to the selected value based on its type.
+     * @function
+     * @name onCommonUIWidgetSelectObjectValue
+     * @memberof module:Lineage_relationFilter
+     * @param {string} value - The selected value.
+     * @returns {void}
      */
     self.onCommonUIWidgetSelectObjectValue = function (value) {
         if (value.indexOf("xsd") == 0) {
@@ -230,9 +249,11 @@ var Lineage_relationFilter = (function () {
     };
 
     /**
-     * @function addFilter
-     * @memberof Lineage_relationFilter
-     * @description Ajoute un filtre basé sur la propriété et la valeur sélectionnées.
+     * Adds a filter based on the selected property and value.
+     * @function
+     * @name addFilter
+     * @memberof module:Lineage_relationFilter
+     * @returns {void}
      */
     self.addFilter = function () {
         var role = $("#lineage_relation_filterRoleSelect2").val();

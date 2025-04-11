@@ -1,3 +1,9 @@
+/**
+ * KGquery_myQueries Module
+ * Handles saving and loading of knowledge graph queries.
+ * @module KGquery_myQueries
+ */
+
 import KGquery from "./KGquery.js";
 import SavedQueriesWidget from "../../uiWidgets/savedQueriesWidget.js";
 import KGquery_graph from "./KGquery_graph.js";
@@ -5,6 +11,19 @@ import KGquery_graph from "./KGquery_graph.js";
 var KGquery_myQueries = (function () {
     var self = {};
 
+    /**
+     * Saves the current query state.
+     * @function
+     * @name save
+     * @memberof module:KGquery_myQueries
+     * @param {Function} callback - Callback function called with (err, data) where data contains:
+     * @param {Object} callback.data - The data to save
+     * @param {Object} callback.data.querySets - The current query sets
+     * @param {string} callback.data.sparqlQuery - The current SPARQL query
+     * @param {string} callback.data.optionalPredicatesSparql - Optional predicates in SPARQL format
+     * @param {string} callback.data.selectClauseSparql - The SELECT clause in SPARQL format
+     * @returns {void}
+     */
     self.save = function (callback) {
         //   KGquery.execPathQuery({ dontExecute: true }, function (err, query) {
 
@@ -22,6 +41,18 @@ var KGquery_myQueries = (function () {
         //  });
     };
 
+    /**
+     * Loads a saved query state.
+     * @function
+     * @name load
+     * @memberof module:KGquery_myQueries
+     * @param {Error} err - Error object if loading failed
+     * @param {Object} result - The saved query state to load
+     * @param {Object} result.querySets - The saved query sets
+     * @param {string} result.optionalPredicatesSparql - Optional predicates in SPARQL format
+     * @param {string} result.selectClauseSparql - The SELECT clause in SPARQL format
+     * @returns {void}
+     */
     self.load = function (err, result) {
         // return; // ! not working correctly !!!!!!!!!!!!!!!!!!!!!!!!
         if (err) {

@@ -6,6 +6,18 @@ import OntologyModels from "../../shared/ontologyModels.js";
 import Lineage_createRelation from "./lineage_createRelation.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
 
+/**
+ * @module Lineage_createResource
+ * @description Module for creating new resources (classes, named individuals) in the ontology.
+ * Provides functionality for:
+ * - Creating new classes and named individuals
+ * - Generating and managing RDF triples
+ * - Handling resource URIs and labels
+ * - Managing resource relationships and hierarchies
+ * - Supporting metadata and provenance information
+ * - Validating resource creation inputs
+ */
+
 var Lineage_createResource = (function () {
     var self = {};
 
@@ -248,6 +260,7 @@ var Lineage_createResource = (function () {
      * @function
      * @name showResourceTriples
      * @memberof Lineage_createResource
+     * @returns {void}
      */
     self.showResourceTriples = function () {
         var num = 0;
@@ -429,6 +442,26 @@ var Lineage_createResource = (function () {
     self.startCreateRessourceBot = function () {
         CreateResource_bot.start(null, { source: Lineage_sources.activeSource }, function (err, result) {});
     };
+
+    /**
+     * Helper function to create a triple object with subject, predicate and object.
+     * 
+     * @function
+     * @name getTriple
+     * @param {string} resourceUri - The URI of the resource (subject)
+     * @param {string} predicate - The predicate of the triple
+     * @param {string} object - The object of the triple
+     * @returns {Object} Triple object with subject, predicate and object properties
+     */
+    function getTriple(resourceUri, predicate, object) {
+        var triple = {
+            subject: resourceUri,
+            predicate: predicate,
+            object: object,
+        };
+        return triple;
+    }
+
     return self;
 })();
 

@@ -1,15 +1,21 @@
 {
-    "source": {
-      "include": [
-        "public/vocables/modules/tools/mappingModeler",
-        "public/vocables/modules/tools/KGquery",
-        "public/vocables/modules/tools/lineage"
-        ],
-      "includePattern": ".+\\.js(doc)?$",
-      "excludePattern": "(^|\\/|\\\\)_"
-    },
-    "opts": {
-      "destination": "./docs/docs/developer-docs",
-      "recurse": true
-    }
+   
+  "source": {
+
+    "include": [
+      "public/vocables/modules/tools/lineage",
+      "public/vocables/modules/tools/KGquery",
+      "public/vocables/modules/tools/mappingModeler"
+    ],
+    "includePattern": ".+\\.js(doc)?$",
+    "excludePattern": "(^|\\/|\\\\)_"
+  },
+  
+  "opts": {
+  
+    "destination": "./docs/docs/developer-docs",
+    
+    "recurse": true
+  
+  }
 }

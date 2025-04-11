@@ -16,8 +16,7 @@ pip install poetry
 
 ```bash
 cd docs
-python -m venv sls
-.\sls\Scripts\activate.bat
+python -m venv sls .\sls\Scripts\activate.bat
 pip install poetry
 
 

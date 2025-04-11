@@ -8,6 +8,18 @@ import LegendWidget from "../../uiWidgets/legendWidget.js";
 import Containers_graph from "../containers/containers_graph.js";
 import Sparql_generic from "../../sparqlProxies/sparql_generic.js";
 
+/**
+ * @module Lineage_decoration
+ * @description Module for managing visual decorations and styling of nodes in the lineage graph.
+ * Provides functionality for:
+ * - Managing node colors and styles based on ontology classes
+ * - Handling legends and visual indicators
+ * - Supporting different decoration schemes (upper ontology, custom)
+ * - Managing predefined color schemes
+ * - Handling node shapes and icons
+ * - Supporting dynamic visual updates
+ */
+
 //@typescript-eslint/no-unused-vars
 var Lineage_decoration = (function () {
     var self = {};

@@ -5,12 +5,32 @@ import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 import OntologyModels from "../../shared/ontologyModels.js";
 import jstreeWidget from "../../uiWidgets/jstreeWidget.js";
 
+/**
+ * @module Lineage_rules
+ * @description Module for managing ontological rules and constraints.
+ * Provides functionality for:
+ * - Creating and managing ontology rules
+ * - Handling premises and conclusions
+ * - Supporting rule-based reasoning
+ * - Managing rule components and relationships
+ * - Supporting rule validation and execution
+ * - Handling rule visualization and editing
+ * - Managing rule-based constraints
+ */
+
 var Lineage_rules = (function () {
     var self = {};
 
     self.selectedEntitiesDiv = {};
     self.conclusionsDivs = {};
 
+    /**
+     * Displays the rules dialog.
+     * @function
+     * @name showRulesDialog
+     * @memberof module:Lineage_rules
+     * @returns {void}
+     */
     self.showRulesDialog = function () {
         $("#mainDialogDiv").dialog("open");
         $("#mainDialogDiv").load("modules/tools/lineage/html/lineage_rulesDialog.html", function () {
@@ -18,6 +38,15 @@ var Lineage_rules = (function () {
             $("#lineage_rules_searchPropertyInput").bind("keydown", null, Lineage_rules.onSearchPropertyKeyDown);
         });
     };
+
+    /**
+     * Handles the class search event on key press.
+     * @function
+     * @name onSearchClassKeyDown
+     * @memberof module:Lineage_rules
+     * @param {Event} event - The keyboard event.
+     * @returns {void}
+     */
     self.onSearchClassKeyDown = function (event) {
         if (event.keyCode != 13 && event.keyCode != 9) {
             return;
@@ -26,6 +55,14 @@ var Lineage_rules = (function () {
         self.searchItem(term, "Class");
     };
 
+    /**
+     * Handles the property search event on key press.
+     * @function
+     * @name onSearchPropertyKeyDown
+     * @memberof module:Lineage_rules
+     * @param {Event} event - The keyboard event.
+     * @returns {void}
+     */
     self.onSearchPropertyKeyDown = function (event) {
         if (event.keyCode != 13 && event.keyCode != 9) {
             return;
@@ -34,6 +71,15 @@ var Lineage_rules = (function () {
         self.searchItem(term, "ObjectProperty");
     };
 
+    /**
+     * Searches for items (classes or properties) in the ontology.
+     * @function
+     * @name searchItem
+     * @memberof module:Lineage_rules
+     * @param {string} term - The search term.
+     * @param {string} type - The type of item to search for ("Class" or "ObjectProperty").
+     * @returns {void}
+     */
     self.searchItem = function (term, type) {
         var filter = "";
         if (term) {
@@ -72,6 +118,13 @@ var Lineage_rules = (function () {
         });
     };
 
+    /**
+     * Returns the context menu for the rules tree.
+     * @function
+     * @name getContextMenu
+     * @memberof module:Lineage_rules
+     * @returns {Object} The context menu items.
+     */
     self.getContextMenu = function () {
         var items = {};
 
@@ -90,6 +143,16 @@ var Lineage_rules = (function () {
 
         return items;
     };
+
+    /**
+     * Handles the selection of a node in the tree.
+     * @function
+     * @name selectTreeNodeFn
+     * @memberof module:Lineage_rules
+     * @param {Event} event - The selection event.
+     * @param {Object} obj - Object containing the selected node data.
+     * @returns {void}
+     */
     self.selectTreeNodeFn = function (event, obj) {
         self.currentTreeNode = obj.node;
         if (obj.node.children.length == 0) {
@@ -97,6 +160,15 @@ var Lineage_rules = (function () {
         }
     };
 
+    /**
+     * Adds a premise or conclusion to the rule.
+     * @function
+     * @name addPremiseOrConclusion
+     * @memberof module:Lineage_rules
+     * @param {Object} node - The node to add.
+     * @param {string} role - The role of the node ("premise" or "conclusion").
+     * @returns {void}
+     */
     self.addPremiseOrConclusion = function (node, role) {
         var containerDiv, divId;
         if (role == "premise") {
@@ -125,17 +197,40 @@ var Lineage_rules = (function () {
         $("#" + containerDiv).append(html);
     };
 
+    /**
+     * Removes a premise from the rule.
+     * @function
+     * @name clearPremise
+     * @memberof module:Lineage_rules
+     * @param {string} div - The ID of the div to remove.
+     * @returns {void}
+     */
     self.clearPremise = function (div) {
         delete self.selectedEntitiesDiv[div];
         $("#" + div).remove();
     };
 
+    /**
+     * Retrieves the implicit model of the ontology.
+     * @function
+     * @name getImplicitModel
+     * @memberof module:Lineage_rules
+     * @returns {void}
+     */
     self.getImplicitModel = function () {
         OntologyModels.getImplicitModel(Lineage_sources.activeSource, null, function (err, result) {});
 
         return;
     };
 
+    /**
+     * Adds properties to the tree for a given node.
+     * @function
+     * @name addPropertiesToTree
+     * @memberof module:Lineage_rules
+     * @param {Object} node - The node for which to add properties.
+     * @returns {void}
+     */
     self.addPropertiesToTree = function (node) {
         OntologyModels.getAllowedPropertiesBetweenNodes(node.data.source, node.data.id, null, null, function (err, result) {
             if (err) {
@@ -179,6 +274,13 @@ var Lineage_rules = (function () {
         });
     };
 
+    /**
+     * Exécute la règle définie avec les prémisses et conclusions sélectionnées.
+     * @function
+     * @name execRule
+     * @memberof module:Lineage_rules
+     * @returns {void}
+     */
     self.execRule = function () {
         var operation;
         var params = {

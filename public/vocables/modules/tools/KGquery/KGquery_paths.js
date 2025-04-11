@@ -1,3 +1,20 @@
+/**
+ * KGquery_paths Module
+ * @module KGquery_paths
+ * @description Module for managing paths in knowledge graph queries.
+ * This module provides functionality for:
+ * - Configuring and managing paths between nodes
+ * - Manipulating identifiers and variables in paths
+ * - Managing graphical display of paths
+ * - Finding shortest paths between nodes
+ * - Managing path ambiguities
+ * 
+ * @requires module:shared/common
+ * @requires module:KGquery_graph
+ * @requires module:uiWidgets/simpleListSelectorWidget
+ * @requires module:sparqlProxies/sparql_common
+ */
+
 import common from "../../shared/common.js";
 import KGquery_graph from "./KGquery_graph.js";
 import SimpleListSelectorWidget from "../../uiWidgets/simpleListSelectorWidget.js";
@@ -7,6 +24,15 @@ var KGquery_paths = (function () {
     var self = {};
     //  self.pathDivsMap = {};
 
+    /**
+     * Configures the path of a query element by finding and managing paths between nodes.
+     * @function
+     * @name setQueryElementPath
+     * @memberof KGquery_paths
+     * @param {Object} queryElement - The query element to configure
+     * @param {Function} callback - Callback function called with (err, queryElement)
+     * @returns {void}
+     */
     self.setQueryElementPath = function (queryElement, callback) {
         self.getPathBetweenNodes(queryElement.fromNode.id, queryElement.toNode.id, function (err, path) {
             if (err) {
@@ -24,6 +50,15 @@ var KGquery_paths = (function () {
         });
     };
 
+    /**
+     * Substitutes class IDs with variable names in a path.
+     * @function
+     * @name substituteClassIdToVarNameInPath
+     * @memberof KGquery_paths
+     * @param {Object} queryElement - The query element containing node information
+     * @param {Array} path - The path to transform
+     * @returns {Array} The path with substituted variable names
+     */
     self.substituteClassIdToVarNameInPath = function (queryElement, path) {
         path.forEach(function (item, index) {
             item[0] = "?" + Sparql_common.formatStringForTriple(KGquery_graph.labelsMap[item[0]], true);
@@ -33,8 +68,13 @@ var KGquery_paths = (function () {
     };
 
     /**
-     when we have several paths in a set they  need to intersect
-
+     * Checks if a path is valid in a query set.
+     * @function
+     * @name isPathValid
+     * @memberof KGquery_paths
+     * @param {Object} querySet - The query set to check
+     * @param {string} targetNodeId - The target node ID
+     * @returns {boolean} True if the path is valid, false otherwise
      */
     self.isPathValid = function (querySet, targetNodeId) {
         if (querySet.elements.length > 1) {
@@ -55,6 +95,15 @@ var KGquery_paths = (function () {
         }
     };
 
+    /**
+     * Handles duplicate class IDs in a path.
+     * @function
+     * @name processPathDuplicateClassIds
+     * @memberof KGquery_paths
+     * @param {Array} path - The path to process
+     * @param {Object} currentQueryElement - The current query element
+     * @returns {Array} The path with processed duplicate IDs
+     */
     self.processPathDuplicateClassIds = function (path, currentQueryElement) {
         //manage multiple instance or sameClass
         path.forEach(function (pathItem, index) {
@@ -70,6 +119,14 @@ var KGquery_paths = (function () {
         return path;
     };
 
+    /**
+     * Draws a path on the graph by updating edge colors.
+     * @function
+     * @name drawPathOnGraph
+     * @memberof KGquery_paths
+     * @param {Array} path - The path to draw
+     * @returns {void}
+     */
     self.drawPathOnGraph = function (path) {
         //update of graph edges color
         var newVisjsEdges = [];
@@ -89,6 +146,15 @@ var KGquery_paths = (function () {
         }
     };
 
+    /**
+     * Gets nodes linked to a given node up to a certain level.
+     * @function
+     * @name getNodeLinkedNodes
+     * @memberof KGquery_paths
+     * @param {string} fromNodeId - The starting node ID
+     * @param {number} [maxLevels=1] - Maximum number of levels to traverse
+     * @returns {Array} List of linked node IDs
+     */
     self.getNodeLinkedNodes = function (fromNodeId, maxLevels) {
         if (!maxLevels) maxLevels = 1;
         var edges = KGquery_graph.visjsData.edges;
@@ -117,6 +183,16 @@ var KGquery_paths = (function () {
         return linkedNodes;
     };
 
+    /**
+     * Finds the shortest path between two nodes.
+     * @function
+     * @name getPathBetweenNodes
+     * @memberof KGquery_paths
+     * @param {string} fromNodeId - The starting node ID
+     * @param {string} toNodeId - The destination node ID
+     * @param {Function} callback - Callback function called with (err, path)
+     * @returns {void}
+     */
     self.getPathBetweenNodes = function (fromNodeId, toNodeId, callback) {
         if (!self.vicinityArray) {
             self.vicinityArray = [];
@@ -164,6 +240,15 @@ var KGquery_paths = (function () {
         });
     };
 
+    /**
+     * Counts how many times a node appears in a query set.
+     * @function
+     * @name countNodeVarExistingInSet
+     * @memberof KGquery_paths
+     * @param {string} nodeId - The node ID to count
+     * @param {Object} querySet - The query set to analyze
+     * @returns {number} The number of occurrences of the node
+     */
     self.countNodeVarExistingInSet = function (nodeId, querySet) {
         var count = 0;
         querySet.elements.forEach(function (queryElement) {
@@ -177,6 +262,17 @@ var KGquery_paths = (function () {
         return count;
     };
 
+    /**
+     * Finds the ID of the nearest node in a query set.
+     * @function
+     * @name getNearestNodeId
+     * @memberof KGquery_paths
+     * @param {string} nodeId - The reference node ID
+     * @param {Object} querySet - The query set to analyze
+     * @param {boolean} excludeSelf - If true, excludes the node itself
+     * @param {Function} callback - Callback function called with (err, nearestNodeId)
+     * @returns {void}
+     */
     self.getNearestNodeId = function (nodeId, querySet, excludeSelf, callback) {
         var allCandidateNodesMap = {};
 
@@ -227,6 +323,15 @@ var KGquery_paths = (function () {
         );
     };
 
+    /**
+     * Manages ambiguous edges in a path.
+     * @function
+     * @name managePathAmbiguousEdges
+     * @memberof KGquery_paths
+     * @param {Array} path - The path potentially containing ambiguous edges
+     * @param {Function} callback - Callback function called with the unambiguous path
+     * @returns {void}
+     */
     self.managePathAmbiguousEdges = function (path, callback) {
         var fromToMap = {};
         path.forEach(function (pathItem, pathIndex) {

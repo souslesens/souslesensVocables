@@ -3,6 +3,7 @@ const httpProxy = require("../../../bin/httpProxy.");
 const ConfigManager = require("../../../bin/configManager.");
 const UserRequestFiltering = require("../../../bin/userRequestFiltering.");
 
+
 module.exports = function () {
     let operations = {
         POST,
@@ -13,8 +14,8 @@ module.exports = function () {
         try {
             if (req.body.POST) {
                 var body = JSON.parse(req.body.body);
-                if (req.body.graphUri == "http://purl.obolibrary.org/obo/vo.owl") {
-
+                if (req.body.body.indexOf("http://purl.obolibrary.org/obo/vo.owl")>-1) {
+                    const Parliament=require("../../../bin/parliamentProxy.js")
                     Parliament.post( body.params, function (err, result) {
                         processResponse(res, err, result);
                     });

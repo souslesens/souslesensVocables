@@ -14,12 +14,17 @@ module.exports = function () {
         try {
             if (req.body.POST) {
                 var body = JSON.parse(req.body.body);
-                if (req.body.body.indexOf("http://purl.obolibrary.org/obo/vo.owl")>-1) {
-                    const Parliament=require("../../../bin/parliamentProxy.js")
-                    Parliament.post( body.params, function (err, result) {
-                        processResponse(res, err, result);
-                    });
+                var query = body.params.query
+                if (query.indexOf("http://purl.obolibrary.org/obo/vo.owl") > -1) {
 
+                    const Parliament = require("../../../bin/parliamentProxy.js")
+                    try {
+                        Parliament.execPostQuery(query, function (err, result) {
+                            processResponse(res, err, result);
+                        });
+                    } catch (e) {
+                        next(e);
+                    }
                     return;
 
                 }

@@ -1725,6 +1725,10 @@ var Lineage_whiteboard = (function () {
                 $("#waitImg").css("display", "none");
                 return UI.message("No data found", true);
             }
+            if (result.length >self.showLimit) {
+                return alert("Too may nodes (" + result.length + ") only "+self.showLimit+"can be shown ");
+
+            }
 
             var color = self.getSourceColor(source);
 

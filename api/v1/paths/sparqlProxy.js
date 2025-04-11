@@ -1,4 +1,4 @@
-const { processResponse } = require("./utils");
+const {processResponse} = require("./utils");
 const httpProxy = require("../../../bin/httpProxy.");
 const ConfigManager = require("../../../bin/configManager.");
 const UserRequestFiltering = require("../../../bin/userRequestFiltering.");
@@ -13,6 +13,15 @@ module.exports = function () {
         try {
             if (req.body.POST) {
                 var body = JSON.parse(req.body.body);
+                if (req.body.graphUri == "http://purl.obolibrary.org/obo/vo.owl") {
+
+                    Parliament.post( body.params, function (err, result) {
+                        processResponse(res, err, result);
+                    });
+
+                    return;
+
+                }
 
                 if (ConfigManager.config && req.body.url.indexOf(ConfigManager.config.sparql_server.url) == 0) {
                     if (ConfigManager.config.sparql_server.user) {
@@ -67,7 +76,7 @@ module.exports = function () {
 
     POST.apiDoc = {
         summary: "Send a request to a different domain",
-        security: [{ restrictLoggedUser: [] }],
+        security: [{restrictLoggedUser: []}],
         operationId: "httpProxy",
         parameters: [],
         responses: {
@@ -115,7 +124,7 @@ module.exports = function () {
 
     GET.apiDoc = {
         summary: "Retrieve a request from a different domain",
-        security: [{ restrictLoggedUser: [] }],
+        security: [{restrictLoggedUser: []}],
         operationId: "httpProxy",
         parameters: [],
         responses: {

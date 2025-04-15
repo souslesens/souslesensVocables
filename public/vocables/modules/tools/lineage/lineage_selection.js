@@ -1,7 +1,30 @@
+/**
+ * @module Lineage_selection
+ * @description Module for managing node selection in the lineage graph.
+ * Provides functionality for:
+ * - Selecting and deselecting nodes
+ * - Managing multiple node selections
+ * - Visualizing selected nodes
+ * - Supporting keyboard modifiers for selection
+ * - Handling selection events and actions
+ * - Managing selection trees and hierarchies
+ * - Supporting selection-based operations
+ */
+
 var Lineage_selection = (function () {
     var self = {};
     self.selectedNodes = [];
 
+    /**
+     * Adds a node to the current selection and updates its visual appearance.
+     * @function
+     * @name addNodeToSelection
+     * @memberof module:Lineage_selection
+     * @param {Object} node - The node to add to the selection.
+     * @param {Object} node.data - The node's data.
+     * @param {string} node.data.id - The node's unique identifier.
+     * @returns {void}
+     */
     self.addNodeToSelection = function (node) {
         Lineage_selection.selectedNodes.push(node);
         $("#Lineageclasses_selectedNodesCount").html(Lineage_selection.selectedNodes.length);
@@ -9,6 +32,14 @@ var Lineage_selection = (function () {
         $("#Lineage_combine_mergeNodesDialogButton").css("display", "block");
     };
 
+    /**
+     * Clears the selection for specified node IDs or all nodes if no IDs are provided.
+     * @function
+     * @name clearNodesSelection
+     * @memberof module:Lineage_selection
+     * @param {string|string[]} [ids] - Single ID or array of node IDs to clear from selection.
+     * @returns {void}
+     */
     self.clearNodesSelection = function (ids) {
         if (ids && !Array.isArray(ids)) {
             ids = [ids];
@@ -28,6 +59,14 @@ var Lineage_selection = (function () {
         $("#Lineageclasses_selectedNodesCount").html(Lineage_selection.selectedNodes.length);
         $("#Lineage_combine_mergeNodesDialogButton").css("display", "none");
     };
+
+    /**
+     * Creates a jstree data structure from the currently selected nodes.
+     * @function
+     * @name getSelectedNodesTree
+     * @memberof module:Lineage_selection
+     * @returns {Array<Object>} Array of jstree node objects.
+     */
     self.getSelectedNodesTree = function () {
         var jstreeData = [];
         var distinctNodes = {};
@@ -53,6 +92,14 @@ var Lineage_selection = (function () {
         return jstreeData;
     };
 
+    /**
+     * Shows the selection dialog with a tree view of selected nodes.
+     * @function
+     * @name showSelectionDialog
+     * @memberof module:Lineage_selection
+     * @param {boolean} allGraphNodes - If true, selects all nodes in the graph.
+     * @returns {void}
+     */
     self.showSelectionDialog = function (allGraphNodes) {
         if (allGraphNodes) {
             Lineage_selection.selectedNodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
@@ -88,6 +135,19 @@ var Lineage_selection = (function () {
         });
     };
 
+    /**
+     * Handles node selection on hover with keyboard modifiers.
+     * @function
+     * @name selectNodesOnHover
+     * @memberof module:Lineage_selection
+     * @param {Object} node - The node being hovered.
+     * @param {Object} point - The point where the hover occurred.
+     * @param {Object} options - Keyboard modifier options.
+     * @param {boolean} options.ctrlKey - Whether the Ctrl key is pressed.
+     * @param {boolean} options.altKey - Whether the Alt key is pressed.
+     * @param {boolean} options.shiftKey - Whether the Shift key is pressed.
+     * @returns {void}
+     */
     self.selectNodesOnHover = function (node, point, options) {
         if (options.ctrlKey && options.altKey) {
             Lineage_selection.addNodeToSelection(node);
@@ -96,6 +156,15 @@ var Lineage_selection = (function () {
         }
     };
 
+    /**
+     * Handles click events on nodes in the selection tree.
+     * @function
+     * @name onSelectedNodeTreeclick
+     * @memberof module:Lineage_selection
+     * @param {Event} event - The click event.
+     * @param {Object} obj - Object containing the clicked node data.
+     * @returns {void}
+     */
     self.onSelectedNodeTreeclick = function (event, obj) {
         var node = obj.node;
         if (node.parent == "#") {
@@ -104,6 +173,14 @@ var Lineage_selection = (function () {
         NodeInfosWidget.showNodeInfos(node.data.source, node, "lineage_selection_rightPanel");
     };
 
+    /**
+     * Gets the currently selected nodes from the selection tree.
+     * @function
+     * @name getSelectedNodes
+     * @memberof module:Lineage_selection
+     * @param {boolean} onlyIds - If true, returns only node IDs instead of full node objects.
+     * @returns {Array<string|Object>} Array of node IDs or node objects.
+     */
     self.getSelectedNodes = function (onlyIds) {
         var selection = [];
         var nodes = $("#lineage_selection_selectedNodesTreeDiv").jstree(true).get_checked(true);
@@ -118,6 +195,16 @@ var Lineage_selection = (function () {
         });
         return selection;
     };
+
+    /**
+     * Executes an action on the selected nodes.
+     * @function
+     * @name onSelectionExecuteAction
+     * @memberof module:Lineage_selection
+     * @param {string} action - The action to execute ("filterBy", "decorate", "classDecorate", etc.).
+     * @param {boolean} checkSelected - Whether to check if nodes are selected before executing.
+     * @returns {void}
+     */
     self.onSelectionExecuteAction = function (action, checkSelected) {
         if (action == "filterBy") {
             self.filterBy.showDialog();
@@ -142,7 +229,19 @@ var Lineage_selection = (function () {
         }
     };
 
+    /**
+     * Filter operations for selected nodes.
+     * @namespace
+     * @memberof module:Lineage_selection
+     */
     self.filterBy = {
+        /**
+         * Shows the filter dialog for selected nodes.
+         * @function
+         * @name showDialog
+         * @memberof module:Lineage_selection.filterBy
+         * @returns {void}
+         */
         showDialog: function () {
             $("#lineage_selection_rightPanel").load("modules/tools/lineage/html/selection/lineage_selection_filterBy.html", function () {
                 return;
@@ -156,7 +255,19 @@ var Lineage_selection = (function () {
         },
     };
 
+    /**
+     * Decoration operations for selected nodes.
+     * @namespace
+     * @memberof module:Lineage_selection
+     */
     self.decorate = {
+        /**
+         * Shows the decoration dialog for selected nodes.
+         * @function
+         * @name showDialog
+         * @memberof module:Lineage_selection.decorate
+         * @returns {void}
+         */
         showDialog: function () {
             $("#lineage_selection_rightPanel").load("modules/tools/lineage/html/selection/lineage_selection_decorateDialog.html", function () {
                 $("#lineage_selection_decorate_applyButton").bind("click", Lineage_selection.decorate.execDecorate);
@@ -168,6 +279,13 @@ var Lineage_selection = (function () {
             });
         },
 
+        /**
+         * Applies decoration settings to selected nodes.
+         * @function
+         * @name execDecorate
+         * @memberof module:Lineage_selection.decorate
+         * @returns {void}
+         */
         execDecorate: function () {
             var jstreeNodes = self.getSelectedNodes();
 
@@ -200,7 +318,20 @@ var Lineage_selection = (function () {
             Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(newIds);
         },
     };
+
+    /**
+     * Class decoration operations for selected nodes.
+     * @namespace
+     * @memberof module:Lineage_selection
+     */
     self.classDecorate = {
+        /**
+         * Shows the class decoration dialog.
+         * @function
+         * @name showDialog
+         * @memberof module:Lineage_selection.classDecorate
+         * @returns {void}
+         */
         showDialog: function () {
             $("#lineage_selection_rightPanel").load("modules/tools/lineage/html/selection/lineage_selection_decorateClassDialog.html", function () {
                 $("#lineage_selection_decorate_applyButton").bind("click", Lineage_selection.classDecorate.execDecorate);

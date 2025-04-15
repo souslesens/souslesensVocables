@@ -70,7 +70,7 @@ var PlantUmlTransformer = (function () {
         });
     };
 
-    self.visjsDataToClassDiagram = function (visjsData) {
+    self.visjsDataToClassDiagram = function (visjsData, notDisplayDiagram) {
         if (!visjsData) {
             visjsData = {
                 nodes: Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(),
@@ -78,9 +78,18 @@ var PlantUmlTransformer = (function () {
             };
         }
         var nodesMap = {};
+
+        // PlantUML does not support multiple items with the same label
+        var labelsMapCount = {};
         visjsData.nodes.forEach(function (node) {
             if (node.label) {
                 var nodeLabel = node.label.replace(/[ -\(\):\/]/g, "_");
+                if (labelsMapCount[nodeLabel]) {
+                    labelsMapCount[nodeLabel]++;
+                    nodeLabel += "_" + labelsMapCount[nodeLabel];
+                } else {
+                    labelsMapCount[nodeLabel] = 1;
+                }
                 nodesMap[node.id] = nodeLabel;
             }
         });
@@ -114,7 +123,9 @@ var PlantUmlTransformer = (function () {
         str += "@enduml";
 
         console.log(str);
-
+        if (notDisplayDiagram) {
+            return str;
+        }
         $("#smallDialogDiv").html("<div id='plantUmlImg' style='width:80%;height: 500px' />");
         $("#smallDialogDiv").dialog("open");
         self.getImage(str, "plantUmlImg");

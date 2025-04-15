@@ -11,12 +11,31 @@ import OntologyModels from "../../shared/ontologyModels.js";
 import Lineage_relationIndividualsFilter from "./lineage_relationIndividualsFilter.js";
 import GraphDecorationWidget from "../../uiWidgets/graphDecorationWidget.js";
 
+/**
+ * @module Lineage_relations
+ * @description Module for managing and visualizing relationships between nodes in the lineage graph.
+ * Provides functionality for:
+ * - Drawing and filtering relationships between nodes
+ * - Managing property trees and their visualization
+ * - Handling relationship queries and filters
+ * - Managing relationship colors and visual styles
+ * - Supporting different types of relationships (hierarchical, semantic, etc.)
+ */
+
 // eslint-disable-next-line no-global-assign
 var Lineage_relations = (function () {
     var self = {};
     self.currentQueryInfos = {};
     self.whiteboardSourcesFromStatus = false;
 
+    /**
+     * Shows the dialog for drawing relations between nodes in the graph.
+     * @function
+     * @name showDrawRelationsDialog
+     * @memberof module:Lineage_relations
+     * @param {string} caller - The caller of the function ("Graph", "Tree", etc.).
+     * @returns {void}
+     */
     self.showDrawRelationsDialog = function (caller) {
         UI.showHideRightPanel("hide");
         self.drawRelationCurrentCaller = caller;
@@ -133,6 +152,13 @@ var Lineage_relations = (function () {
         });
     };
 
+    /**
+     * Returns the context menu for the properties tree.
+     * @function
+     * @name getPropertiesJstreeMenu
+     * @memberof module:Lineage_relations
+     * @returns {Object} The context menu items.
+     */
     self.getPropertiesJstreeMenu = function () {
         var items = {};
 
@@ -146,6 +172,18 @@ var Lineage_relations = (function () {
         return items;
     };
 
+    /**
+     * Handles the selection of a node in the properties tree.
+     * @function
+     * @name onSelectPropertyTreeNode
+     * @memberof module:Lineage_relations
+     * @param {Event} event - The selection event.
+     * @param {Object} object - The object containing node data.
+     * @param {Object} object.node - The selected node.
+     * @param {string} object.node.parent - The parent node ID.
+     * @param {Object} object.node.data - Additional node data.
+     * @returns {void}
+     */
     self.onSelectPropertyTreeNode = function (event, object) {
         if (object.node.parent == "#") {
             return (self.currentProperty = null);
@@ -157,6 +195,16 @@ var Lineage_relations = (function () {
         Lineage_relationFilter.currentProperty = { id: object.node.data.id, label: object.node.data.label, vocabulary: vocabulary };
         Lineage_relationFilter.showAddFilterDiv();
     };
+
+    /**
+     * Handles the selection of object type for filtering.
+     * @function
+     * @name onFilterObjectTypeSelect
+     * @memberof module:Lineage_relations
+     * @param {string} role - The role of the object (subject or object).
+     * @param {string} type - The selected object type.
+     * @returns {void}
+     */
     self.onFilterObjectTypeSelect = function (role, type) {
         var valueStr = "";
         if (type == "String") {
@@ -169,6 +217,15 @@ var Lineage_relations = (function () {
         var domainValue = valueStr;
     };
 
+    /**
+     * Validates and executes the selected action in the relations dialog.
+     * @function
+     * @name onshowDrawRelationsDialogValidate
+     * @memberof module:Lineage_relations
+     * @param {string} action - The action to execute ("clear" or "draw").
+     * @param {string} [_type] - The type of relation (unused).
+     * @returns {void}
+     */
     self.onshowDrawRelationsDialogValidate = function (action, _type) {
         if (action == "clear") {
             var properties = $("#lineageRelations_propertiesJstreeDiv").jstree().get_checked(true);
@@ -282,6 +339,17 @@ var Lineage_relations = (function () {
         $("#mainDialogDiv").dialog("close");
     };
 
+    /**
+     * Outlines nodes in the whiteboard based on their properties.
+     * @function
+     * @name outlineWhiteboardNodes
+     * @memberof module:Lineage_relations
+     * @param {Object} options - Configuration options for outlining nodes.
+     * @param {string} options.filter - SPARQL filter to apply when querying nodes.
+     * @param {string} options.output - The output format ("outline").
+     * @param {string} options.edgesColor - Color to use for edges.
+     * @returns {void}
+     */
     self.outlineWhiteboardNodes = function (options) {
         var source = Lineage_sources.activeSource;
         var subjectIds = Lineage_whiteboard.getGraphIdsFromSource(source);
@@ -319,6 +387,25 @@ var Lineage_relations = (function () {
         });
     };
 
+    /**
+     * Draws relations between nodes in the graph.
+     * @function
+     * @name drawRelations
+     * @memberof module:Lineage_relations
+     * @param {string} direction - Direction of relations ("direct", "inverse", or "both").
+     * @param {string} type - Type of relations to draw ("restrictions", "dictionary", etc.).
+     * @param {string} caller - The caller of the function ("Graph", "Tree", "leftPanel", etc.).
+     * @param {Object} options - Configuration options for drawing relations.
+     * @param {boolean} [options.skipLiterals=true] - Whether to skip literal nodes.
+     * @param {string} [options.source] - Source to use for relations.
+     * @param {string|Array} [options.data] - Data to use for relations (node IDs).
+     * @param {string} [options.output] - Output format ("table" or graph).
+     * @param {boolean} [options.returnVisjsData] - Whether to return Vis.js data.
+     * @param {string} [options.filter] - SPARQL filter to apply.
+     * @param {string} [options.includeSources] - Sources to include.
+     * @param {string} [graphDiv] - The div element where to draw the graph.
+     * @returns {void}
+     */
     self.drawRelations = function (direction, type, caller, options, graphDiv) {
         if (!options) {
             options = {};
@@ -360,6 +447,17 @@ var Lineage_relations = (function () {
         }
         var allVisjsData = { nodes: [], edges: [] };
 
+        /**
+         * Concatenates Vis.js data objects.
+         * @function
+         * @name concatVisjsdata
+         * @memberof module:Lineage_relations
+         * @param {Object} visjsData - The Vis.js data to concatenate.
+         * @param {Array} visjsData.nodes - Array of nodes to concatenate.
+         * @param {Array} visjsData.edges - Array of edges to concatenate.
+         * @returns {void}
+         * @private
+         */
         function concatVisjsdata(visjsData) {
             if (!visjsData.nodes || !visjsData.edges) {
                 return;
@@ -574,6 +672,21 @@ var Lineage_relations = (function () {
         );
     };
 
+    /**
+     * Retrieves inferred properties from the ontology model.
+     * @function
+     * @name getInferredProperties
+     * @memberof module:Lineage_relations
+     * @param {string} source - The source from which to get inferred properties.
+     * @param {Function} callback - Callback function with signature (error, result).
+     * @param {Object} result - The jstree data structure containing inferred properties.
+     * @param {Array} result.nodes - Array of nodes representing properties and their constraints.
+     * @param {Object} result.nodes[].data - Node data containing property information.
+     * @param {string} result.nodes[].data.id - Property ID.
+     * @param {string} result.nodes[].data.label - Property label.
+     * @param {Object} result.nodes[].data.constraints - Property constraints with domain and range.
+     * @returns {void}
+     */
     self.getInferredProperties = function (source, callback) {
         if (!source) {
             source = Lineage_sources.activeSource;
@@ -670,6 +783,19 @@ var Lineage_relations = (function () {
         );
     };
 
+    /**
+     * Handles the selection of a node in the properties tree.
+     * @function
+     * @name onCheckNodePropertyTreeNode
+     * @memberof module:Lineage_relations
+     * @param {Event} event - The selection event.
+     * @param {Object} obj - The object containing node data.
+     * @param {Object} obj.node - The selected node.
+     * @param {Object} obj.node.data - Node data containing property information.
+     * @param {Object} obj.node.data.constraints - Property constraints.
+     * @param {string} obj.node.data.label - Property label.
+     * @returns {void}
+     */
     self.onCheckNodePropertyTreeNode = function (event, obj) {
         self.currentPropertyTreeNode = obj.node;
         if (true || (obj.node.data && obj.node.data.constraints)) {
@@ -678,6 +804,13 @@ var Lineage_relations = (function () {
         }
     };
 
+    /**
+     * Recalls and executes the previous query.
+     * @function
+     * @name callPreviousQuery
+     * @memberof module:Lineage_relations
+     * @returns {void}
+     */
     self.callPreviousQuery = function () {
         if (!self.previousQuery) {
             return;
@@ -693,9 +826,26 @@ var Lineage_relations = (function () {
             $("#Lineage_relation_filterText2").val(self.previousQuery.propFilter);
         }
     };
+
+    /**
+     * Loads user-saved queries.
+     * @function
+     * @name loadUserQueries
+     * @memberof module:Lineage_relations
+     * @returns {void}
+     */
     self.loadUserQueries = function () {
         //   Sparql_CRUD.list("STORED_QUERIES", null, null, "lineageRelations_savedQueriesSelect");
     };
+
+    /**
+     * Handles the selection of a saved query.
+     * @function
+     * @name onSelectSavedQuery
+     * @memberof module:Lineage_relations
+     * @param {string} id - The ID of the saved query to load.
+     * @returns {void}
+     */
     self.onSelectSavedQuery = function (id) {
         $("#lineageRelations_history_deleteBtn").css("display", "inline");
         Sparql_CRUD.loadItem(id, {}, function (err, result) {
@@ -713,6 +863,14 @@ var Lineage_relations = (function () {
             }
         });
     };
+
+    /**
+     * Saves the current query configuration.
+     * @function
+     * @name saveCurrentQuery
+     * @memberof module:Lineage_relations
+     * @returns {void}
+     */
     self.saveCurrentQuery = function () {
         var propIds = $("#lineageRelations_propertiesJstreeDiv").jstree().get_checked(true);
         var propFilter = $("#Lineage_relation_filterText2").val();
@@ -729,6 +887,14 @@ var Lineage_relations = (function () {
         });
     };
 
+    /**
+     * Deletes a saved query.
+     * @function
+     * @name deleteSavedQuery
+     * @memberof module:Lineage_relations
+     * @param {string} id - The ID of the query to delete.
+     * @returns {void}
+     */
     self.deleteSavedQuery = function (id) {
         if (confirm("delete query")) {
             Sparql_CRUD.delete("STORED_QUERIES", id, function (err, result) {
@@ -741,6 +907,16 @@ var Lineage_relations = (function () {
         }
     };
 
+    /**
+     * Draws equivalent classes in the graph.
+     * @function
+     * @name drawEquivalentClasses
+     * @memberof module:Lineage_relations
+     * @param {string} source - The source containing the equivalent classes.
+     * @param {Array<string>} data - Array of class IDs to find equivalents for.
+     * @param {Function} callback - Callback function with signature (error, result).
+     * @returns {void}
+     */
     self.drawEquivalentClasses = function (source, data, callback) {
         var filter = " Filter (?prop= <http://www.w3.org/2002/07/owl#equivalentClass>)";
         Sparql_OWL.getFilteredTriples(source, data, null, null, { filter: filter }, function (err, result) {

@@ -6,6 +6,20 @@ import Lineage_relations from "./lineage_relations.js";
 import DateWidget from "../../uiWidgets/dateWidget.js";
 import IndividualValueFilterWidget from "../../uiWidgets/individualValuefilterWidget.js";
 
+/**
+ * @module Lineage_relationIndividualsFilter
+ * @description Module for managing filters on individuals in ontology relationships.
+ * Provides functionality for:
+ * - Filtering individuals based on class membership
+ * - Supporting date-based filtering of individuals
+ * - Managing advanced search criteria for individuals
+ * - Handling individual selection and filtering UI
+ * - Supporting range and domain filtering
+ * - Managing filter persistence and application
+ * - Supporting multiple filter types and combinations
+ * - Coordinating with relation visualization
+ */
+
 var Lineage_relationIndividualsFilter = (function () {
     var self = {};
     self.filter = "";

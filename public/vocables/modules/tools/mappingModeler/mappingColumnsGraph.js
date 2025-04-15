@@ -1147,7 +1147,7 @@ var MappingColumnsGraph = (function () {
                     success: function (result, _textStatus, _jqXHR) {
                         var data = JSON.parse(result);
                         if (data?.options?.config?.sparqlServerUrl) {
-                            data.options.config.sparqlServerUrl = "default";
+                            data.options.config.sparqlServerUrl = "_default";
                         }
                         Export.downloadJSON(data, fileName);
                     },

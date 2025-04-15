@@ -1,3 +1,9 @@
+/**
+ * KGquery_nodeSelector Module
+ * Module for selecting and managing nodes in knowledge graph queries.
+ * @module KGquery_nodeSelector
+ */
+
 import KGquery from "./KGquery.js";
 import JstreeWidget from "../../uiWidgets/jstreeWidget.js";
 import KGquery_paths from "./KGquery_paths.js";
@@ -5,6 +11,17 @@ import KGquery_paths from "./KGquery_paths.js";
 var KGquery_nodeSelector = (function () {
     var self = {};
     self.jstreeData = [];
+
+    /**
+     * Shows the implicit model in a jsTree structure.
+     * @function
+     * @name showImplicitModelInJstree
+     * @memberof module:KGquery_nodeSelector
+     * @param {Object} visjsData - The Vis.js graph data containing nodes and edges
+     * @param {Array} visjsData.nodes - Array of nodes in the graph
+     * @param {Array} visjsData.edges - Array of edges in the graph
+     * @returns {void}
+     */
     self.showImplicitModelInJstree = function (visjsData) {
         var jstreeData = [];
         self.graphVisjsdata = visjsData;
@@ -66,6 +83,17 @@ var KGquery_nodeSelector = (function () {
         });
     };
 
+    /**
+     * Handles node selection in the jsTree.
+     * @function
+     * @name onSelectNode
+     * @memberof module:KGquery_nodeSelector
+     * @param {Object} node - The selected node from jsTree
+     * @param {string} node.id - The node ID
+     * @param {string} node.text - The node text/label
+     * @param {Object} node.data - Additional node data
+     * @returns {void}
+     */
     self.onSelectNode = function (node) {
         var targetNodes = KGquery_paths.getNodeLinkedNodes(node.id, 3);
         self.alowedNodes = targetNodes; //self.alowedNodes.concat(targetNodes)

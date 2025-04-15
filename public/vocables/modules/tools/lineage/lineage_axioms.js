@@ -1,5 +1,16 @@
 import NodeInfosAxioms from "../axioms/nodeInfosAxioms.js";
 
+/**
+ * @module Lineage_axioms
+ * @description Module for managing and visualizing ontological axioms in the lineage graph.
+ * Provides functionality for:
+ * - Visualizing classes with their associated axioms
+ * - Drawing axiom relationships in the graph
+ * - Supporting different types of axioms
+ * - Testing axiom functionality
+ * - Managing axiom metadata and visualization
+ */
+
 var Lineage_axioms = (function () {
     var self = {};
 

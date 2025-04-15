@@ -20,6 +20,7 @@ import Lineage_createRelation from "./lineage_createRelation.js";
 import NodeInfosAxioms from "../axioms/nodeInfosAxioms.js";
 import UserDataWidget from "../../uiWidgets/userDataWidget.js";
 import Containers_tree from "../containers/containers_tree.js";
+import Export from "../../shared/export.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -29,6 +30,11 @@ import Containers_tree from "../containers/containers_tree.js";
  The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
+/**
+ * @module Lineage_whiteboard
+ 
  */
 
 var Lineage_whiteboard = (function () {
@@ -87,18 +93,13 @@ var Lineage_whiteboard = (function () {
 
     self.queriesStack = [];
 
-    /**
-     *
-     *
-     * @param callback
-     */
 
     self.firstLoad = true;
 
     /**
      * @function
      * @name onLoaded
-     * @memberof Lineage_whiteboard
+     * @memberof module:Lineage_whiteboard
      * Initializes the Lineage whiteboard module when loaded.
      * Sets up the search widget, initializes the UI menu bar, and loads necessary components.
      * Also resets the visualization graph for a fresh start.
@@ -126,7 +127,7 @@ var Lineage_whiteboard = (function () {
     /**
      * @function
      * @name unload
-     * @memberof Lineage_whiteboard
+     * @memberof module:Lineage_whiteboard
      * Unloads the Lineage whiteboard by clearing the graph display and resetting the lateral panel.
      * @returns {void}
      */
@@ -139,7 +140,7 @@ var Lineage_whiteboard = (function () {
     /**
      * @function
      * @name resetVisjsGraph
-     * @memberof Lineage_whiteboard
+     * @memberof module:Lineage_whiteboard
      * Resets the Vis.js graph by clearing the graph container and drawing a new empty graph.
      * @returns {void}
      */
@@ -151,7 +152,7 @@ var Lineage_whiteboard = (function () {
     /**
      * @function
      * @name loadSources
-     * @memberof Lineage_whiteboard
+     * @memberof module:Lineage_whiteboard
      * Loads available sources for the Lineage module and initializes the UI components.
      * Handles errors and sets up the lateral panel with the required elements.
      * @returns {void}
@@ -171,18 +172,18 @@ var Lineage_whiteboard = (function () {
     /**
      * @function
      * @name onSourceSelect
-     * @memberof Lineage_whiteboard
+     * @memberof module:Lineage_whiteboard
      * Handles the selection of a source.
      * @param {string} sourceLabel - The label of the selected source.
      * @param {Object} event - The event object containing information about the interaction.
      * @returns {void}
      */
-    self.onSourceSelect = function (sourceLabel, /** @type {{ button: number; }} */ event) {};
+    self.onSourceSelect = function (sourceLabel,  event) {};
 
     /**
      * @function
      * @name onGraphOrTreeNodeClick
-     * @memberof Lineage_whiteboard
+     * @memberof module:Lineage_whiteboard
      * Handles click events on graph or tree nodes, determining appropriate actions based on key combinations.
      * @param {Object} node - The clicked node object containing data.
      * @param {Object} nodeEvent - The event object containing key press information.
@@ -241,7 +242,7 @@ var Lineage_whiteboard = (function () {
     /**
      * @function
      * @name jstreeContextMenu
-     * @memberof Lineage_whiteboard
+     * @memberof module:Lineage_whiteboard
      * Generates a custom context menu for the jsTree component, providing additional actions based on user permissions.
      * @returns {Object} - The context menu items object.
      */
@@ -250,7 +251,7 @@ var Lineage_whiteboard = (function () {
 
         items.addSimilarlabels = {
             label: "add similars (label)",
-            action: function (/** @type {any} */ _e) {
+            action: function (_e) {
                 Lineage_whiteboard.drawSimilarsNodes("sameLabel");
             },
         };
@@ -258,7 +259,7 @@ var Lineage_whiteboard = (function () {
         if (authentication.currentUser.groupes.indexOf("admin") > -1) {
             items.wikiPage = {
                 label: "Wiki page",
-                action: function (/** @type {any} */ _e) {
+                action: function (_e) {
                     var source = $("#sourcesTreeDiv").jstree().get_selected()[0];
                     Lineage_whiteboard.showWikiPage(source);
                 },
@@ -271,7 +272,7 @@ var Lineage_whiteboard = (function () {
     /**
      * @function
      * @name selectTreeNodeFn
-     * @memberof Lineage_whiteboard
+     * @memberof module:Lineage_whiteboard
      * Handles selection events on tree nodes, managing node data and triggering actions based on user interaction.
      * @param {Object} event - The event object triggered by node selection.
      * @param {Object} propertiesMap - Contains node data and event-related properties.
@@ -292,7 +293,7 @@ var Lineage_whiteboard = (function () {
     /**
      * @function
      * @name initUI
-     * @memberof Lineage_whiteboard
+     * @memberof module:Lineage_whiteboard
      * Initializes the user interface, resetting elements and loading necessary components.
      * @param {boolean} clearTree - If true, clears the tree and resets the lineage sources.
      * @returns {void}
@@ -318,7 +319,7 @@ var Lineage_whiteboard = (function () {
     /**
      * @function
      * @name clearLastAddedNodesAndEdges
-     * @memberof Lineage_whiteboard
+     * @memberof module:Lineage_whiteboard
      * Clears the last added nodes and edges from the graph, ensuring a clean state.
      * @returns {void}
      */
@@ -335,7 +336,7 @@ var Lineage_whiteboard = (function () {
     /**
      * @function
      * @name showLastAddedNodesOnly
-     * @memberof Lineage_whiteboard
+     * @memberof module:Lineage_whiteboard
      * Displays only the last added nodes by removing all other nodes from the graph.
      * @returns {void}
      */
@@ -358,7 +359,7 @@ var Lineage_whiteboard = (function () {
     /**
      * @function
      * @name showHideIndividuals
-     * @memberof Lineage_whiteboard
+     * @memberof module:Lineage_whiteboard
      * Toggles the visibility of individuals (nodes with a specific shape) in the graph.
      * @returns {void}
      */
@@ -384,7 +385,7 @@ var Lineage_whiteboard = (function () {
     /**
      * @function
      * @name drawModel
-     * @memberof Lineage_whiteboard
+     * @memberof module:Lineage_whiteboard
      * Draws top classes and restrictions.
      * @param {string} source - The source name to be visualized.
      * @param {string} graphDiv - The ID of the div container where the graph will be drawn.
@@ -482,7 +483,7 @@ var Lineage_whiteboard = (function () {
     /**
      * @function
      * @name drawTopConcepts
-     * @memberof Lineage_whiteboard
+     * @memberof module:Lineage_whiteboard
      * @description Retrieves and displays the top-level concepts for a given ontology source.
      * It ensures that concepts are properly linked to their respective sources and adds them to the graph.
      * @param {string} source - The ontology source to retrieve top concepts from.
@@ -534,7 +535,7 @@ var Lineage_whiteboard = (function () {
             }
         }
         if (imports) {
-            imports.forEach(function (/** @type {string} */ importedSource) {
+            imports.forEach(function (importedSource) {
                 if (!Config.sources[importedSource]) {
                     return;
                 }
@@ -583,7 +584,7 @@ var Lineage_whiteboard = (function () {
         allSources.push(source);
         async.eachSeries(
             allSources,
-            function (/** @type {string} */ source, /** @type {(arg0: undefined) => void} */ callbackEach) {
+            function ( source,  callbackEach) {
                 UI.message("loading source " + source);
                 var queryOptions = { selectGraph: true, withoutImports: Lineage_sources.activeSource || false };
                 for (var key in options) {
@@ -647,7 +648,7 @@ var Lineage_whiteboard = (function () {
                     callbackEach();
                 });
             },
-            function (/** @type {any} */ err, /** @type {any} */ _result) {
+            function (err, _result) {
                 if (err) {
                     if (callback) {
                         return callback(err);
@@ -679,7 +680,7 @@ var Lineage_whiteboard = (function () {
     /**
      * @function
      * @name isResultAcceptable
-     * @memberof Lineage_whiteboard
+     * @memberof module:Lineage_whiteboard
      * @description Checks if the result set is acceptable based on predefined constraints.
      * If too many nodes are present, an alert is shown, and false is returned.
      * If no data is found, a message is displayed.
@@ -701,7 +702,7 @@ var Lineage_whiteboard = (function () {
     /**
      * @function
      * @name initWhiteBoard
-     * @memberof Lineage_whiteboard
+     * @memberof module:Lineage_whiteboard
      * @description Initializes the whiteboard by clearing or redrawing the graph if necessary.
      * If the graph is empty or the force parameter is set to true, a new empty graph is drawn.
      * @param {boolean} force - If true, forces the graph to reset even if it's not empty.
@@ -716,7 +717,7 @@ var Lineage_whiteboard = (function () {
     /**
      * @function
      * @name drawNewGraph
-     * @memberof Lineage_whiteboard
+     * @memberof module:Lineage_whiteboard
      * @description Draws a new graph with provided data and options. Configures visualization settings
      * such as physics, layout, and interaction settings. Also manages node and edge interactions.
      * @param {Object} visjsData - The data containing nodes and edges to be displayed.
@@ -775,7 +776,7 @@ var Lineage_whiteboard = (function () {
                         },
                     },
                 },
-                onAddNodeToGraph: function (/** @type {any} */ _properties, /** @type {any} */ _senderId) {
+                onAddNodeToGraph: function (_properties, _senderId) {
                     if (_properties.items.length > 0) {
                         if (!Lineage_sources.activeSource) {
                             var node = self.lineageVisjsGraph.data.nodes.get(_properties.items[0]);
@@ -892,16 +893,14 @@ var Lineage_whiteboard = (function () {
      * @param {any} source - The data source for which to retrieve the node IDs.
      * @returns {Array<string>|null} An array of node IDs related to the source, or null if the graph is empty.
      */
-    self.getGraphIdsFromSource = function (/** @type {any} */ source) {
+    self.getGraphIdsFromSource = function ( source) {
         if (!self.lineageVisjsGraph.isGraphNotEmpty()) {
             return null;
         }
         var existingNodes = self.lineageVisjsGraph.data.nodes.get();
-        /**
-         * @type {any[]}
-         */
+      
         var sourceNodes = [];
-        existingNodes.forEach(function (/** @type {{ id: string; data: { source: any; id: any; }; }} */ item) {
+        existingNodes.forEach(function ( item) {
             if (item.id != "#" && item.data && item.data.source == source) {
                 if (item.id.indexOf(" ") < 0) sourceNodes.push(item.data.id || item.id);
             }
@@ -934,13 +933,13 @@ var Lineage_whiteboard = (function () {
      * @param {Array<Object>} clusterNode.data.cluster - An array of objects with child and childLabel properties.
      * @returns {void} Copies the formatted list to the clipboard and displays a message.
      */
-    self.listClusterToClipboard = function (/** @type {{ data: { cluster: any[]; }; }} */ clusterNode) {
+    self.listClusterToClipboard = function ( clusterNode) {
         var text = "";
-        clusterNode.data.cluster.forEach(function (/** @type {{ child: string; childLabel: string; }} */ item, /** @type {any} */ _index) {
+        clusterNode.data.cluster.forEach(function ( item, _index) {
             text += item.child + "," + item.childLabel + "\n";
         });
 
-        common.copyTextToClipboard(text, function (/** @type {any} */ err, /** @type {any} */ result) {
+        common.copyTextToClipboard(text, function (err, result) {
             if (err) {
                 return UI.message(err);
             }
@@ -958,12 +957,10 @@ var Lineage_whiteboard = (function () {
      * @param {string} clusterNode.data.source - The source related to the cluster.
      * @returns {void} Initializes the tree widget and loads the cluster data.
      */
-    self.listClusterContent = function (/** @type {{ data: { cluster: any[]; source: any; }; }} */ clusterNode) {
-        /**
-         * @type {{ id: any; text: any; parent: string; data: { source: any; id: any; label: any; }; }[]}
-         */
+    self.listClusterContent = function ( clusterNode) {
+       
         var jstreeData = [];
-        clusterNode.data.cluster.forEach(function (/** @type {{ child: any; childLabel: any; }} */ item, /** @type {any} */ _index) {
+        clusterNode.data.cluster.forEach(function ( item, _index) {
             jstreeData.push({
                 id: item.child,
                 text: item.childLabel,
@@ -974,7 +971,7 @@ var Lineage_whiteboard = (function () {
 
         var jstreeOptions = {
             openAll: true,
-            selectTreeNodeFn: function (/** @type {any} */ event, /** @type {any} */ propertiesMap) {
+            selectTreeNodeFn: function ( event,  propertiesMap) {
                 return Lineage_whiteboard.selectTreeNodeFn(event, propertiesMap);
             },
             contextMenu: SearchWidget.getJstreeConceptsContextMenu(),
@@ -995,7 +992,7 @@ var Lineage_whiteboard = (function () {
      * @param {string} clusterNode.id - The unique ID of the cluster node.
      * @returns {void} Visualizes the cluster nodes and edges in the graph or copies large clusters to the clipboard.
      */
-    self.openCluster = function (/** @type {{ data: { cluster: any[]; source: any; }; id: any; }} */ clusterNode) {
+    self.openCluster = function ( clusterNode) {
         UI.message("");
         if (clusterNode.data.cluster.length > self.showLimit) {
             self.listClusterToClipboard(clusterNode);
@@ -1006,7 +1003,7 @@ var Lineage_whiteboard = (function () {
         var attrs = self.getNodeVisjAttrs(item.child1.type, item.subject, clusterNode.data.source);
         var visjsData = { nodes: [], edges: [] };
         var existingNodes = self.lineageVisjsGraph.getExistingIdsMap();
-        clusterNode.data.cluster.forEach(function (/** @type {{ child1: string; child1Label: any; concept: string; }} */ item) {
+        clusterNode.data.cluster.forEach(function (item) {
             if (!existingNodes[item.child1]) {
                 existingNodes[item.child1] = 1;
                 visjsData.nodes.push({
@@ -1052,37 +1049,35 @@ var Lineage_whiteboard = (function () {
      * @param {any} _descendantsAlso - Flag to include descendants in the search for similar nodes.
      * @returns {void} Updates the graph with similar nodes and edges, or displays an alert in case of an error.
      */
-    self.drawSimilarsNodes = function (/** @type {any} */ _similarType, /** @type {any} */ _node, /** @type {any} */ _sources, /** @type {any} */ _descendantsAlso) {
+    self.drawSimilarsNodes = function ( _similarType,  _node, _sources, _descendantsAlso) {
         var toSource = $("#sourcesTreeDiv").jstree().get_selected()[0];
         var fromSource = Lineage_sources.activeSource;
         if (!self.lineageVisjsGraph.isGraphNotEmpty()) {
             return;
         }
         var nodes = self.lineageVisjsGraph.data.nodes.get();
-        /**
-         * @type {any[]}
-         */
+       
         var labels = [];
         var ids = null;
         var labelsMap = {};
-        nodes.forEach(function (/** @type {{ data: { label: string | number; }; }} */ node) {
+        nodes.forEach(function ( node) {
             if (node.data && node.data.label) {
                 labels.push(node.data.label);
             }
             labelsMap[node.data.label] = node;
         });
 
-        SearchUtil.getSimilarLabelsInSources(fromSource, [toSource], labels, ids, "exactMatch", null, function (/** @type {any} */ err, /** @type {any[]} */ result) {
+        SearchUtil.getSimilarLabelsInSources(fromSource, [toSource], labels, ids, "exactMatch", null, function ( err,  result) {
             if (err) {
                 return alert(err.responseText);
             }
 
             var existingNodes = self.lineageVisjsGraph.getExistingIdsMap();
             var visjsData = { nodes: [], edges: [] };
-            result.forEach(function (/** @type {{ label: string | number; matches: { [x: string]: any[]; }; }} */ item) {
+            result.forEach(function ( item) {
                 var sourceNode = labelsMap[item.label];
                 for (var source in item.matches) {
-                    item.matches[source].forEach(function (/** @type {{ id: string; label: any; }} */ match) {
+                    item.matches[source].forEach(function ( match) {
                         if (match.id == sourceNode.id) {
                             return;
                         }
@@ -1156,7 +1151,7 @@ var Lineage_whiteboard = (function () {
      * @param {string | number} sourceLabel - The label of the source for which to display the linked data properties.
      * @returns {void} Populates the tree view with properties from the source configuration.
      */
-    self.initLinkedDataPropertiesSelect = function (/** @type {string | number} */ sourceLabel) {
+    self.initLinkedDataPropertiesSelect = function ( sourceLabel) {
         var schemaType = Config.sources[sourceLabel].schemaType;
         if (schemaType == "INDIVIDUAL") {
             var preferredProperties = Config.sources[sourceLabel].preferredProperties;
@@ -1166,7 +1161,7 @@ var Lineage_whiteboard = (function () {
 
             var jstreeData = [];
             var uriPrefixes = {};
-            preferredProperties.forEach(function (/** @type {string} */ item) {
+            preferredProperties.forEach(function ( item) {
                 var p;
                 p = item.lastIndexOf("#");
                 if (p < 0) {
@@ -1201,9 +1196,9 @@ var Lineage_whiteboard = (function () {
      * @param {Object} nodeData - The data of the node to fetch the property ranges for.
      * @returns {void}
      */
-    self.graphNodeNeighborhoodRanges = function (/** @type {{ id: string; label: string; }} */ nodeData) {
+    self.graphNodeNeighborhoodRanges = function ( nodeData) {
         var fromSource = Lineage_sources.activeSource;
-        Sparql_OWL.getObjectPropertiesDomainAndRange(source, [nodeData.id], {}, function (/** @type {any} */ err, /** @type {any[]} */ result) {
+        Sparql_OWL.getObjectPropertiesDomainAndRange(source, [nodeData.id], {}, function ( err, result) {
             if (err) {
                 return UI.message(err);
             }
@@ -1215,7 +1210,7 @@ var Lineage_whiteboard = (function () {
             var existingIds = self.lineageVisjsGraph.getExistingIdsMap();
             var hasProperties = false;
             var labelStr = "<b>" + nodeData.label + "</b>\n";
-            result.forEach(function (/** @type {{ propLabel: { value: any; }; prop: { value: any; }; rangeLabel: { value: any; }; range: { value: any; }; }} */ item) {
+            result.forEach(function ( item) {
                 hasProperties = true;
                 var propLabel;
                 if (item.propLabel) {
@@ -1343,7 +1338,7 @@ var Lineage_whiteboard = (function () {
 
                             query += "}";
                             var url = sparql_url + "?format=json&query=";
-                            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: source }, function (/** @type {any} */ err, /** @type {{ results: { bindings: any; }; }} */ result) {
+                            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: source }, function (err, result) {
                                 if (err) {
                                     return callbackEach();
                                 }
@@ -1535,8 +1530,8 @@ var Lineage_whiteboard = (function () {
         var visjsData = { nodes: [], edges: [] };
         async.eachSeries(
             slices,
-            function (/** @type {any} */ slice, /** @type {(arg0: undefined) => void} */ callbackEach) {
-                Sparql_OWL.getNodeParents(source, null, slice, 1, options, function (/** @type {any} */ err, /** @type {any[]} */ result) {
+            function (slice, callbackEach) {
+                Sparql_OWL.getNodeParents(source, null, slice, 1, options, function (err, result) {
                     if (err) {
                         return callbackEach(err);
                     }
@@ -1635,7 +1630,7 @@ var Lineage_whiteboard = (function () {
                     callbackEach();
                 });
             },
-            function (/** @type {any} */ err) {
+            function (err) {
                 $("#waitImg").css("display", "none");
                 if (err) {
                     if (callback) {
@@ -1689,7 +1684,7 @@ var Lineage_whiteboard = (function () {
 
             parentIds = [];
             var nodes = self.lineageVisjsGraph.data.nodes.get();
-            nodes.forEach(function (/** @type {{ data: { source: any; id: any; }; }} */ node) {
+            nodes.forEach(function (node) {
                 if ((source == Lineage_sources.activeSource || (node.data && node.data.source == source)) && node.data && node.data.id != source) {
                     parentIds.push(node.data.id);
                 }
@@ -2007,7 +2002,7 @@ var Lineage_whiteboard = (function () {
      * @param {Array<Object>|Object} [edges] - The edges to apply decoration to. If not provided, all edges will be processed.
      * @returns {void}
      */
-    self.drawLinkedDataProperties = function (/** @type {any} */ propertyId, /** @type {any} */ classIds, /** @type {{ inverse?: any; }} */ options) {
+    self.drawLinkedDataProperties = function (propertyId, classIds, options) {
         if (!options) {
             options = {};
         }
@@ -2036,7 +2031,7 @@ var Lineage_whiteboard = (function () {
             subjects = classIds;
         }
         UI.message("");
-        Sparql_OWL.getFilteredTriples(source, subjects, [propertyId], objects, null, function (/** @type {any} */ err, /** @type {any[]} */ result) {
+        Sparql_OWL.getFilteredTriples(source, subjects, [propertyId], objects, null, function (err, result) {
             if ($("#lineage_clearLinkedDataPropertiesCBX").prop("checked")) {
                 var oldIds = Object.keys(self.currentLinkedDataProperties);
                 self.lineageVisjsGraph.data.nodes.remove(oldIds);
@@ -2156,7 +2151,7 @@ var Lineage_whiteboard = (function () {
         var existingNodes = self.lineageVisjsGraph.getExistingIdsMap();
         self.currentExpandLevel += 1;
         sparqlResults.forEach(
-            function (/** @type {{ range: { value?: any; range?: string; }; prop: { value: string; }; rangeLabel: { value: any; }; domain: { value: any; }; propLabel: { value: string; }; }} */ item) {
+            function (item) {
                 if (!item.range) {
                     item.range = { value: "?_" + item.prop.value };
                 }
@@ -2242,7 +2237,7 @@ var Lineage_whiteboard = (function () {
      * @param {boolean} [_descendantsAlso] - A flag to include descendants as well.
      * @returns {void}
      */
-    self.drawObjectProperties = function (/** @type {any} */ source, /** @type {string | null} */ classIds, /** @type {any} */ _descendantsAlso) {
+    self.drawObjectProperties = function (source, classIds, _descendantsAlso) {
         if (!classIds) {
             if (!source) {
                 source = Lineage_sources.activeSource;
@@ -2269,7 +2264,7 @@ var Lineage_whiteboard = (function () {
                     withoutImports: Lineage_sources.activeSource || false,
                     addInverseRestrictions: 1,
                 },
-                function (/** @type {any} */ err, /** @type {any[]} */ result) {
+                function (err, result) {
                     if (err) {
                         return UI.message(err);
                     }
@@ -2749,7 +2744,7 @@ restrictionSource = Config.predicatesSource;
                 var shape = Lineage_whiteboard.defaultShape;
                 result.forEach(
                     function (
-                        /** @type {{ concept: { value: string; }; conceptLabel: { value: any; }; value: { value: any; }; prop: { value: string; }; valueLabel: { value: any; }; propLabel: { value: string; }; node: { value: any; }; }} */ item,
+                        item,
                     ) {
                         // filter blanknodes
                         if (!item.subject.value.startsWith("http") || !item.value.value.startsWith("http")) return;
@@ -2906,16 +2901,13 @@ restrictionSource = Config.predicatesSource;
      * displaying the relationships in a graph format.
      * @function
      * @name drawDictionarySameAs
-     * @memberof Lineage_whiteboard
+     * @memberof module:Lineage_whiteboard
      * @returns {void}
      */
     self.drawDictionarySameAs = function () {
-        /**
-         * @param {any[]} restrictionNodes
-         */
         function processMetadata(restrictionNodes) {
             var restrictionIds = [];
-            restrictionNodes.forEach(function (/** @type {{ node: { id: any; }; }} */ bNode) {
+            restrictionNodes.forEach(function (bNode) {
                 restrictionIds.push(bNode.node.id);
             });
         }
@@ -2934,7 +2926,7 @@ restrictionSource = Config.predicatesSource;
      * and visualizes the results in the graph, adding new nodes and edges as necessary.
      * @function
      * @name drawNamedLinkedData
-     * @memberof Lineage_whiteboard
+     * @memberof module:Lineage_whiteboard
      * @param {any[]} [classIds] - The list of class IDs to filter the linked data by. If not provided, it will be retrieved from the active source.
      * @returns {void}
      */
@@ -2948,7 +2940,7 @@ restrictionSource = Config.predicatesSource;
         }
         UI.message("");
 
-        Sparql_OWL.getNamedLinkedData(source, classIds, null, function (/** @type {any} */ err, /** @type {any[]} */ result) {
+        Sparql_OWL.getNamedLinkedData(source, classIds, null, function (err, /** @type {any[]} */ result) {
             if (err) {
                 return UI.message(err);
             }
@@ -2964,7 +2956,7 @@ restrictionSource = Config.predicatesSource;
             if (!Array.isArray(classIds)) {
                 classIds = [classIds];
             }
-            result.forEach(function (/** @type {{ node: { value: string; }; nodeLabel: { value: any; }; concept: { value: string; }; conceptLabel: { value: any; }; }} */ item) {
+            result.forEach(function (item) {
                 if (!existingNodes[item.node.value]) {
                     existingNodes[item.node.value] = 1;
                     visjsData.nodes.push({
@@ -3033,11 +3025,11 @@ restrictionSource = Config.predicatesSource;
      * This function collapses the specified node and removes any connected nodes in the "from" direction.
      * @function
      * @name collapseNode
-     * @memberof Lineage_whiteboard
+     * @memberof module:Lineage_whiteboard
      * @param {any} nodeId - The ID of the node to collapse.
      * @returns {void}
      */
-    self.collapseNode = function (/** @type {any} */ nodeId) {
+    self.collapseNode = function (nodeId) {
         if (nodeId) {
             var children = self.lineageVisjsGraph.network.getConnectedNodes(nodeId, "from");
             self.lineageVisjsGraph.data.nodes.remove(children);
@@ -3050,7 +3042,7 @@ restrictionSource = Config.predicatesSource;
      * opening clusters, showing property information, or removing nodes from the graph.
      * @function
      * @name setGraphPopupMenus
-     * @memberof Lineage_whiteboard
+     * @memberof module:Lineage_whiteboard
      * @param {Object} node - The node that was clicked on in the graph.
      * @param {Event} event - The event triggered by the click, used to set the context menu options.
      * @returns {void}
@@ -3143,12 +3135,9 @@ restrictionSource = Config.predicatesSource;
             animation: true,
         });
 
-        /**
-         * @type {{ id: any; size: any; shadow: any; shape: any; font: { color: string; }; }[]}
-         */
         var newNodes = [];
         nodes = self.lineageVisjsGraph.data.nodes.get();
-        nodes.forEach(function (/** @type {{ data: { initialParams: { size: any; shape: any; shadow?: any; }; }; shape: any; size: any; id: any; }} */ node) {
+        nodes.forEach(function ( node) {
             if (!node.data) {
                 return;
             }
@@ -3256,7 +3245,7 @@ restrictionSource = Config.predicatesSource;
                 }
             });
 
-            result.forEach(function (/** @type {{ [x: string]: { value: any; }; concept: { value: string | number; }; conceptLabel: { value: any; }; }} */ item) {
+            result.forEach(function (item) {
                 var shape = conceptType == "NamedIndividual" ? self.namedIndividualShape : self.defaultShape;
                 if (options.shape) {
                     shape = options.shape;
@@ -3443,7 +3432,7 @@ self.zoomGraphOnNode(node.data[0].id, false);
          * @param {Object} event - The event object, typically the click event.
          * @returns {void}
          */
-        showGraphPopupMenu: function (/** @type {{ from: any; }} */ node, /** @type {any} */ point, /** @type {any} */ event) {
+        showGraphPopupMenu: function ( node,  point,  event) {
             if (node.from) {
                 self.currentGraphEdge = node;
                 self.currentGraphNode = null;
@@ -3482,7 +3471,7 @@ self.zoomGraphOnNode(node.data[0].id, false);
          * @param {boolean} options.dbleClick - Indicates if the click was a double-click.
          * @returns {void}
          */
-        onNodeClick: function (/** @type {{ data: { cluster: any; }; }} */ node, /** @type {any} */ point, /** @type {{ dbleClick: any; }} */ options) {
+        onNodeClick: function (node,  point, options) {
             if (!node) {
                 PopupMenuWidget.hidePopup("popupMenuWidgetDiv");
 
@@ -4269,16 +4258,26 @@ attrs.color=self.getSourceColor(superClassValue)
         toGraphMl: function () {
             self.lineageVisjsGraph.toGraphMl();
         },
-
+        /**
+         * @function
+         * @name toGraphMl
+         * @memberof module:graphActions.graph
+         * Exports the graph to the GraphML format, which can be used for further analysis or visualization in compatible tools.
+         * @returns {void}
+         */
+        toPlantUML: function () {
+            self.lineageVisjsGraph.toPlantUML(true);
+        },
         /**
          * @function
          * @name exportGraphToDataTable
          * @memberof module:graphActions.graph
+         * *@param {boolean} exportData - If true, exports visjsGraph elements directy without using dataTable
          * Exports the graph data to a tabular format (data table) for easier inspection and manipulation.
          * @returns {void}
          */
-        exportGraphToDataTable: function () {
-            Export.exportGraphToDataTable(self.lineageVisjsGraph);
+        exportGraphToDataTable: function (exportData) {
+            Export.exportGraphToDataTable(self.lineageVisjsGraph, null, null, null, exportData);
         },
 
         /**
@@ -4335,6 +4334,52 @@ attrs.color=self.getSourceColor(superClassValue)
                 }
             });
         },
+        /**
+         * Exports the current whiteboard graph to a JSON file.
+         *
+         * @function
+         * @name exportWhiteboard
+         * @memberof module:graphActions.graph
+         * @returns {void}
+         *
+         */
+        exportWhiteboard: function () {
+            if (Lineage_whiteboard.lineageVisjsGraph.data && Lineage_whiteboard.lineageVisjsGraph.data.nodes.get().length > 0) {
+                var nodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
+                var positions = Lineage_whiteboard.lineageVisjsGraph.network.getPositions();
+                var data = {
+                    nodes: nodes,
+                    edges: Lineage_whiteboard.lineageVisjsGraph.data.edges.get(),
+                    context: Lineage_whiteboard.lineageVisjsGraph.currentContext,
+                    positions: positions,
+                };
+                var fileName = MainController.currentSource + "_whiteBoard.json";
+                Export.downloadJSON(data, fileName);
+            } else {
+                alert("No Whiteboard to save");
+            }
+        },
+        /**
+         * Display a whiteboard graph from a JSON file.
+         *
+         * @function
+         * @name importWhiteboard
+         * @memberof module:graphActions.graph
+         * @returns {void}
+         *
+         */
+        importWhiteboard: function () {
+            ImportFileWidget.showImportDialog(function (err, result) {
+                if (err) {
+                    return alert(err);
+                }
+                var data = JSON.parse(result);
+                if (data.nodes.length == 0) {
+                    return alert("no nodes in file");
+                }
+                self.loadGraphFromJSON(data);
+            });
+        },
     };
     /**
      * @function
@@ -4366,7 +4411,7 @@ attrs.color=self.getSourceColor(superClassValue)
             }
         });
 
-        data.edges.forEach(function (/** @type {{ id: string | number; }} */ edge) {
+        data.edges.forEach(function (edge) {
             if (!existingNodes[edge.id]) {
                 existingNodes[edge.id] = 1;
                 visjsData.edges.push(edge);

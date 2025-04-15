@@ -445,7 +445,7 @@ var Lineage_createResource = (function () {
 
     /**
      * Helper function to create a triple object with subject, predicate and object.
-     * 
+     *
      * @function
      * @name getTriple
      * @param {string} resourceUri - The URI of the resource (subject)

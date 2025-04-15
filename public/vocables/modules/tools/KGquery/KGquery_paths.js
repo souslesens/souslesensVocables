@@ -8,7 +8,7 @@
  * - Managing graphical display of paths
  * - Finding shortest paths between nodes
  * - Managing path ambiguities
- * 
+ *
  * @requires module:shared/common
  * @requires module:KGquery_graph
  * @requires module:uiWidgets/simpleListSelectorWidget

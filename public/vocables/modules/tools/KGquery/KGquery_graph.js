@@ -16,7 +16,6 @@ var KGquery_graph = (function () {
 
     self.labelsMap = {};
 
-
     self.visjsOptions = {
         onclickFn: function (node, point, nodeEvent) {
             if (!node) {

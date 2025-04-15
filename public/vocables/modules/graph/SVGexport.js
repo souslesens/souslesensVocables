@@ -49,7 +49,7 @@ var SVGexport = (function () {
 
             var options = {
                 nodes: {
-                  ////  shape:"box",
+                    ////  shape:"box",
                     borderWidth: 4,
                     size: 30,
                     color: {

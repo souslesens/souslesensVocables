@@ -1,8 +1,7 @@
-const {processResponse} = require("./utils");
+const { processResponse } = require("./utils");
 const httpProxy = require("../../../bin/httpProxy.");
 const ConfigManager = require("../../../bin/configManager.");
 const UserRequestFiltering = require("../../../bin/userRequestFiltering.");
-
 
 module.exports = function () {
     let operations = {
@@ -14,10 +13,9 @@ module.exports = function () {
         try {
             if (req.body.POST) {
                 var body = JSON.parse(req.body.body);
-                var query = body.params.query
-                if (query.indexOf("http://purl.obolibrary.org/obo/vo.owl") > -1) {
-
-                    const Parliament = require("../../../bin/parliamentProxy.js")
+                var query = body.params.query;
+                if (false && (query.indexOf("http://purl.obolibrary.org/obo/vo.owl") > -1 || query.indexOf("http://purl.obolibrary.org/obo") > -1)) {
+                    const Parliament = require("../../../bin/parliamentProxy.js");
                     try {
                         Parliament.execPostQuery(query, function (err, result) {
                             processResponse(res, err, result);
@@ -26,7 +24,6 @@ module.exports = function () {
                         next(e);
                     }
                     return;
-
                 }
 
                 if (ConfigManager.config && req.body.url.indexOf(ConfigManager.config.sparql_server.url) == 0) {
@@ -82,7 +79,7 @@ module.exports = function () {
 
     POST.apiDoc = {
         summary: "Send a request to a different domain",
-        security: [{restrictLoggedUser: []}],
+        security: [{ restrictLoggedUser: [] }],
         operationId: "httpProxy",
         parameters: [],
         responses: {
@@ -130,7 +127,7 @@ module.exports = function () {
 
     GET.apiDoc = {
         summary: "Retrieve a request from a different domain",
-        security: [{restrictLoggedUser: []}],
+        security: [{ restrictLoggedUser: [] }],
         operationId: "httpProxy",
         parameters: [],
         responses: {

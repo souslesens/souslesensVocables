@@ -40,7 +40,7 @@ var KGquery = (function () {
         //self.oldshowHideEditButtons=Lineage_sources.showHideEditButtons;
         //Lineage_sources.showHideEditButtons = UI.disableEditButtons;
         UI.initMenuBar(KGquery.loadSource);
-        KGquery_graph.visjsData=null;
+        KGquery_graph.visjsData = null;
         //KGquery.clearAll();
         UI.disableEditButtons();
         if (Config.clientCache.KGquery) {
@@ -351,11 +351,7 @@ var KGquery = (function () {
                 //  KGconstraints_validator.process(result);
             } else if (output == "gantt") {
                 self.queryResultToGantt(result);
-            }
-
-
-
-            else {
+            } else {
                 Config.userTools.KGquery.toTools[output](result);
             }
         });
@@ -569,8 +565,8 @@ var KGquery = (function () {
                         groupByStr = " GROUP BY " + options.aggregate.groupBy;
                     } else {
                         selectStr += selectClauseSparql;
-                        Object.keys(distinctTypesMap).forEach(function(type){
-                            selectStr+=' '+type;
+                        Object.keys(distinctTypesMap).forEach(function (type) {
+                            selectStr += " " + type;
                         });
                     }
 
@@ -960,12 +956,9 @@ var KGquery = (function () {
         KGquery.queryKG("shacl");
     };
 
-    self.queryResultToGantt= function (result) {
-var implicitModel=KGquery_graph.visjsData
-        GanttWidget.showDialog (null,implicitModel, result, function(err, result){
-
-    })
-
+    self.queryResultToGantt = function (result) {
+        var implicitModel = KGquery_graph.visjsData;
+        GanttWidget.showDialog(null, implicitModel, result, function (err, result) {});
     };
 
     return self;

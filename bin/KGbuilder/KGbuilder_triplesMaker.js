@@ -79,7 +79,6 @@ var KGbuilder_triplesMaker = {
                         async.series(
                             [
                                 function (callbackSeries) {
-                                   
                                     KGbuilder_triplesMaker.getTripleSubject(tableMappings, mapping, line, function (err, result) {
                                         if (err) {
                                             if (err.indexOf("no mapping.subject") > -1) {

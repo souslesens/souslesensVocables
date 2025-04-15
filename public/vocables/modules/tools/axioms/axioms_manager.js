@@ -94,9 +94,8 @@ var Axioms_manager = (function () {
     };
 
     self.getManchesterAxiomsFromTriples = function (source, triples, callback) {
-
-        if(!source){
-            source=NodeInfosAxioms.currentSource
+        if (!source) {
+            source = NodeInfosAxioms.currentSource;
         }
         var rawManchesterStr = "";
 

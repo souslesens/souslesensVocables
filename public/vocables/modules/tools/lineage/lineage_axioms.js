@@ -28,8 +28,7 @@ var Lineage_axioms = (function () {
                 return alert(result.result);
             }
 
-
-            var existingNodes=Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap()
+            var existingNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
             result.forEach(function (item) {
                 item.axiomTypes.forEach(function (type) {
                     if (!axiomTypes[type]) {
@@ -52,8 +51,8 @@ var Lineage_axioms = (function () {
                         to: type,
                     });
                 });
-                if(!existingNodes[item.class]) {
-                    existingNodes[item.class]=1
+                if (!existingNodes[item.class]) {
+                    existingNodes[item.class] = 1;
                     visjsData.nodes.push({
                         id: item.class,
                         label: item.label,
@@ -68,12 +67,12 @@ var Lineage_axioms = (function () {
                     });
                 }
             });
-if( Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()){
-    Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(visjsData.nodes)
-    Lineage_whiteboard.lineageVisjsGraph.data.edges.update(visjsData.edges)
-}else {
-    Lineage_whiteboard.drawNewGraph(visjsData, "graphDiv");
-}
+            if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
+                Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(visjsData.nodes);
+                Lineage_whiteboard.lineageVisjsGraph.data.edges.update(visjsData.edges);
+            } else {
+                Lineage_whiteboard.drawNewGraph(visjsData, "graphDiv");
+            }
         });
     };
 

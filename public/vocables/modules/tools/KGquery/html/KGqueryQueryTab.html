@@ -7,7 +7,7 @@
             <button class="slsv-button-1" onclick="KGquery.clearAll();KGquery.switchRightPanel(true)">Clear</button>
 
             <button class="slsv-button-1" onclick="KGquery.queryKG('table')">Table</button>
-            <button class="slsv-button-1" onclick="KGquery.queryKG('gantt')">Gantt</button>
+            <!--   <button class="slsv-button-1" onclick="KGquery.queryKG('gantt')">Gantt</button>-->
             <!-- <button onclick="KGquery.queryKG('vijsGraph')">Graph</button>-->
             <button class="slsv-button-1" onclick="KGquery.aggregateQuery()">Aggregate</button>
             <button class="slsv-button-1" onclick="KGquery.checkRequirements()">check</button>
@@ -22,7 +22,8 @@
 
             <!--<button onclick="TimeLineWidget.init()">TimeLine</button>-->
         </div>
-        <div> <input type="checkbox" id="KGquery_displayGraphInList" onchange="KGquery_graph.onDisplayGraphInListCBXchange()"/>
+        <div>
+            <input type="checkbox" id="KGquery_displayGraphInList" onchange="KGquery_graph.onDisplayGraphInListCBXchange()" />
             Select nodes in list
         </div>
     </div>

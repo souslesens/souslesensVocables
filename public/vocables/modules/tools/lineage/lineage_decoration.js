@@ -95,7 +95,7 @@ var Lineage_decoration = (function () {
 
         var distinctNodeClassesMap = {};
         var legendColorsMap = {};
-        var ancestorsSourcemap={}
+        var ancestorsSourcemap = {};
         async.series(
             [
                 //build distinctNodeClassesMap
@@ -138,31 +138,27 @@ var Lineage_decoration = (function () {
                                 }
                                 if (nodeType) {
                                     distinctNodeClassesMap[parent.subject.value][0].data.parentClass = nodeType;
-
                                 }
                             }
                         });
                         callbackSeries();
                     });
-
                 },
                 // get nodeClassesAncestors and set classes colors
                 function (callbackSeries) {
-                 /*   var uniqueTypes = {};
+                    /*   var uniqueTypes = {};
                     var classes = Object.keys(distinctNodeClassesMap);*/
 
                     for (var classUri in distinctNodeClassesMap) {
-
                         var ancestors = OntologyModels.getClassHierarchyTreeData(Lineage_sources.activeSource, classUri, "ancestors");
 
                         if (distinctNodeClassesMap[classUri][0].data.rdfType == "NamedIndividual") {
                             ancestors = OntologyModels.getClassHierarchyTreeData(Lineage_sources.activeSource, distinctNodeClassesMap[classUri][0].data.parentClass, "ancestors");
                         }
                         if (ancestors) {
-
                             var color = null;
                             ancestors.forEach(function (ancestor) {
-                                ancestorsSourcemap[ancestor.id]=ancestor.source
+                                ancestorsSourcemap[ancestor.id] = ancestor.source;
                                 if (!color) {
                                     color = self.getPredefinedColor(ancestor.id, Config.currentTopLevelOntology);
                                     if (color) {
@@ -170,13 +166,11 @@ var Lineage_decoration = (function () {
                                         legendColorsMap[ancestor.id] = ancestor;
                                     }
                                 }
-
                             });
                             if (!color) {
                                 color = "#ddd";
                             }
                             distinctNodeClassesMap[classUri].color = color;
-
                         }
                     }
 
@@ -217,8 +211,6 @@ var Lineage_decoration = (function () {
                     var newVisJsNodes = [];
                     // get source decoration data
 
-
-
                     Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(newVisJsNodes);
                     for (var key in distinctNodeClassesMap) {
                         distinctNodeClassesMap[key].forEach(function (node) {
@@ -226,11 +218,11 @@ var Lineage_decoration = (function () {
                                 return;
                             }
 
-                            var data = node.data
+                            var data = node.data;
                             if (data && ancestorsSourcemap[node.id]) {
-                                data.source = ancestorsSourcemap[node.id]
+                                data.source = ancestorsSourcemap[node.id];
                             }
-                            var newNode = {id: node.id, color: distinctNodeClassesMap[key].color, data: data};
+                            var newNode = { id: node.id, color: distinctNodeClassesMap[key].color, data: data };
                             // blank nodes
                             if (newNode.id.startsWith("_:b")) {
                                 newNode.shape = "hexagon";

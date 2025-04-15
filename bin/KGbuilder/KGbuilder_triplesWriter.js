@@ -29,9 +29,8 @@ const KGbuilder_triplesWriter = {
      * @param {Function} callback - Node-style async Function called to proccess result or handle error
      */
     writeTriples: function (allTriples, graphUri, sparqlServerUrl, callback) {
-
         if (sparqlServerUrl == "_default") {
-        sparqlServerUrl = ConfigManager.config.sparql_server.url;
+            sparqlServerUrl = ConfigManager.config.sparql_server.url;
         }
 
         var totalTriples = 0;

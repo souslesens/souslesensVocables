@@ -1508,7 +1508,7 @@ var OntologyModels = (function () {
                         classes[key].source = source;
                     }
                 } else {
-                    item.source=source
+                    item.source = source;
                     classes[key] = item;
                 }
             }

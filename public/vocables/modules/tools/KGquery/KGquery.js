@@ -3,7 +3,7 @@
  * Module for querying and visualizing knowledge graphs.
  * Provides functionality to build and execute queries on knowledge graphs.
  * @module KGquery
- 
+
  */
 
 import Lineage_sources from "../lineage/lineage_sources.js";
@@ -24,6 +24,7 @@ import KGquery_myQueries from "./KGquery_myQueries.js";
 import SQLquery_filters from "./SQLquery_filters.js";
 import KGquery_controlPanel from "./KGquery_controlPanel.js";
 import KGquery_paths from "./KGquery_paths.js";
+import GanttWidget from "../../uiWidgets/ganttWidget.js";
 
 import UI from "../../../modules/shared/UI.js";
 
@@ -45,7 +46,7 @@ var KGquery = (function () {
     /**
      * Called when the module is loaded.
      * Initializes the user interface and loads saved queries.
-     * @function 
+     * @function
      * @name onLoaded
      * @memberof module:KGquery
      * @returns {void}
@@ -404,7 +405,7 @@ var KGquery = (function () {
      * @name aggregateQuery
      * @memberof module:KGquery
      * @returns {void}
-     
+
      */
     self.aggregateQuery = function () {
         var message = "";
@@ -1242,6 +1243,11 @@ var KGquery = (function () {
      */
     self.checkRequirements = function () {
         KGquery.queryKG("shacl");
+    };
+
+    self.queryResultToGantt = function (result) {
+        var implicitModel = KGquery_graph.visjsData;
+        GanttWidget.showDialog(null, implicitModel, result, function (err, result) {});
     };
 
     /**

@@ -108,8 +108,6 @@ var httpProxy = {
             console.log(" POST-----------USING  proxy---------" + proxy);
         }
 
-        options.rejectUnauthorized = false;
-
         request(options, function (error, response, body) {
             if (error) {
                 console.log(error);

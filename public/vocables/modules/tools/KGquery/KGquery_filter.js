@@ -80,6 +80,7 @@ var KGquery_filter = (function () {
             text: "Properties",
             parent: "#",
         });
+
         queryNonObjectProperties.forEach(function (item) {
             var id = item.varName + "_" + item.property.label;
             var nodeDivId = item.nodeDivId;

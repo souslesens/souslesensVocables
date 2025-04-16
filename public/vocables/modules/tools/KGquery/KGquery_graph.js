@@ -1,10 +1,3 @@
-/**
- * KGquery_graph Module
- * Handles graph visualization and manipulation for knowledge graph queries.
- * Provides functionality for drawing, saving, and loading graph visualizations.
- * @module KGquery_graph
- */
-
 import VisjsGraphClass from "../../graph/VisjsGraphClass.js";
 import KGquery from "./KGquery.js";
 import Lineage_whiteboard from "../lineage/lineage_whiteboard.js";
@@ -23,7 +16,6 @@ var KGquery_graph = (function () {
 
     self.labelsMap = {};
 
-   
     self.visjsOptions = {
         onclickFn: function (node, point, nodeEvent) {
             if (!node) {
@@ -1023,13 +1015,13 @@ var KGquery_graph = (function () {
 
     /**
          * Draws the model using the current visjsData.
-         * 
+         *
          * @function
          * @name drawModel
          * @memberof KGquery_graph
          * @param {boolean} [displayGraphInList] - Whether to display the graph as a list
          * @returns {void}
-         * 
+         *
          * @description
          * This function handles the visualization of the graph model. It performs several steps:
          * 1. Updates the labels map for nodes and edges

@@ -21,6 +21,7 @@ import mappingModeler from "./mappingModeler.js";
 import mappingColumnsGraph from "./mappingColumnsGraph.js";
 import Lineage_sources from "../lineage/lineage_sources.js";
 import MainController from "../../shared/mainController.js";
+import dataSourcesManager from "./dataSourcesManager.js";
 
 /**
  * MappingModeler module.
@@ -1299,6 +1300,40 @@ var MappingModeler = (function () {
         }
         PlantUmlTransformer.visjsDataToClassDiagram(visjsData);
     };
+
+
+
+
+    self.applyRestrictions=function(){
+        var nodes = MappingColumnsGraph.visjsGraph.data.nodes.get();
+        var edges = MappingColumnsGraph.visjsGraph.data.edges.get();
+        var nodesMap={}
+        nodes.forEach(function(item){
+          nodesMap[item.id]=item
+        })
+        var classesMap={}
+        var existingRelationsMap={}
+        edges.forEach(function(edge){
+            if(nodesMap[edge.from].data.type=="Column" && nodesMap[edge.to].data.type=="Column" ){
+                existingRelationsMap[ nodesMap[edge.to].id]= nodesMap[edge.from].id
+            }
+
+           if(nodesMap[edge.from].data.type=="Column" && nodesMap[edge.to].data.type=="Class" ){
+               classesMap[ nodesMap[edge.to].id]= nodesMap[edge.from].id
+           }
+
+        })
+        var classes=Object.keys(classesMap)
+
+        var restrictions=Sparql_OWL.getObjectRestrictions(dataSourcesManager.currentSlsvSource,classes,null, function(err, result){
+            result.forEach(function(item){
+
+            })
+
+        })
+
+
+    }
 
     return self;
 })();

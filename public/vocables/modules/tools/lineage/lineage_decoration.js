@@ -105,14 +105,9 @@ var Lineage_decoration = (function () {
             nodeIds.push(node.id);
         });
 
-        /*  var hierarchies = {};
-          var legendJsTreeData = [];
-          var legendClassesMap = {};
-          var newVisJsNodes = [];*/
-
         var distinctNodeClassesMap = {};
         var legendColorsMap = {};
-
+        var ancestorsSourcemap = {};
         async.series(
             [
                 //build distinctNodeClassesMap
@@ -160,34 +155,22 @@ var Lineage_decoration = (function () {
                         });
                         callbackSeries();
                     });
-                    /*async.eachSeries(
-                        namedIndividualNodes,
-                        function (item, callbackEach) {
-                            Sparql_OWL.getNodeParents()
-                        },
-                        function (err) {
-
-                        }
-                    )*/
                 },
                 // get nodeClassesAncestors and set classes colors
                 function (callbackSeries) {
-                    var uniqueTypes = {};
-                    var classes = Object.keys(distinctNodeClassesMap);
+                    /*   var uniqueTypes = {};
+                    var classes = Object.keys(distinctNodeClassesMap);*/
 
                     for (var classUri in distinctNodeClassesMap) {
-                        if (classUri == "http://purl.obolibrary.org/obo/IAO_0000706") {
-                            console.log("here");
-                        }
                         var ancestors = OntologyModels.getClassHierarchyTreeData(Lineage_sources.activeSource, classUri, "ancestors");
+
                         if (distinctNodeClassesMap[classUri][0].data.rdfType == "NamedIndividual") {
                             ancestors = OntologyModels.getClassHierarchyTreeData(Lineage_sources.activeSource, distinctNodeClassesMap[classUri][0].data.parentClass, "ancestors");
                         }
-                        if (!ancestors) {
-                            var x = 3;
-                        } else {
+                        if (ancestors) {
                             var color = null;
                             ancestors.forEach(function (ancestor) {
+                                ancestorsSourcemap[ancestor.id] = ancestor.source;
                                 if (!color) {
                                     color = self.getPredefinedColor(ancestor.id, Config.currentTopLevelOntology);
                                     if (color) {
@@ -243,9 +226,15 @@ var Lineage_decoration = (function () {
                     Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(newVisJsNodes);
                     for (var key in distinctNodeClassesMap) {
                         distinctNodeClassesMap[key].forEach(function (node) {
-                            if (node.shape != "dot") return;
+                            if (node.shape != "dot") {
+                                return;
+                            }
 
-                            var newNode = { id: node.id, color: distinctNodeClassesMap[key].color };
+                            var data = node.data;
+                            if (data && ancestorsSourcemap[node.id]) {
+                                data.source = ancestorsSourcemap[node.id];
+                            }
+                            var newNode = { id: node.id, color: distinctNodeClassesMap[key].color, data: data };
                             // blank nodes
                             if (newNode.id.startsWith("_:b")) {
                                 newNode.shape = "hexagon";

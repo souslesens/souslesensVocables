@@ -52,6 +52,6 @@ poetry shell
 ````
 
 ```bash
-make clean
+
 make html
 ```

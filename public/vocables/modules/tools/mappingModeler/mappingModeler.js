@@ -376,7 +376,7 @@ var MappingModeler = (function () {
      * @param {Object} obj - The selected tree node object.
      */
     self.onSuggestionsSelect = function (event, obj) {
-        if (obj.event.type == "contextmenu") {
+        if (obj?.event?.type == "contextmenu") {
             return;
         }
         if (!DataSourceManager.currentConfig.currentDataSource) {

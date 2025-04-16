@@ -741,7 +741,7 @@ var MappingsDetails = (function () {
             if (!column) {
                 column = MappingColumnsGraph.currentGraphNode.label;
             }
-            $("#smallDialogDiv").load("./modules/tools/mappingModeler/html/transformColumnDialog.html", function (err) {
+            $("#smallDialogDiv").load("./modules/tools/mappingModeler/html/transformColumnDialog.html", function () {
                 $("#smallDialogDiv").dialog("open");
                 $("#smallDialogDiv").dialog("option", "title", "Transform for " + column);
                 self.transformColumn = column;

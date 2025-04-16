@@ -295,8 +295,6 @@
 [role="dialog"]:not(.MuiPaper-root) {
     .border-classic-color-theme4;
     border: @button1-color solid 5px !important;
-    max-height: 97vh;
-    max-width: 97vw;
     /*
     width: 95% !important;
     top: 50%;

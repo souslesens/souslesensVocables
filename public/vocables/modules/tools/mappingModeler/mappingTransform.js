@@ -342,8 +342,6 @@ var MappingTransform = (function () {
                 columnsSelection[node.id] = MappingColumnsGraph.visjsGraph.data.nodes.get(node.id);
             } else if (node.data && node.data.type == "RowIndex") {
                 columnsSelection[node.id] = MappingColumnsGraph.visjsGraph.data.nodes.get(node.id);
-            } else if (node.data && node.data.type == "URI") {
-                columnsSelection[node.id] = MappingColumnsGraph.visjsGraph.data.nodes.get(node.id);
             }
         });
         var mappings = MappingTransform.mappingsToKGcreatorJson(columnsSelection);

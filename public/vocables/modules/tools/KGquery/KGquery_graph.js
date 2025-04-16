@@ -8,7 +8,6 @@ import KGquery_nodeSelector from "./KGquery_nodeSelector.js";
 import UserDataWidget from "../../uiWidgets/userDataWidget.js";
 import DataSourceManager from "../mappingModeler/dataSourcesManager.js";
 import MainController from "../../shared/mainController.js";
-import ImportFileWidget from "../../uiWidgets/importFileWidget.js";
 
 var KGquery_graph = (function () {
     var self = {};
@@ -82,9 +81,11 @@ var KGquery_graph = (function () {
      * @returns {void}
      */
     self.drawVisjsModel = function (mode, options) {
+        var display = "graph";
         var source = KGquery.currentSource;
         var visjsData = { nodes: [], edges: [] };
 
+        //  KGquery.clearAll();
         $("#waitImg").css("display", "block");
         if (!options) {
             options = {};
@@ -97,29 +98,284 @@ var KGquery_graph = (function () {
                     if (mode.indexOf("saved") < 0) {
                         return callbackSeries();
                     }
-                    self.downloadVisjsGraph(source, function (err, result) {
-                        callbackSeries(err);
+                    self.KGqueryGraph = new VisjsGraphClass(
+                        "KGquery_graphDiv",
+                        {
+                            nodes: [],
+                            edges: [],
+                        },
+                        self.visjsOptions,
+                    );
+
+                    UserDataWidget.listUserData({ data_type: "KGmodelGraph", data_tool: "KGquery", data_source: MainController.currentSource }, function (err, result) {
+                        if (err) {
+                            return alert(err || err.responseText);
+                        }
+                        if (result.length == 0) {
+                            savedGraphLocation = "file";
+                        }
+                        // order to get last saved instance of our graph in user_data
+                        result = result.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+                        //if graph loaded with loadSaved --> display=checkBox loadAsGraph else last instance graph
+                        result.forEach(function (item) {
+                            if (item.data_label == source + "_model") {
+                                visjsData = item.data_content;
+                                display = "graph";
+                                if (visjsData && visjsData.options && visjsData.options.output) {
+                                    display = visjsData.options.output;
+                                }
+                            }
+                        });
+                        if (options.loadAsGraph) {
+                            display = "graph";
+                        }
+                        if (options.loadAsGraph == false) {
+                            display = "list";
+                        }
+                        if (display == "graph") {
+                            $("#KGquery_loadAsGraph").prop("checked", true);
+                        } else {
+                            $("#KGquery_loadAsGraph").prop("checked", false);
+                        }
+
+                        return callbackSeries();
                     });
+                },
+                // get from file if the transition to userData is not done
+                function (callbackSeries) {
+                    if (mode.indexOf("saved") < 0) {
+                        return callbackSeries();
+                    }
+                    if (savedGraphLocation != "file") {
+                        return callbackSeries();
+                    }
+                    var visjsGraphFileName = source + "_KGmodelGraph.json";
+
+                    KGquery_graph.message("loading graph display");
+                    self.KGqueryGraph.loadGraph(
+                        visjsGraphFileName,
+                        null,
+                        function (err, result) {
+                            if (err) {
+                                return callbackSeries("notFound");
+                            }
+                            visjsData = result;
+                            if (result && result.options && result.options.output) {
+                                display = result.options.output;
+                            }
+
+                            return callbackSeries();
+                        },
+                        true,
+                    );
                 },
                 //inferred
                 function (callbackSeries) {
                     if (mode.indexOf("inferred") < 0) {
                         return callbackSeries();
                     }
-                    self.buildInferredGraph(source, function (err, result) {
-                        callbackSeries(err);
+                    KGquery_graph.message("generating tbox graph from abox graph");
+                    self.getImplicitModelVisjsData(KGquery.currentSource, function (err, result2) {
+                        if (err) {
+                            return alert(err);
+                        }
+                        var oldNodesMap = {};
+                        var oldEdgesMap = {};
+                        var newNodes = [];
+                        var newEdges = [];
+                        visjsData.nodes.forEach(function (item) {
+                            oldNodesMap[item.id] = item;
+                        });
+
+                        visjsData.edges.forEach(function (item) {
+                            oldEdgesMap[item.id] = item;
+                        });
+
+                        result2.nodes.forEach(function (item) {
+                            if (!oldNodesMap[item.id]) {
+                                newNodes.push(item);
+                            }
+                        });
+                        result2.edges.forEach(function (item) {
+                            if (!oldEdgesMap[item.id]) {
+                                newEdges.push(item);
+                            }
+                        });
+
+                        visjsData.nodes = visjsData.nodes.concat(newNodes);
+                        visjsData.edges = visjsData.edges.concat(newEdges);
+
+                        callbackSeries();
                     });
+                },
+                // load annotationProperties
+                function (callbackSeries) {
+                    if (mode.indexOf("inferred") < 0) {
+                        return callbackSeries();
+                    }
+                    KGquery_graph.message("loading datatypeProperties");
+                    OntologyModels.getKGnonObjectProperties(source, {}, function (err, nonObjectPropertiesmap) {
+                        if (err) {
+                            return callbackSeries(err);
+                        }
+
+                        visjsData.nodes.forEach(function (node) {
+                            if (nonObjectPropertiesmap[node.data.id]) {
+                                if (!node.data.nonObjectProperties) {
+                                    node.data.nonObjectProperties = [];
+                                }
+                                node.data.nonObjectProperties = node.data.nonObjectProperties.concat(nonObjectPropertiesmap[node.data.id].properties);
+                            }
+                        });
+                        callbackSeries();
+                    });
+                }, //Add decoration data from decorate file
+                function (callbackSeries) {
+                    if (mode.indexOf("saved") < 0) {
+                        return callbackSeries();
+                    }
+                    var fileName = MainController.currentSource + "_decoration.json";
+                    //Get current decoration file
+                    var payload = {
+                        dir: "graphs/",
+                        fileName: fileName,
+                    };
+                    //get decoration file
+                    $.ajax({
+                        type: "GET",
+                        url: `${Config.apiUrl}/data/file`,
+                        data: payload,
+                        dataType: "json",
+                        success: function (result, _textStatus, _jqXHR) {
+                            var data = JSON.parse(result);
+
+                            for (var node in data) {
+                                var visjsCorrespondingNode = visjsData.nodes.filter((attr) => attr.id === node)[0];
+                                for (var decoration in data[node]) {
+                                    //decoration = clé de décoration
+                                    if (visjsCorrespondingNode) {
+                                        visjsCorrespondingNode[decoration] = data[node][decoration];
+                                    }
+                                }
+                            }
+                            // J'ajoute mes différentes décorations aux classes visés dans le visjsdata
+                            // Si j'ai des icones je  met dans un répertoire côté client les icones nécessaires à ce graph
+                            callbackSeries();
+                        },
+                        error(err) {
+                            return callbackSeries("no decoration");
+                        },
+                    });
+                },
+
+                function (callbackSeries) {
+                    return callbackSeries();
+                },
+
+                function (callbackSeries) {
+                    callbackSeries();
                 },
             ],
             function (err) {
-                if (err) {
-                    return alert(err.responseText || err);
+                if (err && err != "no decoration") {
+                    if (err == "notFound") {
+                        return self.drawVisjsModel("inferred");
+                    }
+                    KGquery_graph.message("", true);
+                    return alert(err);
                 }
-                self.drawModel(options.displayGraphInList);
+                KGquery_graph.message("drawing graph");
 
-                if (savedGraphLocation == "file") {
-                    self.saveVisjsModelGraph();
+                var newNodes = [];
+                visjsData.nodes.forEach(function (node) {
+                    node.x = node.x || 0;
+                    node.y = node.y || 0;
+                    //node.fixed = false;
+                    newNodes.push(node);
+                });
+                visjsData.nodes = newNodes;
+                self.visjsData = visjsData;
+
+                self.visjsData.nodes.forEach(function (item) {
+                    self.labelsMap[item.id] = item.label || item.id;
+                });
+
+                self.visjsData.edges.forEach(function (item) {
+                    self.labelsMap[item.id] = item.label || item.id;
+                });
+
+                if (display == "list") {
+                    // Draw a empty graph to fit with the object self.KGqueryGraph that has no nodes and edges
+
+                    self.KGqueryGraph.draw(function () {});
+                    return KGquery_nodeSelector.showImplicitModelInJstree(visjsData);
                 }
+
+                //patch to remove duplicate nonObjectProperties
+                self.visjsData.nodes.forEach(function (item) {
+                    if (item.data && item.data.nonObjectProperties) {
+                        var uniques = {};
+                        var newProperties = [];
+                        item.data.nonObjectProperties.forEach(function (prop) {
+                            if (!uniques[prop.id]) {
+                                uniques[prop.id] = 1;
+                                newProperties.push(prop);
+                            }
+                        });
+                        item.data.nonObjectProperties = newProperties;
+                    }
+                });
+
+                /*self.visjsOptions.visjsOptions.physics={enabled: true,
+                stabilization: {
+                  enabled: true,
+                  iterations: 1000, // Nombre d'itérations pour stabiliser le réseau
+                  updateInterval: 25,
+                  onlyDynamicEdges: false,
+                  fit: true
+                }};*/
+                self.KGqueryGraph = new VisjsGraphClass("KGquery_graphDiv", visjsData, self.visjsOptions);
+
+                // cannot get colors from loadGraph ???!!
+                self.KGqueryGraph.draw(function () {
+                    self.simulationOn = true;
+                    var newNodes = [];
+                    visjsData.nodes.forEach(function (node) {
+                        newNodes.push({ id: node.id, color: node.color, shape: node.shape });
+                    });
+                    //    self.KGqueryGraph.data.nodes.update(visjsData.nodes);
+                    KGquery_graph.message("", true);
+                    var nodes_sizes = [];
+                    self.KGqueryGraph.data.nodes.get().forEach(function (node) {
+                        //delete node.x;
+                        //delete node.y;
+                        if (node.size) {
+                            node.originalSize = node.size;
+                        }
+
+                        nodes_sizes.push(node);
+                    });
+                    self.KGqueryGraph.data.nodes.update(nodes_sizes);
+                    self.KGqueryGraph.network.moveTo({
+                        position: { x: 0, y: 0 }, // Position centrale, à ajuster si nécessaire
+                        scale: 1 / 0.9,
+                    });
+                    self.KGqueryGraph.onScaleChange();
+                    var nodes_fonts = [];
+                    visjsData.nodes.forEach(function (node) {
+                        //delete node.x;
+                        //delete node.y;
+                        if (node.font) {
+                            nodes_fonts.push({ id: node.id, font: node.font });
+                        }
+                    });
+                    self.KGqueryGraph.data.nodes.update(nodes_fonts);
+                    if (savedGraphLocation == "file") {
+                        self.saveVisjsModelGraph();
+                    }
+                });
+
+                //  KGquery.clearAll();
             },
         );
     };
@@ -164,6 +420,35 @@ var KGquery_graph = (function () {
             sources,
 
             function (source, callbackEach) {
+                /*var visjsGraphFileName = source + "_KGmodelGraph.json";
+
+                KGquery_graph.message("loading graph display");
+                self.KGqueryGraph.loadGraph(
+                    visjsGraphFileName,
+                    null,
+                    function (err, result) {
+                        if (!err && result.nodes) {
+                            result.nodes.forEach(function (node) {
+                                if (!uniqueNodes[node.id]) {
+                                    uniqueNodes[node.id] = 1;
+                                    node.x = null;
+                                    node.y = null;
+                                    //node.fixed = false;
+                                    visjsData.nodes.push(node);
+                                }
+                            });
+                            result.edges.forEach(function (edge) {
+                                if (!uniqueNodes[edge.id]) {
+                                    uniqueNodes[edge.id] = 1;
+                                    visjsData.edges.push(edge);
+                                }
+                            });
+                        }
+
+                        callbackEach();
+                    },
+                    true,
+                );*/
                 var visjsDataSource = { nodes: [], edges: [] };
                 UserDataWidget.listUserData(null, function (err, result) {
                     if (err) {
@@ -171,7 +456,7 @@ var KGquery_graph = (function () {
                     }
                     // order to get last saved instance of our graph in user_data
                     result = result.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-                    //if graph loaded with loadSaved --> display=checkBox displayGraphInList else last instance graph
+                    //if graph loaded with loadSaved --> display=checkBox loadAsGraph else last instance graph
                     result.forEach(function (item) {
                         if (item.data_label == source + "_model") {
                             visjsDataSource = item.data_content;
@@ -425,11 +710,7 @@ var KGquery_graph = (function () {
 
                             var edgeSize = 30 + reflexiveEdges[item.sClass.value];
 
-                            (edge.dashes = [5, 5]),
-                                (edge.selfReference = {
-                                    renderBehindTheNode: true,
-                                    size: edgeSize,
-                                });
+                            (edge.dashes = [5, 5]), (edge.selfReference = { renderBehindTheNode: true, size: edgeSize });
                             reflexiveEdges[item.sClass.value] += 15;
                         }
                         visjsData.edges.push(edge);
@@ -596,8 +877,8 @@ var KGquery_graph = (function () {
         }
         KGquery_graph.KGqueryGraph.data.nodes.update([{ id: nodeId, color: "#b0f5f5" }]);
         /* setTimeout(function(){
-            KGquery_graph.KGqueryGraph.data.nodes.update([{ id: nodeId, shape: "ellipse", color: "#b0f5f5" }]);
-            },500)*/
+        KGquery_graph.KGqueryGraph.data.nodes.update([{ id: nodeId, shape: "ellipse", color: "#b0f5f5" }]);
+        },500)*/
     };
     /**
      * Saves the current Vis.js graph model.
@@ -610,16 +891,12 @@ var KGquery_graph = (function () {
         var edges = KGquery_graph.KGqueryGraph.data.edges.get();
         var positions = KGquery_graph.KGqueryGraph.network.getPositions();
         var options = {};
-
-        /*   if (KGquery_graph.KGqueryGraph.data.edges.get().length > 30) {
-                   if (confirm("many Edges: choose  list display mode?")) {
-                       options.output = "list";
-                       $("#KGquery_displayGraphInList").prop("checked", true);
-                   }
-               }*/
-        var displayGraphInList = $("#KGquery_displayGraphInList").prop("checked");
-        if (displayGraphInList) {
-            options.output = "list";
+        $("#KGquery_loadAsGraph").prop("checked", true);
+        if (KGquery_graph.KGqueryGraph.data.edges.get().length > 30) {
+            if (confirm("many Edges: choose  list display mode?")) {
+                options.output = "list";
+                $("#KGquery_loadAsGraph").prop("checked", false);
+            }
         }
 
         var data = {
@@ -638,14 +915,8 @@ var KGquery_graph = (function () {
         var label = KGquery.currentSource + "_model";
         var group = "KGquery/models";
         var data_type = "KGmodelGraph";
-        if (self.currentUserDataModel && self.currentUserDataModel.id) {
-            UserDataWidget.currentTreeNode = { id: self.currentUserDataModel.id };
-        }
         UserDataWidget.saveMetadata(label, data_type, data, group, function (err, result) {
             $("#KGquery_messageDiv").text("saved graph");
-            if (callback) {
-                callback();
-            }
         });
         return;
         var fileName = KGquery.currentSource + "_KGmodelGraph.json";

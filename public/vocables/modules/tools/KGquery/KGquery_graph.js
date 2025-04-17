@@ -642,6 +642,9 @@ var KGquery_graph = (function () {
             UserDataWidget.currentTreeNode = { id: self.currentUserDataModel.id };
         }
         UserDataWidget.saveMetadata(label, data_type, data, group, function (err, result) {
+            if(err){
+                return alert(err.responseText || err)
+            }
             $("#KGquery_messageDiv").text("saved graph");
             if (callback) {
                 callback();

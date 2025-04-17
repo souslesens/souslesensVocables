@@ -39,7 +39,6 @@ poetry env use "C:\Users\[Name]\AppData\Local\Programs\Python\Python311\python.e
 
 ```bash
 poetry install
-
 ```
 
 ## Autobuild
@@ -52,6 +51,6 @@ poetry shell
 ````
 
 ```bash
-make clean
+
 make html
 ```

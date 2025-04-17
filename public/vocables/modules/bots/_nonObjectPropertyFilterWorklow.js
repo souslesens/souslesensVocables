@@ -52,7 +52,7 @@ class NonObjectPropertyFilterWorklow {
     }
 
     static choosePropertyOperatorFn() {
-        self.botEngine.insertBotMessage('Choose property operator', { isQuestion: true });
+        self.botEngine.insertBotMessage("Choose property operator", { isQuestion: true });
         var choices = NonObjectPropertyFilterWorklow.getOperatorsList(self.params.propertyDatatype);
         self.botEngine.showList(choices, "propertyOperator", null, null, function (value) {
             self.params.propertyOperator = value;
@@ -72,30 +72,25 @@ class NonObjectPropertyFilterWorklow {
                     NonObjectPropertyFilterWorklow.listLogicalOperatorFn();
                 });
             } else {
-               
                 self.botEngine.promptValue("enter value", "propertyValue", null, { datePicker: 1 }, function (minDate, maxDate) {
                     self.params.propertyValue = minDate;
                     NonObjectPropertyFilterWorklow.listLogicalOperatorFn();
                 });
-                
-                
             }
         } else {
-            if(self.params.propertyOperator=='ChooseInList'){
+            if (self.params.propertyOperator == "ChooseInList") {
                 NonObjectPropertyFilterWorklow.listIndividualsFn();
-            }else{
+            } else {
                 self.botEngine.promptValue("enter value", "propertyValue", null, null, function (value) {
                     self.params.propertyValue = value;
                     NonObjectPropertyFilterWorklow.listLogicalOperatorFn();
                 });
             }
-           
         }
     }
-   
 
     static listLogicalOperatorFn() {
-        self.botEngine.insertBotMessage("Add filter(and/or) or end",{isQuestion:true});
+        self.botEngine.insertBotMessage("Add filter(and/or) or end", { isQuestion: true });
         var choices = ["end", "AND", "OR"];
         self.botEngine.showList(choices, "filterBooleanOperator", null, null, function (value) {
             self.params.filterBooleanOperator = value;
@@ -129,8 +124,6 @@ class NonObjectPropertyFilterWorklow {
     static ChooseInList() {
         KGquery_filter_bot.functions.ChooseInList();
     }
-
-   
 
     static getOperatorsList(propertyDatatype) {
         var choices = [];
@@ -244,8 +237,8 @@ class NonObjectPropertyFilterWorklow {
                 return 0;
             });
             self.params.individualsFilterType = "labelsList";
-            self.botEngine.insertBotMessage('Choose Individual', { isQuestion: true });
-            self.botEngine.showList(individuals, "individualsFilterValue",null,null,function(value){
+            self.botEngine.insertBotMessage("Choose Individual", { isQuestion: true });
+            self.botEngine.showList(individuals, "individualsFilterValue", null, null, function (value) {
                 NonObjectPropertyFilterWorklow.listLogicalOperatorFn();
             });
         });

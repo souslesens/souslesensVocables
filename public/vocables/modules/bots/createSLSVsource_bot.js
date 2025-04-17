@@ -72,8 +72,7 @@ var CreateSLSVsource_bot = (function () {
             if (!self.params.graphUri.match(regex)) {
                 alert("graphUri is not a correct URL");
                 _botEngine.previousStep();
-            }
-            else{
+            } else {
                 _botEngine.nextStep();
             }
         },

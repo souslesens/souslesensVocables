@@ -79,6 +79,14 @@ var KGbuilder_triplesMaker = {
                         async.series(
                             [
                                 function (callbackSeries) {
+                                    if (
+                                        mapping.p == "http://totalenergies/resources/tsf/onedata/dalia/planification/maximumPOB" &&
+                                        mapping.o == "maximunpob" &&
+                                        line.jobcardphaseactivity == "CNT-DAL-MER-001029"
+                                    ) {
+                                        console.log("here");
+                                    }
+
                                     KGbuilder_triplesMaker.getTripleSubject(tableMappings, mapping, line, function (err, result) {
                                         if (err) {
                                             if (err.indexOf("no mapping.subject") > -1) {

@@ -20,7 +20,6 @@ import Lineage_createRelation from "./lineage_createRelation.js";
 import NodeInfosAxioms from "../axioms/nodeInfosAxioms.js";
 import UserDataWidget from "../../uiWidgets/userDataWidget.js";
 import Containers_tree from "../containers/containers_tree.js";
-import Export from "../../shared/export.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -814,7 +813,7 @@ var Lineage_whiteboard = (function () {
         } else if (Lineage_sources.isSourceEditableForUser(Lineage_sources.activeSource)) {
             // if (authentication.currentUser.groupes.indexOf("admin") > -1 && Config.sources[Lineage_sources.activeSource] && Config.sources[Lineage_sources.activeSource].editable) {
             options.visjsOptions.manipulation = {
-                enabled: false,
+                enabled: true,
                 initiallyActive: true,
                 deleteNode: false,
                 deleteEdge: false,
@@ -4250,26 +4249,16 @@ attrs.color=self.getSourceColor(superClassValue)
         toGraphMl: function () {
             self.lineageVisjsGraph.toGraphMl();
         },
-        /**
-         * @function
-         * @name toGraphMl
-         * @memberof module:graphActions.graph
-         * Exports the graph to the GraphML format, which can be used for further analysis or visualization in compatible tools.
-         * @returns {void}
-         */
-        toPlantUML: function () {
-            self.lineageVisjsGraph.toPlantUML(true);
-        },
+
         /**
          * @function
          * @name exportGraphToDataTable
          * @memberof module:graphActions.graph
-         * *@param {boolean} exportData - If true, exports visjsGraph elements directy without using dataTable
          * Exports the graph data to a tabular format (data table) for easier inspection and manipulation.
          * @returns {void}
          */
-        exportGraphToDataTable: function (exportData) {
-            Export.exportGraphToDataTable(self.lineageVisjsGraph, null, null, null, exportData);
+        exportGraphToDataTable: function () {
+            Export.exportGraphToDataTable(self.lineageVisjsGraph);
         },
 
         /**

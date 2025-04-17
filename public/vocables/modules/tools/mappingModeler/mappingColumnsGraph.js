@@ -1146,9 +1146,6 @@ var MappingColumnsGraph = (function () {
                     dataType: "json",
                     success: function (result, _textStatus, _jqXHR) {
                         var data = JSON.parse(result);
-                        if (data?.options?.config?.sparqlServerUrl) {
-                            data.options.config.sparqlServerUrl = "_default";
-                        }
                         Export.downloadJSON(data, fileName);
                     },
                     error(err) {
@@ -1214,9 +1211,6 @@ var MappingColumnsGraph = (function () {
             var data = JSON.parse(result);
             if (data.nodes.length == 0) {
                 return alert("no nodes in file");
-            }
-            if (data?.options?.config?.graphUri != Config.sources[MainController.currentSource].graphUri) {
-                return alert("graphUri in file is not the same as the current graphUri, update graphURI in JSON file");
             }
             var fileName = "mappings_" + MappingModeler.currentSLSsource + "_ALL" + ".json";
             var payload = {

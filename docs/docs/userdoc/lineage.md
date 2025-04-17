@@ -28,7 +28,10 @@ The Lineage UI is composed of three main elements:
 
 -   **A left panel with 5 tabs**: Whiteboard, Classes, Properties,SPARQL
     and Containers
+-   **A left panel with 5 tabs**: Whiteboard, Classes, Properties,SPARQL
+    and Containers
 
+-   **A whiteboard** to show and manipulate graphs.
 -   **A whiteboard** to show and manipulate graphs.
 
 - **A right Pannel with** buttons related to the whiteboard, providing basic
@@ -499,16 +502,26 @@ The concerned properties are listed below:
 
 -   **status**:
     ["https://www.dublincore.org/specifications/bibo/bibo/bibo.rdf.xml#status"](https://www.dublincore.org/specifications/bibo/bibo/bibo.rdf.xml#status)
+-   **status**:
+    ["https://www.dublincore.org/specifications/bibo/bibo/bibo.rdf.xml#status"](https://www.dublincore.org/specifications/bibo/bibo/bibo.rdf.xml#status)
 
+-   **author**:
+    ["http://purl.org/dc/terms/creator"](http://purl.org/dc/terms/creator)
 -   **author**:
     ["http://purl.org/dc/terms/creator"](http://purl.org/dc/terms/creator)
 
 -   **provenance**:
     ["http://purl.org/dc/terms/source"](http://purl.org/dc/terms/source)
+-   **provenance**:
+    ["http://purl.org/dc/terms/source"](http://purl.org/dc/terms/source)
 
 -   **creationDate**:
     ["http://purl.org/dc/terms/created"](http://purl.org/dc/terms/created)
+-   **creationDate**:
+    ["http://purl.org/dc/terms/created"](http://purl.org/dc/terms/created)
 
+-   **mappingFile**:
+    ["http://souslesens.org/KGcreator#mappingFile"](http://souslesens.org/KGcreator#mappingFile)
 -   **mappingFile**:
     ["http://souslesens.org/KGcreator#mappingFile"](http://souslesens.org/KGcreator#mappingFile)
 

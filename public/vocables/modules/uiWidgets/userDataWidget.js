@@ -80,7 +80,7 @@ var UserDataWidget = (function () {
     };
 
     self.getUserdatabyLabel = function (label, callback) {
-        self.listUserData({ data_label: label }, function (err, result) {
+        self.listUserData("", function (err, result) {
             if (err) return callback(err);
             var obj = null;
             result.forEach(function (item) {

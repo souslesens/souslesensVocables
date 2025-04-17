@@ -15,6 +15,14 @@ var KGquery_graph = (function () {
 
     self.labelsMap = {};
 
+    self.init = function () {
+        $("#KGquery_leftPanelTabs").tabs();
+
+        common.fillSelectWithColorPalette("KGquery_graph_nodeColorSelect");
+        var shapes = ["dot", "square", "box", "text", "diamond", "star", "triangle", "ellipse", "circle", "database", "triangleDown", "hexagon"];
+        common.fillSelectOptions("KGquery_graph_nodeShapeSelect", shapes, true);
+    };
+
     self.visjsOptions = {
         onclickFn: function (node, point, nodeEvent) {
             if (!node) {
@@ -54,32 +62,6 @@ var KGquery_graph = (function () {
         color: "#ddd", //Lineage_whiteboard.getSourceColor(source)
     };
 
-    /**
-     * Initializes the graph module.
-     * Sets up UI components and color options.
-     * @function
-     * @name init
-     * @memberof module:KGquery_graph
-     * @returns {void}
-     */
-    self.init = function () {
-        $("#KGquery_leftPanelTabs").tabs();
-
-        common.fillSelectWithColorPalette("KGquery_graph_nodeColorSelect");
-        var shapes = ["dot", "square", "box", "text", "diamond", "star", "triangle", "ellipse", "circle", "database", "triangleDown", "hexagon"];
-        common.fillSelectOptions("KGquery_graph_nodeShapeSelect", shapes, true);
-    };
-
-    /**
-     * Draws a new Vis.js model based on the specified mode.
-     * @function
-     * @name drawVisjsModel
-     * @memberof module:KGquery_graph
-     * @param {string} mode - The drawing mode ('saved', 'inferred', etc.)
-     * @param {Object} [options] - Additional drawing options
-     * @param {boolean} [options.displayGraphInList] - Whether to display the graph in a list
-     * @returns {void}
-     */
     self.drawVisjsModel = function (mode, options) {
         var display = "graph";
         var source = KGquery.currentSource;
@@ -380,13 +362,6 @@ var KGquery_graph = (function () {
         );
     };
 
-    /**
-     * Starts or stops the graph simulation.
-     * @function
-     * @name startStopSimulation
-     * @memberof module:KGquery_graph
-     * @returns {void}
-     */
     self.startStopSimulation = function () {
         if (!self.simulationOn) {
             self.KGqueryGraph.network.startSimulation();
@@ -396,14 +371,6 @@ var KGquery_graph = (function () {
         self.simulationOn = !self.simulationOn;
     };
 
-    /**
-     * Draws a common graph for all imported sources.
-     * Combines and deduplicates nodes and edges from multiple sources.
-     * @function
-     * @name DrawImportsCommonGraph
-     * @memberof module:KGquery_graph
-     * @returns {void}
-     */
     self.DrawImportsCommonGraph = function () {
         var source = KGquery.currentSource;
         var sources = [];
@@ -504,17 +471,6 @@ var KGquery_graph = (function () {
         );
     };
 
-    /**
-     * Gets the implicit model data in Vis.js format.
-     * @function
-     * @name getImplicitModelVisjsData
-     * @memberof module:KGquery_graph
-     * @param {string} source - The source to get the model from
-     * @param {Function} callback - Callback function
-     * @param {Error} callback.err - Error object if operation fails
-     * @param {Object} callback.result - The Vis.js formatted data
-     * @returns {void}
-     */
     self.getImplicitModelVisjsData = function (source, callback) {
         KGquery_graph.message("creating graph");
 
@@ -722,26 +678,10 @@ var KGquery_graph = (function () {
         );
     };
 
-    /**
-     * Enables edge creation mode in the graph.
-     * @function
-     * @name setEdgeMode
-     * @memberof module:KGquery_graph
-     * @returns {void}
-     */
     self.setEdgeMode = function () {
         self.KGqueryGraph.network.addEdgeMode();
     };
 
-    /**
-     * Sets an attribute for the currently selected node.
-     * @function
-     * @name setNodeAttr
-     * @memberof module:KGquery_graph
-     * @param {string} attr - The attribute name to set
-     * @param {*} value - The value to set for the attribute
-     * @returns {void}
-     */
     self.setNodeAttr = function (attr, value) {
         if (!self.currentGraphNode) {
             return;
@@ -754,14 +694,6 @@ var KGquery_graph = (function () {
         self.KGqueryGraph.data.nodes.update(newNode);
     };
 
-    /**
-     * Sets the font size for all nodes in the graph.
-     * Prompts user for font size value.
-     * @function
-     * @name setAllNodesFontSize
-     * @memberof module:KGquery_graph
-     * @returns {void}
-     */
     self.setAllNodesFontSize = function () {
         var fontSize = prompt("font size");
         if (!fontSize) {
@@ -769,15 +701,6 @@ var KGquery_graph = (function () {
         }
         self.setAllNodesAttr("font", { size: parseInt(fontSize) });
     };
-
-    /**
-     * Sets the size for all nodes in the graph.
-     * Prompts user for size value.
-     * @function
-     * @name setAllNodesSizes
-     * @memberof module:KGquery_graph
-     * @returns {void}
-     */
     self.setAllNodesSizes = function () {
         var size = prompt(" size");
         if (!size) {
@@ -787,16 +710,6 @@ var KGquery_graph = (function () {
         self.KGqueryGraph.onScaleChange();
         self.setDecorationAttr("size", parseInt(size));
     };
-
-    /**
-     * Sets an attribute for all nodes in the graph.
-     * @function
-     * @name setAllNodesAttr
-     * @memberof module:KGquery_graph
-     * @param {string} attr - The attribute name to set
-     * @param {*} value - The value to set for the attribute
-     * @returns {void}
-     */
     self.setAllNodesAttr = function (attr, value) {
         var nodesId = self.KGqueryGraph.data.nodes.getIds();
         var newNodes = [];
@@ -808,24 +721,7 @@ var KGquery_graph = (function () {
         });
         self.KGqueryGraph.data.nodes.update(newNodes);
     };
-
-    /**
-     * Sets attributes for graph decorations.
-     * @function
-     * @name setDecorationAttr
-     * @memberof module:KGquery_graph
-     * @returns {void}
-     */
     self.setDecorationAttr = function () {};
-
-    /**
-     * Resets the visual properties of specified nodes.
-     * @function
-     * @name resetVisjNodes
-     * @memberof module:KGquery_graph
-     * @param {Array<Object>} nodes - The nodes to reset
-     * @returns {void}
-     */
     self.resetVisjNodes = function (nodes) {
         if (!KGquery_graph.KGqueryGraph) {
             return;
@@ -880,13 +776,7 @@ var KGquery_graph = (function () {
         KGquery_graph.KGqueryGraph.data.nodes.update([{ id: nodeId, shape: "ellipse", color: "#b0f5f5" }]);
         },500)*/
     };
-    /**
-     * Saves the current Vis.js graph model.
-     * @function
-     * @name saveVisjsModelGraph
-     * @param {Function} [callback] - Callback function called after saving
-     */
-    self.saveVisjsModelGraph = function (callback) {
+    self.saveVisjsModelGraph = function () {
         var nodes = KGquery_graph.KGqueryGraph.data.nodes.get();
         var edges = KGquery_graph.KGqueryGraph.data.edges.get();
         var positions = KGquery_graph.KGqueryGraph.network.getPositions();
@@ -916,13 +806,7 @@ var KGquery_graph = (function () {
         var group = "KGquery/models";
         var data_type = "KGmodelGraph";
         UserDataWidget.saveMetadata(label, data_type, data, group, function (err, result) {
-            if (err) {
-                return alert(err.responseText || err);
-            }
             $("#KGquery_messageDiv").text("saved graph");
-            if (callback) {
-                callback();
-            }
         });
         return;
         var fileName = KGquery.currentSource + "_KGmodelGraph.json";
@@ -1023,374 +907,9 @@ var KGquery_graph = (function () {
             },
         );
     };
-    /**
-     * Loads a saved graph visualization.
-     * @function
-     * @name loadSaved
-     * @memberof module:KGquery_graph
-     * @returns {void}
-     */
     self.loadSaved = function () {
-        var displayGraphInList = $("#KGquery_displayGraphInList").prop("checked");
-        self.drawVisjsModel("saved", { displayGraphInList: displayGraphInList });
-    };
-
-    /**
-     * Handles changes in the display graph in list checkbox.
-     * @function
-     * @name onDisplayGraphInListCBXchange
-     * @memberof module:KGquery_graph
-     * @returns {void}
-     */
-    self.onDisplayGraphInListCBXchange = function () {
-        var inList = $("#KGquery_displayGraphInList").prop("checked");
-        if (inList) {
-            return KGquery_nodeSelector.showImplicitModelInJstree(self.visjsData);
-        }
-    };
-
-    /**
-     * Downloads a previously saved Vis.js graph.
-     * @function
-     * @name downloadVisjsGraph
-     * @memberof module:KGquery_graph
-     * @param {string} source - The source identifier
-     * @param {Function} callback - Callback function to handle the downloaded graph
-
-     * @returns {void}
-     */
-    self.downloadVisjsGraph = function (source, callback) {
-        self.KGqueryGraph = new VisjsGraphClass(
-            "KGquery_graphDiv",
-            {
-                nodes: [],
-                edges: [],
-            },
-            self.visjsOptions,
-        );
-
-        //use Cache
-        if (self.visjsData) {
-            return callback(null, self.visjsData);
-        } else {
-            KGquery_graph.message("loading graph display");
-            UserDataWidget.listUserData(
-                {
-                    data_type: "KGmodelGraph",
-                    data_tool: "KGquery",
-                    data_source: MainController.currentSource,
-                },
-                function (err, result) {
-                    if (err) {
-                        return alert(err || err.responseText);
-                    }
-                    if (result.length > 0 && result[0].data_content) {
-                        // new method in userData
-                        // order to get last saved instance of our graph in user_data
-                        result = result.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-                        self.visjsData = result[0].data_content;
-                        self.currentUserDataModel = result[0];
-                        return callback(null, self.visjsData);
-                    } else {
-                        // get from file if the transition to userData is not done
-
-                        var visjsGraphFileName = source + "_KGmodelGraph.json";
-                        KGquery_graph.message("loading graph display");
-                        self.KGqueryGraph.loadGraph(
-                            visjsGraphFileName,
-                            null,
-                            function (err, result) {
-                                if (err) {
-                                    return callback("notFound");
-                                }
-                                self.visjsData = result;
-                                var display = "graph";
-                                if (result && result.options && result.options.output) {
-                                    display = result.options.output;
-                                }
-                                if (display == "list") {
-                                    $("#KGquery_displayGraphInList").prop("checked", false);
-                                } else {
-                                    $("#KGquery_displayGraphInList").prop("checked", true);
-                                }
-
-                                return callback(null, self.visjsData);
-                            },
-                            true,
-                        );
-                    }
-                },
-            );
-        }
-    };
-    /**
-     * Builds the implicit graph model from predicates.
-     * @function
-     * @name buildInferredGraph
-     * @memberof module:KGquery_graph
-     * @param {string} source - The source to build the graph from
-     * @param {Function} callback - Callback function
-
-     * @returns {void}
-     */
-    self.buildInferredGraph = function (source, callback) {
-        var visjsData = { nodes: [], edges: [] };
-        async.series(
-            [
-                function (callbackSeries) {
-                    KGquery_graph.message("generating tbox graph from abox graph");
-                    self.getImplicitModelVisjsData(KGquery.currentSource, function (err, result2) {
-                        if (err) {
-                            return alert(err);
-                        }
-                        var oldNodesMap = {};
-                        var oldEdgesMap = {};
-                        var newNodes = [];
-                        var newEdges = [];
-                        visjsData.nodes.forEach(function (item) {
-                            oldNodesMap[item.id] = item;
-                        });
-
-                        visjsData.edges.forEach(function (item) {
-                            oldEdgesMap[item.id] = item;
-                        });
-
-                        result2.nodes.forEach(function (item) {
-                            if (!oldNodesMap[item.id]) {
-                                newNodes.push(item);
-                            }
-                        });
-                        result2.edges.forEach(function (item) {
-                            if (!oldEdgesMap[item.id]) {
-                                newEdges.push(item);
-                            }
-                        });
-
-                        visjsData.nodes = visjsData.nodes.concat(newNodes);
-                        visjsData.edges = visjsData.edges.concat(newEdges);
-
-                        callbackSeries();
-                    });
-                },
-                // load annotationProperties
-                function (callbackSeries) {
-                    KGquery_graph.message("loading datatypeProperties");
-                    OntologyModels.getKGnonObjectProperties(source, {}, function (err, nonObjectPropertiesmap) {
-                        if (err) {
-                            return callbackSeries(err);
-                        }
-
-                        visjsData.nodes.forEach(function (node) {
-                            if (nonObjectPropertiesmap[node.data.id]) {
-                                if (!node.data.nonObjectProperties) {
-                                    node.data.nonObjectProperties = [];
-                                }
-                                node.data.nonObjectProperties = node.data.nonObjectProperties.concat(nonObjectPropertiesmap[node.data.id].properties);
-                            }
-                        });
-                        callbackSeries();
-                    });
-                }, //Add decoration data from decorate file
-                function (callbackSeries) {
-                    var fileName = MainController.currentSource + "_decoration.json";
-                    //Get current decoration file
-                    var payload = {
-                        dir: "graphs/",
-                        fileName: fileName,
-                    };
-                    //get decoration file
-                    $.ajax({
-                        type: "GET",
-                        url: `${Config.apiUrl}/data/file`,
-                        data: payload,
-                        dataType: "json",
-                        success: function (result, _textStatus, _jqXHR) {
-                            var data = JSON.parse(result);
-
-                            for (var node in data) {
-                                var visjsCorrespondingNode = visjsData.nodes.filter((attr) => attr.id === node)[0];
-                                for (var decoration in data[node]) {
-                                    //decoration = clé de décoration
-                                    if (visjsCorrespondingNode) {
-                                        visjsCorrespondingNode[decoration] = data[node][decoration];
-                                    }
-                                }
-                            }
-                            // J'ajoute mes différentes décorations aux classes visés dans le visjsdata
-                            // Si j'ai des icones je  met dans un répertoire côté client les icones nécessaires à ce graph
-                            callbackSeries();
-                        },
-                        error(err) {
-                            return callbackSeries();
-                        },
-                    });
-                },
-
-                function (callbackSeries) {
-                    var newNodes = [];
-                    visjsData.nodes.forEach(function (node) {
-                        node.x = node.x || 0;
-                        node.y = node.y || 0;
-                        //node.fixed = false;
-                        newNodes.push(node);
-                    });
-                    visjsData.nodes = newNodes;
-                    self.visjsData = visjsData;
-                    callbackSeries();
-                },
-            ],
-            function (err) {
-                self.visjsData = visjsData;
-                return callback(err, visjsData);
-            },
-        );
-    };
-
-    /**
-     * Exports the current graph model by saving it first and then downloading it.
-     * @function
-     * @name exportVisjsGraph
-     * @memberof module:KGquery_graph
-     * @returns {void}
-     */
-    self.exportVisjsGraph = function () {
-        self.saveVisjsModelGraph(function () {
-            self.downloadVisjsGraph(KGquery.currentSource, function (err, result) {
-                var fileName = KGquery.currentSource + "_KGmodelGraph" + ".json";
-                Export.downloadJSON(result, fileName);
-            });
-        });
-    };
-
-    /**
-     * Imports a KG model graph from a JSON file.
-     * @function
-     * @name importKGmodel
-     * @memberof module:KGquery_graph
-     * @returns {void}
-     *
-     * @description
-     * This function allows importing a previously exported KG model graph.
-     * It loads the JSON file, validates its content, and displays the graph in the interface.
-     *
-     */
-    self.importKGmodel = function () {
-        ImportFileWidget.showImportDialog(function (err, result) {
-            if (err) {
-                return alert(err);
-            }
-            var data = JSON.parse(result);
-            if (!data.nodes || data.nodes.length == 0) {
-                return alert("No nodes in file");
-            }
-
-            self.visjsData = data;
-            var displayGraphInList = $("#KGquery_displayGraphInList").prop("checked");
-            self.drawModel(displayGraphInList);
-        });
-    };
-
-    /**
-         * Draws the model using the current visjsData.
-         *
-         * @function
-         * @name drawModel
-         * @memberof KGquery_graph
-         * @param {boolean} [displayGraphInList] - Whether to display the graph as a list
-         * @returns {void}
-         *
-         * @description
-         * This function handles the visualization of the graph model. It performs several steps:
-         * 1. Updates the labels map for nodes and edges
-         * 2. Determines the display mode (graph or list)
-         * 3. Removes duplicate nonObjectProperties from nodes
-         * 4. Creates a new VisjsGraph instance
-         * 5. Draws the graph with proper:
-         *    - Node colors and shapes
-         *    - Node sizes
-         *    - Node positions and scaling
-         *    - Font settings
-
-         */
-    self.drawModel = function (displayGraphInList) {
-        if (!self.visjsData) {
-            return alert("no graph model");
-        }
-        KGquery_graph.message("drawing graph");
-
-        self.visjsData.nodes.forEach(function (item) {
-            self.labelsMap[item.id] = item.label || item.id;
-        });
-
-        self.visjsData.edges.forEach(function (item) {
-            self.labelsMap[item.id] = item.label || item.id;
-        });
-
-        var display = "graph";
-        if (self.visjsData.options && self.visjsData.options.output) {
-            display = self.visjsData.options.output;
-        }
-        if (displayGraphInList) {
-            display = "list";
-        }
-        if (displayGraphInList == false) {
-            display = "graph";
-        }
-
-        if ($("#KGquery_displayGraphInList").prop("checked")) {
-            display = "list";
-        }
-        if (display == "list") {
-            $("#KGquery_displayGraphInList").prop("checked", true);
-            self.onDisplayGraphInListCBXchange();
-        }
-
-        //patch to remove duplicate nonObjectProperties
-        self.visjsData.nodes.forEach(function (item) {
-            if (item.data && item.data.nonObjectProperties) {
-                var uniques = {};
-                var newProperties = [];
-                item.data.nonObjectProperties.forEach(function (prop) {
-                    if (!uniques[prop.id]) {
-                        uniques[prop.id] = 1;
-                        newProperties.push(prop);
-                    }
-                });
-                item.data.nonObjectProperties = newProperties;
-            }
-        });
-
-        self.KGqueryGraph = new VisjsGraphClass("KGquery_graphDiv", self.visjsData, self.visjsOptions);
-
-        // cannot get colors from loadGraph ???!!
-        self.KGqueryGraph.draw(function () {
-            self.simulationOn = true;
-            var newNodes = [];
-            self.visjsData.nodes.forEach(function (node) {
-                newNodes.push({ id: node.id, color: node.color, shape: node.shape });
-            });
-            KGquery_graph.message("", true);
-            var nodes_sizes = [];
-            self.KGqueryGraph.data.nodes.get().forEach(function (node) {
-                if (node.size) {
-                    node.originalSize = node.size;
-                }
-                nodes_sizes.push(node);
-            });
-            self.KGqueryGraph.data.nodes.update(nodes_sizes);
-            self.KGqueryGraph.network.moveTo({
-                position: { x: 0, y: 0 },
-                scale: 1 / 0.9,
-            });
-            self.KGqueryGraph.onScaleChange();
-            var nodes_fonts = [];
-            self.visjsData.nodes.forEach(function (node) {
-                if (node.font) {
-                    nodes_fonts.push({ id: node.id, font: node.font });
-                }
-            });
-            self.KGqueryGraph.data.nodes.update(nodes_fonts);
-        });
+        var loadAsGraph = $("#KGquery_loadAsGraph").prop("checked");
+        self.drawVisjsModel("saved", { loadAsGraph: loadAsGraph });
     };
 
     return self;

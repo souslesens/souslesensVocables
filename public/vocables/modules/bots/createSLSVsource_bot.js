@@ -36,7 +36,7 @@ var CreateSLSVsource_bot = (function () {
 
     self.workflow = {
         promptSourceNameFn: {
-            promptGraphUriFn:{validateGraphUriFn: self.workflow2},
+            promptGraphUriFn: { validateGraphUriFn: self.workflow2 },
         },
     };
 
@@ -47,7 +47,7 @@ var CreateSLSVsource_bot = (function () {
         saveFn: "Create source",
         uploadFromUrlFn: "Enter graph URL",
         uploadFromFileFn: "Choose graph file",
-        validateGraphUriFn: "validate GraphUri"
+        validateGraphUriFn: "validate GraphUri",
     };
     self.functions = {
         initFn: function () {
@@ -67,13 +67,12 @@ var CreateSLSVsource_bot = (function () {
         promptGraphUriFn: function () {
             _botEngine.promptValue("graph Uri", "graphUri", "http://");
         },
-        validateGraphUriFn:function(){
-var regex=/(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}(\.[a-z]{2,6}|:[0-9]{3,4})\b([-a-zA-Z0-9@:%_\+.~#?&\/\/=]*)/i
-            if(!self.params.graphUri.match(regex)){
-               alert ("graphUri is not a correct URL")
-                _botEngine.previousStep()
+        validateGraphUriFn: function () {
+            var regex = /(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}(\.[a-z]{2,6}|:[0-9]{3,4})\b([-a-zA-Z0-9@:%_\+.~#?&\/\/=]*)/i;
+            if (!self.params.graphUri.match(regex)) {
+                alert("graphUri is not a correct URL");
+                _botEngine.previousStep();
             }
-
         },
 
         listImportsFn: function () {

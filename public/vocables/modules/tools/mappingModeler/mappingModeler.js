@@ -377,7 +377,7 @@ var MappingModeler = (function () {
      * @param {Object} obj - The selected tree node object.
      */
     self.onSuggestionsSelect = function (event, obj) {
-        if (obj.event.type == "contextmenu") {
+        if (obj.event && obj.event.type == "contextmenu") {
             return;
         }
         if (!DataSourceManager.currentConfig.currentDataSource) {
@@ -721,7 +721,9 @@ var MappingModeler = (function () {
         OntologyModels.clearOntologyModelCache(MappingModeler.currentSLSsource);
         var newClasses = [];
         self.allClasses.forEach(function (item) {
-            if (item.source != source) newClasses.push(item);
+            if (item.source != source) {
+                newClasses.push(item);
+            }
         });
         self.allClasses = newClasses;
     };
@@ -909,7 +911,9 @@ var MappingModeler = (function () {
      */
     self.clearMappings = function () {
         if (mappingColumnsGraph.visjsGraph.isGraphNotEmpty()) {
-            if (!confirm("Warning ! if you continue all mappings for this source will be permanently  lost")) return;
+            if (!confirm("Warning ! if you continue all mappings for this source will be permanently  lost")) {
+                return;
+            }
         }
         $("#" + MappingColumnsGraph.graphDivId).html("");
         MappingColumnsGraph.clearGraph();
@@ -1300,40 +1304,6 @@ var MappingModeler = (function () {
         }
         PlantUmlTransformer.visjsDataToClassDiagram(visjsData);
     };
-
-
-
-
-    self.applyRestrictions=function(){
-        var nodes = MappingColumnsGraph.visjsGraph.data.nodes.get();
-        var edges = MappingColumnsGraph.visjsGraph.data.edges.get();
-        var nodesMap={}
-        nodes.forEach(function(item){
-          nodesMap[item.id]=item
-        })
-        var classesMap={}
-        var existingRelationsMap={}
-        edges.forEach(function(edge){
-            if(nodesMap[edge.from].data.type=="Column" && nodesMap[edge.to].data.type=="Column" ){
-                existingRelationsMap[ nodesMap[edge.to].id]= nodesMap[edge.from].id
-            }
-
-           if(nodesMap[edge.from].data.type=="Column" && nodesMap[edge.to].data.type=="Class" ){
-               classesMap[ nodesMap[edge.to].id]= nodesMap[edge.from].id
-           }
-
-        })
-        var classes=Object.keys(classesMap)
-
-        var restrictions=Sparql_OWL.getObjectRestrictions(dataSourcesManager.currentSlsvSource,classes,null, function(err, result){
-            result.forEach(function(item){
-
-            })
-
-        })
-
-
-    }
 
     return self;
 })();

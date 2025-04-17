@@ -177,6 +177,7 @@ var MappingTransform = (function () {
                     });
                 }
             }
+            if (nodeId == "7ce40e6a") var w = 3;
             var connections = MappingColumnsGraph.visjsGraph.getFromNodeEdgesAndToNodes(nodeId);
 
             connections.forEach(function (connection) {

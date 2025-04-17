@@ -891,14 +891,17 @@ var KGquery_graph = (function () {
         var edges = KGquery_graph.KGqueryGraph.data.edges.get();
         var positions = KGquery_graph.KGqueryGraph.network.getPositions();
         var options = {};
-        $("#KGquery_loadAsGraph").prop("checked", true);
+        /*$("#KGquery_loadAsGraph").prop("checked", true);
         if (KGquery_graph.KGqueryGraph.data.edges.get().length > 30) {
             if (confirm("many Edges: choose  list display mode?")) {
                 options.output = "list";
                 $("#KGquery_loadAsGraph").prop("checked", false);
             }
+        }*/
+        var displayGraphInList = $("#KGquery_displayGraphInList").prop("checked");
+        if (displayGraphInList) {
+            options.output = "list";
         }
-
         var data = {
             nodes: nodes,
             edges: edges,
@@ -915,6 +918,9 @@ var KGquery_graph = (function () {
         var label = KGquery.currentSource + "_model";
         var group = "KGquery/models";
         var data_type = "KGmodelGraph";
+        if (self.currentUserDataModel && self.currentUserDataModel.id) {
+            UserDataWidget.currentTreeNode = { id: self.currentUserDataModel.id };
+        }
         UserDataWidget.saveMetadata(label, data_type, data, group, function (err, result) {
             if(err){
                 return alert(err.responseText || err)

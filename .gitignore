@@ -1,6 +1,7 @@
 docs/_build
 docs/docs/_build
 docs/docs/devdoc/codedoc/jsdoc.md
+docs/.slsScriptsactivate.bat
 
 plugins/*
 plugins.available/*

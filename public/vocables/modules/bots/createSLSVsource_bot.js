@@ -36,7 +36,7 @@ var CreateSLSVsource_bot = (function () {
 
     self.workflow = {
         promptSourceNameFn: {
-            promptGraphUriFn:{validateGraphUriFn: self.workflow2},
+            promptGraphUriFn: { validateGraphUriFn: self.workflow2 },
         },
     };
 
@@ -47,7 +47,7 @@ var CreateSLSVsource_bot = (function () {
         saveFn: "Create source",
         uploadFromUrlFn: "Enter graph URL",
         uploadFromFileFn: "Choose graph file",
-        validateGraphUriFn: "validate GraphUri"
+        validateGraphUriFn: "validate GraphUri",
     };
     self.functions = {
         initFn: function () {

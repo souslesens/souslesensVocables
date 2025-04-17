@@ -916,6 +916,9 @@ var KGquery_graph = (function () {
         var group = "KGquery/models";
         var data_type = "KGmodelGraph";
         UserDataWidget.saveMetadata(label, data_type, data, group, function (err, result) {
+            if(err){
+                return alert(err.responseText || err)
+            }
             $("#KGquery_messageDiv").text("saved graph");
         });
         return;

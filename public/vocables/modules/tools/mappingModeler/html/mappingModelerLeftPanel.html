@@ -98,11 +98,14 @@
             <!--  <button class="w3-button slsv-button-2 " onclick="KGcreator_run.stopCreateTriples()" title="Abort">Abort</button>-->
         </div>
     </div>
+    <div id="MappingModeler_RelationsTab" class="coloredContainerImportant">
+        <div style="height: 500px; background-color: #eee">
+            <button class="w3-button slsv-button-2" onclick="MappingModelerRelations.listPossibleRelations()" title="listPossibleRelations">list possible relations</button>
+            <button class="w3-button slsv-button-2" onclick="MappingModelerRelations.applyColumnRelations()" title="applyColumnRelations">apply possible relations</button>
 
-    <div id="   MappingModeler_RelationsTab" class="coloredContainerImportant">
-        <div style="height:500px;background-color: #eee ">
-            <button class="w3-button slsv-button-2" onclick="MappingModeler.applyRestrictions()" title="ApplyRestrictions">applyRestrictions</button>
+            <div style="width: 400px; height: 400px; overflow: auto">
+                <div id="mappingModelerRelations_jstreeDiv"></div>
+            </div>
         </div>
     </div>
-
 </div>

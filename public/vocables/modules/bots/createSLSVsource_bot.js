@@ -68,10 +68,13 @@ var CreateSLSVsource_bot = (function () {
             _botEngine.promptValue("graph Uri", "graphUri", "http://");
         },
         validateGraphUriFn:function(){
-var regex=/(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}(\.[a-z]{2,6}|:[0-9]{3,4})\b([-a-zA-Z0-9@:%_\+.~#?&\/\/=]*)/i
+            var regex=/(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}(\.[a-z]{2,6}|:[0-9]{3,4})\b([-a-zA-Z0-9@:%_\+.~#?&\/\/=]*)/i
             if(!self.params.graphUri.match(regex)){
                alert ("graphUri is not a correct URL")
                 _botEngine.previousStep()
+            }
+            else{
+                _botEngine.nextStep();
             }
 
         },

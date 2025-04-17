@@ -2,6 +2,8 @@ docs/_build
 docs/docs/_build
 docs/docs/devdoc/codedoc/jsdoc.md
 
+
+
 plugins/*
 plugins.available/*
 !plugins

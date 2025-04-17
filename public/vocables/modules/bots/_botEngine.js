@@ -406,6 +406,7 @@ var _botEngine = (function () {
         if (!self.history.step.includes(self.history.currentIndex)) {
             self.history.step.push(self.history.currentIndex);
         }
+        self.insertBotMessage(message,{isQuestion:true});
     };
 
     self.insertBotMessage = function (str, options) {

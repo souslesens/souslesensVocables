@@ -172,7 +172,7 @@ var Lookups_bot = (function () {
                 return alert("targetColumn is mandatory");
             }
             // add lookup in json graph config
-            DataSourceManager.rawConfig.lookups[lookup.name.split("|")[0]] = lookup;
+            DataSourceManager.rawConfig.lookups[lookup.name] = lookup;
             // restore currentDataSource
             DataSourceManager.currentConfig.currentDataSource = self.currentDataSource;
             MappingColumnsGraph.saveVisjsGraph(function (err, result) {

@@ -73,6 +73,9 @@ var CreateSLSVsource_bot = (function () {
                 alert("graphUri is not a correct URL");
                 _botEngine.previousStep();
             }
+            else{
+                _botEngine.nextStep();
+            }
         },
 
         listImportsFn: function () {

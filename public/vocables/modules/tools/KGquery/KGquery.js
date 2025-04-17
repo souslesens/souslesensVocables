@@ -1,3 +1,11 @@
+/**
+ * KGquery Module
+ * Module for querying and visualizing knowledge graphs.
+ * Provides functionality to build and execute queries on knowledge graphs.
+ * @module KGquery
+
+ */
+
 import Lineage_sources from "../lineage/lineage_sources.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
 
@@ -16,6 +24,7 @@ import KGquery_myQueries from "./KGquery_myQueries.js";
 import SQLquery_filters from "./SQLquery_filters.js";
 import KGquery_controlPanel from "./KGquery_controlPanel.js";
 import KGquery_paths from "./KGquery_paths.js";
+import GanttWidget from "../../uiWidgets/ganttWidget.js";
 
 import UI from "../../../modules/shared/UI.js";
 
@@ -34,6 +43,16 @@ var KGquery = (function () {
     self.maxOptionalPredicatesInQuery = 10;
     self.pathEdgesColors = ["green", "blue", "orange", "grey", "yellow"];
 
+    /**
+     * Called when the module is loaded.
+     * Initializes the user interface and loads saved queries.
+     * @function
+     * @name onLoaded
+     * @memberof module:KGquery
+     * @returns {void}
+     * @category KGquery
+     * @public
+     */
     self.onLoaded = function () {
         //Lineage_sources.showHideEditButtons = UI.disableEditButtons;
         //self.oldshowHideEditButtons=Lineage_sources.showHideEditButtons;
@@ -48,21 +67,41 @@ var KGquery = (function () {
         $("#messageDiv").attr("id", "KGquery_messageDiv");
         $("#waitImg").attr("id", "KGquery_waitImg");
     };
+    /**
+     * Unloads the module and restores initial state.
+     * @function
+     * @name unload
+     * @memberof module:KGquery
+     * @returns {void}
+     */
     self.unload = function () {
         Lineage_sources.registerSource = UI.oldRegisterSource;
-
         $("#KGquery_messageDiv").attr("id", "messageDiv");
         $("#KGquery_waitImg").attr("id", "waitImg");
         $("#graphDiv").empty();
         $("#lateralPanelDiv").empty();
     };
 
+    /**
+     * Initializes the module.
+     * Draws the graph model and sets up saved queries.
+     * @function
+     * @name init
+     * @memberof module:KGquery
+     * @returns {void}
+     */
     self.init = function () {
         KGquery_graph.drawVisjsModel("saved");
-        //SavedQueriesWidget.list();
         SavedQueriesWidget.showDialog("tabs_myQueries", self.currentSource, KGquery_myQueries.save, KGquery_myQueries.load, "KGquery/savedQueries/");
     };
 
+    /**
+     * Initializes the output type selector with available tools.
+     * @function
+     * @name initOutputType
+     * @memberof module:KGquery
+     * @returns {void}
+     */
     self.initOutputType = function () {
         const KGquery_outputTypeSelectNode = $("#KGquery_outputTypeSelect");
         for (const toolName in Config.userTools.KGquery.toTools) {
@@ -70,6 +109,13 @@ var KGquery = (function () {
         }
     };
 
+    /**
+     * Loads a source and initializes the graph visualization.
+     * @function
+     * @name loadSource
+     * @memberof module:KGquery
+     * @returns {void}
+     */
     self.loadSource = function () {
         KGquery.currentSource = MainController.currentSource;
         Lineage_sources.loadSources(MainController.currentSource, function (err) {
@@ -79,7 +125,6 @@ var KGquery = (function () {
             $("#graphDiv").load("./modules/tools/KGquery/html/KGquery_centralPanel.html", function () {
                 $("#lateralPanelDiv").load("./modules/tools/KGquery/html/KGquery_leftPanel.html", function () {
                     UI.disableEditButtons();
-                    //KGquery_graph.drawVisjsModel("saved");
                     UI.openTab("lineage-tab", "tabs_Query", KGquery.initQuery, "#QueryTabButton");
                     UI.resetWindowSize();
                     self.clearAll();
@@ -99,6 +144,20 @@ var KGquery = (function () {
         });
     };
 
+    /**
+     * Adds a new query set with a boolean operator.
+     * @function
+     * @name addQuerySet
+     * @memberof module:KGquery
+     * @param {string} booleanOperator - The boolean operator to use (AND, OR, etc.)
+     * @returns {Object} querySet - The newly created query set
+     * @property {string} querySet.divId - The ID of the div containing the query set
+     * @property {Array} querySet.elements - Array of query elements in this set
+     * @property {string} querySet.color - The color assigned to this query set
+     * @property {string} querySet.booleanOperator - The boolean operator for this set
+     * @property {Object} querySet.classFiltersMap - Map of class filters
+     * @property {number} querySet.index - Index of this query set
+     */
     self.addQuerySet = function (booleanOperator) {
         var label = "";
         var color = self.pathEdgesColors[self.querySets.sets.length];
@@ -120,6 +179,23 @@ var KGquery = (function () {
         return querySet;
     };
 
+    /**
+     * Adds a query element to a query set.
+     * @function
+     * @name addQueryElementToQuerySet
+     * @memberof module:KGquery
+     * @param {Object} querySet - The query set to add the element to
+     * @returns {Object} queryElement - The newly created query element
+     * @property {string} queryElement.divId - The ID of the div containing this element
+     * @property {string} queryElement.fromNode - The source node
+     * @property {string} queryElement.toNode - The target node
+     * @property {Array} queryElement.paths - Array of paths between fromNode and toNode
+     * @property {string} queryElement.queryElementDivId - The element's div ID
+     * @property {string} queryElement.fromNodeDivId - The source node's div ID
+     * @property {string} queryElement.toNodeDivId - The target node's div ID
+     * @property {number} queryElement.index - Index within the query set
+     * @property {number} queryElement.setIndex - Index of the parent query set
+     */
     self.addQueryElementToQuerySet = function (querySet) {
         //  $("#KGquery_SetsControlsDiv").show();
         var queryElementDivId = KGquery_controlPanel.addQueryElementToCurrentSet(querySet.divId);
@@ -140,6 +216,16 @@ var KGquery = (function () {
         return queryElement;
     };
 
+    /**
+     * Adds a node to a query element.
+     * @function
+     * @name addNodeToQueryElement
+     * @memberof module:KGquery
+     * @param {Object} queryElement - The query element to add the node to
+     * @param {Object} node - The node to add
+     * @param {string} role - The role of the node ('fromNode' or 'toNode')
+     * @returns {void}
+     */
     self.addNodeToQueryElement = function (queryElement, node, role) {
         self.classeMap[node.id] = node;
         queryElement[role] = node;
@@ -155,6 +241,16 @@ var KGquery = (function () {
         self.divsMap[nodeDivId] = node;
     };
 
+    /**
+     * Adds a node to the graph.
+     * @function
+     * @name addNode
+     * @memberof module:KGquery
+     * @param {Object} selectedNode - The node to add
+     * @param {Object} nodeEvent - The event that triggered the addition
+     * @param {Function} [callback] - Optional callback after adding
+     * @returns {void}
+     */
     self.addNode = function (selectedNode, nodeEvent, callback) {
         if (!selectedNode) {
             return;
@@ -229,6 +325,16 @@ var KGquery = (function () {
         }
     };
 
+    /**
+     * Adds edge nodes to the graph.
+     * @function
+     * @name addEdgeNodes
+     * @memberof module:KGquery
+     * @param {Object} fromNode - The source node
+     * @param {Object} toNode - The target node
+     * @param {Object} edge - The edge data
+     * @returns {void}
+     */
     self.addEdgeNodes = function (fromNode, toNode, edge) {
         if (!self.currentQuerySet) {
             self.currentQuerySet = self.addQuerySet();
@@ -245,6 +351,15 @@ var KGquery = (function () {
         self.addQueryElementToQuerySet(self.currentQuerySet);
     };
 
+    /**
+     * Adds edges between nodes in the graph.
+     * @function
+     * @name addEdge
+     * @memberof module:KGquery
+     * @param {Object} edge - The edge to add
+     * @param {Object} evt - The event that triggered the addition
+     * @returns {void}
+     */
     self.addEdge = function (edge, evt) {
         var fromNode = KGquery_graph.KGqueryGraph.data.nodes.get(edge.from);
         fromNode = JSON.parse(JSON.stringify(fromNode));
@@ -259,7 +374,6 @@ var KGquery = (function () {
                 var options = { memberClass: fromNode.data.id };
 
                 Containers_widget.showDialog(self.currentSource, options, function (err, result) {
-                    //  KGquery_filter.selectContainerFilters(fromNode,function(err, result){
                     fromNode.data.containerFilter = {
                         classId: result ? result.topMember.id : null,
                         depth: result ? result.depth : 1,
@@ -281,6 +395,15 @@ var KGquery = (function () {
         }
     };
 
+    /**
+     * Performs aggregation on query results.
+     * Shows a dialog for selecting aggregate clauses and validates that variables belong to the same set.
+     * @function
+     * @name aggregateQuery
+     * @memberof module:KGquery
+     * @returns {void}
+
+     */
     self.aggregateQuery = function () {
         var message = "";
         if (self.querySets.sets.length > 0) {
@@ -315,6 +438,18 @@ var KGquery = (function () {
         );
     };
 
+    /**
+     * Executes a query on the knowledge graph.
+     * @function
+     * @name queryKG
+     * @memberof module:KGquery
+     * @param {string} output - The desired output format ('table', 'Graph', 'shacl', or custom tool name)
+     * @param {Object} [options] - Additional query options
+     * @param {Object} [options.aggregate] - Aggregation settings for the query
+     * @param {boolean} [isVirtualSQLquery=false] - Whether this is a virtual SQL query
+     * @throws {Error} If the query execution fails
+     * @returns {void}
+     */
     self.queryKG = function (output, options, isVirtualSQLquery) {
         if (!options) {
             options = {};
@@ -353,6 +488,21 @@ var KGquery = (function () {
         });
     };
 
+    /**
+     * Executes a SPARQL path query based on the provided options.
+     * The query is constructed dynamically and executed in multiple steps.
+     *
+     * @function
+     * @name execPathQuery
+     * @memberof module:KGquery
+     * @param {Object} options - The options for query execution
+     * @param {string} options.output - The desired output format (e.g., "shacl")
+     * @param {Object} [options.aggregate] - Aggregation settings for the query
+     * @param {Function} callback - Callback function to handle the query results
+     * @param {Error} callback.err - Error object if the query fails
+     * @param {Object} callback.result - The query results if successful
+     * @returns {void}
+     */
     self.execPathQuery = function (options, callback) {
         var optionalPredicatesSparql = "";
         var selectClauseSparql = [];
@@ -635,6 +785,15 @@ var KGquery = (function () {
         );
     };
 
+    /**
+     * Converts query results to a Vis.js graph visualization.
+     * @function
+     * @name queryResultToVisjsGraph
+     * @memberof module:KGquery
+     * @param {Object} result - The query results to convert
+     * @throws {Error} If result size exceeds maxResultSizeforLineageViz
+     * @returns {void}
+     */
     self.queryResultToVisjsGraph = function (result) {
         var classNodes = self.getAllQueryPathClasses();
 
@@ -680,6 +839,14 @@ var KGquery = (function () {
             }, 2000);
         });
     };
+    /**
+     * Converts query results to a tags geometry visualization.
+     * @function
+     * @name queryToTagsGeometry
+     * @memberof module:KGquery
+     * @param {Object} result - The query results to convert
+     * @returns {void}
+     */
     self.queryToTagsGeometry = function (result) {
         const data = result.results.bindings;
         var tagsMap = {};
@@ -698,6 +865,14 @@ var KGquery = (function () {
         });
     };
 
+    /**
+     * Converts query results to a tags calendar visualization.
+     * @function
+     * @name queryToTagsCalendar
+     * @memberof module:KGquery
+     * @param {Object} result - The query results to convert
+     * @returns {void}
+     */
     self.queryToTagsCalendar = function (result) {
         const data = result.results.bindings;
         if (data.length == 0) {
@@ -711,6 +886,17 @@ var KGquery = (function () {
         });
     };
 
+    /**
+     * Converts query results to a table format and displays it in a dialog.
+     * Handles large result sets by exporting to CSV if size exceeds 10000 rows.
+     * @function
+     * @name queryResultToTable
+     * @memberof module:KGquery
+     * @param {Object} result - The query results to convert
+     * @param {Array} result.results.bindings - The query result bindings
+     * @param {Array} result.head.vars - The query result variables
+     * @returns {void}
+     */
     self.queryResultToTable = function (result) {
         var data = result.results.bindings;
         //prepare columns
@@ -802,6 +988,15 @@ var KGquery = (function () {
         });
     };
 
+    /**
+     * Clears all query sets and resets the graph state.
+     * Optionally preserves set queries if specified.
+     * @function
+     * @name clearAll
+     * @memberof module:KGquery
+     * @param {boolean} [exceptSetQueries] - If true, preserves set queries during cleanup
+     * @returns {void}
+     */
     self.clearAll = function (exceptSetQueries) {
         self.querySets.sets.forEach(function (querySet) {
             querySet.classFiltersMap = {};
@@ -825,12 +1020,28 @@ var KGquery = (function () {
         }
     };
 
+    /**
+     * Gets the variable name for a node.
+     * @function
+     * @name getVarName
+     * @memberof module:KGquery
+     * @param {Object} node - The node to get variable name for
+     * @param {boolean} [withoutQuestionMark] - Whether to omit the question mark prefix
+     * @returns {string} The variable name for the node
+     */
     self.getVarName = function (node, withoutQuestionMark) {
         var varName = (withoutQuestionMark ? "" : "?") + Sparql_common.formatStringForTriple(node.alias || node.label || Sparql_common.getLabelFromURI(node.id), true);
 
         return varName;
     };
 
+    /**
+     * Gets all classes used in query paths.
+     * @function
+     * @name getAllQueryPathClasses
+     * @memberof module:KGquery
+     * @returns {Array<Object>} Array of class objects used in query paths
+     */
     self.getAllQueryPathClasses = function () {
         var classes = [];
         self.querySets.sets.forEach(function (querySet) {
@@ -842,6 +1053,15 @@ var KGquery = (function () {
         return classes;
     };
 
+    /**
+     * Displays a message in the UI and controls the wait image.
+     * @function
+     * @name message
+     * @memberof module:KGquery
+     * @param {string} message - The message to display
+     * @param {boolean} [stopWaitImg=false] - If true, hides the wait image
+     * @returns {void}
+     */
     self.message = function (message, stopWaitImg) {
         $("#KGquery_messageDiv").html(message);
         if (stopWaitImg) {
@@ -851,6 +1071,14 @@ var KGquery = (function () {
         }
     };
 
+    /**
+     * Switches the right panel display between graph and other views.
+     * @function
+     * @name switchRightPanel
+     * @memberof module:KGquery
+     * @param {boolean} [forceGraph] - Whether to force graph display
+     * @returns {void}
+     */
     self.switchRightPanel = function (forceGraph) {
         return;
         var isGraphDisplayed = $("#KGquery_graphDiv").css("display");
@@ -861,12 +1089,28 @@ var KGquery = (function () {
         }
     };
 
+    /**
+     * Handles boolean operator changes for query sets.
+     * @function
+     * @name onBooleanOperatorChange
+     * @memberof module:KGquery
+     * @param {string} querySetDivId - ID of the query set div
+     * @param {string} value - New boolean operator value ('AND', 'OR', 'Union', etc.)
+     * @returns {void}
+     */
     self.onBooleanOperatorChange = function (querySetDivId, value) {
         self.divsMap[querySetDivId].booleanOperator = value;
     };
 
+    /**
+     * Removes a query element from the graph.
+     * @function
+     * @name removeQueryElement
+     * @memberof module:KGquery
+     * @param {string} queryElementDivId - ID of the query element div to remove
+     * @returns {void}
+     */
     self.removeQueryElement = function (queryElementDivId) {
-        //$("#" + queryElementDivId).remove();
         var queryElement = self.divsMap[queryElementDivId];
         var elementLength = self.querySets.sets[queryElement.setIndex].elements.length;
         var classFiltersMap = self.querySets.sets[queryElement.setIndex].classFiltersMap;
@@ -907,6 +1151,14 @@ var KGquery = (function () {
         //self.querySets.sets[queryElement.setIndex].classFiltersMap[]
     };
 
+    /**
+     * Removes a query set from the graph.
+     * @function
+     * @name removeSet
+     * @memberof module:KGquery
+     * @param {string} querySetDivId - ID of the query set div to remove
+     * @returns {void}
+     */
     self.removeSet = function (querySetDivId) {
         $("#" + querySetDivId).remove();
         var set = self.divsMap[querySetDivId];
@@ -914,6 +1166,14 @@ var KGquery = (function () {
         self.currentQuerySet = self.querySets.sets.at(-1);
     };
 
+    /**
+     * Handles output type selection changes.
+     * @function
+     * @name onOutputTypeSelect
+     * @memberof module:KGquery
+     * @param {string} output - The selected output type
+     * @returns {void}
+     */
     self.onOutputTypeSelect = function (output) {
         if (output == "") {
             return;
@@ -922,13 +1182,25 @@ var KGquery = (function () {
         $("#KGquery_outputTypeSelect").val("");
     };
 
+    /**
+     * Adds an output type to the select options.
+     * @function
+     * @name addOutputType
+     * @memberof module:KGquery
+     * @returns {void}
+     */
     self.addOutputType = function () {
         $("KGquery_outputTypeSelect");
     };
-    self.initMyQuery = function () {
-        //SavedQueriesWidget.list();
-        SavedQueriesWidget.showDialog("tabs_myQueries", self.currentSource, KGquery_myQueries.save, KGquery_myQueries.load, "KGquery/savedQueries/");
-    };
+
+    /**
+     * Initializes the query interface.
+     * Loads the query tab HTML if not already loaded.
+     * @function
+     * @name initQuery
+     * @memberof module:KGquery
+     * @returns {void}
+     */
     self.initQuery = function () {
         if ($("#tabs_Query").children().length == 0) {
             $("#tabs_Query").load("./modules/tools/KGquery/html/KGqueryQueryTab.html", function () {
@@ -936,6 +1208,15 @@ var KGquery = (function () {
             });
         }
     };
+
+    /**
+     * Initializes the graph interface.
+     * Loads the graph tab HTML if not already loaded and initializes the graph visualization.
+     * @function
+     * @name initGraph
+     * @memberof module:KGquery
+     * @returns {void}
+     */
     self.initGraph = function () {
         if ($("#tabs_Graph").children().length == 0) {
             $("#tabs_Graph").load("./modules/tools/KGquery/html/KGqueryGraphTab.html", function () {
@@ -945,8 +1226,31 @@ var KGquery = (function () {
         }
     };
 
+    /**
+     * Checks requirements by executing a SHACL query.
+     * @function
+     * @name checkRequirements
+     * @memberof module:KGquery
+     * @returns {void}
+     */
     self.checkRequirements = function () {
         KGquery.queryKG("shacl");
+    };
+
+    self.queryResultToGantt = function (result) {
+        var implicitModel = KGquery_graph.visjsData;
+        GanttWidget.showDialog(null, implicitModel, result, function (err, result) {});
+    };
+
+    /**
+     * Initializes the query management interface.
+     * @function
+     * @name initMyQuery
+     * @memberof module:KGquery
+     * @returns {void}
+     */
+    self.initMyQuery = function () {
+        SavedQueriesWidget.showDialog("tabs_myQueries", self.currentSource, KGquery_myQueries.save, KGquery_myQueries.load, "KGquery/savedQueries/");
     };
 
     return self;

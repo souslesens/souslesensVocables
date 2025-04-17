@@ -4,6 +4,15 @@ import KGcreator from "../KGcreator/KGcreator.js";
 var SQLquery_filters = (function () {
     var self = {};
 
+    /**
+     * Shows the filters dialog for SQL queries.
+     * @function
+     * @name showFiltersDialog
+     * @memberof module:SQLquery_filters
+     * @param {Object} querySets - The query sets to filter
+     * @param {string} slsvSource - The SLSV source identifier
+     * @returns {void}
+     */
     self.showFiltersDialog = function (querySets, slsvSource) {
         self.querySets = querySets;
         var paths = [];
@@ -55,6 +64,17 @@ var SQLquery_filters = (function () {
         );
     };
 
+    /**
+     * Gets the jsTree data for a data source.
+     * @function
+     * @name getDataSourcejstreeData
+     * @memberof module:SQLquery_filters
+     * @param {Object} querySets - The query sets to process
+     * @param {string} slsvSource - The SLSV source identifier
+     * @param {string} dataSource - The data source name
+     * @param {Function} callback - Callback function called with (err, jstreeData)
+     * @returns {void}
+     */
     self.getDataSourcejstreeData = function (querySets, slsvSource, dataSource, callback) {
         var jstreeData = [];
         var dataSourceMappings = {};
@@ -152,6 +172,15 @@ var SQLquery_filters = (function () {
         );
     };
 
+    /**
+     * Gets the data source configurations from an SLSV source.
+     * @function
+     * @name getSlsvSourcedataSourceConfigs
+     * @memberof module:SQLquery_filters
+     * @param {string} slsvSource - The SLSV source identifier
+     * @param {Function} callback - Callback function called with (err, config)
+     * @returns {void}
+     */
     self.getSlsvSourcedataSourceConfigs = function (slsvSource, callback) {
         KGcreator.getSlsvSourceConfig(slsvSource, function (err, config) {
             if (err) {
@@ -161,6 +190,18 @@ var SQLquery_filters = (function () {
             callback(null, config.databaseSources);
         });
     };
+
+    /**
+     * Gets the columns and tables for query sets.
+     * @function
+     * @name getQuerySetsColumnAndTables
+     * @memberof module:SQLquery_filters
+     * @param {Object} querySets - The query sets to process
+     * @param {string} dataSource - The data source name
+     * @param {Object} dataSourcemappings - The data source mappings
+     * @param {Function} callback - Callback function called with (err, paths)
+     * @returns {void}
+     */
     self.getQuerySetsColumnAndTables = function (querySets, dataSource, dataSourcemappings, callback) {
         var paths = [];
         querySets.sets.forEach(function (querySet) {
@@ -197,6 +238,16 @@ var SQLquery_filters = (function () {
         callback(null, paths);
     };
 
+    /**
+     * Gets the column mapping for a class.
+     * @function
+     * @name getClass2ColumnMapping
+     * @memberof module:SQLquery_filters
+     * @param {Object} mappings - The mappings configuration
+     * @param {string} datasource - The data source name
+     * @param {string} classUri - The URI of the class
+     * @returns {Array} Array of matching column mappings
+     */
     self.getClass2ColumnMapping = function (mappings, datasource, classUri) {
         var matches = [];
         for (var table in mappings) {

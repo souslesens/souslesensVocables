@@ -16,6 +16,19 @@ import SearchWidget from "../../uiWidgets/searchWidget.js";
 import Authentification from "../../shared/authentification.js";
 import UI from "../../../modules/shared/UI.js";
 
+/**
+ * @module Lineage_sources
+ * @description Module for managing ontology sources in the lineage system.
+ * Provides functionality for:
+ * - Loading and initializing ontology sources
+ * - Managing source selection and activation
+ * - Handling source-specific UI elements and themes
+ * - Supporting source imports and dependencies
+ * - Managing source metadata and configurations
+ * - Coordinating source-related operations with other modules
+ * - Supporting source validation and persistence
+ */
+
 var Lineage_sources = (function () {
     var self = {};
     self.activeSource = null;
@@ -198,6 +211,15 @@ var Lineage_sources = (function () {
             $("#" + buttonId).prop("disabled", "disabled");
         });
 
+        /**
+         * Highlights the source div in the UI and updates the active source.
+         * @function
+         * @name highlightSourceDiv
+         * @memberof module:Lineage_sources
+         * @param {string} source - The source to highlight.
+         * @returns {void}
+         * @private
+         */
         function highlightSourceDiv(source) {
             $(".Lineage_sourceLabelDiv").removeClass("Lineage_selectedSourceDiv");
             $("#" + self.loadedSources[source].sourceDivId).addClass("Lineage_selectedSourceDiv");
@@ -453,11 +475,12 @@ var Lineage_sources = (function () {
     };
 
     /**
-     * @function indexSourceIfNotIndexed
+     * Checks if a source is indexed in ElasticSearch. If not, it triggers the indexing process.
+     * @function
      * @name indexSourceIfNotIndexed
-     * @memberof Lineage_sources
-     * @description Checks if a source is indexed in ElasticSearch. If not, it triggers the indexing process.
+     * @memberof module:Lineage_sources
      * @param {string} source - The source to check and index if necessary.
+     * @returns {void}
      */
     self.indexSourceIfNotIndexed = function (source) {
         SearchUtil.initSourcesIndexesList(null, function (err, indexedSources) {
@@ -485,12 +508,13 @@ var Lineage_sources = (function () {
     };
 
     /**
-     * @function registerSource
+     * Registers a source, ensuring it is loaded and displayed in the UI.
+     * @function
      * @name registerSource
-     * @memberof Lineage_sources
-     * @description Registers a source, ensuring it is loaded and displayed in the UI.
+     * @memberof module:Lineage_sources
      * @param {string} sourceLabel - The label of the source to register.
      * @param {function} [callback] - Optional callback function to execute after registration.
+     * @returns {void}
      */
     self.registerSource = function (sourceLabel, callback) {
         if (!callback) {
@@ -538,12 +562,14 @@ sourceDivId +
     };
 
     /**
-     * @function registerSourceWithoutDisplayingImports
+     * Registers a source without displaying its imports, adding it to the UI if it matches the active source.
+     * @function
      * @name registerSourceWithoutDisplayingImports
      * @memberof Lineage_sources
      * @description Registers a source without displaying its imports, adding it to the UI if it matches the active source.
      * @param {string} sourceLabel - The label of the source to register.
      * @param {function} [callback] - Optional callback function to execute after registration.
+     * @returns {void}
      */
     self.registerSourceWithoutDisplayingImports = function (sourceLabel, callback) {
         if (!callback) {
@@ -595,11 +621,12 @@ sourceDivId +
     };
 
     /**
-     * @function showSourceDivPopupMenu
+     * Displays a contextual popup menu for a source, allowing various actions such as hiding, grouping, or editing.
+     * @function
      * @name showSourceDivPopupMenu
-     * @memberof Lineage_sources
-     * @description Displays a contextual popup menu for a source, allowing various actions such as hiding, grouping, or editing.
+     * @memberof module:Lineage_sources
      * @param {string} sourceDivId - The ID of the source's div element.
+     * @returns {void}
      */
     self.showSourceDivPopupMenu = function (sourceDivId) {
         event.stopPropagation();
@@ -623,12 +650,13 @@ sourceDivId +
     };
 
     /**
-     * @function registerSourceImports
+     * Registers all imported sources of a given source.
+     * @function
      * @name registerSourceImports
-     * @memberof Lineage_sources
-     * @description Registers all imported sources of a given source.
+     * @memberof module:Lineage_sources
      * @param {string} sourceLabel - The label of the source whose imports should be registered.
      * @param {function} callback - Callback function executed after all imports are registered.
+     * @returns {void}
      */
     self.registerSourceImports = function (sourceLabel, callback) {
         var imports = Config.sources[sourceLabel].imports;
@@ -645,11 +673,12 @@ sourceDivId +
     };
 
     /**
-     * @function setAllWhiteBoardSources
+     * Toggles the selection of all whiteboard sources, affecting UI highlighting and opacity settings.
+     * @function
      * @name setAllWhiteBoardSources
-     * @memberof Lineage_sources
-     * @description Toggles the selection of all whiteboard sources, affecting UI highlighting and opacity settings.
+     * @memberof module:Lineage_sources
      * @param {boolean} remove - If true, sets a flag to remove sources from the whiteboard.
+     * @returns {void}
      */
     self.setAllWhiteBoardSources = function (remove) {
         self.showHideEditButtons(null, true);
@@ -679,14 +708,15 @@ sourceDivId +
     };
 
     /**
-     * @function showHideCurrentSourceNodes
+     * Toggles the visibility of nodes belonging to a given source in the lineage graph.
+     * @function
      * @name showHideCurrentSourceNodes
-     * @memberof Lineage_sources
-     * @description Toggles the visibility of nodes belonging to a given source in the lineage graph.
+     * @memberof module:Lineage_sources
      * @param {string} source - The source whose nodes should be shown or hidden.
      * @param {boolean} hide - Whether to hide (true) or show (false) the nodes.
+     * @returns {void}
      */
-    self.showHideCurrentSourceNodes = function (source, /** @type {any} */ hide) {
+    self.showHideCurrentSourceNodes = function (source, hide) {
         if (!source) {
             source = Lineage_sources.activeSource;
         }
@@ -710,6 +740,14 @@ sourceDivId +
         }
     };
 
+    /**
+     * Sets the current top-level ontology based on a source's imports.
+     * @function
+     * @name setTopLevelOntologyFromImports
+     * @memberof module:Lineage_sources
+     * @param {string} sourceLabel - The source label to check for imports.
+     * @returns {string|null} The selected top-level ontology or null if none found.
+     */
     self.setTopLevelOntologyFromImports = function (sourceLabel) {
         Config.currentTopLevelOntology = null;
         if (Config.topLevelOntologies[sourceLabel]) {
@@ -732,6 +770,15 @@ sourceDivId +
         });
         return Config.currentTopLevelOntology;
     };
+
+    /**
+     * Sets the current top-level ontology based on a prefix.
+     * @function
+     * @name setTopLevelOntologyFromPrefix
+     * @memberof module:Lineage_sources
+     * @param {string} prefix - The prefix to search for in top-level ontologies.
+     * @returns {string|null} The selected top-level ontology or null if none found.
+     */
     self.setTopLevelOntologyFromPrefix = function (prefix) {
         Config.currentTopLevelOntology = null;
         for (var key in Config.topLevelOntologies) {
@@ -742,7 +789,20 @@ sourceDivId +
         return Config.currentTopLevelOntology;
     };
 
+    /**
+     * Collection of menu actions for source management.
+     * @namespace
+     * @memberof module:Lineage_sources
+     */
     self.menuActions = {
+        /**
+         * Sets the opacity of nodes and edges belonging to a source.
+         * @function
+         * @name setSourceOpacity
+         * @memberof module:Lineage_sources.menuActions
+         * @param {string} [source] - The source to modify. If not provided, uses the active source.
+         * @returns {void}
+         */
         setSourceOpacity: function (source) {
             if (!source) {
                 source = Lineage_sources.activeSource;
@@ -790,6 +850,14 @@ sourceDivId +
             });
             Lineage_whiteboard.lineageVisjsGraph.data.edges.update(newEdges);
         },
+        /**
+         * Closes a source and removes its nodes from the graph.
+         * @function
+         * @name closeSource
+         * @memberof module:Lineage_sources.menuActions
+         * @param {string} [source] - The source to close. If not provided, uses the active source.
+         * @returns {void}
+         */
         closeSource: function (source) {
             if (source) {
                 self.activeSource = source;
@@ -808,6 +876,14 @@ sourceDivId +
             self.loadedSources[self.activeSource] = null;
             $("#" + sourceDivId).remove();
         },
+        /**
+         * Hides all nodes belonging to a source.
+         * @function
+         * @name hideSource
+         * @memberof module:Lineage_sources.menuActions
+         * @param {string} [source] - The source to hide. If not provided, uses the active source.
+         * @returns {void}
+         */
         hideSource: function (source) {
             if (!source) {
                 source = Lineage_sources.activeSource;
@@ -815,6 +891,14 @@ sourceDivId +
             PopupMenuWidget.hidePopup("popupMenuWidgetDiv");
             Lineage_sources.showHideCurrentSourceNodes(null, true);
         },
+        /**
+         * Shows all nodes belonging to a source.
+         * @function
+         * @name showSource
+         * @memberof module:Lineage_sources.menuActions
+         * @param {string} [source] - The source to show. If not provided, uses the active source.
+         * @returns {void}
+         */
         showSource: function (source) {
             if (!source) {
                 source = Lineage_sources.activeSource;
@@ -822,6 +906,14 @@ sourceDivId +
             PopupMenuWidget.hidePopup("popupMenuWidgetDiv");
             Lineage_sources.showHideCurrentSourceNodes(null, false);
         },
+        /**
+         * Groups all nodes of a source under a single parent node.
+         * @function
+         * @name groupSource
+         * @memberof module:Lineage_sources.menuActions
+         * @param {string} [source] - The source to group. If not provided, uses the active source.
+         * @returns {void}
+         */
         groupSource: function (source) {
             PopupMenuWidget.hidePopup("popupMenuWidgetDiv");
 
@@ -870,6 +962,14 @@ sourceDivId +
             Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(visjsData.nodes);
             Lineage_whiteboard.lineageVisjsGraph.data.edges.update(visjsData.edges);
         },
+        /**
+         * Removes the grouping of nodes for a source.
+         * @function
+         * @name ungroupSource
+         * @memberof module:Lineage_sources.menuActions
+         * @param {string} [source] - The source to ungroup. If not provided, uses the active source.
+         * @returns {void}
+         */
         ungroupSource: function (source) {
             if (!source) {
                 source = Lineage_sources.activeSource;
@@ -880,6 +980,14 @@ sourceDivId +
             }
             Lineage_whiteboard.lineageVisjsGraph.data.nodes.remove(source);
         },
+        /**
+         * Copies the graph URI of a source to the clipboard.
+         * @function
+         * @name copyGraphUri
+         * @memberof module:Lineage_sources.menuActions
+         * @param {string} [source] - The source whose URI to copy. If not provided, uses the active source.
+         * @returns {void}
+         */
         copyGraphUri: function (source) {
             if (!source) {
                 source = Lineage_sources.activeSource;
@@ -887,6 +995,14 @@ sourceDivId +
             var graphUri = Config.sources[source].graphUri;
             common.copyTextToClipboard(graphUri);
         },
+        /**
+         * Exports a source to OWL format.
+         * @function
+         * @name exportOWL
+         * @memberof module:Lineage_sources.menuActions
+         * @param {string} [source] - The source to export. If not provided, uses the active source.
+         * @returns {void}
+         */
         exportOWL: function (source) {
             if (!source) {
                 source = Lineage_sources.activeSource;
@@ -897,14 +1013,36 @@ sourceDivId +
                 }
             });
         },
+        /**
+         * Opens the source editing dialog.
+         * @function
+         * @name editSource
+         * @memberof module:Lineage_sources.menuActions
+         * @returns {void}
+         */
         editSource: function () {
             window.EditSourceDialog.open(Lineage_sources.activeSource);
         },
+        /**
+         * Opens the graph download modal.
+         * @function
+         * @name downloadGraph
+         * @memberof module:Lineage_sources.menuActions
+         * @returns {void}
+         */
         downloadGraph: function () {
             window.DownloadGraphModal.open(Lineage_sources.activeSource);
         },
     };
 
+    /**
+     * Checks if a source is owned by the current user.
+     * @function
+     * @name isSourceOwnedByUser
+     * @memberof module:Lineage_sources
+     * @param {string} sourceName - The name of the source to check.
+     * @returns {boolean} True if the source is owned by the current user, false otherwise.
+     */
     self.isSourceOwnedByUser = function (sourceName) {
         const source = Config.sources[sourceName];
         if (!source) {
@@ -918,6 +1056,14 @@ sourceDivId +
         return false;
     };
 
+    /**
+     * Checks if a source is editable by the current user based on access control settings.
+     * @function
+     * @name isSourceEditableForUser
+     * @memberof module:Lineage_sources
+     * @param {string} source - The source to check.
+     * @returns {boolean} True if the source is editable by the current user, false otherwise.
+     */
     self.isSourceEditableForUser = function (source) {
         if (!Config.sources[source]) {
             return false; // console.log("no source " + source);
@@ -942,6 +1088,14 @@ sourceDivId +
         });
     };
 
+    /**
+     * Clears all nodes belonging to a source from the graph.
+     * @function
+     * @name clearSource
+     * @memberof module:Lineage_sources
+     * @param {string} [source] - The source to clear. If not provided, uses the active source.
+     * @returns {void}
+     */
     self.clearSource = function (source) {
         if (!source) {
             source = self.activeSource;
@@ -958,6 +1112,14 @@ sourceDivId +
         }
     };
 
+    /**
+     * Sets the theme for the lineage graph, affecting background and text colors.
+     * @function
+     * @name setTheme
+     * @memberof module:Lineage_sources
+     * @param {string} theme - The theme to apply ("white" or other).
+     * @returns {void}
+     */
     self.setTheme = function (theme) {
         var backgroundColor;
 

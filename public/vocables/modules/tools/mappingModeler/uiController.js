@@ -23,7 +23,11 @@ var UIcontroller = (function () {
         if (tabId == "MappingModeler_dataSourcesTab") {
             $("#mappingModeler_structuralPanel").css("display", "block");
             $("#rightControlPanelDiv").load("./modules/tools/mappingModeler/html/mappingsGraphButtons.html", function (err) {});
-        } else if (tabId == "MappingModeler_columnsTab") {
+        } else if (!MappingModeler.currentTable) {
+            $("#MappingModeler_leftTabs").tabs("option", "active", 0);
+            return alert("select a table");
+        }
+        if (tabId == "MappingModeler_columnsTab") {
             $("#mappingModeler_structuralPanel").css("display", "block");
             MappingModeler.initActiveLegend(self.legendGraphDivId);
             MappingModeler.loadSuggestionSelectJstree(MappingModeler.currentTable.columns, "Columns");

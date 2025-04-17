@@ -1,16 +1,19 @@
 <div id="MappingModeler_leftTabs" style="width: 100%; overflow: auto; padding: 0px; border-radius: 0px">
     <ul>
         <li class="mappingModeler-tabDiv">
-            <a href="#MappingModeler_dataSourcesTab" style="padding: 15px">Data<br />Sources</a>
+            <a href="#MappingModeler_dataSourcesTab" style="padding: 7px">Data<br />Sources</a>
         </li>
         <li class="mappingModeler-tabDiv">
-            <a href="#MappingModeler_columnsTab" style="padding: 15px">Column<br />Mappings</a>
+            <a href="#MappingModeler_columnsTab" style="padding: 7px">Column<br />Mappings</a>
         </li>
         <li class="mappingModeler-tabDiv">
-            <a href="#MappingModeler_technicalDetailTab" style="padding: 15px">Technical<br />Mappings</a>
+            <a href="#MappingModeler_technicalDetailTab" style="padding: 7px">Technical<br />Mappings</a>
         </li>
         <li class="mappingModeler-tabDiv">
-            <a href="#MappingModeler_tripleFactoryTab" style="padding: 15px">Triples<br />&nbsp;</a>
+            <a href="#MappingModeler_tripleFactoryTab" style="padding: 7px">Triples<br />&nbsp;</a>
+        </li>
+        <li class="mappingModeler-RelationsDiv">
+            <a href="#MappingModeler_RelationsTab" style="padding: 7px">Relations<br />&nbsp;</a>
         </li>
     </ul>
 
@@ -93,6 +96,16 @@
             </button>-->
 
             <!--  <button class="w3-button slsv-button-2 " onclick="KGcreator_run.stopCreateTriples()" title="Abort">Abort</button>-->
+        </div>
+    </div>
+    <div id="MappingModeler_RelationsTab" class="coloredContainerImportant">
+        <div style="height: 500px; background-color: #eee">
+            <button class="w3-button slsv-button-2" onclick="MappingModelerRelations.listPossibleRelations()" title="listPossibleRelations">list possible relations</button>
+            <button class="w3-button slsv-button-2" onclick="MappingModelerRelations.applyColumnRelations()" title="applyColumnRelations">apply possible relations</button>
+
+            <div style="width: 400px; height: 400px; overflow: auto">
+                <div id="mappingModelerRelations_jstreeDiv"></div>
+            </div>
         </div>
     </div>
 </div>

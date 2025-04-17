@@ -7,6 +7,18 @@ import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 import Lineage_sources from "./lineage_sources.js";
 import CreateRestriction_bot from "../../bots/createRestriction_bot.js";
 
+/**
+ * @module Lineage_createRelation
+ * @description Module for creating and managing relationships between ontology nodes.
+ * Provides functionality for:
+ * - Creating new relationships between nodes in the ontology
+ * - Managing relationship types and properties
+ * - Validating relationship constraints
+ * - Supporting different types of ontological relationships
+ * - Managing relationship metadata and restrictions
+ * - Integrating with the ontology model system
+ */
+
 var Lineage_createRelation = (function () {
     var self = {};
 

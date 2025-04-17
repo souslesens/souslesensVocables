@@ -36,6 +36,7 @@ html_theme_options = {
 }
 html_logo = "logo.png"
 html_favicon = "logo.png"
+html_css_files= ['custom.css']
 
 
 master_doc = "index"

@@ -2,6 +2,18 @@ import common from "../../shared/common.js";
 import Authentification from "../../shared/authentification.js";
 import CreateSLSVsource_bot from "../../bots/createSLSVsource_bot.js";
 
+/**
+ * @module Lineage_createSLSVsource
+ * @description Module for creating new SLSV (Sous Le Sens Vocables) sources in the system.
+ * Provides functionality for:
+ * - Creating and configuring new ontology sources
+ * - Managing source metadata and configuration
+ * - Handling source imports and dependencies
+ * - Managing user permissions and ownership
+ * - Supporting source validation and persistence
+ * - Integrating with the SLSV bot system
+ */
+
 var Lineage_createSLSVsource = (function () {
     var self = {};
 

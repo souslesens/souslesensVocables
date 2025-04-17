@@ -347,17 +347,37 @@ var Axioms_graph = (function () {
 
                 //process inversion of some and property
                 function (callbackSeries) {
+                    //    return callbackSeries()
                     var nodesMap = {};
                     visjsData.nodes.forEach(function (node) {
                         nodesMap[node.id] = node;
                     });
                     var nodesToDelete = [];
                     visjsData.edges.forEach(function (edge, index) {
+                        if (edge.to == "http://purl.obolibrary.org/obo/BFO_0000023") {
+                            console.log(JSON.stringify(nodesMap[edge.from]));
+                        }
+
                         var x = nodesMap[edge.from].label;
+                        if (nodesMap[edge.from].data.type == "inverseOf") {
+                            //concat inverse and exists
+                            nodesMap[edge.from].label += nodesMap[edge.to].label + "";
+                            nodesToDelete.push(edge.to);
+                        }
+
                         if (nodesMap[edge.from].color == "#cb9801") {
+                            //restrcition
                             if (nodesMap[edge.to].data.type == "http://www.w3.org/2002/07/owl#ObjectProperty") {
                                 nodesMap[edge.from].label = nodesMap[edge.to].label + "\n" + nodesMap[edge.from].label + "";
-                                (nodesMap[edge.from].color = "#f5ef39"), (nodesMap[edge.from].font = { size: 14 }), (visjsData.edges[index].length = 120);
+                                //   nodesMap[edge.from].color = "#f5ef39"
+                                nodesMap[edge.from].font = { size: 18, color: "#cb9801" };
+                                visjsData.edges[index].length = 120;
+                                nodesToDelete.push(edge.to);
+                            } else if (nodesMap[edge.to].data.type == "inverseOf") {
+                                nodesMap[edge.from].label = nodesMap[edge.to].label;
+                                //  nodesMap[edge.from].color = "#f5ef39"
+                                nodesMap[edge.from].font = { size: 18, color: "#cb9801" };
+                                //  visjsData.edges[index].length = 120;
                                 nodesToDelete.push(edge.to);
                             }
                         }

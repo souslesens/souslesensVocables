@@ -4,6 +4,18 @@ import common from "../../shared/common.js";
 var SQLquery_run = (function () {
     var self = {};
 
+    /**
+     * Executes a path query on SQL data sources.
+     * @function
+     * @name execPathQuery
+     * @memberof module:SQLquery_run
+     * @param {Object} querySets - The query sets to execute
+     * @param {string} slsvSource - The SLSV source identifier
+     * @param {string} dataSource - The data source name
+     * @param {Object} options - Query execution options
+     * @param {Function} callback - Callback function called with (err, data)
+     * @returns {void}
+     */
     self.execPathQuery = function (querySets, slsvSource, dataSource, options, callback) {
         if (!options) {
             options = {};
@@ -117,6 +129,17 @@ var SQLquery_run = (function () {
         );
     };
 
+    /**
+     * Gets the database model for a data source.
+     * @function
+     * @name getDBmodel
+     * @memberof module:SQLquery_run
+     * @param {Object} dataSourceConfig - The data source configuration
+     * @param {string} dataSourceConfig.name - The name of the data source
+     * @param {string} dataSourceConfig.sqlType - The SQL type (mysql, postgres, etc)
+     * @param {Function} callback - Callback function called with (err, model)
+     * @returns {void}
+     */
     self.getDBmodel = function (dataSourceConfig, callback) {
         const params = new URLSearchParams({
             name: dataSourceConfig.name,
@@ -138,6 +161,21 @@ var SQLquery_run = (function () {
         });
     };
 
+    /**
+     * Generates the FROM clause of an SQL query.
+     * @function
+     * @name getFromSql
+     * @memberof module:SQLquery_run
+     * @param {Object} joinObj - The join configuration object
+     * @param {string} joinObj.fromTable - The source table
+     * @param {string} joinObj.toTable - The target table
+     * @param {string} joinObj.fromColumn - The source column
+     * @param {string} joinObj.toColumn - The target column
+     * @param {string} [joinObj.joinTable] - Optional intermediate join table
+     * @param {string} [joinObj.joinFromColumn] - Column for joining with intermediate table
+     * @param {boolean} isOuterJoin - Whether to use outer joins
+     * @returns {string} The FROM clause SQL
+     */
     self.getFromSql = function (joinObj, isOuterJoin) {
         var sql = "FROM "; //SELECT top 10 * from ";
 
@@ -160,6 +198,17 @@ var SQLquery_run = (function () {
         return sql;
     };
 
+    /**
+     * Executes an SQL query on a data source.
+     * @function
+     * @name execSql
+     * @memberof module:SQLquery_run
+     * @param {string} sqlQuery - The SQL query to execute
+     * @param {string} dataSourceType - The type of data source
+     * @param {string} dbName - The database name
+     * @param {Function} callback - Callback function called with (err, data)
+     * @returns {void}
+     */
     self.execSql = function (sqlQuery, dataSourceType, dbName, callback) {
         const params = new URLSearchParams({
             type: dataSourceType,
@@ -185,6 +234,14 @@ var SQLquery_run = (function () {
         });
     };
 
+    /**
+     * Converts query results to a table format.
+     * @function
+     * @name queryResultToTable
+     * @memberof module:SQLquery_run
+     * @param {Array} data - The query result data
+     * @returns {Object} The formatted table data
+     */
     self.queryResultToTable = function (data) {
         data.forEach(function (item) {
             if (varName.length < 3) {

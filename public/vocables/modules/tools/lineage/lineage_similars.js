@@ -6,9 +6,30 @@ self.lineageVisjsGraph;
 import Lineage_whiteboard from "./lineage_whiteboard.js";
 import Lineage_sources from "./lineage_sources.js";
 
+/**
+ * @module Lineage_similars
+ * @description Module for finding and visualizing similar nodes across different ontology sources.
+ * Provides functionality for:
+ * - Finding nodes with similar labels or properties
+ * - Comparing nodes across different sources
+ * - Visualizing similar nodes in the graph
+ * - Supporting exact and fuzzy matching
+ * - Managing source-specific similarity searches
+ * - Handling node selection and comparison
+ * - Supporting interactive similarity exploration
+ */
+
 var Lineage_similars = (function () {
     var self = {};
 
+    /**
+     * Shows the dialog for finding similar nodes.
+     * @function
+     * @name showDialog
+     * @memberof module:Lineage_similars
+     * @param {boolean} selection - Whether to use selected nodes as the source.
+     * @returns {void}
+     */
     self.showDialog = function (selection) {
         //$("#smallDialogDiv").parent().css("left", "30%");
         $("#smallDialogDiv").dialog("option", "title", "Similars");
@@ -21,11 +42,26 @@ var Lineage_similars = (function () {
         });
     };
 
+    /**
+     * Handles changes in the selection mode.
+     * @function
+     * @name onChangeSelection
+     * @memberof module:Lineage_similars
+     * @param {string} value - The new selection value.
+     * @returns {void}
+     */
     self.onChangeSelection = function (value) {
         self.mode = $("#lineageSimilars_toModeSelect").val();
         self.showSourcesTree();
     };
 
+    /**
+     * Displays the tree of available sources for finding similar nodes.
+     * @function
+     * @name showSourcesTree
+     * @memberof module:Lineage_similars
+     * @returns {void}
+     */
     self.showSourcesTree = function () {
         var options = {
             withCheckboxes: false,
@@ -34,12 +70,36 @@ var Lineage_similars = (function () {
         SourceSelectorWidget.initWidget(["OWL"], "lineageSimilars_sourcesTreeDiv", false, Lineage_similars.onSourceSelected, Lineage_similars.onValidateSources, options);
     };
 
+    /**
+     * Handles the selection of a source from the sources tree.
+     * @function
+     * @name onSourceSelected
+     * @memberof module:Lineage_similars
+     * @param {Event} evt - The selection event.
+     * @param {Object} obj - Object containing the selected node data.
+     * @returns {void}
+     */
     self.onSourceSelected = function (evt, obj) {
         self.currentSource = obj.node.id;
         // self.drawSourceSimilars(source);
     };
+
+    /**
+     * Callback for source selection validation.
+     * @function
+     * @name onValidateSources
+     * @memberof module:Lineage_similars
+     * @returns {void}
+     */
     self.onValidateSources = function () {};
 
+    /**
+     * Initiates the drawing of similar nodes based on the current mode.
+     * @function
+     * @name drawSimilars
+     * @memberof module:Lineage_similars
+     * @returns {void}
+     */
     self.drawSimilars = function () {
         if (!Lineage_whiteboard.lineageVisjsGraph.data) {
             return alert("no nodes to compare");
@@ -61,6 +121,14 @@ var Lineage_similars = (function () {
         $("#smallDialogDiv").dialog("close");
     };
 
+    /**
+     * Draws similar nodes from a specific source.
+     * @function
+     * @name drawSourceSimilars
+     * @memberof module:Lineage_similars
+     * @param {string} source - The source to search for similar nodes.
+     * @returns {void}
+     */
     self.drawSourceSimilars = function (source) {
         var nodes = self.getStartingNodes();
         if (!nodes) {
@@ -222,6 +290,14 @@ var Lineage_similars = (function () {
             },
         );
     };
+
+    /**
+     * Gets the nodes to use as starting points for similarity search.
+     * @function
+     * @name getStartingNodes
+     * @memberof module:Lineage_similars
+     * @returns {Array<Object>|null} Array of starting nodes or null if none selected.
+     */
     self.getStartingNodes = function () {
         var nodes = null;
         var selectMode = $("#lineageSimilars_fromSelect").val();
@@ -234,6 +310,15 @@ var Lineage_similars = (function () {
             return [Lineage_whiteboard.currentGraphNode];
         }
     };
+
+    /**
+     * Draws similar nodes found within the whiteboard.
+     * @function
+     * @name drawWhiteBoardSimilars
+     * @memberof module:Lineage_similars
+     * @param {string} [output] - Optional output format.
+     * @returns {void}
+     */
     self.drawWhiteBoardSimilars = function (output) {
         var commonNodes = [];
         var existingNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();

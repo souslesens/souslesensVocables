@@ -1,6 +1,6 @@
 # Lineage
 
-## Overview
+
 
 The Lineage tool is one of the core components of SousLeSens, a web
 application for managing ontologies and knowledge graphs, built on the
@@ -11,25 +11,31 @@ dynamic, interactive graphs on a whiteboard interface. The underlying
 assumption is that users can better understand graphs when they are both
 visualized and interactively manipulated.
 
+## Contents
+
 ```{contents} Table of Contents
-:depth: 2
+:depth: 3
 ```
+
 
 ## UI Overview
 
 ### Global Overview 
 
-![](images/media/image1.png)
+![](images/media/lineage/image1.png)
 
 The Lineage UI is composed of three main elements:
 
 -   **A left panel with 5 tabs**: Whiteboard, Classes, Properties,SPARQL
     and Containers
+-   **A left panel with 5 tabs**: Whiteboard, Classes, Properties,SPARQL
+    and Containers
 
 -   **A whiteboard** to show and manipulate graphs.
+-   **A whiteboard** to show and manipulate graphs.
 
--   **A right Pannel with** buttons related to the , providing basic
-    actions common to multiple tools
+- **A right Pannel with** buttons related to the whiteboard, providing basic
+  actions common to multiple tools
 
 The top panel is shared across all tools, but its content varies
 depending on the currently selected tool.  
@@ -37,34 +43,34 @@ Lineage has the most buttons on the top panel, and it includes all
 buttons available in other tools. Therefore, the documentation of the
 top panel is comprehensive in this section.
 
-![](images/media/image2.png)
+![](images/media/lineage/image2.png)
 
-1.  **SousLeSens logo** : Redirects to the home page
+a.  **SousLeSens logo** : Redirects to the home page
 
-2.  **Current tool** : Switch to another tool
+b.  **Current tool** : Switch to another tool
 
-3.  **Change source** : Switch to a different graph
+c.  **Change source** : Switch to a different graph
 
-4.  **Add source** : Add an additional graph to explore without
+d.  **Add source** : Add an additional graph to explore without
     replacing the current one
 
-5.  **All** : Select all panel sources as current sources
+e.  **All** : Select all panel sources as current sources
 
-6.  **Current sources pannel :**
+f.  **Current sources pannel :**
 
-> This panel displays all loaded sources. By default, the selected
-> source is loaded along with its imports. In some tools, imports are
-> not shown in the panel.  
-> The currently selected sources are highlighted in blue. Click on
-> another source to change it.  
-> All actions and buttons of the tool will be applied to the current
-> source.  
-> You can add sources to this panel using (d) and select all sources
-> using (e).  
-> Using (c) to change the source will clear the panel and reload it with
-> the selected source and its imports.
+This panel displays all loaded sources. By default, the selected
+source is loaded along with its imports. In some tools, imports are
+not shown in the panel.  
+The currently selected sources are highlighted in blue. Click on
+another source to change it.  
+All actions and buttons of the tool will be applied to the current
+source.  
+You can add sources to this panel using (d) and select all sources
+using (e).  
+Using (c) to change the source will clear the panel and reload it with
+the selected source and its imports.
 
-1.  **Source popup :** Clicking this button opens a popup with several
+g.  **Source popup :** Clicking this button opens a popup with several
     options for the source, such as adjusting node opacity, removing it
     from the panel, grouping nodes belonging to the source, copying the
     graph URI, or downloading it in a triple format (e.g., Turtle,
@@ -73,35 +79,35 @@ top panel is comprehensive in this section.
     parameters such as child and parent properties, or the main class
     query.
 
-> ![](images/media/image3.png)
+> ![](images/media/lineage/image3.png)
 
-1.  **Add resource :** (Lineage only) Adds a new resource. Covered in a
+h.  **Add resource :** (Lineage only) Adds a new resource. Covered in a
     dedicated tutorial section
 
-2.  **Add Relation** : (Lineage only) Adds a new resource. Covered in a
+i.  **Add Relation** : (Lineage only) Adds a new resource. Covered in a
     dedicated tutorial section
 
-3.  **Change Theme** : Changes the color theme of SousLeSens.
+j.  **Change Theme** : Changes the color theme of SousLeSens.
     Administrators can lock a specific theme, in which case this button
     will not appear
 
-4.  **Copy Query** : Copies the most recent SPARQL query to the
+k.  **Copy Query** : Copies the most recent SPARQL query to the
     clipboard
 
-5.  **Account button :** Displays the logged-in user and allows logout
+l.  **Account button :** Displays the logged-in user and allows logout
 
-6.  **Logqueries checkbox :** When checked, all performed queries are
+m.  **Logqueries checkbox :** When checked, all performed queries are
     logged in the browser console
 
-7.  **Swagger link :** Opens the SousLeSens Swagger UI to view and
+n.  **Swagger link :** Opens the SousLeSens Swagger UI to view and
     access all available user API routes
 
-8.  **GitHub link :** Opens the SousLeSens GitHub repository for
+o.  **GitHub link :** Opens the SousLeSens GitHub repository for
     contributing and read the documentation
 
 ### Left panel: Whiteboard Tab 
 
-![](images/media/image4.png)
+![](images/media/lineage/image4.png)
 
 Source section:
 
@@ -115,38 +121,38 @@ Source section:
     This performs the same action, but limited to either **direct**,
     **inverse**, or **all** restrictions.
 
-> ![](images/media/image5.png)
+> ![](images/media/lineage/image5.png)
 
-1.  **Main classes button :** Displays the main classes on the
+2.  **Main classes button :** Displays the main classes on the
     whiteboard. The main classes are those that meet the top classes
     filter condition (by default, all owl:Class).
 
 This parameter can be edited for each source if you are the source
 creator.
 
-> ![](images/media/image6.png)
+> ![](images/media/lineage/image6.png)
 
-![](images/media/image7.png)
+![](images/media/lineage/image7.png)
 
-1.  **Children button** – Adds all children of the classes currently
+3.  **Children button** – Adds all children of the classes currently
     displayed on the whiteboard.
 
 Children are the elements linked to the current node via taxonomy
 predicate properties.
 
-![](images/media/image7.png)
+![](images/media/lineage/image7.png)
 
-> For example, if a node is displayed, clicking on "Children" will show
-> on the whiteboard all nodes that are linked to it via rdf:type or
-> rdfs:subclass properties.
+ For example, if a node is displayed, clicking on "Children" will show
+ on the whiteboard all nodes that are linked to it via rdf:type or
+ rdfs:subclass properties.
 
-1.  **Parents button** – Adds all parents of the nodes currently
+4.  **Parents button** – Adds all parents of the nodes currently
     displayed on the whiteboard.
 
-> A parent is defined by taxonomy predicates as well, but the
-> relationship is reversed.
+ A parent is defined by taxonomy predicates as well, but the
+ relationship is reversed.
 
-1.  **Axioms button**
+5.  **Axioms button**
 
 Displays on the whiteboard all nodes related to an axiom, grouped by
 axiom category (e.g., **SubClassOf**, **EquivalentClasses**, or
@@ -154,141 +160,140 @@ axiom category (e.g., **SubClassOf**, **EquivalentClasses**, or
 
 **Whiteboard section**
 
-1.  **Whiteboard search bar :** Searches for a node that is present on
+6.  **Whiteboard search bar :** Searches for a node that is present on
     the whiteboard.
 
-2.  **Clear all button** – Clears the whiteboard
+7.  **Clear all button** – Clears the whiteboard
 
-3.  **Clear last button** – Clears all nodes on the whiteboard, except
+8.  **Clear last button** – Clears all nodes on the whiteboard, except
     for those added by the most recent action.
 
-4.  **Only last button** – Clears all nodes on the whiteboard, except
+9.  **Only last button** – Clears all nodes on the whiteboard, except
     for those added by the most recent action.
 
-5.  **Selection button :** Displays a menu with a tree of all classes on
+10.  **Selection button :** Displays a menu with a tree of all classes on
     the whiteboard. This menu primarily handles node decoration and icon
     management.
 
-![](images/media/image8.png)
+![](images/media/lineage/image8.png)
 
-1.  **CSV export button :** Displays the whiteboard in a table format,
+11.  **CSV export button :** Displays the whiteboard in a table format,
     which can be exported to a CSV file.
 
-2.  **More actions button**. Displays an additional set of buttons for
+12.  **More actions button**. Displays an additional set of buttons for
     using advanced features (see below).
 
-> ![](images/media/image9.png)
->
-> *Extra features are revealed when the “More Actions” button is
-> clicked*
->
-> • **Implicit Model**: Draws the current source’s implicit model on the
-> whiteboard, which represents the knowledge graph facts.  
-> • **Similars**: Displays a menu to show nodes on the whiteboard that
-> have similar labels to the currently displayed nodes.  
-> • **Paths**: Retrieves the shortest path between two nodes in the
-> source.  
-> • **PlantUML**: Displays the whiteboard in a PlantUML view.  
-> • **Show/Hide Individuals**: Toggles the visibility of individuals on
-> the whiteboard.  
-> • **Reasoner**: Uses a reasoner on the current source to perform
-> inference, consistency, or unsatisfiable operations, and displays the
-> results on the whiteboard.
+ ![](images/media/lineage/image9.png)
 
-1.  **Query legend**: Explains the color codes used on the graph. Colors
+ *Extra features are revealed when the "More Actions" button is
+ clicked*
+
+ • **Implicit Model**: Draws the current source's implicit model on the
+ whiteboard, which represents the knowledge graph facts.  
+ • **Similars**: Displays a menu to show nodes on the whiteboard that
+ have similar labels to the currently displayed nodes.  
+ • **Paths**: Retrieves the shortest path between two nodes in the
+ source.  
+ • **PlantUML**: Displays the whiteboard in a PlantUML view.  
+ • **Show/Hide Individuals**: Toggles the visibility of individuals on
+ the whiteboard.  
+ • **Reasoner**: Uses a reasoner on the current source to perform
+ inference, consistency, or unsatisfiable operations, and displays the
+ results on the whiteboard.
+
+13.  **Query legend**: Explains the color codes used on the graph. Colors
     are selected based on the top-level ontology.
 
 ### Left panel: Classes Tab
 
-![](images/media/image10.png)
+![](images/media/lineage/image10.png)
 
-1.  **Classes Search Bar** – Search for classes within the current
+14.  **Classes Search Bar** – Search for classes within the current
     source.
 
-2.  **Reset Search Results Panel** – Resets the search results panel.
+15.  **Reset Search Results Panel** – Resets the search results panel.
 
-3.  **Export Search Results Button** – Exports the search results.
+16.  **Export Search Results Button** – Exports the search results.
 
-4.  **Hide Options Panel Button** – Hides the options panel.
+17.  **Hide Options Panel Button** – Hides the options panel.
 
-5.  **Options Panel: Exact Match Option** – If the exact match option is
+18.  **Options Panel: Exact Match Option** – If the exact match option is
     checked, the results must be strictly equal; otherwise, a node
     containing the search term is sufficient.
 
-6.  **Options Panel: Scope Option** – By default, the search is
+19.  **Options Panel: Scope Option** – By default, the search is
     performed on the current source. You can also search within the
     imported sources or all available sources.
 
-7.  **Search Results Panel** – Results are displayed in a tree format.
+20.  **Search Results Panel** – Results are displayed in a tree format.
 
 ### Left panel: Properties Tab
 
-![](images/media/image11.png)
+![](images/media/lineage/image11.png)
 
-1.  **Properties search bar** – search for properties
+21.  **Properties search bar** – search for properties
 
-2.  **Export search results button**
+22.  **Export search results button**
 
-3.  **Hide options panel button**
+23.  **Hide options panel button**
 
-4.  **Options panel: Term type option -** Allows you to filter by term
+24.  **Options panel: Term type option -** Allows you to filter by term
     type.
 
-5.  **Options panel: Exact match option -** If enabled, only exact
+25.  **Options panel: Exact match option -** If enabled, only exact
     matches will be shown.
 
-6.  **Options panel: All sources option -** Search across all available
+26.  **Options panel: All sources option -** Search across all available
     sources.
 
-7.  **Actions panel: Relations button -** Displays predicates and
+27.  **Actions panel: Relations button -** Displays predicates and
     restrictions.
 
-8.  **Actions panel: Predicates button**
+28.  **Actions panel: Predicates button**
 
-9.  **Actions panel: Restriction button**
+29.  **Actions panel: Restriction button**
 
-10. **Actions panel: Ranges and Domains -** Displays all ranges and
+30. **Actions panel: Ranges and Domains -** Displays all ranges and
     domains for a source. See Ranges and Domains tutorial section
 
-11. **Search results panel**
+31. **Search results panel**
 
 ### Left panel : SPARQL
 
-See SPARQL tutorial<span id="_Toc194314199" class="anchor"></span>
-section
+See SPARQL tutorial section
 
 ### Left panel : Containers Tab
 
-![](images/media/image12.png)
+![](images/media/lineage/image12.png)
 
-1.  **Container search bar –** Search for rdfs:Container
+32.  **Container search bar –** Search for rdfs:Container
 
-2.  **Parent containers button :** Displays all parent containers on the
+33.  **Parent containers button :** Displays all parent containers on the
     whiteboard
 
-3.  **Create container button**
+34.  **Create container button**
 
-4.  **Export containers button**
+35.  **Export containers button**
 
-5.  **Search results panel**
+36.  **Search results panel**
 
 ### Right Panel : whiteboard buttons
 
-![](images/media/image13.png)
+![](images/media/lineage/image13.png)
 
-1.  **Clear all button :** Clears the whiteboard
+37.  **Clear all button :** Clears the whiteboard
 
-2.  **Display :** Opens a menu to modify the graph display parameters,
+38.  **Display :** Opens a menu to modify the graph display parameters,
     such as spatialization algorithms, node distance, etc.
 
-3.  **Save whiteboard** : Saves the current whiteboard for later reuse.
+39.  **Save whiteboard** : Saves the current whiteboard for later reuse.
 
-4.  **Load saved graph** : Load a previously saved whiteboard.
+40.  **Load saved graph** : Load a previously saved whiteboard.
 
-5.  **Export whiteboard** : Exports the current whiteboard in various
+41.  **Export whiteboard** : Exports the current whiteboard in various
     formats (GraphML, SVG, CSV, PlantUML, JSON).
 
-6.  Import whiteboard : Imports and displays a whiteboard from a JSON
+42.  Import whiteboard : Imports and displays a whiteboard from a JSON
     file provided by the SousLeSens JSON export (supports JSON following
     vis.js network format:
     <https://visjs.github.io/vis-network/docs/network/>).
@@ -300,14 +305,12 @@ Right-clicking on a node triggers a menu with several options.
 **Expand and Parents** – These options are equivalent to the
 children/parent buttons but apply only to the current node.  
 **Collapse** – Removes all child nodes of the current node from the
-whiteboard.
-
-### ![](images/media/image14.png) 
+whiteboard.![](images/media/lineage/image14.png)
 
 Right-clicking on a search result triggers a popup menu with different
 options, depending on the current tab and the node that is clicked.
 
-![](images/media/image15.png)
+![](images/media/lineage/image15.png)
 
 **Ctrl + Alt + Click on a Whiteboard Node**  
 Draws all relations of the clicked node.
@@ -318,30 +321,30 @@ action will be applied to all selected nodes.
 
 ## Tutorial
 
-Let’s open the Lineage tool in SousLeSens, and select the source
+Let's open the Lineage tool in SousLeSens, and select the source
 **HR\_MODEL\_ACADEMIC\_TP** source.
 
 ![A screenshot of a phone AI-generated content may be
-incorrect.](images/media/image16.png)![A screenshot of a computer
-AI-generated content may be incorrect.](images/media/image17.png)
+incorrect.](images/media/lineage/image16.png)![A screenshot of a computer
+AI-generated content may be incorrect.](images/media/lineage/image17.png)
 
 Now, the Lineage tool opens. Click the **Model** button to show the
 model on the graph.
 
-![](images/media/image18.png)
+![](images/media/lineage/image18.png)
 
 The graph displays the source model graph.
 
 Now if you click the **Expand** button:
 
-![](images/media/image19.png)
+![](images/media/lineage/image19.png)
 
 Not only will the model (i.e., the classes) be displayed, but also all
 the children of the classes on the whiteboard will appear.
 
 If you click the **Parents** button instead:
 
-![](images/media/image20.png)
+![](images/media/lineage/image20.png)
 
 The parent classes of the classes currently displayed will be added to
 the graph.
@@ -352,7 +355,7 @@ in CSV format. It also contains a search bar: when searching for a
 string, all nodes containing the searched string will be highlighted on
 the whiteboard.
 
-![](images/media/image21.png)
+![](images/media/lineage/image21.png)
 
 *The whiteboard menu – nodes that match the searched string take a star
 shape*
@@ -362,28 +365,28 @@ the search bar in the **Whiteboard** section.
 Additionally, by right-clicking on a node, you have several options. The
 first option is **Node Infos**, which opens a window displaying detailed
 node information.![A screenshot of a computer AI-generated content may
-be incorrect.](images/media/image22.png)
+be incorrect.](images/media/lineage/image22.png)
 
 ### Creating a relation
 
 By clicking on the **Add Relation** button in the top toolbar, you can
 add a relation between two classes.  
 A relation is a semantic link between two classes. For example, if there
-are two classes, **“Worker”** and **“Project”**, you can define the
-relation **“works on”** between **“Worker”** and **“Project”**.  
-In this case, **“Worker”** is the subject or range of the relation, and
-**“Project”** is the object or domain of the relation. A relation always
+are two classes, **"Worker"** and **"Project"**, you can define the
+relation **"works on"** between **"Worker"** and **"Project"**.  
+In this case, **"Worker"** is the subject or range of the relation, and
+**"Project"** is the object or domain of the relation. A relation always
 goes from subject to object (from range to domain).  
 To create a relation, simply drag and drop one class onto another.
 
-![](images/media/image23.png)
+![](images/media/lineage/image23.png)
 
 A window will then open, displaying all relation types that correspond
 to the selected subject and object types. Choose a relation type, select
 the cardinality, and your new relation will be displayed on the graph.
 
 ![A diagram of a company AI-generated content may be
-incorrect.](images/media/image24.png)
+incorrect.](images/media/lineage/image24.png)
 
 ### Class search
 
@@ -398,9 +401,9 @@ First, the graph displayed on the whiteboard will be rendered as a CSV
 file. Each line in the CSV will represent a triple from the graph. To do
 this, click the **CSV** button (12). A window will then open:
 
-![](images/media/image25.png)
+![](images/media/lineage/image25.png)
 
-Then click the “Export CSV” button. All data displayed will be saved in
+Then click the "Export CSV" button. All data displayed will be saved in
 CSV format.
 
 You can also <u>export lists of classes and properties</u>, in the
@@ -419,17 +422,17 @@ These groups are designed to organize your saved whiteboards and make
 them shareable with other users. After filling in the label and group,
 the current whiteboard can be saved.
 
-![](images/media/image26.png)
+![](images/media/lineage/image26.png)
 
 A saved whiteboard can be reloaded by clicking the **Load** button (on
 the whiteboard). To do so, simply click on the saved whiteboard you wish
 to reload.
 
-![](images/media/image27.png)
+![](images/media/lineage/image27.png)
 
 You can also right click on a saved whiteboard to delete or share it.
 
-![](images/media/image28.png)
+![](images/media/lineage/image28.png)
 
 ### Create a node
 
@@ -442,7 +445,7 @@ create. A superclass is required to create a new class, an individual
 must be derived from a class, and a datatype property needs a range and
 a datatype (e.g., date, string, int…).
 
-![](images/media/image29.png)
+![](images/media/lineage/image29.png)
 
 ### Ranges and Domains
 
@@ -451,10 +454,10 @@ all domains and ranges of the ontology properties graphically. Note that
 ranges and domains are not defined for every ontology. See below for the
 ranges and domains of IDO.
 
-![](images/media/image30.png)
+![](images/media/lineage/image30.png)
 
-For the **‘hasQuality’** property, this means that every time
-**‘hasQuality’** is used, the domain (starting point) of this property
+For the **'hasQuality'** property, this means that every time
+**'hasQuality'** is used, the domain (starting point) of this property
 should be an **Object** or a subclass of **Object**, and the range
 (target) should be a **Quality** or a subclass of **Quality**.
 
@@ -463,12 +466,12 @@ should be an **Object** or a subclass of **Object**, and the range
 When you right-click on a node in the graph or the tree, a popup will
 appear with the option **NodeInfos**.
 
-![](images/media/image14.png)![](images/media/image31.png)
+![](images/media/lineage/image14.png)![](images/media/lineage/image31.png)
 
 NodeInfos can be displayed from several tools and provides information
 about the selected node.
 
-![](images/media/image32.png)
+![](images/media/lineage/image32.png)
 
 In the first tab, the first section (1) displays the URI of the resource
 and the graph URI to which it belongs. The second section (2) lists all
@@ -486,10 +489,10 @@ The **Properties** tab shows all properties authorized for classes and
 individuals, whether the resource is considered as the property range or
 the property domain.
 
-![](images/media/image33.png)
+![](images/media/lineage/image33.png)
 
 For example, **Person** has **Object** as an ancestor, so we can use the
-property **‘hasQuality’** from the **Person** node to link to a node
+property **'hasQuality'** from the **Person** node to link to a node
 with **Quality** as an ancestor.  
 The **MetaData** tab displays the SousLeSens metadata triples. These are
 automatically created when you add a new resource through SousLeSens
@@ -499,16 +502,26 @@ The concerned properties are listed below:
 
 -   **status**:
     ["https://www.dublincore.org/specifications/bibo/bibo/bibo.rdf.xml#status"](https://www.dublincore.org/specifications/bibo/bibo/bibo.rdf.xml#status)
+-   **status**:
+    ["https://www.dublincore.org/specifications/bibo/bibo/bibo.rdf.xml#status"](https://www.dublincore.org/specifications/bibo/bibo/bibo.rdf.xml#status)
 
+-   **author**:
+    ["http://purl.org/dc/terms/creator"](http://purl.org/dc/terms/creator)
 -   **author**:
     ["http://purl.org/dc/terms/creator"](http://purl.org/dc/terms/creator)
 
 -   **provenance**:
     ["http://purl.org/dc/terms/source"](http://purl.org/dc/terms/source)
+-   **provenance**:
+    ["http://purl.org/dc/terms/source"](http://purl.org/dc/terms/source)
 
 -   **creationDate**:
     ["http://purl.org/dc/terms/created"](http://purl.org/dc/terms/created)
+-   **creationDate**:
+    ["http://purl.org/dc/terms/created"](http://purl.org/dc/terms/created)
 
+-   **mappingFile**:
+    ["http://souslesens.org/KGcreator#mappingFile"](http://souslesens.org/KGcreator#mappingFile)
 -   **mappingFile**:
     ["http://souslesens.org/KGcreator#mappingFile"](http://souslesens.org/KGcreator#mappingFile)
 
@@ -516,30 +529,30 @@ The concerned properties are listed below:
 
 The **SPARQL** tab, when clicked, launches a bot that guides you in
 building a SPARQL query, which will then be displayed on the whiteboard.
-The bot’s questions are influenced by the content already present on the
+The bot's questions are influenced by the content already present on the
 whiteboard. This feature is useful for exploring and visualizing
-individuals. The bot’s questions filter the individuals to prevent an
+individuals. The bot's questions filter the individuals to prevent an
 overwhelming display of results and to keep the results understandable.
 You can choose to start from a property or a class to see the
 individuals related to your selection.
 
-![](images/media/image34.png)
+![](images/media/lineage/image34.png)
 
 Choose Class
 
-![](images/media/image35.png)
+![](images/media/lineage/image35.png)
 
-Click on Person , then any
+Click on Person , then any
 
-![](images/media/image36.png)![](images/media/image37.png)
+![](images/media/lineage/image36.png)![](images/media/lineage/image37.png)
 
 Choose the property that interests you from the **Person** individuals:
 
-![](images/media/image38.png)
+![](images/media/lineage/image38.png)
 
 Finally, choose how you would like to receive the output.
 
-![](images/media/image39.png)![](images/media/image40.png)
+![](images/media/lineage/image39.png)![](images/media/lineage/image40.png)
 
 ### Axioms and reasoner
 
@@ -548,6 +561,6 @@ tab displays a graphical representation of the axioms associated with a
 specific class, grouped by axiom type. The **Show Triples** option
 displays the triples corresponding to the displayed axiom.
 
-![](images/media/image41.png)
+![](images/media/lineage/image41.png)
 
 Export buttons are also provided in SVG and GraphML.

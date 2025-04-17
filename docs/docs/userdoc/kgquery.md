@@ -191,7 +191,7 @@ This will open the filter wizard. This wizard helps you choose and set
 the filter you need.
 
 ![A screenshot of a chat AI-generated content may be
-incorrect.](images/media/image88.png)
+incorrect.](images/media/KGquery_image1.png)
 
 The filter wizard is dynamic. It changes according to the type of
 property selected.

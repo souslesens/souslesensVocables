@@ -7,7 +7,7 @@ import GraphDisplayLegend from "../../graph/graphDisplayLegend.js";
 import Lineage_decoration from "./lineage_decoration.js";
 import Lineage_sources from "./lineage_sources.js";
 
-/** The MIT License
+/* The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
 
  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
@@ -15,6 +15,19 @@ import Lineage_sources from "./lineage_sources.js";
  The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
+/**
+ * @module Lineage_properties
+ * @description Module for managing ontology properties and their relationships.
+ * Provides functionality for:
+ * - Managing object and data properties
+ * - Visualizing property hierarchies
+ * - Handling property restrictions and constraints
+ * - Supporting property domains and ranges
+ * - Managing property metadata and visualization
+ * - Supporting property tree operations
+ * - Handling property-based graph operations
  */
 
 var Lineage_properties = (function () {
@@ -26,15 +39,41 @@ var Lineage_properties = (function () {
     self.defaultShape = "text";
     self.defaultShapeSize = 8;
 
+    /**
+     * Initializes the properties module by resetting the graph initialization state.
+     * @function
+     * @name init
+     * @memberof module:Lineage_properties
+     * @returns {void}
+     */
     self.init = function () {
         self.graphInited = false;
     };
+
+    /**
+     * Displays property information in the graph div.
+     * @function
+     * @name showPropInfos
+     * @memberof module:Lineage_properties
+     * @param {Event} _event - The event object (unused).
+     * @param {Object} obj - Object containing the node information.
+     * @param {Object} obj.node - The node object.
+     * @param {string} obj.node.id - The ID of the node.
+     * @returns {void}
+     */
     self.showPropInfos = function (_event, obj) {
         var id = obj.node.id;
         var html = JSON.stringify(self.properties[id]);
         $("#graphDiv").html(html);
     };
 
+    /**
+     * Creates the context menu for the jstree nodes.
+     * @function
+     * @name jstreeContextMenu
+     * @memberof module:Lineage_properties
+     * @returns {Object} Object containing menu items and their actions.
+     */
     self.jstreeContextMenu = function () {
         var items = {
             nodeInfos: {
@@ -95,6 +134,16 @@ var Lineage_properties = (function () {
 
         return items;
     };
+
+    /**
+     * Handles click events on tree nodes.
+     * @function
+     * @name onTreeNodeClick
+     * @memberof module:Lineage_properties
+     * @param {Event} _event - The click event object.
+     * @param {Object} obj - Object containing the clicked node information.
+     * @returns {void}
+     */
     self.onTreeNodeClick = function (_event, obj) {
         if (!obj || !obj.node) {
             return;
@@ -106,6 +155,17 @@ var Lineage_properties = (function () {
         //  self.openNode(obj.node);
     };
 
+    /**
+     * Opens a node in the property tree and loads its subproperties.
+     * @function
+     * @name openNode
+     * @memberof module:Lineage_properties
+     * @param {Object} node - The node to open.
+     * @param {Object} node.data - The node's data.
+     * @param {string} node.data.id - The node's ID.
+     * @param {string} node.data.source - The node's source.
+     * @returns {void}
+     */
     self.openNode = function (node) {
         var options = { subPropIds: node.data.id };
         UI.message("searching in " + node.data.source);
@@ -145,15 +205,17 @@ var Lineage_properties = (function () {
     };
 
     /**
-     *
-     *  generate jstree data with ObjectProperties
-     *
-     * @param source
-     * @param ids
-     * @param words
-     * @param options
-     *  - searchType:filters properties on words  present in  predicate or subject or object label
-     * @param callback
+     * Generates jstree data structure for object properties.
+     * @function
+     * @name getPropertiesjsTreeData
+     * @memberof module:Lineage_properties
+     * @param {string} source - The source to query.
+     * @param {Array<string>} ids - Array of property IDs to filter by.
+     * @param {Array<string>} words - Array of words to search for in property labels.
+     * @param {Object} options - Additional options for the query.
+     * @param {string} [options.searchType] - Type of search to perform (filters properties on words present in predicate or subject or object label).
+     * @param {Function} callback - Callback function with signature (error, jstreeData).
+     * @returns {void}
      */
     self.getPropertiesjsTreeData = function (source, ids, words, options, callback) {
         if (!options) {

@@ -1505,8 +1505,10 @@ var OntologyModels = (function () {
                     if (item.superClass) {
                         classes[key].superClass = item.superClass;
                         classes[key].superClassLabel = item.superClassLabel;
+                        classes[key].source = source;
                     }
                 } else {
+                    item.source = source;
                     classes[key] = item;
                 }
             }

@@ -182,7 +182,10 @@ var Lineage_decoration = (function () {
                             if (!color) {
                                 color = "#ddd";
                             }
+                           
                             distinctNodeClassesMap[classUri].color = color;
+                            
+                            
                         }
                     }
 
@@ -226,7 +229,8 @@ var Lineage_decoration = (function () {
                     Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(newVisJsNodes);
                     for (var key in distinctNodeClassesMap) {
                         distinctNodeClassesMap[key].forEach(function (node) {
-                            if (node.shape != "dot") {
+                            //treat also individuals
+                            if (!node?.data) {
                                 return;
                             }
 

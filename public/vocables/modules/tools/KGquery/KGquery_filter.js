@@ -3,11 +3,27 @@ import KGquery from "./KGquery.js";
 import jstreeWidget from "../../uiWidgets/jstreeWidget.js";
 import KGquery_filter_bot from "../../bots/KGquery_filter_bot.js";
 
+/**
+ * KGquery_filter Module
+ * Handles filtering functionality for knowledge graph queries.
+ * @module KGquery_filter
+ */
+
 var KGquery_filter = (function () {
     var self = {};
 
     self.containersFilterMap = {};
 
+    /**
+     * Selects optional predicates for the query.
+     * @function
+     * @name selectOptionalPredicates
+     * @memberof module:KGquery_filter
+     * @param {Object} querySets - The query sets to process
+     * @param {Object} options - Options for predicate selection
+     * @param {Function} callback - Callback function called with (err, result)
+     * @returns {void}
+     */
     self.selectOptionalPredicates = function (querySets, options, callback) {
         var queryNonObjectProperties = [];
         var uniqueProps = {};
@@ -64,6 +80,7 @@ var KGquery_filter = (function () {
             text: "Properties",
             parent: "#",
         });
+
         queryNonObjectProperties.forEach(function (item) {
             var id = item.varName + "_" + item.property.label;
             var nodeDivId = item.nodeDivId;
@@ -142,6 +159,19 @@ var KGquery_filter = (function () {
             }
         });
     };
+
+    /**
+     * Gets the SPARQL representation of selected optional predicates.
+     * @function
+     * @name getOptionalPredicates
+     * @memberof module:KGquery_filter
+     * @param {Array} propertyNodes - Array of selected property nodes
+     * @param {Function} callback - Callback function called with (err, result)
+     * @param {Object} callback.result - The result object containing:
+     * @param {string} callback.result.optionalPredicatesSparql - The OPTIONAL clauses in SPARQL
+     * @param {string} callback.result.selectClauseSparql - The SELECT clause variables
+     * @returns {void}
+     */
     self.getOptionalPredicates = function (propertyNodes, callback) {
         var selectedPropertyNodes = [];
         var selectClauseSparql = "";
@@ -191,6 +221,15 @@ var KGquery_filter = (function () {
         return callback(null, { optionalPredicatesSparql: optionalPredicatesSparql, selectClauseSparql: selectClauseSparql });
     };
 
+    /**
+     * Gets optional predicates for aggregate filters.
+     * @function
+     * @name getAggregateFilterOptionalPredicates
+     * @memberof module:KGquery_filter
+     * @param {Object} querySet - The query set to process
+     * @param {string} filter - The filter string to check
+     * @returns {string} The filter string with optional predicates
+     */
     self.getAggregateFilterOptionalPredicates = function (querySet, filter) {
         var filterStr = "";
         for (var key in querySet.classFiltersMap) {
@@ -205,6 +244,16 @@ var KGquery_filter = (function () {
         return filterStr;
     };
 
+    /**
+     * Gets aggregate predicates for grouping.
+     * @function
+     * @name getAggregatePredicates
+     * @memberof module:KGquery_filter
+     * @param {Object} groupByPredicates - Map of predicates to group by
+     * @param {Object} groupByPredicates[key] - A predicate object
+     *
+     * @returns {string} SPARQL string for aggregate predicates
+     */
     self.getAggregatePredicates = function (groupByPredicates) {
         var str = "";
         for (var key in groupByPredicates) {
@@ -215,6 +264,16 @@ var KGquery_filter = (function () {
         return str;
     };
 
+    /**
+     * Adds a filter to a node based on a property.
+     * @function
+     * @name addNodeFilter
+     * @memberof module:KGquery_filter
+     * @param {string} classDivId - The ID of the class div
+     * @param {string} addTojsTreeNode - The node to add the filter to
+     * @param {string} propertyId - The ID of the property to filter on
+     * @returns {void}
+     */
     self.addNodeFilter = function (classDivId, addTojsTreeNode, propertyId) {
         var aClass = KGquery.divsMap[classDivId];
         var classSetIndex = aClass.data.setIndex;

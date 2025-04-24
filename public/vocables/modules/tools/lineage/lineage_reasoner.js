@@ -6,6 +6,19 @@ import Lineage_whiteboard from "./lineage_whiteboard.js";
 import Lineage_sources from "./lineage_sources.js";
 import sparql_common from "../../sparqlProxies/sparql_common.js";
 
+/**
+ * @module Lineage_reasoner
+ * @description Module for performing reasoning operations on ontologies.
+ * Provides functionality for:
+ * - Running inference operations on ontologies
+ * - Checking ontology consistency
+ * - Detecting unsatisfiable classes
+ * - Managing inference rules and predicates
+ * - Visualizing reasoning results
+ * - Supporting different reasoning operations
+ * - Handling reasoning errors and results
+ */
+
 var Lineage_reasoner = (function () {
     var self = {};
     self.inferenceTriples = [];
@@ -14,6 +27,14 @@ var Lineage_reasoner = (function () {
     self.ontologyAccessType = "externalUrl";
     self.loaded = false;
     self.currentSource;
+
+    /**
+     * Shows the reasoner dialog with options for different reasoning operations.
+     * @function
+     * @name showReasonerDialog
+     * @memberof module:Lineage_reasoner
+     * @returns {void}
+     */
     self.showReasonerDialog = function () {
         $("#smallDialogDiv").dialog("option", "title", "Reasoner");
         self.currentSource = Lineage_sources.activeSource;
@@ -26,6 +47,14 @@ var Lineage_reasoner = (function () {
         });
     };
 
+    /**
+     * Runs a selected reasoning operation (Inference, Consistency, or Unsatisfiable).
+     * @function
+     * @name runOperation
+     * @memberof module:Lineage_reasoner
+     * @param {string} operation - The type of reasoning operation to run.
+     * @returns {void}
+     */
     self.runOperation = function (operation) {
         self.currentOperation = operation;
         //  $("#lineage_reasoner_outputDiv").css("display", "none");
@@ -41,6 +70,13 @@ var Lineage_reasoner = (function () {
         }
     };
 
+    /**
+     * Runs a consistency check on the current ontology.
+     * @function
+     * @name runConsistency
+     * @memberof module:Lineage_reasoner
+     * @returns {void}
+     */
     self.runConsistency = function () {
         var fromStr = Sparql_common.getFromStr(Lineage_sources.activeSource, false, false);
         var describeQuery = "DESCRIBE ?s ?p ?o  " + fromStr + "  WHERE {  ?s ?p ?o    } ";
@@ -68,6 +104,13 @@ var Lineage_reasoner = (function () {
         });
     };
 
+    /**
+     * Runs an unsatisfiability check on the current ontology.
+     * @function
+     * @name runUnsatisfiable
+     * @memberof module:Lineage_reasoner
+     * @returns {void}
+     */
     self.runUnsatisfiable = function () {
         var fromStr = Sparql_common.getFromStr(Lineage_sources.activeSource, false, false);
         var describeQuery = "DESCRIBE ?s ?p ?o  " + fromStr + "  WHERE {  ?s ?p ?o    } ";
@@ -94,6 +137,13 @@ var Lineage_reasoner = (function () {
         });
     };
 
+    /**
+     * Shows available inference predicates in a tree structure.
+     * @function
+     * @name showInferencePredicates
+     * @memberof module:Lineage_reasoner
+     * @returns {void}
+     */
     self.showInferencePredicates = function () {
         $("#lineage_reasoner_infosDiv").html("getting ListInferenceParams ...");
 
@@ -128,6 +178,15 @@ var Lineage_reasoner = (function () {
         });
     };
 
+    /**
+     * Runs inference on the selected predicates.
+     * @function
+     * @name runInference
+     * @memberof module:Lineage_reasoner
+     * @param {Array<string>} predicates - Array of predicates to use for inference.
+     * @param {Function} callback - Callback function with signature (error, result).
+     * @returns {void}
+     */
     self.runInference = function (predicates, callback) {
         var operation = $("#lineage_reasoner_operationSelect").val();
 
@@ -178,6 +237,13 @@ var Lineage_reasoner = (function () {
         });
     };
 
+    /**
+     * Executes the selected reasoning operation and displays results.
+     * @function
+     * @name execute
+     * @memberof module:Lineage_reasoner
+     * @returns {void}
+     */
     self.execute = function () {
         $("#lineage_reasoner_outputDiv").css("display", "block");
         if (self.currentOperation == "Inference") {
@@ -202,6 +268,13 @@ var Lineage_reasoner = (function () {
 
     self.displayUnsatisfiable = function () {};
 
+    /**
+     * Lists subjects from inference results in a tree structure.
+     * @function
+     * @name listInferenceSubjects
+     * @memberof module:Lineage_reasoner
+     * @returns {void}
+     */
     self.listInferenceSubjects = function () {
         var uniqueSubjects = {};
         var jstreeData = [
@@ -233,6 +306,13 @@ var Lineage_reasoner = (function () {
         JstreeWidget.loadJsTree("reasonerSubjectsDiv", jstreeData, options);
     };
 
+    /**
+     * Displays inference results in either table or graph format.
+     * @function
+     * @name displayInference
+     * @memberof module:Lineage_reasoner
+     * @returns {void}
+     */
     self.displayInference = function () {
         var output = $("#lineage_reasoner_outputSelect").val();
 
@@ -322,6 +402,15 @@ var Lineage_reasoner = (function () {
             return visjsData;
         }
 
+        /**
+         * Recursively processes nodes in the inference tree.
+         * @function
+         * @name recurse
+         * @memberof module:Lineage_reasoner
+         * @param {string} nodeId - The ID of the node to process.
+         * @returns {void}
+         * @private
+         */
         function recurse(nodeId) {
             if (!visited[nodeId]) {
                 visited[nodeId] = 1;
@@ -374,6 +463,15 @@ var Lineage_reasoner = (function () {
     };
 
     self.FunctionalStyleSyntaxToJson = function (functionalStyleStrArray) {
+        /**
+         * Extracts a URI from a string.
+         * @function
+         * @name getUri
+         * @memberof module:Lineage_reasoner
+         * @param {string} str - The string containing a URI.
+         * @returns {string} The extracted URI.
+         * @private
+         */
         function getUri(str) {
             if (!str) {
                 return null;
@@ -394,6 +492,15 @@ var regexNested = /<([^>]+)> ([^\(]+)\(<([^>]+)> <([^>]+)>/gm;
         var array = [];
         var json = [];
 
+        /**
+         * Cleans Jena-specific URI formatting.
+         * @function
+         * @name cleanJenaUris
+         * @memberof module:Lineage_reasoner
+         * @param {string} uri - The URI to clean.
+         * @returns {string} The cleaned URI.
+         * @private
+         */
         function cleanJenaUris(uri) {
             return uri.replace("file:/", "");
             //  return uri.replace("file:/", "_:");

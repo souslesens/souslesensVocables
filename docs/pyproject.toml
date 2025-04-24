@@ -16,6 +16,7 @@ myst-parser = "^4.0.0"
 
 [tool.poetry.group.dev.dependencies]
 sphinx-autobuild = "^2024.10.3"
+myst-parser = "^4.0.1"
 
 [build-system]
 requires = ["poetry-core"]

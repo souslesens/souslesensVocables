@@ -209,7 +209,7 @@
 }
 .mappingModeler-tabDiv {
     .slsv-tabDiv;
-    width: 25% !important;
+    width: 20% !important;
     display: flex !important;
     justify-content: center;
     background-color: @dark-background-color!important;

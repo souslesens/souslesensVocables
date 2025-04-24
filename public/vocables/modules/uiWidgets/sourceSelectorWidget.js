@@ -304,7 +304,7 @@ var SourceSelectorWidget = (function () {
     };
 
     self.onSourceSelect = function (event, obj) {
-        if(obj.node.type=='Folder'){
+        if (obj.node.type == "Folder") {
             $("#sourceSelector_jstreeDiv").jstree(true).open_node(obj.node.id);
             return;
         }
@@ -332,7 +332,7 @@ var SourceSelectorWidget = (function () {
 
     // MainController or in Lineage_r ?
     self.onSourceSelect_AddSource = function (evt, obj) {
-        if(obj.node.type=='Folder'){
+        if (obj.node.type == "Folder") {
             $("#sourceSelector_jstreeDiv").jstree(true).open_node(obj.node.id);
             return;
         }

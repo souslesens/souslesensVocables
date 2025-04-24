@@ -45,7 +45,7 @@
         <button class="w3-button slsv-button-2" id="lineage_actionDiv_last" onclick="Lineage_whiteboard.showLastAddedNodesOnly()" title="Only Last">
             <img src="./icons/CommonIcons/OnlyLastIcon.png" />
         </button>
-        <button class="w3-button slsv-button-2" id="lineage_actionDiv_selectedNodesDialog" onclick="Lineage_selection.showSelectionDialog()" title="Decorate">
+        <button class="w3-button slsv-button-2" id="lineage_actionDiv_selectedNodesDialog" onclick="Lineage_selection.showSelectionDialog(true)" title="Decorate">
             <img src="./icons/CommonIcons/Query.png" />
         </button>
         <button class="w3-button slsv-button-2" onclick="Lineage_whiteboard.graph.exportGraphToDataTable()" title="CSV"><img src="./icons/CommonIcons/CSVIcon.png" /></button>
@@ -74,12 +74,12 @@
             <button class="w3-button slsv-button-3" onclick="GraphDecorationWidget.showDecorateDialog()">decorate nodes</button>
             <button class="w3-button slsv-button-3" onclick="Lineage_whiteboard.graph.showGraphConfig()">Display</button>
             -->
-            
+
             <button class="w3-button slsv-button-3" onclick="PlantUmlTransformer.visjsDataToClassDiagram()">PlantUml</button>
             <button class="w3-button slsv-button-3" onclick="Lineage_whiteboard.showHideIndividuals()">Show/Hide Individuals</button>
 
             <!--Inactives Buttons -->
-           <!--  <button class="w3-button slsv-button-3" id="lineage_actionDiv_equivClass" onclick="Lineage_relations.drawRelations(null,'dictionary')" disabled="">Equiv Class</button>
+            <!--  <button class="w3-button slsv-button-3" id="lineage_actionDiv_equivClass" onclick="Lineage_relations.drawRelations(null,'dictionary')" disabled="">Equiv Class</button>
             <button class="w3-button slsv-button-3" id="lineage_actionDiv_linkedData" onclick="Lineage_linkedData_query.showLinkedDataDialog()" disabled="">Linked Data</button>
             
             <button class="w3-button slsv-button-3" id="lineage_actionDiv_rules" onclick="Lineage_rules.showRulesDialog()" disabled="">Rules</button>

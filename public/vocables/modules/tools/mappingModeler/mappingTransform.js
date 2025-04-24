@@ -177,6 +177,7 @@ var MappingTransform = (function () {
                     });
                 }
             }
+            if (nodeId == "7ce40e6a") var w = 3;
             var connections = MappingColumnsGraph.visjsGraph.getFromNodeEdgesAndToNodes(nodeId);
 
             connections.forEach(function (connection) {
@@ -342,8 +343,7 @@ var MappingTransform = (function () {
                 columnsSelection[node.id] = MappingColumnsGraph.visjsGraph.data.nodes.get(node.id);
             } else if (node.data && node.data.type == "RowIndex") {
                 columnsSelection[node.id] = MappingColumnsGraph.visjsGraph.data.nodes.get(node.id);
-            }
-            else if (node.data && node.data.type == "URI") {
+            } else if (node.data && node.data.type == "URI") {
                 columnsSelection[node.id] = MappingColumnsGraph.visjsGraph.data.nodes.get(node.id);
             }
         });

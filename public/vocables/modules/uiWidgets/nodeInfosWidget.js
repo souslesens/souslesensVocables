@@ -1302,7 +1302,7 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
                     }
                     $("#" + self.divId).dialog("close");
                     UI.message("node deleted");
-                    if(callback){
+                    if (callback) {
                         callback();
                     }
                 },

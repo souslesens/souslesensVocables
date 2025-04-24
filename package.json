@@ -20,7 +20,7 @@
         "tools:tsc": "tsc",
         "tools:eslint": "eslint mainapp/src",
         "tools:jsdoc": "jsdoc",
-        "tools:jsdoc2md": "jsdoc2md -c docs/jsdoc/jsdoc.json -t docs/jsdoc/jsdoc.hbs",
+        "tools:jsdoc2md": "jsdoc2md --configure docs/jsdoc/jsdoc.json  --template docs/jsdoc/jsdoc.hbs  --no-cache",
         "release:patch": "standard-version --skip.tag --skip.commit -t '' -r patch",
         "release:minor": "standard-version --skip.tag --skip.commit -t '' -r minor",
         "release:major": "standard-version --skip.tag --skip.commit -t '' -r major",

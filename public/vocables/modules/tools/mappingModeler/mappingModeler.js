@@ -21,6 +21,7 @@ import mappingModeler from "./mappingModeler.js";
 import mappingColumnsGraph from "./mappingColumnsGraph.js";
 import Lineage_sources from "../lineage/lineage_sources.js";
 import MainController from "../../shared/mainController.js";
+import dataSourcesManager from "./dataSourcesManager.js";
 
 /**
  * MappingModeler module.
@@ -213,7 +214,7 @@ var MappingModeler = (function () {
                         },
                     };
                 }
-                if(self.currentResourceType == "Class"){
+                if (self.currentResourceType == "Class") {
                     items.showSampleData = {
                         label: "deleteClass",
                         action: function (_e) {
@@ -221,15 +222,14 @@ var MappingModeler = (function () {
                             NodeInfosWidget.currentNodeId = node.id;
                             NodeInfosWidget.currentNode.data.source = MainController.currentSource;
                             NodeInfosWidget.currentSource = MainController.currentSource;
-                            NodeInfosWidget.deleteNode(function(){
+                            NodeInfosWidget.deleteNode(function () {
                                 NodeInfosWidget.currentNode = null;
                                 NodeInfosWidget.currentNodeId = null;
                                 NodeInfosWidget.currentSource = null;
-                                $('#suggestionsSelectJstreeDiv').jstree('delete_node',node.id);
-                                if(self.allClasses[node.id]){
+                                $("#suggestionsSelectJstreeDiv").jstree("delete_node", node.id);
+                                if (self.allClasses[node.id]) {
                                     delete self.allClasses[node.id];
                                 }
-
                             });
                         },
                     };
@@ -322,8 +322,7 @@ var MappingModeler = (function () {
         }
 
         JstreeWidget.loadJsTree("suggestionsSelectJstreeDiv", jstreeData, options, function () {
-
-            $('#suggestionsSelectJstreeDiv').css('overflow', 'unset');
+            $("#suggestionsSelectJstreeDiv").css("overflow", "unset");
         });
     };
 
@@ -378,7 +377,7 @@ var MappingModeler = (function () {
      * @param {Object} obj - The selected tree node object.
      */
     self.onSuggestionsSelect = function (event, obj) {
-        if(obj.event.type=="contextmenu"){
+        if (obj.event && obj.event.type == "contextmenu") {
             return;
         }
         if (!DataSourceManager.currentConfig.currentDataSource) {
@@ -722,7 +721,9 @@ var MappingModeler = (function () {
         OntologyModels.clearOntologyModelCache(MappingModeler.currentSLSsource);
         var newClasses = [];
         self.allClasses.forEach(function (item) {
-            if (item.source != source) newClasses.push(item);
+            if (item.source != source) {
+                newClasses.push(item);
+            }
         });
         self.allClasses = newClasses;
     };
@@ -910,7 +911,9 @@ var MappingModeler = (function () {
      */
     self.clearMappings = function () {
         if (mappingColumnsGraph.visjsGraph.isGraphNotEmpty()) {
-            if (!confirm("Warning ! if you continue all mappings for this source will be permanently  lost")) return;
+            if (!confirm("Warning ! if you continue all mappings for this source will be permanently  lost")) {
+                return;
+            }
         }
         $("#" + MappingColumnsGraph.graphDivId).html("");
         MappingColumnsGraph.clearGraph();

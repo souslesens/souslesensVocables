@@ -123,15 +123,11 @@ var SavedQueriesWidget = (function () {
             targetSelect = "SavedQueriesComponent_itemsSelect";
         }
 
-        UserDataWidget.showListDialog(
-            null,
-            { filter: { data_type: "savedQueries", data_tool: "KGquery", data_source: MainController.currentSource }, removeSaveDiv: true },
-            function (err, result) {
-                if (result.id) {
-                    self.loadItem(result.id);
-                }
-            },
-        );
+        UserDataWidget.showListDialog(null, { filter: { data_type: "savedQueries", data_tool: "KGquery", data_source: MainController.currentSource }, removeSaveDiv: true }, function (err, result) {
+            if (result.id) {
+                self.loadItem(result.id);
+            }
+        });
     };
     self.loadItem = function (userDataId, options, callback) {
         UserDataWidget.loadUserDatabyId(userDataId, function (err, result) {

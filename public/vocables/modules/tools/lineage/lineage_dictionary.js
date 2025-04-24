@@ -7,9 +7,16 @@ import Lineage_whiteboard from "./lineage_whiteboard.js";
 import Lineage_createRelation from "./lineage_createRelation.js";
 
 /**
- * Lineage Dictionary module
- * Manages the dictionary-related functionalities within the lineage tool.
  * @module Lineage_dictionary
+ * @description Module for managing ontology dictionaries and term mappings.
+ * Provides functionality for:
+ * - Managing term mappings between different ontology sources
+ * - Supporting dictionary-based operations and queries
+ * - Handling domain and range source relationships
+ * - Managing dictionary filters and constraints
+ * - Supporting dictionary visualization and navigation
+ * - Handling dictionary metadata and timestamps
+ * - Supporting dictionary-based search and filtering
  */
 var Lineage_dictionary = (function () {
     var self = {};
@@ -18,10 +25,26 @@ var Lineage_dictionary = (function () {
     self.dataTablesHiddenColumns = [];
     self.dataTablesOrderedColumns = ["status", "domainSourceLabel", "domainLabel", "rangeSourceLabel", "rangeLabel"]; // ATTENTION status doit toujours etre la premiere colonne
 
+    /**
+     * Callback function executed when the dictionary module is loaded.
+     * Shows the TSF dictionary dialog in the Lineage_dictionary context.
+     * @function
+     * @name onLoaded
+     * @memberof module:Lineage_dictionary
+     * @returns {void}
+     */
     self.onLoaded = function () {
         Lineage_dictionary.showTSFdictionaryDialog("Lineage_dictionary");
     };
 
+    /**
+     * Displays the TSF dictionary dialog with appropriate configuration based on context.
+     * @function
+     * @name showTSFdictionaryDialog
+     * @memberof module:Lineage_dictionary
+     * @param {string} context - The context in which to show the dictionary ("Lineage_dictionary", "Lineage_similars", or "Lineage_relations").
+     * @returns {void}
+     */
     self.showTSFdictionaryDialog = function (context) {
         var targetDiv;
         if (true && context == "Lineage_dictionary") {
@@ -109,10 +132,30 @@ var Lineage_dictionary = (function () {
         });
     };
 
+    /**
+     * Event handler for changes in filter select elements.
+     * Updates dictionary filters based on the selected value.
+     * @function
+     * @name onChangeFilterSelect
+     * @memberof module:Lineage_dictionary
+     * @param {string} value - The selected filter value.
+     * @returns {void}
+     */
     self.onChangeFilterSelect = function (value) {
         self.fillDictionaryFilters(self.filterClass, self.currentDictionary);
     };
 
+    /**
+     * Retrieves dictionary sources with their domain and range labels.
+     * @function
+     * @name getDictionarySources
+     * @memberof module:Lineage_dictionary
+     * @param {string} dictionary - The dictionary source to query.
+     * @param {string} [domainSource] - Optional domain source filter.
+     * @param {string} [rangeSource] - Optional range source filter.
+     * @param {Function} callback - Callback function with signature (error, results).
+     * @returns {void}
+     */
     self.getDictionarySources = function (dictionary, domainSource, rangeSource, callback) {
         var strFrom = Sparql_common.getFromStr(dictionary, false, false);
         var query =
@@ -136,6 +179,13 @@ var Lineage_dictionary = (function () {
         });
     };
 
+    /**
+     * Retrieves current dictionary filters from the UI.
+     * @function
+     * @name getDictionaryFilters
+     * @memberof module:Lineage_dictionary
+     * @returns {string} SPARQL filter string based on current UI filter values.
+     */
     self.getDictionaryFilters = function () {
         var filters = "";
         $(".dictionary_filter").each(function (item) {
@@ -158,6 +208,15 @@ var Lineage_dictionary = (function () {
         });
         return filters;
     };
+
+    /**
+     * Gets filter predicates for a given subject variable.
+     * @function
+     * @name getFilterPredicates
+     * @memberof module:Lineage_dictionary
+     * @param {string} subjectVarname - The name of the subject variable in the SPARQL query.
+     * @returns {string} SPARQL predicates string based on current UI filter values.
+     */
     self.getFilterPredicates = function (subjectVarname) {
         var filters = "";
         $(".dictionary_filter").each(function (item) {
@@ -183,6 +242,15 @@ var Lineage_dictionary = (function () {
         return filters;
     };
 
+    /**
+     * Populates dictionary filter select elements with available values.
+     * @function
+     * @name fillDictionaryFilters
+     * @memberof module:Lineage_dictionary
+     * @param {string} filterClassName - The CSS class name for filter elements.
+     * @param {string} source - The source to query for filter values.
+     * @returns {void}
+     */
     self.fillDictionaryFilters = function (filterClassName, source) {
         var filtersMap = {};
 
@@ -241,6 +309,14 @@ var Lineage_dictionary = (function () {
         );
     };
 
+    /**
+     * Exports dictionary data to a table format based on current filters.
+     * @function
+     * @name exportDictionaryToTable
+     * @memberof module:Lineage_dictionary
+     * @param {Object} filters - Filter criteria for the export.
+     * @returns {void}
+     */
     self.exportDictionaryToTable = function (filters) {
         var SparqlqueryResult = [];
         var domainIds = {};

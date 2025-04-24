@@ -229,8 +229,8 @@ var Lineage_decoration = (function () {
                             /*if (node.shape != "dot") {
                                 return;
                             }*/
-                             //treat also individuals
-                             if (!node?.data) {
+                            //treat also individuals
+                            if (!node?.data) {
                                 return;
                             }
                             var data = node.data;

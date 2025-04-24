@@ -49,7 +49,7 @@ var Lineage_createSLSVsource = (function () {
             return "enter source graphUri";
         }
         var userPrivateProfile = "PRIVATE/" + user;
-        var sourceConfig={};
+        var sourceConfig = {};
 
         async.series(
             [
@@ -82,7 +82,7 @@ var Lineage_createSLSVsource = (function () {
                     if (callback) callback(err);
                     return alert(err.responseText);
                 }
-                callback(err,sourceConfig);
+                callback(err, sourceConfig);
             },
         );
     };

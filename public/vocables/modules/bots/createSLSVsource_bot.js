@@ -1,4 +1,5 @@
 import _botEngine from "./_botEngine.js";
+import Sparql_proxy from "../sparqlProxies/sparql_proxy.js";
 
 var CreateSLSVsource_bot = (function () {
     var self = {};
@@ -36,7 +37,7 @@ var CreateSLSVsource_bot = (function () {
     self.workflow2withoutUpload={
         _OR: {
                 "Add import": { listImportsFn: { afterImportFnWithoutUpload: {} } },
-                "Create source": {  getURIFromUpload:{fillParamsFromUpload:{Finish: self.loadingWorkflow}} },
+                "Create source": {  getURIFromUpload:{fillParamsFromUpload: self.loadingWorkflow} },
         }
         
         
@@ -132,8 +133,8 @@ var CreateSLSVsource_bot = (function () {
         },
         uploadFromFileFn: function () {
             window.UploadGraphModal.open(self.params.sourceLabel, () => {
-                _botEngine.currentObj = self.workflowUpload;
-                _botEngine.nextStep(self.workflowUpload);
+                //_botEngine.currentObj = self.workflowUpload;
+                _botEngine.nextStep();
             });
         },
 
@@ -166,11 +167,12 @@ var CreateSLSVsource_bot = (function () {
                         var randomID=common.getRandomHexaId(8);
                         var url='http://temporary.graphUri.'+self.params.sourceLabel+randomID+'/'
                         self.params.graphUri=url;
-                        Lineage_createSLSVsource.createSource(self.params.sourceLabel, url, null, function (err, result) {
+                        self.params.imports=[];
+                        Lineage_createSLSVsource.createSource(self.params.sourceLabel, url, self.params.imports, function (err, result) {
                             if (err) {
                                 callbackSeries(err);
                             }
-
+                            self.params.newConfig=result;
                             callbackSeries();
                         });
                     },
@@ -192,13 +194,13 @@ var CreateSLSVsource_bot = (function () {
             SELECT * FROM <${self.params.graphUri}>   WHERE{
             ?sub ?pred owl:Ontology .
             } `;
-            SparqlProxy.querySPARQL_GET_proxy('default',query,null, null, function(err,result){
+            Sparql_proxy.querySPARQL_GET_proxy('_default',query,null, null, function(err,result){
                 if(result?.results?.bindings?.length>0){
                     var graphUri=result.results.bindings[0].sub.value;
                     self.params.graphUri=graphUri;
                 }
                 if(!graphUri){
-                    alert('graphUri not found in the source');
+                    alert('graphUri not found in the source file, please enter it manually');
                     // Enter it manually and continue worflow
                     return _botEngine.promptValue('enter manually graphUri', 'graphUri', self.params.graphUri, null, function (value) {
                         if (!value) {
@@ -217,7 +219,15 @@ var CreateSLSVsource_bot = (function () {
             });
         },
         fillParamsFromUpload: function(){
-          var sourceConfig=Config.sources[self.params.sourceLabel];
+
+         if(self.params.newConfig){
+            var sourceConfig=self.params.newConfig[self.params.sourceLabel];
+            if(!sourceConfig){
+                alert('source not registered');
+                return _botEngine.reset();
+            }
+         }
+       
           sourceConfig.graphUri=self.params.graphUri;
           sourceConfig.imports=self.params.imports;
             $.ajax({

@@ -280,8 +280,10 @@ var UserDataWidget = (function () {
         $("#" + divId).load("modules/uiWidgets/html/userDataWidget.html", function () {
             if (mode == "save") {
                 $("#userDataWidget_saveDiv").css("display", "block");
+                $("#" + divId).dialog("option", "title", " Save");
             } else if (mode == "list") {
                 $("#userDataWidget_listDiv").css("display", "block");
+                $("#" + divId).dialog("option", "title", " Load");
             }
 
             if (self.currentTreeNode) {

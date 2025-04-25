@@ -102,7 +102,7 @@ var Lineage_createSLSVsource = (function () {
      */
     self.writeSource = function (sourceName, graphUri, imports, userPrivateProfile, callback) {
         var prefix = common.getRandomString(5);
-        var baseUri = graphUri.endsWith('/') ? graphUri : graphUri + '/'
+        var baseUri = graphUri.endsWith("/") ? graphUri : graphUri + "/";
         var sourceObject = {
             id: common.getRandomHexaId(12),
             name: sourceName,

@@ -7,6 +7,7 @@ import Export from "../../shared/export.js";
 import UIcontroller from "./uiController.js";
 import DataSourceManager from "./dataSourcesManager.js";
 import OntologyModels from "../../shared/ontologyModels.js";
+import MappingColumnsGraph from "./mappingColumnsGraph.js";
 
 /**
  * The TripleFactory module handles the creation, filtering, and writing of RDF triples.
@@ -77,12 +78,15 @@ var TripleFactory = (function () {
     self.showFilterMappingDialog = function (isSample) {
         self.filterMappingIsSample = isSample;
         UIcontroller.activateRightPanel("generic");
-        $("#mappingModeler_genericPanel").load("./modules/tools/mappingModeler/html/filterMappingDialog.html", function () {
-            //  $("#mainDialogDiv").dialog("option", "title", "Filter mappings : table " + MappingModeler.currentTable.name);
-            // $("#mainDialogDiv").dialog("open");
-            var options = { withCheckboxes: true, withoutContextMenu: true, openAll: true, check_all: true };
+        // save current mappings before opening the dialog
+        MappingColumnsGraph.saveVisjsGraph(function () {
+            $("#mappingModeler_genericPanel").load("./modules/tools/mappingModeler/html/filterMappingDialog.html", function () {
+                //  $("#mainDialogDiv").dialog("option", "title", "Filter mappings : table " + MappingModeler.currentTable.name);
+                // $("#mainDialogDiv").dialog("open");
+                var options = { withCheckboxes: true, withoutContextMenu: true, openAll: true, check_all: true };
 
-            MappingsDetails.showDetailedMappingsTree(null, "detailedMappings_filterMappingsTree", options);
+                MappingsDetails.showDetailedMappingsTree(null, "detailedMappings_filterMappingsTree", options);
+            });
         });
     };
 

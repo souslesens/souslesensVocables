@@ -741,7 +741,7 @@ var MappingsDetails = (function () {
             if (!column) {
                 column = MappingColumnsGraph.currentGraphNode.label;
             }
-            $("#smallDialogDiv").load("./modules/tools/mappingModeler/html/transformColumnDialog.html", function () {
+            $("#smallDialogDiv").load("./modules/tools/mappingModeler/html/transformColumnDialog.html", function (err) {
                 $("#smallDialogDiv").dialog("open");
                 $("#smallDialogDiv").dialog("option", "title", "Transform for " + column);
                 self.transformColumn = column;
@@ -762,12 +762,12 @@ var MappingsDetails = (function () {
          * @returns {void}
          */
         createPrefixTransformFn: function () {
-            if (!MappingModeler.currentTreeNode) {
-                var column_selected = $("#KGcreator_transformColumnSelect").val();
+            /*if (!MappingModeler.currentTreeNode) {
+                var column_selected = '';
             } else {
-                var column_selected = MappingModeler.currentTreeNode.data.id;
-            }
-            var prefix = prompt("Enter Prefix", column_selected);
+                var column_selected = MappingColumnsGraph.currentGraphNode.label;
+            }*/
+            var prefix = prompt("Enter Prefix");
             if (!prefix) {
                 return;
             }

@@ -1,5 +1,6 @@
 import common from "../shared/common.js";
-import SVGexport from "./SVGexport.js";
+import SVGexport2 from "./SVGexport2.js";
+
 import GraphMlExport from "./graphMLexport.js";
 
 const VisjsGraphClass = function (graphDiv, data, options) {
@@ -858,7 +859,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
     };
 
     self.toSVG = function () {
-        SVGexport.toSVG(self.network);
+        SVGexport2.toSVG(self);
         //self.redraw();
     };
 
@@ -1161,6 +1162,43 @@ const VisjsGraphClass = function (graphDiv, data, options) {
             $("#visjsConfigureDiv").css("overflow-y", "auto !important");
             $("#visjsConfigureDiv").css("height", "550px !important");
         }, 2000);
+    };
+    /**
+     * @function
+     * @name exportGraphToDataTable
+     * @memberof module:graphActions.graph
+     * *@param {boolean} exportData - If true, exports visjsGraph elements directy without using dataTable
+     * Exports the graph data to a tabular format (data table) for easier inspection and manipulation.
+     * @returns {void}
+     */
+    self.exportGraphToDataTable = function (exportData) {
+        Export.exportGraphToDataTable(self, null, null, null, exportData);
+    };
+
+    /**
+     * Converts the current graph to PlantUML format.
+     *
+     * @function
+     * @name toPlantUML
+     * @memberof VisjsGraphClass
+     * @param {boolean} [exportToFile] - If true, exports to a file; if false, returns the PlantUML string
+     * @param {string} [fileName] - Name of the file to export (only used if exportToFile is true)
+     * @returns {string|void} Returns the PlantUML string if exportToFile is false, otherwise exports to file
+     */
+    self.toPlantUML = function (exportToFile, fileName) {
+        var visjsData = {
+            nodes: self.data.nodes.get(),
+            edges: self.data.edges.get(),
+        };
+
+        var plantUMLString = PlantUmlTransformer.visjsDataToClassDiagram(visjsData, exportToFile);
+
+        if (exportToFile) {
+            if (!fileName) {
+                fileName = "diagram";
+            }
+            Export.exportPlantUML(plantUMLString, fileName);
+        }
     };
 };
 export default VisjsGraphClass;

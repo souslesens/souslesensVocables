@@ -49,12 +49,17 @@ var Lineage_createSLSVsource = (function () {
             return "enter source graphUri";
         }
         var userPrivateProfile = "PRIVATE/" + user;
+        var sourceConfig = {};
 
         async.series(
             [
                 //write source
                 function (callbackSeries) {
                     self.writeSource(sourceName, graphUri, imports, userPrivateProfile, function (err, result) {
+                        if (err) {
+                            return callbackSeries(err);
+                        }
+                        sourceConfig = result?.resources;
                         return callbackSeries(err);
                     });
                 },
@@ -77,7 +82,7 @@ var Lineage_createSLSVsource = (function () {
                     if (callback) callback(err);
                     return alert(err.responseText);
                 }
-                callback();
+                callback(err, sourceConfig);
             },
         );
     };

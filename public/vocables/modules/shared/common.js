@@ -565,6 +565,15 @@ str = str.replace(/%2F/gm, "/");*/
     self.getRandomInt = function () {
         return Math.floor(Math.random() * 100000);
     };
+    self.getRandomString = function (length) {
+        let str = "";
+        for (let i = 0; i < length; i++) {
+            // a --> 97 in ASCII
+            str += String.fromCharCode(97 + Math.floor(Math.random() * 26));
+        }
+        return str;
+    };
+
     self.getItemLabel = function (item, varName, _lang) {
         if (item[varName + "Label"]) {
             return item[varName + "Label"].value;
@@ -1064,7 +1073,12 @@ if (callback) return callback(err);
         if (!source) {
             source = Lineage_sources.activeSource;
         }
-        let graphUri = Config.sources[source].graphUri;
+        if (Config.sources[source].baseUri) {
+            var graphUri = Config.sources[source].baseUri;
+        } else {
+            var graphUri = Config.sources[source].graphUri;
+        }
+        //let graphUri = Config.sources[source].graphUri;
 
         if (!uriType || uriType == "fromLabel") {
             uri = graphUri + common.formatStringForTriple(label, true);

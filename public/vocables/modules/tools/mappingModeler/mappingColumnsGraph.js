@@ -780,9 +780,14 @@ var MappingColumnsGraph = (function () {
         var positions = graph.network.getPositions();
         // Initialisation of Config if there isn't
         if (!DataSourceManager.rawConfig || Object.keys(DataSourceManager.rawConfig).length == 0) {
+            if (Config.sources[MappingModeler.currentSLSsource].baseUri) {
+                var graphUri = Config.sources[MappingModeler.currentSLSsource].baseUri;
+            } else {
+                var graphUri = Config.sources[MappingModeler.currentSLSsource].graphUri;
+            }
             var newJson = {
                 sparqlServerUrl: Config.sources[MappingModeler.currentSLSsource].sparql_server.url,
-                graphUri: Config.sources[MappingModeler.currentSLSsource].graphUri,
+                graphUri: graphUri,
                 prefixes: {},
                 lookups: {},
                 databaseSources: {},
@@ -793,6 +798,13 @@ var MappingColumnsGraph = (function () {
         }
         nodes = self.sortVisjsColumns(nodes);
         var config = JSON.parse(JSON.stringify(DataSourceManager.rawConfig));
+        // replace the graphUri by baseUri (graphUri used in old versions)
+        if (Config.sources[MappingModeler.currentSLSsource].baseUri) {
+            config.graphUri = Config.sources[MappingModeler.currentSLSsource].baseUri;
+        } else {
+            config.graphUri = Config.sources[MappingModeler.currentSLSsource].graphUri;
+        }
+
         delete config.currentDataSource;
         var data = {
             nodes: nodes,

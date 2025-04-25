@@ -1,22 +1,22 @@
 name: Mirror to GitLab
 on:
-  push:
-    branches:
-      - master
+    push:
+        branches:
+            - master
 
 jobs:
-  build:
-    environment: GitLab config
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-      - name: push
-        run: |
-          export GIT_SSH_COMMAND='ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'
-          gitlab_repo_url_with_credentials="https://token:${{ secrets.GITLAB_ACCESS_TOKEN }}@${{ secrets.GITLAB_REPO }}"
-          git remote add gitlab "$gitlab_repo_url_with_credentials"
-          branch_name=$(echo $GITHUB_REF | sed 's/refs\/heads\///')
-          git push gitlab "$branch_name" --force
-          git push gitlab --tags --force
+    build:
+        environment: GitLab config
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+            - name: push
+              run: |
+                  export GIT_SSH_COMMAND='ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'
+                  gitlab_repo_url_with_credentials="https://token:${{ secrets.GITLAB_ACCESS_TOKEN }}@${{ secrets.GITLAB_REPO }}"
+                  git remote add gitlab "$gitlab_repo_url_with_credentials"
+                  branch_name=$(echo $GITHUB_REF | sed 's/refs\/heads\///')
+                  git push gitlab "$branch_name" --force
+                  git push gitlab --tags --force

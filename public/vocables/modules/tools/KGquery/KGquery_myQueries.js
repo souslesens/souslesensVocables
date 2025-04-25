@@ -38,7 +38,6 @@ var KGquery_myQueries = (function () {
         }
         return callback(null, data);
 
-        //  });
     };
 
     /**

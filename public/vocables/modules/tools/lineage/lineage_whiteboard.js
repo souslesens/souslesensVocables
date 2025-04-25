@@ -303,6 +303,7 @@ var Lineage_whiteboard = (function () {
         self.queriesStack = [];
         LegendWidget.clearLegend();
         Lineage_decoration.initLegend();
+        UserDataWidget.currentTreeNode = null;
 
         if (clearTree) {
             $("#lineage_drawnSources").html("");
@@ -4294,7 +4295,7 @@ attrs.color=self.getSourceColor(superClassValue)
                     positions: positions,
                 };
                 var data_path = "savedWhiteboards";
-                UserDataWidget.currentTreeNode = null;
+                
                 UserDataWidget.showSaveDialog(data_path, data, null, function (err, result) {
                     if (err) {
                         return alert(err.responseText);

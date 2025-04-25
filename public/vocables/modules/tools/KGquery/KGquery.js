@@ -31,6 +31,7 @@ import UI from "../../../modules/shared/UI.js";
 import KGquery_filter from "./KGquery_filter.js";
 
 import Containers_widget from "../containers/containers_widget.js";
+import UserDataWidget from "../../uiWidgets/userDataWidget.js";
 
 var KGquery = (function () {
     var self = {};
@@ -1013,6 +1014,7 @@ var KGquery = (function () {
         self.divsMap = {};
         self.currentQuerySet = null;
         self.allPathEdges = {};
+        UserDataWidget.currentTreeNode=null;
         KGquery_filter.containersFilterMap = {};
         if (!exceptSetQueries) {
             self.classeMap = {};

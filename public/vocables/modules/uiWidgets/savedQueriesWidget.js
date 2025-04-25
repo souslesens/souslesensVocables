@@ -157,7 +157,6 @@ var SavedQueriesWidget = (function () {
                 slsvSource = self.slsvSource;
             }
 
-            UserDataWidget.currentTreeNode = null;
             UserDataWidget.showSaveDialog("savedQueries", data, null, function (err, result) {
                 if (err) {
                     return alert(err);

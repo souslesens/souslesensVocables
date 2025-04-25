@@ -48,7 +48,7 @@ var UserDataWidget = (function () {
         var type = "POST";
         if (self.currentTreeNode) {
             type = "PUT";
-            payload.id = self.currentTreeNode.id;
+            payload.id = parseInt(self.currentTreeNode.id);
         }
         payload = JSON.stringify(payload);
         $.ajax({
@@ -65,6 +65,29 @@ var UserDataWidget = (function () {
             },
         });
     };
+    self.updateNode = function(nodeData, callback) {
+        if (!nodeData) {
+            nodeData = self.currentTreeNode;
+        }
+        var label = self.currentTreeNode.data.data_label;
+        if (!label) {
+            return alert("label is mandatory");
+        }
+
+        var data_type = self.data_type;
+
+        var group = self.currentTreeNode.data.data_group;
+
+        self.saveMetadata(label, data_type, self.jsonContent, group, function (err, result) {
+            $("#" + self.divId).dialog("close");
+            UI.message(err || result);
+            if (err) {
+                self.callbackFn(err);
+            }
+
+            self.callbackFn(null, { label: label, data_type: data_type, data_content: self.jsonContent, id: result.id, data_group: group });
+        });
+    }
     self.loadUserDatabyId = function (id, callback) {
         $.ajax({
             type: "GET",
@@ -277,6 +300,22 @@ var UserDataWidget = (function () {
             divId = "smallDialogDiv";
         }
         self.divId = divId;
+        if(UserDataWidget.currentTreeNode) {
+            var updateData= confirm("Do you want to update the current loaded data?");
+            if(!updateData) {
+                UserDataWidget.currentTreeNode = null;
+            }
+            else{
+                return self.updateNode(UserDataWidget.currentTreeNode, function (err, result) {
+                    if (err) {
+                        return callback(err);
+                    }
+                    if(callback){
+                        callback();
+                    }
+                });
+            }
+        }
         $("#" + divId).load("modules/uiWidgets/html/userDataWidget.html", function () {
             if (mode == "save") {
                 $("#userDataWidget_saveDiv").css("display", "block");

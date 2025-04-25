@@ -224,7 +224,7 @@
 
 .KGquery-tabDiv {
     .slsv-tabDiv;
-    width: 33.33% !important;
+    width: 50% !important;
     display: flex !important;
     justify-content: center;
 }

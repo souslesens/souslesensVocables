@@ -14,11 +14,11 @@ var MappingModelerRelations = (function () {
         var classesMap = {};
         var existingRelationsMap = {};
         edges.forEach(function (edge) {
-            if (nodesMap[edge.from].data.type == "Column" && nodesMap[edge.to].data.type == "Column") {
+            if (nodesMap[edge.from]?.data?.type == "Column" && nodesMap[edge.to]?.data?.type == "Column") {
                 existingRelationsMap[nodesMap[edge.to].id] = nodesMap[edge.from].id;
             }
 
-            if (nodesMap[edge.from].data.type == "Column" && nodesMap[edge.to].data.type == "Class") {
+            if (nodesMap[edge.from]?.data?.type == "Column" && nodesMap[edge.to]?.data?.type == "Class") {
                 classesMap[nodesMap[edge.to].id] = nodesMap[edge.from].id;
             }
         });

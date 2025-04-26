@@ -14,6 +14,9 @@ var MappingModelerRelations = (function () {
         var classesMap = {};
         var existingRelationsMap = {};
         edges.forEach(function (edge) {
+            if(!nodesMap[edge.from])
+                return;
+
             if (nodesMap[edge.from].data.type == "Column" && nodesMap[edge.to].data.type == "Column") {
                 existingRelationsMap[nodesMap[edge.to].id] = nodesMap[edge.from].id;
             }
@@ -29,6 +32,9 @@ var MappingModelerRelations = (function () {
                 var fromColumnId = classesMap[item.subject.value];
                 var toColumnId = classesMap[item.value.value];
                 if (fromColumnId && toColumnId) {
+                    if (nodesMap[fromColumnId].data.table!= nodesMap[toColumnId].data.table) {
+                        return
+                    }
                     relations.push({
                         fromColumn: { id: fromColumnId, label: nodesMap[fromColumnId].label },
                         toColumn: { id: toColumnId, label: nodesMap[toColumnId].label },
@@ -36,16 +42,7 @@ var MappingModelerRelations = (function () {
                     });
                 }
 
-                /*  var fromColumnId = classesMap[item.value.value]
-                var toColumnId = classesMap[item.subject.value]
-                if (fromColumnId && toColumnId) {
-                    relations.push({
-                        fromColumn: {id: fromColumnId, label: nodesMap[fromColumnId].label},
-                        toColumn: {id: toColumnId, label: nodesMap[toColumnId].label},
-                        property: {id: item.prop.value, label: item.propLabel.value},
-                        inverse: true,
-                    })
-                }*/
+
             });
             var x = relations;
 

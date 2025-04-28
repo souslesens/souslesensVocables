@@ -430,6 +430,8 @@ to reload.
 
 ![](images/media/lineage/image27.png)
 
+When a saved whiteboard is loaded, you can modify it; clicking on 'Save' will prompt you to update it.
+
 You can also right click on a saved whiteboard to delete or share it.
 
 ![](images/media/lineage/image28.png)

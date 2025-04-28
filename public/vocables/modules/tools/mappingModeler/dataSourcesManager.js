@@ -452,7 +452,14 @@ var DataSourceManager = (function () {
         if (obj.node.data.type == "databaseSource") {
             DataSourceManager.initNewDataSource(obj.node.id, "databaseSource", obj.node.data.sqlType, obj.node.data.table);
             //UIcontroller.switchLeftPanel("mappings");
-            DataSourceManager.loadDataBaseSource(DataSourceManager.currentSlsvSource, obj.node.id, obj.node.data.sqlType);
+            DataSourceManager.loadDataBaseSource(DataSourceManager.currentSlsvSource, obj.node.id, obj.node.data.sqlType, function (err) {
+                if (err) {
+                    return alert(err);
+                }
+                if(callback) {
+                    callback();
+                }
+            });
         } else if (obj.node.data.type == "csvSource") {
             DataSourceManager.initNewDataSource(obj.node.id, "csvSource", obj.node.data.sqlType, obj.node.id);
             var fileName = DataSourceManager.currentSlsvSource;
@@ -467,7 +474,10 @@ var DataSourceManager = (function () {
                     columns: columns,
                 };
                 $("#MappingModeler_leftTabs").tabs("option", "active", 1);
-                UIcontroller.onActivateLeftPanelTab("MappingModeler_columnsTab");
+               
+                if(callback) {
+                    callback();
+                }
             });
         } else if (obj.node.data.type == "table") {
             MappingModeler.currentTable = {
@@ -481,6 +491,7 @@ var DataSourceManager = (function () {
             MappingModeler.currentResourceType = "Column";
             $("#MappingModeler_leftTabs").tabs("option", "active", 1);
             UIcontroller.onActivateLeftPanelTab("MappingModeler_columnsTab");
+            if (callback) callback();
         }
 
         if (obj.node.data.type == "table" || obj.node.data.type == "csvSource") {
@@ -493,7 +504,7 @@ var DataSourceManager = (function () {
                 MappingColumnsGraph.drawResource(tableNode);
             }
         }
-        if (callback) callback();
+        
     };
 
     /**

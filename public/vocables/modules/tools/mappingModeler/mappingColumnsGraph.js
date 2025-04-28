@@ -355,20 +355,37 @@ var MappingColumnsGraph = (function () {
             }
         } else {
             if (node.data && node.data.type == "Table") {
-                var tableSourceType = node.id.indexOf(".") > -1 ? "csvSource" : "table";
 
-                if (tableSourceType == "table" && !DataSourceManager.currentConfig.currentDataSource) {
-                    return alert("choose a data source first");
+                if(node.data.datasource){
+                    if(DataSourceManager.currentConfig.currentDataSource != node.data.datasource){
+                        var tableSourceType = node.id.indexOf(".") > -1 ? "csvSource" : "table";
+                        var dataSourceNode = $('#mappingModeler_dataSourcesJstreeDiv').jstree().get_node(node.data.datasource);
+                        var obj = {
+                            event: "xx",
+                            node: dataSourceNode,
+                        };
+                        
+                        if (dataSourceNode) {
+                            DataSourceManager.onDataSourcesJstreeSelect(null, obj,function (err) {
+                                if (err) {
+                                    return alert(err);
+                                }
+                                if(tableSourceType=='table'){
+                                    var dataSourceNode = $('#mappingModeler_dataSourcesJstreeDiv').jstree().get_node(node.data.dataTable);
+                                    var obj = {
+                                        event: "xx",
+                                        node: dataSourceNode,
+                                    };
+                                    DataSourceManager.onDataSourcesJstreeSelect(null, obj);
+                                }
+                            });
+                        } else {
+                            return alert("data source not found");
+                        }
+                            
+                    }
                 }
-
-                var obj = {
-                    event: "xx",
-                    node: {
-                        id: node.id,
-                        data: { type: tableSourceType, id: node.id, label: node.id },
-                    },
-                };
-                DataSourceManager.onDataSourcesJstreeSelect(null, obj);
+            
                 //  self.zoomOnTable(node.id)
             }
 
@@ -1060,7 +1077,8 @@ var MappingColumnsGraph = (function () {
         data.positions = {};
         var isHierarchical = visjsOptions.layout && visjsOptions.layout.hierarchical;
         var distinctEdges = {};
-        var dataTables = self.getDatasourceTablesFromVisjsGraph();
+        
+        var dataSourcesTables=self.getDatasourcesTablesFromVisjsGraph(data.nodes);
         if (true || !isHierarchical) {
             var tables = {};
             var nodesMap = {};
@@ -1080,10 +1098,18 @@ var MappingColumnsGraph = (function () {
                     node.color = "#d8cacd";
                     node.level = 1;
                     node.data.dataTable = node.id;
+                    var datasourceNode='';
+                    Object.keys(dataSourcesTables).forEach(function (datasource) {
+                        if(dataSourcesTables[datasource].includes(node.data.dataTable)){
+                            datasourceNode=datasource;
+                        }
+                    });
+                    node.data.datasource=datasourceNode;
                 } else {
                     node.level = 2;
 
                     if (node.data.dataTable) {
+                        
                         var dataTableToNodeEdges = data.edges.filter(function (edge) {
                             return edge.to == node.id && edge.from == node.data.dataTable;
                         });
@@ -1290,6 +1316,32 @@ var MappingColumnsGraph = (function () {
                 },
             });
         });
+    };
+
+    self.getDatasourcesTablesFromVisjsGraph=function(nodes){
+        if(!nodes) {
+            nodes = self.visjsGraph.data.nodes.get();
+        }
+        if (nodes?.length == 0) {
+            return [];
+        }
+        var datasourcesTables = {};
+        var tables = nodes.forEach(function (node) {
+            if(node?.data?.dataTable) {
+                if(node.data.datasource){
+                    if(!datasourcesTables[node.data.datasource]){
+                        datasourcesTables[node.data.datasource] = [];
+                        datasourcesTables[node.data.datasource].push(node.data.dataTable);
+                    }else{
+                        if(!datasourcesTables[node.data.datasource].includes(node.data.dataTable)){
+                            datasourcesTables[node.data.datasource].push(node.data.dataTable);
+                        }
+                        
+                    }
+                }
+            }
+        });
+        return datasourcesTables;
     };
     return self;
 })();

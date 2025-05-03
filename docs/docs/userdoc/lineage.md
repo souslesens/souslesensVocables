@@ -25,7 +25,7 @@ visualized and interactively manipulated.
 ![](images/media/lineage/image1.png)
 
 The Lineage UI is composed of three main elements:
-
+blabla
 -   **A left panel with 5 tabs**: Whiteboard, Classes, Properties,SPARQL
     and Containers
 -   **A left panel with 5 tabs**: Whiteboard, Classes, Properties,SPARQL

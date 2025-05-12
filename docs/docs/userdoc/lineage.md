@@ -500,28 +500,23 @@ tools (such as Lineage or MappingModeler).
 
 The concerned properties are listed below:
 
+
 -   **status**:
     ["https://www.dublincore.org/specifications/bibo/bibo/bibo.rdf.xml#status"](https://www.dublincore.org/specifications/bibo/bibo/bibo.rdf.xml#status)
--   **status**:
-    ["https://www.dublincore.org/specifications/bibo/bibo/bibo.rdf.xml#status"](https://www.dublincore.org/specifications/bibo/bibo/bibo.rdf.xml#status)
+
 
 -   **author**:
     ["http://purl.org/dc/terms/creator"](http://purl.org/dc/terms/creator)
--   **author**:
-    ["http://purl.org/dc/terms/creator"](http://purl.org/dc/terms/creator)
+
 
 -   **provenance**:
     ["http://purl.org/dc/terms/source"](http://purl.org/dc/terms/source)
--   **provenance**:
-    ["http://purl.org/dc/terms/source"](http://purl.org/dc/terms/source)
+
 
 -   **creationDate**:
     ["http://purl.org/dc/terms/created"](http://purl.org/dc/terms/created)
--   **creationDate**:
-    ["http://purl.org/dc/terms/created"](http://purl.org/dc/terms/created)
 
--   **mappingFile**:
-    ["http://souslesens.org/KGcreator#mappingFile"](http://souslesens.org/KGcreator#mappingFile)
+
 -   **mappingFile**:
     ["http://souslesens.org/KGcreator#mappingFile"](http://souslesens.org/KGcreator#mappingFile)
 

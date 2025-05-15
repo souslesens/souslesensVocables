@@ -650,6 +650,7 @@ var KGquery_graph = (function () {
                 return alert(err.responseText || err);
             }
             $("#KGquery_messageDiv").text("saved graph");
+            self.currentUserDataModel = {id:result?.id};
             if (callback) {
                 callback();
             }

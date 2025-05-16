@@ -116,12 +116,13 @@ export async function deleteSource(source: ServerSource) {
     }
 }
 
-const decodeSource = (key: string, source: ServerSource): ServerSource => {
+const decodeSource = (key: string, source: ServerSource) => {
     let dSource = ServerSourceSchema.parse({});
     try {
         dSource = ServerSourceSchema.parse({ ...source, name: source.name ?? key });
     } catch (e: unknown) {
-        throw new Error(`Error with source ${source.name}: ${e.message}`);
+        dSource = { ...source, name: source.name ?? key } as ServerSource;
+        console.error(`invalid source ${dSource.name}: ${e as Error}`);
     }
     return dSource;
 };

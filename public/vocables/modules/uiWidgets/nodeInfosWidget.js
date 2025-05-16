@@ -485,7 +485,7 @@ defaultLang = 'en';*/
                             "&nbsp;<button class='w3-button nodesInfos-iconsButtons' style='font-size: 10px;'" +
                             " onclick='NodeInfosWidget.deletePredicate(\"" +
                             predicateId +
-                            "\")'><input type='image' src='./icons/CommonIcons/Erase.png' ></button>";
+                            "\")'><input type='image' style='width: 28px;' src='./icons/CommonIcons/Erase.png' ></button>";
                     }
                     return optionalStr;
                 }

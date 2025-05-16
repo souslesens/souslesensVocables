@@ -30,6 +30,7 @@ module.exports = function () {
             const graphUri = userSources[sourceName].graphUri;
 
             const data = await rdfDataModel.getGraphPartNt(graphUri, limit, offset);
+            var length=data.length
             res.status(200).send(data);
         } catch (error) {
             console.error(error);

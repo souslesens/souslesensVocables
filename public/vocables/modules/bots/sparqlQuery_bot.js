@@ -411,9 +411,7 @@ var SparqlQuery_bot = (function () {
                 filter += self.params.nonObjectPropertyFilter;
             }
 
-            // at first call count result
-            /*  if(!options.count)
-                      options.count=true*/
+
 
             self.getResourcesList("Predicate", role, filter, options, function (err, result) {
                 if (err) {
@@ -421,11 +419,7 @@ var SparqlQuery_bot = (function () {
                     return myBotEngine.previousStep();
                 }
 
-                /*   if(options.count){
-                           myBotEngine.message("predicates found "+result.predicates.length)
-                           options.count=false
-                         return   self.functions.buildResultFn()
-                       }*/
+
 
                 if (self.params.sparqlQuery) {
                     self.params.queryResult = result;

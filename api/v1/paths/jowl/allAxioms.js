@@ -19,13 +19,22 @@ module.exports = function () {
         if (!jowlConfigUrl.endsWith("/")) {
             jowlConfigUrl += "/";
         }
-
-        jowlConfigUrl ="http://localhost:9170/"
-        jowlConfigUrl += "axioms/listClassesWithAxioms";
+        jowlConfigUrl += "axioms/getAllAxioms";
 
         const payload = {
-            graphName: req.query.graphName,
+            graphName: req.query.graphUri
+
         };
+
+        if (req.query.axiomType) {
+            payload.axiomType = req.query.axiomType;
+        }
+        if (req.query.getTriples) {
+            payload.getTriples = true;
+        }
+        if (req.query.getManchesterExpression) {
+            payload.manchetserFormat = true;
+        }
 
         const options = {
             method: "POST",
@@ -42,16 +51,44 @@ module.exports = function () {
 
     GET.apiDoc = {
         security: [{ restrictLoggedUser: [] }],
-        summary: "get  classes with axioms from owl API",
-        description: "get  classes with axioms from owl API",
-        operationId: "get  classes with axioms from owl API",
+        summary: "get existing axioms for a class from owl API",
+        description: "get existing axioms for a class from owl API",
+        operationId: "get existing axioms for a class from owl API",
         parameters: [
             {
-                name: "graphName",
+                name: "graphUri",
                 description: "ontologyGraphUri",
                 type: "string",
                 in: "query",
                 required: true,
+            },
+            {
+                name: "classUri",
+                description: "class URI",
+                in: "query",
+                type: "string",
+                required: true,
+            },
+            {
+                name: "axiomType",
+                description: "axiomType",
+                in: "query",
+                type: "string",
+                required: false,
+            },
+            {
+                name: "getTriples",
+                description: "getTriples",
+                in: "query",
+                type: "string",
+                required: false,
+            },
+            {
+                name: "getManchesterExpression",
+                description: "getManchesterExpression",
+                in: "query",
+                type: "string",
+                required: false,
             },
         ],
 

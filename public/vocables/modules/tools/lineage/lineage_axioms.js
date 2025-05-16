@@ -32,8 +32,10 @@ var Lineage_axioms = (function () {
             if (err) {
                 return alert(err);
             }
+
+            result = result.slice(0, 500)
             var axiomTypes = {};
-            var visjsData = { nodes: [], edges: [] };
+            var visjsData = {nodes: [], edges: []};
             if (!result.forEach) {
                 // nothing found
                 return alert(result.result);
@@ -107,8 +109,13 @@ var Lineage_axioms = (function () {
         NodeInfosAxioms.init("IOF-CORE-202401", node, "mainDialogDiv");
     };
 
+
+
+
     return self;
 })();
 
 export default Lineage_axioms;
 window.Lineage_axioms = Lineage_axioms;
+
+

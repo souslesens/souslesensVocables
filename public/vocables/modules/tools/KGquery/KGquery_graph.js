@@ -113,11 +113,15 @@ var KGquery_graph = (function () {
             ],
             function (err) {
                 if (err) {
+                    if (err == "notFound") {
+                        options.saveGraph = true;
+                        return self.drawVisjsModel("inferred", options);
+                    }
                     return alert(err.responseText || err);
                 }
                 self.drawModel(options.displayGraphInList);
 
-                if (savedGraphLocation == "file") {
+                if (savedGraphLocation == "file" || options?.saveGraph) {
                     self.saveVisjsModelGraph();
                 }
             },
@@ -646,6 +650,7 @@ var KGquery_graph = (function () {
                 return alert(err.responseText || err);
             }
             $("#KGquery_messageDiv").text("saved graph");
+            self.currentUserDataModel = { id: result?.id };
             if (callback) {
                 callback();
             }

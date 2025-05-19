@@ -26,6 +26,17 @@ var AxiomExtractor = (function () {
             })
 
         },
+        function getEquivalentClasses(source, callback) {
+            var query = self.prefixes + "SELECT distinct *  " + self.getFromStr(source) + "\n" +
+                "WHERE { ?s owl:equivalentClass ?o  bind( owl:equivalentClass as ?p) }"
+            self.execQuery(query, function (err, result) {
+                if (err) {
+                    return callback(err);
+                }
+                return callback(null, result)
+            })
+
+        },
         function getRestrictions(source, callback) {
             var query = self.prefixes + "SELECT distinct *  " + self.getFromStr(source) + "\n" +
                 "WHERE { ?subject rdf:type owl:Restriction." +
@@ -96,7 +107,10 @@ var AxiomExtractor = (function () {
     ]
 
 
-    self.loadBasicAxioms = function (source, callback) {
+    self.getBasicAxioms = function (source, callback) {
+        if(self.basicAxioms[source])
+            return callback(null,self.basicAxioms[source])
+        
         var basicAxioms = {}
         async.eachSeries(extractFns, function (fn, callbackEach) {
             fn(source, function (err, result) {
@@ -119,24 +133,45 @@ var AxiomExtractor = (function () {
             if (err) {
                 return callback ? callback(err) : alert(err)
             }
+            self.basicAxioms[source]=basicAxioms;
             return callback ? callback(null, basicAxioms) : "done"
 
         })
     }
 
 
-    self.extractAllAxioms = function (source, callback) {
-        if (!source) {
-            source = "IOF-CORE-202401"
-            //  source="VaccineOntology"
-        }
+    self.listClassesWithAxioms = function (sourceLabel, callback) {
 
-        self.loadBasicAxioms(source, function (err, basicAxioms) {
-            if (err) {
-                return callback ? callback(err) : alert(err)
+        AxiomExtractor.getBasicAxioms(sourceLabel,function(err, basicAxioms){
+            var classesWithAxioms=[]
+            if(err)
+                return callback(err);
+            var axioms
+            for( var uri in basicAxioms) {
+                var axioms = basicAxioms[uri]
+                axioms.forEach(function (axiom) {
+                    if (axiom.p == "http://www.w3.org/2002/07/owl#equivalentClass") {
+                        classesWithAxioms.push({
+                            class: axiom.s,
+                            label: Sparql_common.getLabelFromURI(axiom.s)
+                        })
+                    }
+                    if (axiom.p == "http://www.w3.org/2000/01/rdf-schema#subClassOf") {
+                        if (axiom.o.indexOf("http") < 0) {
+                            classesWithAxioms.push({
+                                class: axiom.s,
+                                label: Sparql_common.getLabelFromURI(axiom.s),
+                                data: {
+                                    id: axiom.s,
+                                    label: Sparql_common.getLabelFromURI(axiom.s)
+                                }
+                            })
+                        }
+                    }
+                })
             }
-            self.basicAxioms[source] = basicAxioms
-            var axioms = self.getClassAxioms(source, "https://spec.industrialontologies.org/ontology/core/Core/BusinessProcess")
+            return callback(null,classesWithAxioms)
+
 
 
         })
@@ -144,7 +179,37 @@ var AxiomExtractor = (function () {
     }
 
 
-    self.getClassAxioms = function (source, classUri) {
+
+    self.test = function (source, callback) {
+        if (!source) {
+            source = "IOF-CORE-202401"
+            //  source="VaccineOntology"
+        }
+     
+
+        self.getBasicAxioms(source, function (err, basicAxioms) {
+          
+            if (err) {
+                return callback ? callback(err) : alert(err)
+            }
+            self.basicAxioms[source] = basicAxioms
+            var classURI="https://spec.industrialontologies.org/ontology/core/Core/BusinessProcess"
+            var axioms = self.getClassAxioms(source, classURI,function(err, visjsData){
+                if(err)
+                    return  alert(err);
+               self.drawGraphCanvas("graphDiv",visjsData)
+            })
+
+
+        })
+
+    }
+    
+    
+    
+
+
+    self.getClassAxioms = function (source, classUri,callback) {
         var sourceBasicAxioms = self.basicAxioms[source];
         if (!sourceBasicAxioms) {
             return alert("source axioms not loaded")
@@ -160,8 +225,10 @@ var AxiomExtractor = (function () {
         function recurse(subject, level) {
             var children = sourceBasicAxioms[subject]
 
+            if(!children || !Array.isArray(children) )
+                return;
             children.forEach(function (child) {
-                var skipo=false
+                var skipo = false
                 var propLabel = "";
                 var nodeLabel = "";
                 var nodeSize = 12;
@@ -171,7 +238,7 @@ var AxiomExtractor = (function () {
                     shape = "text"
                     nodeLabel = Sparql_common.getLabelFromURI(child.p)
 
-                }  else {
+                } else {
                     nodeLabel = Sparql_common.getLabelFromURI(child.s)
                 }
                 if (!distinctNodes[child.s]) {
@@ -199,7 +266,7 @@ var AxiomExtractor = (function () {
                     from: subject,
                     to: child.o,
                     label: propLabel,
-                    arrows:"to"
+                    arrows: "to"
 
                 })
 
@@ -222,9 +289,6 @@ var AxiomExtractor = (function () {
                 } else {
 
 
-
-
-
                     recurse(child.o, level + 1)
                 }
 
@@ -235,11 +299,15 @@ var AxiomExtractor = (function () {
 
         recurse(classUri, 1)
 
-        var x =  self.removeBlankNodes (visjsData)
-        self.drawGraphCanvas("graphDiv", visjsData)
+        self.removeBlankNodes(visjsData)
+
+        callback(null,visjsData )
+
         // Lineage_whiteboard.drawNewGraph(visjsData)
 
     }
+
+
 
     self.removeBlankNodes = function (visjData) {
         var nodesMap = []
@@ -247,35 +315,62 @@ var AxiomExtractor = (function () {
         var edgesToMap = {}
 
         visjData.nodes.forEach(function (node) {
-
-            nodesMap[node.id]=node
-
+            nodesMap[node.id] = node
         })
 
-        var nodesToDelete=[]
-        visjData.edges.forEach(function (edge) {
-        if ( edge.label == "intersectionOf" || edge.label == "unionOf" || edge.label == "hdisjointWith") {
-            // on skippe les noeuds de disjonction
-            nodesMap[edge.from].label = edge.p
-            nodesMap[edge.from].shape = "square";
-            nodesToDelete.push(edge.to) ;
-            visjData.edges.forEach(function (edge2) {
-                if (edge2.from == edge.to) {
-                    edge2.from = edge.from
-                }
 
-            })
+        visjData.edges.forEach(function (edge) {
+            if (!edgesFromMap[edge.from]) {
+                edgesFromMap[edge.from] = []
+            }
+            edgesFromMap[edge.from].push(edge)
+        })
+
+
+        function shiftBackRecurse(edge, shift) {
+
+            if (edgesFromMap[edge.to]) {
+                edgesFromMap[edge.to].forEach(function (edge2) {
+                    if(!nodesMap[edge2.to] || nodesMap[edge2.to].shifted)// on ne shifte qu'une fois
+                        return
+                    nodesMap[edge2.to].level -= shift
+                    nodesMap[edge2.to].shifted=true
+                    shiftBackRecurse(edge2,shift)
+                })
+            }
 
         }
-            if ( edge.label == "rest" ) {
+
+
+        var nodesToDelete = []
+        visjData.edges.forEach(function (edge) {
+            if (edge.label == "intersectionOf" || edge.label == "unionOf" || edge.label == "hdisjointWith") {
+                // on skippe les noeuds de disjonction
+                nodesMap[edge.from].label = edge.p
+                nodesMap[edge.from].shape = "square";
+
+                nodesToDelete.push(edge.to);
+                visjData.edges.forEach(function (edge2) {
+                    if (edge2.from == edge.to) {
+                        edge2.from = edge.from
+                        shiftBackRecurse(edge2,1)
+                    }
+
+                })
+
+            }
+            if (edge.label == "rest") {
                 // on skippe les boeuds rest puis first
 
 
                 visjData.edges.forEach(function (edge2) {
-                    if(edge2.from==edge.to)
-                    nodesToDelete.push(edge.to) ;
                     if (edge2.from == edge.to) {
-                      edge2.from= edge.from
+                        nodesToDelete.push(edge.to);
+                        shiftBackRecurse(edge2,1)
+                    }
+                    if (edge2.from == edge.to) {
+                        edge2.from = edge.from
+
                     }
 
                 })
@@ -284,12 +379,13 @@ var AxiomExtractor = (function () {
 
         })
 
-        var nodesToKeep=[]
+        var nodesToKeep = []
         visjData.nodes.forEach(function (node) {
-            if(nodesToDelete.indexOf(node.id)<0)
+            if (nodesToDelete.indexOf(node.id) < 0) {
                 nodesToKeep.push(node)
+            }
         })
-        visjData.nodes=nodesToKeep
+        visjData.nodes = nodesToKeep
 
     }
 
@@ -325,6 +421,9 @@ var AxiomExtractor = (function () {
 
             layoutHierarchical: self.layoutHierarchical,
             onclickFn: function (node) {
+                if (!node.data) {
+                    return;
+                }
                 NodeInfosWidget.showNodeInfos(node.data.source, node, "mainDialogDiv", {resetVisited: 1});
             }
             //  onRightClickFn: Lineage_whiteboard.graphActions.showGraphPopupMenu,

@@ -28,7 +28,8 @@ var Lineage_axioms = (function () {
         if (!source) {
             source = Lineage_sources.activeSource;
         }
-        Axiom_manager.listClassesWithAxioms(source, function (err, result) {
+      //  Axiom_manager.listClassesWithAxioms(source, function (err, result) {
+        AxiomExtractor.listClassesWithAxioms(source, function (err, result) {
             if (err) {
                 return alert(err);
             }
@@ -43,27 +44,29 @@ var Lineage_axioms = (function () {
 
             var existingNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
             result.forEach(function (item) {
-                item.axiomTypes.forEach(function (type) {
-                    if (!axiomTypes[type]) {
-                        axiomTypes[type] = 1;
-                        visjsData.nodes.push({
-                            id: type,
-                            label: type,
-                            shape: "ellipse",
-                            color: "#ddd",
-                            data: {
+                if(item.axiomTypes) {
+                    item.axiomTypes.forEach(function (type) {
+                        if (!axiomTypes[type]) {
+                            axiomTypes[type] = 1;
+                            visjsData.nodes.push({
                                 id: type,
                                 label: type,
-                                source: source,
-                            },
+                                shape: "ellipse",
+                                color: "#ddd",
+                                data: {
+                                    id: type,
+                                    label: type,
+                                    source: source,
+                                },
+                            });
+                        }
+                        visjsData.edges.push({
+                            id: common.getRandomHexaId(5),
+                            from: item.class,
+                            to: type,
                         });
-                    }
-                    visjsData.edges.push({
-                        id: common.getRandomHexaId(5),
-                        from: item.class,
-                        to: type,
                     });
-                });
+                }
                 if (!existingNodes[item.class]) {
                     existingNodes[item.class] = 1;
                     visjsData.nodes.push({

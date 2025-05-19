@@ -352,7 +352,7 @@ var NodeInfosWidget = (function () {
                         item.value.value = value;
                         var key = item.prop.value + "_" + value;
                     } else {
-                        var key = item.prop.value + "_" + item.value.value + item.value["xml:lang"];
+                        var key = item.prop.value + "_" + item.value?( item.value.value + item.value["xml:lang"]):"";
                     }
                     if (uniqueTriples[key]) {
                         return;

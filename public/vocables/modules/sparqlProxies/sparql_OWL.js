@@ -1038,8 +1038,8 @@ var Sparql_OWL = (function () {
             if (sourceLabel) {
                 self.graphUri = Config.sources[sourceLabel].graphUri;
                 self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
-
-                fromStr = Sparql_common.getFromStr(sourceLabel, false, !options.withImports, options);
+               
+                fromStr = Sparql_common.getFromStr(sourceLabel, false, options.withoutImports, options);
             } else {
                 // to be  implemented
             }

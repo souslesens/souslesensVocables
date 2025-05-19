@@ -516,7 +516,7 @@ var Lineage_relations = (function () {
 
                         UI.message("searching restrictions");
 
-                        Lineage_whiteboard.drawRestrictions(source, data, null, null, options, function (err, result) {
+                        Lineage_whiteboard.drawRestrictions(source, data, null, null, {...options}, function (err, result) {
                             if (err) {
                                 return callbackSeries(err);
                             }
@@ -539,7 +539,7 @@ var Lineage_relations = (function () {
                         options.inverse = true;
                         UI.message("searching inverse restrictions");
 
-                        Lineage_whiteboard.drawRestrictions(source, data, null, null, options, function (err, result) {
+                        Lineage_whiteboard.drawRestrictions(source, data, null, null, {...options}, function (err, result) {
                             if (err) {
                                 return callbackSeries(err);
                             }
@@ -573,7 +573,7 @@ var Lineage_relations = (function () {
                     if (!direction || direction == "direct") {
                         UI.message("searching predicates");
 
-                        Lineage_whiteboard.drawPredicatesGraph(source, data, null, options, function (err, result) {
+                        Lineage_whiteboard.drawPredicatesGraph(source, data, null, {...options}, function (err, result) {
                             if (err) {
                                 if (err == "no data found") {
                                     return callbackSeries();
@@ -606,7 +606,7 @@ var Lineage_relations = (function () {
                         options.inversePredicate = true;
                         UI.message("searching inverse predicates");
 
-                        Lineage_whiteboard.drawPredicatesGraph(source, data, null, options, function (err, result) {
+                        Lineage_whiteboard.drawPredicatesGraph(source, data, null, {...options}, function (err, result) {
                             if (err) {
                                 return callbackSeries(err);
                             }

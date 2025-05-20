@@ -332,6 +332,10 @@ var SearchWidget = (function () {
     };
 
     self.showTopConcepts = function (sourceLabel, options) {
+
+        self.searchTermInSources({onlyClasses:true});
+
+        return;
         if (!sourceLabel) {
             sourceLabel = Lineage_sources.activeSource;
         }

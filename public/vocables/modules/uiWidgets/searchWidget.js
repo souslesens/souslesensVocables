@@ -332,8 +332,7 @@ var SearchWidget = (function () {
     };
 
     self.showTopConcepts = function (sourceLabel, options) {
-
-        self.searchTermInSources({onlyClasses:true});
+        self.searchTermInSources({ onlyClasses: true });
 
         return;
         if (!sourceLabel) {

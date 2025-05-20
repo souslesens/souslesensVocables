@@ -428,16 +428,14 @@ indexes.push(source.toLowerCase());
                 queryObj.bool.must[0].query_string.fields.push("skoslabels");
             }
         }
-        if(options.onlyClasses){
-
-            queryObj.bool.filter={
-                "term": {
-                    "type.keyword": "Class"
-                }   
-            }
+        if (options.onlyClasses) {
+            queryObj.bool.filter = {
+                term: {
+                    "type.keyword": "Class",
+                },
+            };
         }
         if (options.classFilter) {
-            
             queryObj.bool.filter = {
                 multi_match: {
                     query: options.classFilter,
@@ -445,10 +443,7 @@ indexes.push(source.toLowerCase());
                     operator: "or",
                 },
             };
-            
-            
         }
-        
 
         return queryObj;
     };

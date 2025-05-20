@@ -162,9 +162,7 @@ var Lineage_decoration = (function () {
                     var classes = Object.keys(distinctNodeClassesMap);*/
 
                     for (var classUri in distinctNodeClassesMap) {
-                        if (classUri == "http://purl.obolibrary.org/obo/BFO_0000004") {
-                            console.log("MaterialArtifact");
-                        }
+                      
                         var ancestors = OntologyModels.getClassHierarchyTreeData(Lineage_sources.activeSource, classUri, "ancestors");
 
                         if (distinctNodeClassesMap[classUri][0].data.rdfType == "NamedIndividual") {

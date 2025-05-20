@@ -56,7 +56,7 @@ var NodeInfosWidget = (function () {
                 if (node.data.id) {
                     self.currentNodeId = node.data.id;
                 }
-                if(node.data.type=='ObjectProperty' && node.data.prop){
+                if (node.data.type == "ObjectProperty" && node.data.prop) {
                     self.currentNodeId = node.data.prop;
                 }
             } else {

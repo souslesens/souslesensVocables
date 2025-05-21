@@ -128,8 +128,7 @@ var TripleFactory = (function () {
                 UI.message("Done", true);
                 var indexAuto = $("#MappingModeler_indexAutoCBX").prop("checked");
 
-                if (!self.filterMappingIsSample  && indexAuto) {
-
+                if (!self.filterMappingIsSample && indexAuto) {
                     SearchUtil.generateElasticIndex(
                         MappingModeler.currentSLSsource,
                         {
@@ -154,8 +153,6 @@ var TripleFactory = (function () {
                                     UI.message(err.responseText);
                                 },
                             });
-
-
                         },
                     );
                 }
@@ -372,7 +369,6 @@ var TripleFactory = (function () {
                 },
                 // Reindex graph
                 function (callbackSeries) {
-
                     $("#KGcreator_infosDiv").val("reindexing graph)");
                     self.indexGraph(function (err, result) {
                         return callbackSeries(err);

@@ -331,16 +331,12 @@ var JstreeWidget = (function () {
                     return console.error("  Error jstree parent == childNode : " + parentNodeId);
                 }
 
-
-
                 // parent exists and have children
 
                 //Create node
                 $("#" + (jstreeDiv || self.jstreeDiv))
                     .jstree(true)
-                    .create_node(parentNodeId, node, position, function () {
-
-                    });
+                    .create_node(parentNodeId, node, position, function () {});
             }
         });
         self.setTreeAppearance();

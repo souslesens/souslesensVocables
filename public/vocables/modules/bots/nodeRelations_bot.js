@@ -23,7 +23,6 @@ var NodeRelations_bot = (function () {
 
     self.workflow = {
         _OR: {
-
             "Object Property": {
                 listVocabsFn: {
                     listPredicatePathsFn: { executeQuery: {} },
@@ -48,12 +47,12 @@ var NodeRelations_bot = (function () {
             "Similars (same label)": {
                 similarsFn: {},
             },
-            "Container members":{
-                containersMembersFn:{}
+            "Container members": {
+                containersMembersFn: {},
             },
-            "ParentContainers":{
-                parentContainersFn:{}
-            }
+            ParentContainers: {
+                parentContainersFn: {},
+            },
         },
     };
 
@@ -68,13 +67,13 @@ var NodeRelations_bot = (function () {
     };
 
     self.functions = {
-        containersMembersFn:function () {
-            Containers_graph.graphResources(self.params.source, {id:self.params.currentClass}, { leaves: true });
-            _botEngine.nextStep()
+        containersMembersFn: function () {
+            Containers_graph.graphResources(self.params.source, { id: self.params.currentClass }, { leaves: true });
+            _botEngine.nextStep();
         },
-        parentContainersFn:function () {
-            Containers_widget.showParentContainersDialog()
-            _botEngine.nextStep()
+        parentContainersFn: function () {
+            Containers_widget.showParentContainersDialog();
+            _botEngine.nextStep();
         },
         similarsFn: function () {
             Lineage_similars.showDialog(true);

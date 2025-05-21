@@ -3084,9 +3084,10 @@ restrictionSource = Config.predicatesSource;
                 '    <span class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.drawParents();"> Parents</span>';
 
             if (node.data && node.data.type == "container") {
-                html += ' <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.removeFromGraph();">Remove from graph</span>'+
-                '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.removeOthersFromGraph();">Remove others</span>'+
-                '    <span  class="popupMenuItem" onclick="NodeRelations_bot.start();">Relations...</span>' ;
+                html +=
+                    ' <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.removeFromGraph();">Remove from graph</span>' +
+                    '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.removeOthersFromGraph();">Remove others</span>' +
+                    '    <span  class="popupMenuItem" onclick="NodeRelations_bot.start();">Relations...</span>';
             } else {
                 html +=
                     // '    <span class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.drawSimilars();"> Similars</span>' +
@@ -3515,9 +3516,6 @@ self.zoomGraphOnNode(node.data[0].id, false);
                 dontClusterNodes: dontClusterNodes,
                 memberPredicate: memberPredicate,
             });
-
-
-
         },
 
         /**

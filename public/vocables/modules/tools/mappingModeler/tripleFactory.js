@@ -126,8 +126,10 @@ var TripleFactory = (function () {
                 alert(err.responseText || err);
             } else {
                 UI.message("Done", true);
-                if (!self.filterMappingIsSample) {
-                    //Admin.clearOntologyModelCache();
+                var indexAuto = $("#MappingModeler_indexAutoCBX").prop("checked");
+
+                if (!self.filterMappingIsSample  && indexAuto) {
+
                     SearchUtil.generateElasticIndex(
                         MappingModeler.currentSLSsource,
                         {
@@ -152,14 +154,8 @@ var TripleFactory = (function () {
                                     UI.message(err.responseText);
                                 },
                             });
-                            /*
-                        $.ajax(`/api/v1/ontologyModels?source=${MappingModeler.currentSLSsource}`, { method: "DELETE" })
-                            .then((_success) => {
-                                window.UI.message(`${MappingModeler.currentSLSsource} was updated successfully`, true);
-                            })
-                            .catch((error) => {
-                                alert(error);
-                            });*/
+
+
                         },
                     );
                 }
@@ -376,11 +372,7 @@ var TripleFactory = (function () {
                 },
                 // Reindex graph
                 function (callbackSeries) {
-                    var indexAuto = $("MappingModeler_indexAutoCBX").prop("checked");
 
-                    if (!indexAuto) {
-                        return callbackSeries();
-                    }
                     $("#KGcreator_infosDiv").val("reindexing graph)");
                     self.indexGraph(function (err, result) {
                         return callbackSeries(err);

@@ -3084,7 +3084,9 @@ restrictionSource = Config.predicatesSource;
                 '    <span class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.drawParents();"> Parents</span>';
 
             if (node.data && node.data.type == "container") {
-                html += ' <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.removeFromGraph();">Remove from graph</span>';
+                html += ' <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.removeFromGraph();">Remove from graph</span>'+
+                '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.removeOthersFromGraph();">Remove others</span>'+
+                '    <span  class="popupMenuItem" onclick="NodeRelations_bot.start();">Relations...</span>' ;
             } else {
                 html +=
                     // '    <span class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.drawSimilars();"> Similars</span>' +
@@ -3513,6 +3515,9 @@ self.zoomGraphOnNode(node.data[0].id, false);
                 dontClusterNodes: dontClusterNodes,
                 memberPredicate: memberPredicate,
             });
+
+
+
         },
 
         /**
@@ -4537,7 +4542,7 @@ attrs.color=self.getSourceColor(superClassValue)
             $("#containersTab").load("./modules/tools//lineage/html/containersTab.html", function (s) {
                 Containers_tree.search("lineage_containers_containersJstree");
                 $("#containers_showparentContainersBtn").bind("click", function (e) {
-                    if (e.ctrlKey) {
+                    if (true || e.ctrlKey) {
                         return Containers_widget.showParentContainersDialog();
                     }
                     Containers_widget.execParentContainersSearch();

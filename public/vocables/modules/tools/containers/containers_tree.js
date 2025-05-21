@@ -94,10 +94,10 @@ var Containers_tree = (function () {
         });
 
         jstreeData.sort(function (a, b) {
-            if (a.text > b.text) {
+            if (a.text < b.text) {
                 return 1;
             }
-            if (a.text < b.text) {
+            if (a.text > b.text) {
                 return -1;
             }
             return 0;
@@ -206,10 +206,10 @@ var Containers_tree = (function () {
                 };
                 jstreeData.push(node);
                 jstreeData.sort(function (a, b) {
-                    if (a.text > b.text) {
+                    if (a.text < b.text) {
                         return 1;
                     }
-                    if (a.text < b.text) {
+                    if (a.text > b.text) {
                         return -1;
                     }
                     return 0;
@@ -352,7 +352,7 @@ var Containers_tree = (function () {
         items["GraphNode"] = {
             label: "Graph node",
             action: function (_e) {
-                if (self.currentContainer.data.type == "Container") {
+                if (true || self.currentContainer.data.type == "Container") {
                     Containers_graph.graphResources(self.currentSource, self.currentContainer.data, { onlyOneLevel: true });
                 } else {
                     Lineage_whiteboard.drawNodesAndParents(self.currentContainer, 0);

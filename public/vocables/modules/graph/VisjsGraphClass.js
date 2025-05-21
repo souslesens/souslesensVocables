@@ -432,11 +432,11 @@ const VisjsGraphClass = function (graphDiv, data, options) {
          * @type {any[]}
          */
         var nodeIds = [];
-        if(!Array.isArray(nodesToKeep)) {
+        if (!Array.isArray(nodesToKeep)) {
             nodesToKeep = [nodesToKeep];
         }
         nodes.forEach(function (/** @type {{ id: any; }} */ node) {
-            if (!nodesToKeep.includes(node.id) ) {
+            if (!nodesToKeep.includes(node.id)) {
                 nodeIds.push(node.id);
             }
         });

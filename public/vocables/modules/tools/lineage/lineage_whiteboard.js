@@ -3811,9 +3811,9 @@ self.zoomGraphOnNode(node.data[0].id, false);
          * @returns {void}
          */
         removeFromGraph: function () {
-            var nodesSelected =self.lineageVisjsGraph.network.getSelectedNodes();
-            if(nodesSelected.length > 1){
-                for(var i=0; i<nodesSelected.length; i++){
+            var nodesSelected = self.lineageVisjsGraph.network.getSelectedNodes();
+            if (nodesSelected.length > 1) {
+                for (var i = 0; i < nodesSelected.length; i++) {
                     self.lineageVisjsGraph.removeNodes("id", nodesSelected[i], true);
                 }
                 Lineage_decoration.decorateByUpperOntologyByClass();
@@ -3835,8 +3835,8 @@ self.zoomGraphOnNode(node.data[0].id, false);
             if (!Lineage_whiteboard.currentGraphNode.id) {
                 return;
             }
-            var nodesSelected =self.lineageVisjsGraph.network.getSelectedNodes();
-            if(nodesSelected.length > 1){
+            var nodesSelected = self.lineageVisjsGraph.network.getSelectedNodes();
+            if (nodesSelected.length > 1) {
                 self.lineageVisjsGraph.removeOtherNodesFromGraph(nodesSelected);
                 Lineage_decoration.decorateByUpperOntologyByClass();
                 return;

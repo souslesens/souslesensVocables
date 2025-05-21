@@ -4,6 +4,8 @@ import Lineage_whiteboard from "../tools/lineage/lineage_whiteboard.js";
 import Sparql_common from "../sparqlProxies/sparql_common.js";
 import _botEngine from "./_botEngine.js";
 import CommonBotFunctions from "./_commonBotFunctions.js";
+import Containers_graph from "../tools/containers/containers_graph.js";
+import Containers_widget from "../tools/containers/containers_widget.js";
 
 var NodeRelations_bot = (function () {
     var self = {};
@@ -45,6 +47,12 @@ var NodeRelations_bot = (function () {
             "Similars (same label)": {
                 similarsFn: {},
             },
+            "Container members": {
+                containersMembersFn: {},
+            },
+            ParentContainers: {
+                parentContainersFn: {},
+            },
         },
     };
 
@@ -59,6 +67,14 @@ var NodeRelations_bot = (function () {
     };
 
     self.functions = {
+        containersMembersFn: function () {
+            Containers_graph.graphResources(self.params.source, { id: self.params.currentClass }, { leaves: true });
+            _botEngine.nextStep();
+        },
+        parentContainersFn: function () {
+            Containers_widget.showParentContainersDialog();
+            _botEngine.nextStep();
+        },
         similarsFn: function () {
             Lineage_similars.showDialog(true);
             _botEngine.nextStep();

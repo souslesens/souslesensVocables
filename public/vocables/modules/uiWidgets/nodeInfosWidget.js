@@ -346,6 +346,9 @@ var NodeInfosWidget = (function () {
                 var graphUri = "";
                 var uniqueTriples = {};
                 data.forEach(function (item) {
+                    if (!item.value) {
+                        item.value = { value: "" };
+                    }
                     if (item.prop.value.indexOf("label") > -1) {
                         $("#ui-id-1").append(" " + item.value.value);
                     }

@@ -76,8 +76,9 @@ var CreateSLSVsource_bot = (function () {
         promptSourceNameFn: function () {
             _botEngine.promptValue("source label", "sourceLabel", "", null, function (value) {
                 if (!value) {
-                    _botEngine.previousStep();
+                    return _botEngine.previousStep();
                 }
+                self.params.sourceLabel = value;
                 _botEngine.nextStep();
             });
         },
@@ -87,13 +88,11 @@ var CreateSLSVsource_bot = (function () {
         validateGraphUriFn: function () {
             // var regex = /(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}(\.[a-z]{2,6}|:[0-9]{3,4})\b([-a-zA-Z0-9@:%_\+.~#?&\/\/=]*)/i;
             var regex = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/i;
-
             if (!self.params.graphUri.match(regex)) {
                 alert("graphUri is not a correct URL");
-                _botEngine.previousStep();
-            } else {
-                _botEngine.nextStep();
+                return _botEngine.previousStep();
             }
+            _botEngine.nextStep();
         },
 
         listImportsFn: function () {
@@ -130,8 +129,8 @@ var CreateSLSVsource_bot = (function () {
         },
         uploadFromFileFn: function () {
             window.UploadGraphModal.open(self.params.sourceLabel, () => {
-                //_botEngine.currentObj = self.workflowUpload;
-                _botEngine.nextStep();
+                _botEngine.currentObj = self.workflowUpload;
+                _botEngine.nextStep(self.workflowUpload);
             });
         },
 

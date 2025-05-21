@@ -31,6 +31,13 @@ var NodeInfosAxioms = (function () {
                     Axiom_activeLegend.onSuggestionsSelect($(this).val());
                 }
             });
+
+            AxiomExtractor.getClassAxioms(self.currentResource.data.source, self.currentResource.data.id, function (err, visjsData) {
+                var options = {};
+                Axioms_graph.drawGraph(visjsData, "nodeInfosAxioms_graphDiv", options);
+            });
+            return;
+
             Axioms_manager.initResourcesMap(self.currentSource, function (err, result) {
                 // used do draw graph
                 self.initSourceClassesMap(self.currentSource, function (err, result) {
@@ -66,6 +73,7 @@ var NodeInfosAxioms = (function () {
     self.loadAxiomsJstree = function () {
         $("#nodeInfosAxioms_infosDiv").html("Loading Axioms...");
         $("#waitImg").css("display", "block");
+
         self.getResourceAxioms(self.currentResource.data.id, {}, function (err, result) {
             $("#waitImg").css("display", "none");
             if (err) {

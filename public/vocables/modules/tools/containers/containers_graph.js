@@ -219,7 +219,7 @@ var Containers_graph = (function () {
                             shadow: self.nodeShadow,
                             shape: Containers_graph.containerStyle.shape,
                             size: size,
-                            font: type == "container" ? { color: "#70309f" } : null,
+                            font: type == "container" ? { color: "#70309f" } : { color: "black" },
                             color: Containers_graph.containerStyle.color,
                             data: {
                                 type: type,

@@ -48,6 +48,7 @@ var Lookups_bot = (function () {
         //SetLookUpSourceColumn: "Select Source Column ",
         SetDataSource: "Select DataSource",
         SetDataTable: "Select DataTable",
+        SetLookUpSourceColumn: "Select Source Column for the LookUp",
         SetLookUpTargetColumn: "Select Target Column for the LookUp",
         SetLookUpTransform: "Add Transform For the lookUp",
     };

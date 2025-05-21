@@ -1043,8 +1043,9 @@ var MappingColumnsGraph = (function () {
      * @param table
      */
     self.zoomOnTable = function (table) {
+        MappingColumnsGraph.hideNodesFromOtherTables(table);
         self.visjsGraph.network.focus(table, {
-            scale: 1,
+            scale: 0.85,
             offset: { x: 10, y: 200 },
             locked: false,
             animation: true,
@@ -1290,6 +1291,17 @@ var MappingColumnsGraph = (function () {
                 },
             });
         });
+    };
+
+    self.hideNodesFromOtherTables = function (table) {
+        var nodes = MappingColumnsGraph.visjsGraph.data.nodes.get();
+        var newNodes = [];
+        nodes.forEach(function (node) {
+            var hide = false;
+            if (node.data && node.data.dataTable && node.data.dataTable != table) hide = true;
+            newNodes.push({ id: node.id, hidden: hide });
+        });
+        MappingColumnsGraph.visjsGraph.data.nodes.update(newNodes);
     };
     return self;
 })();

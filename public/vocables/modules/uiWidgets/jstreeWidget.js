@@ -308,6 +308,10 @@ var JstreeWidget = (function () {
         if (!Array.isArray(jstreeData)) {
             jstreeData = [jstreeData];
         }
+
+        var parentNodeObj = $("#" + jstreeDiv)
+            .jstree(true)
+            .get_node(parentNodeId_);
         jstreeData.forEach(function (node) {
             var Jstree_id = $("#" + jstreeDiv)
                 .jstree(true)
@@ -327,23 +331,18 @@ var JstreeWidget = (function () {
                     return console.error("  Error jstree parent == childNode : " + parentNodeId);
                 }
 
-                var parentNodeObj = $("#" + jstreeDiv)
-                    .jstree(true)
-                    .get_node(parentNodeId);
-
                 // parent exists and have children
 
                 //Create node
                 $("#" + (jstreeDiv || self.jstreeDiv))
                     .jstree(true)
-                    .create_node(parentNodeId, node, position, function () {
-                        self.setTreeAppearance();
-                        $("#" + (jstreeDiv || self.jstreeDiv))
-                            .jstree(true)
-                            .open_node(parentNodeId, null, 500);
-                    });
+                    .create_node(parentNodeId, node, position, function () {});
             }
         });
+        self.setTreeAppearance();
+        $("#" + (jstreeDiv || self.jstreeDiv))
+            .jstree(true)
+            .open_node(parentNodeId_, null, 500);
         if (callback) {
             callback(jstreeData);
         }

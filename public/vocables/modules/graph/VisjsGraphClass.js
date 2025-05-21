@@ -454,7 +454,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         self.data.edges.remove(edgesIds);
     }),
         (self.onScaleChange = function () {
-            // return;
+            if (!self.data || !self.data.nodes) return;
             var scale = self.network.getScale();
             if (!self.currentScale || Math.abs(scale - self.currentScale) > 0.01) {
                 var scaleCoef = scale >= 1 ? scale * 0.9 : scale * 2;

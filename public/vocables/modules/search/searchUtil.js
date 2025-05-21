@@ -364,7 +364,7 @@ indexes.push(source.toLowerCase());
     };
 
     self.getWordBulkQuery = function (word, mode, indexes, options) {
-        word = self.escapeElasticReservedChars(word); 
+        word = self.escapeElasticReservedChars(word);
         var field = "label.keyword";
         if (word.indexOf && word.indexOf("http://") == 0) {
             field = "id.keyword";

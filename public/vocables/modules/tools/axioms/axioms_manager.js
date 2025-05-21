@@ -163,8 +163,6 @@ var Axioms_manager = (function () {
         });
     };
 
-
-
     self.listClassesWithAxioms = function (sourceLabel, callback) {
         if (!sourceLabel) {
             sourceLabel = Lineage_sources.activeSource;

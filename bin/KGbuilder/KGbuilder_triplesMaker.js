@@ -155,6 +155,9 @@ var KGbuilder_triplesMaker = {
     },
 
     getURIFromSpecificBaseUri: function (mappingValue, line, tableMappings, mapping) {
+        if (!mappingValue || typeof mappingValue != "string") {
+            return null;
+        }
         var p = mappingValue.indexOf("]");
         if (p > 0) {
             //specific baseURI

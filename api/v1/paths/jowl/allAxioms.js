@@ -22,8 +22,7 @@ module.exports = function () {
         jowlConfigUrl += "axioms/getAllAxioms";
 
         const payload = {
-            graphName: req.query.graphUri
-
+            graphName: req.query.graphUri,
         };
 
         if (req.query.axiomType) {

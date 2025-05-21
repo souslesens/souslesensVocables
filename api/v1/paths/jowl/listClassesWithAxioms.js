@@ -20,7 +20,7 @@ module.exports = function () {
             jowlConfigUrl += "/";
         }
 
-        jowlConfigUrl ="http://localhost:9170/"
+        jowlConfigUrl = "http://localhost:9170/";
         jowlConfigUrl += "axioms/listClassesWithAxioms";
 
         const payload = {

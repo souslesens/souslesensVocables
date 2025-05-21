@@ -343,6 +343,9 @@ var NodeInfosWidget = (function () {
                 var graphUri = "";
                 var uniqueTriples = {};
                 data.forEach(function (item) {
+                    if (!item.value) {
+                        item.value = { value: "" };
+                    }
                     if (item.prop.value.indexOf("label") > -1) {
                         $("#ui-id-1").append(" " + item.value.value);
                     }
@@ -352,7 +355,7 @@ var NodeInfosWidget = (function () {
                         item.value.value = value;
                         var key = item.prop.value + "_" + value;
                     } else {
-                        var key = item.prop.value + "_" + item.value?( item.value.value + item.value["xml:lang"]):"";
+                        var key = item.prop.value + "_" + item.value.value + item.value["xml:lang"];
                     }
                     if (uniqueTriples[key]) {
                         return;

@@ -20,7 +20,6 @@ var NodeInfosAxioms = (function () {
             Axiom_activeLegend.drawLegend("nodeInfosAxioms_activeLegendDiv");
             if (!Lineage_sources.isSourceEditableForUser(self.currentSource)) {
                 $("#nodeInfosAxioms_newAxiomBtn").css("display", "none");
-
             }
 
             // onclick="Axiom_activeLegend.onSuggestionsSelect($(this).val())"
@@ -33,14 +32,11 @@ var NodeInfosAxioms = (function () {
                 }
             });
 
-            AxiomExtractor.getClassAxioms(self.currentResource.data.source,self.currentResource.data.id,function(err, visjsData){
-               var options={}
+            AxiomExtractor.getClassAxioms(self.currentResource.data.source, self.currentResource.data.id, function (err, visjsData) {
+                var options = {};
                 Axioms_graph.drawGraph(visjsData, "nodeInfosAxioms_graphDiv", options);
-            })
-        return;
-
-
-
+            });
+            return;
 
             Axioms_manager.initResourcesMap(self.currentSource, function (err, result) {
                 // used do draw graph
@@ -77,10 +73,6 @@ var NodeInfosAxioms = (function () {
     self.loadAxiomsJstree = function () {
         $("#nodeInfosAxioms_infosDiv").html("Loading Axioms...");
         $("#waitImg").css("display", "block");
-
-
-
-
 
         self.getResourceAxioms(self.currentResource.data.id, {}, function (err, result) {
             $("#waitImg").css("display", "none");

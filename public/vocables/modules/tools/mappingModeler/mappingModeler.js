@@ -32,6 +32,7 @@ import dataSourcesManager from "./dataSourcesManager.js";
 var MappingModeler = (function () {
     var self = {};
 
+    self.maxItemsInJstree = 200;
     /**
      * ID of the tree container.
      * @type {string}
@@ -260,6 +261,7 @@ var MappingModeler = (function () {
 
         if (parentName == "Classes" || parentName == "Properties") {
             var uniqueSources = {};
+            var searchDone = {};
             objects.forEach(function (item) {
                 if (item.source) {
                     if (!uniqueSources[item.source]) {
@@ -275,16 +277,29 @@ var MappingModeler = (function () {
                             },
                         });
                     }
-                    jstreeData.push({
-                        id: item.id,
-                        parent: item.source,
-                        text: "<span  style='color:" + color + "'>" + item.label.split(":")[1] + "</span>",
-                        data: {
+                    if (objects.length < self.maxItemsInJstree) {
+                        jstreeData.push({
                             id: item.id,
-                            text: item.label.split(":")[1],
-                            resourceType: item.resourceType,
-                        },
-                    });
+                            parent: item.source,
+                            text: "<span  style='color:" + color + "'>" + item.label.split(":")[1] + "</span>",
+                            data: {
+                                id: item.id,
+                                text: item.label.split(":")[1],
+                                resourceType: item.resourceType,
+                            },
+                        });
+                    } else if (!searchDone[item.source]) {
+                        searchDone[item.source] = 1;
+                        jstreeData.push({
+                            id: common.getRandomHexaId(5),
+                            parent: item.source,
+                            text: "<span  style='color:" + color + "'> SEARCH...</span>",
+                            data: {
+                                resourceType: "search" + item.resourceType,
+                                source: item.source,
+                            },
+                        });
+                    }
                 } else {
                     jstreeData.push({
                         id: item.id,
@@ -428,6 +443,44 @@ var MappingModeler = (function () {
             setTimeout(function () {
                 self.onLegendNodeClick({ id: "Class" });
             }, 500);
+        } else if (obj.node.data && obj.node.data.resourceType == "searchClass") {
+            var word = prompt("class starts with... ");
+            if (!word) return;
+            word = word.toLowerCase();
+            var jstreeData = [];
+            var source = obj.node.data.source;
+            var color = "#00afef";
+            for (var resourceUri in self.allResourcesMap) {
+                var item = self.allResourcesMap[resourceUri];
+                var itemLabel = item.label.toLowerCase();
+                var startWith = true;
+                if (word.startsWith("*") || word.startsWith("%")) {
+                    word = word.substring(1);
+                    startWith = false;
+                }
+                if (item.resourceType == "Class" && item.source == source) {
+                    var label = item.label;
+                    if (label.split(":").length == 2) label = label.split(":")[1];
+                    //  console.log(label)
+
+                    if ((startWith && label.toLowerCase().indexOf(word) == 0) || (!startWith && label.toLowerCase().indexOf(word) > -1)) {
+                        jstreeData.push({
+                            id: item.id,
+                            parent: item.source,
+                            text: "<span  style='color:" + color + "'>" + label + "</span>",
+                            data: {
+                                id: item.id,
+                                text: label,
+                                resourceType: item.resourceType,
+                            },
+                        });
+                    }
+                }
+            }
+            if (jstreeData.length == 0) return alert("no Match");
+            if (jstreeData.length > self.maxItemsInJstree) return alert("to many matches");
+
+            JstreeWidget.addNodesToJstree("suggestionsSelectJstreeDiv", source, jstreeData, { positionLast: true });
         } else if (self.currentResourceType == "Class") {
             var resource = self.allResourcesMap[resourceUri];
             newResource = {

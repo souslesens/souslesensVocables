@@ -771,6 +771,8 @@ var MappingsDetails = (function () {
             if (!prefix) {
                 return;
             }
+            prefix = prefix.replace(/[-_/]/g, "");
+
             var str = "if((mapping.isString||mapping.dataType) && role=='o') return value; else return '" + prefix + "-'+value;";
             $("#MappingModeler_fnBody").val(str);
         },

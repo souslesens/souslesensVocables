@@ -124,25 +124,31 @@ var TripleFactory = (function () {
                 UI.message("Done", true);
                 if (!self.filterMappingIsSample) {
                     //Admin.clearOntologyModelCache();
-                    SearchUtil.generateElasticIndex(MappingModeler.currentSLSsource, { indexProperties: 1, indexNamedIndividuals: 1 }, () => {
-                        $.ajax({
-                            type: "DELETE",
-                            url: `${Config.apiUrl}/ontologyModels?source=${MappingModeler.currentSLSsource}`,
+                    SearchUtil.generateElasticIndex(
+                        MappingModeler.currentSLSsource,
+                        {
+                            indexProperties: 1,
+                            indexNamedIndividuals: 1,
+                        },
+                        () => {
+                            $.ajax({
+                                type: "DELETE",
+                                url: `${Config.apiUrl}/ontologyModels?source=${MappingModeler.currentSLSsource}`,
 
-                            dataType: "json",
-                            success: function (result, _textStatus, _jqXHR) {
-                                delete Config.ontologiesVocabularyModels[MappingModeler.currentSLSsource];
+                                dataType: "json",
+                                success: function (result, _textStatus, _jqXHR) {
+                                    delete Config.ontologiesVocabularyModels[MappingModeler.currentSLSsource];
 
-                                UI.message("ALL DONE");
-                            },
-                            error: function (err) {
-                                if (callback) {
-                                    return callback(err);
-                                }
-                                UI.message(err.responseText);
-                            },
-                        });
-                        /*
+                                    UI.message("ALL DONE");
+                                },
+                                error: function (err) {
+                                    if (callback) {
+                                        return callback(err);
+                                    }
+                                    UI.message(err.responseText);
+                                },
+                            });
+                            /*
                         $.ajax(`/api/v1/ontologyModels?source=${MappingModeler.currentSLSsource}`, { method: "DELETE" })
                             .then((_success) => {
                                 window.UI.message(`${MappingModeler.currentSLSsource} was updated successfully`, true);
@@ -150,7 +156,8 @@ var TripleFactory = (function () {
                             .catch((error) => {
                                 alert(error);
                             });*/
-                    });
+                        },
+                    );
                 }
             }
         });
@@ -226,12 +233,16 @@ var TripleFactory = (function () {
                 MappingModeler.clearSourceClasses(DataSourceManager.currentSlsvSource);
                 if (callback) {
                     return callback();
+                } else {
+                    alert(result.result);
                 }
                 UI.message(result.result);
             },
             error: function (err) {
                 if (callback) {
                     return callback(err);
+                } else {
+                    alert(err.responseText);
                 }
                 UI.message(err.responseText);
             },
@@ -361,6 +372,11 @@ var TripleFactory = (function () {
                 },
                 // Reindex graph
                 function (callbackSeries) {
+                    var indexAuto = $("MappingModeler_indexAutoCBX").prop("checked");
+
+                    if (!indexAuto) {
+                        return callbackSeries();
+                    }
                     $("#KGcreator_infosDiv").val("reindexing graph)");
                     self.indexGraph(function (err, result) {
                         return callbackSeries(err);

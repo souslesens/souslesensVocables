@@ -28,15 +28,15 @@ var Lineage_axioms = (function () {
         if (!source) {
             source = Lineage_sources.activeSource;
         }
-      //  Axiom_manager.listClassesWithAxioms(source, function (err, result) {
+        //  Axiom_manager.listClassesWithAxioms(source, function (err, result) {
         AxiomExtractor.listClassesWithAxioms(source, function (err, result) {
             if (err) {
                 return alert(err);
             }
 
-            result = result.slice(0, 500)
+            result = result.slice(0, 500);
             var axiomTypes = {};
-            var visjsData = {nodes: [], edges: []};
+            var visjsData = { nodes: [], edges: [] };
             if (!result.forEach) {
                 // nothing found
                 return alert(result.result);
@@ -44,7 +44,7 @@ var Lineage_axioms = (function () {
 
             var existingNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
             result.forEach(function (item) {
-                if(item.axiomTypes) {
+                if (item.axiomTypes) {
                     item.axiomTypes.forEach(function (type) {
                         if (!axiomTypes[type]) {
                             axiomTypes[type] = 1;
@@ -112,13 +112,8 @@ var Lineage_axioms = (function () {
         NodeInfosAxioms.init("IOF-CORE-202401", node, "mainDialogDiv");
     };
 
-
-
-
     return self;
 })();
 
 export default Lineage_axioms;
 window.Lineage_axioms = Lineage_axioms;
-
-

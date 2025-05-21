@@ -1719,8 +1719,8 @@ var Lineage_whiteboard = (function () {
                 return UI.message("No data found", true);
             }
             if (result.length > self.showLimit) {
-              alert("Too may nodes (" + result.length + ") only " + self.showLimit + "can be shown ");
-              result=result.slice(0,self.showLimit)
+                alert("Too may nodes (" + result.length + ") only " + self.showLimit + "can be shown ");
+                result = result.slice(0, self.showLimit);
             }
 
             var color = self.getSourceColor(source);

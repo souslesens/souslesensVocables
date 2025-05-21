@@ -411,15 +411,11 @@ var SparqlQuery_bot = (function () {
                 filter += self.params.nonObjectPropertyFilter;
             }
 
-
-
             self.getResourcesList("Predicate", role, filter, options, function (err, result) {
                 if (err) {
                     alert(err.responseText || err);
                     return myBotEngine.previousStep();
                 }
-
-
 
                 if (self.params.sparqlQuery) {
                     self.params.queryResult = result;

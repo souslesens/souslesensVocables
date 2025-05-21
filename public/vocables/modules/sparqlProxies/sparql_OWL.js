@@ -1869,6 +1869,74 @@ var Sparql_OWL = (function () {
         });
     };
 
+    self.getLabelsMap = function (sourceLabel, options, callback) {
+        if (!options) {
+            options = {};
+        }
+        if (!Config.sources[sourceLabel].graphUri) {
+            options.selectGraph = false;
+        }
+        var fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph, options.withoutImports);
+        var query =
+            "PREFIX owl: <http://www.w3.org/2002/07/owl#> " +
+            "PREFIX skos: <http://www.w3.org/2004/02/skos/core#> " +
+            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
+            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> " +
+            "SELECT distinct  ?id ?type ?label " +
+            fromStr +
+            " WHERE {";
+
+        var langFilter = "";
+        if (options.lang) {
+            langFilter = " FILTER (lang(?label)='" + options.lang + "' || !lang(?label))  ";
+        }
+        var filter = "";
+        if (options.filter) {
+            filter = options.filter;
+        }
+
+        query += "?id rdfs:label ?label " + langFilter + "" + filter + " }";
+        var totalSize = 0;
+        var labelsMap = {};
+        var resultSize = 1;
+        var limitSize = 2000;
+        if (options.processorFectchSize) {
+            limitSize = options.processorFectchSize;
+        }
+        var totalLimit = options.limit || Config.queryLimit;
+        var offset = 0;
+        async.whilst(
+            function (_test) {
+                return resultSize > 0 && totalSize < totalLimit;
+            },
+            function (callbackWhilst) {
+                var query2 = "" + query;
+
+                query2 += " limit " + limitSize + " offset " + offset;
+
+                self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
+                var url = self.sparql_url + "?format=json&query=";
+                Sparql_proxy.querySPARQL_GET_proxy(url, query2, "", { source: sourceLabel }, function (err, result) {
+                    if (err) {
+                        return callbackWhilst(err);
+                    }
+                    result = result.results.bindings;
+                    resultSize = result.length;
+                    totalSize += resultSize;
+                    result.forEach(function (item) {
+                        labelsMap[item.id.value] = item.label ? item.label.value : Sparql_common.getLabelFromURI(item.id.value);
+                    });
+
+                    offset += limitSize;
+                    callbackWhilst();
+                });
+            },
+            function (err) {
+                callback(err, labelsMap);
+            },
+        );
+    };
+
     /**
      * returns all URIs,labels and graph (option selectGraph) of classes a source
      *
@@ -1926,7 +1994,8 @@ var Sparql_OWL = (function () {
             typeFilterStr = "";
         }
 
-        var optionalLabel = "OPTIONAL";
+        var optionalLabel = "OPTIONAL"; ///???
+        // var optionalLabel = "";
         if (options.filter && options.filter.indexOf("?label") > -1) {
             optionalLabel = "";
         }

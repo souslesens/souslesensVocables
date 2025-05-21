@@ -1,42 +1,37 @@
 name: build-and-deploy-docs
 on:
-  - push
+    - push
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [22.x]
-    steps:
-      - uses: actions/checkout@v3
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v2
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: "npm"
-      - run: npm ci
-      - run: |
-          cd docs
-          python3 -m venv venv
-          . ./venv/bin/activate
-          pip install -U poetry
-          poetry install --without=dev
-          poetry run make html
-
-  deploy:
-    if: "github.ref == 'refs/heads/master'"
-    permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    name: Upload and Pages
-    steps:
-      - name: Upload
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: docs/_build/html
-      - name: Pages
-        uses: actions/deploy-pages@v4
+    build:
+        if: "github.ref == 'refs/heads/master'"
+        runs-on: ubuntu-latest
+        permissions:
+            pages: write
+            id-token: write
+        environment:
+            name: github-pages
+            url: ${{ steps.deployment.outputs.page_url }}
+        strategy:
+            matrix:
+                node-version: [22.x]
+        steps:
+            - uses: actions/checkout@v4
+            - name: Use Node.js ${{ matrix.node-version }}
+              uses: actions/setup-node@v4
+              with:
+                  node-version: ${{ matrix.node-version }}
+                  cache: "npm"
+            - run: npm ci
+            - run: |
+                  cd docs
+                  python3 -m venv venv
+                  . ./venv/bin/activate
+                  pip install -U poetry
+                  poetry install --without=dev
+                  poetry run make html
+            - name: Upload
+              uses: actions/upload-pages-artifact@v3
+              with:
+                  path: docs/_build/html
+            - name: Pages
+              uses: actions/deploy-pages@v4

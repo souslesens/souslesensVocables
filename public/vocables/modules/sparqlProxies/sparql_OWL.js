@@ -460,6 +460,9 @@ var Sparql_OWL = (function () {
         }
         options.selectGraph = false;
         var fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph, options.withoutImports);
+        const matches = fromStr.match(/<[^>]+>/g);
+        if (!matches) return "()";
+        var fromList = `( ${matches.join(" , ")} )`;
 
         var selectStr = " * ";
         if (true || options.excludeType) {
@@ -478,6 +481,7 @@ var Sparql_OWL = (function () {
             "  WHERE {";
 
         query += "{GRAPH ?subjectGraph" + i + "{";
+        //query+="{";
         query += "?subject rdf:type  ?subjectType. filter (?subjectType not in(owl:Restriction)) ";
         if (words) {
             query += " ?subject rdfs:label ?subjectLabel.";
@@ -485,7 +489,8 @@ var Sparql_OWL = (function () {
             query += " OPTIONAL { ?subject rdfs:label ?subjectLabel.}";
         }
         query += " }}\n";
-
+        query += " filter( ?subjectGraph" + i + " in " + fromList + " ).\n";
+        //query += " }\n";
         ancestorsDepth = Math.min(ancestorsDepth, self.ancestorsDepth);
 
         for (var i = 1; i <= ancestorsDepth; i++) {
@@ -497,6 +502,8 @@ var Sparql_OWL = (function () {
                 query += "  ?broader1 rdf:type ?broaderType. filter(?broaderType !=owl:Restriction)} " + "filter (?broader1 !=owl:Class)";
                 query += Sparql_common.getVariableLangLabel("broader" + i, true);
                 query += "}\n";
+                query += " filter( ?broaderGraph" + i + " in " + fromList + " ).\n";
+
                 // query += " OPTIONAL{?broader" + i + " rdfs:label ?broader" + i + "Label.}";
             } else {
                 query += "OPTIONAL { ?broader" + (i - 1) + " rdfs:subClassOf|rdf:type" + " ?broader" + i + ".";
@@ -515,6 +522,7 @@ var Sparql_OWL = (function () {
         query += "  }";
         if (options.selectGraph) {
             query += " GRAPH ?broader1Graph {?broader1 ?p ?o}}";
+            query += " filter( ?broader1Graph" + i + " in " + fromList + " ).\n";
         }
 
         if (options.filterCollections) {

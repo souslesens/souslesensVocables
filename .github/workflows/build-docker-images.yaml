@@ -13,10 +13,10 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - name: Checkout
-              uses: actions/checkout@v2
+              uses: actions/checkout@v4
             - name: Docker meta
               id: meta
-              uses: docker/metadata-action@v3
+              uses: docker/metadata-action@v5
               with:
                   # list of Docker images to use as base name for tags
                   images: ${{ secrets.DOCKER_REGISTRY }}/${{ secrets.DOCKER_REGISTRY_PATH }}
@@ -38,7 +38,7 @@ jobs:
                   username: ${{ github.repository_owner }}
                   password: ${{ secrets.DOCKER_REGISTRY_TOKEN }}
             - name: Build and push
-              uses: docker/build-push-action@v2
+              uses: docker/build-push-action@v6
               with:
                   context: .
                   push: true

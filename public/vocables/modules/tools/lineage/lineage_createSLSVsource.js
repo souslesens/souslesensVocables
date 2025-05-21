@@ -49,12 +49,17 @@ var Lineage_createSLSVsource = (function () {
             return "enter source graphUri";
         }
         var userPrivateProfile = "PRIVATE/" + user;
+        var sourceConfig = {};
 
         async.series(
             [
                 //write source
                 function (callbackSeries) {
                     self.writeSource(sourceName, graphUri, imports, userPrivateProfile, function (err, result) {
+                        if (err) {
+                            return callbackSeries(err);
+                        }
+                        sourceConfig = result?.resources;
                         return callbackSeries(err);
                     });
                 },
@@ -77,7 +82,7 @@ var Lineage_createSLSVsource = (function () {
                     if (callback) callback(err);
                     return alert(err.responseText);
                 }
-                callback();
+                callback(err, sourceConfig);
             },
         );
     };
@@ -96,6 +101,8 @@ var Lineage_createSLSVsource = (function () {
      * @returns {void}
      */
     self.writeSource = function (sourceName, graphUri, imports, userPrivateProfile, callback) {
+        var prefix = common.getRandomString(5);
+        var baseUri = graphUri.endsWith("/") ? graphUri : graphUri + "/";
         var sourceObject = {
             id: common.getRandomHexaId(12),
             name: sourceName,
@@ -133,6 +140,8 @@ var Lineage_createSLSVsource = (function () {
             graphUri: graphUri,
             owner: Authentification.currentUser.login,
             published: false,
+            prefix: prefix,
+            baseUri: baseUri,
         };
 
         var payload = {

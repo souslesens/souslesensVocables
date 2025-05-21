@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.5.1](https://github.com/souslesens/souslesensVocables/compare/2.5.0...2.5.1) (2025-05-21)
+
+
+### Bug Fixes
+
+* **api/userData:** parse user.id as int ([e3d3438](https://github.com/souslesens/souslesensVocables/commit/e3d3438237d6f28d8e88ef248e33791b618e56aa))
+
+## [2.5.0](https://github.com/souslesens/souslesensVocables/compare/2.4.2...2.5.0) (2025-05-15)
+
 ### [2.4.2](https://github.com/souslesens/souslesensVocables/compare/2.4.1...2.4.2) (2025-03-31)
 
 ### [2.4.1](https://github.com/souslesens/souslesensVocables/compare/2.4.0...2.4.1) (2025-03-28)

@@ -226,10 +226,13 @@ var Lineage_decoration = (function () {
                     Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(newVisJsNodes);
                     for (var key in distinctNodeClassesMap) {
                         distinctNodeClassesMap[key].forEach(function (node) {
-                            if (node.shape != "dot") {
+                            /*if (node.shape != "dot") {
+                                return;
+                            }*/
+                            //treat also individuals
+                            if (!node?.data) {
                                 return;
                             }
-
                             var data = node.data;
                             if (data && ancestorsSourcemap[node.id]) {
                                 data.source = ancestorsSourcemap[node.id];

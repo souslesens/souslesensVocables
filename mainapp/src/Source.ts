@@ -117,7 +117,13 @@ export async function deleteSource(source: ServerSource) {
 }
 
 const decodeSource = (key: string, source: ServerSource): ServerSource => {
-    return ServerSourceSchema.parse({ ...source, name: source.name ?? key });
+    let dSource = ServerSourceSchema.parse({});
+    try {
+        dSource = ServerSourceSchema.parse({ ...source, name: source.name ?? key });
+    } catch (e: unknown) {
+        throw new Error(`Error with source ${source.name}: ${e.message}`);
+    }
+    return dSource;
 };
 
 export type ServerSource = z.infer<typeof ServerSourceSchema>;

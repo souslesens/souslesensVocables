@@ -18,6 +18,26 @@ var TreeController = (function () {
 
         var jstreeData = [];
         var existingNodes = {};
+        if (!Array.isArray(data) || data.length == 0) {
+            return;
+        }
+        data.sort(function (a, b) {
+            var labelA = a.child1 ? a.child1.value : "";
+            var labelB = b.child1 ? b.child1.value : "";
+            if (labelA > labelB) {
+                return -1;
+            }
+            if (labelA < labelB) {
+                return 1;
+            }
+            return 0;
+        });
+        if (data.length > 500) {
+            alert("Too many nodes : only 500 first nodes are displayed");
+            data = data.slice(0, 500);
+        }
+        UI.message("Loading " + data.length + " nodes in the tree");
+
         data.forEach(function (item) {
             var typeObj = item[childNodeVar + "Type"];
             if (!typeObj) {

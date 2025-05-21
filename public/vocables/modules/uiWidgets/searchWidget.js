@@ -281,6 +281,12 @@ var SearchWidget = (function () {
                 openAll: true,
                 selectTreeNodeFn: function (event, obj) {
                     SearchWidget.currentTreeNode = obj.node;
+                    if (obj.event.detail == 2) {
+                        if (obj.node.type == "Class") {
+                            self.openTreeNode(targetDiv, obj.node.data.source, obj.node, { reopen: true });
+                        }
+                    }
+
                     return;
                     /*  if (_options.selectTreeNodeFn) {
                         return _options.selectTreeNodeFn(event, obj);
@@ -311,6 +317,12 @@ var SearchWidget = (function () {
                 $("#" + targetDiv)
                     .jstree(true)
                     .open_all();
+                $("#" + targetDiv).on("close_node.jstree", function (e, data) {
+                    var node = data.node;
+                    if (node.type == "Class") {
+                        JstreeWidget.deleteBranch(targetDiv, node.id, false);
+                    }
+                });
             }, 200);
         }
         if (_callback) {
@@ -332,6 +344,9 @@ var SearchWidget = (function () {
     };
 
     self.showTopConcepts = function (sourceLabel, options) {
+        self.searchTermInSources({ onlyClasses: true });
+
+        return;
         if (!sourceLabel) {
             sourceLabel = Lineage_sources.activeSource;
         }
@@ -479,6 +494,53 @@ var SearchWidget = (function () {
         if (options.depth) {
             descendantsDepth = options.depth;
         }
+
+        var es_options = {};
+
+        es_options.skosLabels = 1;
+        es_options.classFilter = node.data.id;
+        SearchUtil.getSimilarLabelsInSources(null, [sourceLabel], ["*"], null, "fuzzyMatch", es_options, function (_err, result) {
+            if (_err) {
+                return UI.message(err);
+            }
+            var es_results = [];
+            var treated_results = [];
+            if (result[0] && result[0].matches && result[0].matches[sourceLabel]) {
+                es_results = result[0].matches[sourceLabel];
+            }
+            if (es_results.length > 0) {
+                treated_results = [];
+                var item;
+                es_results.forEach(function (result) {
+                    item = {};
+                    if (result.id == node.data.id) {
+                        return;
+                    }
+                    item.subject = { type: "uri", value: node.data.id };
+                    item.subjectLabel = { type: "uri", value: node.data.label };
+                    item.subjectType = { value: "http://www.w3.org/2004/02/skos/core#Concept" };
+                    var type = result.type == "Class" ? "http://www.w3.org/2002/07/owl#Class" : "http://www.w3.org/2002/07/owl#NamedIndividual";
+                    item.child1Type = { type: "uri", value: type };
+                    item.child1 = { type: "uri", value: result.id };
+                    item.child1Label = { type: "uri", value: result.label };
+                    treated_results.push(item);
+                });
+            }
+            if (options.beforeDrawingFn) {
+                options.beforeDrawingFn(treated_results);
+            }
+            var jsTreeOptions = {
+                source: sourceLabel,
+                type: node.data.type,
+            };
+            if (options.optionalData) {
+                jsTreeOptions.optionalData = options.optionalData;
+            }
+            TreeController.drawOrUpdateTree(divId, treated_results, node.id, "child1", jsTreeOptions);
+
+            $("#waitImg").css("display", "none");
+        });
+        return;
         // options.filterCollections = Collection.currentCollectionFilter;
         Sparql_generic.getNodeChildren(sourceLabel, null, node.data.id, descendantsDepth, options, function (err, result) {
             if (err) {

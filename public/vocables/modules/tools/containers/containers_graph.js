@@ -241,7 +241,7 @@ var Containers_graph = (function () {
                                 if (item.memberTypes.value.indexOf("Individual") > -1) {
                                     type = "individual";
                                     shape = "triangle";
-                                } 
+                                }
                                 if (item.memberTypes.value.indexOf("Class") > -1) {
                                     type = "Class";
                                     shape = Lineage_whiteboard.defaultShape;

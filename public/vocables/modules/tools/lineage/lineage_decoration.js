@@ -168,7 +168,7 @@ var Lineage_decoration = (function () {
                             ancestors = OntologyModels.getClassHierarchyTreeData(Lineage_sources.activeSource, distinctNodeClassesMap[classUri][0].data.parentClass, "ancestors");
                         }
                         // don't treat containers
-                        if(distinctNodeClassesMap[classUri][0].data.type == 'container'){
+                        if (distinctNodeClassesMap[classUri][0].data.type == "container") {
                             ancestors = null;
                         }
                         if (ancestors) {

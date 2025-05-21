@@ -241,8 +241,9 @@ var Containers_graph = (function () {
                                 if (item.memberTypes.value.indexOf("Individual") > -1) {
                                     type = "individual";
                                     shape = "triangle";
-                                } else {
-                                    type = "class";
+                                } 
+                                if (item.memberTypes.value.indexOf("Class") > -1) {
+                                    type = "Class";
                                     shape = Lineage_whiteboard.defaultShape;
                                     shape = "dot";
                                 }
@@ -256,7 +257,7 @@ var Containers_graph = (function () {
                                 shadow: self.nodeShadow,
                                 shape: shape,
                                 size: size,
-                                font: type == "container" ? { color: color2, bold: true } : null,
+                                font: type == "container" ? { color: "#70309f" } : null,
                                 color: color,
 
                                 data: {

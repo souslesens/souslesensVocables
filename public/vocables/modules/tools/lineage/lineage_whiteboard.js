@@ -3835,6 +3835,12 @@ self.zoomGraphOnNode(node.data[0].id, false);
             if (!Lineage_whiteboard.currentGraphNode.id) {
                 return;
             }
+            var nodesSelected =self.lineageVisjsGraph.network.getSelectedNodes();
+            if(nodesSelected.length > 1){
+                self.lineageVisjsGraph.removeOtherNodesFromGraph(nodesSelected);
+                Lineage_decoration.decorateByUpperOntologyByClass();
+                return;
+            }
             self.lineageVisjsGraph.removeOtherNodesFromGraph(Lineage_whiteboard.currentGraphNode.id);
             Lineage_decoration.decorateByUpperOntologyByClass();
         },

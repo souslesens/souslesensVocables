@@ -426,14 +426,17 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         }
     };
 
-    (self.removeOtherNodesFromGraph = function (/** @type {any} */ nodeId) {
+    (self.removeOtherNodesFromGraph = function (/** @type {any} */ nodesToKeep) {
         var nodes = self.data.nodes.get();
         /**
          * @type {any[]}
          */
         var nodeIds = [];
+        if(!Array.isArray(nodesToKeep)) {
+            nodesToKeep = [nodesToKeep];
+        }
         nodes.forEach(function (/** @type {{ id: any; }} */ node) {
-            if (node.id != nodeId) {
+            if (!nodesToKeep.includes(node.id) ) {
                 nodeIds.push(node.id);
             }
         });

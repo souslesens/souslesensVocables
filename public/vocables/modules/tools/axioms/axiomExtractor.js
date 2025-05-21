@@ -139,12 +139,34 @@ var AxiomExtractor = (function () {
                         return callback ? callback(err) : alert(err);
                     }
 
+
+
+
+
+
                     self.basicAxioms[source] = basicAxioms;
                     return callback ? callback(null, basicAxioms) : "done";
                 },
             );
         });
     };
+
+    self.getClassUniqueAxioms=function(basicAxioms,classUri){
+        var predicates=basicAxioms[classUri]
+        var duplicates= {}
+        var toKeep=[]
+
+        predicates.forEach(function(item){
+            var key= item.s+"_"+item.p
+
+            if(!duplicates[key] || item.o.indexOf("http")==0 ){
+                toKeep.push(item)
+            }else {
+                duplicates[key]=1
+            }
+        })
+        return toKeep;
+    }
 
     self.listClassesWithAxioms = function (sourceLabel, callback) {
         AxiomExtractor.getBasicAxioms(sourceLabel, function (err, basicAxioms) {
@@ -207,96 +229,104 @@ var AxiomExtractor = (function () {
     };
 
     self.getClassAxioms = function (source, classUri, callback) {
-        var sourceBasicAxioms = self.basicAxioms[source];
-        if (!sourceBasicAxioms) {
-            return alert("source axioms not loaded");
-        }
-        var rootNode = sourceBasicAxioms[classUri];
-        if (!rootNode) {
-            return alert("classUri not found in axioms " + classUri);
-        }
 
-        var visjsData = { nodes: [], edges: [] };
-        var distinctNodes = {};
-
-        function recurse(subject, level) {
-            var children = sourceBasicAxioms[subject];
-
-            if (!children || !Array.isArray(children)) {
-                return;
+        self.getBasicAxioms(source, function (err, sourceBasicAxioms) {
+            if (!sourceBasicAxioms) {
+                return alert("source axioms not loaded");
             }
-            children.forEach(function (child) {
-                var skipo = false;
-                var propLabel = "";
-                var nodeLabel = "";
-                var nodeSize = 12;
-                var shape = "dot";
-                if (child.type && child.type == "Restriction") {
-                    nodeSize = 1;
-                    shape = "text";
-                    nodeLabel = child.pLabel || Sparql_common.getLabelFromURI(child.p);
-                } else {
-                    nodeLabel = child.sLabel || Sparql_common.getLabelFromURI(child.s);
+            var rootNode = sourceBasicAxioms[classUri];
+            if (!rootNode) {
+                return alert("classUri not found in axioms " + classUri);
+            }
+
+            var visjsData = {nodes: [], edges: []};
+            var distinctNodes = {};
+
+            function recurse(subject, level) {
+
+
+                  var children = sourceBasicAxioms[subject];
+
+
+                if (!children || !Array.isArray(children)) {
+                    return;
                 }
-                if (!distinctNodes[child.s]) {
-                    distinctNodes[child.s] = 1;
-                    visjsData.nodes.push({
-                        id: child.s,
-                        label: nodeLabel,
-                        shape: shape,
-                        level: level,
-                        size: nodeSize,
-                        data: {
+                children.forEach(function (child) {
+                    var skipo = false;
+                    var propLabel = "";
+                    var nodeLabel = "";
+                    var nodeSize = 12;
+                    var shape = "dot";
+                    if (child.type && child.type == "Restriction") {
+                        nodeSize = 1;
+                        shape = "text";
+                        nodeLabel = child.pLabel || Sparql_common.getLabelFromURI(child.p);
+                    } else {
+                        nodeLabel = child.sLabel || Sparql_common.getLabelFromURI(child.s);
+                    }
+                    if (!distinctNodes[child.s]) {
+                        distinctNodes[child.s] = 1;
+                        visjsData.nodes.push({
                             id: child.s,
                             label: nodeLabel,
-                            source: source,
-                        },
-                    });
-                }
-
-                var propLabel = "";
-
-                if (true || child.o.startsWith("http")) {
-                    propLabel = child.pLabel || Sparql_common.getLabelFromURI(child.p);
-                }
-                visjsData.edges.push({
-                    from: subject,
-                    to: child.o,
-                    label: propLabel,
-                    arrows: "to",
-                });
-
-                if (child.o.startsWith("http")) {
-                    //stop on classes and properties
-                    if (!distinctNodes[child.o]) {
-                        distinctNodes[child.o] = 1;
-                        var label = child.oLabel || Sparql_common.getLabelFromURI(child.o);
-                        visjsData.nodes.push({
-                            id: child.o,
-                            label: label,
-                            shape: "dot",
+                            shape: shape,
+                            level: level,
                             size: nodeSize,
-                            level: level + 1,
                             data: {
                                 id: child.s,
-                                label: label,
+                                label: nodeLabel,
                                 source: source,
                             },
                         });
                     }
-                } else {
-                    recurse(child.o, level + 1);
-                }
-            });
-        }
 
-        recurse(classUri, 1);
+                    var propLabel = "";
 
-        self.removeBlankNodes(visjsData);
+                    if (true || child.o.startsWith("http")) {
+                        propLabel = child.pLabel || Sparql_common.getLabelFromURI(child.p);
+                    }
+                    visjsData.edges.push({
+                        from: subject,
+                        to: child.o,
+                        label: propLabel,
+                        arrows: "to",
+                    });
 
-        callback(null, visjsData);
+                    if (child.o.startsWith("http")) {
+                        var nodeSize = 12;
+                        //stop on classes and properties
+                        if (!distinctNodes[child.o]) {
+                            distinctNodes[child.o] = 1;
+                            var label = child.oLabel || Sparql_common.getLabelFromURI(child.o);
+                            visjsData.nodes.push({
+                                id: child.o,
+                                label: label,
+                                shape: "dot",
+                                size: nodeSize,
+                                level: level + 1,
+                                data: {
+                                    id: child.s,
+                                    label: label,
+                                    source: source,
+                                },
+                            });
+                        }
+                    } else {
+                        recurse(child.o, level + 1);
+                    }
+                });
+            }
 
-        // Lineage_whiteboard.drawNewGraph(visjsData)
+           /*var children = self.getClassUniqueAxioms(sourceBasicAxioms, classUri)
+            sourceBasicAxioms[classUri]=children*/
+            recurse(classUri, 1);
+
+            self.removeBlankNodes(visjsData);
+
+            callback(null, visjsData);
+
+            // Lineage_whiteboard.drawNewGraph(visjsData)
+        })
     };
 
     self.removeBlankNodes = function (visjData) {
@@ -354,6 +384,16 @@ var AxiomExtractor = (function () {
 
         var nodesToDelete = [];
         visjData.edges.forEach(function (edge) {
+
+            if( nodesMap[edge.from].label==edge.label){
+
+                nodesMap[edge.from].label = "some" + "\n" +  nodesMap[edge.from].label+"";
+                //   nodesMap[edge.from].color = "#f5ef39"
+                nodesMap[edge.from].font = {bold:true, size: 18, color: "#cb9801" };
+                edge.label=""
+            }
+
+
             if (edge.label == "intersectionOf" || edge.label == "unionOf" || edge.label == "disjointWith") {
                 var obj = symbolsMap[edge.label];
                 // on skippe les noeuds de disjonction
@@ -407,7 +447,7 @@ var AxiomExtractor = (function () {
         parentCentralization: true,
         treeSpacing: 200,
         nodeSpacing: 100,
-        levelSeparation: 300,
+        levelSeparation: 100,
     };
     self.physicsHierarchical = {
         enabled: false,

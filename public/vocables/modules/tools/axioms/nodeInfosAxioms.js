@@ -34,7 +34,12 @@ var NodeInfosAxioms = (function () {
 
             AxiomExtractor.getClassAxioms(self.currentResource.data.source, self.currentResource.data.id, function (err, visjsData) {
                 var options = {};
-                Axioms_graph.drawGraph(visjsData, "nodeInfosAxioms_graphDiv", options);
+               // Axioms_graph.drawGraph(visjsData, "nodeInfosAxioms_graphDiv", options);
+
+                AxiomExtractor.drawGraphCanvas  ("nodeInfosAxioms_graphDiv", visjsData, function(err,result) {
+                })
+                return;
+
             });
             return;
 

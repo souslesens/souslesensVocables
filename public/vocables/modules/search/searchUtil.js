@@ -385,8 +385,16 @@ indexes.push(source.toLowerCase());
                 },
             };
         } else if (word == "*") {
+            /*
             queryObj = {
                 match_all: {},
+            };*/
+            queryObj = {
+                bool: {
+                    must: {
+                        match_all: {},
+                    },
+                },
             };
         } else if (word.indexOf("*") > -1) {
             queryObj = {
@@ -419,6 +427,13 @@ indexes.push(source.toLowerCase());
             if (options.skosLabels) {
                 queryObj.bool.must[0].query_string.fields.push("skoslabels");
             }
+        }
+        if (options.onlyClasses) {
+            queryObj.bool.filter = {
+                term: {
+                    "type.keyword": "Class",
+                },
+            };
         }
         if (options.classFilter) {
             queryObj.bool.filter = {

@@ -24,7 +24,7 @@ var MappingModelerRelations = (function () {
             if (nodesMap[edge.from]?.data?.type == "Column" && nodesMap[edge.to]?.data?.type == "Class") {
                 classesMap[nodesMap[edge.to].id] = nodesMap[edge.from].id;
             }
-        });
+        }});
         var classes = Object.keys(classesMap);
         var relations = [];
         Sparql_OWL.getObjectRestrictions(DataSourcesManager.currentSlsvSource, classes, null, function (err, result) {

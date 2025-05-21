@@ -424,6 +424,31 @@ indexes.push(source.toLowerCase());
                     ],
                 },
             };
+            /*
+            queryObj = {
+                bool: {
+                    should: [
+                    {
+                        fuzzy: {
+                        label: {
+                            value: word,
+                            fuzziness: "AUTO"
+                        }
+                        }
+                    },
+                    {
+                        fuzzy: {
+                        skoslabels: {
+                            value: word,
+                            fuzziness: "AUTO"
+                        }
+                        }
+                    }
+                    ],
+                    minimum_should_match: 1
+                }
+            };
+            */
             if (options.skosLabels) {
                 queryObj.bool.must[0].query_string.fields.push("skoslabels");
             }

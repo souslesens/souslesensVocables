@@ -462,8 +462,8 @@ var Sparql_OWL = (function () {
         var fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph, options.withoutImports);
         const matches = fromStr.match(/<[^>]+>/g);
         if (!matches) return "()";
-        var fromList = `( ${matches.join(' , ')} )`;
-        
+        var fromList = `( ${matches.join(" , ")} )`;
+
         var selectStr = " * ";
         if (true || options.excludeType) {
             selectStr = ' ?subject ?subjectLabel (GROUP_CONCAT(?subjectType;SEPARATOR=",") AS ?subjectTypes)';
@@ -489,7 +489,7 @@ var Sparql_OWL = (function () {
             query += " OPTIONAL { ?subject rdfs:label ?subjectLabel.}";
         }
         query += " }}\n";
-        query += " filter( ?subjectGraph" + i +" in "+fromList + " ).\n";
+        query += " filter( ?subjectGraph" + i + " in " + fromList + " ).\n";
         //query += " }\n";
         ancestorsDepth = Math.min(ancestorsDepth, self.ancestorsDepth);
 
@@ -502,8 +502,8 @@ var Sparql_OWL = (function () {
                 query += "  ?broader1 rdf:type ?broaderType. filter(?broaderType !=owl:Restriction)} " + "filter (?broader1 !=owl:Class)";
                 query += Sparql_common.getVariableLangLabel("broader" + i, true);
                 query += "}\n";
-                query += " filter( ?broaderGraph" + i +" in "+fromList + " ).\n";
-                
+                query += " filter( ?broaderGraph" + i + " in " + fromList + " ).\n";
+
                 // query += " OPTIONAL{?broader" + i + " rdfs:label ?broader" + i + "Label.}";
             } else {
                 query += "OPTIONAL { ?broader" + (i - 1) + " rdfs:subClassOf|rdf:type" + " ?broader" + i + ".";
@@ -517,13 +517,12 @@ var Sparql_OWL = (function () {
 
         for (let i = 1; i < ancestorsDepth; i++) {
             query += "} ";
-            
         }
         query += " FILTER (!isBlank(?subject))" + strFilter;
         query += "  }";
         if (options.selectGraph) {
             query += " GRAPH ?broader1Graph {?broader1 ?p ?o}}";
-            query += " filter( ?broader1Graph" + i +" in "+fromList + " ).\n";
+            query += " filter( ?broader1Graph" + i + " in " + fromList + " ).\n";
         }
 
         if (options.filterCollections) {

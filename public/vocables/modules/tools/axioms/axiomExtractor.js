@@ -53,7 +53,7 @@ var AxiomExtractor = (function () {
                 var restrictions = [];
 
                 result.forEach(function (item) {
-                    restrictions.push({ s: item.subject, p: item.prop, o: item.object, type: "Restriction" });
+                    restrictions.push({s: item.subject, p: item.prop, o: item.object, type: "Restriction"});
                 });
                 return callback(null, restrictions);
             });
@@ -140,10 +140,6 @@ var AxiomExtractor = (function () {
                     }
 
 
-
-
-
-
                     self.basicAxioms[source] = basicAxioms;
                     return callback ? callback(null, basicAxioms) : "done";
                 },
@@ -151,18 +147,18 @@ var AxiomExtractor = (function () {
         });
     };
 
-    self.getClassUniqueAxioms=function(basicAxioms,classUri){
-        var predicates=basicAxioms[classUri]
-        var duplicates= {}
-        var toKeep=[]
+    self.getClassUniqueAxioms = function (basicAxioms, classUri) {
+        var predicates = basicAxioms[classUri]
+        var duplicates = {}
+        var toKeep = []
 
-        predicates.forEach(function(item){
-            var key= item.s+"_"+item.p
+        predicates.forEach(function (item) {
+            var key = item.s + "_" + item.p
 
-            if(!duplicates[key] || item.o.indexOf("http")==0 ){
+            if (!duplicates[key] || item.o.indexOf("http") == 0) {
                 toKeep.push(item)
-            }else {
-                duplicates[key]=1
+            } else {
+                duplicates[key] = 1
             }
         })
         return toKeep;
@@ -245,7 +241,7 @@ var AxiomExtractor = (function () {
             function recurse(subject, level) {
 
 
-                  var children = sourceBasicAxioms[subject];
+                var children = sourceBasicAxioms[subject];
 
 
                 if (!children || !Array.isArray(children)) {
@@ -317,11 +313,12 @@ var AxiomExtractor = (function () {
                 });
             }
 
-           /*var children = self.getClassUniqueAxioms(sourceBasicAxioms, classUri)
-            sourceBasicAxioms[classUri]=children*/
+            /*var children = self.getClassUniqueAxioms(sourceBasicAxioms, classUri)
+             sourceBasicAxioms[classUri]=children*/
             recurse(classUri, 1);
 
-            self.removeBlankNodes(visjsData);
+
+            self.removeBlankNodes(visjsData, classUri);
 
             callback(null, visjsData);
 
@@ -329,8 +326,9 @@ var AxiomExtractor = (function () {
         })
     };
 
-    self.removeBlankNodes = function (visjData) {
-        var nodesMap = [];
+
+    self.removeBlankNodes = function (visjData, rootURI) {
+        var nodesMap = {};
         var edgesFromMap = {};
         var edgesToMap = {};
 
@@ -345,7 +343,35 @@ var AxiomExtractor = (function () {
             edgesFromMap[edge.from].push(edge);
         });
 
-        function shiftBackRecurse(edge, shift) {
+        function removeLeafBlankNodes() {//enlève les noeuds blancs terminaux
+            var nodesToDelete = []
+            var edgesFromMap2={}
+            visjData.edges.forEach(function (edge) {
+                if (!edgesFromMap2[edge.from]) {
+                    edgesFromMap2[edge.from] = [];
+                }
+                edgesFromMap2[edge.from].push(edge);
+            });
+
+            visjData.edges.forEach(function (edge) {
+                if (edge.to.indexOf("http") != 0) {
+                    if ( !edgesFromMap2[edge.to] || edgesFromMap2[edge.to].length==0) {
+                        nodesToDelete.push(edge.to)
+                    }
+                }
+
+            })
+            var newNodes = []
+            visjData.nodes.forEach(function (node) {
+                if (nodesToDelete.indexOf(node.id) < 0) {
+                    newNodes.push(node)
+                }
+            });
+            visjData.nodes = newNodes
+        }
+
+
+        function shiftBackRecurse(edge, shift) {//recule les noeuds suivant celui qu'on a supprimé
             if (edgesFromMap[edge.to]) {
                 edgesFromMap[edge.to].forEach(function (edge2) {
                     if (!nodesMap[edge2.to] || nodesMap[edge2.to].shifted) {
@@ -358,6 +384,21 @@ var AxiomExtractor = (function () {
                 });
             }
         }
+
+        function shiftFrontRecurse(edge) {//pousses les noeuds ciblea au dela de la verticale
+            if (!nodesMap[edge.to]) {
+                return;
+            }
+            if (nodesMap[edge.to].level <= nodesMap[edge.from].level) {
+                nodesMap[edge.to].level = nodesMap[edge.from].level + 1
+            }
+            if (edgesFromMap[edge.to]) {
+                edgesFromMap[edge.to].forEach(function (edge2) {
+                    shiftFrontRecurse(edge2);
+                });
+            }
+        }
+
 
         var symbolsMap = {
             unionOf: {
@@ -383,14 +424,17 @@ var AxiomExtractor = (function () {
         };
 
         var nodesToDelete = [];
+
+
+
         visjData.edges.forEach(function (edge) {
 
-            if( nodesMap[edge.from].label==edge.label){
+            if (nodesMap[edge.from].label == edge.label) {
 
-                nodesMap[edge.from].label = "some" + "\n" +  nodesMap[edge.from].label+"";
+                nodesMap[edge.from].label = nodesMap[edge.from].label  + "\n"+ "<some>" + "";
                 //   nodesMap[edge.from].color = "#f5ef39"
-                nodesMap[edge.from].font = {bold:true, size: 18, color: "#cb9801" };
-                edge.label=""
+                nodesMap[edge.from].font = {bold: true, size: 18, color: "#cb9801"};
+                edge.label = ""
             }
 
 
@@ -399,7 +443,7 @@ var AxiomExtractor = (function () {
                 // on skippe les noeuds de disjonction
                 nodesMap[edge.from].label = obj.symbol;
                 nodesMap[edge.from].shape = "circle";
-                nodesMap[edge.from].font = { color: "white", bold: true };
+                nodesMap[edge.from].font = {color: "white", bold: true};
                 nodesMap[edge.from].color = obj.color;
 
                 nodesToDelete.push(edge.to);
@@ -429,13 +473,20 @@ var AxiomExtractor = (function () {
             }
         });
 
-        var nodesToKeep = [];
-        visjData.nodes.forEach(function (node) {
-            if (nodesToDelete.indexOf(node.id) < 0) {
-                nodesToKeep.push(node);
-            }
-        });
-        visjData.nodes = nodesToKeep;
+        edgesFromMap[rootURI].forEach(function (edge) {
+            shiftFrontRecurse(edge)
+        })
+
+        removeLeafBlankNodes()
+
+
+        /*    var nodesToKeep = [];
+            visjData.nodes.forEach(function (node) {
+                if (nodesToDelete.indexOf(node.id) < 0) {
+                    nodesToKeep.push(node);
+                }
+            });
+            visjData.nodes = nodesToKeep;*/
     };
 
     self.layoutHierarchical = {
@@ -446,8 +497,8 @@ var AxiomExtractor = (function () {
         edgeMinimization: true,
         parentCentralization: true,
         treeSpacing: 200,
-        nodeSpacing: 100,
-        levelSeparation: 100,
+        nodeSpacing: 150,
+        levelSeparation: 80,
     };
     self.physicsHierarchical = {
         enabled: false,
@@ -472,7 +523,7 @@ var AxiomExtractor = (function () {
                 if (!node.data) {
                     return;
                 }
-                NodeInfosWidget.showNodeInfos(node.data.source, node, "mainDialogDiv", { resetVisited: 1 });
+                NodeInfosWidget.showNodeInfos(node.data.source, node, "mainDialogDiv", {resetVisited: 1});
             },
             //  onRightClickFn: Lineage_whiteboard.graphActions.showGraphPopupMenu,
             //  onHoverNodeFn: Lineage_selection.selectNodesOnHover,

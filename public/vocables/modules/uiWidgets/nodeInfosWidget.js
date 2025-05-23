@@ -304,8 +304,8 @@ var NodeInfosWidget = (function () {
             PredicatesSelectorWidget.storeRecentPredicates();
             self.addPredicate(null, null, null, null, function () {
                 PredicatesSelectorWidget.fillSelectRecentEditPredicate();
-                $('#editPredicate_objectValue').val('');
-                $('#editPredicate_propertyValue').val('');
+                $("#editPredicate_objectValue").val("");
+                $("#editPredicate_propertyValue").val("");
             });
         });
     };
@@ -1452,8 +1452,8 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
                 self.deletePredicate(predicateId, false, function () {
                     self.addPredicate(null, null, null, null, function () {
                         self.showNodeInfos(MainController.currentSource, self.currentNode, "mainDialogDiv", { resetVisited: 1 });
-                        $('#editPredicate_objectValue').val('');
-                        $('#editPredicate_propertyValue').val('');
+                        $("#editPredicate_objectValue").val("");
+                        $("#editPredicate_propertyValue").val("");
                     });
                 });
             });

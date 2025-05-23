@@ -32,7 +32,7 @@ import dataSourcesManager from "./dataSourcesManager.js";
 var MappingModeler = (function () {
     var self = {};
 
-    self.maxItemsInJstree = 200;
+    self.maxItemsInJstreePerSource = 300;
     /**
      * ID of the tree container.
      * @type {string}
@@ -262,6 +262,15 @@ var MappingModeler = (function () {
         if (parentName == "Classes" || parentName == "Properties") {
             var uniqueSources = {};
             var searchDone = {};
+            const objectsPerSource = objects.reduce((sum, item) => {
+                const source = item.source;
+                if (!sum[source]) {
+                    sum[source] = 1;
+                } else {
+                    sum[source] = sum[source] + 1;
+                }
+                return sum;
+            }, {});
             objects.forEach(function (item) {
                 if (item.source) {
                     if (!uniqueSources[item.source]) {
@@ -277,7 +286,7 @@ var MappingModeler = (function () {
                             },
                         });
                     }
-                    if (objects.length < self.maxItemsInJstree) {
+                    if (objectsPerSource[item.source] < self.maxItemsInJstreePerSource) {
                         jstreeData.push({
                             id: item.id,
                             parent: item.source,
@@ -478,7 +487,7 @@ var MappingModeler = (function () {
                 }
             }
             if (jstreeData.length == 0) return alert("no Match");
-            if (jstreeData.length > self.maxItemsInJstree) return alert("to many matches");
+            if (jstreeData.length > self.maxItemsInJstreePerSource) return alert("to many matches");
 
             JstreeWidget.addNodesToJstree("suggestionsSelectJstreeDiv", source, jstreeData, { positionLast: true });
         } else if (self.currentResourceType == "Class") {

@@ -32,7 +32,8 @@ import dataSourcesManager from "./dataSourcesManager.js";
 var MappingModeler = (function () {
     var self = {};
 
-    self.maxItemsInJstree = 200;
+    self.maxItemsInJstree = 1200;
+    self.maxItemsInJstreePerSource = 200;
     /**
      * ID of the tree container.
      * @type {string}
@@ -262,8 +263,19 @@ var MappingModeler = (function () {
         if (parentName == "Classes" || parentName == "Properties") {
             var uniqueSources = {};
             var searchDone = {};
+            const objectsPerSource = objects.reduce((sum, item) => {
+                const source = item.source;
+                if(!sum[source]) {
+                    sum[source] = 1;
+                }else{
+                    sum[source] = sum[source]+1;
+                }
+                return sum;
+            }, {});
             objects.forEach(function (item) {
                 if (item.source) {
+
+                    
                     if (!uniqueSources[item.source]) {
                         uniqueSources[item.source] = 1;
 
@@ -277,7 +289,7 @@ var MappingModeler = (function () {
                             },
                         });
                     }
-                    if (objects.length < self.maxItemsInJstree) {
+                    if (objectsPerSource[item.source] < self.maxItemsInJstreePerSource && jstreeData.length < self.maxItemsInJstree) {
                         jstreeData.push({
                             id: item.id,
                             parent: item.source,

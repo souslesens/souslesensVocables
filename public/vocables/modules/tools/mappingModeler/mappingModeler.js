@@ -265,17 +265,15 @@ var MappingModeler = (function () {
             var searchDone = {};
             const objectsPerSource = objects.reduce((sum, item) => {
                 const source = item.source;
-                if(!sum[source]) {
+                if (!sum[source]) {
                     sum[source] = 1;
-                }else{
-                    sum[source] = sum[source]+1;
+                } else {
+                    sum[source] = sum[source] + 1;
                 }
                 return sum;
             }, {});
             objects.forEach(function (item) {
                 if (item.source) {
-
-                    
                     if (!uniqueSources[item.source]) {
                         uniqueSources[item.source] = 1;
 

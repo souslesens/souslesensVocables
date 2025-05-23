@@ -440,6 +440,9 @@ var Lineage_createResource = (function () {
      * @memberof Lineage_createResource
      */
     self.startCreateRessourceBot = function () {
+        // reset precendent values to not add triples to another resource
+        $('#editPredicate_objectValue').val('');
+        $('#editPredicate_propertyValue').val('');
         CreateResource_bot.start(null, { source: Lineage_sources.activeSource }, function (err, result) {});
     };
 

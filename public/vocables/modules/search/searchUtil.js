@@ -364,15 +364,16 @@ indexes.push(source.toLowerCase());
         word2 = word2.replace(/\\\\/g, "\\");
         return word2;
     };
-    self.makeFuzzyQueryString=function(word) {
-         return word.split(/\s+/).map(w => {
-                  
-                 if (w.length <= 4) return `${w}~1`;
-                 if (w.length <= 8) return `${w}~2`;
-                 return `${w}~2`; 
-         }).join(' ');
-    }
-
+    self.makeFuzzyQueryString = function (word) {
+        return word
+            .split(/\s+/)
+            .map((w) => {
+                if (w.length <= 4) return `${w}~1`;
+                if (w.length <= 8) return `${w}~2`;
+                return `${w}~2`;
+            })
+            .join(" ");
+    };
 
     self.getWordBulkQuery = function (word, mode, indexes, options) {
         word = self.escapeElasticReservedChars(word);

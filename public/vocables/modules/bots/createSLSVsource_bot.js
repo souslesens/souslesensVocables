@@ -86,9 +86,12 @@ var CreateSLSVsource_bot = (function () {
             _botEngine.promptValue("graph Uri", "graphUri", "http://");
         },
         validateGraphUriFn: function () {
-            // var regex = /(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}(\.[a-z]{2,6}|:[0-9]{3,4})\b([-a-zA-Z0-9@:%_\+.~#?&\/\/=]*)/i;
-            var regex = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/i;
-            if (!self.params.graphUri.match(regex)) {
+            // check that graphUri is a valid URL using URL constructor.
+            // this is the same method used by zod
+            // https://zod.dev/api?id=urls
+            try {
+                new URL(self.params.graphUri);
+            } catch {
                 alert("graphUri is not a correct URL");
                 return _botEngine.previousStep();
             }

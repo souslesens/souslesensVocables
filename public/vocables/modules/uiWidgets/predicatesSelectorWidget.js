@@ -38,6 +38,7 @@ var PredicatesSelectorWidget = (function () {
         "skos:example",
         "skos:member",
         "dcterms:format",
+        'dcterms:description',
         "",
         "_function",
         "_restriction",

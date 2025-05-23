@@ -525,6 +525,9 @@ var SearchWidget = (function () {
                     item.child1Label = { type: "uri", value: result.label };
                     treated_results.push(item);
                 });
+                if (treated_results.length == 0) {
+                    return UI.message("No results found");
+                }
             }
             if (options.beforeDrawingFn) {
                 options.beforeDrawingFn(treated_results);

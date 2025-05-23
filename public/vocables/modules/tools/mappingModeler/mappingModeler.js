@@ -32,8 +32,7 @@ import dataSourcesManager from "./dataSourcesManager.js";
 var MappingModeler = (function () {
     var self = {};
 
-    self.maxItemsInJstree = 1200;
-    self.maxItemsInJstreePerSource = 200;
+    self.maxItemsInJstreePerSource = 300;
     /**
      * ID of the tree container.
      * @type {string}
@@ -287,7 +286,7 @@ var MappingModeler = (function () {
                             },
                         });
                     }
-                    if (objectsPerSource[item.source] < self.maxItemsInJstreePerSource && jstreeData.length < self.maxItemsInJstree) {
+                    if (objectsPerSource[item.source] < self.maxItemsInJstreePerSource) {
                         jstreeData.push({
                             id: item.id,
                             parent: item.source,
@@ -488,7 +487,7 @@ var MappingModeler = (function () {
                 }
             }
             if (jstreeData.length == 0) return alert("no Match");
-            if (jstreeData.length > self.maxItemsInJstree) return alert("to many matches");
+            if (jstreeData.length > self.maxItemsInJstreePerSource) return alert("to many matches");
 
             JstreeWidget.addNodesToJstree("suggestionsSelectJstreeDiv", source, jstreeData, { positionLast: true });
         } else if (self.currentResourceType == "Class") {

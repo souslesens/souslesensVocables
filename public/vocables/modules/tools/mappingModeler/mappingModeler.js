@@ -32,7 +32,7 @@ import dataSourcesManager from "./dataSourcesManager.js";
 var MappingModeler = (function () {
     var self = {};
 
-    self.maxItemsInJstree = 200;
+    self.maxItemsInJstree =400;
     /**
      * ID of the tree container.
      * @type {string}

@@ -1047,6 +1047,12 @@ var KGquery_graph = (function () {
         if (!self.visjsData) {
             return alert("no graph model");
         }
+
+        if(self.visjsData.nodes &&  self.visjsData.nodes.length>200)
+            return alert(" graph model too large "+ self.visjsData.nodes.length);
+
+
+
         KGquery_graph.message("drawing graph");
 
         self.visjsData.nodes.forEach(function (item) {

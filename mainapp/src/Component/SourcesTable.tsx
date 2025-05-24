@@ -29,7 +29,7 @@ import { Datas } from "react-csv-downloader/dist/esm/lib/csv";
 import { failure, SRD, success } from "srd";
 
 import { useModel } from "../Admin";
-import { deleteSource, getGraphSize, saveSource, ServerSource } from "../Source";
+import { deleteSource, getGraphSize, saveSource, ServerSource, ServerSourceSchema } from "../Source";
 import { writeLog } from "../Log";
 import { joinWhenArray, humanizeSize, cleanUpText, jsonToDownloadUrl } from "../Utils";
 import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
@@ -66,6 +66,16 @@ const SourcesTable = () => {
     const reformatSource = (sources: ServerSource[]) => {
         const mapSources = sources.map((s: ServerSource) => [s.name, s]);
         return Object.fromEntries(mapSources as [string, ServerSource][]);
+    };
+
+    const checkSource = (source: ServerSource) => {
+        try {
+            ServerSourceSchema.parse(source);
+        } catch (error: unknown) {
+            const message = `La source ${source.name} est invalide: ${error as Error}`;
+            return { status: false, message: message };
+        }
+        return { status: true, message: "ok" };
     };
 
     const handleDeleteSource = async (source: ServerSource) => {
@@ -244,14 +254,18 @@ const SourcesTable = () => {
                                             const haveIndices = indices ? indices.includes(source.name.toLowerCase()) : false;
                                             const graphInfo = graphs?.find((g) => g.name === source.graphUri);
                                             const haveGraphs = graphInfo !== undefined;
-
+                                            const validity = checkSource(source);
                                             return (
                                                 <TableRow key={source.name}>
                                                     <TableCell>{source.name}</TableCell>
                                                     <TableCell>
-                                                        <Link href={source.graphUri} target="_blank">
-                                                            {source.graphUri}
-                                                        </Link>
+                                                        {validity.status ? (
+                                                            <Link href={source.graphUri} target="_blank">
+                                                                {source.graphUri}
+                                                            </Link>
+                                                        ) : (
+                                                            <Alert severity="error">{validity.message}</Alert>
+                                                        )}
                                                     </TableCell>
                                                     <TableCell align="center">{humanizeSize(getGraphSize(source, graphs))}</TableCell>
                                                     <TableCell align="center">{source.group ? <Chip label={source.group} size="small" /> : ""}</TableCell>

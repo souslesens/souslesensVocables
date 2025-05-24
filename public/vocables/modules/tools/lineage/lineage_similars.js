@@ -155,11 +155,17 @@ var Lineage_similars = (function () {
         var currentWordsCount = 0;
         var offset = 0;
         var similarsSources = [];
+        var mode = "";
+        if ($("#Similars_Only_exact_match").is(":checked")) {
+            mode = "exactMatch";
+        } else {
+            mode = "fuzzyMatch";
+        }
         async.eachSeries(
             slices,
             function (words, callbackEach) {
                 currentWordsCount += words.length;
-                SearchUtil.getElasticSearchMatches(words, indexes, "exactMatch", 0, 10000, {}, function (err, result) {
+                SearchUtil.getElasticSearchMatches(words, indexes, mode, 0, 10000, {}, function (err, result) {
                     if (err) {
                         return callbackEach(err);
                     }

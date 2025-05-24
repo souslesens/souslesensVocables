@@ -360,7 +360,19 @@ indexes.push(source.toLowerCase());
         if (p > -1) {
             word2 += "*";
         }
+        // exception added for \\
+        word2 = word2.replace(/\\\\/g, "\\");
         return word2;
+    };
+    self.makeFuzzyQueryString = function (word) {
+        return word
+            .split(/\s+/)
+            .map((w) => {
+                if (w.length <= 4) return `${w}~1`;
+                if (w.length <= 8) return `${w}~2`;
+                return `${w}~2`;
+            })
+            .join(" ");
     };
 
     self.getWordBulkQuery = function (word, mode, indexes, options) {
@@ -411,12 +423,13 @@ indexes.push(source.toLowerCase());
                 queryObj.bool.must.query_string.fields.push("skoslabels");
             }
         } else {
+            var fuzzyWord = self.makeFuzzyQueryString(word);
             queryObj = {
                 bool: {
                     must: [
                         {
                             query_string: {
-                                query: word,
+                                query: fuzzyWord,
                                 fields: ["label", "skoslabels"],
                                 default_operator: "AND",
                             },
@@ -424,6 +437,32 @@ indexes.push(source.toLowerCase());
                     ],
                 },
             };
+
+            /*
+            queryObj = {
+                bool: {
+                    should: [
+                    {
+                        fuzzy: {
+                        label: {
+                            value: word,
+                            fuzziness: "AUTO"
+                        }
+                        }
+                    },
+                    {
+                        fuzzy: {
+                        skoslabels: {
+                            value: word,
+                            fuzziness: "AUTO"
+                        }
+                        }
+                    }
+                    ],
+                    minimum_should_match: 1
+                }
+            };
+            */
             if (options.skosLabels) {
                 queryObj.bool.must[0].query_string.fields.push("skoslabels");
             }

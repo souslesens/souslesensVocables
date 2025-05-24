@@ -342,7 +342,9 @@ export const SourcesDialog = ({ edit, me, onClose, onSubmit, open, selectedSourc
                                                 </MenuItem>
                                             </TextField>
                                         </Stack>
-                                        <HeadersList headers={source.sparql_server.headers} onSubmit={(headers: Record<string, string>) => handleField("sparql_server.headers", headers)} />
+                                        {source.sparql_server.headers && (
+                                            <HeadersList headers={source.sparql_server.headers} onSubmit={(headers: Record<string, string>) => handleField("sparql_server.headers", headers)} />
+                                        )}
                                     </Stack>
                                 </AccordionDetails>
                             </Accordion>

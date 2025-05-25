@@ -42,6 +42,9 @@ var Axioms_graph = (function () {
                         label = predicate.p.replace("http://www.w3.org/2002/07/owl#", "");
                     }
                 }
+                if (predicate.p.toLowerCase().indexOf("cardinality") > -1) {
+                    label += " " + predicate.o
+                }
             });
 
             color = "#cb9801";

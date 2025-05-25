@@ -43,8 +43,11 @@ var AxiomExtractor = (function () {
                 "   ?subject ?constraintType ?object." +
                 " ?object rdf:type ?objectType." +
                 "optional {?subject ?cardinalityType ?cardinalityValue " +
-                " FILTER (?cardinalityType in (owl:maxCardinality,owl:minCardinality,owl:cardinality ))} " +
-                " filter (?constraintType in (owl:someValuesFrom, owl:allValuesFrom,owl:hasValue,owl:onClass))  } ";
+                " FILTER (?cardinalityType in (owl:maxCardinality,owl:minCardinality,owl:cardinality,owl:qualifiedCardinality ))} " +
+                " filter (?constraintType in (owl:someValuesFrom, owl:allValuesFrom,owl:hasValue,owl:onClass)) " +
+
+                "" +
+                " } ";
             self.execQuery(query, function (err, result) {
                 if (err) {
                     return callback(err);
@@ -53,7 +56,12 @@ var AxiomExtractor = (function () {
                 var restrictions = [];
 
                 result.forEach(function (item) {
-                    restrictions.push({s: item.subject, p: item.prop, o: item.object, type: "Restriction"});
+                    restrictions.push({s: item.subject, p: item.prop, o: item.object,
+                        type: "Restriction",
+                        cardinalityType:item.cardinalityType,
+                        cardinalityValue:item.cardinalityValue,
+                        constraintType:item.constraintType
+                    });
 
                 });
                 return callback(null, restrictions);
@@ -77,6 +85,48 @@ var AxiomExtractor = (function () {
                 return callback(null, result);
             });
         },
+        function getUnions(source, callback) {
+            var query = self.prefixes + "SELECT distinct *  " + self.getFromStr(source) + "\n" + "WHERE { ?s owl:unionOf  ?o bind( owl:unionOf as ?p)} ";
+            self.execQuery(query, function (err, result) {
+                if (err) {
+                    return callback(err);
+                }
+                return callback(null, result);
+            });
+        },
+        function getInverses(source, callback) {
+            var query = self.prefixes + "SELECT distinct *  " + self.getFromStr(source) + "\n" + "WHERE { ?s  owl:inverseOf  ?o bind( owl:inverseOf as ?p)} ";
+            self.execQuery(query, function (err, result) {
+                if (err) {
+                    return callback(err);
+                }
+                return callback(null, result);
+            });
+        },
+
+        function getDisjoints(source, callback) {
+            var query = self.prefixes + "SELECT distinct *  " + self.getFromStr(source) + "\n" + "WHERE { ?s  owl:disjointWith  ?o bind( owl:disjointWith as ?p)} ";
+            self.execQuery(query, function (err, result) {
+                if (err) {
+                    return callback(err);
+                }
+                return callback(null, result);
+            });
+        },
+
+        function getComplements(source, callback) {
+            var query = self.prefixes + "SELECT distinct *  " + self.getFromStr(source) + "\n" + "WHERE { ?s  owl:complementOf  ?o bind( owl:complementOf as ?p)} ";
+            self.execQuery(query, function (err, result) {
+                if (err) {
+                    return callback(err);
+                }
+                return callback(null, result);
+            });
+        },
+
+
+
+
         function getFirsts(source, callback) {
             var query = self.prefixes + "SELECT distinct *  " + self.getFromStr(source) + "\n" + "WHERE { ?s rdf:first  ?o bind( rdf:first as ?p)}";
             self.execQuery(query, function (err, result) {
@@ -422,6 +472,10 @@ var AxiomExtractor = (function () {
                 symbol: "⊑ ┓",
                 color: "#70ac47",
             },
+
+            disjointWith:{
+
+            }
         };
 
         var nodesToDelete = [];
@@ -590,9 +644,16 @@ var AxiomExtractor = (function () {
 
                             triples.push({
                                 subject: child.s,
-                                predicate: "http://www.w3.org/2002/07/owl#someValuesFrom",
+                                predicate:child.constraintType,
                                 object: child.o
                             })
+                        if(child.cardinalityType){
+                            triples.push({
+                                subject: child.s,
+                                predicate:child.cardinalityType,
+                                object: child.cardinalityValue
+                            })
+                        }
 
                         triples.push({
                             "subject": child.o,

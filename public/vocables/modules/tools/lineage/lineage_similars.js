@@ -33,6 +33,7 @@ var Lineage_similars = (function () {
     self.showDialog = function (selection) {
         //$("#smallDialogDiv").parent().css("left", "30%");
         $("#smallDialogDiv").dialog("option", "title", "Similars");
+        self.parentClassJstreeLoaded=false;
         $("#smallDialogDiv").load("modules/tools/lineage/html/lineageSimilarsDialog.html", function () {
             $("#smallDialogDiv").dialog("open");
             self.mode = "whiteboard";
@@ -81,6 +82,7 @@ var Lineage_similars = (function () {
      */
     self.onSourceSelected = function (evt, obj) {
         self.currentSource = obj.node.id;
+        $('#lineageSimilars_chooseParentClassButton').show();
         // self.drawSourceSimilars(source);
     };
 
@@ -161,11 +163,23 @@ var Lineage_similars = (function () {
         } else {
             mode = "fuzzyMatch";
         }
+        var  options = {};
+        if(self.parentClassJstreeLoaded){
+            var parentClasses = $("#lineageSimilars_sourcesTreeDiv").jstree(true).get_selected();
+            if(parentClasses && parentClasses.length>0){
+                var parentClass=$("#lineageSimilars_sourcesTreeDiv").jstree(true).get_node(parentClasses[0]);
+                if(parentClass.data.id ){
+                    options.classFilter = parentClass.data.id;
+                }
+            }
+
+        }
+
         async.eachSeries(
             slices,
             function (words, callbackEach) {
                 currentWordsCount += words.length;
-                SearchUtil.getElasticSearchMatches(words, indexes, mode, 0, 10000, {}, function (err, result) {
+                SearchUtil.getElasticSearchMatches(words, indexes, mode, 0, 10000, options, function (err, result) {
                     if (err) {
                         return callbackEach(err);
                     }
@@ -395,6 +409,14 @@ var Lineage_similars = (function () {
             Lineage_whiteboard.lineageVisjsGraph.data.edges.update(visjsData.edges);
         }
     };
+    self.drawClassTaxonomy = function () {
+        if (!self.currentSource) {
+            return alert("no source selected");
+        }
+        var options={'jstreeDiv':'lineageSimilars_sourcesTreeDiv'};
+        SearchWidget.showTopConcepts(self.currentSource,options);
+        self.parentClassJstreeLoaded = true;
+    }
 
     return self;
 })();

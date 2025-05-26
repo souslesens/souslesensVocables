@@ -53,6 +53,7 @@ describe("UserDataModel", () => {
                     "cvsSources":{}
                 },
                 "is_shared": false,
+                "modification_date": "2025-01-24T14:16:41.111Z",
                 "shared_profiles": [],
                 "shared_users": [],
                 "created_at": "2025-01-24T14:16:41.111Z",
@@ -69,6 +70,7 @@ describe("UserDataModel", () => {
                 "data_group": "",
                 "data_content": {},
                 "is_shared": false,
+                "modification_date": "2025-01-27T08:05:51.750Z",
                 "shared_profiles": [],
                 "shared_users": [
                     "owl_user",

@@ -457,6 +457,9 @@ const apiDoc = {
                 owned_by: {
                     type: "string",
                 },
+                modification_date: {
+                    type: "string",
+                },
                 created_at: {
                     type: "string",
                 },
@@ -555,6 +558,9 @@ const apiDoc = {
                     type: "array",
                     default: [],
                     items: { type: "string" },
+                },
+                modification_date: {
+                    type: "string",
                 },
                 created_at: {
                     type: "string",

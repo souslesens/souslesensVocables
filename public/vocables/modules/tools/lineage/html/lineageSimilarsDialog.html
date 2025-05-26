@@ -8,7 +8,7 @@
                     <option value="SelectedNodes">Selected Nodes</option>
 
                     <!--   <option value="ActiveSource">Active source</option>
-                    <option value="AllCurrentSources">All Current sources</option>-->
+                <option value="AllCurrentSources">All Current sources</option>-->
                 </select>
             </div>
 
@@ -17,21 +17,22 @@
                 <select id="lineageSimilars_toModeSelect" onchange="Lineage_similars.onChangeSelection($(this).val())" size="3">
                     <option value="whiteboard" selected="selected">Whiteboard nodes</option>
                     <option value="chooseSource">Select source</option>
-                    <option value="allSources">All sources</option>
+                    <!--   <option value="allSources">All sources</option>-->
                 </select>
             </div>
             <div>
                 <div>
                     output<br />
-                    <select size="3">
-                        <option>graph</option>
-                        <!--   <option>table</option>
-               <option>clipboard</option>-->
+                    <select id="lineageSimilars_outputTypeSelect" size="3">
+                        <option selected="selected">graph</option>
+                        <option>table</option>
+                        <!--<option>clipboard</option>-->
                     </select>
                 </div>
                 <input id="Similars_Only_exact_match" checked="checked" type="checkbox" /> Only exact results
                 <br />
-                <button onclick="Lineage_similars.drawSimilars()">Draw</button>
+                <button id="lineageSimilars_chooseParentClassButton" onclick="Lineage_similars.drawClassTaxonomy()" style="display: none">Choose Parent Class</button>
+                <button onclick="Lineage_similars.processSimilars()">Draw</button>
             </div>
         </div>
 

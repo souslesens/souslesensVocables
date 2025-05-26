@@ -43,8 +43,10 @@ var AxiomExtractor = (function () {
                 "   ?subject ?constraintType ?object." +
                 " ?object rdf:type ?objectType." +
                 "optional {?subject ?cardinalityType ?cardinalityValue " +
-                " FILTER (?cardinalityType in (owl:maxCardinality,owl:minCardinality,owl:cardinality ))} " +
-                " filter (?constraintType in (owl:someValuesFrom, owl:allValuesFrom,owl:hasValue,owl:onClass))  } ";
+                " FILTER (?cardinalityType in (owl:maxCardinality,owl:minCardinality,owl:cardinality,owl:qualifiedCardinality ))} " +
+                " filter (?constraintType in (owl:someValuesFrom, owl:allValuesFrom,owl:hasValue,owl:onClass)) " +
+                "" +
+                " } ";
             self.execQuery(query, function (err, result) {
                 if (err) {
                     return callback(err);
@@ -53,7 +55,15 @@ var AxiomExtractor = (function () {
                 var restrictions = [];
 
                 result.forEach(function (item) {
-                    restrictions.push({ s: item.subject, p: item.prop, o: item.object, type: "Restriction" });
+                    restrictions.push({
+                        s: item.subject,
+                        p: item.prop,
+                        o: item.object,
+                        type: "Restriction",
+                        cardinalityType: item.cardinalityType,
+                        cardinalityValue: item.cardinalityValue,
+                        constraintType: item.constraintType,
+                    });
                 });
                 return callback(null, restrictions);
             });
@@ -76,6 +86,45 @@ var AxiomExtractor = (function () {
                 return callback(null, result);
             });
         },
+        function getUnions(source, callback) {
+            var query = self.prefixes + "SELECT distinct *  " + self.getFromStr(source) + "\n" + "WHERE { ?s owl:unionOf  ?o bind( owl:unionOf as ?p)} ";
+            self.execQuery(query, function (err, result) {
+                if (err) {
+                    return callback(err);
+                }
+                return callback(null, result);
+            });
+        },
+        function getInverses(source, callback) {
+            var query = self.prefixes + "SELECT distinct *  " + self.getFromStr(source) + "\n" + "WHERE { ?s  owl:inverseOf  ?o bind( owl:inverseOf as ?p)} ";
+            self.execQuery(query, function (err, result) {
+                if (err) {
+                    return callback(err);
+                }
+                return callback(null, result);
+            });
+        },
+
+        function getDisjoints(source, callback) {
+            var query = self.prefixes + "SELECT distinct *  " + self.getFromStr(source) + "\n" + "WHERE { ?s  owl:disjointWith  ?o bind( owl:disjointWith as ?p)} ";
+            self.execQuery(query, function (err, result) {
+                if (err) {
+                    return callback(err);
+                }
+                return callback(null, result);
+            });
+        },
+
+        function getComplements(source, callback) {
+            var query = self.prefixes + "SELECT distinct *  " + self.getFromStr(source) + "\n" + "WHERE { ?s  owl:complementOf  ?o bind( owl:complementOf as ?p)} ";
+            self.execQuery(query, function (err, result) {
+                if (err) {
+                    return callback(err);
+                }
+                return callback(null, result);
+            });
+        },
+
         function getFirsts(source, callback) {
             var query = self.prefixes + "SELECT distinct *  " + self.getFromStr(source) + "\n" + "WHERE { ?s rdf:first  ?o bind( rdf:first as ?p)}";
             self.execQuery(query, function (err, result) {
@@ -146,6 +195,23 @@ var AxiomExtractor = (function () {
         });
     };
 
+    self.getClassUniqueAxioms = function (basicAxioms, classUri) {
+        var predicates = basicAxioms[classUri];
+        var duplicates = {};
+        var toKeep = [];
+
+        predicates.forEach(function (item) {
+            var key = item.s + "_" + item.p;
+
+            if (!duplicates[key] || item.o.indexOf("http") == 0) {
+                toKeep.push(item);
+            } else {
+                duplicates[key] = 1;
+            }
+        });
+        return toKeep;
+    };
+
     self.listClassesWithAxioms = function (sourceLabel, callback) {
         AxiomExtractor.getBasicAxioms(sourceLabel, function (err, basicAxioms) {
             var classesWithAxioms = [];
@@ -207,100 +273,104 @@ var AxiomExtractor = (function () {
     };
 
     self.getClassAxioms = function (source, classUri, callback) {
-        var sourceBasicAxioms = self.basicAxioms[source];
-        if (!sourceBasicAxioms) {
-            return alert("source axioms not loaded");
-        }
-        var rootNode = sourceBasicAxioms[classUri];
-        if (!rootNode) {
-            return alert("classUri not found in axioms " + classUri);
-        }
-
-        var visjsData = { nodes: [], edges: [] };
-        var distinctNodes = {};
-
-        function recurse(subject, level) {
-            var children = sourceBasicAxioms[subject];
-
-            if (!children || !Array.isArray(children)) {
-                return;
+        self.getBasicAxioms(source, function (err, sourceBasicAxioms) {
+            if (!sourceBasicAxioms) {
+                return alert("source axioms not loaded");
             }
-            children.forEach(function (child) {
-                var skipo = false;
-                var propLabel = "";
-                var nodeLabel = "";
-                var nodeSize = 12;
-                var shape = "dot";
-                if (child.type && child.type == "Restriction") {
-                    nodeSize = 1;
-                    shape = "text";
-                    nodeLabel = child.pLabel || Sparql_common.getLabelFromURI(child.p);
-                } else {
-                    nodeLabel = child.sLabel || Sparql_common.getLabelFromURI(child.s);
+            var rootNode = sourceBasicAxioms[classUri];
+            if (!rootNode) {
+                return alert("classUri not found in axioms " + classUri);
+            }
+
+            var visjsData = { nodes: [], edges: [] };
+            var distinctNodes = {};
+
+            function recurse(subject, level) {
+                var children = sourceBasicAxioms[subject];
+
+                if (!children || !Array.isArray(children)) {
+                    return;
                 }
-                if (!distinctNodes[child.s]) {
-                    distinctNodes[child.s] = 1;
-                    visjsData.nodes.push({
-                        id: child.s,
-                        label: nodeLabel,
-                        shape: shape,
-                        level: level,
-                        size: nodeSize,
-                        data: {
+                children.forEach(function (child) {
+                    var skipo = false;
+                    var propLabel = "";
+                    var nodeLabel = "";
+                    var nodeSize = 12;
+                    var shape = "dot";
+                    if (child.type && child.type == "Restriction") {
+                        nodeSize = 1;
+                        shape = "text";
+                        nodeLabel = child.pLabel || Sparql_common.getLabelFromURI(child.p);
+                    } else {
+                        nodeLabel = child.sLabel || Sparql_common.getLabelFromURI(child.s);
+                    }
+                    if (!distinctNodes[child.s]) {
+                        distinctNodes[child.s] = 1;
+                        visjsData.nodes.push({
                             id: child.s,
                             label: nodeLabel,
-                            source: source,
-                        },
-                    });
-                }
-
-                var propLabel = "";
-
-                if (true || child.o.startsWith("http")) {
-                    propLabel = child.pLabel || Sparql_common.getLabelFromURI(child.p);
-                }
-                visjsData.edges.push({
-                    from: subject,
-                    to: child.o,
-                    label: propLabel,
-                    arrows: "to",
-                });
-
-                if (child.o.startsWith("http")) {
-                    //stop on classes and properties
-                    if (!distinctNodes[child.o]) {
-                        distinctNodes[child.o] = 1;
-                        var label = child.oLabel || Sparql_common.getLabelFromURI(child.o);
-                        visjsData.nodes.push({
-                            id: child.o,
-                            label: label,
-                            shape: "dot",
+                            shape: shape,
+                            level: level,
                             size: nodeSize,
-                            level: level + 1,
                             data: {
                                 id: child.s,
-                                label: label,
+                                label: nodeLabel,
                                 source: source,
                             },
                         });
                     }
-                } else {
-                    recurse(child.o, level + 1);
-                }
-            });
-        }
 
-        recurse(classUri, 1);
+                    var propLabel = "";
 
-        self.removeBlankNodes(visjsData);
+                    if (true || child.o.startsWith("http")) {
+                        propLabel = child.pLabel || Sparql_common.getLabelFromURI(child.p);
+                    }
+                    visjsData.edges.push({
+                        from: subject,
+                        to: child.o,
+                        label: propLabel,
+                        arrows: "to",
+                    });
 
-        callback(null, visjsData);
+                    if (child.o.startsWith("http")) {
+                        var nodeSize = 12;
+                        //stop on classes and properties
+                        if (!distinctNodes[child.o]) {
+                            distinctNodes[child.o] = 1;
+                            var label = child.oLabel || Sparql_common.getLabelFromURI(child.o);
+                            visjsData.nodes.push({
+                                id: child.o,
+                                label: label,
+                                shape: "dot",
+                                size: nodeSize,
+                                level: level + 1,
+                                data: {
+                                    id: child.s,
+                                    label: label,
+                                    source: source,
+                                },
+                            });
+                        }
+                    } else {
+                        recurse(child.o, level + 1);
+                    }
+                });
+            }
 
-        // Lineage_whiteboard.drawNewGraph(visjsData)
+            /*var children = self.getClassUniqueAxioms(sourceBasicAxioms, classUri)
+             sourceBasicAxioms[classUri]=children*/
+            recurse(classUri, 1);
+
+            self.removeBlankNodes(visjsData, classUri);
+
+            callback(null, visjsData);
+
+            // Lineage_whiteboard.drawNewGraph(visjsData)
+        });
     };
 
-    self.removeBlankNodes = function (visjData) {
-        var nodesMap = [];
+    self.removeBlankNodes = function (visjData, rootURI) {
+        var nodesMap = {};
         var edgesFromMap = {};
         var edgesToMap = {};
 
@@ -315,7 +385,35 @@ var AxiomExtractor = (function () {
             edgesFromMap[edge.from].push(edge);
         });
 
+        function removeLeafBlankNodes() {
+            //enlève les noeuds blancs terminaux
+            var nodesToDelete = [];
+            var edgesFromMap2 = {};
+            visjData.edges.forEach(function (edge) {
+                if (!edgesFromMap2[edge.from]) {
+                    edgesFromMap2[edge.from] = [];
+                }
+                edgesFromMap2[edge.from].push(edge);
+            });
+
+            visjData.edges.forEach(function (edge) {
+                if (edge.to.indexOf("http") != 0) {
+                    if (!edgesFromMap2[edge.to] || edgesFromMap2[edge.to].length == 0) {
+                        nodesToDelete.push(edge.to);
+                    }
+                }
+            });
+            var newNodes = [];
+            visjData.nodes.forEach(function (node) {
+                if (nodesToDelete.indexOf(node.id) < 0) {
+                    newNodes.push(node);
+                }
+            });
+            visjData.nodes = newNodes;
+        }
+
         function shiftBackRecurse(edge, shift) {
+            //recule les noeuds suivant celui qu'on a supprimé
             if (edgesFromMap[edge.to]) {
                 edgesFromMap[edge.to].forEach(function (edge2) {
                     if (!nodesMap[edge2.to] || nodesMap[edge2.to].shifted) {
@@ -325,6 +423,21 @@ var AxiomExtractor = (function () {
                     nodesMap[edge2.to].level -= shift;
                     nodesMap[edge2.to].shifted = true;
                     shiftBackRecurse(edge2, shift);
+                });
+            }
+        }
+
+        function shiftFrontRecurse(edge) {
+            //pousses les noeuds ciblea au dela de la verticale
+            if (!nodesMap[edge.to]) {
+                return;
+            }
+            if (nodesMap[edge.to].level <= nodesMap[edge.from].level) {
+                nodesMap[edge.to].level = nodesMap[edge.from].level + 1;
+            }
+            if (edgesFromMap[edge.to]) {
+                edgesFromMap[edge.to].forEach(function (edge2) {
+                    shiftFrontRecurse(edge2);
                 });
             }
         }
@@ -350,10 +463,20 @@ var AxiomExtractor = (function () {
                 symbol: "⊑ ┓",
                 color: "#70ac47",
             },
+
+            disjointWith: {},
         };
 
         var nodesToDelete = [];
+
         visjData.edges.forEach(function (edge) {
+            if (nodesMap[edge.from].label == edge.label) {
+                nodesMap[edge.from].label = nodesMap[edge.from].label + "\n" + "<some>" + "";
+                //   nodesMap[edge.from].color = "#f5ef39"
+                nodesMap[edge.from].font = { bold: true, size: 18, color: "#cb9801" };
+                edge.label = "";
+            }
+
             if (edge.label == "intersectionOf" || edge.label == "unionOf" || edge.label == "disjointWith") {
                 var obj = symbolsMap[edge.label];
                 // on skippe les noeuds de disjonction
@@ -389,13 +512,19 @@ var AxiomExtractor = (function () {
             }
         });
 
-        var nodesToKeep = [];
-        visjData.nodes.forEach(function (node) {
-            if (nodesToDelete.indexOf(node.id) < 0) {
-                nodesToKeep.push(node);
-            }
+        edgesFromMap[rootURI].forEach(function (edge) {
+            shiftFrontRecurse(edge);
         });
-        visjData.nodes = nodesToKeep;
+
+        removeLeafBlankNodes();
+
+        /*    var nodesToKeep = [];
+            visjData.nodes.forEach(function (node) {
+                if (nodesToDelete.indexOf(node.id) < 0) {
+                    nodesToKeep.push(node);
+                }
+            });
+            visjData.nodes = nodesToKeep;*/
     };
 
     self.layoutHierarchical = {
@@ -406,8 +535,8 @@ var AxiomExtractor = (function () {
         edgeMinimization: true,
         parentCentralization: true,
         treeSpacing: 200,
-        nodeSpacing: 100,
-        levelSeparation: 300,
+        nodeSpacing: 150,
+        levelSeparation: 80,
     };
     self.physicsHierarchical = {
         enabled: false,
@@ -459,6 +588,124 @@ var AxiomExtractor = (function () {
             });
 
             return callback(null, result.results.bindings);
+        });
+    };
+
+    self.getClassAxiomsTriples = function (source, classUri, callback) {
+        self.getBasicAxioms(source, function (err, sourceBasicAxioms) {
+            if (!sourceBasicAxioms) {
+                return alert("source axioms not loaded");
+            }
+            var rootNode = sourceBasicAxioms[classUri];
+            if (!rootNode) {
+                return alert("classUri not found in axioms " + classUri);
+            }
+
+            var triples = [];
+            var distinctNodes = {};
+
+            function recurse(subject, level) {
+                var children = sourceBasicAxioms[subject];
+
+                if (!children || !Array.isArray(children)) {
+                    return;
+                }
+                children.forEach(function (child) {
+                    if (child.type == "Restriction") {
+                        triples.push({
+                            subject: child.s,
+                            predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                            object: "http://www.w3.org/2002/07/owl#Restriction",
+                        });
+
+                        triples.push({
+                            subject: child.s,
+                            predicate: child.constraintType,
+                            object: child.o,
+                        });
+                        if (child.cardinalityType) {
+                            triples.push({
+                                subject: child.s,
+                                predicate: child.cardinalityType,
+                                object: child.cardinalityValue,
+                            });
+                        }
+
+                        triples.push({
+                            subject: child.o,
+                            predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                            object: "http://www.w3.org/2002/07/owl#Class",
+                        });
+
+                        triples.push({
+                            subject: child.s,
+                            predicate: "http://www.w3.org/2002/07/owl#onProperty",
+                            object: child.p,
+                        });
+
+                        triples.push({
+                            subject: child.o,
+                            predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                            object: "http://www.w3.org/2002/07/owl#Class",
+                        });
+
+                        if (!distinctNodes[child.p]) {
+                            distinctNodes[child.p] = 1;
+                            triples.push({
+                                subject: child.p,
+                                predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                                object: "http://www.w3.org/2002/07/owl#ObjectProperty",
+                            });
+                        }
+                        if (!distinctNodes[child.o] && child.o.indexOf("http") < 0) {
+                            recurse(child.o, level + 1);
+                        }
+                    } else {
+                        triples.push({
+                            subject: child.s,
+                            predicate: child.p,
+                            object: child.o,
+                        });
+
+                        if (!distinctNodes[child.p] && child.p.indexOf("http") == 0) {
+                            distinctNodes[child.p] = 1;
+                            triples.push({
+                                subject: child.p,
+                                predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                                object: "http://www.w3.org/2002/07/owl#ObjectProperty",
+                            });
+                        }
+
+                        if (!distinctNodes[child.o]) {
+                            // on ne passe pas deux fois par le meme noeud
+                            distinctNodes[child.o] = 1;
+                            if (child.o.indexOf("http") == 0) {
+                                //on recurse pas les classes de l'ontologie
+                            } else {
+                                // on ne recurse que les blanknodes
+                                recurse(child.o, level + 1);
+                            }
+                            if (child.o.indexOf("http") == 0) {
+                                triples.push({
+                                    subject: child.o,
+                                    predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                                    object: "http://www.w3.org/2002/07/owl#Class",
+                                });
+                            }
+                            if (child.s.indexOf("http") == 0) {
+                                triples.push({
+                                    subject: child.s,
+                                    predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                                    object: "http://www.w3.org/2002/07/owl#Class",
+                                });
+                            }
+                        }
+                    }
+                });
+            }
+
+            recurse(classUri);
+            callback(null, triples);
         });
     };
 

@@ -42,6 +42,9 @@ var Axioms_graph = (function () {
                         label = predicate.p.replace("http://www.w3.org/2002/07/owl#", "");
                     }
                 }
+                if (predicate.p.toLowerCase().indexOf("cardinality") > -1) {
+                    label += " " + predicate.o;
+                }
             });
 
             color = "#cb9801";
@@ -49,6 +52,10 @@ var Axioms_graph = (function () {
             shape = "dot";
             size = 2; //0.2;
             color = "#70ac47";
+        }
+
+        if (!label && node.id.startsWith("http")) {
+            label = Sparql_common.getLabelFromURI(node.id);
         }
 
         var visjsNode = {
@@ -140,7 +147,7 @@ var Axioms_graph = (function () {
                             disjointClassesAxiomRoot = s;
                         }
                     });
-                    var x = nodesMap;
+
                     callbackSeries();
                 },
 
@@ -232,12 +239,14 @@ var Axioms_graph = (function () {
                                     existingNodes[childNode.id] = 1;
 
                                     var visjsNode = self.getVisjsNode(childNode, level + 1);
-                                    if (rootNodeId == node.id && options.axiomType) {
-                                        if (options.axiomType.indexOf("SubClassOf") > -1) {
+                                    if (rootNodeId == node.id) {
+                                        var edgeid = options.axiomType || predicate.pLabel || Sparql_common.getLabelFromURI(predicate.p);
+                                        edgeid = edgeid.toLowerCase();
+                                        if (edgeid.indexOf("subclassof") > -1) {
                                             edgeLabel = "⊑";
-                                        } else if (options.axiomType.indexOf("Equivalent") > -1) {
+                                        } else if (edgeid.indexOf("equivalent") > -1) {
                                             edgeLabel = "≡";
-                                        } else if (options.axiomType.indexOf("Disjoint") > -1) {
+                                        } else if (edgeid.indexOf("disjoint") > -1) {
                                             edgeLabel = "⊑ ┓";
                                         }
                                     }
@@ -391,6 +400,48 @@ var Axioms_graph = (function () {
                     visjsData.nodes = nodesToKeep;
 
                     return callbackSeries();
+                },
+
+                function (callbackSeries) {
+                    //remove blankNodes edges //!!!!!!!!!!!!dont work
+
+                    return callbackSeries();
+
+                    var edgesTodelete = {};
+                    var nodesTodelete = {};
+                    var edgesFromMap = {};
+                    visjsData.edges.forEach(function (edge) {
+                        edgesFromMap[edge.from] = edge;
+                    });
+                    var nodesMap = {};
+                    visjsData.nodes.forEach(function (node) {
+                        nodesMap[node.id] = node;
+                    });
+
+                    visjsData.edges.forEach(function (edge) {
+                        if (nodesMap[edge.to] && nodesMap[edge.to].color == "#70ac47") {
+                            //blanknode
+                            edgesFromMap[edge.to].from = edge.from;
+                            nodesTodelete[edge.to] = 1;
+                            edgesTodelete[edge.id] = 1;
+                        }
+                    });
+
+                    var newNodes = [];
+                    var newEdges = [];
+                    visjsData.nodes.forEach(function (node) {
+                        if (!nodesTodelete[node.id]) {
+                            newNodes.push(node);
+                        }
+                    });
+                    visjsData.edges.forEach(function (edge) {
+                        if (!edgesTodelete[edge.id]) {
+                            newEdges.push(edge);
+                        }
+                    });
+                    visjsData = { nodes: newNodes, edges: newEdges };
+
+                    callbackSeries();
                 },
                 //draw graph
                 function (callbackSeries) {

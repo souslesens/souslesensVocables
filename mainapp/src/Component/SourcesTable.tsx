@@ -121,6 +121,25 @@ const SourcesTable = () => {
         setSnackMessages(new Set());
     };
 
+    const filterSearchBar = (source: ServerSource, searchEntry: string) => {
+        // extract group:xxx from searchEntry
+        const groups: string[] = [];
+        const strElems: string[] = [];
+        const splitedInput = searchEntry.split(/[ ]+/);
+        splitedInput.forEach((input) => {
+            if (input.startsWith("group:")) {
+                groups.push(...input.replace("group:", "").split(","));
+            } else {
+                strElems.push(input);
+            }
+        });
+
+        const filteredSourcesByGroups = cleanUpText(source.group).includes(cleanUpText(groups.join(" ")));
+        const filteredSourcesByText = cleanUpText(source.name).includes(cleanUpText(strElems.join(" ")));
+
+        return filteredSourcesByText && filteredSourcesByGroups;
+    };
+
     const handleUploadSource = async (sourceFiles: FileList | null) => {
         if (sourceFiles && sourceFiles !== undefined && sourceFiles?.length > 0) {
             const source = JSON.parse(await sourceFiles[0].text()) as ServerSource;
@@ -249,7 +268,9 @@ const SourcesTable = () => {
                                 </TableHead>
                                 <TableBody sx={{ width: "100%", overflow: "visible" }}>
                                     {sortedSources
-                                        .filter((source) => cleanUpText(source.name).includes(cleanUpText(filteringChars)))
+                                        .filter((source) => {
+                                            return filterSearchBar(source, filteringChars);
+                                        })
                                         .map((source) => {
                                             const haveIndices = indices ? indices.includes(source.name.toLowerCase()) : false;
                                             const graphInfo = graphs?.find((g) => g.name === source.graphUri);

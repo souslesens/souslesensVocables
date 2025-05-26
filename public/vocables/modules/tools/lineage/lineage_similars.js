@@ -417,7 +417,72 @@ var Lineage_similars = (function () {
         SearchWidget.showTopConcepts(self.currentSource,options);
         self.parentClassJstreeLoaded = true;
     }
+    self.save={
+        showDialog: function () {
+            $("#smallDialogDiv").dialog("option", "title", "Save Similars");
+            self.parentClassJstreeLoaded=false;
+            $("#smallDialogDiv").load("modules/tools/lineage/html/lineageSimilarsSaveDialog.html", function () {
+                $("#smallDialogDiv").dialog("open");
+                
+            });
+        },
+        drawWhiteboardSimilarsTaxonomy: function () {
+            if(!Lineage_whiteboard.lineageVisjsGraph.data && !Lineage_whiteboard.lineageVisjsGraph.data.nodes){ 
+                return alert("no nodes on whiteboard");
+            }
+            var whiteboard_nodes=Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
+            if(whiteboard_nodes.length==0){
+                return alert("no nodes on whiteboard");
+            }
+             if(!Lineage_whiteboard.lineageVisjsGraph.data && !Lineage_whiteboard.lineageVisjsGraph.data.edges){ 
+                return alert("no edges on whiteboard");
+            }
+            var edges = Lineage_whiteboard.lineageVisjsGraph.data.edges.get();
+            if(edges.length==0){
+                return alert("no edges on whiteboard");
+            }
+            var similarsEdges= Lineage_whiteboard.lineageVisjsGraph.data.edges.get().filter(function(edge){return edge?.data?.label=='sameLabel'})
+            if(similarsEdges.length==0){
+                return alert("no similars edges on whiteboard");
+            }
+            var similarsTaxonomy= {};
+            similarsEdges.forEach(function(edge){
+                if(!edge.from || !edge.to){
+                    return;
+                }
+                if(!similarsTaxonomy[edge.from]){
+                    similarsTaxonomy[edge.from]=[edge.to];
+                }
+                else{
+                    if(!similarsTaxonomy[edge.from].includes(edge.to)){
+                        similarsTaxonomy[edge.from].push(edge.to);
+                    }
+                    
+                }
+               
+            });
+            var jstreeData = [];
+            var sources = {};
+            for (var nodeId in similarsTaxonomy) {
+                var node = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(nodeId);
+                if (!node) {
+                    continue;
+                }
+                var source = node.data.source;
+                if (!sources[source]) {
+                   jstreeData.push({
+                        id: source,
+                        text: Config.sources[source].label,
+                        
+                        data: { id: source, label: source },
+                    });
+                    sources[source] = true;
+                }
+                sources[source].push(nodeId);
+            }
 
+        }
+    }
     return self;
 })();
 

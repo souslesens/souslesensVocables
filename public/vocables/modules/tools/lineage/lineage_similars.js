@@ -1,13 +1,12 @@
 import SourceSelectorWidget from "../../uiWidgets/sourceSelectorWidget.js";
 import common from "../../shared/common.js";
 import SearchUtil from "../../search/searchUtil.js";
-
-self.lineageVisjsGraph;
 import Lineage_whiteboard from "./lineage_whiteboard.js";
 import Lineage_sources from "./lineage_sources.js";
 import JstreeWidget from "../../uiWidgets/jstreeWidget.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import Sparql_generic from "../../sparqlProxies/sparql_generic.js";
+
 
 /**
  * @module Lineage_similars
@@ -432,6 +431,20 @@ var Lineage_similars = (function () {
                 
             });
         },
+        contextMenuSimilars : function (node) {
+                   var items = {};
+                   items.nodeInfos = {
+                        label: "Node infos",
+                        action: function (_e) {
+                            // pb avec source
+                            if (!node.data || !node.data.source) {
+                                return alert("no source for this node");
+                            }
+                            NodeInfosWidget.showNodeInfos(node.data.source, node, "mainDialogDiv");
+                        },
+                    };  
+                    return items;
+        },
         drawWhiteboardSimilarsTaxonomy: function (callback) {
             if(!Lineage_whiteboard.lineageVisjsGraph.data && !Lineage_whiteboard.lineageVisjsGraph.data.nodes){ 
                 return alert("no nodes on whiteboard");
@@ -492,7 +505,7 @@ var Lineage_similars = (function () {
                             id: node.id,
                             text: node.data.label,
                             parent: source,
-                            data: { id: nodeId, label: node.data.label, type: "node" },
+                            data: { id: nodeId, label: node.data.label, type: "node",source: source },
                         });
                         var similars = similarsTaxonomy[nodeId];
                         if (similars && similars.length > 0) {
@@ -503,7 +516,7 @@ var Lineage_similars = (function () {
                                         id: similarNode.id,
                                         text: similarNode.data.label,
                                         parent: node.id,
-                                        data: { id: similarNode.id, label: similarNode.data.label, type: "similars" },
+                                        data: { id: similarNode.id, label: similarNode.data.label, type: "similars",source:similarNode.data.source },
                                     });
                                 }
                             });
@@ -511,12 +524,17 @@ var Lineage_similars = (function () {
                     }
                 }
             }
-            JstreeWidget.loadJsTree('lineageSimilars_similarsTreeDiv', jstreeData, {withCheckboxes:true}, function(){
+          
+
+        
+            
+            var options={withCheckboxes:true,'contextMenu':self.save.contextMenuSimilars};
+            JstreeWidget.loadJsTree('lineageSimilars_similarsTreeDiv', jstreeData,options, function(){
                 $("#lineageSimilars_similarsTreeDiv").jstree(true).open_all();
                 if(callback){
                     callback();
                 }
-            })
+            });
 
         },
         saveSimilars: function (mode) {

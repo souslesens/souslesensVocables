@@ -31,8 +31,8 @@ import dataSourcesManager from "./dataSourcesManager.js";
  */
 var MappingModeler = (function () {
     var self = {};
-
-    self.maxItemsInJstreePerSource = 300;
+    self.maxItemsInJstreePerSource = 250; // Maximum number of items to display in the jstree per source
+    // self.maxItemsInJstree =400;
     /**
      * ID of the tree container.
      * @type {string}
@@ -187,6 +187,36 @@ var MappingModeler = (function () {
     };
 
     /**
+     *
+     *  //manages number of items that can be shown in the tree or need a filter before added
+     * @param resources
+     * @return map[countItems,mappingClasses]
+     */
+    self.initSourcesMap = function (resources) {
+        {
+            const sourcesMap = {};
+            resources.forEach(function (item) {
+                if (!sourcesMap[item.source]) {
+                    sourcesMap[item.source] = {
+                        countItems: 0,
+                        mappingClasses: {},
+                    };
+                }
+                sourcesMap[item.source].countItems += 1;
+            });
+
+            var graphNodes = MappingColumnsGraph.visjsGraph.data.nodes.get();
+            graphNodes.forEach(function (node) {
+                if (node.data && node.data.type == "Class" && sourcesMap[node.data.source]) {
+                    sourcesMap[node.data.source].mappingClasses[node.data.id] = 1;
+                }
+            });
+
+            self.sourcesMap = sourcesMap;
+        }
+    };
+
+    /**
      * Loads and initializes a suggestion tree in the specified container.
      * @function
      * @name loadSuggestionSelectJstree
@@ -207,6 +237,7 @@ var MappingModeler = (function () {
 
             contextMenu: function (node, x) {
                 var items = {};
+
                 if (self.currentResourceType == "Column") {
                     items.showSampleData = {
                         label: "showSampleData",
@@ -215,25 +246,28 @@ var MappingModeler = (function () {
                         },
                     };
                 }
+
                 if (self.currentResourceType == "Class") {
-                    items.showSampleData = {
-                        label: "deleteClass",
-                        action: function (_e) {
-                            NodeInfosWidget.currentNode = node;
-                            NodeInfosWidget.currentNodeId = node.id;
-                            NodeInfosWidget.currentNode.data.source = MainController.currentSource;
-                            NodeInfosWidget.currentSource = MainController.currentSource;
-                            NodeInfosWidget.deleteNode(function () {
-                                NodeInfosWidget.currentNode = null;
-                                NodeInfosWidget.currentNodeId = null;
-                                NodeInfosWidget.currentSource = null;
-                                $("#suggestionsSelectJstreeDiv").jstree("delete_node", node.id);
-                                if (self.allClasses[node.id]) {
-                                    delete self.allClasses[node.id];
-                                }
-                            });
-                        },
-                    };
+                    if (node.data && node.data.resourceType != "searchClass") {
+                        items.showSampleData = {
+                            label: "deleteClass",
+                            action: function (_e) {
+                                NodeInfosWidget.currentNode = node;
+                                NodeInfosWidget.currentNodeId = node.id;
+                                NodeInfosWidget.currentNode.data.source = MainController.currentSource;
+                                NodeInfosWidget.currentSource = MainController.currentSource;
+                                NodeInfosWidget.deleteNode(function () {
+                                    NodeInfosWidget.currentNode = null;
+                                    NodeInfosWidget.currentNodeId = null;
+                                    NodeInfosWidget.currentSource = null;
+                                    $("#suggestionsSelectJstreeDiv").jstree("delete_node", node.id);
+                                    if (self.allClasses[node.id]) {
+                                        delete self.allClasses[node.id];
+                                    }
+                                });
+                            },
+                        };
+                    }
                 }
                 return items;
             },
@@ -241,6 +275,7 @@ var MappingModeler = (function () {
         };
         var jstreeData = [];
 
+        self.sourcesMap = {};
         var color = "#333";
         if (parentName == "Columns") {
             color = "#cb9801";
@@ -262,15 +297,9 @@ var MappingModeler = (function () {
         if (parentName == "Classes" || parentName == "Properties") {
             var uniqueSources = {};
             var searchDone = {};
-            const objectsPerSource = objects.reduce((sum, item) => {
-                const source = item.source;
-                if (!sum[source]) {
-                    sum[source] = 1;
-                } else {
-                    sum[source] = sum[source] + 1;
-                }
-                return sum;
-            }, {});
+
+            self.initSourcesMap(objects);
+
             objects.forEach(function (item) {
                 if (item.source) {
                     if (!uniqueSources[item.source]) {
@@ -286,7 +315,7 @@ var MappingModeler = (function () {
                             },
                         });
                     }
-                    if (objectsPerSource[item.source] < self.maxItemsInJstreePerSource) {
+                    if (self.sourcesMap[item.source].countItems < self.maxItemsInJstreePerSource || self.sourcesMap[item.source].mappingClasses[item.id]) {
                         jstreeData.push({
                             id: item.id,
                             parent: item.source,
@@ -302,7 +331,7 @@ var MappingModeler = (function () {
                         jstreeData.push({
                             id: common.getRandomHexaId(5),
                             parent: item.source,
-                            text: "<span  style='color:" + color + "'> SEARCH...</span>",
+                            text: "<span  style='font-weight:bold;color:" + color + "'> SEARCH...</span>",
                             data: {
                                 resourceType: "search" + item.resourceType,
                                 source: item.source,
@@ -404,6 +433,7 @@ var MappingModeler = (function () {
         if (obj.event && obj.event.type == "contextmenu") {
             return;
         }
+
         if (!DataSourceManager.currentConfig.currentDataSource) {
             return alert("Select a data source");
         }
@@ -454,7 +484,9 @@ var MappingModeler = (function () {
             }, 500);
         } else if (obj.node.data && obj.node.data.resourceType == "searchClass") {
             var word = prompt("class starts with... ");
-            if (!word) return;
+            if (!word) {
+                return;
+            }
             word = word.toLowerCase();
             var jstreeData = [];
             var source = obj.node.data.source;
@@ -469,7 +501,9 @@ var MappingModeler = (function () {
                 }
                 if (item.resourceType == "Class" && item.source == source) {
                     var label = item.label;
-                    if (label.split(":").length == 2) label = label.split(":")[1];
+                    if (label.split(":").length == 2) {
+                        label = label.split(":")[1];
+                    }
                     //  console.log(label)
 
                     if ((startWith && label.toLowerCase().indexOf(word) == 0) || (!startWith && label.toLowerCase().indexOf(word) > -1)) {
@@ -486,8 +520,12 @@ var MappingModeler = (function () {
                     }
                 }
             }
-            if (jstreeData.length == 0) return alert("no Match");
-            if (jstreeData.length > self.maxItemsInJstreePerSource) return alert("to many matches");
+            if (jstreeData.length == 0) {
+                return alert("no Match");
+            }
+            if (jstreeData.length > self.maxItemsInJstree) {
+                return alert("to many matches");
+            }
 
             JstreeWidget.addNodesToJstree("suggestionsSelectJstreeDiv", source, jstreeData, { positionLast: true });
         } else if (self.currentResourceType == "Class") {

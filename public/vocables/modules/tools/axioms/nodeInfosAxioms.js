@@ -16,7 +16,9 @@ var NodeInfosAxioms = (function () {
         Axioms_manager.allResourcesMap = {};
 
         $("#" + divId).load("modules/tools/axioms/html/nodeInfosAxioms.html", function () {
-            if (divId && divId.indexOf("Dialog") > -1) $("#" + divId).dialog("open");
+            if (divId && divId.indexOf("Dialog") > -1) {
+                $("#" + divId).dialog("open");
+            }
             Axiom_activeLegend.drawLegend("nodeInfosAxioms_activeLegendDiv");
             if (!Lineage_sources.isSourceEditableForUser(self.currentSource)) {
                 $("#nodeInfosAxioms_newAxiomBtn").css("display", "none");
@@ -31,10 +33,18 @@ var NodeInfosAxioms = (function () {
                     Axiom_activeLegend.onSuggestionsSelect($(this).val());
                 }
             });
+            Axioms_manager.initResourcesMap(self.currentResource.data.source, function (err, result) {
+                AxiomExtractor.getClassAxiomsTriples(self.currentResource.data.source, self.currentResource.data.id, function (err, triples) {
+                    var divId = "nodeInfosAxioms_graphDiv";
+                    var options = {};
+                    Axioms_graph.drawNodeAxioms2(self.currentResource.data.source, self.currentResource.data.id, triples, divId, options, function (err, triples) {});
+                });
+            });
 
+            return;
             AxiomExtractor.getClassAxioms(self.currentResource.data.source, self.currentResource.data.id, function (err, visjsData) {
-                var options = {};
-                Axioms_graph.drawGraph(visjsData, "nodeInfosAxioms_graphDiv", options);
+                AxiomExtractor.drawGraphCanvas("nodeInfosAxioms_graphDiv", visjsData, function (err, result) {});
+                return;
             });
             return;
 

@@ -365,14 +365,18 @@ indexes.push(source.toLowerCase());
         return word2;
     };
     self.makeFuzzyQueryString = function (word) {
-        return word
-            .split(/\s+/)
-            .map((w) => {
-                if (w.length <= 4) return `${w}~1`;
-                if (w.length <= 8) return `${w}~2`;
-                return `${w}~2`;
-            })
-            .join(" ");
+        var splited_word = word.split(/\s+/);
+        var fuzzyWords = [];
+        splited_word.forEach((word) => {
+            if (word.length <= 7) {
+                return fuzzyWords.push(`${word}~1`);
+            }
+            if (word.length <= 12) {
+                return fuzzyWords.push(`${word}~2`);
+            }
+            return fuzzyWords.push(`${word}~2`);
+        });
+        return fuzzyWords.join(" ");
     };
 
     self.getWordBulkQuery = function (word, mode, indexes, options) {

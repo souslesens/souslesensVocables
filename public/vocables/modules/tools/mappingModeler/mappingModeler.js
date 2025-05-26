@@ -31,7 +31,7 @@ import dataSourcesManager from "./dataSourcesManager.js";
  */
 var MappingModeler = (function () {
     var self = {};
-    self.maxItemsInJstreePerSource = 200
+    self.maxItemsInJstreePerSource = 250; // Maximum number of items to display in the jstree per source
     // self.maxItemsInJstree =400;
     /**
      * ID of the tree container.

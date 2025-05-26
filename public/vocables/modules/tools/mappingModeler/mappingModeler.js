@@ -9,7 +9,7 @@ import common from "../../shared/common.js";
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 import Clipboard from "../../shared/clipboard.js";
 
-import SimpleListFilterWidget from "../../uiWidgets/simpleListFilterWidget.js";
+import SimpleListSelectorWidget from "../../uiWidgets/simpleListSelectorWidget.js";
 import JstreeWidget from "../../uiWidgets/jstreeWidget.js";
 import OntologyModels from "../../shared/ontologyModels.js";
 import MappingsDetails from "./mappingsDetails.js";
@@ -197,8 +197,8 @@ var MappingModeler = (function () {
         {
 
             const sourcesMap = {}
-            resources.forEach(function(item){
-                if(!sourcesMap[item.source]) {
+            resources.forEach(function (item) {
+                if (!sourcesMap[item.source]) {
                     sourcesMap[item.source] = {
                         countItems: 0, mappingClasses: {}
                     }
@@ -213,7 +213,7 @@ var MappingModeler = (function () {
                 }
             })
 
-            self.sourcesMap=sourcesMap
+            self.sourcesMap = sourcesMap
 
 
         }
@@ -457,6 +457,8 @@ var MappingModeler = (function () {
             return self.showCreateResourceBot("ObjectProperty", null);
         } else if (resourceUri == "function") {
             return self.predicateFunctionShowDialog();
+        } else if (resourceUri == "valuesOfColumn") {
+            return self.showValuesOfColumnPredicateDialog();
         } else if (self.currentResourceType == "Column") {
             // Verify that he not already exists
             var nodeInVisjsGraph = MappingColumnsGraph.visjsGraph.data.nodes.get().filter(function (node) {
@@ -712,6 +714,7 @@ var MappingModeler = (function () {
             var newObjects = [
                 {id: "createObjectProperty", label: "_Create new ObjectProperty_"},
                 {id: "function", label: "function"},
+                {id: "valuesOfColumn", label: "values Of column"},
                 {id: "rdfs:member", label: "_rdfs:member_"},
                 {id: "rdfs:subClassOf", label: "_rdfs:subClassOf_"},
             ];
@@ -1228,6 +1231,65 @@ var MappingModeler = (function () {
             $("#smallDialogDiv").dialog("open");
         });
     };
+
+    self.showValuesOfColumnPredicateDialog = function () {
+
+        var loadFn = function (callback) {
+            var data = []
+            MappingModeler.currentTable.columns.forEach(function (column) {
+                data.push({id: column, label: column, parent: "#"})
+            })
+            return callback(data)
+        }
+
+        SimpleListSelectorWidget.showDialog(null, loadFn, function (value) {
+            if (value) {
+                var edge = {
+                    from: self.currentRelation.from.id,
+                    to: self.currentRelation.to.id,
+                    label: "_valuesOfColumn_" + value,
+                    arrows: {
+                        to: {
+                            enabled: true,
+                            type: "diamond",
+                        },
+                    },
+
+                    data: {
+                        id:  "_valuesOfColumn_" + value,
+                        type: "valuesOfColumn",
+                        column: value,
+                        source: self.currentSLSsource,
+                    },
+                    color: "#375521",
+                };
+            }
+            MappingColumnsGraph.addEdge([edge]);
+            $("#smallDialogDiv").dialog("close");
+
+
+        })
+
+        return;
+
+        /*  var html="<div style='width:350px;heigth:500px;overflow:auto'>" +
+              "<div id='mappingModeler_columnsJstreeDiv'></div>"+
+              "</div>" +
+              "<div>" +
+              "<button onclick=' MappingModeler.validateValuesOfColumnPredicateDialog()'>OK</button>" +
+              "</div>"
+          $("#smallDialogDiv").html(html)
+          $("#smallDialogDiv").dialog("option","title","Choose ")
+          $("#smallDialogDiv").dialog("open")
+          JstreeWidget.loadJsTree("mappingModeler_columnsJstreeDiv",jstreeData,{withCheckboxes:true,openAll: true})*/
+
+
+    }
+
+    self.validateValuesOfColumnPredicateDialog = function () {
+
+    }
+
 
     /**
      * Adds a predicate function edge to the current graph.

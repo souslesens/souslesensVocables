@@ -428,6 +428,26 @@ $("#sourceDivControlPanelDiv").html(html);*/
         });
     };
 
+    
+    self.createSkgFromOntology=function(){
+        var sources = SourceSelectorWidget.getCheckedSources();
+        if (sources.length != 1) {
+            return alert("select a single source");
+        }
+
+        var source = sources[0];
+        if (!Config.sources[source]) {
+            return alert("source does not not exist");
+        }
+        var graphUri = Config.sources[source].graphUri;
+        if (!prompt("Do you really want to generate a SKG for ontology " + source + " , graph " + graphUri+"skg/")) {
+            return;
+        }
+        Sparql_OWL.createSkgFromOntology(source,graphUri+"skg/",function(err, result){
+            alert(err?err.responseText : result)
+        })
+        
+    }
     return self;
 })();
 

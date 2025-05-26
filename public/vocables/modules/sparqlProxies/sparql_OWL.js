@@ -1877,6 +1877,12 @@ var Sparql_OWL = (function () {
         });
     };
 
+    /**
+     *
+     * @param sourceLabel
+     * @param options
+     * @param callback : returns a map of URIs and Labels
+     */
     self.getLabelsMap = function (sourceLabel, options, callback) {
         if (!options) {
             options = {};

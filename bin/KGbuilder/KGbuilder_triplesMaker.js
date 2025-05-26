@@ -6,7 +6,7 @@ const KGbuilder_triplesWriter = require("./KGbuilder_triplesWriter");
 var csvCrawler = require("../_csvCrawler.");
 const dataController = require("../dataController.");
 const path = require("path");
-const { databaseModel } = require("../../model/databases");
+const {databaseModel} = require("../../model/databases");
 var KGbuilder_triplesMaker = {
     mappingFilePredicate: "http://souslesens.org/KGcreator#mappingFile",
     existingTriples: {},
@@ -91,7 +91,7 @@ var KGbuilder_triplesMaker = {
                                     });
                                 },
                                 function (callbackSeries) {
-                                    KGbuilder_triplesMaker.getTriplePredicate(mapping, line, function (err, result) {
+                                    KGbuilder_triplesMaker.getTriplePredicate(tableMappings, mapping, line, function (err, result) {
                                         if (err) {
                                             return callbackSeries(err);
                                         }
@@ -164,7 +164,7 @@ var KGbuilder_triplesMaker = {
             var baseUri = mappingValue.substring(1, p);
             var value = line[mappingValue.substring(p + 1)];
             // specific base URI can also have transforms and lookups
-            if (value)
+            if (value) {
                 if (tableMappings.transform && tableMappings.transform[mappingValue]) {
                     try {
                         return "<" + baseUri + tableMappings.transform[mappingValue](util.formatStringForTriple(value, true), "s", mapping.p, line, mapping) + ">";
@@ -178,7 +178,9 @@ var KGbuilder_triplesMaker = {
                 else {
                     return "<" + baseUri + util.formatStringForTriple(value, true) + ">";
                 }
-            else return null;
+            } else {
+                return null;
+            }
         } else {
             return null;
         }
@@ -289,7 +291,9 @@ var KGbuilder_triplesMaker = {
         var isTransformLookUp = false;
         var missingLookups_o;
         var okLookups_o;
-        if (objectStr) return callback(null, objectStr);
+        if (objectStr) {
+            return callback(null, objectStr);
+        }
 
         //get value for Object
 
@@ -492,7 +496,7 @@ var KGbuilder_triplesMaker = {
 
         return callback(null, objectStr);
     },
-    getTriplePredicate: function (mapping, line, callback) {
+    getTriplePredicate: function (tableMappings, mapping, line, callback) {
         var propertyStr = mapping.p;
         if (typeof mapping.p === "function") {
             try {
@@ -501,6 +505,12 @@ var KGbuilder_triplesMaker = {
                 KGbuilder_socket.message("function error " + e + "line" + line);
                 return null;
             }
+        }
+        if (mapping.p.startsWith("_valuesOfColumn")) {
+            var column = mapping.p.split("_")[2]
+            var value = line[column]
+            value = objectStr = "<" + tableMappings.graphUri + util.formatStringForTriple(value, true) + ">";
+            return callback(null, value);
         }
 
         if (!propertyStr) {
@@ -560,7 +570,7 @@ var KGbuilder_triplesMaker = {
                         if (err) {
                             return callbackEachLookup(err);
                         }
-                        lookUpsMap[lookup.name] = { dictionary: {}, transformFn: lookup.transformFn };
+                        lookUpsMap[lookup.name] = {dictionary: {}, transformFn: lookup.transformFn};
                         /*if(!lookup.transformFn){
                             var columnLookUp=lookup.name.split("|")[1];
                             if(columnLookUp && tableMappings.transform[columnLookUp]){
@@ -587,7 +597,7 @@ var KGbuilder_triplesMaker = {
                         .then((result) => {
                             var lookupLines = result.rows;
                             console.log("lookupLines", lookupLines);
-                            lookUpsMap[lookup.name] = { dictionary: {}, transformFn: lookup.transformFn };
+                            lookUpsMap[lookup.name] = {dictionary: {}, transformFn: lookup.transformFn};
                             lookupLines.forEach(function (line, index) {
                                 if (![line[lookup.sourceColumn]] && line[lookup.targetColumn]) {
                                     return KGbuilder_socket.message(options.clientSocketId, "missing lookup line" + index + " " + lookupFilePath, true);
@@ -674,14 +684,14 @@ var KGbuilder_triplesMaker = {
         }
     },
     readCsv: function (filePath, maxLines, callback) {
-        csvCrawler.readCsv({ filePath: filePath }, maxLines, function (err, result) {
+        csvCrawler.readCsv({filePath: filePath}, maxLines, function (err, result) {
             if (err) {
                 return callback(err);
             }
             var data = result.data;
             var headers = result.headers;
 
-            return callback(null, { headers: headers, data: data });
+            return callback(null, {headers: headers, data: data});
         });
     },
     getBlankNodeId: function (key) {
@@ -702,7 +712,7 @@ var KGbuilder_triplesMaker = {
     zipString: function (str) {
         const ascii = encodeURIComponent(str);
         const array = new TextEncoder().encode(ascii);
-        const zip = fflate.deflateSync(array, { level: 9 });
+        const zip = fflate.deflateSync(array, {level: 9});
         return window.btoa(String.fromCharCode(...zip));
     },
 
@@ -718,7 +728,9 @@ var KGbuilder_triplesMaker = {
     getLookupValue: function (lookupName, value, callback) {
         //var lookupArray = lookupName.split("|");
         var target = null;
-        if (lookUpsMap[lookupName]) target = lookUpsMap[lookupName].dictionary[value];
+        if (lookUpsMap[lookupName]) {
+            target = lookUpsMap[lookupName].dictionary[value];
+        }
         if (target && lookUpsMap[lookupName].transformFn) {
             try {
                 target = lookUpsMap[lookupName].transformFn(target, "s", mapping.p, line, mapping);

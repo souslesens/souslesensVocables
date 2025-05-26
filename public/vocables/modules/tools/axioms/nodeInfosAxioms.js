@@ -27,31 +27,24 @@ var NodeInfosAxioms = (function () {
             // onclick="Axiom_activeLegend.onSuggestionsSelect($(this).val())"
             $("#axioms_legend_suggestionsSelect").on("click", function (event) {
                 if (event.ctrlKey) {
-                    var node = {data: {id: $(this).val()}};
+                    var node = { data: { id: $(this).val() } };
                     NodeInfosWidget.showNodeInfos(self.currentSource, node, "smallDialogDiv");
                 } else {
                     Axiom_activeLegend.onSuggestionsSelect($(this).val());
                 }
             });
-Axioms_manager.initResourcesMap(self.currentResource.data.source,function (err, result) {
-    AxiomExtractor.getClassAxiomsTriples(self.currentResource.data.source, self.currentResource.data.id, function (err, triples) {
-        var divId = "nodeInfosAxioms_graphDiv"
-        var options = {}
-        Axioms_graph.drawNodeAxioms2(self.currentResource.data.source, self.currentResource.data.id, triples, divId, options, function (err, triples) {
-        })
-    })
-})
+            Axioms_manager.initResourcesMap(self.currentResource.data.source, function (err, result) {
+                AxiomExtractor.getClassAxiomsTriples(self.currentResource.data.source, self.currentResource.data.id, function (err, triples) {
+                    var divId = "nodeInfosAxioms_graphDiv";
+                    var options = {};
+                    Axioms_graph.drawNodeAxioms2(self.currentResource.data.source, self.currentResource.data.id, triples, divId, options, function (err, triples) {});
+                });
+            });
 
             return;
             AxiomExtractor.getClassAxioms(self.currentResource.data.source, self.currentResource.data.id, function (err, visjsData) {
-
-
-
-
-                AxiomExtractor.drawGraphCanvas("nodeInfosAxioms_graphDiv", visjsData, function (err, result) {
-                })
+                AxiomExtractor.drawGraphCanvas("nodeInfosAxioms_graphDiv", visjsData, function (err, result) {});
                 return;
-
             });
             return;
 
@@ -221,7 +214,7 @@ Axioms_manager.initResourcesMap(self.currentResource.data.source,function (err, 
 
         if (node.parent == "#") {
             // draw   all axioms of class
-            var options = {onNodeClick: NodeInfosAxioms.onNodeGraphClick};
+            var options = { onNodeClick: NodeInfosAxioms.onNodeGraphClick };
             var nodes = JstreeWidget.getNodeDescendants("nodeInfosAxioms_axiomsJstreeDiv", "#", 3);
             var allTriples = [];
             nodes.forEach(function (node, index) {
@@ -230,8 +223,7 @@ Axioms_manager.initResourcesMap(self.currentResource.data.source,function (err, 
                 }
             });
 
-            Axioms_graph.drawNodeAxioms2(self.currentSource, self.currentResource.data.id, allTriples, "nodeInfosAxioms_graphDiv", options, function (err) {
-            });
+            Axioms_graph.drawNodeAxioms2(self.currentSource, self.currentResource.data.id, allTriples, "nodeInfosAxioms_graphDiv", options, function (err) {});
         } else if (node && node.data) {
             Axioms_graph.currentGraphNode = node;
 
@@ -240,9 +232,8 @@ Axioms_manager.initResourcesMap(self.currentResource.data.source,function (err, 
                 self.currentResource.data.id,
                 node.data.triples,
                 "nodeInfosAxioms_graphDiv",
-                {onNodeClick: NodeInfosAxioms.onNodeGraphClick, axiomType: node.parent},
-                function (err) {
-                },
+                { onNodeClick: NodeInfosAxioms.onNodeGraphClick, axiomType: node.parent },
+                function (err) {},
             );
 
             //  $("#nodeInfosAxioms_axiomText").html(node.data.manchester);
@@ -267,9 +258,8 @@ Axioms_manager.initResourcesMap(self.currentResource.data.source,function (err, 
             result.triples.forEach(function (item) {
                 allTriples = allTriples.concat(item);
             });
-            var options = {addToGraph: true, startLevel: node.level, axiomType: node.parent};
-            Axioms_graph.drawNodeAxioms2(self.currentSource, node.data.id, allTriples, "nodeInfosAxioms_graphDiv", options, function (err) {
-            });
+            var options = { addToGraph: true, startLevel: node.level, axiomType: node.parent };
+            Axioms_graph.drawNodeAxioms2(self.currentSource, node.data.id, allTriples, "nodeInfosAxioms_graphDiv", options, function (err) {});
         });
     };
     self.collapseGraphToNode = function () {
@@ -331,16 +321,14 @@ Axioms_manager.initResourcesMap(self.currentResource.data.source,function (err, 
                                 result.triples.forEach(function (item) {
                                     allTriples = allTriples.concat(item);
                                 });
-                                var options = {addToGraph: addToGraph};
-                                Axioms_graph.drawNodeAxioms2(self.currentSource, descendant.data.id, allTriples, "nodeInfosAxioms_graphDiv", options, function (err) {
-                                });
+                                var options = { addToGraph: addToGraph };
+                                Axioms_graph.drawNodeAxioms2(self.currentSource, descendant.data.id, allTriples, "nodeInfosAxioms_graphDiv", options, function (err) {});
                                 addToGraph = true;
 
                                 callbackEach(null);
                             });
                         },
-                        function (err) {
-                        },
+                        function (err) {},
                     );
                 });
             });
@@ -354,7 +342,7 @@ Axioms_manager.initResourcesMap(self.currentResource.data.source,function (err, 
                     nodes: axioms_graph.axiomsVisjsGraph.data.nodes.get(),
                     edges: axioms_graph.axiomsVisjsGraph.data.edges.get(),
                 };
-                axioms_graph.drawGraph(visjsData, "axiomGraphDiv", {randomLayout: true});
+                axioms_graph.drawGraph(visjsData, "axiomGraphDiv", { randomLayout: true });
             }
         },
         toSVG: function () {

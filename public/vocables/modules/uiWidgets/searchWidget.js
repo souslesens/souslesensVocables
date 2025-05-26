@@ -344,12 +344,12 @@ var SearchWidget = (function () {
     };
 
     self.showTopConcepts = function (sourceLabel, options) {
-        if(!options) {
+        if (!options) {
             options = {};
         }
         options.onlyClasses = true;
-        if(sourceLabel) {
-            options.searchedSources=[sourceLabel];
+        if (sourceLabel) {
+            options.searchedSources = [sourceLabel];
         }
         self.searchTermInSources(options);
 

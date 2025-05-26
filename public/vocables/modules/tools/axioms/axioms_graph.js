@@ -15,7 +15,7 @@ var Axioms_graph = (function () {
             color = "#70ac47";
             if (node.symbol == "^") {
                 shape = "ellipse";
-                font = {bold: true};
+                font = { bold: true };
                 color = "#f5ef39";
             }
         } else if (node.type && node.type.indexOf("Class") > -1) {
@@ -43,7 +43,7 @@ var Axioms_graph = (function () {
                     }
                 }
                 if (predicate.p.toLowerCase().indexOf("cardinality") > -1) {
-                    label += " " + predicate.o
+                    label += " " + predicate.o;
                 }
             });
 
@@ -55,7 +55,7 @@ var Axioms_graph = (function () {
         }
 
         if (!label && node.id.startsWith("http")) {
-            label = Sparql_common.getLabelFromURI(node.id)
+            label = Sparql_common.getLabelFromURI(node.id);
         }
 
         var visjsNode = {
@@ -82,7 +82,7 @@ var Axioms_graph = (function () {
         }
         self.graphDivId = divId;
         var nodesMap = {};
-        var visjsData = {nodes: [], edges: []};
+        var visjsData = { nodes: [], edges: [] };
         var edgesToRemove = {};
         var disjointClassesAxiomRoot = null;
         async.series(
@@ -103,7 +103,7 @@ var Axioms_graph = (function () {
                         }
 
                         if (!nodesMap[s]) {
-                            nodesMap[s] = {id: s};
+                            nodesMap[s] = { id: s };
                             if (s.indexOf("http") == 0) {
                                 var obj = Axiom_manager.allResourcesMap[s];
                                 nodesMap[s].label = obj ? obj.label.replace(/_/g, " ") : null;
@@ -147,7 +147,6 @@ var Axioms_graph = (function () {
                             disjointClassesAxiomRoot = s;
                         }
                     });
-
 
                     callbackSeries();
                 },
@@ -239,11 +238,10 @@ var Axioms_graph = (function () {
                                 if (!existingNodes[childNode.id]) {
                                     existingNodes[childNode.id] = 1;
 
-
                                     var visjsNode = self.getVisjsNode(childNode, level + 1);
                                     if (rootNodeId == node.id) {
-                                        var edgeid = options.axiomType || predicate.pLabel || Sparql_common.getLabelFromURI(predicate.p)
-                                        edgeid = edgeid.toLowerCase()
+                                        var edgeid = options.axiomType || predicate.pLabel || Sparql_common.getLabelFromURI(predicate.p);
+                                        edgeid = edgeid.toLowerCase();
                                         if (edgeid.indexOf("subclassof") > -1) {
                                             edgeLabel = "⊑";
                                         } else if (edgeid.indexOf("equivalent") > -1) {
@@ -255,7 +253,6 @@ var Axioms_graph = (function () {
 
                                     visjsData.nodes.push(visjsNode);
                                 }
-
 
                                 var edgeId = node.id + "_" + childNode.id;
 
@@ -382,13 +379,13 @@ var Axioms_graph = (function () {
                             if (nodesMap[edge.to].data.type == "http://www.w3.org/2002/07/owl#ObjectProperty") {
                                 nodesMap[edge.from].label = nodesMap[edge.to].label + "\n" + nodesMap[edge.from].label + "";
                                 //   nodesMap[edge.from].color = "#f5ef39"
-                                nodesMap[edge.from].font = {size: 18, color: "#cb9801"};
+                                nodesMap[edge.from].font = { size: 18, color: "#cb9801" };
                                 visjsData.edges[index].length = 120;
                                 nodesToDelete.push(edge.to);
                             } else if (nodesMap[edge.to].data.type == "inverseOf") {
                                 nodesMap[edge.from].label = nodesMap[edge.to].label;
                                 //  nodesMap[edge.from].color = "#f5ef39"
-                                nodesMap[edge.from].font = {size: 18, color: "#cb9801"};
+                                nodesMap[edge.from].font = { size: 18, color: "#cb9801" };
                                 //  visjsData.edges[index].length = 120;
                                 nodesToDelete.push(edge.to);
                             }
@@ -405,26 +402,28 @@ var Axioms_graph = (function () {
                     return callbackSeries();
                 },
 
-                function (callbackSeries) {//remove blankNodes edges //!!!!!!!!!!!!dont work
+                function (callbackSeries) {
+                    //remove blankNodes edges //!!!!!!!!!!!!dont work
 
-                return callbackSeries()
+                    return callbackSeries();
 
-                    var edgesTodelete = {}
-                    var nodesTodelete = {}
-                    var edgesFromMap = {}
+                    var edgesTodelete = {};
+                    var nodesTodelete = {};
+                    var edgesFromMap = {};
                     visjsData.edges.forEach(function (edge) {
-                        edgesFromMap[edge.from] = edge
+                        edgesFromMap[edge.from] = edge;
                     });
-                    var nodesMap = {}
+                    var nodesMap = {};
                     visjsData.nodes.forEach(function (node) {
-                        nodesMap[node.id] = node
+                        nodesMap[node.id] = node;
                     });
 
                     visjsData.edges.forEach(function (edge) {
-                        if (nodesMap[edge.to] && nodesMap[edge.to].color == "#70ac47") {//blanknode
-                            edgesFromMap[edge.to].from = edge.from
-                            nodesTodelete[edge.to] = 1
-                            edgesTodelete[edge.id] = 1
+                        if (nodesMap[edge.to] && nodesMap[edge.to].color == "#70ac47") {
+                            //blanknode
+                            edgesFromMap[edge.to].from = edge.from;
+                            nodesTodelete[edge.to] = 1;
+                            edgesTodelete[edge.id] = 1;
                         }
                     });
 
@@ -432,20 +431,17 @@ var Axioms_graph = (function () {
                     var newEdges = [];
                     visjsData.nodes.forEach(function (node) {
                         if (!nodesTodelete[node.id]) {
-                            newNodes.push(node)
+                            newNodes.push(node);
                         }
-
                     });
                     visjsData.edges.forEach(function (edge) {
                         if (!edgesTodelete[edge.id]) {
-                            newEdges.push(edge)
+                            newEdges.push(edge);
                         }
-
                     });
-                    visjsData = {nodes: newNodes, edges: newEdges}
+                    visjsData = { nodes: newNodes, edges: newEdges };
 
-                    callbackSeries()
-
+                    callbackSeries();
                 },
                 //draw graph
                 function (callbackSeries) {
@@ -566,8 +562,8 @@ enabled:true},*/
 
     self.outlineNode = function (nodeId) {
         var newNodes = [];
-        self.axiomsVisjsGraph.decorateNodes(null, {borderWidth: 1});
-        self.axiomsVisjsGraph.decorateNodes(nodeId, {borderWidth: 5});
+        self.axiomsVisjsGraph.decorateNodes(null, { borderWidth: 1 });
+        self.axiomsVisjsGraph.decorateNodes(nodeId, { borderWidth: 5 });
     };
     self.removeNodeFromGraph = function () {
         if (confirm("delete node")) {

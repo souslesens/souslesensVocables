@@ -19,6 +19,7 @@
     "is_shared": false,
     "shared_profiles": [],
     "shared_users": [],
+    "modification_date": "2025-01-24T14:16:41.111Z",
     "created_at": "2025-01-24T14:16:41.111Z",
     "owned_by": 1
   },
@@ -44,6 +45,7 @@
     "shared_users": [
       "owl_user"
     ],
+    "modification_date": "2025-01-24T14:18:24.019Z",
     "created_at": "2025-01-24T14:18:24.019Z",
     "owned_by": 2
   },
@@ -69,6 +71,7 @@
       "skos_only"
     ],
     "shared_users": [],
+    "modification_date": "20252025-01-24T14:18:53.409Z",
     "created_at": "2025-01-24T14:18:53.409Z",
     "owned_by": 3
   },
@@ -88,6 +91,7 @@
       "skos_user"
     ],
     "data_content": {},
+    "modification_date": "2025-01-27T08:05:51.750Z",
     "created_at": "2025-01-27T08:05:51.750Z",
     "owned_by": 1
   }

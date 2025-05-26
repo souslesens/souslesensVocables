@@ -261,8 +261,10 @@ class UserDataModel {
         if (Object.hasOwn(userData, "created_at")) {
             delete userData.created_at;
         }
+        if (Object.hasOwn(userData, "modification_date")) {
+            delete userData.modification_date;
+        }
         const data = this._check(userData);
-
         if (this._mainConfig.userData.location === "database" && !this._allowedStringLength(data.data_content)) {
             throw Error(`The specified content is too large for the database`, { cause: 413 });
         }
@@ -282,6 +284,7 @@ class UserDataModel {
             throw Error("The specified owned_by do not exists", { cause: 404 });
         }
         data.owned_by = user.id;
+        data.modification_date = new Date().toISOString();
 
         if (this._mainConfig.userData.location === "file") {
             // Only update the data content when the attribute is in the request

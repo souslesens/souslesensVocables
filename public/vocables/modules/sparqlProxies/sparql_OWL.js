@@ -2978,15 +2978,18 @@ var Sparql_OWL = (function () {
      * @param skgGraphUri
      * @param callback
      */
-    self.createSkgFromOntology=function(sourceLabel,skgGraphUri,callback){
+    self.createSkgFromOntology = function (sourceLabel, skgGraphUri, callback) {
         var ontologygraphUri = Config.sources[sourceLabel].graphUri;
         var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
         var fromStr = Sparql_common.getFromStr(sourceLabel);
 
-        async.series([
-                function(callbackSeries){// transform rdfs:subclassOf in rdf:type
+        async.series(
+            [
+                function (callbackSeries) {
+                    // transform rdfs:subclassOf in rdf:type
 
-                    var query="PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
+                    var query =
+                        "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
                         "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
                         "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
                         "prefix owl: <http://www.w3.org/2002/07/owl#>\n" +
@@ -2998,43 +3001,41 @@ var Sparql_OWL = (function () {
                         "} WHERE { graph <http://totalenergies/resources/tsf/ontology/gidea-3/>{\n" +
                         "    \n" +
                         "  ?sub rdf:type owl:Class .\n" +
-                        "    ?sub rdfs:subClassOf ?superClass . filter (regex(str(?superClass),\"http\"))\n" +
+                        '    ?sub rdfs:subClassOf ?superClass . filter (regex(str(?superClass),"http"))\n' +
                         "    ?sub ?p ?obj filter (?p!=rdfs:subClassOf)\n" +
                         "}\n" +
-                        "}"
+                        "}";
                     Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
-
                         return callbackSeries(err);
                     });
                 },
-            function(callbackSeries){// transform restrictions in predicates
+                function (callbackSeries) {
+                    // transform restrictions in predicates
 
-            var query="PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
-                "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
-                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
-                "insert {  graph <http://totalenergies/resources/tsf/ontology/gidea-3/individuals/>{\n" +
-                " ?sub ?prop ?obj .\n" +
-                "}\n" +
-                "} WHERE { graph <http://totalenergies/resources/tsf/ontology/gidea-3/>{\n" +
-                "    \n" +
-                "  ?sub rdfs:subClassOf ?restr .?restr rdf:type owl:Restriction.\n" +
-                "  ?restr owl:onProperty ?prop.\n" +
-                "    ?restr owl:someValuesFrom ?obj.\n" +
-                "}\n" +
-                "}"
-                Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
-                return callbackSeries(err);
-                });
-            }
-
+                    var query =
+                        "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
+                        "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+                        "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+                        "insert {  graph <http://totalenergies/resources/tsf/ontology/gidea-3/individuals/>{\n" +
+                        " ?sub ?prop ?obj .\n" +
+                        "}\n" +
+                        "} WHERE { graph <http://totalenergies/resources/tsf/ontology/gidea-3/>{\n" +
+                        "    \n" +
+                        "  ?sub rdfs:subClassOf ?restr .?restr rdf:type owl:Restriction.\n" +
+                        "  ?restr owl:onProperty ?prop.\n" +
+                        "    ?restr owl:someValuesFrom ?obj.\n" +
+                        "}\n" +
+                        "}";
+                    Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
+                        return callbackSeries(err);
+                    });
+                },
             ],
-            function(err){
-            return callback(err,"done")
-            })
-
-
-
-    }
+            function (err) {
+                return callback(err, "done");
+            },
+        );
+    };
 
     return self;
 })();

@@ -1093,17 +1093,7 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
                     // manage particular cases
                     if (property == "<http://www.w3.org/2000/01/rdf-schema#subClassOf>" || property == "rdfs:subClassOf") {
                         // update Ontology model cache parent class
-                        if (Config.ontologiesVocabularyModels[self.currentSource]["classes"][self.currentNode.data.id]) {
-                            var data = { classes: {} };
-                            data["classes"][self.currentNode.data.id] = Config.ontologiesVocabularyModels[self.currentSource]["classes"][self.currentNode.data.id];
-                            var valueCleaned = value.replaceAll("<", "").replaceAll(">", "");
-                            data["classes"][self.currentNode.data.id].superClass = valueCleaned;
-                            data["classes"][self.currentNode.data.id].superClassLabel = Sparql_common.getLabelFromURI(valueCleaned);
-                            OntologyModels.updateModel(self.currentSource, data, {}, function (err, result) {
-                                Lineage_whiteboard.lineageVisjsGraph.data.nodes.remove(self.currentNode.data.id);
-                                Lineage_whiteboard.drawNodesAndParents(self.currentNode, null, {}, function () {});
-                            });
-                        }
+                        self.updateSubClassNode(self.currentSource, self.currentNode, value, function (err) {});
                     }
                     // update cache after change subPropertyOf but properties not available in Add Predicates selector
                     /*
@@ -1134,7 +1124,23 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
             });
         }
     };
-
+    self.updateSubClassNode = function (source,node, newSuperClass,callback) {
+        if (Config.ontologiesVocabularyModels[source]["classes"][node.data.id]) {
+            var data = { classes: {} };
+            data["classes"][node.data.id] = Config.ontologiesVocabularyModels[source]["classes"][node.data.id];
+            var valueCleaned = newSuperClass.replaceAll("<", "").replaceAll(">", "");
+            data["classes"][node.data.id].superClass = valueCleaned;
+            data["classes"][node.data.id].superClassLabel = Sparql_common.getLabelFromURI(valueCleaned);
+            OntologyModels.updateModel(source, data, {}, function (err, result) {
+                Lineage_whiteboard.lineageVisjsGraph.data.nodes.remove(node.data.id);
+                Lineage_whiteboard.drawNodesAndParents(node, null, {drawBeforeCallback:true}, function () {
+                    if (callback) {
+                        return callback();
+                    }
+                });
+            });
+        }
+    }
     self.deletePredicate = function (predicateId, prompt, callback) {
         var currentEditingItem = PredicatesSelectorWidget.predicatesIdsMap[predicateId];
         var property = currentEditingItem.item.prop.value;

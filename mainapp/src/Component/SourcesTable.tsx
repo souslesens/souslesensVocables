@@ -1,4 +1,4 @@
-import { SyntheticEvent, useState } from "react";
+import { SyntheticEvent, useState, useRef, ChangeEvent } from "react";
 import {
     Alert,
     Box,
@@ -21,6 +21,7 @@ import {
     TextField,
     Tooltip,
 } from "@mui/material";
+import MenuItem from "@mui/material/MenuItem";
 import { green, pink, grey } from "@mui/material/colors";
 import { Circle, Download, Edit } from "@mui/icons-material";
 
@@ -50,6 +51,8 @@ const SourcesTable = () => {
     const [openModal, setOpenModal] = useState(false);
     const [editModal, setEditModal] = useState(false);
     const [selectedSource, setSelectedSource] = useState<ServerSource | null>(null);
+
+    const searchInputRef = useRef(new HTMLElement());
 
     type Order = "asc" | "desc";
 
@@ -119,6 +122,14 @@ const SourcesTable = () => {
         }
         setSnackOpen(false);
         setSnackMessages(new Set());
+    };
+
+    const handleAddFilter = (event: ChangeEvent<HTMLInputElement>) => {
+        setTimeout(() => {
+            const content = filteringChars ? `${filteringChars} ` : "";
+            setFilteringChars(`${content}${event.currentTarget.value}:`);
+            searchInputRef?.current?.focus();
+        }, 100);
     };
 
     const filterSearchBar = (source: ServerSource, searchEntry: string) => {
@@ -226,14 +237,22 @@ const SourcesTable = () => {
                                 ))}
                             </Alert>
                         </Snackbar>
-                        <TextField
-                            inputProps={{ autoComplete: "off" }}
-                            label="Search Sources by name"
-                            id="search-sources"
-                            onChange={(event) => {
-                                setFilteringChars(event.target.value);
-                            }}
-                        />
+                        <Stack direction="row">
+                            <TextField sx={{ width: "100px" }} select id="filter-sources" label="Filters" value="" onChange={handleAddFilter}>
+                                <MenuItem value="group">group:</MenuItem>
+                            </TextField>
+                            <TextField
+                                sx={{ flex: 1 }}
+                                inputRef={searchInputRef}
+                                value={filteringChars}
+                                inputProps={{ autoComplete: "off", startAdornment: <Circle /> }}
+                                label="Search sources"
+                                id="search-sources"
+                                onChange={(event) => {
+                                    setFilteringChars(event.target.value);
+                                }}
+                            />
+                        </Stack>
                         <TableContainer sx={{ height: "400px" }} component={Paper}>
                             <Table stickyHeader>
                                 <TableHead>

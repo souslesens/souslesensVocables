@@ -837,6 +837,7 @@ var MappingsDetails = (function () {
 
             MappingColumnsGraph.saveVisjsGraph(function () {
                 self.showDetailedMappingsTree();
+                $('#smallDialogDiv').dialog('close');
             });
         },
     };

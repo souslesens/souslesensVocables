@@ -35,13 +35,13 @@ var CreateResource_bot = (function () {
         },
     };
     self.workflow_saveResource = {
-        saveResourceFn: {
+        
             _OR: {
-                Edit: { editResourceFn: {} },
-                Draw: { drawResourceFn: self.workflow_end },
+                Edit: { saveResourceFn: {editResourceFn: {}} },
+                Draw: { saveResourceFn: {drawResourceFn: self.workflow_end }},
             },
-        },
-    };
+    },
+    
 
     self.workflow = {
         listResourceTypesFn: {

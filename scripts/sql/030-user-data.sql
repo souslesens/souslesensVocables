@@ -11,6 +11,7 @@ create table if not exists user_data(
        is_shared         boolean default false,
        shared_profiles   text[],
        shared_users      text[],
+       readwrite         boolean default false,
        created_at        timestamp not null default now(),
        modification_date timestamp not null default now(),
        owned_by          integer references users (id)

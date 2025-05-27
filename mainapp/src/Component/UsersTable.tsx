@@ -119,6 +119,11 @@ export const UsersTable = () => {
 
                     return data;
                 });
+                const goToProfile = (e: React.MouseEvent, profile: string) => {
+                    e.preventDefault();
+                    updateModel({ type: "currentEditionTab", payload: { tab: "profiles", initialFilter: profile } });
+                };
+
                 return (
                     <Stack direction="column" spacing={{ xs: 2 }} sx={{ m: 4 }} useFlexGap>
                         <TextField
@@ -164,7 +169,9 @@ export const UsersTable = () => {
                                                     <TableCell>
                                                         <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
                                                             {user.groups.map((group) => (
-                                                                <Chip key={group} label={group} size="small" />
+                                                                <a href="" key={group} onClick={(e) => goToProfile(e, group)}>
+                                                                    <Chip key={group} label={group} size="small" />
+                                                                </a>
                                                             ))}
                                                         </Stack>
                                                     </TableCell>

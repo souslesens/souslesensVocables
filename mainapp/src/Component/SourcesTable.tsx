@@ -52,7 +52,7 @@ const SourcesTable = () => {
     const [editModal, setEditModal] = useState(false);
     const [selectedSource, setSelectedSource] = useState<ServerSource | null>(null);
 
-    const searchInputRef = useRef(new HTMLElement());
+    const searchInputRef = useRef<HTMLInputElement | null>(null);
 
     type Order = "asc" | "desc";
 
@@ -125,9 +125,9 @@ const SourcesTable = () => {
     };
 
     const handleAddFilter = (event: ChangeEvent<HTMLInputElement>) => {
+        const content = filteringChars ? `${filteringChars} ` : "";
+        setFilteringChars(`${content}${event.target.value}:`);
         setTimeout(() => {
-            const content = filteringChars ? `${filteringChars} ` : "";
-            setFilteringChars(`${content}${event.currentTarget.value}:`);
             searchInputRef?.current?.focus();
         }, 100);
     };

@@ -14,18 +14,18 @@
     "license": "LGPL-3.0-or-later",
     "devDependencies": {
         "@types/human-number": "^1.0.2",
-        "@types/react": "^18.3.12",
-        "@types/react-dom": "^18.3.1",
-        "@vitejs/plugin-react": "^4.3.4",
-        "typescript": "^5.8.2"
+        "@types/react": "^18.3.23",
+        "@types/react-dom": "^18.3.7",
+        "@vitejs/plugin-react": "^4.5.0",
+        "typescript": "^5.8.3"
     },
     "dependencies": {
         "@emotion/react": "^11.14.0",
         "@emotion/styled": "^11.14.0",
-        "@mui/icons-material": "^5.16.14",
-        "@mui/lab": "^5.0.0-alpha.173",
-        "@mui/material": "^5.16.14",
-        "@mui/x-data-grid": "^7.22.3",
+        "@mui/icons-material": "^5.17.1",
+        "@mui/lab": "^5.0.0-alpha.176",
+        "@mui/material": "^5.17.1",
+        "@mui/x-data-grid": "^7.29.4",
         "@mui/x-tree-view": "^6.17.0",
         "clsx": "2.1.1",
         "human-number": "^2.0.4",
@@ -34,7 +34,7 @@
         "react-dom": "18.3.1",
         "react-zorm": "0.9.0",
         "srd": "^1.0.5",
-        "ulid": "^2.3.0",
-        "zod": "3.24.2"
+        "ulid": "^2.4.0",
+        "zod": "3.25.30"
     }
 }

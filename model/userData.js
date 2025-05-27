@@ -22,6 +22,7 @@ const UserDataObject = z
         data_tool: z.string().default(""),
         data_source: z.string().default(""),
         data_path: z.string().default(""),
+        readwrite: z.boolean().default(false),
     })
     .strict();
 
@@ -75,6 +76,7 @@ class UserDataModel {
         is_shared: (typeof data.is_shared === "number" ? data.is_shared === 1 : data.is_shared) || false,
         shared_profiles: (typeof data.shared_profiles === "string" ? JSON.parse(data.shared_profiles) : data.shared_profiles) || [],
         shared_users: (typeof data.shared_users === "string" ? JSON.parse(data.shared_users) : data.shared_users) || [],
+        readwrite: (typeof data.readwrite === "number" ? data.readwrite === 1 : data.readwrite) || false,
     });
 
     /**

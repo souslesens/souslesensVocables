@@ -47,6 +47,7 @@ describe("UserDataModel", () => {
                 shared_profiles: [],
                 shared_users: [],
                 created_at: "2025-01-24T14:16:41.111Z",
+                readwrite: false,
                 owned_by: 1,
             },
             {
@@ -62,6 +63,7 @@ describe("UserDataModel", () => {
                 shared_profiles: [],
                 shared_users: ["owl_user", "skos_user"],
                 created_at: "2025-01-27T08:05:51.750Z",
+                readwrite: false,
                 owned_by: 1,
             },
         ]);
@@ -340,6 +342,7 @@ describe("UserDataModel", () => {
                 databaseSources: {},
             },
             is_shared: true,
+            readwrite: false,
             shared_profiles: [],
             shared_users: ["owl_user", "skos_user"],
         });
@@ -349,6 +352,7 @@ describe("UserDataModel", () => {
         const data = {
             data_content: { sparqlServerUrl: "string", databaseSources: {} },
             is_shared: true,
+            readwrite: false,
             shared_profiles: [],
             shared_users: ["owl_user", "skos_user"],
         };
@@ -359,6 +363,7 @@ describe("UserDataModel", () => {
         expect(userDataModel._convertToJSON({})).toStrictEqual({
             data_content: {},
             is_shared: false,
+            readwrite: false,
             shared_profiles: [],
             shared_users: [],
         });

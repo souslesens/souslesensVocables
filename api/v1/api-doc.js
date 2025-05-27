@@ -460,6 +460,10 @@ const apiDoc = {
                 modification_date: {
                     type: "string",
                 },
+                readwrite: {
+                    type: "boolean",
+                    default: false,
+                },
                 created_at: {
                     type: "string",
                 },
@@ -564,6 +568,10 @@ const apiDoc = {
                     type: "array",
                     default: [],
                     items: { type: "string" },
+                },
+                readwrite: {
+                    type: "boolean",
+                    default: false,
                 },
             },
             required: ["data_type"],

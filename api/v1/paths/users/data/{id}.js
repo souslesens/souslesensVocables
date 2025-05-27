@@ -76,7 +76,11 @@ module.exports = () => {
 
     GET = async (req, res, _next) => {
         try {
+            const userInfo = await userManager.getUser(req.user);
             const data = await userDataModel.find(req.params.id);
+            if (userInfo.user.id != data.owned_by) {
+                throw Error(`The resources is not owned by ${userInfo.user.login}`, { cause: 403 });
+            }
             res.status(200).json(data);
         } catch (error) {
             if (error.cause !== undefined) {

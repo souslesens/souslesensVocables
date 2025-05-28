@@ -533,7 +533,13 @@ var Lineage_createRelation = (function () {
                         } else {
                             callbackSeries("no compatible type");
                         }
-                        var predicatesProperties = ["http://www.w3.org/1999/02/22-rdf-syntax-ns#type", "http://www.w3.org/2000/01/rdf-schema#subClassOf","http://www.w3.org/2000/01/rdf-schema#member",'http://www.w3.org/2002/07/owl#sameAs', 'http://www.w3.org/2002/07/owl#equivalentClass'];
+                        var predicatesProperties = [
+                            "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                            "http://www.w3.org/2000/01/rdf-schema#subClassOf",
+                            "http://www.w3.org/2000/01/rdf-schema#member",
+                            "http://www.w3.org/2002/07/owl#sameAs",
+                            "http://www.w3.org/2002/07/owl#equivalentClass",
+                        ];
                         if (predicatesProperties.includes(propId)) {
                             relationType = "Predicate";
                         }
@@ -641,14 +647,14 @@ var Lineage_createRelation = (function () {
                 },
                 // update ontology model cache for some specific properties
                 function (callbackSeries) {
-                    if( propId=='http://www.w3.org/2000/01/rdf-schema#subClassOf' ) {
-                        self.sourceNode.data={
-                            id: self.sourceNode.id
-                        }
-                        NodeInfosWidget.updateSubClassNode(inSource,self.sourceNode, self.targetNode.id,  function (err) {});
+                    if (propId == "http://www.w3.org/2000/01/rdf-schema#subClassOf") {
+                        self.sourceNode.data = {
+                            id: self.sourceNode.id,
+                        };
+                        NodeInfosWidget.updateSubClassNode(inSource, self.sourceNode, self.targetNode.id, function (err) {});
                     }
                     callbackSeries();
-                }
+                },
             ],
             function (err) {
                 if (self.callbackFn) {

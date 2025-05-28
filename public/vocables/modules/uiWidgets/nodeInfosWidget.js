@@ -1124,7 +1124,7 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
             });
         }
     };
-    self.updateSubClassNode = function (source,node, newSuperClass,callback) {
+    self.updateSubClassNode = function (source, node, newSuperClass, callback) {
         if (Config.ontologiesVocabularyModels[source]["classes"][node.data.id]) {
             var data = { classes: {} };
             data["classes"][node.data.id] = Config.ontologiesVocabularyModels[source]["classes"][node.data.id];
@@ -1133,14 +1133,14 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
             data["classes"][node.data.id].superClassLabel = Sparql_common.getLabelFromURI(valueCleaned);
             OntologyModels.updateModel(source, data, {}, function (err, result) {
                 Lineage_whiteboard.lineageVisjsGraph.data.nodes.remove(node.data.id);
-                Lineage_whiteboard.drawNodesAndParents(node, null, {drawBeforeCallback:true}, function () {
+                Lineage_whiteboard.drawNodesAndParents(node, null, { drawBeforeCallback: true }, function () {
                     if (callback) {
                         return callback();
                     }
                 });
             });
         }
-    }
+    };
     self.deletePredicate = function (predicateId, prompt, callback) {
         var currentEditingItem = PredicatesSelectorWidget.predicatesIdsMap[predicateId];
         var property = currentEditingItem.item.prop.value;

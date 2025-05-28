@@ -34,28 +34,25 @@ var CreateResource_bot = (function () {
             End: {},
         },
     };
-    self.workflow_saveResource = {
-        
-            _OR: {
-                Edit: { saveResourceFn: {editResourceFn: {}} },
-                Draw: { saveResourceFn: {drawResourceFn: self.workflow_end }},
-            },
-    },
-    
-
-    self.workflow = {
-        listResourceTypesFn: {
-            _OR: {
-                "owl:Class": { promptResourceLabelFn: { listVocabsFn: { listSuperClassesFn: self.workflow_saveResource } } },
-                // "owl:ObjectProperty": { promptResourceLabelFn: { listVocabsFn: { listObjectPropertiesfn: self.workflow_saveResource } } },
-
-                "owl:NamedIndividual": { promptResourceLabelFn: { listVocabsFn: { listClassTypesFn: self.workflow_saveResource } } },
-                DatatypeProperty: { promptDatatypePropertyLabelFn: { listDatatypePropertyDomainFn: { listDatatypePropertyRangeFn: { createDataTypePropertyFn: {} } } } },
-                ImportClass: { listVocabsFn: { listSuperClassesFn: self.workflow_saveResource } },
-                ImportSource: { listImportsFn: { saveImportSource: self.workflow_end } },
-            },
+    (self.workflow_saveResource = {
+        _OR: {
+            Edit: { saveResourceFn: { editResourceFn: {} } },
+            Draw: { saveResourceFn: { drawResourceFn: self.workflow_end } },
         },
-    };
+    }),
+        (self.workflow = {
+            listResourceTypesFn: {
+                _OR: {
+                    "owl:Class": { promptResourceLabelFn: { listVocabsFn: { listSuperClassesFn: self.workflow_saveResource } } },
+                    // "owl:ObjectProperty": { promptResourceLabelFn: { listVocabsFn: { listObjectPropertiesfn: self.workflow_saveResource } } },
+
+                    "owl:NamedIndividual": { promptResourceLabelFn: { listVocabsFn: { listClassTypesFn: self.workflow_saveResource } } },
+                    DatatypeProperty: { promptDatatypePropertyLabelFn: { listDatatypePropertyDomainFn: { listDatatypePropertyRangeFn: { createDataTypePropertyFn: {} } } } },
+                    ImportClass: { listVocabsFn: { listSuperClassesFn: self.workflow_saveResource } },
+                    ImportSource: { listImportsFn: { saveImportSource: self.workflow_end } },
+                },
+            },
+        });
 
     self.workFlowDatatypeProperty = {
         promptDatatypePropertyLabelFn: { listDatatypePropertyDomainFn: { listDatatypePropertyRangeFn: { createDataTypePropertyFn: {} } } },

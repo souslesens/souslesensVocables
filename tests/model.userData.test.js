@@ -165,12 +165,14 @@ describe("UserDataModel", () => {
         const filePath = path.join(temporaryDirectory, "user_data", "1-1-xxx.json");
         fs.writeFileSync(filePath, JSON.stringify(data));
 
-        const userData = await userDataModel.find(1);
+        const user = { id: "1", login: "admin", groups: ["admin"] };
+        const userData = await userDataModel.find(1, user);
         expect(userData).toBeTruthy();
     });
 
     test("find userData with unknown identifier", async () => {
-        expect(async () => await userDataModel.find(10)).rejects.toThrow();
+        const user = { id: "1", login: "admin", groups: ["admin"] };
+        expect(async () => await userDataModel.find(10, user)).rejects.toThrow();
     });
 
     test("insert userData (file)", async () => {

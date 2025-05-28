@@ -174,11 +174,20 @@ class UserDataModel {
         }
     };
 
-    find = async (identifier) => {
+    find = async (identifier, user) => {
         this._checkIdentifier(identifier);
+        const currentUser = this._getUser(user);
 
         const connection = getKnexConnection(this._mainConfig.database);
         const results = await connection.select("*").from("user_data").where("id", identifier).first();
+
+        // don't return if unauthorized
+        const isOwner = results.owned_by === parseInt(currentUser.id);
+        const isSharedWithUser = results.is_shared && results.shared_users.includes(currentUser.login);
+        const isSharedWithGroup = results.is_shared && new Set(currentUser.groups.filter((grp) => new Set(results.shared_profiles).has(grp))).size;
+        if (!(isOwner || isSharedWithUser || isSharedWithGroup)) {
+            throw Error("Unauthorized", { cause: 401 });
+        }
 
         if (results.data_path) {
             const fileContent = JSON.parse(fs.readFileSync(this._getStorage(results.data_path)));

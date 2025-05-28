@@ -179,8 +179,8 @@ module.exports = () => {
         try {
             // users can only update their own data
             const userInfo = await userManager.getUser(req.user);
-            const existingData = await userDataModel.find(req.body.id);
-            if (userInfo.user.id != existingData.owned_by && !existingData.readwrite) {
+            const existingData = await userDataModel.find(req.body.id, userInfo.user);
+            if (!existingData.readwrite) {
                 throw Error(`The resources is readonly and not owned by ${userInfo.user.login}`, { cause: 403 });
             }
             const userData = await cleanUserData.clean(req.body);

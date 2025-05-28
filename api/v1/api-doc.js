@@ -569,26 +569,6 @@ const apiDoc = {
         },
         UserDataContent: {
             type: "object",
-            properties: {
-                sparqlServerUrl: {
-                    type: "string",
-                },
-                graphUri: {
-                    type: "string",
-                },
-                prefixes: {
-                    type: "object",
-                },
-                lookups: {
-                    type: "object",
-                },
-                databaseSources: {
-                    type: "object",
-                },
-                cvsSources: {
-                    type: "object",
-                },
-            },
         },
     },
     tags: [

@@ -107,12 +107,11 @@ class UserDataModel {
         let currentUserData = await connection.select("*").from("user_data").where("owned_by", parseInt(currentUser.id)).orWhere("is_shared", true);
         currentUserData = currentUserData
             .map((data) => {
-                if (data.data_path) {
-                    const fileContent = JSON.parse(fs.readFileSync(this._getStorage(data.data_path)));
-                    data.data_content = fileContent;
-                }
-                delete data.data_path;
-                return this._convertToJSON(data);
+                const result = this._convertToJSON(data);
+                // all route don't expose content
+                delete result.data_content;
+                delete result.data_path;
+                return result;
             })
             .filter((data) => {
                 const isOwner = data.owned_by === parseInt(currentUser.id);

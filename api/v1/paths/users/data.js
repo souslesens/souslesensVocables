@@ -81,7 +81,7 @@ module.exports = () => {
                 description: "Retrieve the entire list of User Data",
                 schema: {
                     type: "array",
-                    items: { $ref: "#/definitions/UserData" },
+                    items: { $ref: "#/definitions/UserDataWithoutContent" },
                 },
             },
             500: {

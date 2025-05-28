@@ -36,21 +36,12 @@ describe("UserDataModel", () => {
         expect(userData).toStrictEqual([
             {
                 id: 1,
-                data_path: "1-1-xxx.json",
                 data_type: "",
                 data_source: "",
                 data_tool: "",
                 data_label: "data1",
                 data_comment: "",
                 data_group: "",
-                data_content: {
-                    sparqlServerUrl: "string",
-                    graphUri: "string",
-                    prefixes: {},
-                    lookups: {},
-                    databaseSources: {},
-                    cvsSources: {},
-                },
                 is_shared: false,
                 modification_date: "2025-01-24T14:16:41.111Z",
                 shared_profiles: [],
@@ -60,14 +51,12 @@ describe("UserDataModel", () => {
             },
             {
                 id: 5,
-                data_path: "5-1-xxx.json",
                 data_type: "string",
                 data_source: "source",
                 data_tool: "tool",
                 data_label: "",
                 data_comment: "",
                 data_group: "",
-                data_content: {},
                 is_shared: false,
                 modification_date: "2025-01-27T08:05:51.750Z",
                 shared_profiles: [],
@@ -170,6 +159,10 @@ describe("UserDataModel", () => {
     });
 
     test("get find userData", async () => {
+        const data = { test: "hello" };
+        const filePath = path.join(temporaryDirectory, "user_data", "1-1-xxx.json");
+        fs.writeFileSync(filePath, JSON.stringify(data));
+
         const userData = await userDataModel.find(1);
         expect(userData).toBeTruthy();
     });

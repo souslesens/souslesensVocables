@@ -149,7 +149,7 @@ describe("UserModelJson", () => {
             maxNumberCreatedSource: 5,
         };
         const results = await userModel.addUserAccount(addedUser);
-        expect(results).toStrictEqual(5)
+        expect(results).toStrictEqual(5);
     });
 
     test("add a new user with an existing login", async () => {

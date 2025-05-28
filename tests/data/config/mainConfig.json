@@ -6,9 +6,9 @@
     "auth": "database",
     "defaultGroups": [],
     "logs": {
-      "directory": "logs",
-      "useFileLogger": true,
-      "useSymlink": true
+        "directory": "logs",
+        "useFileLogger": true,
+        "useSymlink": true
     },
     "default_lang": "en",
     "formalOntologySourceLabel": "ISO",

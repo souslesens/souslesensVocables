@@ -85,8 +85,8 @@ describe("ToolModel", () => {
 
     test("Get non existing Repository tag", async () => {
         const result = await toolModel.getRepositoryTags("Test");
-        expect(result.status).toStrictEqual('failure');
-        expect(result.message).toStrictEqual('Cannot found the identifier in the plugins directory');
+        expect(result.status).toStrictEqual("failure");
+        expect(result.message).toStrictEqual("Cannot found the identifier in the plugins directory");
     });
 
     test("Read default config", async () => {
@@ -101,19 +101,14 @@ describe("ToolModel", () => {
 
     test("get fake Repository Plugins", async () => {
         const repositoryPlugins = await toolModel.getRepositoryPlugins("fakeId");
-        expect(repositoryPlugins.status).toStrictEqual("failure")
-        expect(repositoryPlugins.message).toStrictEqual(
-            "Cannot found the identifier in the plugins directory"
-        );
+        expect(repositoryPlugins.status).toStrictEqual("failure");
+        expect(repositoryPlugins.message).toStrictEqual("Cannot found the identifier in the plugins directory");
     });
 
     test("fetch fake Repository", async () => {
         jest.spyOn(console, "error").mockImplementation(() => {});
-        const fetchRepo = await toolModel.fetchRepository(
-            "myRepo",
-            {url: "fakeurl", token: "token", version: "1.0"},
-        )
+        const fetchRepo = await toolModel.fetchRepository("myRepo", { url: "fakeurl", token: "token", version: "1.0" });
         expect(fetchRepo.status).toStrictEqual("failure");
-        expect(fetchRepo.message).toContain('https://fakeurl/');
+        expect(fetchRepo.message).toContain("https://fakeurl/");
     });
 });

@@ -54,7 +54,7 @@ describe("Test the Profilemodel module", () => {
             isShared: true,
             id: "read_folder_1",
             name: "read_folder_1",
-            sourcesAccessControl: {"OWL/FOLDER_1": "read"},
+            sourcesAccessControl: { "OWL/FOLDER_1": "read" },
             theme: "",
         });
     });

@@ -641,7 +641,7 @@ sourceDivId +
             '<span class="popupMenuItem" onclick="Lineage_sources.menuActions.ungroupSource();">Ungroup</span>' +
             '<span  class="popupMenuItem" onclick="Lineage_sources.menuActions.copyGraphUri();"> copy graph URI </span>';
         if (source !== "_defaultSource") {
-            if (self.isSourceOwnedByUser(source)) {
+            if (self.isSourceEditableForUser(source)) {
                 html += '<span class="popupMenuItem" onclick="Lineage_sources.menuActions.editSource();">Edit</span>';
             }
             html += '<span class="popupMenuItem" onclick="Lineage_sources.menuActions.downloadGraph();">Download</span>';

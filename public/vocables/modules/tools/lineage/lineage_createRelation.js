@@ -533,7 +533,14 @@ var Lineage_createRelation = (function () {
                         } else {
                             callbackSeries("no compatible type");
                         }
-                        if (propId == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" || propId == "http://www.w3.org/2000/01/rdf-schema#subClassOf") {
+                        var predicatesProperties = [
+                            "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                            "http://www.w3.org/2000/01/rdf-schema#subClassOf",
+                            "http://www.w3.org/2000/01/rdf-schema#member",
+                            "http://www.w3.org/2002/07/owl#sameAs",
+                            "http://www.w3.org/2002/07/owl#equivalentClass",
+                        ];
+                        if (predicatesProperties.includes(propId)) {
                             relationType = "Predicate";
                         }
                         callbackSeries();
@@ -635,6 +642,16 @@ var Lineage_createRelation = (function () {
                     }
                     if (Lineage_whiteboard.lineageVisjsGraph.data) {
                         Lineage_whiteboard.lineageVisjsGraph.data.edges.add([newEdge]);
+                    }
+                    callbackSeries();
+                },
+                // update ontology model cache for some specific properties
+                function (callbackSeries) {
+                    if (propId == "http://www.w3.org/2000/01/rdf-schema#subClassOf") {
+                        self.sourceNode.data = {
+                            id: self.sourceNode.id,
+                        };
+                        NodeInfosWidget.updateSubClassNode(inSource, self.sourceNode, self.targetNode.id, function (err) {});
                     }
                     callbackSeries();
                 },

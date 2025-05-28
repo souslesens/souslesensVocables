@@ -84,6 +84,7 @@ class UserDataModel {
      * @returns {String} - the absolute path to the file in the storage
      */
     _getStorage = (filename) => {
+        fs.mkdirSync(path.resolve(this._dataPath, "user_data"), { recursive: true });
         return path.resolve(this._dataPath, "user_data", filename);
     };
 
@@ -105,7 +106,14 @@ class UserDataModel {
         const currentUser = this._getUser(user);
         let currentUserData = await connection.select("*").from("user_data").where("owned_by", parseInt(currentUser.id)).orWhere("is_shared", true);
         currentUserData = currentUserData
-            .map((data) => this._convertToJSON(data))
+            .map((data) => {
+                if (data.data_path) {
+                    const fileContent = JSON.parse(fs.readFileSync(this._getStorage(data.data_path)));
+                    data.data_content = fileContent;
+                }
+                delete data.data_path;
+                return this._convertToJSON(data);
+            })
             .filter((data) => {
                 const isOwner = data.owned_by === parseInt(currentUser.id);
                 const isSharedWithUser = data.is_shared && data.shared_users.includes(currentUser.login);
@@ -170,6 +178,13 @@ class UserDataModel {
 
         const connection = getKnexConnection(this._mainConfig.database);
         const results = await connection.select("*").from("user_data").where("id", identifier).first();
+
+        if (results.data_path) {
+            const fileContent = JSON.parse(fs.readFileSync(this._getStorage(results.data_path)));
+            results.data_content = fileContent;
+            delete results.data_path;
+        }
+
         if (results === undefined) {
             cleanupConnection(connection);
             throw Error("The specified identifier do not exists", { cause: 404 });

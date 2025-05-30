@@ -2987,7 +2987,6 @@ var Sparql_OWL = (function () {
     self.createSkgFromOntology = function (sourceLabel, skgGraphUri, callback) {
         var ontologygraphUri = Config.sources[sourceLabel].graphUri;
         var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
-        var fromStr = Sparql_common.getFromStr(sourceLabel);
 
         async.series(
             [
@@ -2999,13 +2998,16 @@ var Sparql_OWL = (function () {
                         "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
                         "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
                         "prefix owl: <http://www.w3.org/2002/07/owl#>\n" +
-                        "insert {  graph <http://totalenergies/resources/tsf/ontology/gidea-3/individuals/>{\n" +
+                        "insert {  graph <" +
+                        skgGraphUri +
+                        ">{\n" +
                         " ?sub rdf:type owl:NamedIndividual .\n" +
                         "   ?sub rdf:type ?superClass.\n" +
                         "    ?sub ?p ?obj\n" +
                         "}\n" +
-                        "} WHERE { graph <http://totalenergies/resources/tsf/ontology/gidea-3/>{\n" +
-                        "    \n" +
+                        "} WHERE { graph <" +
+                        ontologygraphUri +
+                        ">{\n" +
                         "  ?sub rdf:type owl:Class .\n" +
                         '    ?sub rdfs:subClassOf ?superClass . filter (regex(str(?superClass),"http"))\n' +
                         "    ?sub ?p ?obj filter (?p!=rdfs:subClassOf)\n" +
@@ -3022,11 +3024,14 @@ var Sparql_OWL = (function () {
                         "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
                         "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
                         "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
-                        "insert {  graph <http://totalenergies/resources/tsf/ontology/gidea-3/individuals/>{\n" +
+                        "insert {  graph <" +
+                        skgGraphUri +
+                        ">{\n" +
                         " ?sub ?prop ?obj .\n" +
-                        "}\n" +
-                        "} WHERE { graph <http://totalenergies/resources/tsf/ontology/gidea-3/>{\n" +
-                        "    \n" +
+                        "}" +
+                        "} WHERE { graph <" +
+                        ontologygraphUri +
+                        ">{\n" +
                         "  ?sub rdfs:subClassOf ?restr .?restr rdf:type owl:Restriction.\n" +
                         "  ?restr owl:onProperty ?prop.\n" +
                         "    ?restr owl:someValuesFrom ?obj.\n" +

@@ -439,7 +439,7 @@ $("#sourceDivControlPanelDiv").html(html);*/
             return alert("source does not not exist");
         }
         var graphUri = Config.sources[source].graphUri;
-        if (!prompt("Do you really want to generate a SKG for ontology " + source + " , graph " + graphUri + "skg/")) {
+        if (!confirm("Do you  want to generate a SKG for ontology " + source + " , graph " + graphUri + "skg/")) {
             return;
         }
         Sparql_OWL.createSkgFromOntology(source, graphUri + "skg/", function (err, result) {

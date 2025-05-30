@@ -358,9 +358,7 @@ var KGquery_graph = (function () {
                     return callback();
                 }
                 if (implicitModel.length == 0) {
-                    return callback(null,null)
-
-
+                    return callback(null, null);
                 }
 
                 var reflexiveEdges = {};
@@ -877,21 +875,14 @@ var KGquery_graph = (function () {
                             return alert(err);
                         }
 
-                       if(result2===null){
-                           return alert("no implicit graph model for source "+ source )
-                            var transformOntologyToIndividuals=confirm("no implicit graph model . Do you want to generate a SKG from TBOX for source " + source+"");
-                       if(transformOntologyToIndividuals){
-                          $("#KGqueryGraph_useSkgUriCBX").prop("checked",true)
-
-                       }
-                     return ;
-
-
-
-
+                        if (result2 === null) {
+                            return alert("no implicit graph model for source " + source);
+                            var transformOntologyToIndividuals = confirm("no implicit graph model . Do you want to generate a SKG from TBOX for source " + source + "");
+                            if (transformOntologyToIndividuals) {
+                                $("#KGqueryGraph_useSkgUriCBX").prop("checked", true);
+                            }
+                            return;
                         }
-
-
 
                         var oldNodesMap = {};
                         var oldEdgesMap = {};

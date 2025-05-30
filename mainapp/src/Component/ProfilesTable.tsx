@@ -52,7 +52,7 @@ import { Datas } from "react-csv-downloader/dist/esm/lib/csv";
 
 const ProfilesTable = () => {
     const { model, updateModel } = useModel();
-    const [filteringChars, setFilteringChars] = useState("");
+    const [filteringChars, setFilteringChars] = useState(model.profilesInitialFilter);
     const [orderBy, setOrderBy] = useState<keyof Profile>("name");
     const [order, setOrder] = useState<Order>("asc");
 
@@ -127,6 +127,7 @@ const ProfilesTable = () => {
                             onChange={(event) => {
                                 setFilteringChars(event.target.value);
                             }}
+                            value={filteringChars}
                         />
                         <TableContainer sx={{ height: "400px" }} component={Paper}>
                             <Table stickyHeader>

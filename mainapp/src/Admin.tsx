@@ -35,11 +35,12 @@ type Model = {
     pluginsConfig: RD<string, Record<string, PluginOptionType>>;
     pluginsEnabled: RD<string, Array<{ name: string }>>;
     repositories: RD<string, Record<string, RepositoryType>>;
+    profilesInitialFilter: string;
 };
 
 export type Msg =
     | { type: "config"; payload: RD<string, ConfigType> }
-    | { type: "currentEditionTab"; payload: EditionTab }
+    | { type: "currentEditionTab"; payload: { tab: EditionTab; initialFilter: string } }
     | { type: "databases"; payload: RD<string, Database[]> }
     | { type: "graphs"; payload: RD<string, GraphInfo[]> }
     | { type: "indices"; payload: RD<string, string[]> }
@@ -71,6 +72,7 @@ const initialModel: Model = {
     pluginsConfig: loading(),
     pluginsEnabled: loading(),
     repositories: loading(),
+    profilesInitialFilter: "",
 };
 
 const ModelContext = createContext<{ model: Model; updateModel: Dispatch<Msg> } | null>(null);
@@ -86,9 +88,10 @@ export function useModel() {
 function update(model: Model, msg: Msg): Model {
     if (msg.type === "currentEditionTab") {
         const params = new URLSearchParams(document.location.search);
-        params.set("tab", msg.payload.toString());
+        params.set("tab", msg.payload.tab.toString());
         // Insert or replace the tab key in the URL
         window.history.replaceState(null, "", `?${params.toString()}`);
+        return { ...model, currentEditionTab: msg.payload.tab, profilesInitialFilter: msg.payload.initialFilter };
     }
 
     return { ...model, [msg.type]: msg.payload };
@@ -140,7 +143,11 @@ const Admin = () => {
     return (
         <ModelContext.Provider value={{ model, updateModel }}>
             <Box sx={{ bgcolor: "Background.paper", borderBottom: 1, borderColor: "divider" }}>
-                <Tabs onChange={(_event, newValue: string) => updateModel({ type: "currentEditionTab", payload: newValue as EditionTab })} value={model.currentEditionTab} centered>
+                <Tabs
+                    onChange={(_event, newValue: string) => updateModel({ type: "currentEditionTab", payload: { tab: newValue as EditionTab, initialFilter: "" } })}
+                    value={model.currentEditionTab}
+                    centered
+                >
                     <Tab label="Settings" value="settings" />
                     <Tab label="Users" value="users" />
                     <Tab label="Profiles" value="profiles" />
@@ -155,7 +162,7 @@ const Admin = () => {
     );
 };
 
-const Dispatcher = (props: { model: Model }) => {
+export const Dispatcher = (props: { model: Model }) => {
     switch (props.model.currentEditionTab) {
         case "settings":
             return <ConfigForm />;

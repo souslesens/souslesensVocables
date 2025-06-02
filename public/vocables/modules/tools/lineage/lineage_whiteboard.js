@@ -3658,9 +3658,9 @@ self.zoomGraphOnNode(node.data[0].id, false);
          */
         showAxioms: function () {
             if (self.currentGraphNode) {
-                $("#mainDialogDiv").dialog("option", "title", "Axioms of resource " + self.currentGraphNode.data.label);
+                $("#smallDialogDiv").dialog("option", "title", "Axioms of resource " + self.currentGraphNode.data.label);
 
-                NodeInfosAxioms.init(self.currentGraphNode.data.source, self.currentGraphNode, "mainDialogDiv");
+                NodeInfosAxioms.init(self.currentGraphNode.data.source, self.currentGraphNode, "smallDialogDiv");
             }
         },
 

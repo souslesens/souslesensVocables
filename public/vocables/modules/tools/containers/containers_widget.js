@@ -65,12 +65,12 @@ var Containers_widget = (function () {
     self.execParentContainersSearch = function () {
         $("#smallDialogDiv").dialog("close");
         var type = $("#containerSearchWidget_typesSelect").val();
-        
+
         var filter = "";
-        
-        var options={};
+
+        var options = {};
         if (type && type != "all") {
-            options['filterAncestorsType']= type;
+            options["filterAncestorsType"] = type;
             filter = " ?container rdf:type <" + type + ">. ";
         }
         Containers_graph.graphParentContainers(Lineage_sources.activeSource, null, options);

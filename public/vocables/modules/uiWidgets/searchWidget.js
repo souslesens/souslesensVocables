@@ -451,9 +451,9 @@ var SearchWidget = (function () {
         items.axioms = {
             label: "Node axioms",
             action: function (e) {
-                $("#mainDialogDiv").dialog("option", "title", "Axioms of resource " + self.currentTreeNode.data.label);
+                $("#smallDialogDiv").dialog("option", "title", "Axioms of resource " + self.currentTreeNode.data.label);
 
-                NodeInfosAxioms.init(self.currentTreeNode.data.source, self.currentTreeNode, "mainDialogDiv");
+                NodeInfosAxioms.init(self.currentTreeNode.data.source, self.currentTreeNode, "smallDialogDiv");
             },
         };
 

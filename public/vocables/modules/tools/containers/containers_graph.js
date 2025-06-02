@@ -47,13 +47,18 @@ var Containers_graph = (function () {
             source = Lineage_sources.activeSource;
         }
         var fromStr = Sparql_common.getFromStr(source, false, true);
-        if (!ids) {
+
+        var filter=""
+        if (!ids && Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
+
             ids = Lineage_whiteboard.lineageVisjsGraph.data.nodes.getIds();
+             filter = Sparql_common.setFilter("node", ids);
         }
-        var filter = Sparql_common.setFilter("node", ids);
+
 
         if (options.filter) {
             filter += options.filter;
+
         }
 
         options.depth = 1;

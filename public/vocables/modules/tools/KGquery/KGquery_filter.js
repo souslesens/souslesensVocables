@@ -32,8 +32,10 @@ var KGquery_filter = (function () {
             querySet.elements.forEach(function (queryElement, queryElementIndex) {
                 // queryElement.paths.forEach(function(pathItem, pathIndex) {
                 if (queryElement.fromNode) {
+                    var subjectVarName = KGquery.getVarName(queryElement.fromNode, true);
                     if (queryElement.fromNode.data.nonObjectProperties) {
-                        var subjectVarName = KGquery.getVarName(queryElement.fromNode, true);
+                        
+                      
                         queryElement.fromNode.data.nonObjectProperties.forEach(function (property) {
                             if (property.id == "http://purl.org/dc/terms/created") {
                                 return;
@@ -44,12 +46,15 @@ var KGquery_filter = (function () {
                             }
                         });
                     } else {
-                        queryElement.fromNode.data.nonObjectProperties = [];
+                        
+                            uniqueProps[subjectVarName + "_" + 'labelFromURI'] = 1;
+                            queryNonObjectProperties.push({ varName: subjectVarName, property: { id: "labelFromURI", label: "labelFromURI" }, queryElementData: queryElement.fromNode.data });
                     }
                 }
                 if (queryElement.toNode) {
+                    var objectVarName = KGquery.getVarName(queryElement.toNode, true);
                     if (queryElement.toNode.data.nonObjectProperties) {
-                        var objectVarName = KGquery.getVarName(queryElement.toNode, true);
+                        
                         queryElement.toNode.data.nonObjectProperties.forEach(function (property) {
                             if (property.id == "http://purl.org/dc/terms/created") {
                                 return;
@@ -60,7 +65,9 @@ var KGquery_filter = (function () {
                             }
                         });
                     } else {
-                        queryElement.toNode.data.nonObjectProperties = [];
+                        
+                            uniqueProps[objectVarName + "_" + 'labelFromURI'] = 1;
+                            queryNonObjectProperties.push({ varName: objectVarName, property: { id: "labelFromURI", label: "labelFromURI" }, queryElementData: queryElement.toNode.data });
                     }
                 }
 
@@ -179,7 +186,12 @@ var KGquery_filter = (function () {
             alert("no properties selected");
             return callback("no properties selected");
         }
+        var labelFromURIToDisplay = [];
         propertyNodes.forEach(function (node) {
+            if(node?.data?.property && node?.data?.property?.id == "labelFromURI") {
+                labelFromURIToDisplay.push(node?.data?.varName);
+                return;
+            }
             if (node.parents.length == 2) {
                 selectedPropertyNodes.push(node);
                 selectClauseSparql += " ?" + node.id;
@@ -218,7 +230,7 @@ var KGquery_filter = (function () {
             optionalPredicatesSparql = addToStringIfNotExists(str, optionalPredicatesSparql);
         });
         KGquery.currentSelectedPredicates = selectedPropertyNodes;
-        return callback(null, { optionalPredicatesSparql: optionalPredicatesSparql, selectClauseSparql: selectClauseSparql });
+        return callback(null, { optionalPredicatesSparql: optionalPredicatesSparql, selectClauseSparql: selectClauseSparql , labelFromURIToDisplay: labelFromURIToDisplay });
     };
 
     /**

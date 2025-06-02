@@ -34,8 +34,6 @@ var KGquery_filter = (function () {
                 if (queryElement.fromNode) {
                     var subjectVarName = KGquery.getVarName(queryElement.fromNode, true);
                     if (queryElement.fromNode.data.nonObjectProperties) {
-                        
-                      
                         queryElement.fromNode.data.nonObjectProperties.forEach(function (property) {
                             if (property.id == "http://purl.org/dc/terms/created") {
                                 return;
@@ -46,15 +44,13 @@ var KGquery_filter = (function () {
                             }
                         });
                     } else {
-                        
-                            uniqueProps[subjectVarName + "_" + 'labelFromURI'] = 1;
-                            queryNonObjectProperties.push({ varName: subjectVarName, property: { id: "labelFromURI", label: "labelFromURI" }, queryElementData: queryElement.fromNode.data });
+                        uniqueProps[subjectVarName + "_" + "labelFromURI"] = 1;
+                        queryNonObjectProperties.push({ varName: subjectVarName, property: { id: "labelFromURI", label: "labelFromURI" }, queryElementData: queryElement.fromNode.data });
                     }
                 }
                 if (queryElement.toNode) {
                     var objectVarName = KGquery.getVarName(queryElement.toNode, true);
                     if (queryElement.toNode.data.nonObjectProperties) {
-                        
                         queryElement.toNode.data.nonObjectProperties.forEach(function (property) {
                             if (property.id == "http://purl.org/dc/terms/created") {
                                 return;
@@ -65,9 +61,8 @@ var KGquery_filter = (function () {
                             }
                         });
                     } else {
-                        
-                            uniqueProps[objectVarName + "_" + 'labelFromURI'] = 1;
-                            queryNonObjectProperties.push({ varName: objectVarName, property: { id: "labelFromURI", label: "labelFromURI" }, queryElementData: queryElement.toNode.data });
+                        uniqueProps[objectVarName + "_" + "labelFromURI"] = 1;
+                        queryNonObjectProperties.push({ varName: objectVarName, property: { id: "labelFromURI", label: "labelFromURI" }, queryElementData: queryElement.toNode.data });
                     }
                 }
 
@@ -188,7 +183,7 @@ var KGquery_filter = (function () {
         }
         var labelFromURIToDisplay = [];
         propertyNodes.forEach(function (node) {
-            if(node?.data?.property && node?.data?.property?.id == "labelFromURI") {
+            if (node?.data?.property && node?.data?.property?.id == "labelFromURI") {
                 labelFromURIToDisplay.push(node?.data?.varName);
                 return;
             }
@@ -230,7 +225,7 @@ var KGquery_filter = (function () {
             optionalPredicatesSparql = addToStringIfNotExists(str, optionalPredicatesSparql);
         });
         KGquery.currentSelectedPredicates = selectedPropertyNodes;
-        return callback(null, { optionalPredicatesSparql: optionalPredicatesSparql, selectClauseSparql: selectClauseSparql , labelFromURIToDisplay: labelFromURIToDisplay });
+        return callback(null, { optionalPredicatesSparql: optionalPredicatesSparql, selectClauseSparql: selectClauseSparql, labelFromURIToDisplay: labelFromURIToDisplay });
     };
 
     /**

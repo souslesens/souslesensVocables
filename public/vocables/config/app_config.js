@@ -21,7 +21,6 @@ var Config = (function () {
     }
     self.labelsGraphUri = "http://souslesens.org/vocables/resource/labels/";
     self.wikiCategoriesGraphUri = "http://souslesens.org/data/total/ep/";
-
     self.defaultNewUriRoot = "http://souslesens.org/resource/";
     self.linkedData_mappings_graphUri = "http://souslesens.org/resource/linkedData_mappings/";
 

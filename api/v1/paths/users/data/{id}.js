@@ -5,6 +5,10 @@ module.exports = () => {
     DELETE = async (req, res, _next) => {
         try {
             const userInfo = await userManager.getUser(req.user);
+            const userData = userDataModel.find(req.params.id, userInfo.user);
+            if (!userData.readwrite) {
+                throw Error(`The resources is readonly and not owned by ${userInfo.user.login}`, { cause: 403 });
+            }
             await userDataModel.remove(req.params.id, userInfo.user);
             res.status(200).json({ message: "The resource has been removed successfully" });
         } catch (error) {
@@ -76,12 +80,8 @@ module.exports = () => {
 
     GET = async (req, res, _next) => {
         try {
-            const data = await userDataModel.find(req.params.id);
-
-            if (userDataModel._mainConfig.userData.location === "file") {
-                data.data_content = await userDataModel.file(req.params.id, req.user);
-            }
-
+            const userInfo = await userManager.getUser(req.user);
+            const data = await userDataModel.find(req.params.id, userInfo.user);
             res.status(200).json(data);
         } catch (error) {
             if (error.cause !== undefined) {

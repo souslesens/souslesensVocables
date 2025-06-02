@@ -11,7 +11,6 @@ const { cleanupConnection, getKnexConnection } = require("../model/utils");
 const TOOL_MODEL = new ToolModel(path.join(__dirname, "data/plugins"));
 const PROFILE_MODEL = new ProfileModel(TOOL_MODEL, path.join(__dirname, "data/config/profiles.json"));
 
-
 jest.mock("../model/utils", () => {
     const knex = require("knex");
     return {
@@ -19,7 +18,6 @@ jest.mock("../model/utils", () => {
         getKnexConnection: knex({ client: MockClient, dialect: "pg" }),
     };
 });
-
 
 describe("SourceModel", () => {
     let dbProfiles;
@@ -33,9 +31,7 @@ describe("SourceModel", () => {
 
         tracker = createTracker(getKnexConnection);
 
-        dbProfiles = JSON.parse(fs.readFileSync(
-            path.join(__dirname, "data", "config", "profiles.json")
-        ));
+        dbProfiles = JSON.parse(fs.readFileSync(path.join(__dirname, "data", "config", "profiles.json")));
     });
 
     afterEach(() => {
@@ -55,7 +51,7 @@ describe("SourceModel", () => {
             Object.entries(sourcesFromFiles).map(([id, source]) => {
                 source.accessControl = "readwrite";
                 return [id, source];
-            })
+            }),
         );
         expect(sources).toStrictEqual(expectedResult);
     });
@@ -85,32 +81,32 @@ describe("SourceModel", () => {
                     source.accessControl = "read";
                     return [id, source];
                 }
-            })
+            }),
         );
         expect(sources).toStrictEqual(expectedResult);
     });
 
-    test("get one user sources",  async () => {
+    test("get one user sources", async () => {
         tracker.on.select("profiles_list").response(dbProfiles);
-        const user = {login: "admin", groups: []};
+        const user = { login: "admin", groups: [] };
         const source = await sourceModel.getOneUserSource(user, "SOURCE_2");
         expect(source.name).toStrictEqual("SOURCE_2");
     });
 
-    test("get unknow user sources",  async () => {
+    test("get unknow user sources", async () => {
         tracker.on.select("profiles_list").response(dbProfiles);
-        const user = {login: "doe", groups: []};
+        const user = { login: "doe", groups: [] };
         const source = await sourceModel.getOneUserSource(user, "SOURCE_2");
         expect(source === undefined).toBe(true);
     });
 
-    test("get owned user sources",  async () => {
+    test("get owned user sources", async () => {
         tracker.on.select("profiles_list").response(dbProfiles);
-        const user = {login: "admin", groups: []};
+        const user = { login: "admin", groups: [] };
         const sources = await sourceModel.getOwnedSources(user);
         expect(Object.entries(sources).length).toStrictEqual(3);
         Object.entries(sources).map(([_, src]) => {
             expect(src.owner).toStrictEqual(user.login);
-        })
+        });
     });
 });

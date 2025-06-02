@@ -2493,9 +2493,13 @@ var Lineage_whiteboard = (function () {
                             var type = item.objectType ? item.objectType.value : "?";
 
                             var size = Lineage_whiteboard.defaultShapeSize;
-                            rdfType = "NamedIndividual";
+                            rdfType = "";
                             if (type.indexOf("NamedIndividual") > -1) {
+                                rdfType = "NamedIndividual";
                                 shape = Lineage_whiteboard.namedIndividualShape;
+                            }
+                            if (type.indexOf("Class") > -1) {
+                                rdfType = "Class";
                             }
 
                             if (item.object.type == "bnode") {

@@ -22,6 +22,7 @@ const UserDataObject = z
         data_tool: z.string().default(""),
         data_source: z.string().default(""),
         data_path: z.string().default(""),
+        readwrite: z.boolean().default(false),
     })
     .strict();
 
@@ -75,6 +76,7 @@ class UserDataModel {
         is_shared: (typeof data.is_shared === "number" ? data.is_shared === 1 : data.is_shared) || false,
         shared_profiles: (typeof data.shared_profiles === "string" ? JSON.parse(data.shared_profiles) : data.shared_profiles) || [],
         shared_users: (typeof data.shared_users === "string" ? JSON.parse(data.shared_users) : data.shared_users) || [],
+        readwrite: (typeof data.readwrite === "number" ? data.readwrite === 1 : data.readwrite) || false,
     });
 
     /**
@@ -84,6 +86,7 @@ class UserDataModel {
      * @returns {String} - the absolute path to the file in the storage
      */
     _getStorage = (filename) => {
+        fs.mkdirSync(path.resolve(this._dataPath, "user_data"), { recursive: true });
         return path.resolve(this._dataPath, "user_data", filename);
     };
 
@@ -105,7 +108,13 @@ class UserDataModel {
         const currentUser = this._getUser(user);
         let currentUserData = await connection.select("*").from("user_data").where("owned_by", parseInt(currentUser.id)).orWhere("is_shared", true);
         currentUserData = currentUserData
-            .map((data) => this._convertToJSON(data))
+            .map((data) => {
+                const result = this._convertToJSON(data);
+                // all route don't expose content
+                delete result.data_content;
+                delete result.data_path;
+                return result;
+            })
             .filter((data) => {
                 const isOwner = data.owned_by === parseInt(currentUser.id);
                 const isSharedWithUser = data.is_shared && data.shared_users.includes(currentUser.login);
@@ -165,11 +174,27 @@ class UserDataModel {
         }
     };
 
-    find = async (identifier) => {
+    find = async (identifier, user) => {
         this._checkIdentifier(identifier);
+        const currentUser = this._getUser(user);
 
         const connection = getKnexConnection(this._mainConfig.database);
         const results = await connection.select("*").from("user_data").where("id", identifier).first();
+
+        // don't return if unauthorized
+        const isOwner = results.owned_by === parseInt(currentUser.id);
+        const isSharedWithUser = results.is_shared && results.shared_users.includes(currentUser.login);
+        const isSharedWithGroup = results.is_shared && new Set(currentUser.groups.filter((grp) => new Set(results.shared_profiles).has(grp))).size;
+        if (!(isOwner || isSharedWithUser || isSharedWithGroup)) {
+            throw Error("Unauthorized", { cause: 401 });
+        }
+
+        if (results.data_path) {
+            const fileContent = JSON.parse(fs.readFileSync(this._getStorage(results.data_path)));
+            results.data_content = fileContent;
+            delete results.data_path;
+        }
+
         if (results === undefined) {
             cleanupConnection(connection);
             throw Error("The specified identifier do not exists", { cause: 404 });
@@ -261,8 +286,10 @@ class UserDataModel {
         if (Object.hasOwn(userData, "created_at")) {
             delete userData.created_at;
         }
+        if (Object.hasOwn(userData, "modification_date")) {
+            delete userData.modification_date;
+        }
         const data = this._check(userData);
-
         if (this._mainConfig.userData.location === "database" && !this._allowedStringLength(data.data_content)) {
             throw Error(`The specified content is too large for the database`, { cause: 413 });
         }
@@ -282,6 +309,7 @@ class UserDataModel {
             throw Error("The specified owned_by do not exists", { cause: 404 });
         }
         data.owned_by = user.id;
+        data.modification_date = new Date().toISOString();
 
         if (this._mainConfig.userData.location === "file") {
             // Only update the data content when the attribute is in the request

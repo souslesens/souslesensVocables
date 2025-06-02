@@ -457,6 +457,69 @@ const apiDoc = {
                 owned_by: {
                     type: "string",
                 },
+                modification_date: {
+                    type: "string",
+                },
+                readwrite: {
+                    type: "boolean",
+                    default: false,
+                },
+                created_at: {
+                    type: "string",
+                },
+            },
+            required: ["data_type"],
+        },
+        UserDataWithoutContent: {
+            type: "object",
+            properties: {
+                id: {
+                    type: "number",
+                    minimum: 1,
+                },
+                data_type: {
+                    type: "string",
+                },
+                data_label: {
+                    type: "string",
+                    default: "",
+                },
+                data_comment: {
+                    type: "string",
+                    default: "",
+                },
+                data_group: {
+                    type: "string",
+                    default: "",
+                },
+                data_tool: {
+                    type: "string",
+                    default: "",
+                },
+                data_source: {
+                    type: "string",
+                    default: "",
+                },
+                is_shared: {
+                    type: "boolean",
+                    default: false,
+                },
+                shared_profiles: {
+                    type: "array",
+                    default: [],
+                    items: { type: "string" },
+                },
+                shared_users: {
+                    type: "array",
+                    default: [],
+                    items: { type: "string" },
+                },
+                owned_by: {
+                    type: "string",
+                },
+                modification_date: {
+                    type: "string",
+                },
                 created_at: {
                     type: "string",
                 },
@@ -505,6 +568,10 @@ const apiDoc = {
                     type: "array",
                     default: [],
                     items: { type: "string" },
+                },
+                readwrite: {
+                    type: "boolean",
+                    default: false,
                 },
             },
             required: ["data_type"],
@@ -556,6 +623,9 @@ const apiDoc = {
                     default: [],
                     items: { type: "string" },
                 },
+                modification_date: {
+                    type: "string",
+                },
                 created_at: {
                     type: "string",
                 },
@@ -563,26 +633,6 @@ const apiDoc = {
         },
         UserDataContent: {
             type: "object",
-            properties: {
-                sparqlServerUrl: {
-                    type: "string",
-                },
-                graphUri: {
-                    type: "string",
-                },
-                prefixes: {
-                    type: "object",
-                },
-                lookups: {
-                    type: "object",
-                },
-                databaseSources: {
-                    type: "object",
-                },
-                cvsSources: {
-                    type: "object",
-                },
-            },
         },
     },
     tags: [

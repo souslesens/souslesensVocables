@@ -135,7 +135,11 @@ var Containers_query = (function () {
                 ancestorVars = "?ancestor ";
                 ancestorClause = " optional{?ancestor rdfs:member ?ancestorChild .}\n";
             }
-
+            var filterAncestorsType = "";
+            if (options.filterAncestorsType) {
+                filterAncestorsType += " ?ancestor rdfs:member* ?ancestorChild. \n";
+                filterAncestorsType += "FILTER(?ancestorChild = <" + options.filterAncestorsType + "> || " + "?ancestor =<" + options.filterAncestorsType + ">)\n";
+            }
             var query =
                 "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n" +
                 "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \n" +
@@ -149,6 +153,7 @@ var Containers_query = (function () {
                 "  ?ancestorChild  rdfs:member" +
                 pathOperator +
                 " ?child.\n" +
+                filterAncestorsType +
                 "  OPTIONAL{?ancestorChild rdfs:label ?ancestorChildLabel}  \n" +
                 // too long virtuoso error  "  OPTIONAL{?ancestor rdfs:label ?ancestorLabel}  \n" +
                 "  {select ?child where  {\n" +

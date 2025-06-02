@@ -45,7 +45,7 @@ module.exports = () => {
                 type: "string",
                 required: false,
                 name: "data_label",
-                description: "data_group filter",
+                description: "data_label filter",
             },
             {
                 in: "query",
@@ -66,14 +66,14 @@ module.exports = () => {
                 type: "string",
                 required: false,
                 name: "data_tool",
-                description: "data_group filter",
+                description: "data_tool filter",
             },
             {
                 in: "query",
                 type: "string",
                 required: false,
                 name: "data_source",
-                description: "data_type filter",
+                description: "data_source filter",
             },
         ],
         responses: {
@@ -81,7 +81,7 @@ module.exports = () => {
                 description: "Retrieve the entire list of User Data",
                 schema: {
                     type: "array",
-                    items: { $ref: "#/definitions/UserData" },
+                    items: { $ref: "#/definitions/UserDataWithoutContent" },
                 },
             },
             500: {
@@ -179,10 +179,9 @@ module.exports = () => {
         try {
             // users can only update their own data
             const userInfo = await userManager.getUser(req.user);
-            const existingData = await userDataModel.find(req.body.id);
-
-            if (userInfo.user.id != existingData.owned_by) {
-                throw Error(`The resources is not owned by ${userInfo.user.login}`, { cause: 403 });
+            const existingData = await userDataModel.find(req.body.id, userInfo.user);
+            if (!existingData.readwrite) {
+                throw Error(`The resources is readonly and not owned by ${userInfo.user.login}`, { cause: 403 });
             }
             const userData = await cleanUserData.clean(req.body);
             await userDataModel.update({ ...userData, owned_by: parseInt(userInfo.user.id) });

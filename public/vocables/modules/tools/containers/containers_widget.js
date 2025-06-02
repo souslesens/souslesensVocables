@@ -52,7 +52,7 @@ var Containers_widget = (function () {
             var types = [];
             types.splice(0, 0, { id: "all", label: "all" });
             rootNodes.forEach(function (item) {
-                types.push({ id: item.id, label: item.text });
+                types.push({ id: item?.data?.id, label: item.text });
             });
             common.fillSelectOptions("containerSearchWidget_typesSelect", types, true, "label", "id");
             $("#containerSearchWidget_typesSelect").val("all");
@@ -65,12 +65,15 @@ var Containers_widget = (function () {
     self.execParentContainersSearch = function () {
         $("#smallDialogDiv").dialog("close");
         var type = $("#containerSearchWidget_typesSelect").val();
-        $("#containerSearchWidget_typesSelect").val("");
+
         var filter = "";
+
+        var options = {};
         if (type && type != "all") {
+            options["filterAncestorsType"] = type;
             filter = " ?container rdf:type <" + type + ">. ";
         }
-        Containers_graph.graphParentContainers(Lineage_sources.activeSource, null, { filter: filter });
+        Containers_graph.graphParentContainers(Lineage_sources.activeSource, null, options);
     };
     self.search = function () {
         var term = $("#containerWidget_searchInput").val();

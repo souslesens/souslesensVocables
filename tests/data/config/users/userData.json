@@ -1,101 +1,98 @@
 [
-  {
-    "id": 1,
-    "data_path": "data1",
-    "data_type": "",
-    "data_label": "data1",
-    "data_comment": "",
-    "data_group": "",
-    "data_tool": "",
-    "data_source": "",
-    "data_content": {
-      "sparqlServerUrl": "string",
-      "graphUri": "string",
-      "prefixes": {},
-      "lookups": {},
-      "databaseSources": {},
-      "cvsSources": {}
+    {
+        "id": 1,
+        "data_path": "data1",
+        "data_type": "",
+        "data_label": "data1",
+        "data_comment": "",
+        "data_group": "",
+        "data_tool": "",
+        "data_source": "",
+        "data_content": {
+            "sparqlServerUrl": "string",
+            "graphUri": "string",
+            "prefixes": {},
+            "lookups": {},
+            "databaseSources": {},
+            "cvsSources": {}
+        },
+        "is_shared": false,
+        "shared_profiles": [],
+        "shared_users": [],
+        "created_at": "2025-01-24T14:16:41.111Z",
+        "readwrite": false,
+        "owned_by": 1
     },
-    "is_shared": false,
-    "shared_profiles": [],
-    "shared_users": [],
-    "created_at": "2025-01-24T14:16:41.111Z",
-    "owned_by": 1
-  },
-  {
-    "id": 3,
-    "data_path": "shared with owl_user user",
-    "data_type": "",
-    "data_label": "shared with owl_user user",
-    "data_comment": "",
-    "data_group": "",
-    "data_tool": "",
-    "data_source": "",
-    "data_content": {
-      "sparqlServerUrl": "string",
-      "graphUri": "string",
-      "prefixes": {},
-      "lookups": {},
-      "databaseSources": {},
-      "cvsSources": {}
+    {
+        "id": 3,
+        "data_path": "shared with owl_user user",
+        "data_type": "",
+        "data_label": "shared with owl_user user",
+        "data_comment": "",
+        "data_group": "",
+        "data_tool": "",
+        "data_source": "",
+        "data_content": {
+            "sparqlServerUrl": "string",
+            "graphUri": "string",
+            "prefixes": {},
+            "lookups": {},
+            "databaseSources": {},
+            "cvsSources": {}
+        },
+        "is_shared": true,
+        "shared_profiles": [],
+        "shared_users": ["owl_user"],
+        "created_at": "2025-01-24T14:18:24.019Z",
+        "readwrite": false,
+        "owned_by": 2
     },
-    "is_shared": true,
-    "shared_profiles": [],
-    "shared_users": [
-      "owl_user"
-    ],
-    "created_at": "2025-01-24T14:18:24.019Z",
-    "owned_by": 2
-  },
-  {
-    "id": 4,
-    "data_path": "shared with admin profile",
-    "data_type": "",
-    "data_label": "shared with admin profile",
-    "data_comment": "",
-    "data_group": "",
-    "data_tool": "",
-    "data_source": "",
-    "data_content": {
-      "sparqlServerUrl": "string",
-      "graphUri": "string",
-      "prefixes": {},
-      "lookups": {},
-      "databaseSources": {},
-      "cvsSources": {}
+    {
+        "id": 4,
+        "data_path": "shared with admin profile",
+        "data_type": "",
+        "data_label": "shared with admin profile",
+        "data_comment": "",
+        "data_group": "",
+        "data_tool": "",
+        "data_source": "",
+        "data_content": {
+            "sparqlServerUrl": "string",
+            "graphUri": "string",
+            "prefixes": {},
+            "lookups": {},
+            "databaseSources": {},
+            "cvsSources": {}
+        },
+        "is_shared": true,
+        "shared_profiles": ["skos_only"],
+        "shared_users": [],
+        "created_at": "2025-01-24T14:18:53.409Z",
+        "readwrite": false,
+        "owned_by": 3
     },
-    "is_shared": true,
-    "shared_profiles": [
-      "skos_only"
-    ],
-    "shared_users": [],
-    "created_at": "2025-01-24T14:18:53.409Z",
-    "owned_by": 3
-  },
-  {
-    "id": 5,
-    "data_path": "shared with owl_user and skos_user users",
-    "data_type": "string",
-    "data_label": "",
-    "data_comment": "",
-    "data_group": "",
-    "data_tool": "tool",
-    "data_source": "source",
-    "data_content": {
-      "sparqlServerUrl": "string",
-      "graphUri": "string",
-      "prefixes": {},
-      "lookups": {},
-      "databaseSources": {},
-      "cvsSources": {}
-    },
-    "is_shared": false,
-    "shared_profiles": [],
-    "shared_users": [
-      "owl_user",
-      "skos_user"
-    ],
-    "created_at": "2025-01-27T08:05:51.750Z",
-    "owned_by": 1
-  }
+    {
+        "id": 5,
+        "data_path": "shared with owl_user and skos_user users",
+        "data_type": "string",
+        "data_label": "",
+        "data_comment": "",
+        "data_group": "",
+        "data_tool": "tool",
+        "data_source": "source",
+        "data_content": {
+            "sparqlServerUrl": "string",
+            "graphUri": "string",
+            "prefixes": {},
+            "lookups": {},
+            "databaseSources": {},
+            "cvsSources": {}
+        },
+        "is_shared": false,
+        "shared_profiles": [],
+        "shared_users": ["owl_user", "skos_user"],
+        "created_at": "2025-01-27T08:05:51.750Z",
+        "readwrite": false,
+        "owned_by": 1
+    }
 ]

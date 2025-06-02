@@ -135,7 +135,8 @@ var NodeInfosWidget = (function () {
                                 if (ui.newPanel.selector == "#nodeInfosWidget_AxiomsTabDiv") {
                                     var source = self.currentSource;
                                     // source = Lineage_sources.mainSource;
-                                    NodeInfosAxioms.init(source, self.currentNode, "nodeInfosWidget_AxiomsTabDiv");
+                                    $("#smallDialogDiv").dialog("option", "title", "Axioms of resource " + self.currentNode.data.label);
+                                    NodeInfosAxioms.init(source, self.currentNode, "smallDialogDiv");
                                 }
                                 if (ui.newPanel.selector == "#nodeInfosWidget_relationsDiv") {
                                     $("#nodeInfosWidget_relationsDiv").load("modules/uiWidgets/html/nodeRelationsWidget.html", function () {});

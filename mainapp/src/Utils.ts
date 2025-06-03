@@ -12,7 +12,7 @@ function sanitizeValue(value: string | string[]): string[] {
 }
 
 const humanizeSize = (size: number): string => {
-    return humanNumber(size);
+    return humanNumber(size, (n) => n.toFixed(2));
 };
 
 function exhaustiveCheck(): never {

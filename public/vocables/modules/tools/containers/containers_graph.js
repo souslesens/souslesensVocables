@@ -5,7 +5,13 @@ import Sparql_common from "../../sparqlProxies/sparql_common.js";
 var Containers_graph = (function () {
     var self = {};
     self.parentContainersColors = [];
-    self.containerStyle = { shape: "square", color: "#fdac00", size: 5, edgeColor: "#e7a1be", parentContainerColor: "#778dd7" };
+    self.containerStyle = {
+        shape: "square",
+        color: "#fdac00",
+        size: 5,
+        edgeColor: "#e7a1be",
+        parentContainerColor: "#778dd7"
+    };
 
     self.getContainerTypes = function (source, options, callback) {
         if (!options) {
@@ -26,14 +32,14 @@ var Containers_graph = (function () {
         var sparql_url = Config.sources[source].sparql_server.url;
         var url = sparql_url + "?format=json&query=";
 
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: source }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: source}, function (err, result) {
             if (err) {
                 return callback(err);
             }
             var types = [];
             result.results.bindings.forEach(function (item) {
                 var typeLabel = item.typeLabel ? item.typeLabel.value : Sparql_common.getLabelFromURI(item.type.value);
-                types.push({ id: item.type.value, label: typeLabel });
+                types.push({id: item.type.value, label: typeLabel});
             });
             return callback(null, types);
         });
@@ -48,32 +54,32 @@ var Containers_graph = (function () {
         }
         var fromStr = Sparql_common.getFromStr(source, false, true);
 
-        var filter=""
+
+        if (!options.filter) {
+            options.filter = ""
+        }
         if (!ids && Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
 
             ids = Lineage_whiteboard.lineageVisjsGraph.data.nodes.getIds();
-             filter = Sparql_common.setFilter("node", ids);
+            options.filter += Sparql_common.setFilter("child", ids);
         }
 
-
-        if (options.filter) {
-            filter += options.filter;
-
-        }
 
         options.depth = 1;
         options.keepChild = true;
         var existingNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
-        var visjsData = { nodes: [], edges: [] };
+        var visjsData = {nodes: [], edges: []};
         Containers_query.getContainersAscendants(source, ids, options, function (err, result) {
-            if (err) return alert(err.responseText);
+            if (err) {
+                return alert(err.responseText);
+            }
 
             var color = common.palette[self.parentContainersColors.length + 3];
             self.parentContainersColors.push(color);
 
             result.forEach(function (item) {
                 if (item.ancestor) {
-                    if (!existingNodes[item?.ancestor?.value]) {
+                    if (!existingNodes[item.ancestor.value]) {
                         existingNodes[item.ancestor.value] = 1;
 
                         var label = item.ancestorLabel ? item.ancestorLabel.value : Sparql_common.getLabelFromURI(item.ancestor.value);
@@ -127,8 +133,8 @@ var Containers_graph = (function () {
                             to: item.ancestorChild.value,
                             arrows: "to",
 
-                            data: { from: item.ancestor.value, to: item.ancestorChild.value, source: source },
-                            font: { multi: true, size: 10 },
+                            data: {from: item.ancestor.value, to: item.ancestorChild.value, source: source},
+                            font: {multi: true, size: 10},
 
                             //  dashes: true,
                             color: Containers_graph.containerStyle.edgeColor,
@@ -146,8 +152,8 @@ var Containers_graph = (function () {
                             to: item.child.value,
                             arrows: "to",
 
-                            data: { from: item.ancestorChild.value, to: item.child.value, source: source },
-                            font: { multi: true, size: 10 },
+                            data: {from: item.ancestorChild.value, to: item.child.value, source: source},
+                            font: {multi: true, size: 10},
 
                             //  dashes: true,
                             color: Containers_graph.containerStyle.edgeColor,
@@ -155,6 +161,11 @@ var Containers_graph = (function () {
                     }
                 }
             });
+
+
+            if( !Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()){
+                Lineage_whiteboard.drawNewGraph(visjsData)
+            }
 
             Lineage_whiteboard.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
             Lineage_whiteboard.lineageVisjsGraph.data.edges.add(visjsData.edges);
@@ -189,7 +200,7 @@ var Containers_graph = (function () {
                         }
                         data = data.concat(result.results.bindings);
                         if (data.length > Lineage_whiteboard.showLimit * 8) {
-                            return callbackSeries({ responseText: "too many nodes " + data.length + " cannot draw" });
+                            return callbackSeries({responseText: "too many nodes " + data.length + " cannot draw"});
                         }
                         return callbackSeries();
                     });
@@ -206,7 +217,7 @@ var Containers_graph = (function () {
                     var color = Lineage_whiteboard.getSourceColor(source);
                     var opacity = 1.0;
                     var existingNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
-                    visjsData = { nodes: [], edges: [] };
+                    visjsData = {nodes: [], edges: []};
                     var objectProperties = [];
 
                     var shape = "dot";
@@ -224,7 +235,7 @@ var Containers_graph = (function () {
                             shadow: self.nodeShadow,
                             shape: Containers_graph.containerStyle.shape,
                             size: size,
-                            font: type == "container" ? { color: "#70309f" } : { color: "black" },
+                            font: type == "container" ? {color: "#70309f"} : {color: "black"},
                             color: Containers_graph.containerStyle.color,
                             data: {
                                 type: type,
@@ -262,7 +273,7 @@ var Containers_graph = (function () {
                                 shadow: self.nodeShadow,
                                 shape: shape,
                                 size: size,
-                                font: type == "container" ? { color: "#70309f" } : null,
+                                font: type == "container" ? {color: "#70309f"} : null,
                                 color: color,
 
                                 data: {
@@ -347,7 +358,7 @@ var Containers_graph = (function () {
                     //    setNodesLevel(visjsData);
 
                     if (!Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
-                        Lineage_whiteboard.drawNewGraph(visjsData, null, { noDecorations: 0 });
+                        Lineage_whiteboard.drawNewGraph(visjsData, null, {noDecorations: 0});
                         //Lineage_whiteboard.drawNewGraph(visjsData, null);
                     } else {
                         Lineage_whiteboard.lineageVisjsGraph.data.nodes.add(visjsData.nodes);

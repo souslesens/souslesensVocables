@@ -6,6 +6,7 @@ import _botEngine from "./_botEngine.js";
 import CommonBotFunctions from "./_commonBotFunctions.js";
 import Containers_graph from "../tools/containers/containers_graph.js";
 import Containers_widget from "../tools/containers/containers_widget.js";
+import Axioms_graph from "../tools/axioms/axioms_graph.js";
 
 var NodeRelations_bot = (function () {
     var self = {};
@@ -52,6 +53,9 @@ var NodeRelations_bot = (function () {
             },
             ParentContainers: {
                 parentContainersFn: {},
+            },
+            "Node traversal": {
+                nodeTraversalFn: {},
             },
         },
     };
@@ -303,6 +307,52 @@ var NodeRelations_bot = (function () {
 
             _botEngine.nextStep();
         },
+
+        nodeTraversalFn:function(){
+
+            var edgesFromMap={}
+            var edgesToMap={}
+            var nodesMap={}
+            var existingNodes={}
+
+            Lineage_whiteboard.lineageVisjsGraph.data.nodes.get().forEach(function(item){
+                nodesMap[item.id]=item
+            })
+            Lineage_whiteboard.lineageVisjsGraph.data.edges.get().forEach(function(item){
+               if(! edgesFromMap[item.from])
+                edgesFromMap[item.from]=[]
+                edgesFromMap[item.from].push(item)
+            })
+
+            var newNodes=[]
+            var newEdges=[]
+            function recurse(nodeId,level){
+                if(!existingNodes[nodeId]) {
+                    nodesMap[nodeId].level=level
+                    newNodes.push(nodesMap[nodeId])
+               var edges= edgesFromMap[nodeId]
+                if(edges){
+                    edges.forEach(function(edge){
+                       if(!existingNodes[edge.to]) {
+                           newEdges.push(edge)
+                           recurse(edge.to,level+1)
+
+                       }
+                    })
+
+
+                }
+
+            }
+
+        }
+        recurse(self.params.currentClass,1)
+            var visjsData={nodes:newNodes,edges:newEdges}
+            $("#mainDialogDiv").html("<div id='lineageRelation_graphDiv' style='width:800px;height:500px;overflow:auto'></div>")
+            $("#mainDialogDiv").dialog("open");
+            var options={}
+            Axioms_graph.drawGraph(visjsData,"lineageRelation_graphDiv",options)
+        }
     };
 
     self.getSourceImplicitModelVisjsData = function (sourceLabel, callback) {

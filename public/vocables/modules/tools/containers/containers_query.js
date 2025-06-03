@@ -125,21 +125,22 @@ var Containers_query = (function () {
                 filterAncestorsType += "FILTER(?ancestorChild = <" + options.filterAncestorsType + "> || " + "?ancestor =<" + options.filterAncestorsType + ">)\n";
             }*/
 
-            var filter = ""
+            var filterAncestorsTypeStr = ""
             if (options.filterAncestorsType) {
-                filter = "  ?ancestorChild rdfs:type|rdfs:subClassOf <" + options.filterAncestorsType + ">\n"
+               // filterAncestorsTypeStr = "  ?ancestorChild rdfs:type|rdfs:subClassOf <" + options.filterAncestorsType + ">\n"
+                filterAncestorsTypeStr = "  ?ancestorChild ^rdfs:member <" + options.filterAncestorsType + ">\n"
             }
 
             var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n" +
                 "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \n" +
-                "SELECT distinct  * FROM " + fromStr + " WHERE {\n" +
+                "SELECT distinct  * " + fromStr + " WHERE {\n" +
                 "  ?ancestorChild  rdfs:member{1,1} ?child.\n" +
-                " ?ancestor rdfs:member* ?ancestorChild. \n" +
-                filter +
+                " ?ancestor rdfs:member+ ?ancestorChild. \n" +
+                filterAncestorsTypeStr +
                 "  OPTIONAL{?ancestorChild rdfs:label ?ancestorChildLabel}  \n" +
                 "  {select ?child where  {\n" +
                 "   ?child rdfs:label ?childLabel." +
-                filter +
+                (options.filter || "") +
                 "}\n" +
                 "  }\n" +
                 "} limit 10000 ";

@@ -16,6 +16,10 @@ module.exports = () => {
                 } else {
                     query = userData.data_content.query;
                 }
+                // replace query params
+                for (const [key, value] of Object.entries(JSON.parse(req.query.params))) {
+                    query = query.replace(`{{${key}}}`, value);
+                }
                 const config = readMainConfig();
                 const rdfDataModel = new RdfDataModel(config.sparql_server.url, config.sparql_server.user, config.sparql_server.password);
                 const jsonResult = await rdfDataModel.execQuery(query);
@@ -42,6 +46,12 @@ module.exports = () => {
                 in: "path",
                 name: "id",
                 required: true,
+            },
+            {
+                type: "string",
+                in: "query",
+                name: "params",
+                required: false,
             },
         ],
         responses: {

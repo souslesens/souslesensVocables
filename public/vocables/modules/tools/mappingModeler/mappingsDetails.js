@@ -36,9 +36,10 @@ var MappingsDetails = (function () {
      * @name showDetailsDialog
      * @memberof module:MappingsDetails
      * @param {string} [divId="mainDialogDiv"] - The ID of the dialog div to display the details in. Default is "mainDialogDiv".
+     * @param {Function} [callback] - Optional callback function to execute after showing the dialog.
      * @returns {void}
      */
-    self.showDetailsDialog = function (divId) {
+    self.showDetailsDialog = function (divId,callback) {
         if (!MappingModeler.currentTable) {
             return alert("Select a table");
         }
@@ -49,6 +50,9 @@ var MappingsDetails = (function () {
         $("#mappingModeler_genericPanel").load("./modules/tools/mappingModeler/html/detailsDialog.html", function () {
             self.showDetailedMappingsTree();
             self.drawDetailedMappingsGraph();
+            if(callback){
+                callback();
+            }
             $("#detailedMappings_searchInput").bind("keydown", null, function () {
                 if (event.keyCode != 13 && event.keyCode != 9) {
                     return;
@@ -253,9 +257,9 @@ var MappingsDetails = (function () {
     self.showColumnTechnicalMappingsDialog = function (divId, column, callbackFn) {
         self.afterSaveColumnTechnicalMappingsDialog = callbackFn;
         var html = `<tr><td>Table column</td><td><span id='class-column' ><b> ${column.text || column.label} </b></span> </td></tr>`;
-        html += `<tr><td>Base URI</td><td><input id='columnDetails-baseUri' style='width:600px;    background-color: #eee;'> </input>  </td></tr>`;
-        html += `<tr><td>URI syntax*</td><td><select id='columnDetails-UriType' style='padding:6px 6px'> </select>  </td></tr>`;
-
+        html += `<tr></tr>`;
+        html += `<tr><td>URI syntax*</td><td><select id='columnDetails-UriType' onchange='MappingsDetails.onChangeUriType()' style='padding:6px 6px'> </select>  </td></tr>`;
+        html += `<tr><td id='columnDetails-baseUri-label'>Base URI</td><td><input id='columnDetails-baseUri' style='width:300px;    background-color: #eee;'> </input>  </td><td id='columnDetails-prefixURI-label' style='margin-left:10px;'>Prefix URI</td><td><input id='columnDetails-prefixURI' style='width:300px;    background-color: #eee;'> </input>  </td></tr>`;
         html += `<tr><td>rdf:type*</td><td><select id='columnDetails-rdfType' style='padding:6px 6px'> </select> </td></tr> `;
 
         html += `<tr><td>rdfs:label column</td><td><select id='columnDetails-rdfsLabel' style='padding:6px 6px'> </select> </td></tr>`;
@@ -296,6 +300,8 @@ var MappingsDetails = (function () {
         var sourceObj = Config.sources[MappingModeler.currentSLSsource];
 
         $("#columnDetails-baseUri").val(column.data.baseURI || "");
+        $('#columnDetails-prefixURI').val(column.data.prefixURI || "");
+        self.onChangeUriType();
     };
 
     /**
@@ -316,6 +322,16 @@ var MappingsDetails = (function () {
         currentGraphNode.data.uriType = $("#columnDetails-UriType").val();
         currentGraphNode.data.rdfsLabel = $("#columnDetails-rdfsLabel").val();
         currentGraphNode.data.rdfType = $("#columnDetails-rdfType").val();
+        var prefix=$('#columnDetails-prefixURI').val();
+        if (prefix && currentGraphNode.data.uriType == "fromLabel") {
+            var transformFn = 'function{'+self.transform.createPrefixTransformFn(prefix,{notDialog:true})+'}';
+            currentGraphNode.data.transform = transformFn;
+            currentGraphNode.data.prefixURI = prefix;
+        }
+        if(currentGraphNode.data.prefixURI && !prefix){
+            delete currentGraphNode.data.prefixURI;
+            delete currentGraphNode.data.transform; 
+        }
 
         var baseUri = (currentGraphNode.data.baseURI = $("#columnDetails-baseUri").val());
         var sourceObj = Config.sources[MappingModeler.currentSLSsource];
@@ -330,8 +346,9 @@ var MappingsDetails = (function () {
 
         MappingColumnsGraph.updateNode(currentGraphNode);
         self.switchTypeToSubclass(currentGraphNode);
+
         // });
-        MappingColumnsGraph.saveVisjsGraph();
+        MappingColumnsGraph.saveVisjsGraph(function () {});
     };
 
     /**
@@ -367,6 +384,7 @@ var MappingsDetails = (function () {
         if (array.length >= 2 && array[1] == "transform") {
             if (graphNode.data.transform) {
                 delete graphNode.data.transform;
+                delete graphNode.data.prefixURI; //remove prefix URI
             }
         }
         // lookup gestion
@@ -378,8 +396,12 @@ var MappingsDetails = (function () {
         }
 
         JstreeWidget.deleteNode("detailedMappings_jsTreeDiv", treeNode);
-        self.drawDetailedMappingsGraph();
-        MappingColumnsGraph.saveVisjsGraph();
+        
+        MappingColumnsGraph.saveVisjsGraph(function () {
+            self.drawDetailedMappingsGraph();
+            self.showDetailedMappingsTree();
+            self.showColumnTechnicalMappingsDialog("detailedMappings_techDetailsDiv", graphNode, function () {});
+        });
     };
 
     /**
@@ -459,8 +481,12 @@ var MappingsDetails = (function () {
         if (obj.node.parent == MappingModeler.currentTable.name) {
             //column node
             self.showColumnTechnicalMappingsDialog("detailedMappings_techDetailsDiv", obj.node, function () {
-                MappingsDetails.showDetailsDialog();
+                
                 MappingModeler.currentTreeNode = MappingColumnsGraph.visjsGraph.data.nodes.get(obj.node.id);
+                self.showDetailsDialog(null,function(){
+                    self.showColumnTechnicalMappingsDialog("detailedMappings_techDetailsDiv", MappingModeler.currentTreeNode,self.afterSaveColumnTechnicalMappingsDialog);
+                });
+                
             });
         } else {
             MappingModeler.currentTreeNode = null;
@@ -761,20 +787,31 @@ var MappingsDetails = (function () {
          *
          * @returns {void}
          */
-        createPrefixTransformFn: function () {
+        createPrefixTransformFn: function (prefix,options) {
             /*if (!MappingModeler.currentTreeNode) {
                 var column_selected = '';
             } else {
                 var column_selected = MappingColumnsGraph.currentGraphNode.label;
             }*/
-            var prefix = prompt("Enter Prefix");
+           if(!options){
+                options = {};
+            }
+           
+            if(!prefix){
+                prefix = prompt("Enter Prefix");
+            }
+             
             if (!prefix) {
                 return;
             }
             prefix = prefix.replace(/[-_/]/g, "");
 
             var str = "if((mapping.isString||mapping.dataType) && role=='o') return value; else return '" + prefix + "-'+value;";
+            
             $("#MappingModeler_fnBody").val(str);
+            if(options.notDialog){
+                return str;
+            }
         },
 
         /**
@@ -817,9 +854,11 @@ var MappingsDetails = (function () {
                 function (err, result) {},
             );
         },
-        saveTransform: function () {
-            var transformFnStr = $("#MappingModeler_fnBody").val();
+        saveTransform: function (transformFnStr) {
 
+            if(!transformFnStr){
+                transformFnStr = $("#MappingModeler_fnBody").val();
+            }
             transformFnStr = transformFnStr.replace(/"/g, "'");
 
             try {
@@ -861,6 +900,21 @@ var MappingsDetails = (function () {
                 }
             }
         });
+    };
+    self.onChangeUriType = function () {
+        var uriType = $("#columnDetails-UriType").val();
+        if (uriType == "fromLabel") {
+            $('#columnDetails-baseUri').show();
+            $('#columnDetails-baseUri-label').show();
+            $('#columnDetails-prefixURI').show();
+            $('#columnDetails-prefixURI-label').show();
+            
+        } else {
+            $('#columnDetails-baseUri').hide();
+            $('#columnDetails-baseUri-label').hide();
+            $('#columnDetails-prefixURI').hide();
+            $('#columnDetails-prefixURI-label').hide();
+        }
     };
     return self;
 })();

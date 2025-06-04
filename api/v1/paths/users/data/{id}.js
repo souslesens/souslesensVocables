@@ -6,7 +6,7 @@ module.exports = () => {
         try {
             const userInfo = await userManager.getUser(req.user);
             const userData = userDataModel.find(req.params.id, userInfo.user);
-            if (!userData.readwrite) {
+            if (!userData.readwrite && userData.owned_by !== parseInt(userInfo.user.id)) {
                 throw Error(`The resources is readonly and not owned by ${userInfo.user.login}`, { cause: 403 });
             }
             await userDataModel.remove(req.params.id, userInfo.user);

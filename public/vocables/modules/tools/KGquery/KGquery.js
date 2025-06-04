@@ -509,12 +509,14 @@ var KGquery = (function () {
     self.execPathQuery = function (options, callback) {
         var optionalPredicatesSparql = "";
         KGquery.selectClauseSparql = [];
+        KGquery.labelFromURIToDisplay = null;
         var containerFiltersSparql = "";
         var query = "";
         var distinctSetTypes = [];
         var isUnion = false;
         var isJoin = false;
         var data;
+        var labelFromURIToDisplay = [];
         async.series(
             [
                 //selectOptionalPredicates
@@ -522,11 +524,13 @@ var KGquery = (function () {
                     if (options.aggregate) {
                         return callbackSeries();
                     }
-                    if (KGquery_myQueries.currentOptionalPredicatesSparql) {
+                    if (KGquery_myQueries.currentOptionalPredicatesSparql || KGquery_myQueries.labelFromURIToDisplay) {
                         optionalPredicatesSparql = KGquery_myQueries.currentOptionalPredicatesSparql;
                         KGquery_myQueries.currentOptionalPredicatesSparql = null;
                         KGquery.selectClauseSparql = KGquery_myQueries.selectClauseSparql;
                         KGquery_myQueries.selectClauseSparql = null;
+                        KGquery.labelFromURIToDisplay = KGquery_myQueries.labelFromURIToDisplay;
+
                         return callbackSeries();
                     }
 
@@ -535,7 +539,9 @@ var KGquery = (function () {
                             UI.message(err, true);
                             callbackSeries(err);
                         }
+                        KGquery.labelFromURIToDisplay = result.labelFromURIToDisplay;
                         optionalPredicatesSparql = result.optionalPredicatesSparql;
+                        labelFromURIToDisplay = result.labelFromURIToDisplay;
                         KGquery.selectClauseSparql = result.selectClauseSparql;
                         KGquery.currentOptionalPredicatesSparql = optionalPredicatesSparql;
                         callbackSeries();
@@ -715,7 +721,7 @@ var KGquery = (function () {
                         selectStr = options.aggregate.select;
                         groupByStr = " GROUP BY " + options.aggregate.groupBy;
                     } else {
-                        selectStr += KGquery.selectClauseSparql;
+                        selectStr += KGquery.selectClauseSparql ? KGquery.selectClauseSparql : "";
                         Object.keys(distinctTypesMap).forEach(function (type) {
                             selectStr += " " + type;
                         });
@@ -921,6 +927,10 @@ var KGquery = (function () {
                 if (item[varName]) {
                     if (item[varName].type != "uri") {
                         nonNullCols[varName] = item[varName].type;
+                    } else {
+                        if (KGquery.labelFromURIToDisplay?.length > 0 && KGquery.labelFromURIToDisplay.includes(varName)) {
+                            nonNullCols[varName] = "labelFromURI" + varName;
+                        }
                     }
                 }
             });
@@ -941,9 +951,12 @@ var KGquery = (function () {
             var line = [index];
             colNames.forEach(function (col) {
                 var value = null;
+
                 if (item[col]) {
                     value = item[col].value;
-
+                    if (item[col].type == "uri") {
+                        value = Sparql_common.getLabelFromURI(value);
+                    }
                     //format date
                     if (item[col].datatype == "http://www.w3.org/2001/XMLSchema#dateTime") {
                         var p = value.indexOf("T00:00:00.000Z");

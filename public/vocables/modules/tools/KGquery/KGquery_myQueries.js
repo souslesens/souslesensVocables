@@ -32,6 +32,7 @@ var KGquery_myQueries = (function () {
             sparqlQuery: KGquery.currentSparqlQuery,
             optionalPredicatesSparql: KGquery.currentOptionalPredicatesSparql,
             selectClauseSparql: KGquery.selectClauseSparql,
+            labelFromURIToDisplay: KGquery.labelFromURIToDisplay,
         };
         if (data.sparqlQuery == null) {
             return alert("No query to save");
@@ -70,6 +71,9 @@ var KGquery_myQueries = (function () {
         }
         if (result.selectClauseSparql) {
             self.selectClauseSparql = result.selectClauseSparql;
+        }
+        if (result.labelFromURIToDisplay) {
+            self.labelFromURIToDisplay = result.labelFromURIToDisplay;
         }
         var isSkippedElement = false;
         async.eachSeries(

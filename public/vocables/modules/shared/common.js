@@ -27,12 +27,21 @@ var common = (function () {
     };
 
     self.fillSelectOptions = function (selectId, data, withBlanckOption, textfield, valueField, selectedValue) {
-        $("#" + selectId)
+        var select
+        if(selectId instanceof jQuery) {
+            select = selectId;
+        }
+        else{
+            select = $("#" + selectId);
+        } 
+
+
+        select
             .find("option")
             .remove()
             .end();
         if (withBlanckOption) {
-            $("#" + selectId).append(
+            select.append(
                 $("<option>", {
                     text: "",
                     value: "",
@@ -59,7 +68,7 @@ var common = (function () {
                 if (selectedValue && value == selectedValue) {
                     selected = "selected";
                 }
-                $("#" + selectId).append(
+                select.append(
                     $("<option>", {
                         text: text,
                         value: value,
@@ -70,7 +79,7 @@ var common = (function () {
         } else {
             for (var key in data) {
                 var item = data[key];
-                $("#" + selectId).append(
+                select.append(
                     $("<option>", {
                         text: item[textfield] || item,
                         value: item[valueField] || item,

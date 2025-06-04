@@ -542,7 +542,7 @@ var Sparql_common = (function () {
             options.includeSources.forEach(function (source) {
                 if (Config.sources[source] && Config.sources[source].graphUri) {
                     var importGraphUri = Config.sources[source].graphUri;
-                    if (fromStr.indexOf(importGraphUri) < 0) {
+                    if (fromStr.indexOf("<" + importGraphUri + ">") < 0) {
                         fromStr += from + "  <" + importGraphUri + "> ";
                     }
                 }

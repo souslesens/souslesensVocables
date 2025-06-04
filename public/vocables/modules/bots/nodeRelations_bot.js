@@ -322,33 +322,44 @@ var NodeRelations_bot = (function () {
                if(! edgesFromMap[item.from])
                 edgesFromMap[item.from]=[]
                 edgesFromMap[item.from].push(item)
+                if(! edgesToMap[item.to])
+                    edgesToMap[item.to]=[]
+                edgesToMap[item.to].push(item)
+
             })
 
             var newNodes=[]
             var newEdges=[]
             function recurse(nodeId,level){
                 if(!existingNodes[nodeId]) {
+                    existingNodes[nodeId]=1
                     nodesMap[nodeId].level=level
                     newNodes.push(nodesMap[nodeId])
                var edges= edgesFromMap[nodeId]
                 if(edges){
                     edges.forEach(function(edge){
                        if(!existingNodes[edge.to]) {
+
                            newEdges.push(edge)
                            recurse(edge.to,level+1)
-
                        }
                     })
-
-
                 }
+                 edges= edgesToMap[nodeId]
+                    if(edges){
+                        edges.forEach(function(edge){
+                            if(!existingNodes[edge.from]) {
 
+                                newEdges.push(edge)
+                                recurse(edge.from,level+1)
+                            }
+                        })
+                    }
             }
-
         }
         recurse(self.params.currentClass,1)
             var visjsData={nodes:newNodes,edges:newEdges}
-            $("#mainDialogDiv").html("<div id='lineageRelation_graphDiv' style='width:800px;height:500px;overflow:auto'></div>")
+            $("#mainDialogDiv").html("<div id='lineageRelation_graphDiv' style='width:800px;height:800px;overflow:auto'></div>")
             $("#mainDialogDiv").dialog("open");
             var options={}
             Axioms_graph.drawGraph(visjsData,"lineageRelation_graphDiv",options)

@@ -8,12 +8,13 @@ var MappingModeler_bot = (function () {
 
     self.start = function (workflow, _params, callbackFn) {
         self.title = _params.title || "Create Resource";
-        _botEngine.startParams = _botEngine.fillStartParams(arguments);
+        var startParams = _botEngine.fillStartParams(arguments);
         self.callbackFn = callbackFn;
         if (!workflow) {
             workflow = self.workflow;
         }
         _botEngine.init(MappingModeler_bot, workflow, null, function () {
+            _botEngine.startParams = startParams;
             self.params = {};
             if (_params) {
                 for (var key in _params) {

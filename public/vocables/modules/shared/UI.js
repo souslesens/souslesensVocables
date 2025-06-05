@@ -358,16 +358,22 @@ var UI = (function () {
         $(".vis-edit-mode").css("display", "none");
     };
     self.adjustSelectListSize = function (selectListDivId, maxSize) {
-        var numberOfOptions = $("#" + selectListDivId).find("option").length;
+        var selectList;
+        if (selectListDivId instanceof jQuery) {
+            selectList = selectListDivId;
+        } else {
+            selectList = $("#" + selectListDivId);
+        }
+        var numberOfOptions = selectList.find("option").length;
         if (numberOfOptions < maxSize) {
             // Si le nombre d'éléments est inférieur à 10, on ajuste la taille
-            $("#" + selectListDivId).attr("size", numberOfOptions);
+            selectList.attr("size", numberOfOptions);
             if (numberOfOptions == 1) {
-                $("#" + selectListDivId).attr("size", 2);
+                selectList.attr("size", 2);
             }
         } else {
             // Sinon, on fixe à 10
-            $("#" + selectListDivId).attr("size", maxSize);
+            selectList.attr("size", maxSize);
         }
     };
     return self;

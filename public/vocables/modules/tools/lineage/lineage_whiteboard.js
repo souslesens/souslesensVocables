@@ -4492,11 +4492,9 @@ attrs.color=self.getSourceColor(superClassValue)
      * @returns {void}
      */
     self.initQueryTab = function () {
-        if ($("#queryTab").children().length == 0) {
-            $("#queryTab").html("<div id='queryTabDiv'></div>");
-            $("#botContainerDiv").css("width", "100%");
-            SparqlQuery_bot.start({ divId: "queryTabDiv" });
-        }
+        $("#queryTab").html("<div id='queryTabDiv'></div>");
+        $("#botContainerDiv").css("width", "100%");
+        SparqlQuery_bot.start({ divId: "queryTabDiv" });
     };
 
     /**

@@ -1,6 +1,7 @@
 import Lineage_sources from "../lineage/lineage_sources.js";
 import Containers_graph from "./containers_graph.js";
 import common from "../../shared/common.js";
+import Containers_query from "./containers_query.js";
 
 var Containers_widget = (function () {
     var self = {};
@@ -43,21 +44,24 @@ var Containers_widget = (function () {
 
         //  self.currentSource = source;
 
-        var rootNodes = JstreeWidget.getNodeDescendants("lineage_containers_containersJstree", "#", 1);
+        //  var rootNodes = JstreeWidget.getNodeDescendants("lineage_containers_containersJstree", "#", 1);
 
         $("#smallDialogDiv").dialog("open");
         $("#smallDialogDiv").dialog("option", "title", "Parent Containers Type");
         $("#smallDialogDiv").load("./modules/tools/lineage/html/parentContainers.html", function () {
-            rootNodes;
             var types = [];
             types.splice(0, 0, { id: "all", label: "all" });
-            rootNodes.forEach(function (item) {
-                types.push({ id: item.id, label: item.text });
+
+            Containers_query.getTopContainer(source, {}, function (err, result) {
+                if (err) return alert(err.responseText || err);
+                result.results.bindings.forEach(function (item) {
+                    types.push({ id: item.member.value, label: item.memberLabel ? item.memberLabel.value : Sparql_common.getLabelFromURI(item.member.value) });
+                });
+                common.fillSelectOptions("containerSearchWidget_typesSelect", types, true, "label", "id");
+                $("#containerSearchWidget_typesSelect").val("all");
+                //$("#containerSearchWidget_typesSelect").hide();
+                //self.execParentContainersSearch();
             });
-            common.fillSelectOptions("containerSearchWidget_typesSelect", types, true, "label", "id");
-            $("#containerSearchWidget_typesSelect").val("all");
-            //$("#containerSearchWidget_typesSelect").hide();
-            //self.execParentContainersSearch();
         });
         // });
     };
@@ -65,12 +69,15 @@ var Containers_widget = (function () {
     self.execParentContainersSearch = function () {
         $("#smallDialogDiv").dialog("close");
         var type = $("#containerSearchWidget_typesSelect").val();
-        $("#containerSearchWidget_typesSelect").val("");
+
         var filter = "";
+
+        var options = {};
         if (type && type != "all") {
+            options["filterAncestorsType"] = type;
             filter = " ?container rdf:type <" + type + ">. ";
         }
-        Containers_graph.graphParentContainers(Lineage_sources.activeSource, null, { filter: filter });
+        Containers_graph.graphParentContainers(Lineage_sources.activeSource, null, options);
     };
     self.search = function () {
         var term = $("#containerWidget_searchInput").val();

@@ -13,6 +13,7 @@ import _botEngine from "./_botEngine.js";
 import VisjsGraphClass from "../graph/VisjsGraphClass.js";
 import KGquery_graph from "../tools/KGquery/KGquery_graph.js";
 import UserDataWidget from "../uiWidgets/userDataWidget.js";
+import Sparql_OWL from "../sparqlProxies/sparql_OWL.js";
 
 var SparqlQuery_bot = (function () {
     var self = {};
@@ -121,6 +122,17 @@ var SparqlQuery_bot = (function () {
                         },
                     },
                 },
+                Predicate: {
+                    chooseQueryScopeFn: {
+                        choosePredicateDirectionFn: {
+                            listAllPredicatesFn: {
+                                chooseOutputTypeFn: {
+                                    buildResultFn: {},
+                                },
+                            },
+                        },
+                    },
+                },
             },
         },
     };
@@ -150,6 +162,8 @@ var SparqlQuery_bot = (function () {
         listWhiteBoardFilterType: "Choose a scope",
         listQueryTypeFn: "Choose a query type ",
         chooseSelectPredicates: "choose Select Predicates",
+        listAllPredicatesFn: "Choose a predicate",
+        choosePredicateDirectionFn: "Choose  predicate direction",
     };
 
     self.functions = {
@@ -159,6 +173,10 @@ var SparqlQuery_bot = (function () {
                 {
                     id: "Facts",
                     label: "SKG Facts",
+                },
+                {
+                    id: "Predicate",
+                    label: "Predicate",
                 },
             ];
             if (self.noFacts) {
@@ -358,6 +376,42 @@ var SparqlQuery_bot = (function () {
             myBotEngine.nextStep();
         },
 
+        choosePredicateDirectionFn: function () {
+            var choices = ["direct", "inverse"];
+            return myBotEngine.showList(choices, "predicateDirection");
+        },
+
+        listAllPredicatesFn: function () {
+            var options = {
+                distinct: "?prop",
+            };
+            var subjectIds = null;
+            var objectIds = null;
+            if (self.params.queryScope == "whiteboardNodes") {
+                if (!self.params.predicateDirection || self.params.predicateDirection == "direct") {
+                    self.params.whiteboardNodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.getIds();
+                    subjectIds = self.params.whiteboardNodes;
+                } else {
+                    objectIds = self.params.whiteboardNodes;
+                }
+            }
+
+            Sparql_OWL.getFilteredTriples(self.params.source, subjectIds, null, objectIds, options, function (err, result) {
+                if (err) {
+                    return myBotEngine.error(err);
+                }
+                var choices = [];
+                result.forEach(function (item) {
+                    choices.push({
+                        id: item.prop.value,
+                        label: item.propLabel ? item.propLabel.value : Sparql_common.getLabelFromURI(item.prop.value),
+                    });
+                });
+                choices.sort();
+                return myBotEngine.showList(choices, "predicateFilter");
+            });
+        },
+
         buildResultFn: function () {
             var outputType = self.params.outputType;
 
@@ -409,6 +463,9 @@ var SparqlQuery_bot = (function () {
             }
             if (self.params.nonObjectPropertyFilter) {
                 filter += self.params.nonObjectPropertyFilter;
+            }
+            if (self.params.predicateFilter) {
+                filter += "FILTER (?predicate=<" + self.params.predicateFilter + ">)";
             }
 
             self.getResourcesList("Predicate", role, filter, options, function (err, result) {

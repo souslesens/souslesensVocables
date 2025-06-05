@@ -73,8 +73,10 @@ var Lineage_axioms = (function () {
                         id: item.class,
                         label: item.label,
                         shape: "hexagon",
+
                         color: "#ddd",
-                        size: Lineage_whiteboard.defaultShapeSize,
+                        size: 16,
+                        borderWidth: item.data.axiomType == "equivalentClass" ? 4 : 1,
                         data: {
                             id: item.class,
                             label: item.label,

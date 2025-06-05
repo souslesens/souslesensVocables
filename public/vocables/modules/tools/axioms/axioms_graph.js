@@ -228,6 +228,10 @@ var Axioms_graph = (function () {
                                     return;
                                 }
 
+                                if (predicate.p.indexOf("allValuesFrom") > -1) {
+                                    var x = 3;
+                                }
+
                                 if (predicate.p == "http://www.w3.org/1999/02/22-rdf-syntax-ns#first") {
                                     skipNode = true;
                                 }
@@ -345,6 +349,14 @@ var Axioms_graph = (function () {
                                     },
                                 };
                             }
+                            if (edge.to == rootNodeId) {
+                                edge.smooth = {
+                                    type: "diagonalCross",
+                                    forceDirection: "horizontal",
+
+                                    roundness: 0.4,
+                                };
+                            }
                             /*   if (rootNodeId ==edge.to) {
                                    nodesMap[edge.to].color = "#096eac";
                                }*/
@@ -358,15 +370,13 @@ var Axioms_graph = (function () {
                 function (callbackSeries) {
                     //    return callbackSeries()
                     var nodesMap = {};
+                    self.minNodeLevel = 5000;
                     visjsData.nodes.forEach(function (node) {
+                        self.minNodeLevel = Math.min(self.minNodeLevel, node.level);
                         nodesMap[node.id] = node;
                     });
                     var nodesToDelete = [];
                     visjsData.edges.forEach(function (edge, index) {
-                        if (edge.to == "http://purl.obolibrary.org/obo/BFO_0000023") {
-                            console.log(JSON.stringify(nodesMap[edge.from]));
-                        }
-
                         var x = nodesMap[edge.from].label;
                         if (nodesMap[edge.from].data.type == "inverseOf") {
                             //concat inverse and exists
@@ -377,10 +387,34 @@ var Axioms_graph = (function () {
                         if (nodesMap[edge.from].color == "#cb9801") {
                             //restrcition
                             if (nodesMap[edge.to].data.type == "http://www.w3.org/2002/07/owl#ObjectProperty") {
-                                nodesMap[edge.from].label = nodesMap[edge.to].label + "\n" + nodesMap[edge.from].label + "";
+                                var edegLabel = "";
+                                var labelTo = nodesMap[edge.to].label;
+
+                                var maxLineLength = 20;
+                                var lineToLength = maxLineLength;
+                                var labelToLength = Math.min(lineToLength, labelTo.length);
+                                if (labelToLength >= maxLineLength) {
+                                    // on coupe au dernier blanc
+                                    var indexb = labelTo.substring(0, labelToLength).lastIndexOf(" ");
+                                    if (indexb > 0) {
+                                        labelToLength = Math.min(indexb, labelToLength);
+                                    }
+                                }
+
+                                if (labelTo.length <= labelToLength) {
+                                    edegLabel = labelTo + "\n" + nodesMap[edge.from].label + "";
+                                } else {
+                                    edegLabel = labelTo.substring(0, labelToLength) + "\n" + labelTo.substring(labelToLength + 1) + " " + nodesMap[edge.from].label + "";
+                                }
+
+                                nodesMap[edge.from].label = edegLabel;
                                 //   nodesMap[edge.from].color = "#f5ef39"
-                                nodesMap[edge.from].font = { size: 18, color: "#cb9801" };
+                                nodesMap[edge.from].font = { size: 14, color: "#cb9801" };
                                 visjsData.edges[index].length = 120;
+                                nodesMap[edge.from].shape = "ellipse";
+                                nodesMap[edge.from]["color"] = "#eee";
+                                nodesMap[edge.from]["borderWidth"] = 0;
+
                                 nodesToDelete.push(edge.to);
                             } else if (nodesMap[edge.to].data.type == "inverseOf") {
                                 nodesMap[edge.from].label = nodesMap[edge.to].label;
@@ -400,6 +434,16 @@ var Axioms_graph = (function () {
                     visjsData.nodes = nodesToKeep;
 
                     return callbackSeries();
+                },
+
+                function (callbackSeries) {
+                    // on ne bouge pas le noeud  de départ
+                    visjsData.nodes.forEach(function (node) {
+                        if (node.id == rootNodeId) {
+                            node.level = self.minNodeLevel - 1;
+                        }
+                    });
+                    callbackSeries();
                 },
 
                 function (callbackSeries) {
@@ -471,8 +515,8 @@ var Axioms_graph = (function () {
     };
 
     self.drawGraph = function (visjsData, graphDiv, options) {
-        var xOffset = 90;
-        var yOffset = 85;
+        var xOffset = 95;
+        var yOffset = 90;
         //    xOffset = parseInt($("#axiomsDraw_xOffset").val());
         //   yOffset = parseInt($("#axiomsDraw_yOffset").val());
 

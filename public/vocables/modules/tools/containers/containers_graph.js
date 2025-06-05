@@ -5,7 +5,13 @@ import Sparql_common from "../../sparqlProxies/sparql_common.js";
 var Containers_graph = (function () {
     var self = {};
     self.parentContainersColors = [];
-    self.containerStyle = { shape: "square", color: "#fdac00", size: 5, edgeColor: "#e7a1be", parentContainerColor: "#778dd7" };
+    self.containerStyle = {
+        shape: "square",
+        color: "#fdac00",
+        size: 5,
+        edgeColor: "#e7a1be",
+        parentContainerColor: "#778dd7",
+    };
 
     self.getContainerTypes = function (source, options, callback) {
         if (!options) {
@@ -47,13 +53,13 @@ var Containers_graph = (function () {
             source = Lineage_sources.activeSource;
         }
         var fromStr = Sparql_common.getFromStr(source, false, true);
-        if (!ids) {
-            ids = Lineage_whiteboard.lineageVisjsGraph.data.nodes.getIds();
-        }
-        var filter = Sparql_common.setFilter("node", ids);
 
-        if (options.filter) {
-            filter += options.filter;
+        if (!options.filter) {
+            options.filter = "";
+        }
+        if (!ids && Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
+            ids = Lineage_whiteboard.lineageVisjsGraph.data.nodes.getIds();
+            options.filter += Sparql_common.setFilter("child", ids);
         }
 
         options.depth = 1;
@@ -61,14 +67,16 @@ var Containers_graph = (function () {
         var existingNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
         var visjsData = { nodes: [], edges: [] };
         Containers_query.getContainersAscendants(source, ids, options, function (err, result) {
-            if (err) return alert(err.responseText);
+            if (err) {
+                return alert(err.responseText);
+            }
 
             var color = common.palette[self.parentContainersColors.length + 3];
             self.parentContainersColors.push(color);
 
             result.forEach(function (item) {
                 if (item.ancestor) {
-                    if (!existingNodes[item?.ancestor?.value]) {
+                    if (!existingNodes[item.ancestor.value]) {
                         existingNodes[item.ancestor.value] = 1;
 
                         var label = item.ancestorLabel ? item.ancestorLabel.value : Sparql_common.getLabelFromURI(item.ancestor.value);
@@ -150,6 +158,10 @@ var Containers_graph = (function () {
                     }
                 }
             });
+
+            if (!Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
+                Lineage_whiteboard.drawNewGraph(visjsData);
+            }
 
             Lineage_whiteboard.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
             Lineage_whiteboard.lineageVisjsGraph.data.edges.add(visjsData.edges);

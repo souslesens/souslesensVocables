@@ -239,6 +239,7 @@ var Containers_tree = (function () {
             var childrenMap = {};
             result.forEach(function (item) {
                 childrenMap[item.ancestorChild.value] = item.ancestor.value;
+                childrenMap[item.child.value] = item.ancestorChild.value;
             });
             var rootNode = null;
             result.forEach(function (item) {
@@ -292,7 +293,42 @@ var Containers_tree = (function () {
                         //tabId: options.tabId,
                     },
                 };
+
                 jstreeData.push(node);
+                if(item.child && item.child.value) {
+                    //same for child
+                    id = item.child.value;
+                    label = item.childLabel ? item.childLabel.value : Sparql_common.getLabelFromURI(item.child.value);
+                    jstreeId = "_" + common.getRandomHexaId(5);
+
+                    
+                    parent = self.idsMap[item.ancestorChild.value] || "#";
+
+                    if (!self.idsMap[id]) {
+                        self.idsMap[id] = jstreeId;
+                    }
+
+                    if (!existingNodes[jstreeId]) {
+                        existingNodes[jstreeId] = 1;
+                    }
+                    var node = {
+                        id: self.idsMap[id],
+                        text: label,
+                        parent: parent,
+                        type: "Container",
+                        data: {
+                            type: "Container",
+                            source: source,
+                            id: id,
+                            label: label,
+                            parent: parent,
+                        
+                        },
+                    };
+
+                    jstreeData.push(node);   
+                }
+
             });
             var jstreeOptions;
             if (options.jstreeOptions) {

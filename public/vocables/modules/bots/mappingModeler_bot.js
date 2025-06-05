@@ -8,7 +8,7 @@ var MappingModeler_bot = (function () {
 
     self.start = function (workflow, _params, callbackFn) {
         self.title = _params.title || "Create Resource";
-       var startParams = _botEngine.fillStartParams(arguments);
+        var startParams = _botEngine.fillStartParams(arguments);
         self.callbackFn = callbackFn;
         if (!workflow) {
             workflow = self.workflow;

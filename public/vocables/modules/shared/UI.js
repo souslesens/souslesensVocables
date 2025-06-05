@@ -359,10 +359,9 @@ var UI = (function () {
     };
     self.adjustSelectListSize = function (selectListDivId, maxSize) {
         var selectList;
-        if(selectListDivId instanceof jQuery) {
+        if (selectListDivId instanceof jQuery) {
             selectList = selectListDivId;
-        }
-        else{
+        } else {
             selectList = $("#" + selectListDivId);
         }
         var numberOfOptions = selectList.find("option").length;

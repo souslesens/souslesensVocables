@@ -27,19 +27,14 @@ var common = (function () {
     };
 
     self.fillSelectOptions = function (selectId, data, withBlanckOption, textfield, valueField, selectedValue) {
-        var select
-        if(selectId instanceof jQuery) {
+        var select;
+        if (selectId instanceof jQuery) {
             select = selectId;
-        }
-        else{
+        } else {
             select = $("#" + selectId);
-        } 
+        }
 
-
-        select
-            .find("option")
-            .remove()
-            .end();
+        select.find("option").remove().end();
         if (withBlanckOption) {
             select.append(
                 $("<option>", {
@@ -296,7 +291,7 @@ var common = (function () {
                 array.unshift(first);
             }
         },
-        
+
         fullOuterJoin: function (array1, array2, keys) {
             if (!keys || !array1 || !array2) {
                 return "parameter is missing";
@@ -374,8 +369,8 @@ var common = (function () {
             });
             return array;
         },
-        deepCloneWithFunctions: function(obj) {
-            if (obj === null || typeof obj !== 'object') return obj;
+        deepCloneWithFunctions: function (obj) {
+            if (obj === null || typeof obj !== "object") return obj;
 
             if (obj instanceof Date) return new Date(obj);
             if (obj instanceof Array) return obj.map(common.array.deepCloneWithFunctions);
@@ -388,7 +383,6 @@ var common = (function () {
 
             return cloned;
         },
-
     };
 
     self.concatArraysWithoutDuplicate = function (array, addedArray, key) {

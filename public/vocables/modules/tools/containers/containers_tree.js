@@ -480,6 +480,24 @@ var Containers_tree = (function () {
                 predicate: " rdfs:member",
                 object: "<" + containerUri + ">",
             });
+        }else{
+            var containerChildURI=containerUri + "/child";
+            triples.push({
+                subject: "<" + containerUri + ">",
+                predicate: " rdfs:member",
+                object: "<" + containerChildURI + ">",
+            });
+            triples.push({
+                subject: "<" + containerChildURI + ">",
+                predicate: " rdf:type",
+                object: "<http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag>",
+            });
+              triples.push({
+                    subject: containerChildURI,
+                    predicate: " rdfs:label",
+                    object: newContainerLabel+' Child',
+            });
+
         }
 
         triples.push({

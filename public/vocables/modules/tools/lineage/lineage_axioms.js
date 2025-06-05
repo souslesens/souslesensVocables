@@ -76,7 +76,7 @@ var Lineage_axioms = (function () {
 
                         color: "#ddd",
                         size: 16,
-                        borderWidth:item.data.axiomType=="equivalentClass"?4:1,
+                        borderWidth: item.data.axiomType == "equivalentClass" ? 4 : 1,
                         data: {
                             id: item.class,
                             label: item.label,

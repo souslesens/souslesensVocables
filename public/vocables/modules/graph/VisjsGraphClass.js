@@ -107,7 +107,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
             options.visjsOptions.layout = {
                 hierarchical: _options.layoutHierarchical,
             };
-          options.visjsOptions.physics = { enabled: false };
+            options.visjsOptions.physics = { enabled: false };
         } else {
             $("#visjsGraph_layoutSelect").val("");
         }

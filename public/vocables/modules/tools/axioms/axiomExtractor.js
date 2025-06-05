@@ -150,7 +150,7 @@ var AxiomExtractor = (function () {
             return callback(null, self.basicAxioms[source]);
         }
 
-        UI.message("loading axioms of source "+source)
+        UI.message("loading axioms of source " + source);
 
         var basicAxioms = {};
         var labelsMap = {};
@@ -186,7 +186,7 @@ var AxiomExtractor = (function () {
                     });
                 },
                 function (err) {
-                    UI.message("",true)
+                    UI.message("", true);
                     if (err) {
                         return callback ? callback(err) : alert(err);
                     }
@@ -197,8 +197,6 @@ var AxiomExtractor = (function () {
             );
         });
     };
-
-
 
     self.listClassesWithAxioms = function (sourceLabel, callback) {
         AxiomExtractor.getBasicAxioms(sourceLabel, function (err, basicAxioms) {
@@ -218,11 +216,11 @@ var AxiomExtractor = (function () {
                             data: {
                                 id: axiom.s,
                                 label: label,
-                                axiomType:"equivalentClass"
+                                axiomType: "equivalentClass",
                             },
                         });
                     }
-                 /*   if (axiom.p == "http://www.w3.org/2000/01/rdf-schema#subClassOf") {
+                    /*   if (axiom.p == "http://www.w3.org/2000/01/rdf-schema#subClassOf") {
                         if (axiom.o.indexOf("http") < 0) {
                             classesWithAxioms.push({
                                 class: axiom.s,
@@ -261,8 +259,6 @@ var AxiomExtractor = (function () {
             });
         });
     };
-
-
 
     self.execQuery = function (query, callback) {
         var url = Config.sparql_server.url;

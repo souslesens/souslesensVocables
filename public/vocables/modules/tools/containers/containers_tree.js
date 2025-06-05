@@ -295,13 +295,12 @@ var Containers_tree = (function () {
                 };
 
                 jstreeData.push(node);
-                if(item.child && item.child.value) {
+                if (item.child && item.child.value) {
                     //same for child
                     id = item.child.value;
                     label = item.childLabel ? item.childLabel.value : Sparql_common.getLabelFromURI(item.child.value);
                     jstreeId = "_" + common.getRandomHexaId(5);
 
-                    
                     parent = self.idsMap[item.ancestorChild.value] || "#";
 
                     if (!self.idsMap[id]) {
@@ -322,13 +321,11 @@ var Containers_tree = (function () {
                             id: id,
                             label: label,
                             parent: parent,
-                        
                         },
                     };
 
-                    jstreeData.push(node);   
+                    jstreeData.push(node);
                 }
-
             });
             var jstreeOptions;
             if (options.jstreeOptions) {
@@ -480,8 +477,8 @@ var Containers_tree = (function () {
                 predicate: " rdfs:member",
                 object: "<" + containerUri + ">",
             });
-        }else{
-            var containerChildURI=containerUri + "/child";
+        } else {
+            var containerChildURI = containerUri + "/child";
             triples.push({
                 subject: "<" + containerUri + ">",
                 predicate: " rdfs:member",
@@ -492,12 +489,11 @@ var Containers_tree = (function () {
                 predicate: " rdf:type",
                 object: "<http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag>",
             });
-              triples.push({
-                    subject: containerChildURI,
-                    predicate: " rdfs:label",
-                    object: newContainerLabel+' Child',
+            triples.push({
+                subject: containerChildURI,
+                predicate: " rdfs:label",
+                object: newContainerLabel + " Child",
             });
-
         }
 
         triples.push({

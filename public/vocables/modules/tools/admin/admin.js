@@ -439,7 +439,7 @@ $("#sourceDivControlPanelDiv").html(html);*/
             return alert("source does not not exist");
         }
         var graphUri = Config.sources[source].graphUri;
-        var skgGraphUri=prompt(" generate a SKG for ontology " + source + " in  graph " , graphUri + "skg/")
+        var skgGraphUri = prompt(" generate a SKG for ontology " + source + " in  graph ", graphUri + "skg/");
         if (!skgGraphUri) {
             return;
         }

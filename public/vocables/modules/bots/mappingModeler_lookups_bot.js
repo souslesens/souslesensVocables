@@ -3,14 +3,16 @@ import MappingColumnsGraph from "../tools/mappingModeler/mappingColumnsGraph.js"
 
 var Lookups_bot = (function () {
     var self = {};
+
     self.start = function (workflow, _params, callbackFn) {
         self.title = _params.title || "LookUps Bot";
-        _botEngine.startParams = _botEngine.fillStartParams(arguments);
+        var startParams = _botEngine.fillStartParams(arguments);
         self.callbackFn = callbackFn;
         if (!workflow) {
             workflow = self.workflow;
         }
         _botEngine.init(Lookups_bot, workflow, null, function () {
+            _botEngine.startParams = startParams;
             self.params = {};
             if (_params) {
                 for (var key in _params) {

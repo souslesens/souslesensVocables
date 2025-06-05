@@ -14,10 +14,11 @@ var CreateResource_bot = (function () {
     self.title = "Create Resource";
 
     self.start = function (workflow, _params, callback) {
-        _botEngine.startParams = _botEngine.fillStartParams(arguments);
+        var startParams = _botEngine.fillStartParams(arguments);
         self.callback = callback;
         if (!workflow) workflow = self.workflow;
         _botEngine.init(CreateResource_bot, workflow, null, function () {
+            _botEngine.startParams = startParams;
             self.params = { source: self.source || Lineage_sources.activeSource, resourceType: "", resourceLabel: "", currentVocab: "" };
             if (_params)
                 for (var key in _params) {

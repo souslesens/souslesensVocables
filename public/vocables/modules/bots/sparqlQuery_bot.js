@@ -22,7 +22,7 @@ var SparqlQuery_bot = (function () {
 
     self.start = function (options) {
         self.title = "Query graph";
-
+        //_botEngine.startParams = _botEngine.fillStartParams(arguments);
         myBotEngine.init(SparqlQuery_bot, self.workflow, options, function () {
             self.params = {
                 source: Lineage_sources.activeSource,

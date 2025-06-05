@@ -17,7 +17,7 @@ var KGcreator_bot = (function () {
     self.title = "Create mappings";
     self.lastObj = null;
     self.start = function (node, callbackFn) {
-        _botEngine.startParams = _botEngine.fillStartParams(arguments);
+         var startParams = _botEngine.fillStartParams(arguments);
 
         self.currentUri = null;
 

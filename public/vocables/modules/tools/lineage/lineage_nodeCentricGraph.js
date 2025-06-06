@@ -220,6 +220,13 @@ enabled:true},*/
         });
     };
 
+    self.normalLayout = function () {
+        if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
+            Lineage_whiteboard.lineageVisjsGraph.network.setOptions({ hierarchical: { enabled: false } });
+            Lineage_whiteboard.lineageVisjsGraph.network.redraw();
+        }
+    };
+
     return self;
 })();
 

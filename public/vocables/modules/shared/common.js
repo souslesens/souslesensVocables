@@ -27,19 +27,14 @@ var common = (function () {
     };
 
     self.fillSelectOptions = function (selectId, data, withBlanckOption, textfield, valueField, selectedValue) {
-        var select
-        if(selectId instanceof jQuery) {
+        var select;
+        if (selectId instanceof jQuery) {
             select = selectId;
-        }
-        else{
+        } else {
             select = $("#" + selectId);
-        } 
+        }
 
-
-        select
-            .find("option")
-            .remove()
-            .end();
+        select.find("option").remove().end();
         if (withBlanckOption) {
             select.append(
                 $("<option>", {

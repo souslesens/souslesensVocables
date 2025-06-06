@@ -21,6 +21,7 @@ import NodeInfosAxioms from "../axioms/nodeInfosAxioms.js";
 import UserDataWidget from "../../uiWidgets/userDataWidget.js";
 import Containers_tree from "../containers/containers_tree.js";
 import Export from "../../shared/export.js";
+import Lineage_nodeCentricGraph from "./lineage_nodeCentricGraph.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -763,7 +764,7 @@ var Lineage_whiteboard = (function () {
                         },
                         minVelocity: 0.75,
                     },
-                    nodes: { font: { color: self.defaultNodeFontColor } },
+                    nodes: { font: { color: self.defaultNodeFontColor }, borderWidthSelected: 4 },
                     edges: {
                         font: {
                             color: self.defaultEdgeColor,
@@ -3103,10 +3104,14 @@ restrictionSource = Config.predicatesSource;
                     //  "    <span  class=\"popupMenuItem\" onclick=\"Lineage_whiteboard.graphActions.graphNodeNeighborhood('all');\">ObjectProperties</span>" +
                     //   "    <span  class=\"popupMenuItem\" onclick=\"Lineage_whiteboard.graphActions.showRestrictions();\">Restrictions</span>" +
                     //   "  <span  class=\"popupMenuItem\" onclick=\"Lineage_whiteboard.graphActions.showRestrictions();\">Inv Restr</span>" +
+                    "   <hr>" +
                     '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.hideShowOthers();">Hide/show others</span>' +
                     '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.removeFromGraph();">Remove from graph</span>' +
                     '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.removeOthersFromGraph();">Remove others</span>';
             }
+        }
+        if (!node.from) {
+            html += '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.showHierarchicalView();">Hierarchical view </span>';
         }
 
         $("#popupMenuWidgetDiv").html(html);
@@ -3822,11 +3827,15 @@ self.zoomGraphOnNode(node.data[0].id, false);
             var nodesSelected = self.lineageVisjsGraph.network.getSelectedNodes();
             if (nodesSelected.length > 1) {
                 for (var i = 0; i < nodesSelected.length; i++) {
+                    var edgeIds = self.lineageVisjsGraph.network.getConnectedEdges(nodesSelected[i].id);
+                    self.lineageVisjsGraph.data.edges.remove(edgeIds);
                     self.lineageVisjsGraph.removeNodes("id", nodesSelected[i], true);
                 }
                 Lineage_decoration.decorateByUpperOntologyByClass();
                 return;
             }
+            var edgeIds = self.lineageVisjsGraph.network.getConnectedEdges(Lineage_whiteboard.currentGraphNode.id);
+            self.lineageVisjsGraph.data.edges.remove(edgeIds);
             self.lineageVisjsGraph.removeNodes("id", Lineage_whiteboard.currentGraphNode.id, true);
             Lineage_decoration.decorateByUpperOntologyByClass();
         },
@@ -3851,6 +3860,13 @@ self.zoomGraphOnNode(node.data[0].id, false);
             }
             self.lineageVisjsGraph.removeOtherNodesFromGraph(Lineage_whiteboard.currentGraphNode.id);
             Lineage_decoration.decorateByUpperOntologyByClass();
+        },
+
+        showHierarchicalView: function () {
+            if (!Lineage_whiteboard.currentGraphNode.id) {
+                return;
+            }
+            Lineage_nodeCentricGraph.draw(Lineage_whiteboard.currentGraphNode.id);
         },
 
         /**

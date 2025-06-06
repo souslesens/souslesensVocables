@@ -1,0 +1,227 @@
+/**
+ *
+ * manage a hierarchcial view of Whiteboardcontent starting from a specific node
+ * @type {{}}
+ */
+import Lineage_whiteboard from "./lineage_whiteboard.js";
+import PopupMenuWidget from "../../uiWidgets/popupMenuWidget.js";
+import VisjsGraphClass from "../../graph/VisjsGraphClass.js";
+
+var Lineage_nodeCentricGraph = (function () {
+    var self = {};
+
+    self.levelsSelection = [];
+
+    self.draw = function (rootNodeId) {
+        var edgesFromMap = {};
+        var edgesToMap = {};
+        var nodesMap = {};
+        var existingNodes = {};
+
+        Lineage_whiteboard.lineageVisjsGraph.data.nodes.get().forEach(function (item) {
+            nodesMap[item.id] = item;
+        });
+        Lineage_whiteboard.lineageVisjsGraph.data.edges.get().forEach(function (item) {
+            if (!edgesFromMap[item.from]) edgesFromMap[item.from] = [];
+            edgesFromMap[item.from].push(item);
+            if (!edgesToMap[item.to]) edgesToMap[item.to] = [];
+            edgesToMap[item.to].push(item);
+        });
+        var newNodes = [];
+        var newEdges = [];
+
+        function recurse(nodeId, level) {
+            if (!nodesMap[nodeId]) {
+                return;
+            }
+            if (!existingNodes[nodeId]) {
+                existingNodes[nodeId] = 1;
+                nodesMap[nodeId].level = level;
+                newNodes.push(nodesMap[nodeId]);
+                var edges = edgesFromMap[nodeId];
+                if (edges) {
+                    edges.forEach(function (edge) {
+                        if (!existingNodes[edge.to]) {
+                            newEdges.push(edge);
+                            recurse(edge.to, level + 1);
+                        }
+                    });
+                }
+                edges = edgesToMap[nodeId];
+                if (edges) {
+                    edges.forEach(function (edge) {
+                        if (!existingNodes[edge.from]) {
+                            newEdges.push(edge);
+                            recurse(edge.from, level + 1);
+                        }
+                    });
+                }
+            }
+        }
+
+        recurse(rootNodeId, 1);
+        var visjsData = { nodes: newNodes, edges: newEdges };
+
+        if (false) {
+            $("#mainDialogDiv").html(
+                "" +
+                    "<div>" +
+                    "<button onclick='Lineage_nodeCentricGraph.levelsToTable()'>levelsToTable</button>" +
+                    " </div>" +
+                    "<div id='lineageRelation_graphDiv' style='width:80vw;height:80vh;overflow:auto'></div>",
+            );
+            $("#mainDialogDiv").dialog("open");
+            self.drawGraph(visjsData, "lineageRelation_graphDiv", {});
+        } else {
+            var xOffset = 90;
+            var yOffset = 40;
+            var options = {
+                layoutHierarchical: {
+                    direction: "LR",
+                    sortMethod: "hubsize",
+                    levelSeparation: xOffset,
+                    // parentCentralization: false,
+                    shakeTowards: "roots",
+                    blockShifting: true,
+                    edgeMinimization: true,
+                    parentCentralization: true,
+
+                    nodeSpacing: yOffset,
+                },
+                edges: {
+                    smooth: {
+                        type: "cubicBezier",
+                        // type: "diagonalCross",
+                        forceDirection: "horizontal",
+
+                        roundness: 0.4,
+                    },
+                },
+            };
+            Lineage_whiteboard.drawNewGraph(visjsData, "graphDiv", options);
+        }
+    };
+
+    self.graphActions = {
+        showNodeInfos: function () {
+            var node = Lineage_nodeCentricGraph.currentGraphNode;
+            NodeInfosWidget.showNodeInfos(node.data.source, node.data.id, "mainDialogDiv");
+        },
+        showAxioms: function () {
+            var node = Lineage_nodeCentricGraph.currentGraphNode;
+            NodeInfosAxioms.init(node.data.source, node.data.id, "smallDialogDiv");
+        },
+        selectLevel: function () {
+            var node = Lineage_nodeCentricGraph.currentGraphNode;
+            self.levelsSelection.push(node.level);
+        },
+    };
+
+    self.drawGraph = function (visjsData, graphDiv, options) {
+        var xOffset = 90;
+        var yOffset = 40;
+
+        self.graphOptions = {
+            keepNodePositionOnDrag: true,
+            /* physics: {
+enabled:true},*/
+
+            visjsOptions: {
+                edges: {
+                    smooth: {
+                        type: "cubicBezier",
+                        // type: "diagonalCross",
+                        forceDirection: "horizontal",
+
+                        roundness: 0.4,
+                    },
+                },
+            },
+        };
+
+        if (!options.randomLayout) {
+            self.graphOptions.layoutHierarchical = {
+                direction: "LR",
+                sortMethod: "hubsize",
+                levelSeparation: xOffset,
+                // parentCentralization: false,
+                shakeTowards: "roots",
+                blockShifting: true,
+                edgeMinimization: true,
+                parentCentralization: true,
+
+                nodeSpacing: yOffset,
+            };
+        }
+
+        if (graphDiv != "graphDiv") {
+            self.graphOptions.onclickFn = function (node, point, event) {
+                Lineage_nodeCentricGraph.currentGraphNode = node;
+            };
+            self.graphOptions.onRightClickFn = Lineage_nodeCentricGraph.showPopupMenu;
+        } else {
+        }
+
+        self.visjsGraph = new VisjsGraphClass(graphDiv, visjsData, self.graphOptions);
+        self.visjsGraph.draw(function () {});
+    };
+
+    self.showPopupMenu = function (node, point, event) {
+        Lineage_nodeCentricGraph.currentGraphNode = node;
+
+        point = {};
+        point.x = event.x;
+        point.y = event.y;
+        var html =
+            '    <span  class="popupMenuItem" onclick=" Lineage_nodeCentricGraph.graphActions.showNodeInfos() "> Node infos</span>' +
+            ' <span  class="popupMenuItem" onclick=" Lineage_nodeCentricGraph.graphActions.showAxioms() "> Axioms</span>' +
+            ' <span  class="popupMenuItem" onclick=" Lineage_nodeCentricGraph.graphActions.selectLevel() "> Select level</span>';
+
+        PopupMenuWidget.showPopup(point, "popupMenuWidgetDiv");
+        $("#popupMenuWidgetDiv").html(html);
+    };
+
+    self.levelsToTable = function () {
+        self.levelsSelection.sort().reverse();
+
+        var edgesFromMap = {};
+        var edgesToMap = {};
+        var nodesMap = {};
+        var existingNodes = {};
+
+        var lines = {};
+        var matrix = [];
+
+        //on selectionne uniquement les noeuds qui sont dans les niveaux selectionnés
+        self.visjsGraph.data.nodes.get().forEach(function (item) {
+            if (self.levelsSelection.indexOf(item.level) > -1) {
+                if (!lines[item.level]) {
+                    lines[item.level] = {};
+                }
+                lines[item.level][item.id] = item;
+                nodesMap[item.id] = item;
+            }
+        });
+
+        self.visjsGraph.data.edges.get().forEach(function (item) {
+            if (!edgesFromMap[item.from]) edgesFromMap[item.from] = [];
+            edgesFromMap[item.from].push(item);
+            if (!edgesToMap[item.to]) edgesToMap[item.to] = [];
+            edgesToMap[item.to].push(item);
+        });
+
+        self.levelsSelection.forEach(function (level) {
+            var output = [];
+            var nodes = lines[level];
+            for (var nodeId in nodes) {
+                var fromEdges = edgesFromMap[nodeId];
+                fromEdges.forEach(function (item) {});
+            }
+        });
+    };
+
+    return self;
+})();
+
+export default Lineage_nodeCentricGraph;
+window.Lineage_nodeCentricGraph = Lineage_nodeCentricGraph;

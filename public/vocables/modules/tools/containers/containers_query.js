@@ -33,7 +33,7 @@ var Containers_query = (function () {
 
         var url = Config.sources[source].sparql_server.url + "?format=json&query=";
 
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: source}, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: source }, function (err, result) {
             if (err) {
                 return alert(err);
             }
@@ -46,7 +46,7 @@ var Containers_query = (function () {
         var filter = options.filter || "";
         if (containerId) {
             // needs options.useFilterKeyWord because VALUES dont work
-            filter = Sparql_common.setFilter("root", containerId, null, {useFilterKeyWord: 1});
+            filter = Sparql_common.setFilter("root", containerId, null, { useFilterKeyWord: 1 });
         }
 
         if (!options.leaves) {
@@ -77,11 +77,9 @@ var Containers_query = (function () {
             filter +
             "} limit 10000 ";
 
-
-
         var url = Config.sources[source].sparql_server.url + "?format=json&query=";
 
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: source}, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: source }, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -109,7 +107,7 @@ var Containers_query = (function () {
             if (options.depth) {
                 pathOperator = "{1," + options.depth + "}";
             }
-        /*    var childStr = "";
+            /*    var childStr = "";
             if (options.keepChild) {
                 childStr = "?child ?childLabel";
             }
@@ -125,15 +123,18 @@ var Containers_query = (function () {
                 filterAncestorsType += "FILTER(?ancestorChild = <" + options.filterAncestorsType + "> || " + "?ancestor =<" + options.filterAncestorsType + ">)\n";
             }*/
 
-            var filterAncestorsTypeStr = ""
+            var filterAncestorsTypeStr = "";
             if (options.filterAncestorsType) {
-               // filterAncestorsTypeStr = "  ?ancestorChild rdfs:type|rdfs:subClassOf <" + options.filterAncestorsType + ">\n"
-                filterAncestorsTypeStr = "  ?ancestorChild ^rdfs:member <" + options.filterAncestorsType + ">\n"
+                // filterAncestorsTypeStr = "  ?ancestorChild rdfs:type|rdfs:subClassOf <" + options.filterAncestorsType + ">\n"
+                filterAncestorsTypeStr = "  ?ancestorChild ^rdfs:member <" + options.filterAncestorsType + ">\n";
             }
 
-            var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n" +
+            var query =
+                "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n" +
                 "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \n" +
-                "SELECT distinct  * " + fromStr + " WHERE {\n" +
+                "SELECT distinct  * " +
+                fromStr +
+                " WHERE {\n" +
                 "  ?ancestorChild  rdfs:member{1,1} ?child.\n" +
                 " ?ancestor rdfs:member+ ?ancestorChild. \n" +
                 filterAncestorsTypeStr +
@@ -145,7 +146,7 @@ var Containers_query = (function () {
                 "  }\n" +
                 "} limit 10000 ";
 
-        /*    var queryOld =
+            /*    var queryOld =
                 "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n" +
                 "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \n" +
                 "SELECT distinct " +
@@ -169,7 +170,7 @@ var Containers_query = (function () {
                 "  }\n" +
                 "} limit 10000 ";*/
 
-            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: source}, function (err, result) {
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: source }, function (err, result) {
                 if (err) {
                     return callback(err);
                 }
@@ -181,12 +182,12 @@ var Containers_query = (function () {
             var allResults = [];
             var slices = common.array.slice(containerIds, 20);
             // needs options.useFilterKeyWord because VALUES dont work
-            filter = Sparql_common.setFilter("child", containerIds, null, {useFilterKeyWord: 1});
+            filter = Sparql_common.setFilter("child", containerIds, null, { useFilterKeyWord: 1 });
 
             async.eachSeries(
                 slices,
                 function (slice, callbackEach) {
-                    filter = Sparql_common.setFilter("child", slice, null, {useFilterKeyWord: 1});
+                    filter = Sparql_common.setFilter("child", slice, null, { useFilterKeyWord: 1 });
                     execQuery(filter, function (err, result) {
                         if (err) {
                             return callbackEach(err);
@@ -211,7 +212,6 @@ var Containers_query = (function () {
         }
     };
 
-
     self.writeMovedNodeNewParent = function (movedNodeInfos) {
         var graphUri = Config.sources[Lineage_sources.activeSource].graphUri;
         var query =
@@ -231,7 +231,7 @@ var Containers_query = (function () {
 
         var url = Config.sources[Lineage_sources.activeSource].sparql_server.url + "?format=json&query=";
 
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: Lineage_sources.activeSource}, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: Lineage_sources.activeSource }, function (err, result) {
             if (err) {
                 return callback(err);
             }

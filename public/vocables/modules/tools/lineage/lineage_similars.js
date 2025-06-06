@@ -229,7 +229,7 @@ var Lineage_similars = (function () {
                 }
                 var existingNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
 
-                var visjsData = {nodes: [], edges: []};
+                var visjsData = { nodes: [], edges: [] };
 
                 for (var label in whiteboardLabelsMap) {
                     var whiteboardNode = whiteboardLabelsMap[label];
@@ -328,19 +328,17 @@ var Lineage_similars = (function () {
                             dataSet.push([labelsMap[edge.from], predicate, nodesMap[edge.to].label, edge.from, edge.to]);
                         });
                         var cols = [
-                            {title: "label 1", defaultContent: ""},
-                            {title: "predicate", defaultContent: ""},
-                            {title: "label 2", defaultContent: ""},
-                            {title: "URI 1", defaultContent: ""},
-                            {title: "URI 2", defaultContent: ""},
+                            { title: "label 1", defaultContent: "" },
+                            { title: "predicate", defaultContent: "" },
+                            { title: "label 2", defaultContent: "" },
+                            { title: "URI 1", defaultContent: "" },
+                            { title: "URI 2", defaultContent: "" },
                         ];
 
                         Export.showDataTable(null, cols, dataSet);
                     });
                 } else if (ouputType == "save") {
-
-
-                    var targetSource=prompt(" save similiars triples in  source " , fromSource )
+                    var targetSource = prompt(" save similiars triples in  source ", fromSource);
                     if (!targetSource) {
                         return;
                     }
@@ -350,42 +348,29 @@ var Lineage_similars = (function () {
                         nodesMap[node.id] = node;
                     });
 
-
                     Sparql_OWL.getLabelsMap(fromSource, null, function (err, labelsMap) {
-                        var triples=[]
+                        var triples = [];
                         visjsData.edges.forEach(function (edge) {
-                            if (labelsMap[edge.from] == nodesMap[edge.to].label)
-                                predicate = "http://souslesens.org/resource/hasExactSimilarLabel";
+                            if (labelsMap[edge.from] == nodesMap[edge.to].label) predicate = "http://souslesens.org/resource/hasExactSimilarLabel";
                             else predicate = "http://souslesens.org/resource/hasSimilarLabel";
 
                             triples.push({
-                                    subject: edge.from,
-                                    predicate: predicate,
-                                    object: edge.to
-                                }
-                            );
-                        })
-                            Sparql_generic.insertTriples(targetSource,triples, null, function(err, result){
-                                if(err) {
-                                    return alert(err)
-                                }
-                                    return UI.message(result+" inserted in source "+targetSource,true)
-
-                            })
-
-
-
-
-
+                                subject: edge.from,
+                                predicate: predicate,
+                                object: edge.to,
+                            });
+                        });
+                        Sparql_generic.insertTriples(targetSource, triples, null, function (err, result) {
+                            if (err) {
+                                return alert(err);
+                            }
+                            return UI.message(result + " inserted in source " + targetSource, true);
+                        });
                     });
-
                 }
-            }
+            },
         );
     };
-
-
-
 
     /**
      * Gets the nodes to use as starting points for similarity search.

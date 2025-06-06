@@ -7,9 +7,15 @@ var _botEngine = (function () {
             options = {};
         }
         // look if there is a bot already open
-        if ($("#botContainerDiv")?.length > 0) {
+        if ($("#botContainerDiv")?.length > 0 && !self.oldBotEngine) {
             self.resetOldState = true;
-            self.oldBotEngine = JSON.parse(JSON.stringify(_botEngine));
+            self.oldBotEngine = common.array.deepCloneWithFunctions(_botEngine);
+            /*if(self.newStartParams) {
+                self.oldBotEngine.startParams =  self.startParams;
+                self.startParams = self.newStartParams;
+                self.newStartParams = null;
+
+            }*/
         }
         self.options = options;
         self.currentBot = botModule;
@@ -84,6 +90,7 @@ var _botEngine = (function () {
                     });
                 }
             }
+
             //UI.PopUpOnHoverButtons();
             if (callback) {
                 callback();
@@ -294,7 +301,7 @@ var _botEngine = (function () {
 
     self.reset = function () {
         if (self.startParams && self.startParams.length > 0) {
-            self.currentBot.start(...self.startParams);
+            self.currentBot.start(...self.startParams, self.options);
         } else {
             self.currentBot.start(self.options);
         }
@@ -630,6 +637,15 @@ var _botEngine = (function () {
             startParams.push(param);
         }
         return startParams;
+        /* if($('#botContainerDiv')?.length >0){
+            self.newStartParams =startParams;
+
+           
+        }else{
+            self.startParams = startParams;
+        }*/
+
+        return;
     };
     self.deleteLastMessages = function (numberOfMessagesToRemove) {
         if (!numberOfMessagesToRemove) {
@@ -654,11 +670,17 @@ var _botEngine = (function () {
         if (!self.resetOldState) {
             return;
         }
+        if (self.divId == "botDiv") {
+            $("#botPanel").parent().find("#BotUpperButtons").remove();
+        }
+
         setTimeout(function () {
             if (self.oldBotEngine) {
-                _botEngine = JSON.parse(JSON.stringify(self.oldBotEngine));
+                self = common.array.deepCloneWithFunctions(self.oldBotEngine);
+                self.resetOldState = false;
+                self.oldBotEngine = null;
             }
-        }, 1000);
+        }, 300);
     };
 
     return self;

@@ -10,13 +10,14 @@ var CreateRestriction_bot = (function () {
     self.title = "Create Resource";
 
     self.start = function (workflow, params, callback) {
-        _botEngine.startParams = _botEngine.fillStartParams(arguments);
+        var startParams = _botEngine.fillStartParams(arguments);
         self.callbackFn = callback;
         self.params = params;
         if (!workflow) {
             workflow = self.workflow;
         }
         _botEngine.init(CreateRestriction_bot, workflow, null, function () {
+            _botEngine.startParams = startParams;
             _botEngine.nextStep();
         });
     };

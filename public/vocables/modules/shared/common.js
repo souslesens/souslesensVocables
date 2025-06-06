@@ -291,65 +291,7 @@ var common = (function () {
                 array.unshift(first);
             }
         },
-        /*
-        fullOuterJoin:function(array1,array2,keys){
 
-            if(!keys || !array1 || !array2 ){
-                return 'parameter is missing'
-            }
-            if (!Array.isArray(keys)) {
-                keys = [keys]; 
-            }
-            if(array1.length==0 || array2.length==0){
-                return 'one dataset is empty'
-            }
-            var  currentKey;
-            var joinMap={};
-            var joinArray=[];
-            array1.forEach(function(item){
-                currentKey=''
-                keys.forEach(function(key){
-                    if(item[key]){
-                        if(item[key]?.value){
-                             currentKey+=item[key].value+'|'
-                        }else{
-                            currentKey+=item[key]+'|'
-                        }
-                        
-                    }
-                });
-                if(currentKey){
-                    joinMap[currentKey]=item;
-                }else{
-                    joinMap[common.getRandomHexaId(8)]=item;
-                }
-                
-                
-            });
-            array2.forEach(function(item){
-                currentKey=''
-                keys.forEach(function(key){
-                    if(item[key]){
-                        if(item[key]?.value){
-                             currentKey+=item[key].value+'|'
-                        }else{
-                            currentKey+=item[key]+'|'
-                        }
-                        
-                    }
-                });
-                if(joinMap[currentKey]){
-                    joinMap[currentKey]={ ...joinMap[currentKey], ...item};
-                }else if(!currentKey){
-                    joinMap[common.getRandomHexaId(8)]=item;
-                }
-                else{
-                    joinMap[currentKey]=item;
-                }
-            })
-
-            return Object.values(joinMap)
-        },*/
         fullOuterJoin: function (array1, array2, keys) {
             if (!keys || !array1 || !array2) {
                 return "parameter is missing";
@@ -426,6 +368,20 @@ var common = (function () {
                 }
             });
             return array;
+        },
+        deepCloneWithFunctions: function (obj) {
+            if (obj === null || typeof obj !== "object") return obj;
+
+            if (obj instanceof Date) return new Date(obj);
+            if (obj instanceof Array) return obj.map(common.array.deepCloneWithFunctions);
+
+            const cloned = Object.create(Object.getPrototypeOf(obj));
+
+            for (const key in obj) {
+                cloned[key] = common.array.deepCloneWithFunctions(obj[key]);
+            }
+
+            return cloned;
         },
     };
 

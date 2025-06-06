@@ -139,7 +139,7 @@ var Containers_query = (function () {
                 " ?ancestor rdfs:member+ ?ancestorChild. \n" +
                 filterAncestorsTypeStr +
                 "  OPTIONAL{?ancestorChild rdfs:label ?ancestorChildLabel}  \n" +
-                "  {select ?child where  {\n" +
+                "  {select ?child ?childLabel where  {\n" +
                 "   ?child rdfs:label ?childLabel." +
                 (options.filter || "") +
                 "}\n" +

@@ -23,7 +23,7 @@ var SparqlQuery_bot = (function () {
 
     self.start = function (options) {
         self.title = "Query graph";
-        //_botEngine.startParams = _botEngine.fillStartParams(arguments);
+
         myBotEngine.init(SparqlQuery_bot, self.workflow, options, function () {
             self.params = {
                 source: Lineage_sources.activeSource,
@@ -211,6 +211,7 @@ var SparqlQuery_bot = (function () {
 
             if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
                 choices.push({ id: "whiteboardNodes", label: "whiteboard content" });
+                choices.push({ id: "selectedNodes", label: "selected nodes" });
                 myBotEngine.showList(choices, "queryScope");
             } else {
                 self.params.queryScope = "activeSource";
@@ -387,13 +388,23 @@ var SparqlQuery_bot = (function () {
             };
             var subjectIds = null;
             var objectIds = null;
+            var whiteboardNodes = null;
             if (self.params.queryScope == "whiteboardNodes") {
-                if (!self.params.predicateDirection || self.params.predicateDirection == "direct") {
-                    self.params.whiteboardNodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.getIds();
-                    subjectIds = self.params.whiteboardNodes;
-                } else {
-                    objectIds = self.params.whiteboardNodes;
-                }
+                whiteboardNodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.getIds();
+            } else if (self.params.queryScope == "selectedNodes") {
+                whiteboardNodes = Lineage_whiteboard.lineageVisjsGraph.network.getSelectedNodes(true);
+            } else {
+                //no node filter
+            }
+
+            if (whiteboardNodes.length == 0) {
+                return _botEngine.abort("no node selected");
+            }
+            self.params.whiteboardNodes = whiteboardNodes;
+            if (!self.params.predicateDirection || self.params.predicateDirection == "direct") {
+                subjectIds = whiteboardNodes;
+            } else {
+                objectIds = whiteboardNodes;
             }
 
             Sparql_OWL.getFilteredTriples(self.params.source, subjectIds, null, objectIds, options, function (err, result) {
@@ -401,11 +412,15 @@ var SparqlQuery_bot = (function () {
                     return myBotEngine.error(err);
                 }
                 var choices = [];
+                var uniqueIds = {};
                 result.forEach(function (item) {
-                    choices.push({
-                        id: item.prop.value,
-                        label: item.propLabel ? item.propLabel.value : Sparql_common.getLabelFromURI(item.prop.value),
-                    });
+                    if (!uniqueIds[item.prop.value]) {
+                        uniqueIds[item.prop.value] = 1;
+                        choices.push({
+                            id: item.prop.value,
+                            label: item.propLabel ? item.propLabel.value : Sparql_common.getLabelFromURI(item.prop.value),
+                        });
+                    }
                 });
                 choices.sort();
                 return myBotEngine.showList(choices, "predicateFilter");

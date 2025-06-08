@@ -222,8 +222,8 @@ var KGcreator_graph = (function () {
             }
         });
 
-        Lineage_whiteboard.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
-        Lineage_whiteboard.lineageVisjsGraph.data.edges.add(visjsData.edges);
+        Lineage_whiteboard.addVisDataToGraph(visjsData);
+       
     };
 
     self.graphColumnToClassPredicates = function (tables) {

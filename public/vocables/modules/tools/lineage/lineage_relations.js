@@ -657,8 +657,8 @@ var Lineage_relations = (function () {
                 if (!options.output || options.output == "graph") {
                     UI.message("drawing " + allVisjsData.nodes.length + "nodes and " + allVisjsData.edges.length + " edges...", true);
                     if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
-                        Lineage_whiteboard.lineageVisjsGraph.data.nodes.add(allVisjsData.nodes);
-                        Lineage_whiteboard.lineageVisjsGraph.data.edges.add(allVisjsData.edges);
+                        Lineage_whiteboard.addVisDataToGraph(allVisjsData);
+
                     } else {
                         Lineage_whiteboard.drawNewGraph(allVisjsData, graphDiv);
                     }

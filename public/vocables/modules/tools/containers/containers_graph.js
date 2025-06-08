@@ -163,8 +163,8 @@ var Containers_graph = (function () {
                 Lineage_whiteboard.drawNewGraph(visjsData);
             }
 
-            Lineage_whiteboard.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
-            Lineage_whiteboard.lineageVisjsGraph.data.edges.add(visjsData.edges);
+            Lineage_whiteboard.addVisDataToGraph(visjsData);
+           
             Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(visjsData.nodes);
             Lineage_whiteboard.lineageVisjsGraph.network.fit();
             $("#waitImg").css("display", "none");
@@ -357,8 +357,8 @@ var Containers_graph = (function () {
                         Lineage_whiteboard.drawNewGraph(visjsData, null, { noDecorations: 0 });
                         //Lineage_whiteboard.drawNewGraph(visjsData, null);
                     } else {
-                        Lineage_whiteboard.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
-                        Lineage_whiteboard.lineageVisjsGraph.data.edges.add(visjsData.edges);
+                        Lineage_whiteboard.addVisDataToGraph(visjsData);
+                       
                         Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(visjsData.nodes);
                     }
                     Lineage_whiteboard.lineageVisjsGraph.network.fit();

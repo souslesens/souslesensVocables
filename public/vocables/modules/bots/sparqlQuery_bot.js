@@ -930,8 +930,8 @@ var SparqlQuery_bot = (function () {
         });
 
         if (addTograph) {
-            Lineage_whiteboard.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
-            Lineage_whiteboard.lineageVisjsGraph.data.edges.add(visjsData.edges);
+            Lineage_whiteboard.addVisDataToGraph(visjsData);
+           
         } else {
             Lineage_whiteboard.drawNewGraph(visjsData, null, { skipDrawLegend: 1 });
         }

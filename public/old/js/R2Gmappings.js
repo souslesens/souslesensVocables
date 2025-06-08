@@ -504,8 +504,8 @@ var R2Gmappings = (function () {
                 }
             }
 
-            Lineage_whiteboard.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
-            Lineage_whiteboard.lineageVisjsGraph.data.edges.add(visjsData.edges);
+            Lineage_whiteboard.addVisDataToGraph(visjsData);
+           
         },
     };
 

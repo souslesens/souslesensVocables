@@ -2,6 +2,35 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.8.0](https://github.com/souslesens/souslesensVocables/compare/2.7.0...2.8.0) (2025-06-06)
+
+> [!IMPORTANT]
+> Updating to 2.8.0 require a data migration. Execute the following script after upgrade.
+
+```bash
+npm run migrate
+```
+
+
+### Features
+
+* add links to profiles from the users table ([3691421](https://github.com/souslesens/souslesensVocables/commit/369142122b2d5f2546a046d37c2a51e9304cd18f)), closes [#1263](https://github.com/souslesens/souslesensVocables/issues/1263)
+* add modification date to UserData ([3f59a93](https://github.com/souslesens/souslesensVocables/commit/3f59a9361b7dff8714ba4b020bf7827b42602d8f)), closes [#1205](https://github.com/souslesens/souslesensVocables/issues/1205)
+* add readwrite to userData ([b81a646](https://github.com/souslesens/souslesensVocables/commit/b81a6462ec6146316755c0a2216d29f3c5616f3b))
+* **configEditor:** add group:xxx function on searchbar ([e72b30b](https://github.com/souslesens/souslesensVocables/commit/e72b30b191922443c626386234437b86e987b663))
+* **ConfigEditor:** select to help filtering groups ([d04afa6](https://github.com/souslesens/souslesensVocables/commit/d04afa669e1f64a67a176c6f14c19e82dad62825))
+
+
+### Bug Fixes
+
+* **api/userData:** fix GET/PUT/DELETE permissions on userData routes ([591ba72](https://github.com/souslesens/souslesensVocables/commit/591ba723ef30df9e7e7d58a5bf05acebb76a39a2))
+* **api/userData:** fix getting data where data_content is into a file ([0c9f231](https://github.com/souslesens/souslesensVocables/commit/0c9f23128de0f89d6218b8c3b0a00489f5f7292b))
+* Avoid getting a userdata belonging to someone else ([83b813e](https://github.com/souslesens/souslesensVocables/commit/83b813e33685bbe451b4453fa69c296fceb64f62))
+* **ConfigEditor:** Filters by groups ([57e19ab](https://github.com/souslesens/souslesensVocables/commit/57e19abb67efa9aeaee5739bc69524fafbbf4ca1))
+* **openApi:** userDataContent can be any json ([480d322](https://github.com/souslesens/souslesensVocables/commit/480d322fe91091a4fcd42e18f56b46b682e50081))
+* owner can access and modify his data ([644cfff](https://github.com/souslesens/souslesensVocables/commit/644cfffbc40f5d420d937e4e5740b23d1f66d4db))
+* round graph size values ([8a93ef4](https://github.com/souslesens/souslesensVocables/commit/8a93ef48aa4d76b3b6275bb28a169f0b3f4ae7d1)), closes [#1336](https://github.com/souslesens/souslesensVocables/issues/1336)
+
 ## [2.7.0](https://github.com/souslesens/souslesensVocables/compare/2.6.0...2.7.0) (2025-05-26)
 
 

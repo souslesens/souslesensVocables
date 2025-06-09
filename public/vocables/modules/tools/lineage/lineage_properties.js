@@ -423,7 +423,6 @@ var Lineage_properties = (function () {
             });
             if (!isNewGraph) {
                 Lineage_whiteboard.addVisDataToGraph(visjsData);
-               
             } else {
                 Lineage_whiteboard.drawNewGraph(visjsData);
             }
@@ -829,7 +828,6 @@ var Lineage_properties = (function () {
                 Lineage_whiteboard.drawNewGraph(visjsData);
             } else {
                 Lineage_whiteboard.addVisDataToGraph(visjsData);
-               
             }
             Lineage_decoration.decorateNodeAndDrawLegend(allNodeIds, null);
             GraphDisplayLegend.drawLegend("RangesAndDomains", "LineageVisjsLegendCanvas", false);

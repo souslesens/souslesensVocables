@@ -46,7 +46,7 @@ var Lineage_nodeCentricGraph = (function () {
                 if (edges) {
                     edges.forEach(function (edge) {
                         if (!existingNodes[edge.id]) {
-                            existingNodes[edge.id] = 1
+                            existingNodes[edge.id] = 1;
                             newEdges.push(edge);
                             recurse(edge.to, level + 1);
                         }
@@ -56,7 +56,7 @@ var Lineage_nodeCentricGraph = (function () {
                 if (edges) {
                     edges.forEach(function (edge) {
                         if (!existingNodes[edge.id]) {
-                            existingNodes[edge.id] = 1
+                            existingNodes[edge.id] = 1;
                             newEdges.push(edge);
                             recurse(edge.from, level + 1);
                         }
@@ -65,25 +65,26 @@ var Lineage_nodeCentricGraph = (function () {
             }
         }
 
-
         recurse(rootNodeId, 1);
-        self.orphanNodes = []
-        for (var nodeId in nodesMap) {// add orphan nodes
+        self.orphanNodes = [];
+        for (var nodeId in nodesMap) {
+            // add orphan nodes
             if (!existingNodes[nodeId]) {
-                var node = nodesMap[nodeId]
+                var node = nodesMap[nodeId];
                 self.orphanNodes.push(node);
             }
         }
 
-        var visjsData = {nodes: newNodes, edges: newEdges};
+        var visjsData = { nodes: newNodes, edges: newEdges };
 
-        if (false) {// in a separate graph and window
+        if (false) {
+            // in a separate graph and window
             $("#mainDialogDiv").html(
                 "" +
-                "<div>" +
-                "<button onclick='Lineage_nodeCentricGraph.levelsToTable()'>levelsToTable</button>" +
-                " </div>" +
-                "<div id='lineageRelation_graphDiv' style='width:80vw;height:80vh;overflow:auto'></div>",
+                    "<div>" +
+                    "<button onclick='Lineage_nodeCentricGraph.levelsToTable()'>levelsToTable</button>" +
+                    " </div>" +
+                    "<div id='lineageRelation_graphDiv' style='width:80vw;height:80vh;overflow:auto'></div>",
             );
             $("#mainDialogDiv").dialog("open");
             self.drawGraph(visjsData, "lineageRelation_graphDiv", {});
@@ -115,7 +116,7 @@ var Lineage_nodeCentricGraph = (function () {
             };
             Lineage_whiteboard.drawNewGraph(visjsData, "graphDiv", options);
             Lineage_whiteboard.lineageVisjsGraph.options.visjsOptions.layout.hierarchical.enabled = false;
-            Lineage_whiteboard.lineageVisjsGraph.network.setOptions( Lineage_whiteboard.lineageVisjsGraph.options.visjsOptions);
+            Lineage_whiteboard.lineageVisjsGraph.network.setOptions(Lineage_whiteboard.lineageVisjsGraph.options.visjsOptions);
         }
     };
 
@@ -180,9 +181,7 @@ enabled:true},*/
         }
 
         self.visjsGraph = new VisjsGraphClass(graphDiv, visjsData, self.graphOptions);
-        self.visjsGraph.draw(function () {
-        });
-
+        self.visjsGraph.draw(function () {});
     };
 
     self.showPopupMenu = function (node, point, event) {
@@ -238,15 +237,14 @@ enabled:true},*/
             var nodes = lines[level];
             for (var nodeId in nodes) {
                 var fromEdges = edgesFromMap[nodeId];
-                fromEdges.forEach(function (item) {
-                });
+                fromEdges.forEach(function (item) {});
             }
         });
     };
 
     self.normalLayout = function () {
         if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
-            Lineage_whiteboard.lineageVisjsGraph.network.setOptions({hierarchical: {enabled: false}});
+            Lineage_whiteboard.lineageVisjsGraph.network.setOptions({ hierarchical: { enabled: false } });
             Lineage_whiteboard.lineageVisjsGraph.network.redraw();
         }
     };

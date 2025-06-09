@@ -389,7 +389,7 @@ var Lineage_reasoner = (function () {
                 Lineage_whiteboard.drawNewGraph(visjsData);
             }
             Lineage_whiteboard.addVisDataToGraph(visjsData);
-           
+
             Lineage_whiteboard.lineageVisjsGraph.network.fit();
             $("#waitImg").css("display", "none");
         }

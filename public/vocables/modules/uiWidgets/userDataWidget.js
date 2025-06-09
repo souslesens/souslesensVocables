@@ -5,7 +5,7 @@ var UserDataWidget = (function () {
 
     self.data_dir = "";
     self.jsonContent = "";
-    self.callbackFn = null
+    self.callbackFn = null;
     self.saveUI = function () {
         var label = $("#userDataWidget_label").val();
         if (!label) {
@@ -23,7 +23,7 @@ var UserDataWidget = (function () {
                 if (self.callbackFn) {
                     self.callbackFn(err);
                 } else {
-                    alert(err.responseText || err)
+                    alert(err.responseText || err);
                 }
                 return;
             }
@@ -33,7 +33,7 @@ var UserDataWidget = (function () {
                 data_type: data_type,
                 data_content: self.jsonContent,
                 id: result.id,
-                data_group: group
+                data_group: group,
             });
         });
     };
@@ -91,7 +91,7 @@ var UserDataWidget = (function () {
     };
 
     self.getUserdatabyLabel = function (label, callback) {
-        self.listUserData({data_label: label}, function (err, result) {
+        self.listUserData({ data_label: label }, function (err, result) {
             if (err) {
                 return callback(err);
             }

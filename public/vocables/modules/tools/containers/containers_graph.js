@@ -164,7 +164,7 @@ var Containers_graph = (function () {
             }
 
             Lineage_whiteboard.addVisDataToGraph(visjsData);
-           
+
             Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(visjsData.nodes);
             Lineage_whiteboard.lineageVisjsGraph.network.fit();
             $("#waitImg").css("display", "none");
@@ -358,7 +358,7 @@ var Containers_graph = (function () {
                         //Lineage_whiteboard.drawNewGraph(visjsData, null);
                     } else {
                         Lineage_whiteboard.addVisDataToGraph(visjsData);
-                       
+
                         Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(visjsData.nodes);
                     }
                     Lineage_whiteboard.lineageVisjsGraph.network.fit();

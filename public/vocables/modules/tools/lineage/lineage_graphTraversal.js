@@ -406,7 +406,6 @@ var Lineage_graphTraversal = (function () {
 
         if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
             Lineage_whiteboard.addVisDataToGraph(visjsData);
-           
         } else {
             Lineage_whiteboard.drawNewGraph(visjsData);
         }

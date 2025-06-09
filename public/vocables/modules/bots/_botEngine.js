@@ -190,19 +190,15 @@ var _botEngine = (function () {
             return alert("wrong parentStep " + parentStep);
         }
 
+        self.currentObj = self.history.workflowObjects[parentStepIndex];
+        self.nextStep();
 
-        self.currentObj=self.history.workflowObjects[parentStepIndex]
-        self.nextStep()
-
-
-
-
-     /*   var n = 0;
+        /*   var n = 0;
         do {
             self.previousStep();
             n++;
         } while (n <= parentStepIndex);*/
-       // self.previousStep();
+        // self.previousStep();
     };
 
     self.previousStep = function () {

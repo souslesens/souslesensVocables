@@ -519,7 +519,7 @@ var Sparql_common = (function () {
                     }
 
                     var importGraphUri = Config.sources[source2].graphUri;
-                    if (importGraphUri && fromStr.indexOf( "<" + importGraphUri + ">") < 0) {
+                    if (importGraphUri && fromStr.indexOf("<" + importGraphUri + ">") < 0) {
                         fromStr += from + "  <" + importGraphUri + "> ";
                     }
                 });

@@ -223,7 +223,6 @@ var KGcreator_graph = (function () {
         });
 
         Lineage_whiteboard.addVisDataToGraph(visjsData);
-       
     };
 
     self.graphColumnToClassPredicates = function (tables) {

@@ -115,7 +115,7 @@ var _botEngine = (function () {
         }
 
         var key = keys[0];
-        console.log(key);
+
         if (key == "_OR") {
             // alternative
             var alternatives = self.currentObj[key];
@@ -190,12 +190,19 @@ var _botEngine = (function () {
             return alert("wrong parentStep " + parentStep);
         }
 
-        var n = 0;
+
+        self.currentObj=self.history.workflowObjects[parentStepIndex]
+        self.nextStep()
+
+
+
+
+     /*   var n = 0;
         do {
             self.previousStep();
             n++;
-        } while (n <= parentStepIndex);
-        self.previousStep();
+        } while (n <= parentStepIndex);*/
+       // self.previousStep();
     };
 
     self.previousStep = function () {

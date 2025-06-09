@@ -77,7 +77,7 @@ var Lineage_nodeCentricGraph = (function () {
 
         var visjsData = {nodes: newNodes, edges: newEdges};
 
-        if (false) {
+        if (false) {// in a separate graph and window
             $("#mainDialogDiv").html(
                 "" +
                 "<div>" +

@@ -5,27 +5,38 @@ var UserDataWidget = (function () {
 
     self.data_dir = "";
     self.jsonContent = "";
-    (self.callbackFn = null),
-        (self.saveUI = function () {
-            var label = $("#userDataWidget_label").val();
-            if (!label) {
-                return alert("label is mandatory");
+    self.callbackFn = null
+    self.saveUI = function () {
+        var label = $("#userDataWidget_label").val();
+        if (!label) {
+            return alert("label is mandatory");
+        }
+
+        var data_type = self.data_type;
+
+        var group = $("#userDataWidget_group").val();
+
+        self.saveMetadata(label, data_type, self.jsonContent, group, function (err, result) {
+            $("#" + self.divId).dialog("close");
+            UI.message(err || result);
+            if (err) {
+                if (self.callbackFn) {
+                    self.callbackFn(err);
+                } else {
+                    alert(err.responseText || err)
+                }
+                return;
             }
 
-            var data_type = self.data_type;
-
-            var group = $("#userDataWidget_group").val();
-
-            self.saveMetadata(label, data_type, self.jsonContent, group, function (err, result) {
-                $("#" + self.divId).dialog("close");
-                UI.message(err || result);
-                if (err) {
-                    self.callbackFn(err);
-                }
-
-                self.callbackFn(null, { label: label, data_type: data_type, data_content: self.jsonContent, id: result.id, data_group: group });
+            self.callbackFn(null, {
+                label: label,
+                data_type: data_type,
+                data_content: self.jsonContent,
+                id: result.id,
+                data_group: group
             });
         });
+    };
 
     self.saveMetadata = function (label, data_type, jsonContent, group, callback) {
         var tool = MainController.currentTool || "?";
@@ -80,19 +91,27 @@ var UserDataWidget = (function () {
     };
 
     self.getUserdatabyLabel = function (label, callback) {
-        self.listUserData({ data_label: label }, function (err, result) {
-            if (err) return callback(err);
+        self.listUserData({data_label: label}, function (err, result) {
+            if (err) {
+                return callback(err);
+            }
             var obj = null;
             result.forEach(function (item) {
-                if (item.data_label == label) obj = item;
+                if (item.data_label == label) {
+                    obj = item;
+                }
             });
-            if (!obj) return callback("not found");
+            if (!obj) {
+                return callback("not found");
+            }
             callback(null, obj);
         });
     };
 
     self.listUserData = function (filter, callback) {
-        if (!filter) filter = {};
+        if (!filter) {
+            filter = {};
+        }
 
         $.ajax({
             type: "GET",

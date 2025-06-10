@@ -511,9 +511,9 @@ var SparqlQuery_bot = (function () {
             }
 
             if (self.params.chainedPredicates) {
-                var lastPredicate = self.params.predicateFilter;
+                var lastPredicate = "<" + self.params.predicateFilter + ">";
                 if (self.params.predicateDirection == "inverse") {
-                    lastPredicate = "^" + "<" + lastPredicate + ">";
+                    lastPredicate = "^" + lastPredicate;
                 }
                 self.params.chainedPredicates.push(lastPredicate);
                 var predicatesStr = "";
@@ -541,7 +541,7 @@ var SparqlQuery_bot = (function () {
 
                 self.params.queryResult = result;
                 if (self.params.outputType == "SPARQLquery") {
-                    return self.editSparql();
+                    return self.editSparql("");
                 } else if (result.predicates.length >= self.params.maxPredicates && outputType != "CSV") {
                     self.params.queryLimit = null;
 
@@ -558,7 +558,7 @@ var SparqlQuery_bot = (function () {
                         if (action == "TRUNCATE_RESULT") {
                             self.functions.truncateQueryFn();
                         } else if (action == "EDIT_SPARQL") {
-                            return self.editSparql();
+                            return self.editSparql("");
                         } else if (action == "ABORT") {
                             myBotEngine.end();
                         }
@@ -716,7 +716,7 @@ var SparqlQuery_bot = (function () {
                         UserDataWidget.loadUserDatabyId(result.id, function (err, result) {
                             if (err) return myBotEngine.abort(err.responseText || err);
                             self.params.currentSparql = result.data_content.sparqlQuery;
-                            self.editSparql();
+                            self.editSparql(result.data_label, result.data_comment);
                         });
                     }
                 },
@@ -1069,22 +1069,27 @@ var SparqlQuery_bot = (function () {
         myBotEngine.message("CSV export done in download dir");
     };
 
-    self.editSparql = function () {
+    self.editSparql = function (title, description) {
         // $("#" + myBotEngine.divId).dialog("close");
         $("#smallDialogDiv").html(
-            "<div style='background-color:#ddd' >" +
+            "<div  style='font-weight:bold' id='sparqlQueryBot_queryTitle'></div>" +
+                "<div  style='' id='sparqlQueryBot_queryDescription'></div>" +
+                "<div style='background-color:#ddd' >" +
                 "<textarea  id='sparqlQueryBot_textArea'" +
                 " style='width:800px;height:500px'></textarea></div>" +
                 "Output <select id='sparqlQueryBot_outputTypeSelect'><option></option></select>" +
                 "<button onclick='SparqlQuery_bot.functions.onValidateSparqlQuery()'>Execute</button>" +
-                "<button onclick='SparqlQuery_bot.saveQuery()'>SaveQuery</button>",
+                "<button style='float: right' onclick='SparqlQuery_bot.saveQuery()'>SaveQuery</button>",
         );
         $("#smallDialogDiv").dialog("open");
         $("#sparqlQueryBot_outputTypeSelect").css("z-index", 101);
+        $("#sparqlQueryBot_queryTitle").html(title || "");
+        $("#sparqlQueryBot_queryDescription").html(description || "");
 
         var array = ["New Graph", "Add to Graph", "Table", "CSV"];
         common.fillSelectOptions("sparqlQueryBot_outputTypeSelect", array);
         $("#sparqlQueryBot_textArea").text(self.params.currentSparql);
+        myBotEngine.reset();
     };
 
     self.loadImplicitModel = function (source, reload, callback) {

@@ -388,8 +388,8 @@ var Lineage_reasoner = (function () {
             if (!Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
                 Lineage_whiteboard.drawNewGraph(visjsData);
             }
-            Lineage_whiteboard.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
-            Lineage_whiteboard.lineageVisjsGraph.data.edges.add(visjsData.edges);
+            Lineage_whiteboard.addVisDataToGraph(visjsData);
+
             Lineage_whiteboard.lineageVisjsGraph.network.fit();
             $("#waitImg").css("display", "none");
         }

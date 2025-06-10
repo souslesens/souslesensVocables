@@ -18,7 +18,7 @@ class RdfDataModel {
      * @param {boolean} jsonOutput - JSON output format (false = nt)
      * @returns {Promise<any>} json results
      */
-    _query = async (query, jsonOutput = true) => {
+    execQuery = async (query, jsonOutput = true) => {
         const urlParams = new URLSearchParams({
             query: query,
             format: jsonOutput ? "application/sparql-results+json" : "text/plain",
@@ -46,7 +46,7 @@ class RdfDataModel {
 
     getGraphs = async () => {
         const query = "SELECT DISTINCT ?graph count(?s) as ?number_of_triples WHERE { GRAPH ?graph { ?s ?p ?o . }}";
-        const json = await this._query(query);
+        const json = await this.execQuery(query);
         const graphs = json.map((r) => {
             return {
                 name: r.graph.value,
@@ -79,7 +79,7 @@ class RdfDataModel {
                        WHERE {
                            ?s ?p ?o .
                        }`;
-        const json = await this._query(query);
+        const json = await this.execQuery(query);
         return Number(json[0]["total"]["value"]);
     };
 
@@ -91,7 +91,7 @@ class RdfDataModel {
         const query = `SELECT *
                        FROM <${graphUri}>
                        WHERE { <${graphUri}> ?key ?value . }`;
-        const json = await this._query(query);
+        const json = await this.execQuery(query);
         const result = json.map((entry) => {
             return { metadata: entry.key.value, ...entry.value };
         });
@@ -107,7 +107,7 @@ class RdfDataModel {
                        WHERE {
                          <${graphUri}> ?p ?o .
                        }`;
-        await this._query(query);
+        await this.execQuery(query);
     };
 
     /**
@@ -148,7 +148,7 @@ class RdfDataModel {
                                <${graphUri}> <${m.metadata}> ${object} .
                              }
                            }`;
-            await this._query(query);
+            await this.execQuery(query);
         }
 
         return await this.getRdfMetadata(graphUri);
@@ -161,7 +161,7 @@ class RdfDataModel {
             const query = `WITH <${graphUri}>
                            DELETE { <${graphUri}> <${m.metadata}> ${object} }
                            WHERE { <${graphUri}> <${m.metadata}> ${object} }`;
-            await this._query(query);
+            await this.execQuery(query);
         }
     };
 
@@ -174,7 +174,7 @@ class RdfDataModel {
                                <${graphUri}> <${m.metadata}> ${object} .
                              }
                            }`;
-            await this._query(query);
+            await this.execQuery(query);
         }
     };
 
@@ -186,7 +186,7 @@ class RdfDataModel {
         const query = `SELECT *
                        FROM <${graphUri}>
                        WHERE { ?s ?p ?o . }`;
-        const json = await this._query(query);
+        const json = await this.execQuery(query);
         return json.length;
     };
 
@@ -203,7 +203,7 @@ class RdfDataModel {
                        WHERE { ?s ?p ?o .}
                        LIMIT ${limit}
                        OFFSET ${offset}`;
-        const json = await this._query(query, jsonOutput);
+        const json = await this.execQuery(query, jsonOutput);
         return json;
     };
 
@@ -224,7 +224,7 @@ class RdfDataModel {
      */
     loadGraph = async (graphUri, graphPath) => {
         const query = `LOAD <${graphPath}> INTO GRAPH <${graphUri}>`;
-        const json = await this._query(query, true);
+        const json = await this.execQuery(query, true);
         return json;
     };
 }

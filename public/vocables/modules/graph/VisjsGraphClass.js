@@ -60,8 +60,17 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         self.legendLabels = self.legendLabels.concat(visjsData.labels);
         var container = document.getElementById(divId);
 
-        var nodesDataSet = new vis.DataSet(visjsData.nodes);
-        var edgesDataSet = new vis.DataSet(visjsData.edges);
+        var nodesDataSet = null;
+        var edgesDataSet = null;
+        if (Array.isArray(visjsData.nodes)) {
+            // new data
+            var nodesDataSet = new vis.DataSet(visjsData.nodes);
+            var edgesDataSet = new vis.DataSet(visjsData.edges);
+        } else {
+            // already dataset
+            var nodesDataSet = visjsData.nodes;
+            var edgesDataSet = visjsData.edges;
+        }
         self.lastAddedNodes = visjsData.nodes;
         nodesDataSet.on("*", function (/** @type {string} */ event, /** @type {{ items: any; }} */ properties, /** @type {any} */ senderId) {
             if (_options.onAddNodeToGraph) {
@@ -132,9 +141,13 @@ const VisjsGraphClass = function (graphDiv, data, options) {
                         }
                     } else {
                         objId = self.network.getEdgeAt(params.pointer.DOM);
-                        obj = self.data.edges.get(objId);
-                        if (obj) {
-                            _options.onRightClickFn(obj, point, params.event);
+                        if (objId) {
+                            obj = self.data.edges.get(objId);
+                            if (obj) {
+                                _options.onRightClickFn(obj, point, params.event);
+                            }
+                        } else {
+                            _options.onRightClickFn(null, point, params.event);
                         }
                     }
                 }
@@ -292,7 +305,11 @@ const VisjsGraphClass = function (graphDiv, data, options) {
                         self.data.nodes.update(newNodes);
                     }
                 }
+            })
+            .on("beforeDrawing", function () {
+                var x = 3;
             });
+
         if (callback) {
             var intervalIncrement = 0;
             var interval = setInterval(function () {
@@ -325,14 +342,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
             self.currentContext.options.layoutHierarchical = {
                 direction: "LR",
                 sortMethod: "hubsize",
-                //  sortMethod:"directed",
-                //    shakeTowards:"roots",
-                //  sortMethod:"directed",
                 levelSeparation: 200,
-                //   parentCentralization: true,
-                //  shakeTowards:true
-
-                //   nodeSpacing:25,
             };
             self.currentContext.options.edges = {
                 smooth: {
@@ -454,7 +464,9 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         self.data.edges.remove(edgesIds);
     }),
         (self.onScaleChange = function () {
-            if (!self.data || !self.data.nodes) return;
+            if (!self.data || !self.data.nodes) {
+                return;
+            }
             var scale = self.network.getScale();
             if (!self.currentScale || Math.abs(scale - self.currentScale) > 0.01) {
                 var scaleCoef = scale >= 1 ? scale * 0.9 : scale * 2;

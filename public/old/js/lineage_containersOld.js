@@ -1231,8 +1231,8 @@ var query =
                     if (!Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
                         Lineage_whiteboard.drawNewGraph(visjsData);
                     } else {
-                        Lineage_whiteboard.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
-                        Lineage_whiteboard.lineageVisjsGraph.data.edges.add(visjsData.edges);
+                        Lineage_whiteboard.addVisDataToGraph(visjsData);
+                       
                     }
                     Lineage_whiteboard.lineageVisjsGraph.network.fit();
                     $("#waitImg").css("display", "none");
@@ -1426,8 +1426,8 @@ var query =
                 }
             });
 
-            Lineage_whiteboard.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
-            Lineage_whiteboard.lineageVisjsGraph.data.edges.add(visjsData.edges);
+            Lineage_whiteboard.addVisDataToGraph(visjsData);
+           
 
             Lineage_whiteboard.lineageVisjsGraph.network.fit();
             $("#waitImg").css("display", "none");

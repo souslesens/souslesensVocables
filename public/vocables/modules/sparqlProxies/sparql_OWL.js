@@ -770,7 +770,7 @@ var Sparql_OWL = (function () {
 
         //   query+="filter(!isBlank(?superClassSubClass))"
 
-        query += "}}} LIMIT 1000";
+        query += "}}} LIMIT 10000";
 
         var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
         self.no_params = true;

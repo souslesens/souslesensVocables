@@ -173,8 +173,7 @@ self.graphTable(KGcreator.currentTreeNode);
                     });
                 }
                 if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
-                    Lineage_whiteboard.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
-                    Lineage_whiteboard.lineageVisjsGraph.data.edges.add(visjsData.edges);
+                    Lineage_whiteboard.addVisDataToGraph(visjsData);
                 } else {
                     Lineage_whiteboard.drawNewGraph(visjsData);
                 }
@@ -809,8 +808,7 @@ self.graphTable(KGcreator.currentTreeNode);
         }
 
         if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
-            Lineage_whiteboard.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
-            Lineage_whiteboard.lineageVisjsGraph.data.edges.add(visjsData.edges);
+            Lineage_whiteboard.addVisDataToGraph(visjsData);
         } else {
             Lineage_whiteboard.drawNewGraph(visjsData);
         }

@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.9.0](https://github.com/souslesens/souslesensVocables/compare/2.8.0...2.9.0) (2025-06-10)
+
+
+### Features
+
+* add sparql exec route ([eb900ec](https://github.com/souslesens/souslesensVocables/commit/eb900ec6c0ac261664dae228176fc44218091d9d)), closes [#1173](https://github.com/souslesens/souslesensVocables/issues/1173)
+
 ## [2.8.0](https://github.com/souslesens/souslesensVocables/compare/2.7.0...2.8.0) (2025-06-06)
 
 > [!IMPORTANT]

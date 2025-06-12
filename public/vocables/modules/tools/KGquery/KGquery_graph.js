@@ -230,30 +230,40 @@ var KGquery_graph = (function () {
                     // order to get last saved instance of our graph in user_data
                     result = result.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
                     //if graph loaded with loadSaved --> display=checkBox displayGraphInList else last instance graph
+                    var resultId = null;
                     result.forEach(function (item) {
                         if (item.data_label == source + "_model") {
-                            visjsDataSource = item.data_content;
+                            resultId = item.id;
                         }
                     });
-                    if (!err && visjsDataSource.nodes) {
-                        visjsDataSource.nodes.forEach(function (node) {
-                            if (!uniqueNodes[node.id]) {
-                                uniqueNodes[node.id] = 1;
-                                node.x = null;
-                                node.y = null;
-                                //node.fixed = false;
-                                visjsData.nodes.push(node);
-                            }
-                        });
-                        visjsDataSource.edges.forEach(function (edge) {
-                            if (!uniqueNodes[edge.id]) {
-                                uniqueNodes[edge.id] = 1;
-                                visjsData.edges.push(edge);
-                            }
-                        });
+                    if(resultId){
+                            UserDataWidget.loadUserDatabyId(resultId, function (err, result) {
+                                if(result && result.data && result.data.data_content) {
+                                    visjsDataSource = result.data.data_content;
+                                }
+                                if (!err && visjsDataSource.nodes) {
+                                    visjsDataSource.nodes.forEach(function (node) {
+                                        if (!uniqueNodes[node.id]) {
+                                            uniqueNodes[node.id] = 1;
+                                            node.x = null;
+                                            node.y = null;
+                                            //node.fixed = false;
+                                            visjsData.nodes.push(node);
+                                        }
+                                    });
+                                    visjsDataSource.edges.forEach(function (edge) {
+                                        if (!uniqueNodes[edge.id]) {
+                                            uniqueNodes[edge.id] = 1;
+                                            visjsData.edges.push(edge);
+                                        }
+                                    });
+                                    
+                              }
+                              callbackEach();
+                            });
                     }
-
-                    callbackEach();
+                  
+                    
                 });
             },
             function (err) {

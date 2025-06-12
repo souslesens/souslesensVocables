@@ -125,7 +125,9 @@ var SavedQueriesWidget = (function () {
 
         UserDataWidget.showListDialog(null, { filter: { data_type: "savedQueries", data_tool: "KGquery", data_source: MainController.currentSource }, removeSaveDiv: true }, function (err, result) {
             if (result.id) {
-                self.loadItem(result.id);
+                UserDataWidget.loadUserDatabyId(result.id, function (err, result) {
+                    self.loadItem(result.id);
+                });
             }
         });
     };

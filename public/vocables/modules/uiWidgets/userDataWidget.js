@@ -51,15 +51,17 @@ var UserDataWidget = (function () {
             data_source: source || "",
             data_content: jsonContent || {},
             is_shared: false,
-            shared_profiles: [],
-            shared_users: [],
+            shared_profiles:  [],
+            shared_users:  [],
             owned_by: Authentification.currentUser.login,
         };
 
         var type = "POST";
         if (self.currentTreeNode) {
             type = "PUT";
-            payload.id = self.currentTreeNode.id;
+            payload.id = parseInt(self.currentTreeNode.id);
+            payload.shared_profiles = self.currentTreeNode.data?.shared_profiles || [];
+            payload.shared_users = self.currentTreeNode.data?.shared_users || [];    
         }
         payload = JSON.stringify(payload);
         $.ajax({
@@ -272,7 +274,11 @@ var UserDataWidget = (function () {
                             items.share = {
                                 label: "Share",
                                 action: function (_e) {
-                                    alert("coming soon");
+                                    ShareUserData_bot.start(null,{userData:UserDataWidget.currentTreeNode}, function (err, result) {
+                                        if (err) {
+                                            return alert(err);
+                                        }
+                                     });
                                 },
                             };
                             return items;

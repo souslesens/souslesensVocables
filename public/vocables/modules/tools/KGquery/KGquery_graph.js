@@ -110,6 +110,13 @@ var KGquery_graph = (function () {
                         callbackSeries(err);
                     });
                 },
+                // add  decoration
+                function (callbackSeries) {
+
+                    self.fillDecoration(function (err) {
+                        callbackSeries(err);
+                    });
+                },
             ],
             function (err) {
                 if (err) {
@@ -128,6 +135,53 @@ var KGquery_graph = (function () {
         );
     };
 
+    self.fillDecoration = function (callback) {
+        var fileName = MainController.currentSource + "_decoration.json";
+        //Get current decoration file
+        var payload = {
+            dir: "graphs/",
+            fileName: fileName,
+        };
+        if(!self.visjsData &&  !(self.visjsData?.nodes?.length > 0)) { 
+            if(callback) {
+                return callback();
+            }
+            return;
+        }
+        //get decoration file
+        $.ajax({
+            type: "GET",
+            url: `${Config.apiUrl}/data/file`,
+            data: payload,
+            dataType: "json",
+            success: function (result, _textStatus, _jqXHR) {
+                var data = JSON.parse(result);
+
+                for (var node in data) {
+                    var visjsCorrespondingNode = self.visjsData.nodes.filter((attr) => attr.id === node)[0];
+                    for (var decoration in data[node]) {
+                        //decoration = clé de décoration
+                        if (visjsCorrespondingNode) {
+                            visjsCorrespondingNode[decoration] = data[node][decoration];
+                        }
+                    }
+                }
+                // J'ajoute mes différentes décorations aux classes visés dans le visjsdata
+                // Si j'ai des icones je  met dans un répertoire côté client les icones nécessaires à ce graph
+                if(callback) {
+                    return callback();
+                }
+                return;
+            },
+            error(err) {
+                // don't throw error for decoration 
+                if(callback) {  
+                    return callback();
+                }
+                return ;
+            },
+        });
+    }
     /**
      * Starts or stops the graph simulation.
      * @function
@@ -651,6 +705,7 @@ var KGquery_graph = (function () {
             }
             $("#KGquery_messageDiv").text("saved graph");
             self.currentUserDataModel = { id: result?.id };
+            self.visjsData = data;
             if (callback) {
                 callback();
             }
@@ -815,13 +870,24 @@ var KGquery_graph = (function () {
                     if (err) {
                         return alert(err || err.responseText);
                     }
-                    if (result.length > 0 && result[0].data_content) {
+                    if (result.length > 0) {
                         // new method in userData
                         // order to get last saved instance of our graph in user_data
                         result = result.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-                        self.visjsData = result[0].data_content;
-                        self.currentUserDataModel = result[0];
-                        return callback(null, self.visjsData);
+                        if(result[0]?.id){
+                            UserDataWidget.loadUserDatabyId(result[0].id, function (err, result) {
+                                if (err) {
+                                    return callback("notFound");
+                                }
+                                if (!result || !result.data_content) {
+                                    return callback("notFound");
+                                }
+                                self.visjsData = result.data_content;
+                                self.currentUserDataModel = result;
+                                return callback(null, self.visjsData);
+                            });
+                        }
+                        
                     } else {
                         // get from file if the transition to userData is not done
 
@@ -933,37 +999,13 @@ var KGquery_graph = (function () {
                     });
                 }, //Add decoration data from decorate file
                 function (callbackSeries) {
-                    var fileName = MainController.currentSource + "_decoration.json";
-                    //Get current decoration file
-                    var payload = {
-                        dir: "graphs/",
-                        fileName: fileName,
-                    };
-                    //get decoration file
-                    $.ajax({
-                        type: "GET",
-                        url: `${Config.apiUrl}/data/file`,
-                        data: payload,
-                        dataType: "json",
-                        success: function (result, _textStatus, _jqXHR) {
-                            var data = JSON.parse(result);
+                    self.fillDecoration(function(err) {
+                        if (err) {
+                            return callbackSeries(err);
+                        }
+                       
+                        callbackSeries();
 
-                            for (var node in data) {
-                                var visjsCorrespondingNode = visjsData.nodes.filter((attr) => attr.id === node)[0];
-                                for (var decoration in data[node]) {
-                                    //decoration = clé de décoration
-                                    if (visjsCorrespondingNode) {
-                                        visjsCorrespondingNode[decoration] = data[node][decoration];
-                                    }
-                                }
-                            }
-                            // J'ajoute mes différentes décorations aux classes visés dans le visjsdata
-                            // Si j'ai des icones je  met dans un répertoire côté client les icones nécessaires à ce graph
-                            callbackSeries();
-                        },
-                        error(err) {
-                            return callbackSeries();
-                        },
                     });
                 },
 

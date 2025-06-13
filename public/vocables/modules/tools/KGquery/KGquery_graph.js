@@ -112,7 +112,6 @@ var KGquery_graph = (function () {
                 },
                 // add  decoration
                 function (callbackSeries) {
-
                     self.fillDecoration(function (err) {
                         callbackSeries(err);
                     });
@@ -142,8 +141,8 @@ var KGquery_graph = (function () {
             dir: "graphs/",
             fileName: fileName,
         };
-        if(!self.visjsData &&  !(self.visjsData?.nodes?.length > 0)) { 
-            if(callback) {
+        if (!self.visjsData && !(self.visjsData?.nodes?.length > 0)) {
+            if (callback) {
                 return callback();
             }
             return;
@@ -168,20 +167,20 @@ var KGquery_graph = (function () {
                 }
                 // J'ajoute mes différentes décorations aux classes visés dans le visjsdata
                 // Si j'ai des icones je  met dans un répertoire côté client les icones nécessaires à ce graph
-                if(callback) {
+                if (callback) {
                     return callback();
                 }
                 return;
             },
             error(err) {
-                // don't throw error for decoration 
-                if(callback) {  
+                // don't throw error for decoration
+                if (callback) {
                     return callback();
                 }
-                return ;
+                return;
             },
         });
-    }
+    };
     /**
      * Starts or stops the graph simulation.
      * @function
@@ -236,34 +235,31 @@ var KGquery_graph = (function () {
                             resultId = item.id;
                         }
                     });
-                    if(resultId){
-                            UserDataWidget.loadUserDatabyId(resultId, function (err, result) {
-                                if(result && result.data && result.data.data_content) {
-                                    visjsDataSource = result.data.data_content;
-                                }
-                                if (!err && visjsDataSource.nodes) {
-                                    visjsDataSource.nodes.forEach(function (node) {
-                                        if (!uniqueNodes[node.id]) {
-                                            uniqueNodes[node.id] = 1;
-                                            node.x = null;
-                                            node.y = null;
-                                            //node.fixed = false;
-                                            visjsData.nodes.push(node);
-                                        }
-                                    });
-                                    visjsDataSource.edges.forEach(function (edge) {
-                                        if (!uniqueNodes[edge.id]) {
-                                            uniqueNodes[edge.id] = 1;
-                                            visjsData.edges.push(edge);
-                                        }
-                                    });
-                                    
-                              }
-                              callbackEach();
-                            });
+                    if (resultId) {
+                        UserDataWidget.loadUserDatabyId(resultId, function (err, result) {
+                            if (result && result.data && result.data.data_content) {
+                                visjsDataSource = result.data.data_content;
+                            }
+                            if (!err && visjsDataSource.nodes) {
+                                visjsDataSource.nodes.forEach(function (node) {
+                                    if (!uniqueNodes[node.id]) {
+                                        uniqueNodes[node.id] = 1;
+                                        node.x = null;
+                                        node.y = null;
+                                        //node.fixed = false;
+                                        visjsData.nodes.push(node);
+                                    }
+                                });
+                                visjsDataSource.edges.forEach(function (edge) {
+                                    if (!uniqueNodes[edge.id]) {
+                                        uniqueNodes[edge.id] = 1;
+                                        visjsData.edges.push(edge);
+                                    }
+                                });
+                            }
+                            callbackEach();
+                        });
                     }
-                  
-                    
                 });
             },
             function (err) {
@@ -884,7 +880,7 @@ var KGquery_graph = (function () {
                         // new method in userData
                         // order to get last saved instance of our graph in user_data
                         result = result.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-                        if(result[0]?.id){
+                        if (result[0]?.id) {
                             UserDataWidget.loadUserDatabyId(result[0].id, function (err, result) {
                                 if (err) {
                                     return callback("notFound");
@@ -897,7 +893,6 @@ var KGquery_graph = (function () {
                                 return callback(null, self.visjsData);
                             });
                         }
-                        
                     } else {
                         // get from file if the transition to userData is not done
 
@@ -1009,13 +1004,12 @@ var KGquery_graph = (function () {
                     });
                 }, //Add decoration data from decorate file
                 function (callbackSeries) {
-                    self.fillDecoration(function(err) {
+                    self.fillDecoration(function (err) {
                         if (err) {
                             return callbackSeries(err);
                         }
-                       
-                        callbackSeries();
 
+                        callbackSeries();
                     });
                 },
 
@@ -1189,11 +1183,11 @@ var KGquery_graph = (function () {
         });
     };
     self.shareSavedGraph = function () {
-        if(!self.currentUserDataModel?.id){
+        if (!self.currentUserDataModel?.id) {
             return alert("no graph saved");
         }
-        return ShareUserData_bot.start(null,{userData:{id:self.currentUserDataModel.id}},function(err,result){
-            if(err){
+        return ShareUserData_bot.start(null, { userData: { id: self.currentUserDataModel.id } }, function (err, result) {
+            if (err) {
                 return alert(err);
             }
             alert("graph shared");

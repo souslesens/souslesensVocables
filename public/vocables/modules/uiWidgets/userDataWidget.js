@@ -51,8 +51,8 @@ var UserDataWidget = (function () {
             data_source: source || "",
             data_content: jsonContent || {},
             is_shared: false,
-            shared_profiles:  [],
-            shared_users:  [],
+            shared_profiles: [],
+            shared_users: [],
             owned_by: Authentification.currentUser.login,
         };
 
@@ -61,10 +61,10 @@ var UserDataWidget = (function () {
             type = "PUT";
             payload.id = parseInt(self.currentTreeNode.id);
             payload.shared_profiles = self.currentTreeNode.data?.shared_profiles || [];
-            payload.shared_users = self.currentTreeNode.data?.shared_users || [];    
+            payload.shared_users = self.currentTreeNode.data?.shared_users || [];
         }
-        if(payload.shared_profiles.length>0 || payload.shared_users.length>0){
-            payload.is_shared=true;
+        if (payload.shared_profiles.length > 0 || payload.shared_users.length > 0) {
+            payload.is_shared = true;
         }
         payload = JSON.stringify(payload);
         $.ajax({
@@ -277,11 +277,11 @@ var UserDataWidget = (function () {
                             items.share = {
                                 label: "Share",
                                 action: function (_e) {
-                                    ShareUserData_bot.start(null,{userData:UserDataWidget.currentTreeNode}, function (err, result) {
+                                    ShareUserData_bot.start(null, { userData: UserDataWidget.currentTreeNode }, function (err, result) {
                                         if (err) {
                                             return alert(err);
                                         }
-                                     });
+                                    });
                                 },
                             };
                             return items;

@@ -1188,6 +1188,17 @@ var KGquery_graph = (function () {
             self.KGqueryGraph.data.nodes.update(nodes_fonts);
         });
     };
+    self.shareSavedGraph = function () {
+        if(!self.currentUserDataModel?.id){
+            return alert("no graph saved");
+        }
+        return ShareUserData_bot.start(null,{userData:{id:self.currentUserDataModel.id}},function(err,result){
+            if(err){
+                return alert(err);
+            }
+            alert("graph shared");
+        });
+    };
 
     return self;
 })();

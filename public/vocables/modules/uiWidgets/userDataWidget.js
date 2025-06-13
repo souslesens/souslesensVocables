@@ -63,6 +63,9 @@ var UserDataWidget = (function () {
             payload.shared_profiles = self.currentTreeNode.data?.shared_profiles || [];
             payload.shared_users = self.currentTreeNode.data?.shared_users || [];    
         }
+        if(payload.shared_profiles.length>0 || payload.shared_users.length>0){
+            payload.is_shared=true;
+        }
         payload = JSON.stringify(payload);
         $.ajax({
             type: type,

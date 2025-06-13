@@ -5,7 +5,7 @@ module.exports = () => {
     DELETE = async (req, res, _next) => {
         try {
             const userInfo = await userManager.getUser(req.user);
-            const userData = userDataModel.find(req.params.id, userInfo.user);
+            const userData = await userDataModel.find(req.params.id, userInfo.user);
             if (!userData.readwrite && userData.owned_by !== parseInt(userInfo.user.id)) {
                 throw Error(`The resources is readonly and not owned by ${userInfo.user.login}`, { cause: 403 });
             }

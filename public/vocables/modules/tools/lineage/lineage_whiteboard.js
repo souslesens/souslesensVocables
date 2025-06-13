@@ -4439,8 +4439,12 @@ attrs.color=self.getSourceColor(superClassValue)
                     if (err) {
                         return alert(err.responseText);
                     }
-                    if (result?.data_content) {
-                        self.loadGraphFromJSON(result.data_content);
+                    if (result.id) {
+                        UserDataWidget.loadUserDatabyId(result.id, function (err, result) {
+                            if (result?.data_content) {
+                                self.loadGraphFromJSON(result.data_content);
+                            }
+                        });
                     }
                 },
             );

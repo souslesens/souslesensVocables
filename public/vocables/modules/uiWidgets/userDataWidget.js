@@ -59,7 +59,12 @@ var UserDataWidget = (function () {
         var type = "POST";
         if (self.currentTreeNode) {
             type = "PUT";
-            payload.id = self.currentTreeNode.id;
+            payload.id = parseInt(self.currentTreeNode.id);
+            payload.shared_profiles = self.currentTreeNode.data?.shared_profiles || [];
+            payload.shared_users = self.currentTreeNode.data?.shared_users || [];
+        }
+        if (payload.shared_profiles.length > 0 || payload.shared_users.length > 0) {
+            payload.is_shared = true;
         }
         payload = JSON.stringify(payload);
         $.ajax({
@@ -272,7 +277,11 @@ var UserDataWidget = (function () {
                             items.share = {
                                 label: "Share",
                                 action: function (_e) {
-                                    alert("coming soon");
+                                    ShareUserData_bot.start(null, { userData: UserDataWidget.currentTreeNode }, function (err, result) {
+                                        if (err) {
+                                            return alert(err);
+                                        }
+                                    });
                                 },
                             };
                             return items;

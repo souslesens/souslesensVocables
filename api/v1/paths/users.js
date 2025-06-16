@@ -17,15 +17,25 @@ module.exports = function () {
      */
     filterUserByGroup = (users, profiles) => {
         const userProfiles = Object.fromEntries(Object.entries(users).filter(([_key, value]) => value.groups.some((g) => profiles.includes(g))));
-        return Object.entries(userProfiles).map(([key, value]) => ({ [key]: { login: value.login, profiles: value.groups } }));
+        return this.filterUser(userProfiles);
+    };
+    filterUser = (users) => {
+        return Object.entries(users).map(([key, value]) => ({ [key]: { login: value.login, profiles: value.groups } }));
     };
     ///// GET api/v1/users
     async function GET(req, res, next) {
         try {
             const userInfo = await userManager.getUser(req.user);
+
             const userProfiles = await profileModel.getUserProfiles(userInfo.user);
             const sharedProfiles = Object.values(userProfiles).filter((profile) => profile.isShared);
             const allUsers = await userModel.getUserAccounts();
+
+            if ((await userModel.isAdmin(userInfo.user.login)) === true) {
+                res.status(200).json(successfullyFetched(filterUser(sortObjectByKey(allUsers))));
+                return;
+            }
+
             const profileNames = await [...new Set(sharedProfiles.map((item) => item.name))];
             const users = await this.filterUserByGroup(allUsers, profileNames);
             res.status(200).json(successfullyFetched(sortObjectByKey(users)));

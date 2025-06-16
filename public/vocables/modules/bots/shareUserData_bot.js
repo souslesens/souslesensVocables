@@ -43,26 +43,27 @@ var ShareUserData_bot = (function () {
             },
         },
     };
-    self.worflow2={
-        _OR:{
-            'List':{
-                _OR:{
-                    'List Profiles':{listSharedProfilesFn:{}},
-                    'List Users':{listSharedUsersFn:{}}
-                }
+    self.worflow2 = {
+        _OR: {
+            List: {
+                _OR: {
+                    "List Profiles": { listSharedProfilesFn: {} },
+                    "List Users": { listSharedUsersFn: {} },
+                },
             },
-            'Remove':{
-                _OR:{
-                "Remove shared profiles": { removeSharedProfilesFn: { afterRemoveSharedProfilesFn: self.workflowRemoveSharedProfiles } },
-                "Remove shared users": { removeSharedUsersFn: { afterRemoveSharedUsersFn: self.workflowRemoveSharedUsers } },
-            }},
-            'Share':{
-                _OR:{
+            Remove: {
+                _OR: {
+                    "Remove shared profiles": { removeSharedProfilesFn: { afterRemoveSharedProfilesFn: self.workflowRemoveSharedProfiles } },
+                    "Remove shared users": { removeSharedUsersFn: { afterRemoveSharedUsersFn: self.workflowRemoveSharedUsers } },
+                },
+            },
+            Share: {
+                _OR: {
                     "Share with profile": { chooseProfileFn: { afterChooseProfileFn: self.workflowChooseProfile } },
                     "Share with user": { chooseUserFn: { afterChooseUserFn: self.workflowChooseUser } },
-                }
-            }
-        }
+                },
+            },
+        },
     };
 
     self.workflowChooseProfile = {
@@ -255,30 +256,28 @@ var ShareUserData_bot = (function () {
             }
             UI.message("No shared users to remove");
         },
-       
-        listSharedProfilesFn: function(){
+
+        listSharedProfilesFn: function () {
             if (self.params.userData.data?.shared_profiles?.length > 0) {
                 return _botEngine.showList(self.params.userData.data.shared_profiles, null, null, null, function (selectedValue) {
-                    _botEngine.reset()
-                })
-            }
-            else{
-                 return _botEngine.showList(['No shared Profiles'], null, null, null, function (selectedValue) {
-                    _botEngine.reset()
-                })
+                    _botEngine.reset();
+                });
+            } else {
+                return _botEngine.showList(["No shared Profiles"], null, null, null, function (selectedValue) {
+                    _botEngine.reset();
+                });
             }
         },
-        
-        listSharedUsersFn: function(){
+
+        listSharedUsersFn: function () {
             if (self.params.userData.data?.shared_users?.length > 0) {
                 return _botEngine.showList(self.params.userData.data.shared_users, null, null, null, function (selectedValue) {
-                    _botEngine.reset()
-                })
-            }
-            else{
-                  return _botEngine.showList(['No shared Users'], null, null, null, function (selectedValue) {
-                    _botEngine.reset()
-                })
+                    _botEngine.reset();
+                });
+            } else {
+                return _botEngine.showList(["No shared Users"], null, null, null, function (selectedValue) {
+                    _botEngine.reset();
+                });
             }
         },
         afterChooseProfileFn: function () {

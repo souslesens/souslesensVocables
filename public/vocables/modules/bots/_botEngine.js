@@ -35,12 +35,13 @@ var _botEngine = (function () {
         if (options.divId) {
             divId = options.divId;
             _botEngine.divId = options.divId;
-              $("#" + _botEngine.divId).find("#resetButtonBot").remove();
+            $("#" + _botEngine.divId)
+                .find("#resetButtonBot")
+                .remove();
         } else {
             divId = "botDiv";
             _botEngine.divId = "botDiv";
             $($("#botPanel").parent()[0]).on("dialogclose", function (event) {
-               
                 // change div bot
                 _botEngine.resetOldStateFn();
             });
@@ -57,11 +58,10 @@ var _botEngine = (function () {
             }
 
             if (!options.divId) {
-                
                 $("#" + _botEngine.divId)
                     .find("#botFilterProposalInput")
                     .on("keyup", _botEngine.filterList);
-                
+
                 $("#" + _botEngine.divId)
                     .find("#BotUpperButtons")
                     .insertAfter($("#botPanel").parent().find(".ui-dialog-titlebar-close"));
@@ -74,8 +74,6 @@ var _botEngine = (function () {
                     var idDialog = "#" + $(dialogWindow).attr("aria-describedby");
                     $(dialogWindow).on("dialogclose", function (event) {
                         $("#" + _botEngine.divId).empty();
-                       
-                       
                     });
                 }
             }
@@ -662,7 +660,7 @@ var _botEngine = (function () {
         if (!_botEngine.resetOldState) {
             return;
         }
-       
+
         setTimeout(function () {
             if (_botEngine.oldBotEngine) {
                 _botEngine = common.array.deepCloneWithFunctions(_botEngine.oldBotEngine);

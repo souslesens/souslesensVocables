@@ -183,7 +183,8 @@ var UserDataWidget = (function () {
                     var data = _result;
 
                     if (data.length == 0) {
-                        $("#userDataWidget_jstree").html("nothing to load");
+                        $("#userDataWidget_jstree").html("No Data");
+                        return;
                     }
 
                     var jstreeData = [];
@@ -191,7 +192,8 @@ var UserDataWidget = (function () {
 
                     // check data after filters
                     if (data.length == 0) {
-                        $("#userDataWidget_jstree").html("nothing to load");
+                        $("#userDataWidget_jstree").html("No Data");
+                        return;
                     }
 
                     data.forEach(function (item) {

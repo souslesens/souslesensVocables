@@ -684,10 +684,10 @@ var KGquery_graph = (function () {
         var displayGraphInList = $("#KGquery_displayGraphInList").prop("checked");
         if (displayGraphInList) {
             options.output = "list";
-        }else{
-            options.output = 'graph';
+        } else {
+            options.output = "graph";
         }
-       /*
+        /*
         var data = {
             nodes: nodes,
             edges: edges,
@@ -705,9 +705,9 @@ var KGquery_graph = (function () {
         var group = "KGquery/models";
         var data_type = "KGmodelGraph";*/
         var fileName = KGquery.currentSource + "_KGmodelGraph.json";
-        self.visjsData=null;
-        self.KGqueryGraph.saveGraph(fileName, true,options);
-        
+        self.visjsData = null;
+        self.KGqueryGraph.saveGraph(fileName, true, options);
+
         return;
         /*if (self.currentUserDataModel && self.currentUserDataModel.id) {
             UserDataWidget.currentTreeNode = { id: self.currentUserDataModel.id };
@@ -724,7 +724,6 @@ var KGquery_graph = (function () {
             }
         });
         return;*/
-        
     };
     self.addInterGraphProperty = function (edgeData) {
         var propertyId = prompt("enter property URI");
@@ -871,7 +870,7 @@ var KGquery_graph = (function () {
             return callback(null, self.visjsData);
         } else {
             KGquery_graph.message("loading graph display");
-            
+
             var visjsGraphFileName = source + "_KGmodelGraph.json";
             KGquery_graph.message("loading graph display");
             self.KGqueryGraph.loadGraph(
@@ -1212,7 +1211,6 @@ var KGquery_graph = (function () {
             self.KGqueryGraph.data.nodes.update(nodes_fonts);
         });
     };
-   
 
     return self;
 })();

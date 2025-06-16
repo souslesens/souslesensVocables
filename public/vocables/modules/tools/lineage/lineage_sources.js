@@ -532,7 +532,7 @@ var Lineage_sources = (function () {
                 return callback(err);
             }
             var sourceDivId = "source_" + common.getRandomHexaId(5);
-            if(!self.loadedSources[sourceLabel]){
+            if (!self.loadedSources[sourceLabel]) {
                 self.loadedSources[sourceLabel] = { sourceDivId: sourceDivId };
                 self.sourceDivsMap[sourceDivId] = sourceLabel;
                 var html =
@@ -559,7 +559,7 @@ var Lineage_sources = (function () {
                     self.setCurrentSource(source);
                 });
             }
-           
+
             return callback();
         });
     };
@@ -589,7 +589,7 @@ var Lineage_sources = (function () {
             }
             if (sourceLabel == MainController.currentSource) {
                 var sourceDivId = "source_" + common.getRandomHexaId(5);
-                if(!Lineage_sources.loadedSources[sourceLabel]){
+                if (!Lineage_sources.loadedSources[sourceLabel]) {
                     Lineage_sources.loadedSources[sourceLabel] = { sourceDivId: sourceDivId };
                     Lineage_sources.sourceDivsMap[sourceDivId] = sourceLabel;
                     var html =

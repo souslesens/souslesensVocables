@@ -99,11 +99,11 @@ var UserRequestFiltering = {
             if (!graphUri) {
                 error = "DATA PROTECTION : operation " + operation + " needs explicit graph declaration";
             } else {
-                if (false && !userGraphUrisMap[graphUri]) {
+                if (!userGraphUrisMap[graphUri]) {
                     error = " DATA PROTECTION : graphUri not allowed for user  " + graphUri + "\n";
                 } else {
                     // to be fixed PB with PRIVATE sources
-                    if (false && userGraphUrisMap[graphUri].acl != "w") {
+                    if (userGraphUrisMap[graphUri].acl != "w") {
                         error = " DATA PROTECTION : current  user cannot execute " + operation + " on graph " + graphUri + "\n";
                     }
                 }
@@ -142,13 +142,13 @@ var UserRequestFiltering = {
             //check graphuris authorized for user
             var fromError = "";
             json.from.default.forEach(function (fromGraphUri) {
-                if (false && !userGraphUrisMap[fromGraphUri.value]) {
+                if (!userGraphUrisMap[fromGraphUri.value]) {
                     fromError += "DATA PROTECTION: graphUri " + fromGraphUri.value + " not allowed for current user ";
                 }
             });
 
             json.from.named.forEach(function (fromGraphUri) {
-                if (false && !userGraphUrisMap[fromGraphUri.value]) {
+                if (!userGraphUrisMap[fromGraphUri.value]) {
                     fromError += "DATA PROTECTION : graphUri  " + fromGraphUri.value + " not allowed for current user";
                 }
             });

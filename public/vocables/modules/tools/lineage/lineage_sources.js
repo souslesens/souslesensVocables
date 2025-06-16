@@ -532,31 +532,34 @@ var Lineage_sources = (function () {
                 return callback(err);
             }
             var sourceDivId = "source_" + common.getRandomHexaId(5);
-            self.loadedSources[sourceLabel] = { sourceDivId: sourceDivId };
-            self.sourceDivsMap[sourceDivId] = sourceLabel;
-            var html =
-                "<div  id='" +
-                sourceDivId +
-                "' style='color: " +
-                Lineage_whiteboard.getSourceColor(sourceLabel) +
-                ";display:inline-flex;align-items:end;'" +
-                " class='Lineage_sourceLabelDiv'  " +
-                ">" +
-                sourceLabel +
-                "&nbsp;" +
-                /*   "<i class='lineage_sources_menuIcon' onclick='Lineage_sources.showSourceDivPopupMenu(\"" +
-sourceDivId +
-"\")'>[-]</i>";*/
-                "<button class='arrow-icon slsv-invisible-button'  style=' width: 20px;height:20px;}' onclick='Lineage_sources.showSourceDivPopupMenu(\"" +
-                sourceDivId +
-                "\")'/> </button></div>";
-            $("#lineage_drawnSources").append(html);
+            if (!self.loadedSources[sourceLabel]) {
+                self.loadedSources[sourceLabel] = { sourceDivId: sourceDivId };
+                self.sourceDivsMap[sourceDivId] = sourceLabel;
+                var html =
+                    "<div  id='" +
+                    sourceDivId +
+                    "' style='color: " +
+                    Lineage_whiteboard.getSourceColor(sourceLabel) +
+                    ";display:inline-flex;align-items:end;'" +
+                    " class='Lineage_sourceLabelDiv'  " +
+                    ">" +
+                    sourceLabel +
+                    "&nbsp;" +
+                    /*   "<i class='lineage_sources_menuIcon' onclick='Lineage_sources.showSourceDivPopupMenu(\"" +
+    sourceDivId +
+    "\")'>[-]</i>";*/
+                    "<button class='arrow-icon slsv-invisible-button'  style=' width: 20px;height:20px;}' onclick='Lineage_sources.showSourceDivPopupMenu(\"" +
+                    sourceDivId +
+                    "\")'/> </button></div>";
+                $("#lineage_drawnSources").append(html);
 
-            $("#" + sourceDivId).bind("click", function (e) {
-                var sourceDivId = $(this).attr("id");
-                var source = self.sourceDivsMap[sourceDivId];
-                self.setCurrentSource(source);
-            });
+                $("#" + sourceDivId).bind("click", function (e) {
+                    var sourceDivId = $(this).attr("id");
+                    var source = self.sourceDivsMap[sourceDivId];
+                    self.setCurrentSource(source);
+                });
+            }
+
             return callback();
         });
     };
@@ -586,26 +589,28 @@ sourceDivId +
             }
             if (sourceLabel == MainController.currentSource) {
                 var sourceDivId = "source_" + common.getRandomHexaId(5);
-                Lineage_sources.loadedSources[sourceLabel] = { sourceDivId: sourceDivId };
-                Lineage_sources.sourceDivsMap[sourceDivId] = sourceLabel;
-                var html =
-                    "<div  id='" +
-                    sourceDivId +
-                    "' style='color: " +
-                    Lineage_whiteboard.getSourceColor(sourceLabel) +
-                    ";display:inline-flex;align-items:end;'" +
-                    " class='Lineage_sourceLabelDiv'  " +
-                    ">" +
-                    sourceLabel +
-                    "&nbsp;" +
-                    /*   "<i class='lineage_sources_menuIcon' onclick='Lineage_sources.showSourceDivPopupMenu(\"" +
-    sourceDivId +
-    "\")'>[-]</i>";*/
-                    "<button class='arrow-icon slsv-invisible-button'  style=' width: 20px;height:20px;}' onclick='Lineage_sources.showSourceDivPopupMenu(\"" +
-                    sourceDivId +
-                    "\")'/> </button></div>";
-                $("#lineage_drawnSources").append(html);
-                $("#lineage_drawnSources").find(".arrow-icon").hide();
+                if (!Lineage_sources.loadedSources[sourceLabel]) {
+                    Lineage_sources.loadedSources[sourceLabel] = { sourceDivId: sourceDivId };
+                    Lineage_sources.sourceDivsMap[sourceDivId] = sourceLabel;
+                    var html =
+                        "<div  id='" +
+                        sourceDivId +
+                        "' style='color: " +
+                        Lineage_whiteboard.getSourceColor(sourceLabel) +
+                        ";display:inline-flex;align-items:end;'" +
+                        " class='Lineage_sourceLabelDiv'  " +
+                        ">" +
+                        sourceLabel +
+                        "&nbsp;" +
+                        /*   "<i class='lineage_sources_menuIcon' onclick='Lineage_sources.showSourceDivPopupMenu(\"" +
+        sourceDivId +
+        "\")'>[-]</i>";*/
+                        "<button class='arrow-icon slsv-invisible-button'  style=' width: 20px;height:20px;}' onclick='Lineage_sources.showSourceDivPopupMenu(\"" +
+                        sourceDivId +
+                        "\")'/> </button></div>";
+                    $("#lineage_drawnSources").append(html);
+                    $("#lineage_drawnSources").find(".arrow-icon").hide();
+                }
                 /*
                 $("#" + sourceDivId).bind("click", function (e) {
                     var sourceDivId = $(this).attr("id");

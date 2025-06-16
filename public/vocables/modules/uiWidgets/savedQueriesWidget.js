@@ -125,7 +125,9 @@ var SavedQueriesWidget = (function () {
 
         UserDataWidget.showListDialog(null, { filter: { data_type: "savedQueries", data_tool: "KGquery", data_source: MainController.currentSource }, removeSaveDiv: true }, function (err, result) {
             if (result.id) {
-                self.loadItem(result.id);
+                UserDataWidget.loadUserDatabyId(result.id, function (err, result) {
+                    self.loadItem(result.id);
+                });
             }
         });
     };
@@ -164,7 +166,7 @@ var SavedQueriesWidget = (function () {
                 }
                 //console.log(result);
                 $("#KGquery_messageDiv").text("saved query");
-                if (result?.id) {
+                /*if (result?.id) {
                     var groups = result.data_group.split("/");
                     var group_parent = "#";
                     if (groups.length > 0) {
@@ -184,7 +186,7 @@ var SavedQueriesWidget = (function () {
 
                     //$("#SavedQueriesComponent_itemsSelect").append("<option value='" + result.insertedId[0].id + "'>" + result.label + "</option>");
                     //SavedQueriesWidget.showDialog("tabs_myQueries",self.currentSource,KGquery_myQueries.save, KGquery_myQueries.load,"KGquery/savedQueries/");
-                }
+                }*/
             });
         });
 

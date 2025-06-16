@@ -226,7 +226,7 @@ var Lineage_whiteboard = (function () {
             } else if (options.callee == "Tree") {
                 Lineage_whiteboard.drawNodesAndParents(node);
             }
-        } else if (nodeEvent.ctrlKey && nodeEvent.altKey) {
+        } else if (nodeEvent.shiftKey) {
             Lineage_selection.addNodeToSelection(node);
         } else if (nodeEvent.ctrlKey) {
             NodeInfosWidget.showNodeInfos(node.data.source, node, "mainDialogDiv", { resetVisited: 1 });
@@ -4439,8 +4439,12 @@ attrs.color=self.getSourceColor(superClassValue)
                     if (err) {
                         return alert(err.responseText);
                     }
-                    if (result?.data_content) {
-                        self.loadGraphFromJSON(result.data_content);
+                    if (result.id) {
+                        UserDataWidget.loadUserDatabyId(result.id, function (err, result) {
+                            if (result?.data_content) {
+                                self.loadGraphFromJSON(result.data_content);
+                            }
+                        });
                     }
                 },
             );

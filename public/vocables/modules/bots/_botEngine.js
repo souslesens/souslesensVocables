@@ -1,50 +1,52 @@
 var _botEngine = (function () {
     var self = {};
-    self.firstLoad = true;
     self.lastFilterListStr = "";
     self.init = function (botModule, initialWorkflow, options, callback) {
         if (!options) {
             options = {};
         }
         // look if there is a bot already open
-        if ($("#botContainerDiv")?.length > 0 && !self.oldBotEngine) {
-            self.resetOldState = true;
-            self.oldBotEngine = common.array.deepCloneWithFunctions(_botEngine);
-            /*if(self.newStartParams) {
-                self.oldBotEngine.startParams =  self.startParams;
-                self.startParams = self.newStartParams;
-                self.newStartParams = null;
+        if ($("#botContainerDiv")?.length > 0 && !_botEngine.oldBotEngine) {
+            _botEngine.resetOldState = true;
+            _botEngine.oldBotEngine = common.array.deepCloneWithFunctions(_botEngine);
+            /*if(_botEngine.newStartParams) {
+                _botEngine.oldBotEngine.startParams =  _botEngine.startParams;
+                _botEngine.startParams = _botEngine.newStartParams;
+                _botEngine.newStartParams = null;
 
             }*/
         }
-        self.options = options;
-        self.currentBot = botModule;
-        self.currentObj = initialWorkflow;
-        self.initialWorkflow = initialWorkflow;
-        self.history = {};
-        self.history.workflowObjects = [];
-        self.history.returnValues = [];
+        _botEngine.options = options;
+        _botEngine.currentBot = botModule;
+        _botEngine.currentObj = initialWorkflow;
+        _botEngine.initialWorkflow = initialWorkflow;
+        _botEngine.history = {};
+        _botEngine.history.workflowObjects = [];
+        _botEngine.history.returnValues = [];
         //Object {VarFilled:'',valueFilled:''}
-        self.history.VarFilling = {};
-        self.history.currentIndex = -1;
+        _botEngine.history.VarFilling = {};
+        _botEngine.history.currentIndex = -1;
         // Step is the indexes when currentBot.nextStep is a function when the choice is let to the user
-        self.history.step = [];
-        self.currentList = [];
+        _botEngine.history.step = [];
+        _botEngine.currentList = [];
 
         var divId;
 
         if (options.divId) {
             divId = options.divId;
-            self.divId = options.divId;
+            _botEngine.divId = options.divId;
+            $("#" + _botEngine.divId)
+                .find("#resetButtonBot")
+                .remove();
         } else {
             divId = "botDiv";
-            self.divId = "botDiv";
+            _botEngine.divId = "botDiv";
             $($("#botPanel").parent()[0]).on("dialogclose", function (event) {
-                self.firstLoad = false;
                 // change div bot
-                self.resetOldStateFn();
+                _botEngine.resetOldStateFn();
             });
-            $("#botPanel").dialog("option", "title", self.currentBot.title);
+            $("#botPanel").dialog("option", "title", _botEngine.currentBot.title);
+            $("#botPanel").parent().find("#BotUpperButtons").remove();
         }
 
         $("#" + divId).load("./modules/uiWidgets/html/bot.html", function () {
@@ -56,16 +58,11 @@ var _botEngine = (function () {
             }
 
             if (!options.divId) {
-                if (!self.firstLoad) {
-                    $("#" + self.divId)
-                        .find("#BotUpperButtons")
-                        .remove();
-                }
-                $("#" + self.divId)
+                $("#" + _botEngine.divId)
                     .find("#botFilterProposalInput")
-                    .on("keyup", self.filterList);
-                self.firstLoad = false;
-                $("#" + self.divId)
+                    .on("keyup", _botEngine.filterList);
+
+                $("#" + _botEngine.divId)
                     .find("#BotUpperButtons")
                     .insertAfter($("#botPanel").parent().find(".ui-dialog-titlebar-close"));
 
@@ -75,18 +72,8 @@ var _botEngine = (function () {
                         .filter('div[role="dialog"]')[0];
                     var titleDialog = $(dialogWindow).find(".ui-dialog-titlebar-close");
                     var idDialog = "#" + $(dialogWindow).attr("aria-describedby");
-                    $("#" + self.divId)
-                        .find("#BotUpperButtons")
-                        .insertAfter(titleDialog);
                     $(dialogWindow).on("dialogclose", function (event) {
-                        $("#" + self.divId).empty();
-                        $("#" + self.divId)
-                            .find("#resetButtonBot")
-                            .remove();
-                        $("#" + self.divId)
-                            .find("#previousButtonBot")
-                            .remove();
-                        self.firstLoad = true;
+                        $("#" + _botEngine.divId).empty();
                     });
                 }
             }
@@ -99,75 +86,75 @@ var _botEngine = (function () {
     };
 
     self.nextStep = function (returnValue, varToFill) {
-        $("#" + self.divId)
+        $("#" + _botEngine.divId)
             .find("#botFilterProposalDiv")
             .hide();
-        self.history.workflowObjects.push(JSON.parse(JSON.stringify(self.currentObj)));
-        self.history.currentIndex += 1;
-        self.history.returnValues.push(returnValue);
-        if (!self.currentObj) {
-            return self.end();
+        _botEngine.history.workflowObjects.push(JSON.parse(JSON.stringify(_botEngine.currentObj)));
+        _botEngine.history.currentIndex += 1;
+        _botEngine.history.returnValues.push(returnValue);
+        if (!_botEngine.currentObj) {
+            return _botEngine.end();
         }
-        var keys = Object.keys(self.currentObj);
+        var keys = Object.keys(_botEngine.currentObj);
 
         if (keys.length == 0) {
-            return self.end();
+            return _botEngine.end();
         }
 
         var key = keys[0];
 
         if (key == "_OR") {
             // alternative
-            var alternatives = self.currentObj[key];
+            var alternatives = _botEngine.currentObj[key];
             // if  return value execute function linked to return value in alternative
             if (returnValue) {
                 if (alternatives[returnValue]) {
-                    var obj = self.currentObj["_OR"][returnValue];
+                    var obj = _botEngine.currentObj["_OR"][returnValue];
                     var key0 = Object.keys(obj)[0];
                     if (!key0) {
-                        return self.end();
+                        return _botEngine.end();
                     }
 
                     if (!obj[key0]) {
                         console.log("WARNING : in bot workflow has to be declared before it is called in another workflow");
                     }
                     if (key0 == "_OR") {
-                        self.currentObj = obj;
-                        return self.nextStep();
+                        _botEngine.currentObj = obj;
+                        return _botEngine.nextStep();
                     }
                 } else if (alternatives["_DEFAULT"]) {
                     //  try to find _DEFAULT alternative and functuntion associated
-                    var obj = self.currentObj["_OR"]["_DEFAULT"];
+                    var obj = _botEngine.currentObj["_OR"]["_DEFAULT"];
                     var key0 = Object.keys(obj)[0];
                 } else {
-                    self.showAlternatives(alternatives, varToFill);
+                    _botEngine.showAlternatives(alternatives, varToFill);
                     return;
                 }
 
-                var fn = self.currentBot.functions[key0];
+                var fn = _botEngine.currentBot.functions[key0];
 
                 if (!fn || typeof fn !== "function") {
                     return alert("function not defined :" + key0);
                 }
                 if (obj[key0] != "_self") {
-                    self.currentObj = obj[key0];
+                    _botEngine.currentObj = obj[key0];
                 }
-                self.setStepMessage(key0);
+                _botEngine.setStepMessage(key0);
                 fn();
             } else {
-                self.showAlternatives(alternatives, varToFill);
+                _botEngine.showAlternatives(alternatives, varToFill);
             }
         } else {
-            var fn = self.currentBot.functions[key];
-            if (!fn && self.currentBot.functions["_DEFAULT"]) {
-                fn = self.currentBot.functions["_DEFAULT"];
+            var fn = _botEngine.currentBot.functions[key];
+            if (!fn && _botEngine.currentBot.functions["_DEFAULT"]) {
+                fn = _botEngine.currentBot.functions["_DEFAULT"];
             }
             if (!fn || typeof fn !== "function") {
                 return alert("function not defined :" + key);
             }
 
-            self.currentObj = self.currentObj[key];
-            self.setStepMessage(key);
+            _botEngine.currentObj = _botEngine.currentObj[key];
+            _botEngine.setStepMessage(key);
             fn();
         }
     };
@@ -181,7 +168,7 @@ var _botEngine = (function () {
      */
     self.backToStep = function (parentStep) {
         var parentStepIndex = -1;
-        self.history.workflowObjects.forEach(function (item, index) {
+        _botEngine.history.workflowObjects.forEach(function (item, index) {
             if (item[parentStep]) {
                 parentStepIndex = index;
             }
@@ -190,8 +177,8 @@ var _botEngine = (function () {
             return alert("wrong parentStep " + parentStep);
         }
 
-        self.currentObj = self.history.workflowObjects[parentStepIndex];
-        self.nextStep();
+        _botEngine.currentObj = _botEngine.history.workflowObjects[parentStepIndex];
+        _botEngine.nextStep();
 
         /*   var n = 0;
         do {
@@ -202,111 +189,111 @@ var _botEngine = (function () {
     };
 
     self.previousStep = function () {
-        if (self.history.currentIndex > 0) {
-            $("#" + self.divId)
+        if (_botEngine.history.currentIndex > 0) {
+            $("#" + _botEngine.divId)
                 .find("#botPromptInput")
                 .css("display", "none");
 
-            var lastStepIndex = self.history.step[self.history.step.length - 2];
+            var lastStepIndex = _botEngine.history.step[_botEngine.history.step.length - 2];
             if (lastStepIndex == 0) {
-                return self.reset();
+                return _botEngine.reset();
             }
-            self.currentObj = self.history.workflowObjects[lastStepIndex];
-            var returnValue = self.history.returnValues[lastStepIndex];
+            _botEngine.currentObj = _botEngine.history.workflowObjects[lastStepIndex];
+            var returnValue = _botEngine.history.returnValues[lastStepIndex];
 
-            self.deleteLastMessages(2);
+            _botEngine.deleteLastMessages(2);
 
             // cancel var filled concerned by the reverse
 
-            var VarFillingKeys = Object.keys(self.history.VarFilling);
+            var VarFillingKeys = Object.keys(_botEngine.history.VarFilling);
             var VarToUnfill = VarFillingKeys.filter((key) => key >= lastStepIndex);
             if (VarToUnfill.length > 0) {
                 for (const key in VarToUnfill) {
-                    if (self.history.VarFilling[VarToUnfill[key]]) {
-                        var VarFilled = self.history.VarFilling[VarToUnfill[key]].VarFilled;
-                        var ValueFilled = self.history.VarFilling[VarToUnfill[key]].valueFilled;
-                        if (Array.isArray(self.currentBot.params[VarFilled])) {
-                            self.currentBot.params[VarFilled] = self.currentBot.params[VarFilled].filter((item) => item !== ValueFilled);
+                    if (_botEngine.history.VarFilling[VarToUnfill[key]]) {
+                        var VarFilled = _botEngine.history.VarFilling[VarToUnfill[key]].VarFilled;
+                        var ValueFilled = _botEngine.history.VarFilling[VarToUnfill[key]].valueFilled;
+                        if (Array.isArray(_botEngine.currentBot.params[VarFilled])) {
+                            _botEngine.currentBot.params[VarFilled] = _botEngine.currentBot.params[VarFilled].filter((item) => item !== ValueFilled);
                         } else {
-                            self.currentBot.params[VarFilled] = "";
+                            _botEngine.currentBot.params[VarFilled] = "";
                         }
-                        delete self.history.VarFilling[VarToUnfill[key]];
+                        delete _botEngine.history.VarFilling[VarToUnfill[key]];
                     }
                 }
             }
             // delete history trough the last step
-            self.history.currentIndex = lastStepIndex - 1;
-            self.history.workflowObjects = self.history.workflowObjects.filter(function (element, index, array) {
+            _botEngine.history.currentIndex = lastStepIndex - 1;
+            _botEngine.history.workflowObjects = _botEngine.history.workflowObjects.filter(function (element, index, array) {
                 return index < lastStepIndex;
             });
-            self.history.returnValues = self.history.returnValues.filter(function (element, index, array) {
+            _botEngine.history.returnValues = _botEngine.history.returnValues.filter(function (element, index, array) {
                 return index < lastStepIndex;
             });
-            self.history.step = self.history.step.filter(function (element, index, array) {
+            _botEngine.history.step = _botEngine.history.step.filter(function (element, index, array) {
                 return element < lastStepIndex;
             });
 
-            self.nextStep(returnValue);
+            _botEngine.nextStep(returnValue);
         } else {
-            self.history.currentIndex = -1;
-            self.nextStep();
+            _botEngine.history.currentIndex = -1;
+            _botEngine.nextStep();
             // self.reset();
         }
     };
 
     self.end = function (dontCallBack) {
-        self.currentBot.params.queryText = self.getQueryText();
-        self.closeDialog();
-        self.resetOldStateFn();
-        if (!dontCallBack && self.currentBot.callbackFn) {
-            return self.currentBot.callbackFn();
+        _botEngine.currentBot.params.queryText = _botEngine.getQueryText();
+        _botEngine.closeDialog();
+        _botEngine.resetOldStateFn();
+        if (!dontCallBack && _botEngine.currentBot.callbackFn) {
+            return _botEngine.currentBot.callbackFn();
         }
     };
 
     self.closeDialog = function () {
-        if (self.divId != "botDiv") {
-            /*  var dialogWindow = $("#" + self.divId)
+        if (_botEngine.divId != "botDiv") {
+            /*  var dialogWindow = $("#" + _botEngine.divId)
                   .parents()
                   .filter('div[role="dialog"]')[0];
               var idDialog = "#" + $(dialogWindow).attr("aria-describedby");*/
-            $("#" + self.divId).dialog("close");
+            $("#" + _botEngine.divId).dialog("close");
         } else {
             $("#botPanel").dialog("close");
         }
     };
 
     self.setStepMessage = function (step) {
-        if (self.currentBot.functionTitles) {
-            var message = self.currentBot.functionTitles[step];
+        if (_botEngine.currentBot.functionTitles) {
+            var message = _botEngine.currentBot.functionTitles[step];
             // In case 2 questions are asked consecutively erase the last one
-            var messageDivs = $("#" + self.divId)
+            var messageDivs = $("#" + _botEngine.divId)
                 .find("#botTA")
                 .children();
             if (messageDivs.length > 0) {
                 var lastMessages = $(messageDivs[0]).children().filter("span");
                 if (lastMessages.length == 1) {
-                    self.deleteLastMessages();
+                    _botEngine.deleteLastMessages();
                 }
             }
 
             if (message) {
-                self.insertBotMessage(message, { isQuestion: true });
+                _botEngine.insertBotMessage(message, { isQuestion: true });
             } else {
-                self.insertBotMessage("select an option", { isQuestion: true });
+                _botEngine.insertBotMessage("select an option", { isQuestion: true });
             }
         }
     };
 
     self.abort = function (message) {
         alert(message);
-        self.close();
+        _botEngine.close();
     };
 
     self.reset = function () {
-        if (self.startParams && self.startParams.length > 0) {
-            self.currentBot.start(...self.startParams, self.options);
+        if (_botEngine.startParams && _botEngine.startParams.length > 0) {
+            _botEngine.currentBot.start(..._botEngine.startParams, _botEngine.options);
         } else {
-            self.currentBot.start(self.options);
+            _botEngine.currentBot.start(_botEngine.options);
         }
     };
 
@@ -314,7 +301,7 @@ var _botEngine = (function () {
         $("#botPanel").css("display", "none");
     };
     self.message = function (message) {
-        $("#" + self.divId)
+        $("#" + _botEngine.divId)
             .find("#botMessage")
             .html(message);
     };
@@ -332,38 +319,38 @@ var _botEngine = (function () {
                 return 0;
             });
         }
-        if (!self.history.step.includes(self.history.currentIndex)) {
-            self.history.step.push(self.history.currentIndex);
+        if (!_botEngine.history.step.includes(_botEngine.history.currentIndex)) {
+            _botEngine.history.step.push(_botEngine.history.currentIndex);
         }
 
-        $("#" + self.divId)
+        $("#" + _botEngine.divId)
             .find("#bot_resourcesProposalSelect")
             .css("display", "block");
-        self.currentList = values;
+        _botEngine.currentList = values;
         if (values.length > 20) {
-            $("#" + self.divId)
+            $("#" + _botEngine.divId)
                 .find("#botFilterProposalDiv")
                 .show();
             $("#botFilterProposalInput").trigger("focus");
         }
-        common.fillSelectOptions($("#" + self.divId).find("#bot_resourcesProposalSelect"), values, false, "label", "id");
-        $("#" + self.divId)
+        common.fillSelectOptions($("#" + _botEngine.divId).find("#bot_resourcesProposalSelect"), values, false, "label", "id");
+        $("#" + _botEngine.divId)
             .find("#bot_resourcesProposalSelect")
             .unbind("click");
-        UI.adjustSelectListSize($("#" + self.divId).find("#bot_resourcesProposalSelect"), 10);
+        UI.adjustSelectListSize($("#" + _botEngine.divId).find("#bot_resourcesProposalSelect"), 10);
         $("#botPanel").scrollTop($("#botPanel")[0].scrollHeight);
-        $("#" + self.divId)
+        $("#" + _botEngine.divId)
             .find("#bot_resourcesProposalSelect")
             .bind("click", function (evt) {
                 var x = evt;
                 // to edit
-                var text = $("#" + self.divId)
+                var text = $("#" + _botEngine.divId)
                     .find("#bot_resourcesProposalSelect option:selected")
                     .text();
                 if (text == "") {
                     return;
                 }
-                self.insertBotMessage(text + ":");
+                _botEngine.insertBotMessage(text + ":");
 
                 var selectedValue = $(this).val();
                 if (Array.isArray(selectedValue)) {
@@ -374,47 +361,47 @@ var _botEngine = (function () {
                 }
 
                 if (varToFill) {
-                    self.history.VarFilling[self.history.currentIndex] = { VarFilled: varToFill, valueFilled: selectedValue };
-                    if (Array.isArray(self.currentBot.params[varToFill])) {
-                        self.currentBot.params[varToFill].push(selectedValue);
+                    _botEngine.history.VarFilling[_botEngine.history.currentIndex] = { VarFilled: varToFill, valueFilled: selectedValue };
+                    if (Array.isArray(_botEngine.currentBot.params[varToFill])) {
+                        _botEngine.currentBot.params[varToFill].push(selectedValue);
                     } else {
-                        self.currentBot.params[varToFill] = selectedValue;
+                        _botEngine.currentBot.params[varToFill] = selectedValue;
                     }
                 }
                 if (callback) {
                     return callback(selectedValue);
                 }
-                self.nextStep(returnValue || selectedValue);
+                _botEngine.nextStep(returnValue || selectedValue);
             });
     };
     self.filterList = function (evt) {
         //var str = $(this).val();
         var str = $(evt.currentTarget).val();
-        if (!str && self.lastFilterListStr.length < str.length) {
+        if (!str && _botEngine.lastFilterListStr.length < str.length) {
             return;
         } else {
-            common.fillSelectOptions($("#" + self.divId).find("#bot_resourcesProposalSelect"), self.currentList, false, "label", "id");
+            common.fillSelectOptions($("#" + _botEngine.divId).find("#bot_resourcesProposalSelect"), _botEngine.currentList, false, "label", "id");
         }
-        if (str.length < 2 && self.lastFilterListStr.length < str.length) {
+        if (str.length < 2 && _botEngine.lastFilterListStr.length < str.length) {
             return;
         }
-        self.lastFilterListStr = str;
+        _botEngine.lastFilterListStr = str;
         str = str.toLowerCase();
         var selection = [];
-        self.currentList.forEach(function (item) {
+        _botEngine.currentList.forEach(function (item) {
             if (item.label.toLowerCase().indexOf(str) > -1) {
                 selection.push(item);
             }
         });
-        common.fillSelectOptions($("#" + self.divId).find("#bot_resourcesProposalSelect"), selection, false, "label", "id");
-        UI.adjustSelectListSize($("#" + self.divId).find("#bot_resourcesProposalSelect"), 10);
-        $("#" + self.divId)
+        common.fillSelectOptions($("#" + _botEngine.divId).find("#bot_resourcesProposalSelect"), selection, false, "label", "id");
+        UI.adjustSelectListSize($("#" + _botEngine.divId).find("#bot_resourcesProposalSelect"), 10);
+        $("#" + _botEngine.divId)
             .find("#botPanel")
             .scrollTop($("#botPanel")[0].scrollHeight);
     };
 
     self.promptValue = function (message, varToFill, defaultValue, options, callback) {
-        $("#" + self.divId)
+        $("#" + _botEngine.divId)
             .find("#bot_resourcesProposalSelect")
             .hide();
 
@@ -422,62 +409,62 @@ var _botEngine = (function () {
             //DateWidget.unsetDatePickerOnInput("botPromptInput");
             DateWidget.setDatePickerOnInput("botPromptInput", null, function (date) {
                 _botEngine.currentBot.params[varToFill] = date.getTime();
-                $("#" + self.divId)
+                $("#" + _botEngine.divId)
                     .find("#botPromptInput")
                     .trigger("focus");
 
-                // self.nextStep();
+                // _botEngine.nextStep();
             });
         }
 
-        $("#" + self.divId)
+        $("#" + _botEngine.divId)
             .find("#botPromptInput")
             .on("keyup", function (key) {
                 if (event.keyCode == 13 || event.keyCode == 9) {
                     DateWidget.unsetDatePickerOnInput("botPromptInput");
-                    $("#" + self.divId)
+                    $("#" + _botEngine.divId)
                         .find("#bot_resourcesProposalSelect")
                         .show();
-                    $("#" + self.divId)
+                    $("#" + _botEngine.divId)
                         .find("#botPromptInput")
                         .css("display", "none");
                     var value = $(this).val();
-                    var varToFill = $("#" + self.divId)
+                    var varToFill = $("#" + _botEngine.divId)
                         .find("#botVarToFill")
                         .val();
                     if (!varToFill) {
                         return _botEngine.previousStep();
                     }
                     //Il faut attribuer l'objet aux bon numéro de currentObject
-                    self.history.VarFilling[self.history.currentIndex] = { VarFilled: varToFill, valueFilled: value.trim() };
+                    _botEngine.history.VarFilling[_botEngine.history.currentIndex] = { VarFilled: varToFill, valueFilled: value.trim() };
 
                     _botEngine.currentBot.params[varToFill] = value.trim();
-                    self.insertBotMessage(value);
-                    $("#" + self.divId)
+                    _botEngine.insertBotMessage(value);
+                    $("#" + _botEngine.divId)
                         .find("#botPromptInput")
                         .off();
                     if (callback) {
                         return callback(value);
                     } else {
-                        self.nextStep();
+                        _botEngine.nextStep();
                     }
                 }
             });
-        self.clearProposalSelect();
-        $("#" + self.divId)
+        _botEngine.clearProposalSelect();
+        $("#" + _botEngine.divId)
             .find("#botVarToFill")
             .val(varToFill);
-        $("#" + self.divId)
+        $("#" + _botEngine.divId)
             .find("#botPromptInput")
             .val(defaultValue || "");
-        $("#" + self.divId)
+        $("#" + _botEngine.divId)
             .find("#botPromptInput")
             .css("display", "block");
-        $("#" + self.divId)
+        $("#" + _botEngine.divId)
             .find("#botPromptInput")
             .trigger("focus");
-        if (!self.history.step.includes(self.history.currentIndex)) {
-            self.history.step.push(self.history.currentIndex);
+        if (!_botEngine.history.step.includes(_botEngine.history.currentIndex)) {
+            _botEngine.history.step.push(_botEngine.history.currentIndex);
         }
     };
 
@@ -502,21 +489,21 @@ var _botEngine = (function () {
         html += "<span class='" + chat_class + "' id='" + tokenId + "'>" + str + "</span>";
         if (chat_class == "chat-left") {
             html += "</div>";
-            self.lastTokenId = tokenId;
+            _botEngine.lastTokenId = tokenId;
         }
         if (chat_class == "chat-right") {
-            $(html).insertAfter("#" + self.lastTokenId);
+            $(html).insertAfter("#" + _botEngine.lastTokenId);
         } else {
-            $("#" + self.divId)
+            $("#" + _botEngine.divId)
                 .find("#botTA")
                 .prepend(html);
             //$(html).insertBefore("#bot_input");
         }
 
-        $("#" + self.divId)
+        $("#" + _botEngine.divId)
             .find("#bot_input")
             .val("");
-        $("#" + self.divId)
+        $("#" + _botEngine.divId)
             .find("#bot_input")
             .trigger("focus");
         if ($("#botDiv")[0].scrollHeight > 500) {
@@ -532,8 +519,8 @@ var _botEngine = (function () {
             choices.push({ id: key, label: key });
         }
 
-        self.showList(choices, varToFill);
-        self.setStepMessage();
+        _botEngine.showList(choices, varToFill);
+        _botEngine.setStepMessage();
     };
 
     self.getQueryText = function () {
@@ -544,7 +531,7 @@ var _botEngine = (function () {
         return queryText;
     };
     self.clearProposalSelect = function () {
-        $("#" + self.divId)
+        $("#" + _botEngine.divId)
             .find("#bot_resourcesProposalSelect")
             .find("option")
             .remove()
@@ -552,8 +539,8 @@ var _botEngine = (function () {
     };
 
     self.exportToGraph = function () {
-        var functionTitles = self.currentBot.functionTitles;
-        var workflow = self.initialWorkflow;
+        var functionTitles = _botEngine.currentBot.functionTitles;
+        var workflow = _botEngine.initialWorkflow;
 
         var visjsData = { nodes: [], edges: [] };
 
@@ -596,7 +583,7 @@ var _botEngine = (function () {
             }
         };
 
-        var title = self.currentBot.title;
+        var title = _botEngine.currentBot.title;
         visjsData.nodes.push({
             id: title,
             label: title,
@@ -655,7 +642,7 @@ var _botEngine = (function () {
             numberOfMessagesToRemove = 1;
         }
         for (var i = 0; i < numberOfMessagesToRemove; i++) {
-            var messageDivs = $("#" + self.divId)
+            var messageDivs = $("#" + _botEngine.divId)
                 .find("#botTA")
                 .children();
             if (messageDivs.length > 0) {
@@ -670,18 +657,15 @@ var _botEngine = (function () {
         }
     };
     self.resetOldStateFn = function () {
-        if (!self.resetOldState) {
+        if (!_botEngine.resetOldState) {
             return;
-        }
-        if (self.divId == "botDiv") {
-            $("#botPanel").parent().find("#BotUpperButtons").remove();
         }
 
         setTimeout(function () {
-            if (self.oldBotEngine) {
-                self = common.array.deepCloneWithFunctions(self.oldBotEngine);
-                self.resetOldState = false;
-                self.oldBotEngine = null;
+            if (_botEngine.oldBotEngine) {
+                _botEngine = common.array.deepCloneWithFunctions(_botEngine.oldBotEngine);
+                _botEngine.resetOldState = false;
+                _botEngine.oldBotEngine = null;
             }
         }, 300);
     };

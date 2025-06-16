@@ -524,7 +524,7 @@ var KGquery = (function () {
                     if (options.aggregate) {
                         return callbackSeries();
                     }
-                    if (KGquery_myQueries.currentOptionalPredicatesSparql || KGquery_myQueries.labelFromURIToDisplay) {
+                    if (KGquery_myQueries.currentOptionalPredicatesSparql || (KGquery_myQueries.labelFromURIToDisplay && KGquery_myQueries.labelFromURIToDisplay?.length>0)) {
                         optionalPredicatesSparql = KGquery_myQueries.currentOptionalPredicatesSparql;
                         KGquery_myQueries.currentOptionalPredicatesSparql = null;
                         KGquery.selectClauseSparql = KGquery_myQueries.selectClauseSparql;

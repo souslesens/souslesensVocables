@@ -936,7 +936,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         });
     };
 
-    self.saveGraph = function (fileName, raw) {
+    self.saveGraph = function (fileName, raw,options) {
         if (!self.currentContext) {
             return;
         }
@@ -957,7 +957,11 @@ const VisjsGraphClass = function (graphDiv, data, options) {
             edges: self.data.edges.get(),
             context: self.currentContext,
             positions: positions,
+            
         };
+        if(options){
+            data.options=options;
+        }
         if (!fileName) {
             fileName = prompt("graph name");
         }
@@ -1215,6 +1219,38 @@ const VisjsGraphClass = function (graphDiv, data, options) {
             Export.exportPlantUML(plantUMLString, fileName);
         }
     };
+    self.addSelectNode=function(newNodeId){
+        var selectedNodes = self.network.getSelectedNodes();
+
+
+        if (!selectedNodes.includes(newNodeId)) {
+            selectedNodes.push(newNodeId);
+        }
+        self.network.selectNodes(selectedNodes);
+    };
+    self.setSelectedNodes=function(nodes){
+        if(!nodes){
+            return;
+        }
+        if(!Array.isArray(nodes)){
+            nodes=[nodes]
+        }
+        if(!(nodes.length>0)){
+            return;
+        }
+        var selectedNodes=[];
+        nodes.forEach(function(node){
+            if(node?.id){
+                selectedNodes.push(node?.id);
+            }
+            else{
+                selectedNodes.push(node);
+            }
+        });
+        selectedNodes=common.array.distinctValues(selectedNodes);
+        self.network.selectNodes(selectedNodes);
+
+    }
 };
 export default VisjsGraphClass;
 window.VisjsGraphClass = VisjsGraphClass;

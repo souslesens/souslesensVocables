@@ -684,8 +684,10 @@ var KGquery_graph = (function () {
         var displayGraphInList = $("#KGquery_displayGraphInList").prop("checked");
         if (displayGraphInList) {
             options.output = "list";
+        }else{
+            options.output = 'graph';
         }
-
+       /*
         var data = {
             nodes: nodes,
             edges: edges,
@@ -701,8 +703,13 @@ var KGquery_graph = (function () {
         });
         var label = KGquery.currentSource + "_model";
         var group = "KGquery/models";
-        var data_type = "KGmodelGraph";
-        if (self.currentUserDataModel && self.currentUserDataModel.id) {
+        var data_type = "KGmodelGraph";*/
+        var fileName = KGquery.currentSource + "_KGmodelGraph.json";
+        self.visjsData=null;
+        self.KGqueryGraph.saveGraph(fileName, true,options);
+        
+        return;
+        /*if (self.currentUserDataModel && self.currentUserDataModel.id) {
             UserDataWidget.currentTreeNode = { id: self.currentUserDataModel.id };
         }
         UserDataWidget.saveMetadata(label, data_type, data, group, function (err, result) {
@@ -716,10 +723,8 @@ var KGquery_graph = (function () {
                 callback();
             }
         });
-        return;
-        var fileName = KGquery.currentSource + "_KGmodelGraph.json";
-        self.KGqueryGraph.saveGraph(fileName, true);
-        return;
+        return;*/
+        
     };
     self.addInterGraphProperty = function (edgeData) {
         var propertyId = prompt("enter property URI");
@@ -866,7 +871,32 @@ var KGquery_graph = (function () {
             return callback(null, self.visjsData);
         } else {
             KGquery_graph.message("loading graph display");
-            UserDataWidget.listUserData(
+            
+            var visjsGraphFileName = source + "_KGmodelGraph.json";
+            KGquery_graph.message("loading graph display");
+            self.KGqueryGraph.loadGraph(
+                visjsGraphFileName,
+                null,
+                function (err, result) {
+                    if (err) {
+                        return callback("notFound");
+                    }
+                    self.visjsData = result;
+                    var display = "graph";
+                    if (result && result.options && result.options.output) {
+                        display = result.options.output;
+                    }
+                    if (display == "list") {
+                        $("#KGquery_displayGraphInList").prop("checked", true);
+                    } else {
+                        $("#KGquery_displayGraphInList").prop("checked", false);
+                    }
+
+                    return callback(null, self.visjsData);
+                },
+                true,
+            );
+            /*UserDataWidget.listUserData(
                 {
                     data_type: "KGmodelGraph",
                     data_tool: "KGquery",
@@ -922,7 +952,7 @@ var KGquery_graph = (function () {
                         );
                     }
                 },
-            );
+            );*/
         }
     };
     /**
@@ -1182,17 +1212,7 @@ var KGquery_graph = (function () {
             self.KGqueryGraph.data.nodes.update(nodes_fonts);
         });
     };
-    self.shareSavedGraph = function () {
-        if (!self.currentUserDataModel?.id) {
-            return alert("no graph saved");
-        }
-        return ShareUserData_bot.start(null, { userData: { id: self.currentUserDataModel.id } }, function (err, result) {
-            if (err) {
-                return alert(err);
-            }
-            alert("graph shared");
-        });
-    };
+   
 
     return self;
 })();

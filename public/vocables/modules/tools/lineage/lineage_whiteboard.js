@@ -226,7 +226,7 @@ var Lineage_whiteboard = (function () {
             } else if (options.callee == "Tree") {
                 Lineage_whiteboard.drawNodesAndParents(node);
             }
-        } else if (nodeEvent.ctrlKey && nodeEvent.altKey) {
+        } else if (nodeEvent.shiftKey) {
             Lineage_selection.addNodeToSelection(node);
         } else if (nodeEvent.ctrlKey) {
             NodeInfosWidget.showNodeInfos(node.data.source, node, "mainDialogDiv", { resetVisited: 1 });

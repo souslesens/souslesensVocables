@@ -1,4 +1,5 @@
 const { profileModel } = require("../../../model/profiles");
+const { userModel } = require("../../../model/users");
 const { resourceFetched, responseSchema } = require("./utils");
 const userManager = require("../../../bin/user.");
 
@@ -11,6 +12,12 @@ module.exports = function () {
     async function GET(req, res, _next) {
         try {
             const userInfo = await userManager.getUser(req.user);
+
+            if ((await userModel.isAdmin(userInfo.user.login)) === true) {
+                resourceFetched(res, await profileModel.getAllProfiles());
+                return;
+            }
+
             const profiles = await profileModel.getUserProfiles(userInfo.user);
             resourceFetched(res, profiles);
         } catch (error) {

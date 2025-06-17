@@ -50,6 +50,15 @@ var SparqlQuery_bot = (function () {
                         },
                     },
                 },
+                Class: {
+                    chooseQueryScopeFn: {
+                        listAllClassesFn: {
+                            chooseOutputTypeFn: {
+                                buildResultFn: {},
+                            },
+                        },
+                    },
+                },
                 Constraints: {
                     chooseConstraintRoleFn: {
                         _OR: {
@@ -137,6 +146,9 @@ var SparqlQuery_bot = (function () {
                 SavedQuery: {
                     chooseSavedQueryFn: {},
                 },
+                LastQuery: {
+                    showLastQueryFn: {},
+                },
             },
         },
     };
@@ -167,6 +179,7 @@ var SparqlQuery_bot = (function () {
         listQueryTypeFn: "Choose a query type ",
         chooseSelectPredicates: "choose Select Predicates",
         listAllPredicatesFn: "Choose a predicate",
+        listAllClassesFn: "listAllClassesFn",
         choosePredicateDirectionFn: "Choose  predicate direction",
         chooseSavedQueryFn: "choose a saved Query",
     };
@@ -178,6 +191,10 @@ var SparqlQuery_bot = (function () {
                     id: "Predicate",
                     label: "Predicate",
                 },
+                /*  {
+                    id: "Class",
+                    label: "Class",
+                },*/
                 { id: "Constraints", label: "Ontology Constraints" },
                 {
                     id: "Facts",
@@ -186,6 +203,10 @@ var SparqlQuery_bot = (function () {
                 {
                     id: "SavedQuery",
                     label: "Saved Query",
+                },
+                {
+                    id: "LastQuery",
+                    label: "Show last Query",
                 },
             ];
             if (self.noFacts) {
@@ -242,7 +263,7 @@ var SparqlQuery_bot = (function () {
             }
 
             if (self.params.predicateFilter) {
-                choices.splice(1, 0, "Add other predicate");
+                choices.splice(0, 0, "Add other predicate");
             }
             myBotEngine.showList(choices, "outputType");
         },
@@ -396,9 +417,31 @@ var SparqlQuery_bot = (function () {
         },
 
         listAllPredicatesFn: function () {
+            var filter = "";
+            /// from imports if chainedPredicates
+            var withoutImports = true;
+            if (self.params.chainedPredicates) {
+                withoutImports = false;
+                var predicatesStr = "";
+                self.params.chainedPredicates.forEach(function (predicate, index) {
+                    if (index > 0) {
+                        predicatesStr += "/";
+                    }
+                    predicatesStr += predicate;
+                });
+                var inverseStr = "";
+                if (self.params.predicateDirection == "inverse") {
+                    inverseStr = "^";
+                }
+                filter = " {select * where { ?subject " + inverseStr + predicatesStr + " ?x}}";
+            } else if (self.params.queryScope != "activeSource") {
+                withoutImports = false;
+            }
+
             var options = {
                 distinct: "?prop",
-                withoutImports: true,
+                withoutImports: withoutImports,
+                filter: filter,
             };
             var subjectIds = null;
             var objectIds = null;
@@ -439,6 +482,21 @@ var SparqlQuery_bot = (function () {
                 UI.message("", true);
                 return myBotEngine.showList(choices, "predicateFilter", null, true);
             });
+        },
+        listAllClassesFn: function () {
+            UI.message("Loading Classes...");
+
+            var classes = Config.ontologiesVocabularyModels[self.params.source].classes;
+            var choices = [];
+            var existingNodes = {};
+            for (var key in classes) {
+                var obj = classes[key];
+
+                choices.push({ id: obj.id, label: obj.label });
+            }
+
+            UI.message("", true);
+            return myBotEngine.showList(choices, "classFilter", null, true);
         },
 
         buildResultFn: function () {
@@ -526,6 +584,8 @@ var SparqlQuery_bot = (function () {
                 options.chainedPredicates = predicatesStr;
             } else if (self.params.predicateFilter) {
                 filter += "FILTER (?predicate=<" + self.params.predicateFilter + ">)";
+            } else if (self.params.classFilter) {
+                filter += "FILTER (?subject=<" + self.params.classFilter + ">)";
             }
 
             self.getResourcesList("Predicate", role, filter, options, function (err, result) {
@@ -710,17 +770,33 @@ var SparqlQuery_bot = (function () {
         chooseSavedQueryFn: function () {
             UserDataWidget.showListDialog(
                 null,
-                { filter: { data_type: "savedQueries", data_tool: "lineage", data_source: Lineage_sources.activeSource }, removeSaveDiv: true },
+                {
+                    filter: {
+                        data_type: "savedQueries",
+                        data_tool: "lineage",
+                        data_source: Lineage_sources.activeSource,
+                    },
+                    removeSaveDiv: true,
+                },
                 function (err, result) {
                     if (result.id) {
                         UserDataWidget.loadUserDatabyId(result.id, function (err, result) {
-                            if (err) return myBotEngine.abort(err.responseText || err);
+                            if (err) {
+                                return myBotEngine.abort(err.responseText || err);
+                            }
                             self.params.currentSparql = result.data_content.sparqlQuery;
                             self.editSparql(result.data_label, result.data_comment);
                         });
                     }
                 },
             );
+        },
+
+        showLastQueryFn: function () {
+            if (self.lastQuery) {
+                self.editSparql("", "last Query", self.lastQuery);
+                myBotEngine.end();
+            }
         },
     };
 
@@ -832,12 +908,13 @@ var SparqlQuery_bot = (function () {
                 return callback(null, query);
             }
         }
-
+        //  query=Sparql_common.formatSparqlQuery(query)
         Sparql_proxy.querySPARQL_GET_proxy(sparql_url, query, null, null, function (err, result) {
             if (err) {
+                // self.lastQuery =null;
                 return callback(err);
             }
-
+            self.lastQuery = query;
             var predicates = [];
             var labelsMap = {};
 
@@ -1069,7 +1146,7 @@ var SparqlQuery_bot = (function () {
         myBotEngine.message("CSV export done in download dir");
     };
 
-    self.editSparql = function (title, description) {
+    self.editSparql = function (title, description, query) {
         // $("#" + myBotEngine.divId).dialog("close");
         $("#smallDialogDiv").html(
             "<div  style='font-weight:bold' id='sparqlQueryBot_queryTitle'></div>" +
@@ -1088,7 +1165,8 @@ var SparqlQuery_bot = (function () {
 
         var array = ["New Graph", "Add to Graph", "Table", "CSV"];
         common.fillSelectOptions("sparqlQueryBot_outputTypeSelect", array);
-        $("#sparqlQueryBot_textArea").text(self.params.currentSparql);
+        self.params.currentSparql = Sparql_common.formatSparqlQuery(query || self.params.currentSparql);
+        $("#sparqlQueryBot_textArea").text(query || self.params.currentSparql);
         myBotEngine.reset();
     };
 

@@ -4,6 +4,8 @@ import Axioms_graph from "./axioms_graph.js";
 import Axioms_suggestions from "./axioms_suggestions.js";
 import common from "../../shared/common.js";
 import Lineage_whiteboard from "../lineage/lineage_whiteboard.js";
+import MainController from "../../shared/mainController.js";
+import JstreeWidget from "../../uiWidgets/jstreeWidget.js";
 
 var Axiom_activeLegend = (function () {
     var self = {};
@@ -25,6 +27,7 @@ var Axiom_activeLegend = (function () {
         self.hideForbiddenResources("Class");
         self.isLegendActive = true;
         self.bNodeCounter = 0;
+        self.maxItemsInJstreePerSource = 250;
     };
     self.filterSuggestion = function (suggestions, resourceType) {
         var selection = [];
@@ -41,8 +44,7 @@ var Axiom_activeLegend = (function () {
         }
         self.currentNodeType = null;
         if (node && node.data) {
-            self.currentNodeType = node.data.type;
-            self.currentLegendNodeType = node.data.type;
+            self.currentLegendNode = node;
 
             if (node.data.type == "Class") {
                 self.hideLegendItems();
@@ -164,7 +166,10 @@ var Axiom_activeLegend = (function () {
         if (newOption) {
             filteredItems.splice(0, 0, newOption);
         }
-        common.fillSelectOptions("axioms_legend_suggestionsSelect", filteredItems, false, "label", "id");
+
+        self.loadSuggestionSelectJstree(filteredItems, self.currentLegendNode.data.type);
+
+        //   common.fillSelectOptions("axioms_legend_suggestionsSelect", filteredItems, false, "label", "id");
     };
 
     self.onSuggestionsSelect = function (resourceUri, legendNode, newResource) {
@@ -216,7 +221,7 @@ var Axiom_activeLegend = (function () {
             }
         }
 
-        var nodeType = self.currentLegendNodeType;
+        var nodeType = self.currentLegendNode.data.id;
         if (newResource) {
             //resourcecomming from functioncall
         } else if (legendNode) {
@@ -243,16 +248,16 @@ var Axiom_activeLegend = (function () {
             var subType = null;
             var label = "";
             if (nodeType == "Restriction") {
-                label = $("#axioms_legend_suggestionsSelect option:selected").text();
-                subType = $("#axioms_legend_suggestionsSelect").val();
+                label = self.currentSuggestedNode.data.label;
+                subType = self.currentSuggestedNode.data.id;
             } else {
-                label = $("#axioms_legend_suggestionsSelect option:selected").text();
-                subType = $("#axioms_legend_suggestionsSelect").val();
+                label = self.currentSuggestedNode.data.label;
+                subType = self.currentSuggestedNode.data.id;
             }
 
             var cardinality = "";
             if (label == "max" || label == "min" || label == "cardinality") {
-                cardinality = prompt("cardinanlity min ");
+                cardinality = prompt("cardinality min ");
             }
 
             var symbolsMap = {
@@ -407,7 +412,9 @@ var Axiom_activeLegend = (function () {
         //  });
     };
     self.hideLegendItems = function (hiddenNodes) {
-        if (!self.axiomsLegendVisjsGraph) return;
+        if (!self.axiomsLegendVisjsGraph) {
+            return;
+        }
         var legendNodes = self.axiomsLegendVisjsGraph.data.nodes.getIds();
         var newNodes = [];
         legendNodes.forEach(function (nodeId) {
@@ -419,8 +426,8 @@ var Axiom_activeLegend = (function () {
 
     self.drawNewAxiom = function (selectedObject) {
         var currentNode = {
-            id: selectedObject.id,
-            label: selectedObject.label,
+            id: selectedObject.data.id,
+            label: selectedObject.data.label,
             type: selectedObject.resourceType,
             symbol: null,
         };
@@ -510,8 +517,7 @@ var Axiom_activeLegend = (function () {
         });
         str += "</ul>";
 
-        $("#smallDialogDiv").html(str);
-        $("#smallDialogDiv").dialog("open");
+        $("#axiomsEditor_textDiv").html(str);
     };
 
     /**
@@ -609,23 +615,35 @@ var Axiom_activeLegend = (function () {
             });
 
             //check manchester Syntax
-            self.axiomTriplesToManchester(triples, function (err, manchesterStr) {
-                if (err) {
-                    //machstersyntax dont work yet with cardinality restrictions but we store the triples anyway
-                    if (!hasCardinalityRestriction) {
-                        return alert(err);
-                    }
-                }
+            /*   self.axiomTriplesToManchester(triples, function (err, manchesterStr) {
+                   if (err) {
+                       //machstersyntax dont work yet with cardinality restrictions but we store the triples anyway
+                       if (!hasCardinalityRestriction) {
+                           return alert(err);
+                       }
+                   }*/
 
-                var triples = self.visjsGraphToTriples();
-                Sparql_generic.insertTriples(self.currentSource, triples, {}, function (err, result) {
+            var triples = self.visjsGraphToTriples();
+            Sparql_generic.insertTriples(self.currentSource, triples, {}, function (err, result) {
+                if (err) {
+                    return alert(err.responseText);
+                }
+                UI.message("axiom saved");
+                var divId = "nodeInfosAxioms_graphDiv";
+                var options = {};
+
+                AxiomExtractor.addTriplesToBasicAxioms(self.currentResource.data.source, triples, function (err, result) {
                     if (err) {
-                        return alert(err.responseText);
+                        return alert(err.responseText || err);
                     }
-                    //add manchester to Axioms JSTree
-                    self.addAxiomToAxomsJstree(manchesterStr, triples);
+
+                    Axioms_graph.drawNodeAxioms2(self.currentResource.data.source, self.currentResource.data.id, triples, divId, options, function (err, triples) {});
                 });
+
+                //add manchester to Axioms JSTree
+                //  self.addAxiomToAxomsJstree(manchesterStr, triples);
             });
+            //  });
         }
     };
 
@@ -691,7 +709,7 @@ var Axiom_activeLegend = (function () {
         var nodesMap = {};
         var edgesFromMap = {};
         nodes.forEach(function (node) {
-            if (node.level >= self.newAxiomNode.level) {
+            if (true || node.level >= self.newAxiomNode.level) {
                 nodesMap[node.id] = node;
             }
         });
@@ -872,6 +890,170 @@ var Axiom_activeLegend = (function () {
 
         /*     var options = self.axiomTypes
         common.fillSelectOptions("axioms_legend_suggestionsSelect", options, false);*/
+    };
+
+    self.loadSuggestionSelectJstree = function (objects, parentName) {
+        if ($("#suggestionsSelectJstreeDiv").jstree()) {
+            try {
+                $("#suggestionsSelectJstreeDiv").jstree().empty();
+            } catch {}
+        }
+
+        self.initSourcesMap(objects);
+        self.filterSuggestionList = null;
+
+        var options = {
+            openAll: true,
+
+            contextMenu: function (node, x) {
+                var items = {};
+                if (self.currentLegendNode.data.type == "Class" || self.currentLegendNode.data.type == "ObjectProperty") {
+                    if (node.data && node.data.resourceType != "searchClass") {
+                        items.NodeInfos = {
+                            label: "nodeInfos",
+                            action: function (_e) {
+                                NodeInfosWidget.showNodeInfos(self.currentSource, self.currentResource, "smallDialogDiv");
+                            },
+                        };
+                    }
+                }
+                return items;
+            },
+            selectTreeNodeFn: function (event, obj) {
+                self.currentSuggestedNode = obj.node;
+                var resourceUri = obj.node.data.id;
+                self.onSuggestionsSelect(resourceUri);
+            },
+        };
+        var jstreeData = [];
+
+        var color = "#333";
+        if (parentName == "Class") {
+            color = "#00afef";
+        } else if (parentName == "ObjectProperty") {
+            color = "#409304";
+        } else {
+        }
+        jstreeData.push({
+            id: parentName,
+            parent: "#", // MappingModeler.currentTable,
+            text: "<span style='font-weight:bold;font-size:large;color:" + color + "'>" + parentName + "</span>",
+            data: {
+                id: parentName,
+                label: parentName,
+            },
+        });
+
+        if (parentName == "Class" || parentName == "ObjectProperty") {
+            var uniqueSources = {};
+            var searchDone = {};
+
+            objects.forEach(function (item) {
+                if (item.source) {
+                    if (!uniqueSources[item.source]) {
+                        uniqueSources[item.source] = 1;
+
+                        jstreeData.push({
+                            id: item.source,
+                            parent: parentName,
+                            text: "<span style='font-size:larger;color:" + color + "'>" + item.source + "</span>",
+                            data: {
+                                id: item.source,
+                                label: item.source,
+                            },
+                        });
+                    }
+                    if (self.sourcesMap[item.source].countItems < self.maxItemsInJstreePerSource || self.sourcesMap[item.source].mappingClasses[item.id]) {
+                        jstreeData.push({
+                            id: item.id,
+                            parent: item.source,
+                            text: "<span  style='color:" + color + "'>" + item.label + "</span>",
+                            data: {
+                                id: item.id,
+                                text: item.label,
+                                resourceType: item.resourceType,
+                            },
+                        });
+                    } else if (!searchDone[item.source]) {
+                        searchDone[item.source] = 1;
+                        jstreeData.push({
+                            id: common.getRandomHexaId(5),
+                            parent: item.source,
+                            text: "<span  style='font-weight:bold;color:" + color + "'> SEARCH...</span>",
+                            data: {
+                                resourceType: "search" + item.resourceType,
+                                source: item.source,
+                            },
+                        });
+                    }
+                } else {
+                    jstreeData.push({
+                        id: item.id,
+                        parent: parentName,
+                        text: "<span  style='color:" + color + "'>" + item.label + "</span>",
+                        data: {
+                            id: item.id,
+                            text: item.label,
+                        },
+                    });
+                }
+            });
+        } else {
+            objects.forEach(function (item) {
+                if (item != "" && item != "#") {
+                    jstreeData.push({
+                        id: item.id,
+                        parent: parentName,
+                        text: "<span  style='color:" + color + "'>" + item.label + "</span>",
+                        data: {
+                            id: item.id,
+                            label: item.label,
+                        },
+                    });
+                }
+            });
+        }
+        var sourceIndex = jstreeData.findIndex((obj) => obj.id == MappingModeler.currentSLSsource);
+        if (sourceIndex > -1) {
+            if (parentName == "Properties") {
+                common.array.moveItem(jstreeData, sourceIndex, 5);
+            } else {
+                common.array.moveItem(jstreeData, sourceIndex, 2);
+            }
+        }
+
+        JstreeWidget.loadJsTree("axiomSuggestionsSelectJstreeDiv", jstreeData, options, function () {
+            //  $("#suggestionsSelectJstreeDiv").css("overflow", "unset");
+        });
+    };
+
+    self.initSourcesMap = function (resources) {
+        {
+            const sourcesMap = {};
+            resources.forEach(function (item) {
+                if (!sourcesMap[item.source]) {
+                    sourcesMap[item.source] = {
+                        countItems: 0,
+                        mappingClasses: {},
+                    };
+                }
+                sourcesMap[item.source].countItems += 1;
+            });
+            if (Axioms_graph.axiomsVisjsGraph) {
+                var graphNodes = Axioms_graph.axiomsVisjsGraph.data.nodes.get();
+                graphNodes.forEach(function (node) {
+                    if (node.data && node.data.type == "Class" && sourcesMap[node.data.source]) {
+                        sourcesMap[node.data.source].mappingClasses[node.data.id] = 1;
+                    }
+                });
+            }
+
+            self.sourcesMap = sourcesMap;
+        }
+    };
+
+    self.clearSuggestionsJstree = function () {
+        $("#axiomSuggestionsSelectJstreeDiv").jstree().empty();
     };
 
     return self;

@@ -24,15 +24,6 @@ var NodeInfosAxioms = (function () {
                 $("#nodeInfosAxioms_newAxiomBtn").css("display", "none");
             }
 
-            // onclick="Axiom_activeLegend.onSuggestionsSelect($(this).val())"
-            $("#axioms_legend_suggestionsSelect").on("click", function (event) {
-                if (event.ctrlKey) {
-                    var node = { data: { id: $(this).val() } };
-                    NodeInfosWidget.showNodeInfos(self.currentSource, node, "smallDialogDiv");
-                } else {
-                    Axiom_activeLegend.onSuggestionsSelect($(this).val());
-                }
-            });
             Axioms_manager.initResourcesMap(self.currentResource.data.source, function (err, result) {
                 AxiomExtractor.getClassAxiomsTriples(self.currentResource.data.source, self.currentResource.data.id, function (err, triples) {
                     var divId = "nodeInfosAxioms_graphDiv";
@@ -374,6 +365,16 @@ var NodeInfosAxioms = (function () {
         if (clearAll) {
             Axiom_activeLegend.isLegendActive = false;
             Axioms_graph.clearGraph();
+        }
+
+        if (Lineage_sources.isSourceEditableForUser(self.currentSource)) {
+            Axiom_activeLegend.init(
+                "nodeInfosAxioms_activeLegendDiv",
+                "nodeInfosAxioms_graphDiv",
+                NodeInfosAxioms.currentSource,
+                NodeInfosAxioms.currentResource,
+                self.currentJstreeNode ? self.currentJstreeNode.data.id : null,
+            );
         }
         self.switchLeftPanelDisplay("new");
 

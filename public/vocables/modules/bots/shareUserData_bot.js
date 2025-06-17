@@ -2,7 +2,7 @@ var ShareUserData_bot = (function () {
     var self = {};
 
     self.start = function (workflow, _params, callbackFn) {
-        self.title = _params.title || "Share";
+        self.title = _params?.title || "Share";
         var startParams = _botEngine.fillStartParams(arguments);
 
         if (!workflow) {

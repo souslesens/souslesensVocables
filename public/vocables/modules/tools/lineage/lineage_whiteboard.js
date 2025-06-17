@@ -164,6 +164,7 @@ var Lineage_whiteboard = (function () {
             }
             $("#lateralPanelDiv").load("./modules/tools/lineage/html/lateralPanel.html", function () {
                 Lineage_whiteboard.initWhiteboardTab();
+                //Lineage_whiteboard.initClassesTab();
                 Lineage_whiteboard.initUI();
             });
         });

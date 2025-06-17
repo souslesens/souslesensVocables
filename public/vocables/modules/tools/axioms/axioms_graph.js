@@ -76,7 +76,7 @@ var Axioms_graph = (function () {
         return visjsNode;
     };
 
-    self.drawNodeAxioms2 = function (sourceLabel, rootNodeId, manchesterTriples, divId, options, callback) {
+    self.drawNodeAxioms2 = function (sourceLabel, rootNodeId, axiomsTriples, divId, options, callback) {
         if (!options) {
             options = {};
         }
@@ -90,7 +90,7 @@ var Axioms_graph = (function () {
                 //format mancheseter triples
                 function (callbackSeries) {
                     var data = [];
-                    manchesterTriples.forEach(function (triple) {
+                    axiomsTriples.forEach(function (triple) {
                         var s = triple.subject.replace("[OntObject]", "");
                         var p = triple.predicate.replace("[OntObject]", "");
                         var o = triple.object.replace("[OntObject]", "");

@@ -1,6 +1,7 @@
 import common from "../shared/common.js";
 import MainController from "../shared/mainController.js";
 import authentication from "../shared/authentification.js";
+import Sparql_common from "./sparql_common.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -113,7 +114,6 @@ query=query.replace(/GRAPH ?[a-zA-Z0-9]+\{/,"{")
             }
 
             query = Sparql_common.addBasicVocabulariesPrefixes(query);
-
             var body = {
                 params: { query: query, useProxy: useProxy },
                 headers: headers,

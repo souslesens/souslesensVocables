@@ -276,6 +276,11 @@ class UserModel {
      * @returns {boolean} the administrator status of the user
      */
     isAdmin = async (login) => {
+        // user is admin if auth is disabled
+        if (login === "admin" && this._mainConfig.auth === "disabled") {
+            return true;
+        }
+
         const conn = getKnexConnection(this._mainConfig.database);
         const user = await conn.select("login", "profiles").from("public_users_list").where("login", login).first();
         cleanupConnection(conn);

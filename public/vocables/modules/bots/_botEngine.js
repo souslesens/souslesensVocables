@@ -264,15 +264,17 @@ var _botEngine = (function () {
     };
 
     self.closeDialog = function () {
-        if (self.divId != "botDiv") {
-            /*  var dialogWindow = $("#" + self.divId)
-                  .parents()
-                  .filter('div[role="dialog"]')[0];
-              var idDialog = "#" + $(dialogWindow).attr("aria-describedby");*/
-            $("#" + self.divId).dialog("close");
-        } else {
-            $("#botPanel").dialog("close");
-        }
+        try {
+            if (self.divId != "botDiv") {
+                /*  var dialogWindow = $("#" + self.divId)
+                      .parents()
+                      .filter('div[role="dialog"]')[0];
+                  var idDialog = "#" + $(dialogWindow).attr("aria-describedby");*/
+                $("#" + self.divId).dialog("close");
+            } else {
+                $("#botPanel").dialog("close");
+            }
+        } catch (e) {}
     };
 
     self.setStepMessage = function (step) {

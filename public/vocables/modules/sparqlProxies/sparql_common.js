@@ -220,6 +220,15 @@ var Sparql_common = (function () {
         return filter;
     };
 
+    self.formatSparqlQuery = function (query) {
+        return query.replace(/PREFIX|SELECT|FROM|WHERE|LIMIT/gim, function (value) {
+            if (query.indexOf("\n" + value) < 0)
+                // we do it only once
+                return "\n" + value.toUpperCase();
+            return value;
+        });
+    };
+
     self.setSparqlResultPropertiesLabels = function (sourceLabel, SparqlResults, propVariable, callback) {
         if (SparqlResults.length == 0) {
             return callback(null, SparqlResults);

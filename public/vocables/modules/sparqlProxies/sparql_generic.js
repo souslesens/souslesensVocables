@@ -477,6 +477,7 @@ var Sparql_generic = (function () {
         if (item.isString) {
             objectStr = '"' + item.object + '"';
         } else {
+            console.log(item.object + " is not a String ");
             objectStr = setElementSyntax(item.object);
         }
 

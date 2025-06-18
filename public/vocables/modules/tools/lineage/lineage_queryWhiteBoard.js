@@ -62,6 +62,8 @@ var Lineage_queryWhiteBoard = (function () {
 
 
 
+
+
             var dataArray=[]
             nodes.forEach(function(node){
                var obj= {

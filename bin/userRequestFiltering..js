@@ -10,40 +10,52 @@ const { userModel } = require(rootPath+"model\\users");
 const ConfigManager = require("../bin/configManager.");
 const async = require("async");
 const SparqlParser = require("sparqljs").Parser;
-const parser = new SparqlParser({ skipValidation: true });
+const parser = new SparqlParser({skipValidation: true});
 
 var UserRequestFiltering = {
     existingSources: null,
 
     getUserGraphUrisMap: function (userSourcesMap) {
         var basicVocabularies = {
-            rdf: { graphUri: "https://www.w3.org/1999/02/22-rdf-syntax-ns" },
-            rdfs: { graphUri: "https://www.w3.org/2000/01/rdf-schema" },
-            owl: { graphUri: "https://www.w3.org/2002/07/owl" },
-            "iof-av": { graphUri: "https://spec.industrialontologies.org/ontology/core/meta/AnnotationVocabulary/" },
-            skos: { graphUri: "http://www.w3.org/2004/02/skos/core/" },
-            dcterms: { graphUri: "http://purl.org/dc/terms/" },
-            dc: { graphUri: "http://purl.org/dc/elements/1.1/" },
+            rdf: {graphUri: "https://www.w3.org/1999/02/22-rdf-syntax-ns"},
+            rdfs: {graphUri: "https://www.w3.org/2000/01/rdf-schema"},
+            owl: {graphUri: "https://www.w3.org/2002/07/owl"},
+            "iof-av": {graphUri: "https://spec.industrialontologies.org/ontology/core/meta/AnnotationVocabulary/"},
+            skos: {graphUri: "http://www.w3.org/2004/02/skos/core/"},
+            dcterms: {graphUri: "http://purl.org/dc/terms/"},
+            dc: {graphUri: "http://purl.org/dc/elements/1.1/"},
         };
 
         var userGraphUrisMap = {};
 
         for (var key in basicVocabularies) {
             var source = basicVocabularies[key];
-            userGraphUrisMap[source.graphUri] = { source: key, acl: "r" };
+            userGraphUrisMap[source.graphUri] = {source: key, acl: "r"};
         }
 
         // add slsvLabels (readonly) for everyone
-        userGraphUrisMap["http://souslesens.org/vocables/resource/labels/"] = { source: "slsvLabels", acl: "r" };
-        userGraphUrisMap["http://souslesens.org/resource/stored-timeline-queries/"] = { source: "slsvMyQueriesTimeLine", acl: "w" };
-        userGraphUrisMap["http://souslesens.org/resource/stored-lineage-queries/"] = { source: "slsvMyQueriesLineage", acl: "w" };
-        userGraphUrisMap["http://souslesens.org/resource/stored-kgqueries-queries/"] = { source: "slsvMyQueriesKGCreator", acl: "w" };
-        userGraphUrisMap["http://souslesens.org/resource/stored-visjs-graphs/"] = { source: "slsvMyQueriesVisJsGraph", acl: "w" };
+        userGraphUrisMap["http://souslesens.org/vocables/resource/labels/"] = {source: "slsvLabels", acl: "r"};
+        userGraphUrisMap["http://souslesens.org/resource/stored-timeline-queries/"] = {
+            source: "slsvMyQueriesTimeLine",
+            acl: "w"
+        };
+        userGraphUrisMap["http://souslesens.org/resource/stored-lineage-queries/"] = {
+            source: "slsvMyQueriesLineage",
+            acl: "w"
+        };
+        userGraphUrisMap["http://souslesens.org/resource/stored-kgqueries-queries/"] = {
+            source: "slsvMyQueriesKGCreator",
+            acl: "w"
+        };
+        userGraphUrisMap["http://souslesens.org/resource/stored-visjs-graphs/"] = {
+            source: "slsvMyQueriesVisJsGraph",
+            acl: "w"
+        };
 
         for (var key in userSourcesMap) {
             source = userSourcesMap[key];
             if ((source.sparql_server.url == "_default" || source.sparql_server.url == ConfigManager.config.sparql_server.url) && source.graphUri) {
-                userGraphUrisMap[source.graphUri] = { source: key, acl: source.accessControl == "readwrite" ? "w" : "r" };
+                userGraphUrisMap[source.graphUri] = {source: key, acl: source.accessControl == "readwrite" ? "w" : "r"};
             }
         }
 
@@ -191,7 +203,7 @@ var UserRequestFiltering = {
     validateElasticSearchIndices: function (userInfo, indices, userSourcesMap, acl, callback) {
         var indicesMap = {};
         for (var source in userSourcesMap) {
-            indicesMap[source.toLowerCase()] = { source: source, acl: source.accessControl == "readwrite" ? "w" : "r" };
+            indicesMap[source.toLowerCase()] = {source: source, acl: source.accessControl == "readwrite" ? "w" : "r"};
         }
 
         var error = null;
@@ -202,6 +214,19 @@ var UserRequestFiltering = {
             }
             return callback(error, indices);
         }
+
+
+        // ajout provisoire CF
+        var isWhiteboard_Index = false;
+        indices.forEach(function (indexName) {
+            if (indexName.startsWith("whiteboard_")) {
+                isWhiteboard_Index = true
+            }
+        })
+        if (isWhiteboard_Index) {
+            return callback(null, indices);
+        }
+
 
         indices.forEach(function (indexName) {
             if (!indicesMap[indexName]) {

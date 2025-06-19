@@ -6,6 +6,7 @@ import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 import SaveIcon from "@mui/icons-material/Save";
 import CancelIcon from "@mui/icons-material/Close";
 import AddIcon from "@mui/icons-material/Add";
+import { createRoot } from "react-dom/client";
 
 declare module "@mui/x-data-grid" {
     interface ToolbarPropsOverrides {
@@ -413,3 +414,19 @@ export function MetadataModal({ onClose, open, sourceName, isReadOnly = false }:
         </Dialog>
     );
 }
+declare global {
+    interface Window {
+        MetaDataDialog: {
+            createApp: (props: Omit<MetadataModalProps, "open" | "sources">) => void;
+        };
+    }
+}
+window.MetaDataDialog = {
+    createApp: (props: Omit<MetadataModalProps, "open" | "sources">) => {
+        const container = document.getElementById("mount-edit-metadata-dialog-here");
+
+        const root = createRoot(container!);
+        root.render(<MetadataModal open={true} {...props} />);
+        return root;
+    },
+};

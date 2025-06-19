@@ -644,7 +644,9 @@ var Lineage_sources = (function () {
             '<span class="popupMenuItem" onclick="Lineage_sources.menuActions.showSource();">Show</span>' +
             '<span class="popupMenuItem" onclick="Lineage_sources.menuActions.groupSource();">Group</span>' +
             '<span class="popupMenuItem" onclick="Lineage_sources.menuActions.ungroupSource();">Ungroup</span>' +
-            '<span  class="popupMenuItem" onclick="Lineage_sources.menuActions.copyGraphUri();"> copy graph URI </span>';
+            '<span  class="popupMenuItem" onclick="Lineage_sources.menuActions.copyGraphUri();"> copy graph URI </span>' +
+            '<span  class="popupMenuItem" onclick="Lineage_sources.menuActions.sourceMetaData();"> MetaData </span>';
+
         if (source !== "_defaultSource") {
             if (self.isSourceEditableForUser(source)) {
                 html += '<span class="popupMenuItem" onclick="Lineage_sources.menuActions.editSource();">Edit</span>';
@@ -1037,6 +1039,16 @@ var Lineage_sources = (function () {
          */
         downloadGraph: function () {
             window.DownloadGraphModal.open(Lineage_sources.activeSource);
+        },
+        /**
+         * Opens the graph download modal.
+         * @function
+         * @name downloadGraph
+         * @memberof module:Lineage_sources.menuActions
+         * @returns {void}
+         */
+        sourceMetaData: function () {
+            window.MetaDataDialog.open(Lineage_sources.activeSource);
         },
     };
 

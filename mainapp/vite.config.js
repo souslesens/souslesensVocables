@@ -16,6 +16,7 @@ export default defineConfig({
                 graph_management: path.resolve(__dirname, "src/graph-management.tsx"),
                 user_management: path.resolve(__dirname, "src/user-management.tsx"),
                 mappingModeler_upload_app: path.resolve(__dirname, "src/mappingModeler-upload-app.tsx"),
+                metadata_dialog: path.resolve(__dirname, "src/Component/MetadataModal.tsx"),
             },
             output: {
                 entryFileNames: `assets/[name].js`,

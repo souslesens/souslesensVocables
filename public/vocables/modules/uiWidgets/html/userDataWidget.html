@@ -1,4 +1,8 @@
 <div id="userDataWidget_listDiv" style="display: none">
+    <div id="userDataWidget_descriptionDiv" style="display: flex; flex-direction: row; display: none">
+        <div id="userDataWidget_descriptionLabel">Description:</div>
+        <div id="userDataWidget_description"></div>
+    </div>
     <div style="width: 350px; height: 500px; overflow: auto">
         <div id="userDataWidget_jstree"></div>
     </div>
@@ -13,6 +17,10 @@
         <tr>
             <td>Group</td>
             <td><input id="userDataWidget_group" style="width: 250px" /></td>
+        </tr>
+        <tr>
+            <td>Description</td>
+            <td><textarea id="userDataWidget_comment" style="width: 250px" rows="5"></textarea></td>
         </tr>
     </table>
 

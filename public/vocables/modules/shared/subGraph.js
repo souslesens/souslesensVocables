@@ -1,6 +1,7 @@
 import Sparql_proxy from "../sparqlProxies/sparql_proxy.js";
 import Sparql_common from "../sparqlProxies/sparql_common.js";
 import Shacl from "./shacl.js";
+import Lineage_whiteboard from "../tools/lineage/lineage_whiteboard.js";
 
 var SubGraph = (function () {
     var self = {};
@@ -577,6 +578,14 @@ var SubGraph = (function () {
 
     self.validateShalcRules = function (sourceLabel, processClass, options, callback) {};
 
+
+
+
+
+
+
+
+
     self.getSubGraphVisjsData = function (sourceLabel, processClass, options, callback) {
         self.graphDiv = options.graphDiv;
         SubGraph.instantiateSubGraphTriples(sourceLabel, processClass, options, function (err, result) {
@@ -647,9 +656,7 @@ var SubGraph = (function () {
                     return;
                 }
 
-                if (triple.predicate.endsWith("hasPhysicalQuantity")) {
-                    return;
-                }
+
                 var font = null;
                 var borderWidth = null;
                 var color = getNodeColor(triple.subject);

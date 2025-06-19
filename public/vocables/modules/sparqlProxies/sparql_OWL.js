@@ -1877,6 +1877,42 @@ var Sparql_OWL = (function () {
         });
     };
 
+
+
+    self.getUrisLabelsMap = function (source,uris, callback) {
+        var sparql_url = Config.sources[source].sparql_server.url;
+        var fromStr = Sparql_common.getFromStr(source);
+
+        var filter = Sparql_common.setFilter("s", uris);
+
+        var query =
+            "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
+            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
+            "SELECT distinct * " +
+            fromStr +
+            " WHERE {\n" +
+            "  ?s rdfs:label ?sLabel. " +
+            filter +
+            "} limit 10000";
+        Sparql_proxy.querySPARQL_GET_proxy(sparql_url, query, null, null, function (err, result) {
+            if (err) {
+                return callback(err);
+            }
+            var labelsMap = {};
+            result.results.bindings.forEach(function (item) {
+                labelsMap[item.s.value] = item.sLabel.value;
+            });
+            uris.forEach(function (uri) {
+                if (!labelsMap[uri]) {
+                    labelsMap[uri] = Sparql_common.getLabelFromURI(uri);
+                }
+            });
+
+            callback(null, labelsMap);
+        });
+    };
+
     /**
      *
      * @param sourceLabel

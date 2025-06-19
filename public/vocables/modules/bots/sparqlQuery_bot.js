@@ -990,7 +990,8 @@ var SparqlQuery_bot = (function () {
             async.eachSeries(
                 slices,
                 function (slice, callbackEach) {
-                    self.fillLabelsFromUris(slice, function (err, result) {
+                    Sparql_OWL.getUrisLabelsMap (self.params.source,slice, function (err, result) {
+                  //  self.fillLabelsFromUris(slice, function (err, result) {
                         if (err) {
                             return callbackEach(err);
                         }
@@ -1006,7 +1007,7 @@ var SparqlQuery_bot = (function () {
             );
         });
     };
-    self.fillLabelsFromUris = function (uris, callback) {
+ /*   self.fillLabelsFromUris = function (uris, callback) {
         var sparql_url = Config.sources[self.params.source].sparql_server.url;
         var fromStr = Sparql_common.getFromStr(self.params.source);
 
@@ -1038,7 +1039,7 @@ var SparqlQuery_bot = (function () {
 
             callback(null, labelsMap);
         });
-    };
+    };*/
 
     /**
      *

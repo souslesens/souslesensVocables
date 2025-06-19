@@ -281,10 +281,15 @@ var util = {
               console.log("no line break or return in file");
               return null;*/
 
-                    var firstLine = line.substring(0, match.index);
+                    var lines = line.split(/\r?\n/);
+                    var firstLine = lines[0];
+                    var secondLine = lines[1];
                     for (var k = 0; k < separators.length; k++) {
                         if (firstLine.indexOf(separators[k]) > -1) {
-                            callback(separators[k]);
+                            // evaluate separator line is same on the second and first line avoid mistake separators
+                            if (firstLine.split(separators[k]).length == secondLine.split(separators[k])?.length) {
+                                callback(separators[k]);
+                            }
                         }
                     }
 
@@ -317,6 +322,7 @@ var util = {
         r = r.replace(new RegExp("[ùúûü]", "g"), "u");
         r = r.replace(new RegExp("[ýÿ]", "g"), "y");
         r = r.replace(new RegExp("\\W", "g"), "");
+        r = r.replace(new RegExp(",", "g"), " ");
         //  r = "" + r.charAt(0).toLowerCase() + r.substring(1);
         headerArray.push(r);
         return r;

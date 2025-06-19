@@ -15,8 +15,8 @@ var UserDataWidget = (function () {
         var data_type = self.data_type;
 
         var group = $("#userDataWidget_group").val();
-
-        self.saveMetadata(label, data_type, self.jsonContent, group, function (err, result) {
+        var comment = $("#userDataWidget_comment").val();
+        self.saveMetadata(label, data_type, self.jsonContent, group, comment, function (err, result) {
             $("#" + self.divId).dialog("close");
             UI.message(err || result);
             if (err) {
@@ -34,18 +34,19 @@ var UserDataWidget = (function () {
                 data_content: self.jsonContent,
                 id: result.id,
                 data_group: group,
+                data_comment: comment,
             });
         });
     };
 
-    self.saveMetadata = function (label, data_type, jsonContent, group, callback) {
+    self.saveMetadata = function (label, data_type, jsonContent, group, comment, callback) {
         var tool = MainController.currentTool || "?";
         var source = MainController.currentSource || "?";
         var payload = {
             data_path: "",
             data_type: data_type,
             data_label: label,
-            data_comment: "",
+            data_comment: comment || "",
             data_group: group || "",
             data_tool: tool || "",
             data_source: source || "",
@@ -262,7 +263,6 @@ var UserDataWidget = (function () {
                                     },
                                 };
                             }
-
                             items.delete = {
                                 label: "Delete",
                                 action: function (_e) {
@@ -274,6 +274,17 @@ var UserDataWidget = (function () {
                                         //!!!!!TODO  delete also graph data
                                         JstreeWidget.deleteNode("userDataWidget_jstree", node.data.id);
                                     });
+                                },
+                            };
+                            items.description = {
+                                label: "Description",
+                                action: function (_e) {
+                                    if (node?.data?.data_comment) {
+                                        $("#userDataWidget_descriptionDiv").show();
+                                        $("#userDataWidget_description").html(node?.data?.data_comment || "");
+                                    } else {
+                                        $("#userDataWidget_descriptionDiv").hide();
+                                    }
                                 },
                             };
                             items.share = {

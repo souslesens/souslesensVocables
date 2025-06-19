@@ -446,6 +446,14 @@ var SearchWidget = (function () {
                     common.copyTextToClipboard(JSON.stringify(self.currentTreeNode));
                 },
             };
+            items.createSubClass = {
+                label: "Create SubClass",
+                action: function (_e) {
+                    var label = prompt("Enter SubClass label");
+                    if (!label) return;
+                    Lineage_createResource.createSubClass(self.currentTreeNode.data.source, label, self.currentTreeNode.data.id);
+                },
+            };
         }
 
         items.axioms = {

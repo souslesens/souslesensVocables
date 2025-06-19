@@ -256,12 +256,26 @@ var Lineage_whiteboard = (function () {
                 Lineage_whiteboard.drawSimilarsNodes("sameLabel");
             },
         };
-
+        items.metaData = {
+            label: "metadata",
+            action: function (_e) {
+                var sourceLabel = $("#sourceSelector_jstreeDiv").jstree().get_selected()[0];
+                var source = $("#sourceSelector_jstreeDiv").jstree().get_node(sourceLabel);
+                if (!source || source?.data?.type != "source") {
+                    return;
+                }
+                Lineage_sources.menuActions.sourceMetaData(source);
+            },
+        };
         if (authentication.currentUser.groupes.indexOf("admin") > -1) {
             items.wikiPage = {
                 label: "Wiki page",
                 action: function (_e) {
-                    var source = $("#sourcesTreeDiv").jstree().get_selected()[0];
+                    var sourceLabel = $("#sourceSelector_jstreeDiv").jstree().get_selected()[0];
+                    var source = $("#sourceSelector_jstreeDiv").jstree().get_node(sourceLabel);
+                    if (!source || source?.data?.type != "source") {
+                        return;
+                    }
                     Lineage_whiteboard.showWikiPage(source);
                 },
             };
@@ -3115,7 +3129,8 @@ restrictionSource = Config.predicatesSource;
             } else {
                 html +=
                     // '    <span class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.drawSimilars();"> Similars</span>' +
-                    '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.collapse();">Collapse</span>' +
+                    //'    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.collapse();">Collapse</span>' +
+                    '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.createSubClass();">Create SubClass</span>' +
                     '    <span  class="popupMenuItem" onclick="NodeRelations_bot.start();">Relations...</span>' +
                     // '    <span  class="popupMenuItem" onclick="Lineage_relations.showDrawRelationsDialog(\'Graph\');">Relations...</span>' +
                     //  "   <span  class=\"popupMenuItem\" onclick=\"Lineage_relations.drawRelations('direct',null,'Graph');\">Relations</span>" +
@@ -4116,6 +4131,17 @@ self.zoomGraphOnNode(node.data[0].id, false);
                 });
             }
             self.lineageVisjsGraph.data.nodes.update(newNodes);
+        },
+        createSubClass: function () {
+            var node = self.currentGraphNode;
+            if (!node && !node?.data?.id && !node?.data?.source) {
+                return;
+            }
+            var label = prompt("enter subClass label");
+            if (!label) {
+                return;
+            }
+            Lineage_createResource.createSubClass(node.data.source, label, node.data.id);
         },
     };
 

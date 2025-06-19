@@ -115,7 +115,7 @@ var Lineage_nodeCentricGraph = (function () {
                 },
             };
             Lineage_whiteboard.drawNewGraph(visjsData, "graphDiv", options);
-            Lineage_whiteboard.lineageVisjsGraph.options.visjsOptions.layout.hierarchical.enabled = false;
+            Lineage_whiteboard.lineageVisjsGraph.options.visjsOptions.layout.hierarchical.enabled = true;
             Lineage_whiteboard.lineageVisjsGraph.network.setOptions(Lineage_whiteboard.lineageVisjsGraph.options.visjsOptions);
         }
     };

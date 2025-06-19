@@ -194,6 +194,7 @@ var ShareUserData_bot = (function () {
                         self.params.userData.data.data_type,
                         self.params.userData.data.data_content,
                         self.params.userData.data.data_group,
+                        self.params.userData.data.data_comment,
                         function () {
                             UI.message("User data shared with profiles: " + self.params.profiles.join(", "));
                             _botEngine.end();
@@ -219,6 +220,7 @@ var ShareUserData_bot = (function () {
                         self.params.userData.data.data_type,
                         self.params.userData.data.data_content,
                         self.params.userData.data.data_group,
+                        self.params.userData.data.data_comment,
                         function () {
                             UI.message("User data shared with users: " + self.params.users.join(", "));
                             _botEngine.end();

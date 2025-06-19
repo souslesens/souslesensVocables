@@ -1224,7 +1224,7 @@ var SparqlQuery_bot = (function () {
                       KGqueryGraph.saveGraph(fileName, true);
                       return;*/
 
-                    UserDataWidget.saveMetadata(label, null, visjsData, group, function (err, result) {
+                    UserDataWidget.saveMetadata(label, null, visjsData, group, null, function (err, result) {
                         return callbackSeries();
                     });
                 },

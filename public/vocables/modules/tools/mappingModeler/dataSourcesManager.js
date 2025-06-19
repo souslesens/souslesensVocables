@@ -451,7 +451,6 @@ var DataSourceManager = (function () {
 
         if (obj.node.data.type == "databaseSource") {
             DataSourceManager.initNewDataSource(obj.node.id, "databaseSource", obj.node.data.sqlType, obj.node.data.table);
-            //UIcontroller.switchLeftPanel("mappings");
             DataSourceManager.loadDataBaseSource(DataSourceManager.currentSlsvSource, obj.node.id, obj.node.data.sqlType);
         } else if (obj.node.data.type == "csvSource") {
             DataSourceManager.initNewDataSource(obj.node.id, "csvSource", obj.node.data.sqlType, obj.node.id);

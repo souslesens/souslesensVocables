@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.10.0](https://github.com/souslesens/souslesensVocables/compare/2.9.0...2.10.0) (2025-06-17)
+
+
+### Features
+
+* **api/users:** /profiles return all profiles if user is admin ([ef78756](https://github.com/souslesens/souslesensVocables/commit/ef78756ae3dcce9e3f58645d2055cb3d8188e279))
+* **api/users:** /users return all users if user is admin ([213f9d3](https://github.com/souslesens/souslesensVocables/commit/213f9d3014cbd295f5b988340dd54df1483c388a))
+
+
+### Bug Fixes
+
+* **model/user:** isAdmin always return true if auth is disabled ([2895ea5](https://github.com/souslesens/souslesensVocables/commit/2895ea56b52d43c780b6f50f12d64fc292997215))
+
+## [2.9.0](https://github.com/souslesens/souslesensVocables/compare/2.8.0...2.9.0) (2025-06-10)
+
+
+### Features
+
+* add sparql exec route ([eb900ec](https://github.com/souslesens/souslesensVocables/commit/eb900ec6c0ac261664dae228176fc44218091d9d)), closes [#1173](https://github.com/souslesens/souslesensVocables/issues/1173)
+
 ## [2.8.0](https://github.com/souslesens/souslesensVocables/compare/2.7.0...2.8.0) (2025-06-06)
 
 > [!IMPORTANT]

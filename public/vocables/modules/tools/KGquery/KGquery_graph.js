@@ -110,6 +110,12 @@ var KGquery_graph = (function () {
                         callbackSeries(err);
                     });
                 },
+                // add  decoration
+                function (callbackSeries) {
+                    self.fillDecoration(function (err) {
+                        callbackSeries(err);
+                    });
+                },
             ],
             function (err) {
                 if (err) {
@@ -128,6 +134,53 @@ var KGquery_graph = (function () {
         );
     };
 
+    self.fillDecoration = function (callback) {
+        var fileName = MainController.currentSource + "_decoration.json";
+        //Get current decoration file
+        var payload = {
+            dir: "graphs/",
+            fileName: fileName,
+        };
+        if (!self.visjsData && !(self.visjsData?.nodes?.length > 0)) {
+            if (callback) {
+                return callback();
+            }
+            return;
+        }
+        //get decoration file
+        $.ajax({
+            type: "GET",
+            url: `${Config.apiUrl}/data/file`,
+            data: payload,
+            dataType: "json",
+            success: function (result, _textStatus, _jqXHR) {
+                var data = JSON.parse(result);
+
+                for (var node in data) {
+                    var visjsCorrespondingNode = self.visjsData.nodes.filter((attr) => attr.id === node)[0];
+                    for (var decoration in data[node]) {
+                        //decoration = clé de décoration
+                        if (visjsCorrespondingNode) {
+                            visjsCorrespondingNode[decoration] = data[node][decoration];
+                        }
+                    }
+                }
+                // J'ajoute mes différentes décorations aux classes visés dans le visjsdata
+                // Si j'ai des icones je  met dans un répertoire côté client les icones nécessaires à ce graph
+                if (callback) {
+                    return callback();
+                }
+                return;
+            },
+            error(err) {
+                // don't throw error for decoration
+                if (callback) {
+                    return callback();
+                }
+                return;
+            },
+        });
+    };
     /**
      * Starts or stops the graph simulation.
      * @function
@@ -176,30 +229,37 @@ var KGquery_graph = (function () {
                     // order to get last saved instance of our graph in user_data
                     result = result.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
                     //if graph loaded with loadSaved --> display=checkBox displayGraphInList else last instance graph
+                    var resultId = null;
                     result.forEach(function (item) {
                         if (item.data_label == source + "_model") {
-                            visjsDataSource = item.data_content;
+                            resultId = item.id;
                         }
                     });
-                    if (!err && visjsDataSource.nodes) {
-                        visjsDataSource.nodes.forEach(function (node) {
-                            if (!uniqueNodes[node.id]) {
-                                uniqueNodes[node.id] = 1;
-                                node.x = null;
-                                node.y = null;
-                                //node.fixed = false;
-                                visjsData.nodes.push(node);
+                    if (resultId) {
+                        UserDataWidget.loadUserDatabyId(resultId, function (err, result) {
+                            if (result && result.data && result.data.data_content) {
+                                visjsDataSource = result.data.data_content;
                             }
-                        });
-                        visjsDataSource.edges.forEach(function (edge) {
-                            if (!uniqueNodes[edge.id]) {
-                                uniqueNodes[edge.id] = 1;
-                                visjsData.edges.push(edge);
+                            if (!err && visjsDataSource.nodes) {
+                                visjsDataSource.nodes.forEach(function (node) {
+                                    if (!uniqueNodes[node.id]) {
+                                        uniqueNodes[node.id] = 1;
+                                        node.x = null;
+                                        node.y = null;
+                                        //node.fixed = false;
+                                        visjsData.nodes.push(node);
+                                    }
+                                });
+                                visjsDataSource.edges.forEach(function (edge) {
+                                    if (!uniqueNodes[edge.id]) {
+                                        uniqueNodes[edge.id] = 1;
+                                        visjsData.edges.push(edge);
+                                    }
+                                });
                             }
+                            callbackEach();
                         });
                     }
-
-                    callbackEach();
                 });
             },
             function (err) {
@@ -624,8 +684,10 @@ var KGquery_graph = (function () {
         var displayGraphInList = $("#KGquery_displayGraphInList").prop("checked");
         if (displayGraphInList) {
             options.output = "list";
+        } else {
+            options.output = "graph";
         }
-
+        /*
         var data = {
             nodes: nodes,
             edges: edges,
@@ -641,8 +703,13 @@ var KGquery_graph = (function () {
         });
         var label = KGquery.currentSource + "_model";
         var group = "KGquery/models";
-        var data_type = "KGmodelGraph";
-        if (self.currentUserDataModel && self.currentUserDataModel.id) {
+        var data_type = "KGmodelGraph";*/
+        var fileName = KGquery.currentSource + "_KGmodelGraph.json";
+        self.visjsData = null;
+        self.KGqueryGraph.saveGraph(fileName, true, options);
+
+        return;
+        /*if (self.currentUserDataModel && self.currentUserDataModel.id) {
             UserDataWidget.currentTreeNode = { id: self.currentUserDataModel.id };
         }
         UserDataWidget.saveMetadata(label, data_type, data, group, function (err, result) {
@@ -651,14 +718,12 @@ var KGquery_graph = (function () {
             }
             $("#KGquery_messageDiv").text("saved graph");
             self.currentUserDataModel = { id: result?.id };
+            self.visjsData = data;
             if (callback) {
                 callback();
             }
         });
-        return;
-        var fileName = KGquery.currentSource + "_KGmodelGraph.json";
-        self.KGqueryGraph.saveGraph(fileName, true);
-        return;
+        return;*/
     };
     self.addInterGraphProperty = function (edgeData) {
         var propertyId = prompt("enter property URI");
@@ -805,7 +870,32 @@ var KGquery_graph = (function () {
             return callback(null, self.visjsData);
         } else {
             KGquery_graph.message("loading graph display");
-            UserDataWidget.listUserData(
+
+            var visjsGraphFileName = source + "_KGmodelGraph.json";
+            KGquery_graph.message("loading graph display");
+            self.KGqueryGraph.loadGraph(
+                visjsGraphFileName,
+                null,
+                function (err, result) {
+                    if (err) {
+                        return callback("notFound");
+                    }
+                    self.visjsData = result;
+                    var display = "graph";
+                    if (result && result.options && result.options.output) {
+                        display = result.options.output;
+                    }
+                    if (display == "list") {
+                        $("#KGquery_displayGraphInList").prop("checked", true);
+                    } else {
+                        $("#KGquery_displayGraphInList").prop("checked", false);
+                    }
+
+                    return callback(null, self.visjsData);
+                },
+                true,
+            );
+            /*UserDataWidget.listUserData(
                 {
                     data_type: "KGmodelGraph",
                     data_tool: "KGquery",
@@ -815,13 +905,23 @@ var KGquery_graph = (function () {
                     if (err) {
                         return alert(err || err.responseText);
                     }
-                    if (result.length > 0 && result[0].data_content) {
+                    if (result.length > 0) {
                         // new method in userData
                         // order to get last saved instance of our graph in user_data
                         result = result.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-                        self.visjsData = result[0].data_content;
-                        self.currentUserDataModel = result[0];
-                        return callback(null, self.visjsData);
+                        if (result[0]?.id) {
+                            UserDataWidget.loadUserDatabyId(result[0].id, function (err, result) {
+                                if (err) {
+                                    return callback("notFound");
+                                }
+                                if (!result || !result.data_content) {
+                                    return callback("notFound");
+                                }
+                                self.visjsData = result.data_content;
+                                self.currentUserDataModel = result;
+                                return callback(null, self.visjsData);
+                            });
+                        }
                     } else {
                         // get from file if the transition to userData is not done
 
@@ -851,7 +951,7 @@ var KGquery_graph = (function () {
                         );
                     }
                 },
-            );
+            );*/
         }
     };
     /**
@@ -933,37 +1033,12 @@ var KGquery_graph = (function () {
                     });
                 }, //Add decoration data from decorate file
                 function (callbackSeries) {
-                    var fileName = MainController.currentSource + "_decoration.json";
-                    //Get current decoration file
-                    var payload = {
-                        dir: "graphs/",
-                        fileName: fileName,
-                    };
-                    //get decoration file
-                    $.ajax({
-                        type: "GET",
-                        url: `${Config.apiUrl}/data/file`,
-                        data: payload,
-                        dataType: "json",
-                        success: function (result, _textStatus, _jqXHR) {
-                            var data = JSON.parse(result);
+                    self.fillDecoration(function (err) {
+                        if (err) {
+                            return callbackSeries(err);
+                        }
 
-                            for (var node in data) {
-                                var visjsCorrespondingNode = visjsData.nodes.filter((attr) => attr.id === node)[0];
-                                for (var decoration in data[node]) {
-                                    //decoration = clé de décoration
-                                    if (visjsCorrespondingNode) {
-                                        visjsCorrespondingNode[decoration] = data[node][decoration];
-                                    }
-                                }
-                            }
-                            // J'ajoute mes différentes décorations aux classes visés dans le visjsdata
-                            // Si j'ai des icones je  met dans un répertoire côté client les icones nécessaires à ce graph
-                            callbackSeries();
-                        },
-                        error(err) {
-                            return callbackSeries();
-                        },
+                        callbackSeries();
                     });
                 },
 

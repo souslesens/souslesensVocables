@@ -315,6 +315,11 @@ options, depending on the current tab and the node that is clicked.
 **Ctrl + Alt + Click on a Whiteboard Node**  
 Draws all relations of the clicked node.
 
+**Shift + Click on a Whiteboard Node**  
+Select a node of the whiteboard. Use it on multiple nodes on whiteboard to select them. 
+Remove from graph and remove others right click actions will performs on all of them. 
+The selection can be performed on a large zone with shift + click dragged on a whiteboard zone. 
+
 **Ctrl + Shift + Click on Search Results Panel**  
 Allows you to select multiple nodes by clicking on them. The right-click
 action will be applied to all selected nodes.

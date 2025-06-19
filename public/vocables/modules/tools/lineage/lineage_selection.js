@@ -30,6 +30,7 @@ var Lineage_selection = (function () {
         $("#Lineageclasses_selectedNodesCount").html(Lineage_selection.selectedNodes.length);
         Lineage_whiteboard.lineageVisjsGraph.data.nodes.update({ id: node.data.id, borderWidth: 6 });
         $("#Lineage_combine_mergeNodesDialogButton").css("display", "block");
+        Lineage_whiteboard.lineageVisjsGraph.setSelectedNodes(Lineage_selection.selectedNodes);
     };
 
     /**

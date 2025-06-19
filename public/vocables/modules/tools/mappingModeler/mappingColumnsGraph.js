@@ -323,6 +323,9 @@ var MappingColumnsGraph = (function () {
 
         //add relation between columns
         if (options.ctrlKey) {
+            if (!DataSourceManager.currentConfig.currentDataSource) {
+                return alert("choose a data source first");
+            }
             function getColumnClass(node) {
                 var connections = self.visjsGraph.getFromNodeEdgesAndToNodes(node.id);
 

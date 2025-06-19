@@ -414,8 +414,6 @@ export function MetadataModal({ onClose, open, sourceName, isReadOnly = false }:
         </Dialog>
     );
 }
-
-
 declare global {
     interface Window {
         MetaDataDialog: {
@@ -423,7 +421,6 @@ declare global {
         };
     }
 }
-
 window.MetaDataDialog = {
     createApp: (props: Omit<MetadataModalProps, "open" | "sources">) => {
         const container = document.getElementById("mount-edit-metadata-dialog-here");

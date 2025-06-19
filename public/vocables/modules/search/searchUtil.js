@@ -365,7 +365,7 @@ indexes.push(source.toLowerCase());
         return word2;
     };
     self.makeFuzzyQueryString = function (word) {
-        // to add  fuziness in query string elastic search, parameter isn't available 
+        // to add  fuziness in query string elastic search, parameter isn't available
         // It's needed to add ~n symbol to each word
         // n is Levenshtein distance authorized for each word
         //https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-query-string-query#query-string-fuzziness

@@ -8,7 +8,7 @@ var Similars_bot = (function () {
         if (!workflow) {
             workflow = self.nodeSelectionWorkflow;
         }
-        self.params = { nodeSelection:'', source: '' , mode: '', output: '',parents:[] };
+        self.params = { nodeSelection: "", source: "", mode: "", output: "", parents: [] };
         self.profiles = null;
         self.users = null;
         _botEngine.init(Similars_bot, workflow, null, function () {
@@ -25,41 +25,40 @@ var Similars_bot = (function () {
     self.nodeSelectionWorkflow = {
         startFn: {
             _OR: {
-                "All whiteboard nodes": { allWhiteboardNodesFn: {searchSimilarsInWorkflowFn: {}} },
-                "Selected whiteboard nodes": { selectedWhiteboardNodesFn: {searchSimilarsInWorkflowFn: {}} },
+                "All whiteboard nodes": { allWhiteboardNodesFn: { searchSimilarsInWorkflowFn: {} } },
+                "Selected whiteboard nodes": { selectedWhiteboardNodesFn: { searchSimilarsInWorkflowFn: {} } },
             },
         },
     };
-    
+
     self.searchSimilarsInWorkflow = {
         _OR: {
-            "whiteboard nodes": { similarsInWhiteboardNodesFn: {similarsSearchParamsFn: {}} },
-            "source": { similarsInSourceFn: {similarsSearchParamsFn: {}} },
+            "whiteboard nodes": { similarsInWhiteboardNodesFn: { similarsSearchParamsFn: {} } },
+            source: { similarsInSourceFn: { similarsSearchParamsFn: {} } },
         },
-    }
+    };
     self.similarsSearchParams = {
         _OR: {
-            "exact match": { exactMatchFn: {elasticQueryFn: {filterResultsWorkflowFn:{}}} },
-            "fuzzy match": { fuzzyMatchFn: {elasticQueryFn: {filterResultsWorkflowFn:{}}} },
+            "exact match": { exactMatchFn: { elasticQueryFn: { filterResultsWorkflowFn: {} } } },
+            "fuzzy match": { fuzzyMatchFn: { elasticQueryFn: { filterResultsWorkflowFn: {} } } },
         },
-    }
+    };
     self.filterResultsWorkflow = {
         hasFilterFn: {
             _OR: {
-                "Filter results": { setFilterFn:{filterResultsFn: {saveWorkflowFn:{}}} },
-                "No filter": { noFilterFn: {saveWorkflowFn:{}}} ,
+                "Filter results": { setFilterFn: { filterResultsFn: { saveWorkflowFn: {} } } },
+                "No filter": { noFilterFn: { saveWorkflowFn: {} } },
             },
         },
-    }
+    };
     self.saveWorkflow = {
-        drawResultsFn:{ 
+        drawResultsFn: {
             _OR: {
-                "Save results": { saveResultsFn: {}} ,
-                "Display in Table": { displayInTableFn: {}} ,
+                "Save results": { saveResultsFn: {} },
+                "Display in Table": { displayInTableFn: {} },
             },
         },
-    }
-       
+    };
 
     self.functionTitles = {
         startFn: "Search similars for",
@@ -74,8 +73,6 @@ var Similars_bot = (function () {
         displayInTableFn: "Display in Table",
         displayInWhiteboardNodesFn: "Display in whiteboard nodes",
         searchSimilarsInWorkflowFn: "Search similars in ",
-
-        
     };
 
     self.functions = {
@@ -83,11 +80,11 @@ var Similars_bot = (function () {
             _botEngine.nextStep();
         },
         allWhiteboardNodesFn: function () {
-            self.params.nodeSelection='AllWhiteboardNodes';
+            self.params.nodeSelection = "AllWhiteboardNodes";
             _botEngine.nextStep();
         },
         selectedWhiteboardNodesFn: function () {
-            self.params.nodeSelection='SelectedNodes';
+            self.params.nodeSelection = "SelectedNodes";
             _botEngine.nextStep();
         },
         similarsInWhiteboardNodesFn: function () {
@@ -95,8 +92,7 @@ var Similars_bot = (function () {
         },
         similarsInSourceFn: function () {
             var sources = Object.keys(Config.sources);
-            _botEngine.showList(sources, 'source', null, true)
-            
+            _botEngine.showList(sources, "source", null, true);
         },
         searchSimilarsInWorkflowFn: function () {
             _botEngine.currentObj = self.searchSimilarsInWorkflow;
@@ -107,11 +103,11 @@ var Similars_bot = (function () {
             _botEngine.nextStep();
         },
         exactMatchFn: function () {
-            self.params.mode='exact';
+            self.params.mode = "exact";
             _botEngine.nextStep();
         },
         fuzzyMatchFn: function () {
-            self.params.mode='fuzzy';
+            self.params.mode = "fuzzy";
             _botEngine.nextStep();
         },
         saveWorkflowFn: function () {
@@ -125,64 +121,59 @@ var Similars_bot = (function () {
         hasFilterFn: function () {
             var parents = [];
             Lineage_similars.visjsData.nodes.forEach(function (node) {
-                if(node.data.parents.length>0){
-                    parents=parents.concat(node.data.parents);
+                if (node.data.parents.length > 0) {
+                    parents = parents.concat(node.data.parents);
                 }
-                
             });
             parents = common.array.distinctValues(parents);
             self.params.parents = parents;
-            if(parents.length>0){
+            if (parents.length > 0) {
                 _botEngine.nextStep();
-            }else{
-               self.functions.saveWorkflowFn();
+            } else {
+                self.functions.saveWorkflowFn();
             }
         },
         noFilterFn: function () {
-            
             _botEngine.nextStep();
         },
         setFilterFn: function () {
-            if(self.params.parents.length>0){
-                _botEngine.showList(self.params.parents, 'filterParent', null, true)
-            }else{
+            if (self.params.parents.length > 0) {
+                _botEngine.showList(self.params.parents, "filterParent", null, true);
+            } else {
                 _botEngine.nextStep();
             }
         },
         filterResultsFn: function () {
-           if(self.params.filterParent){
-              Lineage_similars.visjsData.nodes=Lineage_similars.visjsData.nodes.filter(function (node) {
-                return node.data.parents.includes(self.params.filterParent);
-              });
-              var nodeIds=Lineage_similars.visjsData.nodes.map(function (node) {
-                return node.id;
-              });
-              Lineage_similars.visjsData.edges=Lineage_similars.visjsData.edges.filter(function (edge) {
-                return nodeIds.includes(edge.to);
-              });
-           }
-           _botEngine.nextStep();
+            if (self.params.filterParent) {
+                Lineage_similars.visjsData.nodes = Lineage_similars.visjsData.nodes.filter(function (node) {
+                    return node.data.parents.includes(self.params.filterParent);
+                });
+                var nodeIds = Lineage_similars.visjsData.nodes.map(function (node) {
+                    return node.id;
+                });
+                Lineage_similars.visjsData.edges = Lineage_similars.visjsData.edges.filter(function (edge) {
+                    return nodeIds.includes(edge.to);
+                });
+            }
+            _botEngine.nextStep();
         },
         elasticQueryFn: function () {
-            
-            Lineage_similars.drawSourceSimilars(Lineage_sources.activeSource, self.params.source,self.params.mode,self.params.nodeSelection,'no draw',function () {
+            Lineage_similars.drawSourceSimilars(Lineage_sources.activeSource, self.params.source, self.params.mode, self.params.nodeSelection, "no draw", function () {
                 _botEngine.nextStep();
             });
-            
         },
         drawResultsFn: function () {
-           
-            Lineage_similars.displaySimilars('graph',Lineage_similars.similarsSources,self.params.source,Lineage_sources.activeSource,function () {
+            Lineage_similars.displaySimilars("graph", Lineage_similars.similarsSources, self.params.source, Lineage_sources.activeSource, function () {
                 _botEngine.nextStep();
             });
         },
         saveResultsFn: function () {
-            Lineage_similars.displaySimilars('save',Lineage_similars.similarsSources,self.params.source,Lineage_sources.activeSource,function () {
+            Lineage_similars.displaySimilars("save", Lineage_similars.similarsSources, self.params.source, Lineage_sources.activeSource, function () {
                 _botEngine.nextStep();
             });
         },
         displayInTableFn: function () {
-            Lineage_similars.displaySimilars('table',Lineage_similars.similarsSources,self.params.source,Lineage_sources.activeSource,function () {
+            Lineage_similars.displaySimilars("table", Lineage_similars.similarsSources, self.params.source, Lineage_sources.activeSource, function () {
                 _botEngine.nextStep();
             });
         },

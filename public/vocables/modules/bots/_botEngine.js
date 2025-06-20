@@ -520,7 +520,9 @@ var _botEngine = (function () {
         }
 
         _botEngine.showList(choices, varToFill);
-        _botEngine.setStepMessage();
+        // alternatives has no message because is not a function 
+        // message of alternative is last setted function question message
+        //_botEngine.setStepMessage();
     };
 
     self.getQueryText = function () {

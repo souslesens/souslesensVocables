@@ -43,7 +43,14 @@ var SubGraph = (function () {
                         },
 
                         function (callbackWhilst) {
-                            var filter = Sparql_common.setFilter("s", currentClasses, null, { values: true });
+                            var varName="s"
+                            var optionalStr="OPTIONAL"
+                            if(options.inverseRestrictions) {
+                                varName = "targetClass"
+                                optionalStr=""
+                            }
+                            var filter = Sparql_common.setFilter(varName, currentClasses, null, { values: true });
+
                             var strFrom = Sparql_common.getFromStr(sourceLabel, null, null, options);
                             var query =
                                 //  "PREFIX dexp: <http://totalenergies/resources/tsf/ontology/dexpi-process/specific/>\n" +
@@ -52,8 +59,9 @@ var SubGraph = (function () {
                                 "WHERE {" +
                                 "  ?s rdfs:subClassOf+ ?o. ?o rdf:type ?type " +
                                 filter +
-                                filterPropStr +
-                                "optional { ?o owl:onProperty ?property. ?o owl:someValuesFrom|owl:onClass ?targetClass  optional { ?o ?cardinalityType  ?cardinalityValue. filter (?cardinalityType in (owl:minCardinality,owl:maxCardinality,owl:cardinality))}}\n" +
+                                filterPropStr +optionalStr+
+                                " { ?o owl:onProperty ?property. ?o owl:someValuesFrom|owl:onClass ?targetClass  optional { ?o ?cardinalityType  ?cardinalityValue. filter (?cardinalityType in (owl:minCardinality,owl:maxCardinality,owl:cardinality))}}\n" +
+
                                 "  } limit 10000";
                             self.query(sourceLabel, query, function (err, result) {
                                 if (err) {
@@ -64,15 +72,7 @@ var SubGraph = (function () {
                                     if (!item.type) {
                                         return;
                                     }
-                                    /*  console.log(
-                                            Sparql_common.getLabelFromURI(item.s.value) +
-                                                "-->" +
-                                                Sparql_common.getLabelFromURI(item.o.value) +
-                                                "--" +
-                                                (item.property ? Sparql_common.getLabelFromURI(item.property.value) : "") +
-                                                "--" +
-                                                (item.targetClass ? Sparql_common.getLabelFromURI(item.targetClass.value) : "")
-                                        );*/
+
 
                                     if (item.type.value.endsWith("Class")) {
                                         if (!allClasses[item.s.value]) {
@@ -264,7 +264,9 @@ var SubGraph = (function () {
             if (uniqueResources[classUri]) {
                 return uniqueResources[classUri];
             }
-            var uri = classUri + "_" + common.getRandomHexaId(10);
+            var uri = classUri
+            if(!options.nonUnique)
+           uri  += "_" + common.getRandomHexaId(10);
             uniqueResources[classUri] = uri;
             triples.push({
                 subject: uri,

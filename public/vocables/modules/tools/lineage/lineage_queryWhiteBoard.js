@@ -234,7 +234,8 @@ var Lineage_queryWhiteBoard = (function () {
             html += "</ul>";
             $("#Browse_indexHitsDiv").html(html);
             $("#Browse_hitDetailsDiv").html("");
-        }, showHitDetails: function (hitKey) {
+        },
+        showHitDetails: function (hitKey) {
             var array = hitKey.split("|");
             var hit = null;
             var index = array[0]
@@ -248,27 +249,7 @@ var Lineage_queryWhiteBoard = (function () {
             if (!hit) {
                 return console.log("no hit");
             }
-            /*   $(".Browse_indexList").removeClass("selectedItem");
-               $("#" + self.browse.encodeUriForHtmlId(hit.id)).addClass("selectedItem");
-               var html = "";
-               if (hit.parents) {
-                   html += "<div class='Browse_nodeParents'>";
-                   var notFirst = false;
-                   hit.parents.forEach(function (parent, index) {
-                       if (notFirst) html += " -> ";
-                       var parentLabel = self.currentSearchResult.parentIdsLabelsMap[parent];
-                       if (parentLabel && typeof parentLabel == "string") {
-                           html += parentLabel;
-                           notFirst = true;
-                       }
-                   });
-                   html += "</div>";
-               }
-               html += "<div  id='Browse_nodeInfosDiv' ></div>";
-               if (!Config.sources[hit.source].controllerName) {
-                   Config.sources[hit.source].controllerName = "" + Config.sources[hit.source].controller;
-                   Config.sources[hit.source].controller = eval(Config.sources[hit.source].controller);
-               }*/
+
             var node = {data: {id: hit.id}};
             NodeInfosWidget.showNodeInfos(hit.source, node, "Browse_hitDetailsDiv", {
                 hideModifyButtons: true,
@@ -276,53 +257,72 @@ var Lineage_queryWhiteBoard = (function () {
             });
             self.browse.showHitGraph(hit)
 
-
-            // $("#Browse_hitDetailsDiv").html(html);
         },
 
 
         showHitGraph: function (hit) {
+            var triples = []
+            SubGraph.instantiateSubGraphTriples(hit.source, hit.id, {nonUnique: true}, function (err, result) {
+                if (err) {
+                    return alert(err)
+                }
+                triples = result.triples
+                SubGraph.instantiateSubGraphTriples(hit.source, hit.id, {
+                    nonUnique: true,
+                    inverseRestrictions: true
+                }, function (err, result2) {
+
+                    result2.triples.forEach(function (item) {
+
+                       // item.isInverse = true
+                        triples.push({
+                            subject:item.object,
+                            predicate:item.predicate,
+                            object:item.subject,
+                            isInverse:true
+
+                        })
+
+                    })
+
+                    //  triples = triples.concat(result2.triples)
 
 
-            SubGraph.instantiateSubGraphTriples(hit.source,  hit.id, {}, function (err, result) {
+                    self.browse.getSubGraphHierarchicalVisjsData(triples, hit.id, {}, function (err, visjsData) {
 
+                        var options = {
+                            keepNodePositionOnDrag: true,
+                            layoutHierarchical: {
+                                direction: "LR",
+                                nodeSpacing: 60,
+                                levelSeparation: 300,
+                            },
+                            physics: {
+                                enabled: true
+                            },
 
-                self.browse.getSubGraphHierarchicalVisjsData(result.triples,hit.id,{},function(err, visjsData){
-
-                    var options = {
-                        keepNodePositionOnDrag: true,
-                        layoutHierarchical: {
-                            direction: "UD",
-                            nodeSpacing: 200,
-                            levelSeparation: 100,
-                        },
-                        physics: {
-                            enabled: true
-                        },
-
-                        visjsOptions: {
-                            edges: {
-                                //  smooth: false,
-                                smooth: {
-                                    type: "cubicBezier",
-                                    // type: "diagonalCross",
-                                    forceDirection: "horizontal",
-                                    roundness: 0.4,
+                            visjsOptions: {
+                                edges: {
+                                    //  smooth: false,
+                                    smooth: {
+                                        type: "cubicBezier",
+                                        // type: "diagonalCross",
+                                        forceDirection: "horizontal",
+                                        roundness: 0.4,
+                                    },
                                 },
                             },
-                        },
-                    };
-                    options.onclickFn = self.onVisjsGraphClick;
-                    options.onRightClickFn = self.showGraphPopupMenu;
+                        };
+                        options.onclickFn = self.onVisjsGraphClick;
+                        options.onRightClickFn = self.showGraphPopupMenu;
 
 
+                        self.visjsGraph = new VisjsGraphClass("Browse_graphDiv", visjsData, options);
+                        self.visjsGraph.draw(function () {
 
-                    self.visjsGraph = new VisjsGraphClass("Browse_graphDiv", visjsData, options);
-                    self.visjsGraph.draw(function () {
 
-
+                        });
                     });
-
 
 
                 })
@@ -331,86 +331,102 @@ var Lineage_queryWhiteBoard = (function () {
             })
 
         },
-       getSubGraphHierarchicalVisjsData  (data, rootNodeId, options, callback) {
+        getSubGraphHierarchicalVisjsData(data, rootNodeId, options, callback) {
 
-            var visjsData = { nodes: [], edges: [] };
+            var visjsData = {nodes: [], edges: []};
             var uniqueIds = {};
             var edgesMap = {};
             var edgesToMap = {};
             var nodesMap = {};
             var existingNodes = {};
 
-               data.forEach(function (item) {
-                   if (!nodesMap[item.subject]) {
-                       nodesMap[item.subject] = []
-                   }
-                   nodesMap[item.subject].push(item)
-                   if(!edgesMap[item.predicate])
-                       edgesMap[item.predicate]=1
+            data.forEach(function (item) {
+                if (!nodesMap[item.subject]) {
+                    nodesMap[item.subject] = []
+                }
+                nodesMap[item.subject].push(item)
+                if (!edgesMap[item.predicate]) {
+                    edgesMap[item.predicate] = 1
+                }
 
-               });
+            });
 
-               var allUris=Object.keys(nodesMap).concat(Object.keys(edgesMap))
-           Sparql_OWL.getUrisLabelsMap (Lineage_sources.activeSource,allUris, function (err, labelsMap) {
-               var newNodes = [];
-               var newEdges = [];
+            var allUris = Object.keys(nodesMap).concat(Object.keys(edgesMap))
+            Sparql_OWL.getUrisLabelsMap(Lineage_sources.activeSource, allUris, function (err, labelsMap) {
+                var newNodes = [];
+                var newEdges = [];
 
-               function addVisjsNode(nodeId){
-                   var label=labelsMap[nodeId] || Sparql_common.getLabelFromURI(nodeId)
-                   newNodes.push({
-                       id: nodeId,
-                       label:label,
-                       shape: "dot",
-                       level:level,
-                       data:{
-                           id: nodeId,
-                           label:label,
-                       }
+                function addVisjsNode(nodeId, level) {
+                    var label = labelsMap[nodeId] || Sparql_common.getLabelFromURI(nodeId)
+                    newNodes.push({
+                        id: nodeId,
+                        label: label,
+                        shape: "dot",
+                        level: level,
+                        data: {
+                            id: nodeId,
+                            label: label,
+                        },
+                        size: 12
 
-                   });
-               }
-
-
-
-               function recurse(nodeId, level) {
-                   if (!nodesMap[nodeId]) {
-                       return;
-                   }
-                   if (!existingNodes[nodeId]) {
-                       existingNodes[nodeId] = 1;
-
-                       addVisjsNode(nodeId)
-
-                       nodesMap[nodeId].forEach(function (item) {
+                    });
+                }
 
 
-                                   newEdges.push({
-                                       from:item.predicate,
-                                       to:item.predicate,
-                                       label:item.predicate,
-                                       arrows:"to"
-                                   });
+                function recurse(nodeId, level) {
+                    if (!nodesMap[nodeId]) {
+                        return;
+                    }
 
-                           if (!existingNodes[item.predicate]) {
-                               addVisjsNode(item.predicate)
-                               recurse(item.predicate, level + 1);
-                           }
+                    if (!existingNodes[nodeId]) {
+                        existingNodes[nodeId] = 1;
 
-                           });
+                        addVisjsNode(nodeId, level)
 
-                   }
-               }
-
-               recurse(rootNodeId, 1);
-               var visjsData={nodes:newNodes, edges:newEdges}
-               callback(null,visjsData)
+                        nodesMap[nodeId].forEach(function (item) {
 
 
 
+                            if (item.isInverse) {
+                                level = -level
+                            }
 
-           })
+                            if(  item.predicate!="rdf:type") {
+                                var label = labelsMap[item.predicate] || Sparql_common.getLabelFromURI(item.predicate)
+
+                                newEdges.push({
+                                    from: item.subject,
+                                    to: item.object,
+                                    label: label,
+                                    font: {align: "middle"},
+                                    arrows: "to"
+                                });
+                            }
+
+                            if (!existingNodes[item.object] ) {
+                                existingNodes[item.object] = 1
+                                addVisjsNode(item.object, level + 1)
+                                recurse(item.object, level + 1);
+                            }
+
+                        });
+
+                    }
+                }
+
+                recurse(rootNodeId, 1);
+                var visjsData = {nodes: newNodes, edges: newEdges}
+                callback(null, visjsData)
+
+
+            })
         }
 
+
+    }
+
+
+    self.exportPDF = function () {
 
 
     }

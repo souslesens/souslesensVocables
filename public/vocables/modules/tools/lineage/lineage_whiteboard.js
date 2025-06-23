@@ -22,6 +22,7 @@ import UserDataWidget from "../../uiWidgets/userDataWidget.js";
 import Containers_tree from "../containers/containers_tree.js";
 import Export from "../../shared/export.js";
 import Lineage_nodeCentricGraph from "./lineage_nodeCentricGraph.js";
+import Browse from "../browse/browse.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -164,7 +165,7 @@ var Lineage_whiteboard = (function () {
             }
             $("#lateralPanelDiv").load("./modules/tools/lineage/html/lateralPanel.html", function () {
                 Lineage_whiteboard.initWhiteboardTab();
-                //Lineage_whiteboard.initClassesTab();
+                //  Lineage_whiteboard.initClassesTab();
                 Lineage_whiteboard.initUI();
             });
         });
@@ -227,7 +228,7 @@ var Lineage_whiteboard = (function () {
             } else if (options.callee == "Tree") {
                 Lineage_whiteboard.drawNodesAndParents(node);
             }
-        } else if (nodeEvent.shiftKey) {
+        } else if (nodeEvent.ctrlKey && nodeEvent.altKey) {
             Lineage_selection.addNodeToSelection(node);
         } else if (nodeEvent.ctrlKey) {
             NodeInfosWidget.showNodeInfos(node.data.source, node, "mainDialogDiv", { resetVisited: 1 });
@@ -4409,6 +4410,17 @@ attrs.color=self.getSourceColor(superClassValue)
         },
 
         /**
+         * @name showBrowseDialog
+         * @memberof module:graphActions.graph
+         *
+         * allows to query the whiteboard content
+         *
+         */
+        showBrowseDialog: function () {
+            Browse.showDialog();
+        },
+
+        /**
          * @function
          * @name saveWhiteboard
          * @memberof module:graphActions.graph
@@ -4466,12 +4478,8 @@ attrs.color=self.getSourceColor(superClassValue)
                     if (err) {
                         return alert(err.responseText);
                     }
-                    if (result.id) {
-                        UserDataWidget.loadUserDatabyId(result.id, function (err, result) {
-                            if (result?.data_content) {
-                                self.loadGraphFromJSON(result.data_content);
-                            }
-                        });
+                    if (result?.data_content) {
+                        self.loadGraphFromJSON(result.data_content);
                     }
                 },
             );

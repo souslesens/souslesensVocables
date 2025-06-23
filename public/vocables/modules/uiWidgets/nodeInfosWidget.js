@@ -113,49 +113,55 @@ var NodeInfosWidget = (function () {
     self.initDialog = function (sourceLabel, divId, options, callback) {
         self.divId = divId;
         self.currentSource = sourceLabel;
-        if (!options.noDialog) {
-            $("#" + divId).dialog("option", "title", " Node infos :"); // source " + sourceLabel);
-        }
-        $("#" + divId).load("modules/uiWidgets/html/nodeInfosWidget.html", function () {
-            $("#addPredicateButton").remove();
-            // $("#addRestrictionButton").remove();
-            $("#deleteButton").remove();
-            $("#" + divId).dialog("close");
-            $("#" + divId).dialog({
-                open: function (event, ui) {
-                    $("#nodeInfosWidget_tabsDiv").tabs({
-                        //  active: options.showAxioms ? 1 : 0,
-
-                        load: function (event, ui) {},
-                        activate: function (event, ui) {
-                            $(".nodeInfosWidget_tabDiv").removeClass("nodesInfos-selectedTab");
-
-                            setTimeout(function () {
-                                $("[aria-selected='true']").addClass("nodesInfos-selectedTab");
-                                if (ui.newPanel.selector == "#nodeInfosWidget_AxiomsTabDiv") {
-                                    var source = self.currentSource;
-                                    // source = Lineage_sources.mainSource;
-                                    $("#smallDialogDiv").dialog("option", "title", "Axioms of resource " + self.currentNode.data.label);
-                                    NodeInfosAxioms.init(source, self.currentNode, "smallDialogDiv");
-                                }
-                                if (ui.newPanel.selector == "#nodeInfosWidget_relationsDiv") {
-                                    $("#nodeInfosWidget_relationsDiv").load("modules/uiWidgets/html/nodeRelationsWidget.html", function () {});
-                                }
-                            }, 100);
-                        },
-                    });
-                },
-                close: function (event, ui) {
-                    $("#addPredicateButton").remove();
-                    //  $("#addRestrictionButton").remove();
-                    $("#deleteButton").remove();
-                },
+        if (options.noDialog) {
+            $("#" + divId).load("modules/uiWidgets/html/nodeInfosWidget.html", function (err) {
+                $("#addPredicateButton").remove();
+                $("#deleteButton").remove();
+                $(".nodeInfosWidget_tabDiv").css("margin", "0px");
+                $("[aria-selected='true']").addClass("nodesInfos-selectedTab");
+                return callback();
             });
-            $("#" + divId).dialog("open");
-            $(".nodeInfosWidget_tabDiv").css("margin", "0px");
-            $("[aria-selected='true']").addClass("nodesInfos-selectedTab");
-            callback();
-        });
+        } else {
+            $("#" + divId).load("modules/uiWidgets/html/nodeInfosWidget.html", function (err) {
+                $("#" + divId).dialog("option", "title", " Node infos :");
+                $("#addPredicateButton").remove();
+                $("#deleteButton").remove();
+                $("#" + divId).dialog("close");
+                $("#" + divId).dialog({
+                    open: function (event, ui) {
+                        $("#nodeInfosWidget_tabsDiv").tabs({
+                            //  active: options.showAxioms ? 1 : 0,
+
+                            load: function (event, ui) {},
+                            activate: function (event, ui) {
+                                $(".nodeInfosWidget_tabDiv").removeClass("nodesInfos-selectedTab");
+
+                                setTimeout(function () {
+                                    $("[aria-selected='true']").addClass("nodesInfos-selectedTab");
+                                    if (ui.newPanel.selector == "#nodeInfosWidget_AxiomsTabDiv") {
+                                        var source = self.currentSource;
+                                        // source = Lineage_sources.mainSource;
+                                        $("#smallDialogDiv").dialog("option", "title", "Axioms of resource " + self.currentNode.data.label);
+                                        NodeInfosAxioms.init(source, self.currentNode, "smallDialogDiv");
+                                    }
+                                    if (ui.newPanel.selector == "#nodeInfosWidget_relationsDiv") {
+                                        $("#nodeInfosWidget_relationsDiv").load("modules/uiWidgets/html/nodeRelationsWidget.html", function () {});
+                                    }
+                                }, 100);
+                            },
+                        });
+                    },
+                    close: function (event, ui) {
+                        $("#addPredicateButton").remove();
+                        $("#deleteButton").remove();
+                    },
+                });
+                $("#" + divId).dialog("open");
+                $(".nodeInfosWidget_tabDiv").css("margin", "0px");
+                $("[aria-selected='true']").addClass("nodesInfos-selectedTab");
+                callback();
+            });
+        }
     };
 
     self.drawAllInfos = function (sourceLabel, nodeId, options, callback) {
@@ -170,7 +176,9 @@ var NodeInfosWidget = (function () {
                         if (err) {
                             return callbackSeries(err);
                         }
-                        if (result.length == 0) return callbackSeries();
+                        if (result.length == 0) {
+                            return callbackSeries();
+                        }
                         var item = result[0];
                         self.currentNode = {
                             id: item.subject.value,
@@ -859,7 +867,9 @@ defaultLang = 'en';*/
         var jstreeData = [];
         var ancestors = OntologyModels.getClassHierarchyTreeData(sourceLabel, nodeId, "ancestors");
 
-        if (ancestors.length == 0) return callback();
+        if (ancestors.length == 0) {
+            return callback();
+        }
         var uniqueIds = {};
         if (ancestors.length > 0) {
             ancestors.forEach(function (item) {
@@ -1607,9 +1617,10 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
 
             var html = "<div style='display:flex;align-items:center;'> <b class='nodesInfos_titles'>Restrictions </b> ";
 
-            if (!node.from)
+            if (!node.from) {
                 html +=
                     " <div class='slsv-button-2' style='padding: 2px 4px;margin-left:10px;border-radius:5px;height:32px;margin-bottom:5px;' onclick='NodeInfosWidget.showAddRestrictionWidget()'><button  class='slsv-invisible-button add-icon' style='margin-right: 2px; height: 26px; width: 27px;border-radius:14px;' ></button></div>";
+            }
             html += "</div>";
             html += '<div style="max-width:800px;max-height:400px">' + " <table>\n" + "        <tr>\n";
             if (filterProp) {

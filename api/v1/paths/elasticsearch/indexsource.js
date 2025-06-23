@@ -15,6 +15,10 @@ module.exports = function () {
         async function isIndexPrivate(userInfo, indexName, callback) {
             const sources = await sourceModel.getAllSources();
 
+            // ajout provisoire CF
+            if (indexName.startsWith("whiteboard_")) {
+                return callback(null, true);
+            }
             var sourceObj = null;
             for (var key in sources) {
                 if (indexName == key.toLowerCase()) {

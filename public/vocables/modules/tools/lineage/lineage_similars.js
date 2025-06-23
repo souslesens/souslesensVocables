@@ -440,7 +440,7 @@ var Lineage_similars = (function () {
             if (!Lineage_selection.selectedNodes || Lineage_selection.selectedNodes.length == 0) {
                 return null;
             }
-            return Lineage_selection.selectedNodes;
+            return Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(Lineage_selection.selectedNodes);
         }
     };
 

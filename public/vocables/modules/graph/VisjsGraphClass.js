@@ -123,7 +123,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
 
         self.network = new vis.Network(container, self.data, options.visjsOptions);
         self.simulationOn = true;
-
+        Lineage_selection.selectedNodes = [];
         self.network.on("afterDrawing", function (/** @type {any} */ _params) {
             self.drawingDone = true;
         });
@@ -1258,9 +1258,9 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         if (!Array.isArray(nodes)) {
             nodes = [nodes];
         }
-        if (!(nodes.length > 0)) {
+        /*if (!(nodes.length > 0)) {
             return;
-        }
+        }*/
         var selectedNodes = [];
         nodes.forEach(function (node) {
             if (node?.id) {

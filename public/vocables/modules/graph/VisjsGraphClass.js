@@ -142,15 +142,18 @@ const VisjsGraphClass = function (graphDiv, data, options) {
            
         });
         self.network.on("deselectNode", function (/** @type {{ nodes: any[]; }} */ params) {
-            // deselect Nodes only if no nodes clicked (click on whiteboard)
+            // deselect Nodes only if no nodes clicked (click on whiteboard) or other node left clicked (without shift key)
             if (params.nodes.length == 0) {
                 self.setSelectedNodes([]);
             }
             else{
-                // reset previous selection because it is automatically deselected by native behavior
-                var previousNodesIds= params.previousSelection.nodes.map(function (node){return node.id});
-                previousNodesIds.push(params.nodes[0]);
-                self.setSelectedNodes(previousNodesIds);
+                // reset previous selection because it is automatically deselected by native behavior when shift key is pressed
+                var isShiftKey = params.event.srcEvent.shiftKey;
+                if(isShiftKey){
+                    var previousNodesIds= params.previousSelection.nodes.map(function (node){return node.id});
+                    previousNodesIds.push(params.nodes[0]);
+                    self.setSelectedNodes(previousNodesIds);
+                }
             }
         });
         self.network.on("oncontext", function (/** @type {{ event: { preventDefault: () => void; which: number; }; pointer: { DOM: any; }; }} */ params) {

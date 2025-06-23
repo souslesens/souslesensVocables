@@ -1566,8 +1566,29 @@ var Sparql_OWL = (function () {
                     if (err) {
                         return callback(err);
                     }
-                    result2 = Sparql_generic.setBindingsOptionalProperties(result2, ["prop", "node", "subject", "value"], { source: sourceLabel });
-                    return callback(null, result2);
+                    // fill value labels for restrictions values from imports sources
+                    var noValueLabelResults = result2.filter(function(result){
+                        return !result.valueLabel
+                    });
+                    var valueIds = noValueLabelResults.map(function(result){
+                        return result.value?.value
+                    });
+                    var filter=Sparql_common.setFilter("id", valueIds);
+                    Sparql_OWL.getLabelsMap(sourceLabel, {filter: filter}, function(err, labelsMap){
+                        if(err){
+                            return callback(err);
+                        }
+                        noValueLabelResults.forEach(function(result){
+                            if(labelsMap[result.value?.value]){
+                                result.valueLabel={value:labelsMap[result.value?.value], type:'literal'}
+                            }
+                        })
+                        result2 = Sparql_generic.setBindingsOptionalProperties(result2, ["prop", "node", "subject", "value"], { source: sourceLabel });
+                        return callback(null, result2);
+                        
+                    })
+                    
+                    
                 });
             },
         );

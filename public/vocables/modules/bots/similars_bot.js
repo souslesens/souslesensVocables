@@ -34,9 +34,15 @@ var Similars_bot = (function () {
     self.searchSimilarsInWorkflow = {
         _OR: {
             "whiteboard nodes": { similarsInWhiteboardNodesFn: { similarsSearchParamsFn: {} } },
-            source: { similarsInSourceFn: { similarsSearchParamsFn: {} } },
+            source: { similarsInSourceFn: { sourceWorkflowFn: {} } },
         },
     };
+    self.sourceWorkflow = {
+        _OR: {
+            "next": {similarsSearchParamsFn: {} },
+            "add source": {similarsInSourceFn: { sourceWorkflowFn: {} } } 
+        },
+    }
     self.similarsSearchParams = {
         _OR: {
             "exact match": { exactMatchFn: { elasticQueryFn: { filterResultsWorkflowFn: {} } } },
@@ -182,6 +188,10 @@ var Similars_bot = (function () {
             Lineage_similars.displaySimilars("table", Lineage_similars.similarsSources, self.params.source, Lineage_sources.activeSource, function () {
                 _botEngine.nextStep();
             });
+        },
+        sourceWorkflowFn: function () {
+            _botEngine.currentObj = self.sourceWorkflow;
+            _botEngine.nextStep();
         },
     };
     return self;

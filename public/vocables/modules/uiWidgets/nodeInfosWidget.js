@@ -324,6 +324,7 @@ var NodeInfosWidget = (function () {
             _options = {};
         }
         var valueLabelsMap = {};
+        var valuesLabelsToMap={};
         $(".infosTable").html("");
         self.propertiesMap = { label: "", id: "", properties: {} };
         var blankNodes = [];
@@ -407,6 +408,10 @@ var NodeInfosWidget = (function () {
                     if (item.valueLabel) {
                         if (!item["xml:lang"]) {
                             valueLabelsMap[value] = item.valueLabel.value;
+                        }
+                    }else{
+                        if (value.indexOf("http") == 0) {
+                            valuesLabelsToMap[value]=true;
                         }
                     }
                     /*   if (item.valueLabel)
@@ -509,125 +514,139 @@ defaultLang = 'en';*/
 
                 var metaDataStr = str;
                 var metaDataProps = Object.values(Config.dictionaryMetaDataPropertiesMap);
-                defaultProps.forEach(function (key) {
-                    var strGeneratedByProp = "";
-                    if (!self.propertiesMap.properties[key]) {
+                if(Object.keys(valuesLabelsToMap).length>0){
+                    var filter=Sparql_common.setFilter("id",Object.keys(valuesLabelsToMap));
+                }
+                Sparql_OWL.getLabelsMap(sourceLabel,{filter:filter},function (err,result) {
+                    if(err){
+                        UI.message(err.responseText);
                         return;
                     }
-
-                    strGeneratedByProp += "<tr class='infos_table'>";
-
-                    if (self.propertiesMap.properties[key].value) {
-                        var values = self.propertiesMap.properties[key].value;
-                        strGeneratedByProp +=
-                            "<td class='detailsCellName'>" +
-                            "<a target='" +
-                            self.getUriTarget(self.propertiesMap.properties[key].propUri) +
-                            "' href='" +
-                            self.propertiesMap.properties[key].propUri +
-                            "'>" +
-                            self.propertiesMap.properties[key].name +
-                            "</a>" +
-                            "</td>";
-                        var valuesStr = "";
-
-                        values.forEach(function (valueObj, index) {
-                            var value = valueObj.value;
-
-                            var predicateId = valueObj.predicateId;
-                            var optionalStr = getOptionalStr(key, predicateId);
-
-                            if (value.indexOf("http") == 0) {
-                                if (valueLabelsMap[value]) {
-                                    value = "<a target='" + self.getUriTarget(nodeId) + "' href='" + value + "'>" + valueLabelsMap[value] + "</a>";
-                                } else {
-                                    value = "<a target='" + self.getUriTarget(value) + "' href='" + value + "'>" + value + "</a>";
-                                }
-                            }
-                            if (index > 0) {
-                                valuesStr += "<br>";
-                            }
-                            valuesStr += value + optionalStr;
+                    if(result){
+                        Object.keys(result).forEach(function (item) {
+                            valueLabelsMap[item]=result[item];
                         });
-                        strGeneratedByProp += "<td class='detailsCellValue'><div class='detailsCellValueContent'>" + valuesStr + "</div></td>";
-                        strGeneratedByProp += "</tr>";
-                    } else {
-                        // manage lang
-                        var keyName = self.propertiesMap.properties[key].name;
-                        var selectId = "detailsLangSelect_" + keyName;
-                        var propNameSelect = "<select id='" + selectId + "' onchange=NodeInfosWidget.onNodeDetailsLangChange('" + keyName + "') >";
-                        var langDivs = "";
+                    }
+                    defaultProps.forEach(function (key) {
+                        var strGeneratedByProp = "";
+                        if (!self.propertiesMap.properties[key]) {
+                            return;
+                        }
 
-                        for (var lang in self.propertiesMap.properties[key].langValues) {
-                            values = self.propertiesMap.properties[key].langValues[lang];
-                            var selected = "";
-                            if (lang == defaultLang) {
-                                selected = "selected";
-                            }
-                            propNameSelect += "<option " + selected + ">" + lang + "</option> ";
+                        strGeneratedByProp += "<tr class='infos_table'>";
+
+                        if (self.propertiesMap.properties[key].value) {
+                            var values = self.propertiesMap.properties[key].value;
+                            strGeneratedByProp +=
+                                "<td class='detailsCellName'>" +
+                                "<a target='" +
+                                self.getUriTarget(self.propertiesMap.properties[key].propUri) +
+                                "' href='" +
+                                self.propertiesMap.properties[key].propUri +
+                                "'>" +
+                                self.propertiesMap.properties[key].name +
+                                "</a>" +
+                                "</td>";
                             var valuesStr = "";
-                            values.forEach(function (valueObject, index) {
-                                var optionalStr = getOptionalStr(key, valueObject.predicateId);
-                                var value = valueObject.value;
+
+                            values.forEach(function (valueObj, index) {
+                                var value = valueObj.value;
+
+                                var predicateId = valueObj.predicateId;
+                                var optionalStr = getOptionalStr(key, predicateId);
+
                                 if (value.indexOf("http") == 0) {
                                     if (valueLabelsMap[value]) {
-                                        value = "<a target='" + NodeInfosWidget.getUriTarget(nodeId) + "' href='" + value + "'>" + valueLabelsMap[value] + "</a>";
+                                        value = "<a target='" + self.getUriTarget(nodeId) + "' href='" + value + "'>" + valueLabelsMap[value] + "</a>";
                                     } else {
-                                        value += "<a target='" + NodeInfosWidget.getUriTarget(value) + "' href='" + value + "'>" + value + "</a>";
+                                        value = "<a target='" + self.getUriTarget(value) + "' href='" + value + "'>" + value + "</a>";
                                     }
                                 }
-                                var optionalStr = ""; //  complcated to manage lang together with edit and delete
-                                // var optionalStr = getOptionalStr(key,valueObject.predicateId);
                                 if (index > 0) {
                                     valuesStr += "<br>";
                                 }
                                 valuesStr += value + optionalStr;
                             });
+                            strGeneratedByProp += "<td class='detailsCellValue'><div class='detailsCellValueContent'>" + valuesStr + "</div></td>";
+                            strGeneratedByProp += "</tr>";
+                        } else {
+                            // manage lang
+                            var keyName = self.propertiesMap.properties[key].name;
+                            var selectId = "detailsLangSelect_" + keyName;
+                            var propNameSelect = "<select id='" + selectId + "' onchange=NodeInfosWidget.onNodeDetailsLangChange('" + keyName + "') >";
+                            var langDivs = "";
 
-                            langDivs += "<div class='detailsLangDiv_" + keyName + "' id='detailsLangDiv_" + keyName + "_" + lang + "'>" + valuesStr + "</div>";
+                            for (var lang in self.propertiesMap.properties[key].langValues) {
+                                values = self.propertiesMap.properties[key].langValues[lang];
+                                var selected = "";
+                                if (lang == defaultLang) {
+                                    selected = "selected";
+                                }
+                                propNameSelect += "<option " + selected + ">" + lang + "</option> ";
+                                var valuesStr = "";
+                                values.forEach(function (valueObject, index) {
+                                    var optionalStr = getOptionalStr(key, valueObject.predicateId);
+                                    var value = valueObject.value;
+                                    if (value.indexOf("http") == 0) {
+                                        if (valueLabelsMap[value]) {
+                                            value = "<a target='" + NodeInfosWidget.getUriTarget(nodeId) + "' href='" + value + "'>" + valueLabelsMap[value] + "</a>";
+                                        } else {
+                                            value += "<a target='" + NodeInfosWidget.getUriTarget(value) + "' href='" + value + "'>" + value + "</a>";
+                                        }
+                                    }
+                                    var optionalStr = ""; //  complcated to manage lang together with edit and delete
+                                    // var optionalStr = getOptionalStr(key,valueObject.predicateId);
+                                    if (index > 0) {
+                                        valuesStr += "<br>";
+                                    }
+                                    valuesStr += value + optionalStr;
+                                });
+
+                                langDivs += "<div class='detailsLangDiv_" + keyName + "' id='detailsLangDiv_" + keyName + "_" + lang + "'>" + valuesStr + "</div>";
+                            }
+
+                            propNameSelect += "</select>";
+
+                            strGeneratedByProp +=
+                                "<td class='detailsCellName'>" +
+                                "<a target ='" +
+                                self.getUriTarget(self.propertiesMap.properties[key].propUri) +
+                                "' href='" +
+                                self.propertiesMap.properties[key].propUri +
+                                "'>" +
+                                self.propertiesMap.properties[key].name +
+                                "</a> " +
+                                propNameSelect +
+                                "</td>";
+                            strGeneratedByProp += "<td class='detailsCellValue'>" + langDivs + "</td>";
+
+                            if (self.propertiesMap.properties[key].langValues[defaultLang]) {
+                                strGeneratedByProp += "<script>NodeInfosWidget.onNodeDetailsLangChange('" + keyName + "','" + defaultLang + "') </script>";
+                            }
+
+                            strGeneratedByProp += "</tr>";
                         }
-
-                        propNameSelect += "</select>";
-
-                        strGeneratedByProp +=
-                            "<td class='detailsCellName'>" +
-                            "<a target ='" +
-                            self.getUriTarget(self.propertiesMap.properties[key].propUri) +
-                            "' href='" +
-                            self.propertiesMap.properties[key].propUri +
-                            "'>" +
-                            self.propertiesMap.properties[key].name +
-                            "</a> " +
-                            propNameSelect +
-                            "</td>";
-                        strGeneratedByProp += "<td class='detailsCellValue'>" + langDivs + "</td>";
-
-                        if (self.propertiesMap.properties[key].langValues[defaultLang]) {
-                            strGeneratedByProp += "<script>NodeInfosWidget.onNodeDetailsLangChange('" + keyName + "','" + defaultLang + "') </script>";
+                        if (metaDataProps.includes(self.propertiesMap.properties[key].propUri)) {
+                            metaDataStr += strGeneratedByProp;
+                        } else {
+                            str += strGeneratedByProp;
                         }
+                    });
+                    str += "</table></div>";
+                    metaDataStr += "</table></div>";
+                    str +=
+                        " <div id='nodeInfos_listsDiv' >" +
+                        "<div id='nodeInfos_classHierarchyDiv' class='nodeInfos_rigthDiv' ></div><br>" +
+                        "<div id='nodeInfos_restrictionsDiv' class='nodeInfos_rigthDiv'  style='display:table-caption;'></div>" +
+                        //  " <div id='nodeInfos_associatedPropertiesDiv' className='nodeInfos_rigthDiv'></div>" +
+                        "<div id='nodeInfos_individualsDiv' class='nodeInfos_rigthDiv' style=' display:flex;flex-direction: ></div></div>";
 
-                        strGeneratedByProp += "</tr>";
-                    }
-                    if (metaDataProps.includes(self.propertiesMap.properties[key].propUri)) {
-                        metaDataStr += strGeneratedByProp;
-                    } else {
-                        str += strGeneratedByProp;
+                    $("#" + divId).html(str);
+                    $("#nodeInfosWidget_metaDataTabDiv").html(metaDataStr);
+                    if (callback) {
+                        return callback(null, { types: types, blankNodes: blankNodes });
                     }
                 });
-                str += "</table></div>";
-                metaDataStr += "</table></div>";
-                str +=
-                    " <div id='nodeInfos_listsDiv' >" +
-                    "<div id='nodeInfos_classHierarchyDiv' class='nodeInfos_rigthDiv' ></div><br>" +
-                    "<div id='nodeInfos_restrictionsDiv' class='nodeInfos_rigthDiv'  style='display:table-caption;'></div>" +
-                    //  " <div id='nodeInfos_associatedPropertiesDiv' className='nodeInfos_rigthDiv'></div>" +
-                    "<div id='nodeInfos_individualsDiv' class='nodeInfos_rigthDiv' style=' display:flex;flex-direction: ></div></div>";
-
-                $("#" + divId).html(str);
-                $("#nodeInfosWidget_metaDataTabDiv").html(metaDataStr);
-                if (callback) {
-                    return callback(null, { types: types, blankNodes: blankNodes });
-                }
             },
         );
     };

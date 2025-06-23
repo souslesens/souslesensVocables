@@ -145,7 +145,7 @@ var Lineage_similars = (function () {
      * @param {string} source - The source to search for similar nodes.
      * @returns {void}
      */
-    self.drawSourceSimilars = function (fromSource, source, mode, selectedMode, output, callback) {
+    self.drawSourceSimilars = function (fromSource, sources, mode, selectedMode, output, callback) {
         self.visjsData = null;
         self.similarsSources = null;
         var nodes = self.getStartingNodes(selectedMode);
@@ -163,8 +163,13 @@ var Lineage_similars = (function () {
         var nodelabels = Object.keys(whiteboardLabelsMap);
         var slices = common.array.slice(nodelabels, size);
         var indexes = [];
-        if (source) {
-            indexes = [source.toLowerCase()];
+        if (sources) {
+            if (!Array.isArray(sources)) {
+                sources = [sources];
+            }
+            indexes = sources.map(function (s) {
+                return s.toLowerCase();
+            });
         }
         var similarNodesArray = [];
         var currentWordsCount = 0;
@@ -310,7 +315,7 @@ var Lineage_similars = (function () {
                 var ouputType = output || $("#lineageSimilars_outputTypeSelect").val();
                 self.visjsData = visjsData;
                 self.similarsSources = similarsSources;
-                self.displaySimilars(ouputType, similarsSources, source, fromSource, callback);
+                self.displaySimilars(ouputType, similarsSources, sources, fromSource, callback);
             },
         );
     };
@@ -339,7 +344,7 @@ var Lineage_similars = (function () {
                 });
         }
     };
-    self.displaySimilars = function (ouputType, similarsSources, source, fromSource, callback) {
+    self.displaySimilars = function (ouputType, similarsSources, sources, fromSource, callback) {
         if (!self.visjsData || (self.visjsData.nodes.length == 0 && self.visjsData.edges.length == 0)) {
             return;
         }
@@ -351,8 +356,10 @@ var Lineage_similars = (function () {
                     Lineage_sources.menuActions.groupSource(_source);
                 });
             }
-            if (source) {
-                Lineage_sources.registerSource(source);
+            if (sources) {
+                sources.forEach(function (_source) {
+                    Lineage_sources.registerSource(_source);
+                });
             }
             if (callback) {
                 callback();

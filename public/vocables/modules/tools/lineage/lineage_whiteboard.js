@@ -22,7 +22,7 @@ import UserDataWidget from "../../uiWidgets/userDataWidget.js";
 import Containers_tree from "../containers/containers_tree.js";
 import Export from "../../shared/export.js";
 import Lineage_nodeCentricGraph from "./lineage_nodeCentricGraph.js";
-import Lineage_queryWhiteBoard from "./lineage_queryWhiteBoard.js";
+import Browse from "../browse/browse.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -165,7 +165,7 @@ var Lineage_whiteboard = (function () {
             }
             $("#lateralPanelDiv").load("./modules/tools/lineage/html/lateralPanel.html", function () {
                 Lineage_whiteboard.initWhiteboardTab();
-              //  Lineage_whiteboard.initClassesTab();
+                //  Lineage_whiteboard.initClassesTab();
                 Lineage_whiteboard.initUI();
             });
         });
@@ -4384,14 +4384,14 @@ attrs.color=self.getSourceColor(superClassValue)
         },
 
         /**
-         * @name showQueryWhiteBoardDialog
+         * @name showBrowseDialog
          * @memberof module:graphActions.graph
          *
          * allows to query the whiteboard content
          *
          */
-        showQueryWhiteBoardDialog:function(){
-            Lineage_queryWhiteBoard.showDialog()
+        showBrowseDialog: function () {
+            Browse.showDialog();
         },
 
         /**

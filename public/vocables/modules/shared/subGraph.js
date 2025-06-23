@@ -43,11 +43,11 @@ var SubGraph = (function () {
                         },
 
                         function (callbackWhilst) {
-                            var varName="s"
-                            var optionalStr="OPTIONAL"
-                            if(options.inverseRestrictions) {
-                                varName = "targetClass"
-                                optionalStr=""
+                            var varName = "s";
+                            var optionalStr = "OPTIONAL";
+                            if (options.inverseRestrictions) {
+                                varName = "targetClass";
+                                optionalStr = "";
                             }
                             var filter = Sparql_common.setFilter(varName, currentClasses, null, { values: true });
 
@@ -59,9 +59,9 @@ var SubGraph = (function () {
                                 "WHERE {" +
                                 "  ?s rdfs:subClassOf+ ?o. ?o rdf:type ?type " +
                                 filter +
-                                filterPropStr +optionalStr+
+                                filterPropStr +
+                                optionalStr +
                                 " { ?o owl:onProperty ?property. ?o owl:someValuesFrom|owl:onClass ?targetClass  optional { ?o ?cardinalityType  ?cardinalityValue. filter (?cardinalityType in (owl:minCardinality,owl:maxCardinality,owl:cardinality))}}\n" +
-
                                 "  } limit 10000";
                             self.query(sourceLabel, query, function (err, result) {
                                 if (err) {
@@ -72,7 +72,6 @@ var SubGraph = (function () {
                                     if (!item.type) {
                                         return;
                                     }
-
 
                                     if (item.type.value.endsWith("Class")) {
                                         if (!allClasses[item.s.value]) {
@@ -264,9 +263,8 @@ var SubGraph = (function () {
             if (uniqueResources[classUri]) {
                 return uniqueResources[classUri];
             }
-            var uri = classUri
-            if(!options.nonUnique)
-           uri  += "_" + common.getRandomHexaId(10);
+            var uri = classUri;
+            if (!options.nonUnique) uri += "_" + common.getRandomHexaId(10);
             uniqueResources[classUri] = uri;
             triples.push({
                 subject: uri,
@@ -580,14 +578,6 @@ var SubGraph = (function () {
 
     self.validateShalcRules = function (sourceLabel, processClass, options, callback) {};
 
-
-
-
-
-
-
-
-
     self.getSubGraphVisjsData = function (sourceLabel, processClass, options, callback) {
         self.graphDiv = options.graphDiv;
         SubGraph.instantiateSubGraphTriples(sourceLabel, processClass, options, function (err, result) {
@@ -657,7 +647,6 @@ var SubGraph = (function () {
                 if (triple.predicate == "rdf:type") {
                     return;
                 }
-
 
                 var font = null;
                 var borderWidth = null;

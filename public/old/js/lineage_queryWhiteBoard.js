@@ -1,7 +1,7 @@
-import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
-import Lineage_sources from "./lineage_sources.js";
-import SearchUtil from "../../search/searchUtil.js";
-import Lineage_whiteboard from "./lineage_whiteboard.js";
+import Sparql_OWL from "../../vocables/modules/sparqlProxies/sparql_OWL.js";
+import Lineage_sources from "../../vocables/modules/tools/lineage/lineage_sources.js";
+import SearchUtil from "../../vocables/modules/search/searchUtil.js";
+import Lineage_whiteboard from "../../vocables/modules/tools/lineage/lineage_whiteboard.js";
 
 
 var Lineage_queryWhiteBoard = (function () {
@@ -125,7 +125,7 @@ var Lineage_queryWhiteBoard = (function () {
 
     self.searchTerm = function () {
 
-        var words = [$("#queryWhiteboard_searchInput").val()]
+        var words = [$("#queryWhiteboard_searchInput").val()+"*"]
         SearchUtil.getElasticSearchMatches(words, [self.indexName], "fuzzy", 0, 1000, {}, function (err, result) {
             if (err) {
                 return alert(err.responseText || err);
@@ -274,12 +274,12 @@ var Lineage_queryWhiteBoard = (function () {
 
                     result2.triples.forEach(function (item) {
 
-                       // item.isInverse = true
+                        // item.isInverse = true
                         triples.push({
-                            subject:item.object,
-                            predicate:item.predicate,
-                            object:item.subject,
-                            isInverse:true
+                            subject: item.object,
+                            predicate: item.predicate,
+                            object: item.subject,
+                            isInverse: true
 
                         })
 
@@ -319,6 +319,8 @@ var Lineage_queryWhiteBoard = (function () {
 
                         self.visjsGraph = new VisjsGraphClass("Browse_graphDiv", visjsData, options);
                         self.visjsGraph.draw(function () {
+
+                            Lineage_decoration.decorateByUpperOntologyByClass(visjsData.nodes, self.visjsGraph)
 
 
                         });
@@ -367,7 +369,7 @@ var Lineage_queryWhiteBoard = (function () {
                             id: nodeId,
                             label: label,
                         },
-                        size: 12
+                        size: 8
 
                     });
                 }
@@ -385,13 +387,17 @@ var Lineage_queryWhiteBoard = (function () {
 
                         nodesMap[nodeId].forEach(function (item) {
 
-
-
-                            if (item.isInverse) {
-                                level = -level
+                            if(!item.object.startsWith("http")){
+                                return;
                             }
 
-                            if(  item.predicate!="rdf:type") {
+                            var direction = "to"
+                            if (item.isInverse) {
+                                direction = "from"
+                            }
+
+
+                            if (item.predicate != "rdf:type") {
                                 var label = labelsMap[item.predicate] || Sparql_common.getLabelFromURI(item.predicate)
 
                                 newEdges.push({
@@ -399,13 +405,14 @@ var Lineage_queryWhiteBoard = (function () {
                                     to: item.object,
                                     label: label,
                                     font: {align: "middle"},
-                                    arrows: "to"
+                                    arrows: direction
                                 });
                             }
 
-                            if (!existingNodes[item.object] ) {
+                            if (!existingNodes[item.object]) {
                                 existingNodes[item.object] = 1
-                                addVisjsNode(item.object, level + 1)
+                                var nodeLevel=item.isInverse?level - 1:(level+1)
+                                addVisjsNode(item.object, nodeLevel)
                                 recurse(item.object, level + 1);
                             }
 

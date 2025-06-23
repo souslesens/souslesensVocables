@@ -746,7 +746,9 @@ var Sparql_OWL = (function () {
                 "  OPTIONAL {?superClassSubClass rdfs:label ?superClassSubClassLabel }" +
                 "  OPTIONAL {?superClass rdfs:label ?superClassLabel }" +
                 " { SELECT * where {" +
-                "  ?class rdf:type ?type. ?class rdfs:subClassOf"+modifier+" ?superClass.\n" +
+                "  ?class rdf:type ?type. ?class rdfs:subClassOf" +
+                modifier +
+                " ?superClass.\n" +
                 "    ?superClass rdf:type ?superClassType filter (?superClassType !=owl:Restriction)\n" +
                 "  ?subject  rdfs:subClassOf|rdf:type ?class. ?subject rdf:type ?subjectType ";
         } else {
@@ -756,7 +758,9 @@ var Sparql_OWL = (function () {
                 "   ?superClassSubClass  rdfs:subClassOf ?class" +
                 "  \n" +
                 " { SELECT * where {" +
-                "  ?class rdf:type ?type. ?class rdfs:subClassOf"+modifier+" ?superClass.\n" +
+                "  ?class rdf:type ?type. ?class rdfs:subClassOf" +
+                modifier +
+                " ?superClass.\n" +
                 "    ?superClass rdf:type ?superClassType filter (?superClassType !=owl:Restriction)\n" +
                 "   OPTIONAL {?class rdfs:label ?classLabel }" +
                 "  ?subject  rdfs:subClassOf|rdf:type ?class. ?subject rdf:type ?subjectType ";
@@ -1877,9 +1881,7 @@ var Sparql_OWL = (function () {
         });
     };
 
-
-
-    self.getUrisLabelsMap = function (source,uris, callback) {
+    self.getUrisLabelsMap = function (source, uris, callback) {
         var sparql_url = Config.sources[source].sparql_server.url;
         var fromStr = Sparql_common.getFromStr(source);
 

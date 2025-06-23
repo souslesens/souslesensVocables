@@ -16,8 +16,8 @@ module.exports = function () {
             const sources = await sourceModel.getAllSources();
 
             // ajout provisoire CF
-            if(indexName.startsWith("whiteboard_")){
-               return callback(null,true)
+            if (indexName.startsWith("whiteboard_")) {
+                return callback(null, true);
             }
             var sourceObj = null;
             for (var key in sources) {

@@ -229,8 +229,8 @@ indexes.push(source.toLowerCase());
 
                             const payload = {
                                 method: "POST",
-                                headers: {"content-type": "application/json"},
-                                body: JSON.stringify({indices: indexes, uris: ids}),
+                                headers: { "content-type": "application/json" },
+                                body: JSON.stringify({ indices: indexes, uris: ids }),
                             };
 
                             fetch(`${Config.apiUrl}/elasticsearch/search`, payload)
@@ -290,7 +290,7 @@ indexes.push(source.toLowerCase());
                 slices,
                 function (ids, callbackEach) {
                     var str = "";
-                    var header = {index: indexes};
+                    var header = { index: indexes };
 
                     ids.forEach(function (id) {
                         var query = {
@@ -323,7 +323,7 @@ indexes.push(source.toLowerCase());
                 },
             );
         } else {
-            var queryObj = {match_all: {}};
+            var queryObj = { match_all: {} };
 
             var query = {
                 query: queryObj,
@@ -333,7 +333,7 @@ indexes.push(source.toLowerCase());
                     excludes: ["attachment.content"],
                 },
                 sort: {
-                    "label.keyword": {order: "asc"},
+                    "label.keyword": { order: "asc" },
                 },
             };
 
@@ -377,15 +377,13 @@ indexes.push(source.toLowerCase());
     };
 
     self.getWordBulkQuery = function (word, mode, indexes, options) {
-
-
         var fields = [];
 
         if (word.indexOf("*") > -1) {
-            fields = ["label"]
+            fields = ["label"];
         }
         if (options.fields) {
-            fields = options.fields
+            fields = options.fields;
         }
         if (options.skosLabels) {
             fields.push("skoslabels");
@@ -412,7 +410,6 @@ indexes.push(source.toLowerCase());
                 },
             };
         } else if (word == "*") {
-
             queryObj = {
                 bool: {
                     must: {
@@ -420,7 +417,8 @@ indexes.push(source.toLowerCase());
                     },
                 },
             };
-        } else if (word.indexOf("*") > -1) {// old fuzzy CF with queryString
+        } else if (word.indexOf("*") > -1) {
+            // old fuzzy CF with queryString
             queryObj = {
                 bool: {
                     must: {
@@ -434,7 +432,8 @@ indexes.push(source.toLowerCase());
             if (options.skosLabels) {
                 queryObj.bool.must.query_string.fields.push("skoslabels");
             }
-        } else {// fuzzy new way
+        } else {
+            // fuzzy new way
             var fuzzyWord = self.makeFuzzyQueryString(word);
             queryObj = {
                 bool: {
@@ -449,8 +448,6 @@ indexes.push(source.toLowerCase());
                     ],
                 },
             };
-
-
         }
         if (options.onlyClasses) {
             queryObj.bool.filter = {
@@ -494,7 +491,7 @@ indexes.push(source.toLowerCase());
                     var queryObj = self.getWordBulkQuery(word, mode, indexes, options);
                     var header = {};
                     if (indexes) {
-                        header = {index: indexes};
+                        header = { index: indexes };
                     }
 
                     var query = {
@@ -529,7 +526,7 @@ indexes.push(source.toLowerCase());
         if (data.length == 0) {
             return callback();
         }
-        var options = {replaceIndex: replaceIndex, owltype: "Class"};
+        var options = { replaceIndex: replaceIndex, owltype: "Class" };
         var payload = {
             indexName: indexName,
             data: data,
@@ -674,16 +671,21 @@ indexes.push(source.toLowerCase());
                             //Filter on individuals = entities that are  type of a class
                             var filter = "?id rdf:type ?type.?type rdf:type owl:Class";
                             //  filter+="?id <http://souslesens.org/KGcreator#mappingFile> 'dbo.V_jobcard'"
-                            Sparql_OWL.getDictionary(sourceLabel, {
-                                filter: filter,
-                                processorFectchSize: 100,
-                                skosPrefLabel: true
-                            }, processor, function (err, result) {
-                                if (err) {
-                                    console.log(err.responseText);
-                                }
-                                return callbackSeries(err);
-                            });
+                            Sparql_OWL.getDictionary(
+                                sourceLabel,
+                                {
+                                    filter: filter,
+                                    processorFectchSize: 100,
+                                    skosPrefLabel: true,
+                                },
+                                processor,
+                                function (err, result) {
+                                    if (err) {
+                                        console.log(err.responseText);
+                                    }
+                                    return callbackSeries(err);
+                                },
+                            );
                         },
                         // index properties
                         function (callbackSeries) {
@@ -770,33 +772,37 @@ indexes.push(source.toLowerCase());
     self.addObjectsToIndex = function (sourceLabel, ids, callback) {
         var filter = " filter (?subject =<" + self.currentNodeId + ">) ";
         filter = Sparql_common.setFilter("subject", ids);
-        Sparql_generic.getSourceTaxonomy(sourceLabel, {
-            filter: filter,
-            withoutImports: true,
-            parentsTopDown: true
-        }, function (err, result) {
-            var classesArray = [];
-            for (var key in result.classesMap) {
-                classesArray.push(result.classesMap[key]);
-            }
-            var slices = common.array.slice(classesArray, 100);
-            async.eachSeries(
-                slices,
-                function (data, callbackEach) {
-                    var replaceIndex = false;
+        Sparql_generic.getSourceTaxonomy(
+            sourceLabel,
+            {
+                filter: filter,
+                withoutImports: true,
+                parentsTopDown: true,
+            },
+            function (err, result) {
+                var classesArray = [];
+                for (var key in result.classesMap) {
+                    classesArray.push(result.classesMap[key]);
+                }
+                var slices = common.array.slice(classesArray, 100);
+                async.eachSeries(
+                    slices,
+                    function (data, callbackEach) {
+                        var replaceIndex = false;
 
-                    self.indexData(sourceLabel.toLowerCase(), data, replaceIndex, function (err, _result) {
-                        if (err) {
-                            return callbackEach(err);
-                        }
-                        callbackEach();
-                    });
-                },
-                function (err) {
-                    return callback(err, "DONE");
-                },
-            );
-        });
+                        self.indexData(sourceLabel.toLowerCase(), data, replaceIndex, function (err, _result) {
+                            if (err) {
+                                return callbackEach(err);
+                            }
+                            callbackEach();
+                        });
+                    },
+                    function (err) {
+                        return callback(err, "DONE");
+                    },
+                );
+            },
+        );
     };
 
     /**
@@ -883,7 +889,7 @@ indexes.push(source.toLowerCase());
                 },
             ],
             function (err) {
-                return callback(err, {data: allData, labelsMap: allLabelsMap});
+                return callback(err, { data: allData, labelsMap: allLabelsMap });
             },
         );
     };

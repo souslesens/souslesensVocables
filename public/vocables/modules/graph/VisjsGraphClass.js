@@ -130,7 +130,8 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         self.network.on("selectNode", function (/** @type {{ nodes: any[]; }} */ params) {
             // if shift key is pressed, add to selection
             var isShiftKey = params.event.srcEvent.shiftKey;
-            if (isShiftKey) {
+            var ctrlKey = params.event.srcEvent.ctrlKey;
+            if(isShiftKey && !ctrlKey){
                 if(self.network.getSelectedNodes().length > 0 && params.nodes.length > 1){
                     var newNodes = self.network.getSelectedNodes().concat(params.nodes);
                     newNodes = common.array.distinctValues(newNodes);
@@ -149,7 +150,8 @@ const VisjsGraphClass = function (graphDiv, data, options) {
             else{
                 // reset previous selection because it is automatically deselected by native behavior when shift key is pressed
                 var isShiftKey = params.event.srcEvent.shiftKey;
-                if(isShiftKey){
+                var ctrlKey = params.event.srcEvent.ctrlKey;
+                if(isShiftKey && !ctrlKey){
                     var previousNodesIds= params.previousSelection.nodes.map(function (node){return node.id});
                     previousNodesIds.push(params.nodes[0]);
                     self.setSelectedNodes(previousNodesIds);

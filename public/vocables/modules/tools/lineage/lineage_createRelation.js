@@ -38,6 +38,7 @@ var Lineage_createRelation = (function () {
         self.callbackFn = callback;
         $("#smallDialogDiv").dialog("option", "title", "Create relation in source " + Lineage_sources.activeSource);
         Lineage_sources.showHideEditButtons(Lineage_sources.activeSource);
+        var allLabelsMap={};
         $("#smallDialogDiv").load("modules/tools/lineage/html/lineageAddEdgeDialog.html", function () {
             $("#smallDialogDiv").dialog("open");
             self.sourceNode = edgeData.from; // Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(edgeData.from).data;
@@ -181,40 +182,56 @@ var Lineage_createRelation = (function () {
                             if (err) {
                                 return callbackSeries(err);
                             }
-                            authorizedProps = result.constraints;
+                            var allNodes=result.nodes.startNode.concat(result.nodes.endNode);
+                            var filter=Sparql_common.setFilter("id", allNodes);
+                            Sparql_OWL.getLabelsMap(source, {filter: filter}, function(err, labelsMap){
+                                if(err){
+                                    return callbackSeries(err);
+                                }
+                                allLabelsMap=labelsMap;
+                                authorizedProps = result.constraints;
 
-                            var html = "Ancestors<br>";
-                            var str = ""; //"<b>" + self.sourceNode.label + "</b>";
-                            result.nodes.startNode.forEach(function (item, index) {
-                                if (index == 0) {
-                                    str += "<b>";
-                                } else {
-                                    str += "->";
-                                }
-                                str += Sparql_common.getLabelFromURI(item);
-                                if (index == 0) {
-                                    str += "</b>";
-                                }
+                                var html = "Ancestors<br>";
+                                var str = ""; //"<b>" + self.sourceNode.label + "</b>";
+                                result.nodes.startNode.forEach(function (item, index) {
+                                    if (index == 0) {
+                                        str += "<b>";
+                                    } else {
+                                        str += "->";
+                                    }
+                                    if(allLabelsMap[item]){
+                                        str += allLabelsMap[item];
+                                    }else{
+                                        str += Sparql_common.getLabelFromURI(item);
+                                    }
+                                    if (index == 0) {
+                                        str += "</b>";
+                                    }
+                                });
+                                html += str;
+                                html += "<br>";
+
+                                var str = ""; //"<b>" + self.targetNode.label + "</b>";
+                                result.nodes.endNode.forEach(function (item, index) {
+                                    if (index == 0) {
+                                        str += "<b>";
+                                    } else {
+                                        str += "->";
+                                    }
+                                    if(allLabelsMap[item]){
+                                        str += allLabelsMap[item];
+                                    }else{
+                                        str += Sparql_common.getLabelFromURI(item);
+                                    }
+                                    if (index == 0) {
+                                        str += "</b>";
+                                    }
+                                });
+                                html += str;
+                                $("#lineageAddEdgeDialog_nodesAncestorsDiv").html(html);
+
+                                return callbackSeries();
                             });
-                            html += str;
-                            html += "<br>";
-
-                            var str = ""; //"<b>" + self.targetNode.label + "</b>";
-                            result.nodes.endNode.forEach(function (item, index) {
-                                if (index == 0) {
-                                    str += "<b>";
-                                } else {
-                                    str += "->";
-                                }
-                                str += Sparql_common.getLabelFromURI(item);
-                                if (index == 0) {
-                                    str += "</b>";
-                                }
-                            });
-                            html += str;
-                            $("#lineageAddEdgeDialog_nodesAncestorsDiv").html(html);
-
-                            return callbackSeries();
                         });
                     },
                     function (callbackSeries) {
@@ -263,6 +280,12 @@ var Lineage_createRelation = (function () {
                                         if (!uniqueProps[propId]) {
                                             uniqueProps[propId] = 1;
                                             var propertyLabel = property.label || Sparql_common.getLabelFromURI(propId);
+                                            if(allLabelsMap[property.domain]){
+                                                property.domainLabel=allLabelsMap[property.domain];
+                                            }
+                                            if(allLabelsMap[property.range]){
+                                                property.rangeLabel=allLabelsMap[property.range];
+                                            }
                                             var label = (property.domainLabel || "any") + "<b>-" + propertyLabel + "-></b>" + (property.rangeLabel || "any");
 
                                             var cssClass = propStatusCssClassMap[group];

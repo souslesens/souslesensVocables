@@ -18,6 +18,7 @@ var Similars_bot = (function () {
                     self.params[key] = _params[key];
                 }
             }
+            
             _botEngine.nextStep();
         });
     };
@@ -62,6 +63,7 @@ var Similars_bot = (function () {
             _OR: {
                 "Save results": { saveResultsFn: {} },
                 "Display in Table": { displayInTableFn: {} },
+                "end": { endFn: {} },
             },
         },
     };
@@ -70,7 +72,7 @@ var Similars_bot = (function () {
         startFn: "Search similars for",
         allWhiteboardNodesFn: "All whiteboard nodes",
         selectedWhiteboardNodesFn: "Selected whiteboard nodes",
-        similarsSearchParamsFn: "Search similars for",
+        similarsSearchParamsFn: "Search similars with",
         exactMatchFn: "Exact match",
         fuzzyMatchFn: "Fuzzy match",
         filterResultsFn: "Filter results",
@@ -79,11 +81,16 @@ var Similars_bot = (function () {
         displayInTableFn: "Display in Table",
         displayInWhiteboardNodesFn: "Display in whiteboard nodes",
         searchSimilarsInWorkflowFn: "Search similars in ",
+        similarsInSourceFn: "Choose source",
+        
     };
 
     self.functions = {
         startFn: function () {
             _botEngine.nextStep();
+        },
+        endFn: function () {
+            _botEngine.end();
         },
         allWhiteboardNodesFn: function () {
             self.params.nodeSelection = "AllWhiteboardNodes";
@@ -180,9 +187,10 @@ var Similars_bot = (function () {
             });
         },
         saveResultsFn: function () {
-            Lineage_similars.displaySimilars("save", Lineage_similars.similarsSources, self.params.source, Lineage_sources.activeSource, function () {
-                _botEngine.nextStep();
-            });
+           
+            _botEngine.nextStep();
+            Lineage_similars.save.showDialog();
+            
         },
         displayInTableFn: function () {
             Lineage_similars.displaySimilars("table", Lineage_similars.similarsSources, self.params.source, Lineage_sources.activeSource, function () {

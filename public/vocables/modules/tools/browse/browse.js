@@ -50,6 +50,9 @@ var Browse = (function () {
                 }
 
                 $("#mainDialogDiv").dialog("option", "title", title);
+                if (mode == "fuzzyMatch" && !term.endsWith("*")) {
+                    term += "*";
+                }
                 SearchUtil.getSimilarLabelsInSources(null, sources, [term], null, mode, options, function (_err, result) {
                     if (_err) {
                         return alert(err.responseText);

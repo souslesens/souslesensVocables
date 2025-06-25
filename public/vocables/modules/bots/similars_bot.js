@@ -18,7 +18,7 @@ var Similars_bot = (function () {
                     self.params[key] = _params[key];
                 }
             }
-            
+
             _botEngine.nextStep();
         });
     };
@@ -40,10 +40,10 @@ var Similars_bot = (function () {
     };
     self.sourceWorkflow = {
         _OR: {
-            "next": {similarsSearchParamsFn: {} },
-            "add source": {similarsInSourceFn: { sourceWorkflowFn: {} } } 
+            next: { similarsSearchParamsFn: {} },
+            "add source": { similarsInSourceFn: { sourceWorkflowFn: {} } },
         },
-    }
+    };
     self.similarsSearchParams = {
         _OR: {
             "exact match": { exactMatchFn: { elasticQueryFn: { filterResultsWorkflowFn: {} } } },
@@ -63,7 +63,7 @@ var Similars_bot = (function () {
             _OR: {
                 "Save results": { saveResultsFn: {} },
                 "Display in Table": { displayInTableFn: {} },
-                "end": { endFn: {} },
+                end: { endFn: {} },
             },
         },
     };
@@ -82,7 +82,6 @@ var Similars_bot = (function () {
         displayInWhiteboardNodesFn: "Display in whiteboard nodes",
         searchSimilarsInWorkflowFn: "Search similars in ",
         similarsInSourceFn: "Choose source",
-        
     };
 
     self.functions = {
@@ -176,9 +175,8 @@ var Similars_bot = (function () {
                     _botEngine.nextStep();
                 });
             } else {
-                Lineage_similars.drawWhiteBoardSimilars(self.params.nodeSelection,self.params.mode,"no draw");
+                Lineage_similars.drawWhiteBoardSimilars(self.params.nodeSelection, self.params.mode, "no draw");
                 _botEngine.nextStep();
-
             }
         },
         drawResultsFn: function () {
@@ -187,10 +185,8 @@ var Similars_bot = (function () {
             });
         },
         saveResultsFn: function () {
-           
             _botEngine.nextStep();
             Lineage_similars.save.showDialog();
-            
         },
         displayInTableFn: function () {
             Lineage_similars.displaySimilars("table", Lineage_similars.similarsSources, self.params.source, Lineage_sources.activeSource, function () {

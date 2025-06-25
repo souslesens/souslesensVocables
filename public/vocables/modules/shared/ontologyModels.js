@@ -876,7 +876,7 @@ var OntologyModels = (function () {
                                     allConstraints[property] = constraint;
 
                                     if (constraint.domain && constraint.domain.startsWith("http")) {
-                                        if ( 
+                                        if (
                                             startNodeAncestorIds.length == 0 ||
                                             startNodeAncestorIds.indexOf(constraint.domain) > -1 ||
                                             startNodeAncestorIds[0] == "http://www.w3.org/2002/07/owl#Class"

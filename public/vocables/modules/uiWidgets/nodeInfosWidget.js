@@ -324,7 +324,7 @@ var NodeInfosWidget = (function () {
             _options = {};
         }
         var valueLabelsMap = {};
-        var valuesLabelsToMap={};
+        var valuesLabelsToMap = {};
         $(".infosTable").html("");
         self.propertiesMap = { label: "", id: "", properties: {} };
         var blankNodes = [];
@@ -409,9 +409,9 @@ var NodeInfosWidget = (function () {
                         if (!item["xml:lang"]) {
                             valueLabelsMap[value] = item.valueLabel.value;
                         }
-                    }else{
+                    } else {
                         if (value.indexOf("http") == 0) {
-                            valuesLabelsToMap[value]=true;
+                            valuesLabelsToMap[value] = true;
                         }
                     }
                     /*   if (item.valueLabel)
@@ -514,17 +514,17 @@ defaultLang = 'en';*/
 
                 var metaDataStr = str;
                 var metaDataProps = Object.values(Config.dictionaryMetaDataPropertiesMap);
-                if(Object.keys(valuesLabelsToMap).length>0){
-                    var filter=Sparql_common.setFilter("id",Object.keys(valuesLabelsToMap));
+                if (Object.keys(valuesLabelsToMap).length > 0) {
+                    var filter = Sparql_common.setFilter("id", Object.keys(valuesLabelsToMap));
                 }
-                Sparql_OWL.getLabelsMap(sourceLabel,{filter:filter},function (err,result) {
-                    if(err){
+                Sparql_OWL.getLabelsMap(sourceLabel, { filter: filter }, function (err, result) {
+                    if (err) {
                         UI.message(err.responseText);
                         return;
                     }
-                    if(result){
+                    if (result) {
                         Object.keys(result).forEach(function (item) {
-                            valueLabelsMap[item]=result[item];
+                            valueLabelsMap[item] = result[item];
                         });
                     }
                     defaultProps.forEach(function (key) {

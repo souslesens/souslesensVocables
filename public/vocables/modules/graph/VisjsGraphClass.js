@@ -92,7 +92,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
             h: $("#" + divId).height() - 50,
         };
         var options = {
-            interaction: { hover: true  },
+            interaction: { hover: true },
             width: "" + self.canvasDimension.w + "px",
             height: "" + self.canvasDimension.h + "px",
             nodes: {
@@ -131,28 +131,27 @@ const VisjsGraphClass = function (graphDiv, data, options) {
             // if shift key is pressed, add to selection
             var isShiftKey = params.event.srcEvent.shiftKey;
             var ctrlKey = params.event.srcEvent.ctrlKey;
-            if(isShiftKey && !ctrlKey){
-                if(self.network.getSelectedNodes().length > 0 && params.nodes.length > 1){
+            if (isShiftKey && !ctrlKey) {
+                if (self.network.getSelectedNodes().length > 0 && params.nodes.length > 1) {
                     var newNodes = self.network.getSelectedNodes().concat(params.nodes);
                     newNodes = common.array.distinctValues(newNodes);
                     self.setSelectedNodes(newNodes);
                 }
-                
             }
-           // else default behavior
-           
+            // else default behavior
         });
         self.network.on("deselectNode", function (/** @type {{ nodes: any[]; }} */ params) {
             // deselect Nodes only if no nodes clicked (click on whiteboard) or other node left clicked (without shift key)
             if (params.nodes.length == 0) {
                 self.setSelectedNodes([]);
-            }
-            else{
+            } else {
                 // reset previous selection because it is automatically deselected by native behavior when shift key is pressed
                 var isShiftKey = params.event.srcEvent.shiftKey;
                 var ctrlKey = params.event.srcEvent.ctrlKey;
-                if(isShiftKey && !ctrlKey){
-                    var previousNodesIds= params.previousSelection.nodes.map(function (node){return node.id});
+                if (isShiftKey && !ctrlKey) {
+                    var previousNodesIds = params.previousSelection.nodes.map(function (node) {
+                        return node.id;
+                    });
                     previousNodesIds.push(params.nodes[0]);
                     self.setSelectedNodes(previousNodesIds);
                 }

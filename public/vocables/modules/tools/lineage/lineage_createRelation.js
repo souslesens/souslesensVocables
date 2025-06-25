@@ -38,7 +38,7 @@ var Lineage_createRelation = (function () {
         self.callbackFn = callback;
         $("#smallDialogDiv").dialog("option", "title", "Create relation in source " + Lineage_sources.activeSource);
         Lineage_sources.showHideEditButtons(Lineage_sources.activeSource);
-        var allLabelsMap={};
+        var allLabelsMap = {};
         $("#smallDialogDiv").load("modules/tools/lineage/html/lineageAddEdgeDialog.html", function () {
             $("#smallDialogDiv").dialog("open");
             self.sourceNode = edgeData.from; // Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(edgeData.from).data;
@@ -182,23 +182,23 @@ var Lineage_createRelation = (function () {
                             if (err) {
                                 return callbackSeries(err);
                             }
-                            var allNodes=result.nodes.startNode.concat(result.nodes.endNode);
-                            Object.keys(result.constraints).forEach(function(group){
-                                Object.keys(result.constraints[group]).forEach(function(property){
-                                    if(result.constraints[group][property].domain){
+                            var allNodes = result.nodes.startNode.concat(result.nodes.endNode);
+                            Object.keys(result.constraints).forEach(function (group) {
+                                Object.keys(result.constraints[group]).forEach(function (property) {
+                                    if (result.constraints[group][property].domain) {
                                         allNodes.push(result.constraints[group][property].domain);
                                     }
-                                    if(result.constraints[group][property].range){
+                                    if (result.constraints[group][property].range) {
                                         allNodes.push(result.constraints[group][property].range);
                                     }
                                 });
                             });
-                            var filter=Sparql_common.setFilter("id", allNodes);
-                            Sparql_OWL.getLabelsMap(source, {filter: filter}, function(err, labelsMap){
-                                if(err){
+                            var filter = Sparql_common.setFilter("id", allNodes);
+                            Sparql_OWL.getLabelsMap(source, { filter: filter }, function (err, labelsMap) {
+                                if (err) {
                                     return callbackSeries(err);
                                 }
-                                allLabelsMap=labelsMap;
+                                allLabelsMap = labelsMap;
                                 authorizedProps = result.constraints;
 
                                 var html = "Ancestors<br>";
@@ -209,9 +209,9 @@ var Lineage_createRelation = (function () {
                                     } else {
                                         str += "->";
                                     }
-                                    if(allLabelsMap[item]){
+                                    if (allLabelsMap[item]) {
                                         str += allLabelsMap[item];
-                                    }else{
+                                    } else {
                                         str += Sparql_common.getLabelFromURI(item);
                                     }
                                     if (index == 0) {
@@ -228,9 +228,9 @@ var Lineage_createRelation = (function () {
                                     } else {
                                         str += "->";
                                     }
-                                    if(allLabelsMap[item]){
+                                    if (allLabelsMap[item]) {
                                         str += allLabelsMap[item];
-                                    }else{
+                                    } else {
                                         str += Sparql_common.getLabelFromURI(item);
                                     }
                                     if (index == 0) {
@@ -290,11 +290,11 @@ var Lineage_createRelation = (function () {
                                         if (!uniqueProps[propId]) {
                                             uniqueProps[propId] = 1;
                                             var propertyLabel = property.label || Sparql_common.getLabelFromURI(propId);
-                                            if(allLabelsMap[property.domain]){
-                                                property.domainLabel=allLabelsMap[property.domain];
+                                            if (allLabelsMap[property.domain]) {
+                                                property.domainLabel = allLabelsMap[property.domain];
                                             }
-                                            if(allLabelsMap[property.range]){
-                                                property.rangeLabel=allLabelsMap[property.range];
+                                            if (allLabelsMap[property.range]) {
+                                                property.rangeLabel = allLabelsMap[property.range];
                                             }
                                             var label = (property.domainLabel || "any") + "<b>-" + propertyLabel + "-></b>" + (property.rangeLabel || "any");
 

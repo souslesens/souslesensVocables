@@ -93,9 +93,6 @@ function LogsTableComponent({ logFiles }: { logFiles: LogFiles }) {
             .sort((a: Log, b: Log) => {
                 const left: string = a[orderBy];
                 const right: string = b[orderBy];
-                if (orderBy === "timestamp") {
-                    return order === "asc" ? Number(new Date(left).getTime() > new Date(right).getTime()) : Number(new Date(left) < new Date(right));
-                }
                 return order === "asc" ? left.localeCompare(right) : right.localeCompare(left);
             });
     }, [order, orderBy, selectedLogs]);

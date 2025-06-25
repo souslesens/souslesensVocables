@@ -183,6 +183,16 @@ var Lineage_createRelation = (function () {
                                 return callbackSeries(err);
                             }
                             var allNodes=result.nodes.startNode.concat(result.nodes.endNode);
+                            Object.keys(result.constraints).forEach(function(group){
+                                Object.keys(result.constraints[group]).forEach(function(property){
+                                    if(result.constraints[group][property].domain){
+                                        allNodes.push(result.constraints[group][property].domain);
+                                    }
+                                    if(result.constraints[group][property].range){
+                                        allNodes.push(result.constraints[group][property].range);
+                                    }
+                                });
+                            });
                             var filter=Sparql_common.setFilter("id", allNodes);
                             Sparql_OWL.getLabelsMap(source, {filter: filter}, function(err, labelsMap){
                                 if(err){

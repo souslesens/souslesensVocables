@@ -869,9 +869,6 @@ var OntologyModels = (function () {
                         }
 
                         for (var property in sourceConstraintsAndRestrictions) {
-                            if (property == "http://purl.obolibrary.org/obo/BFO_0000110") {
-                                var x = 3;
-                            }
                             sourceConstraintsAndRestrictions[property].forEach(function (constraint) {
                                 constraint.source = _source;
                                 var domainOK = false;
@@ -879,7 +876,7 @@ var OntologyModels = (function () {
                                     allConstraints[property] = constraint;
 
                                     if (constraint.domain && constraint.domain.startsWith("http")) {
-                                        if (
+                                        if ( 
                                             startNodeAncestorIds.length == 0 ||
                                             startNodeAncestorIds.indexOf(constraint.domain) > -1 ||
                                             startNodeAncestorIds[0] == "http://www.w3.org/2002/07/owl#Class"

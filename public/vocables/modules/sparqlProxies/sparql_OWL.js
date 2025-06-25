@@ -746,7 +746,9 @@ var Sparql_OWL = (function () {
                 "  OPTIONAL {?superClassSubClass rdfs:label ?superClassSubClassLabel }" +
                 "  OPTIONAL {?superClass rdfs:label ?superClassLabel }" +
                 " { SELECT * where {" +
-                "  ?class rdf:type ?type. ?class rdfs:subClassOf* ?superClass.\n" +
+                "  ?class rdf:type ?type. ?class rdfs:subClassOf" +
+                modifier +
+                " ?superClass.\n" +
                 "    ?superClass rdf:type ?superClassType filter (?superClassType !=owl:Restriction)\n" +
                 "  ?subject  rdfs:subClassOf|rdf:type ?class. ?subject rdf:type ?subjectType ";
         } else {
@@ -756,7 +758,9 @@ var Sparql_OWL = (function () {
                 "   ?superClassSubClass  rdfs:subClassOf ?class" +
                 "  \n" +
                 " { SELECT * where {" +
-                "  ?class rdf:type ?type. ?class rdfs:subClassOf* ?superClass.\n" +
+                "  ?class rdf:type ?type. ?class rdfs:subClassOf" +
+                modifier +
+                " ?superClass.\n" +
                 "    ?superClass rdf:type ?superClassType filter (?superClassType !=owl:Restriction)\n" +
                 "   OPTIONAL {?class rdfs:label ?classLabel }" +
                 "  ?subject  rdfs:subClassOf|rdf:type ?class. ?subject rdf:type ?subjectType ";
@@ -1562,8 +1566,26 @@ var Sparql_OWL = (function () {
                     if (err) {
                         return callback(err);
                     }
-                    result2 = Sparql_generic.setBindingsOptionalProperties(result2, ["prop", "node", "subject", "value"], { source: sourceLabel });
-                    return callback(null, result2);
+                    // fill value labels for restrictions values from imports sources
+                    var noValueLabelResults = result2.filter(function (result) {
+                        return !result.valueLabel;
+                    });
+                    var valueIds = noValueLabelResults.map(function (result) {
+                        return result.value?.value;
+                    });
+                    var filter = Sparql_common.setFilter("id", valueIds);
+                    Sparql_OWL.getLabelsMap(sourceLabel, { filter: filter }, function (err, labelsMap) {
+                        if (err) {
+                            return callback(err);
+                        }
+                        noValueLabelResults.forEach(function (result) {
+                            if (labelsMap[result.value?.value]) {
+                                result.valueLabel = { value: labelsMap[result.value?.value], type: "literal" };
+                            }
+                        });
+                        result2 = Sparql_generic.setBindingsOptionalProperties(result2, ["prop", "node", "subject", "value"], { source: sourceLabel });
+                        return callback(null, result2);
+                    });
                 });
             },
         );
@@ -1874,6 +1896,40 @@ var Sparql_OWL = (function () {
             // _result.results.bindings=   Sparql_generic.setBindingsOptionalProperties(_result.results.bindings, ["subject"]);
 
             callback(null, _result.results.bindings);
+        });
+    };
+
+    self.getUrisLabelsMap = function (source, uris, callback) {
+        var sparql_url = Config.sources[source].sparql_server.url;
+        var fromStr = Sparql_common.getFromStr(source);
+
+        var filter = Sparql_common.setFilter("s", uris);
+
+        var query =
+            "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
+            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
+            "SELECT distinct * " +
+            fromStr +
+            " WHERE {\n" +
+            "  ?s rdfs:label ?sLabel. " +
+            filter +
+            "} limit 10000";
+        Sparql_proxy.querySPARQL_GET_proxy(sparql_url, query, null, null, function (err, result) {
+            if (err) {
+                return callback(err);
+            }
+            var labelsMap = {};
+            result.results.bindings.forEach(function (item) {
+                labelsMap[item.s.value] = item.sLabel.value;
+            });
+            uris.forEach(function (uri) {
+                if (!labelsMap[uri]) {
+                    labelsMap[uri] = Sparql_common.getLabelFromURI(uri);
+                }
+            });
+
+            callback(null, labelsMap);
         });
     };
 

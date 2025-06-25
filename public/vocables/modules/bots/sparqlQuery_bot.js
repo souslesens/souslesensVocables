@@ -412,7 +412,7 @@ var SparqlQuery_bot = (function () {
         },
 
         choosePredicateDirectionFn: function () {
-            var choices = ["direct", "inverse"];
+            var choices = ["any", "direct", "inverse"];
             return myBotEngine.showList(choices, "predicateDirection");
         },
 
@@ -433,7 +433,11 @@ var SparqlQuery_bot = (function () {
                 if (self.params.predicateDirection == "inverse") {
                     inverseStr = "^";
                 }
-                filter = " {select * where { ?subject " + inverseStr + predicatesStr + " ?x}}";
+                var unionStr = "";
+                if (self.params.predicateDirection == "any") {
+                    unionStr = " UNION {select ?subject where { ?subject ^" + predicatesStr + " ?x }} ";
+                }
+                filter = " {{select ?subject where { ?subject " + inverseStr + predicatesStr + " ?x }}" + unionStr + "}";
             } else if (self.params.queryScope != "activeSource") {
                 withoutImports = false;
             }
@@ -464,24 +468,62 @@ var SparqlQuery_bot = (function () {
                 objectIds = whiteboardNodes;
             }
             UI.message("Loading predicates...");
-            Sparql_OWL.getFilteredTriples(self.params.source, subjectIds, null, objectIds, options, function (err, result) {
-                if (err) {
-                    return myBotEngine.error(err);
-                }
-                var choices = [];
-                var uniqueIds = {};
-                result.forEach(function (item) {
-                    if (!uniqueIds[item.prop.value]) {
-                        uniqueIds[item.prop.value] = 1;
-                        choices.push({
-                            id: item.prop.value,
-                            label: item.propLabel ? item.propLabel.value : Sparql_common.getLabelFromURI(item.prop.value),
+            var choices = [];
+            var uniqueIds = {};
+            async.series(
+                [
+                    function (callbackSeries) {
+                        if (self.params.predicateDirection == "inverse") {
+                            return callbackSeries();
+                        }
+                        Sparql_OWL.getFilteredTriples(self.params.source, whiteboardNodes, null, null, options, function (err, result) {
+                            if (err) {
+                                return myBotEngine.error(err);
+                            }
+
+                            result.forEach(function (item) {
+                                if (!uniqueIds[item.prop.value]) {
+                                    uniqueIds[item.prop.value] = 1;
+                                    choices.push({
+                                        id: item.prop.value,
+                                        label: item.propLabel ? item.propLabel.value : Sparql_common.getLabelFromURI(item.prop.value),
+                                    });
+                                }
+                            });
+                            callbackSeries();
                         });
+                    },
+                    function (callbackSeries) {
+                        if (self.params.predicateDirection == "direct") {
+                            return callbackSeries();
+                        }
+                        Sparql_OWL.getFilteredTriples(self.params.source, null, null, whiteboardNodes, options, function (err, result) {
+                            if (err) {
+                                return myBotEngine.error(err);
+                            }
+                            result.forEach(function (item) {
+                                if (!uniqueIds[item.prop.value]) {
+                                    uniqueIds[item.prop.value] = 1;
+                                    choices.push({
+                                        id: item.prop.value,
+                                        label: item.propLabel ? item.propLabel.value : Sparql_common.getLabelFromURI(item.prop.value),
+                                    });
+                                }
+                            });
+                            callbackSeries();
+                        });
+                    },
+                ],
+                function (err) {
+                    UI.message("", true);
+
+                    if (choices.length == 0) {
+                        alert("no " + self.params.predicateDirection + " predicates found in this source");
+                        return myBotEngine.previousStep();
                     }
-                });
-                UI.message("", true);
-                return myBotEngine.showList(choices, "predicateFilter", null, true);
-            });
+                    return myBotEngine.showList(choices, "predicateFilter", null, true);
+                },
+            );
         },
         listAllClassesFn: function () {
             UI.message("Loading Classes...");
@@ -509,10 +551,8 @@ var SparqlQuery_bot = (function () {
                     predicate = "^" + predicate;
                 }
                 self.params.chainedPredicates.push(predicate);
-
-                //  myBotEngine.previousStep()
                 myBotEngine.backToStep("choosePredicateDirectionFn");
-                //   myBotEngine.previousStep()
+
                 return;
             }
 
@@ -583,7 +623,9 @@ var SparqlQuery_bot = (function () {
                 });
                 options.chainedPredicates = predicatesStr;
             } else if (self.params.predicateFilter) {
-                filter += "FILTER (?predicate=<" + self.params.predicateFilter + ">)";
+                var inverseStr = self.params.predicateDirection == "inverse" ? "^" : "";
+
+                filter += "FILTER (?predicate=" + inverseStr + "<" + self.params.predicateFilter + ">)";
             } else if (self.params.classFilter) {
                 filter += "FILTER (?subject=<" + self.params.classFilter + ">)";
             }
@@ -944,7 +986,8 @@ var SparqlQuery_bot = (function () {
             async.eachSeries(
                 slices,
                 function (slice, callbackEach) {
-                    self.fillLabelsFromUris(slice, function (err, result) {
+                    Sparql_OWL.getUrisLabelsMap(self.params.source, slice, function (err, result) {
+                        //  self.fillLabelsFromUris(slice, function (err, result) {
                         if (err) {
                             return callbackEach(err);
                         }
@@ -960,7 +1003,7 @@ var SparqlQuery_bot = (function () {
             );
         });
     };
-    self.fillLabelsFromUris = function (uris, callback) {
+    /*   self.fillLabelsFromUris = function (uris, callback) {
         var sparql_url = Config.sources[self.params.source].sparql_server.url;
         var fromStr = Sparql_common.getFromStr(self.params.source);
 
@@ -992,7 +1035,7 @@ var SparqlQuery_bot = (function () {
 
             callback(null, labelsMap);
         });
-    };
+    };*/
 
     /**
      *

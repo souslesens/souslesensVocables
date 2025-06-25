@@ -86,11 +86,13 @@ var Lineage_decoration = (function () {
      * @param {Array<Object>} visjsNodes - Array of nodes to decorate.
      * @returns {void}
      */
-    self.decorateByUpperOntologyByClass = function (visjsNodes) {
+    self.decorateByUpperOntologyByClass = function (visjsNodes, visjsGraphInstance) {
         if (!Config.topLevelOntologies[Config.currentTopLevelOntology]) {
             return $("#lineage_legendWrapperSection").css("display", "none");
         }
-
+        if (!visjsGraphInstance) {
+            visjsGraphInstance = Lineage_whiteboard.lineageVisjsGraph;
+        }
         if (!visjsNodes) {
             visjsNodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
             var notVisJsNodes = true;
@@ -227,7 +229,7 @@ var Lineage_decoration = (function () {
                     var newVisJsNodes = [];
                     // get source decoration data
 
-                    Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(newVisJsNodes);
+                    visjsGraphInstance.data.nodes.update(newVisJsNodes);
                     for (var key in distinctNodeClassesMap) {
                         distinctNodeClassesMap[key].forEach(function (node) {
                             /*if (node.shape != "dot") {
@@ -260,7 +262,7 @@ var Lineage_decoration = (function () {
                             newVisJsNodes.push(newNode);
                         });
                     }
-                    Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(newVisJsNodes);
+                    visjsGraphInstance.data.nodes.update(newVisJsNodes);
                     callbackSeries();
                 },
                 ///draw Legend

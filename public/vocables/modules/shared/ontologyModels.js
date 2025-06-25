@@ -869,9 +869,6 @@ var OntologyModels = (function () {
                         }
 
                         for (var property in sourceConstraintsAndRestrictions) {
-                            if (property == "http://purl.obolibrary.org/obo/BFO_0000110") {
-                                var x = 3;
-                            }
                             sourceConstraintsAndRestrictions[property].forEach(function (constraint) {
                                 constraint.source = _source;
                                 var domainOK = false;

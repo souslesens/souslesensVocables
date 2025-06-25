@@ -18,6 +18,8 @@
         </button>
         <!-- <button class="w3-button slsv-button-1" onclick="SparqlQuery_bot.start()" title="Query"><img src="./icons/CommonIcons/Query.png" /></button>-->
         <button class="w3-button slsv-button-1" onclick="Lineage_axioms.drawClassesWithAxioms()" title="Axioms">A</button>
+
+        <button class="w3-button slsv-button-3" id="lineage_actionDiv_newAxiom" onclick="Lineage_whiteboard.graph.showBrowseDialog()">?</button>
     </div>
 
     <div id="whiteboard_Section" class="w3-panel w3-border w3-round-small lateralPanelSection-width">
@@ -49,8 +51,6 @@
             <img src="./icons/CommonIcons/Query.png" />
         </button>
         <button class="w3-button slsv-button-2" onclick="Lineage_whiteboard.graph.exportGraphToDataTable()" title="CSV"><img src="./icons/CommonIcons/CSVIcon.png" /></button>
-        <!--   <button onclick="AxiomEditor.init()">Edit Axiom</button>
-        <button class="w3-button slsv-button-3" id="lineage_actionDiv_newAxiom" onclick="MappingModeler.init()" style="display: block">test</button>-->
     </div>
 
     <div id="Lineage_MoreActionsSection" class="w3-panel w3-border w3-round-small lateralPanelSection-width">
@@ -65,7 +65,6 @@
             <!--   <button class="w3-button slsv-button-3" id="lineage_actionDiv_implicitModel" onclick="Lineage_whiteboard.drawInferredClassesModel()">Implicit Model</button>-->
             <!--    <button class="w3-button slsv-button-3" id="lineage_actionDiv_" onclick="Lineage_nodeCentricGraph.normalLayout();">Normal layout</button>-->
             <button class="w3-button slsv-button-3" id="lineage_actionDiv_similars" onclick="Lineage_similars.showDialog();">Similars</button>
-            <button class="w3-button slsv-button-3" id="lineage_actionDiv_Savesimilars" onclick="Lineage_similars.save.showDialog()">Save Similars</button>
             <button class="w3-button slsv-button-3" id="lineage_actionDiv_pathes" onclick="Lineage_graphTraversal.showShortestPathDialog()">Paths</button>
             <!--WhiteBoard Display Buttons 
             <button class="w3-button slsv-button-3" onclick="Lineage_whiteboard.graph.saveWhiteboard()">saveWhiteboard</button>

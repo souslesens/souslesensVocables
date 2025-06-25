@@ -90,7 +90,6 @@ var CreateRestriction_bot = (function () {
                 { id: "owl:allValuesFrom ", label: "owl:allValuesFrom " },
                 { id: "owl:hasValue ", label: "owl:hasValue " },
                 { id: "owl:maxCardinality", label: "owl:maxCardinality" },
-                { id: "owl:maxCardinality", label: "owl:maxCardinality" },
                 { id: "owl:minCardinality", label: "owl:minCardinality" },
                 { id: "owl:cardinality", label: "owl:cardinality" },
             ];

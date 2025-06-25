@@ -26,7 +26,12 @@ var Lineage_selection = (function () {
      * @returns {void}
      */
     self.addNodeToSelection = function (node) {
+        var nodesSelected = Lineage_whiteboard.lineageVisjsGraph.network.getSelectedNodes();
+        if (nodesSelected.length > 1) {
+            Lineage_selection.selectedNodes = Lineage_selection.selectedNodes.concat(nodesSelected);
+        }
         Lineage_selection.selectedNodes.push(node);
+        Lineage_selection.selectedNodes = common.array.distinctValues(Lineage_selection.selectedNodes, "id");
         $("#Lineageclasses_selectedNodesCount").html(Lineage_selection.selectedNodes.length);
         Lineage_whiteboard.lineageVisjsGraph.data.nodes.update({ id: node.data.id, borderWidth: 6 });
         $("#Lineage_combine_mergeNodesDialogButton").css("display", "block");

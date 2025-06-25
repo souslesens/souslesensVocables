@@ -35,10 +35,22 @@ var UserRequestFiltering = {
 
         // add slsvLabels (readonly) for everyone
         userGraphUrisMap["http://souslesens.org/vocables/resource/labels/"] = { source: "slsvLabels", acl: "r" };
-        userGraphUrisMap["http://souslesens.org/resource/stored-timeline-queries/"] = { source: "slsvMyQueriesTimeLine", acl: "w" };
-        userGraphUrisMap["http://souslesens.org/resource/stored-lineage-queries/"] = { source: "slsvMyQueriesLineage", acl: "w" };
-        userGraphUrisMap["http://souslesens.org/resource/stored-kgqueries-queries/"] = { source: "slsvMyQueriesKGCreator", acl: "w" };
-        userGraphUrisMap["http://souslesens.org/resource/stored-visjs-graphs/"] = { source: "slsvMyQueriesVisJsGraph", acl: "w" };
+        userGraphUrisMap["http://souslesens.org/resource/stored-timeline-queries/"] = {
+            source: "slsvMyQueriesTimeLine",
+            acl: "w",
+        };
+        userGraphUrisMap["http://souslesens.org/resource/stored-lineage-queries/"] = {
+            source: "slsvMyQueriesLineage",
+            acl: "w",
+        };
+        userGraphUrisMap["http://souslesens.org/resource/stored-kgqueries-queries/"] = {
+            source: "slsvMyQueriesKGCreator",
+            acl: "w",
+        };
+        userGraphUrisMap["http://souslesens.org/resource/stored-visjs-graphs/"] = {
+            source: "slsvMyQueriesVisJsGraph",
+            acl: "w",
+        };
 
         for (var key in userSourcesMap) {
             source = userSourcesMap[key];
@@ -201,6 +213,17 @@ var UserRequestFiltering = {
                 indices.push(source.toLowerCase());
             }
             return callback(error, indices);
+        }
+
+        // ajout provisoire CF
+        var isWhiteboard_Index = false;
+        indices.forEach(function (indexName) {
+            if (indexName.startsWith("whiteboard_")) {
+                isWhiteboard_Index = true;
+            }
+        });
+        if (isWhiteboard_Index) {
+            return callback(null, indices);
         }
 
         indices.forEach(function (indexName) {

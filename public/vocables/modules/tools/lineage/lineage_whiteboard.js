@@ -4595,9 +4595,9 @@ attrs.color=self.getSourceColor(superClassValue)
                 Lineage_sources.showHideEditButtons(Lineage_sources.activeSource);
                 Lineage_whiteboard.hideShowMoreActions("hide");
 
-                if (window.location.href.indexOf("localhost") < 0) {
+                /*if (window.location.href.indexOf("localhost") < 0) {
                     $("#lineage_actionDiv_newAxiom").css("display", "none");
-                }
+                }*/
                 $("#lineageWhiteboard_modelBtn").bind("click", function (e) {
                     Lineage_whiteboard.drawModel(null, null, { inverse: e.ctrlKey });
                 });

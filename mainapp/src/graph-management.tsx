@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 
-import { Button, Chip, Link, Paper, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableSortLabel, TextField } from "@mui/material";
+import { Button, Chip, Link, Paper, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableSortLabel, TextField, Typography } from "@mui/material";
 import CsvDownloader from "react-csv-downloader";
 
 import { humanizeSize, cleanUpText } from "./Utils";
@@ -118,7 +118,10 @@ export default function GraphManagement() {
                                 </TableCell>
                                 <TableCell align="center" style={{ fontWeight: "bold", whiteSpace: "nowrap" }}>
                                     <TableSortLabel active={orderBy === "graphSize"} direction={order} onClick={() => handleRequestSort("graphSize")}>
-                                        Graph Size
+                                        <Stack direction="row" spacing={1} sx={{ alignItems: "center" }} useFlexGap>
+                                            <div>Graph Size</div>
+                                            <Typography variant="caption">(Triple)</Typography>
+                                        </Stack>
                                     </TableSortLabel>
                                 </TableCell>
                                 <TableCell align="center" style={{ fontWeight: "bold" }}>

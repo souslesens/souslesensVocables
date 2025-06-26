@@ -4442,7 +4442,7 @@ attrs.color=self.getSourceColor(superClassValue)
                     positions: positions,
                 };
                 var data_path = "savedWhiteboards";
-                UserDataWidget.currentTreeNode = null;
+                //UserDataWidget.currentTreeNode = null;
                 UserDataWidget.showSaveDialog(data_path, data, null, function (err, result) {
                     if (err) {
                         return alert(err.responseText);
@@ -4478,9 +4478,20 @@ attrs.color=self.getSourceColor(superClassValue)
                     if (err) {
                         return alert(err.responseText);
                     }
-                    if (result?.data_content) {
-                        self.loadGraphFromJSON(result.data_content);
+                    if(result && result.id){
+                        UserDataWidget.loadUserDatabyId(result.id, function (err, result) {
+                            if (err) {
+                                return alert(err.responseText);
+                            }
+                            if (result?.data_content) {
+                                self.loadGraphFromJSON(result.data_content);
+                            } else {
+                                alert("No data found in the selected whiteboard.");
+                            }
+                        });
+                        return;
                     }
+                  
                 },
             );
         },

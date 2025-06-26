@@ -62,7 +62,7 @@ var UserDataWidget = (function () {
             type = "PUT";
             payload.id = parseInt(self.currentTreeNode.id);
             // PUT don't update owned_by
-            delete payload.owned_by 
+            delete payload.owned_by;
             // update shared data with current node data
             payload.shared_profiles = self.currentTreeNode.data?.shared_profiles || [];
             payload.shared_users = self.currentTreeNode.data?.shared_users || [];
@@ -157,11 +157,11 @@ var UserDataWidget = (function () {
             });
         }
     };
-    self.updateItem = function ( ) {
-        if(!self.currentTreeNode) {
+    self.updateItem = function () {
+        if (!self.currentTreeNode) {
             return alert("No item selected to update");
         }
-        self.saveUI()
+        self.saveUI();
     };
     self.showSaveDialog = function (data_type, jsonContent, divId, callbackFn) {
         self.data_type = data_type;

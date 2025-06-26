@@ -137,7 +137,6 @@ var SavedQueriesWidget = (function () {
                 return alert(err);
             }
             if (result && result?.data_content?.sparqlQuery && self.loadQueryFn) {
-                
                 self.loadQueryFn(null, result.data_content);
             }
         });

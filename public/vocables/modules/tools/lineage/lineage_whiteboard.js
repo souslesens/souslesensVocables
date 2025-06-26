@@ -4478,7 +4478,7 @@ attrs.color=self.getSourceColor(superClassValue)
                     if (err) {
                         return alert(err.responseText);
                     }
-                    if(result && result.id){
+                    if (result && result.id) {
                         UserDataWidget.loadUserDatabyId(result.id, function (err, result) {
                             if (err) {
                                 return alert(err.responseText);
@@ -4491,7 +4491,6 @@ attrs.color=self.getSourceColor(superClassValue)
                         });
                         return;
                     }
-                  
                 },
             );
         },

@@ -15,15 +15,13 @@ var UI = (function () {
         var messageDiv = $("#messageDiv");
         var waitImgDiv = $("#waitImg");
         if (messageDiv.length == 0 || waitImgDiv.length == 0) {
-
-            messageDiv=$('#KGquery_messageDiv');
-            waitImgDiv=$('#KGquery_waitImg');
+            messageDiv = $("#KGquery_messageDiv");
+            waitImgDiv = $("#KGquery_waitImg");
         }
         if (message.length > 200) {
             alert(message);
         } else {
             messageDiv.html(message);
-
         }
         if (stopWaitImg) {
             waitImgDiv.css("display", "none");

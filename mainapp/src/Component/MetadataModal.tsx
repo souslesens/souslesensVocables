@@ -357,10 +357,9 @@ export function MetadataModal({ onClose, open, sourceName, isReadOnly = false }:
         };
 
         const fetchPrefixCc = async () => {
-            const response = await fetch("http://prefix.cc/popular/all.file.json");
+            const response = await fetch("/api/v1/prefixes");
             const json = (await response.json()) as Record<string, string>;
-            const result = Object.fromEntries(Object.entries(json).map(([k, v]) => [v, k]));
-            setPrefixes(result);
+            setPrefixes(json);
         };
 
         // eslint-disable-next-line @typescript-eslint/no-floating-promises

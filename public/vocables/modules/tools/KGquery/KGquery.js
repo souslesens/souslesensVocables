@@ -31,6 +31,7 @@ import UI from "../../../modules/shared/UI.js";
 import KGquery_filter from "./KGquery_filter.js";
 
 import Containers_widget from "../containers/containers_widget.js";
+import UserDataWidget from "../../uiWidgets/userDataWidget.js";
 
 var KGquery = (function () {
     var self = {};
@@ -59,6 +60,7 @@ var KGquery = (function () {
         //Lineage_sources.showHideEditButtons = UI.disableEditButtons;
         UI.initMenuBar(KGquery.loadSource);
         KGquery_graph.visjsData = null;
+        UserDataWidget.currentTreeNode = null;
         //KGquery.clearAll();
         UI.disableEditButtons();
         if (Config.clientCache.KGquery) {

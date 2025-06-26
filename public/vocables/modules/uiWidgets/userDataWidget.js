@@ -61,11 +61,15 @@ var UserDataWidget = (function () {
         if (self.currentTreeNode) {
             type = "PUT";
             payload.id = parseInt(self.currentTreeNode.id);
+            // PUT don't update owned_by
+            delete payload.owned_by;
+            // update shared data with current node data
             payload.shared_profiles = self.currentTreeNode.data?.shared_profiles || [];
             payload.shared_users = self.currentTreeNode.data?.shared_users || [];
         }
         if (payload.shared_profiles.length > 0 || payload.shared_users.length > 0) {
-            payload.is_shared = true;
+            payload.is_shared = true; // option to share with others
+            payload.readwrite = true; // default for shared data
         }
         payload = JSON.stringify(payload);
         $.ajax({
@@ -144,6 +148,8 @@ var UserDataWidget = (function () {
                 dataType: "json",
                 success: function (_result, _textStatus, _jqXHR) {
                     callback(null, "graph saved");
+                    // refresh show dialog
+                    self.showListDialog(self.divId, self.options, self.callbackFn);
                 },
                 error(err) {
                     return callback(err);
@@ -151,7 +157,12 @@ var UserDataWidget = (function () {
             });
         }
     };
-
+    self.updateItem = function () {
+        if (!self.currentTreeNode) {
+            return alert("No item selected to update");
+        }
+        self.saveUI();
+    };
     self.showSaveDialog = function (data_type, jsonContent, divId, callbackFn) {
         self.data_type = data_type;
         self.jsonContent = jsonContent;
@@ -328,6 +339,8 @@ var UserDataWidget = (function () {
             if (self.currentTreeNode) {
                 $("#userDataWidget_updateButton").css("display", "block");
                 $("#userDataWidget_label").val(self.currentTreeNode.data.data_label);
+                $("#userDataWidget_group").val(self.currentTreeNode.data.data_group);
+                $("#userDataWidget_comment").val(self.currentTreeNode.data.data_comment);
             }
 
             if (divId == "smallDialogDiv") {

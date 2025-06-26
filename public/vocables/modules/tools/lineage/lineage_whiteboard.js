@@ -112,7 +112,7 @@ var Lineage_whiteboard = (function () {
 
             SearchWidget.currentTargetDiv = "LineageNodesJsTreeDiv";
         }
-
+        UserDataWidget.currentTreeNode = null;
         UI.initMenuBar(self.loadSources);
         $("#Lineage_graphEditionButtons").show();
         $("#Lineage_graphEditionButtons").load("./modules/tools/lineage/html/AddNodeEdgeButtons.html");

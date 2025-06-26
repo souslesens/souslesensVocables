@@ -12,16 +12,24 @@ var UI = (function () {
     self.smartPhoneScreen = null;
 
     self.message = function (message, stopWaitImg, startWaitImg) {
+        var messageDiv = $("#messageDiv");
+        var waitImgDiv = $("#waitImg");
+        if (messageDiv.length == 0 || waitImgDiv.length == 0) {
+
+            messageDiv=$('#KGquery_messageDiv');
+            waitImgDiv=$('#KGquery_waitImg');
+        }
         if (message.length > 200) {
             alert(message);
         } else {
-            $("#messageDiv").html(message);
+            messageDiv.html(message);
+
         }
         if (stopWaitImg) {
-            $("#waitImg").css("display", "none");
+            waitImgDiv.css("display", "none");
         }
         if (startWaitImg) {
-            $("#waitImg").css("display", "block");
+            waitImgDiv.css("display", "block");
         }
     };
 

@@ -137,6 +137,7 @@ var SavedQueriesWidget = (function () {
                 return alert(err);
             }
             if (result && result?.data_content?.sparqlQuery && self.loadQueryFn) {
+                
                 self.loadQueryFn(null, result.data_content);
             }
         });
@@ -159,7 +160,7 @@ var SavedQueriesWidget = (function () {
                 slsvSource = self.slsvSource;
             }
 
-            UserDataWidget.currentTreeNode = null;
+            //UserDataWidget.currentTreeNode = null;
             UserDataWidget.showSaveDialog("savedQueries", data, null, function (err, result) {
                 if (err) {
                     return alert(err);

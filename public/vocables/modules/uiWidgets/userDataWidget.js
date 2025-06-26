@@ -148,6 +148,8 @@ var UserDataWidget = (function () {
                 dataType: "json",
                 success: function (_result, _textStatus, _jqXHR) {
                     callback(null, "graph saved");
+                    // refresh show dialog
+                    self.showListDialog(self.divId, self.options, self.callbackFn);
                 },
                 error(err) {
                     return callback(err);

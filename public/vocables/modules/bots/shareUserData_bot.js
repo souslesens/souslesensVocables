@@ -1,9 +1,12 @@
+import BotEngineClass from "./_botEngineClass.js";
+
 var ShareUserData_bot = (function () {
     var self = {};
+    self.myBotEngine = new BotEngineClass();
 
     self.start = function (workflow, _params, callbackFn) {
         self.title = _params?.title || "Share";
-        var startParams = _botEngine.fillStartParams(arguments);
+        var startParams = self.myBotEngine.fillStartParams(arguments);
 
         if (!workflow) {
             workflow = self.worflow2;
@@ -11,8 +14,8 @@ var ShareUserData_bot = (function () {
         self.params = { profiles: [], users: [] };
         self.profiles = null;
         self.users = null;
-        _botEngine.init(ShareUserData_bot, workflow, null, function () {
-            _botEngine.startParams = startParams;
+        self.myBotEngine.init(ShareUserData_bot, workflow, null, function () {
+            self.myBotEngine.startParams = startParams;
             if (_params) {
                 for (var key in _params) {
                     self.params[key] = _params[key];
@@ -20,7 +23,7 @@ var ShareUserData_bot = (function () {
             }
             if (!self.params?.userData?.id) {
                 UI.message("no id on user data");
-                return _botEngine.end();
+                return self.myBotEngine.end();
             }
             UserDataWidget.loadUserDatabyId(parseInt(self.params.userData.id), function (err, result) {
                 if (err) {
@@ -28,7 +31,7 @@ var ShareUserData_bot = (function () {
                 }
 
                 self.params.userData.data = result;
-                _botEngine.nextStep();
+                self.myBotEngine.nextStep();
             });
         });
     };
@@ -99,7 +102,7 @@ var ShareUserData_bot = (function () {
 
     self.functions = {
         startFn: function () {
-            _botEngine.nextStep();
+            self.myBotEngine.nextStep();
         },
         chooseProfileFn: function () {
             if (self.profiles) {
@@ -109,9 +112,9 @@ var ShareUserData_bot = (function () {
                 });
                 if (self.profiles.length == 0) {
                     UI.message("No profiles available to share with");
-                    return _botEngine.previousStep();
+                    return self.myBotEngine.previousStep();
                 }
-                return _botEngine.showList(self.profiles, "profiles");
+                return self.myBotEngine.showList(self.profiles, "profiles");
             }
             $.ajax({
                 url: `${Config.apiUrl}/profiles`,
@@ -129,15 +132,15 @@ var ShareUserData_bot = (function () {
                             return !self.params.userData.data.shared_profiles.includes(profil);
                         });
 
-                        return _botEngine.showList(self.profiles, "profiles");
+                        return self.myBotEngine.showList(self.profiles, "profiles");
                     } else {
                         UI.message("No profiles available to share with");
-                        return _botEngine.previousStep();
+                        return self.myBotEngine.previousStep();
                     }
                 },
                 error: function (xhr, status, error) {
                     UI.message("Error fetching profiles: " + error);
-                    return _botEngine.end();
+                    return self.myBotEngine.end();
                 },
             });
         },
@@ -148,7 +151,7 @@ var ShareUserData_bot = (function () {
                 self.users = self.users.filter(function (user) {
                     return !self.params.users.includes(user);
                 });
-                return _botEngine.showList(self.users, "users");
+                return self.myBotEngine.showList(self.users, "users");
             }
             $.ajax({
                 url: `${Config.apiUrl}/users`,
@@ -165,15 +168,15 @@ var ShareUserData_bot = (function () {
                         self.users = self.users.filter(function (user) {
                             return !self.params.userData.data.shared_users.includes(user);
                         });
-                        return _botEngine.showList(self.users, "users");
+                        return self.myBotEngine.showList(self.users, "users");
                     } else {
                         UI.message("No users available to share with");
-                        return _botEngine.previousStep();
+                        return self.myBotEngine.previousStep();
                     }
                 },
                 error: function (xhr, status, error) {
                     UI.message("Error fetching users: " + error);
-                    return _botEngine.end();
+                    return self.myBotEngine.end();
                 },
             });
         },
@@ -197,12 +200,12 @@ var ShareUserData_bot = (function () {
                         self.params.userData.data.data_comment,
                         function () {
                             UI.message("User data shared with profiles: " + self.params.profiles.join(", "));
-                            _botEngine.end();
+                            self.myBotEngine.end();
                         },
                     );
                 }
             }
-            _botEngine.end();
+            self.myBotEngine.end();
         },
         setSharedUsersFn: function () {
             if (self.params.users) {
@@ -223,37 +226,37 @@ var ShareUserData_bot = (function () {
                         self.params.userData.data.data_comment,
                         function () {
                             UI.message("User data shared with users: " + self.params.users.join(", "));
-                            _botEngine.end();
+                            self.myBotEngine.end();
                         },
                     );
                 }
             }
-            _botEngine.end();
+            self.myBotEngine.end();
         },
         removeSharedProfilesFn: function () {
             if (self.params.userData.data?.shared_profiles?.length > 0) {
-                return _botEngine.showList(self.params.userData.data.shared_profiles, null, null, null, function (selectedValue) {
+                return self.myBotEngine.showList(self.params.userData.data.shared_profiles, null, null, null, function (selectedValue) {
                     self.params.profiles = self.params.userData.data.shared_profiles.filter(function (profile) {
                         return profile != selectedValue;
                     });
                     self.params.userData.data.shared_profiles = self.params.userData.data.shared_profiles.filter(function (profile) {
                         return profile != selectedValue;
                     });
-                    _botEngine.nextStep();
+                    self.myBotEngine.nextStep();
                 });
             }
             UI.message("No shared profiles to remove");
         },
         removeSharedUsersFn: function () {
             if (self.params.userData.data?.shared_users?.length > 0) {
-                return _botEngine.showList(self.params.userData.data.shared_users, null, null, null, function (selectedValue) {
+                return self.myBotEngine.showList(self.params.userData.data.shared_users, null, null, null, function (selectedValue) {
                     self.params.users = self.params.userData.data.shared_users.filter(function (user) {
                         return user != selectedValue;
                     });
                     self.params.userData.data.shared_users = self.params.userData.data.shared_users.filter(function (user) {
                         return user != selectedValue;
                     });
-                    _botEngine.nextStep();
+                    self.myBotEngine.nextStep();
                 });
             }
             UI.message("No shared users to remove");
@@ -261,24 +264,24 @@ var ShareUserData_bot = (function () {
 
         listSharedProfilesFn: function () {
             if (self.params.userData.data?.shared_profiles?.length > 0) {
-                return _botEngine.showList(self.params.userData.data.shared_profiles, null, null, null, function (selectedValue) {
-                    _botEngine.reset();
+                return self.myBotEngine.showList(self.params.userData.data.shared_profiles, null, null, null, function (selectedValue) {
+                    self.myBotEngine.reset();
                 });
             } else {
-                return _botEngine.showList(["No shared Profiles"], null, null, null, function (selectedValue) {
-                    _botEngine.reset();
+                return self.myBotEngine.showList(["No shared Profiles"], null, null, null, function (selectedValue) {
+                    self.myBotEngine.reset();
                 });
             }
         },
 
         listSharedUsersFn: function () {
             if (self.params.userData.data?.shared_users?.length > 0) {
-                return _botEngine.showList(self.params.userData.data.shared_users, null, null, null, function (selectedValue) {
-                    _botEngine.reset();
+                return self.myBotEngine.showList(self.params.userData.data.shared_users, null, null, null, function (selectedValue) {
+                    self.myBotEngine.reset();
                 });
             } else {
-                return _botEngine.showList(["No shared Users"], null, null, null, function (selectedValue) {
-                    _botEngine.reset();
+                return self.myBotEngine.showList(["No shared Users"], null, null, null, function (selectedValue) {
+                    self.myBotEngine.reset();
                 });
             }
         },
@@ -286,24 +289,24 @@ var ShareUserData_bot = (function () {
             //_botEngine.previousStep();
             //update profiles list
 
-            _botEngine.currentObj = self.workflowChooseProfile;
-            _botEngine.nextStep(self.workflowChooseProfile);
+            self.myBotEngine.currentObj = self.workflowChooseProfile;
+            self.myBotEngine.nextStep(self.workflowChooseProfile);
         },
 
         afterChooseUserFn: function () {
-            //_botEngine.previousStep();
-            _botEngine.currentObj = self.workflowChooseUser;
-            _botEngine.nextStep(self.workflowChooseUser);
+            //self.myBotEngine.previousStep();
+            self.myBotEngine.currentObj = self.workflowChooseUser;
+            self.myBotEngine.nextStep(self.workflowChooseUser);
         },
         afterRemoveSharedProfilesFn: function () {
-            //_botEngine.previousStep();
-            _botEngine.currentObj = self.workflowRemoveSharedProfiles;
-            _botEngine.nextStep(self.workflowRemoveSharedProfiles);
+            //self.myBotEngine.previousStep();
+            self.myBotEngine.currentObj = self.workflowRemoveSharedProfiles;
+            self.myBotEngine.nextStep(self.workflowRemoveSharedProfiles);
         },
         afterRemoveSharedUsersFn: function () {
-            //_botEngine.previousStep();
-            _botEngine.currentObj = self.workflowRemoveSharedUsers;
-            _botEngine.nextStep(self.workflowRemoveSharedUsers);
+            //self.myBotEngine.previousStep();
+            self.myBotEngine.currentObj = self.workflowRemoveSharedUsers;
+            self.myBotEngine.nextStep(self.workflowRemoveSharedUsers);
         },
     };
     return self;

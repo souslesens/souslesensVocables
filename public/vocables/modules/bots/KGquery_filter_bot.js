@@ -1,16 +1,15 @@
 import Sparql_common from "../sparqlProxies/sparql_common.js";
 import SparqlQuery_bot from "./sparqlQuery_bot.js";
-import _botEngine from "./_botEngine.js";
-//import botEngineClass from "./_botEngineClass.js";
+import BotEngineClass from "./_botEngineClass.js";
+import CommonBotFunctions_class from "./_commonBotFunctions_class.js";
 import Sparql_OWL from "../sparqlProxies/sparql_OWL.js";
 
 var KGquery_filter_bot = (function () {
     var self = {};
     self.title = "Filter Class";
-    self.aBotEngine = _botEngine; //new botEngineClass()
+    self.myBotEngine = new BotEngineClass();
     self.start = function (data, currentQuery, validateFn) {
-        var startParams = self.aBotEngine.fillStartParams(arguments);
-        //self.aBotEngine.fillStartParams(arguments);
+        var startParams = self.myBotEngine.fillStartParams(arguments);
 
         self.data = data;
         self.filter = "";
@@ -22,18 +21,18 @@ var KGquery_filter_bot = (function () {
             workflow = self.workflow_filterClass;
         }
 
-        self.aBotEngine.init(KGquery_filter_bot, workflow, null, function () {
-            self.aBotEngine.startParams = startParams;
+        self.myBotEngine.init(KGquery_filter_bot, workflow, null, function () {
+            self.myBotEngine.startParams = startParams;
             self.validateFn = validateFn;
             self.callbackFn = function () {
-                var filterLabel = self.aBotEngine.getQueryText();
+                var filterLabel = self.myBotEngine.getQueryText();
                 return self.validateFn(null, { filter: self.filter, filterLabel: filterLabel, filterParams: self.filterParams });
             };
 
             self.params = currentQuery;
             SparqlQuery_bot.params = currentQuery;
 
-            self.aBotEngine.nextStep();
+            self.myBotEngine.nextStep();
         });
     };
 
@@ -92,7 +91,7 @@ var KGquery_filter_bot = (function () {
                 return 0;
             });
             self.params.individualsFilterType = "labelsList";
-            self.aBotEngine.showList(individuals, "individualsFilterValue");
+            self.myBotEngine.showList(individuals, "individualsFilterValue");
         });
     };
     self.functions.listFilterTypes = function () {
@@ -100,11 +99,11 @@ var KGquery_filter_bot = (function () {
             { id: "label", label: "rdfs:label contains" },
             { id: "labelsList", label: "Choose rdfs:label" },
         ];
-        self.aBotEngine.showList(choices, "individualsFilterType");
+        self.myBotEngine.showList(choices, "individualsFilterType");
     };
     self.functions.listPropertiesFn = function () {
         if (self.params.property) {
-            return self.aBotEngine.nextStep();
+            return self.myBotEngine.nextStep();
         }
 
         //var choices = [{ id: "http://www.w3.org/2000/01/rdf-schema#label", label: "label" }];
@@ -112,9 +111,9 @@ var KGquery_filter_bot = (function () {
         if (self.data && self.data.nonObjectProperties) {
             choices = choices.concat(self.data.nonObjectProperties);
         }
-        self.aBotEngine.showList(choices, "property", null, null, function (value) {
+        self.myBotEngine.showList(choices, "property", null, null, function (value) {
             self.params.property = value;
-            self.aBotEngine.nextStep();
+            self.myBotEngine.nextStep();
         });
     };
 
@@ -141,36 +140,36 @@ var KGquery_filter_bot = (function () {
             choices = ["=", "!=", "contains", ">", "!contains", "ChooseInList"];
         }
 
-        self.aBotEngine.showList(choices, "propertyOperator");
+        self.myBotEngine.showList(choices, "propertyOperator");
     };
 
     self.functions.promptIndividualsLabelFn = function () {
         self.params.individualsFilterType = "label";
-        self.aBotEngine.promptValue("enter value", "individualsFilterValue");
+        self.myBotEngine.promptValue("enter value", "individualsFilterValue");
     };
 
     self.functions.promptPropertyValueFn = function () {
         if (!self.params.propertyDatatype || self.params.propertyDatatype == "xsd:string") {
-            self.aBotEngine.promptValue("enter value", "propertyValue");
+            self.myBotEngine.promptValue("enter value", "propertyValue");
         } else if (!self.params.propertyDatatype || self.params.propertyDatatype.indexOf("http://www.w3.org/2001/XMLSchema#date") > -1) {
             if (self.params.propertyOperator == "range") {
                 DateWidget.showDateRangePicker("widgetGenericDialogDiv", null, null, function (minDate, maxDate) {
                     self.params.dateValueRange = { minDate: minDate, maxDate: maxDate };
                     //   self.functions.setSparqlQueryFilterFn()
-                    self.aBotEngine.nextStep();
+                    self.myBotEngine.nextStep();
                 });
                 return;
             } else {
-                self.aBotEngine.promptValue("enter value", "propertyValue", null, { datePicker: 1 });
+                self.myBotEngine.promptValue("enter value", "propertyValue", null, { datePicker: 1 });
             }
         } else {
-            self.aBotEngine.promptValue("enter value", "propertyValue");
+            self.myBotEngine.promptValue("enter value", "propertyValue");
         }
     };
 
     self.functions.listLogicalOperatorFn = function () {
         var choices = ["end", "AND", "OR"];
-        self.aBotEngine.showList(choices, "filterBooleanOperator");
+        self.myBotEngine.showList(choices, "filterBooleanOperator");
     };
 
     self.functions.setSparqlQueryFilterFn = function () {
@@ -235,20 +234,20 @@ var KGquery_filter_bot = (function () {
         } else if (individualsFilterType == "labelsList" && individualsFilterValue) {
             self.filterItems.push(filterBooleanOperator + " ?" + varName + " =<" + individualsFilterValue + ">");
         } else {
-            self.aBotEngine.abort("filter type not implemented");
+            self.myBotEngine.abort("filter type not implemented");
         }
 
         if (self.params.filterBooleanOperator == "end") {
             self.functions.writeFilterFn();
 
-            self.aBotEngine.nextStep();
+            self.myBotEngine.nextStep();
         } else {
-            self.aBotEngine.currentObj = self.workflow_filterClass;
-            self.aBotEngine.currentBot.params.property = "";
-            self.aBotEngine.currentBot.params.propertyDatatype = "";
-            self.aBotEngine.currentBot.params.propertyOperator = "";
-            self.aBotEngine.currentBot.params.propertyValue = "";
-            self.aBotEngine.nextStep();
+            self.myBotEngine.currentObj = self.workflow_filterClass;
+            self.myBotEngine.currentBot.params.property = "";
+            self.myBotEngine.currentBot.params.propertyDatatype = "";
+            self.myBotEngine.currentBot.params.propertyOperator = "";
+            self.myBotEngine.currentBot.params.propertyValue = "";
+            self.myBotEngine.nextStep();
         }
     };
 

@@ -1,24 +1,25 @@
 import Sparql_common from "../sparqlProxies/sparql_common.js";
-import _botEngine from "./_botEngine.js";
-import CommonBotFunctions from "./_commonBotFunctions.js";
+import BotEngineClass from "./_botEngineClass.js";
+import CommonBotFunctions_class from "./_commonBotFunctions_class.js";
 import Lineage_createRelation from "../tools/lineage/lineage_createRelation.js";
 import common from "../shared/common.js";
 import Sparql_generic from "../sparqlProxies/sparql_generic.js";
 
 var CreateRestriction_bot = (function () {
     var self = {};
+    self.myBotEngine = new BotEngineClass();
     self.title = "Create Resource";
 
     self.start = function (workflow, params, callback) {
-        var startParams = _botEngine.fillStartParams(arguments);
+        var startParams = self.myBotEngine.fillStartParams(arguments);
         self.callbackFn = callback;
         self.params = params;
         if (!workflow) {
             workflow = self.workflow;
         }
-        _botEngine.init(CreateRestriction_bot, workflow, null, function () {
-            _botEngine.startParams = startParams;
-            _botEngine.nextStep();
+        self.myBotEngine.init(CreateRestriction_bot, workflow, null, function () {
+            self.myBotEngine.startParams = startParams;
+            self.myBotEngine.nextStep();
         });
     };
 
@@ -62,18 +63,18 @@ var CreateRestriction_bot = (function () {
                 { id: "CardinalityRestriction", label: "CardinalityRestriction" },
                 { id: "ValueRestriction", label: "ValueRestriction" },
             ];
-            _botEngine.showList(choices, "resourceType");
+            self.myBotEngine.showList(choices, "resourceType");
         },
 
         listVocabsFn: function () {
-            CommonBotFunctions.listVocabsFn(self.params.source, "currentVocab");
+            CommonBotFunctions_class.listVocabsFn(self.params.source, "currentVocab");
         },
 
         listTargetClassFn: function () {
-            CommonBotFunctions.listVocabClasses(self.params.currentVocab, "targetClassUri", true);
+            CommonBotFunctions_class.listVocabClasses(self.params.currentVocab, "targetClassUri", true);
         },
         listTargetPropertyFn: function () {
-            CommonBotFunctions.listVocabPropertiesFn(self.params.currentVocab, "objectPropertyUri");
+            CommonBotFunctions_class.listVocabPropertiesFn(self.params.currentVocab, "objectPropertyUri");
         },
 
         chooseCardinalityTypeFn: function () {
@@ -82,7 +83,7 @@ var CreateRestriction_bot = (function () {
                 { id: "owl:minCardinality", label: "owl:minCardinality" },
                 { id: "owl:cardinality", label: "owl:cardinality" },
             ];
-            _botEngine.showList(choices, "cardinalityType");
+            self.myBotEngine.showList(choices, "cardinalityType");
         },
         chooseConstraintTypeFn: function () {
             var choices = [
@@ -93,18 +94,18 @@ var CreateRestriction_bot = (function () {
                 { id: "owl:minCardinality", label: "owl:minCardinality" },
                 { id: "owl:cardinality", label: "owl:cardinality" },
             ];
-            _botEngine.showList(choices, "constraintType");
+            self.myBotEngine.showList(choices, "constraintType");
         },
         promptCardinalityNumberFn: function () {
-            _botEngine.promptValue("enter Cardinality value", "cardinalityValue");
+            self.myBotEngine.promptValue("enter Cardinality value", "cardinalityValue");
         },
 
         saveCardinalityRestrictionFn: function () {
             if (!self.params.constraintType && !self.params.cardinalityType) {
-                return _botEngine.end();
+                return self.myBotEngine.end();
             }
             if (!self.params.cardinalityValue) {
-                return _botEngine.end();
+                return self.myBotEngine.end();
             }
 
             self.saveCardinalityRestriction(
@@ -115,10 +116,10 @@ var CreateRestriction_bot = (function () {
                 self.params.cardinalityValue,
                 function (err, result) {
                     if (err) {
-                        _botEngine.abort(err.responseText || err);
+                        self.myBotEngine.abort(err.responseText || err);
                     }
                     //add manchester to Axioms JSTree
-                    _botEngine.end();
+                    self.myBotEngine.end();
                 },
             );
         },
@@ -133,7 +134,7 @@ var CreateRestriction_bot = (function () {
                     source: self.params.currentVocab,
                 },
             };
-            _botEngine.closeDialog();
+            self.myBotEngine.closeDialog();
             Lineage_createRelation.showAddEdgeFromGraphDialog(edgeData, self.callbackFn);
             /*     Lineage_createRelation.showAddEdgeFromGraphDialog(edgeData, function (err, result) {
              if (err) {
@@ -141,7 +142,7 @@ var CreateRestriction_bot = (function () {
                 }
                 //add manchester to Axioms JSTree
 
-                _botEngine.end(true)
+                self.myBotEngine.end(true)
             })*/
         },
 
@@ -149,17 +150,17 @@ var CreateRestriction_bot = (function () {
             var constraintType = self.params.constraintType;
 
             if (constraintType.indexOf("ardinality") > -1) {
-                _botEngine.promptValue("enter Cardinality value", "cardinalityValue", "", null, function (cardinality) {
+                self.myBotEngine.promptValue("enter Cardinality value", "cardinalityValue", "", null, function (cardinality) {
                     if (!cardinality) {
-                        return _botEngine.end();
+                        return self.myBotEngine.end();
                     }
                     self.params.cardinality = cardinality;
-                    _botEngine.end();
+                    self.myBotEngine.end();
                     // self.functions.saveCardinalityRestrictionFn()
                 });
             } else {
                 //return  self.params.constraintType
-                _botEngine.end();
+                self.myBotEngine.end();
             }
         },
     };

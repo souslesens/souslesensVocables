@@ -9,18 +9,17 @@ class BotEngineClass {
             returnValues: [],
             VarFilling: {},
             currentIndex: -1,
-            step: []
-        }
+            step: [],
+        };
         this.currentList = [];
         this.divId = null;
-        
     }
 
     init(botModule, initialWorkflow, options, callback) {
         if (!options) {
             options = {};
         }
-      
+
         this.options = options;
         this.currentBot = botModule;
         this.currentObj = initialWorkflow;
@@ -46,7 +45,7 @@ class BotEngineClass {
         } else {
             divId = "botDiv";
             this.divId = "botDiv";
-        
+
             $("#botPanel").dialog("option", "title", this.currentBot.title);
             $("#botPanel").parent().find("#BotUpperButtons").remove();
         }
@@ -80,7 +79,7 @@ class BotEngineClass {
                 }
             }
             this.botClickGestion();
-            
+
             //UI.PopUpOnHoverButtons();
             if (callback) {
                 callback();
@@ -88,7 +87,7 @@ class BotEngineClass {
         });
     }
     // see if is necessary when botEngine is removed and bot work with botEngineClass
-    botClickGestion(){
+    botClickGestion() {
         // find if bot is in dialog
         var botInDialog = $("#" + this.divId).find("#resetButtonBot").length == 0;
         var resetButton = $("#" + this.divId).find("#resetButtonBot");
@@ -105,8 +104,8 @@ class BotEngineClass {
         input.off();
 
         // temporary : remove onclick attribute, for not breaking _botEngine html and working
-        resetButton.removeAttr("onclick");          
-        previousButton.removeAttr("onclick");          
+        resetButton.removeAttr("onclick");
+        previousButton.removeAttr("onclick");
         input.removeAttr("onkeyup");
         // set new listeners
         input.on("keyup", (event) => {
@@ -118,7 +117,6 @@ class BotEngineClass {
         resetButton.click(() => {
             this.reset();
         });
-
     }
     nextStep(returnValue, varToFill) {
         $("#" + this.divId)
@@ -377,9 +375,7 @@ class BotEngineClass {
             .find("#bot_resourcesProposalSelect")
             .bind("click", (evt) => {
                 // 'this' ici est l'instance de la classe, evt.currentTarget est le select DOM
-                var text = $(evt.currentTarget)
-                    .find("option:selected")
-                    .text();
+                var text = $(evt.currentTarget).find("option:selected").text();
                 if (text == "") {
                     return;
                 }
@@ -616,7 +612,7 @@ class BotEngineClass {
                     }
                 }
             }
-        }
+        };
 
         var title = this.currentBot.title;
         visjsData.nodes.push({
@@ -691,7 +687,6 @@ class BotEngineClass {
             }
         }
     }
-   
 }
 
 export default BotEngineClass;

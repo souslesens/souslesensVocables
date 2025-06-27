@@ -200,7 +200,6 @@ var Lineage_createRelation = (function () {
                             } else {
                                 options.noExecute = true;
                             }
-                            
 
                             Sparql_OWL.getLabelsMap(source, options, function (err, labelsMap) {
                                 if (err) {

@@ -1573,7 +1573,7 @@ var Sparql_OWL = (function () {
                     var valueIds = noValueLabelResults.map(function (result) {
                         return result.value?.value;
                     });
-                  
+
                     var options = {};
                     var filter = Sparql_common.setFilter("id", valueIds);
                     if (valueIds.length == 0) {
@@ -1950,7 +1950,7 @@ var Sparql_OWL = (function () {
         if (!options) {
             options = {};
         }
-        if(options.noExecute){
+        if (options.noExecute) {
             return callback(null, {});
         }
         if (!Config.sources[sourceLabel].graphUri) {

@@ -419,6 +419,10 @@ var AxiomExtractor = (function () {
         var options = {
             filter: Sparql_common.setFilter("id", Object.keys(uris)),
         };
+        if (Object.keys(uris).length == 0) {
+            options.noExecute = true;
+        }
+
         Sparql_OWL.getLabelsMap(source, options, function (err, labelsMap) {
             if (err) return callback(err);
             triples.forEach(function (triple) {

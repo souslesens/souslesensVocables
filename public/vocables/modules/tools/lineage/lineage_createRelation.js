@@ -193,8 +193,16 @@ var Lineage_createRelation = (function () {
                                     }
                                 });
                             });
-                            var filter = Sparql_common.setFilter("id", allNodes);
-                            Sparql_OWL.getLabelsMap(source, { filter: filter }, function (err, labelsMap) {
+                            var options = {};
+                            if (Object.keys(allNodes).length > 0) {
+                                var filter = Sparql_common.setFilter("id", allNodes);
+                                options.filter = filter;
+                            } else {
+                                options.noExecute = true;
+                            }
+                            
+
+                            Sparql_OWL.getLabelsMap(source, options, function (err, labelsMap) {
                                 if (err) {
                                     return callbackSeries(err);
                                 }

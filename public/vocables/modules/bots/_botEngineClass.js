@@ -1,31 +1,34 @@
-const botEngineClass = function () {
-    var self = {};
-    self.firstLoad = true;
-    self.lastFilterListStr = "";
-    self.init = function (botModule, initialWorkflow, options, callback) {
+class BotEngineClass {
+    constructor() {
+        this.options = {};
+        this.currentBot = null;
+        this.currentObj = null;
+        this.initialWorkflow = null;
+        this.history = {
+            workflowObjects: [],
+            returnValues: [],
+            VarFilling: {},
+            currentIndex: -1,
+            step: []
+        }
+        this.currentList = [];
+        this.divId = null;
+        
+    }
+
+    init(botModule, initialWorkflow, options, callback) {
         if (!options) {
             options = {};
         }
-        self.currentBot = botModule;
-        self.currentObj = initialWorkflow;
-        self.initialWorkflow = initialWorkflow;
-        self.history = {};
-        self.history.workflowObjects = [];
-        self.history.returnValues = [];
-        //Object {VarFilled:'',valueFilled:''}
-        self.history.VarFilling = {};
-        self.history.currentIndex = -1;
-        // Step is the indexes when currentBot.nextStep is a function when the choice is let to the user
-        self.history.step = [];
-        self.currentList = [];
-
+      
+        this.options = options;
         this.currentBot = botModule;
         this.currentObj = initialWorkflow;
         this.initialWorkflow = initialWorkflow;
         this.history = {};
         this.history.workflowObjects = [];
         this.history.returnValues = [];
-
+        //Object {VarFilled:'',valueFilled:''}
         this.history.VarFilling = {};
         this.history.currentIndex = -1;
         // Step is the indexes when currentBot.nextStep is a function when the choice is let to the user
@@ -33,19 +36,22 @@ const botEngineClass = function () {
         this.currentList = [];
 
         var divId;
+
         if (options.divId) {
             divId = options.divId;
-            self.divId = options.divId;
+            this.divId = options.divId;
+            $("#" + this.divId)
+                .find("#resetButtonBot")
+                .remove();
         } else {
             divId = "botDiv";
-
-            $($("#botPanel").parent()[0]).on("dialogclose", function (event) {
-                self.firstLoad = false;
-            });
-            $("#botPanel").dialog("option", "title", self.currentBot.title);
+            this.divId = "botDiv";
+        
+            $("#botPanel").dialog("option", "title", this.currentBot.title);
+            $("#botPanel").parent().find("#BotUpperButtons").remove();
         }
 
-        $("#" + divId).load("./modules/uiWidgets/html/bot.html", function () {
+        $("#" + divId).load("./modules/uiWidgets/html/bot.html", () => {
             if (!options.divId) {
                 $("#botPanel").dialog("open");
             }
@@ -53,104 +59,140 @@ const botEngineClass = function () {
                 $("#KGcreatorBot_exportToGraph").css("display", "none");
             }
 
-            if (!self.firstLoad) {
-                $("#BotUpperButtons").remove();
-            }
-            $("#botFilterProposalInput").on("keyup", self.filterList);
-            self.firstLoad = false;
-            $("#BotUpperButtons").insertAfter($("#botPanel").parent().find(".ui-dialog-titlebar-close"));
+            if (!options.divId) {
+                $("#" + this.divId)
+                    .find("#botFilterProposalInput")
+                    .on("keyup", this.filterList);
 
-            if (divId != "botDiv") {
-                var dialogWindow = $("#" + divId)
-                    .parents()
-                    .filter('div[role="dialog"]')[0];
-                var titleDialog = $(dialogWindow).find(".ui-dialog-titlebar-close");
-                var idDialog = "#" + $(dialogWindow).attr("aria-describedby");
-                $("#BotUpperButtons").insertAfter(titleDialog);
-                $(dialogWindow).on("dialogclose", function (event) {
-                    $("#" + self.divId).empty();
-                    $(dialogWindow).find("#resetButtonBot").remove();
-                    $(dialogWindow).find("#previousButtonBot").remove();
-                    self.firstLoad = true;
-                });
+                $("#" + this.divId)
+                    .find("#BotUpperButtons")
+                    .insertAfter($("#botPanel").parent().find(".ui-dialog-titlebar-close"));
+
+                if (divId != "botDiv") {
+                    var dialogWindow = $("#" + divId)
+                        .parents()
+                        .filter('div[role="dialog"]')[0];
+                    var titleDialog = $(dialogWindow).find(".ui-dialog-titlebar-close");
+                    var idDialog = "#" + $(dialogWindow).attr("aria-describedby");
+                    $(dialogWindow).on("dialogclose", (event) => {
+                        $("#" + this.divId).empty();
+                    });
+                }
             }
+            this.botClickGestion();
+            
             //UI.PopUpOnHoverButtons();
             if (callback) {
                 callback();
             }
         });
-    };
-
-    self.nextStep = function (returnValue, varToFill) {
-        $("#botFilterProposalDiv").hide();
-        self.history.workflowObjects.push(JSON.parse(JSON.stringify(self.currentObj)));
-        self.history.currentIndex += 1;
-        self.history.returnValues.push(returnValue);
-        if (!self.currentObj) {
-            return self.end();
+    }
+    // see if is necessary when botEngine is removed and bot work with botEngineClass
+    botClickGestion(){
+        // find if bot is in dialog
+        var botInDialog = $("#" + this.divId).find("#resetButtonBot").length == 0;
+        var resetButton = $("#" + this.divId).find("#resetButtonBot");
+        var previousButton = $("#" + this.divId).find("#previousButtonBot");
+        // necessary because dialog buttons are in the upper dialog not on bot div
+        if (botInDialog) {
+            resetButton = $("#botPanel").parent().find("#resetButtonBot");
+            previousButton = $("#botPanel").parent().find("#previousButtonBot");
         }
-        var keys = Object.keys(self.currentObj);
+        var input = $("#" + this.divId).find("#botFilterProposalInput");
+        //desactivate others bots listeners in same context
+        resetButton.off();
+        previousButton.off();
+        input.off();
+
+        // temporary : remove onclick attribute, for not breaking _botEngine html and working
+        resetButton.removeAttr("onclick");          
+        previousButton.removeAttr("onclick");          
+        input.removeAttr("onkeyup");
+        // set new listeners
+        input.on("keyup", (event) => {
+            this.filterList(event);
+        });
+        previousButton.click(() => {
+            this.previousStep();
+        });
+        resetButton.click(() => {
+            this.reset();
+        });
+
+    }
+    nextStep(returnValue, varToFill) {
+        $("#" + this.divId)
+            .find("#botFilterProposalDiv")
+            .hide();
+        this.history.workflowObjects.push(JSON.parse(JSON.stringify(this.currentObj)));
+        this.history.currentIndex += 1;
+        this.history.returnValues.push(returnValue);
+        if (!this.currentObj) {
+            return this.end();
+        }
+        var keys = Object.keys(this.currentObj);
 
         if (keys.length == 0) {
-            return self.end();
+            return this.end();
         }
 
         var key = keys[0];
 
         if (key == "_OR") {
             // alternative
-            var alternatives = self.currentObj[key];
+            var alternatives = this.currentObj[key];
             // if  return value execute function linked to return value in alternative
             if (returnValue) {
                 if (alternatives[returnValue]) {
-                    var obj = self.currentObj["_OR"][returnValue];
+                    var obj = this.currentObj["_OR"][returnValue];
                     var key0 = Object.keys(obj)[0];
                     if (!key0) {
-                        return self.end();
+                        return this.end();
                     }
 
                     if (!obj[key0]) {
                         console.log("WARNING : in bot workflow has to be declared before it is called in another workflow");
                     }
                     if (key0 == "_OR") {
-                        self.currentObj = obj;
-                        return self.nextStep();
+                        this.currentObj = obj;
+                        return this.nextStep();
                     }
                 } else if (alternatives["_DEFAULT"]) {
                     //  try to find _DEFAULT alternative and functuntion associated
-                    var obj = self.currentObj["_OR"]["_DEFAULT"];
+                    var obj = this.currentObj["_OR"]["_DEFAULT"];
                     var key0 = Object.keys(obj)[0];
                 } else {
-                    self.showAlternatives(alternatives, varToFill);
+                    this.showAlternatives(alternatives, varToFill);
                     return;
                 }
 
-                var fn = self.currentBot.functions[key0];
+                var fn = this.currentBot.functions[key0];
 
                 if (!fn || typeof fn !== "function") {
                     return alert("function not defined :" + key0);
                 }
                 if (obj[key0] != "_self") {
-                    self.currentObj = obj[key0];
+                    this.currentObj = obj[key0];
                 }
-                self.setStepMessage(key0);
+                this.setStepMessage(key0);
                 fn();
             } else {
-                self.showAlternatives(alternatives, varToFill);
+                this.showAlternatives(alternatives, varToFill);
             }
         } else {
-            var fn = self.currentBot.functions[key];
-            if (!fn && self.currentBot.functions["_DEFAULT"]) {
-                fn = self.currentBot.functions["_DEFAULT"];
+            var fn = this.currentBot.functions[key];
+            if (!fn && this.currentBot.functions["_DEFAULT"]) {
+                fn = this.currentBot.functions["_DEFAULT"];
             }
             if (!fn || typeof fn !== "function") {
                 return alert("function not defined :" + key);
             }
-            self.currentObj = self.currentObj[key];
-            self.setStepMessage(key);
+
+            this.currentObj = this.currentObj[key];
+            this.setStepMessage(key);
             fn();
         }
-    };
+    }
 
     /**
      *
@@ -159,9 +201,9 @@ const botEngineClass = function () {
      * works by applying  self.previousStep() until the current step index match the  step desired
      * @param parentStep
      */
-    self.backToStep = function (parentStep) {
+    backToStep(parentStep) {
         var parentStepIndex = -1;
-        self.history.workflowObjects.forEach(function (item, index) {
+        this.history.workflowObjects.forEach(function (item, index) {
             if (item[parentStep]) {
                 parentStepIndex = index;
             }
@@ -170,128 +212,135 @@ const botEngineClass = function () {
             return alert("wrong parentStep " + parentStep);
         }
 
-        var n = 0;
+        this.currentObj = this.history.workflowObjects[parentStepIndex];
+        this.nextStep();
+
+        /*   var n = 0;
         do {
             self.previousStep();
             n++;
-        } while (n <= parentStepIndex);
-        self.previousStep();
-    };
+        } while (n <= parentStepIndex);*/
+        // self.previousStep();
+    }
 
-    self.previousStep = function () {
-        /*
-        if (message) {
-            self.message(message);
-        }*/
-        if (self.history.currentIndex > 0) {
-            $("#botPromptInput").css("display", "none");
+    previousStep() {
+        if (this.history.currentIndex > 0) {
+            $("#" + this.divId)
+                .find("#botPromptInput")
+                .css("display", "none");
 
-            //self.history.currentIndex -= 2;
-            var lastStepIndex = self.history.step[self.history.step.length - 2];
+            var lastStepIndex = this.history.step[this.history.step.length - 2];
             if (lastStepIndex == 0) {
-                return self.reset();
+                return this.reset();
             }
-            self.currentObj = self.history.workflowObjects[lastStepIndex];
-            var returnValue = self.history.returnValues[lastStepIndex];
+            this.currentObj = this.history.workflowObjects[lastStepIndex];
+            var returnValue = this.history.returnValues[lastStepIndex];
 
-            //self.currentObj = self.history[self.history.currentIndex];
+            this.deleteLastMessages(2);
 
-            //delete last 3 message sended
-            var childrens = $("#botTA").children();
-            // last is bot_input --> don't count
-            $("#botTA").children().slice(-4).filter("span").remove();
+            // cancel var filled concerned by the reverse
 
-            // Annuler les variables filled dans le bot qui ont une clé supérieure ou égale au lastStepIndex (été faites après l'application de l'étape)
-            var VarFillingKeys = Object.keys(self.history.VarFilling);
+            var VarFillingKeys = Object.keys(this.history.VarFilling);
             var VarToUnfill = VarFillingKeys.filter((key) => key >= lastStepIndex);
             if (VarToUnfill.length > 0) {
                 for (const key in VarToUnfill) {
-                    if (self.history.VarFilling[VarToUnfill[key]]) {
-                        var VarFilled = self.history.VarFilling[VarToUnfill[key]].VarFilled;
-                        var ValueFilled = self.history.VarFilling[VarToUnfill[key]].valueFilled;
-                        if (Array.isArray(self.currentBot.params[VarFilled])) {
-                            self.currentBot.params[VarFilled] = self.currentBot.params[VarFilled].filter((item) => item !== ValueFilled);
+                    if (this.history.VarFilling[VarToUnfill[key]]) {
+                        var VarFilled = this.history.VarFilling[VarToUnfill[key]].VarFilled;
+                        var ValueFilled = this.history.VarFilling[VarToUnfill[key]].valueFilled;
+                        if (Array.isArray(this.currentBot.params[VarFilled])) {
+                            this.currentBot.params[VarFilled] = this.currentBot.params[VarFilled].filter((item) => item !== ValueFilled);
                         } else {
-                            self.currentBot.params[VarFilled] = "";
+                            this.currentBot.params[VarFilled] = "";
                         }
-                        delete self.history.VarFilling[VarToUnfill[key]];
+                        delete this.history.VarFilling[VarToUnfill[key]];
                     }
                 }
             }
-            //Supprimer tous l'historique jusqu'au currentIndex
-            self.history.currentIndex = lastStepIndex - 1;
-            self.history.workflowObjects = self.history.workflowObjects.filter(function (element, index, array) {
+            // delete history trough the last step
+            this.history.currentIndex = lastStepIndex - 1;
+            this.history.workflowObjects = this.history.workflowObjects.filter(function (element, index, array) {
                 return index < lastStepIndex;
             });
-            self.history.returnValues = self.history.returnValues.filter(function (element, index, array) {
+            this.history.returnValues = this.history.returnValues.filter(function (element, index, array) {
                 return index < lastStepIndex;
             });
-            self.history.step = self.history.step.filter(function (element, index, array) {
-                return index < lastStepIndex;
+            this.history.step = this.history.step.filter(function (element, index, array) {
+                return element < lastStepIndex;
             });
 
-            self.nextStep(returnValue);
+            this.nextStep(returnValue);
         } else {
-            self.reset();
+            this.history.currentIndex = -1;
+            this.nextStep();
+            // self.reset();
         }
-    };
+    }
 
-    self.end = function (dontCallBack) {
-        self.currentBot.params.queryText = self.getQueryText();
-        self.closeDialog();
-        if (!dontCallBack && self.currentBot.callbackFn) {
-            return self.currentBot.callbackFn();
+    end(dontCallBack) {
+        this.currentBot.params.queryText = this.getQueryText();
+        this.closeDialog();
+        if (!dontCallBack && this.currentBot.callbackFn) {
+            return this.currentBot.callbackFn();
         }
-    };
+    }
 
-    self.closeDialog = function () {
-        if (self.divId) {
-            /*  var dialogWindow = $("#" + self.divId)
+    closeDialog() {
+        if (this.divId != "botDiv") {
+            /*  var dialogWindow = $("#" + this.divId)
                   .parents()
                   .filter('div[role="dialog"]')[0];
               var idDialog = "#" + $(dialogWindow).attr("aria-describedby");*/
-            $(self.divId).dialog("close");
+            $("#" + this.divId).dialog("close");
         } else {
             $("#botPanel").dialog("close");
         }
-    };
+    }
 
-    self.setStepMessage = function (step) {
-        if (self.currentBot.functionTitles) {
-            var message = self.currentBot.functionTitles[step];
-            // In case 2 questions are asked at the same time erase the last one
-            var last_message = $("#botTA").children().filter("span").slice(-1)[0];
-            if ($(last_message).attr("class") == "chat-left") {
-                last_message.remove();
+    setStepMessage(step) {
+        if (this.currentBot.functionTitles) {
+            var message = this.currentBot.functionTitles[step];
+            // In case 2 questions are asked consecutively erase the last one
+            var messageDivs = $("#" + this.divId)
+                .find("#botTA")
+                .children();
+            if (messageDivs.length > 0) {
+                var lastMessages = $(messageDivs[0]).children().filter("span");
+                if (lastMessages.length == 1) {
+                    this.deleteLastMessages();
+                }
             }
-            self.insertBotMessage(message || "select an option", { isQuestion: true });
-        } else {
-            self.insertBotMessage("select an option", { isQuestion: true });
+
+            if (message) {
+                this.insertBotMessage(message, { isQuestion: true });
+            } else {
+                this.insertBotMessage("select an option", { isQuestion: true });
+            }
         }
-    };
+    }
 
-    self.message = function (message) {
-        $("#botMessage").html(message);
-    };
-
-    self.abort = function (message) {
+    abort(message) {
         alert(message);
-        self.close();
-    };
+        this.close();
+    }
 
-    self.reset = function () {
-        if (self.startParams && self.startParams.length > 0) {
-            self.currentBot.start(...self.startParams);
+    reset() {
+        if (this.startParams && this.startParams.length > 0) {
+            this.currentBot.start(...this.startParams, this.options);
         } else {
-            self.currentBot.start();
+            this.currentBot.start(this.options);
         }
-    };
+    }
 
-    self.close = function () {
+    close() {
         $("#botPanel").css("display", "none");
-    };
+    }
+    message(message) {
+        $("#" + this.divId)
+            .find("#botMessage")
+            .html(message);
+    }
 
-    self.showList = function (values, varToFill, returnValue, sort, callback) {
+    showList(values, varToFill, returnValue, sort, callback) {
         values = common.StringArrayToIdLabelObjectArray(values);
         if (sort) {
             values.sort(function (a, b) {
@@ -304,129 +353,163 @@ const botEngineClass = function () {
                 return 0;
             });
         }
-        if (!self.history.step.includes(self.history.currentIndex)) {
-            self.history.step.push(self.history.currentIndex);
+        if (!this.history.step.includes(this.history.currentIndex)) {
+            this.history.step.push(this.history.currentIndex);
         }
 
-        $("#bot_resourcesProposalSelect").css("display", "block");
-        self.currentList = values;
+        $("#" + this.divId)
+            .find("#bot_resourcesProposalSelect")
+            .css("display", "block");
+        this.currentList = values;
         if (values.length > 20) {
-            $("#botFilterProposalDiv").show();
+            $("#" + this.divId)
+                .find("#botFilterProposalDiv")
+                .show();
+            $("#botFilterProposalInput").trigger("focus");
         }
-        common.fillSelectOptions("bot_resourcesProposalSelect", values, false, "label", "id");
-        $("#bot_resourcesProposalSelect").unbind("click");
-        UI.adjustSelectListSize("bot_resourcesProposalSelect", 10);
+        common.fillSelectOptions($("#" + this.divId).find("#bot_resourcesProposalSelect"), values, false, "label", "id");
+        $("#" + this.divId)
+            .find("#bot_resourcesProposalSelect")
+            .unbind("click");
+        UI.adjustSelectListSize($("#" + this.divId).find("#bot_resourcesProposalSelect"), 10);
         $("#botPanel").scrollTop($("#botPanel")[0].scrollHeight);
-        $("#bot_resourcesProposalSelect").bind("click", function (evt) {
-            var x = evt;
-
-            var text = $("#bot_resourcesProposalSelect option:selected").text();
-            if (text == "") {
-                return;
-            }
-            self.insertBotMessage(text + ":");
-            //voir avec Claude
-            //Donne une liste pour cet élement de façon inconnue
-            var selectedValue = $(this).val();
-            if (Array.isArray(selectedValue)) {
-                selectedValue = selectedValue[0];
-            }
-            if (evt.ctrlKey) {
-                return;
-            }
-            if (callback) {
-                return callback(selectedValue);
-            }
-            if (varToFill) {
-                //Il faut attribuer l'objet aux bon numéro de currentObject
-                self.history.VarFilling[self.history.currentIndex] = { VarFilled: varToFill, valueFilled: selectedValue };
-                if (Array.isArray(self.currentBot.params[varToFill])) {
-                    self.currentBot.params[varToFill].push(selectedValue);
-                } else {
-                    self.currentBot.params[varToFill] = selectedValue;
+        $("#" + this.divId)
+            .find("#bot_resourcesProposalSelect")
+            .bind("click", (evt) => {
+                // 'this' ici est l'instance de la classe, evt.currentTarget est le select DOM
+                var text = $(evt.currentTarget)
+                    .find("option:selected")
+                    .text();
+                if (text == "") {
+                    return;
                 }
-            }
+                this.insertBotMessage(text + ":");
 
-            self.nextStep(returnValue || selectedValue);
-        });
-    };
-    self.filterList = function (evt) {
+                var selectedValue = $(evt.currentTarget).val();
+                if (Array.isArray(selectedValue)) {
+                    selectedValue = selectedValue[0];
+                }
+                if (evt.ctrlKey) {
+                    return;
+                }
+
+                if (varToFill) {
+                    this.history.VarFilling[this.history.currentIndex] = { VarFilled: varToFill, valueFilled: selectedValue };
+                    if (Array.isArray(this.currentBot.params[varToFill])) {
+                        this.currentBot.params[varToFill].push(selectedValue);
+                    } else {
+                        this.currentBot.params[varToFill] = selectedValue;
+                    }
+                }
+                if (callback) {
+                    return callback(selectedValue);
+                }
+                this.nextStep(returnValue || selectedValue);
+            });
+    }
+    filterList(evt) {
         //var str = $(this).val();
         var str = $(evt.currentTarget).val();
-        if (!str && self.lastFilterListStr.length < str.length) {
+        if (!str && this.lastFilterListStr.length < str.length) {
             return;
         } else {
-            common.fillSelectOptions("bot_resourcesProposalSelect", self.currentList, false, "label", "id");
+            common.fillSelectOptions($("#" + this.divId).find("#bot_resourcesProposalSelect"), this.currentList, false, "label", "id");
         }
-        if (str.length < 2 && self.lastFilterListStr.length < str.length) {
+        if (str.length < 2 && this.lastFilterListStr.length < str.length) {
             return;
         }
-        self.lastFilterListStr = str;
+        this.lastFilterListStr = str;
         str = str.toLowerCase();
         var selection = [];
-        self.currentList.forEach(function (item) {
+        this.currentList.forEach(function (item) {
             if (item.label.toLowerCase().indexOf(str) > -1) {
                 selection.push(item);
             }
         });
-        common.fillSelectOptions("bot_resourcesProposalSelect", selection, false, "label", "id");
-        UI.adjustSelectListSize("bot_resourcesProposalSelect", 10);
-        $("#botPanel").scrollTop($("#botPanel")[0].scrollHeight);
-    };
+        common.fillSelectOptions($("#" + this.divId).find("#bot_resourcesProposalSelect"), selection, false, "label", "id");
+        UI.adjustSelectListSize($("#" + this.divId).find("#bot_resourcesProposalSelect"), 10);
+        $("#" + this.divId)
+            .find("#botPanel")
+            .scrollTop($("#botPanel")[0].scrollHeight);
+    }
 
-    self.promptValue = function (message, varToFill, defaultValue, options, callback) {
-        $("#bot_resourcesProposalSelect").hide();
+    promptValue(message, varToFill, defaultValue, options, callback) {
+        $("#" + this.divId)
+            .find("#bot_resourcesProposalSelect")
+            .hide();
 
         if (options && options.datePicker) {
             //DateWidget.unsetDatePickerOnInput("botPromptInput");
             DateWidget.setDatePickerOnInput("botPromptInput", null, function (date) {
-                self.currentBot.params[varToFill] = date.getTime();
+                this.currentBot.params[varToFill] = date.getTime();
+                $("#" + this.divId)
+                    .find("#botPromptInput")
+                    .trigger("focus");
 
-                // self.nextStep();
+                // this.nextStep();
             });
         }
 
-        $("#botPromptInput").on("keyup", function (key) {
-            if (event.keyCode == 13 || event.keyCode == 9) {
-                DateWidget.unsetDatePickerOnInput("botPromptInput");
-                $("#bot_resourcesProposalSelect").show();
-                $("#botPromptInput").css("display", "none");
-                var value = $(this).val();
-                var varToFill = $("#botVarToFill").val();
-                if (!varToFill) {
-                    return this.previousStep();
-                }
-                //Il faut attribuer l'objet aux bon numéro de currentObject
-                self.history.VarFilling[self.history.currentIndex] = { VarFilled: varToFill, valueFilled: value.trim() };
+        $("#" + this.divId)
+            .find("#botPromptInput")
+            .on("keyup", (evt) => {
+                if (evt.keyCode == 13 || evt.keyCode == 9) {
+                    DateWidget.unsetDatePickerOnInput("botPromptInput");
+                    $("#" + this.divId)
+                        .find("#bot_resourcesProposalSelect")
+                        .show();
+                    $("#" + this.divId)
+                        .find("#botPromptInput")
+                        .css("display", "none");
+                    var value = $(evt.currentTarget).val();
+                    var varToFill = $("#" + this.divId)
+                        .find("#botVarToFill")
+                        .val();
+                    if (!varToFill) {
+                        return this.previousStep();
+                    }
+                    //Il faut attribuer l'objet aux bon numéro de currentObject
+                    this.history.VarFilling[this.history.currentIndex] = { VarFilled: varToFill, valueFilled: value.trim() };
 
-                self.currentBot.params[varToFill] = value.trim();
-                self.insertBotMessage(value);
-                $("#botPromptInput").off();
-                if (callback) {
-                    return callback(value);
-                } else {
-                    self.nextStep();
+                    this.currentBot.params[varToFill] = value.trim();
+                    this.insertBotMessage(value);
+                    $("#" + this.divId)
+                        .find("#botPromptInput")
+                        .off();
+                    if (callback) {
+                        return callback(value);
+                    } else {
+                        this.nextStep();
+                    }
                 }
-            }
-        });
-        self.clearProposalSelect();
-        $("#botVarToFill").val(varToFill);
-        $("#botPromptInput").val(defaultValue || "");
-        $("#botPromptInput").css("display", "block");
-        $("#botPromptInput").trigger("focus");
-        if (!self.history.step.includes(self.history.currentIndex)) {
-            self.history.step.push(self.history.currentIndex);
+            });
+        this.clearProposalSelect();
+        $("#" + this.divId)
+            .find("#botVarToFill")
+            .val(varToFill);
+        $("#" + this.divId)
+            .find("#botPromptInput")
+            .val(defaultValue || "");
+        $("#" + this.divId)
+            .find("#botPromptInput")
+            .css("display", "block");
+        $("#" + this.divId)
+            .find("#botPromptInput")
+            .trigger("focus");
+        if (!this.history.step.includes(this.history.currentIndex)) {
+            this.history.step.push(this.history.currentIndex);
         }
-    };
+    }
 
-    self.insertBotMessage = function (str, options) {
+    insertBotMessage(str, options) {
         if (!str) {
             return;
         }
         if (!options) {
             options = {};
         }
-        if (options.question) {
+
+        if (options.isQuestion) {
             var chat_class = "chat-left";
         } else {
             var chat_class = "chat-right";
@@ -439,47 +522,60 @@ const botEngineClass = function () {
         html += "<span class='" + chat_class + "' id='" + tokenId + "'>" + str + "</span>";
         if (chat_class == "chat-left") {
             html += "</div>";
-            self.lastTokenId = tokenId;
+            this.lastTokenId = tokenId;
         }
         if (chat_class == "chat-right") {
-            $(html).insertAfter("#" + self.lastTokenId);
+            $(html).insertAfter("#" + this.lastTokenId);
         } else {
-            $(html).insertBefore("#bot_input");
+            $("#" + this.divId)
+                .find("#botTA")
+                .prepend(html);
+            //$(html).insertBefore("#bot_input");
         }
 
-        $("#bot_input").val("");
-        $("#bot_input").trigger("focus");
+        $("#" + this.divId)
+            .find("#bot_input")
+            .val("");
+        $("#" + this.divId)
+            .find("#bot_input")
+            .trigger("focus");
         if ($("#botDiv")[0].scrollHeight > 500) {
             $("#botPanel").scrollTop($("#botPanel")[0].scrollHeight);
         }
 
         return;
-    };
+    }
 
-    self.showAlternatives = function (alternatives, varToFill) {
+    showAlternatives(alternatives, varToFill) {
         var choices = [];
         for (var key in alternatives) {
             choices.push({ id: key, label: key });
         }
 
-        self.showList(choices, varToFill);
-        self.setStepMessage();
-    };
+        this.showList(choices, varToFill);
+        // alternatives has no message because is not a function
+        // message of alternative is last setted function question message
+        //this.setStepMessage();
+    }
 
-    self.getQueryText = function () {
+    getQueryText() {
         var queryText = "";
         $(".bot-token").each(function () {
             queryText += $(this).html();
         });
         return queryText;
-    };
-    self.clearProposalSelect = function () {
-        $("#bot_resourcesProposalSelect").find("option").remove().end();
-    };
+    }
+    clearProposalSelect() {
+        $("#" + this.divId)
+            .find("#bot_resourcesProposalSelect")
+            .find("option")
+            .remove()
+            .end();
+    }
 
-    self.exportToGraph = function () {
-        var functionTitles = self.currentBot.functionTitles;
-        var workflow = self.initialWorkflow;
+    exportToGraph() {
+        var functionTitles = this.currentBot.functionTitles;
+        var workflow = this.initialWorkflow;
 
         var visjsData = { nodes: [], edges: [] };
 
@@ -520,9 +616,9 @@ const botEngineClass = function () {
                     }
                 }
             }
-        };
+        }
 
-        var title = self.currentBot.title;
+        var title = this.currentBot.title;
         visjsData.nodes.push({
             id: title,
             label: title,
@@ -546,11 +642,11 @@ const botEngineClass = function () {
         $("#mainDialogDiv").dialog("open");
         //  $("#mainDialogDiv").parent().css("z-index", 1);
         Lineage_whiteboard.drawNewGraph(visjsData, "botGraphDiv", {
-            layoutHierarchical: { vertical: true, levelSeparation: 150, nodeSpacing: 50, direction: "LR" },
+            layoutHierarchical: { levelSeparation: 150, nodeSpacing: 50, direction: "LR" },
             physics: { enabled: true },
         });
-    };
-    self.fillStartParams = function (params) {
+    }
+    fillStartParams(params) {
         var startParams = [];
         var param;
         for (let i = 0; i < params.length; i++) {
@@ -566,10 +662,38 @@ const botEngineClass = function () {
             startParams.push(param);
         }
         return startParams;
-    };
+        /* if($('#botContainerDiv')?.length >0){
+            self.newStartParams =startParams;
 
-    return self;
-};
-export default botEngineClass;
+           
+        }else{
+            self.startParams = startParams;
+        }*/
 
-window.botEngineClass = botEngineClass;
+        return;
+    }
+    deleteLastMessages(numberOfMessagesToRemove) {
+        if (!numberOfMessagesToRemove) {
+            numberOfMessagesToRemove = 1;
+        }
+        for (var i = 0; i < numberOfMessagesToRemove; i++) {
+            var messageDivs = $("#" + this.divId)
+                .find("#botTA")
+                .children();
+            if (messageDivs.length > 0) {
+                var lastMessageDiv = $(messageDivs[0]);
+                var lastMessages = $(lastMessageDiv).children().filter("span");
+                if (lastMessages.length == 1) {
+                    $(lastMessageDiv).remove();
+                } else {
+                    $(lastMessages[1]).remove();
+                }
+            }
+        }
+    }
+   
+}
+
+export default BotEngineClass;
+
+// window.botEngineClass = new BotEngineClass(); // Uncomment if global instance is needed

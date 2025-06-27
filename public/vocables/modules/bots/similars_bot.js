@@ -1,9 +1,13 @@
+import BotEngineClass from "./_botEngineClass.js";
+import CommonBotFunctions_class from "./_commonBotFunctions_class.js";
+
 var Similars_bot = (function () {
     var self = {};
+    self.myBotEngine = new BotEngineClass();
 
     self.start = function (workflow, _params, callbackFn) {
         self.title = _params?.title || "Similars";
-        var startParams = _botEngine.fillStartParams(arguments);
+        var startParams = self.myBotEngine.fillStartParams(arguments);
 
         if (!workflow) {
             workflow = self.nodeSelectionWorkflow;
@@ -11,15 +15,15 @@ var Similars_bot = (function () {
         self.params = { nodeSelection: "", source: [], mode: "", output: "", parents: [] };
         self.profiles = null;
         self.users = null;
-        _botEngine.init(Similars_bot, workflow, null, function () {
-            _botEngine.startParams = startParams;
+        self.myBotEngine.init(Similars_bot, workflow, null, function () {
+            self.myBotEngine.startParams = startParams;
             if (_params) {
                 for (var key in _params) {
                     self.params[key] = _params[key];
                 }
             }
 
-            _botEngine.nextStep();
+            self.myBotEngine.nextStep();
         });
     };
 
@@ -86,49 +90,49 @@ var Similars_bot = (function () {
 
     self.functions = {
         startFn: function () {
-            _botEngine.nextStep();
+            self.myBotEngine.nextStep();
         },
         endFn: function () {
-            _botEngine.end();
+            self.myBotEngine.end();
         },
         allWhiteboardNodesFn: function () {
             self.params.nodeSelection = "AllWhiteboardNodes";
-            _botEngine.nextStep();
+            self.myBotEngine.nextStep();
         },
         selectedWhiteboardNodesFn: function () {
             self.params.nodeSelection = "SelectedNodes";
-            _botEngine.nextStep();
+            self.myBotEngine.nextStep();
         },
         similarsInWhiteboardNodesFn: function () {
-            _botEngine.nextStep();
+            self.myBotEngine.nextStep();
         },
         similarsInSourceFn: function () {
             var sources = Object.keys(Config.sources);
-            _botEngine.showList(sources, "source", null, true);
+            self.myBotEngine.showList(sources, "source", null, true);
         },
         searchSimilarsInWorkflowFn: function () {
-            _botEngine.currentObj = self.searchSimilarsInWorkflow;
-            _botEngine.nextStep();
+            self.myBotEngine.currentObj = self.searchSimilarsInWorkflow;
+            self.myBotEngine.nextStep();
         },
         similarsSearchParamsFn: function () {
-            _botEngine.currentObj = self.similarsSearchParams;
-            _botEngine.nextStep();
+            self.myBotEngine.currentObj = self.similarsSearchParams;
+            self.myBotEngine.nextStep();
         },
         exactMatchFn: function () {
             self.params.mode = "exactMatch";
-            _botEngine.nextStep();
+            self.myBotEngine.nextStep();
         },
         fuzzyMatchFn: function () {
             self.params.mode = "fuzzyMatch";
-            _botEngine.nextStep();
+            self.myBotEngine.nextStep();
         },
         saveWorkflowFn: function () {
-            _botEngine.currentObj = self.saveWorkflow;
-            _botEngine.nextStep();
+            self.myBotEngine.currentObj = self.saveWorkflow;
+            self.myBotEngine.nextStep();
         },
         filterResultsWorkflowFn: function () {
-            _botEngine.currentObj = self.filterResultsWorkflow;
-            _botEngine.nextStep();
+            self.myBotEngine.currentObj = self.filterResultsWorkflow;
+            self.myBotEngine.nextStep();
         },
         hasFilterFn: function () {
             var parents = [];
@@ -140,19 +144,19 @@ var Similars_bot = (function () {
             parents = common.array.distinctValues(parents);
             self.params.parents = parents;
             if (parents.length > 0) {
-                _botEngine.nextStep();
+                self.myBotEngine.nextStep();
             } else {
                 self.functions.saveWorkflowFn();
             }
         },
         noFilterFn: function () {
-            _botEngine.nextStep();
+            self.myBotEngine.nextStep();
         },
         setFilterFn: function () {
             if (self.params.parents.length > 0) {
-                _botEngine.showList(self.params.parents, "filterParent", null, true);
+                self.myBotEngine.showList(self.params.parents, "filterParent", null, true);
             } else {
-                _botEngine.nextStep();
+                self.myBotEngine.nextStep();
             }
         },
         filterResultsFn: function () {
@@ -167,35 +171,35 @@ var Similars_bot = (function () {
                     return nodeIds.includes(edge.to);
                 });
             }
-            _botEngine.nextStep();
+            self.myBotEngine.nextStep();
         },
         elasticQueryFn: function () {
             if (self.params.source?.length > 0) {
                 Lineage_similars.drawSourceSimilars(Lineage_sources.activeSource, self.params.source, self.params.mode, self.params.nodeSelection, "no draw", function () {
-                    _botEngine.nextStep();
+                    self.myBotEngine.nextStep();
                 });
             } else {
                 Lineage_similars.drawWhiteBoardSimilars(self.params.nodeSelection, self.params.mode, "no draw");
-                _botEngine.nextStep();
+                self.myBotEngine.nextStep();
             }
         },
         drawResultsFn: function () {
             Lineage_similars.displaySimilars("graph", Lineage_similars.similarsSources, self.params.source, Lineage_sources.activeSource, function () {
-                _botEngine.nextStep();
+                self.myBotEngine.nextStep();
             });
         },
         saveResultsFn: function () {
-            _botEngine.nextStep();
+            self.myBotEngine.nextStep();
             Lineage_similars.save.showDialog();
         },
         displayInTableFn: function () {
             Lineage_similars.displaySimilars("table", Lineage_similars.similarsSources, self.params.source, Lineage_sources.activeSource, function () {
-                _botEngine.nextStep();
+                self.myBotEngine.nextStep();
             });
         },
         sourceWorkflowFn: function () {
-            _botEngine.currentObj = self.sourceWorkflow;
-            _botEngine.nextStep();
+            self.myBotEngine.currentObj = self.sourceWorkflow;
+            self.myBotEngine.nextStep();
         },
     };
     return self;

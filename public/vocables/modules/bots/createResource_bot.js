@@ -1,8 +1,8 @@
 import Sparql_common from "../sparqlProxies/sparql_common.js";
-import _botEngine from "./_botEngine.js";
+import BotEngineClass from "./_botEngineClass.js";
 import Lineage_sources from "../tools/lineage/lineage_sources.js";
 import Lineage_whiteboard from "../tools/lineage/lineage_whiteboard.js";
-import CommonBotFunctions from "./_commonBotFunctions.js";
+import CommonBotFunctions_class from "./_CommonBotFunctions_class.js";
 import Lineage_createRelation from "../tools/lineage/lineage_createRelation.js";
 import common from "../shared/common.js";
 import Sparql_generic from "../sparqlProxies/sparql_generic.js";
@@ -11,21 +11,22 @@ import Lineage_createResource from "../tools/lineage/lineage_createResource.js";
 
 var CreateResource_bot = (function () {
     var self = {};
+    self.myBotEngine = new BotEngineClass();
     self.title = "Create Resource";
 
     self.start = function (workflow, _params, callback) {
-        var startParams = _botEngine.fillStartParams(arguments);
+        var startParams = self.myBotEngine.fillStartParams(arguments);
         self.callback = callback;
         if (!workflow) workflow = self.workflow;
-        _botEngine.init(CreateResource_bot, workflow, null, function () {
-            _botEngine.startParams = startParams;
+        self.myBotEngine.init(CreateResource_bot, workflow, null, function () {
+            self.myBotEngine.startParams = startParams;
             self.params = { source: self.source || Lineage_sources.activeSource, resourceType: "", resourceLabel: "", currentVocab: "" };
             if (_params)
                 for (var key in _params) {
                     self.params[key] = _params[key];
                 }
             self.source = self.params.source || Lineage_sources.activeSource;
-            _botEngine.nextStep();
+            self.myBotEngine.nextStep();
         });
     };
 
@@ -83,22 +84,22 @@ var CreateResource_bot = (function () {
                 //   { id: "ImportClass", label: "Import Class" },
                 //  { id: "ImportSource", label: "Add import source " },
             ];
-            _botEngine.showList(choices, "resourceType");
+            self.myBotEngine.showList(choices, "resourceType");
         },
 
         listVocabsFn: function () {
-            CommonBotFunctions.listVocabsFn(self.source, "currentVocab");
+            CommonBotFunctions_class.listVocabsFn(self.myBotEngine, self.source, "currentVocab");
         },
 
         promptResourceLabelFn: function () {
-            _botEngine.promptValue("resource label ", "resourceLabel");
+            self.myBotEngine.promptValue("resource label ", "resourceLabel");
             /*  self.params.resourceLabel = prompt("resource label ");
             _botEngine.insertBotMessage(self.params.resourceLabel);
             _botEngine.nextStep();*/
         },
 
         listSuperClassesFn: function () {
-            CommonBotFunctions.listVocabClasses(self.params.currentVocab, "resourceId", true);
+            CommonBotFunctions_class.listVocabClasses(self.myBotEngine, self.params.currentVocab, "resourceId", true);
         },
         listClassTypesFn: function () {
             self.functions.listSuperClassesFn();
@@ -113,16 +114,16 @@ var CreateResource_bot = (function () {
         listImportsFn: function () {
             var choices = Object.keys(Config.sources);
             choices.sort();
-            _botEngine.showList(choices, "importSource");
+            self.myBotEngine.showList(choices, "importSource");
         },
         saveImportSource: function () {
             var importSource = self.params.importSource;
             if (!importSource) {
                 alert("no source selected for import");
-                return _botEngine.reset();
+                return self.myBotEngine.reset();
             }
             Lineage_createRelation.setNewImport(self.params.source, importSource, function (err, result) {
-                _botEngine.nextStep();
+                self.myBotEngine.nextStep();
             });
         },
 
@@ -133,17 +134,17 @@ var CreateResource_bot = (function () {
                 var triples = Lineage_createResource.getResourceTriples(self.params.source, self.params.resourceType, null, self.params.resourceLabel, self.params.resourceId);
                 Lineage_createResource.writeResource(self.params.source, triples, function (err, resourceId) {
                     if (err) {
-                        _botEngine.abort(err.responseText);
+                        self.myBotEngine.abort(err.responseText);
                     }
                     self.params.resourceId = resourceId;
-                    _botEngine.nextStep();
+                    self.myBotEngine.nextStep();
                 });
             }
         },
 
         editResourceFn: function () {
             NodeInfosWidget.showNodeInfos(self.params.source, self.params.resourceId, "mainDialogDiv");
-            _botEngine.end();
+            self.myBotEngine.end();
             //  _botEngine.nextStep();
         },
         drawResourceFn: function () {
@@ -155,23 +156,23 @@ var CreateResource_bot = (function () {
                 },
             };
             Lineage_whiteboard.drawNodesAndParents(nodeData, 1, { legendType: "individualClasses" });
-            _botEngine.nextStep();
+            self.myBotEngine.nextStep();
         },
         newResourceFn: function () {
             self.start();
         },
 
         promptDatatypePropertyLabelFn: function () {
-            _botEngine.promptValue("DatatypePropertyLabel", "datatypePropertyLabel");
+            self.myBotEngine.promptValue("DatatypePropertyLabel", "datatypePropertyLabel");
         },
 
         listDatatypePropertyDomainFn: function () {
-            if (self.params.datatypePropertyDomain) return _botEngine.nextStep();
-            CommonBotFunctions.listVocabClasses(self.params.source, "datatypePropertyDomain", false, [{ id: "", label: "none" }]);
+            if (self.params.datatypePropertyDomain) return self.myBotEngine.nextStep();
+            CommonBotFunctions_class.listVocabClasses(self.myBotEngine, self.params.source, "datatypePropertyDomain", false, [{ id: "", label: "none" }]);
         },
         listDatatypePropertyRangeFn: function () {
             var choices = ["", "xsd:string", "xsd:int", "xsd:float", "xsd:dateTime"];
-            _botEngine.showList(choices, "datatypePropertyRange");
+            self.myBotEngine.showList(choices, "datatypePropertyRange");
         },
 
         createDataTypePropertyFn: function (source, propLabel, domain, range, callback) {
@@ -227,7 +228,7 @@ var CreateResource_bot = (function () {
                     if (self.callback) {
                         return self.callback();
                     }
-                    _botEngine.nextStep();
+                    self.myBotEngine.nextStep();
                 });
             });
         },

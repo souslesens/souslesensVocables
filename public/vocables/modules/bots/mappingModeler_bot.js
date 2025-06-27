@@ -1,27 +1,28 @@
-import _botEngine from "./_botEngine.js";
-import CommonBotFunctions from "./_commonBotFunctions.js";
+import BotEngineClass from "./_botEngineClass.js";
+import CommonBotFunctions_class from "./_commonBotFunctions_class.js";
 import CreateResource_bot from "./createResource_bot.js";
 import MappingsDetails from "../tools/mappingModeler/mappingsDetails.js";
 
 var MappingModeler_bot = (function () {
     var self = {};
+    self.myBotEngine = new BotEngineClass();
 
     self.start = function (workflow, _params, callbackFn) {
         self.title = _params.title || "Create Resource";
-        var startParams = _botEngine.fillStartParams(arguments);
+        var startParams = self.myBotEngine.fillStartParams(arguments);
         self.callbackFn = callbackFn;
         if (!workflow) {
             workflow = self.workflow;
         }
-        _botEngine.init(MappingModeler_bot, workflow, null, function () {
-            _botEngine.startParams = startParams;
+        self.myBotEngine.init(MappingModeler_bot, workflow, null, function () {
+            self.myBotEngine.startParams = startParams;
             self.params = {};
             if (_params) {
                 for (var key in _params) {
                     self.params[key] = _params[key];
                 }
             }
-            _botEngine.nextStep();
+            self.myBotEngine.nextStep();
         });
     };
     self.workflowColumnmMappingOther = {
@@ -111,47 +112,41 @@ var MappingModeler_bot = (function () {
 
     self.functions = {
         startFn: function () {
-            _botEngine.nextStep();
+            self.myBotEngine.nextStep();
         },
         URItypeFn: function () {
             var choices = ["fromLabel", "blankNode", "randomIdentifier"];
-            _botEngine.showList(choices, "URItype");
+            self.myBotEngine.showList(choices, "URItype");
         },
         rdfTypeFn: function () {
             var choices = ["owl:NamedIndividual", "owl:Class"];
             self.params.addingType = true;
-            _botEngine.showList(choices, "rdfType");
+            self.myBotEngine.showList(choices, "rdfType");
         },
         addTransformFn: function () {
             MappingsDetails.transform.showTansformDialog();
-
             self.params.addingTransform = true;
-            _botEngine.end();
+            self.myBotEngine.end();
         },
-
         labelFn: function () {
             var choices = self.params.columns;
             choices.splice(0, 0, "");
-            _botEngine.showList(choices, "rdfsLabel");
+            self.myBotEngine.showList(choices, "rdfsLabel");
         },
         promptLabelFn: function () {
-            _botEngine.promptValue("enter resource label", "rdfsLabel");
+            self.myBotEngine.promptValue("enter resource label", "rdfsLabel");
         },
-
         listNonObjectPropertiesVocabsFn: function () {
-            CommonBotFunctions.listVocabsFn(self.params.source, "nonObjectPropertyVocab", true);
+            CommonBotFunctions_class.listVocabsFn(self.myBotEngine, self.params.source, "nonObjectPropertyVocab", true);
         },
-
         listNonObjectPropertiesFn: function () {
-            // filter properties compatible with
-            var columnRdfType = null; //self.getColumnClass(self.params.tripleModels, self.params.column);
-
-            CommonBotFunctions.listNonObjectPropertiesFn(self.params.nonObjectPropertyVocab, "nonObjectPropertyId", columnRdfType);
+            var columnRdfType = null;
+            CommonBotFunctions_class.listNonObjectPropertiesFn(self.myBotEngine, self.params.nonObjectPropertyVocab, "nonObjectPropertyId", columnRdfType);
         },
         choosedateTypeFn: function () {
-            var datatypePropertyRange = _botEngine.currentBot.params.datatypePropertyRange;
+            var datatypePropertyRange = self.myBotEngine.currentBot.params.datatypePropertyRange;
             if (datatypePropertyRange != "xsd:dateTime") {
-                return _botEngine.nextStep();
+                return self.myBotEngine.nextStep();
             } else {
                 var choices = [
                     { id: "FR", label: "FR : DD/MM/YYYY hh:mm:ss" },
@@ -161,18 +156,18 @@ var MappingModeler_bot = (function () {
                     { id: "ISO-time", label: "ISO-time : YYYY-MM-DD hh:mm:ss" },
                     { id: "other", label: "other" },
                 ];
-                _botEngine.showList(choices, "nonObjectPropertyDateFormat", null, false, function (result) {
+                self.myBotEngine.showList(choices, "nonObjectPropertyDateFormat", null, false, function (result) {
                     if (result == "other") {
-                        return _botEngine.nextStep();
+                        return self.myBotEngine.nextStep();
                     }
                     self.params.nonObjectPropertyDateFormat = result;
-                    _botEngine.nextStep();
+                    self.myBotEngine.nextStep();
                 });
             }
             /*
             var range = Config.ontologiesVocabularyModels[self.params.nonObjectPropertyVocab].nonObjectProperties[self.params.nonObjectPropertyId].range;
             if (!range) {
-                return _botEngine.nextStep();
+                return self.myBotEngine.nextStep();
             }
             if (range != "xsd:dateTime") {
                 return _botEngine.nextStep();
@@ -198,9 +193,8 @@ var MappingModeler_bot = (function () {
 
         listTableColumnsFn: function () {
             var choices = self.params.columns;
-            _botEngine.showList(choices, "predicateObjectColumn");
+            self.myBotEngine.showList(choices, "predicateObjectColumn");
         },
-
         createDatatypePropertyFn: function () {
             var classId = self.params.columnClass;
             CreateResource_bot.start(
@@ -210,28 +204,27 @@ var MappingModeler_bot = (function () {
                     datatypePropertyDomain: classId,
                 },
                 function (err, result) {
-                    _botEngine.nextStep();
+                    self.myBotEngine.nextStep();
                 },
             );
         },
         listDatatypePropertyRangeFn: function () {
             var choices = ["", "xsd:string", "xsd:int", "xsd:float", "xsd:dateTime"];
-            _botEngine.showList(choices, "datatypePropertyRange");
+            self.myBotEngine.showList(choices, "datatypePropertyRange");
         },
         listVocabsFn: function () {
             if (self.params.filteredUris && self.params.filteredUris.length > 0) {
-                _botEngine.nextStep();
+                self.myBotEngine.nextStep();
             } else {
-                CommonBotFunctions.listVocabsFn(self.params.source, "currentVocab");
+                CommonBotFunctions_class.listVocabsFn(self.myBotEngine, self.params.source, "currentVocab");
             }
         },
-
         listSuperClassesFn: function () {
-            CommonBotFunctions.listVocabClasses(self.params.currentVocab, "superClassId", true);
+            CommonBotFunctions_class.listVocabClasses(self.myBotEngine, self.params.currentVocab, "superClassId", true);
         },
         setSubClassOfFn: function () {
             self.params.addingSubClassOf = self.params.superClassId;
-            _botEngine.nextStep();
+            self.myBotEngine.nextStep();
         },
         addLookUpFn: function () {
             Lookups_bot.start(Lookups_bot.lookUpWorkflow, {}, function (err, result) {

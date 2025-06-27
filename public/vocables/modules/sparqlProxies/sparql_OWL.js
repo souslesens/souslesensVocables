@@ -1573,8 +1573,15 @@ var Sparql_OWL = (function () {
                     var valueIds = noValueLabelResults.map(function (result) {
                         return result.value?.value;
                     });
+
+                    var options = {};
                     var filter = Sparql_common.setFilter("id", valueIds);
-                    Sparql_OWL.getLabelsMap(sourceLabel, { filter: filter }, function (err, labelsMap) {
+                    if (valueIds.length == 0) {
+                        options.noExecute = true;
+                    } else {
+                        options.filter = filter;
+                    }
+                    Sparql_OWL.getLabelsMap(sourceLabel, options, function (err, labelsMap) {
                         if (err) {
                             return callback(err);
                         }
@@ -1942,6 +1949,9 @@ var Sparql_OWL = (function () {
     self.getLabelsMap = function (sourceLabel, options, callback) {
         if (!options) {
             options = {};
+        }
+        if (options.noExecute) {
+            return callback(null, {});
         }
         if (!Config.sources[sourceLabel].graphUri) {
             options.selectGraph = false;

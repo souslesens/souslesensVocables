@@ -514,10 +514,14 @@ defaultLang = 'en';*/
 
                 var metaDataStr = str;
                 var metaDataProps = Object.values(Config.dictionaryMetaDataPropertiesMap);
+                var options = {};
                 if (Object.keys(valuesLabelsToMap).length > 0) {
                     var filter = Sparql_common.setFilter("id", Object.keys(valuesLabelsToMap));
+                    options.filter = filter;
+                } else {
+                    options.noExecute = true;
                 }
-                Sparql_OWL.getLabelsMap(sourceLabel, { filter: filter }, function (err, result) {
+                Sparql_OWL.getLabelsMap(sourceLabel, options, function (err, result) {
                     if (err) {
                         UI.message(err.responseText);
                         return;

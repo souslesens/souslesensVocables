@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.12.0](https://github.com/souslesens/souslesensVocables/compare/2.11.1...2.12.0) (2025-07-01)
+
+
+### Features
+
+* **api:** add a logged user route to fetch the prefixes ([f0c20ac](https://github.com/souslesens/souslesensVocables/commit/f0c20ac4b130499545cabda718ab8e8f1290c4dd))
+* **mainapp:** add the Group column to GraphManagement ([808e8d4](https://github.com/souslesens/souslesensVocables/commit/808e8d441d827ef2ab5dbd35cd20343ad47338eb)), closes [#1359](https://github.com/souslesens/souslesensVocables/issues/1359)
+* **mainapp:** add the Triple unit for the Graph Size column in GraphManagement ([76f6dc5](https://github.com/souslesens/souslesensVocables/commit/76f6dc59a3ae690fcc595d0b44ecf150c3d07016)), closes [#1360](https://github.com/souslesens/souslesensVocables/issues/1360)
+
+
+### Bug Fixes
+
+* **deflate.js:** remove onmessage and onconnect + don't call function ([f800339](https://github.com/souslesens/souslesensVocables/commit/f8003391b3fffca317c9244666e64880401510d9))
+* **mainapp:** correctly sort the date in the Logs table view ([23cee7d](https://github.com/souslesens/souslesensVocables/commit/23cee7d1b8b7b691da2163a5dccc7909fe764360))
+
 ### [2.11.1](https://github.com/souslesens/souslesensVocables/compare/2.11.0...2.11.1) (2025-06-25)
 
 ## [2.11.0](https://github.com/souslesens/souslesensVocables/compare/2.10.0...2.11.0) (2025-06-25)

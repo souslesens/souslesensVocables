@@ -1,16 +1,17 @@
-import _botEngine from "./_botEngine.js";
+import BotEngineClass from "./_botEngineClass.js";
 import Sparql_proxy from "../sparqlProxies/sparql_proxy.js";
 
 var CreateSLSVsource_bot = (function () {
     var self = {};
+    self.myBotEngine = new BotEngineClass();
 
     self.title = "OntoCreator";
 
     self.start = function () {
-        _botEngine.init(CreateSLSVsource_bot, self.workflow, null, function () {
+        self.myBotEngine.init(CreateSLSVsource_bot, self.workflow, null, function () {
             self.params = { sourceLabel: "", graphUri: "", imports: [] };
 
-            _botEngine.nextStep();
+            self.myBotEngine.nextStep();
         });
     };
     self.loadingWorkflow = {
@@ -68,22 +69,22 @@ var CreateSLSVsource_bot = (function () {
     };
     self.functions = {
         initFn: function () {
-            _botEngine.nextStep();
+            self.myBotEngine.nextStep();
         },
         createSLSVsourceFn: function () {
-            _botEngine.nextStep();
+            self.myBotEngine.nextStep();
         },
         promptSourceNameFn: function () {
-            _botEngine.promptValue("source label", "sourceLabel", "", null, function (value) {
+            self.myBotEngine.promptValue("source label", "sourceLabel", "", null, function (value) {
                 if (!value) {
-                    return _botEngine.previousStep();
+                    return self.myBotEngine.previousStep();
                 }
                 self.params.sourceLabel = value;
-                _botEngine.nextStep();
+                self.myBotEngine.nextStep();
             });
         },
         promptGraphUriFn: function () {
-            _botEngine.promptValue("graph Uri", "graphUri", "http://");
+            self.myBotEngine.promptValue("graph Uri", "graphUri", "http://");
         },
         validateGraphUriFn: function () {
             // check that graphUri is a valid URL using URL constructor.
@@ -93,47 +94,47 @@ var CreateSLSVsource_bot = (function () {
                 new URL(self.params.graphUri);
             } catch {
                 alert("graphUri is not a correct URL");
-                return _botEngine.previousStep();
+                return self.myBotEngine.previousStep();
             }
-            _botEngine.nextStep();
+            self.myBotEngine.nextStep();
         },
 
         listImportsFn: function () {
             var sources = Object.keys(Config.sources);
             86;
             sources.sort();
-            _botEngine.showList(sources, "imports");
+            self.myBotEngine.showList(sources, "imports");
         },
 
         afterImportFn: function () {
-            //_botEngine.previousStep();
-            _botEngine.currentObj = self.workflow2;
-            _botEngine.nextStep(self.workflow2);
+            //self.myBotEngine.previousStep();
+            self.myBotEngine.currentObj = self.workflow2;
+            self.myBotEngine.nextStep(self.workflow2);
         },
         afterImportFnWithoutUpload: function () {
-            //_botEngine.previousStep();
-            _botEngine.currentObj = self.workflow2withoutUpload;
-            _botEngine.nextStep(self.workflow2withoutUpload);
+            //self.myBotEngine.previousStep();
+            self.myBotEngine.currentObj = self.workflow2withoutUpload;
+            self.myBotEngine.nextStep(self.workflow2withoutUpload);
         },
 
         uploadFromUrlFn: function () {
-            _botEngine.promptValue("enter remote Url", "uploadUrl", "", null, function (value) {
+            self.myBotEngine.promptValue("enter remote Url", "uploadUrl", "", null, function (value) {
                 if (!value) {
                     alert("enter a value ");
-                    return _botEngine.previousStep();
+                    return self.myBotEngine.previousStep();
                 }
                 self.uploadGraphFromUrl(function (err, result) {
                     if (err) {
                         return alert(err.responseText || err);
                     }
-                    return _botEngine.nextStep();
+                    return self.myBotEngine.nextStep();
                 });
             });
         },
         uploadFromFileFn: function () {
             window.UploadGraphModal.open(self.params.sourceLabel, () => {
-                _botEngine.currentObj = self.workflowUpload;
-                _botEngine.nextStep(self.workflowUpload);
+                self.myBotEngine.currentObj = self.workflowUpload;
+                self.myBotEngine.nextStep(self.workflowUpload);
             });
         },
 
@@ -153,9 +154,9 @@ var CreateSLSVsource_bot = (function () {
                 function (err) {
                     if (err) {
                         alert(err.responseText);
-                        return _botEngine.reset();
+                        return self.myBotEngine.reset();
                     }
-                    return _botEngine.nextStep();
+                    return self.myBotEngine.nextStep();
                 },
             );
         },
@@ -179,9 +180,9 @@ var CreateSLSVsource_bot = (function () {
                 function (err) {
                     if (err) {
                         alert(err.responseText);
-                        return _botEngine.reset();
+                        return self.myBotEngine.reset();
                     }
-                    return _botEngine.nextStep();
+                    return self.myBotEngine.nextStep();
                 },
             );
         },
@@ -201,16 +202,16 @@ var CreateSLSVsource_bot = (function () {
                 if (!graphUri) {
                     alert("graphUri not found in the source file, please enter it manually");
                     // Enter it manually and continue worflow
-                    return _botEngine.promptValue("enter manually graphUri", "graphUri", self.params.graphUri, null, function (value) {
+                    return self.myBotEngine.promptValue("enter manually graphUri", "graphUri", self.params.graphUri, null, function (value) {
                         if (!value) {
                             alert("enter a value ");
-                            return _botEngine.previousStep();
+                            return self.myBotEngine.previousStep();
                         }
                         self.params.graphUri = value;
-                        _botEngine.nextStep();
+                        self.myBotEngine.nextStep();
                     });
                 } else {
-                    _botEngine.nextStep();
+                    self.myBotEngine.nextStep();
                 }
             });
         },
@@ -219,7 +220,7 @@ var CreateSLSVsource_bot = (function () {
                 var sourceConfig = self.params.newConfig[self.params.sourceLabel];
                 if (!sourceConfig) {
                     alert("source not registered");
-                    return _botEngine.reset();
+                    return self.myBotEngine.reset();
                 }
             }
 
@@ -232,7 +233,7 @@ var CreateSLSVsource_bot = (function () {
                 contentType: "application/json",
                 dataType: "json",
                 success: function (data, _textStatus, _jqXHR) {
-                    return _botEngine.nextStep();
+                    return self.myBotEngine.nextStep();
                 },
                 error: function (err) {
                     return alert(err.responseText);
@@ -289,10 +290,10 @@ var CreateSLSVsource_bot = (function () {
                 if (data.result == -1) {
                     UI.message("", true);
                     alert("graph already exist ");
-                    return _botEngine.reset();
+                    return self.myBotEngine.reset();
                 } else {
                     UI.message("imported triples :" + data.result, true);
-                    _botEngine.nextStep();
+                    self.myBotEngine.nextStep();
                 }
                 callback();
             })
@@ -317,7 +318,7 @@ var CreateSLSVsource_bot = (function () {
                 if (data.result == -1) {
                     UI.message("", true);
                     alert("graph already exist ");
-                    return _botEngine.reset();
+                    return self.myBotEngine.reset();
                 } else {
                     UI.message("imported triples :" + data.result, true);
                     botEngine.nextStep();
@@ -325,7 +326,7 @@ var CreateSLSVsource_bot = (function () {
             })
             .catch((error) => {
                 alert("graph already exist ");
-                return _botEngine.reset();
+                return self.myBotEngine.reset();
             });
     };
 

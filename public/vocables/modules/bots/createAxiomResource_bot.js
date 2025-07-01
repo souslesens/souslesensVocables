@@ -1,23 +1,24 @@
 import Sparql_common from "../sparqlProxies/sparql_common.js";
-import _botEngine from "./_botEngine.js";
-import CommonBotFunctions from "./_commonBotFunctions.js";
+import BotEngineClass from "./_botEngineClass.js";
+import CommonBotFunctions_class from "./_commonBotFunctions_class.js";
 import Lineage_createRelation from "../tools/lineage/lineage_createRelation.js";
 import common from "../shared/common.js";
 import Lineage_createResource from "../tools/lineage/lineage_createResource.js";
 
 var CreateAxiomResource_bot = (function () {
     var self = {};
+    self.myBotEngine = new BotEngineClass();
     self.title = "Create Resource";
 
     self.start = function (workflow, _params, callbackFn) {
-        var startParams = _botEngine.fillStartParams(arguments);
+        var startParams = self.myBotEngine.fillStartParams(arguments);
 
         self.callbackFn = callbackFn;
         if (!workflow) {
             workflow = self.workflow;
         }
-        _botEngine.init(CreateAxiomResource_bot, workflow, null, function () {
-            _botEngine.startParams = startParams;
+        self.myBotEngine.init(CreateAxiomResource_bot, workflow, null, function () {
+            self.myBotEngine.startParams = startParams;
             self.params = {}; // { source:self._params.source, resourceType: "", resourceLabel: "", currentVocab: "" };
             if (_params) {
                 for (var key in _params) {
@@ -26,7 +27,7 @@ var CreateAxiomResource_bot = (function () {
             }
             self.source = self.params.source;
 
-            _botEngine.nextStep();
+            self.myBotEngine.nextStep();
         });
     };
 
@@ -53,32 +54,32 @@ var CreateAxiomResource_bot = (function () {
     self.functions = {
         listVocabsFn: function () {
             if (self.params.filteredUris && self.params.filteredUris.length > 0) {
-                _botEngine.nextStep();
+                self.myBotEngine.nextStep();
             } else {
-                CommonBotFunctions.listVocabsFn(self.source, "currentVocab");
+                CommonBotFunctions_class.listVocabsFn(self.source, "currentVocab");
             }
         },
 
         promptClassLabelFn: function () {
-            _botEngine.promptValue("Class label ", "resourceLabel");
+            self.myBotEngine.promptValue("Class label ", "resourceLabel");
         },
         promptObjectPropertyLabelFn: function () {
-            _botEngine.promptValue("ObjectProperty label ", "resourceLabel");
+            self.myBotEngine.promptValue("ObjectProperty label ", "resourceLabel");
         },
 
         listSuperClassesFn: function () {
             if (self.params.filteredUris && self.params.filteredUris.length > 0) {
-                _botEngine.showList(self.params.filteredUris, "superResourceId");
+                self.myBotEngine.showList(self.params.filteredUris, "superResourceId");
             } else {
-                CommonBotFunctions.listVocabClasses(self.params.currentVocab, "superResourceId", true);
+                CommonBotFunctions_class.listVocabClasses(self.params.currentVocab, "superResourceId", true);
             }
         },
 
         listSuperObjectPropertiesFn: function () {
             if (self.params.filteredUris && self.params.filteredUris.length > 0) {
-                _botEngine.showList(self.params.filteredUris, "superResourceId");
+                self.myBotEngine.showList(self.params.filteredUris, "superResourceId");
             } else {
-                CommonBotFunctions.listVocabPropertiesFn(self.params.currentVocab, "superResourceId");
+                CommonBotFunctions_class.listVocabPropertiesFn(self.params.currentVocab, "superResourceId");
             }
         },
 
@@ -113,7 +114,7 @@ var CreateAxiomResource_bot = (function () {
                         subType: null,
                     },
                 };
-                _botEngine.nextStep();
+                self.myBotEngine.nextStep();
             });
         },
 
@@ -142,7 +143,7 @@ var CreateAxiomResource_bot = (function () {
                     },
                 };
 
-                _botEngine.nextStep();
+                self.myBotEngine.nextStep();
             });
         },
     };

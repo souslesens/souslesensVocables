@@ -1,25 +1,27 @@
-import _botEngine from "./_botEngine.js";
+import BotEngineClass from "./_botEngineClass.js";
 import MappingColumnsGraph from "../tools/mappingModeler/mappingColumnsGraph.js";
 
 var Lookups_bot = (function () {
     var self = {};
+    var self = {};
+    self.myBotEngine = new BotEngineClass();
 
     self.start = function (workflow, _params, callbackFn) {
         self.title = _params.title || "LookUps Bot";
-        var startParams = _botEngine.fillStartParams(arguments);
+        var startParams = self.myBotEngine.fillStartParams(arguments);
         self.callbackFn = callbackFn;
         if (!workflow) {
             workflow = self.workflow;
         }
-        _botEngine.init(Lookups_bot, workflow, null, function () {
-            _botEngine.startParams = startParams;
+        self.myBotEngine.init(Lookups_bot, workflow, null, function () {
+            self.myBotEngine.startParams = startParams;
             self.params = {};
             if (_params) {
                 for (var key in _params) {
                     self.params[key] = _params[key];
                 }
             }
-            _botEngine.nextStep();
+            self.myBotEngine.nextStep();
         });
     };
 
@@ -55,8 +57,8 @@ var Lookups_bot = (function () {
         SetLookUpTransform: "Add Transform For the lookUp",
     };
     self.getChoosenTableColumns = function () {
-        if (_botEngine.currentBot.params.fileName && DataSourceManager.currentConfig.currentDataSource.tables) {
-            return DataSourceManager.currentConfig.currentDataSource.tables[_botEngine.currentBot.params.fileName];
+        if (self.myBotEngine.currentBot.params.fileName && DataSourceManager.currentConfig.currentDataSource.tables) {
+            return DataSourceManager.currentConfig.currentDataSource.tables[self.myBotEngine.currentBot.params.fileName];
         } else {
             return null;
         }
@@ -81,22 +83,22 @@ var Lookups_bot = (function () {
     };
     self.functions = {
         startFn: function () {
-            _botEngine.nextStep();
+            self.myBotEngine.nextStep();
         },
         SetLookupName: function () {
             // remplir avec le nom du mapping
-            _botEngine.currentBot.params["name"] = DataSourceManager.currentConfig.currentDataSource.currentTable + "|" + MappingColumnsGraph.currentGraphNode.label;
+            self.myBotEngine.currentBot.params["name"] = DataSourceManager.currentConfig.currentDataSource.currentTable + "|" + MappingColumnsGraph.currentGraphNode.label;
 
             //_botEngine.promptValue("Set up lookupName" , "resourceLabel");
 
-            _botEngine.nextStep();
+            self.myBotEngine.nextStep();
         },
         /*
         SetFileName: function () {
             // 
 
-            //_botEngine.currentBot.params['fileName']=DataSourceManager.currentConfig.currentDataSource.currentTable;
-            _botEngine.currentBot.params['type']=DataSourceManager.currentConfig.currentDataSource.type;
+            //self.myBotEngine.currentBot.params['fileName']=DataSourceManager.currentConfig.currentDataSource.currentTable;
+            self.myBotEngine.currentBot.params['type']=DataSourceManager.currentConfig.currentDataSource.type;
             //can be in other file/dataTable 
             var tables = self.getAllDataSources();
             _botEngine.showList(tables, "fileName");
@@ -109,58 +111,58 @@ var Lookups_bot = (function () {
             self.currentDataSource = JSON.parse(JSON.stringify(DataSourceManager.currentConfig.currentDataSource));
             //can be in other file/dataTable
             var tables = self.getAllDataSources();
-            _botEngine.showList(tables, "dataSource");
+            self.myBotEngine.showList(tables, "dataSource");
         },
         SetDataTable: function () {
-            if (self.dataSources[_botEngine.currentBot.params?.dataSource].type == "csvSource") {
-                _botEngine.currentBot.params["fileName"] = _botEngine.currentBot.params.dataSource;
+            if (self.dataSources[self.myBotEngine.currentBot.params?.dataSource].type == "csvSource") {
+                self.myBotEngine.currentBot.params["fileName"] = self.myBotEngine.currentBot.params.dataSource;
                 // initCsvSource
-                DataSourceManager.loadCsvSource(DataSourceManager.currentSlsvSource, _botEngine.currentBot.params.dataSource, false, function (err, columns) {
+                DataSourceManager.loadCsvSource(DataSourceManager.currentSlsvSource, self.myBotEngine.currentBot.params.dataSource, false, function (err, columns) {
                     if (err) {
                         return err;
                     } else {
-                        _botEngine.nextStep();
+                        self.myBotEngine.nextStep();
                     }
                 });
             } else {
                 // InitDatabaseSource
-                DataSourceManager.loadDatabaseSource(DataSourceManager.currentDatabaseSource, _botEngine.currentBot.params.dataSource, false, function (err, tables) {
-                    _botEngine.showList(tables, "fileName");
+                DataSourceManager.loadDatabaseSource(DataSourceManager.currentDatabaseSource, self.myBotEngine.currentBot.params.dataSource, false, function (err, tables) {
+                    self.myBotEngine.showList(tables, "fileName");
                 });
             }
         },
         SetLookUpSourceColumn: function () {
             // the source column is the source that we used to launch lookup bot
             var columns = Lookups_bot.getChoosenTableColumns();
-            _botEngine.showList(columns, "sourceColumn");
+            self.myBotEngine.showList(columns, "sourceColumn");
             /*if(MappingColumnsGraph?.currentGraphNode?.label){
-                _botEngine.currentBot.params['sourceColumn']=MappingColumnsGraph.currentGraphNode.label;
-                _botEngine.nextStep();
+                self.myBotEngine.currentBot.params['sourceColumn']=MappingColumnsGraph.currentGraphNode.label;
+                self.myBotEngine.nextStep();
             }*/
         },
         SetLookUpTargetColumn: function () {
             // to choose
             var columns = Lookups_bot.getChoosenTableColumns();
-            _botEngine.showList(columns, "targetColumn");
+            self.myBotEngine.showList(columns, "targetColumn");
         },
         SetLookUpTransform: function () {
             // see after
-            _botEngine.nextStep();
+            self.myBotEngine.nextStep();
         },
         SetLookUpTargetMapping: function () {
             var choices = ["subject", "object", "both"];
-            _botEngine.showList(choices, "targetMapping");
+            self.myBotEngine.showList(choices, "targetMapping");
         },
         SaveLookUp: function () {
             var lookup = {
-                name: _botEngine.currentBot.params.name,
-                fileName: _botEngine.currentBot.params.fileName,
-                sourceColumn: _botEngine.currentBot.params.sourceColumn,
-                targetColumn: _botEngine.currentBot.params.targetColumn,
-                transformFn: _botEngine.currentBot.params.transformFn,
-                targetMapping: _botEngine.currentBot.params.targetMapping,
-                dataSource: _botEngine.currentBot.params.dataSource,
-                type: self.dataSources[_botEngine.currentBot.params.dataSource].type,
+                name: self.myBotEngine.currentBot.params.name,
+                fileName: self.myBotEngine.currentBot.params.fileName,
+                sourceColumn: self.myBotEngine.currentBot.params.sourceColumn,
+                targetColumn: self.myBotEngine.currentBot.params.targetColumn,
+                transformFn: self.myBotEngine.currentBot.params.transformFn,
+                targetMapping: self.myBotEngine.currentBot.params.targetMapping,
+                dataSource: self.myBotEngine.currentBot.params.dataSource,
+                type: self.dataSources[self.myBotEngine.currentBot.params.dataSource].type,
             };
             if (!lookup.name) {
                 return alert("name is mandatory");
@@ -175,14 +177,17 @@ var Lookups_bot = (function () {
                 return alert("targetColumn is mandatory");
             }
             // add lookup in json graph config
-            DataSourceManager.rawConfig.lookups[lookup.name.split("|")[0]] = lookup;
+            DataSourceManager.rawConfig.lookups[lookup.name] = lookup;
             // restore currentDataSource
             DataSourceManager.currentConfig.currentDataSource = self.currentDataSource;
             MappingColumnsGraph.saveVisjsGraph(function (err, result) {
                 if (err) {
                     return alert(err);
                 }
-                _botEngine.nextStep();
+                self.myBotEngine.nextStep();
+                if (MappingsDetails.afterSaveColumnTechnicalMappingsDialog) {
+                    MappingsDetails.afterSaveColumnTechnicalMappingsDialog();
+                }
             });
         },
     };

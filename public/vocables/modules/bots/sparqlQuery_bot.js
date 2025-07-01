@@ -4,12 +4,12 @@ import Sparql_common from "../sparqlProxies/sparql_common.js";
 import CommonBotFunctions from "./_commonBotFunctions.js";
 import OntologyModels from "../shared/ontologyModels.js";
 import NonObjectPropertyFilterWorklow from "./_nonObjectPropertyFilterWorklow.js";
-//importmysBotEngine from "./myBotEngine.js";
+//importmysBotEngine from "./self.myBotEngine.js";
 import botEngine from "./_botEngineClass.js";
 import Export from "../shared/export.js";
 import KGquery from "../tools/KGquery/KGquery.js";
 import _commonBotFunctions from "./_commonBotFunctions.js";
-import _botEngine from "./_botEngine.js";
+import BotEngineClass from "./_botEngineClass.js";
 import VisjsGraphClass from "../graph/VisjsGraphClass.js";
 import KGquery_graph from "../tools/KGquery/KGquery_graph.js";
 import UserDataWidget from "../uiWidgets/userDataWidget.js";
@@ -19,12 +19,11 @@ var SparqlQuery_bot = (function () {
     var self = {};
     self.maxGraphDisplay = 150;
 
-    var myBotEngine = _botEngine; // new botEngine();
+    self.myBotEngine = new BotEngineClass();
 
     self.start = function (options) {
         self.title = "Query graph";
-
-        myBotEngine.init(SparqlQuery_bot, self.workflow, options, function () {
+        self.myBotEngine.init(SparqlQuery_bot, self.workflow, options, function () {
             self.params = {
                 source: Lineage_sources.activeSource,
                 labelsMap: {},
@@ -32,7 +31,7 @@ var SparqlQuery_bot = (function () {
                 currentClass: "",
                 currentFilter: "",
             };
-            myBotEngine.nextStep();
+            self.myBotEngine.nextStep();
         });
     };
 
@@ -213,23 +212,23 @@ var SparqlQuery_bot = (function () {
                 choices = ["Constraints"];
             }
 
-            myBotEngine.showList(choices, "resourceType");
+            self.myBotEngine.showList(choices, "resourceType");
         },
         afterChooseQueryType: function () {
             if (self.params.resourceType == "Facts") {
                 self.loadImplicitModel(Lineage_sources.activeSource, false, function (err, result) {
                     if (err) {
-                        myBotEngine.message("No  implicitModel available: probably no NamedIndividuals with type and/or ObjectProperty predicates");
+                        self.myBotEngine.message("No  implicitModel available: probably no NamedIndividuals with type and/or ObjectProperty predicates");
                         self.noFacts = true;
-                        myBotEngine.reset();
+                        self.myBotEngine.reset();
                     } else {
-                        myBotEngine.message("");
+                        self.myBotEngine.message("");
                         self.implicitModel = result;
-                        myBotEngine.nextStep();
+                        self.myBotEngine.nextStep();
                     }
                 });
             } else {
-                myBotEngine.nextStep();
+                self.myBotEngine.nextStep();
             }
         },
 
@@ -242,17 +241,17 @@ var SparqlQuery_bot = (function () {
             if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
                 choices.push({ id: "whiteboardNodes", label: "whiteboard content" });
                 choices.push({ id: "selectedNodes", label: "selected nodes" });
-                myBotEngine.showList(choices, "queryScope");
+                self.myBotEngine.showList(choices, "queryScope");
             } else {
                 self.params.queryScope = "activeSource";
-                //myBotEngine.deleteLastMessages();
-                return myBotEngine.nextStep("activeSource");
+                //self.myBotEngine.deleteLastMessages();
+                return self.myBotEngine.nextStep("activeSource");
             }
         },
 
         chooseFactFilterTypeFn: function () {
             var choices = ["Class", "ObjectProperty"];
-            myBotEngine.showList(choices, "predicateFilterType");
+            self.myBotEngine.showList(choices, "predicateFilterType");
         },
 
         chooseOutputTypeFn: function () {
@@ -265,7 +264,7 @@ var SparqlQuery_bot = (function () {
             if (self.params.predicateFilter) {
                 choices.splice(0, 0, "Add other predicate");
             }
-            myBotEngine.showList(choices, "outputType");
+            self.myBotEngine.showList(choices, "outputType");
         },
 
         listClassesFn: function () {
@@ -279,7 +278,7 @@ var SparqlQuery_bot = (function () {
             });
 
             common.array.sort(classes, "label");
-            myBotEngine.showList(classes, "currentClass");
+            self.myBotEngine.showList(classes, "currentClass");
         },
 
         listWhiteboardNodesObectProperties: function () {
@@ -289,7 +288,7 @@ var SparqlQuery_bot = (function () {
             Sparql_OWL.getIndividualsType(self.params.source, nodeIds, null, function (err, result) {
                 if (err) {
                     alert(err.responseText || err);
-                    return myBotEngine.end();
+                    return self.myBotEngine.end();
                 }
                 self.params.currentClass = null;
                 self.params.addToGraph = 1;
@@ -303,7 +302,7 @@ var SparqlQuery_bot = (function () {
 
                 var properties = self.filterObjectProperties(Object.keys(allClasses), null);
 
-                myBotEngine.showList(properties, "currentObjectProperty");
+                self.myBotEngine.showList(properties, "currentObjectProperty");
             });
         },
 
@@ -317,21 +316,21 @@ var SparqlQuery_bot = (function () {
             common.array.sort(properties, "label");
 
             properties.unshift({ id: "any", label: "any" });
-            myBotEngine.showList(properties, "currentObjectProperty");
+            self.myBotEngine.showList(properties, "currentObjectProperty");
         },
         setNonObjectPropertiesFilter: function () {
             if (!self.params.currentClass) {
-                return myBotEngine.nextStep();
+                return self.myBotEngine.nextStep();
             }
 
-            var nonObjectPropertyFilterWorklow = new NonObjectPropertyFilterWorklow(self.implicitModel, self.params, myBotEngine);
+            var nonObjectPropertyFilterWorklow = new NonObjectPropertyFilterWorklow(self.implicitModel, self.params, self.myBotEngine);
             nonObjectPropertyFilterWorklow.listNonObjectPropertiesFn(function (err, filter) {
                 if (err) {
                     alert(err.responseText || err);
-                    return myBotEngine.previousStep();
+                    return self.myBotEngine.previousStep();
                 }
                 self.params.nonObjectPropertyFilter = filter;
-                return myBotEngine.nextStep();
+                return self.myBotEngine.nextStep();
             });
         },
 
@@ -340,7 +339,7 @@ var SparqlQuery_bot = (function () {
             self.params.outputType = $("#sparqlQueryBot_outputTypeSelect").val();
             self.params.sparqlQuery = sparql;
             $("#smallDialogDiv").dialog("close");
-            // $("#" + myBotEngine.divId).dialog("open");
+            // $("#" + self.myBotEngine.divId).dialog("open");
             self.functions.buildResultFn();
         },
 
@@ -358,7 +357,7 @@ var SparqlQuery_bot = (function () {
                 var choices = ["Predicate", "Restriction", "RangeAndDomain"]; //
             }
 
-            myBotEngine.showList(choices, "objectPropertyResourceType");
+            self.myBotEngine.showList(choices, "objectPropertyResourceType");
         },
 
         /* choose predicates to graph or list based on objectProperties where curerntClass isSubject
@@ -367,7 +366,7 @@ var SparqlQuery_bot = (function () {
         chooseBindingPredicatesFn: function () {
             if (!self.params.currentClass) {
                 alert(" missing currentClass");
-                return myBotEngine.previousStep();
+                return self.myBotEngine.previousStep();
             }
 
             var filter = "";
@@ -377,7 +376,7 @@ var SparqlQuery_bot = (function () {
             self.getResourcesList("Predicate", "predicate", filter, {}, function (err, result) {
                 if (err) {
                     alert(err.responseText || err);
-                    return myBotEngine.previousStep();
+                    return self.myBotEngine.previousStep();
                 }
 
                 var jstreeData = [];
@@ -408,7 +407,7 @@ var SparqlQuery_bot = (function () {
                 // self.params.currentFilter += "filter(?predicate rdf:type ?type)"
                 self.params.drawOnlySubject = 1;
             }
-            myBotEngine.nextStep();
+            self.myBotEngine.nextStep();
         },
 
         choosePredicateDirectionFn: function () {
@@ -482,7 +481,7 @@ var SparqlQuery_bot = (function () {
                         }
                         Sparql_OWL.getFilteredTriples(self.params.source, whiteboardNodes, null, null, options, function (err, result) {
                             if (err) {
-                                return myBotEngine.error(err);
+                                return self.myBotEngine.error(err);
                             }
 
                             result.forEach(function (item) {
@@ -503,7 +502,7 @@ var SparqlQuery_bot = (function () {
                         }
                         Sparql_OWL.getFilteredTriples(self.params.source, null, null, whiteboardNodes, options, function (err, result) {
                             if (err) {
-                                return myBotEngine.error(err);
+                                return self.myBotEngine.error(err);
                             }
                             result.forEach(function (item) {
                                 if (!uniqueIds[item.prop.value]) {
@@ -523,9 +522,9 @@ var SparqlQuery_bot = (function () {
 
                     if (choices.length == 0) {
                         alert("no " + self.params.predicateDirection + " predicates found in this source");
-                        return myBotEngine.previousStep();
+                        return self.myBotEngine.previousStep();
                     }
-                    return myBotEngine.showList(choices, "predicateFilter", null, true);
+                    return self.myBotEngine.showList(choices, "predicateFilter", null, true);
                 },
             );
         },
@@ -542,7 +541,7 @@ var SparqlQuery_bot = (function () {
             }
 
             UI.message("", true);
-            return myBotEngine.showList(choices, "classFilter", null, true);
+            return self.myBotEngine.showList(choices, "classFilter", null, true);
         },
 
         buildResultFn: function () {
@@ -555,7 +554,7 @@ var SparqlQuery_bot = (function () {
                     predicate = "^" + predicate;
                 }
                 self.params.chainedPredicates.push(predicate);
-                myBotEngine.backToStep("choosePredicateDirectionFn");
+                self.myBotEngine.backToStep("choosePredicateDirectionFn");
 
                 return;
             }
@@ -587,7 +586,7 @@ var SparqlQuery_bot = (function () {
             if (self.params.currentObjectProperty && self.params.currentObjectProperty != "any") {
                 var propObj = JSON.parse(self.params.currentObjectProperty);
                 role = null;
-                myBotEngine.message("filter property " + propObj.predicate);
+                self.myBotEngine.message("filter property " + propObj.predicate);
                 // options.getType = 1
                 filter +=
                     "  ?subject rdf:type ?subjectType.\n" +
@@ -637,7 +636,7 @@ var SparqlQuery_bot = (function () {
             self.getResourcesList("Predicate", role, filter, options, function (err, result) {
                 if (err) {
                     alert(err.responseText || err);
-                    return myBotEngine.previousStep();
+                    return self.myBotEngine.previousStep();
                 }
 
                 if (self.params.sparqlQuery) {
@@ -651,7 +650,7 @@ var SparqlQuery_bot = (function () {
                 } else if (result.predicates.length >= self.params.maxPredicates && outputType != "CSV") {
                     self.params.queryLimit = null;
 
-                    myBotEngine.message(" too many predicates :display truncated at" + result.predicates.length);
+                    self.myBotEngine.message(" too many predicates :display truncated at" + result.predicates.length);
 
                     var choices = [
                         // {id: "REFINE_QUERY", label: "Refine query"},
@@ -660,13 +659,13 @@ var SparqlQuery_bot = (function () {
                         { id: "ABORT", label: "Abort" },
                     ];
 
-                    myBotEngine.showList(choices, null, null, false, function (action) {
+                    self.myBotEngine.showList(choices, null, null, false, function (action) {
                         if (action == "TRUNCATE_RESULT") {
                             self.functions.truncateQueryFn();
                         } else if (action == "EDIT_SPARQL") {
                             return self.editSparql("");
                         } else if (action == "ABORT") {
-                            myBotEngine.end();
+                            self.myBotEngine.end();
                         }
                     });
                 } else {
@@ -681,14 +680,14 @@ var SparqlQuery_bot = (function () {
             if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
                 choices.splice(0, 0, "Whiteboard nodes");
             }
-            myBotEngine.showList(choices, "constraintObject");
+            self.myBotEngine.showList(choices, "constraintObject");
         },
 
         chooseConstraintClassFn: function () {
             self.getResourcesList("Class", "subject", null, { withoutImports: 1 }, function (err, result) {
                 if (err) {
                     alert(err.responseText || err);
-                    return myBotEngine.previousStep();
+                    return self.myBotEngine.previousStep();
                 }
 
                 var choices = [];
@@ -700,7 +699,7 @@ var SparqlQuery_bot = (function () {
                 });
                 common.array.sort(choices, "label");
                 choices.unshift({ id: "any", label: "any" });
-                myBotEngine.showList(choices, "constraintClass");
+                self.myBotEngine.showList(choices, "constraintClass");
             });
         },
         chooseConstraintPropertyFn: function () {
@@ -708,7 +707,7 @@ var SparqlQuery_bot = (function () {
             self.getResourcesList("Predicate", "subject", filter, { withoutImports: 0 }, function (err, result) {
                 if (err) {
                     alert(err.responseText || err);
-                    return myBotEngine.previousStep();
+                    return self.myBotEngine.previousStep();
                 }
 
                 var choices = [];
@@ -721,7 +720,7 @@ var SparqlQuery_bot = (function () {
 
                 common.array.sort(choices, "label");
                 choices.unshift({ id: "any", label: "any" });
-                myBotEngine.showList(choices, "constraintObjectProperty");
+                self.myBotEngine.showList(choices, "constraintObjectProperty");
             });
         },
         chooseConstraintTypeFn: function () {
@@ -731,7 +730,7 @@ var SparqlQuery_bot = (function () {
                 choices.push("equivalentClass");
             }
 
-            myBotEngine.showList(choices, "constraintType");
+            self.myBotEngine.showList(choices, "constraintType");
         },
 
         buildConstraintResult: function () {
@@ -756,7 +755,7 @@ var SparqlQuery_bot = (function () {
                 self.getResourcesList("Restriction", null, filter, { withoutImports: 0 }, function (err, result) {
                     if (err) {
                         alert(err.responseText || err);
-                        return myBotEngine.previousStep();
+                        return self.myBotEngine.previousStep();
                     }
 
                     self.params.queryResult = result;
@@ -785,7 +784,7 @@ var SparqlQuery_bot = (function () {
                 self.getResourcesList("Predicate", null, filter, { withoutImports: 0 }, function (err, result) {
                     if (err) {
                         alert(err.responseText || err);
-                        return myBotEngine.previousStep();
+                        return self.myBotEngine.previousStep();
                     }
 
                     self.params.queryResult = result;
@@ -813,7 +812,7 @@ var SparqlQuery_bot = (function () {
             } else if (outputType == "CSV") {
                 self.exportResultToCSV(result);
             }
-            myBotEngine.nextStep();
+            self.myBotEngine.nextStep();
         },
 
         chooseSavedQueryFn: function () {
@@ -831,7 +830,7 @@ var SparqlQuery_bot = (function () {
                     if (result.id) {
                         UserDataWidget.loadUserDatabyId(result.id, function (err, result) {
                             if (err) {
-                                return myBotEngine.abort(err.responseText || err);
+                                return self.myBotEngine.abort(err.responseText || err);
                             }
                             self.params.currentSparql = result.data_content.sparqlQuery;
                             self.editSparql(result.data_label, result.data_comment);
@@ -844,7 +843,7 @@ var SparqlQuery_bot = (function () {
         showLastQueryFn: function () {
             if (self.lastQuery) {
                 self.editSparql("", "last Query", self.lastQuery);
-                myBotEngine.end();
+                self.myBotEngine.end();
             }
         },
     };
@@ -1128,15 +1127,15 @@ var SparqlQuery_bot = (function () {
             Lineage_whiteboard.drawNewGraph(visjsData, null, { skipDrawLegend: 1 });
         }
 
-        myBotEngine.reset();
+        self.myBotEngine.reset();
         var choices = [
             { id: "end", label: "end" },
             { id: "addPredicateToGraph", label: "add predicate to graph" },
         ];
-        myBotEngine.showList(choices);
-        /*  myBotEngine.showList(choices, null, null, null, function (value) {
+        self.myBotEngine.showList(choices);
+        /*  self.myBotEngine.showList(choices, null, null, null, function (value) {
                   if (value == "end") {
-                      return myBotEngine.end();
+                      return self.myBotEngine.end();
                   } else {
                       self.functions.listWhiteboardNodesObectProperties();
                   }
@@ -1193,11 +1192,11 @@ var SparqlQuery_bot = (function () {
             }
         });
         download(str, "SLS_QueryExport.csv", "text/csv");
-        myBotEngine.message("CSV export done in download dir");
+        self.myBotEngine.message("CSV export done in download dir");
     };
 
     self.editSparql = function (title, description, query) {
-        // $("#" + myBotEngine.divId).dialog("close");
+        // $("#" + self.myBotEngine.divId).dialog("close");
         $("#smallDialogDiv").html(
             "<div  style='font-weight:bold' id='sparqlQueryBot_queryTitle'></div>" +
                 "<div  style='' id='sparqlQueryBot_queryDescription'></div>" +
@@ -1217,14 +1216,14 @@ var SparqlQuery_bot = (function () {
         common.fillSelectOptions("sparqlQueryBot_outputTypeSelect", array);
         self.params.currentSparql = Sparql_common.formatSparqlQuery(query || self.params.currentSparql);
         $("#sparqlQueryBot_textArea").text(query || self.params.currentSparql);
-        myBotEngine.reset();
+        self.myBotEngine.reset();
     };
 
     self.loadImplicitModel = function (source, reload, callback) {
         if (self.implicitModel) {
             return callback(null, self.implicitModel);
         }
-        myBotEngine.message("loading graph implicitModel...");
+        self.myBotEngine.message("loading graph implicitModel...");
 
         var visjsData = null;
         var save = false;

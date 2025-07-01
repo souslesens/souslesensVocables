@@ -1085,11 +1085,9 @@ var Sparql_OWL = (function () {
 " OPTIONAL{?object rdfs:label ?objectLabel.}  ";*/
             if (options.onlyObjectProperties) {
                 (" ?prop rdf:type owl:ObjectProperty.");
-            }
-
-            else if (options.onlyDataTypeProperties) {
+            } else if (options.onlyDataTypeProperties) {
                 (" filter (isLiteral(?object) )");
-            }else if (!options.includeLiterals && !(options.filter && options.filter.indexOf("?object") > -1)) {
+            } else if (!options.includeLiterals && !(options.filter && options.filter.indexOf("?object") > -1)) {
                 query += " filter (!isLiteral(?object) )";
             }
             query += " } order by ?propLabel ";

@@ -7,12 +7,9 @@ import MainController from "../../shared/mainController.js";
 var Browse = (function () {
     var self = {};
     self.onLoaded = function () {
-    
         UI.initMenuBar(self.loadSource);
-        
-       
     };
-      /**
+    /**
      * Loads a source and initializes modules for browsing.
      * @function
      * @name loadSource
@@ -26,20 +23,17 @@ var Browse = (function () {
                 return alert(err.responseText);
             }
             $("#lateralPanelDiv").load("modules/tools/browse/html/browseLeftPanel.html", function () {
-                    $("#graphDiv").load("modules/tools/browse/html/browseCentralPanel.html", function () {
-                        self.init(MainController.currentSource);
-                        $('#rightControlPanelDiv').hide();
-                        UI.resetWindowSize();
-                        var graphDivWidth=$('#graphDiv').css('width');
-                        $('#Browse_centralPanelDiv').css('width', graphDivWidth);
-                        $('#Browse_rightPanelTabs').css('width', graphDivWidth);
-                        $('#Browse_rightPanelTabs').css('width', graphDivWidth);
-                        $('#Browse_graphDiv').css('width', graphDivWidth);
-
-                    });
-               
+                $("#graphDiv").load("modules/tools/browse/html/browseCentralPanel.html", function () {
+                    self.init(MainController.currentSource);
+                    $("#rightControlPanelDiv").hide();
+                    UI.resetWindowSize();
+                    var graphDivWidth = $("#graphDiv").css("width");
+                    $("#Browse_centralPanelDiv").css("width", graphDivWidth);
+                    $("#Browse_rightPanelTabs").css("width", graphDivWidth);
+                    $("#Browse_rightPanelTabs").css("width", graphDivWidth);
+                    $("#Browse_graphDiv").css("width", graphDivWidth);
+                });
             });
-
         });
     };
     self.showDialog = function (mainSource) {
@@ -57,12 +51,11 @@ var Browse = (function () {
 
     self.init = function (mainSource) {
         $("#Browse_rightPanelTabs").tabs({
-             activate: function (event, ui) {
-                 $(".nodeInfosWidget_tabDiv").removeClass("nodesInfos-selectedTab");
+            activate: function (event, ui) {
+                $(".nodeInfosWidget_tabDiv").removeClass("nodesInfos-selectedTab");
 
                 setTimeout(function () {
                     $("[aria-selected='true']").addClass("nodesInfos-selectedTab");
-                    
                 }, 100);
             },
         });
@@ -191,10 +184,10 @@ var Browse = (function () {
         self.showHitGraph(hit);
     };
 
-    self.showHitGraph = function (hit,_options) {
-       var  options={}
-        if(_options){
-            options=_options
+    self.showHitGraph = function (hit, _options) {
+        var options = {};
+        if (_options) {
+            options = _options;
         }
         var triples = [];
         SubGraph.instantiateSubGraphTriples(hit.source, hit.id, { nonUnique: true }, function (err, result) {
@@ -223,13 +216,13 @@ var Browse = (function () {
                     //  triples = triples.concat(result2.triples)
 
                     self.getSubGraphHierarchicalVisjsData(triples, hit.id, options, function (err, visjsData) {
-                        if(visjsData.nodes.length == 0){
-                            UI.message("no data for " + hit.label);  
+                        if (visjsData.nodes.length == 0) {
+                            UI.message("no data for " + hit.label);
                         }
 
-                        if(options.addToLevel){
-                            self.visjsGraph.data.nodes.update(visjsData.nodes)
-                            self.visjsGraph.data.edges.update(visjsData.edges)
+                        if (options.addToLevel) {
+                            self.visjsGraph.data.nodes.update(visjsData.nodes);
+                            self.visjsGraph.data.edges.update(visjsData.edges);
                             Lineage_decoration.decorateByUpperOntologyByClass(visjsData.nodes, self.visjsGraph);
                             return;
                         }
@@ -258,9 +251,6 @@ var Browse = (function () {
                         };
                         options2.onclickFn = self.graphActions.onVisjsGraphClick;
                         options2.onRightClickFn = self.graphActions.showGraphPopupMenu;
-
-
-
 
                         self.visjsGraph = new VisjsGraphClass("Browse_graphDiv", visjsData, options2);
                         self.visjsGraph.draw(function () {
@@ -361,7 +351,6 @@ var Browse = (function () {
     };
 
     self.showHitDetailsOutsideSearch = function (hitKey) {
-        
         var array = hitKey.split("|");
         var hit = null;
         var index = array[0];
@@ -375,19 +364,19 @@ var Browse = (function () {
         if (hit) {
             return self.showHitGraph(hit);
         }
-        var sources=[index];
+        var sources = [index];
         sources = sources.concat(Config.sources[index].imports);
-        
+
         var options = {
             parentlabels: true,
-            fields: [ "id.keyword"]
+            fields: ["id.keyword"],
         };
         var term = hitId;
         var mode = "exactMatch";
         SearchUtil.getSimilarLabelsInSources(null, sources, [term], null, mode, options, function (_err, result) {
             if (result && result.length > 0) {
                 var matches = result[0].matches;
-                if(Object.keys(matches).length == 0){
+                if (Object.keys(matches).length == 0) {
                     return UI.message("no data for " + hitId);
                 }
                 var matchedSource = Object.keys(matches)[0];
@@ -396,40 +385,31 @@ var Browse = (function () {
                 return self.showHitGraph(hit);
             }
         });
-
     };
 
-    self.graphActions= {
-
+    self.graphActions = {
         onVisjsGraphClick: function (node, point, options) {
-
             if (options.dbleClick) {
-
-                Browse.showHitGraph({source:node.data.source, id: node.data.id},{addToLevel:node.level})
-            }
-            else if (options.ctrlKey) {
-                if(node.data.id && node.data.source){
-                    var hitKey=node.data.source + "|" + node.data.id;
+                Browse.showHitGraph({ source: node.data.source, id: node.data.id }, { addToLevel: node.level });
+            } else if (options.ctrlKey) {
+                if (node.data.id && node.data.source) {
+                    var hitKey = node.data.source + "|" + node.data.id;
                     self.showHitDetailsOutsideSearch(hitKey);
                 }
-               
-            }
-            else {
-               // NodeInfosWidget.showNodeInfos(node.data.source, node, "smallDialogDiv", {});
+            } else {
+                // NodeInfosWidget.showNodeInfos(node.data.source, node, "smallDialogDiv", {});
             }
         },
         showGraphPopupMenu: function (node, point, event) {
-          return;
+            return;
             self.setGraphPopupMenus(node, event);
             point = {};
             point.x = event.x;
             point.y = event.y;
             //end
             PopupMenuWidget.showPopup(point, "popupMenuWidgetDiv");
-
-
-        }
-    }
+        },
+    };
 
     return self;
 })();

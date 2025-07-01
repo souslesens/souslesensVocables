@@ -109,12 +109,12 @@ var NodeInfosWidget = (function () {
             }
         });
     };
-    self.setTabs= function (options) {
-        if(!options) {
+    self.setTabs = function (options) {
+        if (!options) {
             options = {};
         }
-         $("#nodeInfosWidget_tabsDiv").tabs({
-             //  active: options.showAxioms ? 1 : 0,
+        $("#nodeInfosWidget_tabsDiv").tabs({
+            //  active: options.showAxioms ? 1 : 0,
 
             load: function (event, ui) {},
             activate: function (event, ui) {
@@ -134,8 +134,7 @@ var NodeInfosWidget = (function () {
                 }, 100);
             },
         });
-
-    }
+    };
     self.initDialog = function (sourceLabel, divId, options, callback) {
         self.divId = divId;
         self.currentSource = sourceLabel;
@@ -146,7 +145,7 @@ var NodeInfosWidget = (function () {
                 $(".nodeInfosWidget_tabDiv").css("margin", "0px");
                 $("[aria-selected='true']").addClass("nodesInfos-selectedTab");
                 self.setTabs();
-                    
+
                 return callback();
             });
         } else {
@@ -157,7 +156,7 @@ var NodeInfosWidget = (function () {
                 $("#" + divId).dialog("close");
                 $("#" + divId).dialog({
                     open: function (event, ui) {
-                       self.setTabs();
+                        self.setTabs();
                     },
                     close: function (event, ui) {
                         $("#addPredicateButton").remove();

@@ -396,13 +396,10 @@ indexes.push(source.toLowerCase());
         var field = "label.keyword";
         if (word.indexOf && word.indexOf("http://") == 0) {
             field = "id.keyword";
-
-        }else{
+        } else {
             word = self.escapeElasticReservedChars(word);
         }
 
-        
-        
         //  word=word.toLowerCase()
         var queryObj;
         if (!mode || mode == "exactMatch") {

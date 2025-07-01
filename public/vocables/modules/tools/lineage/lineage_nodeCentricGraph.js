@@ -12,9 +12,7 @@ var Lineage_nodeCentricGraph = (function () {
 
     self.levelsSelection = [];
 
-
     self.getHierarchicalViewVisjsdata = function (rootNodeId) {
-
         var edgesFromMap = {};
         var edgesToMap = {};
         var nodesMap = {};
@@ -77,15 +75,11 @@ var Lineage_nodeCentricGraph = (function () {
             }
         }
 
-        return {nodes: newNodes, edges: newEdges}
-
-
-    }
-
+        return { nodes: newNodes, edges: newEdges };
+    };
 
     self.draw = function (rootNodeId) {
-
-        var visjsData = self.getHierarchicalViewVisjsdata(rootNodeId)
+        var visjsData = self.getHierarchicalViewVisjsdata(rootNodeId);
 
         var xOffset = 110;
         var yOffset = 90;
@@ -108,14 +102,13 @@ var Lineage_nodeCentricGraph = (function () {
                     // type: "diagonalCross",
                     forceDirection: "horizontal",
 
-                        roundness: 0.4,
-                    },
+                    roundness: 0.4,
                 },
-            };
-            Lineage_whiteboard.drawNewGraph(visjsData, "graphDiv", options);
-            Lineage_whiteboard.lineageVisjsGraph.options.visjsOptions.layout.hierarchical.enabled = true;
-            Lineage_whiteboard.lineageVisjsGraph.network.setOptions(Lineage_whiteboard.lineageVisjsGraph.options.visjsOptions);
-        
+            },
+        };
+        Lineage_whiteboard.drawNewGraph(visjsData, "graphDiv", options);
+        Lineage_whiteboard.lineageVisjsGraph.options.visjsOptions.layout.hierarchical.enabled = true;
+        Lineage_whiteboard.lineageVisjsGraph.network.setOptions(Lineage_whiteboard.lineageVisjsGraph.options.visjsOptions);
     };
 
     self.graphActions = {
@@ -179,8 +172,7 @@ enabled:true},*/
         }
 
         self.visjsGraph = new VisjsGraphClass(graphDiv, visjsData, self.graphOptions);
-        self.visjsGraph.draw(function () {
-        });
+        self.visjsGraph.draw(function () {});
     };
 
     self.showPopupMenu = function (node, point, event) {
@@ -236,86 +228,71 @@ enabled:true},*/
             var nodes = lines[level];
             for (var nodeId in nodes) {
                 var fromEdges = edgesFromMap[nodeId];
-                fromEdges.forEach(function (item) {
-                });
+                fromEdges.forEach(function (item) {});
             }
         });
     };
 
     self.normalLayout = function () {
         if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
-            Lineage_whiteboard.lineageVisjsGraph.network.setOptions({hierarchical: {enabled: false}});
+            Lineage_whiteboard.lineageVisjsGraph.network.setOptions({ hierarchical: { enabled: false } });
             Lineage_whiteboard.lineageVisjsGraph.network.redraw();
         }
     };
 
-
     self.listAllNodeRelations = function (rootNodeId) {
-        var visjsData = self.getHierarchicalViewVisjsdata(rootNodeId)
+        var visjsData = self.getHierarchicalViewVisjsdata(rootNodeId);
 
-
-        var levelMin = 0
-        var levelMax = 100
-        var edgesFromMap = {}
-        var nodesMap = {}
-
+        var levelMin = 0;
+        var levelMax = 100;
+        var edgesFromMap = {};
+        var nodesMap = {};
 
         visjsData.nodes.forEach(function (node) {
             if (!nodesMap[node.id]) {
-                nodesMap[node.id] = node
+                nodesMap[node.id] = node;
             }
 
-
-            levelMax = Math.max(levelMax, node.level)
-            levelMin = Math.min(levelMin, node.level)
-        })
+            levelMax = Math.max(levelMax, node.level);
+            levelMin = Math.min(levelMin, node.level);
+        });
 
         visjsData.edges.forEach(function (edge) {
             if (!edgesFromMap[edge.from]) {
-                edgesFromMap[edge.from] = {}
+                edgesFromMap[edge.from] = {};
             }
-            var level = nodesMap[edge.from].level
+            var level = nodesMap[edge.from].level;
             if (!edgesFromMap[edge.from][level]) {
-                edgesFromMap[edge.from][level] = []
+                edgesFromMap[edge.from][level] = [];
             }
-            edge.fromLabel = nodesMap[edge.from].label
-            edge.toLabel = nodesMap[edge.to].label
-            edgesFromMap[edge.from][level].push(edge)
-        })
+            edge.fromLabel = nodesMap[edge.from].label;
+            edge.toLabel = nodesMap[edge.to].label;
+            edgesFromMap[edge.from][level].push(edge);
+        });
 
-
-        var matrix = []
-        var uniqueNodes = {}
-        var str = ""
-
+        var matrix = [];
+        var uniqueNodes = {};
+        var str = "";
 
         for (var edgeFrom in edgesFromMap) {
             for (var level = levelMin; level < levelMax; level++) {
-                var edges = edgesFromMap[edgeFrom][level]
+                var edges = edgesFromMap[edgeFrom][level];
 
-
-                    if (edges) {
-                        edges.forEach(function (edge) {
-                            str += edge.fromLabel + "-" + (edge.label || "-") + "-" + edge.toLabel
-                            str += "\t"
-                        })
-
-
+                if (edges) {
+                    edges.forEach(function (edge) {
+                        str += edge.fromLabel + "-" + (edge.label || "-") + "-" + edge.toLabel;
+                        str += "\t";
+                    });
                 }
-                str += "\n"
+                str += "\n";
             }
-
         }
 
-        console.log(str)
-
-
-    }
-
+        console.log(str);
+    };
 
     return self;
-})
-();
+})();
 
 export default Lineage_nodeCentricGraph;
 window.Lineage_nodeCentricGraph = Lineage_nodeCentricGraph;

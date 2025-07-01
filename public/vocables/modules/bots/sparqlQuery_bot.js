@@ -195,7 +195,7 @@ var SparqlQuery_bot = (function () {
                     id: "Class",
                     label: "Class",
                 },*/
-                {id: "Constraints", label: "Ontology Constraints"},
+                { id: "Constraints", label: "Ontology Constraints" },
                 {
                     id: "Facts",
                     label: "SKG Facts",
@@ -235,13 +235,13 @@ var SparqlQuery_bot = (function () {
 
         chooseQueryScopeFn: function () {
             var choices = [
-                {id: "activeSource", label: "active source"},
+                { id: "activeSource", label: "active source" },
                 //{id: "whiteboardSources", label: "all loaded sources"},
             ];
 
             if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
-                choices.push({id: "whiteboardNodes", label: "whiteboard content"});
-                choices.push({id: "selectedNodes", label: "selected nodes"});
+                choices.push({ id: "whiteboardNodes", label: "whiteboard content" });
+                choices.push({ id: "selectedNodes", label: "selected nodes" });
                 myBotEngine.showList(choices, "queryScope");
             } else {
                 self.params.queryScope = "activeSource";
@@ -275,7 +275,7 @@ var SparqlQuery_bot = (function () {
             }
             var classes = [];
             self.implicitModel.nodes.forEach(function (item) {
-                classes.push({id: item.id, label: item.label});
+                classes.push({ id: item.id, label: item.label });
             });
 
             common.array.sort(classes, "label");
@@ -316,7 +316,7 @@ var SparqlQuery_bot = (function () {
             var properties = self.filterObjectProperties(self.params.currentClass, null);
             common.array.sort(properties, "label");
 
-            properties.unshift({id: "any", label: "any"});
+            properties.unshift({ id: "any", label: "any" });
             myBotEngine.showList(properties, "currentObjectProperty");
         },
         setNonObjectPropertiesFilter: function () {
@@ -390,11 +390,11 @@ var SparqlQuery_bot = (function () {
                 });
                 $("#smallDialogDiv").html(
                     "<div id='sparqlQueryBot_bindingPredJstree'style='width:300px;height:500px;overflow: auto;z-index:200'></div>" +
-                    "<button onclick='SparqlQuery_bot.functions.afterChooseBindingPredicates()'>OK</button>",
+                        "<button onclick='SparqlQuery_bot.functions.afterChooseBindingPredicates()'>OK</button>",
                 );
                 $("#botPanel").css("display", "none");
                 $("#smallDialogDiv").dialog("open");
-                var options = {openAll: true, withCheckboxes: true};
+                var options = { openAll: true, withCheckboxes: true };
                 JstreeWidget.loadJsTree("sparqlQueryBot_bindingPredJstree", jstreeData, options);
             });
         },
@@ -446,9 +446,7 @@ var SparqlQuery_bot = (function () {
                 distinct: "?prop",
                 withoutImports: withoutImports,
                 filter: filter,
-
             };
-
 
             var subjectIds = null;
             var objectIds = null;
@@ -471,7 +469,7 @@ var SparqlQuery_bot = (function () {
                 objectIds = whiteboardNodes;
             }
             if (self.params.predicateDirection == "literal") {
-                options.onlyDataTypeProperties = true
+                options.onlyDataTypeProperties = true;
             }
             UI.message("Loading predicates...");
             var choices = [];
@@ -540,7 +538,7 @@ var SparqlQuery_bot = (function () {
             for (var key in classes) {
                 var obj = classes[key];
 
-                choices.push({id: obj.id, label: obj.label});
+                choices.push({ id: obj.id, label: obj.label });
             }
 
             UI.message("", true);
@@ -658,8 +656,8 @@ var SparqlQuery_bot = (function () {
                     var choices = [
                         // {id: "REFINE_QUERY", label: "Refine query"},
                         // {id: "TRUNCATE_RESULT", label: "Truncate query"},
-                        {id: "EDIT_SPARQL", label: "Edit query"},
-                        {id: "ABORT", label: "Abort"},
+                        { id: "EDIT_SPARQL", label: "Edit query" },
+                        { id: "ABORT", label: "Abort" },
                     ];
 
                     myBotEngine.showList(choices, null, null, false, function (action) {
@@ -687,7 +685,7 @@ var SparqlQuery_bot = (function () {
         },
 
         chooseConstraintClassFn: function () {
-            self.getResourcesList("Class", "subject", null, {withoutImports: 1}, function (err, result) {
+            self.getResourcesList("Class", "subject", null, { withoutImports: 1 }, function (err, result) {
                 if (err) {
                     alert(err.responseText || err);
                     return myBotEngine.previousStep();
@@ -701,13 +699,13 @@ var SparqlQuery_bot = (function () {
                     });
                 });
                 common.array.sort(choices, "label");
-                choices.unshift({id: "any", label: "any"});
+                choices.unshift({ id: "any", label: "any" });
                 myBotEngine.showList(choices, "constraintClass");
             });
         },
         chooseConstraintPropertyFn: function () {
             var filter = "  ?subject rdf:type owl:ObjectProperty   filter( ?predicate=rdf:type)";
-            self.getResourcesList("Predicate", "subject", filter, {withoutImports: 0}, function (err, result) {
+            self.getResourcesList("Predicate", "subject", filter, { withoutImports: 0 }, function (err, result) {
                 if (err) {
                     alert(err.responseText || err);
                     return myBotEngine.previousStep();
@@ -722,7 +720,7 @@ var SparqlQuery_bot = (function () {
                 });
 
                 common.array.sort(choices, "label");
-                choices.unshift({id: "any", label: "any"});
+                choices.unshift({ id: "any", label: "any" });
                 myBotEngine.showList(choices, "constraintObjectProperty");
             });
         },
@@ -755,7 +753,7 @@ var SparqlQuery_bot = (function () {
                         filter = "FILTER (?object=<" + self.params.constraintClass + "> )";
                     }
                 }
-                self.getResourcesList("Restriction", null, filter, {withoutImports: 0}, function (err, result) {
+                self.getResourcesList("Restriction", null, filter, { withoutImports: 0 }, function (err, result) {
                     if (err) {
                         alert(err.responseText || err);
                         return myBotEngine.previousStep();
@@ -784,8 +782,7 @@ var SparqlQuery_bot = (function () {
                 };
                 filter += "FILTER (?predicate=" + map[constraintType] + ")";
 
-
-                self.getResourcesList("Predicate", null, filter, {withoutImports: 0}, function (err, result) {
+                self.getResourcesList("Predicate", null, filter, { withoutImports: 0 }, function (err, result) {
                     if (err) {
                         alert(err.responseText || err);
                         return myBotEngine.previousStep();
@@ -1008,7 +1005,7 @@ var SparqlQuery_bot = (function () {
                     });
                 },
                 function (err) {
-                    return callback(null, {predicates: predicates, labels: allLabels});
+                    return callback(null, { predicates: predicates, labels: allLabels });
                 },
             );
         });
@@ -1058,7 +1055,7 @@ var SparqlQuery_bot = (function () {
         if (!options) {
             options = {};
         }
-        var visjsData = {nodes: [], edges: []};
+        var visjsData = { nodes: [], edges: [] };
         var existingNodes = {};
         if (addTograph) {
             existingNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
@@ -1128,13 +1125,13 @@ var SparqlQuery_bot = (function () {
         if (addTograph) {
             Lineage_whiteboard.addVisDataToGraph(visjsData);
         } else {
-            Lineage_whiteboard.drawNewGraph(visjsData, null, {skipDrawLegend: 1});
+            Lineage_whiteboard.drawNewGraph(visjsData, null, { skipDrawLegend: 1 });
         }
 
         myBotEngine.reset();
         var choices = [
-            {id: "end", label: "end"},
-            {id: "addPredicateToGraph", label: "add predicate to graph"},
+            { id: "end", label: "end" },
+            { id: "addPredicateToGraph", label: "add predicate to graph" },
         ];
         myBotEngine.showList(choices);
         /*  myBotEngine.showList(choices, null, null, null, function (value) {
@@ -1154,12 +1151,12 @@ var SparqlQuery_bot = (function () {
         var cols = [];
         var dataset = [];
         cols.push(
-            {title: "subject", defaultContent: ""},
-            {title: "Predicate", defaultContent: ""},
-            {title: "Object", defaultContent: ""},
-            {title: "subjectURI", defaultContent: ""},
-            {title: "PredicateURI", defaultContent: ""},
-            {title: "ObjectURI", defaultContent: ""},
+            { title: "subject", defaultContent: "" },
+            { title: "Predicate", defaultContent: "" },
+            { title: "Object", defaultContent: "" },
+            { title: "subjectURI", defaultContent: "" },
+            { title: "PredicateURI", defaultContent: "" },
+            { title: "ObjectURI", defaultContent: "" },
         );
         var labelsMap = queryResult.labels;
         var existingNodes = {};
@@ -1203,13 +1200,13 @@ var SparqlQuery_bot = (function () {
         // $("#" + myBotEngine.divId).dialog("close");
         $("#smallDialogDiv").html(
             "<div  style='font-weight:bold' id='sparqlQueryBot_queryTitle'></div>" +
-            "<div  style='' id='sparqlQueryBot_queryDescription'></div>" +
-            "<div style='background-color:#ddd' >" +
-            "<textarea  id='sparqlQueryBot_textArea'" +
-            " style='width:800px;height:500px'></textarea></div>" +
-            "Output <select id='sparqlQueryBot_outputTypeSelect'><option></option></select>" +
-            "<button onclick='SparqlQuery_bot.functions.onValidateSparqlQuery()'>Execute</button>" +
-            "<button style='float: right' onclick='SparqlQuery_bot.saveQuery()'>SaveQuery</button>",
+                "<div  style='' id='sparqlQueryBot_queryDescription'></div>" +
+                "<div style='background-color:#ddd' >" +
+                "<textarea  id='sparqlQueryBot_textArea'" +
+                " style='width:800px;height:500px'></textarea></div>" +
+                "Output <select id='sparqlQueryBot_outputTypeSelect'><option></option></select>" +
+                "<button onclick='SparqlQuery_bot.functions.onValidateSparqlQuery()'>Execute</button>" +
+                "<button style='float: right' onclick='SparqlQuery_bot.saveQuery()'>SaveQuery</button>",
         );
         $("#smallDialogDiv").dialog("open");
         $("#sparqlQueryBot_outputTypeSelect").css("z-index", 101);
@@ -1231,7 +1228,7 @@ var SparqlQuery_bot = (function () {
 
         var visjsData = null;
         var save = false;
-        var KGqueryGraph = new VisjsGraphClass("KGquery_graphDiv", {nodes: [], edges: []}, {});
+        var KGqueryGraph = new VisjsGraphClass("KGquery_graphDiv", { nodes: [], edges: [] }, {});
         async.series(
             [
                 //saved visjgraphData
@@ -1324,7 +1321,7 @@ var SparqlQuery_bot = (function () {
 
     self.saveQuery = function () {
         var query = $("#sparqlQueryBot_textArea").text();
-        var data = {sparqlQuery: query};
+        var data = { sparqlQuery: query };
 
         UserDataWidget.showSaveDialog("savedQueries", data, null, function (err, result) {
             if (err) {

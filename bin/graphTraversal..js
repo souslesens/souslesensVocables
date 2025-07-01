@@ -23,7 +23,7 @@ var GraphTraversal = {
             " FILTER( ?p not in(rdf:type, rdfs:subClassOf,rdfs:member)) " +
             "filter (!isLiteral(?o)  && !isBlank(?s)) " +
             " }" +
-            "   UNION {?s  ?p ?o. ?o rdf:type owl:Class  filter (?p=rdfs:subClassOf)}"+
+            "   UNION {?s  ?p ?o. ?o rdf:type owl:Class  filter (?p=rdfs:subClassOf)}" +
             "} limit 10000";
 
         var headers = {};
@@ -189,7 +189,7 @@ var GraphTraversal = {
                     if (!firstPath) firstPath = path;
                     iterations += 1;
                     if (path.length > 0) {
-                        skipNode = path[path.length - 2][0]
+                        skipNode = path[path.length - 2][0];
                         allpaths.push(path);
                     }
 

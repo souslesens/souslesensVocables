@@ -412,7 +412,7 @@ var SparqlQuery_bot = (function () {
 
         choosePredicateDirectionFn: function () {
             var choices = ["any", "direct", "inverse", "literal"];
-            return myBotEngine.showList(choices, "predicateDirection");
+            return self.myBotEngine.showList(choices, "predicateDirection");
         },
 
         listAllPredicatesFn: function () {

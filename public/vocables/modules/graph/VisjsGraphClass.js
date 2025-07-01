@@ -271,7 +271,9 @@ const VisjsGraphClass = function (graphDiv, data, options) {
             .on("dragging", function (_params) {})
             .on("dragEnd", function (/** @type {{ event: { srcEvent: { ctrlKey: any; altKey: any; }; }; pointer: { DOM: any; }; nodes: string | any[]; }} */ params) {
                 //self.network.setOptions({ physics: { enabled: false } });
-
+                if (!self.data) {
+                    return;
+                }
                 var startNode = self.data.nodes.get(params.nodes[0]);
                 if (!startNode) {
                     return;

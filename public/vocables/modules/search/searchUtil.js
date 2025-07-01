@@ -393,11 +393,13 @@ indexes.push(source.toLowerCase());
             fields.push("skoslabels");
         }
 
-        word = self.escapeElasticReservedChars(word);
         var field = "label.keyword";
         if (word.indexOf && word.indexOf("http://") == 0) {
             field = "id.keyword";
+        } else {
+            word = self.escapeElasticReservedChars(word);
         }
+
         //  word=word.toLowerCase()
         var queryObj;
         if (!mode || mode == "exactMatch") {

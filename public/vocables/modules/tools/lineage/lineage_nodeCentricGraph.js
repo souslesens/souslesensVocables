@@ -12,7 +12,7 @@ var Lineage_nodeCentricGraph = (function () {
 
     self.levelsSelection = [];
 
-    self.draw = function (rootNodeId) {
+    self.getHierarchicalViewVisjsdata = function (rootNodeId) {
         var edgesFromMap = {};
         var edgesToMap = {};
         var nodesMap = {};
@@ -75,49 +75,40 @@ var Lineage_nodeCentricGraph = (function () {
             }
         }
 
-        var visjsData = { nodes: newNodes, edges: newEdges };
+        return { nodes: newNodes, edges: newEdges };
+    };
 
-        if (false) {
-            // in a separate graph and window
-            $("#mainDialogDiv").html(
-                "" +
-                    "<div>" +
-                    "<button onclick='Lineage_nodeCentricGraph.levelsToTable()'>levelsToTable</button>" +
-                    " </div>" +
-                    "<div id='lineageRelation_graphDiv' style='width:80vw;height:80vh;overflow:auto'></div>",
-            );
-            $("#mainDialogDiv").dialog("open");
-            self.drawGraph(visjsData, "lineageRelation_graphDiv", {});
-        } else {
-            var xOffset = 110;
-            var yOffset = 90;
-            var options = {
-                layoutHierarchical: {
-                    direction: "LR",
-                    sortMethod: "hubsize",
-                    levelSeparation: xOffset,
-                    // parentCentralization: false,
-                    shakeTowards: "roots",
-                    blockShifting: true,
-                    edgeMinimization: true,
-                    parentCentralization: true,
+    self.draw = function (rootNodeId) {
+        var visjsData = self.getHierarchicalViewVisjsdata(rootNodeId);
 
-                    nodeSpacing: yOffset,
+        var xOffset = 110;
+        var yOffset = 90;
+        var options = {
+            layoutHierarchical: {
+                direction: "LR",
+                sortMethod: "hubsize",
+                levelSeparation: xOffset,
+                // parentCentralization: false,
+                shakeTowards: "roots",
+                blockShifting: true,
+                edgeMinimization: true,
+                parentCentralization: true,
+
+                nodeSpacing: yOffset,
+            },
+            edges: {
+                smooth: {
+                    type: "cubicBezier",
+                    // type: "diagonalCross",
+                    forceDirection: "horizontal",
+
+                    roundness: 0.4,
                 },
-                edges: {
-                    smooth: {
-                        type: "cubicBezier",
-                        // type: "diagonalCross",
-                        forceDirection: "horizontal",
-
-                        roundness: 0.4,
-                    },
-                },
-            };
-            Lineage_whiteboard.drawNewGraph(visjsData, "graphDiv", options);
-            Lineage_whiteboard.lineageVisjsGraph.options.visjsOptions.layout.hierarchical.enabled = true;
-            Lineage_whiteboard.lineageVisjsGraph.network.setOptions(Lineage_whiteboard.lineageVisjsGraph.options.visjsOptions);
-        }
+            },
+        };
+        Lineage_whiteboard.drawNewGraph(visjsData, "graphDiv", options);
+        Lineage_whiteboard.lineageVisjsGraph.options.visjsOptions.layout.hierarchical.enabled = true;
+        Lineage_whiteboard.lineageVisjsGraph.network.setOptions(Lineage_whiteboard.lineageVisjsGraph.options.visjsOptions);
     };
 
     self.graphActions = {
@@ -247,6 +238,57 @@ enabled:true},*/
             Lineage_whiteboard.lineageVisjsGraph.network.setOptions({ hierarchical: { enabled: false } });
             Lineage_whiteboard.lineageVisjsGraph.network.redraw();
         }
+    };
+
+    self.listAllNodeRelations = function (rootNodeId) {
+        var visjsData = self.getHierarchicalViewVisjsdata(rootNodeId);
+
+        var levelMin = 0;
+        var levelMax = 100;
+        var edgesFromMap = {};
+        var nodesMap = {};
+
+        visjsData.nodes.forEach(function (node) {
+            if (!nodesMap[node.id]) {
+                nodesMap[node.id] = node;
+            }
+
+            levelMax = Math.max(levelMax, node.level);
+            levelMin = Math.min(levelMin, node.level);
+        });
+
+        visjsData.edges.forEach(function (edge) {
+            if (!edgesFromMap[edge.from]) {
+                edgesFromMap[edge.from] = {};
+            }
+            var level = nodesMap[edge.from].level;
+            if (!edgesFromMap[edge.from][level]) {
+                edgesFromMap[edge.from][level] = [];
+            }
+            edge.fromLabel = nodesMap[edge.from].label;
+            edge.toLabel = nodesMap[edge.to].label;
+            edgesFromMap[edge.from][level].push(edge);
+        });
+
+        var matrix = [];
+        var uniqueNodes = {};
+        var str = "";
+
+        for (var edgeFrom in edgesFromMap) {
+            for (var level = levelMin; level < levelMax; level++) {
+                var edges = edgesFromMap[edgeFrom][level];
+
+                if (edges) {
+                    edges.forEach(function (edge) {
+                        str += edge.fromLabel + "-" + (edge.label || "-") + "-" + edge.toLabel;
+                        str += "\t";
+                    });
+                }
+                str += "\n";
+            }
+        }
+
+        console.log(str);
     };
 
     return self;

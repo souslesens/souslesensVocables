@@ -411,7 +411,7 @@ var SparqlQuery_bot = (function () {
         },
 
         choosePredicateDirectionFn: function () {
-            var choices = ["any", "direct", "inverse"];
+            var choices = ["any", "direct", "inverse", "literal"];
             return self.myBotEngine.showList(choices, "predicateDirection");
         },
 
@@ -446,6 +446,7 @@ var SparqlQuery_bot = (function () {
                 withoutImports: withoutImports,
                 filter: filter,
             };
+
             var subjectIds = null;
             var objectIds = null;
             var whiteboardNodes = null;
@@ -465,6 +466,9 @@ var SparqlQuery_bot = (function () {
                 subjectIds = whiteboardNodes;
             } else {
                 objectIds = whiteboardNodes;
+            }
+            if (self.params.predicateDirection == "literal") {
+                options.onlyDataTypeProperties = true;
             }
             UI.message("Loading predicates...");
             var choices = [];
@@ -761,6 +765,8 @@ var SparqlQuery_bot = (function () {
                 if (self.params.constraintObject == "Whiteboard nodes") {
                     var nodeIds = Lineage_whiteboard.lineageVisjsGraph.data.nodes.getIds();
                     filter += Sparql_common.setFilter("subject", nodeIds);
+                } else if (self.params.constraintClass && constraintType == "subClassOf") {
+                    filter += "FILTER (?object=<" + self.params.constraintClass + "> )"; //|| ?object=<" + self.params.constraintClass + ">)"
                 } else if (self.params.constraintClass && self.params.constraintClass != "any") {
                     filter += "FILTER (?subject=<" + self.params.constraintClass + "> )"; //|| ?object=<" + self.params.constraintClass + ">)"
                 } else if (self.params.constraintObjectProperty && self.params.constraintObjectProperty != "any") {
@@ -770,10 +776,11 @@ var SparqlQuery_bot = (function () {
                 var map = {
                     " domain": "rdfs:domain",
                     range: "rdfs:range",
-                    subClassOf: "owl:subClassOf",
+                    subClassOf: "rdfs:subClassOf",
                     equivalentClass: "owl:equivalentClassOf",
                 };
                 filter += "FILTER (?predicate=" + map[constraintType] + ")";
+
                 self.getResourcesList("Predicate", null, filter, { withoutImports: 0 }, function (err, result) {
                     if (err) {
                         alert(err.responseText || err);

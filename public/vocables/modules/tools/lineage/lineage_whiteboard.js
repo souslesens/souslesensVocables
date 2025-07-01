@@ -3147,6 +3147,7 @@ restrictionSource = Config.predicatesSource;
         }
         if (node && !node.from) {
             html += '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.showHierarchicalView();">Hierarchical view </span>';
+            html += '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.listAllNodeRelations();">List All relations </span>';
         }
 
         $("#popupMenuWidgetDiv").html(html);
@@ -3955,6 +3956,12 @@ self.zoomGraphOnNode(node.data[0].id, false);
                 return;
             }
             Lineage_nodeCentricGraph.draw(Lineage_whiteboard.currentGraphNode.id);
+        },
+        listAllNodeRelations: function () {
+            if (!Lineage_whiteboard.currentGraphNode.id) {
+                return;
+            }
+            Lineage_nodeCentricGraph.listAllNodeRelations(Lineage_whiteboard.currentGraphNode.id);
         },
 
         /**

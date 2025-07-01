@@ -156,9 +156,15 @@ var Sparql_common = (function () {
 
                 var uriIds = [];
                 ids.forEach(function (id, _index) {
-                    if (true || ("" + id).indexOf(":") > -1) {
+                  /* if (true || ("" + id).indexOf(":") > -1) {
                         // literal
                         uriIds.push(id);
+                    }*/
+                    if ( ("" + id).startsWith("http") || ("" + id).indexOf(":") > -1 ) {
+
+                        uriIds.push(id);
+                    }else{
+                        console.log(id)
                     }
                 });
 

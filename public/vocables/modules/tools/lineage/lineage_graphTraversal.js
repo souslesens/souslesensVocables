@@ -153,8 +153,7 @@ var Lineage_graphTraversal = (function () {
         $("#mainDialogDiv").load("modules/tools/lineage/html/lineage_shortestPathDialog.html", function () {
             $("#mainDialogDiv").dialog("open");
             $("#lineage_shorterstPath_searchInput").bind("keydown", null, Lineage_graphTraversal.onSearchKeyDown);
-            $("#lineage_DrawAllPaths").prop("disabled", true);
-            $("#Lineage_graphTraversal_numberOfPathes").prop("disabled", true);
+         //   $("#Lineage_graphTraversal_numberOfPathes").prop("disabled", true);
         });
     };
 
@@ -221,7 +220,8 @@ var Lineage_graphTraversal = (function () {
 
         var options = {
             term: term,
-            selectedSources: [Lineage_sources.activeSource],
+          //  selectedSources: [Lineage_sources.activeSource],
+            searchedSources: [Lineage_sources.activeSource],
             exactMatch: exactMatch,
             jstreeDiv: "lineage_shorterstPath_searchJsTreeDiv",
             selectTreeNodeFn: Lineage_graphTraversal.selectTreeNodeFn,

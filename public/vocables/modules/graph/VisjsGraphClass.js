@@ -22,7 +22,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
     self.context = {};
     self.currentScale;
     self.simulationOn;
-    self.globalOptions = { nodes: {}, edges: {} };
+    self.globalOptions = {nodes: {}, edges: {}};
     self.defaultShape = "dot";
 
     self.defaultTextSize = 14;
@@ -48,7 +48,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         }
 
         self.drawingDone = false;
-        self.currentContext = { divId: divId, options: _options, callback: callback };
+        self.currentContext = {divId: divId, options: _options, callback: callback};
         if (!_options) {
             _options = {};
         }
@@ -92,20 +92,20 @@ const VisjsGraphClass = function (graphDiv, data, options) {
             h: $("#" + divId).height() - 50,
         };
         var options = {
-            interaction: { hover: true },
+            interaction: {hover: true},
             width: "" + self.canvasDimension.w + "px",
             height: "" + self.canvasDimension.h + "px",
             nodes: {
                 //   shape: self.defaultShape,
                 size: 12,
-                chosen: { node: true },
+                chosen: {node: true},
                 // scaling:{min:6,max:20}
             },
             edges: {
                 //  scaling:{min:1,max:8}
             },
 
-            layout: { improvedLayout: improvedLayout },
+            layout: {improvedLayout: improvedLayout},
         };
 
         for (var key in _options) {
@@ -116,7 +116,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
             options.visjsOptions.layout = {
                 hierarchical: _options.layoutHierarchical,
             };
-            options.visjsOptions.physics = { enabled: false };
+            options.visjsOptions.physics = {enabled: false};
         } else {
             $("#visjsGraph_layoutSelect").val("");
         }
@@ -225,7 +225,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
                 var newNodes = [];
                 var fixed = false;
 
-                newNodes.push({ id: nodeId, fixed: fixed });
+                newNodes.push({id: nodeId, fixed: fixed});
                 self.data.nodes.update(newNodes);
                 /*self.network.setOptions({ physics: {enabled: true,
                     stabilization: {
@@ -239,10 +239,13 @@ const VisjsGraphClass = function (graphDiv, data, options) {
             .on("controlNodeDragging", function (params) {
                 self.currentDraggingMousePosition = params.pointer.DOM;
             })
-            .on("dragging", function (_params) {})
+            .on("dragging", function (_params) {
+            })
             .on("dragEnd", function (/** @type {{ event: { srcEvent: { ctrlKey: any; altKey: any; }; }; pointer: { DOM: any; }; nodes: string | any[]; }} */ params) {
                 //self.network.setOptions({ physics: { enabled: false } });
-
+                if (!self.data) {
+                    return;
+                }
                 var startNode = self.data.nodes.get(params.nodes[0]);
                 if (!startNode) {
                     return;
@@ -298,7 +301,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
                     if (params.event.srcEvent.altKey) {
                         fixed = false;
                     }
-                    var newNode = { id: nodeId, fixed: fixed };
+                    var newNode = {id: nodeId, fixed: fixed};
 
                     newNodes.push(newNode);
                     if (!self.currentContext.options["layoutHierarchical"]) {
@@ -499,13 +502,13 @@ const VisjsGraphClass = function (graphDiv, data, options) {
                         if (scale > self.showNodesLabelMinScale) {
                             node.label = node.hiddenLabel;
                             node.size = size;
-                            node.font = { size: fontSize };
+                            node.font = {size: fontSize};
                             self.labelsVisible = true;
                             //node.fixed = false;
                         } else {
                             node.label = null;
                             node.size = size;
-                            node.font = { size: fontSize };
+                            node.font = {size: fontSize};
                         }
 
                         //nodes.push(node);
@@ -571,9 +574,9 @@ const VisjsGraphClass = function (graphDiv, data, options) {
             }
             if (dataFields && node.data) {
                 sep +
-                    dataFields.forEach(function (/** @type {string | number} */ field) {
-                        str += node.data[field];
-                    });
+                dataFields.forEach(function (/** @type {string | number} */ field) {
+                    str += node.data[field];
+                });
             }
 
             return str;
@@ -670,7 +673,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
             var fromNode = self.data.nodes.get(edge.from);
             if (bothDirections || edge.from == sourceNodeId) {
                 var toNode = self.data.nodes.get(edge.to);
-                connectedEdges.push({ edge: edge, fromNode: fromNode, toNode: toNode });
+                connectedEdges.push({edge: edge, fromNode: fromNode, toNode: toNode});
             }
         });
         return connectedEdges;
@@ -719,7 +722,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
                     return _options.onClusterClickFn(nodeId, point, options);
                 } else {
                     if (_options.onclickFn) {
-                        return _options.onclickFn({ id: nodeId }, point, options);
+                        return _options.onclickFn({id: nodeId}, point, options);
                     }
                 }
             }
@@ -787,7 +790,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
                     shape = "star";
                     size = 14;
                 }
-                newNodes.push({ id: nodeId, shape: shape, size: size });
+                newNodes.push({id: nodeId, shape: shape, size: size});
             });
             self.data.nodes.update(newNodes);
 
@@ -809,7 +812,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         nodes.forEach(function (/** @type {{ data: { [x: string]: any; }; id: any; }} */ node) {
             for (var key in conditions) {
                 if (node.data[key] == conditions[key]) {
-                    newNodes.push({ id: node.id, hidden: hide });
+                    newNodes.push({id: node.id, hidden: hide});
                 }
             }
         });
@@ -825,7 +828,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         nodes.forEach(function (/** @type {{ data: { [x: string]: any; }; id: any; }} */ node) {
             for (var key in conditions) {
                 if (node.data[key] == conditions[key]) {
-                    newNodes.push({ id: node.id, hidden: hide });
+                    newNodes.push({id: node.id, hidden: hide});
                 }
             }
         });
@@ -921,7 +924,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
                 size = 14;
                 matches.push(node.id);
             }
-            newNodes.push({ id: node.id, shape: shape, size: size });
+            newNodes.push({id: node.id, shape: shape, size: size});
         });
         self.data.nodes.update(newNodes);
         matches.forEach(function (match, index) {
@@ -1027,7 +1030,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
                 }
                 var positions = data.positions;
                 var options = data.context.options;
-                var visjsData = { nodes: [], edges: [] };
+                var visjsData = {nodes: [], edges: []};
                 visjsData.options = data.options;
                 var existingNodes = {};
                 if (addToCurrentGraph) {
@@ -1112,7 +1115,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         $.ajax({
             type: "GET",
             url: Config.apiUrl + "/data/files",
-            data: { dir: "graphs" },
+            data: {dir: "graphs"},
             dataType: "json",
             success: function (result, _textStatus, _jqXHR) {
                 if (callback) {
@@ -1136,7 +1139,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         var newIds = [];
         self.data.nodes.getIds().forEach(function (nodeId) {
             if (!nodeIds || nodeIds.indexOf(nodeId) > -1) {
-                var obj = { id: nodeId };
+                var obj = {id: nodeId};
                 for (var attrName in attrsMap) {
                     obj[attrName] = attrsMap[attrName];
                 }
@@ -1153,10 +1156,10 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         $("#visjsConfigureDiv").parent().css("height", "550px !important");
         $("#visjsConfigureDiv").prepend(
             "<div id='graphDisplay_theme' class='div.vis-configuration.vis-config-item '>theme" +
-                "<select onchange='Lineage_sources.setTheme($(this).val())' >" +
-                "<option>white</option>" +
-                "<option>dark</option>" +
-                "</select></div>",
+            "<select onchange='Lineage_sources.setTheme($(this).val())' >" +
+            "<option>white</option>" +
+            "<option>dark</option>" +
+            "</select></div>",
         );
         // these are all options in full.
         var options = {

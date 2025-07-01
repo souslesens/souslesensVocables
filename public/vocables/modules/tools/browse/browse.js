@@ -1,6 +1,7 @@
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 import Lineage_sources from "../lineage/lineage_sources.js";
 import SearchUtil from "../../search/searchUtil.js";
+import PopupMenuWidget from "../../uiWidgets/popupMenuWidget.js";
 
 var Browse = (function () {
     var self = {};
@@ -145,7 +146,11 @@ var Browse = (function () {
         self.showHitGraph(hit);
     };
 
-    self.showHitGraph = function (hit) {
+    self.showHitGraph = function (hit,_options) {
+       var  options={}
+        if(_options){
+            options=_options
+        }
         var triples = [];
         SubGraph.instantiateSubGraphTriples(hit.source, hit.id, { nonUnique: true }, function (err, result) {
             if (err) {
@@ -172,8 +177,16 @@ var Browse = (function () {
 
                     //  triples = triples.concat(result2.triples)
 
-                    self.getSubGraphHierarchicalVisjsData(triples, hit.id, {}, function (err, visjsData) {
-                        var options = {
+                    self.getSubGraphHierarchicalVisjsData(triples, hit.id, options, function (err, visjsData) {
+
+
+                        if(options.addToLevel){
+                            self.visjsGraph.data.nodes.update(visjsData.nodes)
+                            self.visjsGraph.data.edges.update(visjsData.edges)
+                            Lineage_decoration.decorateByUpperOntologyByClass(visjsData.nodes, self.visjsGraph);
+                            return;
+                        }
+                        var options2 = {
                             keepNodePositionOnDrag: true,
                             layoutHierarchical: {
                                 direction: "LR",
@@ -196,10 +209,13 @@ var Browse = (function () {
                                 },
                             },
                         };
-                        options.onclickFn = self.onVisjsGraphClick;
-                        options.onRightClickFn = self.showGraphPopupMenu;
+                        options2.onclickFn = self.graphActions.onVisjsGraphClick;
+                        options2.onRightClickFn = self.graphActions.showGraphPopupMenu;
 
-                        self.visjsGraph = new VisjsGraphClass("Browse_graphDiv", visjsData, options);
+
+
+
+                        self.visjsGraph = new VisjsGraphClass("Browse_graphDiv", visjsData, options2);
                         self.visjsGraph.draw(function () {
                             Lineage_decoration.decorateByUpperOntologyByClass(visjsData.nodes, self.visjsGraph);
                         });
@@ -288,7 +304,7 @@ var Browse = (function () {
                     }
                 }
 
-                recurse(rootNodeId, 1);
+                recurse(rootNodeId, options.addToLevel || 1);
                 var visjsData = { nodes: newNodes, edges: newEdges };
                 callback(null, visjsData);
             });
@@ -296,6 +312,30 @@ var Browse = (function () {
 
         self.exportPDF = function () {};
     };
+
+    self.graphActions= {
+
+        onVisjsGraphClick: function (node, point, options) {
+
+            if (options.ctrlKey ) {
+
+                Browse.showHitGraph({source:node.data.source, id: node.data.id},{addToLevel:node.level})
+            } else {
+               // NodeInfosWidget.showNodeInfos(node.data.source, node, "smallDialogDiv", {});
+            }
+        },
+        showGraphPopupMenu: function (node, point, event) {
+          return;
+            self.setGraphPopupMenus(node, event);
+            point = {};
+            point.x = event.x;
+            point.y = event.y;
+            //end
+            PopupMenuWidget.showPopup(point, "popupMenuWidgetDiv");
+
+
+        }
+    }
 
     return self;
 })();

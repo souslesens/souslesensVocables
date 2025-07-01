@@ -287,10 +287,10 @@ var SearchWidget = (function () {
                         }
                     }
 
-                    return;
-                    /*  if (_options.selectTreeNodeFn) {
+
+                   if (_options.selectTreeNodeFn) {
                         return _options.selectTreeNodeFn(event, obj);
-                    } else if (Config.userTools[MainController.currentTool].controller.selectTreeNodeFn) {
+                    } /*else if (Config.userTools[MainController.currentTool].controller.selectTreeNodeFn) {
                         return Config.userTools[MainController.currentTool].controller.selectTreeNodeFn(event, obj);
                     }
 

@@ -264,6 +264,8 @@ enabled:true},*/
             if (!nodesMap[node.id]) {
                 nodesMap[node.id] = node
             }
+
+
             levelMax = Math.max(levelMax, node.level)
             levelMin = Math.min(levelMin, node.level)
         })

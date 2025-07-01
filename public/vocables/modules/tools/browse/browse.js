@@ -4,6 +4,9 @@ import SearchUtil from "../../search/searchUtil.js";
 
 var Browse = (function () {
     var self = {};
+    self.onLoaded = function () {
+        self.showDialog('TE_BUSINESS_OBJECTS');
+    };
 
     self.showDialog = function (mainSource) {
         /*   self.loadWhiteboardContent(function (err, result) {

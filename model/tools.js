@@ -31,6 +31,7 @@ const NATIVE_TOOLS = [
     { name: "Standardizer", controller: "Standardizer", useSource: true, multiSources: false, toTools: {} },
     { name: "TSF_Dictionary", controller: "Lineage_dictionary", useSource: false, multiSources: false, toTools: {} },
     { name: "UserManagement", controller: "UserManagement", useSource: false, multiSources: false, toTools: {} },
+    { name: "Browse", controller: "Browse", useSource: true, multiSources: false, toTools: {} },
 
     { name: "Weaver", controller: "Weaver", useSource: true, multiSources: false, toTools: {}, displayImports: true },
     // { name: "Lifex_cost", controller: "Lifex_cost", useSource: false, multiSources: false, toTools: {} },

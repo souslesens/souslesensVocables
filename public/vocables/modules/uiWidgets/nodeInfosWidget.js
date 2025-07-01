@@ -109,7 +109,33 @@ var NodeInfosWidget = (function () {
             }
         });
     };
+    self.setTabs= function (options) {
+        if(!options) {
+            options = {};
+        }
+         $("#nodeInfosWidget_tabsDiv").tabs({
+             //  active: options.showAxioms ? 1 : 0,
 
+            load: function (event, ui) {},
+            activate: function (event, ui) {
+                $(".nodeInfosWidget_tabDiv").removeClass("nodesInfos-selectedTab");
+
+                setTimeout(function () {
+                    $("[aria-selected='true']").addClass("nodesInfos-selectedTab");
+                    if (ui.newPanel.selector == "#nodeInfosWidget_AxiomsTabDiv") {
+                        var source = self.currentSource;
+                        // source = Lineage_sources.mainSource;
+                        $("#smallDialogDiv").dialog("option", "title", "Axioms of resource " + self.currentNode.data.label);
+                        NodeInfosAxioms.init(source, self.currentNode, "smallDialogDiv");
+                    }
+                    if (ui.newPanel.selector == "#nodeInfosWidget_relationsDiv") {
+                        $("#nodeInfosWidget_relationsDiv").load("modules/uiWidgets/html/nodeRelationsWidget.html", function () {});
+                    }
+                }, 100);
+            },
+        });
+
+    }
     self.initDialog = function (sourceLabel, divId, options, callback) {
         self.divId = divId;
         self.currentSource = sourceLabel;
@@ -119,6 +145,8 @@ var NodeInfosWidget = (function () {
                 $("#deleteButton").remove();
                 $(".nodeInfosWidget_tabDiv").css("margin", "0px");
                 $("[aria-selected='true']").addClass("nodesInfos-selectedTab");
+                self.setTabs();
+                    
                 return callback();
             });
         } else {
@@ -129,27 +157,7 @@ var NodeInfosWidget = (function () {
                 $("#" + divId).dialog("close");
                 $("#" + divId).dialog({
                     open: function (event, ui) {
-                        $("#nodeInfosWidget_tabsDiv").tabs({
-                            //  active: options.showAxioms ? 1 : 0,
-
-                            load: function (event, ui) {},
-                            activate: function (event, ui) {
-                                $(".nodeInfosWidget_tabDiv").removeClass("nodesInfos-selectedTab");
-
-                                setTimeout(function () {
-                                    $("[aria-selected='true']").addClass("nodesInfos-selectedTab");
-                                    if (ui.newPanel.selector == "#nodeInfosWidget_AxiomsTabDiv") {
-                                        var source = self.currentSource;
-                                        // source = Lineage_sources.mainSource;
-                                        $("#smallDialogDiv").dialog("option", "title", "Axioms of resource " + self.currentNode.data.label);
-                                        NodeInfosAxioms.init(source, self.currentNode, "smallDialogDiv");
-                                    }
-                                    if (ui.newPanel.selector == "#nodeInfosWidget_relationsDiv") {
-                                        $("#nodeInfosWidget_relationsDiv").load("modules/uiWidgets/html/nodeRelationsWidget.html", function () {});
-                                    }
-                                }, 100);
-                            },
-                        });
+                       self.setTabs();
                     },
                     close: function (event, ui) {
                         $("#addPredicateButton").remove();

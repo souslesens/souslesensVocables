@@ -24,7 +24,7 @@
         "release:patch": "standard-version --skip.tag --skip.commit -t '' -r patch",
         "release:minor": "standard-version --skip.tag --skip.commit -t '' -r minor",
         "release:major": "standard-version --skip.tag --skip.commit -t '' -r major",
-        "release:tag": "sh release-new.sh"
+        "publish:release": "sh release-new.sh"
     },
     "devDependencies": {
         "@typescript-eslint/eslint-plugin": "^8.32.1",

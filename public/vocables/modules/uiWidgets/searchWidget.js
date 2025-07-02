@@ -10,6 +10,7 @@ import Export from "../shared/export.js";
 import PromptedSelectWidget from "./promptedSelectWidget.js";
 import NodeInfosAxioms from "../tools/axioms/nodeInfosAxioms.js";
 
+
 var SearchWidget = (function () {
     var self = {};
 
@@ -453,6 +454,52 @@ var SearchWidget = (function () {
                     Lineage_createResource.createSubClass(self.currentTreeNode.data.source, label, self.currentTreeNode.data.id);
                 },
             };
+            items.createRelation = {
+                label: "Create Relation",
+                action: function (_e) {
+                   
+                    var fromData={id: self.currentTreeNode.data.id, label: self.currentTreeNode.data.label, source: self.currentTreeNode.data.source};
+                    fromData.data = JSON.parse(JSON.stringify(fromData));;
+                    self.currentCreateRelation={from: fromData, to: null};
+                    /*var toData={id: Lineage_whiteboard.currentGraphNode.id, label: Lineage_whiteboard.currentGraphNode.label, source: Lineage_whiteboard.currentGraphNode.data.source}; 
+                    var edgeData = {from:fromData, to:toData};
+                     Lineage_createRelation.showAddEdgeFromGraphDialog(edgeData, function (err, result) {
+                            if (err) {
+                                return callback(err.responseText);
+                            }
+                            return null;
+                        });*/
+                    
+                }
+            };
+            if(self.currentCreateRelation && self.currentCreateRelation.from) {
+                items.createRelation = {
+                    label: "Create Relation with " + self.currentCreateRelation.from.label,
+                    action: function (_e) {
+                        var toData={id: self.currentTreeNode.data.id, label: self.currentTreeNode.data.label, source: self.currentTreeNode.data.source}; 
+                        self.currentCreateRelation.to = toData;
+                        self.currentCreateRelation.to.data = JSON.parse(JSON.stringify(toData));
+                        // draw both nodes before displaying dialog
+                        var nodesToDisplay = [self.currentCreateRelation.from, self.currentCreateRelation.to];
+                        var existingNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
+                        nodesToDisplay=nodesToDisplay.filter(function (node) {
+                            return !existingNodes[node.id];
+                        });
+                        Lineage_whiteboard.drawNodesAndParents(nodesToDisplay, 1,{drawBeforeCallback:true}, function () {
+                            var relation = common.array.deepCloneWithFunctions(self.currentCreateRelation);
+                            self.currentCreateRelation = null;
+                            Lineage_createRelation.showAddEdgeFromGraphDialog(relation, function (err, result) {
+
+                                    if (err) {
+                                        return callback(err.responseText);
+                                    }
+                                    return null;
+                            });
+                        });
+                       
+                    },
+                };
+            }
         }
 
         items.axioms = {

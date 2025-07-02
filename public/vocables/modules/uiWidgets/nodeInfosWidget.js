@@ -418,7 +418,10 @@ var NodeInfosWidget = (function () {
                         }
                     } else {
                         if (value.indexOf("http") == 0) {
-                            valuesLabelsToMap[value] = true;
+                            // exclude text containing urls causing problems with requests
+                            if(value.indexOf(" ") == -1 && value.indexOf(",") == -1) {
+                                valuesLabelsToMap[value] = true;
+                            }
                         }
                     }
                     /*   if (item.valueLabel)
@@ -566,7 +569,7 @@ defaultLang = 'en';*/
                                 var predicateId = valueObj.predicateId;
                                 var optionalStr = getOptionalStr(key, predicateId);
 
-                                if (value.indexOf("http") == 0) {
+                                if (value.indexOf("http") == 0 && value.indexOf(" ") == -1 && value.indexOf(",") == -1) {
                                     if (valueLabelsMap[value]) {
                                         value = "<a target='" + self.getUriTarget(nodeId) + "' href='" + value + "'>" + valueLabelsMap[value] + "</a>";
                                     } else {
@@ -598,10 +601,12 @@ defaultLang = 'en';*/
                                 values.forEach(function (valueObject, index) {
                                     var optionalStr = getOptionalStr(key, valueObject.predicateId);
                                     var value = valueObject.value;
-                                    if (value.indexOf("http") == 0) {
+                                    if (value.indexOf("http") == 0 && value.indexOf(" ") == -1 && value.indexOf(",") == -1) {
+
                                         if (valueLabelsMap[value]) {
                                             value = "<a target='" + NodeInfosWidget.getUriTarget(nodeId) + "' href='" + value + "'>" + valueLabelsMap[value] + "</a>";
                                         } else {
+                                            
                                             value += "<a target='" + NodeInfosWidget.getUriTarget(value) + "' href='" + value + "'>" + value + "</a>";
                                         }
                                     }

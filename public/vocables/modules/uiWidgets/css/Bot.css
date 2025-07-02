@@ -14,6 +14,7 @@
     padding: 5px;
     margin-top: 20px;
     width: 96%;
+    min-width: 350px;
 }
 #bot_resourcesProposalSelect option {
     padding: 5px;

@@ -374,16 +374,15 @@ var Containers_graph = (function () {
                     }
                     return callbackSeries();
                 },
-                // Apply decoration by upper class 
+                // Apply decoration by upper class
                 function (callbackSeries) {
-                    if(visjsData.nodes.length > 0) {
+                    if (visjsData.nodes.length > 0) {
                         Lineage_decoration.decorateByUpperOntologyByClass(visjsData.nodes);
                         callbackSeries();
                     } else {
                         callbackSeries();
                     }
-                }
-
+                },
             ],
             function (err) {
                 UI.message("", true);

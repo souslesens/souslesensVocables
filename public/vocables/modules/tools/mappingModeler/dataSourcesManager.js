@@ -551,8 +551,7 @@ var DataSourceManager = (function () {
                 self.umountKGUploadApp();
                 $("#smallDialogDiv").dialog({
                     open: function (event, ui) {},
-                    beforeClose: function () {}
-
+                    beforeClose: function () {},
                 });
 
                 DataSourceManager.currentSlsvSource = MappingModeler.currentSLSsource;

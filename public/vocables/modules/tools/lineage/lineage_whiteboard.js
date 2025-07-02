@@ -3128,13 +3128,13 @@ restrictionSource = Config.predicatesSource;
                     '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.removeOthersFromGraph();">Remove others</span>' +
                     '    <span  class="popupMenuItem" onclick="NodeRelations_bot.start();">Relations...</span>';
             } else {
-                if(Lineage_sources.isSourceEditableForUser(node.data.source)) {
+                if (Lineage_sources.isSourceEditableForUser(node.data.source)) {
                     html += '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.createSubClass();">Create SubClass</span>';
                 }
                 html +=
                     // '    <span class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.drawSimilars();"> Similars</span>' +
                     //'    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.collapse();">Collapse</span>' +
-                    
+
                     '    <span  class="popupMenuItem" onclick="NodeRelations_bot.start();">Relations...</span>' +
                     // '    <span  class="popupMenuItem" onclick="Lineage_relations.showDrawRelationsDialog(\'Graph\');">Relations...</span>' +
                     //  "   <span  class=\"popupMenuItem\" onclick=\"Lineage_relations.drawRelations('direct',null,'Graph');\">Relations</span>" +

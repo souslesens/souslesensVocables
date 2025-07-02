@@ -9,6 +9,7 @@ import common from "../shared/common.js";
 import Export from "../shared/export.js";
 import PromptedSelectWidget from "./promptedSelectWidget.js";
 import NodeInfosAxioms from "../tools/axioms/nodeInfosAxioms.js";
+import Lineage_sources from "../tools/lineage/lineage_sources.js";
 
 
 var SearchWidget = (function () {
@@ -446,14 +447,16 @@ var SearchWidget = (function () {
                     common.copyTextToClipboard(JSON.stringify(self.currentTreeNode));
                 },
             };
-            items.createSubClass = {
-                label: "Create SubClass",
-                action: function (_e) {
-                    var label = prompt("Enter SubClass label");
-                    if (!label) return;
-                    Lineage_createResource.createSubClass(self.currentTreeNode.data.source, label, self.currentTreeNode.data.id);
-                },
-            };
+            if(Lineage_sources.isSourceEditableForUser(self.currentTreeNode.data.source)) {
+                items.createSubClass = {
+                    label: "Create SubClass",
+                    action: function (_e) {
+                        var label = prompt("Enter SubClass label");
+                        if (!label) return;
+                        Lineage_createResource.createSubClass(self.currentTreeNode.data.source, label, self.currentTreeNode.data.id);
+                    },
+                };
+            }
             items.createRelation = {
                 label: "Create Relation",
                 action: function (_e) {

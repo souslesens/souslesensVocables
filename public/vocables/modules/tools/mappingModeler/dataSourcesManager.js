@@ -547,7 +547,14 @@ var DataSourceManager = (function () {
                 self.umountKGUploadApp = self.createApp(self.uploadFormData);
             },
             beforeClose: function () {
+                //Unmont app and free smallDialogDiv from events else react will take control of dialog
                 self.umountKGUploadApp();
+                $("#smallDialogDiv").dialog({
+                    open: function (event, ui) {},
+                    beforeClose: function () {}
+
+                });
+
                 DataSourceManager.currentSlsvSource = MappingModeler.currentSLSsource;
 
                 DataSourceManager.getSlsvSourceConfig(MappingModeler.currentSLSsource, function (err, result) {

@@ -389,16 +389,13 @@ var Browse = (function () {
 
     self.graphActions = {
         onVisjsGraphClick: function (node, point, options) {
-            
-               
             if (options.ctrlKey) {
                 if (node.data.id && node.data.source) {
                     var hitKey = node.data.source + "|" + node.data.id;
                     self.showHitDetailsOutsideSearch(hitKey);
-                    
                 }
             } else {
-                 Browse.showHitGraph({ source: node.data.source, id: node.data.id }, { addToLevel: node.level });
+                Browse.showHitGraph({ source: node.data.source, id: node.data.id }, { addToLevel: node.level });
                 // NodeInfosWidget.showNodeInfos(node.data.source, node, "smallDialogDiv", {});
             }
         },

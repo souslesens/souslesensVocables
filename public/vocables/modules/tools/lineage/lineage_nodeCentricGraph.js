@@ -111,6 +111,8 @@ var Lineage_nodeCentricGraph = (function () {
         Lineage_whiteboard.lineageVisjsGraph.network.setOptions(Lineage_whiteboard.lineageVisjsGraph.options.visjsOptions);
     };
 
+
+
     self.graphActions = {
         showNodeInfos: function () {
             var node = Lineage_nodeCentricGraph.currentGraphNode;

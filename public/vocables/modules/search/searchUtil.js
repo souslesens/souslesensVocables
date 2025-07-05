@@ -365,6 +365,10 @@ indexes.push(source.toLowerCase());
         return word2;
     };
     self.makeFuzzyQueryString = function (word) {
+        // to add  fuziness in query string elastic search, parameter isn't available
+        // It's needed to add ~n symbol to each word
+        // n is Levenshtein distance authorized for each word
+        //https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-query-string-query#query-string-fuzziness
         var splited_word = word.split(/\s+/);
         var fuzzyWords = [];
         splited_word.forEach((word) => {
@@ -389,11 +393,13 @@ indexes.push(source.toLowerCase());
             fields.push("skoslabels");
         }
 
-        word = self.escapeElasticReservedChars(word);
         var field = "label.keyword";
         if (word.indexOf && word.indexOf("http://") == 0) {
             field = "id.keyword";
+        } else {
+            word = self.escapeElasticReservedChars(word);
         }
+
         //  word=word.toLowerCase()
         var queryObj;
         if (!mode || mode == "exactMatch") {

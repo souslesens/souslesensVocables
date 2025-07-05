@@ -465,6 +465,44 @@ var Lineage_createResource = (function () {
         return triple;
     }
 
+    self.createSubClass = function (source, label, superClassUri) {
+        if (!label || !superClassUri) {
+            return alert("missing parameters");
+        }
+        // verify if node is owl:Class
+        Sparql_OWL.getNodeInfos(source, superClassUri, null, function (err, result) {
+            if (err) {
+                return alert(err);
+            }
+            if (result.length == 0) {
+                return alert("node is not a class");
+            }
+            var classTypeTriple = result.filter(function (item) {
+                if (item.prop.value == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" && item.value.value == "http://www.w3.org/2002/07/owl#Class") {
+                    return item;
+                }
+            });
+            if (classTypeTriple.length == 0) {
+                return alert("node is not a class");
+            }
+            var triples = Lineage_createResource.getResourceTriples(source, "owl:Class", null, label, superClassUri);
+            Lineage_createResource.writeResource(source, triples, function (err, resourceId) {
+                if (err) {
+                    return alert(err);
+                }
+                UI.message("subClass created");
+                var nodeData = {
+                    id: resourceId,
+                    data: {
+                        id: resourceId,
+                        source: source,
+                    },
+                };
+                Lineage_whiteboard.drawNodesAndParents(nodeData, 2, { legendType: "individualClasses" });
+            });
+        });
+    };
+
     return self;
 })();
 

@@ -429,6 +429,8 @@ the current whiteboard can be saved.
 
 ![](images/media/lineage/image26.png)
 
+If a whiteboard has been loaded before an update button, will show up to update the last loaded whiteboard.
+
 A saved whiteboard can be reloaded by clicking the **Load** button (on
 the whiteboard). To do so, simply click on the saved whiteboard you wish
 to reload.

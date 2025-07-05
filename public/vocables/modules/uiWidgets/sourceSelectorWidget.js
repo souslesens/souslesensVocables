@@ -304,6 +304,9 @@ var SourceSelectorWidget = (function () {
     };
 
     self.onSourceSelect = function (event, obj) {
+        if (obj.event.type == "contextmenu") {
+            return;
+        }
         if (obj.node.type == "Folder") {
             $("#sourceSelector_jstreeDiv").jstree(true).open_node(obj.node.id);
             return;

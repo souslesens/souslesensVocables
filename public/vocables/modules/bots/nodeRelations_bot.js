@@ -2,23 +2,24 @@ import Lineage_sources from "../tools/lineage/lineage_sources.js";
 import Sparql_OWL from "../sparqlProxies/sparql_OWL.js";
 import Lineage_whiteboard from "../tools/lineage/lineage_whiteboard.js";
 import Sparql_common from "../sparqlProxies/sparql_common.js";
-import _botEngine from "./_botEngine.js";
-import CommonBotFunctions from "./_commonBotFunctions.js";
+import BotEngineClass from "./_botEngineClass.js";
+import CommonBotFunctions_class from "./_commonBotFunctions_class.js";
 import Containers_graph from "../tools/containers/containers_graph.js";
 import Containers_widget from "../tools/containers/containers_widget.js";
 import Axioms_graph from "../tools/axioms/axioms_graph.js";
 
 var NodeRelations_bot = (function () {
     var self = {};
+    self.myBotEngine = new BotEngineClass();
 
     self.start = function () {
         self.title = "Query graph";
-        _botEngine.init(NodeRelations_bot, self.workflow, null, function () {
+        self.myBotEngine.init(NodeRelations_bot, self.workflow, null, function () {
             self.params = {
                 source: Lineage_sources.activeSource,
                 currentClass: Lineage_whiteboard.currentGraphNode.data.id,
             };
-            _botEngine.nextStep();
+            self.myBotEngine.nextStep();
         });
     };
 
@@ -73,22 +74,22 @@ var NodeRelations_bot = (function () {
     self.functions = {
         containersMembersFn: function () {
             Containers_graph.graphResources(self.params.source, { id: self.params.currentClass }, { leaves: true });
-            _botEngine.nextStep();
+            self.myBotEngine.nextStep();
         },
         parentContainersFn: function () {
             Containers_widget.showParentContainersDialog();
-            _botEngine.nextStep();
+            self.myBotEngine.nextStep();
         },
         similarsFn: function () {
             Lineage_similars.showDialog(true);
-            _botEngine.nextStep();
+            self.myBotEngine.nextStep();
         },
         listVocabsFn: function () {
-            CommonBotFunctions.listVocabsFn(Lineage_sources.activeSource, "currentVocab", true);
+            CommonBotFunctions_class.listVocabsFn(Lineage_sources.activeSource, "currentVocab", true);
         },
 
         listClassesFn: function () {
-            CommonBotFunctions.listVocabClasses(self.params.currentVocab, "currentClass", true, [{ label: "_Any Class", id: "AnyClass" }]);
+            CommonBotFunctions_class.listVocabClasses(self.params.currentVocab, "currentClass", true, [{ label: "_Any Class", id: "AnyClass" }]);
         },
 
         listPredicatePathsFn: function () {
@@ -113,12 +114,12 @@ var NodeRelations_bot = (function () {
         },
 
         listAnnotationPropertiesVocabsFn: function () {
-            CommonBotFunctions.listVocabsFn(self.params.source, "annotationPropertyVocab", true);
+            CommonBotFunctions_class.listVocabsFn(self.params.source, "annotationPropertyVocab", true);
         },
 
         listAnnotationPropertiesFn: function () {
             // filter properties compatible with
-            CommonBotFunctions.listAnnotationPropertiesFn(self.params.annotationPropertyVocab, "annotationPropertyId");
+            CommonBotFunctions_class.listAnnotationPropertiesFn(self.params.annotationPropertyVocab, "annotationPropertyId");
         },
 
         promptAnnotationPropertyValue: function () {
@@ -161,7 +162,7 @@ var NodeRelations_bot = (function () {
                 options.filter = Sparql_common.setFilter("prop", self.params.currentProperty);
             }
             Lineage_whiteboard.drawRestrictions(self.params.source, self.params.currentClass, null, null, {}, function (err, result) {});
-            _botEngine.nextStep();
+            self.myBotEngine.nextStep();
         },
         drawInverseRestrictions: function () {
             var options = { inverseRestriction: true };
@@ -169,7 +170,7 @@ var NodeRelations_bot = (function () {
                 options.filter = Sparql_common.setFilter("prop", self.params.currentProperty);
             }
             Lineage_whiteboard.drawRestrictions(self.params.source, self.params.currentClass, null, null, options, function (err, result) {});
-            _botEngine.nextStep();
+            self.myBotEngine.nextStep();
         },
         executeQuery: function () {
             var source = self.params.source;
@@ -305,7 +306,7 @@ var NodeRelations_bot = (function () {
 
             Lineage_whiteboard.drawPredicatesGraph(source, data, null, options);
 
-            _botEngine.nextStep();
+            self.myBotEngine.nextStep();
         },
 
         nodeTraversalFn: function () {

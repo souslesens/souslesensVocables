@@ -112,7 +112,7 @@ var Lineage_whiteboard = (function () {
 
             SearchWidget.currentTargetDiv = "LineageNodesJsTreeDiv";
         }
-
+        UserDataWidget.currentTreeNode = null;
         UI.initMenuBar(self.loadSources);
         $("#Lineage_graphEditionButtons").show();
         $("#Lineage_graphEditionButtons").load("./modules/tools/lineage/html/AddNodeEdgeButtons.html");
@@ -257,12 +257,26 @@ var Lineage_whiteboard = (function () {
                 Lineage_whiteboard.drawSimilarsNodes("sameLabel");
             },
         };
-
+        items.metaData = {
+            label: "metadata",
+            action: function (_e) {
+                var sourceLabel = $("#sourceSelector_jstreeDiv").jstree().get_selected()[0];
+                var source = $("#sourceSelector_jstreeDiv").jstree().get_node(sourceLabel);
+                if (!source || source?.data?.type != "source") {
+                    return;
+                }
+                Lineage_sources.menuActions.sourceMetaData(source);
+            },
+        };
         if (authentication.currentUser.groupes.indexOf("admin") > -1) {
             items.wikiPage = {
                 label: "Wiki page",
                 action: function (_e) {
-                    var source = $("#sourcesTreeDiv").jstree().get_selected()[0];
+                    var sourceLabel = $("#sourceSelector_jstreeDiv").jstree().get_selected()[0];
+                    var source = $("#sourceSelector_jstreeDiv").jstree().get_node(sourceLabel);
+                    if (!source || source?.data?.type != "source") {
+                        return;
+                    }
                     Lineage_whiteboard.showWikiPage(source);
                 },
             };
@@ -3114,9 +3128,13 @@ restrictionSource = Config.predicatesSource;
                     '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.removeOthersFromGraph();">Remove others</span>' +
                     '    <span  class="popupMenuItem" onclick="NodeRelations_bot.start();">Relations...</span>';
             } else {
+                if (Lineage_sources.isSourceEditableForUser(node.data.source)) {
+                    html += '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.createSubClass();">Create SubClass</span>';
+                }
                 html +=
                     // '    <span class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.drawSimilars();"> Similars</span>' +
-                    '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.collapse();">Collapse</span>' +
+                    //'    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.collapse();">Collapse</span>' +
+
                     '    <span  class="popupMenuItem" onclick="NodeRelations_bot.start();">Relations...</span>' +
                     // '    <span  class="popupMenuItem" onclick="Lineage_relations.showDrawRelationsDialog(\'Graph\');">Relations...</span>' +
                     //  "   <span  class=\"popupMenuItem\" onclick=\"Lineage_relations.drawRelations('direct',null,'Graph');\">Relations</span>" +
@@ -3133,7 +3151,6 @@ restrictionSource = Config.predicatesSource;
         if (node && !node.from) {
             html += '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.showHierarchicalView();">Hierarchical view </span>';
             html += '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.listAllNodeRelations();">List All relations </span>';
-
         }
 
         $("#popupMenuWidgetDiv").html(html);
@@ -4126,6 +4143,17 @@ self.zoomGraphOnNode(node.data[0].id, false);
             }
             self.lineageVisjsGraph.data.nodes.update(newNodes);
         },
+        createSubClass: function () {
+            var node = self.currentGraphNode;
+            if (!node && !node?.data?.id && !node?.data?.source) {
+                return;
+            }
+            var label = prompt("enter subClass label");
+            if (!label) {
+                return;
+            }
+            Lineage_createResource.createSubClass(node.data.source, label, node.data.id);
+        },
     };
 
     /**
@@ -4424,7 +4452,7 @@ attrs.color=self.getSourceColor(superClassValue)
                     positions: positions,
                 };
                 var data_path = "savedWhiteboards";
-                UserDataWidget.currentTreeNode = null;
+                //UserDataWidget.currentTreeNode = null;
                 UserDataWidget.showSaveDialog(data_path, data, null, function (err, result) {
                     if (err) {
                         return alert(err.responseText);
@@ -4460,8 +4488,18 @@ attrs.color=self.getSourceColor(superClassValue)
                     if (err) {
                         return alert(err.responseText);
                     }
-                    if (result?.data_content) {
-                        self.loadGraphFromJSON(result.data_content);
+                    if (result && result.id) {
+                        UserDataWidget.loadUserDatabyId(result.id, function (err, result) {
+                            if (err) {
+                                return alert(err.responseText);
+                            }
+                            if (result?.data_content) {
+                                self.loadGraphFromJSON(result.data_content);
+                            } else {
+                                alert("No data found in the selected whiteboard.");
+                            }
+                        });
+                        return;
                     }
                 },
             );
@@ -4577,9 +4615,9 @@ attrs.color=self.getSourceColor(superClassValue)
                 Lineage_sources.showHideEditButtons(Lineage_sources.activeSource);
                 Lineage_whiteboard.hideShowMoreActions("hide");
 
-                if (window.location.href.indexOf("localhost") < 0) {
+                /*if (window.location.href.indexOf("localhost") < 0) {
                     $("#lineage_actionDiv_newAxiom").css("display", "none");
-                }
+                }*/
                 $("#lineageWhiteboard_modelBtn").bind("click", function (e) {
                     Lineage_whiteboard.drawModel(null, null, { inverse: e.ctrlKey });
                 });

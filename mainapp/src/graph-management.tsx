@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 
-import { Button, Link, Paper, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableSortLabel, TextField } from "@mui/material";
+import { Button, Chip, Link, Paper, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableSortLabel, TextField, Typography } from "@mui/material";
 import CsvDownloader from "react-csv-downloader";
 
 import { humanizeSize, cleanUpText } from "./Utils";
@@ -19,7 +19,7 @@ declare global {
     }
 }
 
-type OrderBy = "name" | "graphUri" | "graphSize";
+type OrderBy = "name" | "graphUri" | "graphSize" | "group";
 
 export default function GraphManagement() {
     // sources fetched from server
@@ -112,8 +112,16 @@ export default function GraphManagement() {
                                     </TableSortLabel>
                                 </TableCell>
                                 <TableCell align="center" style={{ fontWeight: "bold", whiteSpace: "nowrap" }}>
+                                    <TableSortLabel active={orderBy === "group"} direction={order} onClick={() => handleRequestSort("group")}>
+                                        Group
+                                    </TableSortLabel>
+                                </TableCell>
+                                <TableCell align="center" style={{ fontWeight: "bold", whiteSpace: "nowrap" }}>
                                     <TableSortLabel active={orderBy === "graphSize"} direction={order} onClick={() => handleRequestSort("graphSize")}>
-                                        Graph Size
+                                        <Stack direction="row" spacing={1} sx={{ alignItems: "center" }} useFlexGap>
+                                            <div>Graph Size</div>
+                                            <Typography variant="caption">(Triple)</Typography>
+                                        </Stack>
                                     </TableSortLabel>
                                 </TableCell>
                                 <TableCell align="center" style={{ fontWeight: "bold" }}>
@@ -133,6 +141,7 @@ export default function GraphManagement() {
                                                     {source.graphUri}
                                                 </Link>
                                             </TableCell>
+                                            <TableCell align="center">{source.group ? <Chip label={source.group} size="small" /> : ""}</TableCell>
                                             <TableCell align="center">{humanizeSize(getGraphSize(source, graphs))}</TableCell>
                                             <TableCell align="center">
                                                 <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>

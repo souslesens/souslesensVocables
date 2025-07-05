@@ -161,14 +161,6 @@ var csvCrawler = {
                         if (emptyLine) return;
 
                         jsonDataFetch.push(data);
-
-                        /* if (maxLines && jsonDataFetch.length >= maxLines) {
-              jsonData.push(jsonDataFetch);
-              stream.unpipe(parser);
-              parser.end();
-              stream.destroy();
-            }*/
-
                         if (maxLines && jsonData.length > maxLines / fetchSize) {
                             jsonDataFetch = [];
                         } else if (fetchSize && jsonDataFetch.length >= fetchSize) {

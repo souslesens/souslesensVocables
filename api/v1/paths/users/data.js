@@ -184,7 +184,8 @@ module.exports = () => {
                 throw Error(`The resources is readonly and not owned by ${userInfo.user.login}`, { cause: 403 });
             }
             const userData = await cleanUserData.clean(req.body);
-            await userDataModel.update({ ...userData, owned_by: parseInt(userInfo.user.id) });
+            //never change owned_by
+            await userDataModel.update({ ...userData, owned_by: parseInt(existingData.owned_by) });
             res.status(200).json({ message: "The resource has been updated successfully" });
         } catch (error) {
             if (error.cause !== undefined) {

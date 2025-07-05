@@ -1,6 +1,7 @@
 import Lineage_whiteboard from "../lineage/lineage_whiteboard.js";
 import common from "../../shared/common.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
+import Lineage_decoration from "../lineage/lineage_decoration.js";
 
 var Containers_graph = (function () {
     var self = {};
@@ -372,6 +373,15 @@ var Containers_graph = (function () {
                         Lineage_relations.drawRelations(null, null, "Properties", options);
                     }
                     return callbackSeries();
+                },
+                // Apply decoration by upper class
+                function (callbackSeries) {
+                    if (visjsData.nodes.length > 0) {
+                        Lineage_decoration.decorateByUpperOntologyByClass(visjsData.nodes);
+                        callbackSeries();
+                    } else {
+                        callbackSeries();
+                    }
                 },
             ],
             function (err) {

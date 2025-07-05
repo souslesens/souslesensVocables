@@ -478,6 +478,8 @@ var Lineage_graphTraversal = (function () {
         self.clearPathList();
     };
 
+
+
     return self;
 })();
 

@@ -271,41 +271,66 @@ enabled:true},*/
         })
 
         visjsData.edges.forEach(function (edge) {
-            if (!edgesFromMap[edge.from]) {
-                edgesFromMap[edge.from] = {}
-            }
+
             var level = nodesMap[edge.from].level
-            if (!edgesFromMap[edge.from][level]) {
-                edgesFromMap[edge.from][level] = []
+            if (!edgesFromMap[level]) {
+                edgesFromMap[level] = {}
             }
             edge.fromLabel = nodesMap[edge.from].label
             edge.toLabel = nodesMap[edge.to].label
-            edgesFromMap[edge.from][level].push(edge)
+            if (!edgesFromMap[level][edge.from]) {
+                edgesFromMap[level][edge.from] = []
+            }
+            edgesFromMap[level][edge.from].push(edge)
         })
+
+
+        //    return console.log(JSON.stringify(edgesFromMap))
 
 
         var matrix = []
         var uniqueNodes = {}
-        var str = ""
 
 
-        for (var edgeFrom in edgesFromMap) {
-            for (var level = levelMin; level < levelMax; level++) {
-                var edges = edgesFromMap[edgeFrom][level]
+        //  for (var level = levelMin; level < levelMax; level++) {
+
+        var previousFromId = null
+var str=""
+        function recurse(edgeId, level) {
+            var str0=""
+            for (var edgeFrom in edgesFromMap[level]) {
+                var edges = edgesFromMap[level][edgeFrom]
+                if (edges) {
+
+                    edges.forEach(function (edge) {
+                        if (previousFromId == edge.from) {
+                          ;//  str += str0 + "\n"
+                        }
+                        previousFromId = edge.from
+if(level==1)
+    str0 = edge.fromLabel
+                        str0 = "[" + (edge.label || "") + "]" + edge.toLabel
+
+                        if (edgesFromMap[level + 1] && edgesFromMap[level + 1][edge.to]) {
+                          str0+= ", "+ recurse(edge.to, level + 1)
+                            str+=str0+"\n"
+                        }
 
 
-                    if (edges) {
-                        edges.forEach(function (edge) {
-                            str += edge.fromLabel + "-" + (edge.label || "-") + "-" + edge.toLabel
-                            str += "\t"
-                        })
+
+                    })
 
 
                 }
-                str += "\n"
+
             }
+            return str0
+
 
         }
+
+
+       recurse(rootNodeId, 1)
 
         console.log(str)
 

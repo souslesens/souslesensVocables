@@ -153,7 +153,7 @@ var MappingColumnsGraph = (function () {
      * @returns {void}
      */
     self.drawResource = function (newResource, options, callback) {
-        if(!options){
+        if (!options) {
             options = {};
         }
         self.graphDivWidth = $("#mappingModeler_graphDiv").width();
@@ -170,8 +170,7 @@ var MappingColumnsGraph = (function () {
             newResource.level = 3;
         } else if (self.currentGraphNode && newResource.data.type == "Table") {
             newResource.level = 1;
-        }
-        else if(newResource.data.type == "superClass" && newResource.level){
+        } else if (newResource.data.type == "superClass" && newResource.level) {
             // keep level of superClass
         } else {
             newResource.level = 2;
@@ -188,50 +187,48 @@ var MappingColumnsGraph = (function () {
         }
 
         if (self.visjsGraph) {
-            if(options.noSave){
+            if (options.noSave) {
                 var existingNodes = self.visjsGraph.getExistingIdsMap();
                 if (!existingNodes[newResource.id]) {
                     self.visjsGraph.data.nodes.add(visjsData.nodes);
                 }
-            }else{
+            } else {
                 self.addNode(visjsData.nodes);
             }
-            
-                //  self.visjsGraph.network.fit();
 
-                if (self.currentGraphNode && self.currentGraphNode.data) {
-                    if ((newResource.data.type == "Class"||newResource.data.type == "superClass") && self.currentGraphNode) {
-                        var label, type;
-                        if (self.currentGraphNode.data.type == "Class") {
-                            label = "";
-                            type = "rdfs:subClassOf";
-                        } else {
-                            label = "";
-                            type = "rdf:type";
-                        }
+            //  self.visjsGraph.network.fit();
 
-                        var edgeId = common.getRandomHexaId(5);
-                        visjsData.edges.push({
-                            id: edgeId,
-                            from: self.currentGraphNode.id,
-                            label: label,
-                            to: newResource.id,
-                            width: 3,
-                            data: { type: type },
-                            arrows: arrows,
-                            color: edgeColor,
-                        });
-
-                        //  self.updateCurrentGraphNode(visjsNode);
-                        if (options.noSave) {
-                            self.visjsGraph.data.edges.add(visjsData.edges);
-                        } else {
-                            self.addEdge(visjsData.edges);
-                        }
+            if (self.currentGraphNode && self.currentGraphNode.data) {
+                if ((newResource.data.type == "Class" || newResource.data.type == "superClass") && self.currentGraphNode) {
+                    var label, type;
+                    if (self.currentGraphNode.data.type == "Class") {
+                        label = "";
+                        type = "rdfs:subClassOf";
+                    } else {
+                        label = "";
+                        type = "rdf:type";
                     }
-                    
+
+                    var edgeId = common.getRandomHexaId(5);
+                    visjsData.edges.push({
+                        id: edgeId,
+                        from: self.currentGraphNode.id,
+                        label: label,
+                        to: newResource.id,
+                        width: 3,
+                        data: { type: type },
+                        arrows: arrows,
+                        color: edgeColor,
+                    });
+
+                    //  self.updateCurrentGraphNode(visjsNode);
+                    if (options.noSave) {
+                        self.visjsGraph.data.edges.add(visjsData.edges);
+                    } else {
+                        self.addEdge(visjsData.edges);
+                    }
                 }
-            
+            }
 
             //
         } else {
@@ -517,26 +514,24 @@ var MappingColumnsGraph = (function () {
                 if (classLegendItem.length > 0) {
                     classLegendItem = classLegendItem[0];
                 }
-                var level= 3;
-                if (self.currentGraphNode.level ) {
+                var level = 3;
+                if (self.currentGraphNode.level) {
                     level = self.currentGraphNode.level + 1;
                 }
                 var newResource = {
                     id: item.object.value,
                     label: item.objectLabel.value,
-                    shape: classLegendItem.shape ? classLegendItem.shape : '',
-                    color: classLegendItem.color ? classLegendItem.color : '',
+                    shape: classLegendItem.shape ? classLegendItem.shape : "",
+                    color: classLegendItem.color ? classLegendItem.color : "",
                     level: level,
                     data: {
                         id: item.object.value,
                         label: item.objectLabel.value,
                         type: "superClass",
-                        
                     },
                 };
 
-                self.drawResource(newResource,{ noSave: true }, function (err) {
-                });
+                self.drawResource(newResource, { noSave: true }, function (err) {});
             });
         },
 
@@ -920,17 +915,16 @@ var MappingColumnsGraph = (function () {
      * @param {Object} node - The node to be updated.
      * @returns {void}
      */
-    self.updateNode = function (node,callback) {
+    self.updateNode = function (node, callback) {
         if (!node) {
             return;
         }
         self.visjsGraph.data.nodes.update(node);
-        self.saveVisjsGraph(function() {
+        self.saveVisjsGraph(function () {
             if (callback) {
                 callback();
             }
         });
-
     };
 
     /**
@@ -941,12 +935,12 @@ var MappingColumnsGraph = (function () {
      * @param {Object} node - The node to be removed.
      * @returns {void}
      */
-    self.removeNode = function (node,callback) {
+    self.removeNode = function (node, callback) {
         if (!node) {
             return;
         }
         self.visjsGraph.data.nodes.remove(node);
-        self.saveVisjsGraph(function() {
+        self.saveVisjsGraph(function () {
             if (callback) {
                 callback();
             }
@@ -961,7 +955,7 @@ var MappingColumnsGraph = (function () {
      * @param {Object} node - The node to be added.
      * @returns {void}
      */
-    self.addNode = function (node,callback) {
+    self.addNode = function (node, callback) {
         if (!node) {
             return;
         }
@@ -981,12 +975,12 @@ var MappingColumnsGraph = (function () {
      * @param {Object} edge - The edge to be updated.
      * @returns {void}
      */
-    self.updateEdge = function (edge,callback) {
+    self.updateEdge = function (edge, callback) {
         if (!edge) {
             return;
         }
         self.visjsGraph.data.edges.update(edge);
-        self.saveVisjsGraph(function() {
+        self.saveVisjsGraph(function () {
             if (callback) {
                 callback();
             }
@@ -1001,12 +995,12 @@ var MappingColumnsGraph = (function () {
      * @param {Object} edge - The edge to be removed.
      * @returns {void}
      */
-    self.removeEdge = function (edge,callback) {
+    self.removeEdge = function (edge, callback) {
         if (!edge) {
             return;
         }
         self.visjsGraph.data.edges.remove(edge);
-        self.saveVisjsGraph(function() {
+        self.saveVisjsGraph(function () {
             if (callback) {
                 callback();
             }

@@ -1119,7 +1119,6 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
             var login = Sparql_common.formatString(authentication.currentUser.login);
             var dateTime = common.dateToRDFString(new Date(), true) + "^^xsd:dateTime";
 
-
             triples.push({
                 subject: self.currentNodeId,
                 predicate: "http://purl.org/dc/terms/modified",
@@ -1130,7 +1129,6 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
                 predicate: "http://purl.org/dc/terms/creator",
                 object: login,
             });
-
 
             Sparql_generic.insertTriples(self.currentSource, triples, {}, function (err, _result) {
                 if (err) {

@@ -1116,6 +1116,22 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
                 object: value,
             });
 
+            var login = Sparql_common.formatString(authentication.currentUser.login);
+            var dateTime = common.dateToRDFString(new Date(), true) + "^^xsd:dateTime";
+
+
+            triples.push({
+                subject: self.currentNodeId,
+                predicate: "http://purl.org/dc/terms/modified",
+                object: dateTime,
+            });
+            triples.push({
+                subject: self.currentNodeId,
+                predicate: "http://purl.org/dc/terms/creator",
+                object: login,
+            });
+
+
             Sparql_generic.insertTriples(self.currentSource, triples, {}, function (err, _result) {
                 if (err) {
                     return alert(err);

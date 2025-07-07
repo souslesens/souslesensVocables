@@ -82,6 +82,9 @@ var common = (function () {
                 );
             }
         }
+        // force redraw after dynamic change of the select because some navigators don't do it automaticaly
+        select.hide()
+        select.show()
     };
 
     self.fillSelectWithColorPalette = function (selectId, colors) {

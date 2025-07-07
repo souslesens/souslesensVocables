@@ -471,7 +471,7 @@ var MappingModeler = (function () {
                     datasource: DataSourceManager.currentConfig.currentDataSource.id,
                 },
             };
-            MappingColumnsGraph.drawResource(newResource, function () {
+            MappingColumnsGraph.drawResource(newResource, null, function () {
                 var edge = {
                     to: id,
                     from: self.currentTable.name,
@@ -586,7 +586,7 @@ var MappingModeler = (function () {
                     datasource: self.currentDataSource,
                 },
             };
-            MappingColumnsGraph.drawResource(newResource, function (err) {
+            MappingColumnsGraph.drawResource(newResource, null, function (err) {
                 var edge = {
                     to: id,
                     from: self.currentTable.name,

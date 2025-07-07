@@ -4619,7 +4619,8 @@ attrs.color=self.getSourceColor(superClassValue)
                     $("#lineage_actionDiv_newAxiom").css("display", "none");
                 }*/
                 $("#lineageWhiteboard_modelBtn").bind("click", function (e) {
-                    Lineage_whiteboard.drawModel(null, null, { inverse: e.ctrlKey });
+                   // Lineage_whiteboard.drawModel(null, null, { inverse: e.ctrlKey });
+                    Lineage_whiteboard.drawModel(null, null, { all: true })
                 });
                 $("#lineageWhiteboard_modelBtn").bind("contextmenu", function (e) {
                     e.preventDefault();

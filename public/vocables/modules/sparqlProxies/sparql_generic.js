@@ -552,30 +552,7 @@ var Sparql_generic = (function () {
         );
     };
 
-    self.update = function (_sourceLabel, _triples, _callback) {
-        /*
 
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-with <http://data.total.com/resource/tsf/maintenance/romain_14224/>
-DELETE {
-?id rdfs:label ?oldLabel .
-}
-INSERT {
-?id rdfs:label ?newLabel .
-}
-WHERE {
-?id rdfs:label ?oldLabel .
-filter (regex(?oldLabel,"Class.*"))
-bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
-}
-
-
-
-
-*/
-
-        return;
-    };
 
     self.deleteTriplesWithFilter = function (sourceLabel, filter, callback) {
         var graphUri = Config.sources[sourceLabel].graphUri;

@@ -152,7 +152,10 @@ var MappingColumnsGraph = (function () {
      * @param {Object} newResource - The resource to be added to the graph.
      * @returns {void}
      */
-    self.drawResource = function (newResource, callback) {
+    self.drawResource = function (newResource, options, callback) {
+        if(!options){
+            options = {};
+        }
         self.graphDivWidth = $("#mappingModeler_graphDiv").width();
         minX = -self.graphDivWidth / 2 + stepX;
         var arrows = {
@@ -185,7 +188,15 @@ var MappingColumnsGraph = (function () {
         }
 
         if (self.visjsGraph) {
-            self.addNode(visjsData.nodes);
+            if(options.noSave){
+                var existingNodes = self.visjsGraph.getExistingIdsMap();
+                if (!existingNodes[newResource.id]) {
+                    self.visjsGraph.data.nodes.add(visjsData.nodes);
+                }
+            }else{
+                self.addNode(visjsData.nodes);
+            }
+            
                 //  self.visjsGraph.network.fit();
 
                 if (self.currentGraphNode && self.currentGraphNode.data) {
@@ -212,7 +223,11 @@ var MappingColumnsGraph = (function () {
                         });
 
                         //  self.updateCurrentGraphNode(visjsNode);
-                        self.addEdge(visjsData.edges);
+                        if (options.noSave) {
+                            self.visjsGraph.data.edges.add(visjsData.edges);
+                        } else {
+                            self.addEdge(visjsData.edges);
+                        }
                     }
                     
                 }
@@ -520,7 +535,8 @@ var MappingColumnsGraph = (function () {
                     },
                 };
 
-                self.drawResource(newResource);
+                self.drawResource(newResource,{ noSave: true }, function (err) {
+                });
             });
         },
 

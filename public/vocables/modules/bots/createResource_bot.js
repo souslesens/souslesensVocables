@@ -155,7 +155,9 @@ var CreateResource_bot = (function () {
                     source: self.params.source,
                 },
             };
-            Lineage_whiteboard.drawNodesAndParents(nodeData, 1, { legendType: "individualClasses" });
+            Lineage_whiteboard.drawNodesAndParents(nodeData, 1, { legendType: "individualClasses" , drawBeforeCallback: true }, function () {
+                Lineage_whiteboard.graph.searchNode(self.params.resourceId);
+            });
             self.myBotEngine.nextStep();
         },
         newResourceFn: function () {

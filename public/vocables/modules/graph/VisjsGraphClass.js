@@ -923,7 +923,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
     self.searchNode = function (id, word) {
         if (!word || word == "") {
             word = $("#visjsGraph_searchInput").val();
-            if (word == "") {
+            if (word == "" && !id) {
                 return;
             }
         }

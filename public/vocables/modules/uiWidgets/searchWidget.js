@@ -434,9 +434,13 @@ var SearchWidget = (function () {
                     // pb avec source
                     var selectedNodes = $("#LineageNodesJsTreeDiv").jstree().get_selected(true);
                     if (selectedNodes.length > 1) {
-                        Lineage_whiteboard.drawNodesAndParents(selectedNodes, 0);
+                        Lineage_whiteboard.drawNodesAndParents(selectedNodes, 0, {drawBeforeCallback:true}, function () {
+                            Lineage_whiteboard.graph.searchNode(self.currentTreeNode.data.id);
+                        });
                     } else {
-                        Lineage_whiteboard.drawNodesAndParents(self.currentTreeNode, 0);
+                        Lineage_whiteboard.drawNodesAndParents(self.currentTreeNode, 0, {drawBeforeCallback:true}, function () {
+                            Lineage_whiteboard.graph.searchNode(self.currentTreeNode.data.id);
+                        });
                     }
                 },
             };

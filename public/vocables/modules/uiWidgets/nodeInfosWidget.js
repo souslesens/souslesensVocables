@@ -904,6 +904,25 @@ defaultLang = 'en';*/
             return callback();
         }
         var uniqueIds = {};
+        var sources={};
+        var rank=0;
+        ancestors.forEach(function (item) {
+            if (!sources[item.source] && sources[item.source]!== 0) {
+                sources[item.source]=rank;
+                rank++;
+            }
+        });
+        var sourceNumber= Object.keys(sources).length;
+        var startColor = UI.currentTheme["@button1-color"];
+        if (!startColor) {
+            startColor = "#f0f0f0";
+        }
+
+        var sourcesColorArray = common.generateShades(startColor, sourceNumber);
+        Object.keys(sources).forEach(function (source) {
+            sources[source] = sourcesColorArray[sources[source]];
+        });
+
         if (ancestors.length > 0) {
             ancestors.forEach(function (item) {
                 if (!uniqueIds[item.id]) {
@@ -918,6 +937,9 @@ defaultLang = 'en';*/
                             id: item.id,
                             source: sourceLabel,
                         },
+                        a_attr: {
+                            style: "background-color: " + sources[item.source] + ";color:white;"  // couleur directe
+                        }
                     });
                 }
             });
@@ -975,6 +997,7 @@ defaultLang = 'en';*/
         }
 
         JstreeWidget.loadJsTree("classHierarchyTreeDiv", jstreeData, options);
+
 
         callback();
     };

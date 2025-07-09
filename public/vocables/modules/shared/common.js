@@ -964,9 +964,9 @@ if (callback) return callback(err);
 
         var rgbColor = /\((\d+),(\d+),(\d+)/.exec(color);
         if (rgbColor) {
-            var r = rgbColor[1];
-            var g = rgbColor[2];
-            var b = rgbColor[3];
+            var r = parseInt(rgbColor[1]);
+            var g = parseInt(rgbColor[2]);
+            var b = parseInt(rgbColor[3]);
             var hexColor = rgbToHex(r, g, b);
             return hexColor;
         } else {
@@ -1164,6 +1164,99 @@ if (callback) return callback(err);
 
         return str;
     };
+    /*
+    self.generateShades = function(hex, colorNumber) {
+        if (!hex || !colorNumber) {
+            return [];
+        }
+
+        var shades = [];
+        var baseColorRgb = self.colorToRgba(hex, 1); // ex: "rgba(26,40,191,1)"
+        
+        // parser les valeurs RGBA
+        const [_, baseR, baseG, baseB, a] = baseColorRgb
+            .match(/\((\d+),\s*(\d+),\s*(\d+),\s*([0-9.]+)\)/)
+            .map(Number);
+
+        for (let i = 0; i < colorNumber; i++) {
+            const factor = (i - (colorNumber - 1) / 2) / ((colorNumber - 1) / 2); // de -1 à +1
+            const strength = 40; // max variation ±40
+
+            // Ajouter ou retirer de la luminosité sans dénaturer la couleur
+            const r = Math.min(255, Math.max(0, baseR + factor * strength));
+            const g = Math.min(255, Math.max(0, baseG + factor * strength));
+            const b = Math.min(255, Math.max(0, baseB + factor * strength));
+
+            const rgbStr = `rgba(${Math.round(r)},${Math.round(g)},${Math.round(b)},${a})`;
+            shades.push(self.RGBtoHexColor(rgbStr));
+        }
+
+        return shades;
+    };*/
+    self.generateShades = function(hex, colorNumber) {
+        if (!hex || !colorNumber) {
+            return [];
+        }
+
+        const shades = [];
+        const baseColor = self.colorToRgba(hex, 1); // ex: rgba(26,40,191,1)
+
+        const [_, r, g, b, a] = baseColor
+            .match(/\((\d+),\s*(\d+),\s*(\d+),\s*([0-9.]+)\)/)
+            .map(Number);
+
+        const { h, s, l } = self.rgbToHsl(r, g, b); // on appelle une fonction utilitaire interne ici
+
+        for (let i = 0; i < colorNumber; i++) {
+            const factor = i / (colorNumber - 1);
+            const hueShift = h + factor * 30; // dérive de la teinte jusqu’à +30°
+            const newLightness = Math.min(90, l + factor * 35); // clarté progressive mais jamais blanc
+
+            const { r: nr, g: ng, b: nb } = self.hslToRgb(hueShift % 360, s, newLightness);
+            const rgbaStr = `rgba(${Math.round(nr)},${Math.round(ng)},${Math.round(nb)},${a})`;
+            shades.push(self.RGBtoHexColor(rgbaStr));
+        }
+
+        return shades;
+    };
+     self.rgbToHsl=function(r, g, b) {
+        r /= 255; g /= 255; b /= 255;
+        const max = Math.max(r, g, b), min = Math.min(r, g, b);
+        let h = 0, s = 0, l = (max + min) / 2;
+
+        if (max !== min) {
+            const d = max - min;
+            s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+            switch (max) {
+                case r: h = ((g - b) / d + (g < b ? 6 : 0)); break;
+                case g: h = ((b - r) / d + 2); break;
+                case b: h = ((r - g) / d + 4); break;
+            }
+            h *= 60;
+        }
+
+        return { h, s: s * 100, l: l * 100 };
+    }
+    self.hslToRgb = function(h, s, l) {
+        s /= 100; l /= 100;
+        const c = (1 - Math.abs(2 * l - 1)) * s;
+        const x = c * (1 - Math.abs((h / 60) % 2 - 1));
+        const m = l - c / 2;
+        let r, g, b;
+
+        if (0 <= h && h < 60)       [r, g, b] = [c, x, 0];
+        else if (h < 120)           [r, g, b] = [x, c, 0];
+        else if (h < 180)           [r, g, b] = [0, c, x];
+        else if (h < 240)           [r, g, b] = [0, x, c];
+        else if (h < 300)           [r, g, b] = [x, 0, c];
+        else                        [r, g, b] = [c, 0, x];
+
+        return {
+            r: (r + m) * 255,
+            g: (g + m) * 255,
+            b: (b + m) * 255
+        };
+    }
 
     return self;
 })();

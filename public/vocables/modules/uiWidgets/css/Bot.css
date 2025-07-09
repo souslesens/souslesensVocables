@@ -45,3 +45,13 @@
     justify-self: end;
     margin-right: 10px;
 }
+
+.hideScrollBar::-webkit-scrollbar {
+    display: none;
+}
+.hideScrollBar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    min-height: 2.5em;
+    box-sizing: border-box;
+}

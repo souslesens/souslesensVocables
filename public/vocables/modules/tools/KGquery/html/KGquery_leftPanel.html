@@ -1,15 +1,117 @@
-<div id="lineage-tab-buttons" class="w3-barslsv-bg-pale w3-bar" style="border-bottom: 0px">
-    <div class="w3-bar-item KGquery-tabDiv">
+<div id="KGquery_tabsDiv" class="principalTabDiv" style="border-bottom: 0px">
+
+    <!--<div class="KGquery-tabDiv">
         <button id="QueryTabButton" class="w3-button slsv-tabButton" onclick="UI.openTab('lineage-tab','tabs_Query',KGquery.initQuery,this)">Query</button>
     </div>
 
-    <div class="w3-bar-item KGquery-tabDiv" style="border-right: 0px !important">
+    <div class="KGquery-tabDiv" style="border-right: 0px !important">
         <button class="w3-button slsv-tabButton" onclick="UI.openTab('lineage-tab','tabs_Graph',KGquery.initGraph,this)">Graph</button>
+    </div>-->
+     <ul>
+         <li class="KGquery-tabDiv">
+            <a href="#tabs_Query" style="padding: 7px">Query</a>
+        </li>
+        <li class="KGquery-tabDiv">
+            <a href="#tabs_Graph" style="padding: 7px">Graph</a>
+        </li>
+       
+      
+       
+    </ul>
+    
+    <div id="tabs_Query" class="coloredContainerImportant" >
+                <div id="KGquery_queryTab" style="display: flex; flex-direction: column; margin-top: 20px">
+            <div class="w3-panel w3-border w3-round-small lateralPanelSection-width" style="display: flex; flex-direction: column">
+                <div class="titleboxButtons font-button1-color">Query Actions</div>
+
+                <div style="display: flex; flex-direction: row; justify-content: flex-start; align-items: center">
+                    <!-- <button class="slsv-button-1" onclick="KGquery.switchRightPanel(true)">Graph</button>-->
+                    <button class="slsv-button-1" onclick="KGquery.clearAll();KGquery.switchRightPanel(true)">Clear</button>
+
+                    <button class="slsv-button-1" onclick="KGquery.queryKG('table')">Table</button>
+                    <!--   <button class="slsv-button-1" onclick="KGquery.queryKG('gantt')">Gantt</button>-->
+                    <!-- <button onclick="KGquery.queryKG('vijsGraph')">Graph</button>-->
+                    <button class="slsv-button-1" onclick="KGquery.aggregateQuery()">Aggregate</button>
+                    <button class="slsv-button-1" onclick="KGquery.checkRequirements()">check</button>
+                    <!--  <button class="slsv-button-1" onclick="KGquery_nodeSelector.showImplicitModelInJstree()">+</button>-->
+                    <!--  <select id="KGquery_outputTypeSelect" onchange="KGquery.onOutputTypeSelect($(this).val());">
+                        <option selected disabled>Select tool</option>
+                        <option>Graph</option>
+                    </select>-->
+                    <button class="slsv-button-1" onclick=" KGquery_nodeSelector.showImplicitModelInJstree(KGquery_graph.visjsData);">+</button>
+
+                    <!-- <button onclick="KGquery.queryKG('table',null,true)">Query database</button>-->
+
+                    <!--<button onclick="TimeLineWidget.init()">TimeLine</button>-->
+                </div>
+                <div>
+                    <input type="checkbox" id="KGquery_displayGraphInList" onchange="KGquery_graph.onDisplayGraphInListCBXchange()" />
+                    Select nodes in list
+                </div>
+            </div>
+            <div class="w3-panel w3-border w3-round-small lateralPanelSection-width" style="align-items: baseline" id="KGquery_SetsControlsDiv">
+                <div class="titleboxButtons font-button2-color">Joins</div>
+                <button class="slsv-button-2" onclick="KGquery.addQuerySet('Minus');KGquery.switchRightPanel(true)"><img src="icons/CommonIcons/MinusIcon.png" height="15px" />Minus</button>
+                <button class="slsv-button-2" onclick="KGquery.addQuerySet('Union');KGquery.switchRightPanel(true)"><img src="icons/CommonIcons/UnionIcon.png" height="15px" />Union</button>
+            </div>
+
+            <div class="w3-panel w3-border w3-round-small lateralPanelSection-width" style="display: flex; flex-direction: column; overflow: auto; max-height: 40vh">
+                <div class="titleboxButtons font-button3-color" style="position: fixed">Sets</div>
+                <div id="KGquery_pathsDiv"></div>
+            </div>
+        </div>
+        <script>
+            KGquery.initOutputType();
+        </script>
+
+    </div>
+
+    <div id="tabs_Graph" class="coloredContainerImportant">
+          <style>
+            .KGquery_graph_messageDiv {
+                font-size: 14px;
+                font-family: Helvetica, sans-serif;
+                color: #0767b7;
+                // height: 30px;
+            }
+        </style>
+
+        <div id="KGquery_graphTab">
+            <div id="KGquery_graph_messageDiv"></div>
+            <div class="w3-panel w3-border w3-round-small lateralPanelSection-width">
+                <div class="titleboxButtons font-button1-color">Graph</div>
+                <button class="slsv-button-1" onclick="KGquery_graph.loadSaved()">loadSaved</button>
+                <button class="slsv-button-1" onclick="KGquery_graph.drawVisjsModel('inferred')">regenerate</button>
+
+                <button class="slsv-button-1" onclick="KGquery_graph.saveVisjsModelGraph()">saveGraph</button>
+                <button class="slsv-button-1" onclick="KGquery_graph.DrawImportsCommonGraph()">generateCommonGraph</button>
+                <!--  <input type="checkbox" id="KGqueryGraph_useSkgUriCBX"> use KG URI-->
+                <button class="slsv-button-1" onclick="KGquery_graph.genereateCommonDecoration()">generateCommonDecoration</button>
+                <button class="slsv-button-1" onclick="KGquery_graph.setEdgeMode()">setEdgeMode</button>
+            </div>
+
+            <div class="w3-panel w3-border w3-round-small lateralPanelSection-width">
+                <div class="titleboxButtons font-button2-color">Decorations</div>
+                <button class="slsv-button-2" onclick="KGquery_graph.setAllNodesFontSize()">AllNodesFontSize</button>
+                <button class="slsv-button-2" onclick="KGquery_graph.setAllNodesSizes()">AllNodesSize</button>
+                <div style="margin-top: 5px">
+                    Node Color
+                    <select class="select-bar-theme2" id="KGquery_graph_nodeColorSelect" onclick="KGquery_graph.setNodeAttr('color',$(this).val())"></select>
+                    <div>
+                        <br />Node Shape
+                        <select class="select-bar-theme2" id="KGquery_graph_nodeShapeSelect" onclick="KGquery_graph.setNodeAttr('shape',$(this).val())"></select>
+                    </div>
+                </div>
+                <button class="w3-button slsv-button-2" id="lineage_actionDiv_selectedNodesDialog" onclick="Lineage_selection.showSelectionDialog()" title="Selection">
+                    <img src="./icons/CommonIcons/Query.png" />
+                </button>
+            </div>
+        </div>
+
+
+
     </div>
 </div>
 
-<div id="tabs_myQueries" class="w3-container lineage-tab slsv-bg-pale"></div>
 
-<div id="tabs_Query" class="w3-container lineage-tab slsv-bg-pale"></div>
 
-<div id="tabs_Graph" class="w3-container lineage-tab slsv-bg-pale"></div>

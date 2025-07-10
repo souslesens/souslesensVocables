@@ -129,7 +129,14 @@ var KGquery = (function () {
             $("#graphDiv").load("./modules/tools/KGquery/html/KGquery_centralPanel.html", function () {
                 $("#lateralPanelDiv").load("./modules/tools/KGquery/html/KGquery_leftPanel.html", function () {
                     UI.disableEditButtons();
-                    UI.openTab("lineage-tab", "tabs_Query", KGquery.initQuery, "#QueryTabButton");
+                    //UI.openTab("lineage-tab", "tabs_Query", KGquery.initQuery, "#QueryTabButton");
+                    $("#KGquery_tabsDiv").tabs({
+                        activate: function (event, ui) {
+                          
+                            //  UIcontroller.activateRightPanel($(ui.newTab).text());
+                        },
+                    });
+                    $($("#KGquery_tabsDiv").children()[0]).css("border-radius", "0px");
                     UI.resetWindowSize();
                     self.clearAll();
                     if (Config.clientCache.KGquery) {

@@ -367,7 +367,7 @@ const PluginsRepositoryDialog = ({ onClose, onSubmit, open, edit, selectedReposi
         if (selectedRepository !== null && selectedRepository !== undefined) {
             const data = repositories[selectedRepository];
             setRepository({ identifier: selectedRepository, data: data });
-            setPluginsEnabled(data.plugins || []);
+            setPluginsEnabled(data?.plugins || []);
             getRepositoryTags(selectedRepository)
                 .then((response) => {
                     if (response.status === 200) {

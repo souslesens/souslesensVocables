@@ -3,6 +3,7 @@ const { readFile, writeFile } = require("fs/promises");
 const { Lock } = require("async-await-mutex-lock");
 
 const { mainConfigPath } = require("./config");
+const { toolModel } = require("./tools");
 
 const lock = new Lock();
 
@@ -30,6 +31,16 @@ class MainConfigModel {
         } finally {
             lock.release("MainConfigLock");
         }
+    }
+
+    async cleanToolsAvailable() {
+        const config = await this.getConfig();
+        const toolsAvailable = config.tools_available;
+
+        const tools = toolModel.allTools;
+
+        const newToolsAvailable = toolsAvailable.filter((t) => tools.includes(t));
+        await this.writeConfig({ ...config, tools_available: newToolsAvailable });
     }
 }
 

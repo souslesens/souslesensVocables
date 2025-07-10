@@ -1,4 +1,5 @@
 const { toolModel } = require("../../../../../../../model/tools");
+const { mainConfigModel } = require("../../../../../../../model/mainConfig");
 const { responseSchema } = require("../../../../utils");
 
 module.exports = function () {
@@ -16,6 +17,10 @@ module.exports = function () {
                 });
             } else {
                 await toolModel.deleteRepository(identifier);
+
+                // Remove from mainConfig.json if plugin are removed
+                await mainConfigModel.cleanToolsAvailable();
+
                 res.status(200).json({
                     message: "The repository have been removed",
                     status: 200,
@@ -72,6 +77,9 @@ module.exports = function () {
                     const repositories = toolModel.readRepositories();
                     repositories[repository] = req.body.data;
                     await toolModel.writeRepositories(repositories);
+
+                    // Remove from mainConfig.json if plugin are removed
+                    await mainConfigModel.cleanToolsAvailable();
 
                     res.status(200).json({
                         message: "The repository have been updated",

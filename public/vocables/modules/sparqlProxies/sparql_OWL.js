@@ -3079,6 +3079,16 @@ var Sparql_OWL = (function () {
                         "    ?sub ?p ?obj filter (?p!=rdfs:subClassOf)\n" +
                         "}\n" +
                         "}";
+
+
+
+
+
+
+
+
+
+
                     Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
                         return callbackSeries(err);
                     });

@@ -938,7 +938,7 @@ var Sparql_generic = (function () {
                             "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>" +
                             "SELECT distinct *  " +
                             fromStr +
-                            "  WHERE {{  ?subject   rdfs:subClassOf   ?firstParent.?subject rdfs:label ?subjectLabel.  ?firstParent rdf:type owl:Class. " +
+                            "  WHERE {{  ?subject   rdfs:subClassOf+   ?firstParent.?subject rdfs:label ?subjectLabel.  ?firstParent rdf:type owl:Class. " +
                             filter +
                             // "filter( lang(?subjectLabel)= 'en' || !lang(?subjectLabel))" +
                             "OPTIONAL{?subject skos:altLabel \n" +

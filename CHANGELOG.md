@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.14.0](https://github.com/souslesens/souslesensVocables/compare/2.13.1...2.14.0) (2025-07-18)
+
+
+### Features
+
+* **api:** add /users/me to get the current logged user ([98b567e](https://github.com/souslesens/souslesensVocables/commit/98b567eca0e86c0d93b22f21bfd70a0654e30465))
+
+
+### Bug Fixes
+
+* **api:** fix /users/me route for disabled auth ([874bbdf](https://github.com/souslesens/souslesensVocables/commit/874bbdf363698b95a0674464dfde8319c5d413ca))
+* **mainapp:** PluginsForm ([a11fa30](https://github.com/souslesens/souslesensVocables/commit/a11fa300d473c0116fd92f718dded6a6256bf378))
+* **model/tools:** correctly unlink the plugin symlinks when removing a repository ([6e356d4](https://github.com/souslesens/souslesensVocables/commit/6e356d4c112dc83b2b2b46cef2f42351d00b51bf))
+* **plugins:** cleanup tools_available from mainConfig.json at PUT or DELETE ([3ae6e58](https://github.com/souslesens/souslesensVocables/commit/3ae6e5821c6b4ef15fab33143efb09fb14a6e3f7))
+
 ### [2.13.1](https://github.com/souslesens/souslesensVocables/compare/2.13.0...2.13.1) (2025-07-09)
 
 ## [2.13.0](https://github.com/souslesens/souslesensVocables/compare/2.12.2...2.13.0) (2025-07-08)

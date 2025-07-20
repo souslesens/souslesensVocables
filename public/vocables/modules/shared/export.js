@@ -403,6 +403,7 @@ var Export = (function () {
         if (options.divId) {
             div = options.divId;
         } else {
+            if(!div)
             div = "mainDialogDiv";
             //$("#" + div).dialog("open");
         }

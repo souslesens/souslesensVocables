@@ -27,7 +27,7 @@ services:
             - backend
 
     virtuoso:
-        image: askomics/virtuoso:7.2.14
+        image: askomics/virtuoso:7.2.15
         ports:
             - ${VIRTUOSO_LISTEN_PORT:-8890}:8890
         environment:
@@ -115,7 +115,6 @@ services:
             - "${DATA_ROOT_DIR:-/tmp}/souslesens/vocables/config:/souslesens_config:ro"
         networks:
             - backend
-
 
 networks:
     backend:

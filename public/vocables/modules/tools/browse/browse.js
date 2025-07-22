@@ -215,7 +215,7 @@ var Browse = (function () {
 
                     //  triples = triples.concat(result2.triples)
 
-                    self.getSubGraphHierarchicalVisjsData(triples, hit.id, options, function (err, visjsData) {
+                    self.getSubGraphHierarchicalVisjsData(triples, hit.id, hit.source,options, function (err, visjsData) {
                         if (visjsData.nodes.length == 0) {
                             UI.message("no data for " + hit.label);
                         }
@@ -252,7 +252,7 @@ var Browse = (function () {
                         options2.onclickFn = self.graphActions.onVisjsGraphClick;
                         options2.onRightClickFn = self.graphActions.showGraphPopupMenu;
 
-                        self.visjsGraph = new VisjsGraphClass("Browse_graphDiv", visjsData, options2);
+                        self.visjsGraph = new VisjsGraphClass(_options.graphDiv || "Browse_graphDiv", visjsData, options2);
                         self.visjsGraph.draw(function () {
                             Lineage_decoration.decorateByUpperOntologyByClass(visjsData.nodes, self.visjsGraph);
                         });
@@ -261,7 +261,7 @@ var Browse = (function () {
             );
         });
 
-        self.getSubGraphHierarchicalVisjsData = function (data, rootNodeId, options, callback) {
+        self.getSubGraphHierarchicalVisjsData = function (data, rootNodeId,source, options, callback) {
             var visjsData = { nodes: [], edges: [] };
             var uniqueIds = {};
             var edgesMap = {};
@@ -280,7 +280,7 @@ var Browse = (function () {
             });
 
             var allUris = Object.keys(nodesMap).concat(Object.keys(edgesMap));
-            Sparql_OWL.getUrisLabelsMap(Lineage_sources.activeSource, allUris, function (err, labelsMap) {
+            Sparql_OWL.getUrisLabelsMap(source, allUris, function (err, labelsMap) {
                 var newNodes = [];
                 var newEdges = [];
 

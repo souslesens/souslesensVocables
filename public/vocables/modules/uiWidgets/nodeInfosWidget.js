@@ -904,19 +904,43 @@ defaultLang = 'en';*/
             return callback();
         }
         var uniqueIds = {};
+
+
+
+        var borderColors=[
+            "#cccbcb",
+            "#e1dfdf",
+            "#e1dce4",
+            "#f3f3f3",
+        ]
+
+
         if (ancestors.length > 0) {
-            ancestors.forEach(function (item) {
+            var previousSource=null
+            var colorIndex=0
+            ancestors.forEach(function (item,index) {
+                if(index==0)
+                var color="#fff"
+                else if(item.source!=previousSource){
+
+                    colorIndex+=1
+                }else{
+
+                }
+                color=borderColors[colorIndex] ||   "#aaa";
+                previousSource=item.source
                 if (!uniqueIds[item.id]) {
                     var parent = item.superClass || "#";
                     uniqueIds[item.id] = 1;
                     jstreeData.push({
                         id: item.id,
-                        text: item.label,
+                        text: "<span  style='background-color:"+color+";border: solid 0px ; border-radius: 3px; padding: 1px; '>"+item.label+"</span>",
+                      //  text: "<span  style='border: solid 3px "+color+"; border-radius: 3px; padding: 1px; '>"+item.label+"</span>",
                         parent: parent,
                         type: "Class",
                         data: {
                             id: item.id,
-                            source: sourceLabel,
+                            source: item.source,
                         },
                     });
                 }

@@ -152,7 +152,10 @@ var MappingColumnsGraph = (function () {
      * @param {Object} newResource - The resource to be added to the graph.
      * @returns {void}
      */
-    self.drawResource = function (newResource, callback) {
+    self.drawResource = function (newResource, options, callback) {
+        if (!options) {
+            options = {};
+        }
         self.graphDivWidth = $("#mappingModeler_graphDiv").width();
         minX = -self.graphDivWidth / 2 + stepX;
         var arrows = {
@@ -167,6 +170,8 @@ var MappingColumnsGraph = (function () {
             newResource.level = 3;
         } else if (self.currentGraphNode && newResource.data.type == "Table") {
             newResource.level = 1;
+        } else if (newResource.data.type == "superClass" && newResource.level) {
+            // keep level of superClass
         } else {
             newResource.level = 2;
         }
@@ -182,11 +187,19 @@ var MappingColumnsGraph = (function () {
         }
 
         if (self.visjsGraph) {
-            self.addNode(visjsData.nodes);
+            if (options.noSave) {
+                var existingNodes = self.visjsGraph.getExistingIdsMap();
+                if (!existingNodes[newResource.id]) {
+                    self.visjsGraph.data.nodes.add(visjsData.nodes);
+                }
+            } else {
+                self.addNode(visjsData.nodes);
+            }
+
             //  self.visjsGraph.network.fit();
 
             if (self.currentGraphNode && self.currentGraphNode.data) {
-                if (newResource.data.type == "Class" && self.currentGraphNode) {
+                if ((newResource.data.type == "Class" || newResource.data.type == "superClass") && self.currentGraphNode) {
                     var label, type;
                     if (self.currentGraphNode.data.type == "Class") {
                         label = "";
@@ -209,7 +222,11 @@ var MappingColumnsGraph = (function () {
                     });
 
                     //  self.updateCurrentGraphNode(visjsNode);
-                    self.addEdge(visjsData.edges);
+                    if (options.noSave) {
+                        self.visjsGraph.data.edges.add(visjsData.edges);
+                    } else {
+                        self.addEdge(visjsData.edges);
+                    }
                 }
             }
 
@@ -410,7 +427,7 @@ var MappingColumnsGraph = (function () {
         }
         html += "--------------<br>";
         if (node.data) {
-            if (node.data.type == "Class") {
+            if (node.data.type == "Class" || node.data.type == "superClass") {
                 html += '    <span class="popupMenuItem" onclick="MappingColumnsGraph.graphActions.showNodeInfos()">Node Infos</span>';
                 html += '    <span class="popupMenuItem" onclick="MappingColumnsGraph.graphActions.addSuperClassToGraph()">draw superClass</span>';
             }
@@ -491,19 +508,30 @@ var MappingColumnsGraph = (function () {
                 }
                 var item = result[0];
 
+                var classLegendItem = MappingModeler.legendItemsArray.filter(function (item) {
+                    return item.label == "Class";
+                });
+                if (classLegendItem.length > 0) {
+                    classLegendItem = classLegendItem[0];
+                }
+                var level = 3;
+                if (self.currentGraphNode.level) {
+                    level = self.currentGraphNode.level + 1;
+                }
                 var newResource = {
                     id: item.object.value,
                     label: item.objectLabel.value,
-                    shape: self.legendItems["Class"].shape,
-                    color: self.legendItems["Class"].color,
+                    shape: classLegendItem.shape ? classLegendItem.shape : "",
+                    color: classLegendItem.color ? classLegendItem.color : "",
+                    level: level,
                     data: {
                         id: item.object.value,
                         label: item.objectLabel.value,
-                        type: "Class",
+                        type: "superClass",
                     },
                 };
 
-                self.drawResource(newResource);
+                self.drawResource(newResource, { noSave: true }, function (err) {});
             });
         },
 
@@ -887,12 +915,16 @@ var MappingColumnsGraph = (function () {
      * @param {Object} node - The node to be updated.
      * @returns {void}
      */
-    self.updateNode = function (node) {
+    self.updateNode = function (node, callback) {
         if (!node) {
             return;
         }
         self.visjsGraph.data.nodes.update(node);
-        self.saveVisjsGraph();
+        self.saveVisjsGraph(function () {
+            if (callback) {
+                callback();
+            }
+        });
     };
 
     /**
@@ -903,12 +935,16 @@ var MappingColumnsGraph = (function () {
      * @param {Object} node - The node to be removed.
      * @returns {void}
      */
-    self.removeNode = function (node) {
+    self.removeNode = function (node, callback) {
         if (!node) {
             return;
         }
         self.visjsGraph.data.nodes.remove(node);
-        self.saveVisjsGraph();
+        self.saveVisjsGraph(function () {
+            if (callback) {
+                callback();
+            }
+        });
     };
 
     /**
@@ -919,13 +955,15 @@ var MappingColumnsGraph = (function () {
      * @param {Object} node - The node to be added.
      * @returns {void}
      */
-    self.addNode = function (node) {
+    self.addNode = function (node, callback) {
         if (!node) {
             return;
         }
         self.visjsGraph.data.nodes.add(node);
         self.saveVisjsGraph(function () {
-            //   self.loadVisjsGraph();
+            if (callback) {
+                callback();
+            }
         });
     };
 
@@ -937,12 +975,16 @@ var MappingColumnsGraph = (function () {
      * @param {Object} edge - The edge to be updated.
      * @returns {void}
      */
-    self.updateEdge = function (edge) {
+    self.updateEdge = function (edge, callback) {
         if (!edge) {
             return;
         }
         self.visjsGraph.data.edges.update(edge);
-        self.saveVisjsGraph();
+        self.saveVisjsGraph(function () {
+            if (callback) {
+                callback();
+            }
+        });
     };
 
     /**
@@ -953,12 +995,16 @@ var MappingColumnsGraph = (function () {
      * @param {Object} edge - The edge to be removed.
      * @returns {void}
      */
-    self.removeEdge = function (edge) {
+    self.removeEdge = function (edge, callback) {
         if (!edge) {
             return;
         }
         self.visjsGraph.data.edges.remove(edge);
-        self.saveVisjsGraph();
+        self.saveVisjsGraph(function () {
+            if (callback) {
+                callback();
+            }
+        });
     };
 
     /**

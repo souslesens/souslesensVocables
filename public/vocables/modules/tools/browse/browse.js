@@ -391,8 +391,9 @@ var Browse = (function () {
         onVisjsGraphClick: function (node, point, options) {
             if (options.ctrlKey) {
                 if (node.data.id && node.data.source) {
-                    var hitKey = node.data.source + "|" + node.data.id;
-                    self.showHitDetailsOutsideSearch(hitKey);
+                    //var hitKey = node.data.source + "|" + node.data.id;
+                    //self.showHitDetailsOutsideSearch(hitKey);
+                    Browse.showHitGraph({ source: node.data.source, id: node.data.id });
                 }
             } else {
                 Browse.showHitGraph({ source: node.data.source, id: node.data.id }, { addToLevel: node.level });

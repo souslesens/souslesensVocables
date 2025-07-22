@@ -5,7 +5,6 @@
  */
 import Lineage_whiteboard from "./lineage_whiteboard.js";
 
-
 var Lineage_nodeCentricGraph = (function () {
     var self = {};
 
@@ -109,15 +108,6 @@ var Lineage_nodeCentricGraph = (function () {
         Lineage_whiteboard.lineageVisjsGraph.options.visjsOptions.layout.hierarchical.enabled = false;
         Lineage_whiteboard.lineageVisjsGraph.network.setOptions(Lineage_whiteboard.lineageVisjsGraph.options.visjsOptions);
     };
-
-
-
-
-
-
-
-
-
 
     self.listAllNodeRelations = function (rootNodeId) {
         var visjsData = self.getHierarchicalViewVisjsdata(rootNodeId);

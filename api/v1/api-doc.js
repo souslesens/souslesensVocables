@@ -111,6 +111,32 @@ const apiDoc = {
             required: ["_type", "groups", "id", "login", "password"],
             title: "User Model",
         },
+        UserMe: {
+            type: "object",
+            additionalProperties: false,
+            properties: {
+                id: {
+                    type: "string",
+                },
+                login: {
+                    type: "string",
+                },
+                groups: {
+                    type: "array",
+                    items: {
+                        type: "string",
+                    },
+                },
+                allowSourceCreation: {
+                    type: "boolean",
+                },
+                maxNumberCreatedSource: {
+                    type: "number",
+                },
+            },
+            required: ["_type", "groups", "id", "login", "password"],
+            title: "User Model",
+        },
         Source: {
             type: "object",
             additionalProperties: false,

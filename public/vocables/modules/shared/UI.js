@@ -381,7 +381,22 @@ var UI = (function () {
             // Sinon, on fixe à 10
             selectList.attr("size", maxSize);
         }
+        // Hide scrollbar if size <10
+        if (numberOfOptions < maxSize) {
+            selectList.addClass("hideScrollBar");
+        } else {
+            selectList.removeClass("hideScrollBar");
+        }
+        // Force size with height because some time browser don't resize correctly
+        if (numberOfOptions < maxSize) {
+            var optionHeight = selectList.find("option").first().outerHeight();
+            selectList.height(optionHeight * numberOfOptions);
+        } else {
+            var optionHeight = selectList.find("option").first().outerHeight();
+            selectList.height(optionHeight * maxSize);
+        }
     };
+
     return self;
 })();
 export default UI;

@@ -552,8 +552,6 @@ var Sparql_generic = (function () {
         );
     };
 
-
-
     self.deleteTriplesWithFilter = function (sourceLabel, filter, callback) {
         var graphUri = Config.sources[sourceLabel].graphUri;
 

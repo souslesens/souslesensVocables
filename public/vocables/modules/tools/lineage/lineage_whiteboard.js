@@ -3150,7 +3150,7 @@ restrictionSource = Config.predicatesSource;
         }
         if (node && !node.from) {
             html += '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.showHierarchicalView();">Hierarchical view </span>';
-        //    html += '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.listAllNodeRelations();">List All relations </span>';
+            //    html += '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.listAllNodeRelations();">List All relations </span>';
         }
 
         $("#popupMenuWidgetDiv").html(html);

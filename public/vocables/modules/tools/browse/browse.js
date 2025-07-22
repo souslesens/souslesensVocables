@@ -215,7 +215,7 @@ var Browse = (function () {
 
                     //  triples = triples.concat(result2.triples)
 
-                    self.getSubGraphHierarchicalVisjsData(triples, hit.id, hit.source,options, function (err, visjsData) {
+                    self.getSubGraphHierarchicalVisjsData(triples, hit.id, hit.source, options, function (err, visjsData) {
                         if (visjsData.nodes.length == 0) {
                             UI.message("no data for " + hit.label);
                         }
@@ -261,7 +261,7 @@ var Browse = (function () {
             );
         });
 
-        self.getSubGraphHierarchicalVisjsData = function (data, rootNodeId,source, options, callback) {
+        self.getSubGraphHierarchicalVisjsData = function (data, rootNodeId, source, options, callback) {
             var visjsData = { nodes: [], edges: [] };
             var uniqueIds = {};
             var edgesMap = {};

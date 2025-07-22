@@ -179,8 +179,6 @@ var SearchWidget = (function () {
                 return $("#" + (options.jstreeDiv || self.currentTargetDiv)).html("<b>No matches found</b>");
             }
 
-
-
             SearchWidget.searchResultToJstree(options.jstreeDiv || self.currentTargetDiv, result, options, function (err, _result) {
                 if (err) {
                     return alert(err.responseText || err);

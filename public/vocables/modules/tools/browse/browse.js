@@ -7,11 +7,11 @@ import MainController from "../../shared/mainController.js";
 var Browse = (function () {
     var self = {};
     self.onLoaded = function () {
-      //  UI.initMenuBar(self.loadSource);
-        self.initUI()
+        //  UI.initMenuBar(self.loadSource);
+        self.initUI();
     };
 
-    self.initUI=function(){
+    self.initUI = function () {
         UI.showHideRightPanel();
         $("#lateralPanelDiv").load("modules/tools/browse/html/browseLeftPanel.html", function () {
             $("#graphDiv").load("modules/tools/browse/html/browseCentralPanel.html", function () {
@@ -25,7 +25,7 @@ var Browse = (function () {
                 $("#Browse_graphDiv").css("width", graphDivWidth);
             });
         });
-    }
+    };
     /**
      * Loads a source and initializes modules for browsing.
      * @function
@@ -202,7 +202,6 @@ var Browse = (function () {
     };
 
     self.showHitGraph = function (hit, options) {
-
         if (!options) {
             options = {};
         }

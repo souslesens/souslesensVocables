@@ -577,6 +577,7 @@ enabled:true},*/
     };
 
     self.showGraphPopupMenu = function (node, point, event) {
+        return;
         if (!node) {
             return;
         }

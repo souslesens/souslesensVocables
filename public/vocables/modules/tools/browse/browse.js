@@ -7,7 +7,24 @@ import MainController from "../../shared/mainController.js";
 var Browse = (function () {
     var self = {};
     self.onLoaded = function () {
-        UI.initMenuBar(self.loadSource);
+        //  UI.initMenuBar(self.loadSource);
+        self.initUI();
+    };
+
+    self.initUI = function () {
+        UI.showHideRightPanel();
+        $("#lateralPanelDiv").load("modules/tools/browse/html/browseLeftPanel.html", function () {
+            $("#graphDiv").load("modules/tools/browse/html/browseCentralPanel.html", function () {
+                self.init(MainController.currentSource);
+                $("#rightControlPanelDiv").hide();
+                UI.resetWindowSize();
+                var graphDivWidth = $("#graphDiv").css("width");
+                $("#Browse_centralPanelDiv").css("width", graphDivWidth);
+                $("#Browse_rightPanelTabs").css("width", graphDivWidth);
+                $("#Browse_rightPanelTabs").css("width", graphDivWidth);
+                $("#Browse_graphDiv").css("width", graphDivWidth);
+            });
+        });
     };
     /**
      * Loads a source and initializes modules for browsing.
@@ -184,10 +201,9 @@ var Browse = (function () {
         self.showHitGraph(hit);
     };
 
-    self.showHitGraph = function (hit, _options) {
-        var options = {};
-        if (_options) {
-            options = _options;
+    self.showHitGraph = function (hit, options) {
+        if (!options) {
+            options = {};
         }
         var triples = [];
         SubGraph.instantiateSubGraphTriples(hit.source, hit.id, { nonUnique: true }, function (err, result) {
@@ -252,7 +268,7 @@ var Browse = (function () {
                         options2.onclickFn = self.graphActions.onVisjsGraphClick;
                         options2.onRightClickFn = self.graphActions.showGraphPopupMenu;
 
-                        self.visjsGraph = new VisjsGraphClass(_options.graphDiv || "Browse_graphDiv", visjsData, options2);
+                        self.visjsGraph = new VisjsGraphClass(options.graphDiv || "Browse_graphDiv", visjsData, options2);
                         self.visjsGraph.draw(function () {
                             Lineage_decoration.decorateByUpperOntologyByClass(visjsData.nodes, self.visjsGraph);
                         });

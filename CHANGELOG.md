@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.14.2](https://github.com/souslesens/souslesensVocables/compare/2.14.1...2.14.2) (2025-07-24)
+
+
+### Bug Fixes
+
+* **model/tools:** reload availableToolsNames ([be641c2](https://github.com/souslesens/souslesensVocables/commit/be641c27bbb2ad4325208e58bcce8df4c24cc438))
+
 ### [2.14.1](https://github.com/souslesens/souslesensVocables/compare/2.14.0...2.14.1) (2025-07-24)
 
 

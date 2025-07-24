@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.14.1](https://github.com/souslesens/souslesensVocables/compare/2.14.0...2.14.1) (2025-07-24)
+
+
+### Bug Fixes
+
+* **configEditor:** fix mainConfig.json updates when a plugin change ([fd2cc4c](https://github.com/souslesens/souslesensVocables/commit/fd2cc4c74604f10b3b17f3bae097eb36c3a71438))
+
 ## [2.14.0](https://github.com/souslesens/souslesensVocables/compare/2.13.1...2.14.0) (2025-07-18)
 
 

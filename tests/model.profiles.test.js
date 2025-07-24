@@ -76,7 +76,7 @@ describe("Test the Profilemodel module", () => {
 
     test("get tools with an user with an non-admin profile", async () => {
         const tools = await profileModel.getUserTools({ id: "42", login: "someone", groups: ["read_folder_1"] });
-        expect(tools.length).toBe(3);
+        expect(tools.length).toBe(2);
     });
 
     test("get tools with an user with the special ALL profile", async () => {

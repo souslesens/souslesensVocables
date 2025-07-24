@@ -37,9 +37,9 @@ class MainConfigModel {
         const config = await this.getConfig();
         const toolsAvailable = config.tools_available;
 
-        const tools = toolModel.allTools;
+        const allTools = toolModel.allTools.map((t) => t.name);
 
-        const newToolsAvailable = toolsAvailable.filter((t) => tools.includes(t));
+        const newToolsAvailable = toolsAvailable.filter((t) => allTools.includes(t));
         await this.writeConfig({ ...config, tools_available: newToolsAvailable });
     }
 }

@@ -17,6 +17,7 @@ import {
     InputAdornment,
     MenuItem,
     Stack,
+    Switch,
     TextField,
 } from "@mui/material";
 import { Assignment, CheckBox, CheckBoxOutlineBlank, Close, Done, ExpandMore, MiscellaneousServices, RuleFolder, Storage } from "@mui/icons-material";
@@ -43,8 +44,6 @@ type SourcesDialogProps = {
 const permissionLabels = {
     allowIndividuals: "Allows user to create named individuals",
     isDraft: "Draft",
-    editable: "Editable",
-    published: "Published",
 };
 
 const emptySource: ServerSource = defaultSource(ulid());
@@ -535,6 +534,26 @@ export const SourcesDialog = ({ edit, me, onClose, onSubmit, open, selectedSourc
                                 </AccordionDetails>
                             </Accordion>
                         </div>
+                        <FormGroup>
+                            <FormControlLabel
+                                control={
+                                    <Switch checked={source["editable" as keyof ServerSource] as boolean} key={"check-editable"} onChange={(event) => handleField("editable", event.target.checked)} />
+                                }
+                                key="editable"
+                                label="This source is editable?"
+                            />
+                            <FormControlLabel
+                                control={
+                                    <Switch
+                                        checked={source["published" as keyof ServerSource] as boolean}
+                                        key={"check-published"}
+                                        onChange={(event) => handleField("published", event.target.checked)}
+                                    />
+                                }
+                                key="published"
+                                label="This source was published?"
+                            />
+                        </FormGroup>
                     </Stack>
                 </DialogContent>
                 <DialogActions>

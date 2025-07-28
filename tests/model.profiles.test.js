@@ -6,6 +6,19 @@ const { ToolModel } = require("../model/tools");
 
 jest.mock("../model/utils");
 
+class ToolModelTC extends ToolModel {
+    constructor(pluginsDirectory) {
+        super(pluginsDirectory);
+
+        // Override the constant to allow modification without breaking tests
+        this._nativeTools = [
+            { name: "lineage", controller: "Lineage_whiteboard", displayImports: true },
+            { name: "KGcreator", controller: "KGcreator" },
+            { name: "KGquery", controller: "KGquery" },
+        ].map((tool) => ({type: "tool", label: tool.name, useSource: true, multiSources: false, toTools: {}, ...tool}));
+    }
+}
+
 describe("Test the Profilemodel module", () => {
     let allTools;
     let dbProfiles;
@@ -13,7 +26,7 @@ describe("Test the Profilemodel module", () => {
 
     beforeAll(() => {
         dbProfiles = JSON.parse(fs.readFileSync(path.join("tests", "data", "config", "profiles.json")));
-        toolsModel = new ToolModel(path.join(__dirname, "data", "plugins"));
+        toolsModel = new ToolModelTC(path.join(__dirname, "data", "plugins"));
         allTools = toolsModel.allTools.filter((tool) => profileModel._mainConfig.tools_available.includes(tool.name));
     });
 
@@ -66,12 +79,12 @@ describe("Test the Profilemodel module", () => {
         };
 
         const tools = await profileModel.getUserTools(adminUser);
-        expect(tools.length).toBe(allTools.length);
+        expect(tools.length).toBe(4);
     });
 
     test("get tools with an user in the admin profile", async () => {
         const tools = await profileModel.getUserTools({ id: "42", login: "someone", groups: ["admin"] });
-        expect(tools.length).toBe(allTools.length);
+        expect(tools.length).toBe(4);
     });
 
     test("get tools with an user with an non-admin profile", async () => {
@@ -81,7 +94,7 @@ describe("Test the Profilemodel module", () => {
 
     test("get tools with an user with the special ALL profile", async () => {
         const tools = await profileModel.getUserTools({ id: "42", login: "someone", groups: ["all"] });
-        expect(tools.length).toBe(allTools.length);
+        expect(tools.length).toBe(4);
     });
 
     test("get tools with an user with an unknown profile", async () => {

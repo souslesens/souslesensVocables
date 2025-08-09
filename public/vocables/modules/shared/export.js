@@ -457,7 +457,7 @@ fixedColumns: true*/
             params.paging = true;
         }
         self.dataTable = $("#dataTableDivExport").DataTable(params);
-        if (div == "mainDialogDiv") {
+        if (div.indexOf("DialogDiv")>-1) {
             //open the dialog after the datatable is loaded to be on center
             $("#" + div).dialog("open");
         }

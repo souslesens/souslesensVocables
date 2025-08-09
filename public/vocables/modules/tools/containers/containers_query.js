@@ -125,11 +125,10 @@ var Containers_query = (function () {
 
             var filterAncestorsTypeStr = "";
             if (options.filterAncestorsType) {
-                // filterAncestorsTypeStr = "  ?ancestorChild rdfs:type|rdfs:subClassOf <" + options.filterAncestorsType + ">\n"
-                filterAncestorsTypeStr = "  ?ancestorChild ^rdfs:member <" + options.filterAncestorsType + ">\n";
+                filterAncestorsTypeStr = "  ?ancestor ^rdfs:member <" + options.filterAncestorsType + ">\n";
             }
 
-            var query =
+            var queryX =
                 "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n" +
                 "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \n" +
                 "SELECT distinct  * " +
@@ -146,29 +145,23 @@ var Containers_query = (function () {
                 "  }\n" +
                 "} limit 10000 ";
 
-            /*    var queryOld =
+               var query =
                 "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n" +
-                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \n" +
-                "SELECT distinct " +
-                ancestorVars +
-                "?ancestorChild ?ancestorChildLabel" +
-                childStr +
-                fromStr +
-                "WHERE {\n" +
-                ancestorClause +
-                "  ?ancestorChild  rdfs:member" +
-                pathOperator +
-                " ?child.\n" +
-                filterAncestorsType +
-                "  OPTIONAL{?ancestorChild rdfs:label ?ancestorChildLabel}  \n" +
-                // too long virtuoso error  "  OPTIONAL{?ancestor rdfs:label ?ancestorLabel}  \n" +
-                "  {select ?child where  {\n" +
-                "   ?child rdfs:label ?childLabel." +
-                // may not work all times  "   ?child ?p ?childLabel." +
-                filter +
-                "}\n" +
-                "  }\n" +
-                "} limit 10000 ";*/
+                   "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \n" +
+                   "SELECT distinct  * "+
+                   fromStr + " where {"+
+                   " ?ancestorParent rdfs:member ?ancestor.\n" +
+                   "  optional { ?ancestorParent rdfs:label ?ancestorParentLabel.}\n" +
+                   "   optional { ?ancestor rdfs:label ?ancestorLabel.}\n" +
+                   " ?ancestor rdfs:member+ ?child. \n" +
+                   "{select * where{\n" +
+                   "   ?childParent rdfs:member ?child. \n" +
+                   "   optional { ?childParent rdfs:label ?childParentLabel.}"+
+                   "   ?child rdfs:label ?childLabel." +
+                   "\n" +filter+
+                   "    } \n" +
+                   "  }\n" +
+                   "}limit 10000 ";
 
             Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: source }, function (err, result) {
                 if (err) {

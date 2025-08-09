@@ -136,10 +136,9 @@ const KGbuilder_triplesWriter = {
             query += "with  <" + graphUri + "> " + "delete {?s ?p ?o} where {?s ?p ?o. ?s <" + KGbuilder_triplesMaker.mappingFilePredicate + "> ?table }";
         }
 
-        var offset = 0;
-        var step = 100000;
-        var limit = step;
-        var resultSize = step + 1;
+
+        var limit = 10000;
+        var resultSize =1;
         var totalSize = 0;
 
         async.whilst(
@@ -169,7 +168,7 @@ const KGbuilder_triplesWriter = {
                     var result = result.results.bindings[0]["callret-0"].value;
 
                     try {
-                        var regex = / (\d)+ /;
+                        var regex = / (\d+)/;
                         resultSize = result.match(regex)[1];
                         if (resultSize) resultSize = parseInt(resultSize);
                     } catch (e) {
@@ -178,7 +177,8 @@ const KGbuilder_triplesWriter = {
                     }
 
                     totalSize += resultSize;
-                    offset += limit;
+
+                    KGbuilder_socket.message(options.clientSocketId, ""+totalSize+" triples deleted from table " + table, false);
                     return callbackWhilst(err);
                 });
             },

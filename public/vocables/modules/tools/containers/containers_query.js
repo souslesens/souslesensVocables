@@ -115,12 +115,12 @@ var Containers_query = (function () {
             var ancestorClause = "";
             if (options.keepAncestor) {
                 ancestorVars = "?ancestor ";
-                ancestorClause = " optional{?ancestor rdfs:member ?ancestorChild .}\n";
+                ancestorClause = " optional{?ancestor rdfs:member ?ancestorParent .}\n";
             }
             var filterAncestorsType = "";
             if (options.filterAncestorsType) {
-                filterAncestorsType += " ?ancestor rdfs:member* ?ancestorChild. \n";
-                filterAncestorsType += "FILTER(?ancestorChild = <" + options.filterAncestorsType + "> || " + "?ancestor =<" + options.filterAncestorsType + ">)\n";
+                filterAncestorsType += " ?ancestor rdfs:member* ?ancestorParent. \n";
+                filterAncestorsType += "FILTER(?ancestorParent = <" + options.filterAncestorsType + "> || " + "?ancestor =<" + options.filterAncestorsType + ">)\n";
             }*/
 
             var filterAncestorsTypeStr = "";
@@ -134,10 +134,10 @@ var Containers_query = (function () {
                 "SELECT distinct  * " +
                 fromStr +
                 " WHERE {\n" +
-                "  ?ancestorChild  rdfs:member{1,1} ?child.\n" +
-                " ?ancestor rdfs:member+ ?ancestorChild. \n" +
+                "  ?ancestorParent  rdfs:member{1,1} ?child.\n" +
+                " ?ancestor rdfs:member+ ?ancestorParent. \n" +
                 filterAncestorsTypeStr +
-                "  OPTIONAL{?ancestorChild rdfs:label ?ancestorChildLabel}  \n" +
+                "  OPTIONAL{?ancestorParent rdfs:label ?ancestorParentLabel}  \n" +
                 "  {select ?child ?childLabel where  {\n" +
                 "   ?child rdfs:label ?childLabel." +
                 (options.filter || "") +

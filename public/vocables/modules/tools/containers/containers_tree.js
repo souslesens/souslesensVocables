@@ -381,7 +381,7 @@ var Containers_tree = (function () {
                 } else {
                     rootContainer = self.currentContainer.parents[self.currentContainer.parents.length];
                 }
-                var filter = " ?root rdfs:member+ ?ancestorChild  filter (?root=<" + rootContainer + ")"; //" ?container rdf:type <" + type + ">. ";
+                var filter = " ?root rdfs:member+ ?ancestorParent  filter (?root=<" + rootContainer + ")"; //" ?container rdf:type <" + type + ">. ";
                 Containers_graph.graphParentContainers(Lineage_sources.activeSource, null, {filter: filter});
             },
         };

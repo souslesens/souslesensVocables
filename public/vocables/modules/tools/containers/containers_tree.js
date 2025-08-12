@@ -21,12 +21,14 @@ var Containers_tree = (function () {
             options = {};
         }
         if (!callback) {
-            callback = function () {};
+            callback = function () {
+            };
         }
 
         var term = $("#Lineage_containers_searchInput").val();
-        if (source) self.currentSource = source;
-        else {
+        if (source) {
+            self.currentSource = source;
+        } else {
             self.currentSource = Lineage_sources.activeSource;
         }
 
@@ -61,8 +63,9 @@ var Containers_tree = (function () {
             if (rootNode) {
                 parent = rootNode;
             } else {
-                if (self.idsMap[item.parent.value]) parent = self.idsMap[item.parent.value];
-                else {
+                if (self.idsMap[item.parent.value]) {
+                    parent = self.idsMap[item.parent.value];
+                } else {
                     parent = "_" + common.getRandomHexaId(8);
                     self.idsMap[item.parent.value] = parent;
                 }
@@ -151,7 +154,10 @@ var Containers_tree = (function () {
         }
         self.clickedContainers[container.id] = 1;
 
-        Containers_query.getContainerDescendants(source, container.data.id, { depth: 1, leaves: true }, function (err, result) {
+        Containers_query.getContainerDescendants(source, container.data.id, {
+            depth: 1,
+            leaves: true
+        }, function (err, result) {
             if (err) {
                 return alert(err.responsetext);
             }
@@ -237,96 +243,63 @@ var Containers_tree = (function () {
             }
             //identify top Node
             var childrenMap = {};
+            var labelsMap = {}
             result.forEach(function (item) {
-                childrenMap[item.ancestorChild.value] = item.ancestor.value;
-                childrenMap[item.child.value] = item.ancestorChild.value;
+                childrenMap[item.ancestor.value] = item.ancestorParent.value;
+                childrenMap[item.child.value] = item.childParent.value;
+                labelsMap[item.ancestor.value] = item.ancestorLabel ? item.ancestorLabel.value : Sparql_common.getLabelFromURI(item.ancestor.value);
+                labelsMap[item.ancestorParent.value] = item.ancestorParentLabel ? item.ancestorParentLabel.value : Sparql_common.getLabelFromURI(item.ancestorParent.value);
+                labelsMap[item.child.value] = item.childLabel ? item.childLabel.value : Sparql_common.getLabelFromURI(item.child.value);
             });
-            var rootNode = null;
-            result.forEach(function (item) {
-                if (!childrenMap[item.ancestor.value]) {
-                    rootNode = {
-                        ancestor: {
-                            type: "uri",
-                            value: null,
-                        },
-                        ancestorChild: {
-                            type: "uri",
-                            value: item.ancestor.value,
-                        },
-                    };
-                }
-            });
-            result.push(rootNode);
+
 
             var jstreeData = [];
             var existingNodes = {};
 
-            result.forEach(function (item) {
-                var id = item.ancestorChild.value;
-                var label = item.ancestorChildLabel ? item.ancestorChildLabel.value : Sparql_common.getLabelFromURI(item.ancestorChild.value);
-                var jstreeId = "_" + common.getRandomHexaId(5);
 
-                var parent;
-                /*  if(item.ancestor.value ==rootNode)
-                    parent="#"
-                else*/
-                parent = self.idsMap[item.ancestor.value] || "#";
-
-                if (!self.idsMap[id]) {
-                    self.idsMap[id] = jstreeId;
-                }
-
-                if (!existingNodes[jstreeId]) {
-                    existingNodes[jstreeId] = 1;
-                }
-                var node = {
-                    id: self.idsMap[id],
-                    text: label,
-                    parent: parent,
-                    type: "Container",
-                    data: {
-                        type: "Container",
-                        source: source,
+            for (var key in childrenMap) {
+                if (!existingNodes[key]) {
+                    existingNodes[key] = 1
+                    var id = key
+                    jstreeData.push({
                         id: id,
-                        label: label,
-                        parent: parent,
-                        //tabId: options.tabId,
-                    },
-                };
-
-                jstreeData.push(node);
-                if (item.child && item.child.value) {
-                    //same for child
-                    id = item.child.value;
-                    label = item.childLabel ? item.childLabel.value : Sparql_common.getLabelFromURI(item.child.value);
-                    jstreeId = "_" + common.getRandomHexaId(5);
-
-                    parent = self.idsMap[item.ancestorChild.value] || "#";
-
-                    if (!self.idsMap[id]) {
-                        self.idsMap[id] = jstreeId;
-                    }
-
-                    if (!existingNodes[jstreeId]) {
-                        existingNodes[jstreeId] = 1;
-                    }
-                    var node = {
-                        id: self.idsMap[id],
-                        text: label,
-                        parent: parent,
+                        text: labelsMap[key],
+                        parent: childrenMap[key],
                         type: "Container",
                         data: {
                             type: "Container",
                             source: source,
                             id: id,
-                            label: label,
-                            parent: parent,
+                            label: labelsMap[key],
+                            parent: childrenMap[key],
+                            //tabId: options.tabId,
                         },
-                    };
-
-                    jstreeData.push(node);
+                    });
                 }
-            });
+                var parent = childrenMap[key]
+                if (!existingNodes[parent]) {
+                    existingNodes[parent] = 1
+
+                    jstreeData.push({
+                        id: parent,
+                        text: labelsMap[parent],
+                        parent: childrenMap[parent] || "#",
+                        type: "Container",
+                        data: {
+                            type: "Container",
+                            source: source,
+                            id: parent,
+                            label: labelsMap[parent],
+                            parent: childrenMap[parent],
+
+                        },
+                    });
+
+
+                }
+            }
+
+
             var jstreeOptions;
             if (options.jstreeOptions) {
                 jstreeOptions = options.jstreeOptions;
@@ -386,7 +359,7 @@ var Containers_tree = (function () {
             label: "Graph node",
             action: function (_e) {
                 if (true || self.currentContainer.data.type == "Container") {
-                    Containers_graph.graphResources(self.currentSource, self.currentContainer.data, { onlyOneLevel: true });
+                    Containers_graph.graphResources(self.currentSource, self.currentContainer.data, {onlyOneLevel: true});
                 } else {
                     Lineage_whiteboard.drawNodesAndParents(self.currentContainer, 0);
                 }
@@ -395,7 +368,7 @@ var Containers_tree = (function () {
         items["GraphContainerDescendantAndLeaves"] = {
             label: "Graph  all descendants",
             action: function (_e) {
-                Containers_graph.graphResources(self.currentSource, self.currentContainer.data, { leaves: true });
+                Containers_graph.graphResources(self.currentSource, self.currentContainer.data, {leaves: true});
             },
         };
 
@@ -403,10 +376,13 @@ var Containers_tree = (function () {
             label: "Graph  parent container",
             action: function (_e) {
                 var rootContainer = null;
-                if (self.currentContainer.parent == "#") rootContainer = self.currentContainer.data.id;
-                else rootContainer = self.currentContainer.parents[self.currentContainer.parents.length];
-                var filter = " ?root rdfs:member+ ?ancestorChild  filter (?root=<" + rootContainer + ")"; //" ?container rdf:type <" + type + ">. ";
-                Containers_graph.graphParentContainers(Lineage_sources.activeSource, null, { filter: filter });
+                if (self.currentContainer.parent == "#") {
+                    rootContainer = self.currentContainer.data.id;
+                } else {
+                    rootContainer = self.currentContainer.parents[self.currentContainer.parents.length];
+                }
+                var filter = " ?root rdfs:member+ ?ancestorParent  filter (?root=<" + rootContainer + ")"; //" ?container rdf:type <" + type + ">. ";
+                Containers_graph.graphParentContainers(Lineage_sources.activeSource, null, {filter: filter});
             },
         };
         /* items["GraphContainerDescendant"] = {
@@ -418,7 +394,8 @@ var Containers_tree = (function () {
 
         items["----"] = {
             label: "-----------------------",
-            action: function (_e) {},
+            action: function (_e) {
+            },
         };
         items.copyNodes = {
             label: "Copy Node(s)",
@@ -435,8 +412,10 @@ var Containers_tree = (function () {
             action: function (_e) {
                 var graphNodeData = Lineage_whiteboard.currentGraphNode.data;
                 Containers_tree.menuActions.addResourcesToContainer(self.currentSource, self.currentContainer, graphNodeData, false, function (err, result) {
-                    if (err) return alert(err.responseText || err);
-                    Containers_graph.graphResources(self.currentSource, self.currentContainer.data, { leaves: true });
+                    if (err) {
+                        return alert(err.responseText || err);
+                    }
+                    Containers_graph.graphResources(self.currentSource, self.currentContainer.data, {leaves: true});
                 });
             },
         };
@@ -629,8 +608,8 @@ var Containers_tree = (function () {
                             to: nodeData.id,
                             // arrows: " middle",
 
-                            data: { propertyId: "http://www.w3.org/2000/01/rdf-schema#member", source: source },
-                            font: { multi: true, size: 10 },
+                            data: {propertyId: "http://www.w3.org/2000/01/rdf-schema#member", source: source},
+                            font: {multi: true, size: 10},
 
                             //  dashes: true,
                             color: self.containerEdgeColor,
@@ -711,7 +690,7 @@ var Containers_tree = (function () {
 
         var url = Config.sources[self.currentSource].sparql_server.url + "?format=json&query=";
 
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: self.currentSource }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: self.currentSource}, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -720,9 +699,12 @@ var Containers_tree = (function () {
     self.pasteNodeIntoContainer = function (source, container) {
         try {
             common.pasteTextFromClipboard(function (str) {
-                if (!str) throw "xx";
+                if (!str) {
+                    throw "xx";
+                }
                 var obj = JSON.parse(str);
-                self.menuActions.addResourcesToContainer(source, container, obj.data, true, function (er, result) {});
+                self.menuActions.addResourcesToContainer(source, container, obj.data, true, function (er, result) {
+                });
             });
         } catch (e) {
             alert("invalid clipboard content");

@@ -759,9 +759,10 @@ var KGbuilder_triplesMaker = {
                 callback(null, tableData);
             });
         } else if (tableMappings.datasourceConfig) {
+            KGbuilder_socket.message(options.clientSocketId, "loading data from csv file " + tableMappings.table, false);
             databaseModel
                 .batchSelect(tableMappings.datasourceConfig.dbName, tableMappings.table, {
-                    limit: options.sampleSize || 1000,
+                    limit: options.sampleSize || 10000,
                     noRecurs: Boolean(options.sampleSize),
                 })
                 .then((result) => {

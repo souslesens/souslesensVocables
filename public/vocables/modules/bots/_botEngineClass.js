@@ -379,7 +379,7 @@ class BotEngineClass {
                 if (text == "") {
                     return;
                 }
-                this.insertBotMessage(text + ":");
+                this.insertBotMessage(text );
 
                 var selectedValue = $(evt.currentTarget).val();
                 if (Array.isArray(selectedValue)) {
@@ -543,15 +543,24 @@ class BotEngineClass {
     }
 
     showAlternatives(alternatives, varToFill) {
+        var lastMessageDiv = $("#" + 'botPanel') .find("#botTA" ).children().first()
+        if(lastMessageDiv){
+            var lastMessageClass =$(lastMessageDiv).children().last().attr('class');
+            if( lastMessageClass && lastMessageClass.indexOf("chat-right") > -1){
+                this.insertBotMessage("Please select an option", { isQuestion: true });
+            }
+
+        }
+        
         var choices = [];
         for (var key in alternatives) {
             choices.push({ id: key, label: key });
         }
 
         this.showList(choices, varToFill);
-        // alternatives has no message because is not a function
-        // message of alternative is last setted function question message
-        //this.setStepMessage();
+        // check if a message is already displayed by last function 
+        // or let a generic message to not disturb message flow
+      
     }
 
     getQueryText() {

@@ -3,6 +3,7 @@ import DataSourcesManager from "./dataSourcesManager.js";
 import common from "../../shared/common.js";
 import JstreeWidget from "../../uiWidgets/jstreeWidget.js";
 import MappingModeler from "./mappingModeler.js";
+import UI from "../../shared/UI.js";
 var MappingModelerRelations = (function () {
     self.listPossibleRelations = function () {
         var nodes = MappingColumnsGraph.visjsGraph.data.nodes.get();
@@ -87,6 +88,9 @@ var MappingModelerRelations = (function () {
 
             MappingColumnsGraph.addEdge([edge]);
         });
+        $("#MappingModeler_leftTabs").tabs("option", "active", 1);
+        UIcontroller.onActivateLeftPanelTab("MappingModeler_columnsTab");
+        
     };
 
     return self;

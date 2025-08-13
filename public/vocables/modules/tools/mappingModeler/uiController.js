@@ -29,7 +29,7 @@ var UIcontroller = (function () {
         }
         if (tabId == "MappingModeler_columnsTab") {
             $("#mappingModeler_structuralPanel").css("display", "block");
-            MappingModeler.initActiveLegend(self.legendGraphDivId);
+            MappingModeler.initActiveLegend(MappingModeler.legendGraphDivId);
             MappingModeler.loadSuggestionSelectJstree(MappingModeler.currentTable.columns, "Columns");
             $("#MappingModeler_currentDataSource").html(DataSourceManager.currentConfig.currentDataSource.name);
             $("#rightControlPanelDiv").load("./modules/tools/mappingModeler/html/mappingsGraphButtons.html", function (err) {});
@@ -52,7 +52,7 @@ var UIcontroller = (function () {
     self.switchLeftPanel = function (target) {
         var tabsArray = ["dataSource", "mappings", "triples"];
         if (target == "Column Mappings") {
-            MappingModeler.initActiveLegend(self.legendGraphDivId);
+            MappingModeler.initActiveLegend(MappingModeler.legendGraphDivId);
         } else if (target == "Technical Mappings") {
             MappingsDetails.showDetailsDialog();
         }

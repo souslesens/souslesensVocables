@@ -45,7 +45,7 @@ var CreateSLSVsource_bot = (function () {
     self.workflow2 = {
         _OR: {
             "Add import": { listImportsFn: { afterImportFn: {} } },
-            "Create source": { saveFn: self.workflowUpload },
+            "Create source": { saveFn: { addCreatorFn: self.workflowUpload } },
         },
     };
     self.workflow2withoutUpload = {
@@ -302,7 +302,7 @@ var CreateSLSVsource_bot = (function () {
                     "xml:lang": "en"
                 }];
 
-                  $.ajax({
+                $.ajax({
                     type: "POST",
                     url: `${Config.apiUrl}/rdf/graph/metadata?source=${self.params.sourceLabel}`,
                     data: JSON.stringify({ addedData: ontologyDescription ,removedData: []}),
@@ -314,8 +314,33 @@ var CreateSLSVsource_bot = (function () {
                         alert(err.responseText);
                         return self.myBotEngine.previousStep();
                     },
-                 });
+                });
             
+        });
+      },
+      addCreatorFn: function(){
+        const ontologyCreator = [{
+            id: 0,
+            isNew: true,
+            metadata: "http://purl.org/dc/elements/1.1/creator",
+            shortType: undefined,
+            type: "literal",
+            value: authentication.currentUser.identifiant,
+            "xml:lang": "en"
+        }];
+
+        $.ajax({
+            type: "POST",
+            url: `${Config.apiUrl}/rdf/graph/metadata?source=${self.params.sourceLabel}`,
+            data: JSON.stringify({ addedData: ontologyCreator ,removedData: []}),
+            contentType: "application/json",
+            success: function (data, _textStatus, _jqXHR) {
+                return self.myBotEngine.nextStep();
+            },
+            error: function (err) {
+                alert(err.responseText);
+                return self.myBotEngine.previousStep();
+            },
         });
       },
       workflowMetaDataFn: function () {

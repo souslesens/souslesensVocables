@@ -21,8 +21,7 @@ var Containers_tree = (function () {
             options = {};
         }
         if (!callback) {
-            callback = function () {
-            };
+            callback = function () {};
         }
 
         var term = $("#Lineage_containers_searchInput").val();
@@ -154,76 +153,81 @@ var Containers_tree = (function () {
         }
         self.clickedContainers[container.id] = 1;
 
-        Containers_query.getContainerDescendants(source, container.data.id, {
-            depth: 1,
-            leaves: true
-        }, function (err, result) {
-            if (err) {
-                return alert(err.responsetext);
-            }
-
-            if (result.length == 0) {
-                return UI.message("no result", true);
-            }
-            var jstreeData = [];
-
-            var existingNodes = {};
-            var descendantsURI = {};
-            var parent = container.id;
-            result.results.bindings.forEach(function (item) {
-                var id = item.member.value;
-                if (descendantsURI[id]) {
-                    return;
-                } else {
-                    descendantsURI[id] = 1;
-                }
-                var label = item.memberLabel ? item.memberLabel.value : Sparql_common.getLabelFromURI(item.member.value);
-                var jstreeId = "_" + common.getRandomHexaId(5);
-
-                //var parent = self.idsMap[item.parent.value];
-
-                var type = "Container";
-                if (item.memberTypes.value.indexOf("http://www.w3.org/2002/07/owl#Class") > -1) {
-                    type = "Class";
-                }
-                if (item.memberTypes.value.indexOf("http://www.w3.org/2002/07/owl#NamedIndividual") > -1) {
-                    type = "Individual";
-                }
-                if (!self.idsMap[id]) {
-                    self.idsMap[id] = jstreeId;
+        Containers_query.getContainerDescendants(
+            source,
+            container.data.id,
+            {
+                depth: 1,
+                leaves: true,
+            },
+            function (err, result) {
+                if (err) {
+                    return alert(err.responsetext);
                 }
 
-                if (!existingNodes[jstreeId]) {
-                    existingNodes[jstreeId] = 1;
+                if (result.length == 0) {
+                    return UI.message("no result", true);
                 }
-                var node = {
-                    id: jstreeId,
-                    text: label,
-                    parent: parent,
-                    type: type,
-                    data: {
-                        type: type,
-                        source: source,
-                        id: id,
-                        label: label,
+                var jstreeData = [];
+
+                var existingNodes = {};
+                var descendantsURI = {};
+                var parent = container.id;
+                result.results.bindings.forEach(function (item) {
+                    var id = item.member.value;
+                    if (descendantsURI[id]) {
+                        return;
+                    } else {
+                        descendantsURI[id] = 1;
+                    }
+                    var label = item.memberLabel ? item.memberLabel.value : Sparql_common.getLabelFromURI(item.member.value);
+                    var jstreeId = "_" + common.getRandomHexaId(5);
+
+                    //var parent = self.idsMap[item.parent.value];
+
+                    var type = "Container";
+                    if (item.memberTypes.value.indexOf("http://www.w3.org/2002/07/owl#Class") > -1) {
+                        type = "Class";
+                    }
+                    if (item.memberTypes.value.indexOf("http://www.w3.org/2002/07/owl#NamedIndividual") > -1) {
+                        type = "Individual";
+                    }
+                    if (!self.idsMap[id]) {
+                        self.idsMap[id] = jstreeId;
+                    }
+
+                    if (!existingNodes[jstreeId]) {
+                        existingNodes[jstreeId] = 1;
+                    }
+                    var node = {
+                        id: jstreeId,
+                        text: label,
                         parent: parent,
-                        //tabId: options.tabId,
-                    },
-                };
-                jstreeData.push(node);
-                jstreeData.sort(function (a, b) {
-                    if (a.text < b.text) {
-                        return 1;
-                    }
-                    if (a.text > b.text) {
-                        return -1;
-                    }
-                    return 0;
+                        type: type,
+                        data: {
+                            type: type,
+                            source: source,
+                            id: id,
+                            label: label,
+                            parent: parent,
+                            //tabId: options.tabId,
+                        },
+                    };
+                    jstreeData.push(node);
+                    jstreeData.sort(function (a, b) {
+                        if (a.text < b.text) {
+                            return 1;
+                        }
+                        if (a.text > b.text) {
+                            return -1;
+                        }
+                        return 0;
+                    });
                 });
-            });
-            //var parent = self.idsMap[container.data.id];
-            JstreeWidget.addNodesToJstree(self.jstreeDivId, parent, jstreeData);
-        });
+                //var parent = self.idsMap[container.data.id];
+                JstreeWidget.addNodesToJstree(self.jstreeDivId, parent, jstreeData);
+            },
+        );
     };
 
     self.drawContainerAndAncestorsJsTree = function (source, term, options, callback) {
@@ -243,7 +247,7 @@ var Containers_tree = (function () {
             }
             //identify top Node
             var childrenMap = {};
-            var labelsMap = {}
+            var labelsMap = {};
             result.forEach(function (item) {
                 childrenMap[item.ancestor.value] = item.ancestorParent.value;
                 childrenMap[item.child.value] = item.childParent.value;
@@ -252,15 +256,13 @@ var Containers_tree = (function () {
                 labelsMap[item.child.value] = item.childLabel ? item.childLabel.value : Sparql_common.getLabelFromURI(item.child.value);
             });
 
-
             var jstreeData = [];
             var existingNodes = {};
 
-
             for (var key in childrenMap) {
                 if (!existingNodes[key]) {
-                    existingNodes[key] = 1
-                    var id = key
+                    existingNodes[key] = 1;
+                    var id = key;
                     jstreeData.push({
                         id: id,
                         text: labelsMap[key],
@@ -276,9 +278,9 @@ var Containers_tree = (function () {
                         },
                     });
                 }
-                var parent = childrenMap[key]
+                var parent = childrenMap[key];
                 if (!existingNodes[parent]) {
-                    existingNodes[parent] = 1
+                    existingNodes[parent] = 1;
 
                     jstreeData.push({
                         id: parent,
@@ -291,14 +293,10 @@ var Containers_tree = (function () {
                             id: parent,
                             label: labelsMap[parent],
                             parent: childrenMap[parent],
-
                         },
                     });
-
-
                 }
             }
-
 
             var jstreeOptions;
             if (options.jstreeOptions) {
@@ -359,7 +357,7 @@ var Containers_tree = (function () {
             label: "Graph node",
             action: function (_e) {
                 if (true || self.currentContainer.data.type == "Container") {
-                    Containers_graph.graphResources(self.currentSource, self.currentContainer.data, {onlyOneLevel: true});
+                    Containers_graph.graphResources(self.currentSource, self.currentContainer.data, { onlyOneLevel: true });
                 } else {
                     Lineage_whiteboard.drawNodesAndParents(self.currentContainer, 0);
                 }
@@ -368,7 +366,7 @@ var Containers_tree = (function () {
         items["GraphContainerDescendantAndLeaves"] = {
             label: "Graph  all descendants",
             action: function (_e) {
-                Containers_graph.graphResources(self.currentSource, self.currentContainer.data, {leaves: true});
+                Containers_graph.graphResources(self.currentSource, self.currentContainer.data, { leaves: true });
             },
         };
 
@@ -382,7 +380,7 @@ var Containers_tree = (function () {
                     rootContainer = self.currentContainer.parents[self.currentContainer.parents.length];
                 }
                 var filter = " ?root rdfs:member+ ?ancestorParent  filter (?root=<" + rootContainer + ")"; //" ?container rdf:type <" + type + ">. ";
-                Containers_graph.graphParentContainers(Lineage_sources.activeSource, null, {filter: filter});
+                Containers_graph.graphParentContainers(Lineage_sources.activeSource, null, { filter: filter });
             },
         };
         /* items["GraphContainerDescendant"] = {
@@ -394,8 +392,7 @@ var Containers_tree = (function () {
 
         items["----"] = {
             label: "-----------------------",
-            action: function (_e) {
-            },
+            action: function (_e) {},
         };
         items.copyNodes = {
             label: "Copy Node(s)",
@@ -415,7 +412,7 @@ var Containers_tree = (function () {
                     if (err) {
                         return alert(err.responseText || err);
                     }
-                    Containers_graph.graphResources(self.currentSource, self.currentContainer.data, {leaves: true});
+                    Containers_graph.graphResources(self.currentSource, self.currentContainer.data, { leaves: true });
                 });
             },
         };
@@ -608,8 +605,8 @@ var Containers_tree = (function () {
                             to: nodeData.id,
                             // arrows: " middle",
 
-                            data: {propertyId: "http://www.w3.org/2000/01/rdf-schema#member", source: source},
-                            font: {multi: true, size: 10},
+                            data: { propertyId: "http://www.w3.org/2000/01/rdf-schema#member", source: source },
+                            font: { multi: true, size: 10 },
 
                             //  dashes: true,
                             color: self.containerEdgeColor,
@@ -690,7 +687,7 @@ var Containers_tree = (function () {
 
         var url = Config.sources[self.currentSource].sparql_server.url + "?format=json&query=";
 
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: self.currentSource}, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: self.currentSource }, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -703,8 +700,7 @@ var Containers_tree = (function () {
                     throw "xx";
                 }
                 var obj = JSON.parse(str);
-                self.menuActions.addResourcesToContainer(source, container, obj.data, true, function (er, result) {
-                });
+                self.menuActions.addResourcesToContainer(source, container, obj.data, true, function (er, result) {});
             });
         } catch (e) {
             alert("invalid clipboard content");

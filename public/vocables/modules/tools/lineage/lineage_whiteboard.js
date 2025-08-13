@@ -4708,7 +4708,7 @@ attrs.color=self.getSourceColor(superClassValue)
      * @returns {void}
      */
     self.initContainersTab = function () {
-        if ( $("#containersTab").children() && $("#containersTab").children().length == 0) {
+        if ($("#containersTab").children() && $("#containersTab").children().length == 0) {
             $("#containersTab").load("./modules/tools//lineage/html/containersTab.html", function (s) {
                 Containers_tree.search("lineage_containers_containersJstree");
                 $("#containers_showparentContainersBtn").bind("click", function (e) {

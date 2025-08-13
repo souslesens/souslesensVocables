@@ -145,23 +145,25 @@ var Containers_query = (function () {
                 "  }\n" +
                 "} limit 10000 ";
 
-               var query =
+            var query =
                 "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n" +
-                   "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \n" +
-                   "SELECT distinct  * "+
-                   fromStr + " where {"+
-                   " ?ancestorParent rdfs:member ?ancestor.\n" +
-                   "  optional { ?ancestorParent rdfs:label ?ancestorParentLabel.}\n" +
-                   "   optional { ?ancestor rdfs:label ?ancestorLabel.}\n" +
-                   " ?ancestor rdfs:member+ ?child. \n" +
-                   "{select * where{\n" +
-                   "   ?childParent rdfs:member ?child. \n" +
-                   "   optional { ?childParent rdfs:label ?childParentLabel.}"+
-                   "   ?child rdfs:label ?childLabel." +
-                   "\n" +filter+
-                   "    } \n" +
-                   "  }\n" +
-                   "}limit 10000 ";
+                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \n" +
+                "SELECT distinct  * " +
+                fromStr +
+                " where {" +
+                " ?ancestorParent rdfs:member ?ancestor.\n" +
+                "  optional { ?ancestorParent rdfs:label ?ancestorParentLabel.}\n" +
+                "   optional { ?ancestor rdfs:label ?ancestorLabel.}\n" +
+                " ?ancestor rdfs:member+ ?child. \n" +
+                "{select * where{\n" +
+                "   ?childParent rdfs:member ?child. \n" +
+                "   optional { ?childParent rdfs:label ?childParentLabel.}" +
+                "   ?child rdfs:label ?childLabel." +
+                "\n" +
+                filter +
+                "    } \n" +
+                "  }\n" +
+                "}limit 10000 ";
 
             Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: source }, function (err, result) {
                 if (err) {

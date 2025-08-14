@@ -824,6 +824,7 @@ var MappingColumnsGraph = (function () {
                 databaseSources: {},
                 csvSources: {},
                 isConfigInMappingGraph: true,
+                prefixURI: {},
             };
             DataSourceManager.rawConfig = newJson;
         }

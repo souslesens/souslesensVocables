@@ -451,7 +451,8 @@ var KGbuilder_triplesMaker = {
                 objectStr = '"' + str + '"^^' + mapping.dataType;
             } else {
                 if (isTransform == false) {
-                    objectStr = line[mapping.o];
+                    var prefixURI =  tableMappings.prefixURI[mapping.o] || ""; 
+                    objectStr = prefixURI + line[mapping.o];
                 }
             }
 

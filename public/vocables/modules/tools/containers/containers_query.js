@@ -107,43 +107,12 @@ var Containers_query = (function () {
             if (options.depth) {
                 pathOperator = "{1," + options.depth + "}";
             }
-            /*    var childStr = "";
-            if (options.keepChild) {
-                childStr = "?child ?childLabel";
-            }
-            var ancestorVars = "";
-            var ancestorClause = "";
-            if (options.keepAncestor) {
-                ancestorVars = "?ancestor ";
-                ancestorClause = " optional{?ancestor rdfs:member ?ancestorParent .}\n";
-            }
-            var filterAncestorsType = "";
-            if (options.filterAncestorsType) {
-                filterAncestorsType += " ?ancestor rdfs:member* ?ancestorParent. \n";
-                filterAncestorsType += "FILTER(?ancestorParent = <" + options.filterAncestorsType + "> || " + "?ancestor =<" + options.filterAncestorsType + ">)\n";
-            }*/
 
             var filterAncestorsTypeStr = "";
             if (options.filterAncestorsType) {
                 filterAncestorsTypeStr = "  ?ancestor ^rdfs:member <" + options.filterAncestorsType + ">\n";
             }
 
-            var queryX =
-                "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n" +
-                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \n" +
-                "SELECT distinct  * " +
-                fromStr +
-                " WHERE {\n" +
-                "  ?ancestorParent  rdfs:member{1,1} ?child.\n" +
-                " ?ancestor rdfs:member+ ?ancestorParent. \n" +
-                filterAncestorsTypeStr +
-                "  OPTIONAL{?ancestorParent rdfs:label ?ancestorParentLabel}  \n" +
-                "  {select ?child ?childLabel where  {\n" +
-                "   ?child rdfs:label ?childLabel." +
-                (options.filter || "") +
-                "}\n" +
-                "  }\n" +
-                "} limit 10000 ";
 
                var query =
                 "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n" +
@@ -153,7 +122,7 @@ var Containers_query = (function () {
                    " ?ancestorParent rdfs:member ?ancestor.\n" +
                    "  optional { ?ancestorParent rdfs:label ?ancestorParentLabel.}\n" +
                    "   optional { ?ancestor rdfs:label ?ancestorLabel.}\n" +
-                   " ?ancestor rdfs:member+ ?child. \n" +
+                   " ?ancestor rdfs:member* ?child. \n" +
                    "{select * where{\n" +
                    "   ?childParent rdfs:member ?child. \n" +
                    "   optional { ?childParent rdfs:label ?childParentLabel.}"+

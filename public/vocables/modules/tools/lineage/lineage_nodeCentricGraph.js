@@ -112,19 +112,87 @@ var Lineage_nodeCentricGraph = (function () {
     self.listAllNodeRelations = function (rootNodeId) {
         var visjsData = self.getHierarchicalViewVisjsdata(rootNodeId);
 
-        var levelMin = 0;
-        var levelMax = 100;
-        var edgesFromMap = {};
+        var levelMin = 100;
+        var levelMax = 0;
+        var edgesToMap = {};
         var nodesMap = {};
 
+
+        var levelsMap={}
         visjsData.nodes.forEach(function (node) {
             if (!nodesMap[node.id]) {
                 nodesMap[node.id] = node;
             }
+            if(!levelsMap[node.level]){
+                levelsMap[node.level]= []
+            }
+            levelsMap[node.level].push(node.id)
 
             levelMax = Math.max(levelMax, node.level);
             levelMin = Math.min(levelMin, node.level);
         });
+
+        visjsData.edges.forEach(function (edge) {
+            if (!edgesToMap[edge.to]) {
+                edgesToMap[edge.to] = edge;
+            }
+
+        });
+
+        var sep="\t"
+        var line=""
+        function recurse(nodeId){
+
+            if(edgesToMap[nodeId]){
+                var edgeFrom=edgesToMap[nodeId].from
+                if(!edgeFrom)
+                    return line
+                var edgeLabel=edgesToMap[nodeId].label
+                if(edgeLabel)
+                    edgeLabel="-"+edgeLabel+"->"+sep
+                else
+                    edgeLabel="-->"+sep
+                line=nodesMap[edgeFrom].label+sep+edgeLabel+line
+                if(nodesMap[edgeFrom].level>=levelMin){
+                recurse(edgeFrom)}
+                else{
+                    return line
+                }
+            }   else{
+                return line
+            }
+           // return line
+
+        }
+
+var str=""
+
+        for (var level = levelMax; level >= levelMin; level--) {
+            if(levelsMap[level] ){
+                levelsMap[level].forEach(function(nodeId){
+                   line=nodesMap[nodeId].label+sep;
+                  recurse(nodeId)
+                    console.log(line)
+                    str+=line+"\n"
+                })
+
+            }
+
+
+
+
+
+
+        }
+
+        var x=str;
+
+
+
+return;
+
+        visjsData.nodes.forEach(function (node) {
+        })
 
         visjsData.edges.forEach(function (edge) {
             if (!edgesFromMap[edge.from]) {

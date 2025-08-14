@@ -76,14 +76,14 @@ var Containers_graph = (function () {
             self.parentContainersColors.push(color);
 
             result.forEach(function (item) {
-                if (item.ancestor) {
-                    if (!existingNodes[item.ancestor.value]) {
-                        existingNodes[item.ancestor.value] = 1;
+                if (item.childParent) {
+                    if (!existingNodes[item.childParent.value]) {
+                        existingNodes[item.childParent.value] = 1;
 
-                        var label = item.ancestorLabel ? item.ancestorLabel.value : Sparql_common.getLabelFromURI(item.ancestor.value);
+                        var label = item.childParentLabel ? item.childParentLabel.value : Sparql_common.getLabelFromURI(item.childParent.value);
 
                         visjsData.nodes.push({
-                            id: item.ancestor.value,
+                            id: item.childParent.value,
                             label: label,
                             shadow: self.nodeShadow,
                             shape: Containers_graph.containerStyle.shape,
@@ -93,13 +93,13 @@ var Containers_graph = (function () {
                             data: {
                                 type: "Container",
                                 source: Lineage_sources.activeSource,
-                                id: item.ancestor.value,
+                                id: item.childParent.value,
                                 label: label,
                             },
                         });
                     }
                 }
-                if (!existingNodes[item.ancestorParent.value]) {
+              /*  if (!existingNodes[item.ancestorParent.value]) {
                     existingNodes[item.ancestorParent.value] = 1;
 
                     var label = item.ancestorParentLabel ? item.ancestorParentLabel.value : Sparql_common.getLabelFromURI(item.ancestorParent.value);
@@ -138,19 +138,21 @@ var Containers_graph = (function () {
                             color: Containers_graph.containerStyle.edgeColor,
                         });
                     }
-                }
+                }*/
+
+                // edge from childParent to Child
                 if (item.child) {
-                    var edgeId = item.ancestorParent.value + "_" + "member" + "_" + item.child.value;
+                    var edgeId = item.childParent.value + "_" + "member" + "_" + item.child.value;
                     if (!existingNodes[edgeId]) {
                         existingNodes[edgeId] = 1;
 
                         visjsData.edges.push({
                             id: edgeId,
-                            from: item.ancestorParent.value,
+                            from: item.childParent.value,
                             to: item.child.value,
                             arrows: "to",
 
-                            data: { from: item.ancestorParent.value, to: item.child.value, source: source },
+                            data: { from: item.childParent.value, to: item.child.value, source: source },
                             font: { multi: true, size: 10 },
 
                             //  dashes: true,

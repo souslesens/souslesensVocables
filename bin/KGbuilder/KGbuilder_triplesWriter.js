@@ -177,8 +177,12 @@ const KGbuilder_triplesWriter = {
                     }
 
                     totalSize += resultSize;
+                   /* if (Config.clientSocketId) {
+                        KGbuilder_socket.message(Config.clientSocketId, ""+totalSize+" triples deleted from table " + table, false);
 
-                    KGbuilder_socket.message(options.clientSocketId, ""+totalSize+" triples deleted from table " + table, false);
+                    }*/
+
+
                     return callbackWhilst(err);
                 });
             },

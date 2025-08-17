@@ -1925,7 +1925,7 @@ var Lineage_whiteboard = (function () {
 
             visjsData.nodes = common.removeDuplicatesFromArray(visjsData.nodes, "id");
             Lineage_whiteboard.addVisDataToGraph(visjsData);
-            self.lineageVisjsGraph.data.edges.add(visjsData.edges);
+           // self.lineageVisjsGraph.data.edges.add(visjsData.edges);
             self.lineageVisjsGraph.network.fit();
 
             $("#waitImg").css("display", "none");
@@ -2837,8 +2837,8 @@ restrictionSource = Config.predicatesSource;
                         if (options.inverse) {
                             visjsData.edges.push({
                                 id: edgeId,
-                                from: item.value.value,
-                                to: item.subject.value,
+                                from: item.subject.value,
+                                to: item.value.value,
                                 //  label: "<i>" + item.propLabel.value + "</i>",
                                 label: item.propLabel.value + ":" + cardinalitylabel,
                                 font: {
@@ -2851,10 +2851,11 @@ restrictionSource = Config.predicatesSource;
                                     source: restrictionSource,
                                     propertyLabel: item.propLabel.value,
                                     subClassId: item.value.value,
+                                    isInverse:true
                                 },
 
                                 arrows: {
-                                    from: {
+                                    to: {
                                         enabled: true,
                                         type: "solid",
                                         scaleFactor: 0.5,

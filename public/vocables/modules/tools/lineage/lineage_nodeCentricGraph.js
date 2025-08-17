@@ -19,6 +19,7 @@ var Lineage_nodeCentricGraph = (function () {
         Lineage_whiteboard.lineageVisjsGraph.data.nodes.get().forEach(function (item) {
             nodesMap[item.id] = item;
         });
+
         Lineage_whiteboard.lineageVisjsGraph.data.edges.get().forEach(function (item) {
             if (!edgesFromMap[item.from]) {
                 edgesFromMap[item.from] = [];
@@ -50,8 +51,10 @@ var Lineage_nodeCentricGraph = (function () {
                         }
                     });
                 }
+
+                //relations inverses
                 edges = edgesToMap[nodeId];
-                if (edges) {
+                if (false && edges) {
                     edges.forEach(function (edge) {
                         if (!existingNodes[edge.id]) {
                             existingNodes[edge.id] = 1;
@@ -60,6 +63,7 @@ var Lineage_nodeCentricGraph = (function () {
                         }
                     });
                 }
+            } else {
             }
         }
 
@@ -73,7 +77,7 @@ var Lineage_nodeCentricGraph = (function () {
             }
         }
 
-        return { nodes: newNodes, edges: newEdges };
+        return {nodes: newNodes, edges: newEdges};
     };
 
     self.draw = function (rootNodeId) {
@@ -110,21 +114,115 @@ var Lineage_nodeCentricGraph = (function () {
     };
 
     self.listAllNodeRelations = function (rootNodeId) {
+        var nodesMap = {}
+
+        Lineage_whiteboard.lineageVisjsGraph.data.nodes.get().forEach(function (item) {
+            nodesMap[item.id] = item;
+        });
+
+
+        var rightAdjacent = []
+        var edges = Lineage_whiteboard.lineageVisjsGraph.data.edges.get()
+        var edgeFromMap = {}
+        edges.forEach(function (edge) {
+            if (!edgeFromMap[edge.from]) {
+                edgeFromMap[edge.from] = []
+            }
+            edgeFromMap[edge.from].push(edge)
+
+
+        })
+        var index = 0
+        var uniqueNodes = {}
+        var nodeIndicesMap = {}
+
+        function recurse2(from) {
+            if (!edgeFromMap[from]) {
+                return;
+            }
+            edgeFromMap[from].forEach(function (edge) {
+                if (!edge) {
+                    return;
+                }
+                if (uniqueNodes[from]) {
+
+                    rightAdjacent.push([])
+                }
+                uniqueNodes[from]=1
+                if (!nodeIndicesMap[index]) {
+                    nodeIndicesMap[index] = edge.from
+                }
+                if (!edgeFromMap[edge.to]) {
+                    rightAdjacent.push([index])
+                } else {
+                    if (!nodeIndicesMap[index + 1]) {
+                        nodeIndicesMap[index + 1] = edge.to
+                    }
+                    rightAdjacent.push([index, ++index])
+                }
+                recurse2(edge.to)
+            })
+        }
+
+
+        recurse2(rootNodeId)
+
+        var x = rightAdjacent
+        //   var rightAdjacent = [[1,7],[2],[3,9],[4],[5],[6,10],[],[8],[2],[5],[11],[12]];
+
+        var visited = {}
+
+        function dfs(node, path) {
+            visited[node] = true
+            path.push(node)
+            if (node >= rightAdjacent.length || rightAdjacent[node].length == 0) {
+                console.log(path)
+            } else {
+                for (var i = 0; i < rightAdjacent[node].length; i++) {
+                    if (!visited[rightAdjacent[node][i]]) {
+                        dfs(rightAdjacent[node][i], path)
+                    }
+                }
+            }
+            visited[node] = false
+            path.pop()
+        }
+
+        dfs(0, [])
+
+
         var visjsData = self.getHierarchicalViewVisjsdata(rootNodeId);
 
+        // start fom original edges
+        var edges = Lineage_whiteboard.lineageVisjsGraph.data.edges.get()
         var levelMin = 100;
         var levelMax = 0;
         var edgesToMap = {};
         var nodesMap = {};
 
-
-        var levelsMap={}
         visjsData.nodes.forEach(function (node) {
             if (!nodesMap[node.id]) {
                 nodesMap[node.id] = node;
             }
-            if(!levelsMap[node.level]){
-                levelsMap[node.level]= []
+        })
+
+        edges.forEach(function (edge) {
+
+            if ((edge.data && edge.data.type === "parent")) {// inverse parent /child relation from child to parent to parent to child
+                var to = edge.to
+                edge.to = edge.from
+                edge.from = to;
+                edge.data.inverse = true
+            }
+
+
+        })
+
+
+        var levelsMap = {}
+        visjsData.nodes.forEach(function (node) {
+            if (!levelsMap[node.level]) {
+                levelsMap[node.level] = []
             }
             levelsMap[node.level].push(node.id)
 
@@ -132,64 +230,109 @@ var Lineage_nodeCentricGraph = (function () {
             levelMin = Math.min(levelMin, node.level);
         });
 
-        visjsData.edges.forEach(function (edge) {
-            if (!edgesToMap[edge.to]) {
-                edgesToMap[edge.to] = edge;
+
+        edges.forEach(function (edge) {
+
+            var isInverse = edge.data && edge.data.isInverse
+            // if (!isInverse && edge.to !== edge.from ) {
+            if (edge.to !== edge.from) {
+                if (edge.to == "http://data.totalenergies.com/resource/tsf/ontology/business-objects/Tag") {
+                    var x = 3
+                }
+                if (!edgesToMap[edge.to]) {
+                    edgesToMap[edge.to] = []
+                }
+                edgesToMap[edge.to].push(edge);
+
             }
 
         });
 
-        var sep="\t"
-        var line=""
-        function recurse(nodeId){
+        var sep = "\t"
+        var line = ""
+        var lineUniqueNodes = {}
 
-            if(edgesToMap[nodeId]){
-                var edgeFrom=edgesToMap[nodeId].from
-                if(!edgeFrom)
-                    return line
-                var edgeLabel=edgesToMap[nodeId].label
-                if(edgeLabel)
-                    edgeLabel="-"+edgeLabel+"->"+sep
-                else
-                    edgeLabel="-->"+sep
-                line=nodesMap[edgeFrom].label+sep+edgeLabel+line
-                if(nodesMap[edgeFrom].level>=levelMin){
-                recurse(edgeFrom)}
-                else{
-                    return line
-                }
-            }   else{
+        function recurse(nodeId, ok) {
+            if (!ok) {
                 return line
             }
-           // return line
+            console.log(nodeId)
+            if (true || !lineUniqueNodes[nodeId]) {
+                lineUniqueNodes[nodeId] = 1
+                if (nodeId == rootNodeId) {
+                    ok = false;
+                }
+                try {
+                    if (edgesToMap[nodeId]) {
+                        edgesToMap[nodeId].forEach(function (edge) {
+                            if (!lineUniqueNodes[edge.id]) {
+                                lineUniqueNodes[edge.id] = 1
+
+                                var edgeFrom = edge.from
+                                if (!edgeFrom) {
+                                    ok = false;
+                                }
+
+                                var edgeLabel = edge.label
+                                if (edgeLabel) {
+                                    edgeLabel = "-" + edgeLabel + "->" + sep
+                                } else {
+                                    edgeLabel = "-->" + sep
+                                }
+                                line = nodesMap[edgeFrom].label + sep + edgeLabel + line
+
+                                if (nodesMap[edgeFrom].level >= levelMin) {
+
+                                    if (ok) {
+                                        recurse(edgeFrom, true)
+                                    } else {
+                                        return line
+                                    }
+
+
+                                } else {
+                                    ok = false;
+                                }
+                            }
+                        })
+                    } else {
+                        return line
+                    }
+                    // return line
+                } catch (e) {
+                    var x = 3
+                    return line
+                }
+            }
+            return line;
 
         }
 
-var str=""
-
+        var str = ""
+        var rootLabel = nodesMap[rootNodeId].label
         for (var level = levelMax; level >= levelMin; level--) {
-            if(levelsMap[level] ){
-                levelsMap[level].forEach(function(nodeId){
-                   line=nodesMap[nodeId].label+sep;
-                  recurse(nodeId)
-                    console.log(line)
-                    str+=line+"\n"
+            lineUniqueNodes = {}
+            if (levelsMap[level]) {
+                levelsMap[level].forEach(function (nodeId) {
+                    var initialLine = nodesMap[nodeId].label + sep;
+                    line = initialLine;
+
+                    line = recurse(nodeId, true)
+                    if (true || (line != initialLine && str.indexOf(line) < 0 && line.startsWith(rootLabel))) {
+                        console.log("-----" + line)
+                        str += line + "\n"
+                    }
                 })
 
             }
 
 
-
-
-
-
         }
 
-        var x=str;
+        var x = str;
 
 
-
-return;
+        return;
 
         visjsData.nodes.forEach(function (node) {
         })

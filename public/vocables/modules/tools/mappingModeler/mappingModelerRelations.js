@@ -90,7 +90,6 @@ var MappingModelerRelations = (function () {
         });
         $("#MappingModeler_leftTabs").tabs("option", "active", 1);
         UIcontroller.onActivateLeftPanelTab("MappingModeler_columnsTab");
-        
     };
 
     return self;

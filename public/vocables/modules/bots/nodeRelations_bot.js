@@ -32,11 +32,18 @@ var NodeRelations_bot = (function () {
             },
 
             "Annotation/Datatype property": {
-                listAnnotationPropertiesVocabsFn: {
-                    listAnnotationPropertiesFn: {
-                        promptAnnotationPropertyValue: {
-                            listWhiteBoardFilterType: {
-                                executeQuery: {},
+                _OR: {
+                    "draw Annotation/Datatype properties": {
+                        drawDatatypePropertiesFn: {},
+                    },
+                    "Filter on Annotation/Datatype property value": {
+                        listAnnotationPropertiesVocabsFn: {
+                            listAnnotationPropertiesFn: {
+                                promptAnnotationPropertyValue: {
+                                    listWhiteBoardFilterType: {
+                                        executeQuery: {},
+                                    },
+                                },
                             },
                         },
                     },
@@ -72,6 +79,11 @@ var NodeRelations_bot = (function () {
     };
 
     self.functions = {
+        drawDatatypePropertiesFn: function () {
+            Lineage_whiteboard.drawDataTypeProperties(null, [self.params.currentClass], {}, function (err, result) {
+                self.myBotEngine.nextStep();
+            });
+        },
         containersMembersFn: function () {
             Containers_graph.graphResources(self.params.source, { id: self.params.currentClass }, { leaves: true });
             self.myBotEngine.nextStep();
@@ -85,11 +97,11 @@ var NodeRelations_bot = (function () {
             self.myBotEngine.nextStep();
         },
         listVocabsFn: function () {
-            CommonBotFunctions_class.listVocabsFn(Lineage_sources.activeSource, "currentVocab", true);
+            CommonBotFunctions_class.listVocabsFn(self.myBotEngine, Lineage_sources.activeSource, "currentVocab", true);
         },
 
         listClassesFn: function () {
-            CommonBotFunctions_class.listVocabClasses(self.params.currentVocab, "currentClass", true, [{ label: "_Any Class", id: "AnyClass" }]);
+            CommonBotFunctions_class.listVocabClasses(self.myBotEngine, self.params.currentVocab, "currentClass", true, [{ label: "_Any Class", id: "AnyClass" }]);
         },
 
         listPredicatePathsFn: function () {
@@ -114,12 +126,12 @@ var NodeRelations_bot = (function () {
         },
 
         listAnnotationPropertiesVocabsFn: function () {
-            CommonBotFunctions_class.listVocabsFn(self.params.source, "annotationPropertyVocab", true);
+            CommonBotFunctions_class.listVocabsFn(self.myBotEngine, self.params.source, "annotationPropertyVocab", true);
         },
 
         listAnnotationPropertiesFn: function () {
             // filter properties compatible with
-            CommonBotFunctions_class.listAnnotationPropertiesFn(self.params.annotationPropertyVocab, "annotationPropertyId");
+            CommonBotFunctions_class.listNonObjectPropertiesFn(self.myBotEngine, self.params.annotationPropertyVocab, "annotationPropertyId");
         },
 
         promptAnnotationPropertyValue: function () {

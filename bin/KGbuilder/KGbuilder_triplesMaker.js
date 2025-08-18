@@ -159,7 +159,7 @@ var KGbuilder_triplesMaker = {
             return null;
         }
         var p = mappingValue.indexOf("]");
-       
+
         if (p > 0) {
             //specific baseURI
             var baseUri = mappingValue.substring(1, p);
@@ -189,7 +189,6 @@ var KGbuilder_triplesMaker = {
                 return null;
             }
         } else {
-            
             return null;
         }
     },
@@ -254,19 +253,17 @@ var KGbuilder_triplesMaker = {
         } else if (typeof mapping.s === "string" && mapping.s.indexOf("http") == 0) {
             var prefixURI = tableMappings.prefixURI[mapping.s] || "";
             subjectStr = "<" + prefixURI + mapping.s + ">";
-        } 
+        }
         // sparql prefix
         else if (typeof mapping.s === "string" && mapping.s.match(/.+:.+/)) {
             subjectStr = mapping.s;
-        } 
-        
-        else {
+        } else {
             if (!line[mapping.s] || (mapping.o.indexOf(":") > -1 && line[mapping.o]) == "null") {
                 return callback(null, null);
             }
             var prefixURI = tableMappings.prefixURI[mapping.s] || "";
 
-            subjectStr = prefixURI +line[mapping.s];
+            subjectStr = prefixURI + line[mapping.s];
         }
         if (mapping.lookup_s && !isTransformLookUp) {
             if (!lookUpsMap[mapping.lookup_s]) {
@@ -451,7 +448,7 @@ var KGbuilder_triplesMaker = {
                 objectStr = '"' + str + '"^^' + mapping.dataType;
             } else {
                 if (isTransform == false) {
-                    var prefixURI =  tableMappings.prefixURI[mapping.o] || ""; 
+                    var prefixURI = tableMappings.prefixURI[mapping.o] || "";
                     objectStr = prefixURI + line[mapping.o];
                 }
             }

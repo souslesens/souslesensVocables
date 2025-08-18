@@ -1339,6 +1339,18 @@ var Sparql_OWL = (function () {
         }
         if (options.inheritedProperties) {
             query += "  { ?prop rdfs:subPropertyOf*/rdf:type owl:ObjectProperty ";
+        }
+        if (options.dataTypeProperties) {
+            query +=
+                "   {?prop rdf:type owl:DatatypeProperty. " +
+                optionalLabelStr +
+                "{?prop rdfs:label ?propLabel.  " +
+                Sparql_common.getLangFilter(sourceLabel, "propLabel") +
+                "}" +
+                "OPTIONAL{?prop owl:inverseOf ?inverseProp. " +
+                "OPTIONAL{?inverseProp rdfs:label ?inversePropLabel.  " +
+                Sparql_common.getLangFilter(sourceLabel, "inversePropLabel") +
+                "}}";
         } else {
             query +=
                 "   {?prop rdf:type owl:ObjectProperty. " +

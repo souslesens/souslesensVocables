@@ -176,7 +176,7 @@ var MappingTransform = (function () {
                         o: data.transform,
                     });
                 }
-                if(data.prefixURI) {
+                if (data.prefixURI) {
                     allMappings.push({
                         s: subject,
                         p: "prefixURI",
@@ -384,7 +384,7 @@ var MappingTransform = (function () {
         //filteredMappings=filteredMappings.concat(columnMappings);
         var table = MappingModeler.currentTable.name;
 
-        filteredMappings = { [table]: { tripleModels: filteredMappings, transform: transforms, lookups: {} ,prefixURI: DataSourceManager.currentConfig?.prefixURI} };
+        filteredMappings = { [table]: { tripleModels: filteredMappings, transform: transforms, lookups: {}, prefixURI: DataSourceManager.currentConfig?.prefixURI } };
         // Add checked lookups
         if (Object.keys(DataSourceManager.currentConfig.lookups)) {
             Object.keys(DataSourceManager.currentConfig.lookups).forEach(function (lookup) {
@@ -396,7 +396,7 @@ var MappingTransform = (function () {
                 }
             });
         }
-       
+
         return filteredMappings;
     };
     return self;

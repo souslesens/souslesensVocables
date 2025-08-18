@@ -60,6 +60,7 @@ var Lineage_whiteboard = (function () {
     self.defaultEdgeColor = "#aaa";
     self.defaultPredicateEdgeColor = "#266264";
     self.restrictionColor = "#efbf00"; //"#fdbf01";
+    self.datatypeColor = "8F8F8F";
     self.restrictionFontSize = 8;
     self.restrictionEdgeWidth = 1;
     self.namedIndividualShape = "triangle";
@@ -477,6 +478,20 @@ var Lineage_whiteboard = (function () {
                     callbackSeries();
                 },
 
+                function (callbackSeries) {
+                    if (!options.drawDataTypeProperties) {
+                        return callbackSeries();
+                    }
+                    var datatypeOptions = {
+                        notDrawDomain: options.notDrawDomain,
+                    };
+                    self.drawDataTypeProperties(source, topConcepts, datatypeOptions, function (err, result) {
+                        if (err) {
+                            return callbackSeries(err);
+                        }
+                        callbackSeries();
+                    });
+                },
                 function (callbackSeries) {
                     //to be finished
                     return callbackSeries();
@@ -2802,7 +2817,7 @@ restrictionSource = Config.predicatesSource;
                     var label = item.valueLabel.value;
                     if (Config.Lineage.logicalOperatorsMap[item.prop.value]) {
                         label = Config.Lineage.logicalOperatorsMap[item.prop.value];
-                        shape = "hegagon";
+                        shape = "hexagon";
                         color = "#EEE";
                     }
 
@@ -4627,6 +4642,7 @@ attrs.color=self.getSourceColor(superClassValue)
                     var html = '<span class="popupMenuItem" onclick="Lineage_whiteboard.drawModel(null, null, { inverse: false });">Direct Restrictions</span>';
                     html += '<span class="popupMenuItem" onclick="Lineage_whiteboard.drawModel(null, null, { inverse: true });">Inverse Restrictions</span>';
                     html += '<span class="popupMenuItem" onclick="Lineage_whiteboard.drawModel(null, null, { all: true })">All Restrictions</span>';
+                    html += '<span class="popupMenuItem" onclick="Lineage_whiteboard.drawModel(null, null, { drawDataTypeProperties:true,notDrawDomain:true })">Data type properties</span>';
                     PopupMenuWidget.initAndShow(html, "popupMenuWidgetDiv");
                 });
                 $("#lateralPanelDiv").resizable({
@@ -4882,6 +4898,116 @@ attrs.color=self.getSourceColor(superClassValue)
             });
             // self.zoomGraphOnNode(visjsData.nodes[0].id)
         }
+    };
+
+    self.drawDataTypeProperties = function (source, classIds, options, callback) {
+        if (!options) {
+            options = {};
+        }
+        if (!source) {
+            source = Lineage_sources.activeSource;
+        }
+        options.dataTypeProperties = true;
+        var existingNodes = Lineage_whiteboard?.lineageVisjsGraph?.data?.nodes?.get() || [];
+        var existingEdges = Lineage_whiteboard?.lineageVisjsGraph?.data?.edges?.get() || [];
+        var existingNodesIds = Object.fromEntries(existingNodes.map((node) => [node.id, true]));
+        var existingEdgesIds = Object.fromEntries(existingEdges.map((edge) => [edge.id, true]));
+        var visjsData = {
+            nodes: [],
+            edges: [],
+        };
+        Sparql_OWL.getObjectPropertiesDomainAndRange(source, classIds, options, function (err, result) {
+            if (err) {
+                return callback(err);
+            }
+            if (result.length == 0) {
+                return callback(null, []);
+            }
+
+            //Draw data type properties on the graph
+            result.forEach(function (item) {
+                if (!item?.prop?.value || !item?.domain?.value) {
+                    return;
+                }
+                var edgeId = item.domain.value + "_datatypeProperty_" + item.prop.value;
+                // Draw only source datatype properties with valid range and domain
+                var rangeDatatype = Config.ontologiesVocabularyModels["testClasses"]?.nonObjectProperties[item.prop.value]?.range;
+                if (!rangeDatatype) {
+                    return;
+                }
+                if (!existingEdgesIds[edgeId]) {
+                    visjsData.edges.push({
+                        id: edgeId,
+                        from: item.domain.value,
+                        to: rangeDatatype,
+                        //  label: "<i>" + item.propLabel.value + "</i>",
+                        label: item.propLabel.value,
+                        font: {
+                            color: Lineage_whiteboard.datatypeColor,
+                            size: Lineage_whiteboard.restrictionFontSize,
+                        },
+                        data: {
+                            propertyId: item.prop.value,
+                            source: source,
+                            propertyLabel: item.propLabel.value,
+                            domain: item.domain.value,
+                            range: rangeDatatype,
+                        },
+
+                        arrows: {
+                            to: {
+                                enabled: true,
+                                type: "solid",
+                                scaleFactor: 0.5,
+                            },
+                        },
+                        dashes: true,
+                        color: Lineage_whiteboard.datatypeColor,
+
+                        width: self.restrictionEdgeWidth,
+                    });
+                }
+                if (!options.notDrawDomain) {
+                    if (!existingNodesIds[item.domain.value]) {
+                        visjsData.nodes.push({
+                            id: item.domain.value,
+                            label: item.domainLabel.value,
+                            data: {
+                                id: item.domain.value,
+                                label: item.domainLabel.value,
+                            },
+                        });
+                    }
+                }
+                if (!existingNodesIds[rangeDatatype]) {
+                    visjsData.nodes.push({
+                        id: rangeDatatype,
+                        label: rangeDatatype,
+                        data: {
+                            id: rangeDatatype,
+                            label: rangeDatatype,
+                        },
+                        color: Lineage_whiteboard.datatypeColor,
+                    });
+                }
+            });
+            if (existingNodes.length == 0) {
+                // if no existing nodes or edges, draw the graph
+                Lineage_whiteboard.lineageVisjsGraph.data = visjsData;
+                Lineage_whiteboard.lineageVisjsGraph.draw(function () {
+                    Lineage_decoration.decorateByUpperOntologyByClass();
+                });
+                if (callback) {
+                    callback(null, visjsData);
+                }
+                return;
+            }
+            self.addVisDataToGraph(visjsData);
+            if (callback) {
+                callback(null, visjsData);
+            }
+            return;
+        });
     };
 
     return self;

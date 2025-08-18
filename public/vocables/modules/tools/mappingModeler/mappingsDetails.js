@@ -324,12 +324,12 @@ var MappingsDetails = (function () {
         currentGraphNode.data.rdfType = $("#columnDetails-rdfType").val();
         var prefix = $("#columnDetails-prefixURI").val();
         if (prefix && currentGraphNode.data.uriType == "fromLabel") {
-            if(!DataSourceManager.rawConfig.prefixURI) {
+            if (!DataSourceManager.rawConfig.prefixURI) {
                 DataSourceManager.rawConfig.prefixURI = {};
             }
             DataSourceManager.rawConfig.prefixURI[currentGraphNode.data.id] = prefix;
         }
-        if(prefix=="" && DataSourceManager.rawConfig.prefixURI[currentGraphNode.data.id]) {
+        if (prefix == "" && DataSourceManager.rawConfig.prefixURI[currentGraphNode.data.id]) {
             delete DataSourceManager.rawConfig.prefixURI[currentGraphNode.data.id];
         }
 

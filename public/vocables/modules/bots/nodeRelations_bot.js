@@ -135,7 +135,7 @@ var NodeRelations_bot = (function () {
         },
 
         promptAnnotationPropertyValue: function () {
-            _botEngine.promptValue("value contains ", "annotationValue");
+            self.myBotEngine.promptValue("value contains ", "annotationValue");
         },
 
         listRestrictions: function () {

@@ -227,6 +227,28 @@ var Lineage_properties = (function () {
         options.whitoutImports = true;
         var distinctIds = {};
         var jstreeData = [];
+        var objectPropertyNode = {
+            text: "ObjectProperties",
+            id: source + "_ObjectProperties",
+            parent: parent,
+            data: {
+                label: "ObjectProperties",
+                id: source + "_ObjectProperties",
+                parent: source,
+            },
+        };
+        var datatypePropertyNode = {
+            text: "DatatypeProperties",
+            id: source + "_DatatypeProperties",
+            parent: parent,
+            data: {
+                label: "DatatypeProperties",
+                id: source + "_DatatypeProperties",
+                parent: source,
+            },
+        };
+        jstreeData.push(objectPropertyNode);
+        jstreeData.push(datatypePropertyNode);
         async.series(
             [
                 function (callbackSeries) {
@@ -240,12 +262,56 @@ var Lineage_properties = (function () {
                             if (!distinctIds[item.prop.value]) {
                                 distinctIds[item.prop.value] = 1;
 
-                                var parent = source;
+                                var parent = source + "_ObjectProperties";
                                 /*
                                 if (item.subProp) {
                                     parent = item.subProp.value;
                                 }*/
                                 var superProp = Config.ontologiesVocabularyModels[source].properties[item.prop.value].superProp;
+                                if (superProp != null) {
+                                    // for use it as parent superProp need to be on jstre
+                                    var superPropFilter = data.filter(function (prop) {
+                                        return prop.prop.value == superProp;
+                                    });
+                                    if (superPropFilter.length > 0) {
+                                        parent = superProp;
+                                    }
+                                }
+                                jstreeData.push({
+                                    text: item.propLabel.value,
+                                    id: item.prop.value,
+                                    parent: parent,
+                                    data: {
+                                        label: item.propLabel.value,
+                                        id: item.prop.value,
+                                        parent: parent,
+                                        type: "http://www.w3.org/2002/07/owl#ObjectProperty",
+                                        source: source,
+                                    },
+                                });
+                            }
+                        });
+                        callbackSeries(null);
+                    });
+                },
+                function (callbackSeries) {
+                    options.dataTypeProperties = true;
+                    Sparql_OWL.getObjectPropertiesDomainAndRange(source, ids, options, function (err, result) {
+                        if (err) {
+                            return callbackSeries(err);
+                        }
+                        var data = common.array.sort(common.array.distinctValues(result, "prop"), "propLabel");
+
+                        data.forEach(function (item) {
+                            if (!distinctIds[item.prop.value]) {
+                                distinctIds[item.prop.value] = 1;
+
+                                var parent = source + "_DatatypeProperties";
+                                /*
+                                if (item.subProp) {
+                                    parent = item.subProp.value;
+                                }*/
+                                var superProp = Config.ontologiesVocabularyModels[source]?.nonObjectProperties[item.prop.value]?.superProp;
                                 if (superProp != null) {
                                     parent = superProp;
                                 }
@@ -257,7 +323,7 @@ var Lineage_properties = (function () {
                                         label: item.propLabel.value,
                                         id: item.prop.value,
                                         parent: parent,
-                                        type: "http://www.w3.org/2002/07/owl#ObjectProperty",
+                                        type: "http://www.w3.org/2002/07/owl#DatatypeProperty",
                                         source: source,
                                     },
                                 });

@@ -14,13 +14,22 @@ var CreateSLSVsource_bot = (function () {
             self.myBotEngine.nextStep();
         });
     };
+
     self.loadingWorkflow = {
-        loadLineageFn: {},
-        /*  _OR: {
+        _OR: {
             "Launch Lineage": { loadLineageFn: {} },
-            "Launch KGquery": { loadKGqueryFn: {} },
-        },*/
+            "Launch Mapping Modeler": { loadMappingModelerFn: {} },
+            "Add Ontology Metadata": { workflowMetaDataFn: {} },
+        },
     };
+
+    self.workflowMetaData = {
+        _OR: {
+            "Add Ontology Description": { promptDescriptionFn: self.loadingWorkflow },
+            Finish: self.loadingWorkflow,
+        },
+    };
+
     self.workflowUpload = {
         _OR: {
             "Upload graph from file": { uploadFromFileFn: self.loadingWorkflow },
@@ -32,7 +41,7 @@ var CreateSLSVsource_bot = (function () {
     self.workflow2 = {
         _OR: {
             "Add import": { listImportsFn: { afterImportFn: {} } },
-            "Create source": { saveFn: self.workflowUpload },
+            "Create source": { saveFn: { addCreatorFn: self.workflowUpload } },
         },
     };
     self.workflow2withoutUpload = {
@@ -101,7 +110,6 @@ var CreateSLSVsource_bot = (function () {
 
         listImportsFn: function () {
             var sources = Object.keys(Config.sources);
-            86;
             sources.sort();
             self.myBotEngine.showList(sources, "imports");
         },
@@ -251,6 +259,17 @@ var CreateSLSVsource_bot = (function () {
             url += "?tool=lineage&source=" + self.params.sourceLabel;
             window.location.href = url;
         },
+        loadMappingModelerFn: function () {
+            var url = window.location.href;
+            url = url.replace("index_old.html", "");
+            var p = url.indexOf("?");
+            if (p > -1) {
+                url = url.substring(0, p);
+            }
+
+            url += "?tool=MappingModeler&source=" + self.params.sourceLabel;
+            window.location.href = url;
+        },
         loadKGqueryFn: function () {
             var url = window.location.href;
             url = url.replace("index_old.html", "");
@@ -261,6 +280,69 @@ var CreateSLSVsource_bot = (function () {
 
             url += "?tool=KGquery&source=" + self.params.sourceLabel;
             window.location.href = url;
+        },
+        promptDescriptionFn: function () {
+            self.myBotEngine.promptValue("Ontology description", "ontologyDescription", "", null, function (value) {
+                if (!value) {
+                    return self.myBotEngine.previousStep();
+                }
+                const ontologyDescription = [
+                    {
+                        id: 1,
+                        isNew: true,
+                        metadata: "http://purl.org/dc/elements/1.1/description",
+                        shortType: undefined,
+                        type: "literal",
+                        value: value,
+                        "xml:lang": "en",
+                    },
+                ];
+
+                $.ajax({
+                    type: "POST",
+                    url: `${Config.apiUrl}/rdf/graph/metadata?source=${self.params.sourceLabel}`,
+                    data: JSON.stringify({ addedData: ontologyDescription, removedData: [] }),
+                    contentType: "application/json",
+                    success: function (data, _textStatus, _jqXHR) {
+                        return self.myBotEngine.nextStep();
+                    },
+                    error: function (err) {
+                        alert(err.responseText);
+                        return self.myBotEngine.previousStep();
+                    },
+                });
+            });
+        },
+        addCreatorFn: function () {
+            const ontologyCreator = [
+                {
+                    id: 0,
+                    isNew: true,
+                    metadata: "http://purl.org/dc/elements/1.1/creator",
+                    shortType: undefined,
+                    type: "literal",
+                    value: authentication.currentUser.identifiant,
+                    "xml:lang": "en",
+                },
+            ];
+
+            $.ajax({
+                type: "POST",
+                url: `${Config.apiUrl}/rdf/graph/metadata?source=${self.params.sourceLabel}`,
+                data: JSON.stringify({ addedData: ontologyCreator, removedData: [] }),
+                contentType: "application/json",
+                success: function (data, _textStatus, _jqXHR) {
+                    return self.myBotEngine.nextStep();
+                },
+                error: function (err) {
+                    alert(err.responseText);
+                    return self.myBotEngine.previousStep();
+                },
+            });
+        },
+        workflowMetaDataFn: function () {
+            self.myBotEngine.currentObj = self.workflowMetaData;
+            self.myBotEngine.nextStep(self.workflowMetaData);
         },
     };
 

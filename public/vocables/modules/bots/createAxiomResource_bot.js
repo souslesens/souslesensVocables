@@ -56,7 +56,7 @@ var CreateAxiomResource_bot = (function () {
             if (self.params.filteredUris && self.params.filteredUris.length > 0) {
                 self.myBotEngine.nextStep();
             } else {
-                CommonBotFunctions_class.listVocabsFn(self.source, "currentVocab");
+                CommonBotFunctions_class.listVocabsFn(self.myBotEngine, self.source, "currentVocab");
             }
         },
 
@@ -71,7 +71,7 @@ var CreateAxiomResource_bot = (function () {
             if (self.params.filteredUris && self.params.filteredUris.length > 0) {
                 self.myBotEngine.showList(self.params.filteredUris, "superResourceId");
             } else {
-                CommonBotFunctions_class.listVocabClasses(self.params.currentVocab, "superResourceId", true);
+                CommonBotFunctions_class.listVocabClasses(self.myBotEngine, self.params.currentVocab, "superResourceId", true);
             }
         },
 
@@ -79,7 +79,7 @@ var CreateAxiomResource_bot = (function () {
             if (self.params.filteredUris && self.params.filteredUris.length > 0) {
                 self.myBotEngine.showList(self.params.filteredUris, "superResourceId");
             } else {
-                CommonBotFunctions_class.listVocabPropertiesFn(self.params.currentVocab, "superResourceId");
+                CommonBotFunctions_class.listVocabPropertiesFn(self.myBotEngine, self.params.currentVocab, "superResourceId");
             }
         },
 

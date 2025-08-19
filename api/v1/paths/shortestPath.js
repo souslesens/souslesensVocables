@@ -1,4 +1,4 @@
-const {processResponse} = require("./utils");
+const { processResponse } = require("./utils");
 const GraphTraversal = require("../../../bin/graphTraversal.");
 const ConfigManager = require("../../../bin/configManager.");
 const UserRequestFiltering = require("../../../bin/userRequestFiltering.");
@@ -38,11 +38,11 @@ module.exports = function () {
                     }
 
                     if (body.numberOfPathes > 1) {
-                        GraphTraversal.getAllShortestPath(body.sparqlServerUrl, body.graphUri, body.fromNodeUri, body.toNodeUri, body.numberOfPathes, {auth: auth}, function (err, result) {
+                        GraphTraversal.getAllShortestPath(body.sparqlServerUrl, body.graphUri, body.fromNodeUri, body.toNodeUri, body.numberOfPathes, { auth: auth }, function (err, result) {
                             processResponse(res, err, result);
                         });
                     } else {
-                        GraphTraversal.getShortestPath(body.sparqlServerUrl, body.graphUri, body.fromNodeUri, body.toNodeUri, {auth: auth}, function (err, result) {
+                        GraphTraversal.getShortestPath(body.sparqlServerUrl, body.graphUri, body.fromNodeUri, body.toNodeUri, { auth: auth }, function (err, result) {
                             processResponse(res, err, result);
                         });
                     }
@@ -53,7 +53,7 @@ module.exports = function () {
 
     POST.apiDoc = {
         summary: "Get the shortest path between two node",
-        security: [{restrictLoggedUser: []}],
+        security: [{ restrictLoggedUser: [] }],
         operationId: "getShortestPath",
         parameters: [
             {

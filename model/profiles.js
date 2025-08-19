@@ -126,7 +126,7 @@ class ProfileModel {
      */
     getUserTools = async (user) => {
         try {
-            const availableToolsNames = new Set(this._mainConfig.tools_available);
+            const availableToolsNames = new Set(readMainConfig().tools_available);
             if (user.login === "admin" || user?.groups.includes("admin")) {
                 return this._toolModel.allTools.filter((tool) => availableToolsNames.has(tool.name));
             }

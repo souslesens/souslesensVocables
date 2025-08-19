@@ -3965,6 +3965,9 @@ self.zoomGraphOnNode(node.data[0].id, false);
             if (!Lineage_whiteboard.currentGraphNode.id) {
                 return;
             }
+
+
+
             Lineage_nodeCentricGraph.listAllNodeRelations(Lineage_whiteboard.currentGraphNode.id);
         },
 

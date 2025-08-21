@@ -1022,6 +1022,18 @@ var MappingModeler = (function () {
         MappingColumnsGraph.clearGraph();
     };
 
+
+    self.restartMappings= function(){
+        var confirmRestart = confirm("Are you sure you want to delete mappings nodes and edges?");
+        if (confirmRestart) {
+
+        var visjsData = { nodes: [], edges: [] };
+                MappingColumnsGraph.visjsGraph.data = visjsData;
+                MappingColumnsGraph.saveVisjsGraph(function(){
+                    MappingColumnsGraph.loadVisjsGraph();
+                });
+        }
+    }
     /**
      * Displays the create resource bot and starts the resource creation workflow based on the provided resource type.
      *

@@ -4931,7 +4931,7 @@ attrs.color=self.getSourceColor(superClassValue)
                 }
                 var edgeId = item.domain.value + "_datatypeProperty_" + item.prop.value;
                 // Draw only source datatype properties with valid range and domain
-                var rangeDatatype = Config.ontologiesVocabularyModels["testClasses"]?.nonObjectProperties[item.prop.value]?.range;
+                var rangeDatatype = Config.ontologiesVocabularyModels[source]?.nonObjectProperties[item.prop.value]?.range;
                 if (!rangeDatatype) {
                     return;
                 }

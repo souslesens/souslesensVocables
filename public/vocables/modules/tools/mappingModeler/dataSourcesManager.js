@@ -690,6 +690,159 @@ var DataSourceManager = (function () {
         });
     };
 
+    self.drawMappingFilesTree = function () {
+           $.ajax({
+            type: "GET",
+            url: `${Config.apiUrl}/kg/mappings/mappingfiles?source=${MappingModeler.currentSLSsource}`,
+
+            dataType: "json",
+            success: function (result, _textStatus, _jqXHR) {
+                var options = {
+                    openAll: true,
+                    selectTreeNodeFn: self.onDataSourcesJstreeSelect,
+                    contextMenu: function (node, x) {
+                        var items = {};
+                        if (node.id == "databaseSources") {
+                            items.addDatabaseSource = {
+                                label: "addDatabaseSources",
+                                action: function (_e) {
+                                    self.displayUploadApp("database");
+                                },
+                            };
+                            return items;
+                        } else if (node.id == "csvSources") {
+                            items.csvSources = {
+                                label: "add Csv Sources",
+                                action: function (_e) {
+                                    // pb avec source
+                                    self.displayUploadApp("file");
+                                },
+                            };
+                            return items;
+                        } else if (true) {
+                            if (node.data.type != "databaseSource") {
+                                items.showSampleData = {
+                                    label: "show SampleData",
+                                    action: function (_e) {
+                                        MappingModeler.showSampleData();
+                                    },
+                                };
+                            }
+                            if (node.data.type != "table") {
+                                items.deleteDataSource = {
+                                    label: "delete DataSource",
+                                    action: function (_e) {
+                                        DataSourceManager.deleteDataSource(node);
+                                    },
+                                };
+                            }
+
+                            return items;
+                        }
+                    },
+                };
+                self.dataSourcejstreeDivId = "mappingModeler_dataSourcesJstreeDiv";
+                var jstreeData = [];
+                jstreeData.push({
+                    id: "databaseSources",
+                    text: "databaseSources",
+                    parent: "#",
+                    type: "databaseSources",
+                    data: {
+                        type: "sourceType",
+                    },
+                });
+                jstreeData.push({
+                    id: "csvSources",
+                    text: "csvSources",
+                    parent: "#",
+                    type: "CSVS",
+                    data: {
+                        type: "sourceType",
+                    },
+                });
+                // Get SQL types when there is with api route
+                async.eachSeries(
+                    Object.entries(self.currentConfig.databaseSources),
+                    function (item, callbackEach) {
+                        var key = item[0];
+                        var datasource = item[1];
+                        $.ajax({
+                            type: "GET",
+                            url: Config.apiUrl + "/databases/" + key,
+                            dataType: "json",
+                            success: function (result, _textStatus, _jqXHR) {
+                                jstreeData.push({
+                                    id: key,
+                                    text: datasource.name || key,
+                                    parent: "databaseSources",
+                                    data: { id: datasource.name, type: "databaseSource", sqlType: result.driver },
+                                });
+                                return callbackEach();
+                            },
+                            error: function (err) {
+                                jstreeData.push({
+                                    id: key,
+                                    text: datasource.name || key,
+                                    parent: "databaseSources",
+                                    data: { id: datasource.name, type: "databaseSource" },
+                                });
+                                return callbackEach();
+                            },
+                        });
+                    },
+                    function (err) {
+                        var dataTables = MappingColumnsGraph.getDatasourceTablesFromVisjsGraph();
+                        for (var datasource in self.currentConfig.csvSources) {
+                            var jstreeNode = {
+                                id: datasource,
+                                text: datasource,
+                                parent: "csvSources",
+                                type: "CSV",
+                                data: { id: datasource, type: "csvSource" },
+                            };
+                            if (dataTables.includes(datasource)) {
+                                jstreeNode.text = "<span style='color:blue'>" + datasource + "</span>";
+                            }
+                            jstreeData.push(jstreeNode);
+                        }
+
+                        //underline CSV with mappings
+                        if (self?.visjsGraph?.data?.nodes?.length == 0) {
+                            var dataSources = MappingColumnsGraph.visjsGraph.data.nodes.get().map(function (node) {
+                                return node?.data?.datasource;
+                            });
+                            if (dataSources.length > 0) {
+                                dataSources = common.array.distinctValues(dataSources);
+                                dataSources = dataSources.filter(function (item) {
+                                    return item != undefined;
+                                });
+                            }
+                            for (var node in jstreeData) {
+                                if (dataSources.includes(jstreeData[node].id)) {
+                                    jstreeData[node].text = "<span style='color:blue'>" + jstreeData[node].text + "</span>";
+                                }
+                            }
+                        }
+
+                        JstreeWidget.loadJsTree(jstreeDiv, jstreeData, options, function () {
+                            $("#MappingModeler_dataSourcesTab").css("margin-top", "0px");
+                        });
+                        if (callback) {
+                            return callback(err, self.currentConfig);
+                        }
+                    },
+                );
+            },
+            error: function (err) {
+                if (callback) {
+                    return callback(err);
+                }
+                UI.message(err.responseText);
+            },
+        });
+    };
+
     return self;
 })();
 

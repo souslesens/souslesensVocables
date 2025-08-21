@@ -294,7 +294,7 @@ var KGbuilder_triplesMaker = {
         } else {
             var prefixURI = tableMappings.prefixURI[mapping.s] || "";
 
-            subjectStr = "<" + prefixURI + tableMappings.graphUri + util.formatStringForTriple(subjectStr, true) + ">";
+            subjectStr = "<"  + tableMappings.graphUri + util.formatStringForTriple(subjectStr, true) + ">";
         }
 
         return callback(null, subjectStr);

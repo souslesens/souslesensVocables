@@ -346,6 +346,8 @@ var TripleFactory = (function () {
      * @memberof module:TripleFactory
      */
     self.createAllMappingsTriples = function () {
+        DataSourceManager.drawMappingFilesTree();
+        /*
         if (!confirm("generate KGcreator triples of datasource " + DataSourceManager.currentConfig.currentDataSource.name + ". this  will delete all triples created with KGcreator  ")) {
             return;
         }
@@ -380,7 +382,7 @@ var TripleFactory = (function () {
                     $("#KGcreator_infosDiv").val("\nALL DONE");
                 }
             },
-        );
+        );*/
     };
 
     /**

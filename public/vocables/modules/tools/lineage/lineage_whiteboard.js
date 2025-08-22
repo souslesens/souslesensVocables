@@ -2855,7 +2855,7 @@ restrictionSource = Config.predicatesSource;
                                 from: item.value.value,
                                 to: item.subject.value,
                                 //  label: "<i>" + item.propLabel.value + "</i>",
-                                label: item.propLabel.value + ":" + cardinalitylabel,
+                                label: cardinalitylabel ? item.propLabel.value + ":" + cardinalitylabel : item.propLabel.value,
                                 font: {
                                     color: options.edgesColor || Lineage_whiteboard.restrictionColor,
                                     size: Lineage_whiteboard.restrictionFontSize,
@@ -2886,7 +2886,7 @@ restrictionSource = Config.predicatesSource;
                                 to: item.value.value,
                                 from: item.subject.value,
                                 //  label: "<i>" + item.propLabel.value + "</i>",
-                                label: item.propLabel.value,
+                                label: cardinalitylabel ? item.propLabel.value + ":" + cardinalitylabel : item.propLabel.value,
                                 font: {
                                     color: options.edgesColor || Lineage_whiteboard.restrictionColor,
                                     size: Lineage_whiteboard.restrictionFontSize,
@@ -4929,23 +4929,16 @@ attrs.color=self.getSourceColor(superClassValue)
                 if (!item?.prop?.value || !item?.domain?.value) {
                     return;
                 }
-                var edgeId = item.domain.value + "_datatypeProperty_" + item.prop.value;
                 // Draw only source datatype properties with valid range and domain
                 var rangeDatatype = Config.ontologiesVocabularyModels[source]?.nonObjectProperties[item.prop.value]?.range;
                 if (!rangeDatatype) {
                     return;
                 }
-                if (!existingEdgesIds[edgeId]) {
-                    visjsData.edges.push({
-                        id: edgeId,
-                        from: item.domain.value,
-                        to: rangeDatatype,
-                        //  label: "<i>" + item.propLabel.value + "</i>",
+                if (!existingNodesIds[item.prop.value]) {
+                    visjsData.nodes.push({
+                        id: item.prop.value,
                         label: item.propLabel.value,
-                        font: {
-                            color: Lineage_whiteboard.datatypeColor,
-                            size: Lineage_whiteboard.restrictionFontSize,
-                        },
+                        shape: 'box',
                         data: {
                             propertyId: item.prop.value,
                             source: source,
@@ -4954,17 +4947,7 @@ attrs.color=self.getSourceColor(superClassValue)
                             range: rangeDatatype,
                         },
 
-                        arrows: {
-                            to: {
-                                enabled: true,
-                                type: "solid",
-                                scaleFactor: 0.5,
-                            },
-                        },
-                        dashes: true,
-                        color: Lineage_whiteboard.datatypeColor,
 
-                        width: self.restrictionEdgeWidth,
                     });
                 }
                 if (!options.notDrawDomain) {
@@ -4979,15 +4962,34 @@ attrs.color=self.getSourceColor(superClassValue)
                         });
                     }
                 }
-                if (!existingNodesIds[rangeDatatype]) {
-                    visjsData.nodes.push({
-                        id: rangeDatatype,
+                var edgeId=item.domain.value + "_datatypeProperty_" + item.prop.value
+                if (!existingEdgesIds[edgeId]) {
+
+                    visjsData.edges.push({
+                        id: edgeId,
                         label: rangeDatatype,
+                        from: item.domain.value,
+                        to: item.prop.value,
                         data: {
                             id: rangeDatatype,
                             label: rangeDatatype,
                         },
                         color: Lineage_whiteboard.datatypeColor,
+                        font: {
+                            color: Lineage_whiteboard.datatypeColor,
+                            size: Lineage_whiteboard.restrictionFontSize,
+                        },
+                        arrows: {
+                            to: {
+                                enabled: true,
+                                type: "solid",
+                                scaleFactor: 0.5,
+                            },
+                        },
+                        dashes: true,
+                        color: Lineage_whiteboard.datatypeColor,
+                        width: self.restrictionEdgeWidth,
+                        
                     });
                 }
             });

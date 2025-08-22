@@ -1,266 +1,157 @@
 import Sparql_common from "../sparqlProxies/sparql_common.js";
-import SparqlQuery_bot from "./sparqlQuery_bot.js";
+
 import BotEngineClass from "./_botEngineClass.js";
 import CommonBotFunctions_class from "./_commonBotFunctions_class.js";
-import Sparql_OWL from "../sparqlProxies/sparql_OWL.js";
+import Lineage_graphPaths from "../tools/lineage/lineage_graphPaths.js";
 
 var GraphPaths_bot = (function () {
     var self = {};
     self.title = "Filter Class";
     self.myBotEngine = new BotEngineClass();
-    self.start = function (data, currentQuery, validateFn) {
+    self.params = {}
+    self.start = function (visjsData, startNode, currentSource, validateFn) {
         var startParams = self.myBotEngine.fillStartParams(arguments);
 
-        self.data = data;
-        self.filter = "";
-        self.filterItems = [];
-        var workflow = null;
-        if (!self.data.nonObjectProperties) {
-            workflow = self.workflow_RdfLabel;
-        } else {
-            workflow = self.workflow_filterClass;
-        }
 
+        var workflow = self.workflow;
+        self.params = {}
+        self.params.visjsData = visjsData;
+        self.params.startNode = startNode
         self.myBotEngine.init(GraphPaths_bot, workflow, null, function () {
             self.myBotEngine.startParams = startParams;
             self.validateFn = validateFn;
             self.callbackFn = function () {
                 var filterLabel = self.myBotEngine.getQueryText();
-                return self.validateFn(null, { filter: self.filter, filterLabel: filterLabel, filterParams: self.filterParams });
+
+                return;
+                return self.validateFn(null, {
+                    filter: self.filter,
+                    filterLabel: filterLabel,
+                    filterParams: self.filterParams
+                });
             };
 
-            self.params = currentQuery;
-            SparqlQuery_bot.params = currentQuery;
 
             self.myBotEngine.nextStep();
         });
     };
 
-    self.workflow_filterClass = {
-        listPropertiesFn: {
-            choosePropertyOperatorFn: {
-                _OR: {
-                    ChooseInList: { listIndividualsFn: { listLogicalOperatorFn: { setSparqlQueryFilterFn: {} } } },
-                    _DEFAULT: {
-                        promptPropertyValueFn: { listLogicalOperatorFn: { setSparqlQueryFilterFn: {} } },
-                    },
+    self.workflow = {
+        choosePathFn: {
+
+            _OR: {
+                pathsBetweenNodes: {promptEndNodeLabelFn: {chooseEndNodesFn: {chooseOuputFn: {executePathFn: {}}}}},
+                shortestPathBetweenNodes: {promptEndNodeLabelFn: {chooseEndNodesFn: {chooseOuputFn: {executePathFn: {}}}}},
+                _DEFAULT: {
+                    chooseOuputFn: {executePathFn: {}}
                 },
             },
+
+
         },
     };
 
-    self.workflow_RdfLabel = {
-        listFilterTypes: {
-            _OR: {
-                label: { promptIndividualsLabelFn: { listLogicalOperatorFn: { setSparqlQueryFilterFn: {} } } },
-                labelsList: { listIndividualsFn: { listLogicalOperatorFn: { setSparqlQueryFilterFn: {} } } },
-            },
-        },
-    };
 
     self.functionTitles = {
-        listPropertiesFn: "Choose an property",
-        choosePropertyOperatorFn: "Choose an operator",
-        promptPropertyValueFn: "Enter a value ",
+        choosePathFn: "Choose Path type",
+        promptEndNodeLabelFn: "promptEndNodeLabel",
+        chooseEndNodesFn: "chooseEndNode ",
         promptIndividualsLabelFn: "Enter a label ",
         listIndividualsFn: "Choose a label ",
     };
 
-    self.functions = {}; //SparqlQuery_bot.functions;
+    self.functions = {
+        choosePathFn: function () {
+            var choices = [
+                {id: "pathsFromNode", label: "All paths FROM selected node"},
+                {id: "pathsToNode", label: "All paths TO selected node"},
+                {id: "pathsBetweenNodes", label: "All paths BETWEEN nodes"},
+                {id: "shortestPathBetweenNodes", label: "SHORTEST path BETWEEN nodes"},
 
-    self.functions.listIndividualsFn = function () {
-        Sparql_OWL.getDistinctClassLabels(self.params.source, [self.params.currentClass], {}, function (err, result) {
-            if (err) {
-                return alert(err);
-            }
-            var individuals = [];
-            result.forEach(function (item) {
-                individuals.push({
-                    id: item.id.value,
-                    label: item.label.value,
-                });
-            });
 
-            individuals.sort(function (a, b) {
-                if (a.label > b.label) {
-                    return 1;
+            ]
+            self.myBotEngine.showList(choices, "pathType")
+        },
+        promptEndNodeLabelFn: function () {
+            self.myBotEngine.promptValue("End node contains...", "endNodeStr")
+        }
+        ,
+        chooseEndNodesFn: function () {
+            var choices = []
+            self.params.visjsData.nodes.forEach(function (node) {
+                var label = node.label.toLowerCase()
+
+                if (label.indexOf(self.params.endNodeStr) > -1) {
+                    choices.push(node)
                 }
-                if (a.label < b.label) {
-                    return -1;
+                self.myBotEngine.showList(choices, "endNode", null, true)
+            })
+        }
+        , chooseOuputFn: function () {
+            var choices = [
+                {id: "text", label: "text"},
+                {id: "listEdges", label: "highlight On Graph"},
+                {id: "table", label: "table"},
+
+
+            ]
+            self.myBotEngine.showList(choices, "outputType")
+        }
+        , executePathFn: function () {
+            var pathType = self.params.pathType;
+            var outputType = self.params.outputType;
+            var color="#ef4270"
+            var result = null;
+            if (pathType == "pathsFromNode") {
+                result = Lineage_graphPaths.getAllpathsFromNode(self.params.visjsData, self.params.startNode, outputType)
+            } else if (pathType == "pathsToNode") {
+                result = Lineage_graphPaths.getAllpathsToNode(self.params.visjsData, self.params.startNode, outputType)
+                color="#096eac"
+            } else if (pathType == "pathsBetweenNodes") {
+                result = Lineage_graphPaths.getAllpathsBetweenNodes(self.params.visjsData, self.params.startNode, self.params.endNode, outputType)
+            } else if (pathType == "shortestPathBetweenNodes") {
+                result = Lineage_graphPaths.getAllpathsBetweenNodes(self.params.visjsData, self.params.startNode, outputType)
+                if(result.length>0) {
+                    result.sort(function (a, b) {
+                        return b.length - a.length
+                    })
+                    result=[result[0]]
                 }
-                return 0;
-            });
-            self.params.individualsFilterType = "labelsList";
-            self.myBotEngine.showList(individuals, "individualsFilterValue");
-        });
-    };
-    self.functions.listFilterTypes = function () {
-        var choices = [
-            { id: "label", label: "rdfs:label contains" },
-            { id: "labelsList", label: "Choose rdfs:label" },
-        ];
-        self.myBotEngine.showList(choices, "individualsFilterType");
-    };
-    self.functions.listPropertiesFn = function () {
-        if (self.params.property) {
-            return self.myBotEngine.nextStep();
-        }
 
-        //var choices = [{ id: "http://www.w3.org/2000/01/rdf-schema#label", label: "label" }];
-        var choices = [];
-        if (self.data && self.data.nonObjectProperties) {
-            choices = choices.concat(self.data.nonObjectProperties);
-        }
-        self.myBotEngine.showList(choices, "property", null, null, function (value) {
-            self.params.property = value;
-            self.myBotEngine.nextStep();
-        });
-    };
 
-    self.functions.choosePropertyOperatorFn = function () {
-        var datatype = null;
-        self.data.nonObjectProperties.forEach(function (item) {
-            if (item.id == self.params.property) {
-                datatype = item.datatype;
             }
-        });
-        self.params.propertyDatatype = datatype;
-        var choices = [];
 
-        if (self.params.propertyDatatype.indexOf("http://www.w3.org/2001/XMLSchema#date") > -1) {
-            // propertyOperator = ">";
-            choices = ["=", "<", "<=", ">", ">=", "range"];
-        } else if (self.params.propertyDatatype == "http://www.w3.org/2001/XMLSchema#int") {
-            choices = ["=", "<", "<=", ">", ">="]; //, "range"];
-        } else if (self.params.propertyDatatype == "http://www.w3.org/2001/XMLSchema#float") {
-            choices = ["=", "<", "<=", ">", ">="]; //, "range"];
-        } else if (self.params.propertyDatatype == "http://www.w3.org/2001/XMLSchema#decimal") {
-            choices = ["=", "<", "<=", ">", ">="]; //, "range"];
-        } else {
-            choices = ["=", "!=", "contains", ">", "!contains", "ChooseInList"];
-        }
+            if(result.length==0)
+                return alert("no path found")
+            if (outputType == "text") {
 
-        self.myBotEngine.showList(choices, "propertyOperator");
-    };
-
-    self.functions.promptIndividualsLabelFn = function () {
-        self.params.individualsFilterType = "label";
-        self.myBotEngine.promptValue("enter value", "individualsFilterValue");
-    };
-
-    self.functions.promptPropertyValueFn = function () {
-        if (!self.params.propertyDatatype || self.params.propertyDatatype == "xsd:string") {
-            self.myBotEngine.promptValue("enter value", "propertyValue");
-        } else if (!self.params.propertyDatatype || self.params.propertyDatatype.indexOf("http://www.w3.org/2001/XMLSchema#date") > -1) {
-            if (self.params.propertyOperator == "range") {
-                DateWidget.showDateRangePicker("widgetGenericDialogDiv", null, null, function (minDate, maxDate) {
-                    self.params.dateValueRange = { minDate: minDate, maxDate: maxDate };
-                    //   self.functions.setSparqlQueryFilterFn()
-                    self.myBotEngine.nextStep();
-                });
-                return;
-            } else {
-                self.myBotEngine.promptValue("enter value", "propertyValue", null, { datePicker: 1 });
-            }
-        } else {
-            self.myBotEngine.promptValue("enter value", "propertyValue");
-        }
-    };
-
-    self.functions.listLogicalOperatorFn = function () {
-        var choices = ["end", "AND", "OR"];
-        self.myBotEngine.showList(choices, "filterBooleanOperator");
-    };
-
-    self.functions.setSparqlQueryFilterFn = function () {
-        var varName = self.params.varName;
-        var individualsFilterType = self.params.individualsFilterType;
-        var individualsFilterValue = self.params.individualsFilterValue;
-
-        var advancedFilter = self.params.advancedFilter || "";
-        var filterLabel = self.params.queryText;
-
-        var property = self.params.property;
-        var propertyOperator = self.params.propertyOperator;
-        var propertyValue = self.params.propertyValue;
-        var dateValueRange = self.params.dateValueRange;
-
-        var filterBooleanOperator = self.params.filterBooleanOperator;
-        if (!filterBooleanOperator || filterBooleanOperator == "end") {
-            filterBooleanOperator = "";
-        } else if (filterBooleanOperator == "AND") {
-            filterBooleanOperator = " && ";
-        } else if (filterBooleanOperator == "OR") {
-            filterBooleanOperator = " || ";
-        }
-
-        var propLabel = Sparql_common.getLabelFromURI(property);
-        if (dateValueRange) {
-            var minDate = new Date(dateValueRange.minDate).toISOString();
-            var maxDate = new Date(dateValueRange.maxDate).toISOString();
-            //minDate = common.ISODateStrToRDFString(minDate);
-            //maxDate = common.ISODateStrToRDFString(maxDate);
-            self.filterItems.push(filterBooleanOperator + "?" + varName + "_" + propLabel + " " + ">=" + ' "' + minDate + '"^^xsd:dateTime ');
-            self.filterItems.push(filterBooleanOperator + "?" + varName + "_" + propLabel + " " + "<=" + ' "' + maxDate + '"^^xsd:dateTime  &&');
-        } else if (propertyValue) {
-            if (self.params.propertyDatatype.indexOf("http://www.w3.org/2001/XMLSchema#date") > -1) {
-                var dateStr = new Date(propertyValue).toISOString();
-                //dateStr = common.ISODateStrToRDFString(dateStr).split(" ")[0];
-                self.filterItems.push(filterBooleanOperator + "?" + varName + "_" + propLabel + " " + propertyOperator + ' "' + dateStr + '"^^xsd:dateTime');
-            } else if (self.params.propertyDatatype == "http://www.w3.org/2001/XMLSchema#int") {
-                self.filterItems.push(filterBooleanOperator + "?" + varName + "_" + propLabel + " " + propertyOperator + ' "' + propertyValue + '"^^xsd:int ');
-            } else if (self.params.propertyDatatype == "http://www.w3.org/2001/XMLSchema#float") {
-                self.filterItems.push(filterBooleanOperator + "?" + varName + "_" + propLabel + " " + propertyOperator + ' "' + propertyValue + '"^^xsd:float ');
-            } else if (self.params.propertyDatatype == "http://www.w3.org/2001/XMLSchema#decimal") {
-                self.filterItems.push(filterBooleanOperator + "?" + varName + "_" + propLabel + " " + propertyOperator + ' "' + propertyValue + '"^^xsd:decimal ');
-            } else {
-                if (false && common.isNumber(propertyValue)) {
-                    self.filterItems.push(filterBooleanOperator + "?" + varName + "_" + propLabel + " " + propertyOperator + " " + propertyValue + " ");
-                } else {
-                    //string
-                    if (propertyOperator == "=" || propertyOperator == "!=") {
-                        self.filterItems.push(filterBooleanOperator + "?" + varName + "_" + propLabel + " " + propertyOperator + ' "' + propertyValue + '"');
-                    } else {
-                        var negation = "";
-                        if (propertyOperator.indexOf("!") == 0) {
-                            negation = "!";
+                common.copyTextToClipboard(result)
+            } else if (outputType == "listEdges") {
+                var newEdgesMap = {}
+                result.forEach(function (path) {
+                    path.forEach(function (edge) {
+                        if (!newEdgesMap[edge.id]) {
+                            newEdgesMap[edge.id] = {id: edge.id, color:color, width: 2}
                         }
-                        self.filterItems.push(filterBooleanOperator + negation + "regex(?" + varName + "_" + propLabel + ',"' + propertyValue + '","i")');
-                    }
+                        if(newEdgesMap[edge.id].width<10)
+                        newEdgesMap[edge.id].width += 1
+                    })
+                })
+                var newEdges = []
+                for (var id in newEdgesMap) {
+                    newEdges.push(newEdgesMap[id])
                 }
+
+                Lineage_whiteboard.lineageVisjsGraph.data.edges.update(newEdges)
             }
-        } else if (individualsFilterType == "label") {
-            self.filterItems.push(filterBooleanOperator + "regex(?" + varName + 'Label , "' + individualsFilterValue + '","i")');
-        } else if (individualsFilterType == "labelsList" && individualsFilterValue) {
-            self.filterItems.push(filterBooleanOperator + " ?" + varName + " =<" + individualsFilterValue + ">");
-        } else {
-            self.myBotEngine.abort("filter type not implemented");
+            self.myBotEngine.end()
+
+
         }
 
-        if (self.params.filterBooleanOperator == "end") {
-            self.functions.writeFilterFn();
 
-            self.myBotEngine.nextStep();
-        } else {
-            self.myBotEngine.currentObj = self.workflow_filterClass;
-            self.myBotEngine.currentBot.params.property = "";
-            self.myBotEngine.currentBot.params.propertyDatatype = "";
-            self.myBotEngine.currentBot.params.propertyOperator = "";
-            self.myBotEngine.currentBot.params.propertyValue = "";
-            self.myBotEngine.nextStep();
-        }
-    };
+    }; //SparqlQuery_bot.functions;
 
-    self.functions.writeFilterFn = function () {
-        var str = "";
-        self.filterItems.forEach(function (item) {
-            str = item + str;
-        });
-        var propLabel = Sparql_common.getLabelFromURI(self.params.property);
-        self.filter += "FILTER (" + str + ")";
-        self.filter = self.filter.replace("Label", "_label");
-        self.filterParams = { varName: self.params.varName, property: self.params.property, propertyLabel: propLabel };
-    };
 
     return self;
 })();

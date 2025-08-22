@@ -23,6 +23,7 @@ import Containers_tree from "../containers/containers_tree.js";
 import Export from "../../shared/export.js";
 import Lineage_nodeCentricGraph from "./lineage_nodeCentricGraph.js";
 import Browse from "../browse/browse.js";
+import GraphPaths_bot from "../../bots/graphPaths_bot.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com

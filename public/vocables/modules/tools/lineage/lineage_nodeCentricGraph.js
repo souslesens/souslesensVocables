@@ -5,6 +5,7 @@
  */
 import Lineage_whiteboard from "./lineage_whiteboard.js";
 import Lineage_graphPaths from "./lineage_graphPaths.js";
+import GraphPaths_bot from "../../bots/graphPaths_bot.js";
 
 var Lineage_nodeCentricGraph = (function () {
     var self = {};
@@ -122,6 +123,12 @@ var Lineage_nodeCentricGraph = (function () {
        var nodes= Lineage_whiteboard.lineageVisjsGraph.data.nodes.get()
         var edges= Lineage_whiteboard.lineageVisjsGraph.data.edges.get()
         var visjsData={nodes:nodes,edges:edges}
+
+
+       GraphPaths_bot.start(visjsData,rootNodeId,null)
+
+
+return;
        var str= Lineage_graphPaths.getAllpathsFromNode(visjsData,rootNodeId,"text")
 common.copyTextToClipboard(str)
 

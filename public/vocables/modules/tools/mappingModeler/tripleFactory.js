@@ -220,6 +220,9 @@ var TripleFactory = (function () {
             source: DataSourceManager.currentSlsvSource,
             tables: JSON.stringify(tables),
         };
+        if(Config.clientSocketId){
+            payload.options = JSON.stringify({clientSocketId: Config.clientSocketId});
+        }
         UI.message("deleting KGcreator  triples...");
         $.ajax({
             type: "DELETE",

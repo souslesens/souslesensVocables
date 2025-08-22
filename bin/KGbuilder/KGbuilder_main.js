@@ -370,6 +370,7 @@ var KGbuilder_main = {
                             tablemappings.prefixes = sourceMainJson.prefixes;
                             tablemappings.graphUri = sourceMainJson.graphUri;
                             tablemappings.sparqlServerUrl = sourceMainJson.sparqlServerUrl;
+                            tablemappings.prefixURI = sourceMainJson.prefixURI || {};
 
                             tableMappingsToProcess.push(tablemappings);
                         }
@@ -392,7 +393,7 @@ var KGbuilder_main = {
      * @param options
      * @param callback
      */
-    deleteKGcreatorTriples: function (source, tables, callback) {
+    deleteKGcreatorTriples: function (source, tables, options,callback) {
         KGbuilder_main.getSourceConfig(source, function (err, sourceMainJson) {
             if (err) {
                 return callbackSeries(err);
@@ -400,7 +401,7 @@ var KGbuilder_main = {
 
             //delete allKGCreator triples
             if (!tables || tables.length == 0) {
-                KGbuilder_triplesWriter.deleteKGcreatorTriples(sourceMainJson.sparqlServerUrl, sourceMainJson.graphUri, null, function (err, result) {
+                KGbuilder_triplesWriter.deleteKGcreatorTriples(sourceMainJson.sparqlServerUrl, sourceMainJson.graphUri, null, options, function (err, result) {
                     if (err) {
                         return callback(err);
                     }
@@ -415,7 +416,7 @@ var KGbuilder_main = {
                 async.eachSeries(
                     tables,
                     function (table, callbackEach) {
-                        KGbuilder_triplesWriter.deleteKGcreatorTriples(sourceMainJson.sparqlServerUrl, sourceMainJson.graphUri, table, function (err, result) {
+                        KGbuilder_triplesWriter.deleteKGcreatorTriples(sourceMainJson.sparqlServerUrl, sourceMainJson.graphUri, table, options, function (err, result) {
                             if (err) {
                                 return callbackEach(err);
                             }

@@ -816,7 +816,7 @@ var MappingColumnsGraph = (function () {
             } else {
                 var graphUri = Config.sources[MappingModeler.currentSLSsource].graphUri;
             }
-            var newJson = {
+            /*var newJson = {
                 sparqlServerUrl: Config.sources[MappingModeler.currentSLSsource].sparql_server.url,
                 graphUri: graphUri,
                 prefixes: {},
@@ -825,6 +825,16 @@ var MappingColumnsGraph = (function () {
                 csvSources: {},
                 isConfigInMappingGraph: true,
                 prefixURI: {},
+            };*/
+            var newJson = {
+                sparqlServerUrl: Config.sources[MappingModeler.currentSLSsource].sparql_server.url,
+                graphUri: graphUri,
+                prefixes: {},
+                lookups: {},
+                databaseSources: {},
+                csvSources: {},
+                isConfigInMappingGraph: true,
+              
             };
             DataSourceManager.rawConfig = newJson;
         }
@@ -1124,7 +1134,16 @@ var MappingColumnsGraph = (function () {
                 node.shape = "box";
                 node.color = oldNode.color;
                 node.size = 18;
+                /*if(oldNode.data.prefixURI){
+                    if(data?.options?.config){
+                        if(!data?.options?.config?.prefixURI){
+                            data.options.config.prefixURI = {};
+                        }
+                        data.options.config.prefixURI[oldNode.label] = oldNode.data.prefixURI;
 
+                    }
+                   
+                }*/
                 if (oldNode.data.type == "Class") {
                     node.level = 3;
                 } else if (oldNode.data.type == "Table") {

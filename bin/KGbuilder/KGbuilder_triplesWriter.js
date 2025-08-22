@@ -127,7 +127,10 @@ const KGbuilder_triplesWriter = {
         );
     },
 
-    deleteKGcreatorTriples: function (sparqlServerUrl, graphUri, table, callback) {
+    deleteKGcreatorTriples: function (sparqlServerUrl, graphUri, table, options,callback) {
+        if(!options){
+            options = {};
+        }
         const KGbuilder_triplesMaker = require("./KGbuilder_triplesMaker");
         var query = "";
         if (table) {
@@ -176,8 +179,10 @@ const KGbuilder_triplesWriter = {
                     }
 
                     totalSize += resultSize;
-
-                    KGbuilder_socket.message(options.clientSocketId, "" + totalSize + " triples deleted from table " + table, false);
+                    if(options.clientSocketId){
+                        KGbuilder_socket.message(options.clientSocketId, "" + totalSize + " triples deleted from table " + table, false);   
+                    }
+                    
                     return callbackWhilst(err);
                 });
             },

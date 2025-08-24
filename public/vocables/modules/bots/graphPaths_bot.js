@@ -91,7 +91,8 @@ var GraphPaths_bot = (function () {
             var choices = [
                 {id: "text", label: "text"},
                 {id: "listEdges", label: "highlight On Graph"},
-                {id: "table", label: "table"},
+                {id: "csv", label: "csv"},
+                {id: "html", label: "html"},
 
 
             ]
@@ -102,15 +103,16 @@ var GraphPaths_bot = (function () {
             var outputType = self.params.outputType;
             var color="#ef4270"
             var result = null;
+            var options={removeDuplicates:true}
             if (pathType == "pathsFromNode") {
-                result = Lineage_graphPaths.getAllpathsFromNode(self.params.visjsData, self.params.startNode, outputType)
+                result = Lineage_graphPaths.getAllpathsFromNode(self.params.visjsData, self.params.startNode, outputType,options)
             } else if (pathType == "pathsToNode") {
-                result = Lineage_graphPaths.getAllpathsToNode(self.params.visjsData, self.params.startNode, outputType)
+                result = Lineage_graphPaths.getAllpathsToNode(self.params.visjsData, self.params.startNode, outputType,options)
                 color="#096eac"
             } else if (pathType == "pathsBetweenNodes") {
-                result = Lineage_graphPaths.getAllpathsBetweenNodes(self.params.visjsData, self.params.startNode, self.params.endNode, outputType)
+                result = Lineage_graphPaths.getAllpathsBetweenNodes(self.params.visjsData, self.params.startNode, self.params.endNode, outputType,options)
             } else if (pathType == "shortestPathBetweenNodes") {
-                result = Lineage_graphPaths.getAllpathsBetweenNodes(self.params.visjsData, self.params.startNode, outputType)
+                result = Lineage_graphPaths.getAllpathsBetweenNodes(self.params.visjsData, self.params.startNode, outputType,options)
                 if(result.length>0) {
                     result.sort(function (a, b) {
                         return b.length - a.length
@@ -123,10 +125,21 @@ var GraphPaths_bot = (function () {
 
             if(result.length==0)
                 return alert("no path found")
-            if (outputType == "text") {
+            else if (outputType == "text") {
 
                 common.copyTextToClipboard(result)
-            } else if (outputType == "listEdges") {
+            }
+            else if (outputType == "csv") {
+
+                common.copyTextToClipboard(result)
+            }
+            else if (outputType == "html") {
+                var html="<div>"+result+"</div>"
+               $("#mainDialogDiv").html(html)
+                $("#mainDialogDiv").dialog("open")
+            }
+
+            else if (outputType == "listEdges") {
                 var newEdgesMap = {}
                 result.forEach(function (path) {
                     path.forEach(function (edge) {

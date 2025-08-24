@@ -324,14 +324,21 @@ var MappingsDetails = (function () {
         currentGraphNode.data.rdfType = $("#columnDetails-rdfType").val();
         var prefix = $("#columnDetails-prefixURI").val();
         if (prefix && currentGraphNode.data.uriType == "fromLabel") {
-            if (!DataSourceManager.rawConfig.prefixURI) {
+            var transformFn = "function{" + self.transform.createPrefixTransformFn(prefix, { notDialog: true }) + "}";
+            currentGraphNode.data.transform = transformFn;
+            currentGraphNode.data.prefixURI = prefix;
+            /*if (!DataSourceManager.rawConfig.prefixURI) {
                 DataSourceManager.rawConfig.prefixURI = {};
             }
-            DataSourceManager.rawConfig.prefixURI[currentGraphNode.data.id] = prefix;
+            DataSourceManager.rawConfig.prefixURI[currentGraphNode.data.id] = prefix;*/
         }
-        if (prefix == "" && DataSourceManager.rawConfig.prefixURI[currentGraphNode.data.id]) {
+         if (currentGraphNode.data.prefixURI && !prefix) {
+            delete currentGraphNode.data.prefixURI;
+            delete currentGraphNode.data.transform;
+         }
+        /*if (prefix == "" && DataSourceManager.rawConfig.prefixURI[currentGraphNode.data.id]) {
             delete DataSourceManager.rawConfig.prefixURI[currentGraphNode.data.id];
-        }
+        }*/
 
         var baseUri = (currentGraphNode.data.baseURI = $("#columnDetails-baseUri").val());
         var sourceObj = Config.sources[MappingModeler.currentSLSsource];

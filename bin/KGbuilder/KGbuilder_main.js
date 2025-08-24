@@ -11,6 +11,8 @@ const SocketManager = require("../socketManager.");
 const KGbuilder_triplesMaker = require("./KGbuilder_triplesMaker");
 const KGbuilder_triplesWriter = require("./KGbuilder_triplesWriter");
 const KGbuilder_socket = require("./KGbuilder_socket");
+const dbConnector = require("../KG/dbConnector");
+const DatabaseModel = require("../../model/databases").databaseModel;
 
 var KGbuilder_main = {
     /**
@@ -368,6 +370,7 @@ var KGbuilder_main = {
                             tablemappings.prefixes = sourceMainJson.prefixes;
                             tablemappings.graphUri = sourceMainJson.graphUri;
                             tablemappings.sparqlServerUrl = sourceMainJson.sparqlServerUrl;
+                            tablemappings.prefixURI = sourceMainJson.prefixURI || {};
 
                             tableMappingsToProcess.push(tablemappings);
                         }
@@ -390,7 +393,7 @@ var KGbuilder_main = {
      * @param options
      * @param callback
      */
-    deleteKGcreatorTriples: function (source, tables, callback) {
+    deleteKGcreatorTriples: function (source, tables, options,callback) {
         KGbuilder_main.getSourceConfig(source, function (err, sourceMainJson) {
             if (err) {
                 return callbackSeries(err);
@@ -398,7 +401,7 @@ var KGbuilder_main = {
 
             //delete allKGCreator triples
             if (!tables || tables.length == 0) {
-                KGbuilder_triplesWriter.deleteKGcreatorTriples(sourceMainJson.sparqlServerUrl, sourceMainJson.graphUri, null, function (err, result) {
+                KGbuilder_triplesWriter.deleteKGcreatorTriples(sourceMainJson.sparqlServerUrl, sourceMainJson.graphUri, null, options, function (err, result) {
                     if (err) {
                         return callback(err);
                     }
@@ -413,7 +416,7 @@ var KGbuilder_main = {
                 async.eachSeries(
                     tables,
                     function (table, callbackEach) {
-                        KGbuilder_triplesWriter.deleteKGcreatorTriples(sourceMainJson.sparqlServerUrl, sourceMainJson.graphUri, table, function (err, result) {
+                        KGbuilder_triplesWriter.deleteKGcreatorTriples(sourceMainJson.sparqlServerUrl, sourceMainJson.graphUri, table, options, function (err, result) {
                             if (err) {
                                 return callbackEach(err);
                             }
@@ -429,6 +432,98 @@ var KGbuilder_main = {
             }
         });
     },
+    
+    // on potential source mappingFiles analyse with SPARQL query which has really triples created on it and return it
+    getSourceMappingsFiles:async function(source, callback) {
+        KGbuilder_main.getSourceConfig(source, async function (err, sourceMainJson) {
+            if (err) {
+                return callback(err);
+            }
+            var mappingFiles = [];
+
+            for (const key of Object.keys(sourceMainJson.databaseSources)) {
+                
+                const database = await DatabaseModel.getDatabase(key);
+                const driver = await DatabaseModel.getClientDriver(database.driver);
+
+                const connection = dbConnector.getConnection(database, driver);
+
+                const data = await dbConnector.getKGModelAsync(connection, database.database,database.driver);
+                let tables = {};
+                data.forEach((d) => {
+                    if (!Object.keys(tables).includes(d.table_name)) {
+                        tables[d.table_name] = [];
+                    }
+                    tables[d.table_name].push(d.column_name);
+                });
+                Object.keys(tables).forEach(function(tableName) {
+                    // also get db type
+                    mappingFiles.push({
+                    id:tableName,
+                    label: tableName,
+                    databaseId: key,
+                    databaseName: database.name,
+                    type: "databaseSource",
+                    database: database.database,
+                    driver: database.driver,
+                    columns : tables[tableName],
+                
+                   });
+                });
+            }
+            
+            Object.keys(sourceMainJson.csvSources).forEach(function (key) {
+                mappingFiles.push({
+                    id: key,
+                    label: key,
+                    type: "csvSource",
+                });
+            });
+            const query = `
+            SELECT DISTINCT ?table,COUNT(?s)
+            WHERE {
+                GRAPH <${sourceMainJson.graphUri}> {
+                    ?s <${KGbuilder_triplesMaker.mappingFilePredicate}> ?table.
+                }
+            }`;
+
+            const params = {
+                query: query
+            };
+            if (ConfigManager.config && ConfigManager.config.sparql_server.user) {
+                params.auth = {
+                    user: ConfigManager.config.sparql_server.user,
+                    pass: ConfigManager.config.sparql_server.password,
+                    sendImmediately: false,
+                };
+            }
+            const sparqlServerUrl = sourceMainJson.sparqlServerUrl;
+            httpProxy.post(sparqlServerUrl, null, params, function (err, result) {
+                if (err) {
+                    return callback(err);
+                }
+                var result = result.results.bindings;
+                var trueMappingFiles = {};
+                result.forEach(function (file) {
+                    trueMappingFiles[file.table.value] = file['callret-1'].value ?? true;
+
+                });
+                mappingFiles = mappingFiles.filter(function (file) {
+
+                        return trueMappingFiles[file.label] !== undefined;
+                    
+                });
+                mappingFiles.forEach(function (file) {
+                    file.triplesCount = trueMappingFiles[file.label];
+                });
+                callback(null, mappingFiles);
+
+
+            });
+
+        });
+    }
+
 };
 
 module.exports = KGbuilder_main;

@@ -96,7 +96,7 @@ var MappingsDetails = (function () {
             if (node.data.type == "Class") {
                 return;
             }
-            if (node.data.type == "table") {
+            if (node.data.type == "Table") {
                 return;
             }
             if(columns.length>0 && !columns.includes(node.label)) {

@@ -4,6 +4,8 @@
  * @type {{}}
  */
 import Lineage_whiteboard from "./lineage_whiteboard.js";
+import Lineage_graphPaths from "./lineage_graphPaths.js";
+import GraphPaths_bot from "../../bots/graphPaths_bot.js";
 
 var Lineage_nodeCentricGraph = (function () {
     var self = {};
@@ -19,6 +21,7 @@ var Lineage_nodeCentricGraph = (function () {
         Lineage_whiteboard.lineageVisjsGraph.data.nodes.get().forEach(function (item) {
             nodesMap[item.id] = item;
         });
+
         Lineage_whiteboard.lineageVisjsGraph.data.edges.get().forEach(function (item) {
             if (!edgesFromMap[item.from]) {
                 edgesFromMap[item.from] = [];
@@ -50,8 +53,10 @@ var Lineage_nodeCentricGraph = (function () {
                         }
                     });
                 }
+
+                //relations inverses
                 edges = edgesToMap[nodeId];
-                if (edges) {
+                if (false && edges) {
                     edges.forEach(function (edge) {
                         if (!existingNodes[edge.id]) {
                             existingNodes[edge.id] = 1;
@@ -60,6 +65,7 @@ var Lineage_nodeCentricGraph = (function () {
                         }
                     });
                 }
+            } else {
             }
         }
 
@@ -73,7 +79,7 @@ var Lineage_nodeCentricGraph = (function () {
             }
         }
 
-        return { nodes: newNodes, edges: newEdges };
+        return {nodes: newNodes, edges: newEdges};
     };
 
     self.draw = function (rootNodeId) {
@@ -109,55 +115,26 @@ var Lineage_nodeCentricGraph = (function () {
         Lineage_whiteboard.lineageVisjsGraph.network.setOptions(Lineage_whiteboard.lineageVisjsGraph.options.visjsOptions);
     };
 
+
+
+
     self.listAllNodeRelations = function (rootNodeId) {
-        var visjsData = self.getHierarchicalViewVisjsdata(rootNodeId);
 
-        var levelMin = 0;
-        var levelMax = 100;
-        var edgesFromMap = {};
-        var nodesMap = {};
+       var nodes= Lineage_whiteboard.lineageVisjsGraph.data.nodes.get()
+        var edges= Lineage_whiteboard.lineageVisjsGraph.data.edges.get()
+        var visjsData={nodes:nodes,edges:edges}
 
-        visjsData.nodes.forEach(function (node) {
-            if (!nodesMap[node.id]) {
-                nodesMap[node.id] = node;
-            }
 
-            levelMax = Math.max(levelMax, node.level);
-            levelMin = Math.min(levelMin, node.level);
-        });
+       GraphPaths_bot.start(visjsData,rootNodeId,null)
 
-        visjsData.edges.forEach(function (edge) {
-            if (!edgesFromMap[edge.from]) {
-                edgesFromMap[edge.from] = {};
-            }
-            var level = nodesMap[edge.from].level;
-            if (!edgesFromMap[edge.from][level]) {
-                edgesFromMap[edge.from][level] = [];
-            }
-            edge.fromLabel = nodesMap[edge.from].label;
-            edge.toLabel = nodesMap[edge.to].label;
-            edgesFromMap[edge.from][level].push(edge);
-        });
 
-        var matrix = [];
-        var uniqueNodes = {};
-        var str = "";
+return;
+       var str= Lineage_graphPaths.getAllpathsFromNode(visjsData,rootNodeId,"text")
+common.copyTextToClipboard(str)
 
-        for (var edgeFrom in edgesFromMap) {
-            for (var level = levelMin; level < levelMax; level++) {
-                var edges = edgesFromMap[edgeFrom][level];
 
-                if (edges) {
-                    edges.forEach(function (edge) {
-                        str += edge.fromLabel + "-" + (edge.label || "-") + "-" + edge.toLabel;
-                        str += "\t";
-                    });
-                }
-                str += "\n";
-            }
-        }
+        return;
 
-        console.log(str);
     };
 
     return self;

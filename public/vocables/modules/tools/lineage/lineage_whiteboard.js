@@ -23,6 +23,7 @@ import Containers_tree from "../containers/containers_tree.js";
 import Export from "../../shared/export.js";
 import Lineage_nodeCentricGraph from "./lineage_nodeCentricGraph.js";
 import Browse from "../browse/browse.js";
+import GraphPaths_bot from "../../bots/graphPaths_bot.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -1940,7 +1941,7 @@ var Lineage_whiteboard = (function () {
 
             visjsData.nodes = common.removeDuplicatesFromArray(visjsData.nodes, "id");
             Lineage_whiteboard.addVisDataToGraph(visjsData);
-            self.lineageVisjsGraph.data.edges.add(visjsData.edges);
+           // self.lineageVisjsGraph.data.edges.add(visjsData.edges);
             self.lineageVisjsGraph.network.fit();
 
             $("#waitImg").css("display", "none");
@@ -2852,8 +2853,8 @@ restrictionSource = Config.predicatesSource;
                         if (options.inverse) {
                             visjsData.edges.push({
                                 id: edgeId,
-                                from: item.value.value,
-                                to: item.subject.value,
+                                from: item.subject.value,
+                                to: item.value.value,
                                 //  label: "<i>" + item.propLabel.value + "</i>",
                                 label: cardinalitylabel ? item.propLabel.value + ":" + cardinalitylabel : item.propLabel.value,
                                 font: {
@@ -2866,10 +2867,11 @@ restrictionSource = Config.predicatesSource;
                                     source: restrictionSource,
                                     propertyLabel: item.propLabel.value,
                                     subClassId: item.value.value,
+                                    isInverse:true
                                 },
 
                                 arrows: {
-                                    from: {
+                                    to: {
                                         enabled: true,
                                         type: "solid",
                                         scaleFactor: 0.5,
@@ -3165,7 +3167,7 @@ restrictionSource = Config.predicatesSource;
         }
         if (node && !node.from) {
             html += '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.showHierarchicalView();">Hierarchical view </span>';
-            //    html += '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.listAllNodeRelations();">List All relations </span>';
+             html += '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.listAllNodeRelations();">List All relations </span>';
         }
 
         $("#popupMenuWidgetDiv").html(html);
@@ -3979,6 +3981,9 @@ self.zoomGraphOnNode(node.data[0].id, false);
             if (!Lineage_whiteboard.currentGraphNode.id) {
                 return;
             }
+
+
+
             Lineage_nodeCentricGraph.listAllNodeRelations(Lineage_whiteboard.currentGraphNode.id);
         },
 

@@ -350,37 +350,16 @@ var KGbuilder_triplesMaker = {
                 objectStr = null;
             }
         } else {
-            var isTransform = false;
+
+            //  treat value
+            //var isTransform = false;
             if (line[mapping.o] === 0) {
                 line[mapping.o] = "0";
             }
             if (!line[mapping.o] || line[mapping.o] == "null") {
                 return callback(null, null);
             }
-            if (tableMappings.transform && tableMappings.transform[mapping.o]) {
-                try {
-                    if (line[mapping.o]) {
-                        var value;
-                        value = util.formatStringForTriple(line[mapping.o], false);
-                        objectStr = tableMappings.transform[mapping.o](util.formatStringForTriple(line[mapping.o], false), "o", mapping.p, line, mapping);
-
-                        isTransform = true;
-                        if (mapping.lookup_o) {
-                            var lookupValue = KGbuilder_triplesMaker.getLookupValue(mapping.lookup_o, value);
-                            if (lookupValue) {
-                                //objectStr = tableMappings.transform[mapping.o](lookupValue, "s", mapping.p, line, mapping);
-                                //okLookups_o += 1;
-                                isTransformLookUp = true;
-                            }
-                        }
-                    } else {
-                        objectStr = ""; //tableMappings.transform[mapping.o](mapping.o, "o", mapping.p, line, mapping);
-                    }
-                    // return callback(null,objectStr);
-                } catch (e) {
-                    return (lineError = e + " " + mapping.o);
-                }
-            }
+           
 
             if (mapping.dataType) {
                 var str = line[mapping.o];
@@ -448,44 +427,49 @@ var KGbuilder_triplesMaker = {
                     } else {
                     }
                 }
-                objectStr = '"' + str + '"^^' + mapping.dataType;
+                // format after to apply transformations
+                objectStr =  str 
             } else {
-                if (isTransform == false) {
-                    var prefixURI = tableMappings.prefixURI[mapping.o] || "";
-                    objectStr = prefixURI + line[mapping.o];
-                }
+                    //var prefixURI = tableMappings.prefixURI[mapping.o] || "";
+                    objectStr =  line[mapping.o];
             }
+            if (tableMappings.transform && (tableMappings.transform[mapping.s]||tableMappings.transform[mapping.o])) {
 
-            if (mapping.lookup_o) {
-                if (!lookUpsMap[mapping.lookup_o]) {
-                    return (lineError = "no lookup named " + mapping.lookup_o);
+                // if the relation is a data property the transform will concern the subject
+                //else he will concern the object
+                if(mapping.dataType && tableMappings.transform[mapping.s]){
+                    try {
+                        if (objectStr) {
+                            
+                            objectStr = tableMappings.transform[mapping.s](objectStr, "o", mapping.p, line, mapping);
+
+                        
+                        }
+                        // return callback(null,objectStr);
+                    } catch (e) {
+                        return (lineError = e + " " + mapping.o);
+                    }
                 }
-                var lookupValue;
-                if (mapping.dataType && str) {
-                    lookupValue = KGbuilder_triplesMaker.getLookupValue(mapping.lookup_o, str);
-                    if (lookupValue) {
-                        if (isTransformLookUp) {
-                            lookupValue = tableMappings.transform[mapping.o](util.formatStringForTriple(lookupValue, false), "o", mapping.p, line, mapping);
-                            lookupValue = '"' + lookupValue + '"^^' + mapping.dataType;
-                        } else {
-                            lookupValue = '"' + lookupValue + '"^^' + mapping.dataType;
+                else{
+
+                    if (objectStr && tableMappings.transform[mapping.o]) {
+                        try {
+                            objectStr = tableMappings.transform[mapping.o](objectStr, "o", mapping.p, line, mapping);
+                        } catch (e) {
+                            return (lineError = e + " " + mapping.o);
                         }
                     }
-                } else {
-                    if (isTransformLookUp) {
-                        lookupValue = KGbuilder_triplesMaker.getLookupValue(mapping.lookup_o, value);
-                        lookupValue = tableMappings.transform[mapping.o](util.formatStringForTriple(lookupValue, false), "o", mapping.p, line, mapping);
-                    } else {
-                        lookupValue = KGbuilder_triplesMaker.getLookupValue(mapping.lookup_o, value);
-                    }
                 }
-
-                if (!lookupValue) {
-                    missingLookups_o += 1;
-                } else {
-                    okLookups_o += 1;
-                    objectStr = lookupValue;
+            }
+            if (mapping.lookup_o) {
+               try{
+                  lookupValue = KGbuilder_triplesMaker.getLookupValue(mapping.lookup_o, objectStr);
+                  objectStr = lookupValue;
                 }
+                catch (e) {
+                    return (lineError = e + " " + mapping.o);
+                }
+                    
             }
         }
 
@@ -505,7 +489,7 @@ var KGbuilder_triplesMaker = {
             else if (KGbuilder_triplesMaker.isPrefixedUri(objectStr)) {
                 // pass
             } else if (mapping.dataType) {
-                //pass
+                objectStr = '"' + objectStr + '"^^' + mapping.dataType;
             } else if (mapping.isString) {
                 objectStr = "'" + util.formatStringForTriple(objectStr, false) + "'";
             } else {
@@ -788,7 +772,10 @@ var KGbuilder_triplesMaker = {
                 .then((result) => {
                     tableData = result;
                     KGbuilder_socket.message(options.clientSocketId, " data loaded ,table " + tableMappings.table, false);
-                    return callback(null, tableData);
+
+                    //function to separate the callback error to the next catch bacause it's degrade visibility and make the callback executed multiple times
+                    //by chat gpt
+                    setImmediate(() => callback(null, tableData));
                 })
                 .catch((err) => {
                     return callback(err);

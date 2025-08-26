@@ -337,9 +337,8 @@ var MappingTransform = (function () {
         var filteredMappings = [];
         var columnsSelection = {};
         var checkedNodeAttrs = [];
-
         checkedNodes.forEach(function (node) {
-            if (node.parents.length == 3) {
+            if (node?.parents?.length == 3) {
                 // attrs
                 checkedNodeAttrs.push(node.id);
                 columnsSelection[node.id] = MappingColumnsGraph.visjsGraph.data.nodes.get(node.parent);
@@ -354,6 +353,7 @@ var MappingTransform = (function () {
                 columnsSelection[node.id] = MappingColumnsGraph.visjsGraph.data.nodes.get(node.id);
             }
         });
+
         var mappings = MappingTransform.mappingsToKGcreatorJson(columnsSelection);
         var columnMappings = MappingTransform.mappingsToKGcreatorJson(columnsSelection, { getColumnMappingsOnly: true });
         var uniqueFilteredMappings = {};

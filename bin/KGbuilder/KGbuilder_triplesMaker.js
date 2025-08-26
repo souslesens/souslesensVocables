@@ -195,13 +195,18 @@ var KGbuilder_triplesMaker = {
 
     getTripleSubject: function (tableMappings, mapping, line, callback) {
         //get value for Subject
+
+        /* treatment for  mapping subject with base URI  */
         var subjectStr = KGbuilder_triplesMaker.getURIFromSpecificBaseUri(mapping.s, line, tableMappings, mapping);
-        var isTransformLookUp = false;
-        var missingLookups_s;
-        var okLookups_s;
         if (subjectStr) {
             return callback(null, subjectStr);
         }
+
+        var isTransformLookUp = false;
+        var missingLookups_s;
+        var okLookups_s;
+
+        /* gestion of specific mapping  */
 
         if (mapping.subjectIsSpecificUri || mapping.s.endsWith("_#")) {
             subjectStr = mapping.s.replace("_#", "");
@@ -232,7 +237,9 @@ var KGbuilder_triplesMaker = {
             } else {
                 subjectStr = null;
             }
-        } else if (tableMappings.transform && tableMappings.transform[mapping.s]) {
+        } 
+        /*
+        else if (tableMappings.transform && tableMappings.transform[mapping.s]) {
             try {
                 if (line[mapping.s]) {
                     subjectStr = tableMappings.transform[mapping.s](util.formatStringForTriple(line[mapping.s], true), "s", mapping.p, line, mapping);
@@ -250,42 +257,65 @@ var KGbuilder_triplesMaker = {
             } catch (e) {
                 return callback((lineError = e + " " + mapping.s));
             }
-        } else if (typeof mapping.s === "string" && mapping.s.indexOf("http") == 0) {
+        } */
+        
+        else if (typeof mapping.s === "string" && mapping.s.indexOf("http") == 0) {
             //var prefixURI = tableMappings.prefixURI[mapping.s] || "";
-            subjectStr = "<" + prefixURI + mapping.s + ">";
+            //subjectStr = "<" + prefixURI + mapping.s + ">";
             subjectStr = "<" +  mapping.s + ">";
         }
         // sparql prefix
         else if (typeof mapping.s === "string" && mapping.s.match(/.+:.+/)) {
             subjectStr = mapping.s;
-        } else {
+        } 
+        /* from now all the specifc mappings are treated and we treat generic mappings */
+        else {
             if (!line[mapping.s] || (mapping.o.indexOf(":") > -1 && line[mapping.o]) == "null") {
                 return callback(null, null);
             }
             //var prefixURI = tableMappings.prefixURI[mapping.s] || "";
             subjectStr =  line[mapping.s];
             //subjectStr = prefixURI + line[mapping.s];
-        }
-        if (mapping.lookup_s && !isTransformLookUp) {
-            if (!lookUpsMap[mapping.lookup_s]) {
-                KGbuilder_socket.message((lineError = "no lookup named " + mapping.lookup_s));
+            /* transform and lookup d'ont concern generic mappings */
+
+            
+            if (mapping.lookup_s ) {
+                if (!lookUpsMap[mapping.lookup_s]) {
+                    KGbuilder_socket.message((lineError = "no lookup named " + mapping.lookup_s));
+                }
+                var lookupValue = KGbuilder_triplesMaker.getLookupValue(mapping.lookup_s, subjectStr);
+                if (!lookupValue) {
+                    missingLookups_s += 1;
+                } else {
+                    //var prefixURI = tableMappings.prefixURI[mapping.s] || "";
+                    //subjectStr = prefixURI + lookupValue;
+                    subjectStr =  lookupValue;
+                    okLookups_s += 1;
+                }
             }
-            var lookupValue = KGbuilder_triplesMaker.getLookupValue(mapping.lookup_s, subjectStr);
-            if (!lookupValue) {
-                missingLookups_s += 1;
-            } else {
-                //var prefixURI = tableMappings.prefixURI[mapping.s] || "";
-                //subjectStr = prefixURI + lookupValue;
-                subjectStr =  lookupValue;
-                okLookups_s += 1;
+            if (tableMappings.transform && tableMappings.transform[mapping.s]) {
+                try {
+                    if (line[mapping.s] && subjectStr) {
+                        subjectStr = tableMappings.transform[mapping.s](util.formatStringForTriple(subjectStr, true), "s", mapping.p, line, mapping);
+                        
+                        
+                    }
+                    //   return callback(null,subjectStr);
+                } catch (e) {
+                    return callback((lineError = e + " " + mapping.s));
+                }
             }
+
+
+
         }
+
 
         if (!subjectStr || subjectStr == "null") {
             return callback("no mapping.subject in line " + JSON.stringify(line));
         }
 
-        //format subject
+        /* format subject */
 
         subjectStr = subjectStr.trim();
 
@@ -433,6 +463,16 @@ var KGbuilder_triplesMaker = {
                     //var prefixURI = tableMappings.prefixURI[mapping.o] || "";
                     objectStr =  line[mapping.o];
             }
+            if (mapping.lookup_o) {
+               try{
+                  lookupValue = KGbuilder_triplesMaker.getLookupValue(mapping.lookup_o, objectStr);
+                  objectStr = lookupValue;
+                }
+                catch (e) {
+                    return (lineError = e + " " + mapping.o);
+                }
+                    
+            }
             if (tableMappings.transform && (tableMappings.transform[mapping.s]||tableMappings.transform[mapping.o])) {
 
                 // if the relation is a data property the transform will concern the subject
@@ -440,10 +480,7 @@ var KGbuilder_triplesMaker = {
                 if(mapping.dataType && tableMappings.transform[mapping.s]){
                     try {
                         if (objectStr) {
-                            
                             objectStr = tableMappings.transform[mapping.s](objectStr, "o", mapping.p, line, mapping);
-
-                        
                         }
                         // return callback(null,objectStr);
                     } catch (e) {
@@ -461,16 +498,7 @@ var KGbuilder_triplesMaker = {
                     }
                 }
             }
-            if (mapping.lookup_o) {
-               try{
-                  lookupValue = KGbuilder_triplesMaker.getLookupValue(mapping.lookup_o, objectStr);
-                  objectStr = lookupValue;
-                }
-                catch (e) {
-                    return (lineError = e + " " + mapping.o);
-                }
-                    
-            }
+            
         }
 
         if (!objectStr || objectStr == "null") {
@@ -519,10 +547,16 @@ var KGbuilder_triplesMaker = {
         if (!propertyStr) {
             return;
         }
+         //  throw error when the propertyStr is not valid as URI no prefix and not an URL or we can have erros on sparqlQuery
+        if (!KGbuilder_triplesMaker.isUri(propertyStr) && !KGbuilder_triplesMaker.isPrefixedUri(propertyStr)) {
+            return callback(null, null);
+        }
+
         if (typeof propertyStr === "string" && propertyStr.indexOf("http") == 0) {
             propertyStr = "<" + propertyStr + ">";
         }
-        // did we need to throw error when the propertyStr is not valid as URI no prefix and not an URL 
+       
+
         return callback(null, propertyStr);
     },
     getRestrictionTriples: function (mapping, subjectStr, propertyStr, objectStr, callback) {

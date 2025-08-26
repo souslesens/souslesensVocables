@@ -8,6 +8,7 @@ import MappingTransform from "./mappingTransform.js";
 import UIcontroller from "./uiController.js";
 import DataSourceManager from "./dataSourcesManager.js";
 
+
 /**
  * MappingsDetails manages technical mappings (non structural mappings)
  *
@@ -63,6 +64,113 @@ var MappingsDetails = (function () {
             // $("#mainDialogDiv").dialog("open");
         });
     };
+    self.generateMappingsTreeData=function(columns){
+        var table = MappingModeler.currentTable.name;
+        var jstreeData = [];
+        var uniqueSubjects = {};
+        var nodes = MappingColumnsGraph.visjsGraph.data.nodes.get();
+        var buttonStr = "<img src='icons\\KGA\\MoreOptionsIcon-KGA.png' onClick=''>";
+
+        if(!columns){
+            columns = []
+        }
+        if(!Array.isArray(columns)){
+            if(columns && typeof columns=="string"){
+                columns = [columns];
+            }else{
+                columns = [];
+            }
+        }
+
+        jstreeData.push({
+            id: MappingModeler.currentTable.name,
+            text: "<b>" + MappingModeler.currentTable.name + "</b>",
+            data: {},
+            parent: "#",
+        });
+
+        nodes.forEach(function (node) {
+            if (node.data.dataTable !== table) {
+                return;
+            }
+            if (node.data.type == "Class") {
+                return;
+            }
+            if (node.data.type == "table") {
+                return;
+            }
+            if(columns.length>0 && !columns.includes(node.label)) {
+                return;
+            }
+
+            if (!uniqueSubjects[node.label]) {
+                uniqueSubjects[node.label] = 1;
+                jstreeData.push({
+                    id: node.id,
+                    text: "<span style='background-color: #cb9801;padding: 3px;border-radius: 7px;'>" + node.label + "</span>&nbsp;" + buttonStr,
+                    data: node.data,
+                    parent: MappingModeler.currentTable.name,
+                });
+
+                var predicates = {
+                    rdfType: "rdf:type",
+                    rdfsLabel: "rdfs:label",
+                    uriType: "uri Type",
+                };
+
+                var color = "";
+                for (var key in node.data) {
+                    if (predicates[key]) {
+                        if (self.colorsMap[key]) {
+                            color = self.colorsMap[key];
+                        } else {
+                            color = "#3339ff";
+                        }
+                        jstreeData.push({
+                            id: node.id + "|" + key + "|" + node.data[key],
+                            text: "<span style='color: " + color + "'>" + key + "</span>  " + node.data[key],
+                            parent: node.id,
+                        });
+                    }
+                }
+
+                if (node.data.otherPredicates) {
+                    node.data.otherPredicates.forEach(function (item) {
+                        jstreeData.push({
+                            id: node.id + "|" + "otherPredicates" + "|" + item.property + "|" + item.object,
+                            text: "<span style='color: " + self.colorsMap["otherPredicates"] + "'>" + item.property + "</span>  " + item.object,
+                            parent: node.id,
+                        });
+                    });
+                }
+                if (node.data.transform) {
+                    jstreeData.push({
+                        id: node.id + "|" + "transform" + "|" + node.data.transform,
+                        text: "<span style='color: " + self.colorsMap["transform"] + "'>" + "transform" + "</span>  " + node.data.transform,
+                        parent: node.id,
+                    });
+                }
+                var currentLookupName = node.data.dataTable + "|" + node.data.label;
+                if (DataSourceManager.currentConfig.lookups[currentLookupName]) {
+                    var lookup = DataSourceManager.currentConfig.lookups[currentLookupName];
+                    if (lookup.name == currentLookupName) {
+                        jstreeData.push({
+                            id: lookup.fileName + "|" + "lookup",
+                            text: "<span style='color: " + self.colorsMap["lookup"] + "'>" + "lookup" + "</span>  " + JSON.stringify(lookup),
+                            parent: node.id,
+                            data: lookup,
+                        });
+                    }
+                }
+            }
+        });
+        return jstreeData;
+
+
+    }
+
+
+
 
     /**
      * Displays the detailed mappings tree for the current table.
@@ -98,10 +206,10 @@ var MappingsDetails = (function () {
         var nodes = MappingColumnsGraph.visjsGraph.data.nodes.get();
 
         var columnsMap = {};
-        var jstreeData = [];
+        var jstreeData = self.generateMappingsTreeData();
         var uniqueSubjects = {};
         var buttonStr = "<img src='icons\\KGA\\MoreOptionsIcon-KGA.png' onClick=''>";
-
+        /*
         jstreeData.push({
             id: MappingModeler.currentTable.name,
             text: "<b>" + MappingModeler.currentTable.name + "</b>",
@@ -181,7 +289,7 @@ var MappingsDetails = (function () {
                 }
             }
         });
-
+        */
         var options = {
             searchPlugin: true,
             openAll: true,
@@ -845,7 +953,9 @@ var MappingsDetails = (function () {
             var filteredMapping = mappings.filter(function (mapping) {
                 return mapping.s.replace("@", "").replace("_$", "").replace("_£", "") == self.transformColumn || mapping.o.replace("@", "").replace("_$", "").replace("_£", "") == self.transformColumn;
             });
-
+            filteredMapping = filteredMapping.filter(function (mapping) {
+                return mapping.p != 'transform'
+            })
             var mappingWithTransform = {};
             mappingWithTransform[MappingModeler.currentTable.name] = { tripleModels: filteredMapping, transform: {} };
             mappingWithTransform[MappingModeler.currentTable.name].transform[self.transformColumn] = transformFn;
@@ -877,6 +987,9 @@ var MappingsDetails = (function () {
             })[0];
             currentNode.data.transform = transformFn;
             MappingColumnsGraph.updateNode(currentNode);
+            
+            var columnCheckNodeData = MappingsDetails.generateMappingsTreeData(self.transformColumn)
+
 
             MappingColumnsGraph.saveVisjsGraph(function () {
                 self.showDetailedMappingsTree();

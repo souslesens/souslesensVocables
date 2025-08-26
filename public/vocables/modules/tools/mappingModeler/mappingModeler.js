@@ -451,7 +451,7 @@ var MappingModeler = (function () {
         } else if (self.currentResourceType == "Column") {
             // Verify that he not already exists
             var nodeInVisjsGraph = MappingColumnsGraph.visjsGraph.data.nodes.get().filter(function (node) {
-                return node.data.dataTable == self.currentTable.name && resourceUri == node.label;
+                return node.data.dataTable == self.currentTable.name &&  node.type== "Column" && resourceUri == node.label;
             });
             if (nodeInVisjsGraph.length > 0) {
                 return alert("Column already exists in the graph");

@@ -116,11 +116,12 @@ var MappingsDetails = (function () {
             if (node.data.type == "Class") {
                 return;
             }
-            if (node.data.type == "table") {
+            if (node.data.type == "Table") {
                 return;
             }
 
             if (!uniqueSubjects[node.label]) {
+                console.log(node.label)
                 uniqueSubjects[node.label] = 1;
                 jstreeData.push({
                     id: node.id,
@@ -191,15 +192,7 @@ var MappingsDetails = (function () {
                 if (_options.withoutContextMenu) {
                     return;
                 }
-                if (node.parents.length == 3) {
-                    //only for node data
-                    items["deletemapping"] = {
-                        label: "delete",
-                        action: function (_e) {
-                            var node = MappingsDetails.deleteMappingInVisjsNode(self.currentTreeNode);
-                        },
-                    };
-                }
+
                 if (node.id.split("|")[1] == "transform") {
                     items["edit transform"] = {
                         label: "edit transform",
@@ -226,6 +219,15 @@ var MappingsDetails = (function () {
                                     return alert(err);
                                 }
                             });
+                        },
+                    };
+                }
+                if (node.parents.length == 3) {
+                    //only for node data
+                    items["deletemapping"] = {
+                        label: "delete",
+                        action: function (_e) {
+                            var node = MappingsDetails.deleteMappingInVisjsNode(self.currentTreeNode);
                         },
                     };
                 }

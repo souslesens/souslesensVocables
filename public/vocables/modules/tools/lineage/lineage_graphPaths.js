@@ -46,7 +46,7 @@ var Lineage_graphPaths = (function () {
 
         var resultArray = []
         paths.forEach(function (path) {
-                var edgesArray = []
+
                 var lineStr = ""
                 for (var i = 1; i < path.length; i++) {
 
@@ -57,7 +57,7 @@ var Lineage_graphPaths = (function () {
                         if (format == "text") {
                             lineStr += (i == 1 ? (edge.fromNode.label) : "") + "-" + (edge.label || "hasChild") + "->" + edge.toNode.label + " "
                         } else if (format == "listEdges") {
-                            edgesArray.push(edge)
+                            resultArray.push(edge)
                         }
                         if (format == "csv") {
                             lineStr += (i == 1 ? (edge.fromNode.label + "") : "") + "\t" + (edge.label || "hasChild") + "\t" + edge.toNode.label + "\t"
@@ -96,7 +96,7 @@ var Lineage_graphPaths = (function () {
 
 
         if (format == "listEdges") {
-            return resultArray;
+            return edgesFromToMap;
         } else {
             var result = ""
             resultArray.forEach(function (line) {
@@ -118,6 +118,32 @@ var Lineage_graphPaths = (function () {
     self.getAllpathsBetweenNodes = function (visjsData, start, end, format, options) {
         var graph = self.getGraphFromVisjsData(visjsData)
 
+        function findAllPathsUndirected(graph, start, end) {
+            let paths = [];
+
+            function dfs(node, path, visited) {
+                path.push(node);
+                visited.add(node);
+
+                if (node === end) {
+                    paths.push([...path]);
+                } else {
+                    for (let neighbor of graph[node] || []) {
+                        if (!visited.has(neighbor)) {
+                            dfs(neighbor, path, visited);
+                        }
+                    }
+                }
+
+                // backtrack
+                path.pop();
+                visited.delete(node);
+            }
+
+            dfs(start, [], new Set());
+            return paths;
+        }
+
         function findAllPaths(graph, start, end, path = [], paths = []) {
             path = [...path, start]; // extend current path
 
@@ -138,8 +164,8 @@ var Lineage_graphPaths = (function () {
 
             return paths;
         }
-
-        var paths = findAllPaths(graph, start, end)
+       // var paths = findAllPaths(graph, start, end)
+        var paths = findAllPathsUndirected(graph, start, end)
         var result = self.formatPaths(visjsData, paths, format, options)
 
         return result;

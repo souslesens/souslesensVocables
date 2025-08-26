@@ -123,8 +123,10 @@ var GraphPaths_bot = (function () {
 
             }
 
-            if(result.length==0)
-                return alert("no path found")
+            if(result.length==0) {
+                 alert("no path found")
+                return self.myBotEngine.previousStep()
+            }
             else if (outputType == "text") {
 
                 common.copyTextToClipboard(result)

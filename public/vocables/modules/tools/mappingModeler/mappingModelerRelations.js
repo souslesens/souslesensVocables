@@ -88,8 +88,12 @@ var MappingModelerRelations = (function () {
 
             MappingColumnsGraph.addEdge([edge]);
         });
-        $("#MappingModeler_leftTabs").tabs("option", "active", 1);
-        UIcontroller.onActivateLeftPanelTab("MappingModeler_columnsTab");
+
+        MappingColumnsGraph.saveVisjsGraph(function () {
+            $("#MappingModeler_leftTabs").tabs("option", "active", 1);
+            UIcontroller.onActivateLeftPanelTab("MappingModeler_columnsTab");
+        });
+
     };
 
     return self;

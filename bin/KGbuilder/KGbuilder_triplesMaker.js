@@ -196,16 +196,6 @@ var KGbuilder_triplesMaker = {
     getTripleSubject: function (tableMappings, mapping, line, callback) {
         //get value for Subject
 
-        /* treatment for  mapping subject with base URI  */
-        var subjectStr = KGbuilder_triplesMaker.getURIFromSpecificBaseUri(mapping.s, line, tableMappings, mapping);
-        if (subjectStr) {
-            return callback(null, subjectStr);
-        }
-
-        var isTransformLookUp = false;
-        var missingLookups_s;
-        var okLookups_s;
-
         /* gestion of specific mapping  */
 
         if (mapping.subjectIsSpecificUri || mapping.s.endsWith("_#")) {
@@ -277,8 +267,11 @@ var KGbuilder_triplesMaker = {
             subjectStr =  line[mapping.s];
             //subjectStr = prefixURI + line[mapping.s];
             /* transform and lookup d'ont concern generic mappings */
+            /* treatment for  mapping subject with base URI  */
 
-            
+            // propose base uri is treated normally in generic mappings
+            var subjectStr = KGbuilder_triplesMaker.getURIFromSpecificBaseUri(mapping.s, line, tableMappings, mapping);
+           
             if (mapping.lookup_s ) {
                 if (!lookUpsMap[mapping.lookup_s]) {
                     KGbuilder_socket.message((lineError = "no lookup named " + mapping.lookup_s));

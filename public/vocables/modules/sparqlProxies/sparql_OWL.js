@@ -2336,8 +2336,8 @@ var Sparql_OWL = (function () {
                     obj[key] = item[key].value;
                 }
                 propsMap[obj.prop0] = {
-                    parentProp: obj.prop,
-                    prop: obj.prop0,
+                    parentProp: obj.prop0,
+                    prop: obj.prop,
                     domain: obj.domain,
                     range: obj.range,
                     domainLabel: obj.domainLabel || obj.domain ? Sparql_common.getLabelFromURI(obj.domain) : null,

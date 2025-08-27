@@ -296,49 +296,7 @@ var OntologyModels = (function () {
                             });
                         },
 
-                        // set retrictions constraints
-                        function (callbackSeries) {
-                            // only relations  declared in sources.json
-                            if (!Config.sources[source]) {
-                                return callbackSeries();
-                            }
-                            //Sparql_OWL.getObjectRestrictions(source, null, { withoutBlankNodes: 1, withoutImports: 1 }, function (err, result) {
-                            Sparql_OWL.getObjectRestrictions(source, null, { withoutImports: 1 }, function (err, result) {
-                                result.forEach(function (item) {
-                                    var propLabel = item.propLabel ? item.propLabel.value : Sparql_common.getLabelFromURI(item.prop.value);
-                                    var domainLabel = item.subjectLabel ? item.subjectLabel.value : Sparql_common.getLabelFromURI(item.subject.value);
-                                    var rangeLabel = item.valueLabel ? item.valueLabel.value : Sparql_common.getLabelFromURI(item.value.value);
-                                    var propLabel = item.propLabel ? item.propLabel.value : Sparql_common.getLabelFromURI(item.prop.value);
-                                    var constraintType = item.constraintType ? item.constraintType.value : null;
-                                    var constraintTypeLabel = item.constraintType ? Sparql_common.getLabelFromURI(item.constraintType.value) : null;
-                                    var cardinalityValue = item.cardinalityValue ? Sparql_common.getIntFromTypeLiteral(item.cardinalityValue.value) : null;
-                                    var cardinalityType = item.cardinalityType ? item.cardinalityType.value : "";
-                                    if (!uniqueProperties[item.prop.value]) {
-                                        uniqueProperties[item.prop.value] = 1;
-                                        Config.ontologiesVocabularyModels[source].properties[item.prop.value] = {
-                                            id: item.prop.value,
-                                            label: propLabel,
-                                        };
-                                    }
-                                    if (!Config.ontologiesVocabularyModels[source].restrictions[item.prop.value]) {
-                                        Config.ontologiesVocabularyModels[source].restrictions[item.prop.value] = [];
-                                    }
-                                    Config.ontologiesVocabularyModels[source].restrictions[item.prop.value].push({
-                                        domain: item.subject.value,
-                                        range: item.value.value,
-                                        domainLabel: domainLabel,
-                                        rangeLabel: rangeLabel,
-                                        blankNodeId: item.node.value,
-                                        constraintType: constraintType,
-                                        constraintTypeLabel: constraintTypeLabel,
-                                        cardinalityType: cardinalityType,
-                                        cardinalityValue: cardinalityValue,
-                                    });
-                                });
 
-                                callbackSeries();
-                            });
-                        },
 
                         //set inverse Props constraints
                         function (callbackSeries) {
@@ -372,6 +330,7 @@ var OntologyModels = (function () {
                             callbackSeries();
                         },
 
+
                         //set inherited domains
                         function (callbackSeries) {
                             var props = propsWithoutDomain.concat(propsWithoutRange);
@@ -389,7 +348,7 @@ var OntologyModels = (function () {
                                     var prop = Config.ontologiesVocabularyModels[source].properties[prop];
                                     var propId = prop.id;
 
-                                    if (propId == "http://rds.posccaesar.org/ontology/lis14/rdl/activeParticipantIn") {
+                                    if (propId == "http://purl.obolibrary.org/obo/BFO_0000115") {
                                         var x = 3;
                                     }
                                     var inheritedConstaint = propsMap[propId];
@@ -418,6 +377,7 @@ var OntologyModels = (function () {
                                 return callbackSeries();
                             });
                         },
+
 
                         // set constraints prop label and superProp
                         function (callbackSeries) {

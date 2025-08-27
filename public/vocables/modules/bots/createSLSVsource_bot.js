@@ -51,6 +51,12 @@ var CreateSLSVsource_bot = (function () {
         },
     };
 
+    self.workflowAfterUpload = {
+        _OR: {
+            "Add import": { listImportsFn: { afterImportFn: {} } },
+            "Create source": self.loadingWorkflow,
+        },
+    };
     self.workflow = {
         promptSourceNameFn: {
             _OR: {
@@ -344,6 +350,33 @@ var CreateSLSVsource_bot = (function () {
             self.myBotEngine.currentObj = self.workflowMetaData;
             self.myBotEngine.nextStep(self.workflowMetaData);
         },
+
+        updateSourceFn: (sourceConfig) => {
+            setLoading(true);
+            $.ajax({
+                url: `/api/v1/sources/${self.params.sourceLabel}`,
+                type: "PUT",
+                contentType: "application/json",
+                data: JSON.stringify(sourceConfig, null, "\t"),
+                success: function (data, textStatus, jqXHR) {
+                    if (jqXHR.status === 200) {
+                        window.Config.sources = data.resources;
+                    } else {
+                        alert(data.message);
+                        return self.myBotEngine.previousStep();
+                    }
+                    setLoading(false);
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    alert(jqXHR.responseText || errorThrown);
+                    setLoading(false);
+                    return self.myBotEngine.previousStep();
+                }
+            });
+        },
+
+        
+
     };
 
     self.uploadGraphFromUrl = function (callback) {

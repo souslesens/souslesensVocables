@@ -1,4 +1,4 @@
-name: Docker build and push
+name: Docker build and Kubernetes deploy
 
 on:
     push:
@@ -46,3 +46,18 @@ jobs:
                   labels: ${{ steps.meta.outputs.labels }}
                   secrets: |
                       GIT_AUTH_TOKEN=${{ secrets.DOCKER_REGISTRY_TOKEN }}
+    deploy:
+        needs:
+            - docker
+        if: "github.ref == 'refs/heads/master'"
+        runs-on: ubuntu-latest
+        container:
+            image: ghcr.io/helmfile/helmfile:v0.171.0
+            env:
+                KUBE_TEST: "toto"
+                KUBECONFIG_B64: "${{ secrets.KUBECONFIG_B64 }}"
+        steps:
+            - name: kubeconfig
+              run: echo ${KUBECONFIG_B64} | base64 -d > ~/kubeconfig
+            - name: helm-upgrade
+              run: helm --kubeconfig ~/kubeconfig upgrade souslesens https://helm.logilab.fr/charts/web-app-2.1.0.tgz --wait --timeout=10m --reuse-values --set=image.tag=${GITHUB_REF_NAME}

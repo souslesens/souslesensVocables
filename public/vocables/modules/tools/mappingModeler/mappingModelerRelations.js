@@ -21,7 +21,7 @@ var MappingModelerRelations = (function () {
                 existingRelationsMap[nodesMap[edge.to].id] = nodesMap[edge.from].id;
             }
 
-            if (nodesMap[edge.from]?.data?.type == "Column" && nodesMap[edge.to]?.data?.type == "Class") {
+            if (nodesMap[edge.from]?.data?.type == "Column" && nodesMap[edge.to]?.data?.type == "Class" && nodesMap[edge.from]?.data?.dataTable == MappingModeler.currentTable.name) {
                 classesMap[nodesMap[edge.to].id] = nodesMap[edge.from].id;
             }
         });

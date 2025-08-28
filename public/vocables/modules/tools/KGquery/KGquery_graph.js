@@ -385,6 +385,7 @@ var KGquery_graph = (function () {
                                 if (err) {
                                     return callbackSeries(err);
                                 }
+                                /*
                                 result.forEach(function (item) {
                                     var edegId = common.getRandomHexaId(5);
                                     visjsData.edges.push({
@@ -398,7 +399,13 @@ var KGquery_graph = (function () {
                                         selfReference: { renderBehindTheNode: true, size: 50 },
                                         data: { propertyId: "rdfs:member" },
                                     });
-                                });
+                                });*/
+                                result.forEach(function(item){
+                                    if(item?.propLabel?.value){
+                                        item.propLabel.value= item.propLabel.value + ' -->'
+                                    }
+                                })
+                                implicitModel = implicitModel.concat(result);
                                 return callbackSeries();
                             });
                         },

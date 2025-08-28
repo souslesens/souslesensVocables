@@ -1247,6 +1247,7 @@ var OntologyModels = (function () {
                 "filter(?sClass not in (owl:Class,owl:NamedIndividual,owl:Restriction,rdf:Bag)) \n" +
                 " filter(?oClass not in (owl:Class,owl:NamedIndividual,owl:Restriction,rdf:Bag)) " +
                 ' filter (!regex(str(?prop),"rdf","i")) filter (?prop not in (<http://purl.org/dc/terms/created>, <http://souslesens.org/KGcreator#mappingFile>))' +
+                //' filter ((!regex(str(?prop), "rdf", "i"))|| (?prop = rdfs:member)) filter (?prop not in (<http://purl.org/dc/terms/created>, <http://souslesens.org/KGcreator#mappingFile>))' +
                 "  filter (?s != ?o)\n" +
                 "    }\n" +
                 "    }\n" +
@@ -1371,6 +1372,8 @@ var OntologyModels = (function () {
             "   ?s ?prop ?o.\n" +
             "   ?s rdf:type ?sClass.\n" +
             "   ?o rdf:type ?oClass. \n" +
+            "OPTIONAL{ ?oClass rdfs:label ?oClassLabel }\n" +
+            "OPTIONAL{ ?sClass rdfs:label ?sClassLabel }\n" +
             "filter(?prop= rdfs:member)\n" +
             "      filter (?sClass  not in(rdf:Bag,owl:NamedIndividual) && ?oClass not in(rdf:Bag,owl:NamedIndividual) )\n" +
             "  }";

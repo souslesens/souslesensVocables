@@ -82,11 +82,13 @@ var MappingModeler = (function () {
      */
     self.onLoaded = function () {
         async.series(
-            [
-                function (callbackSeries) {
-                    //reinitialize config (Change Source and reload after modification)
-                    DataSourceManager.currentConfig = {};
-                    DataSourceManager.rawConfig = {};
+            [   
+                
+          
+            function (callbackSeries) {
+                //reinitialize config (Change Source and reload after modification)
+                DataSourceManager.currentConfig = {};
+                DataSourceManager.rawConfig = {};
                     return callbackSeries();
                 },
                 function (callbackSeries) {
@@ -162,6 +164,16 @@ var MappingModeler = (function () {
                             UI.resetWindowSize();
                         });*/
                     });
+                },
+                // add the MappingModeler_currentDataSource div to set table message in topBar
+                function(callbackSeries){
+                    var datasourceDiv = `
+                    <div class='w3-bar-item' style='display:flex' id="MappingModeler_currentDataSourceDiv">
+                    <span style="font-weight: bold; font-size: 13px;margin-top:15px" id="MappingModeler_currentDataSource"></span>&nbsp;
+                    </div>`
+                    var topControlParent=$('#index_topContolPanel').parent()
+                    $(datasourceDiv).insertAfter(topControlParent);
+                    return callbackSeries();
                 },
             ],
             function (err) {
@@ -300,10 +312,10 @@ var MappingModeler = (function () {
 
             self.initSourcesMap(objects);
 
-            objects.forEach(function (item) {
+            objects.forEach(function (item,index) {
                 if (item.source) {
                     if (!uniqueSources[item.source]) {
-                        uniqueSources[item.source] = 1;
+                        uniqueSources[item.source] = jstreeData.length;
 
                         jstreeData.push({
                             id: item.source,
@@ -350,6 +362,21 @@ var MappingModeler = (function () {
                     });
                 }
             });
+            var sourceOrderArray = [MappingModeler.currentSLSsource];
+            sourceOrderArray = sourceOrderArray.concat(Config.sources[MappingModeler.currentSLSsource].imports);
+            var startIndex=2;
+            if(parentName=="Properties"){
+                startIndex=5;
+            }
+            var index =0;
+            sourceOrderArray.forEach(function (source) {
+            if(uniqueSources[source]){
+                var jstreeIndex=uniqueSources[source];
+                common.array.moveItem(jstreeData, jstreeIndex+index, startIndex+index);
+                index++;
+
+            }
+            });
         } else {
             objects.forEach(function (item) {
                 if (item != "" && item != "#") {
@@ -365,14 +392,15 @@ var MappingModeler = (function () {
                 }
             });
         }
-        var sourceIndex = jstreeData.findIndex((obj) => obj.id == MappingModeler.currentSLSsource);
+        
+        /*
         if (sourceIndex > -1) {
             if (parentName == "Properties") {
                 common.array.moveItem(jstreeData, sourceIndex, 5);
             } else {
                 common.array.moveItem(jstreeData, sourceIndex, 2);
             }
-        }
+        }*/
 
         JstreeWidget.loadJsTree("suggestionsSelectJstreeDiv", jstreeData, options, function () {
             $("#suggestionsSelectJstreeDiv").css("overflow", "unset");

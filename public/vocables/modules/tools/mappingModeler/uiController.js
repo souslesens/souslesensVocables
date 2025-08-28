@@ -31,7 +31,7 @@ var UIcontroller = (function () {
             $("#mappingModeler_structuralPanel").css("display", "block");
             MappingModeler.initActiveLegend(MappingModeler.legendGraphDivId);
             MappingModeler.loadSuggestionSelectJstree(MappingModeler.currentTable.columns, "Columns");
-            $("#MappingModeler_currentDataSource").html(DataSourceManager.currentConfig.currentDataSource.name);
+            //$("#MappingModeler_currentDataSource").html(DataSourceManager.currentConfig.currentDataSource.name);
             $("#rightControlPanelDiv").load("./modules/tools/mappingModeler/html/mappingsGraphButtons.html", function (err) {});
         } else if (tabId == "MappingModeler_technicalDetailTab") {
             MappingsDetails.showDetailsDialog();

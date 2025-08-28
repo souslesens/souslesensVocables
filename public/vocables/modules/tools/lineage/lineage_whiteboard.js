@@ -118,6 +118,7 @@ var Lineage_whiteboard = (function () {
         UI.initMenuBar(self.loadSources);
         $("#Lineage_graphEditionButtons").show();
         $("#Lineage_graphEditionButtons").load("./modules/tools/lineage/html/AddNodeEdgeButtons.html");
+        $("#MappingModeler_currentDataSourceDiv").remove();
         $("KGquery_messageDiv").attr("id", "messageDiv");
         $("KGquery_waitImg").attr("id", "waitImg");
 

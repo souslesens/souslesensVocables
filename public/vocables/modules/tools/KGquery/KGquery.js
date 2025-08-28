@@ -61,6 +61,7 @@ var KGquery = (function () {
         UI.initMenuBar(KGquery.loadSource);
         KGquery_graph.visjsData = null;
         UserDataWidget.currentTreeNode = null;
+
         //KGquery.clearAll();
         UI.disableEditButtons();
         if (Config.clientCache.KGquery) {
@@ -69,6 +70,7 @@ var KGquery = (function () {
         //self.clearAll();
         $("#messageDiv").attr("id", "KGquery_messageDiv");
         $("#waitImg").attr("id", "KGquery_waitImg");
+        $("#MappingModeler_currentDataSourceDiv").remove()
         KGquery.initMyQuery();
     };
     /**

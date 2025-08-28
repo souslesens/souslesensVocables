@@ -66,7 +66,7 @@ var GraphPaths_bot = (function () {
                 {id: "pathsFromNode", label: "All paths FROM selected node"},
                 {id: "pathsToNode", label: "All paths TO selected node"},
                 {id: "pathsBetweenNodes", label: "All paths BETWEEN nodes"},
-                {id: "shortestPathBetweenNodes", label: "SHORTEST path BETWEEN nodes"},
+              //  {id: "shortestPathBetweenNodes", label: "SHORTEST path BETWEEN nodes"},
 
 
             ]
@@ -89,10 +89,10 @@ var GraphPaths_bot = (function () {
         }
         , chooseOuputFn: function () {
             var choices = [
-                {id: "text", label: "text"},
+                {id: "html", label: "text"},
                 {id: "listEdges", label: "highlight On Graph"},
                 {id: "csv", label: "csv"},
-                {id: "html", label: "html"},
+
 
 
             ]
@@ -143,15 +143,15 @@ var GraphPaths_bot = (function () {
 
             else if (outputType == "listEdges") {
                 var newEdgesMap = {}
-                result.forEach(function (path) {
-                    path.forEach(function (edge) {
+                result.forEach(function (edge) {
+                  //  path.forEach(function (edge) {
                         if (!newEdgesMap[edge.id]) {
                             newEdgesMap[edge.id] = {id: edge.id, color:color, width: 2}
                         }
                         if(newEdgesMap[edge.id].width<10)
                         newEdgesMap[edge.id].width += 1
                     })
-                })
+               // })
                 var newEdges = []
                 for (var id in newEdgesMap) {
                     newEdges.push(newEdgesMap[id])

@@ -60,7 +60,7 @@ var Lineage_graphPaths = (function () {
                             resultArray.push(edge)
                         }
                         if (format == "csv") {
-                            lineStr += (i == 1 ? (edge.fromNode.label + "") : "") + "\t" + (edge.label || "hasChild") + "\t" + edge.toNode.label + "\t"
+                            lineStr += (i == 1 ? (edge.fromNode.label + "") : "")  + (edge.label || "hasChild") + "\t" + edge.toNode.label + "\t"
                         } else if (format == "html") {
                             lineStr += (i == 1 ? edge.fromNode.label : "") + " <span style='font-style:italic;color:blue'>" + (edge.label || "hasChild") + "</span> " + edge.toNode.label + " "
                         }
@@ -73,7 +73,7 @@ var Lineage_graphPaths = (function () {
             }
         )
 
-        if (options.removeDuplicates) {
+        if ( options.removeDuplicates) {
             if (resultArray.length > 0) {
                 resultArray = resultArray.sort(function (a, b) {
                     return (b.length - a.length)
@@ -96,7 +96,7 @@ var Lineage_graphPaths = (function () {
 
 
         if (format == "listEdges") {
-            return edgesFromToMap;
+            return resultArray;
         } else {
             var result = ""
             resultArray.forEach(function (line) {
@@ -118,15 +118,15 @@ var Lineage_graphPaths = (function () {
     self.getAllpathsBetweenNodes = function (visjsData, start, end, format, options) {
         var graph = self.getGraphFromVisjsData(visjsData)
 
-        function findAllPathsUndirected(graph, start, end) {
-            let paths = [];
+        function findAllPathsUndirected(graph, start, target) {
+            let result = [];
 
             function dfs(node, path, visited) {
                 path.push(node);
                 visited.add(node);
 
-                if (node === end) {
-                    paths.push([...path]);
+                if (node === target) {
+                    result.push([...path]); // found one path
                 } else {
                     for (let neighbor of graph[node] || []) {
                         if (!visited.has(neighbor)) {
@@ -135,13 +135,12 @@ var Lineage_graphPaths = (function () {
                     }
                 }
 
-                // backtrack
                 path.pop();
-                visited.delete(node);
+                visited.delete(node); // backtrack for other paths
             }
 
             dfs(start, [], new Set());
-            return paths;
+            return result;
         }
 
         function findAllPaths(graph, start, end, path = [], paths = []) {
@@ -232,36 +231,33 @@ var Lineage_graphPaths = (function () {
         }
 
         function findAllPathsToTarget(graph, target, options) {
-            let paths = [];
-
+            let result = [];
             function dfs(node, path) {
                 path.push(node);
 
                 if (node === target) {
-                    paths.push([...path]);
-                    path.pop();
-                    return;
-                }
-
-                for (let neighbor of graph[node] || []) {
-                    if (!path.includes(neighbor)) { // avoid cycles
-                        dfs(neighbor, path);
+                    result.push([...path]); // found a path to target
+                } else {
+                    for (let neighbor of graph[node] || []) {
+                        if (!path.includes(neighbor)) { // avoid cycles
+                            dfs(neighbor, path);
+                        }
                     }
                 }
 
-                path.pop();
+                path.pop(); // backtrack
             }
 
-            // Start DFS from every node in the graph
+            // Try starting from every node in the graph
             for (let node in graph) {
                 dfs(node, []);
             }
 
-            return paths;
+            return result;
         }
 
-        // var paths = findAllPathsToTarget(graph, end)
-        var paths = findAllPathsToTargetUndirected(graph, end)
+       var paths = findAllPathsToTarget(graph, end)
+      //  var paths = findAllPathsToTargetUndirected(graph, end)
         var result = self.formatPaths(visjsData, paths, format, options)
 
         return result;

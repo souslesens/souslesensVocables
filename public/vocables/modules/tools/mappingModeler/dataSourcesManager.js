@@ -484,7 +484,13 @@ var DataSourceManager = (function () {
 
         if (obj.node.data.type == "table" || obj.node.data.type == "csvSource") {
             var table = obj.node.data.id;
-            $("#MappingModeler_currentDataSource").html(table);
+            var dataSourceLabel = table;
+            if(obj.node.type=='Table'){
+                var dataTableName = $("#"+self.dataSourcejstreeDivId).jstree().get_node(obj.node.parent).text
+                var dataSourceLabel = dataTableName + ' : ' +table;
+
+            }
+            $("#MappingModeler_currentDataSource").html(dataSourceLabel);
 
             MappingColumnsGraph.zoomOnTable(table);
             if (!MappingColumnsGraph.visjsGraph.data.nodes.get(table)) {

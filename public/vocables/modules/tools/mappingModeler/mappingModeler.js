@@ -167,6 +167,7 @@ var MappingModeler = (function () {
                 },
                 // add the MappingModeler_currentDataSource div to set table message in topBar
                 function(callbackSeries){
+                    $('#MappingModeler_currentDataSourceDiv').remove();
                     var datasourceDiv = `
                     <div class='w3-bar-item' style='display:flex' id="MappingModeler_currentDataSourceDiv">
                     <span style="font-weight: bold; font-size: 13px;margin-top:15px" id="MappingModeler_currentDataSource"></span>&nbsp;

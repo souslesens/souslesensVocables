@@ -321,7 +321,7 @@ var MappingModeler = (function () {
                         jstreeData.push({
                             id: item.source,
                             parent: parentName,
-                            text: "<span style='font-size:larger;color:" + color + "'>" + item.source + "</span>",
+                            text: "<span style='font-size:larger;color:" + color +"'>" + item.source + "</span>",
                             data: {
                                 id: item.source,
                                 label: item.source,
@@ -332,7 +332,7 @@ var MappingModeler = (function () {
                         jstreeData.push({
                             id: item.id,
                             parent: item.source,
-                            text: "<span  style='color:" + color + "'>" + item.label.split(":")[1] + "</span>",
+                            text: "<span  style='color:" + color +";background-color:" + (item?.highlight ?? '') + "'>" + item.label.split(":")[1] + "</span>",
                             data: {
                                 id: item.id,
                                 text: item.label.split(":")[1],
@@ -771,7 +771,27 @@ var MappingModeler = (function () {
                     //To add NewObjects only one time
                     var propertiesCopy = JSON.parse(JSON.stringify(properties));
                     propertiesCopy.unshift(...newObjects);
-                    self.loadSuggestionSelectJstree(propertiesCopy, "Properties");
+
+                    MappingModelerRelations.listPossibleRelations(function(err,jstreeData){
+                        if(err){
+                            alert(err);
+                        }
+                        jstreeData.forEach(function(item){
+                            if(item?.data?.fromColumn?.id==self.currentRelation.from.id && item?.data?.toColumn?.id==self.currentRelation.to.id){
+                                var restrictionProperty = propertiesCopy.filter(function(prop){
+                                    return prop.id == item?.data?.property?.id;
+                                });
+                                if(restrictionProperty.length > 0){
+                                    restrictionProperty[0].highlight = 'yellow';
+                                }
+
+                            }
+
+                        })
+                        
+                        self.loadSuggestionSelectJstree(propertiesCopy, "Properties");
+                    });
+                   
                     //self.setSuggestionsSelect(properties, false, newObjects);
                 },
             );

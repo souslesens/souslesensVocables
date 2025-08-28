@@ -5,7 +5,8 @@ import JstreeWidget from "../../uiWidgets/jstreeWidget.js";
 import MappingModeler from "./mappingModeler.js";
 import UI from "../../shared/UI.js";
 var MappingModelerRelations = (function () {
-    self.listPossibleRelations = function () {
+    self.listPossibleRelations = function (callback) {
+        
         var nodes = MappingColumnsGraph.visjsGraph.data.nodes.get();
         var edges = MappingColumnsGraph.visjsGraph.data.edges.get();
         var nodesMap = {};
@@ -28,6 +29,10 @@ var MappingModelerRelations = (function () {
         var classes = null; // Object.keys(classesMap);
         var relations = [];
         Sparql_OWL.getObjectRestrictions(DataSourcesManager.currentSlsvSource, classes, null, function (err, result) {
+            if(err){
+                if(callback) callback(err);
+                return;
+            }
             result.forEach(function (item) {
                 var fromColumnId = classesMap[item.subject.value];
                 var toColumnId = classesMap[item.value.value];
@@ -60,14 +65,24 @@ var MappingModelerRelations = (function () {
                     data: item,
                 });
             });
-
-            var options = {
+            if(callback) callback(null,jstreeData);
+            return;
+            
+        });
+    };
+    self.drawPossibleRelations = function () {
+        var jstreeData = self.listPossibleRelations(function(err,jstreeData){
+            if(err){
+                alert(err)
+            }
+            var jstreeOptions = {
                 openAll: true,
                 withCheckboxes: true,
             };
 
-            JstreeWidget.loadJsTree("mappingModelerRelations_jstreeDiv", jstreeData, options);
+            JstreeWidget.loadJsTree("mappingModelerRelations_jstreeDiv", jstreeData, jstreeOptions);
         });
+        // Draw the relations using the jstreeData
     };
 
     self.applyColumnRelations = function () {

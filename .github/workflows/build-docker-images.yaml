@@ -22,11 +22,10 @@ jobs:
                   images: ${{ secrets.DOCKER_REGISTRY }}/${{ secrets.DOCKER_REGISTRY_PATH }}
                   # generate Docker tags based on the following events/attributes
                   tags: |
+                      type=sha
                       type=ref,event=branch
                       type=ref,event=pr
                       type=semver,pattern={{version}}
-                      type=semver,pattern={{major}}.{{minor}}
-                      type=semver,pattern={{major}}
             - name: Set up QEMU
               uses: docker/setup-qemu-action@v1
             - name: Set up Docker Buildx
@@ -60,4 +59,4 @@ jobs:
             - name: kubeconfig
               run: echo ${KUBECONFIG_B64} | base64 -d > ~/kubeconfig
             - name: helm-upgrade
-              run: helm --kubeconfig ~/kubeconfig upgrade souslesens https://helm.logilab.fr/charts/web-app-2.1.0.tgz --wait --timeout=10m --reuse-values --set=image.tag=${GITHUB_REF_NAME}
+              run: helm --kubeconfig ~/kubeconfig upgrade souslesens https://helm.logilab.fr/charts/web-app-2.1.0.tgz --wait --atomic --timeout=10m --reuse-values --set=image.tag=sha-${GITHUB_SHA::7}

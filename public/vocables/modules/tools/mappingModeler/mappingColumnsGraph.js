@@ -312,6 +312,17 @@ var MappingColumnsGraph = (function () {
         });
     };
 
+    self.getColumnClass=function(node) {
+        var connections = self.visjsGraph.getFromNodeEdgesAndToNodes(node.id);
+
+        var classId = null;
+        connections.forEach(function (connection) {
+            if (connection.edge.data.type == "rdf:type" || connection.edge.data.type == "rdfs:subClassOf") {
+                classId = connection.toNode.data.id;
+            }
+        });
+        return classId;
+    }
     /**
      * Handles click events on the Vis.js graph.
      * Updates the current selected node and manages relations between columns.
@@ -344,22 +355,12 @@ var MappingColumnsGraph = (function () {
             if (!DataSourceManager.currentConfig.currentDataSource) {
                 return alert("choose a data source first");
             }
-            function getColumnClass(node) {
-                var connections = self.visjsGraph.getFromNodeEdgesAndToNodes(node.id);
 
-                var classId = null;
-                connections.forEach(function (connection) {
-                    if (connection.edge.data.type == "rdf:type" || connection.edge.data.type == "rdfs:subClassOf") {
-                        classId = connection.toNode.data.id;
-                    }
-                });
-                return classId;
-            }
 
             if (!MappingModeler.currentRelation) {
                 self.relationMessage(node.data.label, null);
                 MappingModeler.currentRelation = {
-                    from: { id: node.id, classId: getColumnClass(node), dataTable: node.data.dataTable },
+                    from: { id: node.id, classId: self.getColumnClass(node), dataTable: node.data.dataTable },
                     to: null,
                     type: node.data.type,
                 };

@@ -106,7 +106,7 @@ var Lineage_graphPaths = (function () {
         if (format == "listEdges") {
             return resultArray;
         } else {
-            if (resultArray.length > self.limit && format != "listEdges") {
+            if (resultArray.length > self.limit && format == "text") {
                 alert("result is too long (" + resultArray.length + "paths), it will be truncated to " + self.limit + " paths.");
                 resultArray = resultArray.slice(0, self.limit);
             }

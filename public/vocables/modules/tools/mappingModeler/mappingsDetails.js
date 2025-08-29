@@ -1027,6 +1027,20 @@ var MappingsDetails = (function () {
             $("#columnDetails-prefixURI-label").hide();
         }
     };
+
+    /**
+     *  fill basigraphUri and prefix with same values found for the node class in other mappings
+     * @param columnNodeId
+     */
+    self.setMappingDefaultFieds=function(columnNodeId){
+       var columnClass=MappingColumnsGraph.getColumnClass(columnNodeId)
+        if(columnClass){
+            MappingColumnsGraph.visjsGraph.data.nodes.forEach(function(node){
+
+            })
+        }
+
+    }
     return self;
 })();
 

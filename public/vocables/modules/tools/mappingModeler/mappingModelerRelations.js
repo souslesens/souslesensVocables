@@ -23,27 +23,38 @@ var MappingModelerRelations = (function () {
             }
 
             if (nodesMap[edge.from]?.data?.type == "Column" && nodesMap[edge.to]?.data?.type == "Class" && nodesMap[edge.from]?.data?.dataTable == MappingModeler.currentTable.name) {
-                classesMap[nodesMap[edge.to].id] = nodesMap[edge.from].id;
+                if(!classesMap[nodesMap[edge.to].id] ){
+                    classesMap[nodesMap[edge.to].id] = [nodesMap[edge.from].id];
+                }
+                else{
+                    classesMap[nodesMap[edge.to].id].push(nodesMap[edge.from].id);
+                }
+                
             }
         });
         var classes = null; // Object.keys(classesMap);
         var relations = [];
+        
         Sparql_OWL.getObjectRestrictions(DataSourcesManager.currentSlsvSource, classes, null, function (err, result) {
             if(err){
                 if(callback) callback(err);
                 return;
             }
             result.forEach(function (item) {
-                var fromColumnId = classesMap[item.subject.value];
-                var toColumnId = classesMap[item.value.value];
-                if (fromColumnId && toColumnId) {
-                    if (nodesMap[fromColumnId].data.table != nodesMap[toColumnId].data.table) {
-                        return;
-                    }
-                    relations.push({
-                        fromColumn: { id: fromColumnId, label: nodesMap[fromColumnId].label },
-                        toColumn: { id: toColumnId, label: nodesMap[toColumnId].label },
-                        property: { id: item.prop.value, label: item.propLabel.value },
+                var fromColumn = classesMap[item.subject.value];
+                var toColumn = classesMap[item.value.value];
+                if (fromColumn && toColumn) {
+                    fromColumn.forEach(function(fromColumnId){
+                        toColumn.forEach(function(toColumnId){
+                            if (nodesMap[fromColumnId].data.table != nodesMap[toColumnId].data.table) {
+                                return;
+                            }
+                            relations.push({
+                                fromColumn: { id: fromColumnId, label: nodesMap[fromColumnId].label },
+                                toColumn: { id: toColumnId, label: nodesMap[toColumnId].label },
+                                property: { id: item.prop.value, label: item.propLabel.value },
+                            });
+                        });
                     });
                 }
             });

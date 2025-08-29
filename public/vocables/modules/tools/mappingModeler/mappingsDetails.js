@@ -104,7 +104,7 @@ var MappingsDetails = (function () {
             }
 
             if (!uniqueSubjects[node.label]) {
-                uniqueSubjects[node.label] = 1;
+                uniqueSubjects[node.label] = node;
                 jstreeData.push({
                     id: node.id,
                     text: "<span style='background-color: #cb9801;padding: 3px;border-radius: 7px;'>" + node.label + "</span>&nbsp;" + buttonStr,
@@ -164,6 +164,17 @@ var MappingsDetails = (function () {
                 }
             }
         });
+        var columnsMap= Object.fromEntries(Object.values(uniqueSubjects).map(obj => [obj.id, obj]));
+        var columnMappings = MappingTransform.mappingsToKGcreatorJson(columnsMap, { getColumnMappingsOnly: true });
+        columnMappings.forEach(function(mapping) {
+            jstreeData.push({
+                id: mapping.id,
+                text: mapping.label,
+                parent: mapping.parent,
+                data: mapping
+            });
+        });
+
         return jstreeData;
 
 

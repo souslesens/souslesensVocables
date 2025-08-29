@@ -1,4 +1,4 @@
-import { useState, ChangeEvent, Dispatch, useEffect } from "react";
+import { useState, ChangeEvent, Dispatch, useEffect, useRef } from "react";
 import {
     Box,
     CircularProgress,
@@ -47,6 +47,7 @@ export const UsersTable = () => {
     const [filteringChars, setFilteringChars] = useState("");
     const [orderBy, setOrderBy] = useState<keyof User>("login");
     const [order, setOrder] = useState<Order>("asc");
+    const searchInputRef = useRef<HTMLInputElement | null>(null);
     type Order = "asc" | "desc";
 
     const me = SRD.withDefault("", model.me);
@@ -60,6 +61,37 @@ export const UsersTable = () => {
     const handleDeleteUser = (user: User, updateModel: Dispatch<Msg>) => {
         void deleteUser(user, updateModel);
         void writeLog(me, "ConfigEditor", "delete", user.login);
+    };
+
+    const handleAddFilter = (event: ChangeEvent<HTMLInputElement>) => {
+        const content = filteringChars ? `${filteringChars} ` : "";
+        setFilteringChars(`${content}${event.target.value}:`);
+        setTimeout(() => {
+            searchInputRef?.current?.focus();
+        }, 100);
+    };
+
+    const filterSearchBar = (user: User, searchEntry: string) => {
+        // extract group:xxx from searchEntry
+        const profiles: string[] = [];
+        const strElems: string[] = [];
+        const splitedInput = searchEntry.split(/[ ]+/);
+        splitedInput.forEach((input) => {
+            if (input.startsWith("profile:")) {
+                profiles.push(...input.replace("profile:", "").split(","));
+            } else {
+                strElems.push(input);
+            }
+        });
+        const filteredSourcesByProfiles = user.groups // XXX: user.group is profiles here
+            .map((profile) => {
+                return cleanUpText(profile).includes(cleanUpText(profiles.join(" ")));
+            })
+            .reduce((acc, val) => acc || val, false); // return true if at least one true
+
+        const filteredSourcesByText = cleanUpText(user.login).includes(cleanUpText(strElems.join(" ")));
+
+        return filteredSourcesByText && filteredSourcesByProfiles;
     };
 
     const [userDialogState, setUserDialogState] = useState<{ open: boolean; user?: User }>({ open: false });
@@ -126,14 +158,22 @@ export const UsersTable = () => {
 
                 return (
                     <Stack direction="column" spacing={{ xs: 2 }} sx={{ m: 4 }} useFlexGap>
-                        <TextField
-                            inputProps={{ autoComplete: "off" }}
-                            label="Search Users by login"
-                            id="search-users"
-                            onChange={(event) => {
-                                setFilteringChars(event.target.value);
-                            }}
-                        />
+                        <Stack direction="row">
+                            <TextField sx={{ width: "100px" }} select id="filter-users" label="Filters" value="" onChange={handleAddFilter}>
+                                <MenuItem value="profile">profile:</MenuItem>
+                            </TextField>
+                            <TextField
+                                sx={{ flex: 1 }}
+                                inputRef={searchInputRef}
+                                value={filteringChars}
+                                inputProps={{ autoComplete: "off" }}
+                                label="Search Users by login"
+                                id="search-users"
+                                onChange={(event) => {
+                                    setFilteringChars(event.target.value);
+                                }}
+                            />
+                        </Stack>
                         <TableContainer sx={{ height: "400px" }} component={Paper}>
                             <Table stickyHeader>
                                 <TableHead>
@@ -160,7 +200,9 @@ export const UsersTable = () => {
                                 </TableHead>
                                 <TableBody sx={{ width: "100%", overflow: "visible" }}>
                                     {sortedUsers
-                                        .filter((user) => cleanUpText(user.login).includes(cleanUpText(filteringChars)))
+                                        .filter((user) => {
+                                            return filterSearchBar(user, filteringChars);
+                                        })
                                         .map((user) => {
                                             return (
                                                 <TableRow key={user.id}>

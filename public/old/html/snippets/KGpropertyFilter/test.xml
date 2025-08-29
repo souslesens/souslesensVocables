@@ -1,4 +1,0 @@
-<http://data.totalenergies.com/resource/ontology/cfihos_1.5/TagClass/CFIHOS-30000395> rdfs:subClassOf  <_:b8e6269d0d0>.
-<_:b8e6269d0d0> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>  <http://www.w3.org/2002/07/owl#Restriction>.
-    <_:b8e6269d0d0> <http://www.w3.org/2002/07/owl#onProperty> part14:qualityOf
-        <_:b8e6269d0d0> <http://www.w3.org/2002/07/owl#someValuesFrom> <http://data.totalenergies.com/resource/ontology/cfihos_1.5/TagClass/CFIHOS-30000395>

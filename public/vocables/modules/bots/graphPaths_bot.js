@@ -41,7 +41,7 @@ var GraphPaths_bot = (function () {
 
             _OR: {
                 pathsBetweenNodes: {promptEndNodeLabelFn: {chooseEndNodesFn: {chooseOuputFn: {executePathFn: {}}}}},
-                shortestPathBetweenNodes: {promptEndNodeLabelFn: {chooseEndNodesFn: {chooseOuputFn: {executePathFn: {}}}}},
+                shortestPathBetweenNodes: {promptEndNodeLabelFn: {chooseEndNodesFn: {chooseOuputFn :{executePathFn: {}}}}},
                 _DEFAULT: {
                     chooseOuputFn: {executePathFn: {}}
                 },
@@ -54,30 +54,34 @@ var GraphPaths_bot = (function () {
 
     self.functionTitles = {
         choosePathFn: "Choose Path type",
-        promptEndNodeLabelFn: "promptEndNodeLabel",
-        chooseEndNodesFn: "chooseEndNode ",
-        promptIndividualsLabelFn: "Enter a label ",
-        listIndividualsFn: "Choose a label ",
+        promptEndNodeLabelFn: "Click on node or End node contains...",
+        chooseEndNodesFn: "choose End Node ",
+        chooseDirectedGraphFn:"graph type",
+        chooseOuputFn: "choose output type ",
+
     };
 
     self.functions = {
         choosePathFn: function () {
             var choices = [
+
                 {id: "pathsFromNode", label: "All paths FROM selected node"},
                 {id: "pathsToNode", label: "All paths TO selected node"},
                 {id: "pathsBetweenNodes", label: "All paths BETWEEN nodes"},
-              //  {id: "shortestPathBetweenNodes", label: "SHORTEST path BETWEEN nodes"},
+                //  {id: "shortestPathBetweenNodes", label: "SHORTEST path BETWEEN nodes"},
 
 
             ]
             self.myBotEngine.showList(choices, "pathType")
         },
         promptEndNodeLabelFn: function () {
-            self.myBotEngine.promptValue("End node contains...", "endNodeStr")
+            self.isWaitingForEndNodeClick=true
+            self.myBotEngine.promptValue("Click on node or End node contains...", "endNodeStr")
         }
         ,
         chooseEndNodesFn: function () {
             var choices = []
+
             self.params.visjsData.nodes.forEach(function (node) {
                 var label = node.label.toLowerCase()
 
@@ -94,78 +98,64 @@ var GraphPaths_bot = (function () {
                 {id: "csv", label: "csv"},
 
 
-
             ]
             self.myBotEngine.showList(choices, "outputType")
         }
+      /*  ,chooseDirectedGraphFn:function(){
+            var choices = [
+                {id: "undirected", label: "Undirected"},
+                {id: "directed", label: "Directed"},
+
+            ]
+            self.myBotEngine.showList(choices, "graphType")
+        }*/
         , executePathFn: function () {
             var pathType = self.params.pathType;
             var outputType = self.params.outputType;
-            var color="#ef4270"
+           // var graphType=self.params.graphType
+            var color = "#ef4270"
             var result = null;
-            var options={removeDuplicates:true}
+            var options = {removeDuplicates: true}
+
+
             if (pathType == "pathsFromNode") {
-                result = Lineage_graphPaths.getAllpathsFromNode(self.params.visjsData, self.params.startNode, outputType,options)
+                result = Lineage_graphPaths.getAllpathsFromNode(self.params.visjsData, self.params.startNode, outputType, options)
             } else if (pathType == "pathsToNode") {
-                result = Lineage_graphPaths.getAllpathsToNode(self.params.visjsData, self.params.startNode, outputType,options)
-                color="#096eac"
+                result = Lineage_graphPaths.getAllpathsToNode(self.params.visjsData, self.params.startNode, outputType, options)
+                color = "#096eac"
             } else if (pathType == "pathsBetweenNodes") {
-                result = Lineage_graphPaths.getAllpathsBetweenNodes(self.params.visjsData, self.params.startNode, self.params.endNode, outputType,options)
+                color = "#07b611"
+                options.inverse = false;
+                result = Lineage_graphPaths.getAllpathsBetweenNodes(self.params.visjsData, self.params.startNode, self.params.endNode, outputType, options)
             } else if (pathType == "shortestPathBetweenNodes") {
-                result = Lineage_graphPaths.getAllpathsBetweenNodes(self.params.visjsData, self.params.startNode, outputType,options)
-                if(result.length>0) {
+                result = Lineage_graphPaths.getAllpathsBetweenNodes(self.params.visjsData, self.params.startNode, outputType, options)
+                if (result.length > 0) {
                     result.sort(function (a, b) {
                         return b.length - a.length
                     })
-                    result=[result[0]]
+                    result = [result[0]]
                 }
 
-
             }
-
-            if(result.length==0) {
-                 alert("no path found")
-                return self.myBotEngine.previousStep()
-            }
-            else if (outputType == "text") {
-
-                common.copyTextToClipboard(result)
-            }
-            else if (outputType == "csv") {
-
-                common.copyTextToClipboard(result)
-            }
-            else if (outputType == "html") {
-                var html="<div>"+result+"</div>"
-               $("#mainDialogDiv").html(html)
-                $("#mainDialogDiv").dialog("open")
-            }
-
-            else if (outputType == "listEdges") {
-                var newEdgesMap = {}
-                result.forEach(function (edge) {
-                  //  path.forEach(function (edge) {
-                        if (!newEdgesMap[edge.id]) {
-                            newEdgesMap[edge.id] = {id: edge.id, color:color, width: 2}
-                        }
-                        if(newEdgesMap[edge.id].width<10)
-                        newEdgesMap[edge.id].width += 1
-                    })
-               // })
-                var newEdges = []
-                for (var id in newEdgesMap) {
-                    newEdges.push(newEdgesMap[id])
+            if (result.length == 0 && pathType == "pathsBetweenNodes") {
+                if(confirm(  "no path found, try undirected graph algorithm ?")) {
+                    options.inverse = true;
+                    result = Lineage_graphPaths.getAllpathsBetweenNodes(self.params.visjsData, self.params.startNode, self.params.endNode, outputType, options)
                 }
 
-                Lineage_whiteboard.lineageVisjsGraph.data.edges.update(newEdges)
             }
+            Lineage_graphPaths.drawPaths(result,outputType,color)
             self.myBotEngine.end()
 
-
         }
+    }
 
+    self.setEndNode=function(visjsNode){
+        var choices=[visjsNode]
+        self.myBotEngine.nextStep()
+        self.myBotEngine.showList(choices, "endNode", null, true)
+    }
 
-    }; //SparqlQuery_bot.functions;
 
 
     return self;

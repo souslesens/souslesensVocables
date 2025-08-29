@@ -196,7 +196,12 @@ var KGbuilder_triplesMaker = {
     getTripleSubject: function (tableMappings, mapping, line, callback) {
         //get value for Subject
 
-        /* gestion of specific mapping  */
+       /* gestion of specific mapping  : all mappings with special caracter to perform some specific treatment,
+         this specific treatment stop the workflow*/ 
+
+        // comment each specific mapping case
+
+        // url to check
 
         if (mapping.subjectIsSpecificUri || mapping.s.endsWith("_#")) {
             subjectStr = mapping.s.replace("_#", "");

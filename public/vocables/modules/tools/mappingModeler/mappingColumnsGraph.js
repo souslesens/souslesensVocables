@@ -6,7 +6,6 @@ import MappingsDetails from "./mappingsDetails.js";
 import DataSourceManager from "./dataSourcesManager.js";
 import MappingModeler from "./mappingModeler.js";
 
-
 /**
  * MappingColumnsGraph module.
  * Handles the visualization and management of mapping columns in a graph.
@@ -840,7 +839,6 @@ var MappingColumnsGraph = (function () {
                 databaseSources: {},
                 csvSources: {},
                 isConfigInMappingGraph: true,
-              
             };
             DataSourceManager.rawConfig = newJson;
         }
@@ -1379,12 +1377,12 @@ var MappingColumnsGraph = (function () {
         MappingColumnsGraph.visjsGraph.data.nodes.update(newNodes);
     };
 
-    self.relationMessage= function(fromLabel, toLabel){
-        if(MappingModeler.currentResourceType != "ObjectProperty"){
+    self.relationMessage = function (fromLabel, toLabel) {
+        if (MappingModeler.currentResourceType != "ObjectProperty") {
             return;
         }
-        $('#mappingModeler_relationInfos').html("from: <b>" + (fromLabel ?? 'None')+ "</b> to: <b>" + (toLabel ?? 'None') + "</b>");
-    }
+        $("#mappingModeler_relationInfos").html("from: <b>" + (fromLabel ?? "None") + "</b> to: <b>" + (toLabel ?? "None") + "</b>");
+    };
     return self;
 })();
 

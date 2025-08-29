@@ -79,7 +79,7 @@ var Lineage_nodeCentricGraph = (function () {
             }
         }
 
-        return {nodes: newNodes, edges: newEdges};
+        return { nodes: newNodes, edges: newEdges };
     };
 
     self.draw = function (rootNodeId) {
@@ -115,26 +115,18 @@ var Lineage_nodeCentricGraph = (function () {
         Lineage_whiteboard.lineageVisjsGraph.network.setOptions(Lineage_whiteboard.lineageVisjsGraph.options.visjsOptions);
     };
 
-
-
-
     self.listAllNodeRelations = function (rootNodeId) {
+        var nodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
+        var edges = Lineage_whiteboard.lineageVisjsGraph.data.edges.get();
+        var visjsData = { nodes: nodes, edges: edges };
 
-       var nodes= Lineage_whiteboard.lineageVisjsGraph.data.nodes.get()
-        var edges= Lineage_whiteboard.lineageVisjsGraph.data.edges.get()
-        var visjsData={nodes:nodes,edges:edges}
-
-
-       GraphPaths_bot.start(visjsData,rootNodeId,null)
-
-
-return;
-       var str= Lineage_graphPaths.getAllpathsFromNode(visjsData,rootNodeId,"text")
-common.copyTextToClipboard(str)
-
+        GraphPaths_bot.start(visjsData, rootNodeId, null);
 
         return;
+        var str = Lineage_graphPaths.getAllpathsFromNode(visjsData, rootNodeId, "text");
+        common.copyTextToClipboard(str);
 
+        return;
     };
 
     return self;

@@ -77,7 +77,7 @@ module.exports = function () {
                 type: "string",
                 in: "query",
                 required: false,
-            }
+            },
         ],
         responses: {
             200: {
@@ -91,7 +91,7 @@ module.exports = function () {
     };
     async function DELETE(req, res, next) {
         try {
-            if(!req.body.options){
+            if (!req.body.options) {
                 req.body.options = "{}";
             }
             KGbuilder_main.deleteKGcreatorTriples(req.body.source, JSON.parse(req.body.tables), JSON.parse(req.body.options), function (err, result) {

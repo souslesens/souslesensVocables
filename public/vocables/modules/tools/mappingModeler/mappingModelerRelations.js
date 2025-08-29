@@ -6,7 +6,6 @@ import MappingModeler from "./mappingModeler.js";
 import UI from "../../shared/UI.js";
 var MappingModelerRelations = (function () {
     self.listPossibleRelations = function (callback) {
-        
         var nodes = MappingColumnsGraph.visjsGraph.data.nodes.get();
         var edges = MappingColumnsGraph.visjsGraph.data.edges.get();
         var nodesMap = {};
@@ -23,29 +22,27 @@ var MappingModelerRelations = (function () {
             }
 
             if (nodesMap[edge.from]?.data?.type == "Column" && nodesMap[edge.to]?.data?.type == "Class" && nodesMap[edge.from]?.data?.dataTable == MappingModeler.currentTable.name) {
-                if(!classesMap[nodesMap[edge.to].id] ){
+                if (!classesMap[nodesMap[edge.to].id]) {
                     classesMap[nodesMap[edge.to].id] = [nodesMap[edge.from].id];
-                }
-                else{
+                } else {
                     classesMap[nodesMap[edge.to].id].push(nodesMap[edge.from].id);
                 }
-                
             }
         });
         var classes = null; // Object.keys(classesMap);
         var relations = [];
-        
+
         Sparql_OWL.getObjectRestrictions(DataSourcesManager.currentSlsvSource, classes, null, function (err, result) {
-            if(err){
-                if(callback) callback(err);
+            if (err) {
+                if (callback) callback(err);
                 return;
             }
             result.forEach(function (item) {
                 var fromColumn = classesMap[item.subject.value];
                 var toColumn = classesMap[item.value.value];
                 if (fromColumn && toColumn) {
-                    fromColumn.forEach(function(fromColumnId){
-                        toColumn.forEach(function(toColumnId){
+                    fromColumn.forEach(function (fromColumnId) {
+                        toColumn.forEach(function (toColumnId) {
                             if (nodesMap[fromColumnId].data.table != nodesMap[toColumnId].data.table) {
                                 return;
                             }
@@ -76,15 +73,14 @@ var MappingModelerRelations = (function () {
                     data: item,
                 });
             });
-            if(callback) callback(null,jstreeData);
+            if (callback) callback(null, jstreeData);
             return;
-            
         });
     };
     self.drawPossibleRelations = function () {
-        var jstreeData = self.listPossibleRelations(function(err,jstreeData){
-            if(err){
-                alert(err)
+        var jstreeData = self.listPossibleRelations(function (err, jstreeData) {
+            if (err) {
+                alert(err);
             }
             var jstreeOptions = {
                 openAll: true,
@@ -119,7 +115,6 @@ var MappingModelerRelations = (function () {
             $("#MappingModeler_leftTabs").tabs("option", "active", 1);
             UIcontroller.onActivateLeftPanelTab("MappingModeler_columnsTab");
         });
-
     };
 
     return self;

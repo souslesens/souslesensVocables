@@ -310,14 +310,14 @@ var Lineage_similars = (function () {
                 }
                 self.visjsData = visjsData;
                 if (visjsData.edges.length == 0) {
-                    if(callback){
+                    if (callback) {
                         return callback();
                     }
                     return;
                 }
 
                 var ouputType = output || $("#lineageSimilars_outputTypeSelect").val();
-                
+
                 self.similarsSources = similarsSources;
                 self.displaySimilars(ouputType, similarsSources, sources, fromSource, callback);
             },

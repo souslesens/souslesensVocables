@@ -83,13 +83,11 @@ var MappingModeler = (function () {
      */
     self.onLoaded = function () {
         async.series(
-            [   
-                
-          
-            function (callbackSeries) {
-                //reinitialize config (Change Source and reload after modification)
-                DataSourceManager.currentConfig = {};
-                DataSourceManager.rawConfig = {};
+            [
+                function (callbackSeries) {
+                    //reinitialize config (Change Source and reload after modification)
+                    DataSourceManager.currentConfig = {};
+                    DataSourceManager.rawConfig = {};
                     return callbackSeries();
                 },
                 function (callbackSeries) {
@@ -167,13 +165,13 @@ var MappingModeler = (function () {
                     });
                 },
                 // add the MappingModeler_currentDataSource div to set table message in topBar
-                function(callbackSeries){
-                    $('#MappingModeler_currentDataSourceDiv').remove();
+                function (callbackSeries) {
+                    $("#MappingModeler_currentDataSourceDiv").remove();
                     var datasourceDiv = `
                     <div class='w3-bar-item' style='display:flex' id="MappingModeler_currentDataSourceDiv">
                     <span style="font-weight: bold; font-size: 13px;margin-top:15px" id="MappingModeler_currentDataSource"></span>&nbsp;
-                    </div>`
-                    var topControlParent=$('#index_topContolPanel').parent()
+                    </div>`;
+                    var topControlParent = $("#index_topContolPanel").parent();
                     $(datasourceDiv).insertAfter(topControlParent);
                     return callbackSeries();
                 },
@@ -314,7 +312,7 @@ var MappingModeler = (function () {
 
             self.initSourcesMap(objects);
 
-            objects.forEach(function (item,index) {
+            objects.forEach(function (item, index) {
                 if (item.source) {
                     if (!uniqueSources[item.source]) {
                         uniqueSources[item.source] = jstreeData.length;
@@ -322,7 +320,7 @@ var MappingModeler = (function () {
                         jstreeData.push({
                             id: item.source,
                             parent: parentName,
-                            text: "<span style='font-size:larger;color:" + color +"'>" + item.source + "</span>",
+                            text: "<span style='font-size:larger;color:" + color + "'>" + item.source + "</span>",
                             data: {
                                 id: item.source,
                                 label: item.source,
@@ -333,7 +331,7 @@ var MappingModeler = (function () {
                         jstreeData.push({
                             id: item.id,
                             parent: item.source,
-                            text: "<span  style='color:" + color +";background-color:" + (item?.highlight ?? '') + "'>" + item.label.split(":")[1] + "</span>",
+                            text: "<span  style='color:" + color + ";background-color:" + (item?.highlight ?? "") + "'>" + item.label.split(":")[1] + "</span>",
                             data: {
                                 id: item.id,
                                 text: item.label.split(":")[1],
@@ -366,18 +364,17 @@ var MappingModeler = (function () {
             });
             var sourceOrderArray = [MappingModeler.currentSLSsource];
             sourceOrderArray = sourceOrderArray.concat(Config.sources[MappingModeler.currentSLSsource].imports);
-            var startIndex=2;
-            if(parentName=="Properties"){
-                startIndex=5;
+            var startIndex = 2;
+            if (parentName == "Properties") {
+                startIndex = 5;
             }
-            var index =0;
+            var index = 0;
             sourceOrderArray.forEach(function (source) {
-            if(uniqueSources[source]){
-                var jstreeIndex=uniqueSources[source];
-                common.array.moveItem(jstreeData, jstreeIndex+index, startIndex+index);
-                index++;
-
-            }
+                if (uniqueSources[source]) {
+                    var jstreeIndex = uniqueSources[source];
+                    common.array.moveItem(jstreeData, jstreeIndex + index, startIndex + index);
+                    index++;
+                }
             });
         } else {
             objects.forEach(function (item) {
@@ -394,7 +391,7 @@ var MappingModeler = (function () {
                 }
             });
         }
-        
+
         /*
         if (sourceIndex > -1) {
             if (parentName == "Properties") {
@@ -481,7 +478,7 @@ var MappingModeler = (function () {
         } else if (self.currentResourceType == "Column") {
             // Verify that he not already exists
             var nodeInVisjsGraph = MappingColumnsGraph.visjsGraph.data.nodes.get().filter(function (node) {
-                return node.data.dataTable == self.currentTable.name &&  node.type== "Column" && resourceUri == node.label;
+                return node.data.dataTable == self.currentTable.name && node.type == "Column" && resourceUri == node.label;
             });
             if (nodeInVisjsGraph.length > 0) {
                 return alert("Column already exists in the graph");
@@ -657,7 +654,7 @@ var MappingModeler = (function () {
                 MappingColumnsGraph.addEdge([edge]);
 
                 self.currentRelation = null;
-                MappingColumnsGraph.relationMessage()
+                MappingColumnsGraph.relationMessage();
                 //$("#axioms_legend_suggestionsSelect").empty();
                 JstreeWidget.empty("suggestionsSelectJstreeDiv");
             }
@@ -679,7 +676,7 @@ var MappingModeler = (function () {
      * - Managing virtual columns or row indices.
      */
     self.onLegendNodeClick = function (node, event) {
-        $('#mappingModeler_relationInfos').html("")
+        $("#mappingModeler_relationInfos").html("");
         if (!node) {
             return;
         }
@@ -732,7 +729,6 @@ var MappingModeler = (function () {
                 self.loadSuggestionSelectJstree(classesCopy, "Classes");
             });
         } else if (self.currentResourceType == "ObjectProperty") {
-
             var newObjects = [
                 { id: "createObjectProperty", label: "_Create new ObjectProperty_" },
                 { id: "function", label: "function" },
@@ -778,26 +774,24 @@ var MappingModeler = (function () {
                     var propertiesCopy = JSON.parse(JSON.stringify(properties));
                     propertiesCopy.unshift(...newObjects);
 
-                    MappingModelerRelations.listPossibleRelations(function(err,jstreeData){
-                        if(err){
+                    MappingModelerRelations.listPossibleRelations(function (err, jstreeData) {
+                        if (err) {
                             alert(err);
                         }
-                        jstreeData.forEach(function(item){
-                            if(item?.data?.fromColumn?.id==self.currentRelation.from.id && item?.data?.toColumn?.id==self.currentRelation.to.id){
-                                var restrictionProperty = propertiesCopy.filter(function(prop){
+                        jstreeData.forEach(function (item) {
+                            if (item?.data?.fromColumn?.id == self.currentRelation.from.id && item?.data?.toColumn?.id == self.currentRelation.to.id) {
+                                var restrictionProperty = propertiesCopy.filter(function (prop) {
                                     return prop.id == item?.data?.property?.id;
                                 });
-                                if(restrictionProperty.length > 0){
-                                    restrictionProperty[0].highlight = 'yellow';
+                                if (restrictionProperty.length > 0) {
+                                    restrictionProperty[0].highlight = "yellow";
                                 }
-
                             }
+                        });
 
-                        })
-                        
                         self.loadSuggestionSelectJstree(propertiesCopy, "Properties");
                     });
-                   
+
                     //self.setSuggestionsSelect(properties, false, newObjects);
                 },
             );
@@ -1077,18 +1071,16 @@ var MappingModeler = (function () {
         MappingColumnsGraph.clearGraph();
     };
 
-
-    self.restartMappings= function(){
+    self.restartMappings = function () {
         var confirmRestart = confirm("Are you sure you want to delete mappings nodes and edges?");
         if (confirmRestart) {
-
-        var visjsData = { nodes: [], edges: [] };
-                MappingColumnsGraph.visjsGraph.data = visjsData;
-                MappingColumnsGraph.saveVisjsGraph(function(){
-                    MappingColumnsGraph.loadVisjsGraph();
-                });
+            var visjsData = { nodes: [], edges: [] };
+            MappingColumnsGraph.visjsGraph.data = visjsData;
+            MappingColumnsGraph.saveVisjsGraph(function () {
+                MappingColumnsGraph.loadVisjsGraph();
+            });
         }
-    }
+    };
     /**
      * Displays the create resource bot and starts the resource creation workflow based on the provided resource type.
      *

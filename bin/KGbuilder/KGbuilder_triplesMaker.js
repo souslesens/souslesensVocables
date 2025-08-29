@@ -253,7 +253,7 @@ var KGbuilder_triplesMaker = {
         } else if (typeof mapping.s === "string" && mapping.s.indexOf("http") == 0) {
             //var prefixURI = tableMappings.prefixURI[mapping.s] || "";
             subjectStr = "<" + prefixURI + mapping.s + ">";
-            subjectStr = "<" +  mapping.s + ">";
+            subjectStr = "<" + mapping.s + ">";
         }
         // sparql prefix
         else if (typeof mapping.s === "string" && mapping.s.match(/.+:.+/)) {
@@ -263,7 +263,7 @@ var KGbuilder_triplesMaker = {
                 return callback(null, null);
             }
             //var prefixURI = tableMappings.prefixURI[mapping.s] || "";
-            subjectStr =  line[mapping.s];
+            subjectStr = line[mapping.s];
             //subjectStr = prefixURI + line[mapping.s];
         }
         if (mapping.lookup_s && !isTransformLookUp) {
@@ -276,7 +276,7 @@ var KGbuilder_triplesMaker = {
             } else {
                 //var prefixURI = tableMappings.prefixURI[mapping.s] || "";
                 //subjectStr = prefixURI + lookupValue;
-                subjectStr =  lookupValue;
+                subjectStr = lookupValue;
                 okLookups_s += 1;
             }
         }
@@ -296,7 +296,7 @@ var KGbuilder_triplesMaker = {
         } else {
             //var prefixURI = tableMappings.prefixURI[mapping.s] || "";
 
-            subjectStr = "<"  + tableMappings.graphUri + util.formatStringForTriple(subjectStr, true) + ">";
+            subjectStr = "<" + tableMappings.graphUri + util.formatStringForTriple(subjectStr, true) + ">";
         }
 
         return callback(null, subjectStr);
@@ -333,7 +333,7 @@ var KGbuilder_triplesMaker = {
         } else if (typeof mapping.o === "string" && mapping.o.indexOf("http") == 0) {
             //var prefixURI = tableMappings.prefixURI[mapping.o] || "";
             //objectStr = "<" + prefixURI + mapping.o + ">";
-            objectStr = "<"  + mapping.o + ">";
+            objectStr = "<" + mapping.o + ">";
             return callback(null, objectStr);
         } else if (typeof mapping.o === "string" && mapping.o.match(/.+:.+/)) {
             objectStr = mapping.o;
@@ -350,7 +350,6 @@ var KGbuilder_triplesMaker = {
                 objectStr = null;
             }
         } else {
-
             //  treat value
             //var isTransform = false;
             if (line[mapping.o] === 0) {
@@ -359,7 +358,6 @@ var KGbuilder_triplesMaker = {
             if (!line[mapping.o] || line[mapping.o] == "null") {
                 return callback(null, null);
             }
-           
 
             if (mapping.dataType) {
                 var str = line[mapping.o];
@@ -428,30 +426,24 @@ var KGbuilder_triplesMaker = {
                     }
                 }
                 // format after to apply transformations
-                objectStr =  str 
+                objectStr = str;
             } else {
-                    //var prefixURI = tableMappings.prefixURI[mapping.o] || "";
-                    objectStr =  line[mapping.o];
+                //var prefixURI = tableMappings.prefixURI[mapping.o] || "";
+                objectStr = line[mapping.o];
             }
-            if (tableMappings.transform && (tableMappings.transform[mapping.s]||tableMappings.transform[mapping.o])) {
-
+            if (tableMappings.transform && (tableMappings.transform[mapping.s] || tableMappings.transform[mapping.o])) {
                 // if the relation is a data property the transform will concern the subject
                 //else he will concern the object
-                if(mapping.dataType && tableMappings.transform[mapping.s]){
+                if (mapping.dataType && tableMappings.transform[mapping.s]) {
                     try {
                         if (objectStr) {
-                            
                             objectStr = tableMappings.transform[mapping.s](objectStr, "o", mapping.p, line, mapping);
-
-                        
                         }
                         // return callback(null,objectStr);
                     } catch (e) {
                         return (lineError = e + " " + mapping.o);
                     }
-                }
-                else{
-
+                } else {
                     if (objectStr && tableMappings.transform[mapping.o]) {
                         try {
                             objectStr = tableMappings.transform[mapping.o](objectStr, "o", mapping.p, line, mapping);
@@ -462,14 +454,12 @@ var KGbuilder_triplesMaker = {
                 }
             }
             if (mapping.lookup_o) {
-               try{
-                  lookupValue = KGbuilder_triplesMaker.getLookupValue(mapping.lookup_o, objectStr);
-                  objectStr = lookupValue;
-                }
-                catch (e) {
+                try {
+                    lookupValue = KGbuilder_triplesMaker.getLookupValue(mapping.lookup_o, objectStr);
+                    objectStr = lookupValue;
+                } catch (e) {
                     return (lineError = e + " " + mapping.o);
                 }
-                    
             }
         }
 
@@ -522,7 +512,7 @@ var KGbuilder_triplesMaker = {
         if (typeof propertyStr === "string" && propertyStr.indexOf("http") == 0) {
             propertyStr = "<" + propertyStr + ">";
         }
-        // did we need to throw error when the propertyStr is not valid as URI no prefix and not an URL 
+        // did we need to throw error when the propertyStr is not valid as URI no prefix and not an URL
         return callback(null, propertyStr);
     },
     getRestrictionTriples: function (mapping, subjectStr, propertyStr, objectStr, callback) {

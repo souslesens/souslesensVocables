@@ -36,12 +36,12 @@ module.exports = {
     getKGModelAsync: async function (connection, dbName, driver) {
         return new Promise((resolve, reject) => {
             module.exports.getKGModel(
-            connection,
-            dbName,
-            driver,
-            (data) => resolve(data),
-            (error) => reject(error)
+                connection,
+                dbName,
+                driver,
+                (data) => resolve(data),
+                (error) => reject(error),
             );
         });
-    }
+    },
 };

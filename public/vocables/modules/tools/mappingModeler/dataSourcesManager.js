@@ -485,10 +485,11 @@ var DataSourceManager = (function () {
         if (obj.node.data.type == "table" || obj.node.data.type == "csvSource") {
             var table = obj.node.data.id;
             var dataSourceLabel = table;
-            if(obj.node.type=='Table'){
-                var dataTableName = $("#"+self.dataSourcejstreeDivId).jstree().get_node(obj.node.parent).text
-                var dataSourceLabel = dataTableName + ' : ' +table;
-
+            if (obj.node.type == "Table") {
+                var dataTableName = $("#" + self.dataSourcejstreeDivId)
+                    .jstree()
+                    .get_node(obj.node.parent).text;
+                var dataSourceLabel = dataTableName + " : " + table;
             }
             $("#MappingModeler_currentDataSource").html(dataSourceLabel);
 
@@ -697,7 +698,7 @@ var DataSourceManager = (function () {
     };
 
     self.drawMappingFilesTree = function () {
-           $.ajax({
+        $.ajax({
             type: "GET",
             url: `${Config.apiUrl}/kg/mappings/mappingfiles?source=${MappingModeler.currentSLSsource}`,
 

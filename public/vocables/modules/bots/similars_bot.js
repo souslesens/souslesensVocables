@@ -177,24 +177,20 @@ var Similars_bot = (function () {
         elasticQueryFn: function () {
             if (self.params.source?.length > 0) {
                 Lineage_similars.drawSourceSimilars(Lineage_sources.activeSource, self.params.source, self.params.mode, self.params.nodeSelection, "no draw", function () {
-                    if(Lineage_similars.visjsData.edges.length == 0){
-                        UI.message('No similars found');
+                    if (Lineage_similars.visjsData.edges.length == 0) {
+                        UI.message("No similars found");
                         self.myBotEngine.end();
-
-                    }else{
+                    } else {
                         self.myBotEngine.nextStep();
                     }
-                        
                 });
             } else {
                 Lineage_similars.drawWhiteBoardSimilars(self.params.nodeSelection, self.params.mode, "no draw");
-                if(Lineage_similars.visjsData.nodes.length > 0) {
-                   self.myBotEngine.nextStep();
-
-                }else{
-                    UI.message('No similars found');
+                if (Lineage_similars.visjsData.nodes.length > 0) {
+                    self.myBotEngine.nextStep();
+                } else {
+                    UI.message("No similars found");
                     self.myBotEngine.end();
-
                 }
             }
         },

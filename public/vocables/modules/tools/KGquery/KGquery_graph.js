@@ -400,11 +400,11 @@ var KGquery_graph = (function () {
                                         data: { propertyId: "rdfs:member" },
                                     });
                                 });*/
-                                result.forEach(function(item){
-                                    if(item?.propLabel?.value){
-                                        item.propLabel.value= item.propLabel.value + ' -->'
+                                result.forEach(function (item) {
+                                    if (item?.propLabel?.value) {
+                                        item.propLabel.value = item.propLabel.value + " -->";
                                     }
-                                })
+                                });
                                 implicitModel = implicitModel.concat(result);
                                 return callbackSeries();
                             });

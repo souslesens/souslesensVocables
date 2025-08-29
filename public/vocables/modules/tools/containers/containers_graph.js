@@ -99,7 +99,7 @@ var Containers_graph = (function () {
                         });
                     }
                 }
-              /*  if (!existingNodes[item.ancestorParent.value]) {
+                /*  if (!existingNodes[item.ancestorParent.value]) {
                     existingNodes[item.ancestorParent.value] = 1;
 
                     var label = item.ancestorParentLabel ? item.ancestorParentLabel.value : Sparql_common.getLabelFromURI(item.ancestorParent.value);

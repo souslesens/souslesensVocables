@@ -371,12 +371,9 @@ var CreateSLSVsource_bot = (function () {
                     alert(jqXHR.responseText || errorThrown);
                     setLoading(false);
                     return self.myBotEngine.previousStep();
-                }
+                },
             });
         },
-
-        
-
     };
 
     self.uploadGraphFromUrl = function (callback) {

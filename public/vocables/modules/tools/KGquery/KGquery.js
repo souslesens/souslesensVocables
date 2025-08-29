@@ -70,7 +70,7 @@ var KGquery = (function () {
         //self.clearAll();
         $("#messageDiv").attr("id", "KGquery_messageDiv");
         $("#waitImg").attr("id", "KGquery_waitImg");
-        $("#MappingModeler_currentDataSourceDiv").remove()
+        $("#MappingModeler_currentDataSourceDiv").remove();
         KGquery.initMyQuery();
     };
     /**

@@ -7,12 +7,12 @@ module.exports = function () {
     };
 
     function GET(req, res, _next) {
-      KGbuilder_main.getSourceMappingsFiles(req.query.source, function (err, result) {
-          if (err) {
-              return res.status(400).json({ error: err });
-          }
-          return res.status(200).json(result);
-      });
+        KGbuilder_main.getSourceMappingsFiles(req.query.source, function (err, result) {
+            if (err) {
+                return res.status(400).json({ error: err });
+            }
+            return res.status(200).json(result);
+        });
     }
 
     GET.apiDoc = {

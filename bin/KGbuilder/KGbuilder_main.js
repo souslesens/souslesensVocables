@@ -393,7 +393,7 @@ var KGbuilder_main = {
      * @param options
      * @param callback
      */
-    deleteKGcreatorTriples: function (source, tables, options,callback) {
+    deleteKGcreatorTriples: function (source, tables, options, callback) {
         KGbuilder_main.getSourceConfig(source, function (err, sourceMainJson) {
             if (err) {
                 return callbackSeries(err);
@@ -432,9 +432,9 @@ var KGbuilder_main = {
             }
         });
     },
-    
+
     // on potential source mappingFiles analyse with SPARQL query which has really triples created on it and return it
-    getSourceMappingsFiles:async function(source, callback) {
+    getSourceMappingsFiles: async function (source, callback) {
         KGbuilder_main.getSourceConfig(source, async function (err, sourceMainJson) {
             if (err) {
                 return callback(err);
@@ -442,13 +442,12 @@ var KGbuilder_main = {
             var mappingFiles = [];
 
             for (const key of Object.keys(sourceMainJson.databaseSources)) {
-                
                 const database = await DatabaseModel.getDatabase(key);
                 const driver = await DatabaseModel.getClientDriver(database.driver);
 
                 const connection = dbConnector.getConnection(database, driver);
 
-                const data = await dbConnector.getKGModelAsync(connection, database.database,database.driver);
+                const data = await dbConnector.getKGModelAsync(connection, database.database, database.driver);
                 let tables = {};
                 data.forEach((d) => {
                     if (!Object.keys(tables).includes(d.table_name)) {
@@ -456,22 +455,21 @@ var KGbuilder_main = {
                     }
                     tables[d.table_name].push(d.column_name);
                 });
-                Object.keys(tables).forEach(function(tableName) {
+                Object.keys(tables).forEach(function (tableName) {
                     // also get db type
                     mappingFiles.push({
-                    id:tableName,
-                    label: tableName,
-                    databaseId: key,
-                    databaseName: database.name,
-                    type: "databaseSource",
-                    database: database.database,
-                    driver: database.driver,
-                    columns : tables[tableName],
-                
-                   });
+                        id: tableName,
+                        label: tableName,
+                        databaseId: key,
+                        databaseName: database.name,
+                        type: "databaseSource",
+                        database: database.database,
+                        driver: database.driver,
+                        columns: tables[tableName],
+                    });
                 });
             }
-            
+
             Object.keys(sourceMainJson.csvSources).forEach(function (key) {
                 mappingFiles.push({
                     id: key,
@@ -488,7 +486,7 @@ var KGbuilder_main = {
             }`;
 
             const params = {
-                query: query
+                query: query,
             };
             if (ConfigManager.config && ConfigManager.config.sparql_server.user) {
                 params.auth = {
@@ -505,25 +503,18 @@ var KGbuilder_main = {
                 var result = result.results.bindings;
                 var trueMappingFiles = {};
                 result.forEach(function (file) {
-                    trueMappingFiles[file.table.value] = file['callret-1'].value ?? true;
-
+                    trueMappingFiles[file.table.value] = file["callret-1"].value ?? true;
                 });
                 mappingFiles = mappingFiles.filter(function (file) {
-
-                        return trueMappingFiles[file.label] !== undefined;
-                    
+                    return trueMappingFiles[file.label] !== undefined;
                 });
                 mappingFiles.forEach(function (file) {
                     file.triplesCount = trueMappingFiles[file.label];
                 });
                 callback(null, mappingFiles);
-
-
             });
-
         });
-    }
-
+    },
 };
 
 module.exports = KGbuilder_main;

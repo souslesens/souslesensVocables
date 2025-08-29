@@ -296,8 +296,6 @@ var OntologyModels = (function () {
                             });
                         },
 
-
-
                         //set inverse Props constraints
                         function (callbackSeries) {
                             self.setInversePropertiesConstaints(source, inversePropsMap);
@@ -329,7 +327,6 @@ var OntologyModels = (function () {
                             }
                             callbackSeries();
                         },
-
 
                         //set inherited domains
                         function (callbackSeries) {
@@ -377,7 +374,6 @@ var OntologyModels = (function () {
                                 return callbackSeries();
                             });
                         },
-
 
                         // set constraints prop label and superProp
                         function (callbackSeries) {

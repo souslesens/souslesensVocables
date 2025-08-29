@@ -127,7 +127,7 @@ const KGbuilder_triplesWriter = {
         );
     },
 
-    deleteKGcreatorTriples: function (sparqlServerUrl, graphUri, table,options, callback) {
+    deleteKGcreatorTriples: function (sparqlServerUrl, graphUri, table, options, callback) {
         const KGbuilder_triplesMaker = require("./KGbuilder_triplesMaker");
         var query = "";
         if (table) {
@@ -177,7 +177,7 @@ const KGbuilder_triplesWriter = {
 
                     totalSize += resultSize;
 
-                   KGbuilder_socket.message(options.clientSocketId, "" + totalSize + " triples deleted from table " + table, false);
+                    KGbuilder_socket.message(options.clientSocketId, "" + totalSize + " triples deleted from table " + table, false);
                     return callbackWhilst(err);
                 });
             },

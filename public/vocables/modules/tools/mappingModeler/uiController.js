@@ -19,7 +19,7 @@ var UIcontroller = (function () {
      * @memberof module:UIcontroller
      */
     self.onActivateLeftPanelTab = function (tabId) {
-        $('#mappingModeler_relationInfos').html("");
+        $("#mappingModeler_relationInfos").html("");
         $(".mappingModeler_rightPanel").css("display", "none");
         if (tabId == "MappingModeler_dataSourcesTab") {
             $("#mappingModeler_structuralPanel").css("display", "block");

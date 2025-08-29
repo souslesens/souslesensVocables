@@ -6,6 +6,7 @@ import MappingsDetails from "./mappingsDetails.js";
 import DataSourceManager from "./dataSourcesManager.js";
 import MappingModeler from "./mappingModeler.js";
 
+
 /**
  * MappingColumnsGraph module.
  * Handles the visualization and management of mapping columns in a graph.
@@ -329,7 +330,8 @@ var MappingColumnsGraph = (function () {
     self.onVisjsGraphClick = function (node, event, options) {
         if (!node) {
             MappingModeler.currentRelation = null;
-            PopupMenuWidget.hidePopup("popupMenuWidgetDiv");
+            self.relationMessage();
+
             return;
         }
 
@@ -356,6 +358,7 @@ var MappingColumnsGraph = (function () {
             }
 
             if (!MappingModeler.currentRelation) {
+                self.relationMessage(node.data.label, null);
                 MappingModeler.currentRelation = {
                     from: { id: node.id, classId: getColumnClass(node), dataTable: node.data.dataTable },
                     to: null,
@@ -364,6 +367,7 @@ var MappingColumnsGraph = (function () {
             } else {
                 if (node.data.dataTable && node.data.dataTable != MappingModeler.currentRelation.from.dataTable) {
                     MappingModeler.currentRelation = null;
+                    self.relationMessage();
                     return alert("Relations between Columns from different datbels are not possible");
                 }
                 MappingModeler.currentRelation.to = { id: node.id, classId: getColumnClass(node) };
@@ -393,6 +397,7 @@ var MappingColumnsGraph = (function () {
             }
 
             MappingModeler.currentRelation = null;
+            self.relationMessage();
         }
     };
 
@@ -565,6 +570,7 @@ var MappingColumnsGraph = (function () {
 
             self.addEdge(edges);
             MappingModeler.currentRelation = null;
+            self.relationMessage();
         },
 
         /**
@@ -1372,6 +1378,13 @@ var MappingColumnsGraph = (function () {
         });
         MappingColumnsGraph.visjsGraph.data.nodes.update(newNodes);
     };
+
+    self.relationMessage= function(fromLabel, toLabel){
+        if(MappingModeler.currentResourceType != "ObjectProperty"){
+            return;
+        }
+        $('#mappingModeler_relationInfos').html("from: <b>" + (fromLabel ?? 'None')+ "</b> to: <b>" + (toLabel ?? 'None') + "</b>");
+    }
     return self;
 })();
 

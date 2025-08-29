@@ -22,6 +22,7 @@ import mappingColumnsGraph from "./mappingColumnsGraph.js";
 import Lineage_sources from "../lineage/lineage_sources.js";
 import MainController from "../../shared/mainController.js";
 import dataSourcesManager from "./dataSourcesManager.js";
+import MappingColumnsGraph from "./mappingColumnsGraph.js";
 
 /**
  * MappingModeler module.
@@ -656,6 +657,7 @@ var MappingModeler = (function () {
                 MappingColumnsGraph.addEdge([edge]);
 
                 self.currentRelation = null;
+                MappingColumnsGraph.relationMessage()
                 //$("#axioms_legend_suggestionsSelect").empty();
                 JstreeWidget.empty("suggestionsSelectJstreeDiv");
             }
@@ -677,6 +679,7 @@ var MappingModeler = (function () {
      * - Managing virtual columns or row indices.
      */
     self.onLegendNodeClick = function (node, event) {
+        $('#mappingModeler_relationInfos').html("")
         if (!node) {
             return;
         }
@@ -729,6 +732,7 @@ var MappingModeler = (function () {
                 self.loadSuggestionSelectJstree(classesCopy, "Classes");
             });
         } else if (self.currentResourceType == "ObjectProperty") {
+
             var newObjects = [
                 { id: "createObjectProperty", label: "_Create new ObjectProperty_" },
                 { id: "function", label: "function" },
@@ -737,8 +741,10 @@ var MappingModeler = (function () {
                 { id: "rdfs:subClassOf", label: "_rdfs:subClassOf_" },
             ];
             var options = { includesnoConstraintsProperties: true };
+            var fromLabel = MappingColumnsGraph.visjsGraph.data.nodes.get(self.currentRelation.from.id).label;
+            var toLabel = MappingColumnsGraph.visjsGraph.data.nodes.get(self.currentRelation.to.id).label;
             //Axioms_suggestions.getValidPropertiesForClasses(MappingModeler.currentSLSsource, self.currentRelation.from.classId, self.currentRelation.to.classId, options, function (err, properties) {
-
+            MappingColumnsGraph.relationMessage(fromLabel, toLabel);
             OntologyModels.getAllowedPropertiesBetweenNodes(
                 MappingModeler.currentSLSsource,
                 self.currentRelation.from.classId,

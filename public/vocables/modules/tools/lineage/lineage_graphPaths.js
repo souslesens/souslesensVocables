@@ -1,7 +1,8 @@
 var Lineage_graphPaths = (function () {
     // from chatGPT
     var self = {};
-    self.limit = 50;
+    self.limit = 100;
+    self.maxPaths = 1000;
 
     self.getGraphFromVisjsData = function (visjsdata, inverse) {
         var graph = {};
@@ -48,6 +49,9 @@ var Lineage_graphPaths = (function () {
         }
         if (!options) {
             options = {};
+        }
+        if (self.tooManyIterations) {
+            alert("too many iterations result truncated");
         }
 
         var edgesFromToMap = self.getEdgesFromToMap(visjsData, options.inverse);
@@ -126,6 +130,8 @@ var Lineage_graphPaths = (function () {
         if (!options) {
             options = {};
         }
+        var countIterations = 0;
+        self.tooManyIterations = false;
         var graph = self.getGraphFromVisjsData(visjsData, options.inverse);
 
         function findAllPathsUndirected(graph, start, target) {
@@ -136,6 +142,9 @@ var Lineage_graphPaths = (function () {
                 visited.add(node);
 
                 if (node === target) {
+                    if (countIterations++ > self.maxPaths) {
+                        return (self.tooManyIterations = true);
+                    }
                     result.push([...path]); // found one path
                 } else {
                     for (let neighbor of graph[node] || []) {
@@ -157,6 +166,9 @@ var Lineage_graphPaths = (function () {
             path = [...path, start]; // extend current path
 
             if (start === end) {
+                if (countIterations++ > self.maxPaths) {
+                    return (self.tooManyIterations = true);
+                }
                 paths.push(path); // found a complete path
                 return paths;
             }
@@ -184,7 +196,8 @@ var Lineage_graphPaths = (function () {
 
     self.getAllpathsFromNode = function (visjsData, start, format, options) {
         var graph = self.getGraphFromVisjsData(visjsData);
-
+        var countIterations = 0;
+        self.tooManyIterations = false;
         function findAllPaths(graph, start, path = [], paths = []) {
             path = [...path, start]; // extend current path
             paths.push(path); // record this path (even if it’s partial)
@@ -195,6 +208,9 @@ var Lineage_graphPaths = (function () {
 
             for (let neighbor of graph[start]) {
                 if (!path.includes(neighbor)) {
+                    if (countIterations++ > self.maxPaths) {
+                        return (self.tooManyIterations = true);
+                    }
                     // avoid cycles
                     findAllPaths(graph, neighbor, path, paths);
                 }
@@ -210,7 +226,8 @@ var Lineage_graphPaths = (function () {
     };
     self.getAllpathsToNode = function (visjsData, end, format, options) {
         var graph = self.getGraphFromVisjsData(visjsData);
-
+        var countIterations = 0;
+        self.tooManyIterations = false;
         function findAllPathsToTargetUndirected(graph, target) {
             let paths = [];
 
@@ -219,6 +236,9 @@ var Lineage_graphPaths = (function () {
                 visited.add(node);
 
                 if (node === target) {
+                    if (countIterations++ > self.maxPaths) {
+                        return (self.tooManyIterations = true);
+                    }
                     paths.push([...path]);
                 } else {
                     for (let neighbor of graph[node] || []) {

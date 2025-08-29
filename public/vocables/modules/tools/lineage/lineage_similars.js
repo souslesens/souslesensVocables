@@ -308,12 +308,16 @@ var Lineage_similars = (function () {
                         }
                     });
                 }
+                self.visjsData = visjsData;
                 if (visjsData.edges.length == 0) {
-                    return alert("no similars found in source " + source);
+                    if (callback) {
+                        return callback();
+                    }
+                    return;
                 }
 
                 var ouputType = output || $("#lineageSimilars_outputTypeSelect").val();
-                self.visjsData = visjsData;
+
                 self.similarsSources = similarsSources;
                 self.displaySimilars(ouputType, similarsSources, sources, fromSource, callback);
             },

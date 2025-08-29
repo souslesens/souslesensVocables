@@ -32,4 +32,16 @@ module.exports = {
             .then((result) => successCallback(result))
             .catch((error) => errorCallback(error));
     },
+
+    getKGModelAsync: async function (connection, dbName, driver) {
+        return new Promise((resolve, reject) => {
+            module.exports.getKGModel(
+                connection,
+                dbName,
+                driver,
+                (data) => resolve(data),
+                (error) => reject(error),
+            );
+        });
+    },
 };

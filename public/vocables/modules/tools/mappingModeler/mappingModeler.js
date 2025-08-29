@@ -22,6 +22,7 @@ import mappingColumnsGraph from "./mappingColumnsGraph.js";
 import Lineage_sources from "../lineage/lineage_sources.js";
 import MainController from "../../shared/mainController.js";
 import dataSourcesManager from "./dataSourcesManager.js";
+import MappingColumnsGraph from "./mappingColumnsGraph.js";
 
 /**
  * MappingModeler module.
@@ -163,6 +164,17 @@ var MappingModeler = (function () {
                         });*/
                     });
                 },
+                // add the MappingModeler_currentDataSource div to set table message in topBar
+                function (callbackSeries) {
+                    $("#MappingModeler_currentDataSourceDiv").remove();
+                    var datasourceDiv = `
+                    <div class='w3-bar-item' style='display:flex' id="MappingModeler_currentDataSourceDiv">
+                    <span style="font-weight: bold; font-size: 13px;margin-top:15px" id="MappingModeler_currentDataSource"></span>&nbsp;
+                    </div>`;
+                    var topControlParent = $("#index_topContolPanel").parent();
+                    $(datasourceDiv).insertAfter(topControlParent);
+                    return callbackSeries();
+                },
             ],
             function (err) {
                 if (err) {
@@ -300,10 +312,10 @@ var MappingModeler = (function () {
 
             self.initSourcesMap(objects);
 
-            objects.forEach(function (item) {
+            objects.forEach(function (item, index) {
                 if (item.source) {
                     if (!uniqueSources[item.source]) {
-                        uniqueSources[item.source] = 1;
+                        uniqueSources[item.source] = jstreeData.length;
 
                         jstreeData.push({
                             id: item.source,
@@ -319,7 +331,7 @@ var MappingModeler = (function () {
                         jstreeData.push({
                             id: item.id,
                             parent: item.source,
-                            text: "<span  style='color:" + color + "'>" + item.label.split(":")[1] + "</span>",
+                            text: "<span  style='color:" + color + ";background-color:" + (item?.highlight ?? "") + "'>" + item.label.split(":")[1] + "</span>",
                             data: {
                                 id: item.id,
                                 text: item.label.split(":")[1],
@@ -350,6 +362,20 @@ var MappingModeler = (function () {
                     });
                 }
             });
+            var sourceOrderArray = [MappingModeler.currentSLSsource];
+            sourceOrderArray = sourceOrderArray.concat(Config.sources[MappingModeler.currentSLSsource].imports);
+            var startIndex = 2;
+            if (parentName == "Properties") {
+                startIndex = 5;
+            }
+            var index = 0;
+            sourceOrderArray.forEach(function (source) {
+                if (uniqueSources[source]) {
+                    var jstreeIndex = uniqueSources[source];
+                    common.array.moveItem(jstreeData, jstreeIndex + index, startIndex + index);
+                    index++;
+                }
+            });
         } else {
             objects.forEach(function (item) {
                 if (item != "" && item != "#") {
@@ -365,14 +391,15 @@ var MappingModeler = (function () {
                 }
             });
         }
-        var sourceIndex = jstreeData.findIndex((obj) => obj.id == MappingModeler.currentSLSsource);
+
+        /*
         if (sourceIndex > -1) {
             if (parentName == "Properties") {
                 common.array.moveItem(jstreeData, sourceIndex, 5);
             } else {
                 common.array.moveItem(jstreeData, sourceIndex, 2);
             }
-        }
+        }*/
 
         JstreeWidget.loadJsTree("suggestionsSelectJstreeDiv", jstreeData, options, function () {
             $("#suggestionsSelectJstreeDiv").css("overflow", "unset");
@@ -451,7 +478,7 @@ var MappingModeler = (function () {
         } else if (self.currentResourceType == "Column") {
             // Verify that he not already exists
             var nodeInVisjsGraph = MappingColumnsGraph.visjsGraph.data.nodes.get().filter(function (node) {
-                return node.data.dataTable == self.currentTable.name && resourceUri == node.label;
+                return node.data.dataTable == self.currentTable.name && node.type == "Column" && resourceUri == node.label;
             });
             if (nodeInVisjsGraph.length > 0) {
                 return alert("Column already exists in the graph");
@@ -627,6 +654,7 @@ var MappingModeler = (function () {
                 MappingColumnsGraph.addEdge([edge]);
 
                 self.currentRelation = null;
+                MappingColumnsGraph.relationMessage();
                 //$("#axioms_legend_suggestionsSelect").empty();
                 JstreeWidget.empty("suggestionsSelectJstreeDiv");
             }
@@ -648,6 +676,7 @@ var MappingModeler = (function () {
      * - Managing virtual columns or row indices.
      */
     self.onLegendNodeClick = function (node, event) {
+        $("#mappingModeler_relationInfos").html("");
         if (!node) {
             return;
         }
@@ -708,8 +737,10 @@ var MappingModeler = (function () {
                 { id: "rdfs:subClassOf", label: "_rdfs:subClassOf_" },
             ];
             var options = { includesnoConstraintsProperties: true };
+            var fromLabel = MappingColumnsGraph.visjsGraph.data.nodes.get(self.currentRelation.from.id).label;
+            var toLabel = MappingColumnsGraph.visjsGraph.data.nodes.get(self.currentRelation.to.id).label;
             //Axioms_suggestions.getValidPropertiesForClasses(MappingModeler.currentSLSsource, self.currentRelation.from.classId, self.currentRelation.to.classId, options, function (err, properties) {
-
+            MappingColumnsGraph.relationMessage(fromLabel, toLabel);
             OntologyModels.getAllowedPropertiesBetweenNodes(
                 MappingModeler.currentSLSsource,
                 self.currentRelation.from.classId,
@@ -742,7 +773,25 @@ var MappingModeler = (function () {
                     //To add NewObjects only one time
                     var propertiesCopy = JSON.parse(JSON.stringify(properties));
                     propertiesCopy.unshift(...newObjects);
-                    self.loadSuggestionSelectJstree(propertiesCopy, "Properties");
+
+                    MappingModelerRelations.listPossibleRelations(function (err, jstreeData) {
+                        if (err) {
+                            alert(err);
+                        }
+                        jstreeData.forEach(function (item) {
+                            if (item?.data?.fromColumn?.id == self.currentRelation.from.id && item?.data?.toColumn?.id == self.currentRelation.to.id) {
+                                var restrictionProperty = propertiesCopy.filter(function (prop) {
+                                    return prop.id == item?.data?.property?.id;
+                                });
+                                if (restrictionProperty.length > 0) {
+                                    restrictionProperty[0].highlight = "yellow";
+                                }
+                            }
+                        });
+
+                        self.loadSuggestionSelectJstree(propertiesCopy, "Properties");
+                    });
+
                     //self.setSuggestionsSelect(properties, false, newObjects);
                 },
             );
@@ -1022,6 +1071,16 @@ var MappingModeler = (function () {
         MappingColumnsGraph.clearGraph();
     };
 
+    self.restartMappings = function () {
+        var confirmRestart = confirm("Are you sure you want to delete mappings nodes and edges?");
+        if (confirmRestart) {
+            var visjsData = { nodes: [], edges: [] };
+            MappingColumnsGraph.visjsGraph.data = visjsData;
+            MappingColumnsGraph.saveVisjsGraph(function () {
+                MappingColumnsGraph.loadVisjsGraph();
+            });
+        }
+    };
     /**
      * Displays the create resource bot and starts the resource creation workflow based on the provided resource type.
      *

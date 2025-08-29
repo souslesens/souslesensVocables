@@ -3,8 +3,9 @@ import DataSourcesManager from "./dataSourcesManager.js";
 import common from "../../shared/common.js";
 import JstreeWidget from "../../uiWidgets/jstreeWidget.js";
 import MappingModeler from "./mappingModeler.js";
+import UI from "../../shared/UI.js";
 var MappingModelerRelations = (function () {
-    self.listPossibleRelations = function () {
+    self.listPossibleRelations = function (callback) {
         var nodes = MappingColumnsGraph.visjsGraph.data.nodes.get();
         var edges = MappingColumnsGraph.visjsGraph.data.edges.get();
         var nodesMap = {};
@@ -20,24 +21,37 @@ var MappingModelerRelations = (function () {
                 existingRelationsMap[nodesMap[edge.to].id] = nodesMap[edge.from].id;
             }
 
-            if (nodesMap[edge.from]?.data?.type == "Column" && nodesMap[edge.to]?.data?.type == "Class") {
-                classesMap[nodesMap[edge.to].id] = nodesMap[edge.from].id;
+            if (nodesMap[edge.from]?.data?.type == "Column" && nodesMap[edge.to]?.data?.type == "Class" && nodesMap[edge.from]?.data?.dataTable == MappingModeler.currentTable.name) {
+                if (!classesMap[nodesMap[edge.to].id]) {
+                    classesMap[nodesMap[edge.to].id] = [nodesMap[edge.from].id];
+                } else {
+                    classesMap[nodesMap[edge.to].id].push(nodesMap[edge.from].id);
+                }
             }
         });
-        var classes = Object.keys(classesMap);
+        var classes = null; // Object.keys(classesMap);
         var relations = [];
+
         Sparql_OWL.getObjectRestrictions(DataSourcesManager.currentSlsvSource, classes, null, function (err, result) {
+            if (err) {
+                if (callback) callback(err);
+                return;
+            }
             result.forEach(function (item) {
-                var fromColumnId = classesMap[item.subject.value];
-                var toColumnId = classesMap[item.value.value];
-                if (fromColumnId && toColumnId) {
-                    if (nodesMap[fromColumnId].data.table != nodesMap[toColumnId].data.table) {
-                        return;
-                    }
-                    relations.push({
-                        fromColumn: { id: fromColumnId, label: nodesMap[fromColumnId].label },
-                        toColumn: { id: toColumnId, label: nodesMap[toColumnId].label },
-                        property: { id: item.prop.value, label: item.propLabel.value },
+                var fromColumn = classesMap[item.subject.value];
+                var toColumn = classesMap[item.value.value];
+                if (fromColumn && toColumn) {
+                    fromColumn.forEach(function (fromColumnId) {
+                        toColumn.forEach(function (toColumnId) {
+                            if (nodesMap[fromColumnId].data.table != nodesMap[toColumnId].data.table) {
+                                return;
+                            }
+                            relations.push({
+                                fromColumn: { id: fromColumnId, label: nodesMap[fromColumnId].label },
+                                toColumn: { id: toColumnId, label: nodesMap[toColumnId].label },
+                                property: { id: item.prop.value, label: item.propLabel.value },
+                            });
+                        });
                     });
                 }
             });
@@ -59,14 +73,23 @@ var MappingModelerRelations = (function () {
                     data: item,
                 });
             });
-
-            var options = {
+            if (callback) callback(null, jstreeData);
+            return;
+        });
+    };
+    self.drawPossibleRelations = function () {
+        var jstreeData = self.listPossibleRelations(function (err, jstreeData) {
+            if (err) {
+                alert(err);
+            }
+            var jstreeOptions = {
                 openAll: true,
                 withCheckboxes: true,
             };
 
-            JstreeWidget.loadJsTree("mappingModelerRelations_jstreeDiv", jstreeData, options);
+            JstreeWidget.loadJsTree("mappingModelerRelations_jstreeDiv", jstreeData, jstreeOptions);
         });
+        // Draw the relations using the jstreeData
     };
 
     self.applyColumnRelations = function () {
@@ -86,6 +109,11 @@ var MappingModelerRelations = (function () {
             );
 
             MappingColumnsGraph.addEdge([edge]);
+        });
+
+        MappingColumnsGraph.saveVisjsGraph(function () {
+            $("#MappingModeler_leftTabs").tabs("option", "active", 1);
+            UIcontroller.onActivateLeftPanelTab("MappingModeler_columnsTab");
         });
     };
 

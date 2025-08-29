@@ -63,44 +63,23 @@ var MappingsDetails = (function () {
             // $("#mainDialogDiv").dialog("open");
         });
     };
-
-    /**
-     * Displays the detailed mappings tree for the current table.
-     * It populates the tree with nodes and mappings related to the selected table and columns.
-     * The tree allows search and interaction with mapping nodes.
-     * @function
-     * @name showDetailedMappingsTree
-     * @memberof module:MappingsDetails
-     * @param {Object} [column] - Optional column data to filter the tree by.
-     * @param {string} [divId="detailedMappings_jsTreeDiv"] - The ID of the div to display the tree in. Default is "detailedMappings_jsTreeDiv".
-     * @param {Object} [_options={}] - Optional configuration options for the tree, such as context menu behavior.
-     * @param {boolean} [_options.withoutContextMenu=false] - If true, disables the context menu.
-     * @param {boolean} [_options.searchPlugin=true] - Enables or disables the search plugin.
-     * @param {boolean} [_options.openAll=true] - If true, expands all nodes by default.
-     * @param {Function} [_options.selectTreeNodeFn] - Callback function for when a tree node is selected.
-     * @returns {void}
-     */
-    self.showDetailedMappingsTree = function (column, divId, _options) {
-        if (!_options) {
-            _options = {};
-        }
-
-        if (!divId) {
-            divId = "detailedMappings_jsTreeDiv";
-        }
-
+    self.generateMappingsTreeData = function (columns) {
         var table = MappingModeler.currentTable.name;
-
-        if (!table) {
-            table = MappingModeler.currentTable.name;
-        }
-
-        var nodes = MappingColumnsGraph.visjsGraph.data.nodes.get();
-
-        var columnsMap = {};
         var jstreeData = [];
         var uniqueSubjects = {};
+        var nodes = MappingColumnsGraph.visjsGraph.data.nodes.get();
         var buttonStr = "<img src='icons\\KGA\\MoreOptionsIcon-KGA.png' onClick=''>";
+
+        if (!columns) {
+            columns = [];
+        }
+        if (!Array.isArray(columns)) {
+            if (columns && typeof columns == "string") {
+                columns = [columns];
+            } else {
+                columns = [];
+            }
+        }
 
         jstreeData.push({
             id: MappingModeler.currentTable.name,
@@ -116,7 +95,10 @@ var MappingsDetails = (function () {
             if (node.data.type == "Class") {
                 return;
             }
-            if (node.data.type == "table") {
+            if (node.data.type == "Table") {
+                return;
+            }
+            if (columns.length > 0 && !columns.includes(node.label)) {
                 return;
             }
 
@@ -181,7 +163,128 @@ var MappingsDetails = (function () {
                 }
             }
         });
+        return jstreeData;
+    };
 
+    /**
+     * Displays the detailed mappings tree for the current table.
+     * It populates the tree with nodes and mappings related to the selected table and columns.
+     * The tree allows search and interaction with mapping nodes.
+     * @function
+     * @name showDetailedMappingsTree
+     * @memberof module:MappingsDetails
+     * @param {Object} [column] - Optional column data to filter the tree by.
+     * @param {string} [divId="detailedMappings_jsTreeDiv"] - The ID of the div to display the tree in. Default is "detailedMappings_jsTreeDiv".
+     * @param {Object} [_options={}] - Optional configuration options for the tree, such as context menu behavior.
+     * @param {boolean} [_options.withoutContextMenu=false] - If true, disables the context menu.
+     * @param {boolean} [_options.searchPlugin=true] - Enables or disables the search plugin.
+     * @param {boolean} [_options.openAll=true] - If true, expands all nodes by default.
+     * @param {Function} [_options.selectTreeNodeFn] - Callback function for when a tree node is selected.
+     * @returns {void}
+     */
+    self.showDetailedMappingsTree = function (column, divId, _options) {
+        if (!_options) {
+            _options = {};
+        }
+
+        if (!divId) {
+            divId = "detailedMappings_jsTreeDiv";
+        }
+
+        var table = MappingModeler.currentTable.name;
+
+        if (!table) {
+            table = MappingModeler.currentTable.name;
+        }
+
+        var nodes = MappingColumnsGraph.visjsGraph.data.nodes.get();
+
+        var columnsMap = {};
+        var jstreeData = self.generateMappingsTreeData();
+        var uniqueSubjects = {};
+        var buttonStr = "<img src='icons\\KGA\\MoreOptionsIcon-KGA.png' onClick=''>";
+        /*
+        jstreeData.push({
+            id: MappingModeler.currentTable.name,
+            text: "<b>" + MappingModeler.currentTable.name + "</b>",
+            data: {},
+            parent: "#",
+        });
+
+        nodes.forEach(function (node) {
+            if (node.data.dataTable !== table) {
+                return;
+            }
+            if (node.data.type == "Class") {
+                return;
+            }
+            if (node.data.type == "Table") {
+                return;
+            }
+
+            if (!uniqueSubjects[node.label]) {
+                console.log(node.label)
+                uniqueSubjects[node.label] = 1;
+                jstreeData.push({
+                    id: node.id,
+                    text: "<span style='background-color: #cb9801;padding: 3px;border-radius: 7px;'>" + node.label + "</span>&nbsp;" + buttonStr,
+                    data: node.data,
+                    parent: MappingModeler.currentTable.name,
+                });
+
+                var predicates = {
+                    rdfType: "rdf:type",
+                    rdfsLabel: "rdfs:label",
+                    uriType: "uri Type",
+                };
+
+                var color = "";
+                for (var key in node.data) {
+                    if (predicates[key]) {
+                        if (self.colorsMap[key]) {
+                            color = self.colorsMap[key];
+                        } else {
+                            color = "#3339ff";
+                        }
+                        jstreeData.push({
+                            id: node.id + "|" + key + "|" + node.data[key],
+                            text: "<span style='color: " + color + "'>" + key + "</span>  " + node.data[key],
+                            parent: node.id,
+                        });
+                    }
+                }
+
+                if (node.data.otherPredicates) {
+                    node.data.otherPredicates.forEach(function (item) {
+                        jstreeData.push({
+                            id: node.id + "|" + "otherPredicates" + "|" + item.property + "|" + item.object,
+                            text: "<span style='color: " + self.colorsMap["otherPredicates"] + "'>" + item.property + "</span>  " + item.object,
+                            parent: node.id,
+                        });
+                    });
+                }
+                if (node.data.transform) {
+                    jstreeData.push({
+                        id: node.id + "|" + "transform" + "|" + node.data.transform,
+                        text: "<span style='color: " + self.colorsMap["transform"] + "'>" + "transform" + "</span>  " + node.data.transform,
+                        parent: node.id,
+                    });
+                }
+                var currentLookupName = node.data.dataTable + "|" + node.data.label;
+                if (DataSourceManager.currentConfig.lookups[currentLookupName]) {
+                    var lookup = DataSourceManager.currentConfig.lookups[currentLookupName];
+                    if (lookup.name == currentLookupName) {
+                        jstreeData.push({
+                            id: lookup.fileName + "|" + "lookup",
+                            text: "<span style='color: " + self.colorsMap["lookup"] + "'>" + "lookup" + "</span>  " + JSON.stringify(lookup),
+                            parent: node.id,
+                            data: lookup,
+                        });
+                    }
+                }
+            }
+        });
+        */
         var options = {
             searchPlugin: true,
             openAll: true,
@@ -191,15 +294,7 @@ var MappingsDetails = (function () {
                 if (_options.withoutContextMenu) {
                     return;
                 }
-                if (node.parents.length == 3) {
-                    //only for node data
-                    items["deletemapping"] = {
-                        label: "delete",
-                        action: function (_e) {
-                            var node = MappingsDetails.deleteMappingInVisjsNode(self.currentTreeNode);
-                        },
-                    };
-                }
+
                 if (node.id.split("|")[1] == "transform") {
                     items["edit transform"] = {
                         label: "edit transform",
@@ -226,6 +321,15 @@ var MappingsDetails = (function () {
                                     return alert(err);
                                 }
                             });
+                        },
+                    };
+                }
+                if (node.parents.length == 3) {
+                    //only for node data
+                    items["deletemapping"] = {
+                        label: "delete",
+                        action: function (_e) {
+                            var node = MappingsDetails.deleteMappingInVisjsNode(self.currentTreeNode);
                         },
                     };
                 }
@@ -327,11 +431,18 @@ var MappingsDetails = (function () {
             var transformFn = "function{" + self.transform.createPrefixTransformFn(prefix, { notDialog: true }) + "}";
             currentGraphNode.data.transform = transformFn;
             currentGraphNode.data.prefixURI = prefix;
+            /*if (!DataSourceManager.rawConfig.prefixURI) {
+                DataSourceManager.rawConfig.prefixURI = {};
+            }
+            DataSourceManager.rawConfig.prefixURI[currentGraphNode.data.id] = prefix;*/
         }
         if (currentGraphNode.data.prefixURI && !prefix) {
             delete currentGraphNode.data.prefixURI;
             delete currentGraphNode.data.transform;
         }
+        /*if (prefix == "" && DataSourceManager.rawConfig.prefixURI[currentGraphNode.data.id]) {
+            delete DataSourceManager.rawConfig.prefixURI[currentGraphNode.data.id];
+        }*/
 
         var baseUri = (currentGraphNode.data.baseURI = $("#columnDetails-baseUri").val());
         var sourceObj = Config.sources[MappingModeler.currentSLSsource];
@@ -838,7 +949,9 @@ var MappingsDetails = (function () {
             var filteredMapping = mappings.filter(function (mapping) {
                 return mapping.s.replace("@", "").replace("_$", "").replace("_£", "") == self.transformColumn || mapping.o.replace("@", "").replace("_$", "").replace("_£", "") == self.transformColumn;
             });
-
+            filteredMapping = filteredMapping.filter(function (mapping) {
+                return mapping.p != "transform";
+            });
             var mappingWithTransform = {};
             mappingWithTransform[MappingModeler.currentTable.name] = { tripleModels: filteredMapping, transform: {} };
             mappingWithTransform[MappingModeler.currentTable.name].transform[self.transformColumn] = transformFn;
@@ -870,6 +983,8 @@ var MappingsDetails = (function () {
             })[0];
             currentNode.data.transform = transformFn;
             MappingColumnsGraph.updateNode(currentNode);
+
+            var columnCheckNodeData = MappingsDetails.generateMappingsTreeData(self.transformColumn);
 
             MappingColumnsGraph.saveVisjsGraph(function () {
                 self.showDetailedMappingsTree();

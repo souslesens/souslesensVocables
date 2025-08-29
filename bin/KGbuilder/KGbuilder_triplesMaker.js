@@ -159,10 +159,17 @@ var KGbuilder_triplesMaker = {
             return null;
         }
         var p = mappingValue.indexOf("]");
+
         if (p > 0) {
             //specific baseURI
             var baseUri = mappingValue.substring(1, p);
             var value = line[mappingValue.substring(p + 1)];
+            /*var columnURI = mappingValue.substring(p + 1);
+            var prefixURI = tableMappings.prefixURI[columnURI];
+            if (prefixURI) {
+                baseUri += prefixURI;
+            }*/
+
             // specific base URI can also have transforms and lookups
             if (value) {
                 if (tableMappings.transform && tableMappings.transform[mappingValue]) {
@@ -244,15 +251,20 @@ var KGbuilder_triplesMaker = {
                 return callback((lineError = e + " " + mapping.s));
             }
         } else if (typeof mapping.s === "string" && mapping.s.indexOf("http") == 0) {
+            //var prefixURI = tableMappings.prefixURI[mapping.s] || "";
+            subjectStr = "<" + prefixURI + mapping.s + ">";
             subjectStr = "<" + mapping.s + ">";
-        } else if (typeof mapping.s === "string" && mapping.s.match(/.+:.+/)) {
+        }
+        // sparql prefix
+        else if (typeof mapping.s === "string" && mapping.s.match(/.+:.+/)) {
             subjectStr = mapping.s;
         } else {
             if (!line[mapping.s] || (mapping.o.indexOf(":") > -1 && line[mapping.o]) == "null") {
                 return callback(null, null);
             }
-
+            //var prefixURI = tableMappings.prefixURI[mapping.s] || "";
             subjectStr = line[mapping.s];
+            //subjectStr = prefixURI + line[mapping.s];
         }
         if (mapping.lookup_s && !isTransformLookUp) {
             if (!lookUpsMap[mapping.lookup_s]) {
@@ -262,6 +274,8 @@ var KGbuilder_triplesMaker = {
             if (!lookupValue) {
                 missingLookups_s += 1;
             } else {
+                //var prefixURI = tableMappings.prefixURI[mapping.s] || "";
+                //subjectStr = prefixURI + lookupValue;
                 subjectStr = lookupValue;
                 okLookups_s += 1;
             }
@@ -280,6 +294,8 @@ var KGbuilder_triplesMaker = {
         } else if (KGbuilder_triplesMaker.isUri(subjectStr)) {
             subjectStr = "<" + subjectStr + ">";
         } else {
+            //var prefixURI = tableMappings.prefixURI[mapping.s] || "";
+
             subjectStr = "<" + tableMappings.graphUri + util.formatStringForTriple(subjectStr, true) + ">";
         }
 
@@ -315,6 +331,8 @@ var KGbuilder_triplesMaker = {
                 return callback(e);
             }
         } else if (typeof mapping.o === "string" && mapping.o.indexOf("http") == 0) {
+            //var prefixURI = tableMappings.prefixURI[mapping.o] || "";
+            //objectStr = "<" + prefixURI + mapping.o + ">";
             objectStr = "<" + mapping.o + ">";
             return callback(null, objectStr);
         } else if (typeof mapping.o === "string" && mapping.o.match(/.+:.+/)) {
@@ -332,36 +350,13 @@ var KGbuilder_triplesMaker = {
                 objectStr = null;
             }
         } else {
-            var isTransform = false;
+            //  treat value
+            //var isTransform = false;
             if (line[mapping.o] === 0) {
                 line[mapping.o] = "0";
             }
             if (!line[mapping.o] || line[mapping.o] == "null") {
                 return callback(null, null);
-            }
-            if (tableMappings.transform && tableMappings.transform[mapping.o]) {
-                try {
-                    if (line[mapping.o]) {
-                        var value;
-                        value = util.formatStringForTriple(line[mapping.o], false);
-                        objectStr = tableMappings.transform[mapping.o](util.formatStringForTriple(line[mapping.o], false), "o", mapping.p, line, mapping);
-
-                        isTransform = true;
-                        if (mapping.lookup_o) {
-                            var lookupValue = KGbuilder_triplesMaker.getLookupValue(mapping.lookup_o, value);
-                            if (lookupValue) {
-                                //objectStr = tableMappings.transform[mapping.o](lookupValue, "s", mapping.p, line, mapping);
-                                //okLookups_o += 1;
-                                isTransformLookUp = true;
-                            }
-                        }
-                    } else {
-                        objectStr = ""; //tableMappings.transform[mapping.o](mapping.o, "o", mapping.p, line, mapping);
-                    }
-                    // return callback(null,objectStr);
-                } catch (e) {
-                    return (lineError = e + " " + mapping.o);
-                }
             }
 
             if (mapping.dataType) {
@@ -430,42 +425,40 @@ var KGbuilder_triplesMaker = {
                     } else {
                     }
                 }
-                objectStr = '"' + str + '"^^' + mapping.dataType;
+                // format after to apply transformations
+                objectStr = str;
             } else {
-                if (isTransform == false) {
-                    objectStr = line[mapping.o];
-                }
+                //var prefixURI = tableMappings.prefixURI[mapping.o] || "";
+                objectStr = line[mapping.o];
             }
-
-            if (mapping.lookup_o) {
-                if (!lookUpsMap[mapping.lookup_o]) {
-                    return (lineError = "no lookup named " + mapping.lookup_o);
-                }
-                var lookupValue;
-                if (mapping.dataType && str) {
-                    lookupValue = KGbuilder_triplesMaker.getLookupValue(mapping.lookup_o, str);
-                    if (lookupValue) {
-                        if (isTransformLookUp) {
-                            lookupValue = tableMappings.transform[mapping.o](util.formatStringForTriple(lookupValue, false), "o", mapping.p, line, mapping);
-                            lookupValue = '"' + lookupValue + '"^^' + mapping.dataType;
-                        } else {
-                            lookupValue = '"' + lookupValue + '"^^' + mapping.dataType;
+            if (tableMappings.transform && (tableMappings.transform[mapping.s] || tableMappings.transform[mapping.o])) {
+                // if the relation is a data property the transform will concern the subject
+                //else he will concern the object
+                if (mapping.dataType && tableMappings.transform[mapping.s]) {
+                    try {
+                        if (objectStr) {
+                            objectStr = tableMappings.transform[mapping.s](objectStr, "o", mapping.p, line, mapping);
+                        }
+                        // return callback(null,objectStr);
+                    } catch (e) {
+                        return (lineError = e + " " + mapping.o);
+                    }
+                } else {
+                    if (objectStr && tableMappings.transform[mapping.o]) {
+                        try {
+                            objectStr = tableMappings.transform[mapping.o](objectStr, "o", mapping.p, line, mapping);
+                        } catch (e) {
+                            return (lineError = e + " " + mapping.o);
                         }
                     }
-                } else {
-                    if (isTransformLookUp) {
-                        lookupValue = KGbuilder_triplesMaker.getLookupValue(mapping.lookup_o, value);
-                        lookupValue = tableMappings.transform[mapping.o](util.formatStringForTriple(lookupValue, false), "o", mapping.p, line, mapping);
-                    } else {
-                        lookupValue = KGbuilder_triplesMaker.getLookupValue(mapping.lookup_o, value);
-                    }
                 }
-
-                if (!lookupValue) {
-                    missingLookups_o += 1;
-                } else {
-                    okLookups_o += 1;
+            }
+            if (mapping.lookup_o) {
+                try {
+                    lookupValue = KGbuilder_triplesMaker.getLookupValue(mapping.lookup_o, objectStr);
                     objectStr = lookupValue;
+                } catch (e) {
+                    return (lineError = e + " " + mapping.o);
                 }
             }
         }
@@ -486,7 +479,7 @@ var KGbuilder_triplesMaker = {
             else if (KGbuilder_triplesMaker.isPrefixedUri(objectStr)) {
                 // pass
             } else if (mapping.dataType) {
-                //pass
+                objectStr = '"' + objectStr + '"^^' + mapping.dataType;
             } else if (mapping.isString) {
                 objectStr = "'" + util.formatStringForTriple(objectStr, false) + "'";
             } else {
@@ -519,6 +512,7 @@ var KGbuilder_triplesMaker = {
         if (typeof propertyStr === "string" && propertyStr.indexOf("http") == 0) {
             propertyStr = "<" + propertyStr + ">";
         }
+        // did we need to throw error when the propertyStr is not valid as URI no prefix and not an URL
         return callback(null, propertyStr);
     },
     getRestrictionTriples: function (mapping, subjectStr, propertyStr, objectStr, callback) {
@@ -759,15 +753,19 @@ var KGbuilder_triplesMaker = {
                 callback(null, tableData);
             });
         } else if (tableMappings.datasourceConfig) {
+            KGbuilder_socket.message(options.clientSocketId, "loading data from database table " + tableMappings.table, false);
             databaseModel
                 .batchSelect(tableMappings.datasourceConfig.dbName, tableMappings.table, {
-                    limit: options.sampleSize || 1000,
+                    limit: options.sampleSize || 10000,
                     noRecurs: Boolean(options.sampleSize),
                 })
                 .then((result) => {
                     tableData = result;
                     KGbuilder_socket.message(options.clientSocketId, " data loaded ,table " + tableMappings.table, false);
-                    return callback(null, tableData);
+
+                    //function to separate the callback error to the next catch bacause it's degrade visibility and make the callback executed multiple times
+                    //by chat gpt
+                    setImmediate(() => callback(null, tableData));
                 })
                 .catch((err) => {
                     return callback(err);

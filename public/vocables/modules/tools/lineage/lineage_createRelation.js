@@ -751,6 +751,7 @@ var Lineage_createRelation = (function () {
             var domainLabel = "";
             var rangeLabel = "";
             sources.forEach(function (source) {
+                if (!Config.ontologiesVocabularyModels[source]) return console.log("no Config.ontologiesVocabularyModels for source " + source);
                 var constraints = Config.ontologiesVocabularyModels[source].constraints;
                 if (constraints && constraints[superPropId]) {
                     domain = domain || constraints[superPropId].domain;

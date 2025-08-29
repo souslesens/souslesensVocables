@@ -138,7 +138,7 @@ const DatabaseFormDialog = ({ database = defaultDatabase(ulid()), create = false
         <>
             {create ? (
                 <Button variant="contained" color="primary" onClick={handleOpen}>
-                    Create Database
+                    Register Database
                 </Button>
             ) : (
                 <IconButton color="primary" onClick={handleOpen} title={"Edit"}>

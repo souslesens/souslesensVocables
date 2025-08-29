@@ -17,6 +17,9 @@ module.exports = function () {
                 processResponse(res, err, result);
             });
         } else {
+            if (!body.sparqlServerUrl) {
+                return processResponse(res, "no sparqlServerUrl", null);
+            }
             if (ConfigManager.config && body.sparqlServerUrl.indexOf(ConfigManager.config.sparql_server.url) == 0) {
                 auth = {
                     user: ConfigManager.config.sparql_server.user,

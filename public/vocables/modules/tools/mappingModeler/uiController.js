@@ -19,6 +19,7 @@ var UIcontroller = (function () {
      * @memberof module:UIcontroller
      */
     self.onActivateLeftPanelTab = function (tabId) {
+        $("#mappingModeler_relationInfos").html("");
         $(".mappingModeler_rightPanel").css("display", "none");
         if (tabId == "MappingModeler_dataSourcesTab") {
             $("#mappingModeler_structuralPanel").css("display", "block");
@@ -29,9 +30,9 @@ var UIcontroller = (function () {
         }
         if (tabId == "MappingModeler_columnsTab") {
             $("#mappingModeler_structuralPanel").css("display", "block");
-            MappingModeler.initActiveLegend(self.legendGraphDivId);
+            MappingModeler.initActiveLegend(MappingModeler.legendGraphDivId);
             MappingModeler.loadSuggestionSelectJstree(MappingModeler.currentTable.columns, "Columns");
-            $("#MappingModeler_currentDataSource").html(DataSourceManager.currentConfig.currentDataSource.name);
+            //$("#MappingModeler_currentDataSource").html(DataSourceManager.currentConfig.currentDataSource.name);
             $("#rightControlPanelDiv").load("./modules/tools/mappingModeler/html/mappingsGraphButtons.html", function (err) {});
         } else if (tabId == "MappingModeler_technicalDetailTab") {
             MappingsDetails.showDetailsDialog();
@@ -52,7 +53,7 @@ var UIcontroller = (function () {
     self.switchLeftPanel = function (target) {
         var tabsArray = ["dataSource", "mappings", "triples"];
         if (target == "Column Mappings") {
-            MappingModeler.initActiveLegend(self.legendGraphDivId);
+            MappingModeler.initActiveLegend(MappingModeler.legendGraphDivId);
         } else if (target == "Technical Mappings") {
             MappingsDetails.showDetailsDialog();
         }

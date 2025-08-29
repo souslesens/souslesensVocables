@@ -71,6 +71,13 @@ module.exports = function () {
                 in: "query",
                 required: false,
             },
+            {
+                name: "options",
+                description: "options",
+                type: "string",
+                in: "query",
+                required: false,
+            },
         ],
         responses: {
             200: {
@@ -84,7 +91,10 @@ module.exports = function () {
     };
     async function DELETE(req, res, next) {
         try {
-            KGbuilder_main.deleteKGcreatorTriples(req.body.source, JSON.parse(req.body.tables), function (err, result) {
+            if (!req.body.options) {
+                req.body.options = "{}";
+            }
+            KGbuilder_main.deleteKGcreatorTriples(req.body.source, JSON.parse(req.body.tables), JSON.parse(req.body.options), function (err, result) {
                 processResponse(res, err, result);
             });
         } catch (e) {

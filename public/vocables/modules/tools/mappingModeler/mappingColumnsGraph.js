@@ -329,7 +329,8 @@ var MappingColumnsGraph = (function () {
     self.onVisjsGraphClick = function (node, event, options) {
         if (!node) {
             MappingModeler.currentRelation = null;
-            PopupMenuWidget.hidePopup("popupMenuWidgetDiv");
+            self.relationMessage();
+
             return;
         }
 
@@ -356,6 +357,7 @@ var MappingColumnsGraph = (function () {
             }
 
             if (!MappingModeler.currentRelation) {
+                self.relationMessage(node.data.label, null);
                 MappingModeler.currentRelation = {
                     from: { id: node.id, classId: getColumnClass(node), dataTable: node.data.dataTable },
                     to: null,
@@ -364,6 +366,7 @@ var MappingColumnsGraph = (function () {
             } else {
                 if (node.data.dataTable && node.data.dataTable != MappingModeler.currentRelation.from.dataTable) {
                     MappingModeler.currentRelation = null;
+                    self.relationMessage();
                     return alert("Relations between Columns from different datbels are not possible");
                 }
                 MappingModeler.currentRelation.to = { id: node.id, classId: getColumnClass(node) };
@@ -393,6 +396,7 @@ var MappingColumnsGraph = (function () {
             }
 
             MappingModeler.currentRelation = null;
+            self.relationMessage();
         }
     };
 
@@ -565,6 +569,7 @@ var MappingColumnsGraph = (function () {
 
             self.addEdge(edges);
             MappingModeler.currentRelation = null;
+            self.relationMessage();
         },
 
         /**
@@ -816,6 +821,16 @@ var MappingColumnsGraph = (function () {
             } else {
                 var graphUri = Config.sources[MappingModeler.currentSLSsource].graphUri;
             }
+            /*var newJson = {
+                sparqlServerUrl: Config.sources[MappingModeler.currentSLSsource].sparql_server.url,
+                graphUri: graphUri,
+                prefixes: {},
+                lookups: {},
+                databaseSources: {},
+                csvSources: {},
+                isConfigInMappingGraph: true,
+                prefixURI: {},
+            };*/
             var newJson = {
                 sparqlServerUrl: Config.sources[MappingModeler.currentSLSsource].sparql_server.url,
                 graphUri: graphUri,
@@ -1123,7 +1138,16 @@ var MappingColumnsGraph = (function () {
                 node.shape = "box";
                 node.color = oldNode.color;
                 node.size = 18;
+                /*if(oldNode.data.prefixURI){
+                    if(data?.options?.config){
+                        if(!data?.options?.config?.prefixURI){
+                            data.options.config.prefixURI = {};
+                        }
+                        data.options.config.prefixURI[oldNode.label] = oldNode.data.prefixURI;
 
+                    }
+                   
+                }*/
                 if (oldNode.data.type == "Class") {
                     node.level = 3;
                 } else if (oldNode.data.type == "Table") {
@@ -1351,6 +1375,13 @@ var MappingColumnsGraph = (function () {
             newNodes.push({ id: node.id, hidden: hide });
         });
         MappingColumnsGraph.visjsGraph.data.nodes.update(newNodes);
+    };
+
+    self.relationMessage = function (fromLabel, toLabel) {
+        if (MappingModeler.currentResourceType != "ObjectProperty") {
+            return;
+        }
+        $("#mappingModeler_relationInfos").html("from: <b>" + (fromLabel ?? "None") + "</b> to: <b>" + (toLabel ?? "None") + "</b>");
     };
     return self;
 })();

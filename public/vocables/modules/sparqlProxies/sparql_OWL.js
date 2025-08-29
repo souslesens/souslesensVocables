@@ -1339,6 +1339,18 @@ var Sparql_OWL = (function () {
         }
         if (options.inheritedProperties) {
             query += "  { ?prop rdfs:subPropertyOf*/rdf:type owl:ObjectProperty ";
+        }
+        if (options.dataTypeProperties) {
+            query +=
+                "   {?prop rdf:type owl:DatatypeProperty. " +
+                optionalLabelStr +
+                "{?prop rdfs:label ?propLabel.  " +
+                Sparql_common.getLangFilter(sourceLabel, "propLabel") +
+                "}" +
+                "OPTIONAL{?prop owl:inverseOf ?inverseProp. " +
+                "OPTIONAL{?inverseProp rdfs:label ?inversePropLabel.  " +
+                Sparql_common.getLangFilter(sourceLabel, "inversePropLabel") +
+                "}}";
         } else {
             query +=
                 "   {?prop rdf:type owl:ObjectProperty. " +
@@ -2324,8 +2336,8 @@ var Sparql_OWL = (function () {
                     obj[key] = item[key].value;
                 }
                 propsMap[obj.prop0] = {
-                    parentProp: obj.prop,
-                    prop: obj.prop0,
+                    parentProp: obj.prop0,
+                    prop: obj.prop,
                     domain: obj.domain,
                     range: obj.range,
                     domainLabel: obj.domainLabel || obj.domain ? Sparql_common.getLabelFromURI(obj.domain) : null,

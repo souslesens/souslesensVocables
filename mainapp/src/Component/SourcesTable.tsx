@@ -153,7 +153,15 @@ const SourcesTable = () => {
 
     const handleUploadSource = async (sourceFiles: FileList | null) => {
         if (sourceFiles && sourceFiles !== undefined && sourceFiles?.length > 0) {
-            const source = JSON.parse(await sourceFiles[0].text()) as ServerSource;
+            try {
+                const source = JSON.parse(await sourceFiles[0].text()) as ServerSource;
+            } catch (error) {
+                setSnackOpen(true);
+                setSnackSeverity("error");
+                console.error(error);
+                setSnackMessages((msg) => new Set(msg).add(`Invalid JSON`));
+                return;
+            }
             // check name
             const existingSourcesName: string[] = SRD.withDefault([], model.sources).map((source) => source.name);
             if (existingSourcesName.includes(source.name)) {

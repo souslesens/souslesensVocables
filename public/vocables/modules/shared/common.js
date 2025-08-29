@@ -84,7 +84,7 @@ var common = (function () {
         }
         // force redraw after dynamic change of the select because some navigators don't do it automaticaly
         select.css("display", "none");
-        select[0].offsetHeight;
+        // select[0].offsetHeight;
         select.css("display", "");
     };
 

@@ -176,6 +176,13 @@ var MappingTransform = (function () {
                         o: data.transform,
                     });
                 }
+                /*if (data.prefixURI) {
+                    allMappings.push({
+                        s: subject,
+                        p: "prefixURI",
+                        o: data.prefixURI,
+                    });
+                }*/
             }
             if (nodeId == "7ce40e6a") var w = 3;
             var connections = MappingColumnsGraph.visjsGraph.getFromNodeEdgesAndToNodes(nodeId);
@@ -330,9 +337,8 @@ var MappingTransform = (function () {
         var filteredMappings = [];
         var columnsSelection = {};
         var checkedNodeAttrs = [];
-
         checkedNodes.forEach(function (node) {
-            if (node.parents.length == 3) {
+            if (node?.parents?.length == 3) {
                 // attrs
                 checkedNodeAttrs.push(node.id);
                 columnsSelection[node.id] = MappingColumnsGraph.visjsGraph.data.nodes.get(node.parent);
@@ -347,6 +353,7 @@ var MappingTransform = (function () {
                 columnsSelection[node.id] = MappingColumnsGraph.visjsGraph.data.nodes.get(node.id);
             }
         });
+
         var mappings = MappingTransform.mappingsToKGcreatorJson(columnsSelection);
         var columnMappings = MappingTransform.mappingsToKGcreatorJson(columnsSelection, { getColumnMappingsOnly: true });
         var uniqueFilteredMappings = {};
@@ -377,7 +384,9 @@ var MappingTransform = (function () {
         //filteredMappings=filteredMappings.concat(columnMappings);
         var table = MappingModeler.currentTable.name;
 
+        //filteredMappings = { [table]: { tripleModels: filteredMappings, transform: transforms, lookups: {}, prefixURI: DataSourceManager.currentConfig?.prefixURI } };
         filteredMappings = { [table]: { tripleModels: filteredMappings, transform: transforms, lookups: {} } };
+        // Add checked lookups
         if (Object.keys(DataSourceManager.currentConfig.lookups)) {
             Object.keys(DataSourceManager.currentConfig.lookups).forEach(function (lookup) {
                 var checkedLookup = checkedNodes.filter(function (item) {
@@ -388,6 +397,7 @@ var MappingTransform = (function () {
                 }
             });
         }
+
         return filteredMappings;
     };
     return self;

@@ -44,6 +44,7 @@
                 </div>
 
                 <br />
+                <div id="mappingModeler_relationInfosDiv"><span id="mappingModeler_relationInfos"></span></div>
                 <div id="suggestionsSelectJstreeDiv" style="width: 450px; height: 500px; overflow: auto"></div>
             </div>
         </div>
@@ -101,8 +102,8 @@
     </div>
     <div id="MappingModeler_RelationsTab" class="coloredContainerImportant">
         <div style="height: 500px">
-            <button class="w3-button slsv-button-2" onclick="MappingModelerRelations.listPossibleRelations()" title="listPossibleRelations">list possible relations</button>
-            <button class="w3-button slsv-button-2" onclick="MappingModelerRelations.applyColumnRelations()" title="applyColumnRelations">apply possible relations</button>
+            <button class="w3-button slsv-button-2" onclick="MappingModelerRelations.drawPossibleRelations()" title="listPossibleRelations">list possible relations</button>
+            <button class="w3-button slsv-button-2" onclick="MappingModelerRelations.applyColumnRelations()" title="applyColumnRelations">apply selected relations</button>
 
             <div style="width: 400px; height: 400px; overflow: auto">
                 <div id="mappingModelerRelations_jstreeDiv"></div>

@@ -103,7 +103,7 @@ var MappingsDetails = (function () {
             }
 
             if (!uniqueSubjects[node.label]) {
-                uniqueSubjects[node.label] = 1;
+                uniqueSubjects[node.label] = node;
                 jstreeData.push({
                     id: node.id,
                     text: "<span style='background-color: #cb9801;padding: 3px;border-radius: 7px;'>" + node.label + "</span>&nbsp;" + buttonStr,
@@ -165,6 +165,47 @@ var MappingsDetails = (function () {
 
             }
         });
+        var columnsMap= Object.fromEntries(Object.values(uniqueSubjects).map(obj => [obj.id, obj]));
+        var columnMappings = MappingTransform.mappingsToKGcreatorJson(columnsMap, { getColumnMappingsOnly: true });
+        columnMappings.forEach(function(mapping) {
+            var propertyLabel = mapping.p;
+            if(mapping.p.indexOf("http://") === 0) {
+                var allPropertiesCorrespondance = MappingModeler.allProperties.filter(function(prop) { return prop.id == mapping.p; });
+                propertyLabel = (allPropertiesCorrespondance.length > 0) ? allPropertiesCorrespondance[0].label : mapping.p;
+            }
+            var subjectId = uniqueSubjects[mapping.s]?.id;
+            var objectId = uniqueSubjects[mapping.o]?.id;
+            if(!subjectId ) return;
+            var objectLabel = mapping.o;
+            if(!objectId && mapping.o.indexOf("http://") === 0){
+
+                var object = MappingModeler.allClasses.find(function(item){ return item.id == mapping.o; });
+                if(object) {
+                    objectId = object.id;
+                    var objectLabel = object.label;
+                }
+
+            }
+            if(!objectId) return;
+            // mapping.s is a column no label case
+            jstreeData.push({
+                id: mapping.s +'-->' + mapping.p +'-->' + mapping.o,
+                text: mapping.s +'-->' + propertyLabel +'-->' + objectLabel,
+                parent: subjectId,
+                data: {
+                    fromNodeColumn:mapping.s,
+                    fromNodeId:subjectId,
+                    toNodeColumn:mapping.o,
+                    toNodeId:objectId,
+                    toNodeLabel:objectLabel,
+                    propertyId:mapping.p,
+                    propertyLabel:propertyLabel,
+                    type:'ColumnMapping'
+                }
+                
+            });
+        });
+
         return jstreeData;
     };
 

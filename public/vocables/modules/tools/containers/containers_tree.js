@@ -115,13 +115,19 @@ var Containers_tree = (function () {
                 selectTreeNodeFn: Containers_tree.onSelectedNodeTreeclick,
                 dnd: {
                     drag_stop: function (data, element, helper, event) {
+
                         //  self.onMoveContainer(data, element, helper, event);
                     },
                     drag_start: function (data, element, helper, event) {
+
                         var sourceNodeId = element.data.nodes[0];
                         self.currenDraggingNodeSourceParent = $("#lineage_containers_containersJstree").jstree().get_node(sourceNodeId).parent;
                     },
                 },
+                dropAllowedFn:function(){
+                    var canMove=$("#Lineage_unlockMoveContainer_cbx").prop("checked")
+                        return canMove;
+                }
             };
         }
         JstreeWidget.loadJsTree(jstreeDiv, jstreeData, jstreeOptions, function () {
@@ -308,9 +314,11 @@ var Containers_tree = (function () {
                     selectTreeNodeFn: Containers_tree.onSelectedNodeTreeclick,
                     dnd: {
                         drag_stop: function (data, element, helper, event) {
+
                             //  self.onMoveContainer(data, element, helper, event);
                         },
                         drag_start: function (data, element, helper, event) {
+
                             var sourceNodeId = element.data.nodes[0];
                             self.currenDraggingNodeSourceParent = $("#lineage_containers_containersJstree").jstree().get_node(sourceNodeId).parent;
                         },
@@ -333,6 +341,7 @@ var Containers_tree = (function () {
                 var uri = node && node.data ? node.data.id : "x";
                 return uri;
             }
+
 
             var movingInfos = {
                 nodeId: getjstreeIdUri(data.node.id),

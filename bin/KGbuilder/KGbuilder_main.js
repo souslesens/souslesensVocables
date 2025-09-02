@@ -14,6 +14,14 @@ const KGbuilder_socket = require("./KGbuilder_socket");
 const dbConnector = require("../KG/dbConnector");
 const DatabaseModel = require("../../model/databases").databaseModel;
 
+
+
+const MappingsParser=require("./mappingsParser.js")
+const TriplesMapker=require("./triplesMaker.js")
+
+
+const TripleMaker=require("./triplesMaker.js")
+
 var KGbuilder_main = {
     /**
      * Generate triples from a CSV file or database
@@ -30,6 +38,7 @@ var KGbuilder_main = {
         var clientSocketId = options.clientSocketId;
         var tableMappingsToProcess = [];
         var sourceMappingsDir = path.join(__dirname, "../../data/mappings/" + source + "/");
+
         var csvDir = path.join(__dirname, "../../data/CSV/" + source + "/");
         var sourceMainJson = {};
         var dataSourceConfig = {};
@@ -45,6 +54,11 @@ var KGbuilder_main = {
                 }
             });
         }
+
+
+
+
+
 
         KGbuilder_main.initMappings(source, datasource, tables, options, function (err, tableMappingsToProcess) {
             if (err) {
@@ -146,6 +160,14 @@ var KGbuilder_main = {
                                 }
                                 callbackSeries();
                             },
+
+
+
+
+
+
+
+
 
                             //load data
                             function (callbackSeries) {
@@ -347,6 +369,18 @@ var KGbuilder_main = {
                         return callbackSeries(e);
                     }
                     callbackSeries();
+                },
+
+
+                function (callbackSeries){
+if(!Array.isArray(tables))
+    tables=[tables]
+                    MappingsParser.getTableMappings(source,tables[0], function(err, mappings){
+                        if(err)
+                            return callbackSeries(err)
+                        tableMappingsToProcess.tripleModels=mappings;
+
+                    })
                 },
 
                 //select tableMappings

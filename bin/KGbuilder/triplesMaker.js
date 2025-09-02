@@ -1,0 +1,258 @@
+const KGbuilder_socket = require("./KGbuilder_socket.js");
+const {databaseModel} = require("../../model/databases.js");
+const csvCrawler = require("../_csvCrawler..js");
+const async = require("async");
+const sqlServerProxy = require("../KG/SQLserverConnector.");
+const util = require("../util.");
+const KGbuilder_triplesWriter = require("./KGbuilder_triplesWriter");
+const KGbuilder_triplesMaker=require("./KGbuilder_triplesMaker")
+
+const dataController = require("../dataController.");
+const path = require("path");
+
+
+var TriplesMaker = {
+
+
+
+    createTriplesProcessor: function (data, tableMappings, options, callback) {
+
+        async.eachSeries(data, function (line, callbackEachLine) {
+                //   lines.forEach(function (line, _indexLine) {
+                //clean line content
+
+                var subjectStr = null;
+                var objectStr = null;
+                var propertyStr = null;
+                var lineError = "";
+                KGbuilder_triplesMaker.blankNodesMap = {};
+                for (var key in line) {
+                    if (line[key]) {
+                        if (!KGbuilder_triplesMaker.allColumns[key]) {
+                            KGbuilder_triplesMaker.allColumns[key] = 1;
+                        }
+                        if (line[key] instanceof Date) {
+                            line[key] = line[key].toISOString();
+                        } else {
+                            line[key] = "" + line[key];
+                        }
+                    }
+                }
+
+                async.eachSeries(
+                    tableMappings.tripleModels,
+                    function (mapping, callbackEachMapping) {
+                        //tableMappings.tripleModels.forEach(function(mapping) {
+
+                        if (line[mapping.s] == "null") {
+                            line[mapping.s] = null;
+                        }
+                        if (line[mapping.o] == "null") {
+                            line[mapping.o] = null;
+                        }
+
+                        if (mapping["if_column_value_not_null"]) {
+                            var value = line[mapping["if_column_value_not_null"]];
+                            if (!value || value == "null") {
+                                return callbackEachMapping();
+                            }
+                        }
+
+                        async.series(
+                            [
+                                function (callbackSeries) {
+                                    KGbuilder_triplesMaker.getTripleSubject(tableMappings, mapping, line, function (err, result) {
+                                        if (err) {
+                                            if (err.indexOf("no mapping.subject") > -1) {
+                                                return callbackEachMapping();
+                                            }
+                                            return callbackSeries(err);
+                                        }
+                                        subjectStr = result;
+                                        return callbackSeries();
+                                    });
+                                },
+                                function (callbackSeries) {
+                                    KGbuilder_triplesMaker.getTriplePredicate(tableMappings, mapping, line, function (err, result) {
+                                        if (err) {
+                                            return callbackSeries(err);
+                                        }
+                                        propertyStr = result;
+                                        return callbackSeries();
+                                    });
+                                },
+                                function (callbackSeries) {
+                                    KGbuilder_triplesMaker.getTripleObject(tableMappings, mapping, line, function (err, result) {
+                                        if (err) {
+                                            return callbackSeries(err);
+                                        }
+
+                                        objectStr = result;
+                                        return callbackSeries();
+                                    });
+                                },
+
+                                function (callbackSeries) {
+                                    if (mapping.isRestriction) {
+                                        KGbuilder_triplesMaker.getRestrictionTriples(mapping, subjectStr, propertyStr, objectStr, function (err, restrictionTriples) {
+                                            if (err) {
+                                                return callbackSeries();
+                                            }
+                                            triples = triples.concat(restrictionTriples);
+                                            return callbackSeries();
+                                        });
+                                    } else {
+                                        if (subjectStr && propertyStr && objectStr) {
+                                            if (!KGbuilder_triplesMaker.existingTriples[subjectStr + "_" + propertyStr + "_" + objectStr]) {
+                                                KGbuilder_triplesMaker.existingTriples[subjectStr + "_" + propertyStr + "_" + objectStr] = 1;
+                                                triples.push({
+                                                    s: subjectStr,
+                                                    p: propertyStr,
+                                                    o: objectStr,
+                                                });
+                                            } else {
+                                                var x = 3;
+                                            }
+                                        }
+                                        return callbackSeries();
+                                    }
+                                },
+                            ],
+                            function (err) {
+                                callbackEachMapping(err);
+                            },
+                        );
+                    },
+                    function (err) {
+                        callbackEachLine(err);
+                    },
+                );
+            },
+            function (err) {
+                callback(err, triples);
+            },
+        );
+
+
+
+
+
+
+
+
+
+},
+
+
+/**
+ *
+ *     read data in batches then create triples from mappings then write them in tripleStore eventually
+ * @param tableMappings
+ * @param options
+ * @param processor function that create the triples
+ * @param callback
+ */
+readAndProcessData: function (tableMappings, options, processor, callback) {
+
+
+    var totalTriples = 0
+
+
+    function processData(data, callback) {
+        TriplesMaker.triplesCache = {};
+        processor(data, function (err, result) {
+            if (err) {
+                return callback(err)
+            }
+            KGbuilder_socket.message(options.clientSocketId, " processed  from " + tableMappings.table + " : " + totalTriples + " triples", false);
+            totalTriples += result.triples;
+            return callback(null, result)
+        })
+    }
+
+    if (tableMappings.csvDataFilePath) {
+        KGbuilder_socket.message(options.clientSocketId, "loading data from csv file " + tableMappings.table, false);
+        TriplesMaker.readCsv(tableMappings.csvDataFilePath, options.sampleSize, function (err, result) {
+            if (err) {
+                KGbuilder_socket.message(options.clientSocketId, err, true);
+                return callback(err);
+            }
+            KGbuilder_socket.message(options.clientSocketId, " data loaded from " + tableMappings.table, false);
+            //  tableData = result.data[0];
+            async.eachSeries(result.data, function (data, callbackEach) {
+                processData(data, callbackEach)
+
+            }, function (err) {
+                return callback(err, totalTriples)
+            })
+        })
+
+
+    } else if (tableMappings.datasourceConfig) {
+        KGbuilder_socket.message(options.clientSocketId, "loading data from database table " + tableMappings.table, false);
+
+
+        var totalSize = 0;
+
+        var resultSize = 1;
+        var limitSize = options.sampleSize || 500;
+        var offset = 0;
+
+        async.whilst(
+            function (_test) {
+                return resultSize > 0;
+
+
+            },
+            function (callbackWhilst) {
+
+                databaseModel.batchSelect(tableMappings.datasourceConfig.dbName, tableMappings.table, {
+                    limit: limitSize,
+                    noRecurs: Boolean(options.sampleSize),
+                    offset: offset
+                })
+                    .then((result) => {
+                        data = result;
+                        resultSize = data.length;
+                        totalSize += resultSize;
+                        offset += resultSize;
+
+
+                        KGbuilder_socket.message(options.clientSocketId, " data loaded ,table " + tableMappings.table, false);
+
+                        //function to separate the callback error to the next catch bacause it's degrade visibility and make the callback executed multiple times
+                        //by chat gpt
+                        setImmediate(() => callback(null, tableData));
+
+                        processData(data, callbackEach)
+
+                    })
+                    .catch((err) => {
+
+                        return callbackWhilst(err);
+                    });
+            }, function (err) {
+                return callback(err, totalTriples)
+            })
+    }
+}
+,
+
+readCsv: function (filePath, maxLines, callback) {
+    csvCrawler.readCsv({filePath: filePath}, maxLines, function (err, result) {
+        if (err) {
+            return callback(err);
+        }
+        var data = result.data;
+        var headers = result.headers;
+
+        return callback(null, {headers: headers, data: data});
+    });
+}
+,
+
+
+}
+
+
+module.exports = TriplesMaker

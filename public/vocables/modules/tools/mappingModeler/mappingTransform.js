@@ -405,6 +405,29 @@ var MappingTransform = (function () {
             }
         });
 
+        // add transforms to the mappings
+
+// add transform
+        var slsMappings=self.getSLSmappingsFromVisjsGraph()
+        var transformMappingsMap={}
+        slsMappings.forEach(function(mapping){
+            if(mapping.p=="transform"){
+                transformMappingsMap[mapping.s]=mapping
+            }
+        })
+
+        filteredMappings.forEach(function(mapping){
+            if(transformMappingsMap[mapping.s])
+                filteredMappings.push(transformMappingsMap[mapping.s])
+            if(transformMappingsMap[mapping.o])
+                filteredMappings.push(transformMappingsMap[mapping.o])
+
+        })
+
+
+
+
+
         // selection isn't concerned for column mappings select all
         //filteredMappings=filteredMappings.concat(columnMappings);
         var table = MappingModeler.currentTable.name;
@@ -422,6 +445,9 @@ var MappingTransform = (function () {
                 }
             });
         }
+
+
+
 
         return filteredMappings;
     };

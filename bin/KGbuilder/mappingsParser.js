@@ -19,18 +19,21 @@ var MappingParser = {
 
 
     },
-
+    /**
+     * get the vijsData of the mappings and extract tripleModels  for each Column in the field mappings
+     *
+     *
+     * @param source
+     * @param table
+     * @param callback
+     */
     getColumnsMap: function (source, table, callback) {
-
-        var data = {nodes: [], edges: []}
 
         MappingParser.getMappingsData("PAZFLOR_ABOX", function (err, data) {
 
 
             var edgesFromMap = {}
             var nodesMap = {}
-            var allColumnsMappings = []
-
             var columnsMap = {}
             data.edges.forEach(function (edge) {
 
@@ -164,7 +167,9 @@ var MappingParser = {
             }
             var mappings = []
             for (var columnId in result) {
-                mappings.push(result[columnId])
+                result[columnId].mappings.forEach(function (mapping) {
+                    mappings.push(mapping)
+                })
             }
             return callback(null,mappings)
         })

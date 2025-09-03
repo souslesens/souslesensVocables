@@ -15,7 +15,7 @@ var TriplesMaker = {
 
 
 
-    createTriplesProcessor: function (data, tableMappings, options, callback) {
+    processTableTriples: function (data, tableMappings, options, callback) {
 
         async.eachSeries(data, function (line, callbackEachLine) {
                 //   lines.forEach(function (line, _indexLine) {
@@ -129,6 +129,7 @@ var TriplesMaker = {
                 );
             },
             function (err) {
+
                 callback(err, triples);
             },
         );
@@ -147,40 +148,36 @@ var TriplesMaker = {
 /**
  *
  *     read data in batches then create triples from mappings then write them in tripleStore eventually
- * @param tableMappings
+ * @param tableInfos defines parameters to connect to the table
  * @param options
  * @param processor function that create the triples
  * @param callback
  */
-readAndProcessData: function (tableMappings, options, processor, callback) {
+readAndProcessData: function ( tableInfos, columnMappings,options, callback) {
 
 
     var totalTriples = 0
 
 
-    function processData(data, callback) {
-        TriplesMaker.triplesCache = {};
-        processor(data, function (err, result) {
-            if (err) {
-                return callback(err)
-            }
-            KGbuilder_socket.message(options.clientSocketId, " processed  from " + tableMappings.table + " : " + totalTriples + " triples", false);
-            totalTriples += result.triples;
-            return callback(null, result)
-        })
-    }
 
-    if (tableMappings.csvDataFilePath) {
-        KGbuilder_socket.message(options.clientSocketId, "loading data from csv file " + tableMappings.table, false);
-        TriplesMaker.readCsv(tableMappings.csvDataFilePath, options.sampleSize, function (err, result) {
+
+    if (tableInfos.csvDataFilePath) {
+        KGbuilder_socket.message(options.clientSocketId, "loading data from csv file " + tableInfos.table, false);
+        TriplesMaker.readCsv(tableInfos.csvDataFilePath, options.sampleSize, function (err, result) {
             if (err) {
                 KGbuilder_socket.message(options.clientSocketId, err, true);
                 return callback(err);
             }
-            KGbuilder_socket.message(options.clientSocketId, " data loaded from " + tableMappings.table, false);
+            KGbuilder_socket.message(options.clientSocketId, " data loaded from " + tableInfos.table, false);
             //  tableData = result.data[0];
             async.eachSeries(result.data, function (data, callbackEach) {
-                processData(data, callbackEach)
+                TriplesMaker.processTableTriples(data, columnMappings,options,function( err, result){
+                    totalTriples+=result.triplesCreated
+                    KGbuilder_socket.message(options.clientSocketId, " processed  from " + tableInfos.table + " : " + totalTriples + " triples", false);
+
+                    callbackEach()
+                })
+
 
             }, function (err) {
                 return callback(err, totalTriples)
@@ -188,47 +185,44 @@ readAndProcessData: function (tableMappings, options, processor, callback) {
         })
 
 
-    } else if (tableMappings.datasourceConfig) {
-        KGbuilder_socket.message(options.clientSocketId, "loading data from database table " + tableMappings.table, false);
+    } else if (tableInfos.dbID) {
+        KGbuilder_socket.message(options.clientSocketId, "loading data from database table " + tableInfos.table, false);
 
 
         var totalSize = 0;
-
         var resultSize = 1;
         var limitSize = options.sampleSize || 500;
         var offset = 0;
 
         async.whilst(
-            function (_test) {
-                return resultSize > 0;
-
-
+            function (callbackTest) {// implementation different in node js and  web browser  !!
+                return callbackTest(null, resultSize > 0 );
             },
             function (callbackWhilst) {
-
-                databaseModel.batchSelect(tableMappings.datasourceConfig.dbName, tableMappings.table, {
+                databaseModel.batchSelect(tableInfos.dbID, tableInfos.table, {
                     limit: limitSize,
-                    noRecurs: Boolean(options.sampleSize),
+                    noRecurs: true,// Boolean(options.sampleSize),
                     offset: offset
                 })
                     .then((result) => {
                         data = result;
-                        resultSize = data.length;
-                        totalSize += resultSize;
-                        offset += resultSize;
 
+                        KGbuilder_socket.message(options.clientSocketId, " data loaded ,table " + tableInfos.table, false);
+                        TriplesMaker.processTableTriples(data, columnMappings,options,function( err, result){
+                            if(err){
+                                return callbackWhilst(err)
+                            }
+                            resultSize = data.length;
+                            totalSize += resultSize;
+                            offset += resultSize;
+                            KGbuilder_socket.message(options.clientSocketId, " processed  from " + tableInfos.table + " : " + totalSize + " triples", false);
 
-                        KGbuilder_socket.message(options.clientSocketId, " data loaded ,table " + tableMappings.table, false);
+                            callbackWhilst()
+                        })
 
-                        //function to separate the callback error to the next catch bacause it's degrade visibility and make the callback executed multiple times
-                        //by chat gpt
-                        setImmediate(() => callback(null, tableData));
-
-                        processData(data, callbackEach)
 
                     })
                     .catch((err) => {
-
                         return callbackWhilst(err);
                     });
             }, function (err) {

@@ -15,12 +15,11 @@ const dbConnector = require("../KG/dbConnector");
 const DatabaseModel = require("../../model/databases").databaseModel;
 
 
+const MappingsParser = require("./mappingsParser.js")
+const TriplesMaker = require("./triplesMaker.js")
 
-const MappingsParser=require("./mappingsParser.js")
-const TriplesMapker=require("./triplesMaker.js")
 
-
-const TripleMaker=require("./triplesMaker.js")
+const TripleMaker = require("./triplesMaker.js")
 
 var KGbuilder_main = {
     /**
@@ -56,8 +55,60 @@ var KGbuilder_main = {
         }
 
 
+        if (!Array.isArray(tables)) {
+            tables = [tables]
+        }
+        var columnsMappings = {}
+
+        /**
+         * for each table get columnsMappingMap and create tripels
+         *
+         */
+        async.eachSeries(
+            tables,
+            function (table, callbackEach) {
+                MappingsParser.getColumnsMap(source, tables[0], function (err, _columnsMappings) {
+                    if (err) {
+                        return callbackEach(err)
+                    }
+                    columnsMappings = _columnsMappings
 
 
+
+
+
+                    var firstColumn = null;
+
+                    for (const colId in columnsMappings) {
+                        firstColumn=columnsMappings[colId]
+                        break;
+                    }
+                    var tableInfos = {
+                        table: firstColumn.dataTable,
+                    }
+                    if(firstColumn.datasource){// database
+                       tableInfos.dbID= firstColumn. datasource
+                    }else{//csv
+                        var csvDir = path.join(__dirname, "../../data/CSV/" + source + "/");
+                        tableInfos.csvDataFilePath=csvDir+firstColumn.dataTable
+                    }
+
+
+                    TriplesMaker.readAndProcessData(tableInfos, columnsMappings, options, function (err, result) {
+
+                        callbackEach(err)
+
+                    })
+
+
+                }, function (err) {
+                    return callback()
+                })
+
+
+            })
+
+        return;
 
 
         KGbuilder_main.initMappings(source, datasource, tables, options, function (err, tableMappingsToProcess) {
@@ -162,13 +213,6 @@ var KGbuilder_main = {
                             },
 
 
-
-
-
-
-
-
-
                             //load data
                             function (callbackSeries) {
                                 KGbuilder_socket.message(options.clientSocketId, "creating triples for mappings " + mappings.table);
@@ -193,7 +237,7 @@ var KGbuilder_main = {
 
                                 //sample only
                                 if (options.sampleSize) {
-                                    options.customMetaData = { [KGbuilder_triplesMaker.mappingFilePredicate]: mappings.table };
+                                    options.customMetaData = {[KGbuilder_triplesMaker.mappingFilePredicate]: mappings.table};
 
                                     KGbuilder_triplesMaker.createTriples(mappings, data, options, function (err, result) {
                                         if (err) {
@@ -254,7 +298,7 @@ var KGbuilder_main = {
                         },
                         //set triples
                         function (callbackSeries) {
-                            options.customMetaData = { [KGbuilder_triplesMaker.mappingFilePredicate]: mappings.table };
+                            options.customMetaData = {[KGbuilder_triplesMaker.mappingFilePredicate]: mappings.table};
                             KGbuilder_triplesMaker.createTriples(mappings, dataSlice, options, function (err, result) {
                                 if (err) {
                                     return callbackSeries(err);
@@ -271,7 +315,7 @@ var KGbuilder_main = {
                                 if (!uniqueSubjects[triple.s]) {
                                     uniqueSubjects[triple.s] = 1;
 
-                                    triples = triples.concat(KGbuilder_triplesMaker.getMetaDataTriples(triple.s, { mappingTable: mappings.table }));
+                                    triples = triples.concat(KGbuilder_triplesMaker.getMetaDataTriples(triple.s, {mappingTable: mappings.table}));
                                 }
                             });
                             callbackSeries();
@@ -371,17 +415,6 @@ var KGbuilder_main = {
                     callbackSeries();
                 },
 
-
-                function (callbackSeries){
-if(!Array.isArray(tables))
-    tables=[tables]
-                    MappingsParser.getTableMappings(source,tables[0], function(err, mappings){
-                        if(err)
-                            return callbackSeries(err)
-                        tableMappingsToProcess.tripleModels=mappings;
-
-                    })
-                },
 
                 //select tableMappings
                 function (callbackSeries) {
@@ -554,6 +587,560 @@ if(!Array.isArray(tables))
 module.exports = KGbuilder_main;
 
 if (false) {
-    var options = {};
-    KGbuilder_main.importTriplesFromCsvOrTable("LIFEX_DALIA", "lifex_dalia_db", "dbo.V_jobcard", options, function (err, result) {});
+    var options = {
+        "filteredMappings": {
+            "subpackage": {
+                "tripleModels": [
+                    {
+                        "s": "discipline_ctr",
+                        "p": "rdf:type",
+                        "o": "owl:NamedIndividual"
+                    },
+                    {
+                        "s": "discipline_ctr",
+                        "p": "rdfs:label",
+                        "o": "discipline_ctr",
+                        "dataType": "xsd:string"
+                    },
+                    {
+                        "s": "discipline_ctr",
+                        "p": "http://purl.obolibrary.org/obo/BFO_0000101",
+                        "o": "funct_loc"
+                    },
+                    {
+                        "s": "discipline_ctr",
+                        "p": "rdf:type",
+                        "o": "http://totalenergies/resources/tsf/ontology/pazflor-tbox/Discipline"
+                    },
+                    {
+                        "s": "package",
+                        "p": "rdf:type",
+                        "o": "owl:NamedIndividual"
+                    },
+                    {
+                        "s": "package",
+                        "p": "rdfs:label",
+                        "o": "package",
+                        "dataType": "xsd:string"
+                    },
+                    {
+                        "s": "package",
+                        "p": "rdf:type",
+                        "o": "http://totalenergies/resources/tsf/ontology/pazflor-tbox/Package"
+                    },
+                    {
+                        "s": "package",
+                        "p": "rdfs:member",
+                        "o": "subpackage"
+                    },
+                    {
+                        "s": "catprof",
+                        "p": "rdf:type",
+                        "o": "owl:NamedIndividual"
+                    },
+                    {
+                        "s": "catprof",
+                        "p": "rdfs:label",
+                        "o": "catprof",
+                        "dataType": "xsd:string"
+                    },
+                    {
+                        "s": "catprof",
+                        "p": "http://purl.obolibrary.org/obo/BFO_0000101",
+                        "o": "funct_loc"
+                    },
+                    {
+                        "s": "catprof",
+                        "p": "rdf:type",
+                        "o": "http://totalenergies/resources/tsf/ontology/pazflor-tbox/CatProf"
+                    },
+                    {
+                        "s": "funct_loc",
+                        "p": "rdf:type",
+                        "o": "owl:NamedIndividual"
+                    },
+                    {
+                        "s": "funct_loc",
+                        "p": "rdf:type",
+                        "o": "http://totalenergies/resources/tsf/ontology/pazflor-tbox/functional_Location"
+                    },
+                    {
+                        "s": "http://totalenergies/resources/tsf/ontology/pazflor-abox/Packages_#",
+                        "p": "rdf:type",
+                        "o": "owl:NamedIndividual"
+                    },
+                    {
+                        "s": "http://totalenergies/resources/tsf/ontology/pazflor-abox/Packages_#",
+                        "p": "rdfs:label",
+                        "o": "Packages",
+                        "dataType": "xsd:string"
+                    },
+                    {
+                        "s": "subpackage",
+                        "p": "rdf:type",
+                        "o": "owl:NamedIndividual"
+                    },
+                    {
+                        "s": "subpackage",
+                        "p": "rdfs:label",
+                        "o": "subpackage",
+                        "dataType": "xsd:string"
+                    },
+                    {
+                        "s": "subpackage",
+                        "p": "rdfs:member",
+                        "o": "funct_loc"
+                    },
+                    {
+                        "s": "subpackage",
+                        "p": "https://spec.industrialontologies.org/ontology/core/Core/isAbout",
+                        "o": "funct_loc"
+                    },
+                    {
+                        "s": "subpackage",
+                        "p": "http://purl.obolibrary.org/obo/BFO_0000176",
+                        "o": "package"
+                    },
+                    {
+                        "s": "subpackage",
+                        "p": "rdf:type",
+                        "o": "http://totalenergies/resources/tsf/ontology/pazflor-tbox/SubPackage"
+                    },
+                    {
+                        "s": "discipline_ctr",
+                        "p": "transform",
+                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'disc-'+value;}"
+                    },
+                    {
+                        "s": "discipline_ctr",
+                        "p": "transform",
+                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'disc-'+value;}"
+                    },
+                    {
+                        "s": "discipline_ctr",
+                        "p": "transform",
+                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'disc-'+value;}"
+                    },
+                    {
+                        "s": "discipline_ctr",
+                        "p": "transform",
+                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'disc-'+value;}"
+                    },
+                    {
+                        "s": "funct_loc",
+                        "p": "transform",
+                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'FL-'+value;}"
+                    },
+                    {
+                        "s": "discipline_ctr",
+                        "p": "transform",
+                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'disc-'+value;}"
+                    },
+                    {
+                        "s": "package",
+                        "p": "transform",
+                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'pack-'+value;}"
+                    },
+                    {
+                        "s": "package",
+                        "p": "transform",
+                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'pack-'+value;}"
+                    },
+                    {
+                        "s": "package",
+                        "p": "transform",
+                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'pack-'+value;}"
+                    },
+                    {
+                        "s": "package",
+                        "p": "transform",
+                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'pack-'+value;}"
+                    },
+                    {
+                        "s": "package",
+                        "p": "transform",
+                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'pack-'+value;}"
+                    },
+                    {
+                        "s": "subpackage",
+                        "p": "transform",
+                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'subPack-'+value;}"
+                    },
+                    {
+                        "s": "catprof",
+                        "p": "transform",
+                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'catProf-'+value;}"
+                    },
+                    {
+                        "s": "catprof",
+                        "p": "transform",
+                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'catProf-'+value;}"
+                    },
+                    {
+                        "s": "catprof",
+                        "p": "transform",
+                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'catProf-'+value;}"
+                    },
+                    {
+                        "s": "catprof",
+                        "p": "transform",
+                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'catProf-'+value;}"
+                    },
+                    {
+                        "s": "funct_loc",
+                        "p": "transform",
+                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'FL-'+value;}"
+                    },
+                    {
+                        "s": "catprof",
+                        "p": "transform",
+                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'catProf-'+value;}"
+                    },
+                    {
+                        "s": "funct_loc",
+                        "p": "transform",
+                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'FL-'+value;}"
+                    },
+                    {
+                        "s": "funct_loc",
+                        "p": "transform",
+                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'FL-'+value;}"
+                    },
+                    {
+                        "s": "subpackage",
+                        "p": "transform",
+                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'subPack-'+value;}"
+                    },
+                    {
+                        "s": "subpackage",
+                        "p": "transform",
+                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'subPack-'+value;}"
+                    },
+                    {
+                        "s": "subpackage",
+                        "p": "transform",
+                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'subPack-'+value;}"
+                    },
+                    {
+                        "s": "subpackage",
+                        "p": "transform",
+                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'subPack-'+value;}"
+                    },
+                    {
+                        "s": "funct_loc",
+                        "p": "transform",
+                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'FL-'+value;}"
+                    },
+                    {
+                        "s": "subpackage",
+                        "p": "transform",
+                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'subPack-'+value;}"
+                    },
+                    {
+                        "s": "funct_loc",
+                        "p": "transform",
+                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'FL-'+value;}"
+                    },
+                    {
+                        "s": "subpackage",
+                        "p": "transform",
+                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'subPack-'+value;}"
+                    },
+                    {
+                        "s": "package",
+                        "p": "transform",
+                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'pack-'+value;}"
+                    },
+                    {
+                        "s": "subpackage",
+                        "p": "transform",
+                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'subPack-'+value;}"
+                    }
+                ],
+                "transform": {},
+                "lookups": {}
+            }
+        },
+        "deleteOldGraph": false,
+        "sampleSize": 500,
+        "clientSocketId": "ycnSsvXFNLkKWTZmAAAI",
+        "mappingsFilter": {
+            "subpackage": {
+                "tripleModels": [
+                    {
+                        "s": "discipline_ctr",
+                        "p": "rdf:type",
+                        "o": "owl:NamedIndividual"
+                    },
+                    {
+                        "s": "discipline_ctr",
+                        "p": "rdfs:label",
+                        "o": "discipline_ctr",
+                        "dataType": "xsd:string"
+                    },
+                    {
+                        "s": "discipline_ctr",
+                        "p": "http://purl.obolibrary.org/obo/BFO_0000101",
+                        "o": "funct_loc"
+                    },
+                    {
+                        "s": "discipline_ctr",
+                        "p": "rdf:type",
+                        "o": "http://totalenergies/resources/tsf/ontology/pazflor-tbox/Discipline"
+                    },
+                    {
+                        "s": "package",
+                        "p": "rdf:type",
+                        "o": "owl:NamedIndividual"
+                    },
+                    {
+                        "s": "package",
+                        "p": "rdfs:label",
+                        "o": "package",
+                        "dataType": "xsd:string"
+                    },
+                    {
+                        "s": "package",
+                        "p": "rdf:type",
+                        "o": "http://totalenergies/resources/tsf/ontology/pazflor-tbox/Package"
+                    },
+                    {
+                        "s": "package",
+                        "p": "rdfs:member",
+                        "o": "subpackage"
+                    },
+                    {
+                        "s": "catprof",
+                        "p": "rdf:type",
+                        "o": "owl:NamedIndividual"
+                    },
+                    {
+                        "s": "catprof",
+                        "p": "rdfs:label",
+                        "o": "catprof",
+                        "dataType": "xsd:string"
+                    },
+                    {
+                        "s": "catprof",
+                        "p": "http://purl.obolibrary.org/obo/BFO_0000101",
+                        "o": "funct_loc"
+                    },
+                    {
+                        "s": "catprof",
+                        "p": "rdf:type",
+                        "o": "http://totalenergies/resources/tsf/ontology/pazflor-tbox/CatProf"
+                    },
+                    {
+                        "s": "funct_loc",
+                        "p": "rdf:type",
+                        "o": "owl:NamedIndividual"
+                    },
+                    {
+                        "s": "funct_loc",
+                        "p": "rdf:type",
+                        "o": "http://totalenergies/resources/tsf/ontology/pazflor-tbox/functional_Location"
+                    },
+                    {
+                        "s": "http://totalenergies/resources/tsf/ontology/pazflor-abox/Packages_#",
+                        "p": "rdf:type",
+                        "o": "owl:NamedIndividual"
+                    },
+                    {
+                        "s": "http://totalenergies/resources/tsf/ontology/pazflor-abox/Packages_#",
+                        "p": "rdfs:label",
+                        "o": "Packages",
+                        "dataType": "xsd:string"
+                    },
+                    {
+                        "s": "subpackage",
+                        "p": "rdf:type",
+                        "o": "owl:NamedIndividual"
+                    },
+                    {
+                        "s": "subpackage",
+                        "p": "rdfs:label",
+                        "o": "subpackage",
+                        "dataType": "xsd:string"
+                    },
+                    {
+                        "s": "subpackage",
+                        "p": "rdfs:member",
+                        "o": "funct_loc"
+                    },
+                    {
+                        "s": "subpackage",
+                        "p": "https://spec.industrialontologies.org/ontology/core/Core/isAbout",
+                        "o": "funct_loc"
+                    },
+                    {
+                        "s": "subpackage",
+                        "p": "http://purl.obolibrary.org/obo/BFO_0000176",
+                        "o": "package"
+                    },
+                    {
+                        "s": "subpackage",
+                        "p": "rdf:type",
+                        "o": "http://totalenergies/resources/tsf/ontology/pazflor-tbox/SubPackage"
+                    },
+                    {
+                        "s": "discipline_ctr",
+                        "p": "transform",
+                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'disc-'+value;}"
+                    },
+                    {
+                        "s": "discipline_ctr",
+                        "p": "transform",
+                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'disc-'+value;}"
+                    },
+                    {
+                        "s": "discipline_ctr",
+                        "p": "transform",
+                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'disc-'+value;}"
+                    },
+                    {
+                        "s": "discipline_ctr",
+                        "p": "transform",
+                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'disc-'+value;}"
+                    },
+                    {
+                        "s": "funct_loc",
+                        "p": "transform",
+                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'FL-'+value;}"
+                    },
+                    {
+                        "s": "discipline_ctr",
+                        "p": "transform",
+                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'disc-'+value;}"
+                    },
+                    {
+                        "s": "package",
+                        "p": "transform",
+                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'pack-'+value;}"
+                    },
+                    {
+                        "s": "package",
+                        "p": "transform",
+                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'pack-'+value;}"
+                    },
+                    {
+                        "s": "package",
+                        "p": "transform",
+                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'pack-'+value;}"
+                    },
+                    {
+                        "s": "package",
+                        "p": "transform",
+                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'pack-'+value;}"
+                    },
+                    {
+                        "s": "package",
+                        "p": "transform",
+                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'pack-'+value;}"
+                    },
+                    {
+                        "s": "subpackage",
+                        "p": "transform",
+                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'subPack-'+value;}"
+                    },
+                    {
+                        "s": "catprof",
+                        "p": "transform",
+                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'catProf-'+value;}"
+                    },
+                    {
+                        "s": "catprof",
+                        "p": "transform",
+                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'catProf-'+value;}"
+                    },
+                    {
+                        "s": "catprof",
+                        "p": "transform",
+                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'catProf-'+value;}"
+                    },
+                    {
+                        "s": "catprof",
+                        "p": "transform",
+                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'catProf-'+value;}"
+                    },
+                    {
+                        "s": "funct_loc",
+                        "p": "transform",
+                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'FL-'+value;}"
+                    },
+                    {
+                        "s": "catprof",
+                        "p": "transform",
+                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'catProf-'+value;}"
+                    },
+                    {
+                        "s": "funct_loc",
+                        "p": "transform",
+                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'FL-'+value;}"
+                    },
+                    {
+                        "s": "funct_loc",
+                        "p": "transform",
+                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'FL-'+value;}"
+                    },
+                    {
+                        "s": "subpackage",
+                        "p": "transform",
+                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'subPack-'+value;}"
+                    },
+                    {
+                        "s": "subpackage",
+                        "p": "transform",
+                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'subPack-'+value;}"
+                    },
+                    {
+                        "s": "subpackage",
+                        "p": "transform",
+                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'subPack-'+value;}"
+                    },
+                    {
+                        "s": "subpackage",
+                        "p": "transform",
+                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'subPack-'+value;}"
+                    },
+                    {
+                        "s": "funct_loc",
+                        "p": "transform",
+                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'FL-'+value;}"
+                    },
+                    {
+                        "s": "subpackage",
+                        "p": "transform",
+                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'subPack-'+value;}"
+                    },
+                    {
+                        "s": "funct_loc",
+                        "p": "transform",
+                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'FL-'+value;}"
+                    },
+                    {
+                        "s": "subpackage",
+                        "p": "transform",
+                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'subPack-'+value;}"
+                    },
+                    {
+                        "s": "package",
+                        "p": "transform",
+                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'pack-'+value;}"
+                    },
+                    {
+                        "s": "subpackage",
+                        "p": "transform",
+                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'subPack-'+value;}"
+                    }
+                ],
+                "transform": {},
+                "lookups": {}
+            }
+        }
+    };
+    KGbuilder_main.importTriplesFromCsvOrTable("PAZFLOR_ABOX", "01K1TNFHADVTT7PHJF0AJ4GFRX", "subpackage", options, function (err, result) {
+        console.log(err);
+        console.log(result)
+
+    });
 }

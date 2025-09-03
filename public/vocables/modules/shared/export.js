@@ -85,7 +85,7 @@ var Export = (function () {
             });
             dataset.unshift(columns);
             if (!exportData) {
-                alert("to large results, it will be exported");
+                alert("to large results, it will be exported to download directory in CSV format");
             }
             return Export.exportDataToCSV(dataset);
         }

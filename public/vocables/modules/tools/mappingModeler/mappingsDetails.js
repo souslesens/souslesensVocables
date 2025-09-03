@@ -203,88 +203,7 @@ var MappingsDetails = (function () {
         var jstreeData = self.generateMappingsTreeData();
         var uniqueSubjects = {};
         var buttonStr = "<img src='icons\\KGA\\MoreOptionsIcon-KGA.png' onClick=''>";
-        /*
-        jstreeData.push({
-            id: MappingModeler.currentTable.name,
-            text: "<b>" + MappingModeler.currentTable.name + "</b>",
-            data: {},
-            parent: "#",
-        });
 
-        nodes.forEach(function (node) {
-            if (node.data.dataTable !== table) {
-                return;
-            }
-            if (node.data.type == "Class") {
-                return;
-            }
-            if (node.data.type == "Table") {
-                return;
-            }
-
-            if (!uniqueSubjects[node.label]) {
-                console.log(node.label)
-                uniqueSubjects[node.label] = 1;
-                jstreeData.push({
-                    id: node.id,
-                    text: "<span style='background-color: #cb9801;padding: 3px;border-radius: 7px;'>" + node.label + "</span>&nbsp;" + buttonStr,
-                    data: node.data,
-                    parent: MappingModeler.currentTable.name,
-                });
-
-                var predicates = {
-                    rdfType: "rdf:type",
-                    rdfsLabel: "rdfs:label",
-                    uriType: "uri Type",
-                };
-
-                var color = "";
-                for (var key in node.data) {
-                    if (predicates[key]) {
-                        if (self.colorsMap[key]) {
-                            color = self.colorsMap[key];
-                        } else {
-                            color = "#3339ff";
-                        }
-                        jstreeData.push({
-                            id: node.id + "|" + key + "|" + node.data[key],
-                            text: "<span style='color: " + color + "'>" + key + "</span>  " + node.data[key],
-                            parent: node.id,
-                        });
-                    }
-                }
-
-                if (node.data.otherPredicates) {
-                    node.data.otherPredicates.forEach(function (item) {
-                        jstreeData.push({
-                            id: node.id + "|" + "otherPredicates" + "|" + item.property + "|" + item.object,
-                            text: "<span style='color: " + self.colorsMap["otherPredicates"] + "'>" + item.property + "</span>  " + item.object,
-                            parent: node.id,
-                        });
-                    });
-                }
-                if (node.data.transform) {
-                    jstreeData.push({
-                        id: node.id + "|" + "transform" + "|" + node.data.transform,
-                        text: "<span style='color: " + self.colorsMap["transform"] + "'>" + "transform" + "</span>  " + node.data.transform,
-                        parent: node.id,
-                    });
-                }
-                var currentLookupName = node.data.dataTable + "|" + node.data.label;
-                if (DataSourceManager.currentConfig.lookups[currentLookupName]) {
-                    var lookup = DataSourceManager.currentConfig.lookups[currentLookupName];
-                    if (lookup.name == currentLookupName) {
-                        jstreeData.push({
-                            id: lookup.fileName + "|" + "lookup",
-                            text: "<span style='color: " + self.colorsMap["lookup"] + "'>" + "lookup" + "</span>  " + JSON.stringify(lookup),
-                            parent: node.id,
-                            data: lookup,
-                        });
-                    }
-                }
-            }
-        });
-        */
         var options = {
             searchPlugin: true,
             openAll: true,
@@ -406,6 +325,8 @@ var MappingsDetails = (function () {
         $("#columnDetails-baseUri").val(column.data.baseURI || "");
         $("#columnDetails-prefixURI").val(column.data.prefixURI || "");
         self.onChangeUriType();
+
+        self.setMappingDefaultFieds(column);
     };
 
     /**
@@ -1025,6 +946,36 @@ var MappingsDetails = (function () {
             $("#columnDetails-baseUri-label").hide();
             $("#columnDetails-prefixURI").hide();
             $("#columnDetails-prefixURI-label").hide();
+        }
+    };
+
+    /**
+     *  fill basigraphUri and prefix with same values found for the node class in other mappings
+     * @param columnNodeId
+     */
+    self.setMappingDefaultFieds = function (columnNode) {
+        var columnsClassMap = {};
+        var columnClass = MappingColumnsGraph.getColumnClass(columnNode);
+        if (columnClass) {
+            MappingColumnsGraph.visjsGraph.data.nodes.get().forEach(function (node) {
+                if (node.data && node.data.type == "Class" && node.data.id == columnClass) {
+                    var sameClassColumns = MappingColumnsGraph.getClassColumns(node);
+                    if (sameClassColumns) {
+                        sameClassColumns.forEach(function (sameColumn) {
+                            if (!$("#columnDetails-prefixURI").val() && sameColumn.data.prefixURI) {
+                                $("#columnDetails-prefixURI").val(sameColumn.data.prefixURI);
+                            }
+                            if ($(!"#columnDetails-baseURI").val() && sameColumn.data.baseURI) {
+                                $("#columnDetails-baseURI").val(sameColumn.data.baseURI);
+                            }
+                        });
+                    }
+                }
+
+                if (!$("#columnDetails-rdfsLabel").val()) {
+                    $("#columnDetails-rdfsLabel").val(columnNode.data.label);
+                }
+            });
         }
     };
     return self;

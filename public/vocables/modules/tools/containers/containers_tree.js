@@ -122,6 +122,10 @@ var Containers_tree = (function () {
                         self.currenDraggingNodeSourceParent = $("#lineage_containers_containersJstree").jstree().get_node(sourceNodeId).parent;
                     },
                 },
+                dropAllowedFn: function () {
+                    var canMove = $("#Lineage_unlockMoveContainer_cbx").prop("checked");
+                    return canMove;
+                },
             };
         }
         JstreeWidget.loadJsTree(jstreeDiv, jstreeData, jstreeOptions, function () {

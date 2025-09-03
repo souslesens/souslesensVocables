@@ -312,6 +312,30 @@ var MappingColumnsGraph = (function () {
         });
     };
 
+    self.getColumnClass = function (node) {
+        var connections = self.visjsGraph.getFromNodeEdgesAndToNodes(node.id);
+
+        var classId = null;
+        connections.forEach(function (connection) {
+            if (connection.edge.data.type == "rdf:type" || connection.edge.data.type == "rdfs:subClassOf") {
+                classId = connection.toNode.data.id;
+            }
+        });
+        return classId;
+    };
+
+    self.getClassColumns = function (node) {
+        var connections = self.visjsGraph.getFromNodeEdgesAndToNodes(node.id, true);
+
+        var columns = [];
+        connections.forEach(function (connection) {
+            if (connection.edge.data.type == "rdf:type" || connection.edge.data.type == "rdfs:subClassOf") {
+                columns.push(connection.fromNode);
+            }
+        });
+        return columns;
+    };
+
     /**
      * Handles click events on the Vis.js graph.
      * Updates the current selected node and manages relations between columns.
@@ -344,22 +368,11 @@ var MappingColumnsGraph = (function () {
             if (!DataSourceManager.currentConfig.currentDataSource) {
                 return alert("choose a data source first");
             }
-            function getColumnClass(node) {
-                var connections = self.visjsGraph.getFromNodeEdgesAndToNodes(node.id);
-
-                var classId = null;
-                connections.forEach(function (connection) {
-                    if (connection.edge.data.type == "rdf:type" || connection.edge.data.type == "rdfs:subClassOf") {
-                        classId = connection.toNode.data.id;
-                    }
-                });
-                return classId;
-            }
 
             if (!MappingModeler.currentRelation) {
                 self.relationMessage(node.data.label, null);
                 MappingModeler.currentRelation = {
-                    from: { id: node.id, classId: getColumnClass(node), dataTable: node.data.dataTable },
+                    from: { id: node.id, classId: self.getColumnClass(node), dataTable: node.data.dataTable },
                     to: null,
                     type: node.data.type,
                 };
@@ -369,7 +382,7 @@ var MappingColumnsGraph = (function () {
                     self.relationMessage();
                     return alert("Relations between Columns from different datbels are not possible");
                 }
-                MappingModeler.currentRelation.to = { id: node.id, classId: getColumnClass(node) };
+                MappingModeler.currentRelation.to = { id: node.id, classId: self.getColumnClass(node) };
                 if (MappingModeler.currentRelation.type != "Class" && node.data.type == "Class") {
                     self.graphActions.drawColumnToClassEdge(MappingModeler.currentRelation);
                 } else if (MappingModeler.currentRelation.from.type != "Class" && node.data.type != "Class") {

@@ -483,6 +483,10 @@ var KGquery = (function () {
                 self.message("found items :" + result.results.bindings.length);
             }
 
+            if (false && self.outputCsv) {
+                self.queryResultToCsv(result);
+            }
+
             if (output == "table") {
                 self.queryResultToTable(result);
             } else if (output == "Graph") {
@@ -738,7 +742,7 @@ var KGquery = (function () {
                     }
                     query += queryType + " " + selectStr + "  " + fromStr + " where {" + whereStr + "}";
 
-                    query += " " + groupByStr + " limit 10000";
+                    query += " " + groupByStr; // + " limit 10000";
 
                     callbackSeries();
                 },
@@ -752,6 +756,7 @@ var KGquery = (function () {
                     if (options.output == "shacl") {
                         url = "http://51.178.139.80:8890/sparql?format=text/Turtle&query=";
                     }
+
                     self.currentSparqlQuery = {
                         url: url,
                         query: query,
@@ -759,13 +764,52 @@ var KGquery = (function () {
                     };
                     // query = Sparql_common.setPrefixesInSelectQuery(query);
 
-                    Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: self.currentSource, caller: "getObjectRestrictions" }, function (err, result) {
-                        if (err) {
-                            return callbackSeries(err);
-                        }
-                        data = result;
-                        callbackSeries(null, result);
-                    });
+                    var totalSize = 0;
+                    var labelsMap = {};
+                    var resultSize = 1;
+                    var limitSize = 10000;
+                    var offset = 0;
+                    self.outputCsv = false;
+                    data = { results: { bindings: [] }, head: { vars: [] } };
+                    async.whilst(
+                        function (_test) {
+                            if (!self.outputCsv && totalSize >= limitSize) {
+                                self.outputCsv = true;
+                            }
+                            UI.message("retreived " + totalSize);
+                            return resultSize > 0;
+                        },
+                        function (callbackWhilst) {
+                            var query2 = "" + query;
+
+                            query2 += " limit " + limitSize + " offset " + offset;
+
+                            Sparql_proxy.querySPARQL_GET_proxy(
+                                url,
+                                query2,
+                                "",
+                                {
+                                    source: self.currentSource,
+                                    caller: "getObjectRestrictions",
+                                },
+                                function (err, result) {
+                                    if (err) {
+                                        return callbackSeries(err);
+                                    }
+                                    var bindings = result.results.bindings;
+                                    offset += bindings.length;
+                                    totalSize += bindings.length;
+                                    resultSize = bindings.length;
+                                    data.head.vars = result.head.vars;
+                                    data.results.bindings = data.results.bindings.concat(bindings);
+                                    callbackWhilst(null, result);
+                                },
+                            );
+                        },
+                        function (err) {
+                            callbackSeries(null, data);
+                        },
+                    );
                 },
                 // Union Joins
                 function (callbackSeries) {
@@ -1010,6 +1054,68 @@ var KGquery = (function () {
                     $("#smallDialogDiv").parent().css("z-index", 1);
                 });
             });
+        });
+    };
+
+    self.queryResultToCsv = function (result) {
+        var data = result.results.bindings;
+        //prepare columns
+        var nonNullCols = {};
+        data.forEach(function (item) {
+            result.head.vars.forEach(function (varName) {
+                if (varName.length < 3) {
+                    return;
+                }
+                if (nonNullCols[varName]) {
+                    return;
+                }
+
+                if (item[varName]) {
+                    if (item[varName].type != "uri") {
+                        nonNullCols[varName] = item[varName].type;
+                    } else {
+                        if (KGquery.labelFromURIToDisplay?.length > 0 && KGquery.labelFromURIToDisplay.includes(varName)) {
+                            nonNullCols[varName] = "labelFromURI" + varName;
+                        }
+                    }
+                }
+            });
+        });
+        var tableCols = [];
+        var colNames = [];
+        tableCols.push({ title: "rowIndex", visible: false, defaultContent: "", width: "15%" });
+        // colNames.push("rowIndex");
+        for (var varName in nonNullCols) {
+            tableCols.push({ title: varName, defaultContent: "", width: "15%" });
+            colNames.push(varName);
+        }
+
+        var tableData = [];
+        self.currentData = data;
+        self.tableCols = tableCols;
+        data.forEach(function (item, index) {
+            var line = [index];
+            colNames.forEach(function (col) {
+                var value = null;
+
+                if (item[col]) {
+                    value = item[col].value;
+                    if (item[col].type == "uri") {
+                        value = Sparql_common.getLabelFromURI(value);
+                    }
+                    //format date
+                    if (item[col].datatype == "http://www.w3.org/2001/XMLSchema#dateTime") {
+                        var p = value.indexOf("T00:00:00.000Z");
+                        if (p > -1) {
+                            value = value.substring(0, p);
+                        }
+                    }
+                }
+
+                line.push(value);
+            });
+
+            tableData.push(line);
         });
     };
 

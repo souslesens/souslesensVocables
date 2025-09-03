@@ -15,7 +15,7 @@ var TriplesMaker = {
 
 
 
-    processTableTriples: function (data, tableMappings, options, callback) {
+    processTableTriples: function (data, tableMappings,globalParamsMap, options, callback) {
 
         async.eachSeries(data, function (line, callbackEachLine) {
                 //   lines.forEach(function (line, _indexLine) {
@@ -135,14 +135,14 @@ var TriplesMaker = {
         );
 
 
-
-
-
-
-
-
-
 },
+    getColumnUri:function(column,globalParamsMap){
+
+    },
+
+    getFormatedLiteral:function(value,globalParamsMap){
+
+    },
 
 
 /**
@@ -153,7 +153,7 @@ var TriplesMaker = {
  * @param processor function that create the triples
  * @param callback
  */
-readAndProcessData: function ( tableInfos, columnMappings,options, callback) {
+readAndProcessData: function ( tableInfos, columnMappings,globalParamsMap,options, callback) {
 
 
     var totalTriples = 0
@@ -171,7 +171,7 @@ readAndProcessData: function ( tableInfos, columnMappings,options, callback) {
             KGbuilder_socket.message(options.clientSocketId, " data loaded from " + tableInfos.table, false);
             //  tableData = result.data[0];
             async.eachSeries(result.data, function (data, callbackEach) {
-                TriplesMaker.processTableTriples(data, columnMappings,options,function( err, result){
+                TriplesMaker.processTableTriples(data, columnMappings,globalParamsMap,options,function( err, result){
                     totalTriples+=result.triplesCreated
                     KGbuilder_socket.message(options.clientSocketId, " processed  from " + tableInfos.table + " : " + totalTriples + " triples", false);
 

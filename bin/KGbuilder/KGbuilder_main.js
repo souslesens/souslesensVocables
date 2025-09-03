@@ -94,7 +94,10 @@ var KGbuilder_main = {
                     }
 
 
-                    TriplesMaker.readAndProcessData(tableInfos, columnsMappings, options, function (err, result) {
+                    var globalParamsMap=MappingsParser.getGlobalParamsMap(columnsMappings)
+
+
+                    TriplesMaker.readAndProcessData(tableInfos, columnsMappings, globalParamsMap,options, function (err, result) {
 
                         callbackEach(err)
 

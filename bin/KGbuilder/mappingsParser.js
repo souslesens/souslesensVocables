@@ -35,6 +35,8 @@ var MappingParser = {
             var edgesFromMap = {}
             var nodesMap = {}
             var columnsMap = {}
+
+
             data.edges.forEach(function (edge) {
 
                 if (!edgesFromMap[edge.from]) {
@@ -156,6 +158,28 @@ var MappingParser = {
             })
             return mappings
         }
+
+    },
+
+    getGlobalParamsMap:function(columnMappings){
+        var globalParamsMap= {
+            functions: {},
+            lookups: {},
+            prefixURIs: {},
+            baseURIs: {}
+        }
+
+        for (var columnId in columnMappings){
+            var column=columnMappings[columnId]
+            globalParamsMap[columnId] ={
+                baseURI:column.baseURI || null,
+                prefixURI:column.prefixURI || null,
+                transform:column.transform || null,
+                uriType:column.uriType || null,
+            }
+        }
+
+        return globalParamsMap;
 
     },
 

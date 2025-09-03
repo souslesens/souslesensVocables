@@ -161,8 +161,6 @@ var MappingsDetails = (function () {
                         });
                     }
                 }
-
-
             }
         });
         return jstreeData;
@@ -328,7 +326,7 @@ var MappingsDetails = (function () {
         $("#columnDetails-prefixURI").val(column.data.prefixURI || "");
         self.onChangeUriType();
 
-        self.setMappingDefaultFieds(column)
+        self.setMappingDefaultFieds(column);
     };
 
     /**
@@ -351,7 +349,7 @@ var MappingsDetails = (function () {
         currentGraphNode.data.rdfType = $("#columnDetails-rdfType").val();
         var prefix = $("#columnDetails-prefixURI").val();
         if (prefix && currentGraphNode.data.uriType == "fromLabel") {
-            var transformFn = "function{" + self.transform.createPrefixTransformFn(prefix, {notDialog: true}) + "}";
+            var transformFn = "function{" + self.transform.createPrefixTransformFn(prefix, { notDialog: true }) + "}";
             currentGraphNode.data.transform = transformFn;
             currentGraphNode.data.prefixURI = prefix;
             /*if (!DataSourceManager.rawConfig.prefixURI) {
@@ -382,8 +380,7 @@ var MappingsDetails = (function () {
         self.switchTypeToSubclass(currentGraphNode);
 
         // });
-        MappingColumnsGraph.saveVisjsGraph(function () {
-        });
+        MappingColumnsGraph.saveVisjsGraph(function () {});
     };
 
     /**
@@ -435,8 +432,7 @@ var MappingsDetails = (function () {
         MappingColumnsGraph.saveVisjsGraph(function () {
             self.drawDetailedMappingsGraph();
             self.showDetailedMappingsTree();
-            self.showColumnTechnicalMappingsDialog("detailedMappings_techDetailsDiv", graphNode, function () {
-            });
+            self.showColumnTechnicalMappingsDialog("detailedMappings_techDetailsDiv", graphNode, function () {});
         });
     };
 
@@ -475,14 +471,14 @@ var MappingsDetails = (function () {
                     property: "rdf:type",
                     object: params.rdfType,
                 });
-                MappingColumnsGraph.updateNode({id: MappingColumnsGraph.currentGraphNode.id, data: data});
+                MappingColumnsGraph.updateNode({ id: MappingColumnsGraph.currentGraphNode.id, data: data });
                 MappingColumnsGraph.saveVisjsGraph();
             } else if (params.addingSubClassOf) {
                 data.otherPredicates.push({
                     property: "rdfs:subClassOf",
                     object: params.addingSubClassOf,
                 });
-                MappingColumnsGraph.updateNode({id: MappingColumnsGraph.currentGraphNode.id, data: data});
+                MappingColumnsGraph.updateNode({ id: MappingColumnsGraph.currentGraphNode.id, data: data });
                 MappingColumnsGraph.saveVisjsGraph();
             } else if (params.nonObjectPropertyId) {
                 var range = params.datatypePropertyRange || Config.ontologiesVocabularyModels[params.nonObjectPropertyVocab].nonObjectProperties[params.nonObjectPropertyId].range;
@@ -492,7 +488,7 @@ var MappingsDetails = (function () {
                     range: range,
                     dateFormat: params.nonObjectPropertyDateFormat || null, //if any
                 });
-                MappingColumnsGraph.updateNode({id: MappingColumnsGraph.currentGraphNode.id, data: data});
+                MappingColumnsGraph.updateNode({ id: MappingColumnsGraph.currentGraphNode.id, data: data });
                 MappingColumnsGraph.saveVisjsGraph();
             }
             if (MappingsDetails.afterSaveColumnTechnicalMappingsDialog) {
@@ -548,7 +544,7 @@ var MappingsDetails = (function () {
 
         var divId = "detailedMappingsGraphDiv";
 
-        var visjsData = {nodes: [], edges: []};
+        var visjsData = { nodes: [], edges: [] };
 
         var existingNodes = {};
         var json = {};
@@ -591,18 +587,18 @@ var MappingsDetails = (function () {
 
             function getNodeAttrs(str) {
                 if (str.indexOf("http") > -1) {
-                    return {type: "Class", color: "#00afef", shape: "box", size: 30};
+                    return { type: "Class", color: "#00afef", shape: "box", size: 30 };
                 } else if (str.indexOf(":") > -1) {
                     drawRelation = false; //rdf Bag
                     return null;
-                    return {type: "OwlType", color: "#aaa", shape: "ellipse"};
+                    return { type: "OwlType", color: "#aaa", shape: "ellipse" };
                 } else if (str.endsWith("_$")) {
-                    return {type: "blankNode", color: "#00afef", shape: "square"};
+                    return { type: "blankNode", color: "#00afef", shape: "square" };
                 } else if (str.indexOf("_rowIndex") > -1) {
-                    return {type: "rowIndex", color: "#f90edd", shape: "star"};
+                    return { type: "rowIndex", color: "#f90edd", shape: "star" };
                 } else {
                     drawRelation = false;
-                    return {type: "Column", color: "#cb9801", shape: "ellipse"};
+                    return { type: "Column", color: "#cb9801", shape: "ellipse" };
                 }
             }
 
@@ -668,7 +664,7 @@ var MappingsDetails = (function () {
                         label: label,
                         shape: attrs.shape,
                         color: attrs.color,
-                        font: attrs.shape == "box" ? {color: "white"} : {color: "black"},
+                        font: attrs.shape == "box" ? { color: "white" } : { color: "black" },
                         size: Lineage_whiteboard.defaultShapeSize,
                         data: {
                             id: item.o,
@@ -757,8 +753,7 @@ var MappingsDetails = (function () {
      * @param {Object} options - Additional options for handling the click event.
      * @returns {void}
      */
-    self.onDetailedMappingsGraphClick = function (obj, event, options) {
-    };
+    self.onDetailedMappingsGraphClick = function (obj, event, options) {};
 
     /**
      * Retrieves the RDF type of a column based on its connected edges in the graph.
@@ -879,7 +874,7 @@ var MappingsDetails = (function () {
                 return mapping.p != "transform";
             });
             var mappingWithTransform = {};
-            mappingWithTransform[MappingModeler.currentTable.name] = {tripleModels: filteredMapping, transform: {}};
+            mappingWithTransform[MappingModeler.currentTable.name] = { tripleModels: filteredMapping, transform: {} };
             mappingWithTransform[MappingModeler.currentTable.name].transform[self.transformColumn] = transformFn;
             TripleFactory.createTriples(
                 true,
@@ -888,8 +883,7 @@ var MappingsDetails = (function () {
                     filteredMappings: mappingWithTransform,
                     table: MappingModeler.currentTable.name,
                 },
-                function (err, result) {
-                },
+                function (err, result) {},
             );
         },
         saveTransform: function (transformFnStr) {
@@ -960,32 +954,30 @@ var MappingsDetails = (function () {
      * @param columnNodeId
      */
     self.setMappingDefaultFieds = function (columnNode) {
-        var columnsClassMap = {}
-        var columnClass = MappingColumnsGraph.getColumnClass(columnNode)
+        var columnsClassMap = {};
+        var columnClass = MappingColumnsGraph.getColumnClass(columnNode);
         if (columnClass) {
             MappingColumnsGraph.visjsGraph.data.nodes.get().forEach(function (node) {
                 if (node.data && node.data.type == "Class" && node.data.id == columnClass) {
-                    var sameClassColumns=MappingColumnsGraph.getClassColumns(node)
-                    if(sameClassColumns) {
-                        sameClassColumns.forEach(function(sameColumn) {
+                    var sameClassColumns = MappingColumnsGraph.getClassColumns(node);
+                    if (sameClassColumns) {
+                        sameClassColumns.forEach(function (sameColumn) {
                             if (!$("#columnDetails-prefixURI").val() && sameColumn.data.prefixURI) {
-                                $("#columnDetails-prefixURI").val(sameColumn.data.prefixURI)
+                                $("#columnDetails-prefixURI").val(sameColumn.data.prefixURI);
                             }
                             if ($(!"#columnDetails-baseURI").val() && sameColumn.data.baseURI) {
-                                $("#columnDetails-baseURI").val(sameColumn.data.baseURI)
+                                $("#columnDetails-baseURI").val(sameColumn.data.baseURI);
                             }
-                        })
+                        });
                     }
                 }
 
                 if (!$("#columnDetails-rdfsLabel").val()) {
-                    $("#columnDetails-rdfsLabel").val(columnNode.data.label)
+                    $("#columnDetails-rdfsLabel").val(columnNode.data.label);
                 }
-
-            })
+            });
         }
-
-    }
+    };
     return self;
 })();
 

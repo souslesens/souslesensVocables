@@ -85,8 +85,6 @@ var MappingTransform = (function () {
         return json;
     };
 
-
-
     /**
      * Converts a node's data to a KGcreator-compatible column name based on its URI type and data type.
      * It generates column names based on different conditions such as blankNode, randomIdentifier, or URI.

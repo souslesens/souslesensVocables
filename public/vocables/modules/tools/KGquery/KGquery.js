@@ -483,8 +483,7 @@ var KGquery = (function () {
                 self.message("found items :" + result.results.bindings.length);
             }
 
-
-            if(false && self.outputCsv){
+            if (false && self.outputCsv) {
                 self.queryResultToCsv(result);
             }
 
@@ -743,7 +742,7 @@ var KGquery = (function () {
                     }
                     query += queryType + " " + selectStr + "  " + fromStr + " where {" + whereStr + "}";
 
-                    query += " " + groupByStr;// + " limit 10000";
+                    query += " " + groupByStr; // + " limit 10000";
 
                     callbackSeries();
                 },
@@ -758,15 +757,6 @@ var KGquery = (function () {
                         url = "http://51.178.139.80:8890/sparql?format=text/Turtle&query=";
                     }
 
-
-
-
-
-
-
-
-
-
                     self.currentSparqlQuery = {
                         url: url,
                         query: query,
@@ -779,44 +769,47 @@ var KGquery = (function () {
                     var resultSize = 1;
                     var limitSize = 10000;
                     var offset = 0;
-                    self.outputCsv=false;
-                    data={results:{bindings:[]},head:{vars:[]}}
+                    self.outputCsv = false;
+                    data = { results: { bindings: [] }, head: { vars: [] } };
                     async.whilst(
                         function (_test) {
-                            if(!self.outputCsv && totalSize>=limitSize) {
-                                self.outputCsv = true
-
+                            if (!self.outputCsv && totalSize >= limitSize) {
+                                self.outputCsv = true;
                             }
-                            UI.message("retreived "+totalSize)
-                            return resultSize > 0 ;
-
-
-
+                            UI.message("retreived " + totalSize);
+                            return resultSize > 0;
                         },
                         function (callbackWhilst) {
                             var query2 = "" + query;
 
                             query2 += " limit " + limitSize + " offset " + offset;
 
-
-                            Sparql_proxy.querySPARQL_GET_proxy(url, query2, "", {
-                                source: self.currentSource,
-                                caller: "getObjectRestrictions"
-                            }, function (err, result) {
-                                if (err) {
-                                    return callbackSeries(err);
-                                }
-                                var bindings=result.results.bindings;
-                                offset+=bindings.length;
-                                totalSize+=bindings.length
-                                resultSize=bindings.length
-                                data.head.vars= result.head.vars
-                                data.results.bindings =  data.results.bindings.concat(bindings);
-                                callbackWhilst (null, result);
-                            });
-                        },function(err){
-                            callbackSeries (null, data);
-                        })
+                            Sparql_proxy.querySPARQL_GET_proxy(
+                                url,
+                                query2,
+                                "",
+                                {
+                                    source: self.currentSource,
+                                    caller: "getObjectRestrictions",
+                                },
+                                function (err, result) {
+                                    if (err) {
+                                        return callbackSeries(err);
+                                    }
+                                    var bindings = result.results.bindings;
+                                    offset += bindings.length;
+                                    totalSize += bindings.length;
+                                    resultSize = bindings.length;
+                                    data.head.vars = result.head.vars;
+                                    data.results.bindings = data.results.bindings.concat(bindings);
+                                    callbackWhilst(null, result);
+                                },
+                            );
+                        },
+                        function (err) {
+                            callbackSeries(null, data);
+                        },
+                    );
                 },
                 // Union Joins
                 function (callbackSeries) {
@@ -1064,10 +1057,7 @@ var KGquery = (function () {
         });
     };
 
-
-
-
-    self.queryResultToCsv=function(result){
+    self.queryResultToCsv = function (result) {
         var data = result.results.bindings;
         //prepare columns
         var nonNullCols = {};
@@ -1127,8 +1117,7 @@ var KGquery = (function () {
 
             tableData.push(line);
         });
-
-    }
+    };
 
     /**
      * Clears all query sets and resets the graph state.

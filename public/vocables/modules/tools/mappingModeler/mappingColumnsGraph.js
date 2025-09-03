@@ -312,7 +312,7 @@ var MappingColumnsGraph = (function () {
         });
     };
 
-    self.getColumnClass=function(node) {
+    self.getColumnClass = function (node) {
         var connections = self.visjsGraph.getFromNodeEdgesAndToNodes(node.id);
 
         var classId = null;
@@ -322,21 +322,19 @@ var MappingColumnsGraph = (function () {
             }
         });
         return classId;
-    }
+    };
 
+    self.getClassColumns = function (node) {
+        var connections = self.visjsGraph.getFromNodeEdgesAndToNodes(node.id, true);
 
-
-    self.getClassColumns=function(node) {
-        var connections = self.visjsGraph.getFromNodeEdgesAndToNodes(node.id,true);
-
-        var columns=[] ;
+        var columns = [];
         connections.forEach(function (connection) {
             if (connection.edge.data.type == "rdf:type" || connection.edge.data.type == "rdfs:subClassOf") {
                 columns.push(connection.fromNode);
             }
         });
         return columns;
-    }
+    };
 
     /**
      * Handles click events on the Vis.js graph.
@@ -370,7 +368,6 @@ var MappingColumnsGraph = (function () {
             if (!DataSourceManager.currentConfig.currentDataSource) {
                 return alert("choose a data source first");
             }
-
 
             if (!MappingModeler.currentRelation) {
                 self.relationMessage(node.data.label, null);

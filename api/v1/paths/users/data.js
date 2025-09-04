@@ -142,6 +142,10 @@ module.exports = () => {
                             type: "string",
                             default: "The resource has been inserted successfully",
                         },
+                        id: {
+                            type: "number",
+                            default: 1,
+                        },
                     },
                 },
             },

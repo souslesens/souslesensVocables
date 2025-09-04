@@ -37,3 +37,12 @@ How to install a development instance and to contribute to the code.
 :maxdepth: 2
 devdoc/index.md
 ```
+
+# API
+
+How to use the _SousLeSens_ API.
+
+```{toctree}
+:maxdepth: 2
+api/index.md
+```

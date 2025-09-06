@@ -23,13 +23,13 @@ var MappingParser = {
      * get the vijsData of the mappings and extract tripleModels  for each Column in the field mappings
      *
      *
-     * @param source
+     * @param mappingData  nodes and edges at visjs format
      * @param table
      * @param callback
      */
-    getColumnsMap: function (source, table, callback) {
+    getColumnsMap: function (mappingData, table, callback) {
 
-        MappingParser.getMappingsData("PAZFLOR_ABOX", function (err, data) {
+
 
 
             var edgesFromMap = {}
@@ -37,21 +37,26 @@ var MappingParser = {
             var columnsMap = {}
 
 
-            data.edges.forEach(function (edge) {
+            mappingData.edges.forEach(function (edge) {
 
                 if (!edgesFromMap[edge.from]) {
                     edgesFromMap[edge.from] = []
                 }
                 edgesFromMap[edge.from].push(edge)
             })
-            data.nodes.forEach(function (node) {
-
+        mappingData.nodes.forEach(function (node) {
+            if(!table  || node.data.dataTable==table) {
                 nodesMap[node.id] = node
                 if (node.data.type == "Column") {
-                    if(!table  || node.data.dataTable==table)
                     columnsMap[node.id] = node.data
-
+                } else if (node.data.type == "RowIndex") {
+                    columnsMap[node.id] = node.data
+                } else if (node.data.type == "VirtualColumn") {
+                    columnsMap[node.id] = node.data
+                } else if (node.data.type == "URI") {
+                    columnsMap[node.id] = node.data
                 }
+            }
             })
 
 
@@ -88,7 +93,7 @@ var MappingParser = {
             return callback(null, columnsMap)
 
 
-        })
+
     },
 
     getTypeAndLabelMappings: function (fromNodeData, toNodeData) {
@@ -174,31 +179,52 @@ var MappingParser = {
             globalParamsMap[columnId] ={
                 baseURI:column.baseURI || null,
                 prefixURI:column.prefixURI || null,
-                transform:column.transform || null,
+                transform:column.transform || null,// clarifier différence entre function at transform
+                function:column.function || null,
                 uriType:column.uriType || null,
             }
         }
 
         return globalParamsMap;
 
-    },
+    }
+    ,
 
-
-    getTableMappings: function(source,table, callback) {
-        MappingParser.getColumnsMap(source, table, function (err, result) {
-            if (err) {
-                return callback(err);
+    /**
+     *
+     * build functions in a  pointers map used to transform data at tripleMaker processe
+     *
+     */
+    getJsFunctionsMap:function(columnMappings, callback){
+        function getFunction(argsArray, fnStr, callback) {
+            try {
+                fnStr = fnStr.replace(/[/r/n/t]gm/, "");
+                var array = /\{(?<body>.*)\}/.exec(fnStr);
+                if (!array) {
+                    return callbackSeries("cannot parse object function " + JSON.stringify(item) + " missing enclosing body into 'function{..}'");
+                }
+                var fnBody = array.groups["body"];
+                fnBody = "try{" + fnBody + "}catch(e){\n\rreturn console.log(e)\n\r}";
+                var fn = new Function(argsArray, fnBody);
+                return callback(null, fn);
+            } catch (err) {
+                return callback("error in object function " + fnStr + "\n" + err);
             }
-            var mappings = []
-            for (var columnId in result) {
-                result[columnId].mappings.forEach(function (mapping) {
-                    mappings.push(mapping)
+        }
+        var jsFunctionsMap={}
+        for(var columnId in columnMappings){
+            var column=columnMappings[columnId]
+            if(column.transform || column.function) {
+                getFunction(["row", "mapping"], columnId, function (err, fn) {
+                    jsFunctionsMap[columnId]=fn
                 })
             }
-            return callback(null,mappings)
-        })
-
+        }
+        return jsFunctionsMap
     }
+
+
+
 
 
 
@@ -208,6 +234,4 @@ var MappingParser = {
 module.exports = MappingParser
 
 
-MappingParser.getColumnsMap("PAZFLOR_ABOX", null, function (err, result) {
-
-})
+//MappingParser.getColumnsMap("PAZFLOR_ABOX", null, function (err, result) {

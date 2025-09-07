@@ -43,7 +43,7 @@ var KGbuilder_main = {
         var dataSourceConfig = {};
         var dataSourceMappings = {};
         var data = [];
-        var triples = [];
+
 
         KGbuilder_main.stopCreateTriples = false;
         if (options.clientSocketId) {
@@ -55,17 +55,23 @@ var KGbuilder_main = {
         }
 
 
-
-            if (!Array.isArray(tables)) {
-                tables = [tables]
-            }
+        if (!Array.isArray(tables)) {
+            tables = [tables]
+        }
 
 
         var mappingData = {}
         var sourceConfig = null
-        var columnsMappings = {}
-        var jsFunctionsMap={}
-        var globalParamsMap={}
+        var tableProcessingParams = {
+            columnsMappings: {},
+            jsFunctionsMap: {},
+            tableInfos: {},
+            sourceInfos: {},
+            uniqueTriplesMap:{}
+
+
+        }
+
 
 
         // load visj mapping file
@@ -73,9 +79,13 @@ var KGbuilder_main = {
             if (err) {
                 return callback(err)
             }
-            sourceConfig = mappingData.options.config
-            mappingData = _mappingData
 
+
+            mappingData = _mappingData
+            tableProcessingParams.sourceInfos = mappingData.options.config
+            tableProcessingParams.uniqueTriplesMap={}
+            var sampleTriples=[];
+            var totalTriplesCount={}
 
             /**
              * for each table get columnsMappingMap and create tripels
@@ -87,37 +97,35 @@ var KGbuilder_main = {
                     async.series([
                         function (callbackSeries) {
 
-                            MappingsParser.getColumnsMap(mappingData, tables[0], function (err, _columnsMappings) {
+                            MappingsParser.getColumnsMap(mappingData, tables[0], function (err, columnsMappings) {
                                 if (err) {
                                     return callbackSeries(err)
                                 }
-                                columnsMappings = _columnsMappings
+                                tableProcessingParams.columnsMappings = columnsMappings
                                 callbackSeries()
                             })
                         },
 
                         function (callbackSeries) {// init functions and transform map
-                            MappingsParser.getJsFunctionsMap(columnsMappings,function(err, _JsFunctionsMap){
+                            MappingsParser.getJsFunctionsMap(tableProcessingParams.columnsMappings, function (err, jsFunctionsMap) {
                                 if (err) {
                                     return callbackSeries(err)
                                 }
-                                JsFunctionsMap = _JsFunctionsMap
+                                tableProcessingParams.jsFunctionsMap = jsFunctionsMap
                                 callbackSeries()
 
                             })
 
-                        },    function (callbackSeries) {
-
-
                         },
                         function (callbackSeries) {// init globalParams
                             var firstColumn = null;
-                            for (const colId in columnsMappings) {
-                                firstColumn = columnsMappings[colId]
+                            for (const colId in tableProcessingParams.columnsMappings) {
+                                firstColumn = tableProcessingParams.columnsMappings[colId]
                                 break;
                             }
-                            if(!firstColumn)
+                            if (!firstColumn) {
                                 return callbackSeries("no column in mappings")
+                            }
                             var tableInfos = {
                                 table: firstColumn.dataTable,
                             }
@@ -127,1099 +135,53 @@ var KGbuilder_main = {
                                 var csvDir = path.join(__dirname, "../../data/CSV/" + source + "/");
                                 tableInfos.csvDataFilePath = csvDir + firstColumn.dataTable
                             }
+                            tableProcessingParams.tableInfos = tableInfos;
 
+                            /*  globalParamsMap = MappingsParser.getGlobalParamsMap(tableProcessingParams.columnsMappings)
+                              globalParamsMap.graphUri = sourceConfig.graphUri
 
-                             globalParamsMap = MappingsParser.getGlobalParamsMap(columnsMappings)
-                            globalParamsMap.graphUri = sourceConfig.graphUri
+                              tableProcessingParams.globalParamsMap =globalParamsMap*/
                             callbackSeries();
 
-                        },    function (callbackSeries) {// create the tripels or thois table
-                            TriplesMaker.readAndProcessData(tableInfos, columnsMappings, globalParamsMap, options, function (err, result) {
+                        }, function (callbackSeries) {// create the tripels or thois table
+                            TriplesMaker.readAndProcessData(tableProcessingParams, options, function (err, result) {
                                 if (err) {
                                     return callbackSeries(err)
                                 }
-                                totalTriple+=result.nTriples
+                                if(options.sampleSize){// dont write return triples sample
+                                    sampleTriples=result.sampleTriples
+                                }else {
+                                    totalTriplesCount[table] += result.totalTriplesCount
+                                }
                                 callbackSeries()
-                        })
-                            ]
-
-
-
-
-
-
-
-                }, function (err) {
-                    return callback()
-                })
-
-
-        }
-
-    },
-    function(callbackSeries) {
-
-    }
-
-
-],
-
-function (err) {
-
-    callback(err)
-}
-
-)
-MappingsParser.getJsFunctionsMap(columnsMappings, function (err, result) {
-
-})
-
-MappingsParser.getMappingsData(source, function (err, mappingData) {
-
-    var sourceConfig = mappingData.options.config
-
-
-})
-
-return;
-
-
-KGbuilder_main.initMappings(source, datasource, tables, options, function (err, tableMappingsToProcess) {
-    if (err) {
-        return callback(err);
-    }
-
-    if (tableMappingsToProcess.length == 0) {
-        return callback(" no mappings to process");
-    }
-
-    async.eachSeries(
-        tableMappingsToProcess,
-        function (mappings, callbackEach) {
-            async.series(
-                [
-                    //set dataSourceMappings config
-
-                    // load Lookups
-                    function (callbackSeries) {
-                        if (!mappings.lookups || mappings.lookups.length == 0) {
-                            return callbackSeries();
+                            })
                         }
-                        // filePath for CSV lookups
-                        var lookups = mappings.lookups;
-                        if (Object.keys(lookups).length > 0) {
-                            Object.keys(lookups).forEach(function (key) {
-                                var lookup = lookups[key];
-                                if (lookup.fileName && lookup.type == "csvSource") {
-                                    lookup.filePath = csvDir + lookup.fileName;
-                                }
-                            });
-                        }
+                    ], function (err) {// after all tables
+                        callbackEach(err)
+                    })
 
-                        KGbuilder_triplesMaker.loadLookups(mappings, function (err, result) {
-                            if (err) {
-                                return callbackSeries(err);
-                            }
-                            lookUpsMap = result;
-                            return callbackSeries();
-                        });
-                    },
-                    // init functions
-                    function (callbackSeries) {
-                        function getFunction(argsArray, fnStr, callback) {
-                            try {
-                                fnStr = fnStr.replace(/[/r/n/t]gm/, "");
-                                var array = /\{(?<body>.*)\}/.exec(fnStr);
-                                if (!array) {
-                                    return callbackSeries("cannot parse object function " + JSON.stringify(item) + " missing enclosing body into 'function{..}'");
-                                }
-                                var fnBody = array.groups["body"];
-                                fnBody = "try{" + fnBody + "}catch(e){\n\rreturn console.log(e)\n\r}";
-                                var fn = new Function(argsArray, fnBody);
-                                return callback(null, fn);
-                            } catch (err) {
-                                return callback("error in object function " + fnStr + "\n" + err);
-                            }
-                        }
+                },
 
-                        mappings.tripleModels.forEach(function (item) {
-                            if (item.s.indexOf("function{") > -1) {
-                                getFunction(["row", "mapping"], item.s, function (err, fn) {
-                                    if (err) {
-                                        return callbackSeries(err + " in mapping" + JSON.stringify(item));
-                                    }
-                                    item.s = fn;
-                                });
-                            }
-                            if (item.o.indexOf("function{") > -1) {
-                                getFunction(["row", "mapping"], item.o, function (err, fn) {
-                                    if (err) {
-                                        return callbackSeries(err + " in mapping" + JSON.stringify(item));
-                                    }
-
-                                    item.o = fn;
-                                });
-                            }
-
-                            if (item.p.indexOf("function{") > -1) {
-                                getFunction(["row", "mapping"], item.p, function (err, fn) {
-                                    if (err) {
-                                        return callbackSeries(err + " in mapping" + JSON.stringify(item));
-                                    }
-
-                                    item.p = fn;
-                                });
-                            }
-                        });
-                        for (var key in mappings.transform) {
-                            var fnStr = mappings.transform[key];
-                            if (fnStr.indexOf("function{") > -1) {
-                                getFunction(["value", "role", "prop", "row", "mapping"], fnStr, function (err, fn) {
-                                    if (err) {
-                                        return callbackSeries(err + " in mapping" + JSON.stringify(fnStr));
-                                    }
-                                    mappings.transform[key] = fn;
-                                });
-                            }
-                        }
-                        callbackSeries();
-                    },
-
-
-                    //load data
-                    function (callbackSeries) {
-                        KGbuilder_socket.message(options.clientSocketId, "creating triples for mappings " + mappings.table);
-                        KGbuilder_triplesMaker.loadData(mappings, options, function (err, result) {
-                            if (err) {
-                                if (tableMappingsToProcess.length > 1) {
-                                    KGbuilder_socket.message(options.clientSocketId, "cannot load data for table " + mappings.table, true);
-                                    return callbackEach();
-                                }
-                                return callbackSeries(err);
-                            }
-                            KGbuilder_triplesMaker.allColumns = {};
-                            data = result;
-
-                            callbackSeries();
-                        });
-                    },
-
-                    //build triples
-                    function (callbackSeries) {
-                        KGbuilder_triplesMaker.existingTriples = {};
-
-                        //sample only
-                        if (options.sampleSize) {
-                            options.customMetaData = {[KGbuilder_triplesMaker.mappingFilePredicate]: mappings.table};
-
-                            KGbuilder_triplesMaker.createTriples(mappings, data, options, function (err, result) {
-                                if (err) {
-                                    return callbackSeries(err);
-                                }
-
-                                output = result;
-                                return callback(null, output);
-                            });
-                        } else {
-                            KGbuilder_main.createTriplesByBatch(data, mappings, options, function (err, result) {
-                                if (err) {
-                                    return callbackSeries(err);
-                                }
-                                totalTriples = result;
-                                callbackSeries();
-                            });
-                        }
-                    },
-                ],
                 function (err) {
-                    if (err) {
-                        return callbackEach(err);
-                    }
-                    output = "(created  triples for table " + mappings.table + " :" + totalTriples;
-                    return callbackEach();
-                },
-            );
-        },
+                    return callback(err, {sampleTriples:sampleTriples,totalTriplesCount:totalTriplesCount})
 
-        function (err) {
-            return callback(err, output);
-        },
-    );
-});
-},
+                }
+            )
 
-createTriplesByBatch: function (data, mappings, options, callback) {
-    var sliceIndex = 0;
-    var totalTriples = 0;
-    var triples = [];
-    var slices = util.sliceArray(data, 200);
-    var uniqueSubjects = {};
 
-    async.eachSeries(
-        slices,
-        function (dataSlice, callbackEach) {
-            async.series(
-                [
-                    // interruption
-                    function (callbackSeries) {
-                        if (KGbuilder_main.stopCreateTriples) {
-                            var message = "mapping " + mappings.table + " : import interrupted by user";
-                            KGbuilder_socket.message(options.clientSocketId, message);
-                            return callbackSeries(message);
-                        }
-                        return callbackSeries();
-                    },
-                    //set triples
-                    function (callbackSeries) {
-                        options.customMetaData = {[KGbuilder_triplesMaker.mappingFilePredicate]: mappings.table};
-                        KGbuilder_triplesMaker.createTriples(mappings, dataSlice, options, function (err, result) {
-                            if (err) {
-                                return callbackSeries(err);
-                            }
-                            triples = result;
-
-                            callbackSeries();
-                        });
-                    },
-
-                    //add metadata
-                    function (callbackSeries) {
-                        triples.forEach(function (triple) {
-                            if (!uniqueSubjects[triple.s]) {
-                                uniqueSubjects[triple.s] = 1;
-
-                                triples = triples.concat(KGbuilder_triplesMaker.getMetaDataTriples(triple.s, {mappingTable: mappings.table}));
-                            }
-                        });
-                        callbackSeries();
-                    },
-
-                    //writeTriples
-                    function (callbackSeries) {
-                        // KGbuilder_socket.message(options.clientSocketId, "table " + mappings.table + " : writing triples:" + triples.length);
-
-                        //return callbackSeries();
-                        KGbuilder_triplesWriter.writeTriples(triples, mappings.graphUri, mappings.sparqlServerUrl, function (err, result) {
-                            if (err) {
-                                var error = " slice " + sliceIndex + "/" + slices.length + "\n";
-                                KGbuilder_socket.message(options.clientSocketId, error);
-                                return callbackEach(err);
-                            }
-                            sliceIndex += 1;
-                            totalTriples += result;
-                            KGbuilder_socket.message(options.clientSocketId, "table " + mappings.table + " : writen triples:" + totalTriples);
-
-                            callbackSeries();
-                        });
-                    },
-                ],
-                function (err) {
-                    callbackEach(err);
-                },
-            );
-        },
-        function (err) {
-            return callback(err, totalTriples);
-        },
-    );
-}
-,
-
-getSourceConfig: function (source, callback) {
-    // var sourceMappingsDir = path.join(__dirname, "../../data/mappings/" + source + "/");
-
-    try {
-        // var mainJsonPath = sourceMappingsDir + "main.json";
-        var mainJsonPath = path.join(__dirname, "../../data/graphs/mappings_" + source + "_ALL" + ".json");
-        var visjsMappingsJson = JSON.parse("" + fs.readFileSync(mainJsonPath));
-        var sourceMainJson = visjsMappingsJson.options.config;
-        if (sourceMainJson.sparqlServerUrl == "_default") {
-            sourceMainJson.sparqlServerUrl = ConfigManager.config.sparql_server.url;
-        }
-    } catch (e) {
-        return callback(e);
+            return;
+        })
     }
-    callback(null, sourceMainJson);
 }
-,
-initMappings: function (source, datasource, tables, options, callback) {
-    var tableMappingsToProcess = [];
-    var sourceMappingsDir = path.join(__dirname, "../../data/mappings/" + source + "/");
-    var csvDir = path.join(__dirname, "../../data/CSV/" + source + "/");
-    var sourceMainJson = {};
-    var dataSourceConfig = {};
-    var dataSourceMappings = {};
-
-    async.series(
-        [
-            // read source main.json
-            function (callbackSeries) {
-                KGbuilder_main.getSourceConfig(source, function (err, result) {
-                    if (err) {
-                        return callbackSeries(err);
-                    }
-                    sourceMainJson = result;
-                    callbackSeries();
-                });
-            },
-            // read datasourceMappings
-            function (callbackSeries) {
-                try {
-                    var mappings;
-                    if (options.mappingsFilter) {
-                        //  mappings = JSON.parse(options.mappingsFilter);
-                        mappings = options.mappingsFilter;
-                    } else {
-                        var dataSourceMappingsPath = sourceMappingsDir + datasource + ".json";
-                        var dataSourceMappingsPath = sourceMappingsDir + datasource + ".json";
-                        mappings = JSON.parse("" + fs.readFileSync(dataSourceMappingsPath));
-                    }
-                    dataSourceMappings.mappings = mappings;
-                    dataSourceMappings.source = source;
-                    dataSourceMappings.datasource = datasource;
-
-                    if (sourceMainJson.databaseSources[datasource]) {
-                        dataSourceMappings.type = "databaseSources";
-
-                        dataSourceMappings.config = sourceMainJson.databaseSources[datasource];
-                        dataSourceMappings.config.dbName = datasource;
-                    }
-                } catch (e) {
-                    return callbackSeries(e);
-                }
-                callbackSeries();
-            },
 
 
-            //select tableMappings
-            function (callbackSeries) {
-                if (tables && !Array.isArray(tables)) {
-                    tables = [tables];
-                }
-                for (var key in dataSourceMappings.mappings) {
-                    if (!tables || tables.indexOf(key) > -1) {
-                        var tablemappings = dataSourceMappings.mappings[key];
+module.exports=KGbuilder_main;
 
-                        tablemappings.table = key;
-                        if (dataSourceMappings.config) {
-                            //database
-                            tablemappings.datasourceConfig = dataSourceMappings.config;
-                        } else {
-                            //csvFile
+  if(false) {
+      KGbuilder_main.importTriplesFromCsvOrTable("PAZFLOR_ABOX", "01K1TNFHADVTT7PHJF0AJ4GFRX", "subpackage", options, function (err, result) {
+          console.log(err);
+          console.log(result)
 
-                            tablemappings.csvDataFilePath = csvDir + key;
-                        }
-                        tablemappings.prefixes = sourceMainJson.prefixes;
-                        tablemappings.graphUri = sourceMainJson.graphUri;
-                        tablemappings.sparqlServerUrl = sourceMainJson.sparqlServerUrl;
-                        tablemappings.prefixURI = sourceMainJson.prefixURI || {};
+      });
+  }
 
-                        tableMappingsToProcess.push(tablemappings);
-                    }
-                }
-                callbackSeries();
-            },
-        ],
-        function (err) {
-            return callback(err, tableMappingsToProcess);
-        },
-    );
-}
-,
-/**
- *
- *
- *
- * @param source
- * @param datasource
- * @param tables list of table otherwise if null delete all KGcreator triples
- * @param options
- * @param callback
- */
-deleteKGcreatorTriples: function (source, tables, options, callback) {
-    KGbuilder_main.getSourceConfig(source, function (err, sourceMainJson) {
-        if (err) {
-            return callbackSeries(err);
-        }
-
-        //delete allKGCreator triples
-        if (!tables || tables.length == 0) {
-            KGbuilder_triplesWriter.deleteKGcreatorTriples(sourceMainJson.sparqlServerUrl, sourceMainJson.graphUri, null, options, function (err, result) {
-                if (err) {
-                    return callback(err);
-                }
-                return callback(null, "deleted all triples :" + result + " in source :" + source);
-            });
-        } // delete specifc triples with predicate
-        else {
-            if (!Array.isArray(tables)) {
-                tables = [tables];
-            }
-            var totalTriples = 0;
-            async.eachSeries(
-                tables,
-                function (table, callbackEach) {
-                    KGbuilder_triplesWriter.deleteKGcreatorTriples(sourceMainJson.sparqlServerUrl, sourceMainJson.graphUri, table, options, function (err, result) {
-                        if (err) {
-                            return callbackEach(err);
-                        }
-                        //   KGbuilder_socket.message(options.clientSocketId, "deleted triples :" + result + " in table " + mappings.table)
-                        totalTriples += result;
-                        return callbackEach(err);
-                    });
-                },
-                function (err) {
-                    return callback(null, "deleted triples  in tables " + tables.toString() + " : " + totalTriples);
-                },
-            );
-        }
-    });
-}
-,
-
-// on potential source mappingFiles analyse with SPARQL query which has really triples created on it and return it
-getSourceMappingsFiles: async function (source, callback) {
-    KGbuilder_main.getSourceConfig(source, async function (err, sourceMainJson) {
-        if (err) {
-            return callback(err);
-        }
-        var mappingFiles = [];
-
-        for (const key of Object.keys(sourceMainJson.databaseSources)) {
-            const database = await DatabaseModel.getDatabase(key);
-            const driver = await DatabaseModel.getClientDriver(database.driver);
-
-            const connection = dbConnector.getConnection(database, driver);
-
-            const data = await dbConnector.getKGModelAsync(connection, database.database, database.driver);
-            let tables = {};
-            data.forEach((d) => {
-                if (!Object.keys(tables).includes(d.table_name)) {
-                    tables[d.table_name] = [];
-                }
-                tables[d.table_name].push(d.column_name);
-            });
-            Object.keys(tables).forEach(function (tableName) {
-                // also get db type
-                mappingFiles.push({
-                    id: tableName,
-                    label: tableName,
-                    databaseId: key,
-                    databaseName: database.name,
-                    type: "databaseSource",
-                    database: database.database,
-                    driver: database.driver,
-                    columns: tables[tableName],
-                });
-            });
-        }
-
-        Object.keys(sourceMainJson.csvSources).forEach(function (key) {
-            mappingFiles.push({
-                id: key,
-                label: key,
-                type: "csvSource",
-            });
-        });
-        const query = `
-            SELECT DISTINCT ?table,COUNT(?s)
-            WHERE {
-                GRAPH <${sourceMainJson.graphUri}> {
-                    ?s <${KGbuilder_triplesMaker.mappingFilePredicate}> ?table.
-                }
-            }`;
-
-        const params = {
-            query: query,
-        };
-        if (ConfigManager.config && ConfigManager.config.sparql_server.user) {
-            params.auth = {
-                user: ConfigManager.config.sparql_server.user,
-                pass: ConfigManager.config.sparql_server.password,
-                sendImmediately: false,
-            };
-        }
-        const sparqlServerUrl = sourceMainJson.sparqlServerUrl;
-        httpProxy.post(sparqlServerUrl, null, params, function (err, result) {
-            if (err) {
-                return callback(err);
-            }
-            var result = result.results.bindings;
-            var trueMappingFiles = {};
-            result.forEach(function (file) {
-                trueMappingFiles[file.table.value] = file["callret-1"].value ?? true;
-            });
-            mappingFiles = mappingFiles.filter(function (file) {
-                return trueMappingFiles[file.label] !== undefined;
-            });
-            mappingFiles.forEach(function (file) {
-                file.triplesCount = trueMappingFiles[file.label];
-            });
-            callback(null, mappingFiles);
-        });
-    });
-}
-,
-}
-;
-
-module.exports = KGbuilder_main;
-
-if (false) {
-    var options = {
-        "filteredMappings": {
-            "subpackage": {
-                "tripleModels": [
-                    {
-                        "s": "discipline_ctr",
-                        "p": "rdf:type",
-                        "o": "owl:NamedIndividual"
-                    },
-                    {
-                        "s": "discipline_ctr",
-                        "p": "rdfs:label",
-                        "o": "discipline_ctr",
-                        "dataType": "xsd:string"
-                    },
-                    {
-                        "s": "discipline_ctr",
-                        "p": "http://purl.obolibrary.org/obo/BFO_0000101",
-                        "o": "funct_loc"
-                    },
-                    {
-                        "s": "discipline_ctr",
-                        "p": "rdf:type",
-                        "o": "http://totalenergies/resources/tsf/ontology/pazflor-tbox/Discipline"
-                    },
-                    {
-                        "s": "package",
-                        "p": "rdf:type",
-                        "o": "owl:NamedIndividual"
-                    },
-                    {
-                        "s": "package",
-                        "p": "rdfs:label",
-                        "o": "package",
-                        "dataType": "xsd:string"
-                    },
-                    {
-                        "s": "package",
-                        "p": "rdf:type",
-                        "o": "http://totalenergies/resources/tsf/ontology/pazflor-tbox/Package"
-                    },
-                    {
-                        "s": "package",
-                        "p": "rdfs:member",
-                        "o": "subpackage"
-                    },
-                    {
-                        "s": "catprof",
-                        "p": "rdf:type",
-                        "o": "owl:NamedIndividual"
-                    },
-                    {
-                        "s": "catprof",
-                        "p": "rdfs:label",
-                        "o": "catprof",
-                        "dataType": "xsd:string"
-                    },
-                    {
-                        "s": "catprof",
-                        "p": "http://purl.obolibrary.org/obo/BFO_0000101",
-                        "o": "funct_loc"
-                    },
-                    {
-                        "s": "catprof",
-                        "p": "rdf:type",
-                        "o": "http://totalenergies/resources/tsf/ontology/pazflor-tbox/CatProf"
-                    },
-                    {
-                        "s": "funct_loc",
-                        "p": "rdf:type",
-                        "o": "owl:NamedIndividual"
-                    },
-                    {
-                        "s": "funct_loc",
-                        "p": "rdf:type",
-                        "o": "http://totalenergies/resources/tsf/ontology/pazflor-tbox/functional_Location"
-                    },
-                    {
-                        "s": "http://totalenergies/resources/tsf/ontology/pazflor-abox/Packages_#",
-                        "p": "rdf:type",
-                        "o": "owl:NamedIndividual"
-                    },
-                    {
-                        "s": "http://totalenergies/resources/tsf/ontology/pazflor-abox/Packages_#",
-                        "p": "rdfs:label",
-                        "o": "Packages",
-                        "dataType": "xsd:string"
-                    },
-                    {
-                        "s": "subpackage",
-                        "p": "rdf:type",
-                        "o": "owl:NamedIndividual"
-                    },
-                    {
-                        "s": "subpackage",
-                        "p": "rdfs:label",
-                        "o": "subpackage",
-                        "dataType": "xsd:string"
-                    },
-                    {
-                        "s": "subpackage",
-                        "p": "rdfs:member",
-                        "o": "funct_loc"
-                    },
-                    {
-                        "s": "subpackage",
-                        "p": "https://spec.industrialontologies.org/ontology/core/Core/isAbout",
-                        "o": "funct_loc"
-                    },
-                    {
-                        "s": "subpackage",
-                        "p": "http://purl.obolibrary.org/obo/BFO_0000176",
-                        "o": "package"
-                    },
-                    {
-                        "s": "subpackage",
-                        "p": "rdf:type",
-                        "o": "http://totalenergies/resources/tsf/ontology/pazflor-tbox/SubPackage"
-                    },
-                    {
-                        "s": "discipline_ctr",
-                        "p": "transform",
-                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'disc-'+value;}"
-                    },
-                    {
-                        "s": "discipline_ctr",
-                        "p": "transform",
-                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'disc-'+value;}"
-                    },
-                    {
-                        "s": "discipline_ctr",
-                        "p": "transform",
-                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'disc-'+value;}"
-                    },
-                    {
-                        "s": "discipline_ctr",
-                        "p": "transform",
-                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'disc-'+value;}"
-                    },
-                    {
-                        "s": "funct_loc",
-                        "p": "transform",
-                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'FL-'+value;}"
-                    },
-                    {
-                        "s": "discipline_ctr",
-                        "p": "transform",
-                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'disc-'+value;}"
-                    },
-                    {
-                        "s": "package",
-                        "p": "transform",
-                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'pack-'+value;}"
-                    },
-                    {
-                        "s": "package",
-                        "p": "transform",
-                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'pack-'+value;}"
-                    },
-                    {
-                        "s": "package",
-                        "p": "transform",
-                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'pack-'+value;}"
-                    },
-                    {
-                        "s": "package",
-                        "p": "transform",
-                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'pack-'+value;}"
-                    },
-                    {
-                        "s": "package",
-                        "p": "transform",
-                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'pack-'+value;}"
-                    },
-                    {
-                        "s": "subpackage",
-                        "p": "transform",
-                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'subPack-'+value;}"
-                    },
-                    {
-                        "s": "catprof",
-                        "p": "transform",
-                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'catProf-'+value;}"
-                    },
-                    {
-                        "s": "catprof",
-                        "p": "transform",
-                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'catProf-'+value;}"
-                    },
-                    {
-                        "s": "catprof",
-                        "p": "transform",
-                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'catProf-'+value;}"
-                    },
-                    {
-                        "s": "catprof",
-                        "p": "transform",
-                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'catProf-'+value;}"
-                    },
-                    {
-                        "s": "funct_loc",
-                        "p": "transform",
-                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'FL-'+value;}"
-                    },
-                    {
-                        "s": "catprof",
-                        "p": "transform",
-                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'catProf-'+value;}"
-                    },
-                    {
-                        "s": "funct_loc",
-                        "p": "transform",
-                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'FL-'+value;}"
-                    },
-                    {
-                        "s": "funct_loc",
-                        "p": "transform",
-                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'FL-'+value;}"
-                    },
-                    {
-                        "s": "subpackage",
-                        "p": "transform",
-                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'subPack-'+value;}"
-                    },
-                    {
-                        "s": "subpackage",
-                        "p": "transform",
-                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'subPack-'+value;}"
-                    },
-                    {
-                        "s": "subpackage",
-                        "p": "transform",
-                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'subPack-'+value;}"
-                    },
-                    {
-                        "s": "subpackage",
-                        "p": "transform",
-                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'subPack-'+value;}"
-                    },
-                    {
-                        "s": "funct_loc",
-                        "p": "transform",
-                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'FL-'+value;}"
-                    },
-                    {
-                        "s": "subpackage",
-                        "p": "transform",
-                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'subPack-'+value;}"
-                    },
-                    {
-                        "s": "funct_loc",
-                        "p": "transform",
-                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'FL-'+value;}"
-                    },
-                    {
-                        "s": "subpackage",
-                        "p": "transform",
-                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'subPack-'+value;}"
-                    },
-                    {
-                        "s": "package",
-                        "p": "transform",
-                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'pack-'+value;}"
-                    },
-                    {
-                        "s": "subpackage",
-                        "p": "transform",
-                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'subPack-'+value;}"
-                    }
-                ],
-                "transform": {},
-                "lookups": {}
-            }
-        },
-        "deleteOldGraph": false,
-        "sampleSize": 500,
-        "clientSocketId": "ycnSsvXFNLkKWTZmAAAI",
-        "mappingsFilter": {
-            "subpackage": {
-                "tripleModels": [
-                    {
-                        "s": "discipline_ctr",
-                        "p": "rdf:type",
-                        "o": "owl:NamedIndividual"
-                    },
-                    {
-                        "s": "discipline_ctr",
-                        "p": "rdfs:label",
-                        "o": "discipline_ctr",
-                        "dataType": "xsd:string"
-                    },
-                    {
-                        "s": "discipline_ctr",
-                        "p": "http://purl.obolibrary.org/obo/BFO_0000101",
-                        "o": "funct_loc"
-                    },
-                    {
-                        "s": "discipline_ctr",
-                        "p": "rdf:type",
-                        "o": "http://totalenergies/resources/tsf/ontology/pazflor-tbox/Discipline"
-                    },
-                    {
-                        "s": "package",
-                        "p": "rdf:type",
-                        "o": "owl:NamedIndividual"
-                    },
-                    {
-                        "s": "package",
-                        "p": "rdfs:label",
-                        "o": "package",
-                        "dataType": "xsd:string"
-                    },
-                    {
-                        "s": "package",
-                        "p": "rdf:type",
-                        "o": "http://totalenergies/resources/tsf/ontology/pazflor-tbox/Package"
-                    },
-                    {
-                        "s": "package",
-                        "p": "rdfs:member",
-                        "o": "subpackage"
-                    },
-                    {
-                        "s": "catprof",
-                        "p": "rdf:type",
-                        "o": "owl:NamedIndividual"
-                    },
-                    {
-                        "s": "catprof",
-                        "p": "rdfs:label",
-                        "o": "catprof",
-                        "dataType": "xsd:string"
-                    },
-                    {
-                        "s": "catprof",
-                        "p": "http://purl.obolibrary.org/obo/BFO_0000101",
-                        "o": "funct_loc"
-                    },
-                    {
-                        "s": "catprof",
-                        "p": "rdf:type",
-                        "o": "http://totalenergies/resources/tsf/ontology/pazflor-tbox/CatProf"
-                    },
-                    {
-                        "s": "funct_loc",
-                        "p": "rdf:type",
-                        "o": "owl:NamedIndividual"
-                    },
-                    {
-                        "s": "funct_loc",
-                        "p": "rdf:type",
-                        "o": "http://totalenergies/resources/tsf/ontology/pazflor-tbox/functional_Location"
-                    },
-                    {
-                        "s": "http://totalenergies/resources/tsf/ontology/pazflor-abox/Packages_#",
-                        "p": "rdf:type",
-                        "o": "owl:NamedIndividual"
-                    },
-                    {
-                        "s": "http://totalenergies/resources/tsf/ontology/pazflor-abox/Packages_#",
-                        "p": "rdfs:label",
-                        "o": "Packages",
-                        "dataType": "xsd:string"
-                    },
-                    {
-                        "s": "subpackage",
-                        "p": "rdf:type",
-                        "o": "owl:NamedIndividual"
-                    },
-                    {
-                        "s": "subpackage",
-                        "p": "rdfs:label",
-                        "o": "subpackage",
-                        "dataType": "xsd:string"
-                    },
-                    {
-                        "s": "subpackage",
-                        "p": "rdfs:member",
-                        "o": "funct_loc"
-                    },
-                    {
-                        "s": "subpackage",
-                        "p": "https://spec.industrialontologies.org/ontology/core/Core/isAbout",
-                        "o": "funct_loc"
-                    },
-                    {
-                        "s": "subpackage",
-                        "p": "http://purl.obolibrary.org/obo/BFO_0000176",
-                        "o": "package"
-                    },
-                    {
-                        "s": "subpackage",
-                        "p": "rdf:type",
-                        "o": "http://totalenergies/resources/tsf/ontology/pazflor-tbox/SubPackage"
-                    },
-                    {
-                        "s": "discipline_ctr",
-                        "p": "transform",
-                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'disc-'+value;}"
-                    },
-                    {
-                        "s": "discipline_ctr",
-                        "p": "transform",
-                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'disc-'+value;}"
-                    },
-                    {
-                        "s": "discipline_ctr",
-                        "p": "transform",
-                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'disc-'+value;}"
-                    },
-                    {
-                        "s": "discipline_ctr",
-                        "p": "transform",
-                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'disc-'+value;}"
-                    },
-                    {
-                        "s": "funct_loc",
-                        "p": "transform",
-                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'FL-'+value;}"
-                    },
-                    {
-                        "s": "discipline_ctr",
-                        "p": "transform",
-                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'disc-'+value;}"
-                    },
-                    {
-                        "s": "package",
-                        "p": "transform",
-                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'pack-'+value;}"
-                    },
-                    {
-                        "s": "package",
-                        "p": "transform",
-                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'pack-'+value;}"
-                    },
-                    {
-                        "s": "package",
-                        "p": "transform",
-                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'pack-'+value;}"
-                    },
-                    {
-                        "s": "package",
-                        "p": "transform",
-                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'pack-'+value;}"
-                    },
-                    {
-                        "s": "package",
-                        "p": "transform",
-                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'pack-'+value;}"
-                    },
-                    {
-                        "s": "subpackage",
-                        "p": "transform",
-                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'subPack-'+value;}"
-                    },
-                    {
-                        "s": "catprof",
-                        "p": "transform",
-                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'catProf-'+value;}"
-                    },
-                    {
-                        "s": "catprof",
-                        "p": "transform",
-                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'catProf-'+value;}"
-                    },
-                    {
-                        "s": "catprof",
-                        "p": "transform",
-                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'catProf-'+value;}"
-                    },
-                    {
-                        "s": "catprof",
-                        "p": "transform",
-                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'catProf-'+value;}"
-                    },
-                    {
-                        "s": "funct_loc",
-                        "p": "transform",
-                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'FL-'+value;}"
-                    },
-                    {
-                        "s": "catprof",
-                        "p": "transform",
-                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'catProf-'+value;}"
-                    },
-                    {
-                        "s": "funct_loc",
-                        "p": "transform",
-                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'FL-'+value;}"
-                    },
-                    {
-                        "s": "funct_loc",
-                        "p": "transform",
-                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'FL-'+value;}"
-                    },
-                    {
-                        "s": "subpackage",
-                        "p": "transform",
-                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'subPack-'+value;}"
-                    },
-                    {
-                        "s": "subpackage",
-                        "p": "transform",
-                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'subPack-'+value;}"
-                    },
-                    {
-                        "s": "subpackage",
-                        "p": "transform",
-                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'subPack-'+value;}"
-                    },
-                    {
-                        "s": "subpackage",
-                        "p": "transform",
-                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'subPack-'+value;}"
-                    },
-                    {
-                        "s": "funct_loc",
-                        "p": "transform",
-                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'FL-'+value;}"
-                    },
-                    {
-                        "s": "subpackage",
-                        "p": "transform",
-                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'subPack-'+value;}"
-                    },
-                    {
-                        "s": "funct_loc",
-                        "p": "transform",
-                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'FL-'+value;}"
-                    },
-                    {
-                        "s": "subpackage",
-                        "p": "transform",
-                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'subPack-'+value;}"
-                    },
-                    {
-                        "s": "package",
-                        "p": "transform",
-                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'pack-'+value;}"
-                    },
-                    {
-                        "s": "subpackage",
-                        "p": "transform",
-                        "o": "function{if((mapping.isString||mapping.dataType) && role=='o') return value; else return 'subPack-'+value;}"
-                    }
-                ],
-                "transform": {},
-                "lookups": {}
-            }
-        }
-    };
-    KGbuilder_main.importTriplesFromCsvOrTable("PAZFLOR_ABOX", "01K1TNFHADVTT7PHJF0AJ4GFRX", "subpackage", options, function (err, result) {
-        console.log(err);
-        console.log(result)
-
-    });
-}

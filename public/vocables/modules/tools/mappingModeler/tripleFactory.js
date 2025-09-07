@@ -415,15 +415,20 @@ var TripleFactory = (function () {
         });
 
         var tableData = [];
-        data.forEach(function (item, index) {
-            tableData.push([escapeMarkup(item.s), escapeMarkup(item.p), escapeMarkup(item.o)]);
-        });
+        data.sampleTriples.forEach(function (item, index) {
 
+            var array=item.split(" ")
+            tableData.push([escapeMarkup(array[0]), escapeMarkup(array[1]), escapeMarkup(array[2])]);
+          //  tableData.push([escapeMarkup(item.s), escapeMarkup(item.p), escapeMarkup(item.o)]);
+        });
+/*
         var str = "<table><tr><td>subject</td><td>predicate</td><td>object</td></tr>";
-        data.forEach(function (item, index) {
+        data.sampleTriples.forEach(function (item, index) {
             str += "<tr><td>" + escapeMarkup(item.s) + "</td><td>" + escapeMarkup(item.p) + "</td><td>" + escapeMarkup(item.o) + "</td></tr>";
         });
         str += "</table>";
+
+ */
 
         /*  $("#KGcreator_triplesDataTableDiv").html(str)
           return;*/

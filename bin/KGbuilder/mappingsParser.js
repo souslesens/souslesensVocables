@@ -45,6 +45,9 @@ var MappingParser = {
                 edgesFromMap[edge.from].push(edge)
             })
         mappingData.nodes.forEach(function (node) {
+                if (node.data.type == "Class") {
+                    nodesMap[node.id] = node.data
+                }
             if(!table  || node.data.dataTable==table) {
                 nodesMap[node.id] = node
                 if (node.data.type == "Column") {
@@ -73,8 +76,10 @@ var MappingParser = {
                             mappings = MappingParser.getTypeAndLabelMappings(fromNodeData, toNodeData)
                             columnMappings = columnMappings.concat(mappings)
                         } else if (toNodeData.type == "Column") {
-                            mappings = MappingParser.getColumnToColumnMappings(fromNodeData, toNodeData, edge.data)
+                            mappings = MappingParser.getColumnToColumnMappings(fromNodeData, toNodeData, edge)
                             columnMappings = columnMappings.concat(mappings)
+                        }else{
+                            var x=3;
                         }
 
                     })
@@ -125,15 +130,16 @@ var MappingParser = {
         return mappings
     },
 
-    getColumnToColumnMappings: function (fromNodeData, toNodeData, edgeData) {
+    getColumnToColumnMappings: function (fromNodeData, toNodeData, edge) {
         var mappings = []
 
-        var type = fromNodeData.rdfType == "owl;Class" ? "rdfs:subClassOf" : "rdf:type"
+
 
         mappings.push({
             s: fromNodeData.id,
-            p: edgeData.id,
+            p: edge.data.id,
             o: toNodeData.id,
+            objColId:edge.to
         })
         return mappings
     },
@@ -166,7 +172,7 @@ var MappingParser = {
 
     },
 
-    getGlobalParamsMap:function(columnMappings){
+  /*  getGlobalParamsMap:function(columnMappings){
         var globalParamsMap= {
             functions: {},
             lookups: {},
@@ -187,8 +193,8 @@ var MappingParser = {
 
         return globalParamsMap;
 
-    }
-    ,
+    }*/
+
 
     /**
      *
@@ -201,7 +207,7 @@ var MappingParser = {
                 fnStr = fnStr.replace(/[/r/n/t]gm/, "");
                 var array = /\{(?<body>.*)\}/.exec(fnStr);
                 if (!array) {
-                    return callbackSeries("cannot parse object function " + JSON.stringify(item) + " missing enclosing body into 'function{..}'");
+                    return callback("cannot parse object function " + JSON.stringify(item) + " missing enclosing body into 'function{..}'");
                 }
                 var fnBody = array.groups["body"];
                 fnBody = "try{" + fnBody + "}catch(e){\n\rreturn console.log(e)\n\r}";
@@ -214,13 +220,18 @@ var MappingParser = {
         var jsFunctionsMap={}
         for(var columnId in columnMappings){
             var column=columnMappings[columnId]
-            if(column.transform || column.function) {
-                getFunction(["row", "mapping"], columnId, function (err, fn) {
+            if( column.function) {
+                getFunction(["row", "mapping"], column.function, function (err, fn) {
+                    jsFunctionsMap[columnId]=fn
+                })
+            }
+            if( column.transform) {
+                getFunction(["row", "mapping"], column.transform, function (err, fn) {
                     jsFunctionsMap[columnId]=fn
                 })
             }
         }
-        return jsFunctionsMap
+        return callback(null,jsFunctionsMap)
     }
 
 

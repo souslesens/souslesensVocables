@@ -30,25 +30,23 @@ var MappingParser = {
     getColumnsMap: function (mappingData, table, callback) {
 
 
+        var edgesFromMap = {}
+        var nodesMap = {}
+        var columnsMap = {}
 
 
-            var edgesFromMap = {}
-            var nodesMap = {}
-            var columnsMap = {}
+        mappingData.edges.forEach(function (edge) {
 
-
-            mappingData.edges.forEach(function (edge) {
-
-                if (!edgesFromMap[edge.from]) {
-                    edgesFromMap[edge.from] = []
-                }
-                edgesFromMap[edge.from].push(edge)
-            })
+            if (!edgesFromMap[edge.from]) {
+                edgesFromMap[edge.from] = []
+            }
+            edgesFromMap[edge.from].push(edge)
+        })
         mappingData.nodes.forEach(function (node) {
-                if (node.data.type == "Class") {
-                    nodesMap[node.id] = node.data
-                }
-            if(!table  || node.data.dataTable==table) {
+            if (node.data.type == "Class") {
+                nodesMap[node.id] = node
+            }
+            if (!table || node.data.dataTable == table) {
                 nodesMap[node.id] = node
                 if (node.data.type == "Column") {
                     columnsMap[node.id] = node.data
@@ -60,46 +58,69 @@ var MappingParser = {
                     columnsMap[node.id] = node.data
                 }
             }
-            })
+        })
 
 
-            for (var columnId in columnsMap) {
+        for (var columnId in columnsMap) {
 
-                var fromNodeData = columnsMap[columnId]
-                var columnMappings = []
-                var edges = edgesFromMap[columnId]
-                if (edges) {
-                    edges.forEach(function (edge) {
-                        var toNode = nodesMap[edge.to]
-                        var toNodeData = toNode ? toNode.data : {}
-                        if (toNodeData.type == "Class") {
-                            mappings = MappingParser.getTypeAndLabelMappings(fromNodeData, toNodeData)
-                            columnMappings = columnMappings.concat(mappings)
-                        } else if (toNodeData.type == "Column") {
-                            mappings = MappingParser.getColumnToColumnMappings(fromNodeData, toNodeData, edge)
-                            columnMappings = columnMappings.concat(mappings)
-                        }else{
-                            var x=3;
-                        }
+            var fromNodeData = columnsMap[columnId]
+            var columnMappings = []
+            var edges = edgesFromMap[columnId]
+            if (edges) {
+                edges.forEach(function (edge) {
+                    var toNode = nodesMap[edge.to]
+                    var toNodeData = toNode ? toNode.data : {}
+                    if (toNodeData.type == "Class") {
+                        mappings = MappingParser.getTypeAndLabelMappings(fromNodeData, toNodeData)
+                        columnMappings = columnMappings.concat(mappings)
+                    } else if (toNodeData.type == "Column") {
+                        mappings = MappingParser.getColumnToColumnMappings(fromNodeData, toNodeData, edge)
+                        columnMappings = columnMappings.concat(mappings)
+                    } else {
+                        var x = 3;
+                    }
 
-                    })
+                })
 
-
-                }
-
-
-                mappings = MappingParser.getOtherPredicates(fromNodeData)
-                columnMappings = columnMappings.concat(mappings)
-
-                columnsMap[columnId].mappings = columnMappings
 
             }
 
-            return callback(null, columnsMap)
 
+            mappings = MappingParser.getOtherPredicates(fromNodeData)
+            columnMappings = columnMappings.concat(mappings)
+
+            columnMappings.forEach(function (mapping) {
+                mapping.isConstantUri = MappingParser.isConstantUri(mapping.o)
+                mapping.isConstantPrefixedUri = MappingParser.isConstantPrefixedUri(mapping.o)
+            })
+
+
+            columnsMap[columnId].mappings = columnMappings
+
+        }
+
+
+        return callback(null, columnsMap)
 
 
     },
+
+
+    isConstantUri: function (str) {
+        if (str.startsWith("http")) {
+            return true;
+        }
+        return false
+
+    },
+    isConstantPrefixedUri: function (str) {
+        if (str.match(/^[A-Za-z_][A-Za-z0-9._-]*:[A-Za-z_][A-Za-z0-9._-]*$/)) {
+            return true;
+
+        }
+        return false
+    },
+
 
     getTypeAndLabelMappings: function (fromNodeData, toNodeData) {
         var mappings = []
@@ -134,12 +155,11 @@ var MappingParser = {
         var mappings = []
 
 
-
         mappings.push({
             s: fromNodeData.id,
             p: edge.data.id,
             o: toNodeData.id,
-            objColId:edge.to
+            objColId: edge.to
         })
         return mappings
     },
@@ -167,33 +187,34 @@ var MappingParser = {
 
                 mappings.push(triple);
             })
-            return mappings
+
         }
+        return mappings
 
     },
 
-  /*  getGlobalParamsMap:function(columnMappings){
-        var globalParamsMap= {
-            functions: {},
-            lookups: {},
-            prefixURIs: {},
-            baseURIs: {}
-        }
+    /*  getGlobalParamsMap:function(columnMappings){
+          var globalParamsMap= {
+              functions: {},
+              lookups: {},
+              prefixURIs: {},
+              baseURIs: {}
+          }
 
-        for (var columnId in columnMappings){
-            var column=columnMappings[columnId]
-            globalParamsMap[columnId] ={
-                baseURI:column.baseURI || null,
-                prefixURI:column.prefixURI || null,
-                transform:column.transform || null,// clarifier différence entre function at transform
-                function:column.function || null,
-                uriType:column.uriType || null,
-            }
-        }
+          for (var columnId in columnMappings){
+              var column=columnMappings[columnId]
+              globalParamsMap[columnId] ={
+                  baseURI:column.baseURI || null,
+                  prefixURI:column.prefixURI || null,
+                  transform:column.transform || null,// clarifier différence entre function at transform
+                  function:column.function || null,
+                  uriType:column.uriType || null,
+              }
+          }
 
-        return globalParamsMap;
+          return globalParamsMap;
 
-    }*/
+      }*/
 
 
     /**
@@ -201,7 +222,7 @@ var MappingParser = {
      * build functions in a  pointers map used to transform data at tripleMaker processe
      *
      */
-    getJsFunctionsMap:function(columnMappings, callback){
+    getJsFunctionsMap: function (columnMappings, callback) {
         function getFunction(argsArray, fnStr, callback) {
             try {
                 fnStr = fnStr.replace(/[/r/n/t]gm/, "");
@@ -217,27 +238,23 @@ var MappingParser = {
                 return callback("error in object function " + fnStr + "\n" + err);
             }
         }
-        var jsFunctionsMap={}
-        for(var columnId in columnMappings){
-            var column=columnMappings[columnId]
-            if( column.function) {
+
+        var jsFunctionsMap = {}
+        for (var columnId in columnMappings) {
+            var column = columnMappings[columnId]
+            if (column.function) {
                 getFunction(["row", "mapping"], column.function, function (err, fn) {
-                    jsFunctionsMap[columnId]=fn
+                    jsFunctionsMap[columnId] = fn
                 })
             }
-            if( column.transform) {
+            if (column.transform) {
                 getFunction(["row", "mapping"], column.transform, function (err, fn) {
-                    jsFunctionsMap[columnId]=fn
+                    jsFunctionsMap[columnId] = fn
                 })
             }
         }
-        return callback(null,jsFunctionsMap)
+        return callback(null, jsFunctionsMap)
     }
-
-
-
-
-
 
 
 }

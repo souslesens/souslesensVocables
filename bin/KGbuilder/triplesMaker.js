@@ -26,7 +26,7 @@ var TriplesMaker = {
 
 
         var totalTriplesCount = 0
-        sampleTriples=[]
+        sampleTriples = []
         var tableInfos = tableProcessingParams.tableInfos;
 
         tableProcessingParams.randomIdentiersMap = {};// identifiers with scope the whole table
@@ -100,9 +100,9 @@ var TriplesMaker = {
                                 KGbuilder_socket.message(options.clientSocketId, " processed  from " + tableInfos.table + " : " + totalSize + " triples", false);
 
                                 if (options.sampleSize) {// sample dont write triples return batchTriples
-                                    resultSize=0;// stop iterate
-                                    sampleTriples=batchTriples
-                                   callbackWhilst()
+                                    resultSize = 0;// stop iterate
+                                    sampleTriples = batchTriples
+                                    callbackWhilst()
 
                                 } else {
 
@@ -110,22 +110,21 @@ var TriplesMaker = {
                                         if (err) {
                                             return callbackWhilst(err)
                                         }
-                                        totalTriplesCount+=batchTriples.length
+                                        totalTriplesCount += batchTriples.length
                                         return callbackWhilst()
                                     })
                                 }
-
 
 
                             })
 
 
                         })
-                     /*   .catch((err) => {
-                            return callbackWhilst(err);
-                        });*/
+                    /*   .catch((err) => {
+                           return callbackWhilst(err);
+                       });*/
                 }, function (err) {
-                    return callback(err,  {sampleTriples: sampleTriples,totalTriplesCount:totalTriplesCount})
+                    return callback(err, {sampleTriples: sampleTriples, totalTriplesCount: totalTriplesCount})
                 })
         }
     },
@@ -151,11 +150,10 @@ var TriplesMaker = {
 
 
             for (var columnId in columnMappings) {
-                if(columnId=="funct_loc")
-                    var x=3
+
                 var columnUri = lineColumnUrisMap[columnId]
                 if (!columnUri) {
-                    columnUri = TriplesMaker.getColumnUri( line, columnId, columnMappings, rowIndex,tableProcessingParams)
+                    columnUri = TriplesMaker.getColumnUri(line, columnId, columnMappings, rowIndex, tableProcessingParams)
                     if (columnId) {
                         lineColumnUrisMap[columnId] = columnUri
                     }
@@ -172,15 +170,25 @@ var TriplesMaker = {
                         return;
                     }
 
-                    var objStr = line[mapping.o]
-                    if (!objStr) {
-                        return;
-                    }
 
                     var object = null
+                    // if no matching item for mapping.o  and no fixed uri return
+                    // the other cases need a value for the mapping object
+                    if (!line[mapping.o]) {
+                        if (mapping.isConstantUri) {// uri
+                            object = "<" + mapping.o + ">"
+                        }
+                        else if (mapping.isConstantPrefixedUri) {//prefix
+                            object = mapping.o
+                        } else {
+                            return;
 
-                    if (columnMappings[mapping.objColId]) {// if object is a column
-                        object = TriplesMaker.getColumnUri( line, mapping.objColId, columnMappings, rowIndex, tableProcessingParams)
+                        }
+                    }
+
+
+                   else if (columnMappings[mapping.objColId]) {// if object is a column
+                        object = TriplesMaker.getColumnUri(line, mapping.objColId, columnMappings, rowIndex, tableProcessingParams)
 
 
                     } else if (mapping.transform) {
@@ -188,7 +196,7 @@ var TriplesMaker = {
                         object = tableProcessingParams.jsFunctionsMap[mapping.s](objStr, "o", mapping.p, line, mapping);
 
                     } else if (mapping.isString) {
-
+                        var objStr = line[mapping.o]
                         object = "\"" + util.formatStringForTriple(objStr) + "\""
 
                     } else {
@@ -202,14 +210,14 @@ var TriplesMaker = {
                         var triple = columnUri + " " + property + " " + object
 
 
-                    var triplelHashCode = TriplesMaker.stringToNumber(triple)
-                    if (!tableProcessingParams.uniqueTriplesMap[triplelHashCode]) {
-                        tableProcessingParams.uniqueTriplesMap[triplelHashCode] = 1
-                        batchTriples.push(triple)
-                    }
-                    }else{
-                        var x=property;
-                        var y=object
+                        var triplelHashCode = TriplesMaker.stringToNumber(triple)
+                        if (!tableProcessingParams.uniqueTriplesMap[triplelHashCode]) {
+                            tableProcessingParams.uniqueTriplesMap[triplelHashCode] = 1
+                            batchTriples.push(triple)
+                        }
+                    } else {
+                        var x = property;
+                        var y = object
                     }
                 })
 
@@ -242,21 +250,20 @@ var TriplesMaker = {
      * @param columnId
      * @param globalParamsMap
      */
-    getColumnUri: function ( dataItem, columnId, columnMappings, rowIndex, tableProcessingParams) {
+    getColumnUri: function (dataItem, columnId, columnMappings, rowIndex, tableProcessingParams) {
         var columnParams = columnMappings[columnId]
-        var graphUri=tableProcessingParams.sourceInfos.graphUri
+        var graphUri = tableProcessingParams.sourceInfos.graphUri
 
 
         if (columnParams.type == "URI") {// same fixed uri for all amappings
             return "<" + graphUri + util.formatStringForTriple(columnParams.id, true) + ">"
-        }
-        else if (columnParams.uriType == "blankNode" || columnParams.uriType == "VirtualColumn") {
+        } else if (columnParams.uriType == "blankNode" || columnParams.uriType == "VirtualColumn") {
             var value = dataItem[columnId];
 
             if (!value) {
                 return
             }
-            value= columnId + ":" +value
+            value = columnId + ":" + value
             var bNode = tableProcessingParams.blankNodesMap[value]
             if (bNode) {
                 return bNode;
@@ -287,10 +294,9 @@ var TriplesMaker = {
         if (columnParams.uriType == "fromLabel") {// cross lines value for the column
 
 
-
-                if (dataItem[columnParams.id]) {
-                    id = util.formatStringForTriple(dataItem[columnParams.id], true)
-                }
+            if (dataItem[columnParams.id]) {
+                id = util.formatStringForTriple(dataItem[columnParams.id], true)
+            }
 
         } else if (columnParams.uriType == "randomIdentifier") {
 
@@ -299,11 +305,11 @@ var TriplesMaker = {
             if (!value) {
                 return
             }
-            value= columnId + ":" +value
-           id  = tableProcessingParams.randomIdentiersMap[value]
+            value = columnId + ":" + value
+            id = tableProcessingParams.randomIdentiersMap[value]
             if (!bNode) {
 
-                id =  ""+util.getRandomHexaId(10) ;
+                id = "" + util.getRandomHexaId(10);
                 tableProcessingParams.randomIdentiersMap[value] = id;
                 return bNode;
             }
@@ -340,6 +346,7 @@ var TriplesMaker = {
 
 
     getFormatedLiteral: function (dataItem, mapping) {
+        var objectStr = null
         if (mapping.dataType) {
             var str = dataItem[mapping.o];
             if (!str || str == "null") {

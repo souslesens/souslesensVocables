@@ -17,11 +17,11 @@ var MappingModelerRelations = (function () {
         edges.forEach(function (edge) {
             if (!nodesMap[edge.from]) return;
 
-            if (nodesMap[edge.from]?.data?.type == "Column" && nodesMap[edge.to]?.data?.type == "Column") {
+            if (MappingModeler.columnsMappingsObjects.includes(nodesMap[edge.from]?.data?.type) && MappingModeler.columnsMappingsObjects.includes(nodesMap[edge.to]?.data?.type == "Column")) {
                 existingRelationsMap[nodesMap[edge.to].id] = nodesMap[edge.from].id;
             }
 
-            if (nodesMap[edge.from]?.data?.type == "Column" && nodesMap[edge.to]?.data?.type == "Class" && nodesMap[edge.from]?.data?.dataTable == MappingModeler.currentTable.name) {
+            if (MappingModeler.columnsMappingsObjects.includes(nodesMap[edge.from]?.data?.type) && nodesMap[edge.to]?.data?.type == "Class" && nodesMap[edge.from]?.data?.dataTable == MappingModeler.currentTable.name) {
                 if (!classesMap[nodesMap[edge.to].id]) {
                     classesMap[nodesMap[edge.to].id] = [nodesMap[edge.from].id];
                 } else {

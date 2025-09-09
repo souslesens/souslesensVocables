@@ -155,33 +155,37 @@ const SourcesTable = () => {
         if (sourceFiles && sourceFiles !== undefined && sourceFiles?.length > 0) {
             try {
                 const source = JSON.parse(await sourceFiles[0].text()) as ServerSource;
+                // check name
+                const existingSourcesName: string[] = SRD.withDefault([], model.sources).map((source) => source.name);
+                if (existingSourcesName.includes(source.name)) {
+                    setSnackOpen(true);
+                    setSnackSeverity("error");
+                    setSnackMessages((msg) => new Set(msg).add(`La source ${source.name} existe déjà`));
+                }
+                // remove unknown imports
+                const imports: string[] = [];
+                source.imports.forEach((imp) => {
+                    if (existingSourcesName.includes(imp)) {
+                        imports.push(imp);
+                    } else {
+                        setSnackOpen(true);
+                        setSnackSeverity("warning");
+                        setSnackMessages((msg) => new Set(msg).add(`L'import ${imp} n'existe pas`));
+                    }
+                });
+                source.imports = imports;
+                handleOpenModal(source);
             } catch (error) {
+                if (error instanceof SyntaxError && error.message.includes("JSON.parse")) {
+                    setSnackMessages((msg) => new Set(msg).add(`Invalid JSON: ${error.message}`));
+                } else {
+                    setSnackMessages((msg) => new Set(msg).add(`Not a JSON file`));
+                }
                 setSnackOpen(true);
                 setSnackSeverity("error");
                 console.error(error);
-                setSnackMessages((msg) => new Set(msg).add(`Invalid JSON`));
                 return;
             }
-            // check name
-            const existingSourcesName: string[] = SRD.withDefault([], model.sources).map((source) => source.name);
-            if (existingSourcesName.includes(source.name)) {
-                setSnackOpen(true);
-                setSnackSeverity("error");
-                setSnackMessages((msg) => new Set(msg).add(`La source ${source.name} existe déjà`));
-            }
-            // remove unknown imports
-            const imports: string[] = [];
-            source.imports.forEach((imp) => {
-                if (existingSourcesName.includes(imp)) {
-                    imports.push(imp);
-                } else {
-                    setSnackOpen(true);
-                    setSnackSeverity("warning");
-                    setSnackMessages((msg) => new Set(msg).add(`L'import ${imp} n'existe pas`));
-                }
-            });
-            source.imports = imports;
-            handleOpenModal(source);
         }
     };
 
@@ -235,7 +239,7 @@ const SourcesTable = () => {
 
                 return (
                     <Stack direction="column" spacing={{ xs: 2 }} sx={{ m: 4 }} useFlexGap>
-                        <Snackbar autoHideDuration={5000} open={snackOpen} onClose={handleSnackbarClose}>
+                        <Snackbar autoHideDuration={15000} open={snackOpen} onClose={handleSnackbarClose}>
                             <Alert onClose={handleSnackbarClose} severity={snackSeverity} sx={{ width: "100%" }}>
                                 {Array.from(snackMessages).map((msg) => (
                                     <>

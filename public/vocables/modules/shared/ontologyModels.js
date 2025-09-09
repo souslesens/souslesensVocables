@@ -581,30 +581,29 @@ var OntologyModels = (function () {
         if (!options.remove) {
             options.remove = false;
         }
-        if(!data){
+        if (!data) {
             return;
         }
-        if(!Config.ontologiesVocabularyModels[source]){
+        if (!Config.ontologiesVocabularyModels[source]) {
             return;
         }
         for (var entryType in data) {
-            if(!data[entryType]){
+            if (!data[entryType]) {
                 continue;
             }
             for (var id in data[entryType]) {
-                if(!data[entryType][id] || Config.ontologiesVocabularyModels[source][entryType]){
+                if (!data[entryType][id] || Config.ontologiesVocabularyModels[source][entryType]) {
                     continue;
                 }
                 if (entryType == "restrictions") {
                     if (options.remove) {
-
                         if (!data[entryType][id].blankNodeId && !Config.ontologiesVocabularyModels[source][entryType][data[entryType][id]]) {
                             delete Config.ontologiesVocabularyModels[source][entryType][data[entryType][id]];
                         } else {
                             if (data[entryType][id].blankNodeId && !Array.isArray(data[entryType][id].blankNodeId)) {
                                 data[entryType][id].blankNodeId = [data[entryType][id].blankNodeId];
                             }
-                            if(!Config.ontologiesVocabularyModels[source][entryType][id]){
+                            if (!Config.ontologiesVocabularyModels[source][entryType][id]) {
                                 continue;
                             }
                             Config.ontologiesVocabularyModels[source][entryType][id] = Config.ontologiesVocabularyModels[source][entryType][id].filter(function (restriction) {
@@ -622,20 +621,18 @@ var OntologyModels = (function () {
                         }
                     } else {
                         data[entryType][id].forEach((_restriction) => {
-                            if(Config.ontologiesVocabularyModels[source][entryType][id] && Array.isArray(Config.ontologiesVocabularyModels[source][entryType][id])){
+                            if (Config.ontologiesVocabularyModels[source][entryType][id] && Array.isArray(Config.ontologiesVocabularyModels[source][entryType][id])) {
                                 Config.ontologiesVocabularyModels[source][entryType][id].push(_restriction);
                             }
-                            
                         });
                     }
                 } else {
                     if (options.remove) {
-                        if(Config.ontologiesVocabularyModels[source][entryType][data[entryType][id]]){
+                        if (Config.ontologiesVocabularyModels[source][entryType][data[entryType][id]]) {
                             delete Config.ontologiesVocabularyModels[source][entryType][data[entryType][id]];
                         }
-                        
                     } else {
-                        if(Config.ontologiesVocabularyModels[source][entryType][id]){
+                        if (Config.ontologiesVocabularyModels[source][entryType][id]) {
                             Config.ontologiesVocabularyModels[source][entryType][id] = data[entryType][id];
                         }
                     }

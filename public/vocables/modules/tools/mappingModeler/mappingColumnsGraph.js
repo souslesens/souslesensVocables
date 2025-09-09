@@ -1148,7 +1148,7 @@ var MappingColumnsGraph = (function () {
                 node.id = oldNode.id;
                 node.label = oldNode.label;
                 node.data = oldNode.data;
-                node.shape = oldNode.shape || 'box';
+                node.shape = oldNode.shape || "box";
                 node.color = oldNode.color;
                 node.size = 18;
                 /*if(oldNode.data.prefixURI){

@@ -301,8 +301,7 @@ var util = {
             })
             .on("close", function () {
                 return;
-            })
-            
+            });
     },
 
     normalizeHeader: function (headerArray, s) {

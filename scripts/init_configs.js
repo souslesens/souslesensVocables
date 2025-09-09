@@ -1,19 +1,15 @@
-const bcrypt = require("bcrypt");
-const fs = require("fs");
-const merge = require("lodash.merge");
-const { UserModel } = require("../model/users");
-const { profileModel } = require("../model/profiles");
+import bcrypt from "bcrypt";
+import fs from "fs";
+import merge from "lodash.merge";
+import { userModel } from "../model/users.js";
+import { profileModel } from "../model/profiles.js";
 
 // create data/mapping dir if not exists
 fs.mkdirSync("data/mappings", { recursive: true });
 
-// Create configs dir if not exists
-fs.mkdirSync("config/users", { recursive: true });
-
-// config/users/users.json
-const usersPath = "config/users/users.json";
-if (!fs.existsSync(usersPath)) {
-    const USERNAME = process.env.USER_USERNAME || "admin";
+// add admin user
+const USERNAME = process.env.USER_USERNAME || "admin";
+if (!userModel.getUserAccount(USERNAME)) {
     const PASSWORD = process.env.USER_PASSWORD || "admin";
 
     const HASH_PASSWORD = bcrypt.hashSync(PASSWORD, 10);
@@ -32,7 +28,6 @@ if (!fs.existsSync(usersPath)) {
         },
     };
 
-    const userModel = new UserModel();
     await userModel.addUserAccount(user_json);
 }
 
@@ -76,9 +71,8 @@ if (!fs.existsSync(mainConfigPath)) {
     });
 }
 
-// config/profiles.json
-const profilesPath = "config/profiles.json";
-if (!fs.existsSync(profilesPath)) {
+// add admin profile
+if (!profileModel.getOneProfile("admin")) {
     const profile_json = {
         label: "admin",
         theme: "Sea Breeze",

@@ -138,6 +138,14 @@ class ProfileModel {
             console.log(error);
         }
     };
+    /**
+     * @param {string} profileName -  a profile name
+     * @returns {Promise<Profile>} a Profile
+     */
+    getOneProfile = async (profileName) => {
+        const allProfiles = await this.getAllProfiles();
+        return allProfiles[profileName];
+    };
 
     /**
      * @param {UserAccount} user -  a user account

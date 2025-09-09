@@ -203,6 +203,7 @@ var TriplesMaker = {
                         object = TriplesMaker.getFormatedLiteral(line, mapping)
                     }
 
+
                     var property = TriplesMaker.getPropertyUri(mapping.p)
 
 

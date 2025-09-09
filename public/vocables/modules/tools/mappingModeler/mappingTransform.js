@@ -338,7 +338,11 @@ var MappingTransform = (function () {
         var columnsSelection = {};
         var checkedNodeAttrs = [];
         checkedNodes.forEach(function (node) {
-            if (node?.parents?.length == 3) {
+            if(node.data && node.data.type=="ColumnMapping"){
+                checkedNodeAttrs.push(node.id);
+                
+            }
+            else if (node?.parents?.length == 3) {
                 // attrs
                 checkedNodeAttrs.push(node.id);
                 columnsSelection[node.id] = MappingColumnsGraph.visjsGraph.data.nodes.get(node.parent);
@@ -365,10 +369,29 @@ var MappingTransform = (function () {
                 return item.s == mapping.s && item.p == mapping.p && item.o == mapping.o;
             });
             if (mappingInColumnMapping.length > 0) {
-                filteredMappings.push(mapping);
+                checkedNodeAttrs.forEach(function (treeNodeId) {
+
+                    
+                    if(treeNodeId==mapping.s+'-->'+mapping.p+'-->'+mapping.o){
+                        filteredMappings.push(mapping);
+                    }
+                    
+                });
             } else {
                 checkedNodeAttrs.forEach(function (treeNodeId) {
-                    if (treeNodeId.indexOf(mapping.o) > -1) {
+                    //not enough we need object is the third
+                    //if (treeNodeId.indexOf(mapping.o) > -1) {
+                    var treeNodeSplit = treeNodeId.split('|');
+                    if (treeNodeSplit.length === 3) {
+                        var objectId = treeNodeSplit[2];
+                    }else{
+                        return;
+                    }
+                    if(!objectId){
+                        return;
+                    }
+                    if(objectId == mapping.o){
+
                         if (treeNodeId.indexOf("transform") > -1 && mapping.p == "transform") {
                             transforms[mapping.s] = mapping.o;
                         } else if (!uniqueFilteredMappings[mapping.s + "|" + mapping.p + "|" + mapping.o]) {
@@ -379,6 +402,29 @@ var MappingTransform = (function () {
                 });
             }
         });
+
+        // add transforms to the mappings
+
+// add transform
+        var slsMappings=self.getSLSmappingsFromVisjsGraph()
+        var transformMappingsMap={}
+        slsMappings.forEach(function(mapping){
+            if(mapping.p=="transform"){
+                transformMappingsMap[mapping.s]=mapping
+            }
+        })
+
+        filteredMappings.forEach(function(mapping){
+            if(transformMappingsMap[mapping.s])
+                filteredMappings.push(transformMappingsMap[mapping.s])
+            if(transformMappingsMap[mapping.o])
+                filteredMappings.push(transformMappingsMap[mapping.o])
+
+        })
+
+
+
+
 
         // selection isn't concerned for column mappings select all
         //filteredMappings=filteredMappings.concat(columnMappings);
@@ -397,6 +443,9 @@ var MappingTransform = (function () {
                 }
             });
         }
+
+
+
 
         return filteredMappings;
     };

@@ -594,7 +594,7 @@ var MappingColumnsGraph = (function () {
          */
         showNodeInfos: function () {
             if (self.currentGraphNode.data.type == "URI") {
-            } else if (["Column", "RowIndex", "VirtualColumn"].indexOf(self.currentGraphNode.data.type) > -1) {
+            } else if (MappingModeler.columnsMappingsObjects.indexOf(self.currentGraphNode.data.type) > -1) {
                 return;
                 /*  MappingsDetails.mappingColumnInfo.editColumnInfos();
                   MappingsDetails.mappingColumnInfo.columnClass = self.getColumnType(self.currentGraphNode.id);*/
@@ -1148,7 +1148,7 @@ var MappingColumnsGraph = (function () {
                 node.id = oldNode.id;
                 node.label = oldNode.label;
                 node.data = oldNode.data;
-                node.shape = "box";
+                node.shape = oldNode.shape || "box";
                 node.color = oldNode.color;
                 node.size = 18;
                 /*if(oldNode.data.prefixURI){

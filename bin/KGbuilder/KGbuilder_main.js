@@ -83,6 +83,7 @@ var KGbuilder_main = {
 
             mappingData = _mappingData
             tableProcessingParams.sourceInfos = mappingData.options.config
+
             tableProcessingParams.uniqueTriplesMap={}
             var sampleTriples=[];
             var totalTriplesCount={}
@@ -172,6 +173,71 @@ var KGbuilder_main = {
             return;
         })
     }
+    , /**
+     *
+     *
+     *
+     * @param source
+     * @param datasource
+     * @param tables list of table otherwise if null delete all KGcreator triples
+     * @param options
+     * @param callback
+     */
+    deleteKGcreatorTriples: function (source, tables, options, callback) {
+        KGbuilder_main.getSourceConfig(source, function (err, sourceMainJson) {
+            if (err) {
+                return callbackSeries(err);
+            }
+
+            //delete allKGCreator triples
+            if (!tables || tables.length == 0) {
+                KGbuilder_triplesWriter.deleteKGcreatorTriples(sourceMainJson.sparqlServerUrl, sourceMainJson.graphUri, null, options, function (err, result) {
+                    if (err) {
+                        return callback(err);
+                    }
+                    return callback(null, "deleted all triples :" + result + " in source :" + source);
+                });
+            } // delete specifc triples with predicate
+            else {
+                if (!Array.isArray(tables)) {
+                    tables = [tables];
+                }
+                var totalTriples = 0;
+                async.eachSeries(
+                    tables,
+                    function (table, callbackEach) {
+                        KGbuilder_triplesWriter.deleteKGcreatorTriples(sourceMainJson.sparqlServerUrl, sourceMainJson.graphUri, table, options, function (err, result) {
+                            if (err) {
+                                return callbackEach(err);
+                            }
+                            //   KGbuilder_socket.message(options.clientSocketId, "deleted triples :" + result + " in table " + mappings.table)
+                            totalTriples += result;
+                            return callbackEach(err);
+                        });
+                    },
+                    function (err) {
+                        return callback(null, "deleted triples  in tables " + tables.toString() + " : " + totalTriples);
+                    },
+                );
+            }
+        });
+    },
+    getSourceConfig: function (source, callback) {
+        // var sourceMappingsDir = path.join(__dirname, "../../data/mappings/" + source + "/");
+
+        try {
+            // var mainJsonPath = sourceMappingsDir + "main.json";
+            var mainJsonPath = path.join(__dirname, "../../data/graphs/mappings_" + source + "_ALL" + ".json");
+            var visjsMappingsJson = JSON.parse("" + fs.readFileSync(mainJsonPath));
+            var sourceMainJson = visjsMappingsJson.options.config;
+            if (sourceMainJson.sparqlServerUrl == "_default") {
+                sourceMainJson.sparqlServerUrl = ConfigManager.config.sparql_server.url;
+            }
+        } catch (e) {
+            return callback(e);
+        }
+        callback(null, sourceMainJson);
+    },
 }
 
 

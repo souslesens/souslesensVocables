@@ -13,6 +13,9 @@ const path = require("path");
 
 var TriplesMaker = {
 
+    batchSize:20,
+
+
 
     /**
      *
@@ -50,7 +53,7 @@ var TriplesMaker = {
                             callbackEach()
 
                         } else {
-                            KGbuilder_triplesWriter.writeTriples(batchTriples, tableProcessingParams.graphUri, sparqlServerUrl, function (err, result) {
+                            KGbuilder_triplesWriter.writeTriples(batchTriples, tableProcessingParams.sourceInfos.graphUri, tableProcessingParams.sourceInfos.sparqlServerUrl, function (err, result) {
                                 if (err) {
                                     return callbackEach(err)
                                 }
@@ -62,7 +65,7 @@ var TriplesMaker = {
 
 
                 }, function (err) {
-                    return callback(err, totalTriples)
+                    return callback(err, totalTriplesCount)
                 })
             })
 
@@ -73,7 +76,7 @@ var TriplesMaker = {
 
             var totalSize = 0;
             var resultSize = 1;
-            var limitSize = options.sampleSize || 500;
+            var limitSize = options.sampleSize || TriplesMaker.batchSize;
             var offset = 0;
 
             async.whilst(
@@ -88,29 +91,30 @@ var TriplesMaker = {
                     })
                         .then((result) => {
                             data = result;
+                            resultSize = data.length;
+                            offset += resultSize;
 
                             KGbuilder_socket.message(options.clientSocketId, " data loaded ,table " + tableInfos.table, false);
                             TriplesMaker.buildTriples(data, tableProcessingParams, options, function (err, batchTriples) {
                                 if (err) {
                                     return callbackWhilst(err)
                                 }
-                                resultSize = data.length;
-                                totalSize += resultSize;
-                                offset += resultSize;
-                                KGbuilder_socket.message(options.clientSocketId, " processed  from " + tableInfos.table + " : " + totalSize + " triples", false);
 
-                                if (options.sampleSize) {// sample dont write triples return batchTriples
+                                  if (options.sampleSize) {// sample dont write triples return batchTriples
                                     resultSize = 0;// stop iterate
                                     sampleTriples = batchTriples
                                     callbackWhilst()
 
                                 } else {
+                                      KGbuilder_socket.message(options.clientSocketId, " created  from " + tableInfos.table + " : " + totalTriplesCount + " triples", false);
 
-                                    KGbuilder_triplesWriter.writeTriples(batchTriples, tableProcessingParams.graphUri, sparqlServerUrl, function (err, result) {
+
+                                      KGbuilder_triplesWriter.writeTriples(batchTriples, tableProcessingParams.sourceInfos.graphUri, tableProcessingParams.sourceInfos.sparqlServerUrl, function (err, totalTriples) {
                                         if (err) {
                                             return callbackWhilst(err)
                                         }
-                                        totalTriplesCount += batchTriples.length
+                                        totalTriplesCount += totalTriples
+
                                         return callbackWhilst()
                                     })
                                 }
@@ -207,7 +211,7 @@ var TriplesMaker = {
                     var property = TriplesMaker.getPropertyUri(mapping.p)
 
 
-                    if (property && object) {
+                    if (columnUri && property && object) {
                         var triple = columnUri + " " + property + " " + object
 
 
@@ -254,6 +258,8 @@ var TriplesMaker = {
     getColumnUri: function (dataItem, columnId, columnMappings, rowIndex, tableProcessingParams) {
         var columnParams = columnMappings[columnId]
         var graphUri = tableProcessingParams.sourceInfos.graphUri
+
+
 
 
         if (columnParams.type == "URI") {// same fixed uri for all amappings
@@ -356,9 +362,7 @@ var TriplesMaker = {
             if (mapping.dataType.startsWith("xsd:date")) {
                 if (mapping.dateFormat) {
                     str = util.getDateFromSLSformat(mapping.dateFormat, str);
-                    if (!str) {
-                        return callback(null, null);
-                    }
+
                 } else if (str.match(/[.-]*Z/)) {
                     //ISO string format (coming from database)
                     // is relevant dates coming from dataBases have mapping.dateFormat=ISO-time?
@@ -382,36 +386,47 @@ var TriplesMaker = {
                         str = formatDate(str);
                     }
                 }
-            }
-            if (!str) {
-                objectStr = "";
+                if(str){
+                    if(str.length>11)
+                        str = '"'+str+'"^^'+"xsd:datetime"
+                    else
+                        str = '"'+str+'"^^'+"xsd:date"
+
+
+
+                }
+
+
             }
 
             if (!mapping.dataType.startsWith("xsd:")) {
                 mapping.dataType = "xsd:string";
             }
             if (!str || str == "null") {
-                return callback(null, null);
+               ;
             }
             if (mapping.dataType == "xsd:string") {
-                str = util.formatStringForTriple(str, false);
+
+                str = '"'+ util.formatStringForTriple(str, false)+'"^^'+mapping.dataType
             }
             if (mapping.dataType == "xsd:float") {
                 if (str == "0") {
-                    return callback(null, null);
+                    str="0.0"
                 }
                 str = str.replace(",", ".");
-                str = str.replace(" ", "");
                 if (!util.isFloat(str)) {
                     return callback(null, null);
                 } else {
+                    str = '"'+str+'"^^'+mapping.dataType
                 }
             }
             if (mapping.dataType == "xsd:int") {
-                str = str.replace(" ", "");
+
                 if (!util.isInt(str)) {
                     return callback(null, null);
+
                 } else {
+                    str = '"'+str+'"^^'+mapping.dataType
                 }
             }
             // format after to apply transformations

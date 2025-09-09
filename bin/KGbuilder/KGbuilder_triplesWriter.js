@@ -43,7 +43,8 @@ const KGbuilder_triplesWriter = {
             function (triples, callbackEach) {
                 var insertTriplesStr = "";
                 triples.forEach(function (triple) {
-                    var str = triple.s + " " + triple.p + " " + triple.o + ". ";
+                 //   var str = triple.s + " " + triple.p + " " + triple.o + ". ";
+                    var str = triple + ". ";
                     insertTriplesStr += str;
                 });
 

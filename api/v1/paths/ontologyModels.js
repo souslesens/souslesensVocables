@@ -170,9 +170,22 @@ module.exports = function () {
         if (!ontologyModelsCache[req.body.source]) {
             return processResponse(res, null, "source not exists in ontologyModelsCache");
         } else {
+            if (!req.body.data || Object.keys(req.body.data).length === 0) {
+                return processResponse(res, null, "no data provided");
+            }
+            
             for (var entryType in req.body.data) {
+                if (!req.body.data[entryType] || Object.keys(req.body.data[entryType]).length === 0) {
+                    continue; 
+                }
                 for (var id in req.body.data[entryType]) {
+
                     if (req.body.options && req.body.options.remove == "true") {
+                        if(!req.body.data[entryType][id]){
+                            continue;
+                        }
+
+                        
                         if (entryType == "restrictions" && req.body.data[entryType][id].blankNodeId) {
                             if (!Array.isArray(req.body.data[entryType][id].blankNodeId)) {
                                 req.body.data[entryType][id].blankNodeId = [req.body.data[entryType][id].blankNodeId];
@@ -180,25 +193,35 @@ module.exports = function () {
                             if (req.body.data[entryType][id].blankNodeId.length == 0) {
                                 return;
                             }
-                            ontologyModelsCache[req.body.source][entryType][id] = ontologyModelsCache[req.body.source][entryType][id].filter(function (restriction) {
-                                return !req.body.data[entryType][id].blankNodeId.includes(restriction.blankNodeId);
-                            });
-                            if (ontologyModelsCache[req.body.source][entryType][id].length == 0) {
-                                delete ontologyModelsCache[req.body.source][entryType][id];
+                            if(ontologyModelsCache[req.body.source][entryType] && ontologyModelsCache[req.body.source][entryType][id]){
+                                ontologyModelsCache[req.body.source][entryType][id] = ontologyModelsCache[req.body.source][entryType][id].filter(function (restriction) {
+                                    return !req.body.data[entryType][id].blankNodeId.includes(restriction.blankNodeId);
+                                });
+                                if (ontologyModelsCache[req.body.source][entryType][id].length == 0) {
+                                    delete ontologyModelsCache[req.body.source][entryType][id];
+                                }
                             }
                         } else {
                             delete ontologyModelsCache[req.body.source][entryType][req.body.data[entryType][id]];
                         }
+                    
                     } else {
                         if (!ontologyModelsCache[req.body.source][entryType]) {
                             ontologyModelsCache[req.body.source][entryType] = {};
                         }
                         if (entryType == "restrictions") {
+                            if(!req.body.data[entryType][id]){
+                                continue;
+                            }
                             if (!ontologyModelsCache[req.body.source][entryType][id]) {
                                 ontologyModelsCache[req.body.source][entryType][id] = [];
                             }
                             ontologyModelsCache[req.body.source][entryType][id] = ontologyModelsCache[req.body.source][entryType][id].concat(req.body.data[entryType][id]);
                         } else {
+                             if(!req.body.data[entryType][id]){
+                                continue;
+                            }
+
                             ontologyModelsCache[req.body.source][entryType][id] = req.body.data[entryType][id];
                         }
                     }

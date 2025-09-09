@@ -632,9 +632,7 @@ var OntologyModels = (function () {
                             delete Config.ontologiesVocabularyModels[source][entryType][data[entryType][id]];
                         }
                     } else {
-                        if (Config.ontologiesVocabularyModels[source][entryType][id]) {
                             Config.ontologiesVocabularyModels[source][entryType][id] = data[entryType][id];
-                        }
                     }
                 }
             }

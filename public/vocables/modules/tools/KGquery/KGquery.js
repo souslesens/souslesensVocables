@@ -675,7 +675,7 @@ var KGquery = (function () {
 
                             var querySetOptionalPredicates = "";
                             Object.keys(distinctTypesMap).forEach(function (type) {
-                                var regex = new RegExp(`^\\s*OPTIONAL\\s*{\\${type}\\b.*?}$`, "gm");
+                                var regex = new RegExp("^\\s*OPTIONAL\\s*{\\s*\\" + type + "\\b[\\s\\S]*?}", "gm");
                                 var matches = optionalPredicatesSparql.match(regex);
                                 if (matches?.length > 0) {
                                     querySetOptionalPredicates += matches.join("\n");
@@ -733,6 +733,9 @@ var KGquery = (function () {
                         Object.keys(distinctTypesMap).forEach(function (type) {
                             selectStr += " " + type;
                         });
+                        if(isJoin){
+                            selectStr += ' ?querySet '
+                        }
                     }
 
                     var queryType = "SELECT";
@@ -817,7 +820,10 @@ var KGquery = (function () {
                         return callbackSeries();
                     }
                     var results = data?.results?.bindings;
+                    // SPARQL Query render differents unions paths with differents values of querySet variable for each set
                     var dataByQuerySet = common.array.arrayByCategory(results, "querySet");
+
+                    //concat data sets with full outer joins
                     var joinedData;
 
                     dataByQuerySet.forEach(function (setData, index) {
@@ -1034,18 +1040,25 @@ var KGquery = (function () {
         }
         Export.showDataTable("KGquery_dataTableDialogDiv", tableCols, tableData, null, { paging: true }, function (err, datatable) {
             $("#dataTableDivExport").on("click", "td", function () {
+
                 var table = $("#dataTableDivExport").DataTable();
 
                 var index = table.cell(this).index();
-                var row = table.row(this).data();
-                var column = table.cell(this).column().data();
-                var data = table.cell(this).data();
+                //var rowData = table.row(index.row).data();
+                //var column = table.cell(this).column().data();
+                //var data = table.cell(this).data();
 
-                var datasetIndex = column[index.row];
-                var dataItem = self.currentData[datasetIndex];
+                //var datasetIndex = column[index.row];
+                if(!index.row){
+                    return UI.message('No row corresponding')
+                }
+                var dataItem = self.currentData[index.row];
                 var varName = self.tableCols[index.column].title;
                 if (true || !dataItem[varName]) {
-                    varName = KGquery.currentSelectedPredicates.filter((key) => key.id == varName)[0].data.varName;
+                    var varNameNode = KGquery.currentSelectedPredicates.filter((key) => key.id == varName);
+                    if(varNameNode && varNameNode.length>0 && varNameNode[0]?.data?.varName){
+                        varName = varNameNode[0].data.varName;
+                    }
                     //varName = varName.split("_")[0];
                 }
                 var uri = dataItem[varName].value;

@@ -282,6 +282,7 @@ var common = (function () {
             return c;
         },
         toMap: function (array, key) {
+            if(!array || !key) return;
             var map = {};
             array.forEach(function (item) {
                 if (item[key]) map[item[key]] = item;
@@ -289,6 +290,7 @@ var common = (function () {
             return map;
         },
         moveItemToFirst: function (array, first) {
+            if(!array || !first){return}
             let index = array.indexOf(first);
             if (index > -1) {
                 array.splice(index, 1);

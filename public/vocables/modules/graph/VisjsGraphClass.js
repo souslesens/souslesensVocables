@@ -991,6 +991,8 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         };
         if (options) {
             data.options = options;
+        }else{
+            options = {};
         }
         if (!fileName) {
             fileName = prompt("graph name");
@@ -1019,6 +1021,9 @@ const VisjsGraphClass = function (graphDiv, data, options) {
             success: function (_result, _textStatus, _jqXHR) {
                 $("#visjsGraph_savedGraphsSelect").append($("<option></option>").attr("value", fileName).text(fileName));
                 UI.message("graph saved");
+                if(options.callback){
+                    return options.callback();
+                }
             },
             error(err) {
                 return alert(err);

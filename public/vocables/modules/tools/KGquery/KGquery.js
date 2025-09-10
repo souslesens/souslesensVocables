@@ -1042,17 +1042,13 @@ var KGquery = (function () {
             $("#dataTableDivExport").on("click", "td", function () {
 
                 var table = $("#dataTableDivExport").DataTable();
-
                 var index = table.cell(this).index();
-                //var rowData = table.row(index.row).data();
-                //var column = table.cell(this).column().data();
-                //var data = table.cell(this).data();
-
-                //var datasetIndex = column[index.row];
                 if(!index.row){
                     return UI.message('No row corresponding')
                 }
                 var dataItem = self.currentData[index.row];
+
+                
                 var varName = self.tableCols[index.column].title;
                 if (true || !dataItem[varName]) {
                     var varNameNode = KGquery.currentSelectedPredicates.filter((key) => key.id == varName);

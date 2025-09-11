@@ -13,7 +13,7 @@ const path = require("path");
 
 var TriplesMaker = {
 
-    batchSize: 8000,
+    batchSize: 300,
     mappingFilePredicate: "http://souslesens.org/KGcreator#mappingFile",
 
 

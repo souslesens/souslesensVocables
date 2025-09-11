@@ -55,7 +55,7 @@ var TriplesMaker = {
                             callbackEach()
 
                         } else {
-                            KGbuilder_socket.message(options.clientSocketId, " writing "+totalDBRecords+ "records  from " + tableInfos.table + " : " + batchTriples.length + " triples", false);
+                            KGbuilder_socket.message(options.clientSocketId, " writing "+totalDBRecords+ " records  from " + tableInfos.table + " : " + batchTriples.length + " triples", false);
 
                             KGbuilder_triplesWriter.writeTriples(batchTriples, tableProcessingParams.sourceInfos.graphUri, tableProcessingParams.sourceInfos.sparqlServerUrl, function (err, result) {
 
@@ -116,7 +116,7 @@ var TriplesMaker = {
                                     callbackWhilst()
 
                                 } else {
-                                    KGbuilder_socket.message(options.clientSocketId, " writing "+totalDBRecords+ "records  from " + tableInfos.table + " : " +totalTriplesCount + " triples", false);
+                                    KGbuilder_socket.message(options.clientSocketId, " writing "+totalDBRecords+ " records  from " + tableInfos.table + " : " +totalTriplesCount + " triples", false);
 
                                     KGbuilder_triplesWriter.writeTriples(batchTriples, tableProcessingParams.sourceInfos.graphUri, tableProcessingParams.sourceInfos.sparqlServerUrl, function (err, totalTriples) {
                                         if (err) {
@@ -430,11 +430,17 @@ var TriplesMaker = {
                 if (util.isFloat(str)) {
                     str = '"' + str + '"^^' + mapping.dataType
                 }
+                else{
+                    str =null
+                }
             }
             if (mapping.dataType == "xsd:int") {
 
                 if (util.isInt(str)) {
                     str = '"' + str + '"^^' + mapping.dataType
+                }
+                else{
+                    str =null
                 }
             }
             // format after to apply transformations

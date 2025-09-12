@@ -262,24 +262,31 @@ var MappingModeler = (function () {
 
                 if (self.currentResourceType == "Class") {
                     if (node.data && node.data.resourceType != "searchClass") {
-                        items.showSampleData = {
-                            label: "deleteClass",
-                            action: function (_e) {
-                                NodeInfosWidget.currentNode = node;
-                                NodeInfosWidget.currentNodeId = node.id;
-                                NodeInfosWidget.currentNode.data.source = MainController.currentSource;
-                                NodeInfosWidget.currentSource = MainController.currentSource;
-                                NodeInfosWidget.deleteNode(function () {
-                                    NodeInfosWidget.currentNode = null;
-                                    NodeInfosWidget.currentNodeId = null;
-                                    NodeInfosWidget.currentSource = null;
-                                    $("#suggestionsSelectJstreeDiv").jstree("delete_node", node.id);
-                                    if (self.allClasses[node.id]) {
-                                        delete self.allClasses[node.id];
-                                    }
-                                });
-                            },
-                        };
+                        // only for classses
+                        if(node.parents && node.parents.length>2){
+                            if(node.parent && Lineage_sources.isSourceEditableForUser(node.parent)){
+                                items.showSampleData = {
+                                    label: "deleteClass",
+                                    action: function (_e) {
+        
+                                        NodeInfosWidget.currentNode = node;
+                                        NodeInfosWidget.currentNodeId = node.id;
+                                        NodeInfosWidget.currentNode.data.source = MainController.currentSource;
+                                        NodeInfosWidget.currentSource = MainController.currentSource;
+                                        NodeInfosWidget.deleteNode(function () {
+                                            NodeInfosWidget.currentNode = null;
+                                            NodeInfosWidget.currentNodeId = null;
+                                            NodeInfosWidget.currentSource = null;
+                                            $("#suggestionsSelectJstreeDiv").jstree("delete_node", node.id);
+                                            if (self.allClasses[node.id]) {
+                                                delete self.allClasses[node.id];
+                                            }
+                                        });
+                                    },
+                                };
+                            }
+                        }
+                        
                     }
                 }
                 return items;
@@ -1518,7 +1525,17 @@ var MappingModeler = (function () {
         }
         PlantUmlTransformer.visjsDataToClassDiagram(visjsData);
     };
-
+    self.refreshSourceResources = function () {
+        OntologyModels.unRegisterSourceModel();
+        self.initResourcesMap(MappingModeler.currentSLSsource,function(){
+            if(self?.currentResourceType=="Class" || self?.currentResourceType=="Property"){
+                self.onLegendNodeClick({
+                    id: self.currentResourceType
+                })
+            }
+        })
+    }
+  
     return self;
 })();
 

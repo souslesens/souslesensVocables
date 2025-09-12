@@ -3,7 +3,7 @@ const httpProxy = require("../httpProxy.");
 const async = require("async");
 const util = require("../util.");
 const KGbuilder_socket = require("./KGbuilder_socket");
-const KGbuilder_triplesMaker = require("./KGbuilder_triplesMaker.js");
+const TriplesMaker = require("./TriplesMaker.js");
 
 const KGbuilder_triplesWriter = {
     sparqlPrefixes: {
@@ -37,13 +37,14 @@ const KGbuilder_triplesWriter = {
 
         var slices = util.sliceArray(allTriples, 200);
 
-        KGbuilder_triplesMaker.existingTriples = {};
+
         async.eachSeries(
             slices,
             function (triples, callbackEach) {
                 var insertTriplesStr = "";
                 triples.forEach(function (triple) {
-                    var str = triple.s + " " + triple.p + " " + triple.o + ". ";
+                 //   var str = triple.s + " " + triple.p + " " + triple.o + ". ";
+                    var str = triple + ". ";
                     insertTriplesStr += str;
                 });
 
@@ -131,9 +132,9 @@ const KGbuilder_triplesWriter = {
         const KGbuilder_triplesMaker = require("./KGbuilder_triplesMaker");
         var query = "";
         if (table) {
-            query += "with  GRAPH <" + graphUri + "> " + "delete {?s ?p ?o} where {?s ?p ?o. ?s <" + KGbuilder_triplesMaker.mappingFilePredicate + "> '" + table + "'}";
+            query += "with  GRAPH <" + graphUri + "> " + "delete {?s ?p ?o} where {?s ?p ?o. ?s <" + TriplesMaker.mappingFilePredicate + "> '" + table + "'}";
         } else {
-            query += "with  <" + graphUri + "> " + "delete {?s ?p ?o} where {?s ?p ?o. ?s <" + KGbuilder_triplesMaker.mappingFilePredicate + "> ?table }";
+            query += "with  <" + graphUri + "> " + "delete {?s ?p ?o} where {?s ?p ?o. ?s <" + TriplesMaker.mappingFilePredicate + "> ?table }";
         }
 
         var limit = 10000;

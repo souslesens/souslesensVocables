@@ -12,6 +12,7 @@ class DatabaseModel {
      */
     constructor(path) {
         this.path = path;
+        this.knexClients = {};
     }
 
     /**
@@ -162,21 +163,43 @@ class DatabaseModel {
      * @param {string} databaseId - the database id
      * @returns {Promise<any>} database connection
      */
+
+
     getConnection = async (databaseId) => {
+    if (!this.knexClients[databaseId]) {
         const database = await this.getDatabase(databaseId);
         const dbClient = this.getClientDriver(database.driver);
-        return knex({
-            acquireConnectionTimeout: 5000,
-            client: dbClient,
-            connection: {
-                host: database.host,
-                port: database.port,
-                user: database.user,
-                password: database.password,
-                database: database.database,
-            },
+        this.knexClients[databaseId] = knex({
+        acquireConnectionTimeout: 5000,
+        client: dbClient,
+        connection: {
+            host: database.host,
+            port: database.port,
+            user: database.user,
+            password: database.password,
+            database: database.database,
+        },
         });
+    }
+
+    return this.knexClients[databaseId];
     };
+
+        /* getConnection = async (databaseId) => {
+    //     const database = await this.getDatabase(databaseId);
+    //     const dbClient = this.getClientDriver(database.driver);
+    //     return knex({
+    //         acquireConnectionTimeout: 5000,
+    //         client: dbClient,
+    //         connection: {
+    //             host: database.host,
+    //             port: database.port,
+    //             user: database.user,
+    //             password: database.password,
+    //             database: database.database,
+    //         },
+    //     });
+    // };*/
 
     /**
      * @param {string} databaseId - the database id

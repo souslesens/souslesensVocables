@@ -107,14 +107,14 @@ var MappingParser = {
 
 
     isConstantUri: function (str) {
-        if (str.startsWith("http")) {
+    if(str && str.startsWith("http")) {
             return true;
         }
         return false
 
     },
     isConstantPrefixedUri: function (str) {
-        if (str.match(/^[A-Za-z_][A-Za-z0-9._-]*:[A-Za-z_][A-Za-z0-9._-]*$/)) {
+        if (str && str.match(/^[A-Za-z_][A-Za-z0-9._-]*:[A-Za-z_][A-Za-z0-9._-]*$/)) {
             return true;
 
         }

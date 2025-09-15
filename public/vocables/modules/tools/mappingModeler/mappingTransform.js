@@ -289,7 +289,7 @@ var MappingTransform = (function () {
 
     /**
      * Adds restrictions to the mappings if both subject and object are classes and are different from each other.
-     * This function checks if the subject and object in a mapping are RDF classes, and if they are, it marks the mapping as a restriction.
+     * This function checks if the subject and object in a mapping are OWL classes, and if they are, it marks the mapping as a restriction.
      * @function
      * @name addMappingsRestrictions
      * @memberof module:MappingTransform

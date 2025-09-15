@@ -47,15 +47,7 @@ var TripleFactory = (function () {
         self.showFilterMappingDialog(false);
     };
 
-    /**
-     * Creates all RDF mappings triples using the KGcreator_run module.
-     * @function
-     * @name createAllMappingsTriples
-     * @memberof module:TripleFactory
-     */
-    self.createAllMappingsTriples = function () {
-        KGcreator_run.createAllMappingsTriples();
-    };
+
 
     /**
      * Indexes the RDF graph using the KGcreator_run module.
@@ -349,43 +341,7 @@ var TripleFactory = (function () {
      * @memberof module:TripleFactory
      */
     self.createAllMappingsTriples = function () {
-        DataSourceManager.drawMappingFilesTree();
-        /*
-        if (!confirm("generate KGcreator triples of datasource " + DataSourceManager.currentConfig.currentDataSource.name + ". this  will delete all triples created with KGcreator  ")) {
-            return;
-        }
-
-        $("#KGcreator_infosDiv").val("generating KGcreator triples form all mappings ");
-        async.series(
-            [
-                //delete previous KG creator triples
-                function (callbackSeries) {
-                    $("#KGcreator_infosDiv").val("deleting previous KGcreator triples ");
-                    self.deleteTriples(true, function (err, result) {
-                        return callbackSeries(err);
-                    });
-                },
-                // Create new triples
-                function (callbackSeries) {
-                    $("#KGcreator_infosDiv").val("creating new triples (can take long...)");
-                    self.createTriples(false, null, function (err, result) {
-                        return callbackSeries(err);
-                    });
-                },
-                // Reindex graph
-                function (callbackSeries) {
-                    $("#KGcreator_infosDiv").val("reindexing graph)");
-                    self.indexGraph(function (err, result) {
-                        return callbackSeries(err);
-                    });
-                },
-            ],
-            function (err) {
-                if (err) {
-                    $("#KGcreator_infosDiv").val("\nALL DONE");
-                }
-            },
-        );*/
+     alert("under construction")
     };
 
     /**

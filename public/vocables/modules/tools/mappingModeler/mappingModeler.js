@@ -83,6 +83,8 @@ var MappingModeler = (function () {
      * @throws {Error} If any step in the initialization sequence fails.
      */
     self.onLoaded = function () {
+
+  var tableStatsMap={}
         async.series(
             [
                 function (callbackSeries) {
@@ -140,6 +142,14 @@ var MappingModeler = (function () {
                         return callbackSeries();
                     });
                 },
+
+                function (callbackSeries){
+                    DataSourceManager.getTriplesStats(DataSourceManager.currentSlsvSource, function(err,result) {
+                        tableStatsMap = result || {}
+                        return callbackSeries()
+
+                    })
+                },
                 function (callbackSeries) {
                     $("#lateralPanelDiv").load("./modules/tools/mappingModeler/html/mappingModelerLeftPanel.html", function (err) {
                         $("#MappingModeler_leftTabs").tabs({
@@ -157,7 +167,7 @@ var MappingModeler = (function () {
                        
                         $($('#MappingModeler_leftTabs').children()[0]).find("li").addClass('lineage-tabDiv');
                         $($('#MappingModeler_leftTabs').children()[0]).find("a").css('text-decoration','none');*/
-                        DataSourceManager.loaDataSourcesJstree(self.jstreeDivId, function (err) {
+                        DataSourceManager.loaDataSourcesJstree(self.jstreeDivId, tableStatsMap,function (err) {
                             return callbackSeries();
                         });
                         /*  $('#rightControlPanelDiv').load("./modules/tools/lineage/html/whiteBoardButtons.html", function () {
@@ -1080,14 +1090,16 @@ var MappingModeler = (function () {
     };
 
     self.restartMappings = function () {
-        var confirmRestart = confirm("Are you sure you want to delete mappings nodes and edges?");
-        if (confirmRestart) {
+      if(!confirm("Do you want to delete all mappings "))
+        return;
+            if(! confirm("Are you sure"))
+                return
             var visjsData = { nodes: [], edges: [] };
             MappingColumnsGraph.visjsGraph.data = visjsData;
             MappingColumnsGraph.saveVisjsGraph(function () {
                 MappingColumnsGraph.loadVisjsGraph();
             });
-        }
+
     };
     /**
      * Displays the create resource bot and starts the resource creation workflow based on the provided resource type.
@@ -1430,6 +1442,9 @@ var MappingModeler = (function () {
      */
 
     self.showSampleData = function (node, columns, callback) {
+        if(!node){
+            node=self.currentTreeNode
+        }
         // alert("coming soon");
         if (!columns) {
             var hasColumn = false;
@@ -1525,8 +1540,9 @@ var MappingModeler = (function () {
         }
         PlantUmlTransformer.visjsDataToClassDiagram(visjsData);
     };
-    self.refreshSourceResources = function () {
+    self.refreshSourceOntologyModel = function () {
         OntologyModels.unRegisterSourceModel();
+        JstreeWidget.clear("mappingModelerRelations_jstreeDiv")
         self.initResourcesMap(MappingModeler.currentSLSsource,function(){
             if(self?.currentResourceType=="Class" || self?.currentResourceType=="Property"){
                 self.onLegendNodeClick({
@@ -1535,6 +1551,8 @@ var MappingModeler = (function () {
             }
         })
     }
+
+
   
     return self;
 })();

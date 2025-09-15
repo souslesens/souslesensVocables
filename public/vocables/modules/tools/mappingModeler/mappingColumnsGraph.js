@@ -834,16 +834,7 @@ var MappingColumnsGraph = (function () {
             } else {
                 var graphUri = Config.sources[MappingModeler.currentSLSsource].graphUri;
             }
-            /*var newJson = {
-                sparqlServerUrl: Config.sources[MappingModeler.currentSLSsource].sparql_server.url,
-                graphUri: graphUri,
-                prefixes: {},
-                lookups: {},
-                databaseSources: {},
-                csvSources: {},
-                isConfigInMappingGraph: true,
-                prefixURI: {},
-            };*/
+
             var newJson = {
                 sparqlServerUrl: Config.sources[MappingModeler.currentSLSsource].sparql_server.url,
                 graphUri: graphUri,
@@ -1127,6 +1118,7 @@ var MappingColumnsGraph = (function () {
             locked: false,
             animation: true,
         });
+        self.visjsGraph.network.fit()
     };
 
     /**
@@ -1381,12 +1373,39 @@ var MappingColumnsGraph = (function () {
 
     self.hideNodesFromOtherTables = function (table) {
         var nodes = MappingColumnsGraph.visjsGraph.data.nodes.get();
+        var edges = MappingColumnsGraph.visjsGraph.data.edges.get();
+
+
         var newNodes = [];
+        var newNodesMap={}
+        var tableNodes= {};
+
         nodes.forEach(function (node) {
-            var hide = false;
-            if (node.data && node.data.dataTable && node.data.dataTable != table) hide = true;
-            newNodes.push({ id: node.id, hidden: hide });
+            if (node.data && node.data.dataTable) {
+                if (  node.data.dataTable == table) {
+                    tableNodes[node.id] = node
+                }
+            }
+            newNodesMap[node.id]={ id: node.id, hidden: true }
         });
+
+
+        var edgesFromClassMap={}
+        edges.forEach(function (edge) {
+            if(edge.data && (edge.data.type=="rdf:type" || edge.data.type=="owl:Class" )) {
+                if(tableNodes[edge.from] ){
+                    newNodesMap[edge.to].hidden= false;
+                    newNodesMap[edge.from].hidden= false;
+
+                }
+            }
+
+        })
+
+        for(var nodeId in newNodesMap){
+            newNodes.push(newNodesMap[nodeId]);
+        }
+
         MappingColumnsGraph.visjsGraph.data.nodes.update(newNodes);
     };
 

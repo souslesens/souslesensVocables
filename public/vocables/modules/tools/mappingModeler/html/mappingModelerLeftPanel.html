@@ -7,14 +7,15 @@
             <a href="#MappingModeler_columnsTab" style="padding: 7px">Column<br />Mappings</a>
         </li>
         <li class="mappingModeler-tabDiv">
+            <a href="#MappingModeler_RelationsTab" style="padding: 7px">Relations<br />&nbsp;</a>
+        </li>
+        <li class="mappingModeler-tabDiv">
             <a href="#MappingModeler_technicalDetailTab" style="padding: 7px">Technical<br />Mappings</a>
         </li>
         <li class="mappingModeler-tabDiv">
             <a href="#MappingModeler_tripleFactoryTab" style="padding: 7px">Triples<br />&nbsp;</a>
         </li>
-        <li class="mappingModeler-tabDiv">
-            <a href="#MappingModeler_RelationsTab" style="padding: 7px">Relations<br />&nbsp;</a>
-        </li>
+
     </ul>
 
     <!-- <div style="display: flex; flex-direction: row">-->
@@ -43,7 +44,9 @@
                         
                     </div>
                     <div class="input-group-append">
-                        <button class="w3-button slsv-invisible-button resetIcon" onclick="MappingModeler.refreshSourceResources()" style="margin-top: 4px; margin-left: 15px; height: 20px; width: 20px"></button>
+                        <button class="w3-button slsv-invisible-button resetIcon"
+                               title="refresh ontology model"
+                                onclick="MappingModeler.refreshSourceOntologyModel()" style="margin-top: 4px; margin-left: 15px; height: 20px; width: 20px"></button>
                     </div>
                 </div>
 

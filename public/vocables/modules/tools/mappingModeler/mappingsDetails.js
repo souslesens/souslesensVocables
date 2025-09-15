@@ -104,9 +104,17 @@ var MappingsDetails = (function () {
 
             if (!uniqueSubjects[node.label]) {
                 uniqueSubjects[node.label] = node;
+                var definitionTable=self.isColumnAllreadyMappedInAnotherTable(node)
+                var color="#cb9801"
+                if(definitionTable){
+                    definitionTable="<font color='#eab3b3'><i> def: "+definitionTable+"</i></font>"
+                    color="#eab3b3"
+                }else
+                    definitionTable=""
+
                 jstreeData.push({
                     id: node.id,
-                    text: "<span style='background-color: #cb9801;padding: 3px;border-radius: 7px;'>" + node.label + "</span>&nbsp;" + buttonStr,
+                    text: "<span style='background-color: "+color+";padding: 3px;border-radius: 7px;'>" + node.label + "</span>&nbsp;" + buttonStr+definitionTable,
                     data: node.data,
                     parent: MappingModeler.currentTable.name,
                 });
@@ -321,13 +329,25 @@ var MappingsDetails = (function () {
      */
     self.showColumnTechnicalMappingsDialog = function (divId, column, callbackFn) {
         self.afterSaveColumnTechnicalMappingsDialog = callbackFn;
-        var html = `<tr><td>Table column</td><td><span id='class-column' ><b> ${column.text || column.label} </b></span> </td></tr>`;
-        html += `<tr></tr>`;
-        html += `<tr><td>URI syntax*</td><td><select id='columnDetails-UriType' onchange='MappingsDetails.onChangeUriType()' style='padding:6px 6px'> </select>  </td></tr>`;
-        html += `<tr><td id='columnDetails-baseUri-label'>Base URI</td><td><input id='columnDetails-baseUri' style='width:300px;    background-color: #eee;margin-right:15px;'> </input>  </td><td id='columnDetails-prefixURI-label' style='margin-left:10px;'>Prefix URI</td><td><input id='columnDetails-prefixURI' style='width:300px;    background-color: #eee;margin-left:15px;'> </input>  </td></tr>`;
-        html += `<tr><td>rdf:type*</td><td><select id='columnDetails-rdfType' style='padding:6px 6px'> </select> </td></tr> `;
 
-        html += `<tr><td>rdfs:label column</td><td><select id='columnDetails-rdfsLabel' style='padding:6px 6px'> </select> </td></tr>`;
+        console.log(column)
+        var isColumnAllreadyMapped=self.isColumnAllreadyMappedInAnotherTable(column)
+        var html = `<tr><td>Table column</td><td><span id='class-column' ><b> ${column.text || column.label} </b></span> </td></tr>`;
+
+
+
+        if(isColumnAllreadyMapped){
+            html += "<tr><td></td><td> column already defined in table "+isColumnAllreadyMapped+"</td></tr>";
+        }
+        else {
+
+            html += `<tr></tr>`;
+            html += `<tr><td>URI syntax*</td><td><select id='columnDetails-UriType' onchange='MappingsDetails.onChangeUriType()' style='padding:6px 6px'> </select>  </td></tr>`;
+            html += `<tr><td id='columnDetails-baseUri-label'>Base URI</td><td><input id='columnDetails-baseUri' style='width:300px;    background-color: #eee;margin-right:15px;'> </input>  </td><td id='columnDetails-prefixURI-label' style='margin-left:10px;'>Prefix URI</td><td><input id='columnDetails-prefixURI' style='width:300px;    background-color: #eee;margin-left:15px;'> </input>  </td></tr>`;
+            html += `<tr><td>rdf:type*</td><td><select id='columnDetails-rdfType' style='padding:6px 6px'> </select> </td></tr> `;
+
+            html += `<tr><td>rdfs:label column</td><td><select id='columnDetails-rdfsLabel' style='padding:6px 6px'> </select> </td></tr>`;
+        }
         html += `<td><button class='slsv-button-1' id='class-datatype' style='padding:6px 6px;margin:0px;' onclick='MappingsDetails.showSpecificMappingsBot("${column.id}")'> More mappings... </button> </td>  `;
         html += `<td><button class='slsv-button-1' id='class-datatype' style='padding:6px 6px;margin:0px;' onclick='MappingsDetails.saveMappingsDetailsToVisjsGraph("${column.id}");MappingsDetails.afterSaveColumnTechnicalMappingsDialog() '> Save </button> </td>  `;
 
@@ -369,6 +389,7 @@ var MappingsDetails = (function () {
         self.onChangeUriType();
 
         self.setMappingDefaultFieds(column);
+        console.log(column)
     };
 
     /**
@@ -391,13 +412,7 @@ var MappingsDetails = (function () {
         currentGraphNode.data.rdfType = $("#columnDetails-rdfType").val();
         var prefix = $("#columnDetails-prefixURI").val();
         if (prefix && currentGraphNode.data.uriType == "fromLabel") {
-            var transformFn = "function{" + self.transform.createPrefixTransformFn(prefix, { notDialog: true }) + "}";
-            currentGraphNode.data.transform = transformFn;
             currentGraphNode.data.prefixURI = prefix;
-            /*if (!DataSourceManager.rawConfig.prefixURI) {
-                DataSourceManager.rawConfig.prefixURI = {};
-            }
-            DataSourceManager.rawConfig.prefixURI[currentGraphNode.data.id] = prefix;*/
         }
         if (currentGraphNode.data.prefixURI && !prefix) {
             delete currentGraphNode.data.prefixURI;
@@ -1006,6 +1021,12 @@ var MappingsDetails = (function () {
                             if ($(!"#columnDetails-baseURI").val() && sameColumn.data.baseURI) {
                                 $("#columnDetails-baseURI").val(sameColumn.data.baseURI);
                             }
+
+
+
+
+
+
                         });
                     }
                 }
@@ -1016,6 +1037,32 @@ var MappingsDetails = (function () {
             });
         }
     };
+
+    self.isColumnAllreadyMappedInAnotherTable=function(columnNode) {
+        var table = false
+
+        var columnsClassMap = {};
+        var columnClass = MappingColumnsGraph.getColumnClass(columnNode);
+        if (columnClass) {
+            MappingColumnsGraph.visjsGraph.data.nodes.get().forEach(function (node) {
+
+                if (node.data && node.data.type == "Class" && node.data.id == columnClass) {
+                    var sameClassColumns = MappingColumnsGraph.getClassColumns(node);
+                    if(sameClassColumns && sameClassColumns.length>0) {
+                        sameClassColumns.forEach(function (column2){
+                            var table2=column2.data.dataTable
+                            if( column2.data.uriType && table2!=columnNode.data.dataTable)
+                            table = table2;
+                        })
+
+                    }
+
+                }
+            })
+        }
+        return table
+
+    }
     return self;
 })();
 

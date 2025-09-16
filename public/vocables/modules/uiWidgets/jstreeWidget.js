@@ -214,6 +214,18 @@ var JstreeWidget = (function () {
                 }
             })
             .on("check_node.jstree", function (evt, obj) {
+                
+                var tree = $("#" + jstreeDiv).jstree(true);
+                if(obj?.node?.children_d && obj?.node?.children_d.length>0){
+                    obj.node.children_d.forEach(function (childId) {
+                        var child = tree.get_node(childId);
+                        if (child?.state?.disabled) {
+                            // Annule la coche sur les nœuds désactivés
+                            tree.uncheck_node(child);
+                        }
+                    });
+                }
+                
                 if (options.onCheckNodeFn) {
                     options.onCheckNodeFn(evt, obj);
                 }

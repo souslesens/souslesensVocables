@@ -228,7 +228,7 @@ var DataSourceManager = (function () {
                         type: "CSV",
                         data: {id: datasource, type: "csvSource"},
                     };
-                    var nTriples = tableStatsMap[node.id]
+                    var nTriples = tableStatsMap[jstreeNode.id]
                     var strStats = ""
                     if (nTriples) {
                         strStats = "<b>" + nTriples + "Triples</b>"

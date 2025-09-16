@@ -719,7 +719,7 @@ var MappingColumnsGraph = (function () {
                     }
                     MappingColumnsGraph.visjsGraph.data = result;
                     if (result.nodes.length == 0) {
-                        MappingColumnsGraph.visjsGraph.draw(function () {
+                        return MappingColumnsGraph.visjsGraph.draw(function () {
                             if (callback) {
                                 return callback();
                             }

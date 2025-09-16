@@ -23,6 +23,7 @@ import Lineage_sources from "../lineage/lineage_sources.js";
 import MainController from "../../shared/mainController.js";
 import dataSourcesManager from "./dataSourcesManager.js";
 import MappingColumnsGraph from "./mappingColumnsGraph.js";
+import authentication from "../../shared/authentification.js";
 
 /**
  * MappingModeler module.
@@ -65,6 +66,8 @@ var MappingModeler = (function () {
     ];
 
     self.propertyColor = "#409304";
+    // 10 minutes without modifying the graph
+    self.accessDelayTimeout =  10 * 60;
 
     /**
      * Initializes the MappingModeler module.
@@ -125,6 +128,24 @@ var MappingModeler = (function () {
                         }
                         return callbackSeries();
                     });
+                },
+                // refuse access if another lastUpdate.user is too recent on mappingFile
+                // concurencial access
+                function(callbackSeries){
+                    if(dataSourcesManager?.currentConfig?.lastUpdate && authentication?.currentUser?.identifiant){
+                        if(dataSourcesManager.currentConfig.lastUpdate.user != authentication?.currentUser?.identifiant){
+                            var currentTime = new Date();
+                            var lastUpdateDate = new Date(dataSourcesManager.currentConfig.lastUpdate.date);
+                            const diffMs = currentTime - lastUpdateDate;
+                            const diffSeconds = diffMs / 1000;
+                            if(diffSeconds<self.accessDelayTimeout){
+                                alert('Another user is already editing the mapping');
+                                window.location.href = '/';
+                            }
+
+                        }
+                    }
+                    return callbackSeries()
                 },
                 //load visjs mapping graph
                 function (callbackSeries) {

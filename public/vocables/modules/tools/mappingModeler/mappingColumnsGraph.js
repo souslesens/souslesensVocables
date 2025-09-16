@@ -854,7 +854,12 @@ var MappingColumnsGraph = (function () {
         } else {
             config.graphUri = Config.sources[MappingModeler.currentSLSsource].graphUri;
         }
-
+        // add lastUpdated dict on update
+        if(!config.lastUpdate){
+            config.lastUpdate={};
+        }
+        config.lastUpdate.user = authentication.currentUser.identifiant;
+        config.lastUpdate.date = (new Date()).toISOString()
         delete config.currentDataSource;
         var data = {
             nodes: nodes,

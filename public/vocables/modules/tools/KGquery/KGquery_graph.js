@@ -713,7 +713,7 @@ var KGquery_graph = (function () {
         var data_type = "KGmodelGraph";*/
         var fileName = KGquery.currentSource + "_KGmodelGraph.json";
         self.visjsData = null;
-        if(callback){
+        if (callback) {
             options.callback = callback;
         }
         self.KGqueryGraph.saveGraph(fileName, true, options);

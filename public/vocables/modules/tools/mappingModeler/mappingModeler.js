@@ -263,12 +263,11 @@ var MappingModeler = (function () {
                 if (self.currentResourceType == "Class") {
                     if (node.data && node.data.resourceType != "searchClass") {
                         // only for classses
-                        if(node.parents && node.parents.length>2){
-                            if(node.parent && Lineage_sources.isSourceEditableForUser(node.parent)){
+                        if (node.parents && node.parents.length > 2) {
+                            if (node.parent && Lineage_sources.isSourceEditableForUser(node.parent)) {
                                 items.showSampleData = {
                                     label: "deleteClass",
                                     action: function (_e) {
-        
                                         NodeInfosWidget.currentNode = node;
                                         NodeInfosWidget.currentNodeId = node.id;
                                         NodeInfosWidget.currentNode.data.source = MainController.currentSource;
@@ -286,7 +285,6 @@ var MappingModeler = (function () {
                                 };
                             }
                         }
-                        
                     }
                 }
                 return items;
@@ -1527,15 +1525,15 @@ var MappingModeler = (function () {
     };
     self.refreshSourceResources = function () {
         OntologyModels.unRegisterSourceModel();
-        self.initResourcesMap(MappingModeler.currentSLSsource,function(){
-            if(self?.currentResourceType=="Class" || self?.currentResourceType=="Property"){
+        self.initResourcesMap(MappingModeler.currentSLSsource, function () {
+            if (self?.currentResourceType == "Class" || self?.currentResourceType == "Property") {
                 self.onLegendNodeClick({
-                    id: self.currentResourceType
-                })
+                    id: self.currentResourceType,
+                });
             }
-        })
-    }
-  
+        });
+    };
+
     return self;
 })();
 

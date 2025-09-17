@@ -8,7 +8,7 @@ var MappingModelerRelations = (function () {
     self.listPossibleRelations = function (callback) {
         var nodes = MappingColumnsGraph.visjsGraph.data.nodes.get();
         var edges = MappingColumnsGraph.visjsGraph.data.edges.get();
-        if(nodes.length==0 || edges.length==0){
+        if (nodes.length == 0 || edges.length == 0) {
             return callback(null, []);
         }
         var nodesMap = {};
@@ -19,24 +19,21 @@ var MappingModelerRelations = (function () {
         var nodesClassesMap = {};
         var existingRelationsMap = {};
         var classesRelationsMap = {};
-        var objectPropertiesMap={};
-        
+        var objectPropertiesMap = {};
+
         edges.forEach(function (edge) {
             if (!nodesMap[edge.from] || !nodesMap[edge.to]) return;
 
             if (MappingModeler.columnsMappingsObjects.includes(nodesMap[edge.from]?.data?.type) && MappingModeler.columnsMappingsObjects.includes(nodesMap[edge.to]?.data?.type)) {
                 existingRelationsMap[nodesMap[edge.to].id] = nodesMap[edge.from].id;
-                if(edge?.data?.id){
-                    objectPropertiesMap[nodesMap[edge.to].id +"-->" +nodesMap[edge.from].id]={propertyId:edge.data.id,fromColumnId:nodesMap[edge.from].id,toColumnId:nodesMap[edge.to].id};
+                if (edge?.data?.id) {
+                    objectPropertiesMap[nodesMap[edge.to].id + "-->" + nodesMap[edge.from].id] = { propertyId: edge.data.id, fromColumnId: nodesMap[edge.from].id, toColumnId: nodesMap[edge.to].id };
                 }
             }
 
-            if (
-                MappingModeler.columnsMappingsObjects.includes(nodesMap[edge.from]?.data?.type) &&
-                nodesMap[edge.to]?.data?.type == "Class" 
-            ) {
+            if (MappingModeler.columnsMappingsObjects.includes(nodesMap[edge.from]?.data?.type) && nodesMap[edge.to]?.data?.type == "Class") {
                 //drawing only relations where nodes comes from the current table
-                if(nodesMap[edge.from]?.data?.dataTable == MappingModeler.currentTable.name){
+                if (nodesMap[edge.from]?.data?.dataTable == MappingModeler.currentTable.name) {
                     if (!classesMap[nodesMap[edge.to].id]) {
                         classesMap[nodesMap[edge.to].id] = [nodesMap[edge.from].id];
                     } else {
@@ -44,22 +41,22 @@ var MappingModelerRelations = (function () {
                     }
                 }
                 // considering all edges for knowing if a restriction between the same two classes  already existing
-                nodesClassesMap[nodesMap[edge.from].id]=nodesMap[edge.to].id;
+                nodesClassesMap[nodesMap[edge.from].id] = nodesMap[edge.to].id;
             }
         });
         Object.keys(objectPropertiesMap).forEach(function (key) {
-            var fromColumnId=objectPropertiesMap[key].fromColumnId;
-            var toColumnId=objectPropertiesMap[key].toColumnId;
-            var propertyId=objectPropertiesMap[key].propertyId;
-            if(!fromColumnId || !toColumnId || !propertyId){
+            var fromColumnId = objectPropertiesMap[key].fromColumnId;
+            var toColumnId = objectPropertiesMap[key].toColumnId;
+            var propertyId = objectPropertiesMap[key].propertyId;
+            if (!fromColumnId || !toColumnId || !propertyId) {
                 return;
             }
             var fromClass = nodesClassesMap[fromColumnId];
             var toClass = nodesClassesMap[toColumnId];
-            if(!fromClass || !toClass){
+            if (!fromClass || !toClass) {
                 return;
             }
-            classesRelationsMap[fromClass + "-->" + toClass] =  propertyId;
+            classesRelationsMap[fromClass + "-->" + toClass] = propertyId;
         });
         var classes = null; // Object.keys(classesMap);
         var relations = [];
@@ -73,7 +70,6 @@ var MappingModelerRelations = (function () {
                 var fromColumn = classesMap[item?.subject?.value];
                 var toColumn = classesMap[item?.value?.value];
                 if (fromColumn && toColumn && item?.prop?.value) {
-                    
                     fromColumn.forEach(function (fromColumnId) {
                         toColumn.forEach(function (toColumnId) {
                             if (nodesMap[fromColumnId].data.table != nodesMap[toColumnId].data.table) {
@@ -83,16 +79,16 @@ var MappingModelerRelations = (function () {
                                 fromColumn: { id: fromColumnId, label: nodesMap[fromColumnId].label },
                                 toColumn: { id: toColumnId, label: nodesMap[toColumnId].label },
                                 property: { id: item.prop.value, label: item.propLabel.value },
-                                isAlreadyExisting:false
+                                isAlreadyExisting: false,
                             };
                             var columnFromClass = nodesClassesMap[relationObject.fromColumn.id];
                             var columnFromTo = nodesClassesMap[relationObject.toColumn.id];
-                            if(!columnFromClass || !columnFromTo){
+                            if (!columnFromClass || !columnFromTo) {
                                 return relations.push(relationObject);
                             }
-                            var isAlreadyExisting = classesRelationsMap[columnFromClass + "-->"+columnFromTo];
-                            if(isAlreadyExisting && isAlreadyExisting==item.prop.value){
-                                relationObject.isAlreadyExisting=true;
+                            var isAlreadyExisting = classesRelationsMap[columnFromClass + "-->" + columnFromTo];
+                            if (isAlreadyExisting && isAlreadyExisting == item.prop.value) {
+                                relationObject.isAlreadyExisting = true;
                             }
                             relations.push(relationObject);
                         });
@@ -110,7 +106,7 @@ var MappingModelerRelations = (function () {
             ];
 
             relations.forEach(function (item) {
-                var state = item.isAlreadyExisting ? { "disabled": true } : { "disabled": false };
+                var state = item.isAlreadyExisting ? { disabled: true } : { disabled: false };
                 jstreeData.push({
                     id: common.getRandomHexaId(5),
                     text: item.fromColumn.label + "-" + item.property.label + "->" + item.toColumn.label,

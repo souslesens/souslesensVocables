@@ -37,13 +37,12 @@ const KGbuilder_triplesWriter = {
 
         var slices = util.sliceArray(allTriples, 200);
 
-
         async.eachSeries(
             slices,
             function (triples, callbackEach) {
                 var insertTriplesStr = "";
                 triples.forEach(function (triple) {
-                 //   var str = triple.s + " " + triple.p + " " + triple.o + ". ";
+                    //   var str = triple.s + " " + triple.p + " " + triple.o + ". ";
                     var str = triple + ". ";
                     insertTriplesStr += str;
                 });

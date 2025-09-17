@@ -436,7 +436,11 @@ var SearchWidget = (function () {
                     if (selectedNodes.length > 1) {
                         Lineage_whiteboard.drawNodesAndParents(selectedNodes, 0);
                     } else {
-                        Lineage_whiteboard.drawNodesAndParents(self.currentTreeNode, 0);
+                        Lineage_whiteboard.drawNodesAndParents(self.currentTreeNode, 0, { drawBeforeCallback: true }, function () {
+                            if (self.currentTreeNode?.data && self.currentTreeNode.data.id) {
+                                Lineage_whiteboard.lineageVisjsGraph.searchNode(self.currentTreeNode.data.id, null);
+                            }
+                        });
                     }
                 },
             };

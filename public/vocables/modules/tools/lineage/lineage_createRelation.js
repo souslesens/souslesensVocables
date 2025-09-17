@@ -640,6 +640,21 @@ var Lineage_createRelation = (function () {
                 function (callbackSeries) {
                     relationId = relationId || "<_:b" + common.getRandomHexaId(10) + ">";
                     let propLabel = obj.node.data.propLabel || Sparql_common.getLabelFromURI(obj.node.data.id);
+                    if (Config?.ontologiesVocabularyModels?.[inSource]?.restrictions?.[obj?.node?.data?.id]) {
+                        let restrict = Config.ontologiesVocabularyModels[inSource].restrictions[obj.node.data.id];
+
+                        restrict.forEach((valeur) => {
+                            if (valeur["blankNodeId"] == relationId) {
+                                let cardinalityTest = valeur;
+                                if (cardinalityTest["cardinalityValue"]) {
+                                    let cardinalityValue = cardinalityTest["cardinalityValue"];
+                                    if (cardinalityValue) {
+                                        propLabel += " : " + cardinalityValue;
+                                    }
+                                }
+                            }
+                        });
+                    }
 
                     let newEdge = {
                         id: relationId,
@@ -910,6 +925,9 @@ var Lineage_createRelation = (function () {
                             ],
                         },
                     };
+                    if (cardinality && cardinality.value) {
+                        modelData.restrictions[type][0].cardinalityValue = cardinality.value;
+                    }
                     if (!Config.ontologiesVocabularyModels[inSource].restrictions[type]) {
                         Config.ontologiesVocabularyModels[inSource].restrictions[type] = [];
                     }

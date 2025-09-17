@@ -733,8 +733,8 @@ var KGquery = (function () {
                         Object.keys(distinctTypesMap).forEach(function (type) {
                             selectStr += " " + type;
                         });
-                        if(isJoin){
-                            selectStr += ' ?querySet '
+                        if (isJoin) {
+                            selectStr += " ?querySet ";
                         }
                     }
 
@@ -1040,19 +1040,17 @@ var KGquery = (function () {
         }
         Export.showDataTable("KGquery_dataTableDialogDiv", tableCols, tableData, null, { paging: true }, function (err, datatable) {
             $("#dataTableDivExport").on("click", "td", function () {
-
                 var table = $("#dataTableDivExport").DataTable();
                 var index = table.cell(this).index();
-                if(!index.row){
-                    return UI.message('No row corresponding')
+                if (!index.row) {
+                    return UI.message("No row corresponding");
                 }
                 var dataItem = self.currentData[index.row];
 
-                
                 var varName = self.tableCols[index.column].title;
                 if (true || !dataItem[varName]) {
                     var varNameNode = KGquery.currentSelectedPredicates.filter((key) => key.id == varName);
-                    if(varNameNode && varNameNode.length>0 && varNameNode[0]?.data?.varName){
+                    if (varNameNode && varNameNode.length > 0 && varNameNode[0]?.data?.varName) {
                         varName = varNameNode[0].data.varName;
                     }
                     //varName = varName.split("_")[0];

@@ -182,8 +182,24 @@ class DatabaseModel {
         });
     }
 
-    return this.knexClients[databaseId];
+    
+        return this.knexClients[databaseId];
     };
+
+    refreshConnection = async(databaseId,callback)=>{
+        const client = this.knexClients[databaseId];
+        if (client) {
+            await client.destroy(); 
+            delete this.knexClients[databaseId];
+            console.log(`Connexion fermée pour la base ${databaseId}`);
+        }
+        await this.getConnection(databaseId);
+
+        if(callback){
+            callback();
+        }
+        return ;
+    }
 
         /* getConnection = async (databaseId) => {
     //     const database = await this.getDatabase(databaseId);

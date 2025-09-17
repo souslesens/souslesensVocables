@@ -1,22 +1,18 @@
 const KGbuilder_socket = require("./KGbuilder_socket.js");
-const {databaseModel} = require("../../model/databases.js");
+const { databaseModel } = require("../../model/databases.js");
 const csvCrawler = require("../_csvCrawler..js");
 const async = require("async");
 const sqlServerProxy = require("../KG/SQLserverConnector.");
 const util = require("../util.");
 const KGbuilder_triplesWriter = require("./KGbuilder_triplesWriter");
-const KGbuilder_triplesMaker = require("./KGbuilder_triplesMaker")
+const KGbuilder_triplesMaker = require("./KGbuilder_triplesMaker");
 
 const dataController = require("../dataController.");
 const path = require("path");
-const { utils } = require("xlsx");
-
 
 var TriplesMaker = {
-
     batchSize: 300,
     mappingFilePredicate: "http://souslesens.org/KGcreator#mappingFile",
-
 
     /**
      *
@@ -27,16 +23,14 @@ var TriplesMaker = {
      * @param callback
      */
     readAndProcessData: function (tableProcessingParams, options, callback) {
-
-
-        var totalTriplesCount = 0
-        sampleTriples = []
-        var totalDBRecords=0
+        var totalTriplesCount = 0;
+        sampleTriples = [];
+        var totalDBRecords = 0;
         var tableInfos = tableProcessingParams.tableInfos;
 
-        tableProcessingParams.randomIdentiersMap = {};// identifiers with scope the whole table
-        tableProcessingParams.blankNodesMap = {};// identifiers with scope the whole table
-        tableProcessingParams.isSampleData = options.sampleSize
+        tableProcessingParams.randomIdentiersMap = {}; // identifiers with scope the whole table
+        tableProcessingParams.blankNodesMap = {}; // identifiers with scope the whole table
+        tableProcessingParams.isSampleData = options.sampleSize;
         if (tableProcessingParams.tableInfos.csvDataFilePath) {
             KGbuilder_socket.message(options.clientSocketId, "loading data from csv file " + tableInfos.table, false);
             TriplesMaker.readCsv(tableInfos.csvDataFilePath, options.sampleSize, function (err, result) {
@@ -44,121 +38,132 @@ var TriplesMaker = {
                     KGbuilder_socket.message(options.clientSocketId, err, true);
                     return callback(err);
                 }
-                totalDBRecords+=result.data.length
-             /  KGbuilder_socket.message(options.clientSocketId, totalDBRecords+"  records loaded in table " + tableInfos.table, false);
+                totalDBRecords += result.data.length / KGbuilder_socket.message(options.clientSocketId, totalDBRecords + "  records loaded in table " + tableInfos.table, false);
                 //  tableData = result.data[0];
 
-                async.eachSeries(result.data, function (data, callbackEach) {
-                    TriplesMaker.buildTriples(data, tableProcessingParams, options, function (err, batchTriples) {
+                async.eachSeries(
+                    result.data,
+                    function (data, callbackEach) {
+                        TriplesMaker.buildTriples(data, tableProcessingParams, options, function (err, batchTriples) {
+                            if (options.sampleSize) {
+                                // sample dont write triples return batchTriples
+                                sampleTriples = batchTriples;
+                                callbackEach();
+                            } else {
+                                KGbuilder_socket.message(options.clientSocketId, " writing " + totalDBRecords + " records  from " + tableInfos.table + " : " + batchTriples.length + " triples", false);
 
-                        if (options.sampleSize) {// sample dont write triples return batchTriples
-                            sampleTriples = batchTriples
-                            callbackEach()
-
-                        } else {
-                            KGbuilder_socket.message(options.clientSocketId, " writing "+totalDBRecords+ " records  from " + tableInfos.table + " : " + batchTriples.length + " triples", false);
-
-                            KGbuilder_triplesWriter.writeTriples(batchTriples, tableProcessingParams.sourceInfos.graphUri, tableProcessingParams.sourceInfos.sparqlServerUrl, function (err, result) {
-
-                                if (err) {
-                                    return callbackEach(err)
-                                }
-                                totalTriplesCount += batchTriples.length
-                                return callbackEach()
-                            })
-                        }
-                    })
-
-
-                }, function (err) {
-                    return callback(err, totalTriplesCount)
-                })
-            })
-
-
+                                KGbuilder_triplesWriter.writeTriples(
+                                    batchTriples,
+                                    tableProcessingParams.sourceInfos.graphUri,
+                                    tableProcessingParams.sourceInfos.sparqlServerUrl,
+                                    function (err, result) {
+                                        if (err) {
+                                            return callbackEach(err);
+                                        }
+                                        totalTriplesCount += batchTriples.length;
+                                        return callbackEach();
+                                    },
+                                );
+                            }
+                        });
+                    },
+                    function (err) {
+                        return callback(err, totalTriplesCount);
+                    },
+                );
+            });
         } else if (tableInfos.dbID) {
-            KGbuilder_socket.message(options.clientSocketId, "loading data from database table " + tableInfos.table, false);
 
+            KGbuilder_socket.message(options.clientSocketId, "loading data from database table " + tableInfos.table, false);
 
             var totalSize = 0;
             var resultSize = 1;
             var limitSize = options.sampleSize || TriplesMaker.batchSize;
 
             var offset = 0;
+            databaseModel.refreshConnection(tableInfos.dbID,function(){
 
-            async.whilst(
-                function (callbackTest) {// implementation different in node js and  web browser  !!
-                    if(!resultSize > 0){
-                        var x=3
-                    }
-                    return callbackTest(null, resultSize > 0);
-                },
-                function (callbackWhilst) {
-                    databaseModel.batchSelect(tableInfos.dbID, tableInfos.table, {
-                        limit: limitSize,
-                        noRecurs: true,// Boolean(options.sampleSize),
-                        offset: offset
-                    })
-                        .then((result) => {
-                            data = result;
-                            totalDBRecords+=data.length
-                            resultSize = data.length;
-                            offset += resultSize;
-
-                           KGbuilder_socket.message(options.clientSocketId, totalDBRecords+"  records loaded from table " + tableInfos.table, false);
-                            TriplesMaker.buildTriples(data, tableProcessingParams, options, function (err, batchTriples) {
-                                if (err) {
-                                    return callbackWhilst(err)
-                                }
-
-                                if (options.sampleSize) {// sample dont write triples return batchTriples
-                                    resultSize = 0;// stop iterate
-                                    sampleTriples = batchTriples
-                                    callbackWhilst()
-
-                                } else {
-                                    KGbuilder_socket.message(options.clientSocketId, " writing "+totalDBRecords+ " records  from " + tableInfos.table + " : " +totalTriplesCount + " triples", false);
-
-                                    KGbuilder_triplesWriter.writeTriples(batchTriples, tableProcessingParams.sourceInfos.graphUri, tableProcessingParams.sourceInfos.sparqlServerUrl, function (err, totalTriples) {
-                                        if (err) {
-                                            return callbackWhilst(err)
-                                        }
-
-
-
-                                        totalTriplesCount += totalTriples
-
-                                        return callbackWhilst()
-                                    })
-                                }
-
-
+            
+                async.whilst(
+                    function (callbackTest) {
+                        // implementation different in node js and  web browser  !!
+                        if (!resultSize > 0) {
+                            var x = 3;
+                        }
+                        return callbackTest(null, resultSize > 0);
+                    },
+                    function (callbackWhilst) {
+                        
+                        databaseModel
+                            .batchSelect(tableInfos.dbID, tableInfos.table, {
+                                limit: limitSize,
+                                noRecurs: true, // Boolean(options.sampleSize),
+                                offset: offset,
                             })
+                            .then((result) => {
+                                data = result;
+                                totalDBRecords += data.length;
+                                resultSize = data.length;
+                                offset += resultSize;
 
+                                KGbuilder_socket.message(options.clientSocketId, totalDBRecords + "  records loaded from table " + tableInfos.table, false);
+                                TriplesMaker.buildTriples(data, tableProcessingParams, options, function (err, batchTriples) {
+                                    if (err) {
+                                        return callbackWhilst(err);
+                                    }
 
-                        })
-                    .catch((err) => {
-                           return callbackWhilst(err);
-                       });
-                }, function (err) {
-                    KGbuilder_socket.message(options.clientSocketId, " DONE "+totalDBRecords+ "records  from " + tableInfos.table + " : " + (totalTriplesCount) + " triples", false);
+                                    if (options.sampleSize) {
+                                        // sample dont write triples return batchTriples
+                                        resultSize = 0; // stop iterate
+                                        sampleTriples = batchTriples;
+                                        callbackWhilst();
+                                    } else {
+                                        KGbuilder_socket.message(
+                                            options.clientSocketId,
+                                            " writing " + totalDBRecords + " records  from " + tableInfos.table + " : " + totalTriplesCount + " triples",
+                                            false,
+                                        );
 
-                    return callback(err, {sampleTriples: sampleTriples, totalTriplesCount: totalTriplesCount})
-                })
+                                        KGbuilder_triplesWriter.writeTriples(
+                                            batchTriples,
+                                            tableProcessingParams.sourceInfos.graphUri,
+                                            tableProcessingParams.sourceInfos.sparqlServerUrl,
+                                            function (err, totalTriples) {
+                                                if (err) {
+                                                    return callbackWhilst(err);
+                                                }
+
+                                                totalTriplesCount += totalTriples;
+
+                                                return callbackWhilst();
+                                            },
+                                        );
+                                    }
+                                });
+                            })
+                            .catch((err) => {
+                                return callbackWhilst(err);
+                            });
+                    },
+                    function (err) {
+                        KGbuilder_socket.message(options.clientSocketId, " DONE " + totalDBRecords + "records  from " + tableInfos.table + " : " + totalTriplesCount + " triples", false);
+
+                        return callback(err, { sampleTriples: sampleTriples, totalTriplesCount: totalTriplesCount });
+                    },
+                );
+            });
         }
     },
 
     buildTriples: function (data, tableProcessingParams, options, callback) {
-
         var columnMappings = tableProcessingParams.columnsMappings;
         var batchTriples = [];
         data.forEach(function (line, rowIndex) {
-            var lineColumnUrisMap = {}
+            var lineColumnUrisMap = {};
 
             var blankNodesMap = {};
             for (var key in line) {
                 if (line[key]) {
-
                     if (line[key] instanceof Date) {
                         line[key] = line[key].toISOString();
                     } else {
@@ -167,23 +172,18 @@ var TriplesMaker = {
                 }
             }
 
-
             for (var columnId in columnMappings) {
-
-                var columnUri = lineColumnUrisMap[columnId]
+                var columnUri = lineColumnUrisMap[columnId];
                 if (!columnUri) {
-                    columnUri = TriplesMaker.getColumnUri(line, columnId, columnMappings, rowIndex, tableProcessingParams)
+                    columnUri = TriplesMaker.getColumnUri(line, columnId, columnMappings, rowIndex, tableProcessingParams);
                     if (columnId) {
-                        lineColumnUrisMap[columnId] = columnUri
+                        lineColumnUrisMap[columnId] = columnUri;
                     }
                 }
-                if(!columnUri)
-                    break;
+                if (!columnUri) break;
 
-
-                var mappings = columnMappings[columnId].mappings
+                var mappings = columnMappings[columnId].mappings;
                 mappings.forEach(function (mapping) {
-
                     if (!mapping) {
                         return;
                     }
@@ -191,65 +191,56 @@ var TriplesMaker = {
                         return;
                     }
 
-
-                    var object = null
+                    var object = null;
                     // if no matching item for mapping.o  and no fixed uri return
                     // the other cases need a value for the mapping object
                     if (!line[mapping.o]) {
-                        if (mapping.isConstantUri) {// uri
-                            object = "<" + mapping.o + ">"
-                        } else if (mapping.isConstantPrefixedUri) {//prefix
-                            object = mapping.o
+                        if (mapping.isConstantUri) {
+                            // uri
+                            object = "<" + mapping.o + ">";
+                        } else if (mapping.isConstantPrefixedUri) {
+                            //prefix
+                            object = mapping.o;
                         } else {
                             return;
-
                         }
-                    } else if (columnMappings[mapping.objColId]) {// if object is a column
-                        object = TriplesMaker.getColumnUri(line, mapping.objColId, columnMappings, rowIndex, tableProcessingParams)
-
-
+                    } else if (columnMappings[mapping.objColId]) {
+                        // if object is a column
+                        object = TriplesMaker.getColumnUri(line, mapping.objColId, columnMappings, rowIndex, tableProcessingParams);
                     } else if (mapping.transform) {
-                        var objStr = line[mapping.o]
+                        var objStr = line[mapping.o];
                         object = tableProcessingParams.jsFunctionsMap[mapping.s](objStr, "o", mapping.p, line, mapping);
-
                     } else if (mapping.isString) {
-                        var objStr = line[mapping.o]
-                        object = "\"" + util.formatStringForTriple(objStr) + "\""
-
+                        var objStr = line[mapping.o];
+                        object = '"' + util.formatStringForTriple(objStr) + '"';
                     } else {
-                        object = TriplesMaker.getFormatedLiteral(line, mapping)
+                        object = TriplesMaker.getFormatedLiteral(line, mapping);
                     }
 
-
-                    var property = TriplesMaker.getPropertyUri(mapping.p)
-
+                    var property = TriplesMaker.getPropertyUri(mapping.p);
 
                     if (columnUri && property && object) {
-                        var triple = columnUri + " " + property + " " + object
+                        var triple = columnUri + " " + property + " " + object;
 
-
-                        var triplelHashCode = TriplesMaker.stringToNumber(triple)
+                        var triplelHashCode = TriplesMaker.stringToNumber(triple);
                         if (!tableProcessingParams.uniqueTriplesMap[triplelHashCode]) {
-                            tableProcessingParams.uniqueTriplesMap[triplelHashCode] = 1
-                            batchTriples.push(triple)
+                            tableProcessingParams.uniqueTriplesMap[triplelHashCode] = 1;
+                            batchTriples.push(triple);
                         }
                     } else {
                         var x = property;
-                        var y = object
+                        var y = object;
                     }
-                })
+                });
                 // add metadata if not sample
                 if (!tableProcessingParams.isSampleData) {
-                    var metaDataTriples = TriplesMaker.getMetaDataTriples(columnUri, tableProcessingParams.tableInfos.table, {})
-                    batchTriples = batchTriples.concat(metaDataTriples)
+                    var metaDataTriples = TriplesMaker.getMetaDataTriples(columnUri, tableProcessingParams.tableInfos.table, {});
+                    batchTriples = batchTriples.concat(metaDataTriples);
                 }
             }
+        });
 
-
-        })
-
-        return callback(null, batchTriples)
-
+        return callback(null, batchTriples);
     },
 
     stringToNumber: function (str) {
@@ -261,7 +252,6 @@ var TriplesMaker = {
         return hash;
     },
 
-
     /**
      *
      * build an URI for the column
@@ -272,42 +262,20 @@ var TriplesMaker = {
      * @param globalParamsMap
      */
     getColumnUri: function (dataItem, columnId, columnMappings, rowIndex, tableProcessingParams) {
-        var columnParams = columnMappings[columnId]
-        var graphUri = tableProcessingParams.sourceInfos.graphUri
+        var columnParams = columnMappings[columnId];
+        var graphUri = tableProcessingParams.sourceInfos.graphUri;
 
-
-        if (columnParams.type == "URI") {// same fixed uri for all amappings
-            return "<" + graphUri + util.formatStringForTriple(columnParams.id, true) + ">"
-        } else if (columnParams.uriType == "blankNode" || columnParams.type == "VirtualColumn") {
-          /*
-            don't work
+        if (columnParams.type == "URI") {
+            // same fixed uri for all amappings
+            return "<" + graphUri + util.formatStringForTriple(columnParams.id, true) + ">";
+        } else if (columnParams.uriType == "blankNode" || columnParams.uriType == "VirtualColumn") {
             var value = dataItem[columnId];
 
             if (!value) {
-                return
+                return;
             }
-            value = columnId + ":" + value
-            var bNode = tableProcessingParams.blankNodesMap[value]
-            */
-
-             var bNode;
-             var value;
-            // blank nodes uriType should have an associated data column so a value
-            if(columnParams.uriType == "blankNode"){
-                  value = dataItem[columnParams.id];
-                  if(!value) {
-                        return
-                  }
-                  value = columnId + ":" + value
-                bNode = tableProcessingParams.blankNodesMap[value]
-            }else{
-                // virtual columns hasn't associated data column so we use rowIndex as value with the id of the virtual column
-                value = columnParams.id + ":" +rowIndex;
-                bNode = tableProcessingParams.blankNodesMap[value]
-
-            }
-            
-            
+            value = columnId + ":" + value;
+            var bNode = tableProcessingParams.blankNodesMap[value];
             if (bNode) {
                 return bNode;
             } else {
@@ -315,11 +283,10 @@ var TriplesMaker = {
                 tableProcessingParams.blankNodesMap[value] = bNode;
                 return bNode;
             }
-
-
-        } else if (columnParams.type == "RowIndex") {// unique uri for the line
+        } else if (columnParams.type == "RowIndex") {
+            // unique uri for the line
             var value = "_row_" + rowIndex;
-            var rowUri = tableProcessingParams.blankNodesMap[value]
+            var rowUri = tableProcessingParams.blankNodesMap[value];
             if (rowUri) {
                 return rowUri;
             } else {
@@ -333,71 +300,54 @@ var TriplesMaker = {
 
         var id = null;
 
-
-        if (columnParams.uriType == "fromLabel") {// cross lines value for the column
-
+        if (columnParams.uriType == "fromLabel") {
+            // cross lines value for the column
 
             if (dataItem[columnParams.id]) {
-                id = util.formatStringForTriple(dataItem[columnParams.id], true)
+                id = util.formatStringForTriple(dataItem[columnParams.id], true);
             }
-
         } else if (columnParams.uriType == "randomIdentifier") {
-
             var value = dataItem[columnId];
 
             if (!value) {
-                return
+                return;
             }
-            value = columnId + ":" + value
-            id = tableProcessingParams.randomIdentiersMap[value]
+            value = columnId + ":" + value;
+            id = tableProcessingParams.randomIdentiersMap[value];
             if (!bNode) {
-
                 id = "" + util.getRandomHexaId(10);
                 tableProcessingParams.randomIdentiersMap[value] = id;
                 return bNode;
             }
-
-
         } else {
-            id = util.formatStringForTriple(dataItem[columnParams.id], true)
+            id = util.formatStringForTriple(dataItem[columnParams.id], true);
         }
 
         if (!id) {
             return null;
         }
 
-
-        var baseUri = columnParams.baseURI || graphUri
+        var baseUri = columnParams.baseURI || graphUri;
         if (!baseUri.endsWith("/")) {
-            baseUri += "/"
+            baseUri += "/";
         }
-        
-        //var prefix = columnParams.prefixURI ? (columnParams.prefixURI + "-") : ""
-        // this force using '-' as prefix seperator, 
-        // new version authorize others separators caracters if there is already one
-        var prefix = columnParams.prefixURI ? (columnParams.prefixURI ) : ""
-        if(prefix){
-            if(!util.hasURISeparator(prefix)){
-                prefix += '-'
-            }
-        }
-        var uri = "<" + baseUri + prefix + id + ">"
-        return uri
+        var prefix = columnParams.prefixURI ? columnParams.prefixURI + "-" : "";
 
+        var uri = "<" + baseUri + prefix + id + ">";
+        return uri;
     },
 
     getPropertyUri: function (property, rowIndex) {
         if (property.startsWith("http")) {
-            return "<" + property + ">"
-        } else //prefix
-        {
-            return property
+            return "<" + property + ">";
+        } //prefix
+        else {
+            return property;
         }
     },
 
-
     getFormatedLiteral: function (dataItem, mapping) {
-        var objectStr = null
+        var objectStr = null;
         if (mapping.dataType) {
             var str = dataItem[mapping.o];
             if (!str || str == "null") {
@@ -406,7 +356,6 @@ var TriplesMaker = {
             if (mapping.dataType.startsWith("xsd:date")) {
                 if (mapping.dateFormat) {
                     str = util.getDateFromSLSformat(mapping.dateFormat, str);
-
                 } else if (str.match(/[.-]*Z/)) {
                     //ISO string format (coming from database)
                     // is relevant dates coming from dataBases have mapping.dateFormat=ISO-time?
@@ -432,15 +381,11 @@ var TriplesMaker = {
                 }
                 if (str) {
                     if (str.length > 11) {
-                        str = '"' + str + '"^^' + "xsd:dateTime"
+                        str = '"' + str + '"^^' + "xsd:dateTime";
                     } else {
-                        str = '"' + str + '"^^' + "xsd:date"
+                        str = '"' + str + '"^^' + "xsd:date";
                     }
-
-
                 }
-
-
             }
 
             if (!mapping.dataType.startsWith("xsd:")) {
@@ -450,28 +395,24 @@ var TriplesMaker = {
                 return null;
             }
             if (mapping.dataType == "xsd:string") {
-
-                str = '"' + util.formatStringForTriple(str, false) + '"^^' + mapping.dataType
+                str = '"' + util.formatStringForTriple(str, false) + '"^^' + mapping.dataType;
             }
             if (mapping.dataType == "xsd:float") {
                 if (str == "0") {
-                    str = "0.0"
+                    str = "0.0";
                 }
                 str = str.replace(",", ".");
                 if (util.isFloat(str)) {
-                    str = '"' + str + '"^^' + mapping.dataType
-                }
-                else{
-                    str =null
+                    str = '"' + str + '"^^' + mapping.dataType;
+                } else {
+                    str = null;
                 }
             }
             if (mapping.dataType == "xsd:int") {
-
                 if (util.isInt(str)) {
-                    str = '"' + str + '"^^' + mapping.dataType
-                }
-                else{
-                    str =null
+                    str = '"' + str + '"^^' + mapping.dataType;
+                } else {
+                    str = null;
                 }
             }
             // format after to apply transformations
@@ -493,7 +434,6 @@ var TriplesMaker = {
         if (options.customMetaData) {
             for (var predicate in options.customMetaData) {
                 metaDataTriples.push(subjectUri + " " + predicate + " " + options.customMetaData[predicate]);
-
             }
         }
 
@@ -501,20 +441,16 @@ var TriplesMaker = {
     },
 
     readCsv: function (filePath, maxLines, callback) {
-        csvCrawler.readCsv({filePath: filePath}, maxLines, function (err, result) {
+        csvCrawler.readCsv({ filePath: filePath }, maxLines, function (err, result) {
             if (err) {
                 return callback(err);
             }
             var data = result.data;
             var headers = result.headers;
 
-            return callback(null, {headers: headers, data: data});
+            return callback(null, { headers: headers, data: data });
         });
-    }
-    ,
+    },
+};
 
-
-}
-
-
-module.exports = TriplesMaker
+module.exports = TriplesMaker;

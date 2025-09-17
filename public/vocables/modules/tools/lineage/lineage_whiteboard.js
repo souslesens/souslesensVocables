@@ -769,7 +769,7 @@ var Lineage_whiteboard = (function () {
      * @param {string} [_options.legendType] - Type of legend to be used for decoration.
      * @returns {void}
      */
-    self.drawNewGraph = function (visjsData, graphDiv, _options) {
+    self.drawNewGraph = function (visjsData, graphDiv, _options, callback) {
         if (!_options) {
             _options = {};
         }
@@ -917,6 +917,9 @@ var Lineage_whiteboard = (function () {
                 Lineage_decoration.decorationDone = true;
                 Lineage_decoration.decorateNodeAndDrawLegend(visjsData.nodes, _options.legendType);
                 //  GraphDisplayLegend.drawLegend("Lineage", "LineageVisjsLegendCanvas");
+            }
+            if (callback) {
+                callback();
             }
         });
         Lineage_sources.showHideEditButtons(Lineage_sources.activeSource);
@@ -3441,19 +3444,23 @@ restrictionSource = Config.predicatesSource;
             //Lineage_sources.registerSource(source);
 
             if (!self.lineageVisjsGraph.isGraphNotEmpty()) {
-                self.drawNewGraph(visjsData, null, options);
+                self.drawNewGraph(visjsData, null, options, function () {
+                    if (callback) {
+                        return callback(null, visjsData);
+                    }
+                });
             } else {
                 Lineage_whiteboard.addVisDataToGraph(visjsData);
                 self.lineageVisjsGraph.data.edges.add(visjsData.edges);
+                if (callback) {
+                    return callback(null, visjsData);
+                }
             }
 
             /*  setTimeout(function () {
 self.zoomGraphOnNode(node.data[0].id, false);
 }, 500);*/
             UI.message("", true);
-            if (callback) {
-                return callback(null, visjsData);
-            }
         });
     };
 

@@ -2,22 +2,17 @@ const path = require("path");
 const async = require("async");
 const fs = require("fs");
 
-
 var MappingParser = {
-
     getMappingsData: function (source, callback) {
-
         var mappingGraphDir = path.join(__dirname, "../../data/graphs/");
-        var file = mappingGraphDir + "mappings_" + source + "_ALL.json"
-        var visjsData
+        var file = mappingGraphDir + "mappings_" + source + "_ALL.json";
+        var visjsData;
         try {
             visjsData = JSON.parse("" + fs.readFileSync(file));
         } catch (e) {
-            return callback(e)
+            return callback(e);
         }
         return callback(null, visjsData);
-
-
     },
     /**
      * get the vijsData of the mappings and extract tripleModels  for each Column in the field mappings
@@ -28,115 +23,96 @@ var MappingParser = {
      * @param callback
      */
     getColumnsMap: function (mappingData, table, callback) {
-
-
-        var edgesFromMap = {}
-        var nodesMap = {}
-        var columnsMap = {}
-
+        var edgesFromMap = {};
+        var nodesMap = {};
+        var columnsMap = {};
 
         mappingData.edges.forEach(function (edge) {
-
             if (!edgesFromMap[edge.from]) {
-                edgesFromMap[edge.from] = []
+                edgesFromMap[edge.from] = [];
             }
-            edgesFromMap[edge.from].push(edge)
-        })
+            edgesFromMap[edge.from].push(edge);
+        });
         mappingData.nodes.forEach(function (node) {
             if (node.data.type == "Class") {
-                nodesMap[node.id] = node
+                nodesMap[node.id] = node;
             }
             if (!table || node.data.dataTable == table) {
-                nodesMap[node.id] = node
+                nodesMap[node.id] = node;
                 if (node.data.type == "Column") {
-                    columnsMap[node.id] = node.data
+                    columnsMap[node.id] = node.data;
                 } else if (node.data.type == "RowIndex") {
-                    columnsMap[node.id] = node.data
+                    columnsMap[node.id] = node.data;
                 } else if (node.data.type == "VirtualColumn") {
-                    columnsMap[node.id] = node.data
+                    columnsMap[node.id] = node.data;
                 } else if (node.data.type == "URI") {
-                    columnsMap[node.id] = node.data
+                    columnsMap[node.id] = node.data;
                 }
             }
-        })
-
+        });
 
         for (var columnId in columnsMap) {
-
-            var fromNodeData = columnsMap[columnId]
-            var columnMappings = []
-            var edges = edgesFromMap[columnId]
+            var fromNodeData = columnsMap[columnId];
+            var columnMappings = [];
+            var edges = edgesFromMap[columnId];
             if (edges) {
                 edges.forEach(function (edge) {
-                    var toNode = nodesMap[edge.to]
-                    var toNodeData = toNode ? toNode.data : {}
+                    var toNode = nodesMap[edge.to];
+                    var toNodeData = toNode ? toNode.data : {};
                     if (toNodeData.type == "Class") {
-                        mappings = MappingParser.getTypeAndLabelMappings(fromNodeData, toNodeData)
-                        columnMappings = columnMappings.concat(mappings)
+                        mappings = MappingParser.getTypeAndLabelMappings(fromNodeData, toNodeData);
+                        columnMappings = columnMappings.concat(mappings);
                     } else if (toNodeData.type == "Column") {
-                        mappings = MappingParser.getColumnToColumnMappings(fromNodeData, toNodeData, edge)
-                        columnMappings = columnMappings.concat(mappings)
+                        mappings = MappingParser.getColumnToColumnMappings(fromNodeData, toNodeData, edge);
+                        columnMappings = columnMappings.concat(mappings);
                     } else {
                         var x = 3;
                     }
-
-                })
-
-
+                });
             }
 
-
-            mappings = MappingParser.getOtherPredicates(fromNodeData)
-            columnMappings = columnMappings.concat(mappings)
+            mappings = MappingParser.getOtherPredicates(fromNodeData);
+            columnMappings = columnMappings.concat(mappings);
 
             columnMappings.forEach(function (mapping) {
-                mapping.isConstantUri = MappingParser.isConstantUri(mapping.o)
-                mapping.isConstantPrefixedUri = MappingParser.isConstantPrefixedUri(mapping.o)
-            })
+                mapping.isConstantUri = MappingParser.isConstantUri(mapping.o);
+                mapping.isConstantPrefixedUri = MappingParser.isConstantPrefixedUri(mapping.o);
+            });
 
-
-            columnsMap[columnId].mappings = columnMappings
-
+            columnsMap[columnId].mappings = columnMappings;
         }
 
-
-        return callback(null, columnsMap)
-
-
+        return callback(null, columnsMap);
     },
 
-
     isConstantUri: function (str) {
-    if(str && str.startsWith("http")) {
+        if (str && str.startsWith("http")) {
             return true;
         }
-        return false
-
+        return false;
     },
     isConstantPrefixedUri: function (str) {
         if (str && str.match(/^[A-Za-z_][A-Za-z0-9._-]*:[A-Za-z_][A-Za-z0-9._-]*$/)) {
             return true;
-
         }
-        return false
+        return false;
     },
 
-
     getTypeAndLabelMappings: function (fromNodeData, toNodeData) {
-        var mappings = []
+        var mappings = [];
 
-        var type = fromNodeData.rdfType == "owl;Class" ? "rdfs:subClassOf" : "rdf:type"
+        var type = fromNodeData.rdfType == "owl;Class" ? "rdfs:subClassOf" : "rdf:type";
 
         mappings.push({
             s: fromNodeData.id,
             p: type,
             o: toNodeData.id,
-        })
+        });
         mappings.push({
             s: fromNodeData.id,
             p: "rdf:type",
             o: fromNodeData.rdfType,
-        })
+        });
 
         if (fromNodeData.rdfsLabel) {
             mappings.push({
@@ -144,28 +120,25 @@ var MappingParser = {
                 p: "rdfs:label",
                 o: fromNodeData.rdfsLabel,
                 isString: true,
-            })
+            });
         }
 
-
-        return mappings
+        return mappings;
     },
 
     getColumnToColumnMappings: function (fromNodeData, toNodeData, edge) {
-        var mappings = []
-
+        var mappings = [];
 
         mappings.push({
             s: fromNodeData.id,
             p: edge.data.id,
             o: toNodeData.id,
-            objColId: edge.to
-        })
-        return mappings
+            objColId: edge.to,
+        });
+        return mappings;
     },
     getOtherPredicates: function (columnData) {
-
-        var mappings = []
+        var mappings = [];
         if (columnData.otherPredicates) {
             columnData.otherPredicates.forEach(function (predicate) {
                 var triple = {
@@ -186,11 +159,9 @@ var MappingParser = {
                 }
 
                 mappings.push(triple);
-            })
-
+            });
         }
-        return mappings
-
+        return mappings;
     },
 
     /*  getGlobalParamsMap:function(columnMappings){
@@ -216,7 +187,6 @@ var MappingParser = {
 
       }*/
 
-
     /**
      *
      * build functions in a  pointers map used to transform data at tripleMaker processe
@@ -239,27 +209,24 @@ var MappingParser = {
             }
         }
 
-        var jsFunctionsMap = {}
+        var jsFunctionsMap = {};
         for (var columnId in columnMappings) {
-            var column = columnMappings[columnId]
+            var column = columnMappings[columnId];
             if (column.function) {
                 getFunction(["row", "mapping"], column.function, function (err, fn) {
-                    jsFunctionsMap[columnId] = fn
-                })
+                    jsFunctionsMap[columnId] = fn;
+                });
             }
             if (column.transform) {
                 getFunction(["row", "mapping"], column.transform, function (err, fn) {
-                    jsFunctionsMap[columnId] = fn
-                })
+                    jsFunctionsMap[columnId] = fn;
+                });
             }
         }
-        return callback(null, jsFunctionsMap)
-    }
+        return callback(null, jsFunctionsMap);
+    },
+};
 
-
-}
-
-module.exports = MappingParser
-
+module.exports = MappingParser;
 
 //MappingParser.getColumnsMap("PAZFLOR_ABOX", null, function (err, result) {

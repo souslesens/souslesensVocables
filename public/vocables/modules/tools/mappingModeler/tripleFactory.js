@@ -372,12 +372,11 @@ var TripleFactory = (function () {
 
         var tableData = [];
         data.sampleTriples.forEach(function (item, index) {
-
-            var array=item.split(" ")
+            var array = item.split(" ");
             tableData.push([escapeMarkup(array[0]), escapeMarkup(array[1]), escapeMarkup(array[2])]);
-          //  tableData.push([escapeMarkup(item.s), escapeMarkup(item.p), escapeMarkup(item.o)]);
+            //  tableData.push([escapeMarkup(item.s), escapeMarkup(item.p), escapeMarkup(item.o)]);
         });
-/*
+        /*
         var str = "<table><tr><td>subject</td><td>predicate</td><td>object</td></tr>";
         data.sampleTriples.forEach(function (item, index) {
             str += "<tr><td>" + escapeMarkup(item.s) + "</td><td>" + escapeMarkup(item.p) + "</td><td>" + escapeMarkup(item.o) + "</td></tr>";

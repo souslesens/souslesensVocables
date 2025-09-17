@@ -139,7 +139,7 @@ var MappingModeler = (function () {
                                 const diffMs = currentTime - lastUpdateDate;
                                 const diffSeconds = diffMs / 1000;
                                 if (diffSeconds && diffSeconds < self.accessDelayTimeout) {
-                                    alert("Sorrry another user is already editing the mapping,please come back later");
+                                    alert("Sorry another user is already editing the mapping,please come back later");
                                     window.location.href = "/";
                                 }
                             }

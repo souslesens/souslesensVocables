@@ -719,7 +719,7 @@ var MappingColumnsGraph = (function () {
                     }
                     MappingColumnsGraph.visjsGraph.data = result;
                     if (result.nodes.length == 0) {
-                        MappingColumnsGraph.visjsGraph.draw(function () {
+                        return MappingColumnsGraph.visjsGraph.draw(function () {
                             if (callback) {
                                 return callback();
                             }
@@ -854,7 +854,12 @@ var MappingColumnsGraph = (function () {
         } else {
             config.graphUri = Config.sources[MappingModeler.currentSLSsource].graphUri;
         }
-
+        // add lastUpdated dict on update
+        if(!config.lastUpdate){
+            config.lastUpdate={};
+        }
+        config.lastUpdate.user = authentication.currentUser.identifiant;
+        config.lastUpdate.date = (new Date()).toISOString()
         delete config.currentDataSource;
         var data = {
             nodes: nodes,

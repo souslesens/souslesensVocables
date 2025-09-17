@@ -20,7 +20,7 @@ var UIcontroller = (function () {
      */
     self.onActivateLeftPanelTab = function (tabId) {
         $("#mappingModeler_relationInfos").html("");
-      //  $(".mappingModeler_rightPanel").css("display", "none");
+        //  $(".mappingModeler_rightPanel").css("display", "none");
         if (tabId == "MappingModeler_dataSourcesTab") {
             $("#mappingModeler_structuralPanel").css("display", "block");
             $("#rightControlPanelDiv").load("./modules/tools/mappingModeler/html/mappingsGraphButtons.html", function (err) {});

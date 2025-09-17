@@ -164,44 +164,42 @@ class DatabaseModel {
      * @returns {Promise<any>} database connection
      */
 
-
     getConnection = async (databaseId) => {
-    if (!this.knexClients[databaseId]) {
-        const database = await this.getDatabase(databaseId);
-        const dbClient = this.getClientDriver(database.driver);
-        this.knexClients[databaseId] = knex({
-        acquireConnectionTimeout: 5000,
-        client: dbClient,
-        connection: {
-            host: database.host,
-            port: database.port,
-            user: database.user,
-            password: database.password,
-            database: database.database,
-        },
-        });
-    }
+        if (!this.knexClients[databaseId]) {
+            const database = await this.getDatabase(databaseId);
+            const dbClient = this.getClientDriver(database.driver);
+            this.knexClients[databaseId] = knex({
+                acquireConnectionTimeout: 5000,
+                client: dbClient,
+                connection: {
+                    host: database.host,
+                    port: database.port,
+                    user: database.user,
+                    password: database.password,
+                    database: database.database,
+                },
+            });
+        }
 
-    
         return this.knexClients[databaseId];
     };
 
-    refreshConnection = async(databaseId,callback)=>{
+    refreshConnection = async (databaseId, callback) => {
         const client = this.knexClients[databaseId];
         if (client) {
-            await client.destroy(); 
+            await client.destroy();
             delete this.knexClients[databaseId];
             console.log(`Connexion fermée pour la base ${databaseId}`);
         }
         await this.getConnection(databaseId);
 
-        if(callback){
+        if (callback) {
             callback();
         }
-        return ;
-    }
+        return;
+    };
 
-        /* getConnection = async (databaseId) => {
+    /* getConnection = async (databaseId) => {
     //     const database = await this.getDatabase(databaseId);
     //     const dbClient = this.getClientDriver(database.driver);
     //     return knex({

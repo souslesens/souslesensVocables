@@ -709,7 +709,7 @@ var util = {
         }
     },
 
-    hasURISeparator: function(uri){
+    hasURISeparator: function (uri) {
         const lastChar = uri.slice(-1);
 
         // Définir les séparateurs acceptés
@@ -717,10 +717,10 @@ var util = {
 
         // Si le dernier caractère n'est pas un séparateur, on ajoute un "-"
         if (separators.includes(lastChar)) {
-           return true;
+            return true;
         }
-        return false
-    }
+        return false;
+    },
 };
 
 module.exports = util;

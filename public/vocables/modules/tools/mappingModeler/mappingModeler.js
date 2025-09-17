@@ -67,7 +67,7 @@ var MappingModeler = (function () {
 
     self.propertyColor = "#409304";
     // 10 minutes without modifying the graph
-    self.accessDelayTimeout =  10 * 60;
+    self.accessDelayTimeout = 10 * 60;
 
     /**
      * Initializes the MappingModeler module.
@@ -86,8 +86,7 @@ var MappingModeler = (function () {
      * @throws {Error} If any step in the initialization sequence fails.
      */
     self.onLoaded = function () {
-
-  var tableStatsMap={}
+        var tableStatsMap = {};
         async.series(
             [
                 function (callbackSeries) {
@@ -131,24 +130,22 @@ var MappingModeler = (function () {
                 },
                 // refuse access if another lastUpdate.user is too recent on mappingFile
                 // concurencial access
-                function(callbackSeries){
-                    if(dataSourcesManager?.currentConfig?.lastUpdate && authentication?.currentUser?.identifiant){
-                        if(dataSourcesManager.currentConfig.lastUpdate.user != authentication?.currentUser?.identifiant){
+                function (callbackSeries) {
+                    if (dataSourcesManager?.currentConfig?.lastUpdate && authentication?.currentUser?.identifiant) {
+                        if (dataSourcesManager.currentConfig.lastUpdate.user != authentication?.currentUser?.identifiant) {
                             var currentTime = new Date();
                             var lastUpdateDate = new Date(dataSourcesManager.currentConfig.lastUpdate?.date);
-                            if(currentTime && lastUpdateDate){
+                            if (currentTime && lastUpdateDate) {
                                 const diffMs = currentTime - lastUpdateDate;
                                 const diffSeconds = diffMs / 1000;
-                                if(diffSeconds && diffSeconds<self.accessDelayTimeout){
-                                    alert('Sorrry another user is already editing the mapping,please come back later');
-                                    window.location.href = '/';
+                                if (diffSeconds && diffSeconds < self.accessDelayTimeout) {
+                                    alert("Sorrry another user is already editing the mapping,please come back later");
+                                    window.location.href = "/";
                                 }
                             }
-                           
-
                         }
                     }
-                    return callbackSeries()
+                    return callbackSeries();
                 },
                 //load visjs mapping graph
                 function (callbackSeries) {
@@ -166,13 +163,15 @@ var MappingModeler = (function () {
                         return callbackSeries();
                     });
                 },
-
-                function (callbackSeries){
-                    DataSourceManager.getTriplesStats(DataSourceManager.currentSlsvSource, function(err,result) {
-                        tableStatsMap = result || {}
-                        return callbackSeries()
-
-                    })
+                function (callbackSeries) {
+                    MappingColumnsGraph.drawClassesGraph();
+                    return callbackSeries();
+                },
+                function (callbackSeries) {
+                    DataSourceManager.getTriplesStats(DataSourceManager.currentSlsvSource, function (err, result) {
+                        tableStatsMap = result || {};
+                        return callbackSeries();
+                    });
                 },
                 function (callbackSeries) {
                     $("#lateralPanelDiv").load("./modules/tools/mappingModeler/html/mappingModelerLeftPanel.html", function (err) {
@@ -191,7 +190,7 @@ var MappingModeler = (function () {
                        
                         $($('#MappingModeler_leftTabs').children()[0]).find("li").addClass('lineage-tabDiv');
                         $($('#MappingModeler_leftTabs').children()[0]).find("a").css('text-decoration','none');*/
-                        DataSourceManager.loaDataSourcesJstree(self.jstreeDivId, tableStatsMap,function (err) {
+                        DataSourceManager.loaDataSourcesJstree(self.jstreeDivId, tableStatsMap, function (err) {
                             return callbackSeries();
                         });
                         /*  $('#rightControlPanelDiv').load("./modules/tools/lineage/html/whiteBoardButtons.html", function () {
@@ -297,12 +296,11 @@ var MappingModeler = (function () {
                 if (self.currentResourceType == "Class") {
                     if (node.data && node.data.resourceType != "searchClass") {
                         // only for classses
-                        if(node.parents && node.parents.length>2){
-                            if(node.parent && Lineage_sources.isSourceEditableForUser(node.parent)){
+                        if (node.parents && node.parents.length > 2) {
+                            if (node.parent && Lineage_sources.isSourceEditableForUser(node.parent)) {
                                 items.showSampleData = {
                                     label: "deleteClass",
                                     action: function (_e) {
-        
                                         NodeInfosWidget.currentNode = node;
                                         NodeInfosWidget.currentNodeId = node.id;
                                         NodeInfosWidget.currentNode.data.source = MainController.currentSource;
@@ -320,7 +318,6 @@ var MappingModeler = (function () {
                                 };
                             }
                         }
-                        
                     }
                 }
                 return items;
@@ -1114,16 +1111,13 @@ var MappingModeler = (function () {
     };
 
     self.restartMappings = function () {
-      if(!confirm("Do you want to delete all mappings "))
-        return;
-            if(! confirm("Are you sure"))
-                return
-            var visjsData = { nodes: [], edges: [] };
-            MappingColumnsGraph.visjsGraph.data = visjsData;
-            MappingColumnsGraph.saveVisjsGraph(function () {
-                MappingColumnsGraph.loadVisjsGraph();
-            });
-
+        if (!confirm("Do you want to delete all mappings ")) return;
+        if (!confirm("Are you sure")) return;
+        var visjsData = { nodes: [], edges: [] };
+        MappingColumnsGraph.visjsGraph.data = visjsData;
+        MappingColumnsGraph.saveVisjsGraph(function () {
+            MappingColumnsGraph.loadVisjsGraph();
+        });
     };
     /**
      * Displays the create resource bot and starts the resource creation workflow based on the provided resource type.
@@ -1466,8 +1460,8 @@ var MappingModeler = (function () {
      */
 
     self.showSampleData = function (node, columns, callback) {
-        if(!node){
-            node=self.currentTreeNode
+        if (!node) {
+            node = self.currentTreeNode;
         }
         // alert("coming soon");
         if (!columns) {
@@ -1566,18 +1560,16 @@ var MappingModeler = (function () {
     };
     self.refreshSourceOntologyModel = function () {
         OntologyModels.unRegisterSourceModel();
-        JstreeWidget.clear("mappingModelerRelations_jstreeDiv")
-        self.initResourcesMap(MappingModeler.currentSLSsource,function(){
-            if(self?.currentResourceType=="Class" || self?.currentResourceType=="Property"){
+        JstreeWidget.clear("mappingModelerRelations_jstreeDiv");
+        self.initResourcesMap(MappingModeler.currentSLSsource, function () {
+            if (self?.currentResourceType == "Class" || self?.currentResourceType == "Property") {
                 self.onLegendNodeClick({
-                    id: self.currentResourceType
-                })
+                    id: self.currentResourceType,
+                });
             }
-        })
-    }
+        });
+    };
 
-
-  
     return self;
 })();
 

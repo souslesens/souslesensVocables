@@ -47,8 +47,6 @@ var TripleFactory = (function () {
         self.showFilterMappingDialog(false);
     };
 
-
-
     /**
      * Indexes the RDF graph using the KGcreator_run module.
      * @function
@@ -341,7 +339,7 @@ var TripleFactory = (function () {
      * @memberof module:TripleFactory
      */
     self.createAllMappingsTriples = function () {
-     alert("under construction")
+        alert("under construction");
     };
 
     /**

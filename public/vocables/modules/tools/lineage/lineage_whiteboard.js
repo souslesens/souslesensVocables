@@ -4962,7 +4962,7 @@ attrs.color=self.getSourceColor(superClassValue)
                             propertyLabel: item.propLabel.value,
                             domain: item.domain.value,
                             range: rangeDatatype,
-                            type:'DatatypeProperty'
+                            type: "DatatypeProperty",
                         },
                     });
                 }

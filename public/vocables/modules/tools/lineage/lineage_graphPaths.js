@@ -57,6 +57,11 @@ var Lineage_graphPaths = (function () {
         var edgesFromToMap = self.getEdgesFromToMap(visjsData, options.inverse);
 
         var resultArray = [];
+
+        if (format == "raw") {
+            return paths;
+        }
+
         paths.forEach(function (path) {
             var lineStr = "";
             for (var i = 1; i < path.length; i++) {

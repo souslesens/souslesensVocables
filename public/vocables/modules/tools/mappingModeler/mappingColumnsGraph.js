@@ -5,6 +5,7 @@ import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 import MappingsDetails from "./mappingsDetails.js";
 import DataSourceManager from "./dataSourcesManager.js";
 import MappingModeler from "./mappingModeler.js";
+import Lineage_graphPaths from "../lineage/lineage_graphPaths.js";
 
 /**
  * MappingColumnsGraph module.
@@ -312,12 +313,29 @@ var MappingColumnsGraph = (function () {
         });
     };
 
+    self.getColumnsClasses = function (nodes) {
+        if (!nodes) {
+            nodes = self.visjsGraph.data.nodes.get();
+        }
+        if (!Array.isArray(nodes)) {
+            nodes = [nodes];
+        }
+        var map = {};
+        nodes.forEach(function (node) {
+            map[node.id] = self.getColumnClass(node);
+        });
+        return map;
+    };
+
     self.getColumnClass = function (node) {
+        if (!node.id) {
+            node = { id: node };
+        }
         var connections = self.visjsGraph.getFromNodeEdgesAndToNodes(node.id);
 
         var classId = null;
         connections.forEach(function (connection) {
-            if (connection.edge.data.type == "rdf:type" || connection.edge.data.type == "rdfs:subClassOf") {
+            if (connection.edge.data && (connection.edge.data.type == "rdf:type" || connection.edge.data.type == "rdfs:subClassOf")) {
                 classId = connection.toNode.data.id;
             }
         });
@@ -325,6 +343,9 @@ var MappingColumnsGraph = (function () {
     };
 
     self.getClassColumns = function (node) {
+        if (!node.id) {
+            node = { id: node };
+        }
         var connections = self.visjsGraph.getFromNodeEdgesAndToNodes(node.id, true);
 
         var columns = [];
@@ -334,6 +355,20 @@ var MappingColumnsGraph = (function () {
             }
         });
         return columns;
+    };
+
+    self.getAllColumnsClasses = function (nodes) {
+        if (!nodes) {
+            nodes = self.visjsGraph.data.nodes.get();
+        }
+        if (!Array.isArray(nodes)) {
+            nodes = [nodes];
+        }
+        var map = {};
+        nodes.forEach(function (node) {
+            map[node.id] = self.getColumnClass(node);
+        });
+        return map;
     };
 
     /**
@@ -855,11 +890,11 @@ var MappingColumnsGraph = (function () {
             config.graphUri = Config.sources[MappingModeler.currentSLSsource].graphUri;
         }
         // add lastUpdated dict on update
-        if(!config.lastUpdate){
-            config.lastUpdate={};
+        if (!config.lastUpdate) {
+            config.lastUpdate = {};
         }
         config.lastUpdate.user = authentication.currentUser.identifiant;
-        config.lastUpdate.date = (new Date()).toISOString()
+        config.lastUpdate.date = new Date().toISOString();
         delete config.currentDataSource;
         var data = {
             nodes: nodes,
@@ -1123,7 +1158,7 @@ var MappingColumnsGraph = (function () {
             locked: false,
             animation: true,
         });
-        self.visjsGraph.network.fit()
+        self.visjsGraph.network.fit();
     };
 
     /**
@@ -1380,34 +1415,30 @@ var MappingColumnsGraph = (function () {
         var nodes = MappingColumnsGraph.visjsGraph.data.nodes.get();
         var edges = MappingColumnsGraph.visjsGraph.data.edges.get();
 
-
         var newNodes = [];
-        var newNodesMap={}
-        var tableNodes= {};
+        var newNodesMap = {};
+        var tableNodes = {};
 
         nodes.forEach(function (node) {
             if (node.data && node.data.dataTable) {
-                if (  node.data.dataTable == table) {
-                    tableNodes[node.id] = node
+                if (node.data.dataTable == table) {
+                    tableNodes[node.id] = node;
                 }
             }
-            newNodesMap[node.id]={ id: node.id, hidden: true }
+            newNodesMap[node.id] = { id: node.id, hidden: true };
         });
 
-
-        var edgesFromClassMap={}
+        var edgesFromClassMap = {};
         edges.forEach(function (edge) {
-            if(edge.data && (edge.data.type=="rdf:type" || edge.data.type=="owl:Class" )) {
-                if(tableNodes[edge.from] ){
-                    newNodesMap[edge.to].hidden= false;
-                    newNodesMap[edge.from].hidden= false;
-
+            if (edge.data && (edge.data.type == "rdf:type" || edge.data.type == "owl:Class")) {
+                if (tableNodes[edge.from]) {
+                    newNodesMap[edge.to].hidden = false;
+                    newNodesMap[edge.from].hidden = false;
                 }
             }
+        });
 
-        })
-
-        for(var nodeId in newNodesMap){
+        for (var nodeId in newNodesMap) {
             newNodes.push(newNodesMap[nodeId]);
         }
 
@@ -1420,6 +1451,122 @@ var MappingColumnsGraph = (function () {
         }
         $("#mappingModeler_relationInfos").html("from: <b>" + (fromLabel ?? "None") + "</b> to: <b>" + (toLabel ?? "None") + "</b>");
     };
+
+    self.drawClassesGraph = function () {
+        var columns = self.getNodesOfType("Column");
+        var edgesFromMap = self.getEdgesMap("from");
+        var classNodesMap = self.getNodesMap("Class");
+        var linkedClasses = {};
+
+        columns.forEach(function (column) {
+            var columnClass = self.getColumnClass(column);
+            if (edgesFromMap[column.id]) {
+                for (var edgeId in edgesFromMap) {
+                    var edge = edgesFromMap[edgeId];
+                    if (edge.from == column.id) {
+                        var edgeType = edge.data ? edge.data.id : null;
+
+                        if (edgeType && edgeType != "owl:Class" && edgeType != "rdf:type") {
+                            if (!linkedClasses[columnClass]) {
+                                linkedClasses[columnClass] = [];
+                            }
+                            edge.targetClass = self.getColumnClass(edge.to);
+                            linkedClasses[columnClass].push(edge);
+                        } else {
+                        }
+                    }
+                }
+            }
+        });
+
+        var x = linkedClasses;
+
+        var classVisjsData = { nodes: [], edges: [] };
+        var uniqueNodes = {};
+        for (var classId in linkedClasses) {
+            if (!uniqueNodes[classId]) {
+                uniqueNodes[classId] = 1;
+                var startNode = classNodesMap[classId];
+                if (startNode) {
+                    classVisjsData.nodes.push(startNode);
+                }
+            }
+            var targetClass;
+            var targetEdges = linkedClasses[classId];
+            targetEdges.forEach(function (edge) {
+                targetClass = classNodesMap[edge.targetClass];
+                if (targetClass && !uniqueNodes[edge.targetClass]) {
+                    uniqueNodes[edge.targetClass] = 1;
+                    classVisjsData.nodes.push(targetClass);
+                }
+
+                if (targetClass) {
+                    var edge2 = {
+                        label: edge.label,
+                        data: {
+                            label: edge.label,
+                        },
+                        from: classId,
+                        to: targetClass.id,
+                        arrows: {
+                            to: {
+                                enabled: true,
+                                type: "arrow",
+                            },
+                        },
+                    };
+                    classVisjsData.edges.push(edge2);
+                }
+            });
+        }
+        //  classVisjsData={nodes:[], edges:[]}
+        var html = "<div style='width:1000px;height:800px' id='mappingModeler_implicitModelGraph'></div>";
+        $("#mainDialogDiv").html(html);
+        $("#mainDialogDiv").dialog("open");
+
+        self.implicitModelVisjsGraph = new VisjsGraphClass("mappingModeler_implicitModelGraph", classVisjsData);
+        self.implicitModelVisjsGraph.draw(function () {});
+
+        // self.drawGraphCanvas(self.graphDiv, classVisjsData);
+    };
+
+    self.getNodesOfType = function (type, onlyIds) {
+        var nodes = self.visjsGraph.data.nodes.get();
+        var filteredNodes = [];
+        nodes.forEach(function (node) {
+            if (node.data && node.data.type == type) {
+                if (onlyIds) {
+                    filteredNodes.push(node.id);
+                } else {
+                    filteredNodes.push(node);
+                }
+            }
+        });
+        return filteredNodes;
+    };
+
+    self.getNodesMap = function (type) {
+        var nodes = self.visjsGraph.data.nodes.get();
+        var map = {};
+        nodes.forEach(function (node) {
+            if (!type || (node.data && node.data.type == type)) {
+                map[node.id] = node;
+            }
+        });
+        return map;
+    };
+    self.getEdgesMap = function (key) {
+        var edges = self.visjsGraph.data.edges.get();
+        var map = {};
+        edges.forEach(function (edge) {
+            if (!key || key == "id") {
+                map[edge.id] = edge;
+            }
+            map[edge[key]] = edge;
+        });
+        return map;
+    };
+
     return self;
 })();
 

@@ -73,7 +73,6 @@ var TriplesMaker = {
                 );
             });
         } else if (tableInfos.dbID) {
-
             KGbuilder_socket.message(options.clientSocketId, "loading data from database table " + tableInfos.table, false);
 
             var totalSize = 0;
@@ -81,9 +80,7 @@ var TriplesMaker = {
             var limitSize = options.sampleSize || TriplesMaker.batchSize;
 
             var offset = 0;
-            databaseModel.refreshConnection(tableInfos.dbID,function(){
-
-            
+            databaseModel.refreshConnection(tableInfos.dbID, function () {
                 async.whilst(
                     function (callbackTest) {
                         // implementation different in node js and  web browser  !!
@@ -93,7 +90,6 @@ var TriplesMaker = {
                         return callbackTest(null, resultSize > 0);
                     },
                     function (callbackWhilst) {
-                        
                         databaseModel
                             .batchSelect(tableInfos.dbID, tableInfos.table, {
                                 limit: limitSize,

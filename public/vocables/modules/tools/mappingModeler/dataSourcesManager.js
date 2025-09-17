@@ -121,7 +121,7 @@ var DataSourceManager = (function () {
             openAll: true,
             selectTreeNodeFn: self.onDataSourcesJstreeSelect,
             contextMenu: function (node, x) {
-                self.currentDataSourceTreeNode = node
+                self.currentDataSourceTreeNode = node;
                 var items = {};
                 if (node.id == "databaseSources") {
                     items.addDatabaseSource = {
@@ -203,7 +203,7 @@ var DataSourceManager = (function () {
                             id: key,
                             text: datasource.name || key,
                             parent: "databaseSources",
-                            data: {id: datasource.name, type: "databaseSource", sqlType: result.driver},
+                            data: { id: datasource.name, type: "databaseSource", sqlType: result.driver },
                         });
                         return callbackEach();
                     },
@@ -212,7 +212,7 @@ var DataSourceManager = (function () {
                             id: key,
                             text: datasource.name || key,
                             parent: "databaseSources",
-                            data: {id: datasource.name, type: "databaseSource"},
+                            data: { id: datasource.name, type: "databaseSource" },
                         });
                         return callbackEach();
                     },
@@ -226,19 +226,18 @@ var DataSourceManager = (function () {
                         text: datasource,
                         parent: "csvSources",
                         type: "CSV",
-                        data: {id: datasource, type: "csvSource"},
+                        data: { id: datasource, type: "csvSource" },
                     };
-                    var nTriples = tableStatsMap[jstreeNode.id]
-                    var strStats = ""
+                    var nTriples = tableStatsMap[jstreeNode.id];
+                    var strStats = "";
                     if (nTriples) {
-                        strStats = "<b>" + nTriples + "Triples</b>"
+                        strStats = "<b>" + nTriples + "Triples</b>";
                     }
                     if (dataTables.includes(datasource)) {
                         jstreeNode.text = "<span style='color:blue'>" + datasource + "</span>";
                     }
                     jstreeData.push(jstreeNode);
                 }
-
 
                 //underline CSV with mappings
                 if (self?.visjsGraph?.data?.nodes?.length == 0) {
@@ -252,10 +251,10 @@ var DataSourceManager = (function () {
                         });
                     }
                     for (var node in jstreeData) {
-                        var nTriples = tableStatsMap[node.id]
-                        var strStats = ""
+                        var nTriples = tableStatsMap[node.id];
+                        var strStats = "";
                         if (nTriples) {
-                            strStats = "<b>" + nTriples + "Triples</b>"
+                            strStats = "<b>" + nTriples + "Triples</b>";
                         }
                         if (dataSources.includes(jstreeData[node].id)) {
                             jstreeData[node].text = "<span style='color:blue'>" + jstreeData[node].text + strStats + "</span>";
@@ -342,7 +341,7 @@ var DataSourceManager = (function () {
                         dataType: "json",
                         success: function (result, _textStatus, _jqXHR) {
                             columns = result.headers;
-                            var tableObj = {[fileName]: columns};
+                            var tableObj = { [fileName]: columns };
                             self.currentConfig.currentDataSource.tables = tableObj;
                             self.currentConfig.currentDataSource.sampleData = result.data[0];
                             callbackSeries();
@@ -401,7 +400,7 @@ var DataSourceManager = (function () {
                                 success: function (data, _textStatus, _jqXHR) {
                                     self.currentDataSourceModel = data;
                                     self.currentSource = self.dataSource;
-                                    self.currentdabase = {type: sqlType, dbName: self.dataSource};
+                                    self.currentdabase = { type: sqlType, dbName: self.dataSource };
                                     self.currentConfig.currentDataSource.tables = data;
                                     callbackSeries();
                                 },
@@ -420,19 +419,16 @@ var DataSourceManager = (function () {
                             var dataTables = MappingColumnsGraph.getDatasourceTablesFromVisjsGraph();
                             for (var table in self.currentConfig.currentDataSource.tables) {
                                 var label = table;
-                                var color="blue"
+                                var color = "blue";
                                 if (dataTables.includes(table)) {
-
-
-                                    var nTriples =   self.statsMap[table]
-                                    var strStats = ""
+                                    var nTriples = self.statsMap[table];
+                                    var strStats = "";
                                     if (nTriples) {
-                                        color="green"
-                                        strStats = "<b> " + nTriples + " Triples</b>"
+                                        color = "green";
+                                        strStats = "<b> " + nTriples + " Triples</b>";
                                     }
 
-
-                                    label = "<span style='color:blue'>" + table + strStats+"</span>";
+                                    label = "<span style='color:blue'>" + table + strStats + "</span>";
                                 }
                                 jstreeData.push({
                                     id: table,
@@ -590,10 +586,8 @@ var DataSourceManager = (function () {
                 //Unmont app and free smallDialogDiv from events else react will take control of dialog
                 self.umountKGUploadApp();
                 $("#smallDialogDiv").dialog({
-                    open: function (event, ui) {
-                    },
-                    beforeClose: function () {
-                    },
+                    open: function (event, ui) {},
+                    beforeClose: function () {},
                 });
 
                 DataSourceManager.currentSlsvSource = MappingModeler.currentSLSsource;
@@ -629,10 +623,10 @@ var DataSourceManager = (function () {
             return;
         }
         if (!datasource.id) {
-            datasource = {id: datasource, name: datasource};
+            datasource = { id: datasource, name: datasource };
         }
-        DataSourceManager.currentConfig.databaseSources[datasource.id] = {name: datasource.name};
-        DataSourceManager.rawConfig.databaseSources[datasource.id] = {name: datasource.name};
+        DataSourceManager.currentConfig.databaseSources[datasource.id] = { name: datasource.name };
+        DataSourceManager.rawConfig.databaseSources[datasource.id] = { name: datasource.name };
         DataSourceManager.saveSlsvSourceConfig(function (err, result) {
             if (err) {
                 return alert(err);
@@ -732,65 +726,62 @@ var DataSourceManager = (function () {
         });
     };
 
-
     self.deleteTableMappings = function () {
-        var tableNode = MappingModeler.currentTreeNode
-        var table = tableNode.id
+        var tableNode = MappingModeler.currentTreeNode;
+        var table = tableNode.id;
         if (!confirm("delete all mappings for table" + table)) {
-            return
+            return;
         } else if (!confirm("are you sure ? this table mappings will be lost")) {
-            return
+            return;
         }
-        var nodesToRemove = []
-        var edgesToRemove = []
+        var nodesToRemove = [];
+        var edgesToRemove = [];
         MappingColumnsGraph.visjsGraph.data.nodes.forEach(function (node) {
-
             if (node.data && node.data.dataTable == table) {
-                nodesToRemove.push(node.id)
-                edgesToRemove = edgesToRemove.concat(MappingColumnsGraph.visjsGraph.network.getConnectedEdges(node.id))
+                nodesToRemove.push(node.id);
+                edgesToRemove = edgesToRemove.concat(MappingColumnsGraph.visjsGraph.network.getConnectedEdges(node.id));
             }
-
-        })
+        });
         MappingColumnsGraph.visjsGraph.data.nodes.remove(nodesToRemove);
         MappingColumnsGraph.visjsGraph.data.edges.remove(edgesToRemove);
-        MappingColumnsGraph.saveVisjsGraph()
+        MappingColumnsGraph.saveVisjsGraph();
         // reload table
         //   self.onDataSourcesJstreeSelect(null, {node: tableNode})
 
-        var text = MappingModeler.currentTreeNode.text.replace("style='color:blue'", "")
-        $("#" + self.dataSourcejstreeDivId).jstree('rename_node', MappingModeler.currentTreeNode, text);
-
-    }
+        var text = MappingModeler.currentTreeNode.text.replace("style='color:blue'", "");
+        $("#" + self.dataSourcejstreeDivId).jstree("rename_node", MappingModeler.currentTreeNode, text);
+    };
     /**
      *  retreives stats about each table
      *
      * @param source
      */
     self.getTriplesStats = function (source, callback) {
-        var fromStr = Sparql_common.getFromStr(source)
-        var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+        var fromStr = Sparql_common.getFromStr(source);
+        var query =
+            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
             "SELECT count(?sub) as ?triples ?table  " +
             fromStr +
             " WHERE {\n" +
             "  ?sub ?pred ?obj . ?sub <http://souslesens.org/KGcreator#mappingFile> ?table\n" +
-            "} group by ?table"
+            "} group by ?table";
 
         var url = Config.sources[source].sparql_server.url + "?format=json&query=";
-        UI.message("getting table triples stat...")
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {source: source}, function (err, result) {
-            UI.message("")
+        UI.message("getting table triples stat...");
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: source }, function (err, result) {
+            UI.message("");
             if (err) {
                 return callback(err);
             }
-            var statsMap = {}
+            var statsMap = {};
             result.results.bindings.forEach(function (item) {
-                statsMap[item.table.value] = item.triples.value
-            })
-            self.statsMap=statsMap
-            return callback(null, statsMap)
-        })
-    }
+                statsMap[item.table.value] = item.triples.value;
+            });
+            self.statsMap = statsMap;
+            return callback(null, statsMap);
+        });
+    };
     return self;
 })();
 

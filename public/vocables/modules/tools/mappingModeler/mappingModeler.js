@@ -135,13 +135,16 @@ var MappingModeler = (function () {
                     if(dataSourcesManager?.currentConfig?.lastUpdate && authentication?.currentUser?.identifiant){
                         if(dataSourcesManager.currentConfig.lastUpdate.user != authentication?.currentUser?.identifiant){
                             var currentTime = new Date();
-                            var lastUpdateDate = new Date(dataSourcesManager.currentConfig.lastUpdate.date);
-                            const diffMs = currentTime - lastUpdateDate;
-                            const diffSeconds = diffMs / 1000;
-                            if(diffSeconds<self.accessDelayTimeout){
-                                alert('Another user is already editing the mapping');
-                                window.location.href = '/';
+                            var lastUpdateDate = new Date(dataSourcesManager.currentConfig.lastUpdate?.date);
+                            if(currentTime && lastUpdateDate){
+                                const diffMs = currentTime - lastUpdateDate;
+                                const diffSeconds = diffMs / 1000;
+                                if(diffSeconds && diffSeconds<self.accessDelayTimeout){
+                                    alert('Sorrry another user is already editing the mapping,please come back later');
+                                    window.location.href = '/';
+                                }
                             }
+                           
 
                         }
                     }

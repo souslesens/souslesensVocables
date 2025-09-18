@@ -291,6 +291,26 @@ export const SourcesDialog = ({ edit, me, onClose, onSubmit, open, selectedSourc
                             }
                             value={source.imports}
                         />
+                        <FormGroup>
+                            <FormControlLabel
+                                control={
+                                    <Switch checked={source["editable" as keyof ServerSource] as boolean} key={"check-editable"} onChange={(event) => handleField("editable", event.target.checked)} />
+                                }
+                                key="editable"
+                                label="This source is editable?"
+                            />
+                            <FormControlLabel
+                                control={
+                                    <Switch
+                                        checked={source["published" as keyof ServerSource] as boolean}
+                                        key={"check-published"}
+                                        onChange={(event) => handleField("published", event.target.checked)}
+                                    />
+                                }
+                                key="published"
+                                label="This source was published?"
+                            />
+                        </FormGroup>
                         <div>
                             <Accordion>
                                 <AccordionSummary expandIcon={<ExpandMore />} aria-controls="source-sparql-content" id="source-sparql-header">
@@ -534,26 +554,6 @@ export const SourcesDialog = ({ edit, me, onClose, onSubmit, open, selectedSourc
                                 </AccordionDetails>
                             </Accordion>
                         </div>
-                        <FormGroup>
-                            <FormControlLabel
-                                control={
-                                    <Switch checked={source["editable" as keyof ServerSource] as boolean} key={"check-editable"} onChange={(event) => handleField("editable", event.target.checked)} />
-                                }
-                                key="editable"
-                                label="This source is editable?"
-                            />
-                            <FormControlLabel
-                                control={
-                                    <Switch
-                                        checked={source["published" as keyof ServerSource] as boolean}
-                                        key={"check-published"}
-                                        onChange={(event) => handleField("published", event.target.checked)}
-                                    />
-                                }
-                                key="published"
-                                label="This source was published?"
-                            />
-                        </FormGroup>
                     </Stack>
                 </DialogContent>
                 <DialogActions>

@@ -1461,21 +1461,21 @@ var MappingColumnsGraph = (function () {
         columns.forEach(function (column) {
             var columnClass = self.getColumnClass(column);
             if (edgesFromMap[column.id]) {
-                for (var edgeId in edgesFromMap) {
-                    var edge = edgesFromMap[edgeId];
-                    if (edge.from == column.id) {
-                        var edgeType = edge.data ? edge.data.id : null;
+                var edgesFrom = edgesFromMap[column.id];
+                edgesFrom.forEach(function (edge) {
+                        if (edge.from == column.id) {
+                            var edgeType = edge.data ? edge.data.id : null;
 
-                        if (edgeType && edgeType != "owl:Class" && edgeType != "rdf:type") {
-                            if (!linkedClasses[columnClass]) {
+                            if (edgeType && edgeType != "owl:Class" && edgeType != "rdf:type") {
+                                if (!linkedClasses[columnClass]) {
                                 linkedClasses[columnClass] = [];
                             }
                             edge.targetClass = self.getColumnClass(edge.to);
                             linkedClasses[columnClass].push(edge);
                         } else {
                         }
-                    }
-                }
+                       }
+                    });
             }
         });
 

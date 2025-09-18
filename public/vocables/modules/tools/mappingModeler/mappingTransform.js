@@ -362,13 +362,16 @@ var MappingTransform = (function () {
         var transforms = {};
         // checkedNodeAttrs work only for technical mappings we need to also add structural column mappings
         mappings.forEach(function (mapping) {
+            var mappingS= mapping.s.replaceAll("_$", "").replaceAll("_£", "").replaceAll("@", "");
+            var mappingO= mapping.o.replaceAll("_$", "").replaceAll("_£", "").replaceAll("@", "");
             // columnsMapping
             var mappingInColumnMapping = columnMappings.filter(function (item) {
                 return item.s == mapping.s && item.p == mapping.p && item.o == mapping.o;
             });
+
             if (mappingInColumnMapping.length > 0) {
                 checkedNodeAttrs.forEach(function (treeNodeId) {
-                    if (treeNodeId == mapping.s + "-->" + mapping.p + "-->" + mapping.o) {
+                    if (treeNodeId == mappingS + "-->" + mapping.p + "-->" + mappingO) {
                         filteredMappings.push(mapping);
                     }
                 });

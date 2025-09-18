@@ -192,6 +192,8 @@ var TriplesMaker = {
                     var object = null;
                     // if no matching item for mapping.o  and no fixed uri return
                     // the other cases need a value for the mapping object
+                    // no value case should implements blank nodes,virtual columns,rowIndex ... 
+                    // getColumnUri function handle all cases 
                     if (!line[mapping.o]) {
                         if (mapping.isConstantUri) {
                             // uri
@@ -199,8 +201,11 @@ var TriplesMaker = {
                         } else if (mapping.isConstantPrefixedUri) {
                             //prefix
                             object = mapping.o;
-                        } else {
-                            return;
+                        }else {
+                            object = TriplesMaker.getColumnUri(line, mapping.objColId, columnMappings, rowIndex, tableProcessingParams);
+                            if (!object) {
+                                return;
+                            }
                         }
                     } else if (columnMappings[mapping.objColId]) {
                         // if object is a column
@@ -266,7 +271,7 @@ var TriplesMaker = {
         if (columnParams.type == "URI") {
             // same fixed uri for all amappings
             return "<" + graphUri + util.formatStringForTriple(columnParams.id, true) + ">";
-        } else if (columnParams.uriType == "blankNode" || columnParams.uriType == "VirtualColumn") {
+        } else if (columnParams.uriType == "blankNode" || columnParams.type == "VirtualColumn") {
            /*
             don't work
             var value = dataItem[columnId];

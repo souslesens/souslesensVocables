@@ -86,6 +86,16 @@ var Lineage_properties = (function () {
                     });
                 },
             },
+
+            graphNode: {
+                label: "graph node",
+                action: function (_e) {
+                    // rajouter une condition pour tester sur object properties 
+                    // function graph node
+                    
+                },
+            },
+
         };
         if (MainController.currentTool == "lineage") {
             items.restrictions = {

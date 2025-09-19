@@ -1453,7 +1453,7 @@ var MappingColumnsGraph = (function () {
     };
 
     self.drawClassesGraph = function () {
-        var columns = self.getNodesOfType("Column");
+        var columns = self.getNodesOfType(MappingModeler.columnsMappingsObjects);
         var edgesFromMap = self.getEdgesMap("from");
         var classNodesMap = self.getNodesMap("Class");
         var linkedClasses = {};
@@ -1461,21 +1461,21 @@ var MappingColumnsGraph = (function () {
         columns.forEach(function (column) {
             var columnClass = self.getColumnClass(column);
             if (edgesFromMap[column.id]) {
-                for (var edgeId in edgesFromMap) {
-                    var edge = edgesFromMap[edgeId];
-                    if (edge.from == column.id) {
-                        var edgeType = edge.data ? edge.data.id : null;
+                var edgesFrom = edgesFromMap[column.id];
+                edgesFrom.forEach(function (edge) {
+                        if (edge.from == column.id) {
+                            var edgeType = edge.data ? edge.data.id : null;
 
-                        if (edgeType && edgeType != "owl:Class" && edgeType != "rdf:type") {
-                            if (!linkedClasses[columnClass]) {
+                            if (edgeType && edgeType != "owl:Class" && edgeType != "rdf:type") {
+                                if (!linkedClasses[columnClass]) {
                                 linkedClasses[columnClass] = [];
                             }
                             edge.targetClass = self.getColumnClass(edge.to);
                             linkedClasses[columnClass].push(edge);
                         } else {
                         }
-                    }
-                }
+                       }
+                    });
             }
         });
 
@@ -1530,11 +1530,22 @@ var MappingColumnsGraph = (function () {
         // self.drawGraphCanvas(self.graphDiv, classVisjsData);
     };
 
-    self.getNodesOfType = function (type, onlyIds) {
+    self.getNodesOfType = function (types, onlyIds) {
+        if(!types){
+            return [];
+        }
+        if(!Array.isArray(types)){
+            types = [types]
+        }
+        if(types.length==0){
+            return [];
+        }
+
         var nodes = self.visjsGraph.data.nodes.get();
         var filteredNodes = [];
         nodes.forEach(function (node) {
-            if (node.data && node.data.type == type) {
+            if (node?.data?.type && types.includes(node.data.type)) {
+
                 if (onlyIds) {
                     filteredNodes.push(node.id);
                 } else {
@@ -1558,11 +1569,18 @@ var MappingColumnsGraph = (function () {
     self.getEdgesMap = function (key) {
         var edges = self.visjsGraph.data.edges.get();
         var map = {};
+        var calculatedKey;
         edges.forEach(function (edge) {
             if (!key || key == "id") {
-                map[edge.id] = edge;
+                calculatedKey = edge.id
+                
+            }else{
+                calculatedKey = edge[key]
             }
-            map[edge[key]] = edge;
+            if(!map[calculatedKey]){
+                map[calculatedKey]=[];
+            }
+            map[calculatedKey].push(edge);
         });
         return map;
     };

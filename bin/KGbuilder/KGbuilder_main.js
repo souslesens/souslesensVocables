@@ -120,7 +120,7 @@ var KGbuilder_main = {
                                 var tableInfos = {
                                     table: firstColumn.dataTable,
                                 };
-                                if (firstColumn.datasource) {
+                                if (tableProcessingParams?.sourceInfos?.databaseSources && tableProcessingParams?.sourceInfos?.databaseSources[firstColumn?.datasource]) {
                                     // database
                                     tableInfos.dbID = firstColumn.datasource;
                                 } else {

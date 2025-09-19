@@ -3,6 +3,7 @@ const async = require("async");
 const fs = require("fs");
 
 var MappingParser = {
+    columnsMappingsObjects: ["Column", "RowIndex", "VirtualColumn"],
     getMappingsData: function (source, callback) {
         var mappingGraphDir = path.join(__dirname, "../../data/graphs/");
         var file = mappingGraphDir + "mappings_" + source + "_ALL.json";
@@ -62,7 +63,9 @@ var MappingParser = {
                     if (toNodeData.type == "Class") {
                         mappings = MappingParser.getTypeAndLabelMappings(fromNodeData, toNodeData);
                         columnMappings = columnMappings.concat(mappings);
-                    } else if (toNodeData.type == "Column") {
+                    } 
+                    // not just column check all columnMappingsObjects
+                    else if (MappingParser.columnsMappingsObjects.includes(toNodeData.type)) {
                         mappings = MappingParser.getColumnToColumnMappings(fromNodeData, toNodeData, edge);
                         columnMappings = columnMappings.concat(mappings);
                     } else {

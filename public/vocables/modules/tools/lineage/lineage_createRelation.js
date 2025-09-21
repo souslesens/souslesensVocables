@@ -6,7 +6,7 @@ import common from "../../shared/common.js";
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 import Lineage_sources from "./lineage_sources.js";
 import CreateRestriction_bot from "../../bots/createRestriction_bot.js";
-
+import UI from "../../shared/UI.js";
 /**
  * @module Lineage_createRelation
  * @description Module for creating and managing relationships between ontology nodes.
@@ -435,57 +435,7 @@ var Lineage_createRelation = (function () {
                     NodeInfosWidget.showNodeInfos(self.currentPropertiesTreeNode.data.source, self.currentPropertiesTreeNode, "mainDialogDiv", null, function () {
                         //  $("#mainDialogDiv").parent().css("z-index", 1);
                       
-                        (function placeMainNearExisting(leftSel="#smallDialogDiv", rightSel="#mainDialogDiv"){
-                        const gap=12, ww=$(window).width(), wh=$(window).height();
-
-                        // s'assurer que ce sont des dialogs
-                        $(leftSel).dialog({modal:false,draggable:true,resizable:true,appendTo:"body"});
-                        $(rightSel).dialog({modal:false,draggable:true,resizable:true,appendTo:"body"});
-
-                        const $L=$(leftSel).closest(".ui-dialog");
-                        let w=$L.outerWidth(), h=$L.outerHeight();
-                        const off=$L.offset()||{left:gap,top:gap};
-
-                        // ne pas dépasser l'écran en taille
-                        w=Math.min(w, ww-gap*2);
-                        h=Math.min(h, wh-gap*2);
-                        $(rightSel).dialog("option",{width:w,height:h});
-
-                        // espaces disponibles autour de l'existante
-                        const spaceR = ww - (off.left + $L.outerWidth()) - gap;
-                        const spaceL = off.left - gap;
-                        const spaceB = wh - (off.top + $L.outerHeight()) - gap;
-
-                        // choisir l’emplacement qui ne déborde pas
-                        let pos;
-                        if (spaceR >= w) {
-                            pos = { my:"left top",  at:`right+${gap} top`, of:$L };
-                        } else if (spaceL >= w) {
-                            pos = { my:"right top", at:`left-${gap} top`,  of:$L };
-                        } else {
-                            // Aucun côté ne peut contenir la largeur demandée :
-                            // => garder la TAILLE actuelle et FORCER la disposition :
-                            //    existing (leftSel) à DROITE, main (rightSel) à GAUCHE.
-                            const top = Math.min(Math.max(gap, off.top), wh - gap - h);
-
-                            // existing -> bord droit
-                            $(leftSel).dialog("option", "position", {
-                                my:"right top", at:`right-${gap} top+${top}`, of: window
-                            });
-
-                            // main -> bord gauche
-                            $(rightSel).dialog("option", "position", {
-                                my:"left  top", at:`left+${gap}  top+${top}`, of: window
-                            });
-                            }
-
-
-                        $(rightSel).dialog("option","position",pos);
-
-                        // empêcher de sortir ensuite lors du drag/resize
-                        try{$L.draggable("option","containment","window");}catch(e){}
-                        try{$(rightSel).closest(".ui-dialog").draggable("option","containment","window");}catch(e){}
-                        })();
+                        UI.SideBySideTwoWindows("#smallDialogDiv","#mainDialogDiv");
                        
                     });
                 },

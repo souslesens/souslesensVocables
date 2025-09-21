@@ -160,47 +160,8 @@ var UI = (function () {
     };
 
 
-    self.placeMainDialogNearExisting = function (openedWindow, existingWindow) {
-        const gap = 12, windowWidth = $(window).width(), windowHeight = $(window).height();
 
 
-        $(existingWindow + "," + openedWindow).each(function () {
-            $(this).dialog({ modal:false, draggable:true, resizable:true, appendTo:"body" });
-        });
-
-        const testExistingWindow = $(existingWindow).closest(".ui-dialog");
-        if (!testExistingWindow.length) return;
-
-        const widthExistingWindow = testExistingWindow.width(), heightExistingWindow = testExistingWindow.height();
-        const windowPosition = testExistingWindow.offset() || { left: gap, top: gap };
-        const windowOuterWidth = testExistingWindow.outerWidth();
-
-        // same size as existingWindow
-        $(openedWindow).dialog("option", { width: widthExistingWindow, height: heightExistingWindow });
-
-        // available screen space
-        const spaceRight = testExistingWindow - (windowPosition.left + windowOuterWidth) - gap;
-        const spaceLeft = windowPosition.left - gap;
-
-        // top value clamped to keep the element visible
-        const top = Math.min(Math.max(gap, windowPosition.top), wh - gap - heightExistingWindow);
-
-        if (spaceR >= widthExistingWindow) {
-            // place openedWindow at right side of de existing window
-            $(openedWindow).dialog("option", "position", { my:"left top", at:`right+${gap} top`, of:$E });
-        } else if (spaceL >= widthExistingWindow) {
-            // place openedWindow at lef side of de existing window
-            $(openedWindow).dialog("option", "position", { my:"right top", at:`left-${gap} top`, of:$E });
-        } else {
-            // no side available: preserve size, place existing on the right and main on the left
-            $(existingWindow).dialog("option", "position", { my:"right top", at:`right-${gap} top+${top}`, of:window });
-            $(openedWindow)    .dialog("option", "position", { my:"left  top", at:`left+${gap}  top+${top}`, of:window });
-        }
-
-        // containment to prevent dragging outside the screen
-        try { $(existingWindow).closest(".ui-dialog").draggable("option","containment","window"); } catch(e){}
-        try { $(openedWindow).closest(".ui-dialog").draggable("option","containment","window"); } catch(e){}
-   };
 
 
 
@@ -264,6 +225,47 @@ var UI = (function () {
         }
         self.ApplySelectedTabCSS(buttonClicked, tabGroup);
     };
+
+    self.SideBySideTwoWindows = function (existingWindow, newWindow) {
+        const gap = 12;
+        const windowWidth = $(window).width();
+        const windowHeight = $(window).height();
+
+
+        $(existingWindow).dialog({ modal:false, draggable:true, resizable:true, appendTo:"body" });
+        $(newWindow).dialog({ modal:false, draggable:true, resizable:true, appendTo:"body" });
+
+        const existingWindowConvert = $(existingWindow).closest(".ui-dialog");
+        const newWindowConvert = $(newWindow).closest(".ui-dialog");
+        let widthexistingWindow = existingWindowConvert.outerWidth(),  heightExistingWindow = existingWindowConvert.outerHeight();
+        let widthNewWindow = newWindowConvert.outerWidth(),  hR = newWindowConvert.outerHeight();
+
+
+        const maxEachW = Math.max(200, Math.floor((windowWidth - 3*gap) / 2)); 
+        widthexistingWindow = Math.min(widthexistingWindow, maxEachW);
+        widthNewWindow = Math.min(widthNewWindow, maxEachW);
+        const maxH = windowHeight - 2*gap;
+        const targetH = Math.min(Math.max(200, Math.min(heightExistingWindow, hR)), maxH);
+
+        $(existingWindow).dialog("option", { width: widthexistingWindow, height: targetH });
+        $(newWindow).dialog("option",{ width: widthNewWindow, height: targetH });
+
+  
+        const offL = existingWindowConvert.offset() || { left: gap, top: gap };
+        const top = Math.min(Math.max(gap, offL.top), windowHeight - gap - targetH);  
+        $(newWindow).dialog("option", "position", {
+            my: "left top", at: `left+${gap} top+${top}`, of: window
+        });
+        $(existingWindow).dialog("option", "position", {
+            my: "right top", at: `right-${gap} top+${top}`, of: window
+        });
+
+        //  Prevent from going outside during drag/resize
+        try { existingWindowConvert.draggable("option","containment","window"); } catch(e){}
+        try { newWindowConvert.draggable("option","containment","window"); } catch(e){}
+
+    };
+
 
     //keep
     self.setSlsvCssClasses = function (callback) {

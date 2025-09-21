@@ -1,6 +1,4 @@
 import common from "../../shared/common.js";
-import KGcreator from "../KGcreator/KGcreator.js";
-import KGcreator_graph from "../KGcreator/KGcreator_graph.js";
 import VisjsGraphClass from "../../graph/VisjsGraphClass.js";
 import MappingModeler from "./mappingModeler.js";
 import TripleFactory from "./tripleFactory.js";
@@ -88,6 +86,9 @@ var MappingsDetails = (function () {
             parent: "#",
         });
 
+
+
+        var allreadyDefinedNodes=[]// nodes that are allready defined that need to be saved together after running isColumnAllreadyMappedInAnotherTable
         nodes.forEach(function (node) {
             if (node.data.dataTable !== table) {
                 return;
@@ -107,6 +108,7 @@ var MappingsDetails = (function () {
                 var definitionTable = self.isColumnAllreadyMappedInAnotherTable(node);
                 var color = "#cb9801";
                 if (definitionTable) {
+                    allreadyDefinedNodes.push(node)
                     definitionTable = "<font color='#eab3b3'><i> def: " + definitionTable + "</i></font>";
                     color = "#eab3b3";
                 } else definitionTable = "";
@@ -126,17 +128,19 @@ var MappingsDetails = (function () {
 
                 var color = "";
                 for (var key in node.data) {
-                    if (predicates[key]) {
-                        if (self.colorsMap[key]) {
-                            color = self.colorsMap[key];
-                        } else {
-                            color = "#3339ff";
+                    if( node.data[key]) {
+                        if (predicates[key]) {
+                            if (self.colorsMap[key]) {
+                                color = self.colorsMap[key];
+                            } else {
+                                color = "#3339ff";
+                            }
+                            jstreeData.push({
+                                id: node.id + "|" + key + "|" + node.data[key],
+                                text: "<span style='color: " + color + "'>" + key + "</span>  " + node.data[key],
+                                parent: node.id,
+                            });
                         }
-                        jstreeData.push({
-                            id: node.id + "|" + key + "|" + node.data[key],
-                            text: "<span style='color: " + color + "'>" + key + "</span>  " + node.data[key],
-                            parent: node.id,
-                        });
                     }
                 }
 
@@ -211,6 +215,11 @@ var MappingsDetails = (function () {
                 },
             });
         });
+
+
+        if(allreadyDefinedNodes.length>0){
+            self.savejsTreeNodesToVisjsGraph(allreadyDefinedNodes)
+        }
 
         return jstreeData;
     };
@@ -335,14 +344,15 @@ var MappingsDetails = (function () {
 
         if (isColumnAllreadyMapped) {
             html += "<tr><td></td><td> column already defined in table " + isColumnAllreadyMapped + "</td></tr>";
-        } else {
+        }else {
             html += `<tr></tr>`;
             html += `<tr><td>URI syntax*</td><td><select id='columnDetails-UriType' onchange='MappingsDetails.onChangeUriType()' style='padding:6px 6px'> </select>  </td></tr>`;
-            html += `<tr><td id='columnDetails-baseUri-label'>Base URI</td><td><input id='columnDetails-baseUri' style='width:300px;    background-color: #eee;margin-right:15px;'> </input>  </td><td id='columnDetails-prefixURI-label' style='margin-left:10px;'>Prefix URI</td><td><input id='columnDetails-prefixURI' style='width:300px;    background-color: #eee;margin-left:15px;'> </input>  </td></tr>`;
+            html += `<tr><td id='columnDetails-baseUri-label'>Base URI</td><td><input id='columnDetails-baseUri' style='width:300px;    background-color: #eee;margin-right:15px;'> </input>  </td><td id='columnDetails-prefixURI-label' style='margin-left:10px;'>URI prefix</td><td><input id='columnDetails-prefixURI' style='width:300px;    background-color: #eee;margin-left:15px;'> </input>  </td></tr>`;
             html += `<tr><td>rdf:type*</td><td><select id='columnDetails-rdfType' style='padding:6px 6px'> </select> </td></tr> `;
 
             html += `<tr><td>rdfs:label column</td><td><select id='columnDetails-rdfsLabel' style='padding:6px 6px'> </select> </td></tr>`;
         }
+
         html += `<td><button class='slsv-button-1' id='class-datatype' style='padding:6px 6px;margin:0px;' onclick='MappingsDetails.showSpecificMappingsBot("${column.id}")'> More mappings... </button> </td>  `;
         html += `<td><button class='slsv-button-1' id='class-datatype' style='padding:6px 6px;margin:0px;' onclick='MappingsDetails.saveMappingsDetailsToVisjsGraph("${column.id}");MappingsDetails.afterSaveColumnTechnicalMappingsDialog() '> Save </button> </td>  `;
 
@@ -431,6 +441,26 @@ var MappingsDetails = (function () {
         MappingColumnsGraph.saveVisjsGraph(function () {});
     };
 
+
+    self.savejsTreeNodesToVisjsGraph = function (nodes) {
+        if(nodes.length==0)
+            return;
+        nodes.forEach(function(node){
+            var currentGraphNode = MappingColumnsGraph.visjsGraph.data.nodes.get(node.id);
+            currentGraphNode.data.uriType=node.data.uriType
+            currentGraphNode.data.prefixURI = node.data.prefixURI;
+            currentGraphNode.data.baseURI= node.data.baseURI
+            MappingColumnsGraph.updateNode(currentGraphNode);
+
+        })
+        MappingColumnsGraph.saveVisjsGraph(function () {});
+
+
+    };
+
+
+
+
     /**
      * Deletes a specific mapping from the Vis.js graph node.
      * It identifies the mapping based on the node's ID and removes the corresponding property
@@ -480,6 +510,7 @@ var MappingsDetails = (function () {
         MappingColumnsGraph.saveVisjsGraph(function () {
             self.drawDetailedMappingsGraph();
             self.showDetailedMappingsTree();
+            if(graphNode)
             self.showColumnTechnicalMappingsDialog("detailedMappings_techDetailsDiv", graphNode, function () {});
         });
     };
@@ -974,7 +1005,7 @@ var MappingsDetails = (function () {
         edges.forEach(function (edge) {
             if (edge.from == node.id) {
                 var nodeTo = MappingColumnsGraph.visjsGraph.data.nodes.get(edge.to);
-                if (nodeTo.data.type == "Class") {
+                if (nodeTo && nodeTo.data.type == "Class") {
                     edge.label = node.data.rdfType == "owl:Class" ? "subClassOf" : "a";
                     edge.data.type = node.data.rdfType == "owl:Class" ? "rdfs:subClassOf" : "rdf:type";
                     MappingColumnsGraph.updateEdge(edge);
@@ -1039,7 +1070,21 @@ var MappingsDetails = (function () {
                     if (sameClassColumns && sameClassColumns.length > 0) {
                         sameClassColumns.forEach(function (column2) {
                             var table2 = column2.data.dataTable;
-                            if (column2.data.uriType && table2 != columnNode.data.dataTable) table = table2;
+                            if (column2.data.isMainColumn && table2 != columnNode.data.dataTable) {
+                                columnNode.data.definedInColumn=column2.id
+                                table = table2;
+
+                            }else{
+                              /*  if(columnNode.data.uriType) {
+                                    delete columnNode.data.uriType
+                                    delete columnNode.data.baseURI
+                                    delete columnNode.data.prefixURI
+                                    delete columnNode.data.rdfType
+
+
+                                }*/
+
+                            }
                         });
                     }
                 }
@@ -1047,6 +1092,19 @@ var MappingsDetails = (function () {
         }
         return table;
     };
+
+    self.setIsMainColumnKey=function(){
+        MappingColumnsGraph.visjsGraph.data.nodes.forEach(function(node){
+            if( node.data && node.data.type=="Column" && node.data.rdfsLabel){
+                node.data.isMainColumn=true
+            }
+        })
+    }
+
+
+
+
+
     return self;
 })();
 

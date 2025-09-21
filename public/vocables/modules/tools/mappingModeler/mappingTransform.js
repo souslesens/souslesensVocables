@@ -13,26 +13,7 @@ import UIcontroller from "./uiController.js";
 var MappingTransform = (function () {
     var self = {};
 
-    /**
-     * Generates the SLS mappings from the Vis.js graph and displays them in the right panel of the UI.
-     * The mappings are formatted as JSON and placed inside a textarea for easy access and copying.
-     *
-     * @function
-     * @name generateSLSmappings
-     * @memberof module:MappingTransform
-     * @returns {void}
-     */
-    self.generateSLSmappings = function () {
-        var json = MappingTransform.getSLSmappingsFromVisjsGraph();
-        UIcontroller.activateRightPanel("generic");
 
-        $("#mappingModeler_genericPanel").html(
-            '<button class="w3-button nodesInfos-iconsButtons " style="font-size: 10px;margin-left:7px;" onclick=" MappingModeler.copyKGcreatorMappings()"><input type="image" src="./icons/CommonIcons/CopyIcon.png"></button>' +
-                ' <textarea id="mappingModeler_infosTA" style="display: block;width:80%;height: 700px;overflow: auto;"> </textarea>',
-        );
-        //    $("#smallDialogDiv").dialog("open");
-        $("#mappingModeler_infosTA").val(JSON.stringify(json, null, 2));
-    };
 
     /**
      * Placeholder function for generating R2ML mappings. Currently displays an alert.

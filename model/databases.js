@@ -192,7 +192,7 @@ class DatabaseModel {
             console.log(`Connexion fermée pour la base ${databaseId}`);
         }
         await this.getConnection(databaseId);
-
+        console.log(`Connexion ouverte pour la base ${databaseId}`);
         if (callback) {
             callback();
         }
@@ -251,9 +251,15 @@ class DatabaseModel {
      * @returns {Promise<any[]>} query result
      */
     recurseBatchSelect = async (connection, databaseId, tableName, { values = [], select = "*", offset = 0, limit = 1000, noRecurs = false }) => {
-        const columns = await connection(tableName).columnInfo();
-        const columnsKeys = Object.keys(columns);
-        const res = await connection.select(select).from(tableName).orderBy(columnsKeys).limit(limit).offset(offset);
+        var res=null
+        if(select=="*") {
+           const columns = await connection(tableName).columnInfo();
+           const columnsKeys = Object.keys(columns);
+            res = await connection.select(select).from(tableName).orderBy(columnsKeys).limit(limit).offset(offset);
+       }
+       else{
+            res = await connection.select(select).from(tableName).limit(limit).offset(offset);
+       }
 
         const concat = values.concat(res);
 

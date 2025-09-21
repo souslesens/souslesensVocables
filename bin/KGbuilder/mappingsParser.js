@@ -27,6 +27,7 @@ var MappingParser = {
         var nodesMap = {};
         var columnsMap = {};
 
+
         mappingData.edges.forEach(function (edge) {
             if (!edgesFromMap[edge.from]) {
                 edgesFromMap[edge.from] = [];
@@ -37,7 +38,7 @@ var MappingParser = {
             if (node.data.type == "Class") {
                 nodesMap[node.id] = node;
             }
-            if (!table || node.data.dataTable == table) {
+            if (true || !table || node.data.dataTable == table) {
                 nodesMap[node.id] = node;
                 if (node.data.type == "Column") {
                     columnsMap[node.id] = node.data;
@@ -62,11 +63,8 @@ var MappingParser = {
                     if (toNodeData.type == "Class") {
                         mappings = MappingParser.getTypeAndLabelMappings(fromNodeData, toNodeData);
                         columnMappings = columnMappings.concat(mappings);
-                    } else if (toNodeData.type == "Column") {
-                        mappings = MappingParser.getColumnToColumnMappings(fromNodeData, toNodeData, edge);
-                        columnMappings = columnMappings.concat(mappings);
                     } else {
-                        var x = 3;
+
                     }
                 });
             }
@@ -84,6 +82,7 @@ var MappingParser = {
 
         return callback(null, columnsMap);
     },
+
 
     isConstantUri: function (str) {
         if (str && str.startsWith("http")) {
@@ -126,16 +125,24 @@ var MappingParser = {
         return mappings;
     },
 
-    getColumnToColumnMappings: function (fromNodeData, toNodeData, edge) {
-        var mappings = [];
+    getColumnToColumnMappings: function (mappingData,table,filterMappingIds) {
+        var columnsMap = {}
+        var edgeMap = {};
+        mappingData.nodes.forEach(function (node) {
+            if (node.data && node.data.type == "Column" && node.data.dataTable == table) {
+                columnsMap[node.id] = node
 
-        mappings.push({
-            s: fromNodeData.id,
-            p: edge.data.id,
-            o: toNodeData.id,
-            objColId: edge.to,
-        });
-        return mappings;
+            }
+        })
+
+        mappingData.edges.forEach(function (edge) {
+            if (columnsMap[edge.from] && columnsMap[edge.to] && filterMappingIds.indexOf(edge.id)>-1) {
+               var isRestriction=columnsMap[edge.from].data.rdfType=="owl:Class" && columnsMap[edge.to].data.rdfType=="owl:Class"
+                edge.isRestriction=isRestriction
+                edgeMap[edge.id]=edge;
+            }
+        })
+        return edgeMap;
     },
     getOtherPredicates: function (columnData) {
         var mappings = [];

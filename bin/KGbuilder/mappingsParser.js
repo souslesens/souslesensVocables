@@ -130,7 +130,7 @@ var MappingParser = {
         var columnsMap = {}
         var edgeMap = {};
         mappingData.nodes.forEach(function (node) {
-            if (node.data && node.data.type == "Column" && node.data.dataTable == table) {
+            if (node.data && MappingParser.columnsMappingsObjects.includes(node?.data?.type) && node.data.dataTable == table) {
                 columnsMap[node.id] = node
 
             }

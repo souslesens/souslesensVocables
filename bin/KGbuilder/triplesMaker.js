@@ -76,31 +76,6 @@ var TriplesMaker = {
             })
 
 
-<<<<<<< HEAD
-                                KGbuilder_triplesWriter.writeTriples(
-                                    batchTriples,
-                                    tableProcessingParams.sourceInfos.graphUri,
-                                    tableProcessingParams.sourceInfos.sparqlServerUrl,
-                                    function (err, result) {
-                                        if (err) {
-                                            return callbackEach(err);
-                                        }
-                                        totalTriplesCount += batchTriples.length;
-                                        return callbackEach();
-                                    },
-                                );
-                            }
-                        });
-                    },
-                    function (err) {
-                        return callback(err,  { sampleTriples: sampleTriples, totalTriplesCount: totalTriplesCount }
-
-                        );
-                    },
-                );
-            });
-=======
->>>>>>> origin/CF/2025_09_17
         } else if (tableInfos.dbID) {
             KGbuilder_socket.message(options.clientSocketId, "loading data from database table " + tableInfos.table, false);
 
@@ -145,7 +120,7 @@ var TriplesMaker = {
                             limit: limitSize,
                             noRecurs: true,// Boolean(options.sampleSize),
                             offset: offset,
-                            select: select
+                            //select: select
                         })
                             .then((result) => {
 
@@ -301,7 +276,6 @@ var TriplesMaker = {
                     // no value case should implements blank nodes,virtual columns,rowIndex ... 
                     // getColumnUri function handle all cases 
                     if (!line[mapping.o]) {
-<<<<<<< HEAD
                         if (mapping.isConstantUri) {
                             // uri
                             object = "<" + mapping.o + ">";
@@ -313,15 +287,6 @@ var TriplesMaker = {
                             if (!object) {
                                 return;
                             }
-=======
-                        if (mapping.isConstantUri) {// uri
-                            object = "<" + mapping.o + ">"
-                        } else if (mapping.isConstantPrefixedUri) {//prefix
-                            object = mapping.o
-                        } else {
-                            return;
-
->>>>>>> origin/CF/2025_09_17
                         }
                     } else if (columnMappings[mapping.objColId]) {// if object is a column
                         object = TriplesMaker.getColumnUri(line, mapping.objColId, columnMappings, rowIndex, tableProcessingParams)
@@ -412,6 +377,9 @@ var TriplesMaker = {
      */
     getColumnUri: function (dataItem, columnId, columnMappings, rowIndex, tableProcessingParams) {
         var columnParams = columnMappings[columnId]
+        if(!columnParams){
+            return null;
+        }
         //substitute column params to those of the definedInColumn for the same class if !columnParams.isMainColumn
         if(!columnParams.isMainColumn &&  columnParams.definedInColumn){
            var definedInColumn=tableProcessingParams.allColumnsMappings[columnParams.definedInColumn]
@@ -421,39 +389,6 @@ var TriplesMaker = {
             columnParams.baseURI=definedInColumn.baseURI
             columnParams.prefixURI=definedInColumn.prefixURI
 
-<<<<<<< HEAD
-        if (columnParams.type == "URI") {
-            // same fixed uri for all amappings
-            return "<" + graphUri + util.formatStringForTriple(columnParams.id, true) + ">";
-        } else if (columnParams.uriType == "blankNode" || columnParams.type == "VirtualColumn") {
-           /*
-            don't work
-            var value = dataItem[columnId];
-
-            if (!value) {
-                return
-            }
-            value = columnId + ":" + value
-            var bNode = tableProcessingParams.blankNodesMap[value]
-            */
-
-             var bNode;
-             var value;
-            // blank nodes uriType should have an associated data column so a value
-            if(columnParams.uriType == "blankNode"){
-                  value = dataItem[columnParams.id];
-                  if(!value) {
-                        return
-                  }
-                  value = columnId + ":" + value
-                bNode = tableProcessingParams.blankNodesMap[value]
-            }else{
-                // virtual columns hasn't associated data column so we use rowIndex as value with the id of the virtual column
-                value = columnParams.id + ":" +rowIndex;
-                bNode = tableProcessingParams.blankNodesMap[value]
-
-            }
-=======
         }
 
         var graphUri = tableProcessingParams.sourceInfos.graphUri
@@ -491,7 +426,6 @@ var TriplesMaker = {
             }
 
 
->>>>>>> origin/CF/2025_09_17
             if (bNode) {
                 return bNode;
             } else {
@@ -550,22 +484,6 @@ var TriplesMaker = {
             return null;
         }
 
-<<<<<<< HEAD
-        var baseUri = columnParams.baseURI || graphUri;
-        if (!baseUri.endsWith("/")) {
-            baseUri += "/";
-        }
-        //var prefix = columnParams.prefixURI ? (columnParams.prefixURI + "-") : ""
-        // this force using '-' as prefix seperator, 
-        // new version authorize others separators caracters if there is already one
-        var prefix = columnParams.prefixURI ? (columnParams.prefixURI ) : ""
-        if(prefix){
-            if(!util.hasURISeparator(prefix)){
-                prefix += '-'
-            }
-        }
-=======
->>>>>>> origin/CF/2025_09_17
 
         var baseUri = columnParams.baseURI || graphUri
         if (!baseUri.endsWith("/")) {

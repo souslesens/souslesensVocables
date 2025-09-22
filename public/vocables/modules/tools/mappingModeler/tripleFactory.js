@@ -402,7 +402,7 @@ var TripleFactory = (function () {
 
         var columnsMap = {}
         nodes.forEach(function (node) {
-            if (node.data && node.data.type == "Column" && node.data.dataTable == table) {
+            if (node.data && MappingModeler.columnsMappingsObjects.includes(node?.data?.type) && node.data.dataTable == table) {
                 columnsMap[node.id] = node
                 treeData.push({
                     id: node.id,

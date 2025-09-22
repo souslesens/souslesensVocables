@@ -1,4 +1,5 @@
 import knex from "knex";
+import sparqljs from "sparqljs";
 
 const RDF_FORMATS_MIMETYPES = {
     json: "application/sparql-results+json",
@@ -94,6 +95,30 @@ const sleep = (sec) => {
 };
 
 /**
+ * Add a FROM clause to a SPARQL query
+ *
+ * @param {string} sparqlQuery - a SPARQL query
+ * @param {string[]} graphUris - a list of graph URI
+ * @param {boolean} replaceFrom - true: replace all FROM clauses. false: append a FROM clause
+ * @returns {string} a SPARQL query with a FORM clause
+ */
+const addFromsToSparqlQuery = (sparqlQuery, graphUris, replaceFrom = false) => {
+    const parser = new sparqljs.Parser();
+    const generator = new sparqljs.Generator();
+
+    const parsedQuery = parser.parse(sparqlQuery);
+    const emptyFrom = { default: [], named: [] };
+    const from = replaceFrom ? emptyFrom : parsedQuery.from || emptyFrom;
+
+    graphUris.forEach((graphUri) => {
+        from.default.push({ termType: "NamedNode", value: graphUri });
+    });
+    parsedQuery.from = from;
+
+    return generator.stringify(parsedQuery);
+};
+
+/**
  * Convert a string to a valid JavaScript type
  *
  * @param {string} value – The value to convert
@@ -161,4 +186,4 @@ const cleanupConnection = (connection) => {
     return connection.destroy && connection.destroy();
 };
 
-export { cleanupConnection, convertType, chunk, getKnexConnection, redoIfFailure, redoIfFailureCallback, RDF_FORMATS_MIMETYPES, sleep };
+export { cleanupConnection, convertType, chunk, getKnexConnection, redoIfFailure, redoIfFailureCallback, RDF_FORMATS_MIMETYPES, sleep, addFromsToSparqlQuery };

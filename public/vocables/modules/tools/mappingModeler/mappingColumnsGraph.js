@@ -179,10 +179,17 @@ var MappingColumnsGraph = (function () {
 
         var visjsData = {nodes: [], edges: []};
         var visjsNode = newResource;
+
+
         if (newResource.data.type == "Class") {
-            if (!self.objectIdExistsInGraph(newResource.data.id)) {
+            var tableWithSameClass = MappingsDetails.isColumnAllreadyMappedInAnotherTable(self.currentGraphNode, newResource.data.id)
+            if (!tableWithSameClass) {
                 visjsData.nodes.push(visjsNode);
+            } else {
+                self.visjsGraph.data.nodes.update({id: newResource.id, hidden: false});
             }
+            self.saveVisjsGraph()
+
         } else {
             visjsData.nodes.push(visjsNode);
         }
@@ -192,9 +199,10 @@ var MappingColumnsGraph = (function () {
                 var existingNodes = self.visjsGraph.getExistingIdsMap();
                 if (!existingNodes[newResource.id]) {
                     self.visjsGraph.data.nodes.add(visjsData.nodes);
+
                 }
             } else {
-                self.addNode(visjsData.nodes);
+                self.addNodes(visjsData.nodes);
             }
 
             //  self.visjsGraph.network.fit();
@@ -866,9 +874,7 @@ var MappingColumnsGraph = (function () {
         // Initialisation of Config if there isn't
 
 
-       // MappingsDetails.setIsMainColumnKey()
-
-
+        // MappingsDetails.setIsMainColumnKey()
 
 
         if (!DataSourceManager.rawConfig || Object.keys(DataSourceManager.rawConfig).length == 0) {
@@ -1029,21 +1035,36 @@ var MappingColumnsGraph = (function () {
     /**
      * Adds a new node to the Vis.js graph and saves the updated graph.
      * @function
-     * @name addNode
+     * @name addNodes
      * @memberof module:MappingColumnsGraph
      * @param {Object} node - The node to be added.
      * @returns {void}
      */
-    self.addNode = function (node, callback) {
-        if (!node) {
+    self.addNodes = function (nodes, callback) {
+        if (!nodes) {
             return;
         }
-        self.visjsGraph.data.nodes.add(node);
-        self.saveVisjsGraph(function () {
-            if (callback) {
-                callback();
+        if (!Array.isArray(nodes)) {
+            nodes = [nodes]
+        }
+
+        var save = false;
+        var existingNodeIds = self.visjsGraph.data.nodes.getIds()
+        nodes.forEach(function (node) {
+            if (existingNodeIds.indexOf(node.id) > -1) {
+                return;
             }
-        });
+            save = true;
+            self.visjsGraph.data.nodes.add(node);
+
+        })
+        if (save) {
+            self.saveVisjsGraph(function () {
+                if (callback) {
+                    callback();
+                }
+            });
+        }
     };
 
     /**

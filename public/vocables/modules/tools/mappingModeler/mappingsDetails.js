@@ -1064,31 +1064,40 @@ var MappingsDetails = (function () {
         }
     };
 
-    self.isColumnAllreadyMappedInAnotherTable = function (columnNode) {
+    self.isColumnAllreadyMappedInAnotherTable = function (columnNode,columnClass) {
         var table = false;
 
         var columnsClassMap = {};
-        var columnClass = MappingColumnsGraph.getColumnClass(columnNode);
+       if(!columnClass)
+           columnClass=   MappingColumnsGraph.getColumnClass(columnNode);
         if (columnClass) {
+
             MappingColumnsGraph.visjsGraph.data.nodes.get().forEach(function (node) {
                 if (node.data && node.data.type == "Class" && node.data.id == columnClass) {
                     var sameClassColumns = MappingColumnsGraph.getClassColumns(node);
                     if (sameClassColumns && sameClassColumns.length > 0) {
+                        var stop=false
                         sameClassColumns.forEach(function (column2) {
+                            if(stop)
+                                return;
                             var table2 = column2.data.dataTable;
                             if (column2.data.isMainColumn && table2 != columnNode.data.dataTable) {
-                                columnNode.data.definedInColumn=column2.id
+                                columnNode.data.definedInColumn=column2.id;
+                                stop=true;
+                                /*
+                                  delete columnNode.data.uriType
+                                  delete columnNode.data.baseURI
+                                  delete columnNode.data.prefixURI
+                                  delete columnNode.data.rdfType
+
+
+                              }*/
+
                                 table = table2;
 
                             }else{
-                              /*  if(columnNode.data.uriType) {
-                                    delete columnNode.data.uriType
-                                    delete columnNode.data.baseURI
-                                    delete columnNode.data.prefixURI
-                                    delete columnNode.data.rdfType
+                                columnNode.data.isMainColumn=true
 
-
-                                }*/
 
                             }
                         });
@@ -1098,6 +1107,7 @@ var MappingsDetails = (function () {
         }
         return table;
     };
+
 
     self.setIsMainColumnKey=function(){
         MappingColumnsGraph.visjsGraph.data.nodes.forEach(function(node){

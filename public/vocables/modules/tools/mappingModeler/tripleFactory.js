@@ -153,6 +153,10 @@ var TripleFactory = (function () {
      * @returns {boolean} - Returns true if the current table is valid and its mappings details are loaded, otherwise false.
      */
     self.checkCurrentTable = function () {
+        //obsolete avec le systeme des definedInColumn
+        return true;
+
+
         var check = false;
         if (!MappingModeler.currentTable) {
             alert("select a table or a csv source");

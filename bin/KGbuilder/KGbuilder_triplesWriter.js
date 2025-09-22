@@ -3,7 +3,7 @@ const httpProxy = require("../httpProxy.");
 const async = require("async");
 const util = require("../util.");
 const KGbuilder_socket = require("./KGbuilder_socket");
-const TriplesMaker = require("./triplesMaker.js");
+const TriplesMaker = require("./TriplesMaker.js");
 
 const KGbuilder_triplesWriter = {
     sparqlPrefixes: {

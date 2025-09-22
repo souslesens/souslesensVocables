@@ -6,6 +6,7 @@ import Export from "../../shared/export.js";
 import GraphDisplayLegend from "../../graph/graphDisplayLegend.js";
 import Lineage_decoration from "./lineage_decoration.js";
 import Lineage_sources from "./lineage_sources.js";
+import JstreeWidget from "../../uiWidgets/jstreeWidget.js";
 
 /* The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -86,17 +87,44 @@ var Lineage_properties = (function () {
                     });
                 },
             },
-
-            graphNode: {
-                label: "graph node",
-                action: function (_e) {
-                    // rajouter une condition pour tester sur object properties 
-                    // function graph node
+        
+           
+        }
+        if(self.currentTreeNode.data.type=="http://www.w3.org/2002/07/owl#ObjectProperty"){
                     
-                },
-            },
+                            items["graphNode"]= {
+                                            label: "graph node",
+                                            action: function (_e) {
+                                                //rajouter une condition pour tester sur object properties 
+                                                
 
-        };
+                                                        var properties = $("#Lineage_propertiesTree").jstree().get_selected(true);
+                                                                                                                    
+                                                            var options = {
+                                                                filter: Sparql_common.setFilter("prop", properties),
+                                                            };
+                                                            nodeIds = Lineage_whiteboard.lineageVisjsGraph.data.nodes.getIds();
+                                                            if (!nodeIds) {
+                                                                options.allNodes = true;
+                                                                options.withoutImports = true;
+                                                            }
+                                                            Lineage_relations.drawRelations(null, null, "Properties", options);
+                                                        if (selectedNodes.length > 1) {
+
+                                                            
+                                                        } else {
+                                                            Lineage_whiteboard.drawNodesAndParents(self.currentTreeNode, 0, { drawBeforeCallback: true }, function () {
+                                                                if (self.currentTreeNode?.data && self.currentTreeNode.data.id) {
+                                                                    Lineage_whiteboard.lineageVisjsGraph.searchNode(self.currentTreeNode.data.id, null);
+                                                                }
+                                                            });
+                                                        }
+                                                    
+                                                
+                                                
+                                                }
+                            }
+        };       
         if (MainController.currentTool == "lineage") {
             items.restrictions = {
                 label: "Restrictions",
@@ -1122,7 +1150,7 @@ var Lineage_properties = (function () {
                     openAll: true,
                     withCheckboxes: true,
                 };
-                options.contextMenu = self.jstreeContextMenu();
+                options.contextMenu = self.jstreeContextMenu;
 
                 JstreeWidget.loadJsTree("Lineage_propertiesTree", jstreeData, options);
             },

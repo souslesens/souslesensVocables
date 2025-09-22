@@ -2,6 +2,9 @@ import { processResponse, responseSchema } from "./utils.js";
 import httpProxy from "../../../bin/httpProxy.js";
 import ConfigManager from "../../../bin/configManager.js";
 import UserRequestFiltering from "../../../bin/userRequestFiltering.js";
+import userManager from "../../../bin/user.js";
+import { sourceModel } from "../../../model/sources.js";
+import { addFromsToSparqlQuery } from "../../../model/utils.js";
 
 export default function () {
     let operations = {
@@ -10,10 +13,17 @@ export default function () {
 
     async function POST(req, res, next) {
         try {
+            const userInfo = await userManager.getUser(req.user);
+            const sources = await sourceModel.getUserSources(userInfo.user);
+            const graphs = Object.entries(sources).map(([_, source]) => source.graphUri);
+
             let query = req.body.query || req.body.update;
             const headers = {};
-            if (req.query.graphUri) {
-                query = query.replace(/where/gi, "from <" + req.query.graphUri + "> WHERE ");
+
+            if (req.query.graphUri && graphs.includes(req.query.graphUri)) {
+                query = addFromsToSparqlQuery(query, [req.query.graphUri], true);
+            } else {
+                query = addFromsToSparqlQuery(query, graphs, true);
             }
 
             if (req.query.method == "POST") {

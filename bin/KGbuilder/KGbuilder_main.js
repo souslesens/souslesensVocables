@@ -157,6 +157,9 @@ var KGbuilder_main = {
                             },
                             // countitems in table
                             function (callbackSeries) {
+                             if(!tableProcessingParams.tableInfos.dbID){
+                                return callbackSeries();
+                             }
                              var sql="select count(*) as count from \""+table+"\";"
                                 try {
                                     databaseModel.query(tableProcessingParams.tableInfos.dbID, sql)

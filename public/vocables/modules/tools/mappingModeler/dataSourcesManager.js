@@ -112,7 +112,7 @@ var DataSourceManager = (function () {
      * @name loaDataSourcesJstree
      * @memberof module:DataSourceManager
      * @param {string} jstreeDiv - The DOM element where the tree should be loaded.
-     * @param {string} tableStatsMap map wher key is a table and value the number of triples created from this table
+     * @param {string} tableStatsMap map where key is a table and value the number of triples created from this table
      * @param {Function} callback - The callback function to be executed after loading the data sources.
      * @returns {void}
      */

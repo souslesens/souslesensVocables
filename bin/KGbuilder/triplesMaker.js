@@ -9,6 +9,7 @@ const KGbuilder_triplesMaker = require("./KGbuilder_triplesMaker")
 
 const dataController = require("../dataController.");
 const path = require("path");
+const MappingParser = require("./mappingsParser.js");
 
 
 var TriplesMaker = {
@@ -70,7 +71,7 @@ var TriplesMaker = {
 
 
                 }, function (err) {
-                    return callback(err, totalTriplesCount)
+                    return callback(err, { sampleTriples: sampleTriples, totalTriplesCount: totalTriplesCount })
                 })
             })
 
@@ -90,8 +91,16 @@ var TriplesMaker = {
 
             for (var columnId in tableProcessingParams.tableColumnsMappings) {
                 var column=tableProcessingParams.tableColumnsMappings[columnId]
-                if(column.type=="Column")
-                select.push(column.id)
+                if(column.type=="Column"){
+                    select.push(column.id)
+                }
+                if(MappingParser.columnsMappingsObjects.includes(column.type)){
+                    if(column.otherPredicates){
+                        column.otherPredicates.forEach(function (predicate) {
+                            select.push(predicate.object)
+                        })
+                    }
+                }
               
             }
             var message={
@@ -119,7 +128,7 @@ var TriplesMaker = {
                             limit: limitSize,
                             noRecurs: true,// Boolean(options.sampleSize),
                             offset: offset,
-                            //select: select
+                            select: select
                         })
                             .then((result) => {
 

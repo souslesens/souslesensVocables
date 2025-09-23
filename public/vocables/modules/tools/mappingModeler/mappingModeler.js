@@ -1573,7 +1573,7 @@ var MappingModeler = (function () {
         }
         PlantUmlTransformer.visjsDataToClassDiagram(visjsData);
     };
-    self.refreshSourceOntologyModel = function () {
+    self.refreshSourceOntologyModel = function (callback) {
         OntologyModels.unRegisterSourceModel();
         JstreeWidget.clear("mappingModelerRelations_jstreeDiv");
         self.initResourcesMap(MappingModeler.currentSLSsource, function () {
@@ -1582,6 +1582,7 @@ var MappingModeler = (function () {
                     id: self.currentResourceType,
                 });
             }
+            if(callback) callback();
         });
     };
 
@@ -1594,7 +1595,7 @@ var MappingModeler = (function () {
             var messageStr = percent+"% :"
 
             if (message.operation == "records") {
-                messageStr += message.processedRecords + " records loaded from table " + message.table+" on "+message.tableTotalRecords +"in "+message.operationDuration+"msec"
+                messageStr += message.processedRecords + " records loaded from table " + message.table+" on "+message.tableTotalRecords +" in "+message.operationDuration+"msec"
             }
             else if (message.operation == "buildTriples") {
                 messageStr += message.batchTriples + " triples created in "+message.operationDuration+"msec"
@@ -1605,7 +1606,7 @@ var MappingModeler = (function () {
             else if (message.operation == "finished") {
                 messageStr += message.totalTriples + " triples writen in "+message.totalDuration+"msec"
             }
-            UI.message(message);
+            UI.message(messageStr);
         }
 
     };

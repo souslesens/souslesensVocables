@@ -38,7 +38,11 @@ var UIcontroller = (function () {
             MappingsDetails.showDetailsDialog();
           //  $("#rightControlPanelDiv").load("./modules/tools/mappingModeler/html/detailsGraphButtons.html", function (err) {});
             $("#rightControlPanelDiv").load("./modules/tools/mappingModeler/html/mappingsGraphButtons.html", function (err) {});
-        } else if (tabId == "MappingModeler_tripleFactoryTab") {
+        }
+        else if (tabId == "MappingModeler_RelationsTab") {
+            MappingModelerRelations.drawPossibleRelations()
+        }
+        else if (tabId == "MappingModeler_tripleFactoryTab") {
         }
     };
 

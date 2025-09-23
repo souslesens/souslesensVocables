@@ -102,13 +102,12 @@
     </div>
     <div id="MappingModeler_RelationsTab" class="coloredContainerImportant">
         <div style="height: 500px">
-            <button class="w3-button slsv-button-2" onclick="MappingModelerRelations.drawPossibleRelations()" title="listPossibleRelations">list possible relations</button>
+            <!--<button class="w3-button slsv-button-2" onclick="MappingModelerRelations.drawPossibleRelations()" title="listPossibleRelations">list possible relations</button>-->
             <button class="w3-button slsv-button-2" onclick="MappingModelerRelations.applyColumnRelations()" title="applyColumnRelations">apply selected relations</button>
-
-                <button
+            <button
                         class="w3-button slsv-invisible-button resetIcon"
                         title="refresh ontology model"
-                        onclick="MappingModeler.refreshSourceOntologyModel()"
+                        onclick="MappingModeler.refreshSourceOntologyModel(function(){MappingModelerRelations.drawPossibleRelations()})"
                         style="margin-top: 4px; margin-left: 15px; height: 20px; width: 20px"
                 ></button>
 

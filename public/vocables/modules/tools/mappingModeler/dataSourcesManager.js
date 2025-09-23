@@ -14,7 +14,7 @@ var DataSourceManager = (function () {
     var self = {};
     self.currentConfig = {};
     self.currentSlsvSource = {};
-
+    self.statsMap={}
     var mappingsDir = "mappings";
     self.umountKGUploadApp = null;
 

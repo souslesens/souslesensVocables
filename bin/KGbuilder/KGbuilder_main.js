@@ -18,6 +18,7 @@ const MappingsParser = require("./mappingsParser.js");
 const TriplesMaker = require("./triplesMaker.js");
 
 const TripleMaker = require("./triplesMaker.js");
+const {databaseModel} = require("../../model/databases.js");
 
 var KGbuilder_main = {
     /**
@@ -44,7 +45,7 @@ var KGbuilder_main = {
 
         KGbuilder_main.stopCreateTriples = false;
         if (options.clientSocketId) {
-            SocketManager.clientSockets[options.clientSocketId].on("KGCreator", function (message) {
+            SocketManager.clientSockets[options.clientSocketId].on("KGbuilder", function (message) {
                 if (message == "stopCreateTriples") {
                     KGbuilder_main.stopCreateTriples = true;
                 }
@@ -87,19 +88,40 @@ var KGbuilder_main = {
                 function (table, callbackEach) {
                     async.series(
                         [
+                            //getColumnsMap
                             function (callbackSeries) {
-                                MappingsParser.getColumnsMap(mappingData, tables[0], function (err, columnsMappings) {
+                                MappingsParser.getColumnsMap(mappingData, tables[0], function (err, allColumnsMappings) {
                                     if (err) {
                                         return callbackSeries(err);
                                     }
-                                    tableProcessingParams.columnsMappings = columnsMappings;
+
+                                    tableProcessingParams.allColumnsMappings= allColumnsMappings;
+
+                                   var tableMappings={}
+                                    for(var columnId in allColumnsMappings){
+                                        if(allColumnsMappings[columnId].dataTable==tables[0]){
+                                            tableMappings[columnId]=allColumnsMappings[columnId]
+
+                                        }
+                                    }
+                                    tableProcessingParams.tableColumnsMappings=tableMappings
+
+
+
                                     callbackSeries();
                                 });
                             },
 
+                            //getColumnToColumnMappings
                             function (callbackSeries) {
-                                // init functions and transform map
-                                MappingsParser.getJsFunctionsMap(tableProcessingParams.columnsMappings, function (err, jsFunctionsMap) {
+                                tableProcessingParams.columnToColumnEdgesMap = MappingsParser.getColumnToColumnMappings(mappingData,tables[0],options.filterMappingIds);
+                                callbackSeries();
+                            }
+                            ,
+
+                            // init functions and transform map
+                            function (callbackSeries) {
+                                MappingsParser.getJsFunctionsMap(tableProcessingParams.allColumnsMappings, function (err, jsFunctionsMap) {
                                     if (err) {
                                         return callbackSeries(err);
                                     }
@@ -107,11 +129,12 @@ var KGbuilder_main = {
                                     callbackSeries();
                                 });
                             },
+
+                            // init globalParams
                             function (callbackSeries) {
-                                // init globalParams
                                 var firstColumn = null;
-                                for (const colId in tableProcessingParams.columnsMappings) {
-                                    firstColumn = tableProcessingParams.columnsMappings[colId];
+                                for (const colId in tableProcessingParams.tableColumnsMappings) {
+                                    firstColumn = tableProcessingParams.tableColumnsMappings[colId];
                                     break;
                                 }
                                 if (!firstColumn) {
@@ -130,14 +153,24 @@ var KGbuilder_main = {
                                 }
                                 tableProcessingParams.tableInfos = tableInfos;
 
-                                /*  globalParamsMap = MappingsParser.getGlobalParamsMap(tableProcessingParams.columnsMappings)
-                              globalParamsMap.graphUri = sourceConfig.graphUri
-
-                              tableProcessingParams.globalParamsMap =globalParamsMap*/
                                 callbackSeries();
                             },
+                            // countitems in table
                             function (callbackSeries) {
-                                // create the tripels or thois table
+                             var sql="select count(*) as count from \""+table+"\";"
+                                try {
+                                    databaseModel.query(tableProcessingParams.tableInfos.dbID, sql)
+                                        .then((result) => {
+                                            tableProcessingParams.tableInfos.tableTotalRecords = parseInt(result.rows[0].count)
+                                            callbackSeries();
+                                        })
+                                }catch(eee){
+                                    callbackSeries(err);
+                                }
+                            },
+                            // create the tripels for this table
+                            function (callbackSeries) {
+
                                 TriplesMaker.readAndProcessData(tableProcessingParams, options, function (err, result) {
                                     if (err) {
                                         return callbackSeries(err);
@@ -160,7 +193,7 @@ var KGbuilder_main = {
                 },
 
                 function (err) {
-                    return callback(err, { sampleTriples: sampleTriples, totalTriplesCount: totalTriplesCount });
+                    return callback(err, {sampleTriples: sampleTriples, totalTriplesCount: totalTriplesCount});
                 },
             );
 
@@ -172,19 +205,19 @@ var KGbuilder_main = {
      *
      * @param source
      * @param datasource
-     * @param tables list of table otherwise if null delete all KGcreator triples
+     * @param tables list of table otherwise if null delete all  triples
      * @param options
      * @param callback
      */,
-    deleteKGcreatorTriples: function (source, tables, options, callback) {
+    deleteKGBuilderTriples: function (source, tables, options, callback) {
         KGbuilder_main.getSourceConfig(source, function (err, sourceMainJson) {
             if (err) {
-                return callbackSeries(err);
+                return callback(err);
             }
 
-            //delete allKGCreator triples
+            //delete allKGbuilderC triples
             if (!tables || tables.length == 0) {
-                KGbuilder_triplesWriter.deleteKGcreatorTriples(sourceMainJson.sparqlServerUrl, sourceMainJson.graphUri, null, options, function (err, result) {
+                KGbuilder_triplesWriter.deleteKGBuilderTriples(sourceMainJson.sparqlServerUrl, sourceMainJson.graphUri, null, options, function (err, result) {
                     if (err) {
                         return callback(err);
                     }
@@ -199,7 +232,7 @@ var KGbuilder_main = {
                 async.eachSeries(
                     tables,
                     function (table, callbackEach) {
-                        KGbuilder_triplesWriter.deleteKGcreatorTriples(sourceMainJson.sparqlServerUrl, sourceMainJson.graphUri, table, options, function (err, result) {
+                        KGbuilder_triplesWriter.deleteKGBuilderTriples(sourceMainJson.sparqlServerUrl, sourceMainJson.graphUri, table, options, function (err, result) {
                             if (err) {
                                 return callbackEach(err);
                             }

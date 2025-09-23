@@ -127,7 +127,7 @@ const KGbuilder_triplesWriter = {
         );
     },
 
-    deleteKGcreatorTriples: function (sparqlServerUrl, graphUri, table, options, callback) {
+    deleteKGBuilderTriples: function (sparqlServerUrl, graphUri, table, options, callback) {
         const KGbuilder_triplesMaker = require("./KGbuilder_triplesMaker");
         var query = "";
         if (table) {

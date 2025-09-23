@@ -37,6 +37,20 @@ var TriplesMaker = {
         tableProcessingParams.randomIdentiersMap = {};// identifiers with scope the whole table
         tableProcessingParams.blankNodesMap = {};// identifiers with scope the whole table
         tableProcessingParams.isSampleData = options.sampleSize
+
+        var message={
+            table:tableInfos.table,
+            tableTotalRecords:tableProcessingParams.tableInfos.tableTotalRecords || 0,
+            processedRecords:0,
+            totalTriples:0,
+            batchTriples:0,
+            operation:"startProcessing",
+            operationDuration:0,
+            totalDuration:0
+        }
+        var oldTime = new Date()
+        var startTime=oldTime;
+
         if (tableProcessingParams.tableInfos.csvDataFilePath) {
             KGbuilder_socket.message(options.clientSocketId, "loading data from csv file " + tableInfos.table, false);
             TriplesMaker.readCsv(tableInfos.csvDataFilePath, options.sampleSize, function (err, result) {
@@ -44,12 +58,38 @@ var TriplesMaker = {
                     KGbuilder_socket.message(options.clientSocketId, err, true);
                     return callback(err);
                 }
-                processedRecords += result.data.length
-                    KGbuilder_socket.message(options.clientSocketId, processedRecords + "  records loaded in table " + tableInfos.table, false);
-                //  tableData = result.data[0];
+
+
+
+
+
+                var currentTime = new Date()
+                message.tableTotalRecords=result.data[0].length
+                message.operation="records"
+                message.processedRecords+= 0
+                message.operationDuration=currentTime - oldTime
+                message.totalDuration+= message.operationDuration
+                KGbuilder_socket.message(options.clientSocketId,message)
+                oldTime = new Date()
 
                 async.eachSeries(result.data, function (data, callbackEach) {
+
+
                     TriplesMaker.buildTriples(data, tableProcessingParams, options, function (err, batchTriples) {
+
+
+
+                        totalTriplesCount += batchTriples.length
+                        var currentTime = new Date()
+
+
+                        message.operation="buildTriples";
+                        message.totalTriples=totalTriplesCount
+                        message.batchTriples=batchTriples.length
+                        message.operationDuration=currentTime - oldTime
+                        message.totalDuration+= message.operationDuration
+                        KGbuilder_socket.message(options.clientSocketId,message)
+                        oldTime = new Date()
 
                         if (options.sampleSize) {// sample dont write triples return batchTriples
                             sampleTriples = batchTriples
@@ -60,10 +100,19 @@ var TriplesMaker = {
 
                             KGbuilder_triplesWriter.writeTriples(batchTriples, tableProcessingParams.sourceInfos.graphUri, tableProcessingParams.sourceInfos.sparqlServerUrl, function (err, result) {
 
+
                                 if (err) {
                                     return callbackEach(err)
                                 }
                                 totalTriplesCount += batchTriples.length
+                                var currentTime = new Date()
+
+
+                                message.operation="writeTriples";
+                                message.operationDuration=currentTime - oldTime
+                                message.totalDuration+= message.operationDuration
+                                KGbuilder_socket.message(options.clientSocketId,message)
+                                oldTime = new Date()
                                 return callbackEach()
                             })
                         }
@@ -71,7 +120,12 @@ var TriplesMaker = {
 
 
                 }, function (err) {
-                    return callback(err, totalTriplesCount)
+                    message.operation="finished";
+                    message.totalTriples=totalTriplesCount
+                    KGbuilder_socket.message(options.clientSocketId,message)
+                    // KGbuilder_socket.message(options.clientSocketId, " DONE " + processedRecords + "records  from " + tableInfos.table + " : " + (totalTriplesCount) + " triples", false);
+
+                    return callback(err, {sampleTriples: sampleTriples, totalTriplesCount: totalTriplesCount})
                 })
             })
 
@@ -95,20 +149,10 @@ var TriplesMaker = {
                 select.push(column.id)
               
             }
-            var message={
-                table:tableInfos.table,
-                tableTotalRecords:tableProcessingParams.tableInfos.tableTotalRecords,
-                processedRecords:0,
-                totalTriples:0,
-                batchTriples:0,
-                operation:"startProcessing",
-                operationDuration:0,
-                totalDuration:0
-            }
 
 
-            var oldTime = new Date()
-            var startTime=oldTime;
+
+
             databaseModel.refreshConnection(tableInfos.dbID, function () {
                 async.whilst(
                     function (callbackTest) {// implementation different in node js and  web browser  !!

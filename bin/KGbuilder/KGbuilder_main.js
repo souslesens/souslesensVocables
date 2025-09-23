@@ -95,17 +95,16 @@ var KGbuilder_main = {
                                         return callbackSeries(err);
                                     }
 
-                                    tableProcessingParams.allColumnsMappings= allColumnsMappings;
+                                    tableProcessingParams.allColumnsMappings = allColumnsMappings;
 
-                                   var tableMappings={}
-                                    for(var columnId in allColumnsMappings){
-                                        if(allColumnsMappings[columnId].dataTable==tables[0]){
-                                            tableMappings[columnId]=allColumnsMappings[columnId]
+                                    var tableMappings = {}
+                                    for (var columnId in allColumnsMappings) {
+                                        if (allColumnsMappings[columnId].dataTable == tables[0]) {
+                                            tableMappings[columnId] = allColumnsMappings[columnId]
 
                                         }
                                     }
-                                    tableProcessingParams.tableColumnsMappings=tableMappings
-
+                                    tableProcessingParams.tableColumnsMappings = tableMappings
 
 
                                     callbackSeries();
@@ -114,7 +113,7 @@ var KGbuilder_main = {
 
                             //getColumnToColumnMappings
                             function (callbackSeries) {
-                                tableProcessingParams.columnToColumnEdgesMap = MappingsParser.getColumnToColumnMappings(mappingData,tables[0],options.filterMappingIds);
+                                tableProcessingParams.columnToColumnEdgesMap = MappingsParser.getColumnToColumnMappings(mappingData, tables[0], options.filterMappingIds);
                                 callbackSeries();
                             }
                             ,
@@ -145,26 +144,34 @@ var KGbuilder_main = {
                                 };
                                 if (firstColumn.datasource) {
                                     // database
-                                    tableInfos.dbID = firstColumn.datasource;
+                                    if ( tableProcessingParams.sourceInfos.csvSources[firstColumn.dataTable]) {
+                                        var csvDir = path.join(__dirname, "../../data/CSV/" + source + "/");
+                                        tableInfos.csvDataFilePath = csvDir + firstColumn.dataTable;
+                                    } else {
+                                        tableInfos.dbID = firstColumn.datasource;
+                                    }
                                 } else {
                                     //csv
-                                    var csvDir = path.join(__dirname, "../../data/CSV/" + source + "/");
-                                    tableInfos.csvDataFilePath = csvDir + firstColumn.dataTable;
+                                    return callbackSeries("no datasource")
                                 }
                                 tableProcessingParams.tableInfos = tableInfos;
 
                                 callbackSeries();
                             },
-                            // countitems in table
+                            // countitems in table if database
                             function (callbackSeries) {
-                             var sql="select count(*) as count from \""+table+"\";"
+                                if (tableProcessingParams.tableInfos.csvDataFilePath) {
+                                    return callbackSeries()
+                                }
+
+                                var sql = "select count(*) as count from \"" + table + "\";"
                                 try {
                                     databaseModel.query(tableProcessingParams.tableInfos.dbID, sql)
                                         .then((result) => {
                                             tableProcessingParams.tableInfos.tableTotalRecords = parseInt(result.rows[0].count)
                                             callbackSeries();
                                         })
-                                }catch(eee){
+                                } catch (err) {
                                     callbackSeries(err);
                                 }
                             },

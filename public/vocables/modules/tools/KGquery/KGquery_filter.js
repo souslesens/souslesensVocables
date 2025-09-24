@@ -113,7 +113,11 @@ var KGquery_filter = (function () {
                     return callback(err, result);
                 });
             },
+
         };
+        if(options.additionalHTMLComponent){
+            jstreeOptions.additionalHTMLComponent = options.additionalHTMLComponent;
+        }
         JstreeWidget.loadJsTree(null, jstreeData, jstreeOptions, function () {
             JstreeWidget.openNodeDescendants(null, "root");
 

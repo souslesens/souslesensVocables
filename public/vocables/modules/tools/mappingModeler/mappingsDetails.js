@@ -87,6 +87,7 @@ var MappingsDetails = (function () {
         });
 
         var allreadyDefinedNodes = []; // nodes that are allready defined that need to be saved together after running isColumnAllreadyMappedInAnotherTable
+        var allreadyDefinedNodes = []; // nodes that are allready defined that need to be saved together after running isColumnAllreadyMappedInAnotherTable
         nodes.forEach(function (node) {
             if (node.data.dataTable !== table) {
                 return;
@@ -177,6 +178,12 @@ var MappingsDetails = (function () {
         var columnsMap = Object.fromEntries(Object.values(uniqueSubjects).map((obj) => [obj.id, obj]));
         var columnMappings = MappingTransform.mappingsToKGcreatorJson(columnsMap, { getColumnMappingsOnly: true });
         columnMappings.forEach(function (mapping) {
+            if (!mapping.s || !mapping.p || !mapping.o) {
+                return;
+            }
+            var mappingS = mapping.s.replaceAll("_$", "").replaceAll("_£", "").replaceAll("@", "");
+            var mappingO = mapping.o.replaceAll("_$", "").replaceAll("_£", "").replaceAll("@", "");
+
             var propertyLabel = mapping.p;
             if (mapping.p.indexOf("http://") === 0) {
                 var allPropertiesCorrespondance = MappingModeler.allProperties.filter(function (prop) {

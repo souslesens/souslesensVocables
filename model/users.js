@@ -257,7 +257,7 @@ class UserModel {
         // remove userData owned by deleted user
         await conn.select("*").from("user_data").where("owned_by", results.id).del();
         // remove user login from userData.shared_user
-        const allUserData = await conn.select("*").from("user_data_list");
+        const allUserData = await conn.select("*").from("user_data");
         Object.values(allUserData).map((userData) => {
             if (userData.shared_users.includes(login)) {
                 userData.shared_users = userData.shared_users.filter((u) => u !== login);

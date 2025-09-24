@@ -525,7 +525,7 @@ var KGquery = (function () {
         var isJoin = false;
         var data;
         var labelFromURIToDisplay = [];
-        var sampleSize = $("#KGquery_sampleInput").val();
+        var sampleSize;
         async.series(
             [
                 //selectOptionalPredicates
@@ -542,12 +542,17 @@ var KGquery = (function () {
 
                         return callbackSeries();
                     }
+                    var additionalHTMLComponent = ` 
+                    <div style="margin-right: 10px;">Sample size
+                    <input type="text" id="KGquery_sampleInput" value=""/></div>`;
+                    var selectOptionalPredicatesOptions = { ...options, additionalHTMLComponent: additionalHTMLComponent };
 
-                    KGquery_filter.selectOptionalPredicates(self.querySets, options, function (err, result) {
+                    KGquery_filter.selectOptionalPredicates(self.querySets, selectOptionalPredicatesOptions, function (err, result) {
                         if (err) {
                             UI.message(err, true);
                             callbackSeries(err);
                         }
+                        sampleSize = $("#KGquery_sampleInput").val();
                         KGquery.labelFromURIToDisplay = result.labelFromURIToDisplay;
                         optionalPredicatesSparql = result.optionalPredicatesSparql;
                         labelFromURIToDisplay = result.labelFromURIToDisplay;

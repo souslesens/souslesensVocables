@@ -9,7 +9,7 @@ const KGbuilder_triplesMaker = require("./KGbuilder_triplesMaker");
 
 const dataController = require("../dataController.");
 const path = require("path");
-const { utils } = require("xlsx");
+const MappingParser = require("./mappingsParser.js");
 
 var TriplesMaker = {
     batchSize: 300,
@@ -135,8 +135,27 @@ var TriplesMaker = {
 
             for (var columnId in tableProcessingParams.tableColumnsMappings) {
                 var column = tableProcessingParams.tableColumnsMappings[columnId];
-                if (column.type == "Column") select.push(column.id);
+                if (column.type == "Column") {
+                    select.push(column.id);
+                }
+                if (MappingParser.columnsMappingsObjects.includes(column.type)) {
+                    if (column.otherPredicates) {
+                        column.otherPredicates.forEach(function (predicate) {
+                            select.push(predicate.object);
+                        });
+                    }
+                }
             }
+            var message = {
+                table: tableInfos.table,
+                tableTotalRecords: tableProcessingParams.tableInfos.tableTotalRecords,
+                processedRecords: 0,
+                totalTriples: 0,
+                batchTriples: 0,
+                operation: "startProcessing",
+                operationDuration: 0,
+                totalDuration: 0,
+            };
 
             databaseModel.refreshConnection(tableInfos.dbID, function () {
                 async.whilst(
@@ -289,6 +308,8 @@ var TriplesMaker = {
                     var object = null;
                     // if no matching item for mapping.o  and no fixed uri return
                     // the other cases need a value for the mapping object
+                    // no value case should implements blank nodes,virtual columns,rowIndex ...
+                    // getColumnUri function handle all cases
                     if (!line[mapping.o]) {
                         if (mapping.isConstantUri) {
                             // uri
@@ -297,7 +318,10 @@ var TriplesMaker = {
                             //prefix
                             object = mapping.o;
                         } else {
-                            return;
+                            object = TriplesMaker.getColumnUri(line, mapping.objColId, columnMappings, rowIndex, tableProcessingParams);
+                            if (!object) {
+                                return;
+                            }
                         }
                     } else if (columnMappings[mapping.objColId]) {
                         // if object is a column
@@ -374,6 +398,9 @@ var TriplesMaker = {
      */
     getColumnUri: function (dataItem, columnId, columnMappings, rowIndex, tableProcessingParams) {
         var columnParams = columnMappings[columnId];
+        if (!columnParams) {
+            return null;
+        }
         //substitute column params to those of the definedInColumn for the same class if !columnParams.isMainColumn
         if (!columnParams.isMainColumn && columnParams.definedInColumn) {
             var definedInColumn = tableProcessingParams.allColumnsMappings[columnParams.definedInColumn];

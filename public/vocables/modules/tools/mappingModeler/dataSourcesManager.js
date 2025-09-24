@@ -234,7 +234,7 @@ var DataSourceManager = (function () {
                         strStats = "<b>" + nTriples + "Triples</b>";
                     }
                     if (dataTables.includes(datasource)) {
-                        jstreeNode.text = "<span style='color:blue'>" + datasource + "</span>";
+                        jstreeNode.text = "<span style='color:blue'>" + datasource +strStats+ "</span>";
                     }
                     jstreeData.push(jstreeNode);
                 }

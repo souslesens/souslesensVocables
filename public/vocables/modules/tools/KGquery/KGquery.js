@@ -542,18 +542,17 @@ var KGquery = (function () {
 
                         return callbackSeries();
                     }
-                    var additionalHTMLComponent = 
-                    ` 
+                    var additionalHTMLComponent = ` 
                     <div style="margin-right: 10px;">Sample size
                     <input type="text" id="KGquery_sampleInput" value=""/></div>`;
-                    var selectOptionalPredicatesOptions = {...options,additionalHTMLComponent:additionalHTMLComponent};
-                   
+                    var selectOptionalPredicatesOptions = { ...options, additionalHTMLComponent: additionalHTMLComponent };
+
                     KGquery_filter.selectOptionalPredicates(self.querySets, selectOptionalPredicatesOptions, function (err, result) {
                         if (err) {
                             UI.message(err, true);
                             callbackSeries(err);
                         }
-                        sampleSize = $('#KGquery_sampleInput').val();
+                        sampleSize = $("#KGquery_sampleInput").val();
                         KGquery.labelFromURIToDisplay = result.labelFromURIToDisplay;
                         optionalPredicatesSparql = result.optionalPredicatesSparql;
                         labelFromURIToDisplay = result.labelFromURIToDisplay;
@@ -753,8 +752,6 @@ var KGquery = (function () {
                     query += queryType + " " + selectStr + "  " + fromStr + " where {" + whereStr + "}";
 
                     query += " " + groupByStr; // + " limit 10000";
-                    
-                    
 
                     callbackSeries();
                 },
@@ -790,22 +787,22 @@ var KGquery = (function () {
                                 self.outputCsv = true;
                             }
                             UI.message("retreived " + totalSize);
-                            if(sampleSize && sampleSize>0){
+                            if (sampleSize && sampleSize > 0) {
                                 return totalSize < sampleSize && resultSize > 0;
                             }
                             return resultSize > 0;
                         },
                         function (callbackWhilst) {
                             var query2 = "" + query;
-                            currentLimit = limitSize; 
-                            if(sampleSize && sampleSize>0){
+                            currentLimit = limitSize;
+                            if (sampleSize && sampleSize > 0) {
                                 var remaining = sampleSize - totalSize;
-                                
+
                                 if (remaining <= 0) {
                                     resultSize = 0;
                                     return callbackWhilst(null);
                                 }
-                                
+
                                 if (remaining < limitSize) {
                                     currentLimit = remaining;
                                 }

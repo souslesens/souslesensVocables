@@ -343,15 +343,15 @@ var Sparql_common = (function () {
                 return "filter( ?" + varName + "=" + str + lang + ").";
             }
         }
-        
+
         if (!Array.isArray(values)) {
             values = [values];
         }
-        
+
         // Separate blank nodes (nodeID://) from standard values (URIs/literals)
         var blankNodeValues = [];
         var standardValues = [];
-        
+
         values.forEach(function (item) {
             if (item.indexOf("nodeID://") === 0) {
                 blankNodeValues.push(item);
@@ -359,9 +359,9 @@ var Sparql_common = (function () {
                 standardValues.push(item);
             }
         });
-        
+
         var filterConditions = [];
-        
+
         // Handle standard values with direct comparison
         if (standardValues.length > 0) {
             var standardValuesStr = "";
@@ -379,14 +379,14 @@ var Sparql_common = (function () {
                     standardValuesStr += "<" + item + ">";
                 }
             });
-            
+
             if (standardValues.length > 1) {
                 filterConditions.push("?" + varName + " in (" + standardValuesStr + ")");
             } else {
                 filterConditions.push("?" + varName + "=" + standardValuesStr);
             }
         }
-        
+
         // Handle blank nodes with str() comparison
         if (blankNodeValues.length > 0) {
             var blankNodeValuesStr = "";
@@ -396,14 +396,14 @@ var Sparql_common = (function () {
                 }
                 blankNodeValuesStr += '"' + blankNode + '"';
             });
-            
+
             if (blankNodeValues.length > 1) {
                 filterConditions.push("str(?" + varName + ") in (" + blankNodeValuesStr + ")");
             } else {
-                filterConditions.push('str(?' + varName + ') = "' + blankNodeValues[0] + '"');
+                filterConditions.push("str(?" + varName + ') = "' + blankNodeValues[0] + '"');
             }
         }
-        
+
         // Combine conditions
         var filterStr = "";
         if (filterConditions.length > 1) {
@@ -411,7 +411,7 @@ var Sparql_common = (function () {
         } else if (filterConditions.length === 1) {
             filterStr = "filter (" + filterConditions[0] + ")";
         }
-        
+
         return filterStr + ".";
     };
 

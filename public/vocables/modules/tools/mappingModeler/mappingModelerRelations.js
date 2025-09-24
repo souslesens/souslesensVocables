@@ -136,7 +136,7 @@ var MappingModelerRelations = (function () {
 
     self.applyColumnRelations = function () {
         var relations = $("#mappingModelerRelations_jstreeDiv").jstree().get_checked(true);
-        if(relations.length == 0){
+        if (relations.length == 0) {
             alert("Please select at least one relation");
             return;
         }

@@ -28,7 +28,6 @@ var MappingParser = {
         var nodesMap = {};
         var columnsMap = {};
 
-
         mappingData.edges.forEach(function (edge) {
             if (!edgesFromMap[edge.from]) {
                 edgesFromMap[edge.from] = [];
@@ -65,7 +64,6 @@ var MappingParser = {
                         mappings = MappingParser.getTypeAndLabelMappings(fromNodeData, toNodeData);
                         columnMappings = columnMappings.concat(mappings);
                     } else {
-
                     }
                 });
             }
@@ -83,7 +81,6 @@ var MappingParser = {
 
         return callback(null, columnsMap);
     },
-
 
     isConstantUri: function (str) {
         if (str && str.startsWith("http")) {
@@ -126,23 +123,22 @@ var MappingParser = {
         return mappings;
     },
 
-    getColumnToColumnMappings: function (mappingData,table,filterMappingIds) {
-        var columnsMap = {}
+    getColumnToColumnMappings: function (mappingData, table, filterMappingIds) {
+        var columnsMap = {};
         var edgeMap = {};
         mappingData.nodes.forEach(function (node) {
             if (node.data && MappingParser.columnsMappingsObjects.includes(node?.data?.type) && node.data.dataTable == table) {
-                columnsMap[node.id] = node
-
+                columnsMap[node.id] = node;
             }
-        })
+        });
 
         mappingData.edges.forEach(function (edge) {
-            if (columnsMap[edge.from] && columnsMap[edge.to] && filterMappingIds.indexOf(edge.id)>-1) {
-               var isRestriction=columnsMap[edge.from].data.rdfType=="owl:Class" && columnsMap[edge.to].data.rdfType=="owl:Class"
-                edge.isRestriction=isRestriction
-                edgeMap[edge.id]=edge;
+            if (columnsMap[edge.from] && columnsMap[edge.to] && filterMappingIds.indexOf(edge.id) > -1) {
+                var isRestriction = columnsMap[edge.from].data.rdfType == "owl:Class" && columnsMap[edge.to].data.rdfType == "owl:Class";
+                edge.isRestriction = isRestriction;
+                edgeMap[edge.id] = edge;
             }
-        })
+        });
         return edgeMap;
     },
     getOtherPredicates: function (columnData) {

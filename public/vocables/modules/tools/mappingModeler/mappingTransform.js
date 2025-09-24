@@ -13,8 +13,6 @@ import UIcontroller from "./uiController.js";
 var MappingTransform = (function () {
     var self = {};
 
-
-
     /**
      * Placeholder function for generating R2ML mappings. Currently displays an alert.
      *
@@ -343,8 +341,8 @@ var MappingTransform = (function () {
         var transforms = {};
         // checkedNodeAttrs work only for technical mappings we need to also add structural column mappings
         mappings.forEach(function (mapping) {
-            var mappingS= mapping.s.replaceAll("_$", "").replaceAll("_£", "").replaceAll("@", "");
-            var mappingO= mapping.o.replaceAll("_$", "").replaceAll("_£", "").replaceAll("@", "");
+            var mappingS = mapping.s.replaceAll("_$", "").replaceAll("_£", "").replaceAll("@", "");
+            var mappingO = mapping.o.replaceAll("_$", "").replaceAll("_£", "").replaceAll("@", "");
             // columnsMapping
             var mappingInColumnMapping = columnMappings.filter(function (item) {
                 return item.s == mapping.s && item.p == mapping.p && item.o == mapping.o;

@@ -84,10 +84,10 @@ var JstreeWidget = (function () {
 
             $("#smallDialogDiv").load("modules/uiWidgets/html/jsTreeWidget.html", function () {
                 $("#smallDialogDiv").dialog("open");
-                if(options && options.additionalHTMLComponent){
-                    try{
+                if (options && options.additionalHTMLComponent) {
+                    try {
                         $(options.additionalHTMLComponent).insertBefore("#jstreeWidget_okButton");
-                    }catch(error){
+                    } catch (error) {
                         console.log("Error inserting additional HTML component: " + error);
                     }
                 }

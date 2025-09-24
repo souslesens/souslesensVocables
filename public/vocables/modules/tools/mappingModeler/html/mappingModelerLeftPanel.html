@@ -41,7 +41,6 @@
                     <div class="SearchButtonIconRight border-without-raduis-theme1" style="height: 33.5px; padding-left: 7px; padding-right: 5px">
                         <button class="search-icon slsv-invisible-button" onclick="MappingModeler.filterSuggestionTree()" style="margin-top: 4px; height: 20px; width: 20px"></button>
                     </div>
-
                 </div>
 
                 <br />
@@ -105,11 +104,11 @@
             <!--<button class="w3-button slsv-button-2" onclick="MappingModelerRelations.drawPossibleRelations()" title="listPossibleRelations">list possible relations</button>-->
             <button class="w3-button slsv-button-2" onclick="MappingModelerRelations.applyColumnRelations()" title="applyColumnRelations">apply selected relations</button>
             <button
-                        class="w3-button slsv-invisible-button resetIcon"
-                        title="refresh ontology model"
-                        onclick="MappingModeler.refreshSourceOntologyModel(function(){MappingModelerRelations.drawPossibleRelations()})"
-                        style="margin-top: 4px; margin-left: 15px; height: 20px; width: 20px"
-                ></button>
+                class="w3-button slsv-invisible-button resetIcon"
+                title="refresh ontology model"
+                onclick="MappingModeler.refreshSourceOntologyModel(function(){MappingModelerRelations.drawPossibleRelations()})"
+                style="margin-top: 4px; margin-left: 15px; height: 20px; width: 20px"
+            ></button>
 
             <div style="width: 400px; height: 400px; overflow: auto">
                 <div id="mappingModelerRelations_jstreeDiv"></div>

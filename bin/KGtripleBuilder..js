@@ -15,7 +15,7 @@ const SocketManager = require("./socketManager.");
 var KGtripleBuilder = {
     message: function (clientSocketId, content, isError) {
         if (clientSocketId) {
-            SocketManager.message(clientSocketId, "KGcreator", content);
+            SocketManager.message(clientSocketId, "KGbuilder", content);
         }
         if (isError) {
             console.log(content);
@@ -1094,7 +1094,7 @@ callbackEach();
         var allMappingFiles = [];
 
         KGtripleBuilder.stopCreateTriples = false;
-        SocketManager.clientSockets[options.clientSocketId].on("KGCreator", function (message) {
+        SocketManager.clientSockets[options.clientSocketId].on("KGbuilder", function (message) {
             if (message == "stopCreateTriples") {
                 KGtripleBuilder.stopCreateTriples = true;
             }

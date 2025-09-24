@@ -525,6 +525,7 @@ var KGquery = (function () {
         var isJoin = false;
         var data;
         var labelFromURIToDisplay = [];
+        var sampleSize;
         async.series(
             [
                 //selectOptionalPredicates
@@ -541,12 +542,17 @@ var KGquery = (function () {
 
                         return callbackSeries();
                     }
+                    var additionalHTMLComponent = ` 
+                    <div style="margin-right: 10px;">Sample size
+                    <input type="text" id="KGquery_sampleInput" value=""/></div>`;
+                    var selectOptionalPredicatesOptions = { ...options, additionalHTMLComponent: additionalHTMLComponent };
 
-                    KGquery_filter.selectOptionalPredicates(self.querySets, options, function (err, result) {
+                    KGquery_filter.selectOptionalPredicates(self.querySets, selectOptionalPredicatesOptions, function (err, result) {
                         if (err) {
                             UI.message(err, true);
                             callbackSeries(err);
                         }
+                        sampleSize = $("#KGquery_sampleInput").val();
                         KGquery.labelFromURIToDisplay = result.labelFromURIToDisplay;
                         optionalPredicatesSparql = result.optionalPredicatesSparql;
                         labelFromURIToDisplay = result.labelFromURIToDisplay;
@@ -675,7 +681,7 @@ var KGquery = (function () {
 
                             var querySetOptionalPredicates = "";
                             Object.keys(distinctTypesMap).forEach(function (type) {
-                                var regex = new RegExp(`^\\s*OPTIONAL\\s*{\\${type}\\b.*?}$`, "gm");
+                                var regex = new RegExp("^\\s*OPTIONAL\\s*{\\s*\\" + type + "\\b[\\s\\S]*?}", "gm");
                                 var matches = optionalPredicatesSparql.match(regex);
                                 if (matches?.length > 0) {
                                     querySetOptionalPredicates += matches.join("\n");
@@ -733,6 +739,9 @@ var KGquery = (function () {
                         Object.keys(distinctTypesMap).forEach(function (type) {
                             selectStr += " " + type;
                         });
+                        if (isJoin) {
+                            selectStr += " ?querySet ";
+                        }
                     }
 
                     var queryType = "SELECT";
@@ -769,6 +778,7 @@ var KGquery = (function () {
                     var resultSize = 1;
                     var limitSize = 10000;
                     var offset = 0;
+                    var currentLimit;
                     self.outputCsv = false;
                     data = { results: { bindings: [] }, head: { vars: [] } };
                     async.whilst(
@@ -777,12 +787,27 @@ var KGquery = (function () {
                                 self.outputCsv = true;
                             }
                             UI.message("retreived " + totalSize);
+                            if (sampleSize && sampleSize > 0) {
+                                return totalSize < sampleSize && resultSize > 0;
+                            }
                             return resultSize > 0;
                         },
                         function (callbackWhilst) {
                             var query2 = "" + query;
+                            currentLimit = limitSize;
+                            if (sampleSize && sampleSize > 0) {
+                                var remaining = sampleSize - totalSize;
 
-                            query2 += " limit " + limitSize + " offset " + offset;
+                                if (remaining <= 0) {
+                                    resultSize = 0;
+                                    return callbackWhilst(null);
+                                }
+
+                                if (remaining < limitSize) {
+                                    currentLimit = remaining;
+                                }
+                            }
+                            query2 += " limit " + currentLimit + " offset " + offset;
 
                             Sparql_proxy.querySPARQL_GET_proxy(
                                 url,
@@ -817,7 +842,10 @@ var KGquery = (function () {
                         return callbackSeries();
                     }
                     var results = data?.results?.bindings;
+                    // SPARQL Query render differents unions paths with differents values of querySet variable for each set
                     var dataByQuerySet = common.array.arrayByCategory(results, "querySet");
+
+                    //concat data sets with full outer joins
                     var joinedData;
 
                     dataByQuerySet.forEach(function (setData, index) {
@@ -1035,17 +1063,18 @@ var KGquery = (function () {
         Export.showDataTable("KGquery_dataTableDialogDiv", tableCols, tableData, null, { paging: true }, function (err, datatable) {
             $("#dataTableDivExport").on("click", "td", function () {
                 var table = $("#dataTableDivExport").DataTable();
-
                 var index = table.cell(this).index();
-                var row = table.row(this).data();
-                var column = table.cell(this).column().data();
-                var data = table.cell(this).data();
+                if (!index.row) {
+                    return UI.message("No row corresponding");
+                }
+                var dataItem = self.currentData[index.row];
 
-                var datasetIndex = column[index.row];
-                var dataItem = self.currentData[datasetIndex];
                 var varName = self.tableCols[index.column].title;
                 if (true || !dataItem[varName]) {
-                    varName = KGquery.currentSelectedPredicates.filter((key) => key.id == varName)[0].data.varName;
+                    var varNameNode = KGquery.currentSelectedPredicates.filter((key) => key.id == varName);
+                    if (varNameNode && varNameNode.length > 0 && varNameNode[0]?.data?.varName) {
+                        varName = varNameNode[0].data.varName;
+                    }
                     //varName = varName.split("_")[0];
                 }
                 var uri = dataItem[varName].value;

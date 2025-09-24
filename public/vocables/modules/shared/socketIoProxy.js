@@ -1,4 +1,5 @@
 import KGcreator_run from "../tools/KGcreator/KGcreator_run.js";
+import MappingModeler from "../tools/mappingModeler/mappingModeler.js";
 
 const socket = io();
 // client-side
@@ -11,8 +12,8 @@ socket.on("disconnect", () => {
     //  console.log(socket.id); // undefined
 });
 
-socket.on("KGcreator", function (message) {
-    KGcreator_run.socketMessage(message);
+socket.on("KGbuilder", function (message) {
+    MappingModeler.socketMessage(message);
 });
 
 socket.connect("ws://localhost:8080/", "echo-protocol");

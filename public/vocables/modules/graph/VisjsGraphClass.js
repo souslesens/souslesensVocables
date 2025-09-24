@@ -923,11 +923,13 @@ const VisjsGraphClass = function (graphDiv, data, options) {
     self.searchNode = function (id, word) {
         if (!word || word == "") {
             word = $("#visjsGraph_searchInput").val();
-            if (word == "") {
+            if (word == "" && !id) {
                 return;
             }
         }
-
+        if (!self.data && !self.data.nodes) {
+            return;
+        }
         var nodes = self.data.nodes.get();
         /**
          * @type {any[]}
@@ -991,6 +993,8 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         };
         if (options) {
             data.options = options;
+        } else {
+            options = {};
         }
         if (!fileName) {
             fileName = prompt("graph name");
@@ -1019,6 +1023,9 @@ const VisjsGraphClass = function (graphDiv, data, options) {
             success: function (_result, _textStatus, _jqXHR) {
                 $("#visjsGraph_savedGraphsSelect").append($("<option></option>").attr("value", fileName).text(fileName));
                 UI.message("graph saved");
+                if (options.callback) {
+                    return options.callback();
+                }
             },
             error(err) {
                 return alert(err);

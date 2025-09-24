@@ -6,7 +6,7 @@ import common from "../../shared/common.js";
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 import Lineage_sources from "./lineage_sources.js";
 import CreateRestriction_bot from "../../bots/createRestriction_bot.js";
-
+import UI from "../../shared/UI.js";
 /**
  * @module Lineage_createRelation
  * @description Module for creating and managing relationships between ontology nodes.
@@ -431,8 +431,11 @@ var Lineage_createRelation = (function () {
                 label: "Node infos",
                 action: function (_e) {
                     // pb avec source
+
                     NodeInfosWidget.showNodeInfos(self.currentPropertiesTreeNode.data.source, self.currentPropertiesTreeNode, "mainDialogDiv", null, function () {
                         //  $("#mainDialogDiv").parent().css("z-index", 1);
+
+                        UI.SideBySideTwoWindows("#smallDialogDiv", "#mainDialogDiv");
                     });
                 },
             },
@@ -640,6 +643,21 @@ var Lineage_createRelation = (function () {
                 function (callbackSeries) {
                     relationId = relationId || "<_:b" + common.getRandomHexaId(10) + ">";
                     let propLabel = obj.node.data.propLabel || Sparql_common.getLabelFromURI(obj.node.data.id);
+                    if (Config?.ontologiesVocabularyModels?.[inSource]?.restrictions?.[obj?.node?.data?.id]) {
+                        let restrict = Config.ontologiesVocabularyModels[inSource].restrictions[obj.node.data.id];
+
+                        restrict.forEach((valeur) => {
+                            if (valeur["blankNodeId"] == relationId) {
+                                let cardinalityTest = valeur;
+                                if (cardinalityTest["cardinalityValue"]) {
+                                    let cardinalityValue = cardinalityTest["cardinalityValue"];
+                                    if (cardinalityValue) {
+                                        propLabel += " : " + cardinalityValue;
+                                    }
+                                }
+                            }
+                        });
+                    }
 
                     let newEdge = {
                         id: relationId,
@@ -910,6 +928,9 @@ var Lineage_createRelation = (function () {
                             ],
                         },
                     };
+                    if (cardinality && cardinality.value) {
+                        modelData.restrictions[type][0].cardinalityValue = cardinality.value;
+                    }
                     if (!Config.ontologiesVocabularyModels[inSource].restrictions[type]) {
                         Config.ontologiesVocabularyModels[inSource].restrictions[type] = [];
                     }

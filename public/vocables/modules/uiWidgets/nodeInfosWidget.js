@@ -45,8 +45,11 @@ var NodeInfosWidget = (function () {
                 if (node.data.propertyId && !node.data.id) {
                     //when  a property in a restriction
                     //  node.data.id = node.data.propertyId;
-
-                    return self.showRestrictionInfos(node, null, true);
+                    if (node.data.type == "DatatypeProperty" && node.data.propertyId) {
+                        self.currentNodeId = node.data.propertyId;
+                    } else {
+                        return self.showRestrictionInfos(node, null, true);
+                    }
                 }
                 if (node.data.from && !node.data.id) {
                     //when  a property in a restriction

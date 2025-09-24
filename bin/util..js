@@ -708,6 +708,19 @@ var util = {
             return id.substring(p + 1);
         }
     },
+
+    hasURISeparator: function (uri) {
+        const lastChar = uri.slice(-1);
+
+        // Définir les séparateurs acceptés
+        const separators = ["/", "-", "_", "#", ":"];
+
+        // Si le dernier caractère n'est pas un séparateur, on ajoute un "-"
+        if (separators.includes(lastChar)) {
+            return true;
+        }
+        return false;
+    },
 };
 
 module.exports = util;

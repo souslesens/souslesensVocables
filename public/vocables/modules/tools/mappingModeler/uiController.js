@@ -20,7 +20,7 @@ var UIcontroller = (function () {
      */
     self.onActivateLeftPanelTab = function (tabId) {
         $("#mappingModeler_relationInfos").html("");
-        $(".mappingModeler_rightPanel").css("display", "none");
+        //  $(".mappingModeler_rightPanel").css("display", "none");
         if (tabId == "MappingModeler_dataSourcesTab") {
             $("#mappingModeler_structuralPanel").css("display", "block");
             $("#rightControlPanelDiv").load("./modules/tools/mappingModeler/html/mappingsGraphButtons.html", function (err) {});
@@ -36,7 +36,10 @@ var UIcontroller = (function () {
             $("#rightControlPanelDiv").load("./modules/tools/mappingModeler/html/mappingsGraphButtons.html", function (err) {});
         } else if (tabId == "MappingModeler_technicalDetailTab") {
             MappingsDetails.showDetailsDialog();
-            $("#rightControlPanelDiv").load("./modules/tools/mappingModeler/html/detailsGraphButtons.html", function (err) {});
+            //  $("#rightControlPanelDiv").load("./modules/tools/mappingModeler/html/detailsGraphButtons.html", function (err) {});
+            $("#rightControlPanelDiv").load("./modules/tools/mappingModeler/html/mappingsGraphButtons.html", function (err) {});
+        } else if (tabId == "MappingModeler_RelationsTab") {
+            MappingModelerRelations.drawPossibleRelations();
         } else if (tabId == "MappingModeler_tripleFactoryTab") {
         }
     };

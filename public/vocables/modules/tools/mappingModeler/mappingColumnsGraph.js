@@ -5,6 +5,7 @@ import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 import MappingsDetails from "./mappingsDetails.js";
 import DataSourceManager from "./dataSourcesManager.js";
 import MappingModeler from "./mappingModeler.js";
+import Lineage_graphPaths from "../lineage/lineage_graphPaths.js";
 
 /**
  * MappingColumnsGraph module.
@@ -175,13 +176,19 @@ var MappingColumnsGraph = (function () {
         } else {
             newResource.level = 2;
         }
+        var existingNodes = self.visjsGraph.getExistingIdsMap();
 
         var visjsData = { nodes: [], edges: [] };
         var visjsNode = newResource;
+
         if (newResource.data.type == "Class") {
-            if (!self.objectIdExistsInGraph(newResource.data.id)) {
+            var tableWithSameClass = MappingsDetails.isColumnAllreadyMappedInAnotherTable(self.currentGraphNode, newResource.data.id);
+            if (!tableWithSameClass && !existingNodes[visjsNode.id]) {
                 visjsData.nodes.push(visjsNode);
+            } else {
+                self.visjsGraph.data.nodes.update({ id: newResource.id, hidden: false });
             }
+            self.saveVisjsGraph();
         } else {
             visjsData.nodes.push(visjsNode);
         }
@@ -193,7 +200,7 @@ var MappingColumnsGraph = (function () {
                     self.visjsGraph.data.nodes.add(visjsData.nodes);
                 }
             } else {
-                self.addNode(visjsData.nodes);
+                self.addNodes(visjsData.nodes);
             }
 
             //  self.visjsGraph.network.fit();
@@ -312,12 +319,29 @@ var MappingColumnsGraph = (function () {
         });
     };
 
+    self.getColumnsClasses = function (nodes) {
+        if (!nodes) {
+            nodes = self.visjsGraph.data.nodes.get();
+        }
+        if (!Array.isArray(nodes)) {
+            nodes = [nodes];
+        }
+        var map = {};
+        nodes.forEach(function (node) {
+            map[node.id] = self.getColumnClass(node);
+        });
+        return map;
+    };
+
     self.getColumnClass = function (node) {
+        if (!node.id) {
+            node = { id: node };
+        }
         var connections = self.visjsGraph.getFromNodeEdgesAndToNodes(node.id);
 
         var classId = null;
         connections.forEach(function (connection) {
-            if (connection.edge.data.type == "rdf:type" || connection.edge.data.type == "rdfs:subClassOf") {
+            if (connection.edge.data && (connection.edge.data.type == "rdf:type" || connection.edge.data.type == "rdfs:subClassOf")) {
                 classId = connection.toNode.data.id;
             }
         });
@@ -325,6 +349,9 @@ var MappingColumnsGraph = (function () {
     };
 
     self.getClassColumns = function (node) {
+        if (!node.id) {
+            node = { id: node };
+        }
         var connections = self.visjsGraph.getFromNodeEdgesAndToNodes(node.id, true);
 
         var columns = [];
@@ -334,6 +361,20 @@ var MappingColumnsGraph = (function () {
             }
         });
         return columns;
+    };
+
+    self.getAllColumnsClasses = function (nodes) {
+        if (!nodes) {
+            nodes = self.visjsGraph.data.nodes.get();
+        }
+        if (!Array.isArray(nodes)) {
+            nodes = [nodes];
+        }
+        var map = {};
+        nodes.forEach(function (node) {
+            map[node.id] = self.getColumnClass(node);
+        });
+        return map;
     };
 
     /**
@@ -719,7 +760,7 @@ var MappingColumnsGraph = (function () {
                     }
                     MappingColumnsGraph.visjsGraph.data = result;
                     if (result.nodes.length == 0) {
-                        MappingColumnsGraph.visjsGraph.draw(function () {
+                        return MappingColumnsGraph.visjsGraph.draw(function () {
                             if (callback) {
                                 return callback();
                             }
@@ -828,22 +869,16 @@ var MappingColumnsGraph = (function () {
         //var positions = {};
         var positions = graph.network.getPositions();
         // Initialisation of Config if there isn't
+
+        // MappingsDetails.setIsMainColumnKey()
+
         if (!DataSourceManager.rawConfig || Object.keys(DataSourceManager.rawConfig).length == 0) {
             if (Config.sources[MappingModeler.currentSLSsource].baseUri) {
                 var graphUri = Config.sources[MappingModeler.currentSLSsource].baseUri;
             } else {
                 var graphUri = Config.sources[MappingModeler.currentSLSsource].graphUri;
             }
-            /*var newJson = {
-                sparqlServerUrl: Config.sources[MappingModeler.currentSLSsource].sparql_server.url,
-                graphUri: graphUri,
-                prefixes: {},
-                lookups: {},
-                databaseSources: {},
-                csvSources: {},
-                isConfigInMappingGraph: true,
-                prefixURI: {},
-            };*/
+
             var newJson = {
                 sparqlServerUrl: Config.sources[MappingModeler.currentSLSsource].sparql_server.url,
                 graphUri: graphUri,
@@ -863,7 +898,12 @@ var MappingColumnsGraph = (function () {
         } else {
             config.graphUri = Config.sources[MappingModeler.currentSLSsource].graphUri;
         }
-
+        // add lastUpdated dict on update
+        if (!config.lastUpdate) {
+            config.lastUpdate = {};
+        }
+        config.lastUpdate.user = authentication.currentUser.identifiant;
+        config.lastUpdate.date = new Date().toISOString();
         delete config.currentDataSource;
         var data = {
             nodes: nodes,
@@ -885,28 +925,35 @@ var MappingColumnsGraph = (function () {
             fileName: fileName,
             data: data,
         };
+        var dataStr = JSON.stringify(data, null, 2);
         var payload = {
             dir: "graphs/",
             fileName: fileName,
-            data: JSON.stringify(data, null, 2),
+            data: dataStr,
         };
 
-        $.ajax({
-            type: "POST",
-            url: `${Config.apiUrl}/data/file`,
-            data: payload,
-            dataType: "json",
-            success: function (_result, _textStatus, _jqXHR) {
-                $("#visjsGraph_savedGraphsSelect").append($("<option></option>").attr("value", fileName).text(fileName));
-                UI.message("graph saved");
-                if (callback) {
-                    callback();
-                }
-            },
-            error(err) {
-                return alert(err);
-            },
-        });
+        try {
+            JSON.parse(dataStr);
+
+            $.ajax({
+                type: "POST",
+                url: `${Config.apiUrl}/data/file`,
+                data: payload,
+                dataType: "json",
+                success: function (_result, _textStatus, _jqXHR) {
+                    $("#visjsGraph_savedGraphsSelect").append($("<option></option>").attr("value", fileName).text(fileName));
+                    UI.message("graph saved");
+                    if (callback) {
+                        callback();
+                    }
+                },
+                error(err) {
+                    return alert(err);
+                },
+            });
+        } catch (e) {
+            return alert(e);
+        }
     };
 
     /**
@@ -967,6 +1014,7 @@ var MappingColumnsGraph = (function () {
         if (!node) {
             return;
         }
+
         self.visjsGraph.data.nodes.remove(node);
         self.saveVisjsGraph(function () {
             if (callback) {
@@ -978,21 +1026,35 @@ var MappingColumnsGraph = (function () {
     /**
      * Adds a new node to the Vis.js graph and saves the updated graph.
      * @function
-     * @name addNode
+     * @name addNodes
      * @memberof module:MappingColumnsGraph
      * @param {Object} node - The node to be added.
      * @returns {void}
      */
-    self.addNode = function (node, callback) {
-        if (!node) {
+    self.addNodes = function (nodes, callback) {
+        if (!nodes) {
             return;
         }
-        self.visjsGraph.data.nodes.add(node);
-        self.saveVisjsGraph(function () {
-            if (callback) {
-                callback();
+        if (!Array.isArray(nodes)) {
+            nodes = [nodes];
+        }
+
+        var save = false;
+        var existingNodeIds = self.visjsGraph.data.nodes.getIds();
+        nodes.forEach(function (node) {
+            if (existingNodeIds.indexOf(node.id) > -1) {
+                return;
             }
+            save = true;
+            self.visjsGraph.data.nodes.add(node);
         });
+        if (save) {
+            self.saveVisjsGraph(function () {
+                if (callback) {
+                    callback();
+                }
+            });
+        }
     };
 
     /**
@@ -1127,6 +1189,7 @@ var MappingColumnsGraph = (function () {
             locked: false,
             animation: true,
         });
+        self.visjsGraph.network.fit();
     };
 
     /**
@@ -1381,12 +1444,35 @@ var MappingColumnsGraph = (function () {
 
     self.hideNodesFromOtherTables = function (table) {
         var nodes = MappingColumnsGraph.visjsGraph.data.nodes.get();
+        var edges = MappingColumnsGraph.visjsGraph.data.edges.get();
+
         var newNodes = [];
+        var newNodesMap = {};
+        var tableNodes = {};
+
         nodes.forEach(function (node) {
-            var hide = false;
-            if (node.data && node.data.dataTable && node.data.dataTable != table) hide = true;
-            newNodes.push({ id: node.id, hidden: hide });
+            if (node.data && node.data.dataTable) {
+                if (node.data.dataTable == table) {
+                    tableNodes[node.id] = node;
+                }
+            }
+            newNodesMap[node.id] = { id: node.id, hidden: true };
         });
+
+        var edgesFromClassMap = {};
+        edges.forEach(function (edge) {
+            if (edge.data && (edge.data.type == "rdf:type" || edge.data.type == "owl:Class")) {
+                if (tableNodes[edge.from]) {
+                    newNodesMap[edge.to].hidden = false;
+                    newNodesMap[edge.from].hidden = false;
+                }
+            }
+        });
+
+        for (var nodeId in newNodesMap) {
+            newNodes.push(newNodesMap[nodeId]);
+        }
+
         MappingColumnsGraph.visjsGraph.data.nodes.update(newNodes);
     };
 
@@ -1396,6 +1482,214 @@ var MappingColumnsGraph = (function () {
         }
         $("#mappingModeler_relationInfos").html("from: <b>" + (fromLabel ?? "None") + "</b> to: <b>" + (toLabel ?? "None") + "</b>");
     };
+
+    self.drawClassesGraph = function () {
+        var columns = self.getNodesOfType(MappingModeler.columnsMappingsObjects);
+        var edgesFromMap = self.getEdgesMap("from");
+        var classNodesMap = self.getNodesMap("Class");
+        var linkedClasses = {};
+        var classVisjsData = { nodes: [], edges: [] };
+
+        async.series(
+            [
+                //get transitive linked classes
+                function (callbackSeries) {
+                    columns.forEach(function (column) {
+                        var columnClass = self.getColumnClass(column);
+                        if (edgesFromMap[column.id]) {
+                            var edgesFrom = edgesFromMap[column.id];
+                            edgesFrom.forEach(function (edge) {
+                                if (edge.from == column.id) {
+                                    var edgeType = edge.data ? edge.data.id : null;
+
+                                    if (edgeType && edgeType != "owl:Class" && edgeType != "rdf:type") {
+                                        if (!linkedClasses[columnClass]) {
+                                            linkedClasses[columnClass] = [];
+                                        }
+                                        edge.targetClass = self.getColumnClass(edge.to);
+                                        linkedClasses[columnClass].push(edge);
+                                    } else {
+                                    }
+                                }
+                            });
+                        }
+                    });
+                    callbackSeries();
+                },
+
+                //build visjgraph
+                function (callbackSeries) {
+                    var uniqueNodes = {};
+                    for (var classId in linkedClasses) {
+                        if (!uniqueNodes[classId]) {
+                            uniqueNodes[classId] = 1;
+                            var startClass = classNodesMap[classId];
+
+                            if (startClass) {
+                                startClass.hidden = false;
+                                classVisjsData.nodes.push(startClass);
+                            }
+                        }
+                        var targetClass;
+                        var targetEdges = linkedClasses[classId];
+                        targetEdges.forEach(function (edge) {
+                            targetClass = classNodesMap[edge.targetClass];
+                            if (targetClass && !uniqueNodes[edge.targetClass]) {
+                                uniqueNodes[edge.targetClass] = 1;
+                                targetClass.hidden = false;
+                                classVisjsData.nodes.push(targetClass);
+                            }
+
+                            if (targetClass) {
+                                var edge2 = {
+                                    label: edge.label,
+                                    data: {
+                                        label: edge.label,
+                                        id: edge.data.id,
+                                    },
+                                    from: classId,
+                                    to: targetClass.id,
+                                    arrows: {
+                                        to: {
+                                            enabled: true,
+                                            type: "arrow",
+                                        },
+                                    },
+                                };
+                                classVisjsData.edges.push(edge2);
+                            }
+                        });
+                    }
+                    callbackSeries();
+                },
+                // compare to model restrictions
+                function (callbackSeries) {
+                    Sparql_OWL.getObjectRestrictions(MappingModeler.currentSLSsource, null, {}, function (err, result) {
+                        if (err) {
+                            return callbackSeries();
+                        }
+
+                        var map = {};
+                        result.forEach(function (item) {
+                            map[item.subject.value + "_" + item.value.value] = item;
+                        });
+
+                        classVisjsData.edges.forEach(function (edge) {
+                            var modelRestriction = map[edge.from + "_" + edge.to];
+                            if (modelRestriction) {
+                                if (modelRestriction.prop.value == edge.data.id) {
+                                    edge.color = "green";
+                                } else {
+                                    edge.color = "red";
+
+                                    classVisjsData.edges.push({
+                                        from: edge.from,
+                                        to: edge.to,
+                                        label: modelRestriction.propLabel.value,
+                                        data: { id: modelRestriction.prop.value },
+                                        arrows: {
+                                            to: {
+                                                enabled: true,
+                                                type: "arrow",
+                                            },
+                                        },
+                                    });
+                                }
+                            } else {
+                                var inverseModelRestriction = map[edge.to + "_" + edge.from];
+                                if (inverseModelRestriction) {
+                                    classVisjsData.edges.push({
+                                        from: edge.from,
+                                        to: edge.to,
+                                        volor: "blue",
+                                        label: inverseModelRestriction.propLabel.value,
+                                        data: { id: inverseModelRestriction.prop.value },
+                                        arrows: {
+                                            to: {
+                                                enabled: true,
+                                                type: "arrow",
+                                            },
+                                        },
+                                    });
+                                }
+
+                                edge.color = "blue";
+                            }
+                        });
+                        callbackSeries();
+                    });
+                },
+                // draw graph
+                function (callbackSeries) {
+                    //  classVisjsData={nodes:[], edges:[]}
+                    var html = "<div style='width:1000px;height:800px' id='mappingModeler_implicitModelGraph'></div>";
+                    $("#mainDialogDiv").html(html);
+                    $("#mainDialogDiv").dialog("open");
+
+                    self.implicitModelVisjsGraph = new VisjsGraphClass("mappingModeler_implicitModelGraph", classVisjsData);
+                    self.implicitModelVisjsGraph.draw(function () {});
+
+                    // self.drawGraphCanvas(self.graphDiv, classVisjsData);
+                    callbackSeries();
+                },
+            ],
+            function (err) {},
+        );
+    };
+
+    self.getNodesOfType = function (types, onlyIds) {
+        if (!types) {
+            return [];
+        }
+        if (!Array.isArray(types)) {
+            types = [types];
+        }
+        if (types.length == 0) {
+            return [];
+        }
+
+        var nodes = self.visjsGraph.data.nodes.get();
+        var filteredNodes = [];
+        nodes.forEach(function (node) {
+            if (node?.data?.type && types.includes(node.data.type)) {
+                if (onlyIds) {
+                    filteredNodes.push(node.id);
+                } else {
+                    filteredNodes.push(node);
+                }
+            }
+        });
+        return filteredNodes;
+    };
+
+    self.getNodesMap = function (type) {
+        var nodes = self.visjsGraph.data.nodes.get();
+        var map = {};
+        nodes.forEach(function (node) {
+            if (!type || (node.data && node.data.type == type)) {
+                map[node.id] = node;
+            }
+        });
+        return map;
+    };
+    self.getEdgesMap = function (key) {
+        var edges = self.visjsGraph.data.edges.get();
+        var map = {};
+        var calculatedKey;
+        edges.forEach(function (edge) {
+            if (!key || key == "id") {
+                calculatedKey = edge.id;
+            } else {
+                calculatedKey = edge[key];
+            }
+            if (!map[calculatedKey]) {
+                map[calculatedKey] = [];
+            }
+            map[calculatedKey].push(edge);
+        });
+        return map;
+    };
+
     return self;
 })();
 

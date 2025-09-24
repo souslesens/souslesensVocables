@@ -291,7 +291,7 @@ var Sparql_common = (function () {
         return str;
     };
 
-    self.getUriFilter = function (varName, values) {
+    /*self.getUriFilter = function (varName, values) {
         if (values.value) {
             if (values.isString) {
                 var lang = values.lang ? "@" + values.lang : "";
@@ -306,6 +306,9 @@ var Sparql_common = (function () {
 
         var str = "";
         var filterStr = "";
+
+
+
         values.forEach(function (item, index) {
             if (index > 0) {
                 str += ",";
@@ -330,6 +333,86 @@ var Sparql_common = (function () {
         }
 
         return filterStr;
+    };*/
+    // new version that handles blank nodes (nodeID://)
+    self.getUriFilter = function (varName, values) {
+        if (values.value) {
+            if (values.isString) {
+                var lang = values.lang ? "@" + values.lang : "";
+                str = '"' + values.value.replace(/"/g, "'") + '"';
+                return "filter( ?" + varName + "=" + str + lang + ").";
+            }
+        }
+
+        if (!Array.isArray(values)) {
+            values = [values];
+        }
+
+        // Separate blank nodes (nodeID://) from standard values (URIs/literals)
+        var blankNodeValues = [];
+        var standardValues = [];
+
+        values.forEach(function (item) {
+            if (item.indexOf("nodeID://") === 0) {
+                blankNodeValues.push(item);
+            } else {
+                standardValues.push(item);
+            }
+        });
+
+        var filterConditions = [];
+
+        // Handle standard values with direct comparison
+        if (standardValues.length > 0) {
+            var standardValuesStr = "";
+            standardValues.forEach(function (item, index) {
+                if (index > 0) {
+                    standardValuesStr += ",";
+                }
+                let isLiteral = true;
+                if (item.indexOf("http") == 0 || (item.indexOf(":") > 0 && item.indexOf(" ") < 0)) {
+                    isLiteral = false;
+                }
+                if (isLiteral) {
+                    standardValuesStr += '"' + item.replace(/"/g, "'") + '"';
+                } else {
+                    standardValuesStr += "<" + item + ">";
+                }
+            });
+
+            if (standardValues.length > 1) {
+                filterConditions.push("?" + varName + " in (" + standardValuesStr + ")");
+            } else {
+                filterConditions.push("?" + varName + "=" + standardValuesStr);
+            }
+        }
+
+        // Handle blank nodes with str() comparison
+        if (blankNodeValues.length > 0) {
+            var blankNodeValuesStr = "";
+            blankNodeValues.forEach(function (blankNode, index) {
+                if (index > 0) {
+                    blankNodeValuesStr += ",";
+                }
+                blankNodeValuesStr += '"' + blankNode + '"';
+            });
+
+            if (blankNodeValues.length > 1) {
+                filterConditions.push("str(?" + varName + ") in (" + blankNodeValuesStr + ")");
+            } else {
+                filterConditions.push("str(?" + varName + ') = "' + blankNodeValues[0] + '"');
+            }
+        }
+
+        // Combine conditions
+        var filterStr = "";
+        if (filterConditions.length > 1) {
+            filterStr = "filter (" + filterConditions.join(" || ") + ")";
+        } else if (filterConditions.length === 1) {
+            filterStr = "filter (" + filterConditions[0] + ")";
+        }
+
+        return filterStr + ".";
     };
 
     self.formatString = function (str, forUri) {

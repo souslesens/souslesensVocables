@@ -49,7 +49,7 @@ var CreateResource_bot = (function () {
                     // "owl:ObjectProperty": { promptResourceLabelFn: { listVocabsFn: { listObjectPropertiesfn: self.workflow_saveResource } } },
 
                     "owl:NamedIndividual": { promptResourceLabelFn: { listVocabsFn: { listClassTypesFn: self.workflow_saveResource } } },
-                    DatatypeProperty: { promptDatatypePropertyLabelFn: { listDatatypePropertyDomainFn: { listDatatypePropertyRangeFn: { createDataTypePropertyFn: {} } } } },
+                    DatatypeProperty: { promptDatatypePropertyLabelFn: { listDatatypePropertyDomainFn: { listDatatypePropertyRangeFn: { createDataTypePropertyFn: { drawDataTypePropertFn: {} } } } } },
                     ImportClass: { listVocabsFn: { listSuperClassesFn: self.workflow_saveResource } },
                     ImportSource: { listImportsFn: { saveImportSource: self.workflow_end } },
                 },
@@ -57,7 +57,7 @@ var CreateResource_bot = (function () {
         });
 
     self.workFlowDatatypeProperty = {
-        promptDatatypePropertyLabelFn: { listDatatypePropertyDomainFn: { listDatatypePropertyRangeFn: { createDataTypePropertyFn: {} } } },
+        promptDatatypePropertyLabelFn: { listDatatypePropertyDomainFn: { listDatatypePropertyRangeFn: { createDataTypePropertyFn: { drawDataTypePropertFn: {} } } } },
     };
 
     self.functionTitles = {
@@ -231,6 +231,13 @@ var CreateResource_bot = (function () {
                     self.myBotEngine.nextStep();
                 });
             });
+        },
+        drawDataTypePropertFn: function () {
+            if (self.params && self.params.datatypePropertyDomain) {
+                Lineage_whiteboard.drawDataTypeProperties(null, self.params.datatypePropertyDomain, null, function () {
+                    self.myBotEngine.nextStep();
+                });
+            }
         },
     };
 

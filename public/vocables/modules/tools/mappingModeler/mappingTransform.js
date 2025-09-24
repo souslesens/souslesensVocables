@@ -14,27 +14,6 @@ var MappingTransform = (function () {
     var self = {};
 
     /**
-     * Generates the SLS mappings from the Vis.js graph and displays them in the right panel of the UI.
-     * The mappings are formatted as JSON and placed inside a textarea for easy access and copying.
-     *
-     * @function
-     * @name generateSLSmappings
-     * @memberof module:MappingTransform
-     * @returns {void}
-     */
-    self.generateSLSmappings = function () {
-        var json = MappingTransform.getSLSmappingsFromVisjsGraph();
-        UIcontroller.activateRightPanel("generic");
-
-        $("#mappingModeler_genericPanel").html(
-            '<button class="w3-button nodesInfos-iconsButtons " style="font-size: 10px;margin-left:7px;" onclick=" MappingModeler.copyKGcreatorMappings()"><input type="image" src="./icons/CommonIcons/CopyIcon.png"></button>' +
-                ' <textarea id="mappingModeler_infosTA" style="display: block;width:80%;height: 700px;overflow: auto;"> </textarea>',
-        );
-        //    $("#smallDialogDiv").dialog("open");
-        $("#mappingModeler_infosTA").val(JSON.stringify(json, null, 2));
-    };
-
-    /**
      * Placeholder function for generating R2ML mappings. Currently displays an alert.
      *
      * @function
@@ -289,7 +268,7 @@ var MappingTransform = (function () {
 
     /**
      * Adds restrictions to the mappings if both subject and object are classes and are different from each other.
-     * This function checks if the subject and object in a mapping are RDF classes, and if they are, it marks the mapping as a restriction.
+     * This function checks if the subject and object in a mapping are OWL classes, and if they are, it marks the mapping as a restriction.
      * @function
      * @name addMappingsRestrictions
      * @memberof module:MappingTransform
@@ -338,7 +317,9 @@ var MappingTransform = (function () {
         var columnsSelection = {};
         var checkedNodeAttrs = [];
         checkedNodes.forEach(function (node) {
-            if (node?.parents?.length == 3) {
+            if (node.data && node.data.type == "ColumnMapping") {
+                checkedNodeAttrs.push(node.id);
+            } else if (node?.parents?.length == 3) {
                 // attrs
                 checkedNodeAttrs.push(node.id);
                 columnsSelection[node.id] = MappingColumnsGraph.visjsGraph.data.nodes.get(node.parent);
@@ -360,15 +341,33 @@ var MappingTransform = (function () {
         var transforms = {};
         // checkedNodeAttrs work only for technical mappings we need to also add structural column mappings
         mappings.forEach(function (mapping) {
+            var mappingS = mapping.s.replaceAll("_$", "").replaceAll("_£", "").replaceAll("@", "");
+            var mappingO = mapping.o.replaceAll("_$", "").replaceAll("_£", "").replaceAll("@", "");
             // columnsMapping
             var mappingInColumnMapping = columnMappings.filter(function (item) {
                 return item.s == mapping.s && item.p == mapping.p && item.o == mapping.o;
             });
+
             if (mappingInColumnMapping.length > 0) {
-                filteredMappings.push(mapping);
+                checkedNodeAttrs.forEach(function (treeNodeId) {
+                    if (treeNodeId == mappingS + "-->" + mapping.p + "-->" + mappingO) {
+                        filteredMappings.push(mapping);
+                    }
+                });
             } else {
                 checkedNodeAttrs.forEach(function (treeNodeId) {
-                    if (treeNodeId.indexOf(mapping.o) > -1) {
+                    //not enough we need object is the third
+                    //if (treeNodeId.indexOf(mapping.o) > -1) {
+                    var treeNodeSplit = treeNodeId.split("|");
+                    if (treeNodeSplit.length === 3) {
+                        var objectId = treeNodeSplit[2];
+                    } else {
+                        return;
+                    }
+                    if (!objectId) {
+                        return;
+                    }
+                    if (objectId == mapping.o) {
                         if (treeNodeId.indexOf("transform") > -1 && mapping.p == "transform") {
                             transforms[mapping.s] = mapping.o;
                         } else if (!uniqueFilteredMappings[mapping.s + "|" + mapping.p + "|" + mapping.o]) {
@@ -378,6 +377,22 @@ var MappingTransform = (function () {
                     }
                 });
             }
+        });
+
+        // add transforms to the mappings
+
+        // add transform
+        var slsMappings = self.getSLSmappingsFromVisjsGraph();
+        var transformMappingsMap = {};
+        slsMappings.forEach(function (mapping) {
+            if (mapping.p == "transform") {
+                transformMappingsMap[mapping.s] = mapping;
+            }
+        });
+
+        filteredMappings.forEach(function (mapping) {
+            if (transformMappingsMap[mapping.s]) filteredMappings.push(transformMappingsMap[mapping.s]);
+            if (transformMappingsMap[mapping.o]) filteredMappings.push(transformMappingsMap[mapping.o]);
         });
 
         // selection isn't concerned for column mappings select all

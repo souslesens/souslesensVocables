@@ -36,7 +36,7 @@ Checkout the latest [release](https://github.com/souslesens/souslesensVocables/r
 git checkout x.x.x  # replace with release number (e.g. 1.95.0)
 ```
 
-## Prepare the sls-py-api git repository
+## Optional : Prepare the sls-py-api git repository
 
 Clone the git repository
 
@@ -51,7 +51,7 @@ Checkout the latest [tag](https://github.com/souslesens/sls-py-api/tags)
 git checkout x.x.x  # replace with release number (e.g. 1.4.0)
 ```
 
-## Prepare the jowl git repository
+## Optional : Prepare the jowl git repository
 
 Clone the git repository
 

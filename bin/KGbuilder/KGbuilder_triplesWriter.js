@@ -3,7 +3,7 @@ const httpProxy = require("../httpProxy.");
 const async = require("async");
 const util = require("../util.");
 const KGbuilder_socket = require("./KGbuilder_socket");
-const KGbuilder_triplesMaker = require("./KGbuilder_triplesMaker.js");
+const TriplesMaker = require("./triplesMaker.js");
 
 const KGbuilder_triplesWriter = {
     sparqlPrefixes: {
@@ -37,13 +37,13 @@ const KGbuilder_triplesWriter = {
 
         var slices = util.sliceArray(allTriples, 200);
 
-        KGbuilder_triplesMaker.existingTriples = {};
         async.eachSeries(
             slices,
             function (triples, callbackEach) {
                 var insertTriplesStr = "";
                 triples.forEach(function (triple) {
-                    var str = triple.s + " " + triple.p + " " + triple.o + ". ";
+                    //   var str = triple.s + " " + triple.p + " " + triple.o + ". ";
+                    var str = triple + ". ";
                     insertTriplesStr += str;
                 });
 
@@ -127,13 +127,13 @@ const KGbuilder_triplesWriter = {
         );
     },
 
-    deleteKGcreatorTriples: function (sparqlServerUrl, graphUri, table, options, callback) {
+    deleteKGBuilderTriples: function (sparqlServerUrl, graphUri, table, options, callback) {
         const KGbuilder_triplesMaker = require("./KGbuilder_triplesMaker");
         var query = "";
         if (table) {
-            query += "with  GRAPH <" + graphUri + "> " + "delete {?s ?p ?o} where {?s ?p ?o. ?s <" + KGbuilder_triplesMaker.mappingFilePredicate + "> '" + table + "'}";
+            query += "with  GRAPH <" + graphUri + "> " + "delete {?s ?p ?o} where {?s ?p ?o. ?s <" + TriplesMaker.mappingFilePredicate + "> '" + table + "'}";
         } else {
-            query += "with  <" + graphUri + "> " + "delete {?s ?p ?o} where {?s ?p ?o. ?s <" + KGbuilder_triplesMaker.mappingFilePredicate + "> ?table }";
+            query += "with  <" + graphUri + "> " + "delete {?s ?p ?o} where {?s ?p ?o. ?s <" + TriplesMaker.mappingFilePredicate + "> ?table }";
         }
 
         var limit = 10000;

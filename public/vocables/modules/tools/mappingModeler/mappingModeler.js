@@ -23,6 +23,7 @@ import Lineage_sources from "../lineage/lineage_sources.js";
 import MainController from "../../shared/mainController.js";
 import dataSourcesManager from "./dataSourcesManager.js";
 import MappingColumnsGraph from "./mappingColumnsGraph.js";
+import authentication from "../../shared/authentification.js";
 
 /**
  * MappingModeler module.
@@ -32,6 +33,8 @@ import MappingColumnsGraph from "./mappingColumnsGraph.js";
  */
 var MappingModeler = (function () {
     var self = {};
+    self.skipStats = false;
+
     self.maxItemsInJstreePerSource = 250;
     // self.maxItemsInJstree =400;
     /**
@@ -65,6 +68,8 @@ var MappingModeler = (function () {
     ];
 
     self.propertyColor = "#409304";
+    // 10 minutes without modifying the graph
+    self.accessDelayTimeout = 10 * 60;
 
     /**
      * Initializes the MappingModeler module.
@@ -83,6 +88,7 @@ var MappingModeler = (function () {
      * @throws {Error} If any step in the initialization sequence fails.
      */
     self.onLoaded = function () {
+        var tableStatsMap = {};
         async.series(
             [
                 function (callbackSeries) {
@@ -116,6 +122,7 @@ var MappingModeler = (function () {
                     });
                 },
                 //load visjs mapping graph
+
                 function (callbackSeries) {
                     MappingColumnsGraph.loadVisjsGraph(function (err) {
                         if (err) {
@@ -123,6 +130,25 @@ var MappingModeler = (function () {
                         }
                         return callbackSeries();
                     });
+                },
+                // refuse access if another lastUpdate.user is too recent on mappingFile
+                // concurencial access
+                function (callbackSeries) {
+                    if (dataSourcesManager?.currentConfig?.lastUpdate && authentication?.currentUser?.identifiant) {
+                        if (dataSourcesManager.currentConfig.lastUpdate.user != authentication?.currentUser?.identifiant) {
+                            var currentTime = new Date();
+                            var lastUpdateDate = new Date(dataSourcesManager.currentConfig.lastUpdate?.date);
+                            if (currentTime && lastUpdateDate) {
+                                const diffMs = currentTime - lastUpdateDate;
+                                const diffSeconds = diffMs / 1000;
+                                if (diffSeconds && diffSeconds < self.accessDelayTimeout) {
+                                    alert("Sorry another user is already editing the mapping,please come back later");
+                                    window.location.href = "/";
+                                }
+                            }
+                        }
+                    }
+                    return callbackSeries();
                 },
                 //load visjs mapping graph
                 function (callbackSeries) {
@@ -137,6 +163,20 @@ var MappingModeler = (function () {
                             return callbackSeries(err);
                         }
 
+                        return callbackSeries();
+                    });
+                },
+                function (callbackSeries) {
+                    return callbackSeries();
+                    MappingColumnsGraph.drawClassesGraph();
+                    return callbackSeries();
+                },
+                function (callbackSeries) {
+                    if (self.skipStats) {
+                        return callbackSeries();
+                    }
+                    DataSourceManager.getTriplesStats(DataSourceManager.currentSlsvSource, function (err, result) {
+                        tableStatsMap = result || {};
                         return callbackSeries();
                     });
                 },
@@ -157,7 +197,7 @@ var MappingModeler = (function () {
                        
                         $($('#MappingModeler_leftTabs').children()[0]).find("li").addClass('lineage-tabDiv');
                         $($('#MappingModeler_leftTabs').children()[0]).find("a").css('text-decoration','none');*/
-                        DataSourceManager.loaDataSourcesJstree(self.jstreeDivId, function (err) {
+                        DataSourceManager.loaDataSourcesJstree(self.jstreeDivId, tableStatsMap, function (err) {
                             return callbackSeries();
                         });
                         /*  $('#rightControlPanelDiv').load("./modules/tools/lineage/html/whiteBoardButtons.html", function () {
@@ -262,24 +302,29 @@ var MappingModeler = (function () {
 
                 if (self.currentResourceType == "Class") {
                     if (node.data && node.data.resourceType != "searchClass") {
-                        items.showSampleData = {
-                            label: "deleteClass",
-                            action: function (_e) {
-                                NodeInfosWidget.currentNode = node;
-                                NodeInfosWidget.currentNodeId = node.id;
-                                NodeInfosWidget.currentNode.data.source = MainController.currentSource;
-                                NodeInfosWidget.currentSource = MainController.currentSource;
-                                NodeInfosWidget.deleteNode(function () {
-                                    NodeInfosWidget.currentNode = null;
-                                    NodeInfosWidget.currentNodeId = null;
-                                    NodeInfosWidget.currentSource = null;
-                                    $("#suggestionsSelectJstreeDiv").jstree("delete_node", node.id);
-                                    if (self.allClasses[node.id]) {
-                                        delete self.allClasses[node.id];
-                                    }
-                                });
-                            },
-                        };
+                        // only for classses
+                        if (node.parents && node.parents.length > 2) {
+                            if (node.parent && Lineage_sources.isSourceEditableForUser(node.parent)) {
+                                items.showSampleData = {
+                                    label: "deleteClass",
+                                    action: function (_e) {
+                                        NodeInfosWidget.currentNode = node;
+                                        NodeInfosWidget.currentNodeId = node.id;
+                                        NodeInfosWidget.currentNode.data.source = MainController.currentSource;
+                                        NodeInfosWidget.currentSource = MainController.currentSource;
+                                        NodeInfosWidget.deleteNode(function () {
+                                            NodeInfosWidget.currentNode = null;
+                                            NodeInfosWidget.currentNodeId = null;
+                                            NodeInfosWidget.currentSource = null;
+                                            $("#suggestionsSelectJstreeDiv").jstree("delete_node", node.id);
+                                            if (self.allClasses[node.id]) {
+                                                delete self.allClasses[node.id];
+                                            }
+                                        });
+                                    },
+                                };
+                            }
+                        }
                     }
                 }
                 return items;
@@ -1073,14 +1118,17 @@ var MappingModeler = (function () {
     };
 
     self.restartMappings = function () {
-        var confirmRestart = confirm("Are you sure you want to delete mappings nodes and edges?");
-        if (confirmRestart) {
-            var visjsData = { nodes: [], edges: [] };
-            MappingColumnsGraph.visjsGraph.data = visjsData;
-            MappingColumnsGraph.saveVisjsGraph(function () {
-                MappingColumnsGraph.loadVisjsGraph();
-            });
+        if (!confirm("Do you want to delete all mappings ")) {
+            return;
         }
+        if (!confirm("Are you sure")) {
+            return;
+        }
+        var visjsData = { nodes: [], edges: [] };
+        MappingColumnsGraph.visjsGraph.data = visjsData;
+        MappingColumnsGraph.saveVisjsGraph(function () {
+            MappingColumnsGraph.loadVisjsGraph();
+        });
     };
     /**
      * Displays the create resource bot and starts the resource creation workflow based on the provided resource type.
@@ -1423,6 +1471,9 @@ var MappingModeler = (function () {
      */
 
     self.showSampleData = function (node, columns, callback) {
+        if (!node) {
+            node = self.currentTreeNode;
+        }
         // alert("coming soon");
         if (!columns) {
             var hasColumn = false;
@@ -1517,6 +1568,38 @@ var MappingModeler = (function () {
             };
         }
         PlantUmlTransformer.visjsDataToClassDiagram(visjsData);
+    };
+    self.refreshSourceOntologyModel = function (callback) {
+        OntologyModels.unRegisterSourceModel();
+        JstreeWidget.clear("mappingModelerRelations_jstreeDiv");
+        self.initResourcesMap(MappingModeler.currentSLSsource, function () {
+            if (self?.currentResourceType == "Class" || self?.currentResourceType == "Property") {
+                self.onLegendNodeClick({
+                    id: self.currentResourceType,
+                });
+            }
+            if (callback) callback();
+        });
+    };
+
+    self.socketMessage = function (message) {
+        if (typeof message == "string") {
+            UI.message(message);
+        } else {
+            var percent = Math.round((message.processedRecords / message.tableTotalRecords) * 100);
+            var messageStr = percent + "% :";
+
+            if (message.operation == "records") {
+                messageStr += message.processedRecords + " records loaded from table " + message.table + " on " + message.tableTotalRecords + " in " + message.operationDuration + "msec";
+            } else if (message.operation == "buildTriples") {
+                messageStr += message.batchTriples + " triples created in " + message.operationDuration + "msec";
+            } else if (message.operation == "writeTriples") {
+                messageStr += message.batchTriples + " triples writen in " + message.operationDuration + "msec. totalTriples created " + message.totalTriples;
+            } else if (message.operation == "finished") {
+                messageStr += message.totalTriples + " triples writen in " + message.totalDuration + "msec";
+            }
+            UI.message(messageStr);
+        }
     };
 
     return self;

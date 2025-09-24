@@ -12,6 +12,7 @@ class DatabaseModel {
      */
     constructor(path) {
         this.path = path;
+        this.knexClients = {};
     }
 
     /**
@@ -162,21 +163,57 @@ class DatabaseModel {
      * @param {string} databaseId - the database id
      * @returns {Promise<any>} database connection
      */
+
     getConnection = async (databaseId) => {
-        const database = await this.getDatabase(databaseId);
-        const dbClient = this.getClientDriver(database.driver);
-        return knex({
-            acquireConnectionTimeout: 5000,
-            client: dbClient,
-            connection: {
-                host: database.host,
-                port: database.port,
-                user: database.user,
-                password: database.password,
-                database: database.database,
-            },
-        });
+        if (!this.knexClients[databaseId]) {
+            const database = await this.getDatabase(databaseId);
+            const dbClient = this.getClientDriver(database.driver);
+            this.knexClients[databaseId] = knex({
+                acquireConnectionTimeout: 5000,
+                client: dbClient,
+                connection: {
+                    host: database.host,
+                    port: database.port,
+                    user: database.user,
+                    password: database.password,
+                    database: database.database,
+                },
+            });
+        }
+
+        return this.knexClients[databaseId];
     };
+
+    refreshConnection = async (databaseId, callback) => {
+        const client = this.knexClients[databaseId];
+        if (client) {
+            await client.destroy();
+            delete this.knexClients[databaseId];
+            console.log(`Connexion fermée pour la base ${databaseId}`);
+        }
+        await this.getConnection(databaseId);
+        console.log(`Connexion ouverte pour la base ${databaseId}`);
+        if (callback) {
+            callback();
+        }
+        return;
+    };
+
+    /* getConnection = async (databaseId) => {
+    //     const database = await this.getDatabase(databaseId);
+    //     const dbClient = this.getClientDriver(database.driver);
+    //     return knex({
+    //         acquireConnectionTimeout: 5000,
+    //         client: dbClient,
+    //         connection: {
+    //             host: database.host,
+    //             port: database.port,
+    //             user: database.user,
+    //             password: database.password,
+    //             database: database.database,
+    //         },
+    //     });
+    // };*/
 
     /**
      * @param {string} databaseId - the database id
@@ -214,9 +251,14 @@ class DatabaseModel {
      * @returns {Promise<any[]>} query result
      */
     recurseBatchSelect = async (connection, databaseId, tableName, { values = [], select = "*", offset = 0, limit = 1000, noRecurs = false }) => {
-        const columns = await connection(tableName).columnInfo();
-        const columnsKeys = Object.keys(columns);
-        const res = await connection.select(select).from(tableName).orderBy(columnsKeys).limit(limit).offset(offset);
+        var res = null;
+        if (select == "*") {
+            const columns = await connection(tableName).columnInfo();
+            const columnsKeys = Object.keys(columns);
+            res = await connection.select(select).from(tableName).orderBy(columnsKeys).limit(limit).offset(offset);
+        } else {
+            res = await connection.select(select).from(tableName).limit(limit).offset(offset);
+        }
 
         const concat = values.concat(res);
 

@@ -360,10 +360,10 @@ var TripleFactory = (function () {
         });
 
         var tableData = [];
-        var regex = /(<[^>]*>) ([^ ]*) (.*)/;
+        var regex = /<([^>]*)> <*([^ ]*)>* <*([^>]*)>*/;
         data.sampleTriples.forEach(function (item, index) {
             var array = regex.exec(item);
-
+            tableData.push([array[1], array[2], array[3]]);
             tableData.push([escapeMarkup(array[1]), escapeMarkup(array[2]), escapeMarkup(array[3])]);
             //  tableData.push([escapeMarkup(item.s), escapeMarkup(item.p), escapeMarkup(item.o)]);
         });

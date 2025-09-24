@@ -139,30 +139,35 @@ var KGbuilder_main = {
                                 var tableInfos = {
                                     table: firstColumn.dataTable,
                                 };
-                                if (tableProcessingParams?.sourceInfos?.databaseSources && tableProcessingParams?.sourceInfos?.databaseSources[firstColumn?.datasource]) {
+                                if (firstColumn.datasource) {
                                     // database
-                                    tableInfos.dbID = firstColumn.datasource;
+                                    if (tableProcessingParams.sourceInfos.csvSources[firstColumn.dataTable]) {
+                                        var csvDir = path.join(__dirname, "../../data/CSV/" + source + "/");
+                                        tableInfos.csvDataFilePath = csvDir + firstColumn.dataTable;
+                                    } else {
+                                        tableInfos.dbID = firstColumn.datasource;
+                                    }
                                 } else {
                                     //csv
-                                    var csvDir = path.join(__dirname, "../../data/CSV/" + source + "/");
-                                    tableInfos.csvDataFilePath = csvDir + firstColumn.dataTable;
+                                    return callbackSeries("no datasource");
                                 }
                                 tableProcessingParams.tableInfos = tableInfos;
 
                                 callbackSeries();
                             },
-                            // countitems in table
+                            // countitems in table if database
                             function (callbackSeries) {
-                                if (!tableProcessingParams.tableInfos.dbID) {
+                                if (tableProcessingParams.tableInfos.csvDataFilePath) {
                                     return callbackSeries();
                                 }
+
                                 var sql = 'select count(*) as count from "' + table + '";';
                                 try {
                                     databaseModel.query(tableProcessingParams.tableInfos.dbID, sql).then((result) => {
                                         tableProcessingParams.tableInfos.tableTotalRecords = parseInt(result.rows[0].count);
                                         callbackSeries();
                                     });
-                                } catch (eee) {
+                                } catch (err) {
                                     callbackSeries(err);
                                 }
                             },

@@ -87,6 +87,7 @@ var MappingsDetails = (function () {
         });
 
         var allreadyDefinedNodes = []; // nodes that are allready defined that need to be saved together after running isColumnAllreadyMappedInAnotherTable
+        var allreadyDefinedNodes = []; // nodes that are allready defined that need to be saved together after running isColumnAllreadyMappedInAnotherTable
         nodes.forEach(function (node) {
             if (node.data.dataTable !== table) {
                 return;
@@ -109,7 +110,9 @@ var MappingsDetails = (function () {
                     allreadyDefinedNodes.push(node);
                     definitionTable = "<font color='#eab3b3'><i> def: " + definitionTable + "</i></font>";
                     color = "#eab3b3";
-                } else definitionTable = "";
+                } else {
+                    definitionTable = "";
+                }
 
                 jstreeData.push({
                     id: node.id,
@@ -188,29 +191,33 @@ var MappingsDetails = (function () {
                 });
                 propertyLabel = allPropertiesCorrespondance.length > 0 ? allPropertiesCorrespondance[0].label : mapping.p;
             }
-            var subjectId = uniqueSubjects[mappingS]?.id;
-            var objectId = uniqueSubjects[mappingO]?.id;
-            if (!subjectId) return;
-            var objectLabel = mappingO;
-            if (!objectId && mappingO.indexOf("http://") === 0) {
+            var subjectId = uniqueSubjects[mapping.s]?.id;
+            var objectId = uniqueSubjects[mapping.o]?.id;
+            if (!subjectId) {
+                return;
+            }
+            var objectLabel = mapping.o;
+            if (!objectId && mapping.o.indexOf("http://") === 0) {
                 var object = MappingModeler.allClasses.find(function (item) {
-                    return item.id == mappingO;
+                    return item.id == mapping.o;
                 });
                 if (object) {
                     objectId = object.id;
                     var objectLabel = object.label;
                 }
             }
-            if (!objectId) return;
+            if (!objectId) {
+                return;
+            }
             // mapping.s is a column no label case
             jstreeData.push({
-                id: mappingS + "-->" + mapping.p + "-->" + mappingO,
-                text: mappingS + "-->" + propertyLabel + "-->" + objectLabel,
+                id: mapping.s + "-->" + mapping.p + "-->" + mapping.o,
+                text: mapping.s + "-->" + propertyLabel + "-->" + objectLabel,
                 parent: subjectId,
                 data: {
-                    fromNodeColumn: mappingS,
+                    fromNodeColumn: mapping.s,
                     fromNodeId: subjectId,
-                    toNodeColumn: mappingO,
+                    toNodeColumn: mapping.o,
                     toNodeId: objectId,
                     toNodeLabel: objectLabel,
                     propertyId: mapping.p,
@@ -445,7 +452,9 @@ var MappingsDetails = (function () {
     };
 
     self.savejsTreeNodesToVisjsGraph = function (nodes) {
-        if (nodes.length == 0) return;
+        if (nodes.length == 0) {
+            return;
+        }
         nodes.forEach(function (node) {
             var currentGraphNode = MappingColumnsGraph.visjsGraph.data.nodes.get(node.id);
             currentGraphNode.data.uriType = node.data.uriType;
@@ -505,7 +514,9 @@ var MappingsDetails = (function () {
         MappingColumnsGraph.saveVisjsGraph(function () {
             self.drawDetailedMappingsGraph();
             self.showDetailedMappingsTree();
-            if (graphNode) self.showColumnTechnicalMappingsDialog("detailedMappings_techDetailsDiv", graphNode, function () {});
+            if (graphNode) {
+                self.showColumnTechnicalMappingsDialog("detailedMappings_techDetailsDiv", graphNode, function () {});
+            }
         });
     };
 
@@ -1056,7 +1067,9 @@ var MappingsDetails = (function () {
         var table = false;
 
         var columnsClassMap = {};
-        if (!columnClass) columnClass = MappingColumnsGraph.getColumnClass(columnNode);
+        if (!columnClass) {
+            columnClass = MappingColumnsGraph.getColumnClass(columnNode);
+        }
         if (columnClass) {
             MappingColumnsGraph.visjsGraph.data.nodes.get().forEach(function (node) {
                 if (node.data && node.data.type == "Class" && node.data.id == columnClass) {
@@ -1064,7 +1077,9 @@ var MappingsDetails = (function () {
                     if (sameClassColumns && sameClassColumns.length > 0) {
                         var stop = false;
                         sameClassColumns.forEach(function (column2) {
-                            if (stop) return;
+                            if (stop) {
+                                return;
+                            }
                             var table2 = column2.data.dataTable;
                             if (column2.data.isMainColumn && table2 != columnNode.data.dataTable) {
                                 columnNode.data.definedInColumn = column2.id;
@@ -1080,7 +1095,9 @@ var MappingsDetails = (function () {
 
                                 table = table2;
                             } else {
-                                columnNode.data.isMainColumn = true;
+                                if (columnNode.data.uriType) {
+                                    columnNode.data.isMainColumn = true;
+                                }
                             }
                         });
                     }

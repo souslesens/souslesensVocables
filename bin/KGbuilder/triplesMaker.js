@@ -9,11 +9,7 @@ const KGbuilder_triplesMaker = require("./KGbuilder_triplesMaker");
 
 const dataController = require("../dataController.");
 const path = require("path");
-<<<<<<< HEAD
 const MappingParser = require("./mappingsParser.js");
-=======
-const { utils } = require("xlsx");
->>>>>>> origin/CF/2025_09_23
 
 var TriplesMaker = {
     batchSize: 300,
@@ -36,8 +32,6 @@ var TriplesMaker = {
         tableProcessingParams.randomIdentiersMap = {}; // identifiers with scope the whole table
         tableProcessingParams.blankNodesMap = {}; // identifiers with scope the whole table
         tableProcessingParams.isSampleData = options.sampleSize;
-<<<<<<< HEAD
-=======
 
         var message = {
             table: tableInfos.table,
@@ -52,7 +46,6 @@ var TriplesMaker = {
         var oldTime = new Date();
         var startTime = oldTime;
 
->>>>>>> origin/CF/2025_09_23
         if (tableProcessingParams.tableInfos.csvDataFilePath) {
             KGbuilder_socket.message(options.clientSocketId, "loading data from csv file " + tableInfos.table, false);
             TriplesMaker.readCsv(tableInfos.csvDataFilePath, options.sampleSize, function (err, result) {
@@ -60,12 +53,6 @@ var TriplesMaker = {
                     KGbuilder_socket.message(options.clientSocketId, err, true);
                     return callback(err);
                 }
-<<<<<<< HEAD
-                processedRecords += result.data.length;
-                KGbuilder_socket.message(options.clientSocketId, processedRecords + "  records loaded in table " + tableInfos.table, false);
-                //  tableData = result.data[0];
-
-=======
 
                 var currentTime = new Date();
                 message.tableTotalRecords = result.data[0].length;
@@ -76,13 +63,10 @@ var TriplesMaker = {
                 KGbuilder_socket.message(options.clientSocketId, message);
                 oldTime = new Date();
 
->>>>>>> origin/CF/2025_09_23
                 async.eachSeries(
                     result.data,
                     function (data, callbackEach) {
                         TriplesMaker.buildTriples(data, tableProcessingParams, options, function (err, batchTriples) {
-<<<<<<< HEAD
-=======
                             totalTriplesCount += batchTriples.length;
                             var currentTime = new Date();
 
@@ -94,7 +78,6 @@ var TriplesMaker = {
                             KGbuilder_socket.message(options.clientSocketId, message);
                             oldTime = new Date();
 
->>>>>>> origin/CF/2025_09_23
                             if (options.sampleSize) {
                                 // sample dont write triples return batchTriples
                                 sampleTriples = batchTriples;
@@ -105,25 +88,6 @@ var TriplesMaker = {
                                     " writing " + processedRecords + " records  from " + tableInfos.table + " : " + batchTriples.length + " triples",
                                     false,
                                 );
-<<<<<<< HEAD
-
-                                KGbuilder_triplesWriter.writeTriples(
-                                    batchTriples,
-                                    tableProcessingParams.sourceInfos.graphUri,
-                                    tableProcessingParams.sourceInfos.sparqlServerUrl,
-                                    function (err, result) {
-                                        if (err) {
-                                            return callbackEach(err);
-                                        }
-                                        totalTriplesCount += batchTriples.length;
-                                        return callbackEach();
-                                    },
-                                );
-                            }
-                        });
-                    },
-                    function (err) {
-=======
 
                                 KGbuilder_triplesWriter.writeTriples(
                                     batchTriples,
@@ -153,7 +117,6 @@ var TriplesMaker = {
                         KGbuilder_socket.message(options.clientSocketId, message);
                         // KGbuilder_socket.message(options.clientSocketId, " DONE " + processedRecords + "records  from " + tableInfos.table + " : " + (totalTriplesCount) + " triples", false);
 
->>>>>>> origin/CF/2025_09_23
                         return callback(err, { sampleTriples: sampleTriples, totalTriplesCount: totalTriplesCount });
                     },
                 );
@@ -172,7 +135,6 @@ var TriplesMaker = {
 
             for (var columnId in tableProcessingParams.tableColumnsMappings) {
                 var column = tableProcessingParams.tableColumnsMappings[columnId];
-<<<<<<< HEAD
                 if (column.type == "Column") {
                     select.push(column.id);
                 }
@@ -183,9 +145,6 @@ var TriplesMaker = {
                         });
                     }
                 }
-=======
-                if (column.type == "Column") select.push(column.id);
->>>>>>> origin/CF/2025_09_23
             }
             var message = {
                 table: tableInfos.table,
@@ -198,11 +157,6 @@ var TriplesMaker = {
                 totalDuration: 0,
             };
 
-<<<<<<< HEAD
-            var oldTime = new Date();
-            var startTime = oldTime;
-=======
->>>>>>> origin/CF/2025_09_23
             databaseModel.refreshConnection(tableInfos.dbID, function () {
                 async.whilst(
                     function (callbackTest) {
@@ -354,11 +308,8 @@ var TriplesMaker = {
                     var object = null;
                     // if no matching item for mapping.o  and no fixed uri return
                     // the other cases need a value for the mapping object
-<<<<<<< HEAD
                     // no value case should implements blank nodes,virtual columns,rowIndex ...
                     // getColumnUri function handle all cases
-=======
->>>>>>> origin/CF/2025_09_23
                     if (!line[mapping.o]) {
                         if (mapping.isConstantUri) {
                             // uri
@@ -367,14 +318,10 @@ var TriplesMaker = {
                             //prefix
                             object = mapping.o;
                         } else {
-<<<<<<< HEAD
                             object = TriplesMaker.getColumnUri(line, mapping.objColId, columnMappings, rowIndex, tableProcessingParams);
                             if (!object) {
                                 return;
                             }
-=======
-                            return;
->>>>>>> origin/CF/2025_09_23
                         }
                     } else if (columnMappings[mapping.objColId]) {
                         // if object is a column
@@ -451,12 +398,9 @@ var TriplesMaker = {
      */
     getColumnUri: function (dataItem, columnId, columnMappings, rowIndex, tableProcessingParams) {
         var columnParams = columnMappings[columnId];
-<<<<<<< HEAD
         if (!columnParams) {
             return null;
         }
-=======
->>>>>>> origin/CF/2025_09_23
         //substitute column params to those of the definedInColumn for the same class if !columnParams.isMainColumn
         if (!columnParams.isMainColumn && columnParams.definedInColumn) {
             var definedInColumn = tableProcessingParams.allColumnsMappings[columnParams.definedInColumn];
@@ -637,24 +581,16 @@ var TriplesMaker = {
                 if (util.isFloat(str)) {
                     str = '"' + str + '"^^' + mapping.dataType;
                 } else {
-<<<<<<< HEAD
-                    str = null;
-=======
                     str = '"' + util.formatStringForTriple(str, false) + '"^^' + "xsd:string";
                     // str = null
->>>>>>> origin/CF/2025_09_23
                 }
             }
             if (mapping.dataType == "xsd:int") {
                 if (util.isInt(str)) {
                     str = '"' + str + '"^^' + mapping.dataType;
                 } else {
-<<<<<<< HEAD
-                    str = null;
-=======
                     str = '"' + util.formatStringForTriple(str, false) + '"^^' + "xsd:string";
                     //   str = null
->>>>>>> origin/CF/2025_09_23
                 }
             }
             // format after to apply transformations

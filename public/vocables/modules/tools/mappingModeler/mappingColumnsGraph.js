@@ -144,6 +144,21 @@ var MappingColumnsGraph = (function () {
         };
         return edge;
     };
+
+
+    /**
+     * return a visJsEdge for DatatypeProperty
+     * @param {string} from  node id (subject column)
+     * @param {string} to    node id (object/value column)
+     * @param {string} label property label
+     * @param {Object|string} property  either {id,label,source} or a URI string
+     * @param {string} uri   property URI (if property is string, this is redundant but accepted)
+     * @param {string} color edge color
+     */
+
+
+
+
     /**
      * Draws a new resource node in the Vis.js graph.
      * Positions the node dynamically and links it with existing nodes if necessary.
@@ -428,9 +443,22 @@ var MappingColumnsGraph = (function () {
                 MappingModeler.currentRelation.to = {id: node.id, classId: self.getColumnClass(node)};
                 if (MappingModeler.currentRelation.type != "Class" && node.data.type == "Class") {
                     self.graphActions.drawColumnToClassEdge(MappingModeler.currentRelation);
-                } else if (MappingModeler.currentRelation.from.type != "Class" && node.data.type != "Class") {
-                    MappingModeler.onLegendNodeClick({id: "ObjectProperty"});
+                }else if (
+                MappingModeler.currentRelation.from.type != "Class" &&
+                node.data.type != "Class"
+                ) {
+                const kind =
+                    MappingModeler.currentResourceType === "DatatypeProperty"
+                    ? "DatatypeProperty"
+                    : "ObjectProperty";
+                MappingModeler.onLegendNodeClick({ id: kind });
                 }
+
+                // else if (MappingModeler.currentRelation.from.type != "Class" && node.data.type != "Class") {
+                //     MappingModeler.onLegendNodeClick({id: "ObjectProperty"});
+                // }
+
+                
             }
         } else {
             if (node.data && node.data.type == "Table") {
@@ -596,6 +624,7 @@ var MappingColumnsGraph = (function () {
             });
         },
 
+
         /**
          * Draws an edge between a column and a class in the graph.
          * @function
@@ -733,6 +762,8 @@ var MappingColumnsGraph = (function () {
             },
         );
     };
+
+
     /**
      * Loads the Vis.js graph for the current mapping source.
      * Retrieves graph data from a JSON file and adjusts layout positioning.
@@ -790,7 +821,7 @@ var MappingColumnsGraph = (function () {
 
                         MappingColumnsGraph.visjsGraph.network.setOptions({physics: self.physicsHierarchical});
                         UI.resetWindowSize();
-
+                        
                         if (callback) {
                             return callback();
                         }
@@ -1485,6 +1516,10 @@ var MappingColumnsGraph = (function () {
 
         MappingColumnsGraph.visjsGraph.data.nodes.update(newNodes);
     };
+
+
+
+
 
     self.relationMessage = function (fromLabel, toLabel) {
         if (MappingModeler.currentResourceType != "ObjectProperty") {

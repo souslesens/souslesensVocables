@@ -65,6 +65,8 @@ var MappingModeler = (function () {
         {label: "URI", color: "#bc7dec", shape: "square"},
 
         {label: "Class", color: "#00afef", shape: "box"},
+        {label: "DatatypeProperty",id: "DatatypeProperty" , color: "#9b59b6", shape: "line" }
+
     ];
 
     self.propertyColor = "#409304";
@@ -851,6 +853,9 @@ var MappingModeler = (function () {
                 self.onSuggestionsSelect(null, {node: {id: columnName}});
             }
         }
+
+
+        
     };
 
     /**

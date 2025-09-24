@@ -90,115 +90,80 @@ var Lineage_properties = (function () {
         
            
         }
-        // if(self.currentTreeNode.data.type=="http://www.w3.org/2002/07/owl#ObjectProperty"){
-                    
-        //                     items["graphNode"]= {
-        //                                     label: "graph node",
-        //                                     action: function (_e) {
-        //                                         //rajouter une condition pour tester sur object properties 
-                                                
-
-        //                                                 var properties = $("#Lineage_propertiesTree").jstree().get_selected(true);
-                                                                                                                    
-        //                                                     var options = {
-        //                                                         filter: Sparql_common.setFilter("prop", properties),
-        //                                                     };
-        //                                                     nodeIds = Lineage_whiteboard.lineageVisjsGraph.data.nodes.getIds();
-        //                                                     if (!nodeIds) {
-        //                                                         options.allNodes = true;
-        //                                                         options.withoutImports = true;
-        //                                                     }
-        //                                                     Lineage_relations.drawRelations(null, null, "Properties", options);
-        //                                                 if (selectedNodes.length > 1) {
-
-                                                            
-        //                                                 } else {
-        //                                                     Lineage_whiteboard.drawNodesAndParents(self.currentTreeNode, 0, { drawBeforeCallback: true }, function () {
-        //                                                         if (self.currentTreeNode?.data && self.currentTreeNode.data.id) {
-        //                                                             Lineage_whiteboard.lineageVisjsGraph.searchNode(self.currentTreeNode.data.id, null);
-        //                                                         }
-        //                                                     });
-        //                                                 }
-                                                    
-                                                
-                                                
-        //                                         }
-        //                     }
-        // }; 
+        
     
-    if (self.currentTreeNode?.data?.type === "http://www.w3.org/2002/07/owl#ObjectProperty") {
-    items["graphNode"] = {
-        label: "graph node",
-        action: function (_e) {
-        try {
-            const properties = "http://www.w3.org/2002/07/owl#ObjectProperty";
-            const jsTree = $("#Lineage_propertiesTree").jstree(true);
-            const selected = jsTree ? jsTree.get_selected(true) : [];
+        if (self.currentTreeNode?.data?.type === "http://www.w3.org/2002/07/owl#ObjectProperty") {
+            items["graphNode"] = {
+                label: "graph node",
+                action: function (_e) {
+                    try {
+                        const properties = "http://www.w3.org/2002/07/owl#ObjectProperty";
+                        const jsTree = $("#Lineage_propertiesTree").jstree(true);
+                        const selected = jsTree ? jsTree.get_selected(true) : [];
+
+                        let propIds = selected
+                        .filter(n => n?.data?.type === properties && n?.data?.id)
+                        .map(n => n.data.id);
 
             
-            let propIds = selected
-            .filter(n => n?.data?.type === properties && n?.data?.id)
-            .map(n => n.data.id);
-
-            
-            if (propIds.length === 0 && self.currentTreeNode?.data?.id) {
-            propIds = [self.currentTreeNode.data.id];
-            }
-            if (propIds.length === 0) {
-            return UI.message("Sélectionne une ObjectProperty d'abord.", true);
-            }
+                        if (propIds.length === 0 && self.currentTreeNode?.data?.id) {
+                        propIds = [self.currentTreeNode.data.id];
+                        }
+                        if (propIds.length === 0) {
+                        return UI.message("Sélectionne une ObjectProperty d'abord.", true);
+                        }
 
            
-            const visjsData = { nodes: [], edges: [] };
-            const existing = (Lineage_whiteboard?.lineageVisjsGraph?.getExistingIdsMap)
-            ? Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap()
-            : {};
+                        const visjsData = { nodes: [], edges: [] };
+                        const existing = (Lineage_whiteboard?.lineageVisjsGraph?.getExistingIdsMap)
+                        ? Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap()
+                        : {};
 
-            const propShape = "box";
-            const propColor = "#ddd";
-            const propFont = { color: "blue", size: 12 };
-            const src = Lineage_sources.activeSource || self.currentTreeNode?.data?.source;
+                        const propShape = "box";
+                        const propColor = "#ddd";
+                        const propFont = { color: "blue", size: 12 };
+                        const src = Lineage_sources.activeSource || self.currentTreeNode?.data?.source;
 
-            propIds.forEach((id) => {
-            if (existing[id]) return;
+                        propIds.forEach((id) => {
+                        if (existing[id]) return;
 
             
-            const fromSel = selected.find(n => n?.data?.id === id)?.data;
-            const label =
-                (fromSel && fromSel.label) ||
-                (self.currentTreeNode?.data?.id === id ? self.currentTreeNode.data.label : null) ||
-                Sparql_common.getLabelFromURI(id);
+                        const fromSel = selected.find(n => n?.data?.id === id)?.data;
+                        const label =
+                            (fromSel && fromSel.label) ||
+                            (self.currentTreeNode?.data?.id === id ? self.currentTreeNode.data.label : null) ||
+                            Sparql_common.getLabelFromURI(id);
 
-            visjsData.nodes.push({
-                id,
-                label,
-                shape: propShape,         
-                color: propColor,
-                size: self.defaultShapeSize,
-                font: propFont,
-                data: {
-                id,
-                label,
-                source: src,
-                type: properties
+                        visjsData.nodes.push({
+                            id,
+                            label,
+                            shape: propShape,         
+                            color: propColor,
+                            size: self.defaultShapeSize,
+                            font: propFont,
+                            data: {
+                            id,
+                            label,
+                            source: src,
+                            type: properties
+                            }
+                        });
+                        existing[id] = 1;
+                        });
+
+                
+                    if (!Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
+                    Lineage_whiteboard.drawNewGraph(visjsData);
+                    } else {
+                    Lineage_whiteboard.addVisDataToGraph(visjsData);
+                    }
+                    Lineage_whiteboard.lineageVisjsGraph.network.fit();
+                    } catch (err) {
+                        const msg = err?.responseText || err?.message || String(err);
+                        UI.message(msg, true);
+                    }
                 }
-            });
-            existing[id] = 1;
-            });
-
-           
-            if (!Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
-            Lineage_whiteboard.drawNewGraph(visjsData);
-            } else {
-            Lineage_whiteboard.addVisDataToGraph(visjsData);
-            }
-            Lineage_whiteboard.lineageVisjsGraph.network.fit();
-        } catch (err) {
-            const msg = err?.responseText || err?.message || String(err);
-            UI.message(msg, true);
-        }
-        }
-    };
+            };
     }
 
     

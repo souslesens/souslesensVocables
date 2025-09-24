@@ -176,13 +176,14 @@ var MappingColumnsGraph = (function () {
         } else {
             newResource.level = 2;
         }
+        var existingNodes = self.visjsGraph.getExistingIdsMap();
 
         var visjsData = { nodes: [], edges: [] };
         var visjsNode = newResource;
-
+       
         if (newResource.data.type == "Class") {
             var tableWithSameClass = MappingsDetails.isColumnAllreadyMappedInAnotherTable(self.currentGraphNode, newResource.data.id);
-            if (!tableWithSameClass) {
+            if (!tableWithSameClass && !existingNodes[visjsNode.id]) {
                 visjsData.nodes.push(visjsNode);
             } else {
                 self.visjsGraph.data.nodes.update({ id: newResource.id, hidden: false });

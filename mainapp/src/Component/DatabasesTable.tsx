@@ -335,7 +335,7 @@ const DatabasesTable = () => {
                                 </TableHead>
                                 <TableBody sx={{ width: "100%", overflow: "visible" }}>
                                     {sortedDatabases
-                                        .filter((database: Database) => cleanUpText(database.id).includes(cleanUpText(filteringChars)))
+                                        .filter((database: Database) => cleanUpText(database.name).includes(cleanUpText(filteringChars)))
                                         .map((database: Database) => {
                                             return (
                                                 <TableRow key={database.name}>

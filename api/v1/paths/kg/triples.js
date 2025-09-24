@@ -94,7 +94,7 @@ module.exports = function () {
             if (!req.body.options) {
                 req.body.options = "{}";
             }
-            KGbuilder_main.deleteKGcreatorTriples(req.body.source, JSON.parse(req.body.tables), JSON.parse(req.body.options), function (err, result) {
+            KGbuilder_main.deleteKGBuilderTriples(req.body.source, JSON.parse(req.body.tables), JSON.parse(req.body.options), function (err, result) {
                 processResponse(res, err, result);
             });
         } catch (e) {

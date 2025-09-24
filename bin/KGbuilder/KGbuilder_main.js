@@ -18,7 +18,7 @@ const MappingsParser = require("./mappingsParser.js");
 const TriplesMaker = require("./triplesMaker.js");
 
 const TripleMaker = require("./triplesMaker.js");
-const {databaseModel} = require("../../model/databases.js");
+const { databaseModel } = require("../../model/databases.js");
 
 var KGbuilder_main = {
     /**
@@ -97,15 +97,13 @@ var KGbuilder_main = {
 
                                     tableProcessingParams.allColumnsMappings = allColumnsMappings;
 
-                                    var tableMappings = {}
+                                    var tableMappings = {};
                                     for (var columnId in allColumnsMappings) {
                                         if (allColumnsMappings[columnId].dataTable == tables[0]) {
-                                            tableMappings[columnId] = allColumnsMappings[columnId]
-
+                                            tableMappings[columnId] = allColumnsMappings[columnId];
                                         }
                                     }
-                                    tableProcessingParams.tableColumnsMappings = tableMappings
-
+                                    tableProcessingParams.tableColumnsMappings = tableMappings;
 
                                     callbackSeries();
                                 });
@@ -115,8 +113,7 @@ var KGbuilder_main = {
                             function (callbackSeries) {
                                 tableProcessingParams.columnToColumnEdgesMap = MappingsParser.getColumnToColumnMappings(mappingData, tables[0], options.filterMappingIds);
                                 callbackSeries();
-                            }
-                            ,
+                            },
 
                             // init functions and transform map
                             function (callbackSeries) {
@@ -144,7 +141,7 @@ var KGbuilder_main = {
                                 };
                                 if (firstColumn.datasource) {
                                     // database
-                                    if ( tableProcessingParams.sourceInfos.csvSources[firstColumn.dataTable]) {
+                                    if (tableProcessingParams.sourceInfos.csvSources[firstColumn.dataTable]) {
                                         var csvDir = path.join(__dirname, "../../data/CSV/" + source + "/");
                                         tableInfos.csvDataFilePath = csvDir + firstColumn.dataTable;
                                     } else {
@@ -152,7 +149,7 @@ var KGbuilder_main = {
                                     }
                                 } else {
                                     //csv
-                                    return callbackSeries("no datasource")
+                                    return callbackSeries("no datasource");
                                 }
                                 tableProcessingParams.tableInfos = tableInfos;
 
@@ -161,23 +158,21 @@ var KGbuilder_main = {
                             // countitems in table if database
                             function (callbackSeries) {
                                 if (tableProcessingParams.tableInfos.csvDataFilePath) {
-                                    return callbackSeries()
+                                    return callbackSeries();
                                 }
 
-                                var sql = "select count(*) as count from \"" + table + "\";"
+                                var sql = 'select count(*) as count from "' + table + '";';
                                 try {
-                                    databaseModel.query(tableProcessingParams.tableInfos.dbID, sql)
-                                        .then((result) => {
-                                            tableProcessingParams.tableInfos.tableTotalRecords = parseInt(result.rows[0].count)
-                                            callbackSeries();
-                                        })
+                                    databaseModel.query(tableProcessingParams.tableInfos.dbID, sql).then((result) => {
+                                        tableProcessingParams.tableInfos.tableTotalRecords = parseInt(result.rows[0].count);
+                                        callbackSeries();
+                                    });
                                 } catch (err) {
                                     callbackSeries(err);
                                 }
                             },
                             // create the tripels for this table
                             function (callbackSeries) {
-
                                 TriplesMaker.readAndProcessData(tableProcessingParams, options, function (err, result) {
                                     if (err) {
                                         return callbackSeries(err);
@@ -200,7 +195,7 @@ var KGbuilder_main = {
                 },
 
                 function (err) {
-                    return callback(err, {sampleTriples: sampleTriples, totalTriplesCount: totalTriplesCount});
+                    return callback(err, { sampleTriples: sampleTriples, totalTriplesCount: totalTriplesCount });
                 },
             );
 

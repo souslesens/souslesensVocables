@@ -251,15 +251,14 @@ class DatabaseModel {
      * @returns {Promise<any[]>} query result
      */
     recurseBatchSelect = async (connection, databaseId, tableName, { values = [], select = "*", offset = 0, limit = 1000, noRecurs = false }) => {
-        var res=null
-        if(select=="*") {
-           const columns = await connection(tableName).columnInfo();
-           const columnsKeys = Object.keys(columns);
+        var res = null;
+        if (select == "*") {
+            const columns = await connection(tableName).columnInfo();
+            const columnsKeys = Object.keys(columns);
             res = await connection.select(select).from(tableName).orderBy(columnsKeys).limit(limit).offset(offset);
-       }
-       else{
+        } else {
             res = await connection.select(select).from(tableName).limit(limit).offset(offset);
-       }
+        }
 
         const concat = values.concat(res);
 

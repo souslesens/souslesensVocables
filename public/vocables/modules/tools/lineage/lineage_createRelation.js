@@ -6,7 +6,7 @@ import common from "../../shared/common.js";
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 import Lineage_sources from "./lineage_sources.js";
 import CreateRestriction_bot from "../../bots/createRestriction_bot.js";
-
+import UI from "../../shared/UI.js";
 /**
  * @module Lineage_createRelation
  * @description Module for creating and managing relationships between ontology nodes.
@@ -431,8 +431,11 @@ var Lineage_createRelation = (function () {
                 label: "Node infos",
                 action: function (_e) {
                     // pb avec source
+
                     NodeInfosWidget.showNodeInfos(self.currentPropertiesTreeNode.data.source, self.currentPropertiesTreeNode, "mainDialogDiv", null, function () {
                         //  $("#mainDialogDiv").parent().css("z-index", 1);
+
+                        UI.SideBySideTwoWindows("#smallDialogDiv", "#mainDialogDiv");
                     });
                 },
             },

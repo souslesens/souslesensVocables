@@ -220,6 +220,52 @@ var UI = (function () {
         self.ApplySelectedTabCSS(buttonClicked, tabGroup);
     };
 
+    self.SideBySideTwoWindows = function (existingWindow, newWindow) {
+        const gap = 12;
+        const windowWidth = $(window).width();
+        const windowHeight = $(window).height();
+
+        $(existingWindow).dialog({ modal: false, draggable: true, resizable: true, appendTo: "body" });
+        $(newWindow).dialog({ modal: false, draggable: true, resizable: true, appendTo: "body" });
+
+        const existingWindowConvert = $(existingWindow).closest(".ui-dialog");
+        const newWindowConvert = $(newWindow).closest(".ui-dialog");
+        let widthexistingWindow = existingWindowConvert.outerWidth(),
+            heightExistingWindow = existingWindowConvert.outerHeight();
+        let widthNewWindow = newWindowConvert.outerWidth(),
+            hR = newWindowConvert.outerHeight();
+
+        const maxEachW = Math.max(200, Math.floor((windowWidth - 3 * gap) / 2));
+        widthexistingWindow = Math.min(widthexistingWindow, maxEachW);
+        widthNewWindow = Math.min(widthNewWindow, maxEachW);
+        const maxH = windowHeight - 2 * gap;
+        const targetH = Math.min(Math.max(200, Math.min(heightExistingWindow, hR)), maxH);
+
+        $(existingWindow).dialog("option", { width: widthexistingWindow, height: targetH });
+        $(newWindow).dialog("option", { width: widthNewWindow, height: targetH });
+
+        const offL = existingWindowConvert.offset() || { left: gap, top: gap };
+        const top = Math.min(Math.max(gap, offL.top), windowHeight - gap - targetH);
+        $(newWindow).dialog("option", "position", {
+            my: "left top",
+            at: `left+${gap} top+${top}`,
+            of: window,
+        });
+        $(existingWindow).dialog("option", "position", {
+            my: "right top",
+            at: `right-${gap} top+${top}`,
+            of: window,
+        });
+
+        //  Prevent from going outside during drag/resize
+        try {
+            existingWindowConvert.draggable("option", "containment", "window");
+        } catch (e) {}
+        try {
+            newWindowConvert.draggable("option", "containment", "window");
+        } catch (e) {}
+    };
+
     //keep
     self.setSlsvCssClasses = function (callback) {
         less.pageLoadFinished.then(async function () {

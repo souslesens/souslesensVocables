@@ -71,7 +71,7 @@ var TripleFactory = (function () {
         // save current mappings before opening the dialog
         MappingColumnsGraph.saveVisjsGraph(function () {
             $("#mappingModeler_genericPanel").load("./modules/tools/mappingModeler/html/filterMappingDialog.html", function () {
-                self.showFilterMappingsDialog("detailedMappings_filterMappingsTree", MappingModeler.currentTable.name)
+                self.showFilterMappingsDialog("detailedMappings_filterMappingsTree", MappingModeler.currentTable.name);
             });
         });
     };
@@ -85,63 +85,62 @@ var TripleFactory = (function () {
      */
     self.runSlsFilteredMappings = function () {
         var checkedNodes = JstreeWidget.getjsTreeCheckedNodes("detailedMappings_filterMappingsTree");
-        if(checkedNodes.length==0)
-            return alert(" no mappings selected")
-        var  filterMappingIds = [];
+        if (checkedNodes.length == 0) return alert(" no mappings selected");
+        var filterMappingIds = [];
         checkedNodes.forEach(function (item) {
-            filterMappingIds.push(item.id)
-        })
-        try{
-        var offset=parseInt($("#mappingTripleFactory_offset").val())
-
-        }catch(err){
-          return  alert(err)
+            filterMappingIds.push(item.id);
+        });
+        try {
+            var offset = parseInt($("#mappingTripleFactory_offset").val());
+        } catch (err) {
+            return alert(err);
         }
 
+        TripleFactory.createTriples(
+            self.filterMappingIsSample,
+            MappingModeler.currentTable.name,
+            {
+                filterMappingIds: filterMappingIds,
+                offset: offset,
+            },
+            function (err, result) {
+                if (err) {
+                    alert(err.responseText || err);
+                } else {
+                    // UI.message("Done", true);
+                    var indexAuto = $("#MappingModeler_indexAutoCBX").prop("checked");
 
+                    if (!self.filterMappingIsSample && indexAuto) {
+                        SearchUtil.generateElasticIndex(
+                            MappingModeler.currentSLSsource,
+                            {
+                                indexProperties: 1,
+                                indexNamedIndividuals: 1,
+                            },
+                            () => {
+                                $.ajax({
+                                    type: "DELETE",
+                                    url: `${Config.apiUrl}/ontologyModels?source=${MappingModeler.currentSLSsource}`,
 
+                                    dataType: "json",
+                                    success: function (result, _textStatus, _jqXHR) {
+                                        delete Config.ontologiesVocabularyModels[MappingModeler.currentSLSsource];
 
-        TripleFactory.createTriples(self.filterMappingIsSample, MappingModeler.currentTable.name, {
-            filterMappingIds: filterMappingIds,
-            offset:offset
-
-        }, function (err, result) {
-            if (err) {
-                alert(err.responseText || err);
-            } else {
-               // UI.message("Done", true);
-                var indexAuto = $("#MappingModeler_indexAutoCBX").prop("checked");
-
-                if (!self.filterMappingIsSample && indexAuto) {
-                    SearchUtil.generateElasticIndex(
-                        MappingModeler.currentSLSsource,
-                        {
-                            indexProperties: 1,
-                            indexNamedIndividuals: 1,
-                        },
-                        () => {
-                            $.ajax({
-                                type: "DELETE",
-                                url: `${Config.apiUrl}/ontologyModels?source=${MappingModeler.currentSLSsource}`,
-
-                                dataType: "json",
-                                success: function (result, _textStatus, _jqXHR) {
-                                    delete Config.ontologiesVocabularyModels[MappingModeler.currentSLSsource];
-
-                                //    UI.message("ALL DONE");
-                                },
-                                error: function (err) {
-                                    if (callback) {
-                                        return callback(err);
-                                    }
-                                    UI.message(err.responseText);
-                                },
-                            });
-                        },
-                    );
+                                        //    UI.message("ALL DONE");
+                                    },
+                                    error: function (err) {
+                                        if (callback) {
+                                            return callback(err);
+                                        }
+                                        UI.message(err.responseText);
+                                    },
+                                });
+                            },
+                        );
+                    }
                 }
-            }
-        });
+            },
+        );
     };
 
     /**
@@ -155,7 +154,6 @@ var TripleFactory = (function () {
     self.checkCurrentTable = function () {
         //obsolete avec le systeme des definedInColumn
         return true;
-
 
         var check = false;
         if (!MappingModeler.currentTable) {
@@ -209,7 +207,7 @@ var TripleFactory = (function () {
             tables: JSON.stringify(tables),
         };
         if (Config.clientSocketId) {
-            payload.options = JSON.stringify({clientSocketId: Config.clientSocketId});
+            payload.options = JSON.stringify({ clientSocketId: Config.clientSocketId });
         }
         UI.message("deleting KGcreator  triples...");
         $.ajax({
@@ -255,7 +253,6 @@ var TripleFactory = (function () {
      * @param {function} callback - A callback function to be executed after the triples creation process.
      */
     self.createTriples = function (sampleData, table, options, callback) {
-
         if (!options) {
             options = {};
         }
@@ -280,7 +277,6 @@ var TripleFactory = (function () {
             table = null;
         }
 
-
         if (options.filteredMappings) {
             options.mappingsFilter = options.filteredMappings;
         }
@@ -301,15 +297,15 @@ var TripleFactory = (function () {
                 if (sampleData) {
                     UIcontroller.activateRightPanel("generic");
                     self.showTriplesInDataTable(result, "mappingModeler_genericPanel");
-                 //   UI.message("", true);
+                    //   UI.message("", true);
                 } else {
                     if (options.deleteTriples) {
                         $("#KGcreator_infosDiv").val(result.result);
                         UI.message(result.result, true);
                     } else {
-                   var message = result.result + " triples created in graph " + DataSourceManager.currentConfig.graphUri;
+                        var message = result.result + " triples created in graph " + DataSourceManager.currentConfig.graphUri;
                         alert(message);
-                      //  UI.message(message, true);
+                        //  UI.message(message, true);
                     }
                 }
                 if (callback) {
@@ -360,13 +356,15 @@ var TripleFactory = (function () {
         var tableCols = [];
         var hearders = ["subject", "predicate", "object"];
         hearders.forEach(function (item) {
-            tableCols.push({title: item, defaultContent: "", width: "30%"});
+            tableCols.push({ title: item, defaultContent: "", width: "30%" });
         });
 
         var tableData = [];
+        var regex = /(<[^>]*>) ([^ ]*) (.*)/;
         data.sampleTriples.forEach(function (item, index) {
-            var array = item.split(" ");
-            tableData.push([escapeMarkup(array[0]), escapeMarkup(array[1]), escapeMarkup(array[2])]);
+            var array = regex.exec(item);
+
+            tableData.push([escapeMarkup(array[1]), escapeMarkup(array[2]), escapeMarkup(array[3])]);
             //  tableData.push([escapeMarkup(item.s), escapeMarkup(item.p), escapeMarkup(item.o)]);
         });
         /*
@@ -380,63 +378,58 @@ var TripleFactory = (function () {
 
         /*  $("#KGcreator_triplesDataTableDiv").html(str)
           return;*/
-        Export.showDataTable(div, tableCols, tableData, null, {paging: true, divId: div}, function (err, datatable) {
-        });
+        Export.showDataTable(div, tableCols, tableData, null, { paging: true, divId: div }, function (err, datatable) {});
     };
-
 
     self.showFilterMappingsDialog = function (divId, table) {
         var nodes = MappingColumnsGraph.visjsGraph.data.nodes.get();
         var edges = MappingColumnsGraph.visjsGraph.data.edges.get();
 
+        var treeData = [
+            {
+                id: "root",
+                text: table,
+                parent: "#",
+            },
+            {
+                id: "Columns",
+                text: "Column",
+                parent: "root",
+            },
+            {
+                id: "Relations",
+                text: "Relations",
+                parent: "root",
+            },
+        ];
 
-        var treeData = [{
-            id: "root",
-            text: table,
-            parent: "#"
-        }, {
-            id: "Columns",
-            text: "Column",
-            parent: "root"
-        }, {
-            id: "Relations",
-            text: "Relations",
-            parent: "root"
-        }];
-
-        var columnsMap = {}
+        var columnsMap = {};
         nodes.forEach(function (node) {
-            if (node.data && node.data.type == "Column" && node.data.dataTable == table) {
-                columnsMap[node.id] = node
+            if (node.data && MappingModeler.columnsMappingsObjects.includes(node?.data?.type) && node.data.dataTable == table) {
+                columnsMap[node.id] = node;
                 treeData.push({
                     id: node.id,
                     text: node.label,
                     parent: "Columns",
-
-                })
+                });
             }
-        })
+        });
 
         edges.forEach(function (edge) {
             if (columnsMap[edge.from] && columnsMap[edge.to]) {
-                var label = columnsMap[edge.from].label + "-" + edge.label + "->" + columnsMap[edge.to].label
+                var label = columnsMap[edge.from].label + "-" + edge.label + "->" + columnsMap[edge.to].label;
                 treeData.push({
                     id: edge.id,
                     text: label,
                     parent: "Relations",
-
-                })
-
-
+                });
             }
-        })
-        var options = {withCheckboxes: true,openAll: true}
+        });
+        var options = { withCheckboxes: true, openAll: true };
         JstreeWidget.loadJsTree(divId, treeData, options, function () {
             $("#detailedMappings_treeContainer").css("overflow", "unset");
         });
-
-
-    }
+    };
 
     return self;
 })();

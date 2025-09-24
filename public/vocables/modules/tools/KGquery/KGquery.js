@@ -525,6 +525,7 @@ var KGquery = (function () {
         var isJoin = false;
         var data;
         var labelFromURIToDisplay = [];
+        var sampleSize = $("#KGquery_sampleInput").val();
         async.series(
             [
                 //selectOptionalPredicates
@@ -772,6 +773,7 @@ var KGquery = (function () {
                     var resultSize = 1;
                     var limitSize = 10000;
                     var offset = 0;
+                    var currentLimit;
                     self.outputCsv = false;
                     data = { results: { bindings: [] }, head: { vars: [] } };
                     async.whilst(
@@ -780,12 +782,27 @@ var KGquery = (function () {
                                 self.outputCsv = true;
                             }
                             UI.message("retreived " + totalSize);
+                            if (sampleSize && sampleSize > 0) {
+                                return totalSize < sampleSize && resultSize > 0;
+                            }
                             return resultSize > 0;
                         },
                         function (callbackWhilst) {
                             var query2 = "" + query;
+                            currentLimit = limitSize;
+                            if (sampleSize && sampleSize > 0) {
+                                var remaining = sampleSize - totalSize;
 
-                            query2 += " limit " + limitSize + " offset " + offset;
+                                if (remaining <= 0) {
+                                    resultSize = 0;
+                                    return callbackWhilst(null);
+                                }
+
+                                if (remaining < limitSize) {
+                                    currentLimit = remaining;
+                                }
+                            }
+                            query2 += " limit " + currentLimit + " offset " + offset;
 
                             Sparql_proxy.querySPARQL_GET_proxy(
                                 url,

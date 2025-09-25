@@ -64,8 +64,8 @@ var MappingModeler = (function () {
         {label: "VirtualColumn", color: "#cb9801", shape: "square"},
         {label: "URI", color: "#bc7dec", shape: "square"},
 
-        {label: "Class", color: "#00afef", shape: "box"},
-        {label: "DatatypeProperty",id: "DatatypeProperty" , color: "#9b59b6", shape: "line" }
+        {label: "Class", color: "#00afef", shape: "box"}
+   
 
     ];
 

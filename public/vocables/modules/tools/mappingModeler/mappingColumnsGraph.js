@@ -145,6 +145,21 @@ var MappingColumnsGraph = (function () {
         return edge;
     };
 
+    self.getVisjsDatatypePropertyEdgeBetweenClassAndRange = function (domainId, rangeId, propUri, propLabel) {
+    return {
+        id: domainId + "_dp_" + propUri + "_" + rangeId,
+        from: domainId,
+        to: rangeId,
+        label: propLabel,
+        width: 3,
+        arrows: { to: { enabled: true, type: "arrow" } },
+        smooth: { type: "curvedCCW", forceDirection: "vertical", roundness: 0.5 },
+        color: "#9b59b6",
+        data: { id: propUri, type: "DatatypeProperty" }
+    };
+    };
+
+
 
     /**
      * return a visJsEdge for DatatypeProperty
@@ -1608,6 +1623,85 @@ var MappingColumnsGraph = (function () {
                 }
                 callbackSeries()
             },
+
+            // --- ADD DP FROM columns[i].data.otherPredicates ---
+        function (callbackSeries) {
+            try {
+                
+                const classNodesMap2 = {};
+                classVisjsData.nodes.forEach(n => { classNodesMap2[n.id] = 1; });
+
+                
+                const addedDpNodeIds = {};
+                const addedDpEdgeIds = {};
+
+
+                columns.forEach(function (column) {
+                const colClassId = self.getColumnClass(column);
+                if (!colClassId) return;
+                if (!classNodesMap2[colClassId]) return; 
+
+                const otherPreds = column?.data?.otherPredicates;
+                if (!otherPreds) return;
+
+
+                const items = Array.isArray(otherPreds) ? otherPreds : Object.values(otherPreds);
+
+                items.forEach(function (predItem) {
+                    if (!predItem) return;
+
+  
+                    const propUri   = predItem.id || predItem.prop || predItem.p || predItem.predicate || "";
+                    const propLabel = predItem.label || predItem.propLabel || (propUri ? Sparql_common.getLabelFromURI(propUri) : "");
+
+  
+                    const obj = predItem.object || predItem.value || predItem.objectValue || null;
+                    if (!obj) return;
+
+
+                    const rawObjId = (typeof obj === "object") ? (obj.id || obj.value || obj["@id"]) : obj;
+                    const safeObjId = rawObjId ? String(rawObjId) : (column.id + "_dp_" + (propUri || "prop") + "_lit");
+                    const dpNodeId = "dpNode|" + colClassId + "|" + (propUri || "prop") + "|" + safeObjId;
+
+                    const dpNodeLabel = (obj && (obj.label || obj.value || obj["@value"])) ? (obj.label || obj.value || obj["@value"]) :
+                                        (typeof obj === "string" ? obj : (predItem.objectLabel || propLabel || "value"));
+
+                    if (!addedDpNodeIds[dpNodeId]) {
+                    classVisjsData.nodes.push({
+                        id: dpNodeId,
+                        label: String(dpNodeLabel),
+                        shape: "dot",
+                        size: 12,
+                        color: "#9b59b6",
+                        data: { id: dpNodeId, type: "Datatype", source: MappingModeler.currentSLSsource }
+                    });
+                    addedDpNodeIds[dpNodeId] = 1;
+                    }
+
+
+                    const edgeId = colClassId + "_dpEdge_" + (propUri || "prop") + "_" + dpNodeId;
+                    if (!addedDpEdgeIds[edgeId]) {
+ 
+                    const edge = self.getVisjsDatatypePropertyEdgeBetweenClassAndRange(colClassId, dpNodeId, propUri || "DatatypeProperty", propLabel || "value");
+                    edge.id = edgeId;
+                    classVisjsData.edges.push(edge);
+
+
+
+                    addedDpEdgeIds[edgeId] = 1;
+                    }
+                });
+                });
+
+                return callbackSeries();
+            } catch (e) {
+                console.error(e);
+                return callbackSeries();
+            }
+        },
+        // --- END DP STEP ---
+
+
             // compare to model restrictions
             function (callbackSeries) {
                 Sparql_OWL.getObjectRestrictions(MappingModeler.currentSLSsource, null, {}, function (err, result) {

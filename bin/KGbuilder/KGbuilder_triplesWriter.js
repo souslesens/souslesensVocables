@@ -4,7 +4,6 @@ const async = require("async");
 const util = require("../util.");
 const KGbuilder_socket = require("./KGbuilder_socket.js");
 
-
 const KGbuilder_triplesWriter = {
     sparqlPrefixes: {
         xs: "<http://www.w3.org/2001/XMLSchema#>",

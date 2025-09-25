@@ -2,12 +2,12 @@ const KGbuilder_socket = require("./KGbuilder_socket.js");
 const { databaseModel } = require("../../model/databases.js");
 const csvCrawler = require("../_csvCrawler..js");
 const async = require("async");
-const sqlServerProxy = require("../KG/SQLserverConnector.");
-const util = require("../util.");
-const KGbuilder_triplesWriter = require("./KGbuilder_triplesWriter");
-const KGbuilder_triplesMaker = require("./KGbuilder_triplesMaker");
+const sqlServerProxy = require("../KG/SQLserverConnector..js");
+const util = require("../util..js");
+const KGbuilder_triplesWriter = require("./KGbuilder_triplesWriter.js");
+const KGbuilder_triplesMaker = require("./KGbuilder_triplesMaker.js");
 
-const dataController = require("../dataController.");
+const dataController = require("../dataController..js");
 const path = require("path");
 const MappingParser = require("./mappingsParser.js");
 

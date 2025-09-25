@@ -100,7 +100,7 @@
         "superagent": "^10.2.1",
         "superagent-proxy": "^3.0.0",
         "swagger-ui-express": "^5.0.1",
-        "tmp": "^0.2.3",
+        "tmp": "^0.2.4",
         "ulid": "^2.4.0",
         "unzipper": "^0.12.3",
         "winston": "^3.17.0",

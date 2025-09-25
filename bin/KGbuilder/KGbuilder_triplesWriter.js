@@ -1,9 +1,8 @@
 const ConfigManager = require("../configManager.");
-const httpProxy = require("../httpProxy.");
+const httpProxy = require("../httpProxy..js");
 const async = require("async");
 const util = require("../util.");
-const KGbuilder_socket = require("./KGbuilder_socket");
-const TriplesMaker = require("./triplesMaker.js");
+const KGbuilder_socket = require("./KGbuilder_socket.js");
 
 const KGbuilder_triplesWriter = {
     sparqlPrefixes: {
@@ -128,7 +127,7 @@ const KGbuilder_triplesWriter = {
     },
 
     deleteKGBuilderTriples: function (sparqlServerUrl, graphUri, table, options, callback) {
-        const KGbuilder_triplesMaker = require("./KGbuilder_triplesMaker");
+        const TriplesMaker = require("./KGbuilder_triplesMaker");
         var query = "";
         if (table) {
             query += "with  GRAPH <" + graphUri + "> " + "delete {?s ?p ?o} where {?s ?p ?o. ?s <" + TriplesMaker.mappingFilePredicate + "> '" + table + "'}";

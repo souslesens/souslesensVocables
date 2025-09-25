@@ -1,4 +1,18 @@
-const { convertType, chunk, cleanupConnection, getKnexConnection } = require("../model/utils");
+const { convertType, chunk, cleanupConnection, getKnexConnection, redoIfFailure } = require("../model/utils");
+
+describe("redoIfFailure", () => {
+    test("redo", async () => {
+        let ntry = 0;
+        const noThrowAtThirdCall = () => {
+            ntry += 1;
+            if (ntry <= 3) {
+                throw `Throw error at call ${ntry}`;
+            }
+        };
+
+        redoIfFailure(noThrowAtThirdCall, 4, 0.1);
+    });
+});
 
 describe("convertTypeUtils", () => {
     test("Convert string to boolean", async () => {

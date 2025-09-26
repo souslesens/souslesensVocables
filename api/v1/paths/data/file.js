@@ -12,6 +12,7 @@ module.exports = function () {
                 if (err == "file does not exist") {
                     return res.status(500).json(err);
                 }
+                res.status(err.status || 500).json(err);
                 next(err);
             } else {
                 return res.status(200).json(result);

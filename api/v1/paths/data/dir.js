@@ -8,6 +8,7 @@ module.exports = function () {
     function POST(req, res, next) {
         dataController.createDirectory(req.body.dir, req.body.newDirName, function (err, result) {
             if (err) {
+                res.status(err.status || 500).json(err);
                 next(err);
             } else {
                 return res.status(200).json(result);

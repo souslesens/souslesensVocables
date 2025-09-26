@@ -59,6 +59,7 @@ module.exports = function () {
                 });
             }
         } catch (err) {
+            res.status(err.status || 500).json(err);
             next(err);
         }
     }

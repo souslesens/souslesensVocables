@@ -211,9 +211,7 @@ var KGquery_graph = (function () {
         var imports = Config.sources[source].imports;
         if (imports) {
             sources = sources.concat(imports);
-        }
-
-        self.saveVisjsModelGraph();
+        }  
         var visjsData = { nodes: [], edges: [] };
         var uniqueNodes = {};
         self.KGqueryGraph = new VisjsGraphClass("KGquery_graphDiv", { nodes: [], edges: [] }, self.visjsOptions);
@@ -222,25 +220,16 @@ var KGquery_graph = (function () {
 
             function (source, callbackEach) {
                 var visjsDataSource = { nodes: [], edges: [] };
-                UserDataWidget.listUserData(null, function (err, result) {
-                    if (err) {
+                self.downloadVisjsGraph(source, function (err, result) {
+                    if (err && err != "notFound") {
                         return alert(err || err.responseText);
                     }
-                    // order to get last saved instance of our graph in user_data
-                    result = result.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-                    //if graph loaded with loadSaved --> display=checkBox displayGraphInList else last instance graph
-                    var resultId = null;
-                    result.forEach(function (item) {
-                        if (item.data_label == source + "_model") {
-                            resultId = item.id;
-                        }
-                    });
-                    if (resultId) {
-                        UserDataWidget.loadUserDatabyId(resultId, function (err, result) {
-                            if (result && result.data && result.data.data_content) {
-                                visjsDataSource = result.data.data_content;
+                  
+                            if (result) {
+                                visjsDataSource.nodes = result.nodes;
+                                visjsDataSource.edges = result.edges;
                             }
-                            if (!err && visjsDataSource.nodes) {
+                            if ( visjsDataSource.nodes) {
                                 visjsDataSource.nodes.forEach(function (node) {
                                     if (!uniqueNodes[node.id]) {
                                         uniqueNodes[node.id] = 1;
@@ -257,9 +246,8 @@ var KGquery_graph = (function () {
                                     }
                                 });
                             }
+                            self.visjsData = null;
                             callbackEach();
-                        });
-                    }
                 });
             },
             function (err) {

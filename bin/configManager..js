@@ -178,6 +178,7 @@ var ConfigManager = {
             const userInfo = await userManager.getUser(req.user || null);
             next(null, userInfo);
         } catch (err) {
+            res.status(err.status || 500).json(err);
             next(err);
         }
     },
@@ -191,6 +192,7 @@ var ConfigManager = {
             next(null, allowedSources);
             //  resourceFetched(res, sortedSources);
         } catch (err) {
+            res.status(err.status || 500).json(err);
             next(err);
         }
         if (false) {

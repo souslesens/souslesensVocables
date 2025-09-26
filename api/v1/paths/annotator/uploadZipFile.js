@@ -20,6 +20,7 @@ module.exports = function () {
                 });
             }
         } catch (e) {
+            res.status(e.status || 500).json(e);
             next(e);
         }
     }

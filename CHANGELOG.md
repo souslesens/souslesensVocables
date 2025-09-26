@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.15.0](https://github.com/souslesens/souslesensVocables/compare/2.14.2...2.15.0) (2025-09-25)
+
+
+### Features
+
+* **ConfigEditor:** move editable and published switches ([3d5dcfa](https://github.com/souslesens/souslesensVocables/commit/3d5dcfa0f00e2dbf926db57e06affb051f073eaa))
+* download all external libraries locally ([df76753](https://github.com/souslesens/souslesensVocables/commit/df767536ee89c1ce3e77150d75fabddbba91d548))
+* **mainapp:** change Create Database button to Register Database ([5e50bfc](https://github.com/souslesens/souslesensVocables/commit/5e50bfc2175584fadf1e7c7b581417e7891a7829))
+* **mainapp:** ConfigEditor User: add filters to filter on profiles ([c6aefc8](https://github.com/souslesens/souslesensVocables/commit/c6aefc88a8acd24e4230fc10680d06f471d74530))
+* **mainapp:** display error message when uploading bad json source ([fa5e5e7](https://github.com/souslesens/souslesensVocables/commit/fa5e5e74387a9a944aeb218d37a3c1177fc52faf))
+* **mainapp:** improve JSON.parse error message ([d8b2dbc](https://github.com/souslesens/souslesensVocables/commit/d8b2dbcaee04e419eb6761055f06adfb15aadce6))
+* **mainapp:** move editable and published switch from Source editor modal ([e043831](https://github.com/souslesens/souslesensVocables/commit/e0438319a4208573f54f60bb44ce0bcc3de07cf4))
+* **scripts:** update init_configs.js script ([b15f413](https://github.com/souslesens/souslesensVocables/commit/b15f41368a6f896e0946aaec2fbf9854b014d60c))
+
+
+### Bug Fixes
+
+* **api:** add id to API doc ([65fbd09](https://github.com/souslesens/souslesensVocables/commit/65fbd09e14286790f871975efc03553b2ed7c0c6))
+* **api:** users/data/{id}/exec if no params are passed ([675e3c1](https://github.com/souslesens/souslesensVocables/commit/675e3c166fb22de38969c84ea2dccbc2c8a9b92d))
+* **ConfigEditor:** fix database search ([6858e1a](https://github.com/souslesens/souslesensVocables/commit/6858e1a23c5b46f63a2b2e1f7244d017761602f2))
+* **external:** move jquery to jquery directory ([220bf0e](https://github.com/souslesens/souslesensVocables/commit/220bf0e9f2088d286b023273ff38f89bd0984fd6))
+* **model/users:** fix deleteUserAccount function ([369a53a](https://github.com/souslesens/souslesensVocables/commit/369a53ab173684789237f950394a823676ce6a40))
+
 ### [2.14.2](https://github.com/souslesens/souslesensVocables/compare/2.14.1...2.14.2) (2025-07-24)
 
 

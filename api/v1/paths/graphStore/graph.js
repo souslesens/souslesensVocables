@@ -21,6 +21,7 @@ module.exports = function () {
 
             GraphStore.exportGraph(sparqlServerConnection, req.query.graphUri, function (err, result) {
                 if (err) {
+                    res.status(err.status || 500).json(err);
                     next(err);
                 } else {
                     return res.status(200).json(result);

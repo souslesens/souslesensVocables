@@ -45,6 +45,7 @@ module.exports = function () {
                     resources: databases,
                 });
             } catch (err) {
+                res.status(err.status || 500).json(err);
                 next(err);
             }
         }
@@ -89,6 +90,7 @@ module.exports = function () {
                     resources: databases,
                 });
             } catch (err) {
+                res.status(err.status || 500).json(err);
                 next(err);
             }
         }

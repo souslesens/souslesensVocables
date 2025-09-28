@@ -164,9 +164,12 @@ var TriplesMaker = {
                         oldTime = new Date();
                         return callbackTest(null, resultSize > 0);
                     },
+
+
                     function (callbackWhilst) {
-                        databaseModel
-                            .batchSelect(tableInfos.dbID, tableInfos.table, {
+
+
+                        databaseModel.batchSelect(tableInfos.dbID, tableInfos.table, {
                                 limit: limitSize,
                                 noRecurs: true, // Boolean(options.sampleSize),
                                 offset: offset,
@@ -186,6 +189,10 @@ var TriplesMaker = {
                                 message.totalDuration += message.operationDuration;
                                 KGbuilder_socket.message(options.clientSocketId, message);
                                 oldTime = new Date();
+
+
+
+
 
                                 // KGbuilder_socket.message(options.clientSocketId, processedRecords + "  records loaded from table " + tableInfos.table, false);
                                 TriplesMaker.buildTriples(data, tableProcessingParams, options, function (err, batchTriples) {

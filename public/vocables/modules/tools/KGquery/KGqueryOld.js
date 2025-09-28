@@ -32,7 +32,6 @@ import KGquery_filter from "./KGquery_filter.js";
 
 import Containers_widget from "../containers/containers_widget.js";
 import UserDataWidget from "../../uiWidgets/userDataWidget.js";
-import KGquery_predicates from "./KGquery_predicates.js";
 
 var KGquery = (function () {
     var self = {};
@@ -444,8 +443,8 @@ var KGquery = (function () {
             },
 
             function (err, aggregateClauses) {
-                //  self.queryKG("table", {aggregate: aggregateClauses});
-                self.execPathQuery({aggregate: aggregateClauses, outpu: "table"}, function (err, result) {
+              //  self.queryKG("table", {aggregate: aggregateClauses});
+                self.execPathQuery({aggregate: aggregateClauses,outpu:"table"},function(err,result){
 
                 })
             },
@@ -581,18 +580,95 @@ var KGquery = (function () {
                         var predicatesSubjectsMap = {}
 
                         querySet.elements.forEach(function (queryElement, queryElementIndex) {
+                            if (!queryElement.toNode) {
+                                return;
+                                if (queryElement.fromNode) {
+                                } else {
+                                }
+                            }
 
-                            KGquery_predicates.setRdfTypePredicates(queryElement, predicatesSubjectsMap)
+                            var subjectVarName = self.getVarName(queryElement.fromNode);
 
+                            if (!predicatesSubjectsMap[subjectVarName]) {
+                                predicatesSubjectsMap[subjectVarName] = {
+                                    predicates: [],
+                                    optional: queryElement.isOptional
+                                }
+                            }
+
+
+                            var subjectUri = queryElement.fromNode.id;
+                            if (!distinctTypesMap[subjectVarName]) {
+                                distinctTypesMap[subjectVarName] = 1;
+
+                                var predicate = filterStr = " " + subjectVarName + "  rdf:type <" + subjectUri + ">. ";
+                                filterStr = predicate
+                                predicatesSubjectsMap[subjectVarName].predicates.push(predicate)
+
+                            }
+
+                            if (queryElement.toNode) {
+                                var objectVarName = self.getVarName(queryElement.toNode);
+                                if (!predicatesSubjectsMap[objectVarName]) {
+                                    predicatesSubjectsMap[objectVarName] = {
+                                        predicates: [],
+                                        optional: queryElement.isOptional
+                                    }
+                                }
+                                var objectUri = queryElement.toNode.id;
+                                if (!distinctTypesMap[objectVarName]) {
+                                    distinctTypesMap[objectVarName] = 1;
+                                    var predicate = " " + objectVarName + "  rdf:type <" + objectUri + ">.";
+                                    filterStr += predicate
+                                    predicatesSubjectsMap[objectVarName].predicates.push(predicate)
+                                }
+                            }
                             var filterClassLabels = {};
                             queryElement.paths.forEach(function (pathItem, pathIndex) {
                                 var propertyStr = pathItem[2];
 
                                 //disable rdf:member predicate
                                 if (false && propertyStr == "rdfs:member") {
-                                    KGquery_predicates.setRdfsMemberPredicates(queryElement, predicatesSubjectsMap)
+                                    /*  if (!queryElement.fromNode.data.containerFilter) {
+                                          return;
+                                      }
+                                      if (queryElement.fromNode.data.containerFilter.classId) {
+                                          var predicate = "\n FILTER(" + subjectVarName + "=<" + queryElement.fromNode.data.containerFilter.classId + ">)\n ";
+                                          filterStr += predicate
+                                          predicatesSubjectsMap[subjectVarName].predicates.push(predicate)
+
+                                      }
+                                      var depth = queryElement.fromNode.data.containerFilter.depth || 1;
+                                      {
+                                          if (depth) {
+                                              var str = "";
+                                              var number = parseInt(depth);
+                                              propertyStr = " rdfs:member{0," + number + "} ";
+                                              otherPredicatesStrs += " FILTER (" + pathItem[0] + " !=" + pathItem[1] + ") ";
+                                          } else {
+                                          }
+                                      }*/
                                 } else {
-                                    KGquery_predicates.setPathPredicates(queryElement, predicatesSubjectsMap)
+                                    propertyStr = "<" + propertyStr + "> ";
+                                }
+
+                                var startVarName;
+                                var endVarName;
+                                var inverseStr = "";
+                                if (pathItem.length == 4) {
+                                    startVarName = pathItem[1]; //self.getVarName({ id: pathItem[1] });
+                                    endVarName = pathItem[0]; //self.getVarName({ id: pathItem[0] });
+                                    inverseStr = "^";
+                                } else {
+                                    startVarName = pathItem[0]; //; self.getVarName({ id: pathItem[0] });
+                                    endVarName = pathItem[1]; // self.getVarName({ id: pathItem[1] });
+                                }
+
+                                var basicPredicate = startVarName + " " + inverseStr + propertyStr + endVarName + ".\n";
+                                if (!uniqueBasicPredicatesMap[basicPredicate]) {
+                                    uniqueBasicPredicatesMap[basicPredicate] = 1;
+                                    predicateStr += basicPredicate;
+                                    predicatesSubjectsMap[startVarName].predicates.push(basicPredicate)
                                 }
                             });
                         });
@@ -635,7 +711,7 @@ var KGquery = (function () {
 
                         //set Optional predicates
                         if (options.aggregate) {
-                            KGquery.optionalPredicatesSubjecstMap = {}
+                            KGquery.optionalPredicatesSubjecstMap={}
                         }
                         whereStr = self.processOptionalQueryElements(predicatesSubjectsMap, KGquery.optionalPredicatesSubjecstMap)
                         //  whereStr += querySetOptionalPredicates;

@@ -43,9 +43,11 @@ var KGquery_controlPanel = (function () {
                 "</select>" +
                 "</div>";
         }
-        var setHtml = "<div id='" + querySetDivId + "' class='KGquery_setDiv' style='color:" + color + ";border-color:" + color + "'>" + booleanOperatorHtml + label;
+        var setHtml = "<div id='" + querySetDivId + "' class='KGquery_setDiv' style='color:" + color + ";border-color:" + color + "'>" + booleanOperatorHtml + label
+
 
         if (booleanOperator) {
+
             setHtml += "&nbsp;<button class=' titleboxButtons KGquery_smallButton  deleteIcon' onclick='KGquery.removeSet( \"" + querySetDivId + "\")' ></button>";
         }
         // "<button onclick='' >save</button>" +
@@ -77,9 +79,9 @@ var KGquery_controlPanel = (function () {
             queryElementDivId +
             "'>" +
             "&nbsp;<button class=' titleboxButtons KGquery_smallButton  deleteIcon' " +
-            "onclick='KGquery.removeQueryElement( \"" +
-            queryElementDivId +
-            "\") '></button>" +
+            "onclick='KGquery.removeQueryElement( \"" +queryElementDivId + "\") '></button>" +
+             "&nbsp;<input type='checkbox' id='KGquery_setOptionalCBX'  onchange='KGquery_controlPanel.onSetOptionalChange($(this).val(),"+querySetDivId+","+queryElementDivId+")' >Optional";
+
             "</div>";
         $("#" + querySetDivId).append(html);
 
@@ -157,6 +159,15 @@ var KGquery_controlPanel = (function () {
         });
         return predicateLabel;
     };
+
+    self.onSetOptionalChange=function(state,querySetDivId,queryElementDivId){
+
+        var querySet=KGquery.divsMap[querySetDivId.id]
+        querySet.elements.forEach(function(element){
+            if (element.divId==queryElementDivId.id)
+               element.isOptional=(state=="on")
+        })
+    }
 
     return self;
 })();

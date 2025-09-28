@@ -2,6 +2,7 @@ import JstreeWidget from "../../uiWidgets/jstreeWidget.js";
 import KGquery from "./KGquery.js";
 import jstreeWidget from "../../uiWidgets/jstreeWidget.js";
 import KGquery_filter_bot from "../../bots/KGquery_filter_bot.js";
+import common from "../../shared/common.js";
 
 /**
  * KGquery_filter Module
@@ -40,12 +41,20 @@ var KGquery_filter = (function () {
                             }
                             if (!uniqueProps[subjectVarName + "_" + property.label]) {
                                 uniqueProps[subjectVarName + "_" + property.label] = 1;
-                                queryNonObjectProperties.push({ varName: subjectVarName, property: property, queryElementData: queryElement.fromNode.data });
+                                queryNonObjectProperties.push({
+                                    varName: subjectVarName,
+                                    property: property,
+                                    queryElementData: queryElement.fromNode.data
+                                });
                             }
                         });
                     } else {
                         uniqueProps[subjectVarName + "_" + "labelFromURI"] = 1;
-                        queryNonObjectProperties.push({ varName: subjectVarName, property: { id: "labelFromURI", label: "labelFromURI" }, queryElementData: queryElement.fromNode.data });
+                        queryNonObjectProperties.push({
+                            varName: subjectVarName,
+                            property: {id: "labelFromURI", label: "labelFromURI"},
+                            queryElementData: queryElement.fromNode.data
+                        });
                     }
                 }
                 if (queryElement.toNode) {
@@ -57,12 +66,20 @@ var KGquery_filter = (function () {
                             }
                             if (!uniqueProps[objectVarName + "_" + property.label]) {
                                 uniqueProps[objectVarName + "_" + property.label] = 1;
-                                queryNonObjectProperties.push({ varName: objectVarName, property: property, queryElementData: queryElement.toNode.data });
+                                queryNonObjectProperties.push({
+                                    varName: objectVarName,
+                                    property: property,
+                                    queryElementData: queryElement.toNode.data
+                                });
                             }
                         });
                     } else {
                         uniqueProps[objectVarName + "_" + "labelFromURI"] = 1;
-                        queryNonObjectProperties.push({ varName: objectVarName, property: { id: "labelFromURI", label: "labelFromURI" }, queryElementData: queryElement.toNode.data });
+                        queryNonObjectProperties.push({
+                            varName: objectVarName,
+                            property: {id: "labelFromURI", label: "labelFromURI"},
+                            queryElementData: queryElement.toNode.data
+                        });
                     }
                 }
 
@@ -114,9 +131,13 @@ var KGquery_filter = (function () {
                 });
             },
         };
-        if (options.additionalHTMLComponent) {
-            jstreeOptions.additionalHTMLComponent = options.additionalHTMLComponent;
-        }
+
+        var sampleSizeHtml = "<div style=\"margin-right: 10px;\">" +
+            "  <button onclick=\"KGquery_filter.setKGquerySampleSize()\"> Sample</button></div>`;"
+
+
+        jstreeOptions.additionalHTMLComponent = sampleSizeHtml;
+
         JstreeWidget.loadJsTree(null, jstreeData, jstreeOptions, function () {
             JstreeWidget.openNodeDescendants(null, "root");
 
@@ -129,7 +150,9 @@ var KGquery_filter = (function () {
                 jstreeData.forEach(function (item) {
                     var str = item.text.toLowerCase();
                     precheckedWords.forEach(function (expression) {
-                        if (str.indexOf(expression) > -1) preCheckedOptions.push(item.id);
+                        if (str.indexOf(expression) > -1) {
+                            preCheckedOptions.push(item.id);
+                        }
                     });
                 });
                 // Check properties with filter
@@ -155,13 +178,7 @@ var KGquery_filter = (function () {
                 jstreeWidget.setjsTreeCheckedNodes(null, preCheckedOptions);
             }
 
-            if (false && options && options.output != "table") {
-                var checkedNodes = JstreeWidget.getjsTreeCheckedNodes();
-                KGquery_filter.getOptionalPredicates(checkedNodes, function (err, result) {
-                    JstreeWidget.closeDialog();
-                    return callback(err, result);
-                });
-            }
+
         });
     };
 
@@ -214,6 +231,7 @@ var KGquery_filter = (function () {
 
         var optionalPredicatesSparql = "";
 
+        var optionalPredicatesSubjecstMap = {}
         selectedPropertyNodes.forEach(function (propertyNode) {
             var optionalStr = " OPTIONAL ";
             var data = propertyNode.data;
@@ -224,11 +242,23 @@ var KGquery_filter = (function () {
             } else {
                 propertyStr = data.property.id;
             }
-            var str = optionalStr + " {?" + data.varName + " " + propertyStr + " ?" + data.varName + "_" + data.property.label + ".}\n";
-            optionalPredicatesSparql = addToStringIfNotExists(str, optionalPredicatesSparql);
+
+            var predicate = optionalStr +" {?" + data.varName + " " + propertyStr + " ?" + data.varName + "_" + data.property.label + ".}\n";
+
+            optionalPredicatesSparql = addToStringIfNotExists(predicate, optionalPredicatesSparql);
+            if (!optionalPredicatesSubjecstMap["?" + data.varName]) {
+                optionalPredicatesSubjecstMap["?" + data.varName] = ""
+            }
+            optionalPredicatesSubjecstMap["?" + data.varName] += predicate
         });
         KGquery.currentSelectedPredicates = selectedPropertyNodes;
-        return callback(null, { optionalPredicatesSparql: optionalPredicatesSparql, selectClauseSparql: selectClauseSparql, labelFromURIToDisplay: labelFromURIToDisplay });
+        return callback(null, {
+            optionalPredicatesSparql: optionalPredicatesSparql,
+            selectClauseSparql: selectClauseSparql,
+            labelFromURIToDisplay: labelFromURIToDisplay,
+            sampleSize: self.currentSampleSize,
+            optionalPredicatesSubjecstMap: optionalPredicatesSubjecstMap
+        });
     };
 
     /**
@@ -307,7 +337,7 @@ var KGquery_filter = (function () {
             if (err) {
                 return alert(err.responseText);
             }
-            KGquery.querySets.sets[classSetIndex].classFiltersMap[classDivId] = { class: aClass, filter: result.filter };
+            KGquery.querySets.sets[classSetIndex].classFiltersMap[classDivId] = {class: aClass, filter: result.filter};
             $("#" + classDivId + "_filter").text(result.filterLabel || result.filter);
 
             if (addTojsTreeNode) {
@@ -322,6 +352,22 @@ var KGquery_filter = (function () {
             }
         });
     };
+
+    self.setKGquerySampleSize = function () {
+        var size = prompt("Enter sample size")
+        if (size && common.isInt(size)) {
+            try {
+                size = parseInt(size)
+            } catch (e) {
+                return alert(e)
+            }
+            self.currentSampleSize = size;
+
+            JstreeWidget.validateSelfDialog()
+
+        }
+
+    }
 
     return self;
 })();

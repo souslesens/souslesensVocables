@@ -127,6 +127,8 @@ var KGquery_graph = (function () {
                 }
                 self.drawModel(options.displayGraphInList);
 
+                KGquery.initVarNamesMap()
+
                 if (savedGraphLocation == "file" || options?.saveGraph) {
                     self.saveVisjsModelGraph();
                 }

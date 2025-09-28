@@ -19,11 +19,11 @@ var KGquery_predicates = (function () {
         }
 
         var subjectUri = queryElement.fromNode.id;
-        if (true || !predicatesSubjectsMap[subjectVarName]) {
+
             var predicate = subjectVarName + "  rdf:type <" + subjectUri + ">. ";
             predicatesSubjectsMap[subjectVarName].predicates.push(predicate)
 
-        }
+
         if (queryElement.toNode) {
             var objectVarName = KGquery.getVarName(queryElement.toNode);
             if (!predicatesSubjectsMap[objectVarName]) {
@@ -33,12 +33,9 @@ var KGquery_predicates = (function () {
                 }
             }
             var objectUri = queryElement.toNode.id;
-            if (true || !predicatesSubjectsMap[objectVarName]) {
-
                 var predicate = objectVarName + "  rdf:type <" + objectUri + ">.";
-
                 predicatesSubjectsMap[objectVarName].predicates.push(predicate)
-            }
+
         }
         return predicatesSubjectsMap
 
@@ -64,10 +61,18 @@ var KGquery_predicates = (function () {
                 endVarName = pathItem[1];
             }
 
-            var pathPredicate = startVarName + " " + inverseStr + propertyStr + endVarName + ".\n";
+
             if (!predicatesSubjectsMap[startVarName]) {
                 predicatesSubjectsMap[startVarName] = {isOptional: false, predicates: []}
+// for transitive nodes of path that are note already typed
+                var itemUri = KGquery.varNameToClassMap[startVarName]
+                var predicate = startVarName + "  rdf:type <" + itemUri + ">.";
+                predicatesSubjectsMap[startVarName].predicates.push(predicate)
+
             }
+
+
+            var pathPredicate = startVarName + " " + inverseStr + propertyStr + endVarName + ".\n";
             predicatesSubjectsMap[startVarName].predicates.push(pathPredicate)
 
 

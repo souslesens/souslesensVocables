@@ -99,6 +99,7 @@ var KGquery = (function () {
      */
     self.init = function () {
         KGquery_graph.drawVisjsModel("saved");
+
         SavedQueriesWidget.showDialog("tabs_myQueries", self.currentSource, KGquery_myQueries.save, KGquery_myQueries.load, "KGquery/savedQueries/");
     };
 
@@ -115,6 +116,19 @@ var KGquery = (function () {
             KGquery_outputTypeSelectNode.append(`<option>${toolName}</option>`);
         }
     };
+    
+    
+    self.initVarNamesMap=function(){
+        self.varNameToClassMap={}
+        self.classToVarNameMap={}
+        var nodes= KGquery_graph.KGqueryGraph.data.nodes.get()
+        nodes.forEach(function(node){
+            var varName=self.getVarName(node)
+            self.varNameToClassMap[varName]=node.id
+            self.classToVarNameMap[node.id]=varName
+
+        })
+    }
 
     /**
      * Loads a source and initializes the graph visualization.
@@ -585,8 +599,6 @@ var KGquery = (function () {
                             KGquery_predicates.setRdfTypePredicates(queryElement, predicatesSubjectsMap)
 
                             var filterClassLabels = {};
-                            queryElement.paths.forEach(function (pathItem, pathIndex) {
-                                var propertyStr = pathItem[2];
 
                                 //disable rdf:member predicate
                                 if (false && propertyStr == "rdfs:member") {
@@ -594,7 +606,7 @@ var KGquery = (function () {
                                 } else {
                                     KGquery_predicates.setPathPredicates(queryElement, predicatesSubjectsMap)
                                 }
-                            });
+
                         });
 
                         for (var key in querySet.classFiltersMap) {
@@ -743,7 +755,8 @@ var KGquery = (function () {
                             if (!self.outputCsv && totalSize >= limitSize) {
                                 self.outputCsv = true;
                             }
-                            return resultSize > 0;
+
+                            return (resultSize > 0);
                         },
                         function (callbackWhilst) {
                             var query2 = "" + query;

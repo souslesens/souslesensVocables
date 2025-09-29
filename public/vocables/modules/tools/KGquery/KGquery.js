@@ -553,9 +553,10 @@ var KGquery = (function () {
                             callbackSeries(err);
                         }
                         sampleSize = $("#KGquery_sampleInput").val();
-                        if (sampleSize && !Number.isInteger(sampleSize)) {
+                        if (sampleSize && !Number.isInteger(parseInt(sampleSize))) {
                             sampleSize = null;
                             alert("sample size must be an integer");
+                            return callbackSeries("sample size must be an integer");
                         }
 
                         KGquery.labelFromURIToDisplay = result.labelFromURIToDisplay;

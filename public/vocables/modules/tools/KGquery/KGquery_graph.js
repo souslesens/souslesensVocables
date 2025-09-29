@@ -211,7 +211,7 @@ var KGquery_graph = (function () {
         var imports = Config.sources[source].imports;
         if (imports) {
             sources = sources.concat(imports);
-        }  
+        }
         var visjsData = { nodes: [], edges: [] };
         var uniqueNodes = {};
         self.KGqueryGraph = new VisjsGraphClass("KGquery_graphDiv", { nodes: [], edges: [] }, self.visjsOptions);
@@ -224,30 +224,30 @@ var KGquery_graph = (function () {
                     if (err && err != "notFound") {
                         return alert(err || err.responseText);
                     }
-                  
-                            if (result) {
-                                visjsDataSource.nodes = result.nodes;
-                                visjsDataSource.edges = result.edges;
+
+                    if (result) {
+                        visjsDataSource.nodes = result.nodes;
+                        visjsDataSource.edges = result.edges;
+                    }
+                    if (visjsDataSource.nodes) {
+                        visjsDataSource.nodes.forEach(function (node) {
+                            if (!uniqueNodes[node.id]) {
+                                uniqueNodes[node.id] = 1;
+                                node.x = null;
+                                node.y = null;
+                                //node.fixed = false;
+                                visjsData.nodes.push(node);
                             }
-                            if ( visjsDataSource.nodes) {
-                                visjsDataSource.nodes.forEach(function (node) {
-                                    if (!uniqueNodes[node.id]) {
-                                        uniqueNodes[node.id] = 1;
-                                        node.x = null;
-                                        node.y = null;
-                                        //node.fixed = false;
-                                        visjsData.nodes.push(node);
-                                    }
-                                });
-                                visjsDataSource.edges.forEach(function (edge) {
-                                    if (!uniqueNodes[edge.id]) {
-                                        uniqueNodes[edge.id] = 1;
-                                        visjsData.edges.push(edge);
-                                    }
-                                });
+                        });
+                        visjsDataSource.edges.forEach(function (edge) {
+                            if (!uniqueNodes[edge.id]) {
+                                uniqueNodes[edge.id] = 1;
+                                visjsData.edges.push(edge);
                             }
-                            self.visjsData = null;
-                            callbackEach();
+                        });
+                    }
+                    self.visjsData = null;
+                    callbackEach();
                 });
             },
             function (err) {

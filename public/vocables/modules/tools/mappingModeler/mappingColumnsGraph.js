@@ -1335,8 +1335,8 @@ var MappingColumnsGraph = (function () {
                 if (data.nodes.length == 0) {
                     return alert("no nodes in file");
                 }
-                if(data.options?.config?.lastUpdate){
-                    delete data.options.config.lastUpdate 
+                if (data.options?.config?.lastUpdate) {
+                    delete data.options.config.lastUpdate;
                 }
                 var fileName = "mappings_" + MappingModeler.currentSLSsource + "_ALL" + ".json";
                 var payload = {
@@ -1344,7 +1344,7 @@ var MappingColumnsGraph = (function () {
                     fileName: fileName,
                     data: JSON.stringify(data, null, 2),
                 };
-                
+
                 $.ajax({
                     type: "POST",
                     url: `${Config.apiUrl}/data/file`,

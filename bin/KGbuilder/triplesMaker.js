@@ -45,7 +45,7 @@ var TriplesMaker = {
         };
         var oldTime = new Date();
         var startTime = oldTime;
-
+        var currentBatchRowIndex = 0;
         if (tableProcessingParams.tableInfos.csvDataFilePath) {
             KGbuilder_socket.message(options.clientSocketId, "loading data from csv file " + tableInfos.table, false);
             TriplesMaker.readCsv(tableInfos.csvDataFilePath, options.sampleSize, function (err, result) {
@@ -66,7 +66,11 @@ var TriplesMaker = {
                 async.eachSeries(
                     result.data,
                     function (data, callbackEach) {
+                        if(currentBatchRowIndex && options){
+                            options.currentBatchRowIndex = currentBatchRowIndex;
+                        }
                         TriplesMaker.buildTriples(data, tableProcessingParams, options, function (err, batchTriples) {
+                            currentBatchRowIndex += data.length;
                             totalTriplesCount += batchTriples.length;
                             var currentTime = new Date();
 
@@ -132,6 +136,7 @@ var TriplesMaker = {
 
             var select = [];
             var databaseErrors = 0;
+            var currentBatchRowIndex = 0;
 
             for (var columnId in tableProcessingParams.tableColumnsMappings) {
                 var column = tableProcessingParams.tableColumnsMappings[columnId];
@@ -186,9 +191,12 @@ var TriplesMaker = {
                                 message.totalDuration += message.operationDuration;
                                 KGbuilder_socket.message(options.clientSocketId, message);
                                 oldTime = new Date();
-
+                                if(currentBatchRowIndex && options){
+                                    options.currentBatchRowIndex = currentBatchRowIndex;
+                                }
                                 // KGbuilder_socket.message(options.clientSocketId, processedRecords + "  records loaded from table " + tableInfos.table, false);
                                 TriplesMaker.buildTriples(data, tableProcessingParams, options, function (err, batchTriples) {
+                                    currentBatchRowIndex = offset;
                                     if (err) {
                                         return callbackWhilst(err);
                                     }
@@ -265,9 +273,13 @@ var TriplesMaker = {
     buildTriples: function (data, tableProcessingParams, options, callback) {
         var columnMappings = tableProcessingParams.tableColumnsMappings;
         var batchTriples = [];
-        data.forEach(function (line, rowIndex) {
+        data.forEach(function (line, index) {
             var lineColumnUrisMap = {};
-
+            var rowIndex = index;
+            if(options.currentBatchRowIndex){
+                rowIndex += options.currentBatchRowIndex;
+                
+            }
             var blankNodesMap = {};
             for (var key in line) {
                 if (line[key]) {

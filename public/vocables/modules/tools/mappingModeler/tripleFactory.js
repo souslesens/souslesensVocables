@@ -108,7 +108,7 @@ var TripleFactory = (function () {
                     alert(err.responseText || err);
                 } else {
                     // UI.message("Done", true);
-                    var indexAuto = $("#MappingModeler_indexAutoCBX").prop("checked");
+                 var indexAuto = $("#MappingModeler_indexAutoCBX").prop("checked");
 
                     if (!self.filterMappingIsSample && indexAuto) {
                         SearchUtil.generateElasticIndex(
@@ -303,7 +303,7 @@ var TripleFactory = (function () {
                         $("#KGcreator_infosDiv").val(result.result);
                         UI.message(result.result, true);
                     } else {
-                        var message = result.result + " triples created in graph " + DataSourceManager.currentConfig.graphUri;
+                        var message = result.totalTriplesCount[MappingModeler.currentTable.name] + " triples created in graph " + DataSourceManager.currentConfig.graphUri;
                         alert(message);
                         //  UI.message(message, true);
                     }

@@ -21,7 +21,7 @@ import MainController from "../../shared/mainController.js";
 import KGquery_graph from "./KGquery_graph.js";
 import SavedQueriesWidget from "../../uiWidgets/savedQueriesWidget.js";
 import KGquery_myQueries from "./KGquery_myQueries.js";
-import SQLquery_filters from "./SQLquery_filters.js";
+import SQLquery_filters from "./sql/SQLquery_filters.js";
 import KGquery_controlPanel from "./KGquery_controlPanel.js";
 import KGquery_paths from "./KGquery_paths.js";
 import GanttWidget from "../../uiWidgets/ganttWidget.js";

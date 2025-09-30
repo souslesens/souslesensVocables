@@ -1547,6 +1547,7 @@ var MappingColumnsGraph = (function () {
         var classNodesMap = self.getNodesMap("Class");
         var linkedClasses = {};
         var classVisjsData = {nodes: [], edges: []};
+        var uniqueNodes = {};
 
 
         async.series([
@@ -1578,7 +1579,7 @@ var MappingColumnsGraph = (function () {
             //build visjgraph
             function (callbackSeries) {
 
-                var uniqueNodes = {};
+                
                 for (var classId in linkedClasses) {
                     if (!uniqueNodes[classId]) {
                         uniqueNodes[classId] = 1;
@@ -1623,13 +1624,7 @@ var MappingColumnsGraph = (function () {
             },
             // --- get link from column to class and build vijsgraph
 
-            function (callbackSeries) {                
-                var existingClassIds = {};
-                classVisjsData.nodes.forEach(function (n) {
-                    if (n && n.id) {
-                        existingClassIds[n.id] = 1;
-                    }
-                });
+            function (callbackSeries) {   
 
                 var addedColumnNodeIds = {};
                 var addedColEdgeIds = {};
@@ -1645,7 +1640,7 @@ var MappingColumnsGraph = (function () {
                         return;
                     } 
                     if (column.label) {
-                        var columnLalbel = String(column.label);
+                        var columnLalbel = column.label;
                     } 
                     var dataTable = null;
                     if (column.data && column.data.dataTable) {
@@ -1663,25 +1658,25 @@ var MappingColumnsGraph = (function () {
                     if (!classId) {
                         return;
                     }
-                    if (!existingClassIds[classId]) {
+                    if (!uniqueNodes[classId]) {
                         return; 
                     }
 
                     // Create Node if not existing
-                    if (!addedColumnNodeIds[columnId]) {
+                    if (!uniqueNodes[columnId]) {
                         classVisjsData.nodes.push({
                             id: columnId,
-                            label: String(displayLabel),
+                            label: displayLabel,
                             shape: "box",
                             color: "#cb9801",
                             data: {
                             id: columnId,
-                            label: String(columnLalbel), 
+                            label: columnLalbel, 
                             type: "Column",
                             dataTable: dataTable
                             }
                         });
-                        addedColumnNodeIds[columnId] = 1;
+                        uniqueNodes[columnId] = 1;
                     }
 
                     // Retrieve edge from columnID to class
@@ -1721,125 +1716,117 @@ var MappingColumnsGraph = (function () {
                 callbackSeries();
             },
 
-            // --- STEP : ajouter les Datatype Properties (nœuds = label de la propriété, arêtes depuis la colonne) ---
+            // build datatype property edge 
             function (callbackSeries) {
-            // Existing Nodes
-            var nodesMapLocal = {};
-            classVisjsData.nodes.forEach(function (n) {
-                if (n && n.id) {
-                nodesMapLocal[n.id] = 1;
-                }
-            });
 
-            var addedDpNodeIds = {};
-            var addedDpEdgeIds = {};
-            var cols = columns;
-            cols.forEach(function (column) {
-                // columnId
-                var columnId = null;
-                if (column) {
-                if (column.id) {
-                    columnId = column.id;
-                } 
-
-                }
-                if (!columnId) {
-                    return;
-                }
-
-                // columnLalbel
-                var columnLalbel = columnId;
-                if (column) {
-                    if (column.label) {
-                        columnLalbel = String(column.label);
+                var addedDpEdgeIds = {};
+                var cols = columns;
+                cols.forEach(function (column) {
+                    // columnId
+                    var columnId = null;
+                    if (column) {
+                    if (column.id) {
+                        columnId = column.id;
                     } 
-                }
 
-                // dataTable
-                var dataTable = null;
-                if (column && column.data && column.data.dataTable) {
-                dataTable = column.data.dataTable;
-                }
-
-                // // s'assurer que la colonne existe comme nœud
-                // if (!nodesMapLocal[columnId]) {
-                // classVisjsData.nodes.push({
-                //     id: columnId,
-                //     label: String(columnLalbel),
-                //     shape: "box",
-                //     color: "#eaf4ff",
-                //     data: { id: columnId, label: String(columnLalbel), type: "Column", dataTable: dataTable }
-                // });
-                // nodesMapLocal[columnId] = 1;
-                // }
-
-                // otherPredicates
-                var dataTypeNodes = null;
-                if (column && column.data && column.data.otherPredicates) {
-                    dataTypeNodes = column.data.otherPredicates;
-                                   }
-                if (!dataTypeNodes) {
-                return;
-                }
-                dataTypeNodes.forEach(function (predItem) {
-                    if (!predItem) {
+                    }
+                    if (!columnId) {
                         return;
                     }
-                    dpColumnId = column.data.otherPredicates[0].object;
-                    // data type propertie
-                    var propUri = null;
-                    if (predItem.property) {
-                        propUri = predItem.property;
-                        
+
+                    // columnLalbel
+                    var columnLalbel = columnId;
+                    if (column) {
+                        if (column.label) {
+                            columnLalbel = String(column.label);
+                        } 
                     }
-                    if (!propUri) {
-                        return;
+
+                    // dataTable
+                    var dataTable = null;
+                    if (column && column.data && column.data.dataTable) {
+                    dataTable = column.data.dataTable;
                     }
-                    
-                    // create node if not existing
-                    if (!addedDpNodeIds[dpColumnId] && !nodesMapLocal[dpColumnId]) {
-                        classVisjsData.nodes.push({
-                        id: dpColumnId,
-                        label: dpColumnId,
+
+                    // s'assurer que la colonne existe comme nœud
+                    if (!uniqueNodes[columnId]) {
+                    classVisjsData.nodes.push({
+                        id: columnId,
+                        label: String(columnLalbel),
                         shape: "box",
-                        size: 10,
-                        color :"#ddd",
-                        data: {
-                            id: dpColumnId,
-                            type: "DatatypeProperty",
-                            source: MappingModeler.currentSLSsource,
-                            prop: propUri,
-                            propLabel: propUri,
-                            dataTable: dataTable
+                        color: "#eaf4ff",
+                        data: { id: columnId, label: String(columnLalbel), type: "Column", dataTable: dataTable }
+                    });
+                    uniqueNodes[columnId] = 1;
+                    }
+
+                    // otherPredicates
+                    var dataTypeNodes = null;
+                    if (column && column.data && column.data.otherPredicates) {
+                        dataTypeNodes = column.data.otherPredicates;
+                                    }
+                    if (!dataTypeNodes) {
+                    return;
+                    }
+                    dataTypeNodes.forEach(function (predItem) {
+                        if (!predItem) {
+                            return;
                         }
-                        });
-                        addedDpNodeIds[dpColumnId] = 1;
-                        nodesMapLocal[dpColumnId] = 1;
-                    }
+                        var dpColumnId = predItem.object;
+                        // data type propertie
+                        var propUri = null;
+                        if (predItem.property) {
+                            propUri = predItem.property;
+                            
+                        }
+                        if (!propUri) {
+                            return;
+                        }
+                        
+                        // create node if not existing
+                        if (!uniqueNodes[dpColumnId] && !uniqueNodes[dpColumnId]) {
+                            classVisjsData.nodes.push({
+                            id: dpColumnId,
+                            label: dpColumnId,
+                            shape: "box",
+                            size: 10,
+                            color :"#ddd",
+                            data: {
+                                id: dpColumnId,
+                                type: "DatatypeProperty",
+                                source: MappingModeler.currentSLSsource,
+                                prop: propUri,
+                                propLabel: propUri,
+                                dataTable: dataTable
+                            }
+                            });
+                            uniqueNodes[dpColumnId] = 1;
+                            uniqueNodes[dpColumnId] = 1;
+                        }
 
-                    // edge from datatype propertie to column
-                    var edgeId = columnId + "->" + dpColumnId + "|" + propUri;
-                    if (!addedDpEdgeIds[edgeId]) {
-                        var dpColor = (Lineage_whiteboard && Lineage_whiteboard.datatypeColor) ? Lineage_whiteboard.datatypeColor : "#9b59b6";
-                        classVisjsData.edges.push({
-                        id: edgeId,
-                        from: columnId,
-                        to: dpColumnId,
-                        label: propUri,
-                        arrows: { to: { enabled: true, type: "solid" } },
-                        font: { color: Lineage_whiteboard.datatypeColor, size: 12 },
-                        color: dpColor,
-                        width: 3,
-                        dashes: true,
-                        data: { id: propUri, type: "DatatypeProperty" }
-                        });
-                        addedDpEdgeIds[edgeId] = 1;
-                    }
+                        // edge from datatype propertie to column
+                        var edgeId = columnId + "->" + dpColumnId + "|" + propUri;
+                        if (!addedDpEdgeIds[edgeId]) {
+                            var dpColor = (Lineage_whiteboard && Lineage_whiteboard.datatypeColor) ? Lineage_whiteboard.datatypeColor : "#9b59b6";
+                            classVisjsData.edges.push({
+                            id: edgeId,
+                            from: columnId,
+                            to: dpColumnId,
+                            label: propUri,
+                            arrows: { to: { enabled: true, type: "solid" } },
+                            font: { color: Lineage_whiteboard.datatypeColor, size: 12 },
+                            color: dpColor,
+                            width: 3,
+                            dashes: true,
+                            data: { id: propUri, type: "DatatypeProperty" }
+                            });
+                            addedDpEdgeIds[edgeId] = 1;
+                        }
+                    });
                 });
-            });
 
-            callbackSeries();
-            },
+                callbackSeries();
+        },
 
 
 

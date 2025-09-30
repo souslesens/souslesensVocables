@@ -1625,8 +1625,6 @@ var MappingColumnsGraph = (function () {
             // --- get link from column to class and build vijsgraph
 
             function (callbackSeries) {   
-
-                var addedColumnNodeIds = {};
                 var addedColEdgeIds = {};
                 columns.forEach(function (column) {
                     if (!column) {
@@ -1686,13 +1684,13 @@ var MappingColumnsGraph = (function () {
                     }
 
                     var edgeType = null;
-                    edgeColumnToClass.forEach(function (e) {
+                    edgeColumnToClass.forEach(function (edge) {
                         if (edgeType) {
                             return; 
                         }
-                        if (e && e.data) {
-                            if (e.data.type) {
-                                edgeType = e.data.type;
+                        if (edge && edge.data) {
+                            if (edge.data.type) {
+                                edgeType = edge.data.type;
                             } 
                         }
                     });
@@ -1748,7 +1746,7 @@ var MappingColumnsGraph = (function () {
                     dataTable = column.data.dataTable;
                     }
 
-                    // s'assurer que la colonne existe comme nœud
+                   
                     if (!uniqueNodes[columnId]) {
                     classVisjsData.nodes.push({
                         id: columnId,
@@ -1773,7 +1771,7 @@ var MappingColumnsGraph = (function () {
                             return;
                         }
                         var dpColumnId = predItem.object;
-                        // data type propertie
+                        
                         var propUri = null;
                         if (predItem.property) {
                             propUri = predItem.property;

@@ -1534,8 +1534,6 @@ var MappingColumnsGraph = (function () {
 
 
 
-
-
     self.relationMessage = function (fromLabel, toLabel) {
         if (MappingModeler.currentResourceType != "ObjectProperty") {
             return;
@@ -1623,153 +1621,229 @@ var MappingColumnsGraph = (function () {
                 }
                 callbackSeries()
             },
+            // --- get link from column to class and build vijsgraph
 
-            // --- ADD DP FROM columns[i].data.otherPredicates ---
-        function (callbackSeries) {
-            try {
-                
-                const classNodesMap2 = {};
-                classVisjsData.nodes.forEach(n => { classNodesMap2[n.id] = 1; });
+            function (callbackSeries) {                
+                var existingClassIds = {};
+                classVisjsData.nodes.forEach(function (n) {
+                    if (n && n.id) {
+                        existingClassIds[n.id] = 1;
+                    }
+                });
 
-                
-                const addedDpNodeIds = {};
-                const addedDpEdgeIds = {};
-
-
+                var addedColumnNodeIds = {};
+                var addedColEdgeIds = {};
                 columns.forEach(function (column) {
-                const colClassId = self.getColumnClass(column);
-                if (!colClassId) return;
-                if (!classNodesMap2[colClassId]) return; 
-
-                const otherPreds = column?.data?.otherPredicates;
-                if (!otherPreds) return;
-
-
-                const items = Array.isArray(otherPreds) ? otherPreds : Object.values(otherPreds);
-
-                items.forEach(function (predItem) {
-                    if (!predItem) return;
-
-  
-                    const propUri   = predItem.id || predItem.prop || predItem.p || predItem.predicate || "";
-                    const propLabel = predItem.label || predItem.propLabel || (propUri ? Sparql_common.getLabelFromURI(propUri) : "");
-
-  
-                    const obj = predItem.object || predItem.value || predItem.objectValue || null;
-                    if (!obj) return;
-
-
-                    const rawObjId = (typeof obj === "object") ? (obj.id || obj.value || obj["@id"]) : obj;
-                    const safeObjId = rawObjId ? String(rawObjId) : (column.id + "_dp_" + (propUri || "prop") + "_lit");
-                    const dpNodeId = "dpNode|" + colClassId + "|" + (propUri || "prop") + "|" + safeObjId;
-
-                    const dpNodeLabel = (obj && (obj.label || obj.value || obj["@value"])) ? (obj.label || obj.value || obj["@value"]) :
-                                        (typeof obj === "string" ? obj : (predItem.objectLabel || propLabel || "value"));
-
-                    if (!addedDpNodeIds[dpNodeId]) {
-                    classVisjsData.nodes.push({
-                        id: dpNodeId,
-                        label: String(dpNodeLabel),
-                        shape: "dot",
-                        size: 12,
-                        color: "#9b59b6",
-                        data: { id: dpNodeId, type: "Datatype", source: MappingModeler.currentSLSsource }
-                    });
-                    addedDpNodeIds[dpNodeId] = 1;
+                    if (!column) {
+                        return;
+                    }
+                    var columnId = null;
+                    if (column.id) {
+                        var columnId = column.id;
+                    } 
+                    if (!columnId) {
+                        return;
+                    } 
+                    if (column.label) {
+                        var columnLalbel = String(column.label);
+                    } 
+                    var dataTable = null;
+                    if (column.data && column.data.dataTable) {
+                        dataTable = column.data.dataTable;
                     }
 
-
-                    const edgeId = colClassId + "_dpEdge_" + (propUri || "prop") + "_" + dpNodeId;
-                    if (!addedDpEdgeIds[edgeId]) {
- 
-                    const edge = self.getVisjsDatatypePropertyEdgeBetweenClassAndRange(colClassId, dpNodeId, propUri || "DatatypeProperty", propLabel || "value");
-                    edge.id = edgeId;
-                    classVisjsData.edges.push(edge);
-
-
-
-                    addedDpEdgeIds[edgeId] = 1;
-                    }
-                });
-                });
-
-                return callbackSeries();
-            } catch (e) {
-                console.error(e);
-                return callbackSeries();
-            }
-        },
-        // --- END DP STEP ---
-
-
-            // compare to model restrictions
-            function (callbackSeries) {
-                Sparql_OWL.getObjectRestrictions(MappingModeler.currentSLSsource, null, {}, function (err, result) {
-
-                    if (err) {
-                        return callbackSeries()
+                    // label value
+                    var displayLabel = columnLalbel;
+                    if (dataTable) {
+                        displayLabel = dataTable + ":" + columnLalbel; 
                     }
 
-                    var map = {}
-                    result.forEach(function (item) {
-                        map[item.subject.value + "_" + item.value.value] = item
-                    })
+                    // get column class ID
+                    var classId = self.getColumnClass(column);
+                    if (!classId) {
+                        return;
+                    }
+                    if (!existingClassIds[classId]) {
+                        return; 
+                    }
 
-
-                    classVisjsData.edges.forEach(function (edge) {
-                        var modelRestriction = map[edge.from + "_" + edge.to]
-                        if (modelRestriction) {
-                            if (modelRestriction.prop.value == edge.data.id) {
-                                edge.color = "green"
-                            } else {
-                                edge.color = "red"
-
-
-                                classVisjsData.edges.push({
-                                    from: edge.from,
-                                    to: edge.to,
-                                    label: modelRestriction.propLabel.value,
-                                    data: {id: modelRestriction.prop.value},
-                                    arrows: {
-                                        to: {
-                                            enabled: true,
-                                            type: "arrow",
-                                        },
-                                    }
-
-                                })
+                    // Create Node if not existing
+                    if (!addedColumnNodeIds[columnId]) {
+                        classVisjsData.nodes.push({
+                            id: columnId,
+                            label: String(displayLabel),
+                            shape: "box",
+                            color: "#cb9801",
+                            data: {
+                            id: columnId,
+                            label: String(columnLalbel), 
+                            type: "Column",
+                            dataTable: dataTable
                             }
-                        } else {
-                            var inverseModelRestriction = map[edge.to + "_" + edge.from]
-                            if (inverseModelRestriction) {
+                        });
+                        addedColumnNodeIds[columnId] = 1;
+                    }
 
+                    // Retrieve edge from columnID to class
+                    var edgeColumnToClass = [];
+                    if (edgesFromMap && edgesFromMap[columnId]) {
+                        edgeColumnToClass = edgesFromMap[columnId];
+                    }
 
-                                classVisjsData.edges.push({
-                                    from: edge.from,
-                                    to: edge.to,
-                                    volor: "blue",
-                                    label: inverseModelRestriction.propLabel.value,
-                                    data: {id: inverseModelRestriction.prop.value},
-                                    arrows: {
-                                        to: {
-                                            enabled: true,
-                                            type: "arrow",
-                                        },
-                                    },
-
-                                })
-                            }
-
-
-                            edge.color = "blue"
+                    var edgeType = null;
+                    edgeColumnToClass.forEach(function (e) {
+                        if (edgeType) {
+                            return; 
                         }
+                        if (e && e.data) {
+                            if (e.data.type) {
+                                edgeType = e.data.type;
+                            } 
+                        }
+                    });
 
+                    var edgeId = columnId + "->" + classId + "|" + edgeType;
+                    if (!addedColEdgeIds[edgeId]) {
+                    classVisjsData.edges.push({
+                        id: edgeId,
+                        from: columnId,
+                        to: classId,
+                        label: "",
+                        color: "#00afef",
+                        width: 3,
+                        arrows: { to: { enabled: true, type: "arrow" } },
+                        data: { type: edgeType }
+                    });
+                    addedColEdgeIds[edgeId] = 1;
+                    }
+                });
 
-                    })
-                    callbackSeries()
-                })
-
+                callbackSeries();
             },
+
+            // --- STEP : ajouter les Datatype Properties (nœuds = label de la propriété, arêtes depuis la colonne) ---
+            function (callbackSeries) {
+            // Existing Nodes
+            var nodesMapLocal = {};
+            classVisjsData.nodes.forEach(function (n) {
+                if (n && n.id) {
+                nodesMapLocal[n.id] = 1;
+                }
+            });
+
+            var addedDpNodeIds = {};
+            var addedDpEdgeIds = {};
+            var cols = columns;
+            cols.forEach(function (column) {
+                // columnId
+                var columnId = null;
+                if (column) {
+                if (column.id) {
+                    columnId = column.id;
+                } 
+
+                }
+                if (!columnId) {
+                    return;
+                }
+
+                // columnLalbel
+                var columnLalbel = columnId;
+                if (column) {
+                    if (column.label) {
+                        columnLalbel = String(column.label);
+                    } 
+                }
+
+                // dataTable
+                var dataTable = null;
+                if (column && column.data && column.data.dataTable) {
+                dataTable = column.data.dataTable;
+                }
+
+                // // s'assurer que la colonne existe comme nœud
+                // if (!nodesMapLocal[columnId]) {
+                // classVisjsData.nodes.push({
+                //     id: columnId,
+                //     label: String(columnLalbel),
+                //     shape: "box",
+                //     color: "#eaf4ff",
+                //     data: { id: columnId, label: String(columnLalbel), type: "Column", dataTable: dataTable }
+                // });
+                // nodesMapLocal[columnId] = 1;
+                // }
+
+                // otherPredicates
+                var dataTypeNodes = null;
+                if (column && column.data && column.data.otherPredicates) {
+                    dataTypeNodes = column.data.otherPredicates;
+                                   }
+                if (!dataTypeNodes) {
+                return;
+                }
+                dataTypeNodes.forEach(function (predItem) {
+                    if (!predItem) {
+                        return;
+                    }
+                    dpColumnId = column.data.otherPredicates[0].object;
+                    // data type propertie
+                    var propUri = null;
+                    if (predItem.property) {
+                        propUri = predItem.property;
+                        
+                    }
+                    if (!propUri) {
+                        return;
+                    }
+                    
+                    // create node if not existing
+                    if (!addedDpNodeIds[dpColumnId] && !nodesMapLocal[dpColumnId]) {
+                        classVisjsData.nodes.push({
+                        id: dpColumnId,
+                        label: dpColumnId,
+                        shape: "box",
+                        size: 10,
+                        color :"#ddd",
+                        data: {
+                            id: dpColumnId,
+                            type: "DatatypeProperty",
+                            source: MappingModeler.currentSLSsource,
+                            prop: propUri,
+                            propLabel: propUri,
+                            dataTable: dataTable
+                        }
+                        });
+                        addedDpNodeIds[dpColumnId] = 1;
+                        nodesMapLocal[dpColumnId] = 1;
+                    }
+
+                    // edge from datatype propertie to column
+                    var edgeId = columnId + "->" + dpColumnId + "|" + propUri;
+                    if (!addedDpEdgeIds[edgeId]) {
+                        var dpColor = (Lineage_whiteboard && Lineage_whiteboard.datatypeColor) ? Lineage_whiteboard.datatypeColor : "#9b59b6";
+                        classVisjsData.edges.push({
+                        id: edgeId,
+                        from: columnId,
+                        to: dpColumnId,
+                        label: propUri,
+                        arrows: { to: { enabled: true, type: "solid" } },
+                        font: { color: Lineage_whiteboard.datatypeColor, size: 12 },
+                        color: dpColor,
+                        width: 3,
+                        dashes: true,
+                        data: { id: propUri, type: "DatatypeProperty" }
+                        });
+                        addedDpEdgeIds[edgeId] = 1;
+                    }
+                });
+            });
+
+            callbackSeries();
+            },
+
+
+
+
 // draw graph
             function (callbackSeries) {
                 //  classVisjsData={nodes:[], edges:[]}

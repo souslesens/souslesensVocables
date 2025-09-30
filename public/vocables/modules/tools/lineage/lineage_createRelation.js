@@ -435,7 +435,7 @@ var Lineage_createRelation = (function () {
                     NodeInfosWidget.showNodeInfos(self.currentPropertiesTreeNode.data.source, self.currentPropertiesTreeNode, "mainDialogDiv", null, function () {
                         //  $("#mainDialogDiv").parent().css("z-index", 1);
                       
-                        UI.SideBySideTwoWindows("#smallDialogDiv","#mainDialogDiv");
+                        UI.sideBySideTwoWindows("#smallDialogDiv","#mainDialogDiv");
                        
                     });
                 },

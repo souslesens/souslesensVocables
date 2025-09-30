@@ -92,64 +92,50 @@ var Lineage_properties = (function () {
         }
         
     
-        if (self.currentTreeNode?.data?.type === "http://www.w3.org/2002/07/owl#ObjectProperty") {
+        if (self.currentTreeNode.data.type === "http://www.w3.org/2002/07/owl#ObjectProperty") {
             items["graphNode"] = {
                 label: "graph node",
                 action: function (_e) {
                     try {
                         const properties = "http://www.w3.org/2002/07/owl#ObjectProperty";
-                        const jsTree = $("#Lineage_propertiesTree").jstree(true);
-                        const selected = jsTree ? jsTree.get_selected(true) : [];
-
-                        let propIds = selected
-                        .filter(n => n?.data?.type === properties && n?.data?.id)
-                        .map(n => n.data.id);
-
-            
-                        if (propIds.length === 0 && self.currentTreeNode?.data?.id) {
-                        propIds = [self.currentTreeNode.data.id];
-                        }
-                        if (propIds.length === 0) {
-                        return UI.message("Sélectionne une ObjectProperty d'abord.", true);
-                        }
-
-           
                         const visjsData = { nodes: [], edges: [] };
-                        const existing = (Lineage_whiteboard?.lineageVisjsGraph?.getExistingIdsMap)
-                        ? Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap()
-                        : {};
+                        var existingNodes = {};
 
+                        if (typeof Lineage_whiteboard !== "undefined" && Lineage_whiteboard !== null) {
+                            var graph = Lineage_whiteboard.lineageVisjsGraph;
+                            if (graph && typeof graph.getExistingIdsMap === "function") {
+                                var result = graph.getExistingIdsMap();
+                                if (result && typeof result === "object") {
+                                    existingNodes = result;
+                                }
+                            }
+                        }                      
                         const propShape = "box";
                         const propColor = "#ddd";
                         const propFont = { color: "blue", size: 12 };
-                        const src = Lineage_sources.activeSource || self.currentTreeNode?.data?.source;
+                        let id = self.currentTreeNode.data.id
+                        const source = self.currentTreeNode.data.source;
+                        const label = self.currentTreeNode.data.label
+                        if (existingNodes[id]){
+                            return;     
+                        }else {
 
-                        propIds.forEach((id) => {
-                        if (existing[id]) return;
-
-            
-                        const fromSel = selected.find(n => n?.data?.id === id)?.data;
-                        const label =
-                            (fromSel && fromSel.label) ||
-                            (self.currentTreeNode?.data?.id === id ? self.currentTreeNode.data.label : null) ||
-                            Sparql_common.getLabelFromURI(id);
-
-                        visjsData.nodes.push({
-                            id,
-                            label,
-                            shape: propShape,         
-                            color: propColor,
-                            size: self.defaultShapeSize,
-                            font: propFont,
-                            data: {
-                            id,
-                            label,
-                            source: src,
-                            type: properties
-                            }
-                        });
-                        existing[id] = 1;
-                        });
+                            visjsData.nodes.push({
+                                id,
+                                label,
+                                shape: propShape,         
+                                color: propColor,
+                                size: self.defaultShapeSize,
+                                font: propFont,
+                                data: {
+                                id,
+                                label,
+                                source: source,
+                                type: properties
+                                }
+                            });
+                                existingNodes[id] = 1;
+                        };
 
                 
                     if (!Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
@@ -159,8 +145,8 @@ var Lineage_properties = (function () {
                     }
                     Lineage_whiteboard.lineageVisjsGraph.network.fit();
                     } catch (err) {
-                        const msg = err?.responseText || err?.message || String(err);
-                        UI.message(msg, true);
+                        const msg = err.responseText || err.message || String(err);
+                        // UI.message(msg, true);
                     }
                 }
             };

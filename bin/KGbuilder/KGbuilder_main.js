@@ -181,8 +181,8 @@ var KGbuilder_main = {
                                         // dont write return triples sample
                                         sampleTriples = result.sampleTriples;
                                     } else {
-                                        if(!totalTriplesCount[table]){
-                                            totalTriplesCount[table]=0;
+                                        if (!totalTriplesCount[table]) {
+                                            totalTriplesCount[table] = 0;
                                         }
                                         totalTriplesCount[table] += result.totalTriplesCount;
                                     }

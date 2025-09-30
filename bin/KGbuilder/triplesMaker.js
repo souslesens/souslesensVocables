@@ -66,7 +66,7 @@ var TriplesMaker = {
                 async.eachSeries(
                     result.data,
                     function (data, callbackEach) {
-                        if(currentBatchRowIndex && options){
+                        if (currentBatchRowIndex && options) {
                             options.currentBatchRowIndex = currentBatchRowIndex;
                         }
                         TriplesMaker.buildTriples(data, tableProcessingParams, options, function (err, batchTriples) {
@@ -191,7 +191,7 @@ var TriplesMaker = {
                                 message.totalDuration += message.operationDuration;
                                 KGbuilder_socket.message(options.clientSocketId, message);
                                 oldTime = new Date();
-                                if(currentBatchRowIndex && options){
+                                if (currentBatchRowIndex && options) {
                                     options.currentBatchRowIndex = currentBatchRowIndex;
                                 }
                                 // KGbuilder_socket.message(options.clientSocketId, processedRecords + "  records loaded from table " + tableInfos.table, false);
@@ -276,9 +276,8 @@ var TriplesMaker = {
         data.forEach(function (line, index) {
             var lineColumnUrisMap = {};
             var rowIndex = index;
-            if(options.currentBatchRowIndex){
+            if (options.currentBatchRowIndex) {
                 rowIndex += options.currentBatchRowIndex;
-                
             }
             var blankNodesMap = {};
             for (var key in line) {

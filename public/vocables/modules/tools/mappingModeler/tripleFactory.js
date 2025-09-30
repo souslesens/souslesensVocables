@@ -303,13 +303,11 @@ var TripleFactory = (function () {
                         $("#KGcreator_infosDiv").val(result.result);
                         UI.message(result.result, true);
                     } else {
-                        if(result?.totalTriplesCount && result?.totalTriplesCount[MappingModeler.currentTable.name]){
-                            
-                        
+                        if (result?.totalTriplesCount && result?.totalTriplesCount[MappingModeler.currentTable.name]) {
                             var message = result.totalTriplesCount[MappingModeler.currentTable.name] + " triples created in graph " + DataSourceManager.currentConfig.graphUri;
                             alert(message);
-                        }else{
-                            var message =  " triples created in graph " + DataSourceManager.currentConfig.graphUri;
+                        } else {
+                            var message = " triples created in graph " + DataSourceManager.currentConfig.graphUri;
                             alert(message);
                         }
                         //  UI.message(message, true);

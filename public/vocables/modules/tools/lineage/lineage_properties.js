@@ -6,6 +6,7 @@ import Export from "../../shared/export.js";
 import GraphDisplayLegend from "../../graph/graphDisplayLegend.js";
 import Lineage_decoration from "./lineage_decoration.js";
 import Lineage_sources from "./lineage_sources.js";
+import JstreeWidget from "../../uiWidgets/jstreeWidget.js";
 
 /* The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -86,15 +87,73 @@ var Lineage_properties = (function () {
                     });
                 },
             },
-
-            graphNode: {
+        
+           
+        }
+        
+    
+        if (self.currentTreeNode.data.type === "http://www.w3.org/2002/07/owl#ObjectProperty") {
+            items["graphNode"] = {
                 label: "graph node",
                 action: function (_e) {
-                    // rajouter une condition pour tester sur object properties
-                    // function graph node
-                },
-            },
-        };
+                    try {
+                        const properties = "http://www.w3.org/2002/07/owl#ObjectProperty";
+                        const visjsData = { nodes: [], edges: [] };
+                        var existingNodes = {};
+
+                        if (typeof Lineage_whiteboard !== "undefined" && Lineage_whiteboard !== null) {
+                            var graph = Lineage_whiteboard.lineageVisjsGraph;
+                            if (graph && typeof graph.getExistingIdsMap === "function") {
+                                var result = graph.getExistingIdsMap();
+                                if (result && typeof result === "object") {
+                                    existingNodes = result;
+                                }
+                            }
+                        }                      
+                        const propShape = "box";
+                        const propColor = "#ddd";
+                        const propFont = { color: "blue", size: 12 };
+                        let id = self.currentTreeNode.data.id
+                        const source = self.currentTreeNode.data.source;
+                        const label = self.currentTreeNode.data.label
+                        if (existingNodes[id]){
+                            return;     
+                        }else {
+
+                            visjsData.nodes.push({
+                                id,
+                                label,
+                                shape: propShape,         
+                                color: propColor,
+                                size: self.defaultShapeSize,
+                                font: propFont,
+                                data: {
+                                id,
+                                label,
+                                source: source,
+                                type: properties
+                                }
+                            });
+                                existingNodes[id] = 1;
+                        };
+
+                
+                    if (!Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
+                    Lineage_whiteboard.drawNewGraph(visjsData);
+                    } else {
+                    Lineage_whiteboard.addVisDataToGraph(visjsData);
+                    }
+                    Lineage_whiteboard.lineageVisjsGraph.network.fit();
+                    } catch (err) {
+                        const msg = err.responseText || err.message || String(err);
+                        // UI.message(msg, true);
+                    }
+                }
+            };
+    }
+
+    
+    
         if (MainController.currentTool == "lineage") {
             items.restrictions = {
                 label: "Restrictions",
@@ -1120,7 +1179,7 @@ var Lineage_properties = (function () {
                     openAll: true,
                     withCheckboxes: true,
                 };
-                options.contextMenu = self.jstreeContextMenu();
+                options.contextMenu = self.jstreeContextMenu;
 
                 JstreeWidget.loadJsTree("Lineage_propertiesTree", jstreeData, options);
             },

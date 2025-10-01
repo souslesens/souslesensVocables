@@ -849,6 +849,9 @@ var MappingModeler = (function () {
                 self.onSuggestionsSelect(null, { node: { id: columnName } });
             }
         }
+
+
+        
     };
 
     /**

@@ -553,8 +553,7 @@ var KGquery = (function () {
                             callbackSeries(err);
                         }
                         sampleSize = $("#KGquery_sampleInput").val();
-                       
-                            
+
                         KGquery.labelFromURIToDisplay = result.labelFromURIToDisplay;
                         optionalPredicatesSparql = result.optionalPredicatesSparql;
                         labelFromURIToDisplay = result.labelFromURIToDisplay;

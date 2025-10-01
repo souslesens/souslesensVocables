@@ -553,10 +553,7 @@ var KGquery = (function () {
                             callbackSeries(err);
                         }
                         sampleSize = $("#KGquery_sampleInput").val();
-                        if (sampleSize && !Number.isInteger(sampleSize) ) {
-                            sampleSize = null;
-                            alert("sample size must be an integer");
-                        }
+                       
                             
                         KGquery.labelFromURIToDisplay = result.labelFromURIToDisplay;
                         optionalPredicatesSparql = result.optionalPredicatesSparql;

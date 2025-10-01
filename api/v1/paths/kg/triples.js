@@ -13,6 +13,7 @@ module.exports = function () {
                 processResponse(res, err, result);
             });
         } catch (e) {
+            res.status(e.status || 500).json(e);
             next(e);
         }
     }
@@ -98,6 +99,7 @@ module.exports = function () {
                 processResponse(res, err, result);
             });
         } catch (e) {
+            res.status(e.status || 500).json(e);
             next(e);
         }
     }

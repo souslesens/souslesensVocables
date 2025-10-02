@@ -116,16 +116,16 @@ var KGquery = (function () {
             KGquery_outputTypeSelectNode.append(`<option>${toolName}</option>`);
         }
     };
-    
-    
-    self.initVarNamesMap=function(){
-        self.varNameToClassMap={}
-        self.classToVarNameMap={}
-        var nodes= KGquery_graph.KGqueryGraph.data.nodes.get()
-        nodes.forEach(function(node){
-            var varName=self.getVarName(node)
-            self.varNameToClassMap[varName]=node.id
-            self.classToVarNameMap[node.id]=varName
+
+
+    self.initVarNamesMap = function () {
+        self.varNameToClassMap = {}
+        self.classToVarNameMap = {}
+        var nodes = KGquery_graph.KGqueryGraph.data.nodes.get()
+        nodes.forEach(function (node) {
+            var varName = self.getVarName(node)
+            self.varNameToClassMap[varName] = node.id
+            self.classToVarNameMap[node.id] = varName
 
         })
     }
@@ -560,7 +560,7 @@ var KGquery = (function () {
         KGquery.labelFromURIToDisplay = KGquery.labelFromURIToDisplay;
         var containerFiltersSparql = "";
         var query = "";
-        var distinctSetTypes = [];
+
         var isUnion = false;
         var isJoin = false;
         var data;
@@ -569,9 +569,10 @@ var KGquery = (function () {
         async.series(
             [
 
-
-
-
+                function (callbackSeries) {
+                   query= KGquery_predicates.buildQuery(self.querySets, {})
+                    return callbackSeries()
+                },
                 //execute query
                 function (callbackSeries) {
                     //var url = Config.sources[self.currentSource].sparql_server.url + "?format=text&query=";
@@ -1224,45 +1225,7 @@ var KGquery = (function () {
     self.initMyQuery = function () {
         SavedQueriesWidget.showDialog("tabs_myQueries", self.currentSource, KGquery_myQueries.save, KGquery_myQueries.load, "KGquery/savedQueries/");
     };
-    /**
-     *  !!! if a variable is optio,nall all predicates tha contains this variable as subject have to be in nthe optional clause
-     * @param predicatesSubjectsMap
-     * @param optionalPredicatesSubjecstMap
-     * @return {string}
-     */
-    self.processOptionalQueryElements = function (predicatesSubjectsMap, optionalPredicatesSubjecstMap) {
-        var whereStr = ""
 
-
-        // case when select a unique Class
-        if(Object.keys(predicatesSubjectsMap).length==0){
-            for (var varName in optionalPredicatesSubjecstMap) {
-                whereStr += optionalPredicatesSubjecstMap[varName] + "\n"
-            }
-            predicatesSubjectsMap[varName]={}
-            return whereStr;
-        }
-
-        for (var varName in predicatesSubjectsMap) {
-            var str = ""
-            var obj = predicatesSubjectsMap[varName]
-            obj.predicates.forEach(function (predicate) {
-                str += predicate + "\n"
-
-            })
-            if (optionalPredicatesSubjecstMap[varName]) {
-                str += optionalPredicatesSubjecstMap[varName] + "\n"
-            }
-            if (obj.optional) {
-                str = "OPTIONAL {" + str + "}"
-            }
-            whereStr += str + "\n"
-
-        }
-
-
-        return whereStr;
-    }
 
 
     return self;

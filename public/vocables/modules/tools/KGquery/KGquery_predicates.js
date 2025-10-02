@@ -113,7 +113,8 @@ var KGquery_predicates = (function () {
     }
 
     self.buildQuery=function(querySets,options){
-
+        var distinctSetTypes = [];
+        var query=""
         //build query
 
             if (!options) {
@@ -173,7 +174,7 @@ var KGquery_predicates = (function () {
                     filterStr += KGquery_filter.getAggregateFilterOptionalPredicates(querySet, filterStr);
                 }
 
-
+var optionalPredicatesSparql=""
                 if (optionalPredicatesSparql) {
                     //optional predicates are filtered for each set or weird comportement for multiple set queries
 
@@ -203,11 +204,11 @@ var KGquery_predicates = (function () {
                 var variables = whereStr.match(regex);
                 var uniqueVariables = [...new Set(variables)];
 
-                var subjectsPredicatesMap = {}
+              //  var subjectsPredicatesMap = {}
 
                 disctinctSetVars.push(uniqueVariables);
                 querySetsWhereStr.push(whereStr);
-                distinctSetTypes.push(distinctTypesMap);
+             distinctSetTypes.push(distinctTypesMap);
             });
 
 
@@ -229,9 +230,9 @@ var KGquery_predicates = (function () {
                     var querySetNumber = index + 1;
                     if (self.querySets.sets[index].booleanOperator) {
                         whereStr += "\n " + self.querySets.sets[index].booleanOperator + "\n ";
-                        isJoin = true;
+                      var  isJoin = true;
                         if (self.querySets.sets[index].booleanOperator == "Union") {
-                            isUnion = true;
+                           var isUnion = true;
                         }
                     }
                     whereStr += "{SELECT " + disctinctVarsStr + ' (("Query ' + querySetNumber + '") AS ?querySet) ';
@@ -240,7 +241,7 @@ var KGquery_predicates = (function () {
                 });
             }
 
-            var fromStr = Sparql_common.getFromStr(self.currentSource);
+            var fromStr = Sparql_common.getFromStr(KGquery.currentSource);
             query =
                 "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
                 "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
@@ -257,7 +258,7 @@ var KGquery_predicates = (function () {
                 Object.keys(distinctTypesMap).forEach(function (type) {
                     selectStr += " " + type;
                 });
-                if (isJoin) {
+                if (options.isJoin) {
                     selectStr += " ?querySet ";
                 }
             }
@@ -271,13 +272,52 @@ var KGquery_predicates = (function () {
 
             query += " " + groupByStr; // + " limit 10000";
 
-            callbackSeries();
+
+        return query;
 
 
 
 
     }
+    /**
+     *  !!! if a variable is optio,nall all predicates tha contains this variable as subject have to be in nthe optional clause
+     * @param predicatesSubjectsMap
+     * @param optionalPredicatesSubjecstMap
+     * @return {string}
+     */
+    self.processOptionalQueryElements = function (predicatesSubjectsMap, optionalPredicatesSubjecstMap) {
+        var whereStr = ""
 
+
+        // case when select a unique Class
+        if (Object.keys(predicatesSubjectsMap).length == 0) {
+            for (var varName in optionalPredicatesSubjecstMap) {
+                whereStr += optionalPredicatesSubjecstMap[varName] + "\n"
+            }
+            predicatesSubjectsMap[varName] = {}
+            return whereStr;
+        }
+
+        for (var varName in predicatesSubjectsMap) {
+            var str = ""
+            var obj = predicatesSubjectsMap[varName]
+            obj.predicates.forEach(function (predicate) {
+                str += predicate + "\n"
+
+            })
+            if (optionalPredicatesSubjecstMap[varName]) {
+                str += optionalPredicatesSubjecstMap[varName] + "\n"
+            }
+            if (obj.optional) {
+                str = "OPTIONAL {" + str + "}"
+            }
+            whereStr += str + "\n"
+
+        }
+
+
+        return whereStr;
+    }
 
 
     return self;

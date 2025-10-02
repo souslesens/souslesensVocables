@@ -12,7 +12,7 @@ const path = require("path");
 const MappingParser = require("./mappingsParser.js");
 
 var TriplesMaker = {
-    batchSize: 300,
+    batchSize:1000000,
     mappingFilePredicate: "http://souslesens.org/KGcreator#mappingFile",
     uniqueSubjects: {},
 
@@ -126,7 +126,109 @@ var TriplesMaker = {
                     },
                 );
             });
-        } else if (tableInfos.dbID) {
+        }else if (true) { /// tedmporary fix batchselect problem
+            //!!!!!!!!!! temporary to cure batchselect bug
+            //  var slices=common.array.slice(data,300)
+            databaseModel.batchSelect(tableInfos.dbID, tableInfos.table, {
+              limit: TriplesMaker.batchSize,
+                noRecurs: true,
+              //  offset: offset,
+                select: select,
+            })
+                .then((result) => {
+            //  async.eachSeries(slices,function(data,callbackEachDataSlice){
+            KGbuilder_socket.message(options.clientSocketId, "loading data from database table " + tableInfos.table, false);
+
+
+
+
+               var slices=util.sliceArray(result,300)
+                var currentTime = new Date();
+                message.tableTotalRecords = slices[0].length;
+                message.operation = "records";
+                message.processedRecords += 0;
+                message.operationDuration = currentTime - oldTime;
+                message.totalDuration += message.operationDuration;
+                KGbuilder_socket.message(options.clientSocketId, message);
+                oldTime = new Date();
+
+                async.eachSeries(
+                    slices,
+                    function (data, callbackEach) {
+                        if (currentBatchRowIndex && options) {
+                            options.currentBatchRowIndex = currentBatchRowIndex;
+                        }
+                        TriplesMaker.buildTriples(data, tableProcessingParams, options, function (err, batchTriples) {
+                            //  totalTriplesCount += batchTriples.length;
+                            var currentTime = new Date();
+                            currentBatchRowIndex += data.length;
+                            message.operation = "buildTriples";
+                            message.totalTriples = totalTriplesCount;
+                            message.batchTriples = batchTriples.length;
+                            message.operationDuration = currentTime - oldTime;
+                            message.totalDuration += message.operationDuration;
+                            KGbuilder_socket.message(options.clientSocketId, message);
+                            oldTime = new Date();
+
+                            if (options.sampleSize) {
+                                // sample dont write triples return batchTriples
+                                sampleTriples = batchTriples;
+                                callbackEach();
+                            } else {
+                                KGbuilder_socket.message(
+                                    options.clientSocketId,
+                                    " writing " + processedRecords + " records  from " + tableInfos.table + " : " + batchTriples.length + " triples",
+                                    false,
+                                );
+
+                                KGbuilder_triplesWriter.writeTriples(
+                                    batchTriples,
+                                    tableProcessingParams.sourceInfos.graphUri,
+                                    tableProcessingParams.sourceInfos.sparqlServerUrl,
+                                    function (err, writtenTriples) {
+                                        if (err) {
+                                            return callbackEach(err);
+                                        }
+                                        totalTriplesCount += writtenTriples;
+                                        var currentTime = new Date();
+
+                                        message.operation = "writeTriples";
+                                        message.operationDuration = currentTime - oldTime;
+                                        message.totalDuration += message.operationDuration;
+                                        KGbuilder_socket.message(options.clientSocketId, message);
+                                        oldTime = new Date();
+                                        return callbackEach();
+                                    },
+                                );
+                            }
+                        });
+                    },
+                    function (err) {
+                        message.operation = "finished";
+                        message.totalTriples = totalTriplesCount;
+                        KGbuilder_socket.message(options.clientSocketId, message);
+                        // KGbuilder_socket.message(options.clientSocketId, " DONE " + processedRecords + "records  from " + tableInfos.table + " : " + (totalTriplesCount) + " triples", false);
+
+                        return callback(err, {sampleTriples: sampleTriples, totalTriplesCount: totalTriplesCount});
+                    },
+                )
+            }).catch((err) => {
+                console.log(err);
+                if (databaseErrors < 5) {
+                    databaseErrors += 1;
+                    databaseModel.refreshConnection(tableInfos.dbID, function () {
+                        callback();
+                    });
+                } else {
+                    return callback(err);
+                }
+            });
+        }
+
+
+
+// usual case for DB temporay disabled because pb with batchSelect
+     else if (tableInfos.dbID) {
             KGbuilder_socket.message(options.clientSocketId, "loading data from database table " + tableInfos.table, false);
 
             var totalSize = 0;
@@ -162,6 +264,14 @@ var TriplesMaker = {
                 totalDuration: 0,
             };
 
+
+
+
+
+
+
+
+
             databaseModel.refreshConnection(tableInfos.dbID, function () {
                 async.whilst(
                     function (callbackTest) {
@@ -176,7 +286,7 @@ var TriplesMaker = {
 
                         databaseModel.batchSelect(tableInfos.dbID, tableInfos.table, {
                             limit: limitSize,
-                            noRecurs: true, // Boolean(options.sampleSize),
+                            noRecurs: true,
                             offset: offset,
                             select: select,
                         })
@@ -196,10 +306,12 @@ var TriplesMaker = {
                                 //   KGbuilder_socket.message(options.clientSocketId, message);
                                 oldTime = new Date();
 
-
                                 if (currentBatchRowIndex && options) {
                                     options.currentBatchRowIndex = currentBatchRowIndex;
                                 }
+
+
+
 
                                 // KGbuilder_socket.message(options.clientSocketId, processedRecords + "  records loaded from table " + tableInfos.table, false);
                                 TriplesMaker.buildTriples(data, tableProcessingParams, options, function (err, batchTriples) {
@@ -222,22 +334,19 @@ var TriplesMaker = {
                                     KGbuilder_socket.message(options.clientSocketId, message);
                                     oldTime = new Date();
 
+
+
+
+
                                     if (options.sampleSize) {
                                         // sample dont write triples return batchTriples
                                         resultSize = 0; // stop iterate
                                         sampleTriples = batchTriples;
-                                        callbackWhilst();
+                                     return   callbackWhilst();
                                     } else {
 
-                                        var ok = false
-                                        batchTriples.forEach(function (triple) {
+                                      return  callbackWhilst();
 
-                                            if (triple.indexOf("BLT-FL-B1") > -1) {
-                                                var x = 3
-                                                ok = true
-                                            }
-
-                                        })
 
 
                                         KGbuilder_triplesWriter.writeTriples(
@@ -298,6 +407,16 @@ var TriplesMaker = {
         var batchTriples = [];
 
         data.forEach(function (line, index) {
+
+            if( line.functionallocation=="PAZ/FPSOH/GAS/FLARE/16-VE-HU86139-B063"){
+               var x=3
+            }
+            else{
+              ; // return
+            }
+
+
+
             var lineColumnUrisMap = {};
             var rowIndex = index + options.currentBatchRowIndex;
             var blankNodesMap = {};

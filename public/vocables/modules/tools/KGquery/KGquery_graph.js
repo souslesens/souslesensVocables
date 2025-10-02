@@ -825,11 +825,11 @@ var KGquery_graph = (function () {
                     data: payload,
                     dataType: "json",
                     success: function (_result, _textStatus, _jqXHR) {
-                        MainController.UI.message("Decoration saved");
-                        callbackSeries();
+                      UI.message("Decoration saved");
+
                     },
                     error(err) {
-                        return callbackSeries(err);
+                      alert(err.responseText || err)
                     },
                 });
             },

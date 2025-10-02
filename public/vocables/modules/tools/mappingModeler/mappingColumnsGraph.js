@@ -1779,7 +1779,7 @@ var MappingColumnsGraph = (function () {
                     });
                 });
 
-                callbackSeries();
+            callbackSeries();
         },
 
 

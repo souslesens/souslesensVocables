@@ -300,22 +300,6 @@ class DatabaseModel {
         this.refreshAdminConnection(databaseId, callback);
     };
 
-    /* getConnection = async (databaseId) => {
-    //     const database = await this.getDatabase(databaseId);
-    //     const dbClient = this.getClientDriver(database.driver);
-    //     return knex({
-    //         acquireConnectionTimeout: 5000,
-    //         client: dbClient,
-    //         connection: {
-    //             host: database.host,
-    //             port: database.port,
-    //             user: database.user,
-    //             password: database.password,
-    //             database: database.database,
-    //         },
-    //     });
-    // };*/
-
     /**
      * @param {any} connection - a database connection
      * @param {string} query - a sql query

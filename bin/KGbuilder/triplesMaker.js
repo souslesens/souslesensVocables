@@ -444,7 +444,7 @@ var TriplesMaker = {
                     }
                 }
                 if (!columnUri) {
-                    break;
+                    continue;
                 }
 
                 var mappings = columnMappings[columnId].mappings;

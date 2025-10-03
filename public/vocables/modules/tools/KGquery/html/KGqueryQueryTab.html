@@ -3,24 +3,13 @@
         <div class="titleboxButtons font-button1-color">Query Actions</div>
 
         <div style="display: flex; flex-direction: row; justify-content: flex-start; align-items: center">
-            <!-- <button class="slsv-button-1" onclick="KGquery.switchRightPanel(true)">Graph</button>-->
-            <button class="slsv-button-1" onclick="KGquery.clearAll();KGquery.switchRightPanel(true)">Clear</button>
 
+            <button class="slsv-button-1" onclick="KGquery.clearAll();KGquery.switchRightPanel(true)">Clear</button>
             <button class="slsv-button-1" onclick="KGquery.queryKG('table')">Table</button>
-            <!--   <button class="slsv-button-1" onclick="KGquery.queryKG('gantt')">Gantt</button>-->
-            <!-- <button onclick="KGquery.queryKG('vijsGraph')">Graph</button>-->
             <button class="slsv-button-1" onclick="KGquery.aggregateQuery()">Aggregate</button>
             <button class="slsv-button-1" onclick="KGquery.checkRequirements()">check</button>
-            <!--  <button class="slsv-button-1" onclick="KGquery_nodeSelector.showImplicitModelInJstree()">+</button>-->
-            <!--  <select id="KGquery_outputTypeSelect" onchange="KGquery.onOutputTypeSelect($(this).val());">
-                <option selected disabled>Select tool</option>
-                <option>Graph</option>
-            </select>-->
             <button class="slsv-button-1" onclick=" KGquery_nodeSelector.showImplicitModelInJstree(KGquery_graph.visjsData);">+</button>
 
-            <!-- <button onclick="KGquery.queryKG('table',null,true)">Query database</button>-->
-
-            <!--<button onclick="TimeLineWidget.init()">TimeLine</button>-->
         </div>
         <div>
             <input type="checkbox" id="KGquery_displayGraphInList" onchange="KGquery_graph.onDisplayGraphInListCBXchange()" />

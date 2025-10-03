@@ -1570,7 +1570,7 @@ var Sparql_OWL = (function () {
             "",
             {
                 source: sourceLabel,
-                caller: "getObjectRestrictions",
+                caller: null,
             },
             function (err, result) {
                 if (err) {

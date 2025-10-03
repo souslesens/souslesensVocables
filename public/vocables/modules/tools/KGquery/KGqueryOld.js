@@ -831,7 +831,7 @@ var KGquery = (function () {
                                 "",
                                 {
                                     source: self.currentSource,
-                                    caller: "getObjectRestrictions",
+                                    caller: null,
                                 },
                                 function (err, result) {
                                     if (err) {

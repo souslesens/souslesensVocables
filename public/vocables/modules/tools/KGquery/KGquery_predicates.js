@@ -4,6 +4,10 @@ import Sparql_common from "../../sparqlProxies/sparql_common.js";
 var KGquery_predicates = (function () {
 
     var self = {}
+    self.queryPrefixesStr = "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
+        "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+        "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
+        "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>";
 
 
     self.setRdfTypePredicates = function (queryElement, predicatesSubjectsMap) {
@@ -23,8 +27,8 @@ var KGquery_predicates = (function () {
 
         var subjectUri = queryElement.fromNode.id;
 
-            var predicate = subjectVarName + "  rdf:type <" + subjectUri + ">. ";
-            predicatesSubjectsMap[subjectVarName].predicates.push(predicate)
+        var predicate = subjectVarName + "  rdf:type <" + subjectUri + ">. ";
+        predicatesSubjectsMap[subjectVarName].predicates.push(predicate)
 
 
         if (queryElement.toNode) {
@@ -36,8 +40,8 @@ var KGquery_predicates = (function () {
                 }
             }
             var objectUri = queryElement.toNode.id;
-                var predicate = objectVarName + "  rdf:type <" + objectUri + ">.";
-                predicatesSubjectsMap[objectVarName].predicates.push(predicate)
+            var predicate = objectVarName + "  rdf:type <" + objectUri + ">.";
+            predicatesSubjectsMap[objectVarName].predicates.push(predicate)
 
         }
         return predicatesSubjectsMap
@@ -48,8 +52,6 @@ var KGquery_predicates = (function () {
     self.setPathPredicates = function (queryElement, predicatesSubjectsMap) {
         queryElement.paths.forEach(function (pathItem, pathIndex) {
             var propertyStr = "<" + pathItem[2] + "> ";
-
-
 
 
             var startVarName;
@@ -112,170 +114,152 @@ var KGquery_predicates = (function () {
 
     }
 
-    self.buildQuery=function(querySets,options){
+    self.buildQuery = function (querySets, options) {
         var distinctSetTypes = [];
-        var query=""
+        var query = ""
         //build query
 
-            if (!options) {
-                options = {};
+        if (!options) {
+            options = {};
+        }
+
+        var distinctTypesMap = {};
+
+
+        var whereStr = "";
+
+        var querySetsWhereStr = [];
+        var disctinctSetVars = [];
+
+        querySets.sets.forEach(function (querySet) {
+
+            if (querySet.elements.length == 0 || !querySet.elements[0].fromNode) {
+                return;
             }
-
-            var distinctTypesMap = {};
-
-
-            var whereStr = "";
-
-            var querySetsWhereStr = [];
-            var disctinctSetVars = [];
-
-           querySets.sets.forEach(function (querySet) {
-
-                if (querySet.elements.length == 0 || !querySet.elements[0].fromNode) {
-                    return;
-                }
-                whereStr = "";
-                distinctTypesMap = {};
-                var predicateStr = "";
-                var filterStr = "";
-                var otherPredicatesStrs = "";
-                var predicatesSubjectsMap = {}
+            whereStr = "";
+            distinctTypesMap = {};
+            var predicateStr = "";
+            var filterStr = "";
+            var otherPredicatesStrs = "";
+            var predicatesSubjectsMap = {}
 
 
-                // set rdftype and predicates between classes
-                querySet.elements.forEach(function (queryElement, queryElementIndex) {
+            // set rdftype and predicates between classes
+            querySet.elements.forEach(function (queryElement, queryElementIndex) {
 
-                    KGquery_predicates.setRdfTypePredicates(queryElement, predicatesSubjectsMap)
+                KGquery_predicates.setRdfTypePredicates(queryElement, predicatesSubjectsMap)
 
-                    var filterClassLabels = {};
+                var filterClassLabels = {};
 
-                    //disable rdf:member predicate
-                    if ( false) {
-                        KGquery_predicates.setRdfsMemberPredicates(queryElement, predicatesSubjectsMap)
-                    } else {
-                        KGquery_predicates.setPathPredicates(queryElement, predicatesSubjectsMap)
-                    }
-
-                });
-
-
-
-                //set class filter
-                for (var key in querySet.classFiltersMap) {
-                    filterStr += querySet.classFiltersMap[key].filter + " \n";
-
+                //disable rdf:member predicate
+                if (false) {
+                    KGquery_predicates.setRdfsMemberPredicates(queryElement, predicatesSubjectsMap)
+                } else {
+                    KGquery_predicates.setPathPredicates(queryElement, predicatesSubjectsMap)
                 }
 
-                if (options.aggregate) {
-                    whereStr += options.aggregate.where;
-                    var groupByPredicates = options.aggregate.groupByPredicates;
-                    otherPredicatesStrs += " \n" + KGquery_filter.getAggregatePredicates(groupByPredicates);
-
-                    filterStr += KGquery_filter.getAggregateFilterOptionalPredicates(querySet, filterStr);
-                }
-
-var optionalPredicatesSparql=""
-                if (optionalPredicatesSparql) {
-                    //optional predicates are filtered for each set or weird comportement for multiple set queries
-
-                    var querySetOptionalPredicates = "";
-                    Object.keys(distinctTypesMap).forEach(function (type) {
-                        var regex = new RegExp("^\\s*OPTIONAL\\s*{\\s*\\" + type + "\\b[\\s\\S]*?}", "gm");
-                        var matches = optionalPredicatesSparql.match(regex);
-                        if (matches.length > 0) {
-                            querySetOptionalPredicates += matches.join("\n");
-                        }
-                    });
-
-                }
-                whereStr = predicateStr + "\n" + "" + "\n" + filterStr + "\n" + otherPredicatesStrs;
-
-                //set Optional predicates
-                if (options.aggregate) {
-                    KGquery.optionalPredicatesSubjecstMap = {}
-                }
-                whereStr += self.processOptionalQueryElements(predicatesSubjectsMap, KGquery.optionalPredicatesSubjecstMap)
-                //  whereStr += querySetOptionalPredicates;
-
-
-
-                //whereStr = "{" + whereStr + "}";
-                var regex = /\?[\w_]+/g;
-                var variables = whereStr.match(regex);
-                var uniqueVariables = [...new Set(variables)];
-
-              //  var subjectsPredicatesMap = {}
-
-                disctinctSetVars.push(uniqueVariables);
-                querySetsWhereStr.push(whereStr);
-             distinctSetTypes.push(distinctTypesMap);
             });
 
 
-            //after each query set whereStr
+            //set class filter
+            for (var key in querySet.classFiltersMap) {
+                filterStr += querySet.classFiltersMap[key].filter + " \n";
 
-
-            whereStr = "";
-            if (querySetsWhereStr.length == 0) {
-                return alert("no node selected");
-            }
-            if (querySetsWhereStr.length == 1) {
-                whereStr = querySetsWhereStr[0];
-            }
-            if (querySetsWhereStr.length > 1) {
-                querySetsWhereStr.forEach(function (querySetsWhereStr, index) {
-
-
-                    var disctinctVarsStr = disctinctSetVars[index].join(" ");
-                    var querySetNumber = index + 1;
-                    if (self.querySets.sets[index].booleanOperator) {
-                        whereStr += "\n " + self.querySets.sets[index].booleanOperator + "\n ";
-                      var  isJoin = true;
-                        if (self.querySets.sets[index].booleanOperator == "Union") {
-                           var isUnion = true;
-                        }
-                    }
-                    whereStr += "{SELECT " + disctinctVarsStr + ' (("Query ' + querySetNumber + '") AS ?querySet) ';
-                    whereStr += "{" + querySetsWhereStr + "}";
-                    whereStr += "}";
-                });
             }
 
-            var fromStr = Sparql_common.getFromStr(KGquery.currentSource);
-            query =
-                "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
-                "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
-                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
-                "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>";
 
-            var selectStr = " DISTINCT ";
-            var groupByStr = "";
-            if (options.aggregate) {
-                selectStr = options.aggregate.select;
-                groupByStr = " GROUP BY " + options.aggregate.groupBy;
-            } else {
-                selectStr += KGquery.selectClauseSparql ? KGquery.selectClauseSparql : "";
+
+            var optionalPredicatesSparql = ""
+            if (optionalPredicatesSparql) {
+                //optional predicates are filtered for each set or weird comportement for multiple set queries
+
+                var querySetOptionalPredicates = "";
                 Object.keys(distinctTypesMap).forEach(function (type) {
-                    selectStr += " " + type;
+                    var regex = new RegExp("^\\s*OPTIONAL\\s*{\\s*\\" + type + "\\b[\\s\\S]*?}", "gm");
+                    var matches = optionalPredicatesSparql.match(regex);
+                    if (matches.length > 0) {
+                        querySetOptionalPredicates += matches.join("\n");
+                    }
                 });
-                if (options.isJoin) {
-                    selectStr += " ?querySet ";
+
+            }
+            whereStr = predicateStr + "\n" + "" + "\n" + filterStr + "\n" + otherPredicatesStrs;
+
+            whereStr += self.processOptionalQueryElements(predicatesSubjectsMap, KGquery.optionalPredicatesSubjecstMap)
+            //  whereStr += querySetOptionalPredicates;
+
+
+            //whereStr = "{" + whereStr + "}";
+            var regex = /\?[\w_]+/g;
+            var variables = whereStr.match(regex);
+            var uniqueVariables = [...new Set(variables)];
+
+            //  var subjectsPredicatesMap = {}
+
+            disctinctSetVars.push(uniqueVariables);
+            querySetsWhereStr.push(whereStr);
+            distinctSetTypes.push(distinctTypesMap);
+        });
+
+
+        //after each query set whereStr
+
+
+        whereStr = "";
+        if (querySetsWhereStr.length == 0) {
+            return alert("no node selected");
+        }
+        if (querySetsWhereStr.length == 1) {
+            whereStr = querySetsWhereStr[0];
+        }
+        if (querySetsWhereStr.length > 1) {
+            querySetsWhereStr.forEach(function (querySetsWhereStr, index) {
+
+
+                var disctinctVarsStr = disctinctSetVars[index].join(" ");
+                var querySetNumber = index + 1;
+                if (self.querySets.sets[index].booleanOperator) {
+                    whereStr += "\n " + self.querySets.sets[index].booleanOperator + "\n ";
+                    var isJoin = true;
+                    if (self.querySets.sets[index].booleanOperator == "Union") {
+                        var isUnion = true;
+                    }
                 }
-            }
+                whereStr += "{SELECT " + disctinctVarsStr + ' (("Query ' + querySetNumber + '") AS ?querySet) ';
+                whereStr += "{" + querySetsWhereStr + "}";
+                whereStr += "}";
+            });
+        }
 
-            var queryType = "SELECT";
-            if (options.output == "shacl") {
-                queryType = "CONSTRUCT";
-                selectStr = "";
-            }
-            query += queryType + " " + selectStr + "  " + fromStr + " where {" + whereStr + "}";
+        var fromStr = Sparql_common.getFromStr(KGquery.currentSource);
+        query = self.queryPrefixesStr
 
-            query += " " + groupByStr; // + " limit 10000";
+        var selectStr = " DISTINCT ";
+        var groupByStr = "";
+        if (options.aggregate) {
+            selectStr = options.aggregate.select;
+            groupByStr = " GROUP BY " + options.aggregate.groupBy;
+        } else {
+            selectStr += KGquery.selectClauseSparql ? KGquery.selectClauseSparql : "";
+            Object.keys(distinctTypesMap).forEach(function (type) {
+                selectStr += " " + type;
+            });
+            if (options.isJoin) {
+                selectStr += " ?querySet ";
+            }
+        }
+
+        var queryType = "SELECT";
+        if (options.output == "shacl") {
+            queryType = "CONSTRUCT";
+            selectStr = "";
+        }
+        query += queryType + " " + selectStr + "  " + fromStr + " where {" + whereStr + "}";
+
+        query += " " + groupByStr; // + " limit 10000";
 
 
         return query;
-
-
 
 
     }
@@ -317,6 +301,52 @@ var optionalPredicatesSparql=""
 
 
         return whereStr;
+    }
+
+
+    self.buildAggregateQuery = function (querySet, aggregateClauses, options) {
+
+
+        if (!options) {
+            options = {};
+        }
+
+        var predicatesSubjectsMap = {}
+
+        var filterStr = ""
+        querySet.elements.forEach(function (queryElement, queryElementIndex) {
+            KGquery_predicates.setRdfTypePredicates(queryElement, predicatesSubjectsMap)
+            KGquery_predicates.setPathPredicates(queryElement, predicatesSubjectsMap)
+
+        });
+
+
+        var whereStr = ""
+        for (var varName in predicatesSubjectsMap) {
+            var obj = predicatesSubjectsMap[varName]
+            obj.predicates.forEach(function (predicate) {
+                whereStr += predicate + "\n"
+            })
+        }
+
+
+        for (var key in querySet.classFiltersMap) {
+            whereStr += querySet.classFiltersMap[key].filter + " \n";
+
+        }
+
+
+        var query = self.queryPrefixesStr
+        query +="SELECT "+ aggregateClauses.select+"\n"
+        query += "WHERE { "+ aggregateClauses.where+"\n"
+        query += whereStr+"\n"
+        query += filterStr+"\n}\n"
+        query += "GROUP BY "+aggregateClauses.groupBy+"\n"
+        query += "ORDER BY DESC ("+aggregateClauses.orderBy+")\n"
+
+        return query
+
+
     }
 
 

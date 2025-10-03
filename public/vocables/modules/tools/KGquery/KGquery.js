@@ -432,10 +432,13 @@ var KGquery = (function () {
      */
     self.aggregateQuery = function () {
         var message = "";
-        if (self.querySets.sets.length > 0) {
-            message = "<font color='blue'>aggregate works only with variables belonging to the same set !</font>";
+        if (self.querySets.sets.length > 1) {
+            return alert("Aggregate works only with variables belonging to the same set")
+           // message = "<font color='blue'>aggregate works only with variables belonging to the same set !</font>";
         }
-
+        if (self.querySets.sets.length ==0) {
+            return alert("no data selected")
+        }
         var varsMap = {};
 
         self.querySets.sets.forEach(function (querySet) {
@@ -458,10 +461,28 @@ var KGquery = (function () {
             },
 
             function (err, aggregateClauses) {
-                //  self.queryKG("table", {aggregate: aggregateClauses});
-                self.execPathQuery({aggregate: aggregateClauses, outpu: "table"}, function (err, result) {
+               var query= KGquery_predicates.buildAggregateQuery( self.querySets.sets[0],aggregateClauses,{})
+                var url = Config.sources[self.currentSource].sparql_server.url + "?format=json&query=";
 
-                })
+                Sparql_proxy.querySPARQL_GET_proxy(
+                    url,
+                    query,
+                    "",
+                    {
+                        source: self.currentSource,
+
+                    },
+                    function (err, result) {
+                        if (err) {
+                            return alert(err);
+                        }
+                     //   var bindings = result.results.bindings;
+                        self.queryResultToTable(result);
+                       
+                    },
+                );
+        
+            
             },
             message,
         );
@@ -526,7 +547,7 @@ var KGquery = (function () {
 
                 if (output == "table") {
                     self.queryResultToTable(result);
-                    console.trace()
+                  //  console.trace()
                 } else if (output == "Graph") {
                     self.queryResultToVisjsGraph(result);
                 } else if (output == "shacl") {
@@ -548,7 +569,6 @@ var KGquery = (function () {
      * @memberof module:KGquery
      * @param {Object} options - The options for query execution
      * @param {string} options.output - The desired output format (e.g., "shacl")
-     * @param {Object} [options.aggregate] - Aggregation settings for the query
      * @param {Function} callback - Callback function to handle the query results
      * @param {Error} callback.err - Error object if the query fails
      * @param {Object} callback.result - The query results if successful
@@ -575,9 +595,7 @@ var KGquery = (function () {
                 },
                 //execute query
                 function (callbackSeries) {
-                    //var url = Config.sources[self.currentSource].sparql_server.url + "?format=text&query=";
 
-                    //url="http://51.178.139.80:8890/sparql?format=text/Turtle&query="
                     var url = Config.sources[self.currentSource].sparql_server.url + "?format=json&query=";
                     if (options.output == "shacl") {
                         url = "http://51.178.139.80:8890/sparql?format=text/Turtle&query=";
@@ -616,7 +634,7 @@ var KGquery = (function () {
                                 "",
                                 {
                                     source: self.currentSource,
-                                    caller: "getObjectRestrictions",
+                                    caller: null,
                                 },
                                 function (err, result) {
                                     if (err) {

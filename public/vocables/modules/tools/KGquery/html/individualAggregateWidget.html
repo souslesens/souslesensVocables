@@ -18,29 +18,32 @@
     }
 
     .individualAggregate_select {
-        width: 200px;
+        width: 300px;
     }
 </style>
 <div id="individualAggregate_messageDiv"></div>
 <div id="individualAggregate_mainDiv" style="display: flex; flex-direction: row">
     <div>
         <b> Group by</b><br />
-        <select class="individualAggregate_select" id="individualAggregate_groupBySelect" size="20" style="overflow: auto; border: none; width: 300px" multiple="multiple"></select>
+      <!--  <select class="individualAggregate_select" id="individualAggregate_groupBySelect" size="20" style="overflow: auto; border: none; width: 300px" multiple="multiple"></select>-->
+        <div class="individualAggregate_select" id="individualAggregate_groupBySelect"  ></div>
     </div>
 
     <div>
         <b>Group function</b><br />
-        <select
+        <div class="individualAggregate_select" id="individualAggregate_groupFunctionSelect"  ></div>
+      <!--  <select
             class="individualAggregate_select"
             id="individualAggregate_groupFunctionSelect"
             size="8"
             multiple="multiple"
             onclick="IndividualAggregateWidget.onGroupFunctionSelect($(this).val())"
-        ></select>
+        ></select>-->
     </div>
     <div>
         <b>function variable</b><br />
-        <select class="individualAggregate_select" id="individualAggregate_functionVariableSelect" size="20" style="overflow: auto; border: none; width: 300px" multiple="multiple"></select>
+     <!--   <select class="individualAggregate_select" id="individualAggregate_functionVariableSelect" size="20" style="overflow: auto; border: none; width: 300px" multiple="multiple"></select>-->
+        <div class="individualAggregate_select" id="individualAggregate_functionVariableSelect"  ></div>
     </div>
 </div>
 <button id="individualAggregate_okButton" onclick="IndividualAggregateWidget.onOKbutton()">OK</button>

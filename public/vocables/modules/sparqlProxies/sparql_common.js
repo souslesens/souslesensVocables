@@ -863,6 +863,36 @@ var Sparql_common = (function () {
         return parseInt(valueStr);
     };
 
+    self.getPrefixedLabelFromURI = function (uri) {
+        if(!uri){
+            return;
+        }
+        
+        var lastSep = uri.lastIndexOf("#");
+        if (lastSep < 0) {
+            lastSep = uri.lastIndexOf("/");
+        }
+
+        if (lastSep == uri.length - 1) {
+            return;
+        }
+
+        var graphURI = uri.substring(0, lastSep + 1);
+        var sourceLabel;
+        Object.keys(Config.sources).forEach(function(source){
+            if(Config.sources[source].graphUri==graphURI){
+                sourceLabel=source;
+            }
+        });
+        if(!sourceLabel){
+            return uri;
+        }
+        sourceLabel = sourceLabel.substring(0, 3);
+        var label = uri.substring(lastSep + 1);
+        return sourceLabel + ":" + label;
+    };
+
+
     return self;
 })();
 

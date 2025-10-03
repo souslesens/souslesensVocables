@@ -1126,7 +1126,7 @@ var KGquery_graph = (function () {
          *    - Font settings
 
          */
-    self.drawModel = function (displayGraphInList) {
+    self.drawModel = function (displayGraphInList,callback) {
         if (!self.visjsData) {
             return alert("no graph model");
         }
@@ -1207,6 +1207,9 @@ var KGquery_graph = (function () {
                 }
             });
             self.KGqueryGraph.data.nodes.update(nodes_fonts);
+            if(callback){
+                callback();
+            }
         });
     };
 

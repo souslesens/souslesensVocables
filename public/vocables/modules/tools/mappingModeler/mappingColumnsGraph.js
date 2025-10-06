@@ -6,6 +6,7 @@ import MappingsDetails from "./mappingsDetails.js";
 import DataSourceManager from "./dataSourcesManager.js";
 import MappingModeler from "./mappingModeler.js";
 import Lineage_graphPaths from "../lineage/lineage_graphPaths.js";
+import UIcontroller from "./uiController.js";
 
 /**
  * MappingColumnsGraph module.
@@ -433,56 +434,76 @@ var MappingColumnsGraph = (function () {
             self.visjsGraph.network.openCluster(node.id);
         }
         self.currentGraphNode = node;
+    
 
-        //add relation between columns
-        if (options.ctrlKey) {
-            if (!DataSourceManager.currentConfig.currentDataSource) {
-                return alert("choose a data source first");
-            }
-
-            if (!MappingModeler.currentRelation) {
-                self.relationMessage(node.data.label, null);
-                MappingModeler.currentRelation = {
-                    from: { id: node.id, classId: self.getColumnClass(node), dataTable: node.data.dataTable },
-                    to: null,
-                    type: node.data.type,
-                };
-            } else {
-                if (node.data.dataTable && node.data.dataTable != MappingModeler.currentRelation.from.dataTable) {
-                    MappingModeler.currentRelation = null;
-                    self.relationMessage();
-                    return alert("Relations between Columns from different datbels are not possible");
-                }
-                MappingModeler.currentRelation.to = { id: node.id, classId: self.getColumnClass(node) };
-                if (MappingModeler.currentRelation.type != "Class" && node.data.type == "Class") {
-                    self.graphActions.drawColumnToClassEdge(MappingModeler.currentRelation);
-                } else if (MappingModeler.currentRelation.from.type != "Class" && node.data.type != "Class") {
-                    MappingModeler.onLegendNodeClick({ id: "ObjectProperty" });
-                }
-            }
-        } else {
-            if (node.data && node.data.type == "Table") {
-                var tableSourceType = node.id.indexOf(".") > -1 ? "csvSource" : "table";
-
-                if (tableSourceType == "table" && !DataSourceManager.currentConfig.currentDataSource) {
+            //add relation between columns
+            if (options.ctrlKey) {
+                if (!DataSourceManager.currentConfig.currentDataSource) {
                     return alert("choose a data source first");
                 }
 
-                var obj = {
-                    event: "xx",
-                    node: {
-                        id: node.id,
-                        data: { type: tableSourceType, id: node.id, label: node.id },
-                    },
-                };
-                DataSourceManager.onDataSourcesJstreeSelect(null, obj);
-                //  self.zoomOnTable(node.id)
-            }
+                if (!MappingModeler.currentRelation) {
+                    self.relationMessage(node.data.label, null);
+                    MappingModeler.currentRelation = {
+                        from: { id: node.id, classId: self.getColumnClass(node), dataTable: node.data.dataTable },
+                        to: null,
+                        type: node.data.type,
+                    };
+                } else {
+                    if (node.data.dataTable && node.data.dataTable != MappingModeler.currentRelation.from.dataTable) {
+                        MappingModeler.currentRelation = null;
+                        self.relationMessage();
+                        return alert("Relations between Columns from different datbels are not possible");
+                    }
+                    MappingModeler.currentRelation.to = { id: node.id, classId: self.getColumnClass(node) };
+                    if (MappingModeler.currentRelation.type != "Class" && node.data.type == "Class") {
+                        self.graphActions.drawColumnToClassEdge(MappingModeler.currentRelation);
+                    } else if (MappingModeler.currentRelation.from.type != "Class" && node.data.type != "Class") {
+                        MappingModeler.onLegendNodeClick({ id: "ObjectProperty" });
+                    }
+                }
+            } else {
+                if (node.data && node.data.type == "Table") {
+                    var tableSourceType = node.id.indexOf(".") > -1 ? "csvSource" : "table";
 
-            MappingModeler.currentRelation = null;
-            self.relationMessage();
+                    if (tableSourceType == "table" && !DataSourceManager.currentConfig.currentDataSource) {
+                        return alert("choose a data source first");
+                    }
+
+                    var obj = {
+                        event: "xx",
+                        node: {
+                            id: node.id,
+                            data: { type: tableSourceType, id: node.id, label: node.id },
+                        },
+                    };
+                    DataSourceManager.onDataSourcesJstreeSelect(null, obj);
+                    //  self.zoomOnTable(node.id)
+                }
+
+                MappingModeler.currentRelation = null;
+                self.relationMessage();
+            }
+        };
+        
+        self.showImplicitGraphPopupMenu = function (node, point, event) {
+        if (!node || !node.data) return;
+
+        var html = "";
+        if (node.data.type === "Class" || node.data.type === "superClass") {
+            
+            self.currentGraphNode = node; 
+            html += '    <span class="popupMenuItem" onclick="MappingColumnsGraph.graphActions.showNodeInfos()">Node Infos</span>';
+        }
+
+        if (html !== "") {
+            $("#popupMenuWidgetDiv").html(html);
+            point.x = event.x;
+            point.y = event.y;
+            PopupMenuWidget.showPopup(point, "popupMenuWidgetDiv");
         }
     };
+
 
     /**
      * Displays the context menu for a graph node.
@@ -1518,6 +1539,7 @@ var MappingColumnsGraph = (function () {
         $("#mappingModeler_relationInfos").html("from: <b>" + (fromLabel ?? "None") + "</b> to: <b>" + (toLabel ?? "None") + "</b>");
     };
 
+
     self.drawClassesGraph = function () {
         var columns = self.getNodesOfType(MappingModeler.columnsMappingsObjects);
         var edgesFromMap = self.getEdgesMap("from");
@@ -1791,8 +1813,79 @@ var MappingColumnsGraph = (function () {
                 var html = "<div style='width:1000px;height:800px' id='mappingModeler_implicitModelGraph'></div>";
                 $("#mainDialogDiv").html(html);
                 $("#mainDialogDiv").dialog("open");
+             
 
-                    self.implicitModelVisjsGraph = new VisjsGraphClass("mappingModeler_implicitModelGraph", classVisjsData);
+                var implicitOptions = {
+                onclickFn: function (node, event, options) {
+                    
+
+                
+                    if (!node) return;
+                    self.currentGraphNode = node;
+
+                    if (!node.data) return;
+                    if (node.data.type !== "Column") return;
+
+                  
+                    var baseLabel = null;
+                    if (node.data && node.data.label) {
+                    baseLabel = node.data.label;
+                    } 
+
+                    var parentTable = null;
+                    if (node.data && node.data.dataTable) {
+                    parentTable = node.data.dataTable;
+                    }
+
+                    var dialogNode = {
+                    id: node.id,
+                    label: baseLabel,
+                    data: {
+                        id: node.id,
+                        label: baseLabel,
+                        type: "Column",
+                        dataTable: parentTable
+                    }
+                    };
+                    if(MappingModeler.currentTable.name == node.data.dataTable){
+                        $("#MappingModeler_leftTabs").tabs("option", "active", 3);
+                        UIcontroller.onActivateLeftPanelTab("MappingModeler_technicalDetailTab",function(){
+                            MappingsDetails.showColumnTechnicalMappingsDialog(
+                            "detailedMappings_techDetailsDiv",
+                            dialogNode,
+                            function () {
+                                MappingModeler.currentTreeNode = MappingColumnsGraph.visjsGraph.data.nodes.get(node.id);
+                                MappingsDetails.showDetailsDialog(null, function () {
+                                    var afterSave = null;
+                                    afterSave = MappingsDetails.afterSaveColumnTechnicalMappingsDialog;
+                                    MappingsDetails.showColumnTechnicalMappingsDialog(
+                                    "detailedMappings_techDetailsDiv",
+                                    MappingModeler.currentTreeNode,
+                                    afterSave
+                                    );
+                                });
+                                
+                            }
+                        );
+                        });
+
+                    }else {
+                        MappingModeler.currentTable.name = node.data.dataTable
+                    }
+
+                  
+                  
+
+                },
+
+                onRightClickFn: function (node, point, event) {
+                    self.showImplicitGraphPopupMenu(node, point, event);
+                }
+                };
+
+                
+
+                    self.implicitModelVisjsGraph = new VisjsGraphClass("mappingModeler_implicitModelGraph", classVisjsData,implicitOptions);
                     self.implicitModelVisjsGraph.draw(function () {});
 
                     // self.drawGraphCanvas(self.graphDiv, classVisjsData);

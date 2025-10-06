@@ -127,6 +127,8 @@ var KGquery_graph = (function () {
                 }
                 self.drawModel(options.displayGraphInList);
 
+                KGquery.initVarNamesMap();
+
                 if (savedGraphLocation == "file" || options?.saveGraph) {
                     self.saveVisjsModelGraph();
                 }
@@ -380,6 +382,9 @@ var KGquery_graph = (function () {
                             });
                         },
                         function (callbackSeries) {
+                            //skip containers !!!!!!!!!!
+                            return callbackSeries();
+
                             KGquery_graph.message("getContainerBreakdownClasses");
                             OntologyModels.getContainerBreakdownClasses(source, function (err, result) {
                                 if (err) {
@@ -819,11 +824,10 @@ var KGquery_graph = (function () {
                     data: payload,
                     dataType: "json",
                     success: function (_result, _textStatus, _jqXHR) {
-                        MainController.UI.message("Decoration saved");
-                        callbackSeries();
+                        UI.message("Decoration saved");
                     },
                     error(err) {
-                        return callbackSeries(err);
+                        alert(err.responseText || err);
                     },
                 });
             },
@@ -1117,33 +1121,35 @@ var KGquery_graph = (function () {
     };
 
     /**
-         * Draws the model using the current visjsData.
-         *
-         * @function
-         * @name drawModel
-         * @memberof KGquery_graph
-         * @param {boolean} [displayGraphInList] - Whether to display the graph as a list
-         * @returns {void}
-         *
-         * @description
-         * This function handles the visualization of the graph model. It performs several steps:
-         * 1. Updates the labels map for nodes and edges
-         * 2. Determines the display mode (graph or list)
-         * 3. Removes duplicate nonObjectProperties from nodes
-         * 4. Creates a new VisjsGraph instance
-         * 5. Draws the graph with proper:
-         *    - Node colors and shapes
-         *    - Node sizes
-         *    - Node positions and scaling
-         *    - Font settings
+     * Draws the model using the current visjsData.
+     *
+     * @function
+     * @name drawModel
+     * @memberof KGquery_graph
+     * @param {boolean} [displayGraphInList] - Whether to display the graph as a list
+     * @returns {void}
+     *
+     * @description
+     * This function handles the visualization of the graph model. It performs several steps:
+     * 1. Updates the labels map for nodes and edges
+     * 2. Determines the display mode (graph or list)
+     * 3. Removes duplicate nonObjectProperties from nodes
+     * 4. Creates a new VisjsGraph instance
+     * 5. Draws the graph with proper:
+     *    - Node colors and shapes
+     *    - Node sizes
+     *    - Node positions and scaling
+     *    - Font settings
 
-         */
+     */
     self.drawModel = function (displayGraphInList) {
         if (!self.visjsData) {
             return alert("no graph model");
         }
 
-        if (self.visjsData.nodes && self.visjsData.nodes.length > 200) return alert(" graph model too large " + self.visjsData.nodes.length);
+        if (self.visjsData.nodes && self.visjsData.nodes.length > 200) {
+            return alert(" graph model too large " + self.visjsData.nodes.length);
+        }
 
         KGquery_graph.message("drawing graph");
 

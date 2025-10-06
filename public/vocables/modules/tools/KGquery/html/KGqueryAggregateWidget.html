@@ -1,0 +1,42 @@
+<style>
+    .KGqueryAggregatePanel {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        margin: 3px;
+        width: 300px;
+        height: 200px;
+    }
+
+    .KGqueryAggregatePanel input {
+        width: 240px;
+        margin: 3px;
+        padding: 0px;
+        border: #6e2500 solid 1px;
+        border-radius: 3px;
+        background-color: #ddd;
+    }
+
+    .KGqueryAggregate_select {
+        width: 300px;
+    }
+</style>
+<div id="KGqueryAggregate_messageDiv"></div>
+<div id="KGqueryAggregate_mainDiv" style="display: flex; flex-direction: row">
+    <div>
+        <b> Group by</b><br />
+        <!--  <select class="KGqueryAggregate_select" id="KGqueryAggregate_groupBySelect" size="20" style="overflow: auto; border: none; width: 300px" multiple="multiple"></select>-->
+        <div class="KGqueryAggregate_select" id="KGqueryAggregate_groupBySelect"></div>
+    </div>
+
+    <div>
+        <b>Group what</b><br />
+        <!--   <select class="KGqueryAggregate_select" id="KGqueryAggregate_functionVariableSelect" size="20" style="overflow: auto; border: none; width: 300px" multiple="multiple"></select>-->
+        <div class="KGqueryAggregate_select" id="KGqueryAggregate_functionVariableSelect"></div>
+    </div>
+    <div>
+        <b>Group function</b><br />
+        <div class="KGqueryAggregate_select" id="KGqueryAggregate_groupFunctionSelect"></div>
+    </div>
+</div>
+<button id="KGqueryAggregate_okButton" onclick="KGqueryAggregateWidget.onOKbutton()">OK</button>

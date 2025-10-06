@@ -231,7 +231,7 @@ var DataSourceManager = (function () {
                     var nTriples = tableStatsMap[jstreeNode.id];
                     var strStats = "";
                     if (nTriples) {
-                        strStats = " <b>" + nTriples + "Triples </b>";
+                        strStats = "<b>" + nTriples + "Triples</b>";
                     }
                     if (dataTables.includes(datasource)) {
                         jstreeNode.text = "<span style='color:blue'>" + datasource + strStats + "</span>";

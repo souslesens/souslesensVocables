@@ -1590,10 +1590,10 @@ var MappingModeler = (function () {
             var messageStr = percent + "% :";
 
             if (message.operation == "records") {
-                return
+                return;
                 messageStr += message.processedRecords + " records loaded from table " + message.table + " on " + message.tableTotalRecords + " in " + message.operationDuration + "msec";
             } else if (message.operation == "buildTriples") {
-                return
+                return;
                 messageStr += message.batchTriples + " triples created in " + message.operationDuration + "msec";
             } else if (message.operation == "writeTriples") {
                 messageStr += message.batchTriples + " triples writen in " + message.operationDuration + "msec. totalTriples created " + message.totalTriples;

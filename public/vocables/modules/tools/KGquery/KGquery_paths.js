@@ -60,7 +60,6 @@ var KGquery_paths = (function () {
      * @returns {Array} The path with substituted variable names
      */
     self.substituteClassIdToVarNameInPath = function (queryElement, path) {
-
         path.forEach(function (item, index) {
             var fromLabel = KGquery_graph.labelsMap[item[0]];
             if (queryElement.fromNode.label == fromLabel && queryElement.fromNode.alias) {
@@ -68,13 +67,11 @@ var KGquery_paths = (function () {
             }
             item[0] = "?" + Sparql_common.formatStringForTriple(fromLabel, true);
 
-
             var toLabel = KGquery_graph.labelsMap[item[1]];
             if (queryElement.toNode.label == toLabel && queryElement.toNode.alias) {
                 toLabel = queryElement.toNode.alias;
             }
             item[1] = "?" + Sparql_common.formatStringForTriple(toLabel, true);
-
         });
         return path;
     };

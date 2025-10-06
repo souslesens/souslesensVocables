@@ -180,7 +180,7 @@ var MappingColumnsGraph = (function () {
 
         var visjsData = { nodes: [], edges: [] };
         var visjsNode = newResource;
-       
+
         if (newResource.data.type == "Class") {
             var tableWithSameClass = MappingsDetails.isColumnAllreadyMappedInAnotherTable(self.currentGraphNode, newResource.data.id);
             if (!tableWithSameClass && !existingNodes[visjsNode.id]) {

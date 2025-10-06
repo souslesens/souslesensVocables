@@ -34,15 +34,14 @@ const KGbuilder_triplesWriter = {
         }
 
         var totalTriples = 0;
-        var countTriples=allTriples.length
-      //  console.log("all triples count "+countTriples)
-       var slices = util.sliceArray(allTriples, 500);
-      //  console.log("number of slices  "+slices.length)
+        var countTriples = allTriples.length;
+        //  console.log("all triples count "+countTriples)
+        var slices = util.sliceArray(allTriples, 500);
+        //  console.log("number of slices  "+slices.length)
 
+        // var  slices=[allTriples]
 
-      // var  slices=[allTriples]
-
-        countTriples=0
+        countTriples = 0;
         async.eachSeries(
             slices,
             function (triples, callbackEach) {
@@ -50,16 +49,16 @@ const KGbuilder_triplesWriter = {
                 triples.forEach(function (triple) {
                     var str = triple + ". ";
                     insertTriplesStr += str;
-                    countTriples+=1
+                    countTriples += 1;
                 });
 
-               // console.log("triples in slice "+triples.length)
+                // console.log("triples in slice "+triples.length)
                 var queryGraph = KGbuilder_triplesWriter.getSparqlPrefixesStr();
 
-              //  graphUri=graphUri+"test/"
+                //  graphUri=graphUri+"test/"
                 //  queryGraph += " WITH GRAPH  <" + graphUri + ">  " + "INSERT DATA" + "  {" + insertTriplesStr + "  }";
                 // insert data does not work with bNodes
-                queryGraph += " WITH GRAPH  <" + graphUri+"" + ">  " + "INSERT " + "  {" + insertTriplesStr + "  }";
+                queryGraph += " WITH GRAPH  <" + graphUri + "" + ">  " + "INSERT " + "  {" + insertTriplesStr + "  }";
 
                 var params = { query: queryGraph };
 
@@ -71,23 +70,20 @@ const KGbuilder_triplesWriter = {
                     };
                 }
 
-                var regex=/([0-9]+)/
+                var regex = /([0-9]+)/;
                 httpProxy.post(sparqlServerUrl, null, params, function (err, result) {
                     if (err) {
                         var x = queryGraph;
                         return callbackEach(err);
                     }
 
+                    var array = regex.exec(result.results.bindings[0]["callret-0"].value);
 
-                   var array = regex.exec(result.results.bindings[0]["callret-0"].value);
+                    if (array && array.length == 2) var triplesWritten = parseInt(array[1]);
 
-                    if(array && array.length==2)
-                        var triplesWritten=parseInt (array[1])
-
-                    if(triplesWritten<triples.length-10)
-                        var x=3
-                    totalTriples +=triplesWritten;
-                 //   console.log("triples writen "+totalTriples)
+                    if (triplesWritten < triples.length - 10) var x = 3;
+                    totalTriples += triplesWritten;
+                    //   console.log("triples writen "+totalTriples)
                     return callbackEach(null, totalTriples);
                 });
             },
@@ -180,8 +176,6 @@ const KGbuilder_triplesWriter = {
                         var x = query;
                         return callbackWhilst(err);
                     }
-
-
 
                     var result = result.results.bindings[0]["callret-0"].value;
 

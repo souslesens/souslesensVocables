@@ -108,7 +108,7 @@ var TripleFactory = (function () {
                     alert(err.responseText || err);
                 } else {
                     // UI.message("Done", true);
-                 var indexAuto = $("#MappingModeler_indexAutoCBX").prop("checked");
+                    var indexAuto = $("#MappingModeler_indexAutoCBX").prop("checked");
 
                     if (!self.filterMappingIsSample && indexAuto) {
                         SearchUtil.generateElasticIndex(

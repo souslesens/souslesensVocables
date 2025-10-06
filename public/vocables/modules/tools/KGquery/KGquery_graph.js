@@ -83,7 +83,7 @@ var KGquery_graph = (function () {
      */
     self.drawVisjsModel = function (mode, options) {
         var source = KGquery.currentSource;
-        var visjsData = {nodes: [], edges: []};
+        var visjsData = { nodes: [], edges: [] };
 
         $("#waitImg").css("display", "block");
         if (!options) {
@@ -127,7 +127,7 @@ var KGquery_graph = (function () {
                 }
                 self.drawModel(options.displayGraphInList);
 
-                KGquery.initVarNamesMap()
+                KGquery.initVarNamesMap();
 
                 if (savedGraphLocation == "file" || options?.saveGraph) {
                     self.saveVisjsModelGraph();
@@ -216,14 +216,14 @@ var KGquery_graph = (function () {
         }
 
         self.saveVisjsModelGraph();
-        var visjsData = {nodes: [], edges: []};
+        var visjsData = { nodes: [], edges: [] };
         var uniqueNodes = {};
-        self.KGqueryGraph = new VisjsGraphClass("KGquery_graphDiv", {nodes: [], edges: []}, self.visjsOptions);
+        self.KGqueryGraph = new VisjsGraphClass("KGquery_graphDiv", { nodes: [], edges: [] }, self.visjsOptions);
         async.eachSeries(
             sources,
 
             function (source, callbackEach) {
-                var visjsDataSource = {nodes: [], edges: []};
+                var visjsDataSource = { nodes: [], edges: [] };
                 UserDataWidget.listUserData(null, function (err, result) {
                     if (err) {
                         return alert(err || err.responseText);
@@ -276,7 +276,7 @@ var KGquery_graph = (function () {
                     self.simulationOn = true;
                     var newNodes = [];
                     visjsData.nodes.forEach(function (node) {
-                        newNodes.push({id: node.id, color: node.color, shape: node.shape});
+                        newNodes.push({ id: node.id, color: node.color, shape: node.shape });
                     });
                     //  self.KGqueryGraph.data.nodes.update(visjsData.nodes);
                 });
@@ -305,7 +305,7 @@ var KGquery_graph = (function () {
         var implicitModel = [];
         var nonObjectProperties = {};
         var existingNodes = {};
-        var visjsData = {nodes: [], edges: []};
+        var visjsData = { nodes: [], edges: [] };
         var sources = []; // Config.sources[source].imports;
         if (!sources) {
             sources = [];
@@ -335,7 +335,7 @@ var KGquery_graph = (function () {
                         function (callbackSeries) {
                             KGquery_graph.message("getImplicitModel");
                             var filter = "?id rdf:type ?type. FILTER (?type in(owl:Class,owl:ObjectProperty))";
-                            Sparql_OWL.getDictionary(source, {filter: filter}, null, function (err, result) {
+                            Sparql_OWL.getDictionary(source, { filter: filter }, null, function (err, result) {
                                 if (err) {
                                     return callbackSeries(err);
                                 }
@@ -347,9 +347,9 @@ var KGquery_graph = (function () {
                                 });
 
                                 currentImplicitModel.forEach(function (item) {
-                                    item.sClassLabel = {value: labelsMap[item.sClass.value] || Sparql_common.getLabelFromURI(item.sClass.value)};
-                                    item.oClassLabel = {value: labelsMap[item.oClass.value] || Sparql_common.getLabelFromURI(item.oClass.value)};
-                                    item.propLabel = {value: labelsMap[item.prop.value] || Sparql_common.getLabelFromURI(item.prop.value)};
+                                    item.sClassLabel = { value: labelsMap[item.sClass.value] || Sparql_common.getLabelFromURI(item.sClass.value) };
+                                    item.oClassLabel = { value: labelsMap[item.oClass.value] || Sparql_common.getLabelFromURI(item.oClass.value) };
+                                    item.propLabel = { value: labelsMap[item.prop.value] || Sparql_common.getLabelFromURI(item.prop.value) };
 
                                     implicitModel.push(item);
                                 });
@@ -383,7 +383,7 @@ var KGquery_graph = (function () {
                         },
                         function (callbackSeries) {
                             //skip containers !!!!!!!!!!
-                            return callbackSeries()
+                            return callbackSeries();
 
                             KGquery_graph.message("getContainerBreakdownClasses");
                             OntologyModels.getContainerBreakdownClasses(source, function (err, result) {
@@ -477,7 +477,7 @@ var KGquery_graph = (function () {
                             from: item.sClass.value,
                             to: item.oClass.value,
                             label: item.propLabel.value,
-                            font: {color: Lineage_whiteboard.defaultPredicateEdgeColor},
+                            font: { color: Lineage_whiteboard.defaultPredicateEdgeColor },
                             data: {
                                 propertyId: item.prop.value,
                                 source: source,
@@ -562,7 +562,7 @@ var KGquery_graph = (function () {
         if (!fontSize) {
             return;
         }
-        self.setAllNodesAttr("font", {size: parseInt(fontSize)});
+        self.setAllNodesAttr("font", { size: parseInt(fontSize) });
     };
 
     /**
@@ -611,8 +611,7 @@ var KGquery_graph = (function () {
      * @memberof module:KGquery_graph
      * @returns {void}
      */
-    self.setDecorationAttr = function () {
-    };
+    self.setDecorationAttr = function () {};
 
     /**
      * Resets the visual properties of specified nodes.
@@ -662,7 +661,7 @@ var KGquery_graph = (function () {
         }
 
         edges.forEach(function (edgeId, index) {
-            newVisjsEdges.push({id: edgeId, color: Lineage_whiteboard.restrictionColor, width: 1});
+            newVisjsEdges.push({ id: edgeId, color: Lineage_whiteboard.restrictionColor, width: 1 });
         });
         KGquery_graph.KGqueryGraph.data.edges.update(newVisjsEdges);
     };
@@ -671,7 +670,7 @@ var KGquery_graph = (function () {
         if (!KGquery_graph.KGqueryGraph.data.nodes.update) {
             return;
         }
-        KGquery_graph.KGqueryGraph.data.nodes.update([{id: nodeId, color: "#b0f5f5"}]);
+        KGquery_graph.KGqueryGraph.data.nodes.update([{ id: nodeId, color: "#b0f5f5" }]);
         /* setTimeout(function(){
             KGquery_graph.KGqueryGraph.data.nodes.update([{ id: nodeId, shape: "ellipse", color: "#b0f5f5" }]);
             },500)*/
@@ -798,7 +797,7 @@ var KGquery_graph = (function () {
                     dataType: "json",
                     success: function (result, _textStatus, _jqXHR) {
                         var data = JSON.parse(result);
-                        commonDecoration = {...commonDecoration, ...data};
+                        commonDecoration = { ...commonDecoration, ...data };
 
                         // J'ajoute mes différentes décorations aux classes visés dans le visjsdata
                         // Si j'ai des icones je  met dans un répertoire côté client les icones nécessaires à ce graph
@@ -825,11 +824,10 @@ var KGquery_graph = (function () {
                     data: payload,
                     dataType: "json",
                     success: function (_result, _textStatus, _jqXHR) {
-                      UI.message("Decoration saved");
-
+                        UI.message("Decoration saved");
                     },
                     error(err) {
-                      alert(err.responseText || err)
+                        alert(err.responseText || err);
                     },
                 });
             },
@@ -844,7 +842,7 @@ var KGquery_graph = (function () {
      */
     self.loadSaved = function () {
         var displayGraphInList = $("#KGquery_displayGraphInList").prop("checked");
-        self.drawVisjsModel("saved", {displayGraphInList: displayGraphInList});
+        self.drawVisjsModel("saved", { displayGraphInList: displayGraphInList });
     };
 
     /**
@@ -981,7 +979,7 @@ var KGquery_graph = (function () {
      * @returns {void}
      */
     self.buildInferredGraph = function (source, callback) {
-        var visjsData = {nodes: [], edges: []};
+        var visjsData = { nodes: [], edges: [] };
         async.series(
             [
                 function (callbackSeries) {
@@ -1204,7 +1202,7 @@ var KGquery_graph = (function () {
             self.simulationOn = true;
             var newNodes = [];
             self.visjsData.nodes.forEach(function (node) {
-                newNodes.push({id: node.id, color: node.color, shape: node.shape});
+                newNodes.push({ id: node.id, color: node.color, shape: node.shape });
             });
             KGquery_graph.message("", true);
             var nodes_sizes = [];
@@ -1216,14 +1214,14 @@ var KGquery_graph = (function () {
             });
             self.KGqueryGraph.data.nodes.update(nodes_sizes);
             self.KGqueryGraph.network.moveTo({
-                position: {x: 0, y: 0},
+                position: { x: 0, y: 0 },
                 scale: 1 / 0.9,
             });
             self.KGqueryGraph.onScaleChange();
             var nodes_fonts = [];
             self.visjsData.nodes.forEach(function (node) {
                 if (node.font) {
-                    nodes_fonts.push({id: node.id, font: node.font});
+                    nodes_fonts.push({ id: node.id, font: node.font });
                 }
             });
             self.KGqueryGraph.data.nodes.update(nodes_fonts);

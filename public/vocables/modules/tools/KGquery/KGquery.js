@@ -14,7 +14,7 @@ import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
 import Export from "../../shared/export.js";
 import common from "../../shared/common.js";
 import Lineage_whiteboard from "../lineage/lineage_whiteboard.js";
-import IndividualAggregateWidget from "./individualAggregateWidget.js";
+import KGqueryAggregateWidget from "./KGqueryAggregateWidget.js";
 
 import SourceSelectorWidget from "../../uiWidgets/sourceSelectorWidget.js";
 import MainController from "../../shared/mainController.js";
@@ -36,7 +36,7 @@ import KGquery_predicates from "./KGquery_predicates.js";
 
 var KGquery = (function () {
     var self = {};
-    self.querySets = {sets: [], groups: [], currentIndex: -1};
+    self.querySets = { sets: [], groups: [], currentIndex: -1 };
     self.divsMap = {};
     self.classeMap = {};
     self.allPathEdges = {};
@@ -117,18 +117,16 @@ var KGquery = (function () {
         }
     };
 
-
     self.initVarNamesMap = function () {
-        self.varNameToClassMap = {}
-        self.classToVarNameMap = {}
-        var nodes = KGquery_graph.KGqueryGraph.data.nodes.get()
+        self.varNameToClassMap = {};
+        self.classToVarNameMap = {};
+        var nodes = KGquery_graph.KGqueryGraph.data.nodes.get();
         nodes.forEach(function (node) {
-            var varName = self.getVarName(node)
-            self.varNameToClassMap[varName] = node.id
-            self.classToVarNameMap[node.id] = varName
-
-        })
-    }
+            var varName = self.getVarName(node);
+            self.varNameToClassMap[varName] = node.id;
+            self.classToVarNameMap[node.id] = varName;
+        });
+    };
 
     /**
      * Loads a source and initializes the graph visualization.
@@ -154,8 +152,7 @@ var KGquery = (function () {
                             KGquery_myQueries.load(null, Config.clientCache.KGquery);
                         }, 1000);
                     }
-                    $("#rightControlPanelDiv").load("./modules/tools/KGquery/html/KGqueryGraphButtons.html", function () {
-                    });
+                    $("#rightControlPanelDiv").load("./modules/tools/KGquery/html/KGqueryGraphButtons.html", function () {});
                 });
                 $("#KGquery_dataTableDialogDiv").dialog({
                     autoOpen: false,
@@ -396,7 +393,7 @@ var KGquery = (function () {
                 //  exclude  rdf:member predicate from graph !!!!!!!!!!
                 if (false) {
                     fromNode.alias = fromNode.label + "_parent";
-                    var options = {memberClass: fromNode.data.id};
+                    var options = { memberClass: fromNode.data.id };
 
                     Containers_widget.showDialog(self.currentSource, options, function (err, result) {
                         fromNode.data.containerFilter = {
@@ -433,11 +430,11 @@ var KGquery = (function () {
     self.aggregateQuery = function () {
         var message = "";
         if (self.querySets.sets.length > 1) {
-            return alert("Aggregate works only with variables belonging to the same set")
-           // message = "<font color='blue'>aggregate works only with variables belonging to the same set !</font>";
+            return alert("Aggregate works only with variables belonging to the same set");
+            // message = "<font color='blue'>aggregate works only with variables belonging to the same set !</font>";
         }
-        if (self.querySets.sets.length ==0) {
-            return alert("no data selected")
+        if (self.querySets.sets.length == 0) {
+            return alert("no data selected");
         }
         var varsMap = {};
 
@@ -454,14 +451,14 @@ var KGquery = (function () {
             });
         });
 
-        IndividualAggregateWidget.showDialog(
+        KGqueryAggregateWidget.showDialog(
             null,
             function (callback) {
                 callback(varsMap);
             },
 
             function (err, aggregateClauses) {
-               var query= KGquery_predicates.buildAggregateQuery( self.querySets.sets[0],aggregateClauses,{})
+                var query = KGquery_predicates.buildAggregateQuery(self.querySets.sets[0], aggregateClauses, {});
                 var url = Config.sources[self.currentSource].sparql_server.url + "?format=json&query=";
 
                 Sparql_proxy.querySPARQL_GET_proxy(
@@ -470,19 +467,15 @@ var KGquery = (function () {
                     "",
                     {
                         source: self.currentSource,
-
                     },
                     function (err, result) {
                         if (err) {
                             return alert(err);
                         }
-                     //   var bindings = result.results.bindings;
+                        //   var bindings = result.results.bindings;
                         self.queryResultToTable(result);
-                       
                     },
                 );
-        
-            
             },
             message,
         );
@@ -501,7 +494,6 @@ var KGquery = (function () {
      * @returns {void}
      */
     self.queryKG = function (output, options, isVirtualSQLquery) {
-
         if (!options) {
             options = {};
         }
@@ -514,16 +506,15 @@ var KGquery = (function () {
             return SQLquery_filters.showFiltersDialog(self.querySets, self.currentSource);
         }
 
-
         KGquery_filter.selectOptionalPredicates(self.querySets, {}, function (err, result) {
             if (err) {
-                return alert(err)
+                return alert(err);
             }
 
             KGquery.labelFromURIToDisplay = result.labelFromURIToDisplay;
             KGquery.selectClauseSparql = result.selectClauseSparql;
             KGquery.currentOptionalPredicatesSparql = result.optionalPredicatesSparql;
-            KGquery.optionalPredicatesSubjecstMap = result.optionalPredicatesSubjecstMap
+            KGquery.optionalPredicatesSubjecstMap = result.optionalPredicatesSubjecstMap;
             options.sampleSize = result.sampleSize;
 
             self.execPathQuery(options, function (err, result) {
@@ -547,7 +538,7 @@ var KGquery = (function () {
 
                 if (output == "table") {
                     self.queryResultToTable(result);
-                  //  console.trace()
+                    //  console.trace()
                 } else if (output == "Graph") {
                     self.queryResultToVisjsGraph(result);
                 } else if (output == "shacl") {
@@ -556,9 +547,8 @@ var KGquery = (function () {
                     Config.userTools.KGquery.toTools[output](result);
                 }
             });
-        })
+        });
     };
-
 
     /**
      * Executes a SPARQL path query based on the provided options.
@@ -588,14 +578,12 @@ var KGquery = (function () {
         var sampleSize;
         async.series(
             [
-
                 function (callbackSeries) {
-                   query= KGquery_predicates.buildQuery(self.querySets, {})
-                    return callbackSeries()
+                    query = KGquery_predicates.buildQuery(self.querySets, {});
+                    return callbackSeries();
                 },
                 //execute query
                 function (callbackSeries) {
-
                     var url = Config.sources[self.currentSource].sparql_server.url + "?format=json&query=";
                     if (options.output == "shacl") {
                         url = "http://51.178.139.80:8890/sparql?format=text/Turtle&query=";
@@ -607,7 +595,7 @@ var KGquery = (function () {
                         source: self.currentSource,
                     };
 
-                    var sampleSize = options.sampleSize
+                    var sampleSize = options.sampleSize;
                     var totalSize = 0;
                     var labelsMap = {};
                     var resultSize = 1;
@@ -615,14 +603,14 @@ var KGquery = (function () {
                     var offset = 0;
 
                     self.outputCsv = sampleSize || false;
-                    data = {results: {bindings: []}, head: {vars: []}};
+                    data = { results: { bindings: [] }, head: { vars: [] } };
                     async.whilst(
                         function (_test) {
                             if (!self.outputCsv && totalSize >= limitSize) {
                                 self.outputCsv = true;
                             }
 
-                            return (resultSize > 0);
+                            return resultSize > 0;
                         },
                         function (callbackWhilst) {
                             var query2 = "" + query;
@@ -712,14 +700,16 @@ var KGquery = (function () {
         }
 
         var existingNodes = {};
-        var visjsData = {nodes: [], edges: []};
+        var visjsData = { nodes: [], edges: [] };
         data.forEach(function (item, index) {
             var lineNodeId = common.getRandomHexaId(5);
-            visjsData.nodes.push(VisjsUtil.getVisjsNode(self.currentSource, lineNodeId, "", null, {
-                shape: "text",
-                size: 2,
-                color: "#ddd"
-            }));
+            visjsData.nodes.push(
+                VisjsUtil.getVisjsNode(self.currentSource, lineNodeId, "", null, {
+                    shape: "text",
+                    size: 2,
+                    color: "#ddd",
+                }),
+            );
 
             classNodes.forEach(function (classNode) {
                 var varNameKey = self.getVarName(classNode, true);
@@ -794,7 +784,7 @@ var KGquery = (function () {
         MainController.onToolSelect("TagsCalendar", null, function () {
             setTimeout(function () {
                 //   import TagsGeometry from "../../../../plugins/TagsGeometry/public/js/main.js";
-                TagsCalendar.drawSparqlResultTimeLine({data: data});
+                TagsCalendar.drawSparqlResultTimeLine({ data: data });
             }, 2000);
         });
     };
@@ -836,10 +826,10 @@ var KGquery = (function () {
         });
         var tableCols = [];
         var colNames = [];
-        tableCols.push({title: "rowIndex", visible: false, defaultContent: "", width: "15%"});
+        tableCols.push({ title: "rowIndex", visible: false, defaultContent: "", width: "15%" });
         // colNames.push("rowIndex");
         for (var varName in nonNullCols) {
-            tableCols.push({title: varName, defaultContent: "", width: "15%"});
+            tableCols.push({ title: varName, defaultContent: "", width: "15%" });
             colNames.push(varName);
         }
 
@@ -883,8 +873,8 @@ var KGquery = (function () {
             alert("to large results, it will be exported");
             return Export.exportDataToCSV(tableData);
         }
-        console.trace()
-        Export.showDataTable("KGquery_dataTableDialogDiv", tableCols, tableData, null, {paging: true}, function (err, datatable) {
+        console.trace();
+        Export.showDataTable("KGquery_dataTableDialogDiv", tableCols, tableData, null, { paging: true }, function (err, datatable) {
             $("#dataTableDivExport").on("click", "td", function () {
                 var table = $("#dataTableDivExport").DataTable();
                 var index = table.cell(this).index();
@@ -902,7 +892,7 @@ var KGquery = (function () {
                     //varName = varName.split("_")[0];
                 }
                 var uri = dataItem[varName].value;
-                var node = {data: {id: uri}};
+                var node = { data: { id: uri } };
                 NodeInfosWidget.showNodeInfos(self.currentSource, node, "smallDialogDiv", null, function (err) {
                     $("#smallDialogDiv").parent().css("z-index", 1);
                 });
@@ -936,10 +926,10 @@ var KGquery = (function () {
         });
         var tableCols = [];
         var colNames = [];
-        tableCols.push({title: "rowIndex", visible: false, defaultContent: "", width: "15%"});
+        tableCols.push({ title: "rowIndex", visible: false, defaultContent: "", width: "15%" });
         // colNames.push("rowIndex");
         for (var varName in nonNullCols) {
-            tableCols.push({title: varName, defaultContent: "", width: "15%"});
+            tableCols.push({ title: varName, defaultContent: "", width: "15%" });
             colNames.push(varName);
         }
 
@@ -985,7 +975,7 @@ var KGquery = (function () {
         self.querySets.sets.forEach(function (querySet) {
             querySet.classFiltersMap = {};
         });
-        self.querySets = {sets: [], groups: [], currentIndex: -1};
+        self.querySets = { sets: [], groups: [], currentIndex: -1 };
         self.divsMap = {};
         self.currentQuerySet = null;
         self.allPathEdges = {};
@@ -1111,16 +1101,20 @@ var KGquery = (function () {
                 $("#" + element.divId).remove();
                 // Restore color of nodes
                 if (element?.fromNode?.color) {
-                    KGquery_graph.KGqueryGraph.data.nodes.update([{
-                        id: element.fromNode.id,
-                        color: element.fromNode.color
-                    }]);
+                    KGquery_graph.KGqueryGraph.data.nodes.update([
+                        {
+                            id: element.fromNode.id,
+                            color: element.fromNode.color,
+                        },
+                    ]);
                 }
                 if (element?.toNode?.color) {
-                    KGquery_graph.KGqueryGraph.data.nodes.update([{
-                        id: element.toNode.id,
-                        color: element.toNode.color
-                    }]);
+                    KGquery_graph.KGqueryGraph.data.nodes.update([
+                        {
+                            id: element.toNode.id,
+                            color: element.toNode.color,
+                        },
+                    ]);
                 }
             }
 
@@ -1229,8 +1223,7 @@ var KGquery = (function () {
 
     self.queryResultToGantt = function (result) {
         var implicitModel = KGquery_graph.visjsData;
-        GanttWidget.showDialog(null, implicitModel, result, function (err, result) {
-        });
+        GanttWidget.showDialog(null, implicitModel, result, function (err, result) {});
     };
 
     /**
@@ -1243,8 +1236,6 @@ var KGquery = (function () {
     self.initMyQuery = function () {
         SavedQueriesWidget.showDialog("tabs_myQueries", self.currentSource, KGquery_myQueries.save, KGquery_myQueries.load, "KGquery/savedQueries/");
     };
-
-
 
     return self;
 })();

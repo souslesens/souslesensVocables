@@ -313,6 +313,30 @@ class DatabaseModel {
     /**
      * @param {any} connection - a database connection
      * @param {string} tableName - the database table name
+     * @params {string} select - select query
+     * @params {number} batchSize - batch size
+     */
+    batchSelectGenerator = async function* (databaseId, tableName, { select = "*", batchSize = 1000 }) {
+        const connection = await this.getConnection(databaseId);
+        const columns = await connection(tableName).columnInfo();
+        const columnsKeys = Object.keys(columns);
+
+        const resSize = await connection.count(select).from(tableName);
+        const size = parseInt(resSize[0].count);
+
+        let offset = 0;
+        while (true) {
+            if (offset + batchSize >= size) {
+                return connection.select(select).from(tableName).orderBy(columnsKeys).limit(batchSize).offset(offset);
+            }
+            yield await connection.select(select).from(tableName).orderBy(columnsKeys).limit(batchSize).offset(offset);
+            offset += batchSize;
+        }
+    };
+
+    /**
+     * @param {string} databaseId - the database id
+     * @param {string} tableName - the database table name
      * @param {any[]} values - array of rows
      * @params {string} select - select query
      * @params {number} offset - query offset

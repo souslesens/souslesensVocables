@@ -3,14 +3,37 @@ import { Mode, Type, Msg_ } from "./Component/ProfilesTable";
 import { failure, success } from "srd";
 import { Msg } from "./Admin";
 import React from "react";
+import { useEffect, useState } from "react";
 import { z } from "zod";
 
+import { Database } from "./Database";
 type Response = { message: string; resources: ProfileJson[] };
+type DatabaseResponse = { message: string; resources: Database[] };
 const endpoint = "/api/v1/admin/profiles";
+const admin_database_endpoint = "/api/v1/admin/databases";
+
 async function getProfiles(): Promise<Profile[]> {
     const response = await fetch(endpoint);
     const json = (await response.json()) as Response;
     return mapProfiles(json.resources);
+}
+async function getDatabases(): Promise<Database[]> {
+    const response = await fetch(admin_database_endpoint);
+    const json = (await response.json()) as DatabaseResponse;
+    return json.resources;
+}
+export function useDatabases(): Database[] {
+    const [databases, setDatabases] = useState<Database[]>([]);
+    useEffect(() => {
+        getDatabases()
+            .then((databases: Database[]) => {
+                setDatabases(databases);
+            })
+            .catch((err) => {
+                throw err;
+            });
+    }, []);
+    return databases;
 }
 
 function mapProfiles(resources: ProfileJson[]) {

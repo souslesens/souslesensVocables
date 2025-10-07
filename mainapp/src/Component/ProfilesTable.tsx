@@ -41,7 +41,7 @@ import { ZodIssue } from "zod";
 
 import { Msg, useModel } from "../Admin";
 import { SRD } from "srd";
-import { defaultProfile, saveProfile, Profile, deleteProfile, SourceAccessControl, ProfileSchema, ProfileSchemaCreate } from "../Profile";
+import { defaultProfile, saveProfile, Profile, deleteProfile, SourceAccessControl, ProfileSchema, ProfileSchemaCreate, useDatabases } from "../Profile";
 import { ServerSource } from "../Source";
 import { writeLog } from "../Log";
 import { identity, style, joinWhenArray, cleanUpText } from "../Utils";
@@ -292,6 +292,7 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
     const unwrappedProfiles = SRD.unwrap([], identity, model.profiles);
     const [issues, setIssues] = useState<ZodIssue[]>([]);
     const [filter, setFilter] = useState<string>("");
+    const allDatabases = useDatabases();
     const sources = useMemo(() => {
         return unwrappedSources;
     }, [unwrappedSources]);

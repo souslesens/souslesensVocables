@@ -86,10 +86,11 @@ const ProfilesTable = () => {
             ),
             success: (gotProfiles: Profile[]) => {
                 const datas = gotProfiles.map((profile) => {
-                    const { allowedSourceSchemas, allowedTools, isShared, sourcesAccessControl, ...restOfProperties } = profile;
+                    const { allowedSourceSchemas, allowedTools, allowedDatabases, isShared, sourcesAccessControl, ...restOfProperties } = profile;
                     const processedData = {
                         ...restOfProperties,
                         allowedTools: joinWhenArray(allowedTools),
+                        allowedDatabases: joinWhenArray(allowedDatabases),
                         isShared: JSON.stringify(isShared),
                         allowedSourceSchemas: allowedSourceSchemas.join(";"),
                         sourcesAccessControl: JSON.stringify(sourcesAccessControl),
@@ -651,6 +652,25 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
                                     <MenuItem key={tool} value={tool}>
                                         <Checkbox checked={profileModel.profileForm.allowedTools.includes(tool)} />
                                         {tool}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                        <FormControl>
+                            <InputLabel id="allowedDatabases-label">Allowed databases</InputLabel>
+                            <Select
+                                labelId="allowedDatabases-label"
+                                id="allowedDatabases"
+                                multiple
+                                value={profileModel.profileForm.allowedDatabases}
+                                label="select-allowedDatabases-label"
+                                renderValue={(selected: string | string[]) => (typeof selected === "string" ? selected : selected.join(", "))}
+                                onChange={handleFieldUpdate("allowedDatabases")}
+                            >
+                                {allDatabases.map((database) => (
+                                    <MenuItem key={database.id} value={database.id}>
+                                        <Checkbox checked={profileModel.profileForm.allowedDatabases.includes(database.id)} />
+                                        {database.database}
                                     </MenuItem>
                                 ))}
                             </Select>

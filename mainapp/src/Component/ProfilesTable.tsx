@@ -561,6 +561,13 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
         );
     }
 
+    function handleRenderDatabaseValues(values: string[]): string {
+        const display = values.map((databaseId) => {
+            return allDatabases.find((elem) => elem.id == databaseId)?.database;
+        });
+        return display.join(", ");
+    }
+
     return (
         <>
             {create ? (
@@ -664,7 +671,7 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
                                 multiple
                                 value={profileModel.profileForm.allowedDatabases}
                                 label="select-allowedDatabases-label"
-                                renderValue={(selected: string | string[]) => (typeof selected === "string" ? selected : selected.join(", "))}
+                                renderValue={handleRenderDatabaseValues}
                                 onChange={handleFieldUpdate("allowedDatabases")}
                             >
                                 {allDatabases.map((database) => (

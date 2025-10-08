@@ -302,13 +302,12 @@ class DatabaseModel {
     // };*/
 
     /**
-     * @param {string} databaseId - the database id
+     * @param {any} connection - a database connection
      * @param {string} query - a sql query
      * @returns {Promise<any>} query result
      */
-    query = async (databaseId, query) => {
-        const conn = await this.getConnection(databaseId);
-        const result = await conn.raw(query);
+    query = async (connection, query) => {
+        const result = await connection.raw(query);
         return { rowCount: result.rowCount, rows: result.rows };
     };
 

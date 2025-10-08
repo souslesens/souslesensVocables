@@ -115,6 +115,7 @@ const getKnexConnection = (database) => {
                 ...profile,
                 access_control: JSON.stringify(profile.access_control),
                 allowed_tools: JSON.stringify(profile.allowed_tools),
+                allowed_databases: JSON.stringify(profile.allowed_databases),
                 schema_types: JSON.stringify(profile.schema_types),
             })),
         ),

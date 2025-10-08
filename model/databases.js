@@ -270,19 +270,34 @@ class DatabaseModel {
         return await this.getAdminConnection(databaseId);
     };
 
-    refreshConnection = async (databaseId, callback) => {
+    /*
+     * @param {string} databaseId - a database identifier
+     * @param {function} callback - a function callback
+     */
+    refreshAdminConnection = async (databaseId, callback) => {
         const client = this.knexClients[databaseId];
         if (client) {
             await client.destroy();
             delete this.knexClients[databaseId];
             console.log(`Connexion fermée pour la base ${databaseId}`);
         }
-        await this.getConnection(databaseId);
+        await this.getAdminConnection(databaseId);
         console.log(`Connexion ouverte pour la base ${databaseId}`);
         if (callback) {
             callback();
         }
         return;
+    };
+    /*
+     * @param {UserAccount} user -  a user account
+     * @param {string} databaseId - a database identifier
+     * @param {function} callback - a function callback
+     */
+    refreshUserConnection = async (user, databaseId, callback) => {
+        if (!(await this.isDatabaseAllowed(user, databaseId))) {
+            return null;
+        }
+        this.refreshAdminConnection(databaseId, callback);
     };
 
     /* getConnection = async (databaseId) => {

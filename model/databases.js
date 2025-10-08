@@ -312,7 +312,7 @@ class DatabaseModel {
     };
 
     /**
-     * @param {string} databaseId - the database id
+     * @param {any} connection - a database connection
      * @param {string} tableName - the database table name
      * @param {any[]} values - array of rows
      * @params {string} select - select query
@@ -320,8 +320,7 @@ class DatabaseModel {
      * @params {number} limit - query limit
      * @returns {Promise<any[]>} query result
      */
-    batchSelect = async (databaseId, tableName, { values = [], select = "*", offset = 0, limit = 1000, noRecurs = false }) => {
-        const connection = await this.getConnection(databaseId);
+    batchSelect = async (connection, tableName, { values = [], select = "*", offset = 0, limit = 1000, noRecurs = false }) => {
         return await this.recurseBatchSelect(connection, databaseId, tableName, { values: values, select: select, offset: offset, limit: limit, noRecurs: noRecurs });
     };
 

@@ -103,7 +103,8 @@ class DatabaseModel {
     };
 
     /**
-     * @returns {Promise<Record<string, string>[]>} - a list of database name
+     * @param {string} identifier -  a database identifier
+     * @returns {Promise<Record<string, string>>} - a database with minimal info
      */
     getDatabaseMinimal = async (identifier) => {
         const database = await this.getDatabase(identifier);
@@ -114,6 +115,25 @@ class DatabaseModel {
             driver: database.driver,
             database: database.database,
         };
+    };
+
+    /**
+     * @param {UserAccount} user -  a user account
+     * @param {string} identifier -  a database identifier
+     * @returns {Promise<Record<string, string>>} - a database with minimal info
+     */
+    getUserDatabaseMinimal = async (user, identifier) => {
+        const databases = await this._getUserDatabases(user);
+        return databases
+            .map((database) => {
+                return {
+                    id: database.id,
+                    name: database.name,
+                    driver: database.driver,
+                    database: database.database,
+                };
+            })
+            .find((database) => database.id == identifier);
     };
 
     /**

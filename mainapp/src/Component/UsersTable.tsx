@@ -83,11 +83,21 @@ export const UsersTable = () => {
                 strElems.push(input);
             }
         });
-        const filteredSourcesByProfiles = user.groups // XXX: user.group is profiles here
-            .map((profile) => {
-                return cleanUpText(profile).includes(cleanUpText(profiles.join(" ")));
-            })
-            .reduce((acc, val) => acc || val, false); // return true if at least one true
+
+        let filteredSourcesByProfiles = true;
+        if (user.groups.length === 0) {
+            if (profiles.length === 0) {
+                filteredSourcesByProfiles = true;
+            } else {
+                filteredSourcesByProfiles = false;
+            }
+        } else {
+            filteredSourcesByProfiles = user.groups // XXX: user.group is profiles here
+                .map((profile) => {
+                    return cleanUpText(profile).includes(cleanUpText(profiles.join(" ")));
+                })
+                .reduce((acc, val) => acc || val, false); // return true if at least one true
+        }
 
         const filteredSourcesByText = cleanUpText(user.login).includes(cleanUpText(strElems.join(" ")));
 

@@ -236,8 +236,7 @@ class DatabaseModel {
      * @param {string} databaseId - the database id
      * @returns {Promise<any>} database connection
      */
-
-    getConnection = async (databaseId) => {
+    getAdminConnection = async (databaseId) => {
         if (!this.knexClients[databaseId]) {
             const database = await this.getDatabase(databaseId);
             const dbClient = this.getClientDriver(database.driver);
@@ -255,6 +254,20 @@ class DatabaseModel {
         }
 
         return this.knexClients[databaseId];
+    };
+
+    /**
+     * @param {UserAccount} user -  a user account
+     * @param {string} databaseId - the database id
+     * @returns {Promise<any>} database connection
+     */
+    getUserConnection = async (user, databaseId) => {
+        // return null if database is not allowed
+        if (!(await this.isDatabaseAllowed(user, databaseId))) {
+            return null;
+        }
+
+        return await this.getAdminConnection(databaseId);
     };
 
     refreshConnection = async (databaseId, callback) => {

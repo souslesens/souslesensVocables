@@ -3,6 +3,11 @@ const knex = require("knex");
 const { Lock } = require("async-await-mutex-lock");
 
 const { configDatabasesPath } = require("./config");
+const { profileModel } = require("./profiles");
+
+/**
+ * @typedef {import("./UserTypes").UserAccount} UserAccount
+ */
 
 const lock = new Lock();
 
@@ -126,6 +131,38 @@ class DatabaseModel {
      */
     getAllDatabases = async () => {
         return await this._read();
+    };
+
+    /**
+     * @param {UserAccount} user -  a user account
+     * @returns {Promise<Record<string, Database>>} a collection of databases
+     */
+    _getUserDatabases = async (user) => {
+        const allDatabases = await this.getAllDatabases();
+        if (user.login === "admin" || user.groups.includes("admin")) {
+            return allDatabases;
+        }
+        const userProfiles = await profileModel.getUserProfiles(user);
+        const allowedDatabasesId = Object.entries(userProfiles).flatMap(([profileName, profile]) => {
+            return profile.allowedDatabases;
+        });
+
+        const allowedDatabases = allDatabases.filter((database) => {
+            return allowedDatabasesId.includes(database.id);
+        });
+
+        return allowedDatabases;
+    };
+
+    /**
+     * @param {UserAccount} user -  a user account
+     * @returns {Promise<Record<string, Database>>} a collection of databases
+     */
+    getUserDatabasesName = async (user) => {
+        const databases = await this._getUserDatabases(user);
+        return databases.map((database) => {
+            return { id: database.id, database: database.database };
+        });
     };
 
     /**

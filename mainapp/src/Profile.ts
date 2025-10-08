@@ -3,14 +3,37 @@ import { Mode, Type, Msg_ } from "./Component/ProfilesTable";
 import { failure, success } from "srd";
 import { Msg } from "./Admin";
 import React from "react";
+import { useEffect, useState } from "react";
 import { z } from "zod";
 
+import { Database } from "./Database";
 type Response = { message: string; resources: ProfileJson[] };
+type DatabaseResponse = { message: string; resources: Database[] };
 const endpoint = "/api/v1/admin/profiles";
+const admin_database_endpoint = "/api/v1/admin/databases";
+
 async function getProfiles(): Promise<Profile[]> {
     const response = await fetch(endpoint);
     const json = (await response.json()) as Response;
     return mapProfiles(json.resources);
+}
+async function getDatabases(): Promise<Database[]> {
+    const response = await fetch(admin_database_endpoint);
+    const json = (await response.json()) as DatabaseResponse;
+    return json.resources;
+}
+export function useDatabases(): Database[] {
+    const [databases, setDatabases] = useState<Database[]>([]);
+    useEffect(() => {
+        getDatabases()
+            .then((databases: Database[]) => {
+                setDatabases(databases);
+            })
+            .catch((err) => {
+                throw err;
+            });
+    }, []);
+    return databases;
 }
 
 function mapProfiles(resources: ProfileJson[]) {
@@ -88,6 +111,7 @@ type ProfileJson = {
     allowedSourceSchemas: string[];
     sourcesAccessControl: Record<string, SourceAccessControl>;
     allowedTools: string[];
+    allowedDatabases: string[];
     isShared: boolean;
     theme?: string;
 };
@@ -100,6 +124,7 @@ const decodeProfile = (key: string, profile: ProfileJson): Profile => {
         allowedSourceSchemas: profile.allowedSourceSchemas,
         sourcesAccessControl: profile.sourcesAccessControl,
         allowedTools: profile.allowedTools,
+        allowedDatabases: profile.allowedDatabases,
         isShared: profile.isShared,
         theme: profile.theme,
     };
@@ -119,6 +144,7 @@ const ProfileSchema = z.object({
         .transform((a) => (a ?? []).flatMap((item) => (item ? item : []))),
     sourcesAccessControl: z.record(SourceAccessControlSchema).default({}),
     allowedTools: z.array(z.string()).default([]),
+    allowedDatabases: z.array(z.string()).default([]),
     isShared: z.boolean().default(true),
     id: z.string().default(ulid()),
 });
@@ -142,6 +168,7 @@ export const defaultProfile = (uuid: string): Profile => {
         allowedSourceSchemas: [],
         sourcesAccessControl: {},
         allowedTools: [],
+        allowedDatabases: [],
         isShared: true,
         theme: "",
     };

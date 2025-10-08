@@ -41,7 +41,7 @@ import { ZodIssue } from "zod";
 
 import { Msg, useModel } from "../Admin";
 import { SRD } from "srd";
-import { defaultProfile, saveProfile, Profile, deleteProfile, SourceAccessControl, ProfileSchema, ProfileSchemaCreate } from "../Profile";
+import { defaultProfile, saveProfile, Profile, deleteProfile, SourceAccessControl, ProfileSchema, ProfileSchemaCreate, useDatabases } from "../Profile";
 import { ServerSource } from "../Source";
 import { writeLog } from "../Log";
 import { identity, style, joinWhenArray, cleanUpText } from "../Utils";
@@ -86,10 +86,11 @@ const ProfilesTable = () => {
             ),
             success: (gotProfiles: Profile[]) => {
                 const datas = gotProfiles.map((profile) => {
-                    const { allowedSourceSchemas, allowedTools, isShared, sourcesAccessControl, ...restOfProperties } = profile;
+                    const { allowedSourceSchemas, allowedTools, allowedDatabases, isShared, sourcesAccessControl, ...restOfProperties } = profile;
                     const processedData = {
                         ...restOfProperties,
                         allowedTools: joinWhenArray(allowedTools),
+                        allowedDatabases: joinWhenArray(allowedDatabases),
                         isShared: JSON.stringify(isShared),
                         allowedSourceSchemas: allowedSourceSchemas.join(";"),
                         sourcesAccessControl: JSON.stringify(sourcesAccessControl),
@@ -292,6 +293,7 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
     const unwrappedProfiles = SRD.unwrap([], identity, model.profiles);
     const [issues, setIssues] = useState<ZodIssue[]>([]);
     const [filter, setFilter] = useState<string>("");
+    const allDatabases = useDatabases();
     const sources = useMemo(() => {
         return unwrappedSources;
     }, [unwrappedSources]);
@@ -559,6 +561,13 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
         );
     }
 
+    function handleRenderDatabaseValues(values: string[]): string {
+        const display = values.map((databaseId) => {
+            return allDatabases.find((elem) => elem.id == databaseId)?.database;
+        });
+        return display.join(", ");
+    }
+
     return (
         <>
             {create ? (
@@ -650,6 +659,25 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
                                     <MenuItem key={tool} value={tool}>
                                         <Checkbox checked={profileModel.profileForm.allowedTools.includes(tool)} />
                                         {tool}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                        <FormControl>
+                            <InputLabel id="allowedDatabases-label">Allowed databases</InputLabel>
+                            <Select
+                                labelId="allowedDatabases-label"
+                                id="allowedDatabases"
+                                multiple
+                                value={profileModel.profileForm.allowedDatabases}
+                                label="select-allowedDatabases-label"
+                                renderValue={handleRenderDatabaseValues}
+                                onChange={handleFieldUpdate("allowedDatabases")}
+                            >
+                                {allDatabases.map((database) => (
+                                    <MenuItem key={database.id} value={database.id}>
+                                        <Checkbox checked={profileModel.profileForm.allowedDatabases.includes(database.id)} />
+                                        {database.database}
                                     </MenuItem>
                                 ))}
                             </Select>

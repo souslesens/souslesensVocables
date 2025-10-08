@@ -51,6 +51,7 @@ describe("Test the Profilemodel module", () => {
         expect(profiles.read_folder_1).toStrictEqual({
             allowedSourceSchemas: ["OWL"],
             allowedTools: ["lineage", "KGcreator", "KGquery"],
+            allowedDatabases: [],
             isShared: true,
             id: "read_folder_1",
             name: "read_folder_1",
@@ -94,6 +95,7 @@ describe("Test the Profilemodel module", () => {
         expect(profile).toStrictEqual({
             allowedSourceSchemas: ["OWL", "SKOS"],
             allowedTools: ["ALL"],
+            allowedDatabases: [],
             isShared: true,
             id: "all",
             name: "all",
@@ -107,6 +109,7 @@ describe("Test the Profilemodel module", () => {
         expect(profile).toStrictEqual({
             allowedSourceSchemas: ["OWL"],
             allowedTools: ["lineage", "KGcreator", "KGquery"],
+            allowedDatabases: [],
             isShared: true,
             id: "all_forbidden",
             name: "all_forbidden",
@@ -185,6 +188,7 @@ describe("Test the Profilemodel module", () => {
             label: "test",
             theme: "",
             allowed_tools: [],
+            allowed_databases: [],
             is_shared: true,
             access_control: "{}",
             schema_types: [],
@@ -197,6 +201,7 @@ describe("Test the Profilemodel module", () => {
             label: "test",
             theme: "SLS",
             allowed_tools: [],
+            allowed_databases: [],
             is_shared: true,
             access_control: {},
             schema_types: [],
@@ -210,6 +215,7 @@ describe("Test the Profilemodel module", () => {
                 theme: "SLS",
                 allowedSourceSchemas: [],
                 allowedTools: [],
+                allowedDatabases: [],
                 isShared: true,
                 sourcesAccessControl: {},
             },

@@ -1,12 +1,18 @@
 const { databaseModel } = require("../../../../model/databases");
 const { responseSchema } = require("../utils");
+const userManager = require("../../../../bin/user.");
 
 module.exports = function () {
     let operations = { GET };
 
     async function GET(req, res, _next) {
         try {
-            const database = await databaseModel.getDatabaseMinimal(req.params.id);
+            const userInfo = await userManager.getUser(req.user);
+            const database = await databaseModel.getUserDatabaseMinimal(userInfo.user, req.params.id);
+            if (!database) {
+                res.status(404).json({ message: `database with id ${req.params.id} not found` });
+                return;
+            }
             res.status(200).json(database);
         } catch (error) {
             res.status(500).json({ message: error.message, status: error.cause });

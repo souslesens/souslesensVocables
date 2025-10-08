@@ -3,6 +3,11 @@ const knex = require("knex");
 const { Lock } = require("async-await-mutex-lock");
 
 const { configDatabasesPath } = require("./config");
+const { profileModel } = require("./profiles");
+
+/**
+ * @typedef {import("./UserTypes").UserAccount} UserAccount
+ */
 
 const lock = new Lock();
 
@@ -98,7 +103,8 @@ class DatabaseModel {
     };
 
     /**
-     * @returns {Promise<Record<string, string>[]>} - a list of database name
+     * @param {string} identifier -  a database identifier
+     * @returns {Promise<Record<string, string>>} - a database with minimal info
      */
     getDatabaseMinimal = async (identifier) => {
         const database = await this.getDatabase(identifier);
@@ -109,6 +115,25 @@ class DatabaseModel {
             driver: database.driver,
             database: database.database,
         };
+    };
+
+    /**
+     * @param {UserAccount} user -  a user account
+     * @param {string} identifier -  a database identifier
+     * @returns {Promise<Record<string, string>>} - a database with minimal info
+     */
+    getUserDatabaseMinimal = async (user, identifier) => {
+        const databases = await this._getUserDatabases(user);
+        return databases
+            .map((database) => {
+                return {
+                    id: database.id,
+                    name: database.name,
+                    driver: database.driver,
+                    database: database.database,
+                };
+            })
+            .find((database) => database.id == identifier);
     };
 
     /**
@@ -126,6 +151,38 @@ class DatabaseModel {
      */
     getAllDatabases = async () => {
         return await this._read();
+    };
+
+    /**
+     * @param {UserAccount} user -  a user account
+     * @returns {Promise<Record<string, Database>>} a collection of databases
+     */
+    _getUserDatabases = async (user) => {
+        const allDatabases = await this.getAllDatabases();
+        if (user.login === "admin" || user.groups.includes("admin")) {
+            return allDatabases;
+        }
+        const userProfiles = await profileModel.getUserProfiles(user);
+        const allowedDatabasesId = Object.entries(userProfiles).flatMap(([profileName, profile]) => {
+            return profile.allowedDatabases;
+        });
+
+        const allowedDatabases = allDatabases.filter((database) => {
+            return allowedDatabasesId.includes(database.id);
+        });
+
+        return allowedDatabases;
+    };
+
+    /**
+     * @param {UserAccount} user -  a user account
+     * @returns {Promise<Record<string, Database>>} a collection of databases
+     */
+    getUserDatabasesName = async (user) => {
+        const databases = await this._getUserDatabases(user);
+        return databases.map((database) => {
+            return { id: database.id, database: database.database };
+        });
     };
 
     /**
@@ -160,11 +217,26 @@ class DatabaseModel {
     };
 
     /**
+     * @param {UserAccount} user -  a user account
+     * @param {string} databaseId - the database id
+     * @returns {Promise<boolean>} true if the database is allowed
+     */
+    isDatabaseAllowed = async (user, databaseId) => {
+        if (user.login === "admin" || user.groups.includes("admin")) {
+            return true;
+        }
+        const userProfiles = await profileModel.getUserProfiles(user);
+        const allowedDatabasesId = Object.entries(userProfiles).flatMap(([profileName, profile]) => {
+            return profile.allowedDatabases;
+        });
+        return allowedDatabasesId.includes(databaseId);
+    };
+
+    /**
      * @param {string} databaseId - the database id
      * @returns {Promise<any>} database connection
      */
-
-    getConnection = async (databaseId) => {
+    getAdminConnection = async (databaseId) => {
         if (!this.knexClients[databaseId]) {
             const database = await this.getDatabase(databaseId);
             const dbClient = this.getClientDriver(database.driver);
@@ -184,19 +256,48 @@ class DatabaseModel {
         return this.knexClients[databaseId];
     };
 
-    refreshConnection = async (databaseId, callback) => {
+    /**
+     * @param {UserAccount} user -  a user account
+     * @param {string} databaseId - the database id
+     * @returns {Promise<any>} database connection
+     */
+    getUserConnection = async (user, databaseId) => {
+        // return null if database is not allowed
+        if (!(await this.isDatabaseAllowed(user, databaseId))) {
+            return null;
+        }
+
+        return await this.getAdminConnection(databaseId);
+    };
+
+    /*
+     * @param {string} databaseId - a database identifier
+     * @param {function} callback - a function callback
+     */
+    refreshAdminConnection = async (databaseId, callback) => {
         const client = this.knexClients[databaseId];
         if (client) {
             await client.destroy();
             delete this.knexClients[databaseId];
             console.log(`Connexion fermée pour la base ${databaseId}`);
         }
-        await this.getConnection(databaseId);
+        await this.getAdminConnection(databaseId);
         console.log(`Connexion ouverte pour la base ${databaseId}`);
         if (callback) {
             callback();
         }
         return;
+    };
+    /*
+     * @param {UserAccount} user -  a user account
+     * @param {string} databaseId - a database identifier
+     * @param {function} callback - a function callback
+     */
+    refreshUserConnection = async (user, databaseId, callback) => {
+        if (!(await this.isDatabaseAllowed(user, databaseId))) {
+            return null;
+        }
+        this.refreshAdminConnection(databaseId, callback);
     };
 
     /* getConnection = async (databaseId) => {
@@ -216,18 +317,17 @@ class DatabaseModel {
     // };*/
 
     /**
-     * @param {string} databaseId - the database id
+     * @param {any} connection - a database connection
      * @param {string} query - a sql query
      * @returns {Promise<any>} query result
      */
-    query = async (databaseId, query) => {
-        const conn = await this.getConnection(databaseId);
-        const result = await conn.raw(query);
+    query = async (connection, query) => {
+        const result = await connection.raw(query);
         return { rowCount: result.rowCount, rows: result.rows };
     };
 
     /**
-     * @param {string} databaseId - the database id
+     * @param {any} connection - a database connection
      * @param {string} tableName - the database table name
      * @param {any[]} values - array of rows
      * @params {string} select - select query
@@ -235,8 +335,7 @@ class DatabaseModel {
      * @params {number} limit - query limit
      * @returns {Promise<any[]>} query result
      */
-    batchSelect = async (databaseId, tableName, { values = [], select = "*", offset = 0, limit = 1000, noRecurs = false }) => {
-        const connection = await this.getConnection(databaseId);
+    batchSelect = async (connection, tableName, { values = [], select = "*", offset = 0, limit = 1000, noRecurs = false }) => {
         return await this.recurseBatchSelect(connection, databaseId, tableName, { values: values, select: select, offset: offset, limit: limit, noRecurs: noRecurs });
     };
 

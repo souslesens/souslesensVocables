@@ -217,6 +217,22 @@ class DatabaseModel {
     };
 
     /**
+     * @param {UserAccount} user -  a user account
+     * @param {string} databaseId - the database id
+     * @returns {Promise<boolean>} true if the database is allowed
+     */
+    isDatabaseAllowed = async (user, databaseId) => {
+        if (user.login === "admin" || user.groups.includes("admin")) {
+            return true;
+        }
+        const userProfiles = await profileModel.getUserProfiles(user);
+        const allowedDatabasesId = Object.entries(userProfiles).flatMap(([profileName, profile]) => {
+            return profile.allowedDatabases;
+        });
+        return allowedDatabasesId.includes(databaseId);
+    };
+
+    /**
      * @param {string} databaseId - the database id
      * @returns {Promise<any>} database connection
      */

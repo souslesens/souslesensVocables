@@ -1335,6 +1335,9 @@ var MappingColumnsGraph = (function () {
                 if (data.nodes.length == 0) {
                     return alert("no nodes in file");
                 }
+                if (data.options?.config?.lastUpdate) {
+                    delete data.options.config.lastUpdate;
+                }
                 var fileName = "mappings_" + MappingModeler.currentSLSsource + "_ALL" + ".json";
                 var payload = {
                     dir: "graphs/",

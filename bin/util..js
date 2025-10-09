@@ -32,9 +32,9 @@ var util = {
             return null;
         }
         if (array.length == 2) {
-            return { table: array[0], column: array[1] };
+            return {table: array[0], column: array[1]};
         } else if (array.length == 3) {
-            return { table: array[0] + "." + array[1], column: array[2] };
+            return {table: array[0] + "." + array[1], column: array[2]};
         } else {
             return null;
         }
@@ -265,30 +265,29 @@ var util = {
         return str;
     },
     getCsvFileSeparator: function (file, callback) {
-        var readStream = fs.createReadStream(file, { start: 0, end: 5000, encoding: "utf8" });
+        var readStream = fs.createReadStream(file, {start: 0, end: 5000, encoding: "utf8"});
         var line = "";
         var separators = ["\t", ";", ","];
+        var separator = null;
         readStream
             .on("data", function (chunk) {
                 line += chunk;
 
                 var match = null;
                 if ((match = line.match(/[\n\r]/))) {
-                    /*   var p = line.indexOf("\n");
-          if (p < 0) p = chunk.indexOf("\r");
-          if (p < 0) {
-              readStream.destroy();
-              console.log("no line break or return in file");
-              return null;*/
 
                     var lines = line.split(/\r?\n/);
+                    if(lines.length<2)
+                        return callback(null)
                     var firstLine = lines[0];
                     var secondLine = lines[1];
+
                     for (var k = 0; k < separators.length; k++) {
                         if (firstLine.indexOf(separators[k]) > -1) {
                             // evaluate separator line is same on the second and first line avoid mistake separators
-                            if (firstLine.split(separators[k]).length == secondLine.split(separators[k])?.length) {
-                                callback(separators[k]);
+                            if (firstLine.split(separators[k]).length == secondLine.split(separators[k]).length) {
+                                separator = separators[k]
+
                             }
                         }
                     }
@@ -297,10 +296,10 @@ var util = {
                 }
             })
             .on("end", function () {
-                return;
+                return callback(separator)
             })
             .on("close", function () {
-                return;
+                return callback(separator)
             });
     },
 
@@ -375,11 +374,11 @@ var util = {
             for (var i = 0; i < files.length; i++) {
                 var fileName = parent + files[i];
                 var stats = fs.statSync(fileName);
-                var infos = { lastModified: stats.mtimeMs }; //fileInfos.getDirInfos(dir);
+                var infos = {lastModified: stats.mtimeMs}; //fileInfos.getDirInfos(dir);
 
                 if (stats.isDirectory()) {
                     dirFilesMap[fileName + "\\"] = [];
-                    dirsArray.push({ type: "dir", name: files[i], parent: parent });
+                    dirsArray.push({type: "dir", name: files[i], parent: parent});
                     recurse(fileName);
                 } else {
                     var p = fileName.lastIndexOf(".");
@@ -512,6 +511,7 @@ var util = {
                 return null;
             }
         }
+
         function getHours(str) {
             try {
                 var number = parseInt(str);
@@ -527,6 +527,7 @@ var util = {
                 return null;
             }
         }
+
         function getMinutes(str) {
             try {
                 var number = parseInt(str);
@@ -542,6 +543,7 @@ var util = {
                 return null;
             }
         }
+
         function getSeconds(str) {
             try {
                 var number = parseInt(str);
@@ -557,6 +559,7 @@ var util = {
                 return null;
             }
         }
+
         var day, mont, year, hours, minutes, seconds;
         if (formatCode == "FR") {
             var array = dateStr.split("/");
@@ -668,7 +671,9 @@ var util = {
         //  internal virtuoso date YYYY.MM.DD hh:mm.ss
         var regex = /(\d{4})-(\d{2})-(\d{2})T(\d{2})(\d{2})(\d{2})/;
         var array = isoStringdate.match(regex);
-        if (!array) return null;
+        if (!array) {
+            return null;
+        }
         var str = array[1] + "-" + array[2] + "-" + array[3];
 
         if (array.length > 4) {

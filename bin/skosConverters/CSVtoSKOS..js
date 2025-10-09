@@ -161,6 +161,8 @@ var CSVtoSKOS = {
 
     readCsv: function (connector, lines, callback) {
         util.getCsvFileSeparator(connector.filePath, function (separator) {
+            if(!separator)
+                return callback("unable to determine column separator")
             var headers = [];
             var jsonData = [];
             var jsonDataFetch = [];

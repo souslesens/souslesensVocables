@@ -6,6 +6,8 @@ var SQLutil = {
     csvToJson: function (csvFilePath, sliceLength, callback) {
         if (!fs.existsSync(csvFilePath)) return callback("file does not exists :" + csvFilePath);
         util.getCsvFileSeparator(csvFilePath, function (separator) {
+            if(!separator)
+                return callback("unable to determine column separator")
             //  var separator="\t"
             var headers = [];
             var jsonData = [];

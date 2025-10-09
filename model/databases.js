@@ -199,22 +199,6 @@ class DatabaseModel {
         return;
     };
 
-    /* getConnection = async (databaseId) => {
-    //     const database = await this.getDatabase(databaseId);
-    //     const dbClient = this.getClientDriver(database.driver);
-    //     return knex({
-    //         acquireConnectionTimeout: 5000,
-    //         client: dbClient,
-    //         connection: {
-    //             host: database.host,
-    //             port: database.port,
-    //             user: database.user,
-    //             password: database.password,
-    //             database: database.database,
-    //         },
-    //     });
-    // };*/
-
     /**
      * @param {string} databaseId - the database id
      * @param {string} query - a sql query
@@ -224,6 +208,30 @@ class DatabaseModel {
         const conn = await this.getConnection(databaseId);
         const result = await conn.raw(query);
         return { rowCount: result.rowCount, rows: result.rows };
+    };
+
+    /**
+     * @param {string} databaseId - the database id
+     * @param {string} tableName - the database table name
+     * @params {string} select - select query
+     * @params {number} batchSize - batch size
+     */
+    batchSelectGenerator = async function* (databaseId, tableName, { select = "*", batchSize = 1000 }) {
+        const connection = await this.getConnection(databaseId);
+        const columns = await connection(tableName).columnInfo();
+        const columnsKeys = Object.keys(columns);
+
+        const resSize = await connection.count(select).from(tableName);
+        const size = parseInt(resSize[0].count);
+
+        let offset = 0;
+        while (true) {
+            if (offset + batchSize >= size) {
+                return connection.select(select).from(tableName).orderBy(columnsKeys).limit(batchSize).offset(offset);
+            }
+            yield await connection.select(select).from(tableName).orderBy(columnsKeys).limit(batchSize).offset(offset);
+            offset += batchSize;
+        }
     };
 
     /**
@@ -251,14 +259,10 @@ class DatabaseModel {
      * @returns {Promise<any[]>} query result
      */
     recurseBatchSelect = async (connection, databaseId, tableName, { values = [], select = "*", offset = 0, limit = 1000, noRecurs = false }) => {
-        var res = null;
-        if (select == "*") {
-            const columns = await connection(tableName).columnInfo();
-            const columnsKeys = Object.keys(columns);
-            res = await connection.select(select).from(tableName).orderBy(columnsKeys).limit(limit).offset(offset);
-        } else {
-            res = await connection.select(select).from(tableName).limit(limit).offset(offset);
-        }
+        let res = null;
+        const columns = await connection(tableName).columnInfo();
+        const columnsKeys = Object.keys(columns);
+        res = await connection.select(select).from(tableName).orderBy(columnsKeys).limit(limit).offset(offset);
 
         const concat = values.concat(res);
 

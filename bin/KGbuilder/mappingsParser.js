@@ -109,6 +109,11 @@ var MappingParser = {
     },
 
 
+    /* Builds triples linking `from` to `to`: rdfs:subClassOf if from.rdfType is owl:Class, else rdf:type.
+    Always asserts the subject’s own rdf:type and optionally an rdfs:label when provided.
+    Inputs: fromNodeData {id, rdfType, rdfsLabel}, toNodeData {id}; returns an array of {s,p,o,isString?}.
+    Used to serialize type hierarchy and labels during mapping generation. */
+
     /**  Builds triples linking `from` to `to`: rdfs:subClassOf if from.rdfType is owl:Class, else rdf:type.
     Always asserts the subject’s own rdf:type and optionally an rdfs:label when provided.
     Inputs: fromNodeData {id, rdfType, rdfsLabel}, toNodeData {id}; returns an array of {s,p,o,isString?}.

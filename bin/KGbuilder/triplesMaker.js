@@ -377,7 +377,13 @@ var TriplesMaker = {
             });
         }
     },
-
+/**  Build RDF triples for a batch of rows using the table’s column mappings.
+   @param {Array} data  Array of row objects; values are coerced to strings/ISO dates.
+   @param {Object} tableProcessingParams  Context: tableColumnsMappings, uniqueTriplesMap, blankNodesMap, tableInfos, jsFunctionsMap.
+   @param {Object} options  Batch options: currentBatchRowIndex, filterMappingIds; @param {Function} callback(err, triples).
+   For each row: compute subject URIs per column, emit mapped triples (constants/prefixed URIs, column URIs, transforms, typed literals), then add metadata.
+   Also generate column→column relation triples from edges and de-duplicate via uniqueTriplesMap before returning. 
+   */
     buildTriples: function (data, tableProcessingParams, options, callback) {
         var columnMappings = tableProcessingParams.tableColumnsMappings;
 
@@ -666,6 +672,15 @@ var TriplesMaker = {
         }
     },
 
+     /**
+     * Formats a literal value from a row according to the mapping’s datatype.
+     * Handles xsd:date/xsd:dateTime (incl. custom dateFormat), strings, floats and ints,
+     * converting values to valid RDF literals with datatype annotations.
+     * NOTE: this function references `callback` but does not receive it; it currently returns the string/null.
+     * @param {Object} dataItem   Row object; value is usually taken from dataItem[mapping.o].
+     * @param {Object} mapping    Mapping info: { o, dataType, dateFormat, isString, transform, objColId }.
+     * @returns {string|null}     N-Triples literal (e.g. "\"2024-01-01\"^^xsd:date") or null if no usable value.
+     */
     getFormatedLiteral: function (dataItem, mapping) {
         var objectStr = null;
         if (mapping.dataType) {
@@ -742,6 +757,7 @@ var TriplesMaker = {
         }
         return objectStr;
     },
+    
     getMetaDataTriples: function (subjectUri, table, options) {
         var creator = "KGcreator";
         var dateTime = "'" + util.dateToRDFString(new Date(), true) + "'^^xsd:dateTime";

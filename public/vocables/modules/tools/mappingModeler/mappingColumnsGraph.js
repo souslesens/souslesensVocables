@@ -1869,10 +1869,7 @@ var MappingColumnsGraph = (function () {
                         );
                         });
 
-                    }else {
-                        MappingModeler.currentTable.name = node.data.dataTable
-                    }
-
+                    } 
                   
                   
 

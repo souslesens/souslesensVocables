@@ -232,14 +232,15 @@ class DatabaseModel {
      * @params {string} select - select query
      * @params {number} batchSize - batch size
      */
-    batchSelectGenerator = async function* (databaseId, tableName, { select = "*", batchSize = 1000 }) {
+    batchSelectGenerator = async function* (databaseId, tableName, { select = "*", batchSize = 1000,size=-1 }) {
         const connection = await this.getConnection(databaseId);
         const columns = await connection(tableName).columnInfo();
         const columnsKeys = Object.keys(columns);
 
-        const resSize = await connection.count(select).from(tableName);
-        const size = parseInt(resSize[0].count);
-
+        if(size===-1) {
+            const resSize = await connection.count(select).from(tableName);
+            size = parseInt(resSize[0].count);
+        }
         let offset = 0;
         while (offset < size) {
             yield await connection.select(select).from(tableName).orderBy(columnsKeys).limit(batchSize).offset(offset);

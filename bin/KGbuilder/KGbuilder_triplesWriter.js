@@ -1,9 +1,8 @@
 const ConfigManager = require("../configManager.");
-const httpProxy = require("../httpProxy.");
+const httpProxy = require("../httpProxy..js");
 const async = require("async");
 const util = require("../util.");
-const KGbuilder_socket = require("./KGbuilder_socket");
-const TriplesMaker = require("./TriplesMaker.js");
+const KGbuilder_socket = require("./KGbuilder_socket.js");
 
 const KGbuilder_triplesWriter = {
     sparqlPrefixes: {
@@ -141,9 +140,18 @@ const KGbuilder_triplesWriter = {
             },
         );
     },
-
+    /**
+     * Deletes KGcreator-produced triples from a SPARQL endpoint, scoped to a named graph.
+     * If `table` is provided, only triples whose subject has TriplesMaker.mappingFilePredicate = 'table' are deleted;
+     * otherwise, all KGcreator triples in the graph are deleted. Runs in batches (LIMIT 10000) and reports progress.
+     * @param {string}   sparqlServerUrl  SPARQL endpoint URL for HTTP POST updates.
+     * @param {string}   graphUri         Target named graph IRI to operate on.
+     * @param {string=}  table            Table/mapping name to filter deletions; omit to delete all KGcreator triples.
+     * @param {Object}   options          Extra options (e.g., { clientSocketId?: string } for progress messages).
+     * @param {Function} callback         Node-style callback (err: any, totalDeleted: number).
+     */
     deleteKGBuilderTriples: function (sparqlServerUrl, graphUri, table, options, callback) {
-        const KGbuilder_triplesMaker = require("./KGbuilder_triplesMaker");
+        const TriplesMaker = require("./KGbuilder_triplesMaker");
         var query = "";
         if (table) {
             query += "with  GRAPH <" + graphUri + "> " + "delete {?s ?p ?o} where {?s ?p ?o. ?s <" + TriplesMaker.mappingFilePredicate + "> '" + table + "'}";

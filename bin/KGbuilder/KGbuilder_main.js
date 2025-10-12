@@ -66,7 +66,17 @@ var KGbuilder_main = {
             uniqueTriplesMap: {},
         };
 
-        // load visj mapping file
+        
+        /**load visj mapping file
+         * Orchestrate triple generation for a set of tables.
+         * Loads mappings/config, prepares per-table processing context,
+         * and runs the per-table pipeline (columns map, edges, transforms, counts, build).
+         * Returns either a sample of triples or total triple counts per table.
+         * @param {string} source - SLS source name (mappings bundle to load).
+         * @param {string[]} tables - Table names to process.
+         * @param {Object} options - Execution flags (sampleSize, filterMappingIds, etc.).
+         * @param {Function} callback - Node-style (err, {sampleTriples,totalTriplesCount}).
+         */
         MappingsParser.getMappingsData(source, function (err, _mappingData) {
             if (err) {
                 return callback(err);

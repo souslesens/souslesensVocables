@@ -3,7 +3,7 @@ const async = require("async");
 const fs = require("fs");
 
 var MappingParser = {
-    columnsMappingsObjects: ["Column", "RowIndex", "VirtualColumn"],
+    columnsMappingsObjects: ["Column", "RowIndex", "VirtualColumn","URI"],
     getMappingsData: function (source, callback) {
         var mappingGraphDir = path.join(__dirname, "../../data/graphs/");
         var file = mappingGraphDir + "mappings_" + source + "_ALL.json";

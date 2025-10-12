@@ -171,7 +171,7 @@ var TriplesMaker = {
 
                                 if (options.sampleSize) {
                                     // sample dont write triples return batchTriples
-                                    sampleTriples = batchTriples;
+                                    sampleTriples = sampleTriples.concat(batchTriples);
                                     callbackEach();
                                 } else {
                                     KGbuilder_socket.message(

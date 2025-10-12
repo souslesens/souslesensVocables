@@ -43,7 +43,7 @@ var MappingModeler = (function () {
      * @memberof module:MappingModeler
      */
     self.jstreeDivId = "mappingModeler_dataSourcesJstreeDiv";
-    self.columnsMappingsObjects = ["Column", "RowIndex", "VirtualColumn"];
+    self.columnsMappingsObjects = ["Column", "RowIndex", "VirtualColumn","URI"];
     /**
      * ID of the legend container.
      * @type {string}

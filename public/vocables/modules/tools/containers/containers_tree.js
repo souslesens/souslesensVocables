@@ -76,23 +76,24 @@ var Containers_tree = (function () {
 
             if (!existingNodes[jstreeId]) {
                 existingNodes[jstreeId] = 1;
-            }
-            var node = {
-                id: jstreeId,
-                text: label,
-                parent: parent,
-                type: "Container",
-                data: {
-                    type: "Container",
-                    source: source,
-                    id: id,
-                    label: label,
-                    parent: parent,
-                    //tabId: options.tabId,
-                },
-            };
 
-            jstreeData.push(node);
+                var node = {
+                    id: jstreeId,
+                    text: label,
+                    parent: parent,
+                    type: "Container",
+                    data: {
+                        type: "Container",
+                        source: source,
+                        id: id,
+                        label: label,
+                        parent: parent,
+                        //tabId: options.tabId,
+                    },
+                };
+
+                jstreeData.push(node);
+            }
         });
 
         jstreeData.sort(function (a, b) {

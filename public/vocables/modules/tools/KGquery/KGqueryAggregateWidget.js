@@ -155,8 +155,8 @@ var KGqueryAggregateWidget = (function () {
 
         groupByNodes.forEach(function (node) {
             whereStr += getWhereClause(node);
-            selectStr += " ?" + node.label;
-            groupByStr += " ?" + node.label; // + " ?" +
+            selectStr += " ?" + Sparql_common.formatStringForTriple(node.label, true);
+            groupByStr += " ?" + Sparql_common.formatStringForTriple(node.label, true);// + " ?" +
         });
 
         whereStr += getWhereClause(groupFnVars[0]);

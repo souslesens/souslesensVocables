@@ -509,7 +509,7 @@ var MappingsDetails = (function () {
             }
         }
 
-        JstreeWidget.deleteNode("detailedMappings_jsTreeDiv", treeNode);
+        JstreeWidget.deleteNode("detailedMappings_jsTreeDiv", treeNode.id);
 
         MappingColumnsGraph.saveVisjsGraph(function () {
             self.drawDetailedMappingsGraph();

@@ -770,6 +770,7 @@ var MappingColumnsGraph = (function () {
                     self.addNodesByDataTableBatch(result.nodes, function () {
                         if (true) {
                             self.visjsGraph.data.nodes.get().forEach(function (node) {
+                                node.hidden=false
                                 if (node.data.type == "Class") {
                                     node.level = 3;
                                 } else if (node.data.type == "Table") {
@@ -1451,12 +1452,14 @@ var MappingColumnsGraph = (function () {
         var tableNodes = {};
 
         nodes.forEach(function (node) {
+            var hidden=true
             if (node.data && node.data.dataTable) {
                 if (node.data.dataTable == table) {
                     tableNodes[node.id] = node;
+                    hidden=false
                 }
             }
-            newNodesMap[node.id] = { id: node.id, hidden: true };
+            newNodesMap[node.id] = { id: node.id, hidden: hidden };
         });
 
         var edgesFromClassMap = {};

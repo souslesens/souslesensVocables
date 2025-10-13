@@ -32,9 +32,9 @@ var util = {
             return null;
         }
         if (array.length == 2) {
-            return {table: array[0], column: array[1]};
+            return { table: array[0], column: array[1] };
         } else if (array.length == 3) {
-            return {table: array[0] + "." + array[1], column: array[2]};
+            return { table: array[0] + "." + array[1], column: array[2] };
         } else {
             return null;
         }
@@ -265,7 +265,7 @@ var util = {
         return str;
     },
     getCsvFileSeparator: function (file, callback) {
-        var readStream = fs.createReadStream(file, {start: 0, end: 5000, encoding: "utf8"});
+        var readStream = fs.createReadStream(file, { start: 0, end: 5000, encoding: "utf8" });
         var line = "";
         var separators = ["\t", ";", ","];
         var separator = null;
@@ -275,10 +275,8 @@ var util = {
 
                 var match = null;
                 if ((match = line.match(/[\n\r]/))) {
-
                     var lines = line.split(/\r?\n/);
-                    if(lines.length<2)
-                        return callback(null)
+                    if (lines.length < 2) return callback(null);
                     var firstLine = lines[0];
                     var secondLine = lines[1];
 
@@ -286,8 +284,7 @@ var util = {
                         if (firstLine.indexOf(separators[k]) > -1) {
                             // evaluate separator line is same on the second and first line avoid mistake separators
                             if (firstLine.split(separators[k]).length == secondLine.split(separators[k]).length) {
-                                separator = separators[k]
-
+                                separator = separators[k];
                             }
                         }
                     }
@@ -296,10 +293,10 @@ var util = {
                 }
             })
             .on("end", function () {
-                return callback(separator)
+                return callback(separator);
             })
             .on("close", function () {
-                return callback(separator)
+                return callback(separator);
             });
     },
 
@@ -374,11 +371,11 @@ var util = {
             for (var i = 0; i < files.length; i++) {
                 var fileName = parent + files[i];
                 var stats = fs.statSync(fileName);
-                var infos = {lastModified: stats.mtimeMs}; //fileInfos.getDirInfos(dir);
+                var infos = { lastModified: stats.mtimeMs }; //fileInfos.getDirInfos(dir);
 
                 if (stats.isDirectory()) {
                     dirFilesMap[fileName + "\\"] = [];
-                    dirsArray.push({type: "dir", name: files[i], parent: parent});
+                    dirsArray.push({ type: "dir", name: files[i], parent: parent });
                     recurse(fileName);
                 } else {
                     var p = fileName.lastIndexOf(".");

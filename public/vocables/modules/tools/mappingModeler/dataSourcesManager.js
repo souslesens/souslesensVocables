@@ -485,7 +485,7 @@ var DataSourceManager = (function () {
             DataSourceManager.loadCsvSource(DataSourceManager.currentSlsvSource, obj.node.id, false, function (err, columns) {
                 if (err) {
                     return alert(err.responseText || err);
-                  //  return alert("file not found");
+                    //  return alert("file not found");
                 }
 
                 MappingModeler.currentResourceType = "Column";

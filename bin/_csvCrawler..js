@@ -133,6 +133,7 @@ var csvCrawler = {
     readCsv: function (connector, maxLines, callback) {
         if (!fs.existsSync(connector.filePath)) return callback("file does not exists :" + connector.filePath);
         util.getCsvFileSeparator(connector.filePath, function (separator) {
+            if (!separator) return callback("unable to determine column separator");
             // separator=";"
             var headers = [];
             var jsonData = [];

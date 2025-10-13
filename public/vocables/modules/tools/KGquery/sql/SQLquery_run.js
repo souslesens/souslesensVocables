@@ -1,5 +1,5 @@
-import KGcreator from "../KGcreator/KGcreator.js";
-import common from "../../shared/common.js";
+import KGcreator from "../../KGcreator/KGcreator.js";
+import common from "../../../shared/common.js";
 
 var SQLquery_run = (function () {
     var self = {};

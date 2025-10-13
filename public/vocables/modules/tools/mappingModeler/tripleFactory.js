@@ -303,7 +303,7 @@ var TripleFactory = (function () {
                         $("#KGcreator_infosDiv").val(result.result);
                         UI.message(result.result, true);
                     } else {
-                        var message = result.result + " triples created in graph " + DataSourceManager.currentConfig.graphUri;
+                        var message = result.totalTriplesCount[MappingModeler.currentTable.name] + " triples created in graph " + DataSourceManager.currentConfig.graphUri;
                         alert(message);
                         //  UI.message(message, true);
                     }
@@ -360,10 +360,10 @@ var TripleFactory = (function () {
         });
 
         var tableData = [];
-        var regex = /<([^>]*)> <*([^ ]*)>* <*([^>]*)>*/;
+        var regex = /<([^>]*)> <*([^ >]*)>* <*([^>]*)>*/;
         data.sampleTriples.forEach(function (item, index) {
             var array = regex.exec(item);
-            tableData.push([array[1], array[2], array[3]]);
+            //tableData.push([array[1], array[2], array[3]]);
             tableData.push([escapeMarkup(array[1]), escapeMarkup(array[2]), escapeMarkup(array[3])]);
             //  tableData.push([escapeMarkup(item.s), escapeMarkup(item.p), escapeMarkup(item.o)]);
         });

@@ -1,4 +1,4 @@
-import SQLquery_run from "../KGquery/SQLquery_run.js";
+import SQLquery_run from "../KGquery/sql/SQLquery_run.js";
 
 var KGcreator_joinTables = (function () {
     var self = {};

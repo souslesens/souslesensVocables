@@ -68,9 +68,9 @@ var TriplesMaker = {
                 async.eachSeries(
                     result.data,
                     function (data, callbackEach) {
-                        if (currentBatchRowIndex && options) {
-                            options.currentBatchRowIndex = currentBatchRowIndex;
-                        }
+                      
+                        options.currentBatchRowIndex = currentBatchRowIndex;
+                        
                         TriplesMaker.buildTriples(data, tableProcessingParams, options, function (err, batchTriples) {
                             //  totalTriplesCount += batchTriples.length;
                             var currentTime = new Date();
@@ -154,9 +154,9 @@ var TriplesMaker = {
                     async.eachSeries(
                         slices,
                         function (data, callbackEach) {
-                            if (currentBatchRowIndex && options) {
-                                options.currentBatchRowIndex = currentBatchRowIndex;
-                            }
+                           
+                            options.currentBatchRowIndex = currentBatchRowIndex;
+                            
                             TriplesMaker.buildTriples(data, tableProcessingParams, options, function (err, batchTriples) {
                                 //  totalTriplesCount += batchTriples.length;
                                 var currentTime = new Date();
@@ -757,7 +757,7 @@ var TriplesMaker = {
         }
         return objectStr;
     },
-    
+
     getMetaDataTriples: function (subjectUri, table, options) {
         var creator = "KGcreator";
         var dateTime = "'" + util.dateToRDFString(new Date(), true) + "'^^xsd:dateTime";

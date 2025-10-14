@@ -464,9 +464,9 @@ var TriplesMaker = {
 
                     if (columnUri && property && object) {
                         var triple = columnUri + " " + property + " " + object;
-
-                        var triplelHashCode = TriplesMaker.stringToNumber(triple);
-                        if (true || !tableProcessingParams.uniqueTriplesMap[triplelHashCode]) {
+                        var triplelHashCode = triple;
+                    //    var triplelHashCode = TriplesMaker.stringToNumber(triple);
+                        if ( !tableProcessingParams.uniqueTriplesMap[triplelHashCode]) {
                             tableProcessingParams.uniqueTriplesMap[triplelHashCode] = 1;
                             batchTriples.push(triple);
                         } else {

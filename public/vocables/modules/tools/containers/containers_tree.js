@@ -11,7 +11,8 @@ import Lineage_sources from "../lineage/lineage_sources.js";
 var Containers_tree = (function () {
     var self = {};
     self.jstreeDivId = "lineage_containers_containersJstree";
-
+    self.clickedContainers = {};
+    self.idsMap={}
     self.search = function (jstreeDivId, source, options, callback) {
         if (jstreeDivId) {
             self.jstreeDivId = jstreeDivId;
@@ -150,7 +151,7 @@ var Containers_tree = (function () {
 
     self.menuActions = {};
 
-    self.listContainerResources = function (container) {
+    self.listContainerResources = function (container,jstreeDivId) {
         var source = container.data.source;
         // if container clicked don't click again on because no restrictions on container and class URIs (same class can be drawed n times in arborescence) anymore
         if (self.clickedContainers[container.id]) {
@@ -230,7 +231,7 @@ var Containers_tree = (function () {
                     });
                 });
                 //var parent = self.idsMap[container.data.id];
-                JstreeWidget.addNodesToJstree(self.jstreeDivId, parent, jstreeData);
+                JstreeWidget.addNodesToJstree(jstreeDivId || self.jstreeDivId, parent, jstreeData);
             },
         );
     };

@@ -718,9 +718,16 @@ var KGquery_graph = (function () {
         var data_type = "KGmodelGraph";*/
         var fileName = KGquery.currentSource + "_KGmodelGraph.json";
         self.visjsData = null;
-        if (callback) {
-            options.callback = callback;
-        }
+
+        options.callback = function () {
+            self.visjsData = {};
+            self.visjsData.nodes = self.KGqueryGraph.data.nodes.get();
+            self.visjsData.edges = self.KGqueryGraph.data.edges.get();
+            if (callback) {
+                callback();
+            }
+        };
+
         self.KGqueryGraph.saveGraph(fileName, true, options);
 
         return;

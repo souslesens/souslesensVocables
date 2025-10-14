@@ -255,7 +255,7 @@ class DatabaseModel {
         if (select == "*") {
             const columns = await connection(tableName).columnInfo();
             const columnsKeys = Object.keys(columns);
-            res = await connection.select(select).from(tableName).limit(limit).offset(offset);
+            res = await connection.select(select).from(tableName).orderBy(columnsKeys).limit(limit).offset(offset);
         } else {
             res = await connection.select(select).from(tableName).limit(limit).offset(offset);
         }

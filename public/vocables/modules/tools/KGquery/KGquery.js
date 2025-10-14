@@ -601,16 +601,17 @@ var KGquery = (function () {
                     var resultSize = 1;
                     var limitSize = sampleSize || 10000;
                     var offset = 0;
+                    var csvSize = 0;
 
                     self.outputCsv = sampleSize || false;
                     data = { results: { bindings: [] }, head: { vars: [] } };
                     async.whilst(
                         function (_test) {
-                            if (!self.outputCsv && totalSize >= limitSize) {
+                            if (!self.outputCsv && totalSize >= csvSize) {
                                 self.outputCsv = true;
                             }
 
-                            return resultSize > 0;
+                            return resultSize > 0 && totalSize < limitSize;
                         },
                         function (callbackWhilst) {
                             var query2 = "" + query;

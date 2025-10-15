@@ -606,13 +606,18 @@ var KGquery = (function () {
                     self.outputCsv = false;
                     var limitCondition = true;
                     data = { results: { bindings: [] }, head: { vars: [] } };
+                    if(limitSize > 10000){
+                        alert('sample size is too large, it will be set to 10000');
+                        limitSize = 10000;
+                    }
                     async.whilst(
                         function (_test) {
                             if (!self.outputCsv && totalSize >= csvSize) {
                                 self.outputCsv = true;
                             }
                             UI.message("retreived " + totalSize);
-                            if(options.sampleSize && totalSize >= limitSize){
+                            // only one batch for sample size
+                            if(options.sampleSize && totalSize > 0){
                                 limitCondition = false;
                             }
                             

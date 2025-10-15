@@ -601,17 +601,22 @@ var KGquery = (function () {
                     var resultSize = 1;
                     var limitSize = sampleSize || 10000;
                     var offset = 0;
-                    var csvSize = 0;
+                    var csvSize = 10000;
 
-                    self.outputCsv = sampleSize || false;
+                    self.outputCsv = false;
+                    var limitCondition = true;
                     data = { results: { bindings: [] }, head: { vars: [] } };
                     async.whilst(
                         function (_test) {
                             if (!self.outputCsv && totalSize >= csvSize) {
                                 self.outputCsv = true;
                             }
-
-                            return resultSize > 0 && totalSize < limitSize;
+                            UI.message("retreived " + totalSize);
+                            if(options.sampleSize && totalSize >= limitSize){
+                                limitCondition = false;
+                            }
+                            
+                            return resultSize > 0 && limitCondition;
                         },
                         function (callbackWhilst) {
                             var query2 = "" + query;

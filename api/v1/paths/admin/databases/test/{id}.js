@@ -5,7 +5,7 @@ module.exports = function () {
 
     async function GET(req, res, _next) {
         try {
-            const connection = await databaseModel.getAdminConnection(req.params.id);
+            const connection = await databaseModel.getAdminRestrictedConnection(req.params.id);
             await databaseModel.query(connection, "SELECT 1");
             res.status(200).json({ message: "The remote database server is running" });
         } catch (err) {

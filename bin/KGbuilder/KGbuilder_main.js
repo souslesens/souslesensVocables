@@ -23,13 +23,14 @@ var KGbuilder_main = {
     /**
      * Generate triples from a CSV file or database
      *
+     * @param {string} user - a user
      * @param {string} source - slsv source
      * @param {string} datasource - datasource (database or csv file)
      * @param {array} tables - tables to import or null if import all tables
      * @param {Object} options -
      * @param {Function} options - Node-style async Function called to proccess result or handle error
      */
-    importTriplesFromCsvOrTable: function (source, datasource, tables, options, callback) {
+    importTriplesFromCsvOrTable: function (user, source, datasource, tables, options, callback) {
         //  var sparqlServerUrl;
         var output = "";
         var clientSocketId = options.clientSocketId;
@@ -162,9 +163,11 @@ var KGbuilder_main = {
 
                                 var sql = 'select count(*) as count from "' + table + '";';
                                 try {
-                                    databaseModel.query(tableProcessingParams.tableInfos.dbID, sql).then((result) => {
-                                        tableProcessingParams.tableInfos.tableTotalRecords = parseInt(result.rows[0].count);
-                                        callbackSeries();
+                                    databaseModel.getUserConnection(user, tableProcessingParams.tableInfos.dbID).then((connection) => {
+                                        databaseModel.query(connection, sql).then((result) => {
+                                            tableProcessingParams.tableInfos.tableTotalRecords = parseInt(result.rows[0].count);
+                                            callbackSeries();
+                                        });
                                     });
                                 } catch (err) {
                                     callbackSeries(err);
@@ -172,7 +175,7 @@ var KGbuilder_main = {
                             },
                             // create the tripels for this table
                             function (callbackSeries) {
-                                TriplesMaker.readAndProcessData(tableProcessingParams, options, function (err, result) {
+                                TriplesMaker.readAndProcessData(user, tableProcessingParams, options, function (err, result) {
                                     if (err) {
                                         return callbackSeries(err);
                                     }

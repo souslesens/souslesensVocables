@@ -465,7 +465,8 @@ fixedColumns: true*/
             return callback(null, self.dataTable);
         }
     };
-
+    
+    /*
     self.exportDataToCSV = function (dataset) {
         let csvContent = "data:text/csv;charset=utf-8," + dataset.map((row) => row.map((cell) => `"${cell}"`).join(";")).join("\n");
         let encodedUri = encodeURI(csvContent);
@@ -476,7 +477,31 @@ fixedColumns: true*/
 
         link.click();
         document.body.removeChild(link);
+    };*/
+    self.exportDataToCSV = function (dataset) {
+        
+        let csvContent = dataset
+            .map(row => row.map(cell => `"${cell}"`).join(";"))
+            .join("\n");
+
+        
+        let blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+        let link = document.createElement("a");
+
+        
+        let url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", "export_data.csv");
+        document.body.appendChild(link);
+
+        
+        link.click();
+
+        
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
     };
+
     self.showExportPopUp = function (visjsGraph) {
         var html = `<span class="popupMenuItem" onclick="${visjsGraph}.toGraphMl();">Graph ML </span>`;
         html += `<span class="popupMenuItem" onclick="${visjsGraph}.toSVG()">SVG</span>`;

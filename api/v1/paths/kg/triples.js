@@ -1,5 +1,6 @@
 const KGbuilder_main = require("../../../../bin/KGbuilder/KGbuilder_main");
 const { processResponse } = require("../utils");
+const userManager = require("../../../../bin/user.");
 
 module.exports = function () {
     let operations = {
@@ -7,9 +8,10 @@ module.exports = function () {
         DELETE,
     };
 
-    function POST(req, res, next) {
+    async function POST(req, res, next) {
         try {
-            KGbuilder_main.importTriplesFromCsvOrTable(req.body.source, req.body.datasource, req.body.table, JSON.parse(req.body.options), function (err, result) {
+            const userInfo = await userManager.getUser(req.user);
+            KGbuilder_main.importTriplesFromCsvOrTable(userInfo.user, req.body.source, req.body.datasource, req.body.table, JSON.parse(req.body.options), function (err, result) {
                 processResponse(res, err, result);
             });
         } catch (e) {

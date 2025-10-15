@@ -236,7 +236,7 @@ class DatabaseModel {
      * @param {string} databaseId - the database id
      * @returns {Promise<any>} database connection
      */
-    getAdminConnection = async (databaseId) => {
+    getAdminRestrictedConnection = async (databaseId) => {
         if (!this.knexClients[databaseId]) {
             const database = await this.getDatabase(databaseId);
             const dbClient = this.getClientDriver(database.driver);

@@ -4,11 +4,18 @@ const async = require("async");
 const util = require("../util.");
 const KGbuilder_socket = require("./KGbuilder_socket.js");
 /**
- * KGbuilder_triplesMaker module.
- * Builds RDF triples from table mappings and row data (CSV/DB): resolves subjects/predicates/objects, applies transforms/lookups, manages blank nodes and OWL restrictions, and outputs de-duplicated triples.
- * @module KGbuilder_triplesMaker
+ * KGbuilder_triplesWriter module.
+ * Executes SPARQL UPDATE operations for writing and deleting RDF triples in a named graph.
+ * - Batches INSERTs (handles blank nodes) and parses endpoint-returned write counts.
+ * - Clears an entire graph, defaulting to the configured SPARQL server when needed.
+ * - Deletes KGcreator-scoped triples optionally filtered by a specific table/mapping
+ *   (via `KGbuilder_triplesMaker.mappingFilePredicate`), looping in chunks for large datasets.
+ * - Provides helpers to emit PREFIX blocks and to run `DELETE DATA` on explicit triple lists.
+ * Emits progress messages through `KGbuilder_socket` when a client socket id is supplied.
+ * @module KGbuilder_triplesWriter
  * @see [Tutorial: Overview]{@tutorial overview}
  */
+
 const KGbuilder_triplesWriter = {
     sparqlPrefixes: {
         xs: "<http://www.w3.org/2001/XMLSchema#>",

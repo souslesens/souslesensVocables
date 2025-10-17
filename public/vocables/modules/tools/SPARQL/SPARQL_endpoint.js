@@ -51,7 +51,7 @@ var SPARQL_endpoint = (function () {
             $(".yasr").css("overflow", "scroll");
             $(".yasr").css("height", "500px");
         });
-        yasgui.on("queryError", (Yasgui, tab,err) => {
+        yasgui.on("queryError", (Yasgui, tab, err) => {
             alert(err.responseText);
         });
     };

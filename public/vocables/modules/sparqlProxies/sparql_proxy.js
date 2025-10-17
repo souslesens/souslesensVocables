@@ -250,7 +250,6 @@ query=query.replace(/GRAPH ?[a-zA-Z0-9]+\{/,"{")
                 if (err) {
                     return alert(err.responseText);
                 }
-                
             },
         });
     };

@@ -64,6 +64,9 @@ var authentication = (function () {
             success: function (data) {
                 location.href = data.redirect;
             },
+            error: function (err) {
+                alert(err);
+            },
         });
     };
 

@@ -276,7 +276,8 @@ var KGcreator_run = (function () {
                 if (callback) {
                     return callback(err);
                 }
-                UI.message(err.responseText);
+                alert(err.responseText);
+                return err;
             },
         });
     };

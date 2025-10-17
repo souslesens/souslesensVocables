@@ -68,15 +68,9 @@ var TriplesMaker = {
                 async.eachSeries(
                     result.data,
                     function (data, callbackEach) {
-<<<<<<< HEAD
                       
                         options.currentBatchRowIndex = currentBatchRowIndex;
                         
-=======
-                        if (options) {
-                            options.currentBatchRowIndex = currentBatchRowIndex;
-                        }
->>>>>>> origin/master
                         TriplesMaker.buildTriples(data, tableProcessingParams, options, function (err, batchTriples) {
                             //  totalTriplesCount += batchTriples.length;
                             var currentTime = new Date();

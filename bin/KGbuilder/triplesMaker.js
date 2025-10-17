@@ -10,6 +10,36 @@ const KGbuilder_triplesMaker = require("./KGbuilder_triplesMaker.js");
 const dataController = require("../dataController..js");
 const path = require("path");
 const MappingParser = require("./mappingsParser.js");
+/**
+ * TriplesMaker module.
+ * Orchestrates end-to-end triple production from tabular sources (CSV or DB) using
+ * VisJS-derived column/edge mappings:
+ *  - Streams rows in batches, builds RDF triples per row/column, and (optionally) writes them
+ *    to a SPARQL endpoint via `KGbuilder_triplesWriter`.
+ *  - Resolves subjects/objects from column definitions (fixed URI, prefixed URI, fromLabel,
+ *    blank nodes, virtual columns, row index) with per-table scoping for random ids and bnodes.
+ *  - Applies per-column transforms, typed literal formatting (xsd:string/int/float/date/dateTime),
+ *    and safe-string encoding for IRIs/literals.
+ *  - Emits additional column→column relation triples from mapping edges.
+ *  - De-duplicates triples within a batch and appends provenance metadata
+ *    (`dcterms:created`, mapping table via `mappingFilePredicate`).
+ *  - Reports progress/timings through `KGbuilder_socket`; supports sampling mode (no writes).
+ 
+ * Inputs/Context:
+ *  - tableProcessingParams: {
+ *      sourceInfos: { graphUri, sparqlServerUrl }, tableInfos: { table, csvDataFilePath?, dbID? },
+ *      tableColumnsMappings, allColumnsMappings, columnToColumnEdgesMap, jsFunctionsMap,
+ *      uniqueTriplesMap (per-run), randomIdentiersMap (per-table), blankNodesMap (per-table)
+ *    }
+ *  - options: { sampleSize?, filterMappingIds?, clientSocketId?, currentBatchRowIndex? }
+ *
+ * Output:
+ *  - In sampling mode: { sampleTriples } (no writes).
+ *  - In write mode: total written triple count aggregated across batches.
+ *
+ * @module TriplesMaker
+ * @see [Tutorial: Overview]{@tutorial overview}
+ */
 
 var TriplesMaker = {
     batchSize: 1000000,

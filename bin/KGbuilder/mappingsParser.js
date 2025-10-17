@@ -2,6 +2,19 @@ const path = require("path");
 const async = require("async");
 const fs = require("fs");
 
+/**
+ * MappingParser module.
+ * Parses VisJS mapping graphs into executable mapping artifacts:
+ * - Loads a source’s consolidated graph JSON.
+ * - Extracts per-column mapping definitions (Columns/RowIndex/VirtualColumn/URI) with their triple models.
+ * - Builds type/label assertions from class links and collects non-type predicates (datatype, date formats).
+ * - Detects constant IRIs / prefixed IRIs and annotates mappings accordingly.
+ * - Derives column-to-column relation edges for a given table (with optional filtering).
+ * - Compiles embedded JS `function{...}` / `transform{...}` bodies into callable functions.
+ * Outputs structures consumed by the triples maker during RDF generation.
+ * @module MappingParser
+ * @see [Tutorial: Overview]{@tutorial overview}
+ */
 var MappingParser = {
     columnsMappingsObjects: ["Column", "RowIndex", "VirtualColumn"],
     getMappingsData: function (source, callback) {

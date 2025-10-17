@@ -16,7 +16,12 @@ Manages data-source configurations and operations for the Mapping Modeler:
 
 ### 2. MappingColumnsGraph
 
-Handles the visualization and management of mapping columns in a graph-based interface.
+Visualizes and manages mapping columns and classes in a graph-based interface.:
+ - Draws nodes/edges, hierarchical layout & physics, clustering by data table.
+ - Handles clicks (select, ctrl-link columns→class), context menus, and dialogs.
+ - Builds a derived “classes graph” from column mappings and datatype predicates.
+ - Persists graph (save/load/migrate), updates nodes/edges, zoom & filtering.
+ 
 
 ### 3. MappingModeler
 

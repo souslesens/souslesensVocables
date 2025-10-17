@@ -465,7 +465,7 @@ fixedColumns: true*/
             return callback(null, self.dataTable);
         }
     };
-    
+
     /*
     self.exportDataToCSV = function (dataset) {
         let csvContent = "data:text/csv;charset=utf-8," + dataset.map((row) => row.map((cell) => `"${cell}"`).join(";")).join("\n");
@@ -479,25 +479,18 @@ fixedColumns: true*/
         document.body.removeChild(link);
     };*/
     self.exportDataToCSV = function (dataset) {
-        
-        let csvContent = dataset
-            .map(row => row.map(cell => `"${cell}"`).join(";"))
-            .join("\n");
+        let csvContent = dataset.map((row) => row.map((cell) => `"${cell}"`).join(";")).join("\n");
 
-        
         let blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
         let link = document.createElement("a");
 
-        
         let url = URL.createObjectURL(blob);
         link.setAttribute("href", url);
         link.setAttribute("download", "export_data.csv");
         document.body.appendChild(link);
 
-        
         link.click();
 
-        
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
     };

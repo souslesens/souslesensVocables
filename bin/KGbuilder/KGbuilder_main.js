@@ -20,6 +20,12 @@ const TriplesMaker = require("./triplesMaker.js");
 const TripleMaker = require("./triplesMaker.js");
 const { databaseModel } = require("../../model/databases.js");
 
+/**
+ * KGbuilder_main module.
+ * Orchestrates end-to-end KG building from CSV files or database tables: loads source config and mappings, prepares per-table contexts, drives triple creation, and optionally deletes previously generated triples.
+ * @module KGbuilder_main
+ * @see [Tutorial: Overview]{@tutorial overview}
+ */
 
 
 var KGbuilder_main = {

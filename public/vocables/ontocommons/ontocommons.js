@@ -39,7 +39,13 @@ var Ontocommons = (function () {
                 acronyms.sort();
                 common.fillSelectOptions("ontocommons_ontologiesSelect", acronyms, true);
             },
-            error(err) {},
+            error(err) {
+                console.log(err);
+                if (callback) {
+                    return callback(err);
+                }
+                return err;
+            },
         });
     };
 

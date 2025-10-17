@@ -91,7 +91,12 @@ query=query.replace(/GRAPH ?[a-zA-Z0-9]+\{/,"{")
                         return callback(null, data);
                     }
                 },
-                error: function (data) {},
+                error: function (data) {
+                    if (callback) {
+                        return callback(data);
+                    }
+                    alert(data.responseText);
+                },
             });
         } else {
             //POST
@@ -245,6 +250,7 @@ query=query.replace(/GRAPH ?[a-zA-Z0-9]+\{/,"{")
                 if (err) {
                     return alert(err.responseText);
                 }
+                
             },
         });
     };

@@ -1256,7 +1256,8 @@ var MappingModeler = (function () {
                 if (callback) {
                     return callback(err.responseText);
                 }
-                return alert(err.responseText);
+                alert(err.responseText);
+                return err;
             },
         });
     };

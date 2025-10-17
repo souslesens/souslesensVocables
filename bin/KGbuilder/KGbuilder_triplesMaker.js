@@ -7,6 +7,16 @@ var csvCrawler = require("../_csvCrawler.");
 const dataController = require("../dataController.");
 const path = require("path");
 const { databaseModel } = require("../../model/databases");
+
+/**
+ * KGbuilder_triplesMaker module.
+ * Converts table mappings + row data (CSV/DB) into RDF triples: resolves subjects/predicates/objects,
+ * applies transforms/lookups, manages blank nodes, formats literals (types/dates), builds OWL restriction triples,
+ * de-duplicates emitted triples, and supports metadata tagging. Also loads data and lookup dictionaries,
+ * detects URIs/prefixed URIs, and streams progress via sockets.
+ * @module KGbuilder_triplesMaker
+ * @see [Tutorial: Overview]{@tutorial overview}
+ */
 var KGbuilder_triplesMaker = {
     mappingFilePredicate: "http://souslesens.org/KGcreator#mappingFile",
     existingTriples: {},

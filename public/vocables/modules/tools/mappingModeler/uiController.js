@@ -18,7 +18,7 @@ var UIcontroller = (function () {
      * @param {string} tabId - The ID of the tab to activate.
      * @memberof module:UIcontroller
      */
-    self.onActivateLeftPanelTab = function (tabId) {
+    self.onActivateLeftPanelTab = function (tabId,callback) {
         $("#mappingModeler_relationInfos").html("");
         //  $(".mappingModeler_rightPanel").css("display", "none");
         if (tabId == "MappingModeler_dataSourcesTab") {
@@ -35,7 +35,7 @@ var UIcontroller = (function () {
             //$("#MappingModeler_currentDataSource").html(DataSourceManager.currentConfig.currentDataSource.name);
             $("#rightControlPanelDiv").load("./modules/tools/mappingModeler/html/mappingsGraphButtons.html", function (err) {});
         } else if (tabId == "MappingModeler_technicalDetailTab") {
-            MappingsDetails.showDetailsDialog();
+            MappingsDetails.showDetailsDialog(null, callback);
             //  $("#rightControlPanelDiv").load("./modules/tools/mappingModeler/html/detailsGraphButtons.html", function (err) {});
             $("#rightControlPanelDiv").load("./modules/tools/mappingModeler/html/mappingsGraphButtons.html", function (err) {});
         } else if (tabId == "MappingModeler_RelationsTab") {

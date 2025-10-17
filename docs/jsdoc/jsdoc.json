@@ -6,6 +6,8 @@
       "public/vocables/modules/tools/lineage",
       "public/vocables/modules/tools/KGquery",
       "public/vocables/modules/tools/mappingModeler"
+      
+      
     ],
     "includePattern": ".+\\.js(doc)?$",
     "excludePattern": "(^|\\/|\\\\)_"

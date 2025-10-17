@@ -4925,8 +4925,14 @@ attrs.color=self.getSourceColor(superClassValue)
             source = Lineage_sources.activeSource;
         }
         options.dataTypeProperties = true;
-        var existingNodes = Lineage_whiteboard?.lineageVisjsGraph?.data?.nodes?.get() || [];
-        var existingEdges = Lineage_whiteboard?.lineageVisjsGraph?.data?.edges?.get() || [];
+        var existingNodes = [];
+        if(Lineage_whiteboard?.lineageVisjsGraph?.data?.nodes){
+            existingNodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
+        }
+        var existingEdges = [];
+        if(Lineage_whiteboard?.lineageVisjsGraph?.data?.edges){
+            existingEdges = Lineage_whiteboard.lineageVisjsGraph.data.edges.get() ;
+        }
         var existingNodesIds = Object.fromEntries(existingNodes.map((node) => [node.id, true]));
         var existingEdgesIds = Object.fromEntries(existingEdges.map((edge) => [edge.id, true]));
         var visjsData = {
@@ -4965,6 +4971,7 @@ attrs.color=self.getSourceColor(superClassValue)
                             type: "DatatypeProperty",
                         },
                     });
+                    existingNodesIds[item.prop.value]=true;
                 }
                 if (!options.notDrawDomain) {
                     if (!existingNodesIds[item.domain.value]) {
@@ -4976,7 +4983,9 @@ attrs.color=self.getSourceColor(superClassValue)
                                 label: item.domainLabel.value,
                             },
                         });
+                        existingNodesIds[item.domain.value]=true;
                     }
+                    
                 }
                 var edgeId = item.domain.value + "_datatypeProperty_" + item.prop.value;
                 if (!existingEdgesIds[edgeId]) {
@@ -5004,6 +5013,7 @@ attrs.color=self.getSourceColor(superClassValue)
                         dashes: true,
                         width: self.restrictionEdgeWidth,
                     });
+                    existingEdgesIds[edgeId]=true;
                 }
             });
             if (existingNodes.length == 0) {

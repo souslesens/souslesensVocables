@@ -12,6 +12,13 @@ const SocketManager = require("./socketManager.");
 
 //var rootDir = "D:\\NLP\\ontologies\\CFIHOS\\CFIHOS V1.5\\CFIHOS V1.5 RDL";
 
+/**
+ * KGtripleBuilder module.
+ * Builds RDF triples from table mappings and row data (CSV/DB) and interact with a SPARQL endpoint (write/delete triples, clear graphs, add metadata): resolves subjects/    predicates/objects, applies transforms/lookups, manages blank nodes and OWL restrictions, and outputs de-duplicated triples.
+ * @module KGtripleBuilder
+ * @see [Tutorial: Overview]{@tutorial overview}
+ */
+
 var KGtripleBuilder = {
     message: function (clientSocketId, content, isError) {
         if (clientSocketId) {
@@ -813,7 +820,14 @@ callbackEach();
             },
         );
     },
-
+/**
+ * Write <triples> in <graphUri> at <sparqlServerUrl>
+ *
+ * @param {Array} triples - array of {s: ,p: ,o: }
+ * @param {string} graphUri - URI to name the graph that will be written
+ * @param {string} sparqlServerUrl - URL of the sparql endpoint where to write the graph
+ * @param {Function} callback - Node-style async Function called to proccess result or handle error
+ */
     deleteMappingFileTriples: function (mappings, sparqlServerUrl, callback) {
         var query = "";
         query += "with  GRAPH <" + mappings.graphUri + "> " + "delete {?s ?p ?o} where {?s ?p ?o. ?s <" + KGtripleBuilder.mappingFilePredicate + "> '" + mappings.fileName + "'}";

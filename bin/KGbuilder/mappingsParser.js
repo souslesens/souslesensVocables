@@ -2,6 +2,19 @@ const path = require("path");
 const async = require("async");
 const fs = require("fs");
 
+/**
+ * MappingParser module.
+ * Parses VisJS mapping graphs into executable mapping artifacts:
+ * - Loads a source’s consolidated graph JSON.
+ * - Extracts per-column mapping definitions (Columns/RowIndex/VirtualColumn/URI) with their triple models.
+ * - Builds type/label assertions from class links and collects non-type predicates (datatype, date formats).
+ * - Detects constant IRIs / prefixed IRIs and annotates mappings accordingly.
+ * - Derives column-to-column relation edges for a given table (with optional filtering).
+ * - Compiles embedded JS `function{...}` / `transform{...}` bodies into callable functions.
+ * Outputs structures consumed by the triples maker during RDF generation.
+ * @module MappingParser
+ * @see [Tutorial: Overview]{@tutorial overview}
+ */
 var MappingParser = {
     columnsMappingsObjects: ["Column", "RowIndex", "VirtualColumn"],
     getMappingsData: function (source, callback) {
@@ -95,6 +108,11 @@ var MappingParser = {
         return false;
     },
 
+
+    /* Builds triples linking `from` to `to`: rdfs:subClassOf if from.rdfType is owl:Class, else rdf:type.
+    Always asserts the subject’s own rdf:type and optionally an rdfs:label when provided.
+    Inputs: fromNodeData {id, rdfType, rdfsLabel}, toNodeData {id}; returns an array of {s,p,o,isString?}.
+    Used to serialize type hierarchy and labels during mapping generation. */
     getTypeAndLabelMappings: function (fromNodeData, toNodeData) {
         var mappings = [];
 
@@ -122,7 +140,10 @@ var MappingParser = {
 
         return mappings;
     },
-
+/** Extract column-to-column candidates for a specific table from the mapping graph.
+   Builds a columnsMap keyed by node id for nodes whose type is in columnsMappingsObjects
+   and whose dataTable equals the provided table; edgeMap will hold links discovered later.
+   Intended as the first pass before computing inter-column edges (optionally filtered by IDs). */
     getColumnToColumnMappings: function (mappingData, table, filterMappingIds) {
         var columnsMap = {};
         var edgeMap = {};
@@ -141,6 +162,11 @@ var MappingParser = {
         });
         return edgeMap;
     },
+
+    /**  Build triples from a column’s `otherPredicates` array (non-type properties).
+   @param {Object} columnData  Column mapping object; needs `id` and optionally `otherPredicates[]`.
+   @returns {Array<Object>}    List of triples {s,p,o, dataType?, dateFormat?} derived from predicates.
+   If a predicate.range contains "Resource", dataType is normalized to "xsd:string"; else the range is kept. */
     getOtherPredicates: function (columnData) {
         var mappings = [];
         if (columnData.otherPredicates) {

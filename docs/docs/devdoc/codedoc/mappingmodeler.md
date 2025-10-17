@@ -8,11 +8,20 @@ MappingModeler is a web-based semantic data mapping tool designed to facilitate 
 
 ### 1. DataSourceManager
 
-Manages data source configurations and operations.
+Manages data-source configurations and operations for the Mapping Modeler:
+ - Loads database/CSV sources and builds the left JsTree.
+ - Switches current data source/table and updates MappingModeler state & tabs.
+ - Syncs source config with the Vis.js graph (save, init, delete).
+ - Provides table stats and helpers to add/remove sources and mappings.
 
 ### 2. MappingColumnsGraph
 
-Handles the visualization and management of mapping columns in a graph-based interface.
+Visualizes and manages mapping columns and classes in a graph-based interface.:
+ - Draws nodes/edges, hierarchical layout & physics, clustering by data table.
+ - Handles clicks (select, ctrl-link columns→class), context menus, and dialogs.
+ - Builds a derived “classes graph” from column mappings and datatype predicates.
+ - Persists graph (save/load/migrate), updates nodes/edges, zoom & filtering.
+ 
 
 ### 3. MappingModeler
 

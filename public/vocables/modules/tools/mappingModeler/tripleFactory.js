@@ -217,6 +217,42 @@ var TripleFactory = (function () {
             dataType: "json",
             success: function (result, _textStatus, _jqXHR) {
                 MappingModeler.clearSourceClasses(DataSourceManager.currentSlsvSource);
+                  var tree = $("#dataSourcesJstree").jstree(true);   // <-- adapte l’ID si besoin
+  if (tree) {
+    // regex qui supprime un suffixe " 12345 Triples" en fin de libellé (insensible à la casse)
+    var reTriples = /\s+\d+\s+Triples?$/i;
+
+    if (!all) {
+      // Cas "Current file triples" : on ne touche que la table courante
+      var node = tree.get_selected(true)[0]; // ou retrouve le nœud de la table courante si tu ne l’as pas sélectionnée
+      if (node) {
+        var clean = (node.text || "").replace(reTriples, "").trim();
+        // Après suppression, on enlève complètement le compteur
+        tree.rename_node(node, clean);
+      }
+    } else {
+      // Cas "All mapped triples" : on nettoie tous les enfants du datasource courant
+      // Récupère le nœud racine du datasource sélectionné (ou adapte selon ta structure)
+      var dsNode = tree.get_selected(true)[0];
+      if (dsNode) {
+        var childIds = tree.get_node(dsNode).children_d; // tous les descendants
+        childIds.forEach(function (cid) {
+          var child = tree.get_node(cid);
+          if (!child) return;
+          var newText = (child.text || "").replace(reTriples, "").trim();
+          if (newText !== child.text) {
+            tree.rename_node(child, newText);
+          }
+        });
+      } else {
+        // fallback : on nettoie tout l’arbre si pas de sélection
+        tree.get_json('#', {flat:true}).forEach(function (n) {
+          var base = (n.text || "").replace(reTriples, "").trim();
+          if (base !== n.text) tree.rename_node(n.id, base);
+        });
+      }
+    }
+  }
                 if (callback) {
                     return callback();
                 } else {

@@ -3,6 +3,18 @@ const httpProxy = require("../httpProxy..js");
 const async = require("async");
 const util = require("../util.");
 const KGbuilder_socket = require("./KGbuilder_socket.js");
+/**
+ * KGbuilder_triplesWriter module.
+ * Executes SPARQL UPDATE operations for writing and deleting RDF triples in a named graph.
+ * - Batches INSERTs (handles blank nodes) and parses endpoint-returned write counts.
+ * - Clears an entire graph, defaulting to the configured SPARQL server when needed.
+ * - Deletes KGcreator-scoped triples optionally filtered by a specific table/mapping
+ *   (via `KGbuilder_triplesMaker.mappingFilePredicate`), looping in chunks for large datasets.
+ * - Provides helpers to emit PREFIX blocks and to run `DELETE DATA` on explicit triple lists.
+ * Emits progress messages through `KGbuilder_socket` when a client socket id is supplied.
+ * @module KGbuilder_triplesWriter
+ * @see [Tutorial: Overview]{@tutorial overview}
+ */
 
 const KGbuilder_triplesWriter = {
     sparqlPrefixes: {
@@ -140,7 +152,16 @@ const KGbuilder_triplesWriter = {
             },
         );
     },
-
+    /**
+     * Deletes KGcreator-produced triples from a SPARQL endpoint, scoped to a named graph.
+     * If `table` is provided, only triples whose subject has TriplesMaker.mappingFilePredicate = 'table' are deleted;
+     * otherwise, all KGcreator triples in the graph are deleted. Runs in batches (LIMIT 10000) and reports progress.
+     * @param {string}   sparqlServerUrl  SPARQL endpoint URL for HTTP POST updates.
+     * @param {string}   graphUri         Target named graph IRI to operate on.
+     * @param {string=}  table            Table/mapping name to filter deletions; omit to delete all KGcreator triples.
+     * @param {Object}   options          Extra options (e.g., { clientSocketId?: string } for progress messages).
+     * @param {Function} callback         Node-style callback (err: any, totalDeleted: number).
+     */
     deleteKGBuilderTriples: function (sparqlServerUrl, graphUri, table, options, callback) {
         const TriplesMaker = require("./KGbuilder_triplesMaker");
         var query = "";

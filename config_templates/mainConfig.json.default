@@ -42,6 +42,7 @@
             "clientSecret": ""
         },
         "usernameMapping": "email",
+        "useAuth0Roles": false
     },
     "keycloak": {
         "realm": "master",

@@ -20,7 +20,7 @@ const { databaseModel } = require("../../model/databases");
 var KGbuilder_triplesMaker = {
     mappingFilePredicate: "http://souslesens.org/KGcreator#mappingFile",
     existingTriples: {},
-    /**
+    /** @function createTriples
      * Generate triples
      *
      * @param mappings - ?
@@ -163,6 +163,15 @@ var KGbuilder_triplesMaker = {
             },
         );
     },
+    /** @function getURIFromSpecificBaseUri
+     * Builds a URI from a specific base encoded in `mappingValue` (e.g., "[base]column"), applying optional transforms.
+     * Returns the formatted `<base+value>` URI string or `null` if not applicable.
+     *
+     * @param {string} mappingValue — Pattern like "[baseUri]columnName" indicating the base and source column.
+     * @param {Object} line — Current row object providing the column value referenced by `mappingValue`.
+     * @param {Object} tableMappings — Table-level mappings (e.g., `transform` functions keyed by `mappingValue`).
+     * @param {Object} mapping — Current mapping context passed to transform (e.g., includes `p` predicate).
+     */
 
     getURIFromSpecificBaseUri: function (mappingValue, line, tableMappings, mapping) {
         if (!mappingValue || typeof mappingValue != "string") {
@@ -203,6 +212,16 @@ var KGbuilder_triplesMaker = {
         }
     },
 
+    /**
+     * Computes and formats the RDF subject from row data and mapping rules.
+     * Supports specific base URIs, transforms/lookups, suffix conventions, prefixed/HTTP URIs, blank nodes, or graph-minted IRIs.
+     *
+     * @param {Object} tableMappings — Table-level config (e.g., `transform` map, `graphUri`).
+     * @param {Object} mapping — Mapping descriptor (`s`, `p`, `o`, flags like `subjectIsSpecificUri`, `isSubjectBlankNode`, `lookup_s`).
+     * @param {Object} line — Current row object providing source values for subject building.
+     * @param {(err:any, subject:string|null)=>void} callback — Node-style callback returning `<IRI>` / blank node id / `null`.
+     * @returns {void}
+     */
     getTripleSubject: function (tableMappings, mapping, line, callback) {
         //get value for Subject
         var subjectStr = KGbuilder_triplesMaker.getURIFromSpecificBaseUri(mapping.s, line, tableMappings, mapping);
@@ -311,7 +330,16 @@ var KGbuilder_triplesMaker = {
 
         return callback(null, subjectStr);
     },
-
+    /**
+     * Computes and formats the RDF object from row data and mapping rules.
+     * Handles specific-base URIs, transforms/lookups, suffix conventions, literals with dataType, prefixed/HTTP URIs, blank nodes, or graph-minted IRIs.
+     *
+     * @param {Object} tableMappings — Table-level config (e.g., `transform` map, `graphUri`).
+     * @param {Object} mapping — Mapping descriptor for the object (`o`, `p`, flags like `objectIsSpecificUri`, `isObjectBlankNode`, `lookup_o`, `dataType`, `isString`).
+     * @param {Object} line — Current row providing the source value(s) used to build the object.
+     * @param {(err:any, object:string|null)=>void} callback — Node-style callback returning a formatted object (`<IRI>`, literal with ^^type, blank node id, or `null`).
+     * @returns {void}
+     */
     getTripleObject: function (tableMappings, mapping, line, callback) {
         var objectStr = KGbuilder_triplesMaker.getURIFromSpecificBaseUri(mapping.o, line, tableMappings, mapping);
         var isTransformLookUp = false;
@@ -499,6 +527,17 @@ var KGbuilder_triplesMaker = {
 
         return callback(null, objectStr);
     },
+
+    /** @function getTriplePredicate
+     * Computes the RDF predicate from mapping/row context and formats it for SPARQL.
+     * Supports function-valued predicates, `_valuesOfColumn_*` helper, and `<http…>` wrapping.
+     *
+     * @param {Object} tableMappings — Table-level settings (e.g., `graphUri`) used when deriving values.
+     * @param {Object} mapping — Predicate mapping (`p`) which may be a string or a function.
+     * @param {Object} line — Current row providing source values (used by functions or `_valuesOfColumn_*`).
+     * @param {(err:any, predicate:string)=>void} callback — Node-style callback returning the formatted predicate.
+     * @returns {void}
+     */
     getTriplePredicate: function (tableMappings, mapping, line, callback) {
         var propertyStr = mapping.p;
         if (typeof mapping.p === "function") {
@@ -525,6 +564,18 @@ var KGbuilder_triplesMaker = {
         // did we need to throw error when the propertyStr is not valid as URI no prefix and not an URL
         return callback(null, propertyStr);
     },
+    /**
+     * Builds OWL restriction triples (owl:Restriction with owl:onProperty and owl:someValuesFrom) for a subject–predicate–object.
+     * Ensures de-duplication via an internal cache and links the blank node with rdfs:subClassOf.
+     *
+     * @param {Object} mapping — Mapping context for logging/tracing (not required for construction).
+     * @param {string} subjectStr — Formatted subject IRI or prefixed name used as the restricted class.
+     * @param {string} propertyStr — Formatted predicate IRI/prefix placed in owl:onProperty.
+     * @param {string} objectStr — Formatted object IRI/prefix placed in owl:someValuesFrom.
+     * @param {(err:any, triples:Array<{s:string,p:string,o:string}>)=>void} callback — Returns the generated triples array.
+     * @returns {void}
+     */
+
     getRestrictionTriples: function (mapping, subjectStr, propertyStr, objectStr, callback) {
         if (!subjectStr || subjectStr == "null") {
             return callback("no mapping.subject  null-" + propertyStr + " " + objectStr);
@@ -563,6 +614,15 @@ var KGbuilder_triplesMaker = {
         }
         return callback(null, restrictionTriples);
     },
+    /**
+     * Loads lookup dictionaries declared in `tableMappings.lookups` from CSV files or a database.
+     * Produces a map `{ [name]: { dictionary, transformFn } }` ready for value replacements.
+     *
+     * @param {Object} tableMappings — Source config (lookups, csvDataFilePath or databaseSource, dataSourceConfig).
+     * @param {(err:any, lookups:Record<string,{dictionary:Object,transformFn?:Function}>)=>void} callback — Returns the assembled lookup map.
+     * @returns {void}
+     */
+
     loadLookups: function (tableMappings, callback) {
         var lookUpsMap = {};
         async.eachSeries(
@@ -622,6 +682,13 @@ var KGbuilder_triplesMaker = {
             },
         );
     },
+    /** @function getMetaDataTriples
+     * Creates metadata triples for a subject (created date, mapping table, plus custom predicates).
+     * @param {string} subjectUri — Target subject IRI/prefix. 
+     * @param {{mappingTable?:string,customMetaData?:Record<string,string>}} [options] — Source table and extras. 
+     * @returns {Array<{s:string,p:string,o:string}>}
+     */
+
     getMetaDataTriples: function (subjectUri, options) {
         var creator = "KGcreator";
         var dateTime = "'" + util.dateToRDFString(new Date(), true) + "'^^xsd:dateTime";
@@ -654,6 +721,12 @@ var KGbuilder_triplesMaker = {
 
         return metaDataTriples;
     },
+    /** @function isUri
+     * Checks if a string looks like a full IRI (starts with "http"); returns boolean.
+     * @param {string} str — Candidate value. 
+     * @returns {boolean}
+     */
+
     isUri: function (str) {
         if (!str) {
             return false;
@@ -671,6 +744,11 @@ var KGbuilder_triplesMaker = {
             return false;
         }*/
     },
+    /** @function isPrefixedUri
+     * Checks if a string is a prefixed name using known SPARQL prefixes; returns boolean.
+     * @param {string} str — Candidate value (e.g., "rdf:type"). 
+     * @returns {boolean}
+     */
 
     isPrefixedUri: function (str) {
         if (!str) {
@@ -687,6 +765,14 @@ var KGbuilder_triplesMaker = {
             return false;
         }
     },
+    /** @function readCsv
+     * Reads a CSV and returns `{ headers, data }` via callback.
+     * @param {string} filePath — Path to the CSV file. 
+     * @param {number|null} maxLines — Optional per-chunk line limit. 
+     * @param {(err:any, res:{headers:string[],data:any[][]})=>void} callback — Returns parsed contents. 
+     * @returns {void}
+     */
+
     readCsv: function (filePath, maxLines, callback) {
         csvCrawler.readCsv({ filePath: filePath }, maxLines, function (err, result) {
             if (err) {
@@ -698,6 +784,12 @@ var KGbuilder_triplesMaker = {
             return callback(null, { headers: headers, data: data });
         });
     },
+    /** @function getBlankNodeId
+     * Returns a stable blank node id for a key, generating `<_:bXXXXXXXXXX>` if missing.
+     * @param {string} key — Logical identifier. 
+     * @returns {string}
+     */
+
     getBlankNodeId: function (key) {
         var value = KGbuilder_triplesMaker.blankNodesMap[key];
         if (value) {
@@ -712,6 +804,11 @@ var KGbuilder_triplesMaker = {
             return value;
         }
     },
+    /** @function zipString
+     * Compresses a string with DEFLATE and returns a base64 string.
+     * @param {string} str — Input text. 
+     * @returns {string}
+     */
 
     zipString: function (str) {
         const ascii = encodeURIComponent(str);
@@ -719,6 +816,11 @@ var KGbuilder_triplesMaker = {
         const zip = fflate.deflateSync(array, { level: 9 });
         return window.btoa(String.fromCharCode(...zip));
     },
+    /** @function getStringHashCode
+     * Computes a deterministic 32-bit hash of a string and returns it in hex.
+     * @param {string} str — Input text. 
+     * @returns {string}
+     */
 
     getStringHashCode: function (str) {
         var hashCode = (s) => s.split("").reduce((a, b) => ((a << 5) - a + b.charCodeAt(0)) | 0, 0);
@@ -728,6 +830,13 @@ var KGbuilder_triplesMaker = {
         //console.log(code+"    "+str+"   ")
         return code;
     },
+    /** @function getLookupValue
+     * Retrieves a dictionary-mapped value by `lookupName` and `value`, applying optional transform.
+     * @param {string} lookupName — Lookup dictionary key. 
+     * @param {string} value — Source value to translate. 
+     * @param {(err:any)=>void} [callback] — Receives transform errors. 
+     * @returns {any}
+     */
 
     getLookupValue: function (lookupName, value, callback) {
         //var lookupArray = lookupName.split("|");
@@ -745,6 +854,14 @@ var KGbuilder_triplesMaker = {
 
         return target;
     },
+    /** @function loadData
+     * Loads rows from CSV or database per `tableMappings`, honoring `options.sampleSize`.
+     * @param {Object} tableMappings — Source config (CSV path/table or datasourceConfig). 
+     * @param {{sampleSize?:number,clientSocketId?:string}} options — Read size and progress socket id. 
+     * @param {(err:any, rows:Object[])=>void} callback — Returns loaded rows. 
+     * @returns {void}
+     */
+
     loadData: function (tableMappings, options, callback) {
         var tableData = [];
         if (tableMappings.csvDataFilePath) {

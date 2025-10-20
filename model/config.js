@@ -54,6 +54,7 @@ const MainConfigObject = z
                     })
                     .strict(),
                 usernameMapping: z.enum(["email", "nickname", "name"]),
+                useAuth0Roles: z.boolean(),
             })
             .strict()
             .optional(),

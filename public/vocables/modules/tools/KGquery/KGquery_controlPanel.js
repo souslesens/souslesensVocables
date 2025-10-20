@@ -80,7 +80,13 @@ var KGquery_controlPanel = (function () {
             "onclick='KGquery.removeQueryElement( \"" +
             queryElementDivId +
             "\") '></button>" +
-            "</div>";
+            "&nbsp;<input type='checkbox' id='KGquery_setOptionalCBX'  onchange='KGquery_controlPanel.onSetOptionalChange($(this).val()," +
+            querySetDivId +
+            "," +
+            queryElementDivId +
+            ")' >Optional";
+
+        ("</div>");
         $("#" + querySetDivId).append(html);
 
         return queryElementDivId;
@@ -156,6 +162,13 @@ var KGquery_controlPanel = (function () {
             predicateLabel += Sparql_common.getLabelFromURI(path[2]);
         });
         return predicateLabel;
+    };
+
+    self.onSetOptionalChange = function (state, querySetDivId, queryElementDivId) {
+        var querySet = KGquery.divsMap[querySetDivId.id];
+        querySet.elements.forEach(function (element) {
+            if (element.divId == queryElementDivId.id) element.isOptional = state == "on";
+        });
     };
 
     return self;

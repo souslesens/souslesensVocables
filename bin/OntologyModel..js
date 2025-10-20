@@ -176,7 +176,7 @@ var OntologyModel = {
                     });
                 },
 
-                // set retrictions constraints
+                // set restrictions constraints
                 function (callbackSeries) {
                     // only relations  declared in sources.json
                     if (!OntologyModel.Config.sources[source]) {

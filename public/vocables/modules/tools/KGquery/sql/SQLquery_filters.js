@@ -1,5 +1,5 @@
 import SQLquery_run from "./SQLquery_run.js";
-import KGcreator from "../KGcreator/KGcreator.js";
+import KGcreator from "../../KGcreator/KGcreator.js";
 
 var SQLquery_filters = (function () {
     var self = {};

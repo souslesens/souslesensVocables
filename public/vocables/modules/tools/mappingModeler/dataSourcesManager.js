@@ -231,7 +231,7 @@ var DataSourceManager = (function () {
                     var nTriples = tableStatsMap[jstreeNode.id];
                     var strStats = "";
                     if (nTriples) {
-                        strStats = " <b>" + nTriples + "Triples </b>";
+                        strStats = "<b>" + nTriples + "Triples</b>";
                     }
                     if (dataTables.includes(datasource)) {
                         jstreeNode.text = "<span style='color:blue'>" + datasource + strStats + "</span>";
@@ -484,7 +484,8 @@ var DataSourceManager = (function () {
             var fileName = DataSourceManager.currentSlsvSource;
             DataSourceManager.loadCsvSource(DataSourceManager.currentSlsvSource, obj.node.id, false, function (err, columns) {
                 if (err) {
-                    return alert("file not found");
+                    return alert(err.responseText || err);
+                    //  return alert("file not found");
                 }
 
                 MappingModeler.currentResourceType = "Column";

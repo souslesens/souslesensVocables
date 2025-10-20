@@ -33,24 +33,31 @@ const KGbuilder_triplesWriter = {
         }
 
         var totalTriples = 0;
+        var countTriples = allTriples.length;
+        //  console.log("all triples count "+countTriples)
+        var slices = util.sliceArray(allTriples, 500);
+        //  console.log("number of slices  "+slices.length)
 
-        var slices = util.sliceArray(allTriples, 200);
+        // var  slices=[allTriples]
 
+        countTriples = 0;
         async.eachSeries(
             slices,
             function (triples, callbackEach) {
                 var insertTriplesStr = "";
                 triples.forEach(function (triple) {
-                    //   var str = triple.s + " " + triple.p + " " + triple.o + ". ";
                     var str = triple + ". ";
                     insertTriplesStr += str;
+                    countTriples += 1;
                 });
 
+                // console.log("triples in slice "+triples.length)
                 var queryGraph = KGbuilder_triplesWriter.getSparqlPrefixesStr();
 
+                //  graphUri=graphUri+"test/"
                 //  queryGraph += " WITH GRAPH  <" + graphUri + ">  " + "INSERT DATA" + "  {" + insertTriplesStr + "  }";
                 // insert data does not work with bNodes
-                queryGraph += " WITH GRAPH  <" + graphUri + ">  " + "INSERT " + "  {" + insertTriplesStr + "  }";
+                queryGraph += " WITH GRAPH  <" + graphUri + "" + ">  " + "INSERT " + "  {" + insertTriplesStr + "  }";
 
                 var params = { query: queryGraph };
 
@@ -62,17 +69,25 @@ const KGbuilder_triplesWriter = {
                     };
                 }
 
-                httpProxy.post(sparqlServerUrl, null, params, function (err, _result) {
+                var regex = /([0-9]+)/;
+                httpProxy.post(sparqlServerUrl, null, params, function (err, result) {
                     if (err) {
                         var x = queryGraph;
-                        return callback(err);
+                        return callbackEach(err);
                     }
-                    totalTriples += triples.length;
+
+                    var array = regex.exec(result.results.bindings[0]["callret-0"].value);
+
+                    if (array && array.length == 2) var triplesWritten = parseInt(array[1]);
+
+                    if (triplesWritten < triples.length - 10) var x = 3;
+                    totalTriples += triplesWritten;
+                    //   console.log("triples writen "+totalTriples)
                     return callbackEach(null, totalTriples);
                 });
             },
             function (err) {
-                return callback(null, totalTriples);
+                return callback(err, totalTriples);
             },
         );
     },
@@ -160,8 +175,6 @@ const KGbuilder_triplesWriter = {
                         var x = query;
                         return callbackWhilst(err);
                     }
-
-                    //return callback(null, result.results.bindings[0]["callret-0"].value);
 
                     var result = result.results.bindings[0]["callret-0"].value;
 

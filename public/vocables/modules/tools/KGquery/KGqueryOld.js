@@ -32,7 +32,6 @@ import KGquery_filter from "./KGquery_filter.js";
 
 import Containers_widget from "../containers/containers_widget.js";
 import UserDataWidget from "../../uiWidgets/userDataWidget.js";
-import KGquery_predicates from "./KGquery_predicates.js";
 
 var KGquery = (function () {
     var self = {};
@@ -99,7 +98,6 @@ var KGquery = (function () {
      */
     self.init = function () {
         KGquery_graph.drawVisjsModel("saved");
-
         SavedQueriesWidget.showDialog("tabs_myQueries", self.currentSource, KGquery_myQueries.save, KGquery_myQueries.load, "KGquery/savedQueries/");
     };
 
@@ -115,17 +113,6 @@ var KGquery = (function () {
         for (const toolName in Config.userTools.KGquery.toTools) {
             KGquery_outputTypeSelectNode.append(`<option>${toolName}</option>`);
         }
-    };
-
-    self.initVarNamesMap = function () {
-        self.varNameToClassMap = {};
-        self.classToVarNameMap = {};
-        var nodes = KGquery_graph.KGqueryGraph.data.nodes.get();
-        nodes.forEach(function (node) {
-            var varName = self.getVarName(node);
-            self.varNameToClassMap[varName] = node.id;
-            self.classToVarNameMap[node.id] = varName;
-        });
     };
 
     /**
@@ -429,13 +416,10 @@ var KGquery = (function () {
      */
     self.aggregateQuery = function () {
         var message = "";
-        if (self.querySets.sets.length > 1) {
-            return alert("Aggregate works only with variables belonging to the same set");
-            // message = "<font color='blue'>aggregate works only with variables belonging to the same set !</font>";
+        if (self.querySets.sets.length > 0) {
+            message = "<font color='blue'>aggregate works only with variables belonging to the same set !</font>";
         }
-        if (self.querySets.sets.length == 0) {
-            return alert("no data selected");
-        }
+
         var varsMap = {};
 
         self.querySets.sets.forEach(function (querySet) {
@@ -458,24 +442,8 @@ var KGquery = (function () {
             },
 
             function (err, aggregateClauses) {
-                var query = KGquery_predicates.buildAggregateQuery(self.querySets.sets[0], aggregateClauses, {});
-                var url = Config.sources[self.currentSource].sparql_server.url + "?format=json&query=";
-
-                Sparql_proxy.querySPARQL_GET_proxy(
-                    url,
-                    query,
-                    "",
-                    {
-                        source: self.currentSource,
-                    },
-                    function (err, result) {
-                        if (err) {
-                            return alert(err);
-                        }
-                        //   var bindings = result.results.bindings;
-                        self.queryResultToTable(result);
-                    },
-                );
+                //  self.queryKG("table", {aggregate: aggregateClauses});
+                self.execPathQuery({ aggregate: aggregateClauses, outpu: "table" }, function (err, result) {});
             },
             message,
         );
@@ -538,7 +506,7 @@ var KGquery = (function () {
 
                 if (output == "table") {
                     self.queryResultToTable(result);
-                    //  console.trace()
+                    console.trace();
                 } else if (output == "Graph") {
                     self.queryResultToVisjsGraph(result);
                 } else if (output == "shacl") {
@@ -559,6 +527,7 @@ var KGquery = (function () {
      * @memberof module:KGquery
      * @param {Object} options - The options for query execution
      * @param {string} options.output - The desired output format (e.g., "shacl")
+     * @param {Object} [options.aggregate] - Aggregation settings for the query
      * @param {Function} callback - Callback function to handle the query results
      * @param {Error} callback.err - Error object if the query fails
      * @param {Object} callback.result - The query results if successful
@@ -570,7 +539,7 @@ var KGquery = (function () {
         KGquery.labelFromURIToDisplay = KGquery.labelFromURIToDisplay;
         var containerFiltersSparql = "";
         var query = "";
-
+        var distinctSetTypes = [];
         var isUnion = false;
         var isJoin = false;
         var data;
@@ -578,12 +547,239 @@ var KGquery = (function () {
         var sampleSize;
         async.series(
             [
+                //build query
                 function (callbackSeries) {
-                    query = KGquery_predicates.buildQuery(self.querySets, {});
-                    return callbackSeries();
+                    if (!options) {
+                        options = {};
+                    }
+
+                    var distinctTypesMap = {};
+                    var uniqueBasicPredicatesMap = {};
+
+                    var whereStr = "";
+                    var uniqueQueries = {};
+                    var querySetsWhereStr = [];
+                    var disctinctSetVars = [];
+
+                    self.querySets.sets.forEach(function (querySet) {
+                        if (querySet.elements.length == 0 || !querySet.elements[0].fromNode) {
+                            return;
+                        }
+                        whereStr = "";
+                        distinctTypesMap = {};
+                        var predicateStr = "";
+                        var filterStr = "";
+                        var otherPredicatesStrs = "";
+                        var predicatesSubjectsMap = {};
+
+                        querySet.elements.forEach(function (queryElement, queryElementIndex) {
+                            if (!queryElement.toNode) {
+                                return;
+                                if (queryElement.fromNode) {
+                                } else {
+                                }
+                            }
+
+                            var subjectVarName = self.getVarName(queryElement.fromNode);
+
+                            if (!predicatesSubjectsMap[subjectVarName]) {
+                                predicatesSubjectsMap[subjectVarName] = {
+                                    predicates: [],
+                                    optional: queryElement.isOptional,
+                                };
+                            }
+
+                            var subjectUri = queryElement.fromNode.id;
+                            if (!distinctTypesMap[subjectVarName]) {
+                                distinctTypesMap[subjectVarName] = 1;
+
+                                var predicate = (filterStr = " " + subjectVarName + "  rdf:type <" + subjectUri + ">. ");
+                                filterStr = predicate;
+                                predicatesSubjectsMap[subjectVarName].predicates.push(predicate);
+                            }
+
+                            if (queryElement.toNode) {
+                                var objectVarName = self.getVarName(queryElement.toNode);
+                                if (!predicatesSubjectsMap[objectVarName]) {
+                                    predicatesSubjectsMap[objectVarName] = {
+                                        predicates: [],
+                                        optional: queryElement.isOptional,
+                                    };
+                                }
+                                var objectUri = queryElement.toNode.id;
+                                if (!distinctTypesMap[objectVarName]) {
+                                    distinctTypesMap[objectVarName] = 1;
+                                    var predicate = " " + objectVarName + "  rdf:type <" + objectUri + ">.";
+                                    filterStr += predicate;
+                                    predicatesSubjectsMap[objectVarName].predicates.push(predicate);
+                                }
+                            }
+                            var filterClassLabels = {};
+                            queryElement.paths.forEach(function (pathItem, pathIndex) {
+                                var propertyStr = pathItem[2];
+
+                                //disable rdf:member predicate
+                                if (false && propertyStr == "rdfs:member") {
+                                    /*  if (!queryElement.fromNode.data.containerFilter) {
+                                          return;
+                                      }
+                                      if (queryElement.fromNode.data.containerFilter.classId) {
+                                          var predicate = "\n FILTER(" + subjectVarName + "=<" + queryElement.fromNode.data.containerFilter.classId + ">)\n ";
+                                          filterStr += predicate
+                                          predicatesSubjectsMap[subjectVarName].predicates.push(predicate)
+
+                                      }
+                                      var depth = queryElement.fromNode.data.containerFilter.depth || 1;
+                                      {
+                                          if (depth) {
+                                              var str = "";
+                                              var number = parseInt(depth);
+                                              propertyStr = " rdfs:member{0," + number + "} ";
+                                              otherPredicatesStrs += " FILTER (" + pathItem[0] + " !=" + pathItem[1] + ") ";
+                                          } else {
+                                          }
+                                      }*/
+                                } else {
+                                    propertyStr = "<" + propertyStr + "> ";
+                                }
+
+                                var startVarName;
+                                var endVarName;
+                                var inverseStr = "";
+                                if (pathItem.length == 4) {
+                                    startVarName = pathItem[1]; //self.getVarName({ id: pathItem[1] });
+                                    endVarName = pathItem[0]; //self.getVarName({ id: pathItem[0] });
+                                    inverseStr = "^";
+                                } else {
+                                    startVarName = pathItem[0]; //; self.getVarName({ id: pathItem[0] });
+                                    endVarName = pathItem[1]; // self.getVarName({ id: pathItem[1] });
+                                }
+
+                                var basicPredicate = startVarName + " " + inverseStr + propertyStr + endVarName + ".\n";
+                                if (!uniqueBasicPredicatesMap[basicPredicate]) {
+                                    uniqueBasicPredicatesMap[basicPredicate] = 1;
+                                    predicateStr += basicPredicate;
+                                    predicatesSubjectsMap[startVarName].predicates.push(basicPredicate);
+                                }
+                            });
+                        });
+
+                        for (var key in querySet.classFiltersMap) {
+                            filterStr += querySet.classFiltersMap[key].filter + " \n";
+                        }
+
+                        if (options.aggregate) {
+                            whereStr += options.aggregate.where;
+                            var groupByPredicates = options.aggregate.groupByPredicates;
+                            otherPredicatesStrs += " \n" + KGquery_filter.getAggregatePredicates(groupByPredicates);
+
+                            filterStr += KGquery_filter.getAggregateFilterOptionalPredicates(querySet, filterStr);
+                        } else {
+                        }
+
+                        if (!predicateStr) {
+                            // when only one class
+                            predicateStr = "?" + querySet.elements[0].fromNode.label + " rdf:type " + "<" + querySet.elements[0].fromNode.id + ">.\n";
+                            distinctTypesMap["?" + querySet.elements[0].fromNode.label] = 1;
+                            //predicateStr = optionalPredicatesSparql.replace("OPTIONAL", "");
+                        }
+
+                        if (optionalPredicatesSparql) {
+                            //optional predicates are filtered for each set or weird comportement for multiple set queries
+
+                            var querySetOptionalPredicates = "";
+                            Object.keys(distinctTypesMap).forEach(function (type) {
+                                var regex = new RegExp("^\\s*OPTIONAL\\s*{\\s*\\" + type + "\\b[\\s\\S]*?}", "gm");
+                                var matches = optionalPredicatesSparql.match(regex);
+                                if (matches.length > 0) {
+                                    querySetOptionalPredicates += matches.join("\n");
+                                }
+                            });
+                        }
+
+                        //set Optional predicates
+                        if (options.aggregate) {
+                            KGquery.optionalPredicatesSubjecstMap = {};
+                        }
+                        whereStr = self.processOptionalQueryElements(predicatesSubjectsMap, KGquery.optionalPredicatesSubjecstMap);
+                        //  whereStr += querySetOptionalPredicates;
+
+                        whereStr += predicateStr + "\n" + "" + "\n" + filterStr + "\n" + otherPredicatesStrs;
+
+                        //whereStr = "{" + whereStr + "}";
+                        var regex = /\?[\w_]+/g;
+                        var variables = whereStr.match(regex);
+                        var uniqueVariables = [...new Set(variables)];
+
+                        var subjectsPredicatesMap = {};
+
+                        disctinctSetVars.push(uniqueVariables);
+                        querySetsWhereStr.push(whereStr);
+                        distinctSetTypes.push(distinctTypesMap);
+                    });
+                    whereStr = "";
+                    if (querySetsWhereStr.length == 0) {
+                        return alert("no node selected");
+                    }
+                    if (querySetsWhereStr.length == 1) {
+                        whereStr = querySetsWhereStr[0];
+                    }
+                    if (querySetsWhereStr.length > 1) {
+                        querySetsWhereStr.forEach(function (querySetsWhereStr, index) {
+                            var disctinctVarsStr = disctinctSetVars[index].join(" ");
+                            var querySetNumber = index + 1;
+                            if (self.querySets.sets[index].booleanOperator) {
+                                whereStr += "\n " + self.querySets.sets[index].booleanOperator + "\n ";
+                                isJoin = true;
+                                if (self.querySets.sets[index].booleanOperator == "Union") {
+                                    isUnion = true;
+                                }
+                            }
+                            whereStr += "{SELECT " + disctinctVarsStr + ' (("Query ' + querySetNumber + '") AS ?querySet) ';
+                            whereStr += "{" + querySetsWhereStr + "}";
+                            whereStr += "}";
+                        });
+                    }
+
+                    var fromStr = Sparql_common.getFromStr(self.currentSource);
+                    query =
+                        "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
+                        "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+                        "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
+                        "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>";
+
+                    var selectStr = " DISTINCT ";
+                    var groupByStr = "";
+                    if (options.aggregate) {
+                        selectStr = options.aggregate.select;
+                        groupByStr = " GROUP BY " + options.aggregate.groupBy;
+                    } else {
+                        selectStr += KGquery.selectClauseSparql ? KGquery.selectClauseSparql : "";
+                        Object.keys(distinctTypesMap).forEach(function (type) {
+                            selectStr += " " + type;
+                        });
+                        if (isJoin) {
+                            selectStr += " ?querySet ";
+                        }
+                    }
+
+                    var queryType = "SELECT";
+                    if (options.output == "shacl") {
+                        queryType = "CONSTRUCT";
+                        selectStr = "";
+                    }
+                    query += queryType + " " + selectStr + "  " + fromStr + " where {" + whereStr + "}";
+
+                    query += " " + groupByStr; // + " limit 10000";
+
+                    callbackSeries();
                 },
+
                 //execute query
                 function (callbackSeries) {
+                    //var url = Config.sources[self.currentSource].sparql_server.url + "?format=text&query=";
+
+                    //url="http://51.178.139.80:8890/sparql?format=text/Turtle&query="
                     var url = Config.sources[self.currentSource].sparql_server.url + "?format=json&query=";
                     if (options.output == "shacl") {
                         url = "http://51.178.139.80:8890/sparql?format=text/Turtle&query=";
@@ -609,7 +805,6 @@ var KGquery = (function () {
                             if (!self.outputCsv && totalSize >= limitSize) {
                                 self.outputCsv = true;
                             }
-
                             return resultSize > 0;
                         },
                         function (callbackWhilst) {
@@ -1235,6 +1430,31 @@ var KGquery = (function () {
      */
     self.initMyQuery = function () {
         SavedQueriesWidget.showDialog("tabs_myQueries", self.currentSource, KGquery_myQueries.save, KGquery_myQueries.load, "KGquery/savedQueries/");
+    };
+    /**
+     *  !!! if a variable is optio,nall all predicates tha contains this variable as subject have to be in nthe optional clause
+     * @param predicatesSubjectsMap
+     * @param optionalPredicatesSubjecstMap
+     * @return {string}
+     */
+    self.processOptionalQueryElements = function (predicatesSubjectsMap, optionalPredicatesSubjecstMap) {
+        var whereStr = "";
+        for (var varName in predicatesSubjectsMap) {
+            var str = "";
+            var obj = predicatesSubjectsMap[varName];
+            obj.predicates.forEach(function (predicate) {
+                str += predicate + "\n";
+            });
+            if (optionalPredicatesSubjecstMap[varName]) {
+                str += optionalPredicatesSubjecstMap[varName] + "\n";
+            }
+            if (obj.optional) {
+                str = "OPTIONAL {" + str + "}";
+            }
+            whereStr += str + "\n";
+        }
+
+        return whereStr;
     };
 
     return self;

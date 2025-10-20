@@ -66,6 +66,7 @@ var KGquery_paths = (function () {
                 fromLabel = queryElement.fromNode.alias;
             }
             item[0] = "?" + Sparql_common.formatStringForTriple(fromLabel, true);
+
             var toLabel = KGquery_graph.labelsMap[item[1]];
             if (queryElement.toNode.label == toLabel && queryElement.toNode.alias) {
                 toLabel = queryElement.toNode.alias;

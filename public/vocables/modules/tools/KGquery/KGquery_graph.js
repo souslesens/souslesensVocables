@@ -701,16 +701,16 @@ var KGquery_graph = (function () {
         var data_type = "KGmodelGraph";*/
         var fileName = KGquery.currentSource + "_KGmodelGraph.json";
         self.visjsData = null;
-        
-        options.callback = function(){
+
+        options.callback = function () {
             self.visjsData = {};
             self.visjsData.nodes = self.KGqueryGraph.data.nodes.get();
             self.visjsData.edges = self.KGqueryGraph.data.edges.get();
-            if(callback){
+            if (callback) {
                 callback();
             }
         };
-        
+
         self.KGqueryGraph.saveGraph(fileName, true, options);
 
         return;
@@ -1076,7 +1076,6 @@ var KGquery_graph = (function () {
      */
     self.exportVisjsGraph = function () {
         self.saveVisjsModelGraph(function () {
-
             self.downloadVisjsGraph(KGquery.currentSource, function (err, result) {
                 var fileName = KGquery.currentSource + "_KGmodelGraph" + ".json";
                 Export.downloadJSON(result, fileName);
@@ -1134,7 +1133,7 @@ var KGquery_graph = (function () {
          *    - Font settings
 
          */
-    self.drawModel = function (displayGraphInList,callback) {
+    self.drawModel = function (displayGraphInList, callback) {
         if (!self.visjsData) {
             return alert("no graph model");
         }
@@ -1215,7 +1214,7 @@ var KGquery_graph = (function () {
                 }
             });
             self.KGqueryGraph.data.nodes.update(nodes_fonts);
-            if(callback){
+            if (callback) {
                 callback();
             }
         });

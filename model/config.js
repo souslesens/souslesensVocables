@@ -54,7 +54,6 @@ const MainConfigObject = z
                     })
                     .strict(),
             })
-            .deepPartial()
             .strict()
             .optional(),
         keycloak: z

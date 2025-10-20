@@ -31,20 +31,22 @@ var KGquery_HyperGraphMaker_bot = (function () {
             listImportsSourcesFn: {
                 downloadSelectedGraphFn: {
 
-                    drawHyperGraphFn:{
-                        chooseSourceCommonClassKeyFn: {
-                            chooseTargetCommonClassKeyFn: {
-                                chooseCommonClassMainFn:{
-                                    
-                                    drawCommonClassJoinFn: {
-                                        loopChoiceFn: {},
+                     chooseColorForSelectedGraphFn:{
+                        drawHyperGraphFn:{
+                            chooseSourceCommonClassKeyFn: {
+                                chooseTargetCommonClassKeyFn: {
+                                    chooseCommonClassMainFn:{
+                                        
+                                        drawCommonClassJoinFn: {
+                                            loopChoiceFn: {},
+                                        },
+                                        
                                     },
+                                        
+                                    
+                                    
                                     
                                 },
-                                     
-                                
-                                
-                                
                             },
                         },
                     },
@@ -70,8 +72,10 @@ var KGquery_HyperGraphMaker_bot = (function () {
         chooseSourceCommonClassKeyFn: "Choose a source common class key to joins graphs",
         drawCommonClassJoinFn: "Draw common class join",
         chooseCommonClassMainFn: "choose wich class will be kept in the hypergraph",
+        chooseColorForSelectedGraphFn: "Choose a color for the selected graph",
         };
     self.functions = {
+        // add a new graph to current hypergraph source
         drawHyperGraphFn: function () {
             if(!self.myBotEngine.currentBot.params.selectedGraph){
                 alert("Please select a graph");
@@ -91,6 +95,7 @@ var KGquery_HyperGraphMaker_bot = (function () {
                 });
             }
         },
+        // choose a source common class key to joins graphs
         chooseSourceCommonClassKeyFn: function () {
             self.myBotEngine.currentBot.params.classMap = {};
             if(!self.myBotEngine.currentBot.params.visjsData){
@@ -98,50 +103,51 @@ var KGquery_HyperGraphMaker_bot = (function () {
                 self.myBotEngine.nextStep(self.loopChoice);
                 return;
             }
-            var sourceNodesIds= self.myBotEngine.currentBot.params.visjsData.nodes.map(function(node){
-                return node.id;
-            });
+            var sourceNodes= self.myBotEngine.currentBot.params.visjsData.nodes;
             var prefixedSourcesNodesIds=[];
-            sourceNodesIds.forEach(function(id){
-                var prefixedLabel=Sparql_common.getPrefixedLabelFromURI(id);
-                 self.myBotEngine.currentBot.params.classMap[prefixedLabel]=id;
+            sourceNodes.forEach(function(node){
+                var prefixedLabel=Sparql_common.getPrefixedLabelFromURI(node.data.source,node.id);
+                 self.myBotEngine.currentBot.params.classMap[prefixedLabel]=node.id;
                  prefixedSourcesNodesIds.push(prefixedLabel);
              });
             self.myBotEngine.showList(prefixedSourcesNodesIds,"sourceCommonClass");
             
         },
+        // choose a target common class key to joins graphs
         chooseTargetCommonClassKeyFn: function () {
             if(!self.myBotEngine.currentBot.params.selectedGraph){
                 self.myBotEngine.currentObj = self.loopChoice;
                 self.myBotEngine.nextStep(self.loopChoice);
                 return;
             }
-            var hyperGraphNodesIds= self.myBotEngine.currentBot.params.selectedGraph.nodes.map(function(node){
-                return node.id;
-            });
+            var hyperGraphNodes= self.myBotEngine.currentBot.params.selectedGraph.nodes;
             var prefixedHyperGraphNodesIds=[];
-            hyperGraphNodesIds.forEach(function(id){
-                var prefixedLabel=Sparql_common.getPrefixedLabelFromURI(id);
-                 self.myBotEngine.currentBot.params.classMap[prefixedLabel]=id;
+            hyperGraphNodes.forEach(function(node){
+                var prefixedLabel=Sparql_common.getPrefixedLabelFromURI(node.data.source,node.id);
+                 self.myBotEngine.currentBot.params.classMap[prefixedLabel]=node.id;
                  prefixedHyperGraphNodesIds.push(prefixedLabel);
              });
             self.myBotEngine.showList(prefixedHyperGraphNodesIds,"targetCommonClass");
             
         },
+        // choose a source to import on the hypergraph
         listImportsSourcesFn: function () {
             var source=self.myBotEngine.currentBot.params.source;
             if(!source){
                 alert("Please select a source");
                 return self.myBotEngine.end();
             }
-            var imports=Config.sources[source].imports;
-            if(imports.length==0){
+            var sources=Config.sources[source].imports;
+            
+            if(sources.length==0){
                 alert("No imports found");
                 return self.myBotEngine.end();
             }
+            sources=sources.concat([source]);
             
-            self.myBotEngine.showList(imports,"selectedSource");
+            self.myBotEngine.showList(sources,"selectedSource");
         },
+        // download file graph of selected source
         downloadSelectedGraphFn: function () {
             if(!self.myBotEngine.currentBot.params.selectedSource){
                 alert("Please select a source");
@@ -151,6 +157,10 @@ var KGquery_HyperGraphMaker_bot = (function () {
             KGquery_graph.visjsData=null;
             KGquery_graph.downloadVisjsGraph(self.myBotEngine.currentBot.params.selectedSource,function(err,result){
                 if(err){
+                    if(err=='notFound'){
+                         alert("Downloading graph, wait until next step...");
+                        return self.functions.regenerateGraphFn();
+                    }
                     alert("Error downloading graph");
                     return self.myBotEngine.previousStep();
                 }
@@ -160,10 +170,25 @@ var KGquery_HyperGraphMaker_bot = (function () {
             
             
         },
+        regenerateGraphFn: function () {
+            var source=self.myBotEngine.currentBot.params.selectedSource;
+             KGquery_graph.buildInferredGraph(source, function (err, result) {
+                    if(err ){
+                       
+                        alert("Error building graph");
+                        return self.myBotEngine.previousStep();
+                    }
+                    self.myBotEngine.currentBot.params.selectedGraph=JSON.parse(JSON.stringify(result));
+                    self.myBotEngine.nextStep();
+              });
+            
+        },
+        // choose between source and target common class to keep in the hypergraph to finalize join
         chooseCommonClassMainFn: function () {
             var nodesIds=[self.myBotEngine.currentBot.params.sourceCommonClass,self.myBotEngine.currentBot.params.targetCommonClass];
             self.myBotEngine.showList(nodesIds,"mainCommonClass");
         },
+        // make join between source and target common class
         drawCommonClassJoinFn: function () {
             if(!self.myBotEngine.currentBot.params.sourceCommonClass || !self.myBotEngine.currentBot.params.targetCommonClass || !self.myBotEngine.currentBot.params.mainCommonClass){
                 self.myBotEngine.currentObj = self.loopChoice;
@@ -196,15 +221,27 @@ var KGquery_HyperGraphMaker_bot = (function () {
                 self.myBotEngine.nextStep();
             });
         },
+        // save hypergraph
         saveVisjsModelGraphFn: function () {
             KGquery_graph.saveVisjsModelGraph(function(){
                 self.myBotEngine.nextStep();
             });
            
         },
+        // recurse to next step
         loopChoiceFn: function () {
             self.myBotEngine.currentObj = self.loopChoice;
             self.myBotEngine.nextStep(self.loopChoice);
+        },
+        // choose color for selected graph to add on hypergraph
+        chooseColorForSelectedGraphFn: function () {
+            self.myBotEngine.showList(common.paletteIntense,"selectedColor",null,null,function(color){
+                self.myBotEngine.currentBot.params.selectedGraph.nodes.forEach(function(node){
+                    node.color=color;
+                });
+                self.myBotEngine.nextStep();
+            });
+            common.fillSelectWithColorPalette("bot_resourcesProposalSelect",common.paletteIntense);
         },
     };
     return self;

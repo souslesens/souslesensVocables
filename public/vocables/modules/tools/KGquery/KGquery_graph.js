@@ -975,7 +975,7 @@ var KGquery_graph = (function () {
             [
                 function (callbackSeries) {
                     KGquery_graph.message("generating tbox graph from abox graph");
-                    self.getImplicitModelVisjsData(KGquery.currentSource, function (err, result2) {
+                    self.getImplicitModelVisjsData(source, function (err, result2) {
                         if (err) {
                             return alert(err);
                         }

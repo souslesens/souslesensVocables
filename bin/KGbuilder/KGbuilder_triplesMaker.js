@@ -682,10 +682,14 @@ var KGbuilder_triplesMaker = {
             },
         );
     },
-    /** @function getMetaDataTriples
+    /** 
+     * @function getMetaDataTriples
      * Creates metadata triples for a subject (created date, mapping table, plus custom predicates).
      * @param {string} subjectUri — Target subject IRI/prefix. 
-     * @param {{mappingTable?:string,customMetaData?:Record<string,string>}} [options] — Source table and extras. 
+     * @param {Object} [options] - Source table and extras.
+      *@param {string} [options.mappingTable] - Mapping table name.
+      *@param {Object.<string, string>} [options.customMetaData] - Extra metadata as key/value map.
+    
      * @returns {Array<{s:string,p:string,o:string}>}
      */
 
@@ -721,7 +725,8 @@ var KGbuilder_triplesMaker = {
 
         return metaDataTriples;
     },
-    /** @function isUri
+    /** 
+     * @function isUri
      * Checks if a string looks like a full IRI (starts with "http"); returns boolean.
      * @param {string} str — Candidate value. 
      * @returns {boolean}
@@ -744,7 +749,8 @@ var KGbuilder_triplesMaker = {
             return false;
         }*/
     },
-    /** @function isPrefixedUri
+    /** 
+     * @function isPrefixedUri
      * Checks if a string is a prefixed name using known SPARQL prefixes; returns boolean.
      * @param {string} str — Candidate value (e.g., "rdf:type"). 
      * @returns {boolean}
@@ -765,7 +771,8 @@ var KGbuilder_triplesMaker = {
             return false;
         }
     },
-    /** @function readCsv
+    /** 
+     * @function readCsv
      * Reads a CSV and returns `{ headers, data }` via callback.
      * @param {string} filePath — Path to the CSV file. 
      * @param {number|null} maxLines — Optional per-chunk line limit. 
@@ -784,7 +791,8 @@ var KGbuilder_triplesMaker = {
             return callback(null, { headers: headers, data: data });
         });
     },
-    /** @function getBlankNodeId
+    /**
+     *  @function getBlankNodeId
      * Returns a stable blank node id for a key, generating `<_:bXXXXXXXXXX>` if missing.
      * @param {string} key — Logical identifier. 
      * @returns {string}
@@ -804,7 +812,8 @@ var KGbuilder_triplesMaker = {
             return value;
         }
     },
-    /** @function zipString
+    /** 
+     * @function zipString
      * Compresses a string with DEFLATE and returns a base64 string.
      * @param {string} str — Input text. 
      * @returns {string}
@@ -816,7 +825,8 @@ var KGbuilder_triplesMaker = {
         const zip = fflate.deflateSync(array, { level: 9 });
         return window.btoa(String.fromCharCode(...zip));
     },
-    /** @function getStringHashCode
+    /** 
+     * @function getStringHashCode
      * Computes a deterministic 32-bit hash of a string and returns it in hex.
      * @param {string} str — Input text. 
      * @returns {string}
@@ -830,7 +840,8 @@ var KGbuilder_triplesMaker = {
         //console.log(code+"    "+str+"   ")
         return code;
     },
-    /** @function getLookupValue
+    /** 
+     * @function getLookupValue
      * Retrieves a dictionary-mapped value by `lookupName` and `value`, applying optional transform.
      * @param {string} lookupName — Lookup dictionary key. 
      * @param {string} value — Source value to translate. 
@@ -854,10 +865,14 @@ var KGbuilder_triplesMaker = {
 
         return target;
     },
-    /** @function loadData
+    /** 
+     * @function loadData
      * Loads rows from CSV or database per `tableMappings`, honoring `options.sampleSize`.
      * @param {Object} tableMappings — Source config (CSV path/table or datasourceConfig). 
-     * @param {{sampleSize?:number,clientSocketId?:string}} options — Read size and progress socket id. 
+     *@param {Object} options - Read size and progress socket id.
+     *@param {number} [options.sampleSize] - Number of rows to read (sample).
+     *@param {string} [options.clientSocketId] - Client socket id for progress events.
+
     * @param {Function} [callback] — Returns loaded rows. 
      * @returns {void}
      */

@@ -31,6 +31,7 @@ module.exports = function () {
         httpProxy.post(url, headers, payload, function (err, result) {
             //    HttpProxy.post(jowlConfig.url, {}, function (err, result) {
             if (err) {
+                res.status(err.status || 500).json(err);
                 next(err);
             } else {
                 return processResponse(res, err, result);

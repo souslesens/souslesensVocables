@@ -11,6 +11,7 @@ module.exports = function () {
                 processResponse(res, err, result);
             });
         } catch (err) {
+            res.status(err.status || 500).json(err);
             next(err);
         }
     }

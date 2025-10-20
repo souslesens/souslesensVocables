@@ -20,6 +20,7 @@ module.exports = function () {
             const userSources = await localSourceModel.getUserSources(userInfo.user);
             res.status(200).json(successfullyFetched(userSources));
         } catch (err) {
+            res.status(err.status || 500).json(err);
             next(err);
         }
     }
@@ -74,6 +75,7 @@ module.exports = function () {
             const sources = await sourceModel.getAllSources();
             res.status(200).json(successfullyCreated(sources));
         } catch (err) {
+            res.status(err.status || 500).json(err);
             next(err);
         }
     }

@@ -19,6 +19,7 @@ module.exports = function () {
 
                     elasticRestProxy.executePostQuery(req.body.url, req.body.query, req.body.indexes, function (err, result) {
                         if (err) {
+                            res.status(err.status || 500).json(err);
                             next(err);
                         } else {
                             return res.status(200).json(result);
@@ -29,6 +30,7 @@ module.exports = function () {
         } else {
             elasticRestProxy.executePostQuery(req.body.url, req.body.query, req.body.indexes, function (err, result) {
                 if (err) {
+                    res.status(err.status || 500).json(err);
                     next(err);
                 } else {
                     return res.status(200).json(result);

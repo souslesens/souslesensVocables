@@ -23,6 +23,7 @@ module.exports = function () {
             const sources = await sourceModel.getOwnedSources(userInfo.user);
             res.status(200).json({ message: `${sourceIdToDelete} successfully deleted`, resources: sources });
         } catch (err) {
+            res.status(err.status || 500).json(err);
             next(err);
         }
     }
@@ -44,6 +45,7 @@ module.exports = function () {
             const sources = await sourceModel.getOwnedSources(userInfo.user);
             res.status(200).json({ message: `${sourceIdToUpdate} successfully updated`, resources: sources });
         } catch (err) {
+            res.status(err.status || 500).json(err);
             next(err);
         }
     }

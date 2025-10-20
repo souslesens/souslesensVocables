@@ -12,6 +12,7 @@ module.exports = function () {
         if (config.auth !== "disabled") {
             req.logout(function (err) {
                 if (err) {
+                    res.status(err.status || 500).json(err);
                     return next(err);
                 }
             });

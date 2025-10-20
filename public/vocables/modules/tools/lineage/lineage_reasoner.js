@@ -229,7 +229,7 @@ var Lineage_reasoner = (function () {
                 });
             },
             error(err) {
-                return alert(err.responseText);
+                alert(err.responseText);
                 if (callback) {
                     return callback(err);
                 }

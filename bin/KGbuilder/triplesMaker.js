@@ -551,20 +551,15 @@ var TriplesMaker = {
     },
 
     stringToNumber: function (str) {
-        /*  let hash = 0;
-          for (let i = 0; i < str.length; i++) {
-              hash = (hash << 5) - hash + str.charCodeAt(i);
-              hash |= 0; // Convert to 32-bit integer
-          }
-          return hash;
-
-          function hashStringToNumber(str) {*/
-        let hash = 0n; // Use BigInt
+        let hash = BigInt(0); 
+        const big31 = BigInt("31"); 
+ 
         for (let i = 0; i < str.length; i++) {
-            hash = (hash * 31n + BigInt(str.charCodeAt(i))) % BigInt(Number.MAX_SAFE_INTEGER);
+            hash = (hash * big31 + BigInt(str.charCodeAt(i))) % BigInt(Number.MAX_SAFE_INTEGER);
         }
+ 
         return Number(hash);
-    },
+     },
 
     /**
      *
@@ -702,7 +697,7 @@ var TriplesMaker = {
         }
     },
 
-     /**
+     /** @function getFormatedLiteral
      * Formats a literal value from a row according to the mapping’s datatype.
      * Handles xsd:date/xsd:dateTime (incl. custom dateFormat), strings, floats and ints,
      * converting values to valid RDF literals with datatype annotations.

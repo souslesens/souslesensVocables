@@ -219,7 +219,7 @@ var KGbuilder_triplesMaker = {
      * @param {Object} tableMappings — Table-level config (e.g., `transform` map, `graphUri`).
      * @param {Object} mapping — Mapping descriptor (`s`, `p`, `o`, flags like `subjectIsSpecificUri`, `isSubjectBlankNode`, `lookup_s`).
      * @param {Object} line — Current row object providing source values for subject building.
-     * @param {(err:any, subject:string|null)=>void} callback — Node-style callback returning `<IRI>` / blank node id / `null`.
+     * @param {Function} [callback] - A callback function to be executed after the process is complete. — Node-style callback returning `<IRI>` / blank node id / `null`.
      * @returns {void}
      */
     getTripleSubject: function (tableMappings, mapping, line, callback) {
@@ -337,7 +337,7 @@ var KGbuilder_triplesMaker = {
      * @param {Object} tableMappings — Table-level config (e.g., `transform` map, `graphUri`).
      * @param {Object} mapping — Mapping descriptor for the object (`o`, `p`, flags like `objectIsSpecificUri`, `isObjectBlankNode`, `lookup_o`, `dataType`, `isString`).
      * @param {Object} line — Current row providing the source value(s) used to build the object.
-     * @param {(err:any, object:string|null)=>void} callback — Node-style callback returning a formatted object (`<IRI>`, literal with ^^type, blank node id, or `null`).
+    * @param {Function} [callback] - A callback function to be executed after the process is complete. — Node-style callback returning a formatted object (`<IRI>`, literal with ^^type, blank node id, or `null`).
      * @returns {void}
      */
     getTripleObject: function (tableMappings, mapping, line, callback) {
@@ -535,7 +535,7 @@ var KGbuilder_triplesMaker = {
      * @param {Object} tableMappings — Table-level settings (e.g., `graphUri`) used when deriving values.
      * @param {Object} mapping — Predicate mapping (`p`) which may be a string or a function.
      * @param {Object} line — Current row providing source values (used by functions or `_valuesOfColumn_*`).
-     * @param {(err:any, predicate:string)=>void} callback — Node-style callback returning the formatted predicate.
+    * @param {Function} [callback] - A callback function to be executed after the process is complete. — Node-style callback returning the formatted predicate.
      * @returns {void}
      */
     getTriplePredicate: function (tableMappings, mapping, line, callback) {
@@ -572,7 +572,7 @@ var KGbuilder_triplesMaker = {
      * @param {string} subjectStr — Formatted subject IRI or prefixed name used as the restricted class.
      * @param {string} propertyStr — Formatted predicate IRI/prefix placed in owl:onProperty.
      * @param {string} objectStr — Formatted object IRI/prefix placed in owl:someValuesFrom.
-     * @param {(err:any, triples:Array<{s:string,p:string,o:string}>)=>void} callback — Returns the generated triples array.
+    * @param {Function} [callback] - A callback function to be executed after the process is complete.— Returns the generated triples array.
      * @returns {void}
      */
 
@@ -619,7 +619,7 @@ var KGbuilder_triplesMaker = {
      * Produces a map `{ [name]: { dictionary, transformFn } }` ready for value replacements.
      *
      * @param {Object} tableMappings — Source config (lookups, csvDataFilePath or databaseSource, dataSourceConfig).
-     * @param {(err:any, lookups:Record<string,{dictionary:Object,transformFn?:Function}>)=>void} callback — Returns the assembled lookup map.
+     * @param {Function} [callback] - A callback function to be executed after the process is complete. — Returns the assembled lookup map.
      * @returns {void}
      */
 
@@ -769,7 +769,7 @@ var KGbuilder_triplesMaker = {
      * Reads a CSV and returns `{ headers, data }` via callback.
      * @param {string} filePath — Path to the CSV file. 
      * @param {number|null} maxLines — Optional per-chunk line limit. 
-     * @param {(err:any, res:{headers:string[],data:any[][]})=>void} callback — Returns parsed contents. 
+     * @param {Function} [callback] - A callback function to be executed after the process is complete. — Returns parsed contents. 
      * @returns {void}
      */
 
@@ -834,7 +834,7 @@ var KGbuilder_triplesMaker = {
      * Retrieves a dictionary-mapped value by `lookupName` and `value`, applying optional transform.
      * @param {string} lookupName — Lookup dictionary key. 
      * @param {string} value — Source value to translate. 
-     * @param {(err:any)=>void} [callback] — Receives transform errors. 
+     * @param {Function} [callback] - A callback function to be executed after the process is complete.— Receives transform errors. 
      * @returns {any}
      */
 
@@ -858,7 +858,7 @@ var KGbuilder_triplesMaker = {
      * Loads rows from CSV or database per `tableMappings`, honoring `options.sampleSize`.
      * @param {Object} tableMappings — Source config (CSV path/table or datasourceConfig). 
      * @param {{sampleSize?:number,clientSocketId?:string}} options — Read size and progress socket id. 
-     * @param {(err:any, rows:Object[])=>void} callback — Returns loaded rows. 
+    * @param {Function} [callback] — Returns loaded rows. 
      * @returns {void}
      */
 

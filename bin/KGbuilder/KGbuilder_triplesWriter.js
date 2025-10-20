@@ -226,7 +226,7 @@ const KGbuilder_triplesWriter = {
  * @param {Array<{s:string,p:string,o:string}>} triples — Pre-serialized triples to delete (SPARQL-ready tokens).
  * @param {string} graphUri — IRI of the named graph from which triples are removed.
  * @param {string} sparqlServerUrl — SPARQL endpoint URL accepting POST with a `query` parameter.
- * @param {(err:any, total:number)=>void} callback — Node-style callback; on success returns `triples.length`.
+ * @param {Function} [callback] — Node-style callback; on success returns `triples.length`.
  * @returns {void}
  */
     deleteTriples: function (triples, graphUri, sparqlServerUrl, callback) {

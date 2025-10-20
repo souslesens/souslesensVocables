@@ -198,7 +198,7 @@ var KGquery_graph = (function () {
         }
         self.simulationOn = !self.simulationOn;
     };
-
+    
     /**
      * Draws a common graph for all imported sources.
      * Combines and deduplicates nodes and edges from multiple sources.
@@ -207,6 +207,8 @@ var KGquery_graph = (function () {
      * @memberof module:KGquery_graph
      * @returns {void}
      */
+    // Deprecated method replaced by hypergraphMaker_bot
+    /* 
     self.DrawImportsCommonGraph = function () {
         var source = KGquery.currentSource;
         var sources = [];
@@ -272,7 +274,7 @@ var KGquery_graph = (function () {
             },
         );
     };
-
+    */
     /**
      * Gets the implicit model data in Vis.js format.
      * @function

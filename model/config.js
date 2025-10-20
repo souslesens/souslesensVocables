@@ -53,6 +53,7 @@ const MainConfigObject = z
                         clientSecret: z.string(),
                     })
                     .strict(),
+                usernameMapping: z.enum(["email", "nickname", "name"]),
             })
             .strict()
             .optional(),

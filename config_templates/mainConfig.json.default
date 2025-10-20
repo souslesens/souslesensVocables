@@ -40,7 +40,8 @@
         "api": {
             "clientID": "",
             "clientSecret": ""
-        }
+        },
+        "usernameMapping": "email",
     },
     "keycloak": {
         "realm": "master",

@@ -12,7 +12,7 @@ var Containers_tree = (function () {
     var self = {};
     self.jstreeDivId = "lineage_containers_containersJstree";
     self.clickedContainers = {};
-    self.idsMap={}
+    self.idsMap = {};
     self.search = function (jstreeDivId, source, options, callback) {
         if (jstreeDivId) {
             self.jstreeDivId = jstreeDivId;
@@ -151,7 +151,7 @@ var Containers_tree = (function () {
 
     self.menuActions = {};
 
-    self.listContainerResources = function (container,jstreeDivId) {
+    self.listContainerResources = function (container, jstreeDivId) {
         var source = container.data.source;
         // if container clicked don't click again on because no restrictions on container and class URIs (same class can be drawed n times in arborescence) anymore
         if (self.clickedContainers[container.id]) {

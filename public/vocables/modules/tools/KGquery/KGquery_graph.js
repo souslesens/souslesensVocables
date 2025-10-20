@@ -198,7 +198,7 @@ var KGquery_graph = (function () {
         }
         self.simulationOn = !self.simulationOn;
     };
-    
+
     /**
      * Draws a common graph for all imported sources.
      * Combines and deduplicates nodes and edges from multiple sources.

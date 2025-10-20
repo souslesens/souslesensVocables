@@ -47,7 +47,7 @@ poetry install
 
 ### Windows 
 ```bash 
-poetry add -D myst-parser
+
 poetry shell
 ````
 
@@ -55,3 +55,5 @@ poetry shell
 make clean
 make html
 ```
+
+Access the docs at `docs/_build/html/index.html` you can open it with your browser to see the docs.

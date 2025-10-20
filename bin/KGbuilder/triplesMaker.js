@@ -10,6 +10,36 @@ const KGbuilder_triplesMaker = require("./KGbuilder_triplesMaker.js");
 const dataController = require("../dataController..js");
 const path = require("path");
 const MappingParser = require("./mappingsParser.js");
+/**
+ * TriplesMaker module.
+ * Orchestrates end-to-end triple production from tabular sources (CSV or DB) using
+ * VisJS-derived column/edge mappings:
+ *  - Streams rows in batches, builds RDF triples per row/column, and (optionally) writes them
+ *    to a SPARQL endpoint via `KGbuilder_triplesWriter`.
+ *  - Resolves subjects/objects from column definitions (fixed URI, prefixed URI, fromLabel,
+ *    blank nodes, virtual columns, row index) with per-table scoping for random ids and bnodes.
+ *  - Applies per-column transforms, typed literal formatting (xsd:string/int/float/date/dateTime),
+ *    and safe-string encoding for IRIs/literals.
+ *  - Emits additional column→column relation triples from mapping edges.
+ *  - De-duplicates triples within a batch and appends provenance metadata
+ *    (`dcterms:created`, mapping table via `mappingFilePredicate`).
+ *  - Reports progress/timings through `KGbuilder_socket`; supports sampling mode (no writes).
+ 
+ * Inputs/Context:
+ *  - tableProcessingParams: {
+ *      sourceInfos: { graphUri, sparqlServerUrl }, tableInfos: { table, csvDataFilePath?, dbID? },
+ *      tableColumnsMappings, allColumnsMappings, columnToColumnEdgesMap, jsFunctionsMap,
+ *      uniqueTriplesMap (per-run), randomIdentiersMap (per-table), blankNodesMap (per-table)
+ *    }
+ *  - options: { sampleSize?, filterMappingIds?, clientSocketId?, currentBatchRowIndex? }
+ *
+ * Output:
+ *  - In sampling mode: { sampleTriples } (no writes).
+ *  - In write mode: total written triple count aggregated across batches.
+ *
+ * @module TriplesMaker
+ * @see [Tutorial: Overview]{@tutorial overview}
+ */
 
 var TriplesMaker = {
     batchSize: 1000000,
@@ -377,7 +407,13 @@ var TriplesMaker = {
             });
         }
     },
-
+/**  Build RDF triples for a batch of rows using the table’s column mappings.
+   @param {Array} data  Array of row objects; values are coerced to strings/ISO dates.
+   @param {Object} tableProcessingParams  Context: tableColumnsMappings, uniqueTriplesMap, blankNodesMap, tableInfos, jsFunctionsMap.
+   @param {Object} options  Batch options: currentBatchRowIndex, filterMappingIds; @param {Function} callback(err, triples).
+   For each row: compute subject URIs per column, emit mapped triples (constants/prefixed URIs, column URIs, transforms, typed literals), then add metadata.
+   Also generate column→column relation triples from edges and de-duplicate via uniqueTriplesMap before returning. 
+   */
     buildTriples: function (data, tableProcessingParams, options, callback) {
         var columnMappings = tableProcessingParams.tableColumnsMappings;
 
@@ -515,21 +551,15 @@ var TriplesMaker = {
     },
 
     stringToNumber: function (str) {
-        /*  let hash = 0;
-          for (let i = 0; i < str.length; i++) {
-              hash = (hash << 5) - hash + str.charCodeAt(i);
-              hash |= 0; // Convert to 32-bit integer
-          }
-          return hash;
-
-          function hashStringToNumber(str) {*/
-        let hash = 0n; // Use BigInt
+        let hash = BigInt(0); 
+        const big31 = BigInt("31"); 
+ 
         for (let i = 0; i < str.length; i++) {
-            hash = (hash * 31n + BigInt(str.charCodeAt(i))) % BigInt(Number.MAX_SAFE_INTEGER);
+            hash = (hash * big31 + BigInt(str.charCodeAt(i))) % BigInt(Number.MAX_SAFE_INTEGER);
         }
+ 
         return Number(hash);
-    },
-
+     },
     /**
      *
      * build an URI for the column
@@ -666,6 +696,15 @@ var TriplesMaker = {
         }
     },
 
+     /**
+     * Formats a literal value from a row according to the mapping’s datatype.
+     * Handles xsd:date/xsd:dateTime (incl. custom dateFormat), strings, floats and ints,
+     * converting values to valid RDF literals with datatype annotations.
+     * NOTE: this function references `callback` but does not receive it; it currently returns the string/null.
+     * @param {Object} dataItem   Row object; value is usually taken from dataItem[mapping.o].
+     * @param {Object} mapping    Mapping info: { o, dataType, dateFormat, isString, transform, objColId }.
+     * @returns {string|null}     N-Triples literal (e.g. "\"2024-01-01\"^^xsd:date") or null if no usable value.
+     */
     getFormatedLiteral: function (dataItem, mapping) {
         var objectStr = null;
         if (mapping.dataType) {
@@ -742,6 +781,7 @@ var TriplesMaker = {
         }
         return objectStr;
     },
+    
     getMetaDataTriples: function (subjectUri, table, options) {
         var creator = "KGcreator";
         var dateTime = "'" + util.dateToRDFString(new Date(), true) + "'^^xsd:dateTime";

@@ -217,6 +217,8 @@ const KGbuilder_triplesWriter = {
             };
         }
 
+
+
         httpProxy.post(sparqlServerUrl, null, params, function (err, _result) {
             if (err) {
                 var x = query;

@@ -17,7 +17,6 @@ const main = async () => {
     console.info(argv.write ? "🚧 Prepare the migration…" : "🔧 Dry run mode…");
     const configPath = path.resolve(argv.config, "mainConfig.json");
     const configJSON = JSON.parse(fs.readFileSync(configPath, { encoding: "utf-8" }));
-    console.log(configJSON.auth0);
     if (configJSON.auth0 && (configJSON.auth0.usernameMapping === undefined || configJSON.auth0.useAuth0Roles === undefined)) {
         if (configJSON.auth0.usernameMapping === undefined) {
             configJSON.auth0.usernameMapping = "email";

@@ -3,7 +3,7 @@ const async = require("async");
 const fs = require("fs");
 
 var MappingParser = {
-    columnsMappingsObjects: ["Column", "RowIndex", "VirtualColumn","URI"],
+    columnsMappingsObjects: ["Column", "RowIndex", "VirtualColumn", "URI"],
     getMappingsData: function (source, callback) {
         var mappingGraphDir = path.join(__dirname, "../../data/graphs/");
         var file = mappingGraphDir + "mappings_" + source + "_ALL.json";
@@ -167,29 +167,6 @@ var MappingParser = {
         }
         return mappings;
     },
-
-    /*  getGlobalParamsMap:function(columnMappings){
-          var globalParamsMap= {
-              functions: {},
-              lookups: {},
-              prefixURIs: {},
-              baseURIs: {}
-          }
-
-          for (var columnId in columnMappings){
-              var column=columnMappings[columnId]
-              globalParamsMap[columnId] ={
-                  baseURI:column.baseURI || null,
-                  prefixURI:column.prefixURI || null,
-                  transform:column.transform || null,// clarifier différence entre function at transform
-                  function:column.function || null,
-                  uriType:column.uriType || null,
-              }
-          }
-
-          return globalParamsMap;
-
-      }*/
 
     /**
      *

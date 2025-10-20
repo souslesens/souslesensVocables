@@ -785,7 +785,7 @@ if (callback) return callback(err);
     };
     // var dateTime='2000-01-15T00:00:00'
 
-    self.dateToRDFString = function (date, time) {
+    self.dateToRDFString = function (date, withHours) {
         var str = "";
         if (date instanceof Date && isFinite(date)) {
             var month = "" + (date.getMonth() + 1);
@@ -809,7 +809,7 @@ if (callback) return callback(err);
                 sec = "0" + sec;
             }
             str = date.getFullYear() + "-" + month + "-" + day;
-            if (time) {
+            if (withHours) {
                 str += "T" + hour + ":" + min + ":" + sec;
             }
         } else {

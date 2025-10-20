@@ -770,7 +770,7 @@ var MappingColumnsGraph = (function () {
                     self.addNodesByDataTableBatch(result.nodes, function () {
                         if (true) {
                             self.visjsGraph.data.nodes.get().forEach(function (node) {
-                                node.hidden=false
+                                node.hidden = false;
                                 if (node.data.type == "Class") {
                                     node.level = 3;
                                 } else if (node.data.type == "Table") {
@@ -1215,16 +1215,7 @@ var MappingColumnsGraph = (function () {
                 node.shape = oldNode.shape || "box";
                 node.color = oldNode.color;
                 node.size = 18;
-                /*if(oldNode.data.prefixURI){
-                    if(data?.options?.config){
-                        if(!data?.options?.config?.prefixURI){
-                            data.options.config.prefixURI = {};
-                        }
-                        data.options.config.prefixURI[oldNode.label] = oldNode.data.prefixURI;
 
-                    }
-                   
-                }*/
                 if (oldNode.data.type == "Class") {
                     node.level = 3;
                 } else if (oldNode.data.type == "Table") {
@@ -1452,11 +1443,11 @@ var MappingColumnsGraph = (function () {
         var tableNodes = {};
 
         nodes.forEach(function (node) {
-            var hidden=true
+            var hidden = true;
             if (node.data && node.data.dataTable) {
                 if (node.data.dataTable == table) {
                     tableNodes[node.id] = node;
-                    hidden=false
+                    hidden = false;
                 }
             }
             newNodesMap[node.id] = { id: node.id, hidden: hidden };

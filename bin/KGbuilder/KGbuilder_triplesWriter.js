@@ -143,7 +143,6 @@ const KGbuilder_triplesWriter = {
     },
 
     deleteKGBuilderTriples: function (sparqlServerUrl, graphUri, table, options, callback) {
-        const KGbuilder_triplesMaker = require("./KGbuilder_triplesMaker");
         var query = "";
         if (table) {
             query += "with  GRAPH <" + graphUri + "> " + "delete {?s ?p ?o} where {?s ?p ?o. ?s <" + TriplesMaker.mappingFilePredicate + "> '" + table + "'}";

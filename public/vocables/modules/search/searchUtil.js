@@ -591,6 +591,8 @@ indexes.push(source.toLowerCase());
                                 async.eachSeries(
                                     slices,
                                     function (data, callbackEach) {
+                                        if (data.length == 0) return callbackEach();
+
                                         var replaceIndex = false;
                                         if (index++ == 0 && !options.ids) {
                                             replaceIndex = true;

@@ -357,7 +357,9 @@ var MappingsDetails = (function () {
         } else {
             html += `<tr></tr>`;
             html += `<tr><td>URI syntax*</td><td><select id='columnDetails-UriType' onchange='MappingsDetails.onChangeUriType()' style='padding:6px 6px'> </select>  </td></tr>`;
-            html += `<tr><td id='columnDetails-baseUri-label'>Base URI</td><td><input id='columnDetails-baseUri' style='width:300px;    background-color: #eee;margin-right:15px;'> </input>  </td><td id='columnDetails-prefixURI-label' style='margin-left:10px;'>URI prefix</td><td><input id='columnDetails-prefixURI' style='width:300px;    background-color: #eee;margin-left:15px;'> </input>  </td></tr>`;
+            html += `<tr><td >Base URI</td><td><input id='columnDetails-baseUri' style='width:300px;    background-color: #eee;margin-right:15px;'> </input>  </td>
+            <td  id='columnDetails-prefixURI-label' style='margin-left:10px;'>URI prefix</td><td><input id='columnDetails-prefixURI' style='width:300px;    background-color: #eee;margin-left:15px;'> </input>  </td>
+            <td  id='columnDetails-prefixURI-label' style='margin-left:10px;'>URI suffix</td> <td><input id='columnDetails-suffixURI' style='width:300px;    background-color: #eee;margin-left:15px;'> </input>  </td></tr>`;
             html += `<tr><td>rdf:type*</td><td><select id='columnDetails-rdfType' style='padding:6px 6px'> </select> </td></tr> `;
 
             html += `<tr><td>rdfs:label column</td><td><select id='columnDetails-rdfsLabel' style='padding:6px 6px'> </select> </td></tr>`;
@@ -401,6 +403,7 @@ var MappingsDetails = (function () {
 
         $("#columnDetails-baseUri").val(column.data.baseURI || "");
         $("#columnDetails-prefixURI").val(column.data.prefixURI || "");
+        $("#columnDetails-suffixURI").val(column.data.suffixURI || "");
         self.onChangeUriType();
 
         self.setMappingDefaultFieds(column);
@@ -433,6 +436,14 @@ var MappingsDetails = (function () {
             delete currentGraphNode.data.prefixURI;
         }
 
+        var suffix = $("#columnDetails-suffixURI").val();
+        if (suffix && currentGraphNode.data.uriType == "fromLabel") {
+            currentGraphNode.data.suffixURI = suffix;
+        }
+        if (currentGraphNode.data.suffixURI && !suffix) {
+            delete currentGraphNode.data.suffix;
+        }
+
         var baseUri = $("#columnDetails-baseUri").val();
         var sourceObj = Config.sources[MappingModeler.currentSLSsource];
         var sourceBaseUri = sourceObj.baseUri || sourceObj.graphUri;
@@ -459,6 +470,7 @@ var MappingsDetails = (function () {
             var currentGraphNode = MappingColumnsGraph.visjsGraph.data.nodes.get(node.id);
             currentGraphNode.data.uriType = node.data.uriType;
             currentGraphNode.data.prefixURI = node.data.prefixURI;
+            currentGraphNode.data.suffixURI = node.data.suffixURI;
             currentGraphNode.data.baseURI = node.data.baseURI;
             MappingColumnsGraph.updateNode(currentGraphNode);
         });
@@ -499,6 +511,7 @@ var MappingsDetails = (function () {
             if (graphNode.data.transform) {
                 delete graphNode.data.transform;
                 delete graphNode.data.prefixURI; //remove prefix URI
+                delete graphNode.data.suffixURI; //remove prefix URI
             }
         }
         // lookup gestion
@@ -1024,12 +1037,16 @@ var MappingsDetails = (function () {
             $("#columnDetails-baseUri").show();
             $("#columnDetails-baseUri-label").show();
             $("#columnDetails-prefixURI").show();
+            $("#columnDetails-suffixURI").show();
             $("#columnDetails-prefixURI-label").show();
+            $("#columnDetails-suffixURI-label").show();
         } else {
             $("#columnDetails-baseUri").hide();
             $("#columnDetails-baseUri-label").hide();
             $("#columnDetails-prefixURI").hide();
+            $("#columnDetails-suffixURI").show();
             $("#columnDetails-prefixURI-label").hide();
+            $("#columnDetails-suffixURI-label").hide();
         }
     };
 
@@ -1048,6 +1065,9 @@ var MappingsDetails = (function () {
                         sameClassColumns.forEach(function (sameColumn) {
                             if (!$("#columnDetails-prefixURI").val() && sameColumn.data.prefixURI) {
                                 $("#columnDetails-prefixURI").val(sameColumn.data.prefixURI);
+                            }
+                            if (!$("#columnDetails-suffixURI").val() && sameColumn.data.suffixURI) {
+                                $("#columnDetails-suffixURI").val(sameColumn.data.suffixURI);
                             }
                             if ($(!"#columnDetails-baseURI").val() && sameColumn.data.baseURI) {
                                 $("#columnDetails-baseURI").val(sameColumn.data.baseURI);

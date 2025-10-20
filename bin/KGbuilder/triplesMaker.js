@@ -5,8 +5,6 @@ const async = require("async");
 const sqlServerProxy = require("../KG/SQLserverConnector.");
 const util = require("../util.");
 const KGbuilder_triplesWriter = require("./KGbuilder_triplesWriter");
-const KGbuilder_triplesMaker = require("./KGbuilder_triplesMaker");
-
 const dataController = require("../dataController.");
 const path = require("path");
 const MappingParser = require("./mappingsParser.js");
@@ -465,8 +463,8 @@ var TriplesMaker = {
                     if (columnUri && property && object) {
                         var triple = columnUri + " " + property + " " + object;
                         var triplelHashCode = triple;
-                    //    var triplelHashCode = TriplesMaker.stringToNumber(triple);
-                        if ( !tableProcessingParams.uniqueTriplesMap[triplelHashCode]) {
+                        //    var triplelHashCode = TriplesMaker.stringToNumber(triple);
+                        if (!tableProcessingParams.uniqueTriplesMap[triplelHashCode]) {
                             tableProcessingParams.uniqueTriplesMap[triplelHashCode] = 1;
                             batchTriples.push(triple);
                         } else {
@@ -553,6 +551,7 @@ var TriplesMaker = {
             columnParams.rdfsLabel = definedInColumn.rdfsLabel;
             columnParams.baseURI = definedInColumn.baseURI;
             columnParams.prefixURI = definedInColumn.prefixURI;
+            columnParams.suffixURI = definedInColumn.suffixURI;
         }
 
         var graphUri = tableProcessingParams.sourceInfos.graphUri;
@@ -653,7 +652,8 @@ var TriplesMaker = {
                 prefix += "-";
             }
         }
-        var uri = "<" + baseUri + prefix + id + ">";
+        var suffix = columnParams.suffixURI ? columnParams.suffixURI : "";
+        var uri = "<" + baseUri + prefix + id + suffix + ">";
         return uri;
     },
 

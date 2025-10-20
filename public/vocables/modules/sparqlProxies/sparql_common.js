@@ -649,12 +649,12 @@ var Sparql_common = (function () {
         return fromStr;
     };
 
-    self.getSparqlDate = function (date) {
+    self.getSparqlDate = function (date, withHours) {
         if (!date) {
             date = new Date();
         }
 
-        var str = '"' + common.dateToRDFString(date) + '"^^xsd:dateTime';
+        var str = '"' + common.dateToRDFString(date, withHours) + '"^^xsd:dateTime';
         return str;
         //   return  "\"" + date.getFullYear() + "/" + (date.getMonth() + 1) + "/" + date.getDate() + "\"^^xsd:date"
 

@@ -9,7 +9,7 @@ module.exports = function () {
             const databases = await databaseModel.getDatabasesFromServer();
             resourceFetched(res, databases);
         } catch (error) {
-            next(error);
+            res.status(error.status || 500).json(error);next(error);
         }
     }
 

@@ -53,7 +53,7 @@ module.exports = function () {
             const newConfig = await mainConfigModel.getConfig({ ...initialConfig, defaultGroups, tools_available, theme });
             res.status(200).json(newConfig);
         } catch (error) {
-            next(error);
+            res.status(error.status || 500).json(error);next(error);
         }
     }
 

@@ -248,12 +248,12 @@ var UI = (function () {
         const top = Math.min(Math.max(gap, offL.top), windowHeight - gap - targetH);
         $(newWindow).dialog("option", "position", {
             my: "left top",
-            at: `left+${gap} top+${top}`,
+            at: `right+${gap} top+${top}`,
             of: window,
         });
         $(existingWindow).dialog("option", "position", {
             my: "right top",
-            at: `right-${gap} top+${top}`,
+            at: `left-${gap} top+${top}`,
             of: window,
         });
 

@@ -183,7 +183,7 @@ query=query.replace(/GRAPH ?[a-zA-Z0-9]+\{/,"{")
                 }
                 if (err.responseText.indexOf("Virtuoso 42000") > -1) {
                     //Virtuoso 42000 The estimated execution time
-                    alert(err.responseText.substring(0, err.responseText.indexOf(".")) + "\n select more detailed data");
+                    MainController.errorAlert(err.responseText.substring(0, err.responseText.indexOf(".")) + "\n select more detailed data");
                 } else {
                     console.log(err.responseText);
                     UI.message("error in sparql query");
@@ -248,7 +248,7 @@ query=query.replace(/GRAPH ?[a-zA-Z0-9]+\{/,"{")
             },
             error(err) {
                 if (err) {
-                    return alert(err.responseText);
+                    return MainController.errorAlert(err);
                 }
             },
         });

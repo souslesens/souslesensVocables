@@ -287,7 +287,7 @@ var SparqlQuery_bot = (function () {
             self.params.whiteboardNodes = nodeIds;
             Sparql_OWL.getIndividualsType(self.params.source, nodeIds, null, function (err, result) {
                 if (err) {
-                    alert(err.responseText || err);
+                    MainController.errorAlert(err);
                     return self.myBotEngine.end();
                 }
                 self.params.currentClass = null;
@@ -326,7 +326,7 @@ var SparqlQuery_bot = (function () {
             var nonObjectPropertyFilterWorklow = new NonObjectPropertyFilterWorklow(self.implicitModel, self.params, self.myBotEngine);
             nonObjectPropertyFilterWorklow.listNonObjectPropertiesFn(function (err, filter) {
                 if (err) {
-                    alert(err.responseText || err);
+                    MainController.errorAlert(err);
                     return self.myBotEngine.previousStep();
                 }
                 self.params.nonObjectPropertyFilter = filter;
@@ -375,7 +375,7 @@ var SparqlQuery_bot = (function () {
             }
             self.getResourcesList("Predicate", "predicate", filter, {}, function (err, result) {
                 if (err) {
-                    alert(err.responseText || err);
+                    MainController.errorAlert(err);
                     return self.myBotEngine.previousStep();
                 }
 
@@ -635,7 +635,7 @@ var SparqlQuery_bot = (function () {
 
             self.getResourcesList("Predicate", role, filter, options, function (err, result) {
                 if (err) {
-                    alert(err.responseText || err);
+                    MainController.errorAlert(err);
                     return self.myBotEngine.previousStep();
                 }
 
@@ -686,7 +686,7 @@ var SparqlQuery_bot = (function () {
         chooseConstraintClassFn: function () {
             self.getResourcesList("Class", "subject", null, { withoutImports: 1 }, function (err, result) {
                 if (err) {
-                    alert(err.responseText || err);
+                    MainController.errorAlert(err);
                     return self.myBotEngine.previousStep();
                 }
 
@@ -706,7 +706,7 @@ var SparqlQuery_bot = (function () {
             var filter = "  ?subject rdf:type owl:ObjectProperty   filter( ?predicate=rdf:type)";
             self.getResourcesList("Predicate", "subject", filter, { withoutImports: 0 }, function (err, result) {
                 if (err) {
-                    alert(err.responseText || err);
+                    MainController.errorAlert(err);
                     return self.myBotEngine.previousStep();
                 }
 
@@ -754,7 +754,7 @@ var SparqlQuery_bot = (function () {
                 }
                 self.getResourcesList("Restriction", null, filter, { withoutImports: 0 }, function (err, result) {
                     if (err) {
-                        alert(err.responseText || err);
+                        MainController.errorAlert(err);
                         return self.myBotEngine.previousStep();
                     }
 
@@ -783,7 +783,7 @@ var SparqlQuery_bot = (function () {
 
                 self.getResourcesList("Predicate", null, filter, { withoutImports: 0 }, function (err, result) {
                     if (err) {
-                        alert(err.responseText || err);
+                        MainController.errorAlert(err);
                         return self.myBotEngine.previousStep();
                     }
 
@@ -1324,7 +1324,7 @@ var SparqlQuery_bot = (function () {
 
         UserDataWidget.showSaveDialog("savedQueries", data, null, function (err, result) {
             if (err) {
-                return alert(err);
+                return MainController.errorAlert(err);
             }
             //console.log(result);
             $("#KGquery_messageDiv").text("saved query");

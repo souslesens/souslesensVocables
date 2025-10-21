@@ -1028,7 +1028,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
                 }
             },
             error(err) {
-                return alert(err);
+                return MainController.errorAlert(err);
             },
         });
     };
@@ -1131,7 +1131,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
                 if (err.responseJSON == "file does not exist") {
                     return;
                 }
-                return alert(err);
+                return MainController.errorAlert(err);
             },
         });
     };
@@ -1162,7 +1162,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
                 if (callback) {
                     return callback(err);
                 }
-                return alert(err);
+                return MainController.errorAlert(err);
             },
         });
     };

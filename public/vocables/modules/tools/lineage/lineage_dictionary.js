@@ -97,7 +97,7 @@ var Lineage_dictionary = (function () {
                     //get domain and range sources
                     function (callbackSeries) {
                         self.getDictionarySources(self.currentDictionary, self.currentDomainSource, null, function (err, result) {
-                            if (err) UI.message(err.responseText);
+                            if (err) return MainController.errorAlert(err);
                             var rangeSourceLabel = [];
                             result.forEach(function (item) {
                                 if (!self.domainAndRangeSourcesmap[item.domainSourceLabel.value]) self.domainAndRangeSourcesmap[item.domainSourceLabel.value] = [];
@@ -303,7 +303,7 @@ var Lineage_dictionary = (function () {
             },
             function (err) {
                 if (err) {
-                    return alert(err.responseText);
+                    return MainController.errorAlert(err);
                 }
             },
         );
@@ -504,7 +504,7 @@ targets: [0]
                 },
             ],
             function (err) {
-                if (err) return alert(err.responseText);
+                if (err) return MainController.errorAlert(err);
             },
         );
     };
@@ -552,12 +552,12 @@ targets: [0]
             getMetadata: true,
         };
         Lineage_whiteboard.drawRestrictions(Config.dictionarySource, nodes, false, false, options, function (err) {
-            if (err) return alert(err.responseText);
+            if (err) return MainController.errorAlert(err);
             var nodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.getIds();
             $("#mainDialogDiv").dialog("close");
             var distinctSources = [];
             SearchUtil.getSourceLabels(null, nodes, null, null, function (err, result) {
-                if (err) return alert(err.responseText);
+                if (err) return MainController.errorAlert(err);
                 var newNodes = [];
                 var newSources = [];
                 result.forEach(function (hit) {
@@ -619,7 +619,7 @@ targets: [0]
                 },
                 function (err) {
                     if (err) {
-                        return alert(err.responseText);
+                        return MainController.errorAlert(err);
                     }
                     Lineage_dictionary.validation.updateDatatableCells("delete");
                 },

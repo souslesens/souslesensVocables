@@ -2923,7 +2923,7 @@ var Sparql_OWL = (function () {
                 callback();
             },
             error(err) {
-                alert(err.responseText);
+                MainController.errorAlert(err);
                 if (callback) {
                     return callback(err);
                 }

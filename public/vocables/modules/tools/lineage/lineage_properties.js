@@ -401,7 +401,7 @@ var Lineage_properties = (function () {
 
         Sparql_OWL.getPropertiesRestrictionsDescription(source, properties, options, function (err, result) {
             if (err) {
-                alert(err.responseText);
+                MainController.errorAlert(err);
                 return UI.message(err.responseText, true);
             }
             var visjsData = { nodes: [], edges: [] };
@@ -515,7 +515,7 @@ var Lineage_properties = (function () {
         }
         self.getPropertiesRangeAndDomain(source, property, {}, function (err, result) {
             if (err) {
-                return alert(err.responseText);
+                return MainController.errorAlert(err);
             }
             var strAll = "domainLabel\tsubPropertyLabel\tpropertyLabel\trangeLabel\tinversePropertyURI\t--\tdomainURI\tsubPropertyURI\tpropertyURI\trangeURI\tinversePropertyURI\n";
 
@@ -568,7 +568,7 @@ var Lineage_properties = (function () {
     self.drawRangeAndDomainsGraph = function (source, targetnodes, options, property) {
         self.getPropertiesRangeAndDomain(source, property, options, function (err, result) {
             if (err) {
-                return alert(err.responseText);
+                return MainController.errorAlert(err);
             }
 
             //set invers properties

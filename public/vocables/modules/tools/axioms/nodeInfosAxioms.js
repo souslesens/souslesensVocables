@@ -44,7 +44,7 @@ var NodeInfosAxioms = (function () {
                 self.initSourceClassesMap(self.currentSource, function (err, result) {
                     //used to parse manchester
                     if (err) {
-                        return alert(err);
+                        return MainController.errorAlert(err);
                     }
                     self.loadAxiomsJstree();
                 });
@@ -78,7 +78,7 @@ var NodeInfosAxioms = (function () {
         self.getResourceAxioms(self.currentResource.data.id, {}, function (err, result) {
             $("#waitImg").css("display", "none");
             if (err) {
-                return alert(err.responseText || err);
+                return MainController.errorAlert(err.responseText || err);
             }
 
             if (!result.manchester || result.manchester.length == 0) {
@@ -242,7 +242,7 @@ var NodeInfosAxioms = (function () {
         self.getResourceAxioms(node.data.id, {}, function (err, result) {
             $("#waitImg").css("display", "none");
             if (err) {
-                return alert(err.responseText);
+                return MainController.errorAlert(err.responseText);
             }
 
             var allTriples = [];
@@ -295,7 +295,7 @@ var NodeInfosAxioms = (function () {
                 self.initSourceClassesMap(self.currentSource, function (err, result) {
                     //used to parse manchester
                     if (err) {
-                        return alert(err);
+                        return MainController.errorAlert(err);
                     }
 
                     var addToGraph = false;

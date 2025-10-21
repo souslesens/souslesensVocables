@@ -751,7 +751,7 @@ indexes.push(source.toLowerCase());
             },
             function (err) {
                 if (err) {
-                    alert(err.responseText);
+                    MainController.errorAlert(err);
                 } else {
                     UI.message("ALL DONE  total indexed : " + totalLinesAllsources);
                 }

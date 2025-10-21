@@ -123,7 +123,7 @@ var KGquery_graph = (function () {
                         options.saveGraph = true;
                         return self.drawVisjsModel("inferred", options);
                     }
-                    return alert(err.responseText || err);
+                    return MainController.errorAlert(err.responseText || err);
                 }
                 self.drawModel(options.displayGraphInList);
 
@@ -224,7 +224,7 @@ var KGquery_graph = (function () {
                 var visjsDataSource = { nodes: [], edges: [] };
                 UserDataWidget.listUserData(null, function (err, result) {
                     if (err) {
-                        return alert(err || err.responseText);
+                        return MainController.errorAlert(err || err.responseText);
                     }
                     // order to get last saved instance of our graph in user_data
                     result = result.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
@@ -264,7 +264,7 @@ var KGquery_graph = (function () {
             },
             function (err) {
                 if (err) {
-                    return alert(err);
+                    return MainController.errorAlert(err);
                 }
 
                 self.KGqueryGraph = new VisjsGraphClass("KGquery_graphDiv", visjsData, self.visjsOptions);
@@ -724,7 +724,7 @@ var KGquery_graph = (function () {
         }
         UserDataWidget.saveMetadata(label, data_type, data, group, function (err, result) {
             if (err) {
-                return alert(err.responseText || err);
+                return MainController.errorAlert(err.responseText || err);
             }
             $("#KGquery_messageDiv").text("saved graph");
             self.currentUserDataModel = { id: result?.id };
@@ -805,7 +805,7 @@ var KGquery_graph = (function () {
             },
             function (err) {
                 if (err) {
-                    return alert(err);
+                    return MainController.errorAlert(err);
                 }
                 var fileName = MainController.currentSource + "_decoration.json";
                 var payload = {
@@ -913,7 +913,7 @@ var KGquery_graph = (function () {
                 },
                 function (err, result) {
                     if (err) {
-                        return alert(err || err.responseText);
+                        return MainController.errorAlert(err || err.responseText);
                     }
                     if (result.length > 0) {
                         // new method in userData
@@ -982,7 +982,7 @@ var KGquery_graph = (function () {
                     KGquery_graph.message("generating tbox graph from abox graph");
                     self.getImplicitModelVisjsData(KGquery.currentSource, function (err, result2) {
                         if (err) {
-                            return alert(err);
+                            return MainController.errorAlert(err);
                         }
 
                         if (result2 === null) {
@@ -1103,7 +1103,7 @@ var KGquery_graph = (function () {
     self.importKGmodel = function () {
         ImportFileWidget.showImportDialog(function (err, result) {
             if (err) {
-                return alert(err);
+                return MainController.errorAlert(err);
             }
             var data = JSON.parse(result);
             if (!data.nodes || data.nodes.length == 0) {

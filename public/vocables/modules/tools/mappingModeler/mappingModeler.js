@@ -767,7 +767,7 @@ var MappingModeler = (function () {
             var newObject = { id: "createClass", label: "_Create new Class_" };
             self.getAllClasses(MappingModeler.currentSLSsource, function (err, classes) {
                 if (err) {
-                    return alert(err);
+                    return MainController.errorAlert(err);
                 }
 
                 var classesCopy = JSON.parse(JSON.stringify(classes));
@@ -794,7 +794,7 @@ var MappingModeler = (function () {
                 { keepSuperClasses: true },
                 function (err, result) {
                     if (err) {
-                        return alert(err);
+                        return MainController.errorAlert(err);
                     }
                     var properties = [];
                     for (var group in result.constraints) {
@@ -822,7 +822,7 @@ var MappingModeler = (function () {
 
                     MappingModelerRelations.listPossibleRelations(function (err, jstreeData) {
                         if (err) {
-                            alert(err);
+                            MainController.errorAlert(err);
                         }
                         jstreeData.forEach(function (item) {
                             if (item?.data?.fromColumn?.id == self.currentRelation.from.id && item?.data?.toColumn?.id == self.currentRelation.to.id) {
@@ -1164,7 +1164,7 @@ var MappingModeler = (function () {
         var params = { source: MappingModeler.currentSLSsource, filteredUris: filteredUris };
         return CreateAxiomResource_bot.start(botWorkFlow, params, function (err, result) {
             if (err) {
-                return alert(err);
+                return MainController.errorAlert(err);
             }
             var previousLabel = CreateAxiomResource_bot.params.newObject.label;
             CreateAxiomResource_bot.params.newObject.label = MappingModeler.currentSLSsource.substring(0, 3) + ":" + CreateAxiomResource_bot.params.newObject.label;
@@ -1256,7 +1256,7 @@ var MappingModeler = (function () {
                 if (callback) {
                     return callback(err.responseText);
                 }
-                alert(err.responseText);
+                MainController.errorAlert(err);
                 return err;
             },
         });
@@ -1440,7 +1440,7 @@ var MappingModeler = (function () {
     self.loadSource = function (callback) {
         Lineage_sources.loadSources(MainController.currentSource, function (err) {
             if (err) {
-                return alert(err.responseText);
+                return MainController.errorAlert(err);
             }
             $("#Lineage_graphEditionButtons").hide();
             return callback();
@@ -1553,7 +1553,7 @@ var MappingModeler = (function () {
                     showTable(data.rows);
                 },
                 error(err) {
-                    return alert(err.responseText);
+                    return MainController.errorAlert(err);
                 },
             });
         } else if (DataSourceManager.currentConfig.currentDataSource.type == "csvSource") {

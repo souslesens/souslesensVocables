@@ -37,7 +37,7 @@ var Browse = (function () {
         self.currentSource = MainController.currentSource;
         Lineage_sources.loadSources(MainController.currentSource, function (err) {
             if (err) {
-                return alert(err.responseText);
+                return MainController.errorAlert(err.responseText);
             }
             $("#lateralPanelDiv").load("modules/tools/browse/html/browseLeftPanel.html", function () {
                 $("#graphDiv").load("modules/tools/browse/html/browseCentralPanel.html", function () {
@@ -56,7 +56,7 @@ var Browse = (function () {
     self.showDialog = function (mainSource) {
         /*   self.loadWhiteboardContent(function (err, result) {
             if (err) {
-                return alert(err)
+                return MainController.errorAlert(err)
             }*/
         $("#mainDialogDiv").load("modules/tools/browse/html/browseDialog.html", function () {
             $("#mainDialogDiv").dialog("open");
@@ -111,7 +111,7 @@ var Browse = (function () {
                 }
                 SearchUtil.getSimilarLabelsInSources(null, sources, [term], null, mode, options, function (_err, result) {
                     if (_err) {
-                        return alert(err.responseText);
+                        return MainController.errorAlert(err.responseText);
                     }
                     self.currentSearchResult = result[0].matches;
                     self.currentSearchResult.parentIdsLabelsMap = result.parentIdsLabelsMap;
@@ -208,7 +208,7 @@ var Browse = (function () {
         var triples = [];
         SubGraph.instantiateSubGraphTriples(hit.source, hit.id, { nonUnique: true }, function (err, result) {
             if (err) {
-                return alert(err);
+                return MainController.errorAlert(err);
             }
             triples = result.triples;
             SubGraph.instantiateSubGraphTriples(

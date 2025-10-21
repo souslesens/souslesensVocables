@@ -393,7 +393,7 @@ var Lineage_createRelation = (function () {
                     }
                     Lineage_createRelation.createSubProperty(Lineage_sources.activeSource, self.currentPropertiesTreeNode.data.id, subPropertyLabel, true, function (err, result) {
                         if (err) {
-                            return alert(err);
+                            return MainController.errorAlert(err);
                         }
 
                         if (!self.domainOntologyProperties) {
@@ -536,7 +536,7 @@ var Lineage_createRelation = (function () {
             var xsdType = prompt("DatatypeProperty range xsd:type");
 
             self.createDataTypeProperty(Lineage_sources.activeSource, propLabel, null, xsdType, function (err, result) {
-                if (err) return alert(err.responseText);
+                if (err) return MainController.errorAlert(err);
                 $("#smallDialogDiv").dialog("close");
                 return UI.message("annotation property created", true);
             });
@@ -607,7 +607,7 @@ var Lineage_createRelation = (function () {
                             if (confirm("delete previous relation " + oldRelations[0].data.propertyLabel)) {
                                 Lineage_createRelation.deleteRestriction(Lineage_sources.activeSource, oldRelations[0], function (err) {
                                     if (err) {
-                                        alert(err);
+                                        MainController.errorAlert(err);
                                     }
                                 });
                             }
@@ -945,7 +945,7 @@ var Lineage_createRelation = (function () {
                     if (callback) {
                         return callback(err);
                     }
-                    return alert(err);
+                    return MainController.errorAlert(err);
                 }
 
                 if (callback) {

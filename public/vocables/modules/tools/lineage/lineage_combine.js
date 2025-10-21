@@ -405,7 +405,7 @@ triples.push({})
                 },
                 function (err) {
                     if (callback) return callback(err, sourceMessage);
-                    if (err) return alert(err.responseText);
+                    if (err) return MainController.errorAlert(err);
                     alert(message);
                     return UI.message("ALL DONE", true);
                 },

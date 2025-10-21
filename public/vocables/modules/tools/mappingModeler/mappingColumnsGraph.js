@@ -559,7 +559,7 @@ var MappingColumnsGraph = (function () {
             };
             Sparql_OWL.getFilteredTriples(MappingModeler.currentSLSsource, self.currentGraphNode.data.id, "http://www.w3.org/2000/01/rdf-schema#subClassOf", null, options, function (err, result) {
                 if (err) {
-                    return alert(err);
+                    return MainController.errorAlert(err);
                 }
                 if (result.length == 0) {
                     return alert("no superClass");
@@ -717,7 +717,7 @@ var MappingColumnsGraph = (function () {
             },
             function (err) {
                 if (err) {
-                    return alert(err);
+                    return MainController.errorAlert(err);
                 }
                 var classNodes = nodes.filter(function (node) {
                     return node.data.type == "Class";
@@ -948,11 +948,11 @@ var MappingColumnsGraph = (function () {
                     }
                 },
                 error(err) {
-                    return alert(err);
+                    return MainController.errorAlert(err);
                 },
             });
         } catch (e) {
-            return alert(e);
+            return MainController.errorAlert(e);
         }
     };
 
@@ -1320,7 +1320,7 @@ var MappingColumnsGraph = (function () {
                         if (err.responseJSON == "file does not exist") {
                             return;
                         }
-                        return alert(err);
+                        return MainController.errorAlert(err);
                     },
                 });
             });
@@ -1329,7 +1329,7 @@ var MappingColumnsGraph = (function () {
         self.importMappingsFromJSONFile = function () {
             ImportFileWidget.showImportDialog(function (err, result) {
                 if (err) {
-                    return alert(err);
+                    return MainController.errorAlert(err);
                 }
                 var data = JSON.parse(result);
                 if (data.nodes.length == 0) {
@@ -1351,7 +1351,7 @@ var MappingColumnsGraph = (function () {
                         MappingModeler.onLoaded();
                     },
                     error(err) {
-                        return alert(err);
+                        return MainController.errorAlert(err);
                     },
                 });
             });
@@ -1371,7 +1371,7 @@ var MappingColumnsGraph = (function () {
     self.importMappingsFromJSONFile = function () {
         ImportFileWidget.showImportDialog(function (err, result) {
             if (err) {
-                return alert(err);
+                return MainController.errorAlert(err);
             }
             var data = JSON.parse(result);
             if (data.nodes.length == 0) {
@@ -1396,7 +1396,7 @@ var MappingColumnsGraph = (function () {
                     MappingModeler.onLoaded();
                 },
                 error(err) {
-                    return alert(err);
+                    return MainController.errorAlert(err);
                 },
             });
         });
@@ -1436,7 +1436,7 @@ var MappingColumnsGraph = (function () {
                     if (err.responseJSON == "file does not exist") {
                         return;
                     }
-                    return alert(err);
+                    return MainController.errorAlert(err);
                 },
             });
         });

@@ -361,7 +361,7 @@ var DataSourceManager = (function () {
                     if (callback) {
                         return callback(err);
                     }
-                    return alert(err);
+                    return MainController.errorAlert(err);
                 }
                 if (callback) {
                     return callback(null, columns);
@@ -448,7 +448,7 @@ var DataSourceManager = (function () {
                     ],
                     function (err) {
                         if (err) {
-                            return alert(err);
+                            return MainController.errorAlert(err);
                         }
                         if (callback) {
                             callback();
@@ -629,7 +629,7 @@ var DataSourceManager = (function () {
         DataSourceManager.rawConfig.databaseSources[datasource.id] = { name: datasource.name };
         DataSourceManager.saveSlsvSourceConfig(function (err, result) {
             if (err) {
-                return alert(err);
+                return MainController.errorAlert(err);
             }
             MappingModeler.onLoaded();
             // self.addDataSourceToJstree("databaseSource", datasource, "sql.sqlserver");
@@ -659,7 +659,7 @@ var DataSourceManager = (function () {
 
         DataSourceManager.saveSlsvSourceConfig(function (err, result) {
             if (err) {
-                return alert(err);
+                return MainController.errorAlert(err);
             }
             MappingModeler.onLoaded();
         });
@@ -695,7 +695,7 @@ var DataSourceManager = (function () {
 
         DataSourceManager.saveSlsvSourceConfig(function (err, result) {
             if (err) {
-                return alert(err);
+                return MainController.errorAlert(err);
             }
             // Delete all nodes/edges from this DataSource
 

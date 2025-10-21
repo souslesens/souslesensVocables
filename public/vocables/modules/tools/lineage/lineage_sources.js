@@ -175,7 +175,7 @@ var Lineage_sources = (function () {
                     if (callback) {
                         return callback(err);
                     }
-                    return alert(err);
+                    return MainController.errorAlert(err);
                 }
                 self.setCurrentSource(firstSource);
                 $("#sourcesSelectionDialogdiv").dialog("close");
@@ -302,7 +302,7 @@ var Lineage_sources = (function () {
 
         self.getSourcesClasses(self.activeSource, function (err, result) {
             if (err) {
-                return alert(err);
+                return MainController.errorAlert(err);
             }
 
             //  common.fillSelectOptions("GenericTools_searchAllClassSelect", result, true, "label", "id");
@@ -485,7 +485,7 @@ var Lineage_sources = (function () {
     self.indexSourceIfNotIndexed = function (source) {
         SearchUtil.initSourcesIndexesList(null, function (err, indexedSources) {
             if (err) {
-                return alert(err.responseText);
+                return MainController.errorAlert(err);
             }
             if (indexedSources.indexOf(source) < 0) {
                 UI.message("indexing source " + source);

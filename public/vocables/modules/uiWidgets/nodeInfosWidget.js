@@ -1148,7 +1148,7 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
 
             Sparql_generic.insertTriples(self.currentSource, triples, {}, function (err, _result) {
                 if (err) {
-                    return alert(err);
+                    return MainController.errorAlert(err);
                 }
                 // store Annotator infos in source/userGraph
                 if (authentication.currentUser.groupes.indexOf("Annotator") > -1) {
@@ -1236,7 +1236,7 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
                         }
                         Sparql_generic.deleteTriples(self.currentSource, self.currentNodeId, currentEditingItem.item.prop.value, object, function (err, _result) {
                             if (err) {
-                                return alert(err);
+                                return MainController.errorAlert(err);
                             }
                             result = _result;
                             return callbackSeries();
@@ -1260,7 +1260,7 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
                 ],
                 function (err) {
                     if (err) {
-                        return alert(err);
+                        return MainController.errorAlert(err);
                     }
 
                     self.showNodeInfos(self.currentSource, self.currentNode, "mainDialogDiv");
@@ -1386,7 +1386,7 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
                 ],
                 function (err) {
                     if (err) {
-                        return alert(err);
+                        return MainController.errorAlert(err);
                     }
                     $("#" + self.divId).dialog("close");
                     UI.message("node deleted");
@@ -1408,14 +1408,14 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
 
                 SearchUtil.addPropertiesToIndex(self.currentSource, data, function (err, _result) {
                     if (err) {
-                        return alert(err);
+                        return MainController.errorAlert(err);
                     }
                 });
             }
 
             SearchUtil.addObjectsToIndex(self.currentSource, self.currentNodeId, function (err, _result) {
                 if (err) {
-                    return alert(err);
+                    return MainController.errorAlert(err);
                 }
             });
         }
@@ -1444,11 +1444,11 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
         }
         Sparql_generic.deleteTriples(self.currentSource, self.currentNodeId, self.currentEditingItem.item.prop.value, oldValue, function (err, _result) {
             if (err) {
-                return alert(err);
+                return MainController.errorAlert(err);
             }
             self.addPredicate(self.currentEditingItem.item.prop.value, newValue, self.currentSource, false, function (err, result) {
                 if (err) {
-                    return alert(err.responseText);
+                    return MainController.errorAlert(err);
                 }
                 if (self.currentEditingItem.item.prop.value.indexOf("label") > -1) {
                     if (self.currentNodeId.from) {
@@ -1619,7 +1619,7 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
 
         Sparql_generic.insertTriples(source, triples, {}, function (err, result) {
             if (err) {
-                alert(err.responseText);
+                MainController.errorAlert(err);
             }
 
             var node = {
@@ -1638,7 +1638,7 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
             });
             SearchUtil.generateElasticIndex(source, { ids: [proposedUri] }, function (err, result) {
                 if (err) {
-                    return alert(err.responseText);
+                    return MainController.errorAlert(err);
                 }
                 UI.message("node Created and Indexed");
             });
@@ -1772,7 +1772,7 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
 
         Lineage_createRelation.deleteRestriction(self.currentSource, restrictionNode, function (err, result) {
             if (err) {
-                return alert(err.responseText || err);
+                return MainController.errorAlert(err);
             }
             self.showRestrictionInfos(self.currentNode, "nodeInfos_restrictionsDiv", false);
         });

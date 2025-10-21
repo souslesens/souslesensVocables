@@ -305,7 +305,7 @@ var MappingsDetails = (function () {
                             MappingColumnsGraph.currentGraphNode = MappingColumnsGraph.visjsGraph.data.nodes.get(node.parent);
                             Lookups_bot.start(Lookups_bot.lookUpWorkflow, {}, function (err, result) {
                                 if (err) {
-                                    return alert(err);
+                                    return MainController.errorAlert(err);
                                 }
                             });
                         },

@@ -76,7 +76,7 @@ var SavedQueriesWidget = (function () {
                 if (callback) {
                     callback(err);
                 }
-                return alert(err.responseText);
+                return MainController.errorAlert(err);
             }
             var data = [];
 
@@ -134,7 +134,7 @@ var SavedQueriesWidget = (function () {
     self.loadItem = function (userDataId, options, callback) {
         UserDataWidget.loadUserDatabyId(userDataId, function (err, result) {
             if (err) {
-                return alert(err);
+                return MainController.errorAlert(err);
             }
             if (result && result?.data_content?.sparqlQuery && self.loadQueryFn) {
                 self.loadQueryFn(null, result.data_content);
@@ -145,7 +145,7 @@ var SavedQueriesWidget = (function () {
     self.save = function (slsvSource, scope, callback) {
         self.saveQueryFn(function (err, result) {
             if (err) {
-                return alert(err.responseText);
+                return MainController.errorAlert(err);
             }
             var data = result;
             if (!data) {
@@ -162,7 +162,7 @@ var SavedQueriesWidget = (function () {
             //UserDataWidget.currentTreeNode = null;
             UserDataWidget.showSaveDialog("savedQueries", data, null, function (err, result) {
                 if (err) {
-                    return alert(err);
+                    return MainController.errorAlert(err);
                 }
                 //console.log(result);
                 $("#KGquery_messageDiv").text("saved query");
@@ -226,7 +226,7 @@ var SavedQueriesWidget = (function () {
                     if (callback) {
                         return callback(err);
                     }
-                    return alert(err.responseText);
+                    return MainController.errorAlert(err);
                 }
                 if (callback) {
                     callback(null, { id: queryUri, label: label });
@@ -248,7 +248,7 @@ var SavedQueriesWidget = (function () {
         var node = { id: userDataId, data_label: userDataLabel };
         UserDataWidget.deleteItem(node, function (err, result) {
             if (err) {
-                return alert(err.responseText || err);
+                return MainController.errorAlert(err);
             }
             $("#KGquery_messageDiv").text("deleted query");
             $("#SavedQueriesComponent_itemsSelect")

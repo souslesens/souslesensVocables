@@ -305,7 +305,7 @@ var KGquery_filter = (function () {
 
         KGquery_filter_bot.start(aClass.data, currentFilterQuery, function (err, result) {
             if (err) {
-                return alert(err.responseText);
+                return MainController.errorAlert(err);
             }
             KGquery.querySets.sets[classSetIndex].classFiltersMap[classDivId] = { class: aClass, filter: result.filter };
             $("#" + classDivId + "_filter").text(result.filterLabel || result.filter);

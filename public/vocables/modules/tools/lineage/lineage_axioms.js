@@ -31,7 +31,7 @@ var Lineage_axioms = (function () {
         //  Axiom_manager.listClassesWithAxioms(source, function (err, result) {
         AxiomExtractor.listClassesWithAxioms(source, function (err, result) {
             if (err) {
-                return alert(err);
+                return MainController.errorAlert(err);
             }
 
             result = result.slice(0, 500);

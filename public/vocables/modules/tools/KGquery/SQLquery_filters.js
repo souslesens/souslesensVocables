@@ -268,7 +268,7 @@ var SQLquery_filters = (function () {
     self.runQuery = function () {
         return SQLquery_run.execPathQuery(self.querySets, self.currentSource, "lifex_dalia_db", {}, function (err, tableData) {
             if (err) {
-                return alert(err);
+                return MainController.errorAlert(err);
             }
             self.showTableData(tableData);
         });

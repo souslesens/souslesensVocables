@@ -368,7 +368,7 @@ var CreateSLSVsource_bot = (function () {
                     setLoading(false);
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
-                    MainController.errorAlert(jqXHR); 
+                    MainController.errorAlert(jqXHR);
                     setLoading(false);
                     return self.myBotEngine.previousStep();
                 },

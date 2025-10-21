@@ -30,7 +30,7 @@ var TripleFactory = (function () {
             return;
         }
 
-        self.showFilterMappingDialog(true);
+        self.initFilterMappingDialog(true);
     };
 
     /**
@@ -44,7 +44,7 @@ var TripleFactory = (function () {
         if (!self.checkCurrentTable()) {
             return;
         }
-        self.showFilterMappingDialog(false);
+        self.initFilterMappingDialog(false);
     };
 
     /**
@@ -61,11 +61,11 @@ var TripleFactory = (function () {
      * Displays a dialog for filtering mappings, allowing the user to choose between sample and actual triples.
      * The dialog is populated with a tree view of detailed mappings that can be filtered by the user.
      * @function
-     * @name showFilterMappingDialog
+     * @name initFilterMappingDialog
      * @memberof module:TripleFactory
      * @param {boolean} isSample - If true, the dialog is for displaying sample mappings; if false, for writing actual triples.
      */
-    self.showFilterMappingDialog = function (isSample) {
+    self.initFilterMappingDialog = function (isSample) {
         self.filterMappingIsSample = isSample;
         UIcontroller.activateRightPanel("generic");
         // save current mappings before opening the dialog
@@ -85,7 +85,9 @@ var TripleFactory = (function () {
      */
     self.runSlsFilteredMappings = function () {
         var checkedNodes = JstreeWidget.getjsTreeCheckedNodes("detailedMappings_filterMappingsTree");
-        if (checkedNodes.length == 0) return alert(" no mappings selected");
+        if (checkedNodes.length == 0) {
+            return alert(" no mappings selected");
+        }
         var filterMappingIds = [];
         checkedNodes.forEach(function (item) {
             filterMappingIds.push(item.id);
@@ -363,7 +365,7 @@ var TripleFactory = (function () {
         var regex = /<([^>]*)> <*([^ >]*)>* <*([^>]*)>*/;
         data.sampleTriples.forEach(function (item, index) {
             var array = regex.exec(item);
-            tableData.push([array[1], array[2], array[3]]);
+            //  tableData.push([array[1], array[2], array[3]]);
             tableData.push([escapeMarkup(array[1]), escapeMarkup(array[2]), escapeMarkup(array[3])]);
             //  tableData.push([escapeMarkup(item.s), escapeMarkup(item.p), escapeMarkup(item.o)]);
         });
@@ -403,21 +405,22 @@ var TripleFactory = (function () {
             },
         ];
 
-        var columnsMap = {};
+        self.columnsMap = {};
         nodes.forEach(function (node) {
             if (node.data && MappingModeler.columnsMappingsObjects.includes(node?.data?.type) && node.data.dataTable == table) {
-                columnsMap[node.id] = node;
+                self.columnsMap[node.id] = node;
                 treeData.push({
                     id: node.id,
                     text: node.label,
                     parent: "Columns",
+                    data: node.data,
                 });
             }
         });
 
         edges.forEach(function (edge) {
-            if (columnsMap[edge.from] && columnsMap[edge.to]) {
-                var label = columnsMap[edge.from].label + "-" + edge.label + "->" + columnsMap[edge.to].label;
+            if (self.columnsMap[edge.from] && self.columnsMap[edge.to]) {
+                var label = self.columnsMap[edge.from].label + "-" + edge.label + "->" + self.columnsMap[edge.to].label;
                 treeData.push({
                     id: edge.id,
                     text: label,
@@ -425,7 +428,28 @@ var TripleFactory = (function () {
                 });
             }
         });
-        var options = { withCheckboxes: true, openAll: true };
+        var options = {
+            withCheckboxes: true,
+            openAll: true,
+            selectTreeNodeFn: function (event, obj) {
+                // add otherpredicates onclick
+                if (obj.node.parent == "Columns") {
+                    var otherPredicates = obj.node.data.otherPredicates;
+                    if (otherPredicates) {
+                        var jstreeData = [];
+                        otherPredicates.forEach(function (item) {
+                            jstreeData.push({
+                                id: item.property,
+                                text: item.property,
+                                parent: obj.node.id,
+                                data: { type: "otherPredicate" },
+                            });
+                        });
+                        JstreeWidget.addNodesToJstree(divId, obj.node.id, jstreeData);
+                    }
+                }
+            },
+        };
         JstreeWidget.loadJsTree(divId, treeData, options, function () {
             $("#detailedMappings_treeContainer").css("overflow", "unset");
         });

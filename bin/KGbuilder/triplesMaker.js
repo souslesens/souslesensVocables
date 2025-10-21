@@ -139,6 +139,10 @@ var TriplesMaker = {
                     //  async.eachSeries(slices,function(data,callbackEachDataSlice){
                     KGbuilder_socket.message(options.clientSocketId, "loading data from database table " + tableInfos.table, false);
 
+                    if (options.sampleSize) {
+                        result = result.slice(0, options.sampleSize);
+                    }
+
                     var slices = util.sliceArray(result, 300);
                     var currentTime = new Date();
                     message.tableTotalRecords = slices[0].length;
@@ -381,6 +385,19 @@ var TriplesMaker = {
 
         var batchTriples = [];
 
+        function addTriple(subjectUri, predicateUri, objectUri) {
+            if (subjectUri && predicateUri && objectUri) {
+                var triple = subjectUri + " " + predicateUri + " " + objectUri;
+
+                // var triplelHashCode = TriplesMaker.stringToNumber(triple);
+                var triplelHashCode = triple;
+                if (!tableProcessingParams.uniqueTriplesMap[triplelHashCode]) {
+                    tableProcessingParams.uniqueTriplesMap[triplelHashCode] = 1;
+                    batchTriples.push(triple);
+                }
+            }
+        }
+
         data.forEach(function (line, index) {
             if (line.functionallocation == "PAZ/FPSOH/GAS/FLARE/16-VE-HU86139-B063") {
                 var x = 3;
@@ -460,19 +477,7 @@ var TriplesMaker = {
 
                     var property = TriplesMaker.getPropertyUri(mapping.p);
 
-                    if (columnUri && property && object) {
-                        var triple = columnUri + " " + property + " " + object;
-                        var triplelHashCode = triple;
-                        //    var triplelHashCode = TriplesMaker.stringToNumber(triple);
-                        if (!tableProcessingParams.uniqueTriplesMap[triplelHashCode]) {
-                            tableProcessingParams.uniqueTriplesMap[triplelHashCode] = 1;
-                            batchTriples.push(triple);
-                        } else {
-                            var x = 5;
-                        }
-                    } else {
-                        var x = 3;
-                    }
+                    addTriple(columnUri, property, object);
                 });
                 // add metadata if not sample
                 if (!tableProcessingParams.isSampleData && !TriplesMaker.uniqueSubjects[columnUri]) {
@@ -488,22 +493,28 @@ var TriplesMaker = {
                 var objectUri = TriplesMaker.getColumnUri(line, edge.to, columnMappings, rowIndex, tableProcessingParams);
                 var property = TriplesMaker.getPropertyUri(edge.data.id);
 
-                if (subjectUri && property && objectUri) {
-                    var triple = subjectUri + " " + property + " " + objectUri;
+                addTriple(subjectUri, property, objectUri);
+            }
 
-                    // var triplelHashCode = TriplesMaker.stringToNumber(triple);
-                    var triplelHashCode = triple;
-                    if (!tableProcessingParams.uniqueTriplesMap[triplelHashCode]) {
-                        tableProcessingParams.uniqueTriplesMap[triplelHashCode] = 1;
-                        batchTriples.push(triple);
-                    } else {
-                        var x = 5;
-                    }
-                } else {
-                    var x = 5;
+            // isolated other predicates (dont want to duplicate label, type...
+            for (var columnId in columnMappings) {
+                // filter columns
+                var otherPredicates = columnMappings[columnId].otherPredicates;
+                if (otherPredicates) {
+                    otherPredicates.forEach(function (item) {
+                        if (options.filterMappingIds && options.filterMappingIds.indexOf(item.property) > -1) {
+                            var subjectUri = TriplesMaker.getColumnUri(line, columnId, columnMappings, rowIndex, tableProcessingParams);
+
+                            object = TriplesMaker.getFormatedLiteral(line, { dataType: item.range, o: item.object });
+
+                            var property = TriplesMaker.getPropertyUri(item.property);
+                            addTriple(subjectUri, property, object);
+                        }
+                    });
                 }
             }
         });
+
         /*  if (batchTriples.length < (data.length / 5)) {
             var x = 3
             return callback("!!!")
@@ -671,7 +682,7 @@ var TriplesMaker = {
         if (mapping.dataType) {
             var str = dataItem[mapping.o];
             if (!str || str == "null") {
-                return callback(null, null);
+                return null;
             }
             if (mapping.dataType.startsWith("xsd:date")) {
                 if (mapping.dateFormat) {

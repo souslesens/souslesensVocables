@@ -28,7 +28,7 @@ var KGquery_filter = (function () {
     self.selectOptionalPredicates = function (querySets, options, callback) {
         var queryNonObjectProperties = [];
         var uniqueProps = {};
-
+        self.currentSampleSize = null;
         querySets.sets.forEach(function (querySet) {
             querySet.elements.forEach(function (queryElement, queryElementIndex) {
                 // queryElement.paths.forEach(function(pathItem, pathIndex) {

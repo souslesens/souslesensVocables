@@ -3132,6 +3132,11 @@ restrictionSource = Config.predicatesSource;
             if (Lineage_sources.isSourceEditableForUser(node.data.source)) {
                 html += '    <span class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.deleteObjectProperty();"> Delete relation</span>';
             }
+        
+        else if (node && node.data.type == "http://www.w3.org/2002/07/owl#ObjectProperty" ){
+            html += '    <span class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.showPropertyInfos();"> Property Infos</span>';
+            
+        }
         } else if (false && node.data && node.data.type == "NamedIndividual") {
             html =
                 '    <span  class="popupMenuItem" onclick="Lineage_linkedData.graphActions.showIndividualInfos();"> Node infos</span>' +

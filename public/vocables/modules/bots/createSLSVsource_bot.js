@@ -139,7 +139,7 @@ var CreateSLSVsource_bot = (function () {
                 }
                 self.uploadGraphFromUrl(function (err, result) {
                     if (err) {
-                        return alert(err.responseText || err);
+                        return MainController.errorAlert(err);
                     }
                     return self.myBotEngine.nextStep();
                 });

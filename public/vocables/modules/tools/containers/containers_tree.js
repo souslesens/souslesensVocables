@@ -11,7 +11,8 @@ import Lineage_sources from "../lineage/lineage_sources.js";
 var Containers_tree = (function () {
     var self = {};
     self.jstreeDivId = "lineage_containers_containersJstree";
-
+    self.clickedContainers = {};
+    self.idsMap = {};
     self.search = function (jstreeDivId, source, options, callback) {
         if (jstreeDivId) {
             self.jstreeDivId = jstreeDivId;
@@ -76,23 +77,24 @@ var Containers_tree = (function () {
 
             if (!existingNodes[jstreeId]) {
                 existingNodes[jstreeId] = 1;
-            }
-            var node = {
-                id: jstreeId,
-                text: label,
-                parent: parent,
-                type: "Container",
-                data: {
-                    type: "Container",
-                    source: source,
-                    id: id,
-                    label: label,
-                    parent: parent,
-                    //tabId: options.tabId,
-                },
-            };
 
-            jstreeData.push(node);
+                var node = {
+                    id: jstreeId,
+                    text: label,
+                    parent: parent,
+                    type: "Container",
+                    data: {
+                        type: "Container",
+                        source: source,
+                        id: id,
+                        label: label,
+                        parent: parent,
+                        //tabId: options.tabId,
+                    },
+                };
+
+                jstreeData.push(node);
+            }
         });
 
         jstreeData.sort(function (a, b) {
@@ -149,7 +151,7 @@ var Containers_tree = (function () {
 
     self.menuActions = {};
 
-    self.listContainerResources = function (container) {
+    self.listContainerResources = function (container, jstreeDivId) {
         var source = container.data.source;
         // if container clicked don't click again on because no restrictions on container and class URIs (same class can be drawed n times in arborescence) anymore
         if (self.clickedContainers[container.id]) {
@@ -229,7 +231,7 @@ var Containers_tree = (function () {
                     });
                 });
                 //var parent = self.idsMap[container.data.id];
-                JstreeWidget.addNodesToJstree(self.jstreeDivId, parent, jstreeData);
+                JstreeWidget.addNodesToJstree(jstreeDivId || self.jstreeDivId, parent, jstreeData);
             },
         );
     };

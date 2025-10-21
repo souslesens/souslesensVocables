@@ -2,12 +2,10 @@ const KGbuilder_socket = require("./KGbuilder_socket.js");
 const { databaseModel } = require("../../model/databases.js");
 const csvCrawler = require("../_csvCrawler..js");
 const async = require("async");
-const sqlServerProxy = require("../KG/SQLserverConnector..js");
-const util = require("../util..js");
-const KGbuilder_triplesWriter = require("./KGbuilder_triplesWriter.js");
-const KGbuilder_triplesMaker = require("./KGbuilder_triplesMaker.js");
-
-const dataController = require("../dataController..js");
+const sqlServerProxy = require("../KG/SQLserverConnector.");
+const util = require("../util.");
+const KGbuilder_triplesWriter = require("./KGbuilder_triplesWriter");
+const dataController = require("../dataController.");
 const path = require("path");
 const MappingParser = require("./mappingsParser.js");
 
@@ -141,6 +139,10 @@ var TriplesMaker = {
                     //  async.eachSeries(slices,function(data,callbackEachDataSlice){
                     KGbuilder_socket.message(options.clientSocketId, "loading data from database table " + tableInfos.table, false);
 
+                    if (options.sampleSize) {
+                        result = result.slice(0, options.sampleSize);
+                    }
+
                     var slices = util.sliceArray(result, 300);
                     var currentTime = new Date();
                     message.tableTotalRecords = slices[0].length;
@@ -171,7 +173,7 @@ var TriplesMaker = {
 
                                 if (options.sampleSize) {
                                     // sample dont write triples return batchTriples
-                                    sampleTriples = batchTriples;
+                                    sampleTriples = sampleTriples.concat(batchTriples);
                                     callbackEach();
                                 } else {
                                     KGbuilder_socket.message(
@@ -377,11 +379,30 @@ var TriplesMaker = {
             });
         }
     },
-
+    /**  Build RDF triples for a batch of rows using the table’s column mappings.
+   @param {Array} data  Array of row objects; values are coerced to strings/ISO dates.
+   @param {Object} tableProcessingParams  Context: tableColumnsMappings, uniqueTriplesMap, blankNodesMap, tableInfos, jsFunctionsMap.
+   @param {Object} options  Batch options: currentBatchRowIndex, filterMappingIds; @param {Function} callback(err, triples).
+   For each row: compute subject URIs per column, emit mapped triples (constants/prefixed URIs, column URIs, transforms, typed literals), then add metadata.
+   Also generate column→column relation triples from edges and de-duplicate via uniqueTriplesMap before returning. 
+   */
     buildTriples: function (data, tableProcessingParams, options, callback) {
         var columnMappings = tableProcessingParams.tableColumnsMappings;
 
         var batchTriples = [];
+
+        function addTriple(subjectUri, predicateUri, objectUri) {
+            if (subjectUri && predicateUri && objectUri) {
+                var triple = subjectUri + " " + predicateUri + " " + objectUri;
+
+                // var triplelHashCode = TriplesMaker.stringToNumber(triple);
+                var triplelHashCode = triple;
+                if (!tableProcessingParams.uniqueTriplesMap[triplelHashCode]) {
+                    tableProcessingParams.uniqueTriplesMap[triplelHashCode] = 1;
+                    batchTriples.push(triple);
+                }
+            }
+        }
 
         data.forEach(function (line, index) {
             if (line.functionallocation == "PAZ/FPSOH/GAS/FLARE/16-VE-HU86139-B063") {
@@ -462,19 +483,7 @@ var TriplesMaker = {
 
                     var property = TriplesMaker.getPropertyUri(mapping.p);
 
-                    if (columnUri && property && object) {
-                        var triple = columnUri + " " + property + " " + object;
-
-                        var triplelHashCode = TriplesMaker.stringToNumber(triple);
-                        if (true || !tableProcessingParams.uniqueTriplesMap[triplelHashCode]) {
-                            tableProcessingParams.uniqueTriplesMap[triplelHashCode] = 1;
-                            batchTriples.push(triple);
-                        } else {
-                            var x = 5;
-                        }
-                    } else {
-                        var x = 3;
-                    }
+                    addTriple(columnUri, property, object);
                 });
                 // add metadata if not sample
                 if (!tableProcessingParams.isSampleData && !TriplesMaker.uniqueSubjects[columnUri]) {
@@ -490,22 +499,28 @@ var TriplesMaker = {
                 var objectUri = TriplesMaker.getColumnUri(line, edge.to, columnMappings, rowIndex, tableProcessingParams);
                 var property = TriplesMaker.getPropertyUri(edge.data.id);
 
-                if (subjectUri && property && objectUri) {
-                    var triple = subjectUri + " " + property + " " + objectUri;
+                addTriple(subjectUri, property, objectUri);
+            }
 
-                    // var triplelHashCode = TriplesMaker.stringToNumber(triple);
-                    var triplelHashCode = triple;
-                    if (!tableProcessingParams.uniqueTriplesMap[triplelHashCode]) {
-                        tableProcessingParams.uniqueTriplesMap[triplelHashCode] = 1;
-                        batchTriples.push(triple);
-                    } else {
-                        var x = 5;
-                    }
-                } else {
-                    var x = 5;
+            // isolated other predicates (dont want to duplicate label, type...
+            for (var columnId in columnMappings) {
+                // filter columns
+                var otherPredicates = columnMappings[columnId].otherPredicates;
+                if (otherPredicates) {
+                    otherPredicates.forEach(function (item) {
+                        if (options.filterMappingIds && options.filterMappingIds.indexOf(item.property) > -1) {
+                            var subjectUri = TriplesMaker.getColumnUri(line, columnId, columnMappings, rowIndex, tableProcessingParams);
+
+                            object = TriplesMaker.getFormatedLiteral(line, { dataType: item.range, o: item.object });
+
+                            var property = TriplesMaker.getPropertyUri(item.property);
+                            addTriple(subjectUri, property, object);
+                        }
+                    });
                 }
             }
         });
+
         /*  if (batchTriples.length < (data.length / 5)) {
             var x = 3
             return callback("!!!")
@@ -553,6 +568,7 @@ var TriplesMaker = {
             columnParams.rdfsLabel = definedInColumn.rdfsLabel;
             columnParams.baseURI = definedInColumn.baseURI;
             columnParams.prefixURI = definedInColumn.prefixURI;
+            columnParams.suffixURI = definedInColumn.suffixURI;
         }
 
         var graphUri = tableProcessingParams.sourceInfos.graphUri;
@@ -653,7 +669,8 @@ var TriplesMaker = {
                 prefix += "-";
             }
         }
-        var uri = "<" + baseUri + prefix + id + ">";
+        var suffix = columnParams.suffixURI ? columnParams.suffixURI : "";
+        var uri = "<" + baseUri + prefix + id + suffix + ">";
         return uri;
     },
 
@@ -666,12 +683,21 @@ var TriplesMaker = {
         }
     },
 
+    /**
+     * Formats a literal value from a row according to the mapping’s datatype.
+     * Handles xsd:date/xsd:dateTime (incl. custom dateFormat), strings, floats and ints,
+     * converting values to valid RDF literals with datatype annotations.
+     * NOTE: this function references `callback` but does not receive it; it currently returns the string/null.
+     * @param {Object} dataItem   Row object; value is usually taken from dataItem[mapping.o].
+     * @param {Object} mapping    Mapping info: { o, dataType, dateFormat, isString, transform, objColId }.
+     * @returns {string|null}     N-Triples literal (e.g. "\"2024-01-01\"^^xsd:date") or null if no usable value.
+     */
     getFormatedLiteral: function (dataItem, mapping) {
         var objectStr = null;
         if (mapping.dataType) {
             var str = dataItem[mapping.o];
             if (!str || str == "null") {
-                return callback(null, null);
+                return null;
             }
             if (mapping.dataType.startsWith("xsd:date")) {
                 if (mapping.dateFormat) {
@@ -742,6 +768,7 @@ var TriplesMaker = {
         }
         return objectStr;
     },
+
     getMetaDataTriples: function (subjectUri, table, options) {
         var creator = "KGcreator";
         var dateTime = "'" + util.dateToRDFString(new Date(), true) + "'^^xsd:dateTime";

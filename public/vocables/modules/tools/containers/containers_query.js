@@ -11,9 +11,7 @@ var Containers_query = (function () {
             options = {};
         }
         var filterStr = "";
-        if (false && options.memberClass) {
-            filterStr = "?member rdf:type ?memberClass filter (?memberClass=<" + options.memberClass + ">)";
-        }
+
         if (options.filter) {
             filterStr += " " + options.filter;
         }

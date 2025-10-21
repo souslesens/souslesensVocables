@@ -155,13 +155,6 @@ var MappingTransform = (function () {
                         o: data.transform,
                     });
                 }
-                /*if (data.prefixURI) {
-                    allMappings.push({
-                        s: subject,
-                        p: "prefixURI",
-                        o: data.prefixURI,
-                    });
-                }*/
             }
             if (nodeId == "7ce40e6a") var w = 3;
             var connections = MappingColumnsGraph.visjsGraph.getFromNodeEdgesAndToNodes(nodeId);
@@ -399,7 +392,6 @@ var MappingTransform = (function () {
         //filteredMappings=filteredMappings.concat(columnMappings);
         var table = MappingModeler.currentTable.name;
 
-        //filteredMappings = { [table]: { tripleModels: filteredMappings, transform: transforms, lookups: {}, prefixURI: DataSourceManager.currentConfig?.prefixURI } };
         filteredMappings = { [table]: { tripleModels: filteredMappings, transform: transforms, lookups: {} } };
         // Add checked lookups
         if (Object.keys(DataSourceManager.currentConfig.lookups)) {

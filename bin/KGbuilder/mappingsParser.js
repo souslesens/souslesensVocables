@@ -3,7 +3,7 @@ const async = require("async");
 const fs = require("fs");
 
 var MappingParser = {
-    columnsMappingsObjects: ["Column", "RowIndex", "VirtualColumn"],
+    columnsMappingsObjects: ["Column", "RowIndex", "VirtualColumn", "URI"],
     getMappingsData: function (source, callback) {
         var mappingGraphDir = path.join(__dirname, "../../data/graphs/");
         var file = mappingGraphDir + "mappings_" + source + "_ALL.json";
@@ -95,6 +95,10 @@ var MappingParser = {
         return false;
     },
 
+    /* Builds triples linking `from` to `to`: rdfs:subClassOf if from.rdfType is owl:Class, else rdf:type.
+    Always asserts the subject’s own rdf:type and optionally an rdfs:label when provided.
+    Inputs: fromNodeData {id, rdfType, rdfsLabel}, toNodeData {id}; returns an array of {s,p,o,isString?}.
+    Used to serialize type hierarchy and labels during mapping generation. */
     getTypeAndLabelMappings: function (fromNodeData, toNodeData) {
         var mappings = [];
 
@@ -122,7 +126,10 @@ var MappingParser = {
 
         return mappings;
     },
-
+    /** Extract column-to-column candidates for a specific table from the mapping graph.
+   Builds a columnsMap keyed by node id for nodes whose type is in columnsMappingsObjects
+   and whose dataTable equals the provided table; edgeMap will hold links discovered later.
+   Intended as the first pass before computing inter-column edges (optionally filtered by IDs). */
     getColumnToColumnMappings: function (mappingData, table, filterMappingIds) {
         var columnsMap = {};
         var edgeMap = {};
@@ -141,6 +148,11 @@ var MappingParser = {
         });
         return edgeMap;
     },
+
+    /**  Build triples from a column’s `otherPredicates` array (non-type properties).
+   @param {Object} columnData  Column mapping object; needs `id` and optionally `otherPredicates[]`.
+   @returns {Array<Object>}    List of triples {s,p,o, dataType?, dateFormat?} derived from predicates.
+   If a predicate.range contains "Resource", dataType is normalized to "xsd:string"; else the range is kept. */
     getOtherPredicates: function (columnData) {
         var mappings = [];
         if (columnData.otherPredicates) {
@@ -167,29 +179,6 @@ var MappingParser = {
         }
         return mappings;
     },
-
-    /*  getGlobalParamsMap:function(columnMappings){
-          var globalParamsMap= {
-              functions: {},
-              lookups: {},
-              prefixURIs: {},
-              baseURIs: {}
-          }
-
-          for (var columnId in columnMappings){
-              var column=columnMappings[columnId]
-              globalParamsMap[columnId] ={
-                  baseURI:column.baseURI || null,
-                  prefixURI:column.prefixURI || null,
-                  transform:column.transform || null,// clarifier différence entre function at transform
-                  function:column.function || null,
-                  uriType:column.uriType || null,
-              }
-          }
-
-          return globalParamsMap;
-
-      }*/
 
     /**
      *

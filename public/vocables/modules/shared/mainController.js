@@ -367,8 +367,14 @@ var MainController = (function () {
             callback();
         }
     };
-    self.setErrorMessage = function (err,type) {
-        var message = err.responseText;
+    self.errorAlert = function (err) {
+        if(typeof err == "object"){
+            var message = err.responseText || err.message;
+        }else if(typeof err == "string"){
+            var message = err;
+        }else{
+            var message = "An error occurred";
+        }
         
         alert(message);
     }

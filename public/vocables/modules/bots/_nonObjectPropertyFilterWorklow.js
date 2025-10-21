@@ -215,7 +215,7 @@ class NonObjectPropertyFilterWorklow {
     listIndividualsFn() {
         Sparql_OWL.getDistinctClassLabels(self.params.source, [self.params.currentClass], {}, function (err, result) {
             if (err) {
-                return alert(err);
+                return MainController.errorAlert(err);
             }
             var individuals = [];
             result.forEach(function (item) {

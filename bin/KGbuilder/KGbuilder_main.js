@@ -8,7 +8,6 @@ var httpProxy = require("../httpProxy.");
 const ConfigManager = require("../configManager.");
 
 const SocketManager = require("../socketManager.");
-const KGbuilder_triplesMaker = require("./KGbuilder_triplesMaker");
 const KGbuilder_triplesWriter = require("./KGbuilder_triplesWriter");
 const KGbuilder_socket = require("./KGbuilder_socket");
 const dbConnector = require("../KG/dbConnector");

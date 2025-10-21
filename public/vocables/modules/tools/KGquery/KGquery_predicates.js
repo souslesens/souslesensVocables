@@ -11,7 +11,7 @@ var KGquery_predicates = (function () {
 
     self.setRdfTypePredicates = function (queryElement, predicatesSubjectsMap) {
         if (!queryElement.toNode) {
-            return;
+            //return;
             if (queryElement.fromNode) {
             } else {
             }

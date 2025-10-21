@@ -379,7 +379,7 @@ var TriplesMaker = {
             });
         }
     },
-/**  Build RDF triples for a batch of rows using the table’s column mappings.
+    /**  Build RDF triples for a batch of rows using the table’s column mappings.
    @param {Array} data  Array of row objects; values are coerced to strings/ISO dates.
    @param {Object} tableProcessingParams  Context: tableColumnsMappings, uniqueTriplesMap, blankNodesMap, tableInfos, jsFunctionsMap.
    @param {Object} options  Batch options: currentBatchRowIndex, filterMappingIds; @param {Function} callback(err, triples).
@@ -683,7 +683,7 @@ var TriplesMaker = {
         }
     },
 
-     /**
+    /**
      * Formats a literal value from a row according to the mapping’s datatype.
      * Handles xsd:date/xsd:dateTime (incl. custom dateFormat), strings, floats and ints,
      * converting values to valid RDF literals with datatype annotations.
@@ -768,7 +768,7 @@ var TriplesMaker = {
         }
         return objectStr;
     },
-    
+
     getMetaDataTriples: function (subjectUri, table, options) {
         var creator = "KGcreator";
         var dateTime = "'" + util.dateToRDFString(new Date(), true) + "'^^xsd:dateTime";

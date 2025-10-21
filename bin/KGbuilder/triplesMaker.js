@@ -66,7 +66,7 @@ var TriplesMaker = {
                 async.eachSeries(
                     result.data,
                     function (data, callbackEach) {
-                        if (currentBatchRowIndex && options) {
+                        if (options) {
                             options.currentBatchRowIndex = currentBatchRowIndex;
                         }
                         TriplesMaker.buildTriples(data, tableProcessingParams, options, function (err, batchTriples) {
@@ -152,7 +152,7 @@ var TriplesMaker = {
                     async.eachSeries(
                         slices,
                         function (data, callbackEach) {
-                            if (currentBatchRowIndex && options) {
+                            if (options) {
                                 options.currentBatchRowIndex = currentBatchRowIndex;
                             }
                             TriplesMaker.buildTriples(data, tableProcessingParams, options, function (err, batchTriples) {

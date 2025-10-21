@@ -1,9 +1,8 @@
 const ConfigManager = require("../configManager.");
-const httpProxy = require("../httpProxy.");
+const httpProxy = require("../httpProxy..js");
 const async = require("async");
 const util = require("../util.");
-const KGbuilder_socket = require("./KGbuilder_socket");
-const TriplesMaker = require("./TriplesMaker.js");
+const KGbuilder_socket = require("./KGbuilder_socket.js");
 
 const KGbuilder_triplesWriter = {
     sparqlPrefixes: {

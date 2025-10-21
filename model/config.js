@@ -53,8 +53,9 @@ const MainConfigObject = z
                         clientSecret: z.string(),
                     })
                     .strict(),
+                usernameMapping: z.enum(["email", "nickname", "name"]),
+                useAuth0Roles: z.boolean(),
             })
-            .deepPartial()
             .strict()
             .optional(),
         keycloak: z

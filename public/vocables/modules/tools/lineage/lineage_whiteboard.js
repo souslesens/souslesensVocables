@@ -3108,11 +3108,13 @@ restrictionSource = Config.predicatesSource;
         }
         graphContext.clickOptions = event;
         var html = "";
-        
-        if (node && !node.from && node.data && node.data.type == "http://www.w3.org/2002/07/owl#ObjectProperty" || node.data.type =="DatatypeProperty") {
-        html = '    <span class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.showNodeInfos();"> Node infos</span>' + '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.removeFromGraph();">Remove from graph</span>';
-        $("#popupMenuWidgetDiv").html(html);
-        return;
+
+        if ((node && !node.from && node.data && node.data.type == "http://www.w3.org/2002/07/owl#ObjectProperty") || node.data.type == "DatatypeProperty") {
+            html =
+                '    <span class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.showNodeInfos();"> Node infos</span>' +
+                '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.removeFromGraph();">Remove from graph</span>';
+            $("#popupMenuWidgetDiv").html(html);
+            return;
         }
 
         if (!node) {

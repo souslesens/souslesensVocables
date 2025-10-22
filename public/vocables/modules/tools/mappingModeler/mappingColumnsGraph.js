@@ -1657,12 +1657,7 @@ var MappingColumnsGraph = (function () {
                             label: displayLabel,
                             shape: "box",
                             color: columnColor,                     
-                            data: {
-                            id: columnId,
-                            label: columnLabel,
-                            type: "Column",
-                            dataTable: dataTable
-                            }
+                            data: column.data
                         });
                         uniqueNodes[columnId] = 1;
                     }                 
@@ -1873,6 +1868,8 @@ var MappingColumnsGraph = (function () {
                         });
 
                     } 
+
+                    
                   
                   
 

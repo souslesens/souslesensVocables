@@ -151,6 +151,7 @@ const KGbuilder_triplesWriter = {
      * @param {Function} callback         Node-style callback (err: any, totalDeleted: number).
      */
     deleteKGBuilderTriples: function (sparqlServerUrl, graphUri, table, options, callback) {
+        const TriplesMaker = require("./triplesMaker");
         var query = "";
         if (table) {
             query += "with  GRAPH <" + graphUri + "> " + "delete {?s ?p ?o} where {?s ?p ?o. ?s <" + TriplesMaker.mappingFilePredicate + "> '" + table + "'}";

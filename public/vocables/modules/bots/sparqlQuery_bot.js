@@ -825,6 +825,7 @@ var SparqlQuery_bot = (function () {
                         data_source: Lineage_sources.activeSource,
                     },
                     removeSaveDiv: true,
+                    title: "Load SPARQL Query",
                 },
                 function (err, result) {
                     if (result.id) {
@@ -1322,7 +1323,7 @@ var SparqlQuery_bot = (function () {
         var query = $("#sparqlQueryBot_textArea").text();
         var data = { sparqlQuery: query };
 
-        UserDataWidget.showSaveDialog("savedQueries", data, null, function (err, result) {
+        UserDataWidget.showSaveDialog("savedQueries", data, null, { title: "Save SPARQL Query" }, function (err, result) {
             if (err) {
                 return MainController.errorAlert(err);
             }

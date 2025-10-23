@@ -123,7 +123,7 @@ var SavedQueriesWidget = (function () {
             targetSelect = "SavedQueriesComponent_itemsSelect";
         }
 
-        UserDataWidget.showListDialog(null, { filter: { data_type: "savedQueries", data_tool: "KGquery", data_source: MainController.currentSource }, removeSaveDiv: true }, function (err, result) {
+        UserDataWidget.showListDialog(null, { filter: { data_type: "savedQueries", data_tool: "KGquery", data_source: MainController.currentSource }, removeSaveDiv: true , title: "Load KGquery Query"}, function (err, result) {
             if (result.id) {
                 UserDataWidget.loadUserDatabyId(result.id, function (err, result) {
                     self.loadItem(result.id);
@@ -160,7 +160,7 @@ var SavedQueriesWidget = (function () {
             }
 
             //UserDataWidget.currentTreeNode = null;
-            UserDataWidget.showSaveDialog("savedQueries", data, null, function (err, result) {
+            UserDataWidget.showSaveDialog("savedQueries", data, null, { title: "Save KGquery Query" }, function (err, result) {
                 if (err) {
                     return MainController.errorAlert(err);
                 }

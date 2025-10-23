@@ -316,8 +316,7 @@ class DatabaseModel {
      * @params {string} select - select query
      * @params {number} batchSize - batch size
      */
-    batchSelectGenerator = async function* (databaseId, tableName, { select = "*", batchSize = 1000 }) {
-        const connection = await this.getConnection(databaseId);
+    batchSelectGenerator = async function* (connection, tableName, { select = "*", batchSize = 1000 }) {
         const columns = await connection(tableName).columnInfo();
         const columnsKeys = Object.keys(columns);
 

@@ -267,7 +267,7 @@ class DatabaseModel {
             return null;
         }
 
-        return await this.getAdminConnection(databaseId);
+        return await this.getAdminRestrictedConnection(databaseId);
     };
 
     /*
@@ -281,7 +281,7 @@ class DatabaseModel {
             delete this.knexClients[databaseId];
             console.log(`Connexion fermée pour la base ${databaseId}`);
         }
-        await this.getAdminConnection(databaseId);
+        await this.getAdminRestrictedConnection(databaseId);
         console.log(`Connexion ouverte pour la base ${databaseId}`);
         if (callback) {
             callback();

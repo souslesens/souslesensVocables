@@ -442,7 +442,15 @@ var UI = (function () {
             selectList.height(optionHeight * maxSize);
         }
     };
-
+    self.setDialogTitle = function (div,title) {
+        if(!div || !title){
+            return;
+        }
+        if(!div.startsWith("#")){
+            div = "#"+div;
+        }
+        $(div).dialog("option", "title", title);
+    };
     return self;
 })();
 export default UI;

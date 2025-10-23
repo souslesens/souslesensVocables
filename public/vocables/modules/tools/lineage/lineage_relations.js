@@ -41,7 +41,7 @@ var Lineage_relations = (function () {
         self.drawRelationCurrentCaller = caller;
         self.currentQueryInfos = { predicate: "", filter: {} };
 
-        $("#mainDialogDiv").dialog("option", "title", "Query");
+        UI.setDialogTitle("#mainDialogDiv", "Query");
         $("#mainDialogDiv").load("modules/tools/lineage/html/relationsDialog.html", function () {
             $("#mainDialogDiv").dialog("open");
 

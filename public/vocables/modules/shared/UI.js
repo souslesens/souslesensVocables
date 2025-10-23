@@ -443,7 +443,8 @@ var UI = (function () {
         }
     };
     self.setDialogTitle = function (div,title) {
-        if(!div || !title){
+        // accept "" title
+        if(!div || title === undefined || title === null){
             return;
         }
         if(!div.startsWith("#")){

@@ -163,11 +163,12 @@ var UserDataWidget = (function () {
         }
         self.saveUI();
     };
-    self.showSaveDialog = function (data_type, jsonContent, divId, callbackFn) {
+    self.showSaveDialog = function (data_type, jsonContent, divId, options, callbackFn) {
+        
         self.data_type = data_type;
         self.jsonContent = jsonContent;
         self.callbackFn = callbackFn;
-        self.showDialog(divId, "save");
+        self.showDialog(divId, "save", options);
     };
 
     self.showListDialog = function (divId, options, callbackFn) {
@@ -185,7 +186,11 @@ var UserDataWidget = (function () {
                 }
             });
         }
-        self.showDialog(divId, "list", function () {
+        self.showDialog(divId, "list", null,function () {
+            if(options.title){
+                var div= divId || 'smallDialogDiv';
+                UI.setDialogTitle(div, options.title);
+            }
             $.ajax({
                 type: "GET",
                 url: `${Config.apiUrl}/users/data`,
@@ -324,12 +329,18 @@ var UserDataWidget = (function () {
         });
     };
 
-    self.showDialog = function (divId, mode, callback) {
+    self.showDialog = function (divId, mode, options, callback) {
+        if (!options) {
+            options = {};
+        }
         if (!divId) {
             divId = "smallDialogDiv";
         }
         self.divId = divId;
         $("#" + divId).load("modules/uiWidgets/html/userDataWidget.html", function () {
+            if (options.title) {
+                UI.setDialogTitle(divId, options.title);
+            }
             if (mode == "save") {
                 $("#userDataWidget_saveDiv").css("display", "block");
             } else if (mode == "list") {

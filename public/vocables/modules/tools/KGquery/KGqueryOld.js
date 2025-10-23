@@ -1056,7 +1056,7 @@ var KGquery = (function () {
             tableData.push(line);
         });
 
-        $("#KGquery_dataTableDialogDiv").dialog("option", "title", "Query result size: " + tableData.length);
+        UI.setDialogTitle("#KGquery_dataTableDialogDiv", "Query result size: " + tableData.length);
 
         //$("#KGquery_dataTableDialogDiv").css("left", "10px");
         //$("#KGquery_dataTableDialogDiv").width("90vW");

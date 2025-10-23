@@ -507,7 +507,7 @@ var SearchWidget = (function () {
         items.axioms = {
             label: "Node axioms",
             action: function (e) {
-                $("#smallDialogDiv").dialog("option", "title", "Axioms of resource " + self.currentTreeNode.data.label);
+                UI.setDialogTitle("#smallDialogDiv", "Axioms of resource " + self.currentTreeNode.data.label);
 
                 NodeInfosAxioms.init(self.currentTreeNode.data.source, self.currentTreeNode, "smallDialogDiv");
             },
@@ -526,7 +526,7 @@ var SearchWidget = (function () {
             label: "Descendants axioms",
             action: function (e) {
                 $("#mainDialogDiv").dialog("open");
-                $("#mainDialogDiv").dialog("option", "title", "Axioms of resource " + self.currentTreeNode.data.label);
+                UI.setDialogTitle("#mainDialogDiv", "Axioms of resource " + self.currentTreeNode.data.label);
                 var descendants = JstreeWidget.getNodeDescendants("LineageNodesJsTreeDiv", self.currentTreeNode.id);
                 descendants.push(self.currentTreeNode);
                 NodeInfosAxioms.showResourceDescendantsAxioms(self.currentTreeNode.data.source, self.currentTreeNode, descendants, "mainDialogDiv");

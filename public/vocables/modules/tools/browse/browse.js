@@ -60,7 +60,7 @@ var Browse = (function () {
             }*/
         $("#mainDialogDiv").load("modules/tools/browse/html/browseDialog.html", function () {
             $("#mainDialogDiv").dialog("open");
-            $("#mainDialogDiv").dialog("option", "title", "");
+            UI.setDialogTitle("#mainDialogDiv", "");
             self.init(mainSource);
         });
         //   })
@@ -105,7 +105,7 @@ var Browse = (function () {
                     sources = Object.keys(Lineage_sources.loadedSources);
                 }
 
-                $("#mainDialogDiv").dialog("option", "title", title);
+                UI.setDialogTitle("#mainDialogDiv", title);
                 if (mode == "fuzzyMatch" && !term.endsWith("*")) {
                     term += "*";
                 }

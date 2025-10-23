@@ -19,7 +19,7 @@ var SPARQL_endpoint = (function () {
         //  self.currentSparql_server = Config.sparql_server.urlsparql_server;
         //localStorage.clear();
 
-        $("#mainDialogDiv").dialog("option", "title", "SPARQL endpoint");
+        UI.setDialogTitle("#mainDialogDiv", "SPARQL endpoint");
         //$("#mainDialogDiv").parent().css("left", "100px");
         $("#mainDialogDiv").css("width", "1000px");
         $("#graphDiv").html("");

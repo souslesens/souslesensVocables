@@ -1,5 +1,5 @@
 const KGbuilder_socket = require("./KGbuilder_socket.js");
-const { databaseModel } = require("../../model/databases.js");
+const {databaseModel} = require("../../model/databases.js");
 const csvCrawler = require("../_csvCrawler..js");
 const async = require("async");
 const sqlServerProxy = require("../KG/SQLserverConnector.");
@@ -120,7 +120,7 @@ var TriplesMaker = {
                         KGbuilder_socket.message(options.clientSocketId, message);
                         // KGbuilder_socket.message(options.clientSocketId, " DONE " + processedRecords + "records  from " + tableInfos.table + " : " + (totalTriplesCount) + " triples", false);
 
-                        return callback(err, { sampleTriples: sampleTriples, totalTriplesCount: totalTriplesCount });
+                        return callback(err, {sampleTriples: sampleTriples, totalTriplesCount: totalTriplesCount});
                     },
                 );
             });
@@ -210,7 +210,7 @@ var TriplesMaker = {
                             KGbuilder_socket.message(options.clientSocketId, message);
                             // KGbuilder_socket.message(options.clientSocketId, " DONE " + processedRecords + "records  from " + tableInfos.table + " : " + (totalTriplesCount) + " triples", false);
 
-                            return callback(err, { sampleTriples: sampleTriples, totalTriplesCount: totalTriplesCount });
+                            return callback(err, {sampleTriples: sampleTriples, totalTriplesCount: totalTriplesCount});
                         },
                     );
                 })
@@ -373,7 +373,7 @@ var TriplesMaker = {
                         KGbuilder_socket.message(options.clientSocketId, message);
                         // KGbuilder_socket.message(options.clientSocketId, " DONE " + processedRecords + "records  from " + tableInfos.table + " : " + (totalTriplesCount) + " triples", false);
 
-                        return callback(err, { sampleTriples: sampleTriples, totalTriplesCount: totalTriplesCount });
+                        return callback(err, {sampleTriples: sampleTriples, totalTriplesCount: totalTriplesCount});
                     },
                 );
             });
@@ -493,7 +493,14 @@ var TriplesMaker = {
                 var objectUri = TriplesMaker.getColumnUri(line, edge.to, columnMappings, rowIndex, tableProcessingParams);
                 var property = TriplesMaker.getPropertyUri(edge.data.id);
 
-                addTriple(subjectUri, property, objectUri);
+                if (edge.isRestriction ) {
+                    var triples = TriplesMaker.getRestrictionTriples(subjectUri, property, objectUri, edge.retrictionType, null)
+                    triples.forEach(function (triple) {
+                        addTriple(triple.s, triple.p, triple.o);
+                    })
+                } else {
+                    addTriple(subjectUri, property, objectUri);
+                }
             }
 
             // isolated other predicates (dont want to duplicate label, type...
@@ -505,7 +512,7 @@ var TriplesMaker = {
                         if (options.filterMappingIds && options.filterMappingIds.indexOf(item.property) > -1) {
                             var subjectUri = TriplesMaker.getColumnUri(line, columnId, columnMappings, rowIndex, tableProcessingParams);
 
-                            object = TriplesMaker.getFormatedLiteral(line, { dataType: item.range, o: item.object });
+                            object = TriplesMaker.getFormatedLiteral(line, {dataType: item.range, o: item.object});
 
                             var property = TriplesMaker.getPropertyUri(item.property);
                             addTriple(subjectUri, property, object);
@@ -557,6 +564,8 @@ var TriplesMaker = {
         //substitute column params to those of the definedInColumn for the same class if !columnParams.isMainColumn
         if (!columnParams.isMainColumn && columnParams.definedInColumn) {
             var definedInColumn = tableProcessingParams.allColumnsMappings[columnParams.definedInColumn];
+            if(!definedInColumn)
+                return null;
             columnParams.rdfType = definedInColumn.rdfType;
             columnParams.uriType = definedInColumn.uriType;
             columnParams.rdfsLabel = definedInColumn.rdfsLabel;
@@ -753,6 +762,47 @@ var TriplesMaker = {
         }
         return objectStr;
     },
+
+    getRestrictionTriples: function (subjectUri, predicateUri, objectUri, restrictionType, options) {
+        if (!options) {
+            options = {}
+        }
+
+
+        var triples = []
+        if (!restrictionType) {
+            restrictionType = "http://www.w3.org/2002/07/owl#someValuesFrom"
+        }
+
+        var blankNode = "<_:b" + util.getRandomHexaId(10) + ">";
+
+
+        triples.push({
+            s: blankNode,
+            p: "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>",
+            o: "<http://www.w3.org/2002/07/owl#Restriction>",
+        });
+        triples.push({
+            s: blankNode,
+            p: "<http://www.w3.org/2002/07/owl#onProperty>",
+            o: predicateUri,
+        });
+
+            triples.push({
+                s: blankNode,
+                p: "<" + restrictionType + ">",
+                o: objectUri,
+            });
+
+        triples.push({
+            s: subjectUri,
+            p: "rdfs:subClassOf",
+            o: blankNode,
+        });
+
+     return triples
+
+    },
     getMetaDataTriples: function (subjectUri, table, options) {
         var creator = "KGcreator";
         var dateTime = "'" + util.dateToRDFString(new Date(), true) + "'^^xsd:dateTime";
@@ -774,14 +824,14 @@ var TriplesMaker = {
     },
 
     readCsv: function (filePath, maxLines, callback) {
-        csvCrawler.readCsv({ filePath: filePath }, maxLines, function (err, result) {
+        csvCrawler.readCsv({filePath: filePath}, maxLines, function (err, result) {
             if (err) {
                 return callback(err);
             }
             var data = result.data;
             var headers = result.headers;
 
-            return callback(null, { headers: headers, data: data });
+            return callback(null, {headers: headers, data: data});
         });
     },
 };

@@ -576,10 +576,15 @@ var KGquery = (function () {
         var data;
         var labelFromURIToDisplay = [];
         var sampleSize;
+        var distinctSetTypes;
         async.series(
             [
                 function (callbackSeries) {
-                    query = KGquery_predicates.buildQuery(self.querySets, {});
+                    var queryResult = KGquery_predicates.buildQuery(self.querySets, {});
+                    query = queryResult.query;
+                    isUnion = queryResult.isUnion;
+                    isJoin = queryResult.isJoin;
+                    distinctSetTypes = queryResult.distinctSetTypes;
                     return callbackSeries();
                 },
                 //execute query
@@ -668,7 +673,9 @@ var KGquery = (function () {
 
                     dataByQuerySet.forEach(function (setData, index) {
                         if (joinedData) {
-                            var commonKeys = Object.keys(distinctSetTypes[index]).filter((key) => key in distinctSetTypes[index - 1]);
+                            var keysCurrentSet = distinctSetTypes[index];
+                            var keysPreviousSet = distinctSetTypes[index - 1];
+                            var commonKeys = keysCurrentSet.filter((key) => keysPreviousSet.includes(key));
                             commonKeys = commonKeys.map((str) => str.replace(/\?/g, ""));
                             joinedData = common.array.fullOuterJoin(joinedData, setData, commonKeys);
                         } else {

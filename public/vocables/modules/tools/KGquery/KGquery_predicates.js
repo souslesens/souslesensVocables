@@ -1,5 +1,6 @@
 import KGquery_filter from "./KGquery_filter.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
+import KGquery from "./KGquery.js";
 
 var KGquery_predicates = (function () {
     var self = {};
@@ -112,6 +113,8 @@ var KGquery_predicates = (function () {
 
         var querySetsWhereStr = [];
         var disctinctSetVars = [];
+        var isUnion = false;
+        var isJoin = false;
 
         querySets.sets.forEach(function (querySet) {
             if (querySet.elements.length == 0 || !querySet.elements[0].fromNode) {
@@ -170,7 +173,7 @@ var KGquery_predicates = (function () {
 
             disctinctSetVars.push(uniqueVariables);
             querySetsWhereStr.push(whereStr);
-            distinctSetTypes.push(distinctTypesMap);
+            distinctSetTypes.push(Object.keys(predicatesSubjectsMap));
         });
 
         //after each query set whereStr
@@ -186,11 +189,11 @@ var KGquery_predicates = (function () {
             querySetsWhereStr.forEach(function (querySetsWhereStr, index) {
                 var disctinctVarsStr = disctinctSetVars[index].join(" ");
                 var querySetNumber = index + 1;
-                if (self.querySets.sets[index].booleanOperator) {
-                    whereStr += "\n " + self.querySets.sets[index].booleanOperator + "\n ";
-                    var isJoin = true;
-                    if (self.querySets.sets[index].booleanOperator == "Union") {
-                        var isUnion = true;
+                if (KGquery.querySets.sets[index].booleanOperator) {
+                    whereStr += "\n " + KGquery.querySets.sets[index].booleanOperator + "\n ";
+                    isJoin = true;
+                    if (KGquery.querySets.sets[index].booleanOperator == "Union") {
+                        isUnion = true;
                     }
                 }
                 whereStr += "{SELECT " + disctinctVarsStr + ' (("Query ' + querySetNumber + '") AS ?querySet) ';
@@ -209,10 +212,16 @@ var KGquery_predicates = (function () {
             groupByStr = " GROUP BY " + options.aggregate.groupBy;
         } else {
             selectStr += KGquery.selectClauseSparql ? KGquery.selectClauseSparql : "";
-            Object.keys(distinctTypesMap).forEach(function (type) {
-                selectStr += " " + type;
+            var uniqueSetTypes = {};
+            distinctSetTypes.forEach(function (setTypes) {
+                setTypes.forEach(function (type) {
+                    if (!uniqueSetTypes[type]) {
+                        uniqueSetTypes[type] = true;
+                        selectStr += " " + type;
+                    }
+                });
             });
-            if (options.isJoin) {
+            if (isJoin) {
                 selectStr += " ?querySet ";
             }
         }
@@ -226,7 +235,7 @@ var KGquery_predicates = (function () {
 
         query += " " + groupByStr; // + " limit 10000";
 
-        return query;
+        return { query: query, isUnion: isUnion, isJoin: isJoin, distinctSetTypes: distinctSetTypes };
     };
     /**
      *  !!! if a variable is optio,nall all predicates tha contains this variable as subject have to be in nthe optional clause

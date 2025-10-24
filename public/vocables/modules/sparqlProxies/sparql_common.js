@@ -863,6 +863,19 @@ var Sparql_common = (function () {
         return parseInt(valueStr);
     };
 
+    self.getPrefixedLabelFromURI = function (source, uri) {
+        if (!uri) {
+            return "";
+        }
+        if (!source) {
+            return uri;
+        }
+
+        var sourcePrefix = source.substring(0, 3);
+        var label = self.getLabelFromURI(uri);
+        return sourcePrefix + ":" + label;
+    };
+
     return self;
 })();
 

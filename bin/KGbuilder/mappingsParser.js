@@ -2,7 +2,6 @@ const path = require("path");
 const async = require("async");
 const fs = require("fs");
 
-
 var MappingParser = {
     columnsMappingsObjects: ["Column", "RowIndex", "VirtualColumn", "URI"],
     getMappingsData: function (source, callback) {
@@ -36,8 +35,6 @@ var MappingParser = {
             edgesFromMap[edge.from].push(edge);
         });
         mappingData.nodes.forEach(function (node) {
-
-
             nodesMap[node.id] = node;
             if (node.data.type == "Column") {
                 columnsMap[node.id] = node.data;
@@ -49,17 +46,12 @@ var MappingParser = {
                 columnsMap[node.id] = node.data;
             }
             if (columnsMap[node.id]) {
-                columnsMap[node.id].mappings = []
+                columnsMap[node.id].mappings = [];
             }
         });
 
-
         return callback(null, columnsMap);
     },
-
-
-
-
 
     /**
      *  add basic mappings : rdf:type(s), label, [subClassOf], to all caolumns ids including  columns  in another column (definedInColumn)
@@ -67,20 +59,18 @@ var MappingParser = {
      * @param allColumnsMappings
      */
     setAllColumnsLabelAndType: function (mappingData, allColumnsMappings) {
-
         var nodesMap = {};
         mappingData.nodes.forEach(function (node) {
-            nodesMap[node.id] = node.data
-        })
+            nodesMap[node.id] = node.data;
+        });
         mappingData.edges.forEach(function (edge) {
-
             var fromNodeData = nodesMap[edge.from];
             if (fromNodeData.definedInColumn) {
-                fromNodeData = allColumnsMappings[fromNodeData.definedInColumn]
+                fromNodeData = allColumnsMappings[fromNodeData.definedInColumn];
             }
             if (fromNodeData && fromNodeData.type == "Column") {
                 if (allColumnsMappings[edge.from].mappings.length == 0) {
-                    var toNodeData = nodesMap[edge.to]
+                    var toNodeData = nodesMap[edge.to];
 
                     if (toNodeData && toNodeData.type == "Class") {
                         mappings = MappingParser.getTypeAndLabelMappings(fromNodeData, toNodeData);
@@ -107,9 +97,7 @@ var MappingParser = {
 
             tablecolumnsMap[columnId].mappings = tablecolumnsMap[columnId].mappings.concat(mappings);
         }
-    }
-    ,
-
+    },
     isConstantUri: function (str) {
         if (str && str.startsWith("http")) {
             return true;
@@ -137,13 +125,13 @@ var MappingParser = {
             s: fromNodeData.id,
             p: type,
             o: toNodeData.id,
-            isConstantUri: true
+            isConstantUri: true,
         });
         mappings.push({
             s: fromNodeData.id,
             p: "rdf:type",
             o: fromNodeData.rdfType,
-            isConstantUri: true
+            isConstantUri: true,
         });
 
         if (fromNodeData.rdfsLabel) {
@@ -169,18 +157,17 @@ var MappingParser = {
 
         mappingData.edges.forEach(function (edge) {
             if (columnsMap[edge.from] && columnsMap[edge.to] && filterMappingIds.indexOf(edge.id) > -1) {
-
                 var fromColumn = columnsMap[edge.from];
                 var toColumn = columnsMap[edge.to];
                 if (fromColumn.data.definedInColumn) {
-                    fromColumn = allColumnsMappings[fromColumn.data.definedInColumn]
+                    fromColumn = allColumnsMappings[fromColumn.data.definedInColumn];
                 }
                 if (toColumn.data.definedInColumn) {
-                    toColumn = allColumnsMappings[toColumn.data.definedInColumn]
+                    toColumn = allColumnsMappings[toColumn.data.definedInColumn];
                 }
                 //if edge is not from rdf, rdfs or owl   and if fome and to are rdf;typeClass the edge represents a restriction
                 if (edge.data.id.indexOf("owl") < 0 && edge.data.id.indexOf("rdf") < 0) {
-                    var isRestriction = (fromColumn.rdfType == "owl:Class" && toColumn.rdfType == "owl:Class");
+                    var isRestriction = fromColumn.rdfType == "owl:Class" && toColumn.rdfType == "owl:Class";
                     edge.isRestriction = isRestriction;
                 }
                 edgeMap[edge.id] = edge;

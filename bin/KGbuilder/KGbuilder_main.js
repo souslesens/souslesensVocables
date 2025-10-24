@@ -97,7 +97,6 @@ var KGbuilder_main = {
 
                                     tableProcessingParams.allColumnsMappings = allColumnsMappings;
 
-
                                     for (var columnId in allColumnsMappings) {
                                         if (allColumnsMappings[columnId].dataTable == tables[0]) {
                                             tableMappings[columnId] = allColumnsMappings[columnId];
@@ -111,24 +110,24 @@ var KGbuilder_main = {
 
                             //set label and type for classes referenced by sevral columns
                             function (callbackSeries) {
-
-                            MappingsParser.setAllColumnsLabelAndType(mappingData,tableProcessingParams.allColumnsMappings)
-
+                                MappingsParser.setAllColumnsLabelAndType(mappingData, tableProcessingParams.allColumnsMappings);
 
                                 callbackSeries();
                             },
                             function (callbackSeries) {
-
-                                MappingsParser.  setTableColumnsOtherPredicates(tableMappings)
+                                MappingsParser.setTableColumnsOtherPredicates(tableMappings);
 
                                 callbackSeries();
                             },
-
-
 
                             //getColumnToColumnMappings
                             function (callbackSeries) {
-                                tableProcessingParams.columnToColumnEdgesMap = MappingsParser.getColumnToColumnMappings(mappingData, tables[0], options.filterMappingIds,tableProcessingParams.allColumnsMappings);
+                                tableProcessingParams.columnToColumnEdgesMap = MappingsParser.getColumnToColumnMappings(
+                                    mappingData,
+                                    tables[0],
+                                    options.filterMappingIds,
+                                    tableProcessingParams.allColumnsMappings,
+                                );
                                 callbackSeries();
                             },
 

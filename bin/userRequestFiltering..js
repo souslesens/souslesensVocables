@@ -136,7 +136,7 @@ var UserRequestFiltering = {
                 query3 = query2.replace(/<_:.[^>]*>/gm, "?replacementCitedBlankNodeToParse"); // cited blank nodes on queries don't pass the parser
                 query4 = query3.replace(/<1>,/gm, ""); // ones for pathes
                 // replace aggregates variables as (count,sum,avg,min,max) because parser don't handle them
-                query5 = query4.replace(/\b(count|sum|concat|avg|min|max|group_concat)\s*\([^)]*\)(?!\s+as\s+\?\w+)/gi,"");
+                query5 = query4.replace(/\b(count|sum|concat|avg|min|max|group_concat)\s*\([^)]*\)(?!\s+as\s+\?\w+)/gi, "");
 
                 var json = parser.parse(query5);
             } catch (e) {

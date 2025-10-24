@@ -675,7 +675,7 @@ var KGquery = (function () {
                         if (joinedData) {
                             var keysCurrentSet = distinctSetTypes[index];
                             var keysPreviousSet = distinctSetTypes[index - 1];
-                            var commonKeys = keysCurrentSet.filter(key => keysPreviousSet.includes(key));
+                            var commonKeys = keysCurrentSet.filter((key) => keysPreviousSet.includes(key));
                             commonKeys = commonKeys.map((str) => str.replace(/\?/g, ""));
                             joinedData = common.array.fullOuterJoin(joinedData, setData, commonKeys);
                         } else {

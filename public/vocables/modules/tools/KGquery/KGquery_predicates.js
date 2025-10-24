@@ -126,7 +126,6 @@ var KGquery_predicates = (function () {
             var filterStr = "";
             var otherPredicatesStrs = "";
             var predicatesSubjectsMap = {};
-            
 
             // set rdftype and predicates between classes
             querySet.elements.forEach(function (queryElement, queryElementIndex) {
@@ -194,7 +193,7 @@ var KGquery_predicates = (function () {
                     whereStr += "\n " + KGquery.querySets.sets[index].booleanOperator + "\n ";
                     isJoin = true;
                     if (KGquery.querySets.sets[index].booleanOperator == "Union") {
-                         isUnion = true;
+                        isUnion = true;
                     }
                 }
                 whereStr += "{SELECT " + disctinctVarsStr + ' (("Query ' + querySetNumber + '") AS ?querySet) ';
@@ -216,7 +215,7 @@ var KGquery_predicates = (function () {
             var uniqueSetTypes = {};
             distinctSetTypes.forEach(function (setTypes) {
                 setTypes.forEach(function (type) {
-                    if(!uniqueSetTypes[type]) {
+                    if (!uniqueSetTypes[type]) {
                         uniqueSetTypes[type] = true;
                         selectStr += " " + type;
                     }
@@ -236,7 +235,7 @@ var KGquery_predicates = (function () {
 
         query += " " + groupByStr; // + " limit 10000";
 
-        return {query:query,isUnion:isUnion,isJoin:isJoin,distinctSetTypes:distinctSetTypes};
+        return { query: query, isUnion: isUnion, isJoin: isJoin, distinctSetTypes: distinctSetTypes };
     };
     /**
      *  !!! if a variable is optio,nall all predicates tha contains this variable as subject have to be in nthe optional clause

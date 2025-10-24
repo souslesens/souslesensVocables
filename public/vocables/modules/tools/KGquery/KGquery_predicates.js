@@ -288,9 +288,10 @@ var KGquery_predicates = (function () {
         for (var key in querySet.classFiltersMap) {
             whereStr += querySet.classFiltersMap[key].filter + " \n";
         }
-
+        var fromStr = Sparql_common.getFromStr(KGquery.currentSource);
         var query = self.queryPrefixesStr;
         query += "SELECT " + aggregateClauses.select + "\n";
+        query += fromStr + "\n";
         query += "WHERE { " + aggregateClauses.where + "\n";
         query += whereStr + "\n";
         query += filterStr + "\n}\n";

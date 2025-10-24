@@ -1,9 +1,8 @@
 const ConfigManager = require("../configManager.");
-const httpProxy = require("../httpProxy.");
+const httpProxy = require("../httpProxy..js");
 const async = require("async");
 const util = require("../util.");
-const KGbuilder_socket = require("./KGbuilder_socket");
-const TriplesMaker = require("./TriplesMaker.js");
+const KGbuilder_socket = require("./KGbuilder_socket.js");
 
 const KGbuilder_triplesWriter = {
     sparqlPrefixes: {
@@ -34,31 +33,24 @@ const KGbuilder_triplesWriter = {
         }
 
         var totalTriples = 0;
-        var countTriples = allTriples.length;
-        //  console.log("all triples count "+countTriples)
-        var slices = util.sliceArray(allTriples, 500);
-        //  console.log("number of slices  "+slices.length)
 
-        // var  slices=[allTriples]
+        var slices = util.sliceArray(allTriples, 200);
 
-        countTriples = 0;
         async.eachSeries(
             slices,
             function (triples, callbackEach) {
                 var insertTriplesStr = "";
                 triples.forEach(function (triple) {
+                    //   var str = triple.s + " " + triple.p + " " + triple.o + ". ";
                     var str = triple + ". ";
                     insertTriplesStr += str;
-                    countTriples += 1;
                 });
 
-                // console.log("triples in slice "+triples.length)
                 var queryGraph = KGbuilder_triplesWriter.getSparqlPrefixesStr();
 
-                //  graphUri=graphUri+"test/"
                 //  queryGraph += " WITH GRAPH  <" + graphUri + ">  " + "INSERT DATA" + "  {" + insertTriplesStr + "  }";
                 // insert data does not work with bNodes
-                queryGraph += " WITH GRAPH  <" + graphUri + "" + ">  " + "INSERT " + "  {" + insertTriplesStr + "  }";
+                queryGraph += " WITH GRAPH  <" + graphUri + ">  " + "INSERT " + "  {" + insertTriplesStr + "  }";
 
                 var params = { query: queryGraph };
 
@@ -70,25 +62,17 @@ const KGbuilder_triplesWriter = {
                     };
                 }
 
-                var regex = /([0-9]+)/;
-                httpProxy.post(sparqlServerUrl, null, params, function (err, result) {
+                httpProxy.post(sparqlServerUrl, null, params, function (err, _result) {
                     if (err) {
                         var x = queryGraph;
-                        return callbackEach(err);
+                        return callback(err);
                     }
-
-                    var array = regex.exec(result.results.bindings[0]["callret-0"].value);
-
-                    if (array && array.length == 2) var triplesWritten = parseInt(array[1]);
-
-                    if (triplesWritten < triples.length - 10) var x = 3;
-                    totalTriples += triplesWritten;
-                    //   console.log("triples writen "+totalTriples)
+                    totalTriples += triples.length;
                     return callbackEach(null, totalTriples);
                 });
             },
             function (err) {
-                return callback(err, totalTriples);
+                return callback(null, totalTriples);
             },
         );
     },
@@ -143,6 +127,7 @@ const KGbuilder_triplesWriter = {
     },
 
     deleteKGBuilderTriples: function (sparqlServerUrl, graphUri, table, options, callback) {
+        const TriplesMaker = require("./KGbuilder_triplesMaker");
         var query = "";
         if (table) {
             query += "with  GRAPH <" + graphUri + "> " + "delete {?s ?p ?o} where {?s ?p ?o. ?s <" + TriplesMaker.mappingFilePredicate + "> '" + table + "'}";
@@ -175,6 +160,8 @@ const KGbuilder_triplesWriter = {
                         var x = query;
                         return callbackWhilst(err);
                     }
+
+                    //return callback(null, result.results.bindings[0]["callret-0"].value);
 
                     var result = result.results.bindings[0]["callret-0"].value;
 

@@ -9,7 +9,7 @@ var Containers_widget = (function () {
     self.showDialog = function (source, options, validateFn) {
         self.validateFn = validateFn;
 
-        $("#mainDialogDiv").dialog("option", "title", "Containers widget");
+        UI.setDialogTitle("#mainDialogDiv", "Containers widget");
         $("#mainDialogDiv").load("modules/tools/containers/containers_widget.html", function () {
             $("#mainDialogDiv").dialog("open");
 
@@ -47,7 +47,7 @@ var Containers_widget = (function () {
         //  var rootNodes = JstreeWidget.getNodeDescendants("lineage_containers_containersJstree", "#", 1);
 
         $("#smallDialogDiv").dialog("open");
-        $("#smallDialogDiv").dialog("option", "title", "Parent Containers Type");
+        UI.setDialogTitle("#smallDialogDiv", "Parent Containers Type");
         $("#smallDialogDiv").load("./modules/tools/lineage/html/parentContainers.html", function () {
             var types = [];
             types.splice(0, 0, { id: "all", label: "all" });

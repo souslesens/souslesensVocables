@@ -46,7 +46,7 @@ class BotEngineClass {
             divId = "botDiv";
             this.divId = "botDiv";
 
-            $("#botPanel").dialog("option", "title", this.currentBot.title);
+            UI.setDialogTitle("#botPanel", this.currentBot.title);
             $("#botPanel").parent().find("#BotUpperButtons").remove();
         }
 

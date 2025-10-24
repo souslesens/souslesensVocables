@@ -39,7 +39,7 @@ return alert("select a field (column)");
         }
         $("#smallDialogDiv").parent().css("z-index", 100);
 
-        $("#smallDialogDiv").dialog("option", "title", "Mapping " + columnNode.data.table + "." + columnNode.data.id);
+        UI.setDialogTitle("#smallDialogDiv", "Mapping " + columnNode.data.table + "." + columnNode.data.id);
         $("#smallDialogDiv").css("height", "700px");
         //$("#smallDialogDiv").parent().css("left", "10%");
         /*$("#smallDialogDiv").css('left','10%');*/
@@ -548,7 +548,7 @@ tripleObj.objectIsSpecificUri = true;
         var table = node.data.id;
 
         //$("#smallDialogDiv").parent().css("left", "10%");
-        $("#smallDialogDiv").dialog("option", "title", "Lookups for " + table);
+        UI.setDialogTitle("#smallDialogDiv", "Lookups for " + table);
 
         $("#smallDialogDiv").load("./modules/tools/KGcreator/html/lookupDialog.html", function () {
             $("#smallDialogDiv").dialog("open");
@@ -570,7 +570,7 @@ tripleObj.objectIsSpecificUri = true;
         var table = node.data.id;
         self.currentTable = table;
 
-        $("#smallDialogDiv").dialog("option", "title", "Lookups for " + table);
+        UI.setDialogTitle("#smallDialogDiv", "Lookups for " + table);
 
         $("#smallDialogDiv").load("./modules/tools/KGcreator/html/transformDialog.html", function () {
             $("#smallDialogDiv").dialog("open");

@@ -11,7 +11,7 @@ const GraphManagement = (function () {
         $("#accordion").accordion("option", { active: 2 });
 
         setTimeout(function () {
-            $("#mainDialogDiv").dialog("option", "title", "Graph Management");
+            UI.setDialogTitle("#mainDialogDiv", "Graph Management");
 
             $("#mainDialogDiv").on("dialogclose", function (event, ui) {
                 self.umountKGUploadApp();

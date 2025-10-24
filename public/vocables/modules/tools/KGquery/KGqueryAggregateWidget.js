@@ -17,7 +17,7 @@ var KGqueryAggregateWidget = (function () {
         }
         $("#" + divId).load("modules/tools/KGquery/html/KGqueryAggregateWidget.html", function () {
             $("#" + divId).dialog("open");
-            $("#" + divId).dialog("option", "title", "Aggregate Qyery");
+            UI.setDialogTitle("#" + divId, "Aggregate Query");
             loadClassesFn(function (data) {
                 self.groupByVarsMap = {};
                 self.numericVarsMap = {};
@@ -184,7 +184,7 @@ var KGqueryAggregateWidget = (function () {
         };
 
         $("#" + self.divId).dialog("close");
-        $("#" + "smallDialogDiv").dialog("option", "title", "");
+        UI.setDialogTitle("#" + "smallDialogDiv", "");
         if (self.validateFn) {
             return self.validateFn(null, aggregateClauses);
         }

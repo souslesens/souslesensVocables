@@ -128,7 +128,7 @@ var NodeInfosWidget = (function () {
                     if (ui.newPanel.selector == "#nodeInfosWidget_AxiomsTabDiv") {
                         var source = self.currentSource;
                         // source = Lineage_sources.mainSource;
-                        $("#smallDialogDiv").dialog("option", "title", "Axioms of resource " + self.currentNode.data.label);
+                        UI.setDialogTitle("#smallDialogDiv", "Axioms of resource " + self.currentNode.data.label);
                         NodeInfosAxioms.init(source, self.currentNode, "smallDialogDiv");
                     }
                     if (ui.newPanel.selector == "#nodeInfosWidget_relationsDiv") {
@@ -153,7 +153,7 @@ var NodeInfosWidget = (function () {
             });
         } else {
             $("#" + divId).load("modules/uiWidgets/html/nodeInfosWidget.html", function (err) {
-                $("#" + divId).dialog("option", "title", " Node infos :");
+                UI.setDialogTitle("#" + divId, " Node infos :");
                 $("#addPredicateButton").remove();
                 $("#deleteButton").remove();
                 $("#" + divId).dialog("close");
@@ -1568,7 +1568,7 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
     self.showCreateEntityDialog = function () {
         var divId = "smallDialogDiv";
         var sourceLabel = Lineage_sources.activeSource;
-        $("#" + divId).dialog("option", "title", " Node infos :"); // source " + sourceLabel);
+        UI.setDialogTitle("#" + divId, " Node infos :"); // source " + sourceLabel);
         $("#" + divId).dialog("open");
         self.getCreateEntityDialog(sourceLabel, divId);
     };

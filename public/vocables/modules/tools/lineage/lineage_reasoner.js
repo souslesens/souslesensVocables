@@ -36,7 +36,7 @@ var Lineage_reasoner = (function () {
      * @returns {void}
      */
     self.showReasonerDialog = function () {
-        $("#smallDialogDiv").dialog("option", "title", "Reasoner");
+        UI.setDialogTitle("#smallDialogDiv", "Reasoner");
         self.currentSource = Lineage_sources.activeSource;
         $("#smallDialogDiv").load("modules/tools/lineage/html/lineage_reasoner.html", function () {
             $("#smallDialogDiv").dialog("open");

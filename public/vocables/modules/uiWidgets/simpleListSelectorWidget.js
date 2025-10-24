@@ -33,7 +33,7 @@ var SimpleListSelectorWidget = (function () {
         $("#" + divId).dialog("open");
 
         if (options.title) {
-            $("#" + divId).dialog("option", "title", options.title);
+            UI.setDialogTitle("#" + divId, options.title);
         }
 
         loadFn(function (data) {

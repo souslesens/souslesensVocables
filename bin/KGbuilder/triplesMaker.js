@@ -697,11 +697,7 @@ var TriplesMaker = {
         }
     },
 
-<<<<<<< HEAD
      /** @function getFormatedLiteral
-=======
-     /**
->>>>>>> faea6c0fd (node infos graph)
      * Formats a literal value from a row according to the mapping’s datatype.
      * Handles xsd:date/xsd:dateTime (incl. custom dateFormat), strings, floats and ints,
      * converting values to valid RDF literals with datatype annotations.
@@ -786,11 +782,6 @@ var TriplesMaker = {
         }
         return objectStr;
     },
-<<<<<<< HEAD
-
-=======
-    
->>>>>>> faea6c0fd (node infos graph)
     getMetaDataTriples: function (subjectUri, table, options) {
         var creator = "KGcreator";
         var dateTime = "'" + util.dateToRDFString(new Date(), true) + "'^^xsd:dateTime";

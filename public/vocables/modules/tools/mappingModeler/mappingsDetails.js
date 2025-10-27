@@ -5,6 +5,7 @@ import TripleFactory from "./tripleFactory.js";
 import MappingTransform from "./mappingTransform.js";
 import UIcontroller from "./uiController.js";
 import DataSourceManager from "./dataSourcesManager.js";
+import MappingColumnsGraph from "./mappingColumnsGraph.js";
 
 /**
  * MappingsDetails manages technical mappings (non structural mappings)
@@ -372,9 +373,29 @@ var MappingsDetails = (function () {
 
         var rdfObjectsType = ["owl:NamedIndividual", "owl:Class"];
 
-        //  sort by similarity for others than rowIndex
+        // var columnDataTable = [];
+        // var allColumns = MappingColumnsGraph.getNodesOfType(MappingModeler.columnsMappingsObjects);
+        // for (let i = 0; i < allColumns.length; i++) {
+        //     var col = allColumns[i];
+
+        //     if (!col || !col.data) continue;
+
+            
+        //     if (col.data.dataTable === column.data.dataTable) {
+                
+        //         var columnName = col.label;
+        //         if (columnName === undefined || columnName === null) {
+        //             columnName = col.data.label;
+        //         }
+        //         columnDataTable.push(columnName);
+        //     }
+        // }
+
 
         var columns = JSON.parse(JSON.stringify(MappingModeler.currentTable.columns));
+      
+  
+        
         columns.unshift("");
         common.array.moveItemToFirst(columns, column);
         if (column.data.rdfType) {
@@ -406,6 +427,57 @@ var MappingsDetails = (function () {
         self.setMappingDefaultFieds(column);
         console.log(column);
     };
+
+
+
+
+
+    self.openColumnTechDialog = function (dialogNode,callback) {
+    
+    var html =
+        '<div style="height:80vh">' +
+        '  <div style="display:flex; flex-direction:row">' +
+        '    <div>' +
+        '      <div id="detailedMappings_techDetailsDiv" style="background-color:#fff; padding:5px; border:2px #278ecc solid"></div>' +
+        '      <div id="detailedMappingsGraphDiv" style="width:70vw; height:65vh"></div>' +
+        '    </div>' +
+        '  </div>' +
+        '</div>';
+
+
+    function vhToPx(v) { return Math.round(window.innerHeight * (v / 200)); }
+    function vwToPx(v) { return Math.round(window.innerWidth  * (v / 150)); }
+
+    var dialogHeightPx = vhToPx(80);
+    var dialogWidthPx  = vwToPx(75);
+
+
+    $("#smallDialogDiv").html(html);
+    $("#smallDialogDiv").dialog("option", {
+        title: "Column Technical Mappings",
+        resizable: true,
+        draggable: true,
+        modal: false,
+        width: dialogWidthPx, 
+        height: dialogHeightPx,
+        position: { my: "center", at: "center", of: window }
+    }).dialog("open");
+
+
+    self.showColumnTechnicalMappingsDialog(
+        "detailedMappings_techDetailsDiv",
+        dialogNode,
+        function () {
+        }
+    );
+    $(window).off("resize.mcgTechDlg").on("resize.mcgTechDlg", function () {
+        $("#mainDialogDiv").dialog("option", {
+        width:  vwToPx(75),
+        height: vhToPx(80)
+        });
+    });
+    };
+
 
     /**
      * Saves the mapping details to the Vis.js graph for a specific column.
@@ -581,6 +653,59 @@ var MappingsDetails = (function () {
             // self.showDetailsDialog();
         });
     };
+
+     self.showSpecificMappingsBotGlobal = function (columnId) {
+        MappingColumnsGraph.currentGraphNode = MappingColumnsGraph.implicitModelVisjsGraph.data.nodes.get(columnId);
+
+        var params = {
+            source: MappingModeler.currentSLSsource,
+            columns: MappingModeler.currentTable.columns,
+            title: "" + MappingModeler.currentTable.name,
+            columnClass: self.getColumnType(columnId),
+        };
+
+        MappingModeler_bot.start(MappingModeler_bot.workflowColumnmMappingOther, params, function (err, result) {
+            var params = MappingModeler_bot.params;
+
+            var data = MappingColumnsGraph.currentGraphNode.data;
+            if (!data.otherPredicates) {
+                data.otherPredicates = [];
+            }
+
+            if (params.addingTransform) {
+                return; // function processing made in save transform
+            } else if (params.addingType) {
+                data.otherPredicates.push({
+                    property: "rdf:type",
+                    object: params.rdfType,
+                });
+                MappingColumnsGraph.updateNode({ id: MappingColumnsGraph.currentGraphNode.id, data: data });
+                MappingColumnsGraph.saveVisjsGraph();
+            } else if (params.addingSubClassOf) {
+                data.otherPredicates.push({
+                    property: "rdfs:subClassOf",
+                    object: params.addingSubClassOf,
+                });
+                MappingColumnsGraph.updateNode({ id: MappingColumnsGraph.currentGraphNode.id, data: data });
+                MappingColumnsGraph.saveVisjsGraph();
+            } else if (params.nonObjectPropertyId) {
+                var range = params.datatypePropertyRange || Config.ontologiesVocabularyModels[params.nonObjectPropertyVocab].nonObjectProperties[params.nonObjectPropertyId].range;
+                data.otherPredicates.push({
+                    property: params.nonObjectPropertyId,
+                    object: params.predicateObjectColumn,
+                    range: range,
+                    dateFormat: params.nonObjectPropertyDateFormat || null, //if any
+                });
+                MappingColumnsGraph.updateNode({ id: MappingColumnsGraph.currentGraphNode.id, data: data });
+                MappingColumnsGraph.saveVisjsGraph();
+            }
+            if (MappingsDetails.afterSaveColumnTechnicalMappingsDialog) {
+                MappingsDetails.afterSaveColumnTechnicalMappingsDialog();
+            }
+            // self.showDetailsDialog();
+        });
+    };
+
     /**
      * Handles the selection of a tree node and displays the corresponding column's technical details.
      * If the selected node is a column node, it opens the column technical mappings dialog.

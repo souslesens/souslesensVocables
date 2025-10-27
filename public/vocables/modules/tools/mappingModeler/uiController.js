@@ -23,23 +23,35 @@ var UIcontroller = (function () {
         //  $(".mappingModeler_rightPanel").css("display", "none");
         if (tabId == "MappingModeler_dataSourcesTab") {
             $("#mappingModeler_structuralPanel").css("display", "block");
-            $("#rightControlPanelDiv").load("./modules/tools/mappingModeler/html/mappingsGraphButtons.html", function (err) {});
+            $("#rightControlPanelDiv").load("./modules/tools/mappingModeler/html/mappingsGraphButtons.html", function (err) {
+                if(callback){
+                    callback();
+                }
+            });
         } else if (!MappingModeler.currentTable) {
             $("#MappingModeler_leftTabs").tabs("option", "active", 0);
             return alert("select a table");
         }
         if (tabId == "MappingModeler_columnsTab") {
-            $("#mappingModeler_structuralPanel").css("display", "block");
-            MappingModeler.initActiveLegend(MappingModeler.legendGraphDivId);
-            MappingModeler.loadSuggestionSelectJstree(MappingModeler.currentTable.columns, "Columns");
+           
             //$("#MappingModeler_currentDataSource").html(DataSourceManager.currentConfig.currentDataSource.name);
-            $("#rightControlPanelDiv").load("./modules/tools/mappingModeler/html/mappingsGraphButtons.html", function (err) {});
+            $("#rightControlPanelDiv").load("./modules/tools/mappingModeler/html/mappingsGraphButtons.html", function (err) {
+                 $("#mappingModeler_structuralPanel").css("display", "block");
+                MappingModeler.initActiveLegend(MappingModeler.legendGraphDivId,function(){
+                    MappingModeler.loadSuggestionSelectJstree(MappingModeler.currentTable.columns, "Columns",callback);
+                });
+                
+              
+            });
         } else if (tabId == "MappingModeler_technicalDetailTab") {
-            MappingsDetails.showDetailsDialog(null, callback);
+            
             //  $("#rightControlPanelDiv").load("./modules/tools/mappingModeler/html/detailsGraphButtons.html", function (err) {});
-            $("#rightControlPanelDiv").load("./modules/tools/mappingModeler/html/mappingsGraphButtons.html", function (err) {});
+            $("#rightControlPanelDiv").load("./modules/tools/mappingModeler/html/mappingsGraphButtons.html", function (err) {
+                MappingsDetails.showDetailsDialog(null, callback);
+                
+            });
         } else if (tabId == "MappingModeler_RelationsTab") {
-            MappingModelerRelations.drawPossibleRelations();
+            MappingModelerRelations.drawPossibleRelations(callback);
         } else if (tabId == "MappingModeler_tripleFactoryTab") {
         }
     };

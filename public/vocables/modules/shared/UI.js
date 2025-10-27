@@ -452,6 +452,21 @@ var UI = (function () {
         }
         $(div).dialog("option", "title", title);
     };
+    self.openDialog = function (divId, options) {
+        if (!divId) {
+            return;
+        }
+        if (!options) {
+            options = {};
+        }
+        if (!divId.startsWith("#")) {
+            divId = "#" + divId;
+        }
+        $("#" + divId).dialog("open");
+        if(options.title){
+            self.setDialogTitle(divId, options.title);
+        }
+    };
     return self;
 })();
 export default UI;

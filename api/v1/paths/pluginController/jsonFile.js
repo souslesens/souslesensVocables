@@ -15,7 +15,7 @@ module.exports = function () {
             const json = JSON.parse(data);
             processResponse(res, null, json);
         } catch (error) {
-            next(error);
+            res.status(error.status || 500).json(error);next(error);
         }
     }
 

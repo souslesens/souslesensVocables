@@ -367,6 +367,11 @@ var MainController = (function () {
             callback();
         }
     };
+    self.setErrorMessage = function (err,type) {
+        var message = err.responseText;
+        
+        alert(message);
+    }
 
     return self;
 })();

@@ -36,7 +36,7 @@ var Lineage_createRelation = (function () {
      */
     self.showAddEdgeFromGraphDialog = function (edgeData, callback) {
         self.callbackFn = callback;
-        $("#smallDialogDiv").dialog("option", "title", "Create relation in source " + Lineage_sources.activeSource);
+        UI.setDialogTitle("#smallDialogDiv", "Create relation in source " + Lineage_sources.activeSource);
         Lineage_sources.showHideEditButtons(Lineage_sources.activeSource);
         var allLabelsMap = {};
         $("#smallDialogDiv").load("modules/tools/lineage/html/lineageAddEdgeDialog.html", function () {

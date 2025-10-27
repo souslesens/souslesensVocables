@@ -15,7 +15,7 @@ var ConfigEditor = (function () {
     self.onLoaded = function () {
         $("#accordion").accordion("option", { active: 2 });
 
-        $("#mainDialogDiv").dialog("option", "title", "Config Editor");
+        UI.setDialogTitle("#mainDialogDiv", "Config Editor");
         $("#mainDialogDiv").on("dialogclose", function (event, ui) {
             self.umountKGUploadApp();
         });

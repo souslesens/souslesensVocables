@@ -42,7 +42,7 @@ var SourceSelectorWidget = (function () {
 
         $("#" + targetDivId).load("./modules/uiWidgets/html/sourceSelector.html", function (err) {
             try {
-                $("#" + targetDivId).dialog("open");
+                UI.openDialog(targetDivId);
             } catch (e) {}
             self.loadSourcesTreeDiv("sourceSelector_jstreeDiv", jsTreeOptions);
             $("#sourceSelector_searchInput").trigger("focus");
@@ -61,7 +61,7 @@ var SourceSelectorWidget = (function () {
             }
 
             if (isDialog) {
-                $("#" + targetDivId).dialog("open");
+                UI.openDialog(targetDivId);
             }
             if (callback) {
                 callback();

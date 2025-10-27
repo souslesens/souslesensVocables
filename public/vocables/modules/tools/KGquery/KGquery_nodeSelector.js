@@ -71,7 +71,7 @@ var KGquery_nodeSelector = (function () {
                    }, function(err) {
 
                        if (err) {
-                           return alert(err)
+                           return MainController.errorAlert(err)
                        }
                    })*/
             },
@@ -118,7 +118,7 @@ var KGquery_nodeSelector = (function () {
         } else {
             KGquery_paths.setQueryElementPath(self.currentQueryElement, function (err, result) {
                 if (err) {
-                    return alert(err.responseText);
+                    return MainController.errorAlert(err);
                 }
             });
         }

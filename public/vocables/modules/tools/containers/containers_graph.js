@@ -69,7 +69,7 @@ var Containers_graph = (function () {
         var visjsData = { nodes: [], edges: [] };
         Containers_query.getContainersAscendants(source, ids, options, function (err, result) {
             if (err) {
-                return alert(err.responseText);
+                return MainController.errorAlert(err.responseText);
             }
 
             var color = common.palette[self.parentContainersColors.length + 3];
@@ -389,7 +389,7 @@ var Containers_graph = (function () {
             function (err) {
                 UI.message("", true);
                 if (err) {
-                    return alert(err.responseText);
+                    return MainController.errorAlert(err.responseText);
                     if (callback) {
                         return callback(err);
                     }

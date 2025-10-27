@@ -234,7 +234,7 @@ var MappingModeler_bot = (function () {
         addLookUpFn: function () {
             Lookups_bot.start(Lookups_bot.lookUpWorkflow, {}, function (err, result) {
                 if (err) {
-                    return alert(err);
+                    return MainController.errorAlert(err);
                 }
             });
         },

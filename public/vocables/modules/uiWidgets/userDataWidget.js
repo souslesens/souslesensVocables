@@ -23,7 +23,7 @@ var UserDataWidget = (function () {
                 if (self.callbackFn) {
                     self.callbackFn(err);
                 } else {
-                    alert(err.responseText || err);
+                    MainController.errorAlert(err);
                 }
                 return;
             }
@@ -279,7 +279,7 @@ var UserDataWidget = (function () {
                                 action: function (_e) {
                                     UserDataWidget.deleteItem(node.data, function (err, result) {
                                         if (err) {
-                                            return alert(err.responseText || err);
+                                            return MainController.errorAlert(err);
                                         }
 
                                         //!!!!!TODO  delete also graph data
@@ -303,7 +303,7 @@ var UserDataWidget = (function () {
                                 action: function (_e) {
                                     ShareUserData_bot.start(null, { userData: UserDataWidget.currentTreeNode }, function (err, result) {
                                         if (err) {
-                                            return alert(err);
+                                            return MainController.errorAlert(err);
                                         }
                                     });
                                 },

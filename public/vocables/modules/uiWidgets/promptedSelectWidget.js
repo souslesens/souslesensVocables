@@ -32,7 +32,7 @@ var PromptedSelectWidget = (function () {
         }
         Sparql_OWL.getDictionary(source, options, null, function (err, result) {
             if (err) {
-                alert(err.responseText);
+                MainController.errorAlert(err);
             }
 
             if (result.length >= Config.maxSelectListSize) {

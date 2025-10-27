@@ -181,7 +181,7 @@ var SearchWidget = (function () {
 
             SearchWidget.searchResultToJstree(options.jstreeDiv || self.currentTargetDiv, result, options, function (err, _result) {
                 if (err) {
-                    return MainController.errorAlert( err);
+                    return MainController.errorAlert(err);
                 }
             });
         });

@@ -368,16 +368,16 @@ var MainController = (function () {
         }
     };
     self.errorAlert = function (err) {
-        if(typeof err == "object"){
+        if (typeof err == "object") {
             var message = err.responseText || err.message;
-        }else if(typeof err == "string"){
+        } else if (typeof err == "string") {
             var message = err;
-        }else{
+        } else {
             var message = "An error occurred";
         }
-        
+
         alert(message);
-    }
+    };
 
     return self;
 })();

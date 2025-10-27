@@ -576,10 +576,15 @@ var KGquery = (function () {
         var data;
         var labelFromURIToDisplay = [];
         var sampleSize;
+        var distinctSetTypes;
         async.series(
             [
                 function (callbackSeries) {
-                    query = KGquery_predicates.buildQuery(self.querySets, {});
+                    var queryResult = KGquery_predicates.buildQuery(self.querySets, {});
+                    query = queryResult.query;
+                    isUnion = queryResult.isUnion;
+                    isJoin = queryResult.isJoin;
+                    distinctSetTypes = queryResult.distinctSetTypes;
                     return callbackSeries();
                 },
                 //execute query
@@ -601,16 +606,27 @@ var KGquery = (function () {
                     var resultSize = 1;
                     var limitSize = sampleSize || 10000;
                     var offset = 0;
+                    var csvSize = 10000;
 
-                    self.outputCsv = sampleSize || false;
+                    self.outputCsv = false;
+                    var limitCondition = true;
                     data = { results: { bindings: [] }, head: { vars: [] } };
+                    if (limitSize > 10000) {
+                        alert("sample size is too large, it will be set to 10000");
+                        limitSize = 10000;
+                    }
                     async.whilst(
                         function (_test) {
-                            if (!self.outputCsv && totalSize >= limitSize) {
+                            if (!self.outputCsv && totalSize >= csvSize) {
                                 self.outputCsv = true;
                             }
+                            UI.message("retreived " + totalSize);
+                            // only one batch for sample size
+                            if (options.sampleSize && totalSize > 0) {
+                                limitCondition = false;
+                            }
 
-                            return resultSize > 0;
+                            return resultSize > 0 && limitCondition;
                         },
                         function (callbackWhilst) {
                             var query2 = "" + query;
@@ -657,7 +673,9 @@ var KGquery = (function () {
 
                     dataByQuerySet.forEach(function (setData, index) {
                         if (joinedData) {
-                            var commonKeys = Object.keys(distinctSetTypes[index]).filter((key) => key in distinctSetTypes[index - 1]);
+                            var keysCurrentSet = distinctSetTypes[index];
+                            var keysPreviousSet = distinctSetTypes[index - 1];
+                            var commonKeys = keysCurrentSet.filter((key) => keysPreviousSet.includes(key));
                             commonKeys = commonKeys.map((str) => str.replace(/\?/g, ""));
                             joinedData = common.array.fullOuterJoin(joinedData, setData, commonKeys);
                         } else {

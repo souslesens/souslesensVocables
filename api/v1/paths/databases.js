@@ -1,13 +1,15 @@
 const { databaseModel } = require("../../../model/databases");
 const { resourceFetched, responseSchema } = require("./utils");
+const userManager = require("../../../bin/user.");
 
 module.exports = function () {
     let operations = { GET };
 
     // GET /api/v1/databases
-    async function GET(_req, res, next) {
+    async function GET(req, res, next) {
         try {
-            const databases = await databaseModel.getDatabasesName();
+            const userInfo = await userManager.getUser(req.user);
+            const databases = await databaseModel.getUserDatabasesName(userInfo.user);
             resourceFetched(res, databases);
         } catch (error) {
             next(error);

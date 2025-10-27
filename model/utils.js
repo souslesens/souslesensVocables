@@ -1,6 +1,45 @@
 const knex = require("knex");
 
 /**
+ * Recall a function if it fail.
+ *
+ * @param {function} func - The function to redo if it fail
+ * @param {number} maxRedo - number of try before raise the error
+ * @param {number} sleepTime - number of second to wait between each try.
+ * @param {object} args - other parameters to pass to the func
+ * @returns {Any} - Return of the func
+ */
+const redoIfFailure = async (func, maxRedo = 3, sleepTime = 5, ...args) => {
+    let i = 0;
+    let newSleepTime = sleepTime;
+    while (true) {
+        i += 1;
+        try {
+            return await func(...args);
+        } catch (e) {
+            if (i >= maxRedo) {
+                throw e;
+            }
+            console.warn(e);
+            console.warn(`Fail to execute ${func.name}. Retrying in ${newSleepTime} secs…`);
+            await sleep(newSleepTime);
+            newSleepTime = newSleepTime * 2;
+            continue;
+        }
+    }
+};
+
+/**
+ * Wait
+ *
+ * @param {number} sec - the number of seconds to wait
+ * @returns {Any}
+ */
+const sleep = (sec) => {
+    new Promise((r) => setTimeout(r, sec * 60));
+};
+
+/**
  * Convert a string to a valid JavaScript type
  *
  * @param {string} value – The value to convert
@@ -68,4 +107,4 @@ const cleanupConnection = (connection) => {
     return connection.destroy && connection.destroy();
 };
 
-module.exports = { cleanupConnection, convertType, chunk, getKnexConnection };
+module.exports = { cleanupConnection, convertType, chunk, getKnexConnection, redoIfFailure };

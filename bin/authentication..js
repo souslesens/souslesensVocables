@@ -127,9 +127,12 @@ if (config.auth == "keycloak") {
 
                 const groups = roles.filter((role) => available_groups.includes(role.name)).map((role) => role.name);
 
-                const userAccount = await getUserAccount("auth0", profile._json.nickname);
-                userAccount.groups = groups;
-                userModel.updateUserAccount(userAccount);
+                const userAccount = await getUserAccount("auth0", profile._json[config.auth0.usernameMapping]);
+
+                if (config.auth0.useAuth0Roles) {
+                    userAccount.groups = groups;
+                    userModel.updateUserAccount(userAccount);
+                }
 
                 done(null, userAccount);
             },

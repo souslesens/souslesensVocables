@@ -220,7 +220,7 @@ var UI = (function () {
         self.ApplySelectedTabCSS(buttonClicked, tabGroup);
     };
 
-    self.SideBySideTwoWindows = function (existingWindow, newWindow) {
+    self.sideBySideTwoWindows = function (existingWindow, newWindow) {
         const gap = 12;
         const windowWidth = $(window).width();
         const windowHeight = $(window).height();
@@ -247,13 +247,13 @@ var UI = (function () {
         const offL = existingWindowConvert.offset() || { left: gap, top: gap };
         const top = Math.min(Math.max(gap, offL.top), windowHeight - gap - targetH);
         $(newWindow).dialog("option", "position", {
-            my: "left top",
-            at: `left+${gap} top+${top}`,
+            my: "right top",
+            at: `right+${gap} top+${top}`,
             of: window,
         });
         $(existingWindow).dialog("option", "position", {
-            my: "right top",
-            at: `right-${gap} top+${top}`,
+            my: "left top",
+            at: `left-${gap} top+${top}`,
             of: window,
         });
 

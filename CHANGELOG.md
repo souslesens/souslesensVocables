@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.16.0](https://github.com/souslesens/souslesensVocables/compare/2.15.0...2.16.0) (2025-10-20)
+
+> [!IMPORTANT]
+> Updating to 2.16.0 require a data migration. Execute the following script after upgrade.
+
+```bash
+npm run migrate
+```
+
+
+### Features
+
+* **auth0:** add useAuth0Roles option to use or not auth0 roles as sls profiles ([edbe3b9](https://github.com/souslesens/souslesensVocables/commit/edbe3b978b9c0a4f3cd0a34c70f97a515e03813d))
+* **auth:** customize auth0 username (nickname, email or name) ([b9ad596](https://github.com/souslesens/souslesensVocables/commit/b9ad596eeef10479d9e8abcaa84abc0593df267e))
+* **migrations:** add usernameMapping and useAuth0Roles to mainConfig.json ([f70146a](https://github.com/souslesens/souslesensVocables/commit/f70146a8003905472225b62da497bbb46a393948))
+
+
+### Bug Fixes
+
+* **model/config:** don't deepPartial auth0 config ([f6d3dc7](https://github.com/souslesens/souslesensVocables/commit/f6d3dc73528c13824b8335cb1e4ebb30275c4d6f))
+
 ## [2.15.0](https://github.com/souslesens/souslesensVocables/compare/2.14.2...2.15.0) (2025-09-25)
 
 

@@ -6,6 +6,7 @@ import MappingsDetails from "./mappingsDetails.js";
 import DataSourceManager from "./dataSourcesManager.js";
 import MappingModeler from "./mappingModeler.js";
 import Lineage_graphPaths from "../lineage/lineage_graphPaths.js";
+import UIcontroller from "./uiController.js";
 
 /**
  * MappingColumnsGraph module.
@@ -144,6 +145,31 @@ var MappingColumnsGraph = (function () {
         };
         return edge;
     };
+
+    self.getVisjsDatatypePropertyEdgeBetweenClassAndRange = function (domainId, rangeId, propUri, propLabel) {
+        return {
+            id: domainId + "_dp_" + propUri + "_" + rangeId,
+            from: domainId,
+            to: rangeId,
+            label: propLabel,
+            width: 3,
+            arrows: { to: { enabled: true, type: "arrow" } },
+            smooth: { type: "curvedCCW", forceDirection: "vertical", roundness: 0.5 },
+            color: "#9b59b6",
+            data: { id: propUri, type: "DatatypeProperty" },
+        };
+    };
+
+    /**
+     * return a visJsEdge for DatatypeProperty
+     * @param {string} from  node id (subject column)
+     * @param {string} to    node id (object/value column)
+     * @param {string} label property label
+     * @param {Object|string} property  either {id,label,source} or a URI string
+     * @param {string} uri   property URI (if property is string, this is redundant but accepted)
+     * @param {string} color edge color
+     */
+
     /**
      * Draws a new resource node in the Vis.js graph.
      * Positions the node dynamically and links it with existing nodes if necessary.
@@ -454,6 +480,23 @@ var MappingColumnsGraph = (function () {
         }
     };
 
+    self.showImplicitGraphPopupMenu = function (node, point, event) {
+        if (!node || !node.data) return;
+
+        var html = "";
+        if (node.data.type === "Class" || node.data.type === "superClass") {
+            self.currentGraphNode = node;
+            html += '    <span class="popupMenuItem" onclick="MappingColumnsGraph.graphActions.showNodeInfos()">Node Infos</span>';
+        }
+
+        if (html !== "") {
+            $("#popupMenuWidgetDiv").html(html);
+            point.x = event.x;
+            point.y = event.y;
+            PopupMenuWidget.showPopup(point, "popupMenuWidgetDiv");
+        }
+    };
+
     /**
      * Displays the context menu for a graph node.
      * Shows relevant options based on the node type (Class, Column, or Edge).
@@ -730,6 +773,7 @@ var MappingColumnsGraph = (function () {
             },
         );
     };
+
     /**
      * Loads the Vis.js graph for the current mapping source.
      * Retrieves graph data from a JSON file and adjusts layout positioning.
@@ -770,7 +814,6 @@ var MappingColumnsGraph = (function () {
                     self.addNodesByDataTableBatch(result.nodes, function () {
                         if (true) {
                             self.visjsGraph.data.nodes.get().forEach(function (node) {
-                                node.hidden = false;
                                 if (node.data.type == "Class") {
                                     node.level = 3;
                                 } else if (node.data.type == "Table") {
@@ -1215,7 +1258,16 @@ var MappingColumnsGraph = (function () {
                 node.shape = oldNode.shape || "box";
                 node.color = oldNode.color;
                 node.size = 18;
+                /*if(oldNode.data.prefixURI){
+                    if(data?.options?.config){
+                        if(!data?.options?.config?.prefixURI){
+                            data.options.config.prefixURI = {};
+                        }
+                        data.options.config.prefixURI[oldNode.label] = oldNode.data.prefixURI;
 
+                    }
+                   
+                }*/
                 if (oldNode.data.type == "Class") {
                     node.level = 3;
                 } else if (oldNode.data.type == "Table") {
@@ -1326,6 +1378,9 @@ var MappingColumnsGraph = (function () {
                 var data = JSON.parse(result);
                 if (data.nodes.length == 0) {
                     return alert("no nodes in file");
+                }
+                if (data.options?.config?.lastUpdate) {
+                    delete data.options.config.lastUpdate;
                 }
                 var fileName = "mappings_" + MappingModeler.currentSLSsource + "_ALL" + ".json";
                 var payload = {
@@ -1443,14 +1498,12 @@ var MappingColumnsGraph = (function () {
         var tableNodes = {};
 
         nodes.forEach(function (node) {
-            var hidden = true;
             if (node.data && node.data.dataTable) {
                 if (node.data.dataTable == table) {
                     tableNodes[node.id] = node;
-                    hidden = false;
                 }
             }
-            newNodesMap[node.id] = { id: node.id, hidden: hidden };
+            newNodesMap[node.id] = { id: node.id, hidden: true };
         });
 
         var edgesFromClassMap = {};
@@ -1483,6 +1536,7 @@ var MappingColumnsGraph = (function () {
         var classNodesMap = self.getNodesMap("Class");
         var linkedClasses = {};
         var classVisjsData = { nodes: [], edges: [] };
+        var uniqueNodes = {};
 
         async.series(
             [
@@ -1513,7 +1567,6 @@ var MappingColumnsGraph = (function () {
 
                 //build visjgraph
                 function (callbackSeries) {
-                    var uniqueNodes = {};
                     for (var classId in linkedClasses) {
                         if (!uniqueNodes[classId]) {
                             uniqueNodes[classId] = 1;
@@ -1556,63 +1609,183 @@ var MappingColumnsGraph = (function () {
                     }
                     callbackSeries();
                 },
-                // compare to model restrictions
+                // --- get link from column to class and build vijsgraph
                 function (callbackSeries) {
-                    Sparql_OWL.getObjectRestrictions(MappingModeler.currentSLSsource, null, {}, function (err, result) {
-                        if (err) {
-                            return callbackSeries();
+                    var addedColEdgeIds = {};
+
+                    columns.forEach(function (column) {
+                        if (!column) return;
+
+                        var columnId = null;
+                        if (column.id) columnId = column.id;
+                        if (!columnId) return;
+
+                        var columnLabel = columnId;
+                        if (column.label) columnLabel = column.label;
+
+                        var dataTable = null;
+                        if (column.data && column.data.dataTable) dataTable = column.data.dataTable;
+
+                        var displayLabel = columnLabel;
+                        if (dataTable) displayLabel = dataTable + ":" + columnLabel;
+
+                        var datableKey = dataTable;
+                        var columnColor = common.getResourceColor("dataTable", datableKey, "paletteIntense");
+                        var classId = self.getColumnClass(column);
+                        if (!classId) return;
+                        if (!uniqueNodes[classId]) return;
+
+                        if (!uniqueNodes[columnId]) {
+                            classVisjsData.nodes.push({
+                                id: columnId,
+                                label: displayLabel,
+                                shape: "box",
+                                color: columnColor,
+                                data: {
+                                    id: columnId,
+                                    label: columnLabel,
+                                    type: "Column",
+                                    dataTable: dataTable,
+                                },
+                            });
+                            uniqueNodes[columnId] = 1;
+                        }
+                        var edgeColumnToClass = [];
+                        if (edgesFromMap && edgesFromMap[columnId]) edgeColumnToClass = edgesFromMap[columnId];
+
+                        var edgeType = null;
+                        edgeColumnToClass.forEach(function (edge) {
+                            if (edgeType) return;
+                            if (edge && edge.data && edge.data.type) edgeType = edge.data.type;
+                        });
+
+                        var edgeId = columnId + "->" + classId + "|" + edgeType;
+                        if (!addedColEdgeIds[edgeId]) {
+                            classVisjsData.edges.push({
+                                id: edgeId,
+                                from: columnId,
+                                to: classId,
+                                label: "",
+                                color: "#00afef",
+                                width: 3,
+                                arrows: { to: { enabled: true, type: "arrow" } },
+                                data: { type: edgeType },
+                            });
+                            addedColEdgeIds[edgeId] = 1;
+                        }
+                    });
+
+                    callbackSeries();
+                },
+
+                // build datatype property edge
+                function (callbackSeries) {
+                    var addedDpEdgeIds = {};
+                    var cols = columns;
+                    cols.forEach(function (column) {
+                        // columnId
+                        var columnId = null;
+                        if (column) {
+                            if (column.id) {
+                                columnId = column.id;
+                            }
+                        }
+                        if (!columnId) {
+                            return;
                         }
 
-                        var map = {};
-                        result.forEach(function (item) {
-                            map[item.subject.value + "_" + item.value.value] = item;
-                        });
+                        // columnLalbel
+                        var columnLalbel = columnId;
+                        if (column) {
+                            if (column.label) {
+                                columnLalbel = String(column.label);
+                            }
+                        }
 
-                        classVisjsData.edges.forEach(function (edge) {
-                            var modelRestriction = map[edge.from + "_" + edge.to];
-                            if (modelRestriction) {
-                                if (modelRestriction.prop.value == edge.data.id) {
-                                    edge.color = "green";
-                                } else {
-                                    edge.color = "red";
+                        // dataTable
+                        var dataTable = null;
+                        if (column && column.data && column.data.dataTable) {
+                            dataTable = column.data.dataTable;
+                        }
 
-                                    classVisjsData.edges.push({
-                                        from: edge.from,
-                                        to: edge.to,
-                                        label: modelRestriction.propLabel.value,
-                                        data: { id: modelRestriction.prop.value },
-                                        arrows: {
-                                            to: {
-                                                enabled: true,
-                                                type: "arrow",
-                                            },
-                                        },
-                                    });
-                                }
-                            } else {
-                                var inverseModelRestriction = map[edge.to + "_" + edge.from];
-                                if (inverseModelRestriction) {
-                                    classVisjsData.edges.push({
-                                        from: edge.from,
-                                        to: edge.to,
-                                        volor: "blue",
-                                        label: inverseModelRestriction.propLabel.value,
-                                        data: { id: inverseModelRestriction.prop.value },
-                                        arrows: {
-                                            to: {
-                                                enabled: true,
-                                                type: "arrow",
-                                            },
-                                        },
-                                    });
-                                }
+                        if (!uniqueNodes[columnId]) {
+                            classVisjsData.nodes.push({
+                                id: columnId,
+                                label: String(columnLalbel),
+                                shape: "box",
+                                color: "#eaf4ff",
+                                data: { id: columnId, label: String(columnLalbel), type: "Column", dataTable: dataTable },
+                            });
+                            uniqueNodes[columnId] = 1;
+                        }
 
-                                edge.color = "blue";
+                        // otherPredicates
+                        var dataTypeNodes = null;
+                        if (column && column.data && column.data.otherPredicates) {
+                            dataTypeNodes = column.data.otherPredicates;
+                        }
+                        if (!dataTypeNodes) {
+                            return;
+                        }
+                        dataTypeNodes.forEach(function (predItem) {
+                            if (!predItem) {
+                                return;
+                            }
+                            var dpColumnId = predItem.object;
+
+                            var propUri = null;
+                            if (predItem.property) {
+                                propUri = Sparql_common.getLabelFromURI(predItem.property);
+                            }
+                            if (!propUri) {
+                                return;
+                            }
+
+                            // create node if not existing
+                            if (!uniqueNodes[dpColumnId] && !uniqueNodes[dpColumnId]) {
+                                classVisjsData.nodes.push({
+                                    id: dpColumnId,
+                                    label: dpColumnId,
+                                    shape: "box",
+                                    size: 10,
+                                    color: "#ddd",
+                                    data: {
+                                        id: dpColumnId,
+                                        type: "DatatypeProperty",
+                                        source: MappingModeler.currentSLSsource,
+                                        prop: propUri,
+                                        propLabel: propUri,
+                                        dataTable: dataTable,
+                                    },
+                                });
+                                uniqueNodes[dpColumnId] = 1;
+                                uniqueNodes[dpColumnId] = 1;
+                            }
+
+                            // edge from datatype propertie to column
+                            var edgeId = columnId + "->" + dpColumnId + "|" + propUri;
+                            if (!addedDpEdgeIds[edgeId]) {
+                                var dpColor = Lineage_whiteboard && Lineage_whiteboard.datatypeColor ? Lineage_whiteboard.datatypeColor : "#9b59b6";
+                                classVisjsData.edges.push({
+                                    id: edgeId,
+                                    from: columnId,
+                                    to: dpColumnId,
+                                    label: propUri,
+                                    arrows: { to: { enabled: true, type: "solid" } },
+                                    font: { color: Lineage_whiteboard.datatypeColor, size: 12 },
+                                    color: dpColor,
+                                    width: 3,
+                                    dashes: true,
+                                    data: { id: propUri, type: "DatatypeProperty" },
+                                });
+                                addedDpEdgeIds[edgeId] = 1;
                             }
                         });
-                        callbackSeries();
                     });
+
+                    callbackSeries();
                 },
+
                 // draw graph
                 function (callbackSeries) {
                     //  classVisjsData={nodes:[], edges:[]}
@@ -1620,7 +1793,55 @@ var MappingColumnsGraph = (function () {
                     $("#mainDialogDiv").html(html);
                     $("#mainDialogDiv").dialog("open");
 
-                    self.implicitModelVisjsGraph = new VisjsGraphClass("mappingModeler_implicitModelGraph", classVisjsData);
+                    var implicitOptions = {
+                        onclickFn: function (node, event, options) {
+                            if (!node) return;
+                            self.currentGraphNode = node;
+
+                            if (!node.data) return;
+                            if (node.data.type !== "Column") return;
+
+                            var baseLabel = null;
+                            if (node.data && node.data.label) {
+                                baseLabel = node.data.label;
+                            }
+
+                            var parentTable = null;
+                            if (node.data && node.data.dataTable) {
+                                parentTable = node.data.dataTable;
+                            }
+
+                            var dialogNode = {
+                                id: node.id,
+                                label: baseLabel,
+                                data: {
+                                    id: node.id,
+                                    label: baseLabel,
+                                    type: "Column",
+                                    dataTable: parentTable,
+                                },
+                            };
+                            if (MappingModeler.currentTable.name == node.data.dataTable) {
+                                $("#MappingModeler_leftTabs").tabs("option", "active", 3);
+                                UIcontroller.onActivateLeftPanelTab("MappingModeler_technicalDetailTab", function () {
+                                    MappingsDetails.showColumnTechnicalMappingsDialog("detailedMappings_techDetailsDiv", dialogNode, function () {
+                                        MappingModeler.currentTreeNode = MappingColumnsGraph.visjsGraph.data.nodes.get(node.id);
+                                        MappingsDetails.showDetailsDialog(null, function () {
+                                            var afterSave = null;
+                                            afterSave = MappingsDetails.afterSaveColumnTechnicalMappingsDialog;
+                                            MappingsDetails.showColumnTechnicalMappingsDialog("detailedMappings_techDetailsDiv", MappingModeler.currentTreeNode, afterSave);
+                                        });
+                                    });
+                                });
+                            }
+                        },
+
+                        onRightClickFn: function (node, point, event) {
+                            self.showImplicitGraphPopupMenu(node, point, event);
+                        },
+                    };
+
+                    self.implicitModelVisjsGraph = new VisjsGraphClass("mappingModeler_implicitModelGraph", classVisjsData, implicitOptions);
                     self.implicitModelVisjsGraph.draw(function () {});
 
                     // self.drawGraphCanvas(self.graphDiv, classVisjsData);

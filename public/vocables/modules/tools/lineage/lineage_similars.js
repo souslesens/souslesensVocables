@@ -566,10 +566,9 @@ var Lineage_similars = (function () {
     };
     self.save = {
         showDialog: function () {
-            UI.setDialogTitle("#smallDialogDiv", "Save Similars");
             self.parentClassJstreeLoaded = false;
             $("#smallDialogDiv").load("modules/tools/lineage/html/lineageSimilarsSaveDialog.html", function () {
-                $("#smallDialogDiv").dialog("open");
+                UI.openDialog("smallDialogDiv", {title: "Save Similars"});
                 self.save.drawWhiteboardSimilarsTaxonomy(function () {});
             });
         },

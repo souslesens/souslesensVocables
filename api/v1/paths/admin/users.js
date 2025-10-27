@@ -8,7 +8,7 @@ module.exports = function () {
             const users = await userModel.getUserAccounts();
             res.status(200).json(successfullyFetched(sortObjectByKey(users)));
         } catch (error) {
-            next(error);
+            res.status(error.status || 500).json(error);next(error);
         }
     }
     GET.apiDoc = {
@@ -34,7 +34,7 @@ module.exports = function () {
             const users = await userModel.getUserAccounts();
             res.status(200).json(successfullyUpdated(users));
         } catch (error) {
-            next(error);
+            res.status(error.status || 500).json(error);next(error);
         }
     }
     PUT.apiDoc = {

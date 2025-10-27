@@ -139,7 +139,7 @@ var KGquery = (function () {
         KGquery.currentSource = MainController.currentSource;
         Lineage_sources.loadSources(MainController.currentSource, function (err) {
             if (err) {
-                return alert(err.responseText);
+                return MainController.errorAlert(err);
             }
             $("#graphDiv").load("./modules/tools/KGquery/html/KGquery_centralPanel.html", function () {
                 $("#lateralPanelDiv").load("./modules/tools/KGquery/html/KGquery_leftPanel.html", function () {
@@ -297,7 +297,7 @@ var KGquery = (function () {
             //   $("#KGquery_SetsControlsDiv").show();
             KGquery_paths.getNearestNodeId(node.id, self.currentQuerySet, excludeSelf, function (err, nearestNodeId) {
                 if (err) {
-                    return alert(err.responseText);
+                    return MainController.errorAlert(err);
                 }
 
                 self.addNodeToQueryElement(self.currentQueryElement, node, "fromNode");
@@ -306,7 +306,7 @@ var KGquery = (function () {
 
                 KGquery_paths.setQueryElementPath(self.currentQueryElement, function (err, result) {
                     if (err) {
-                        return alert(err.responseText);
+                        return MainController.errorAlert(err);
                     }
 
                     var predicateLabel = KGquery_controlPanel.getQueryElementPredicateLabel(self.currentQueryElement);
@@ -332,7 +332,7 @@ var KGquery = (function () {
             self.currentQueryElement.toNode = node;
             KGquery_paths.setQueryElementPath(self.currentQueryElement, function (err, result) {
                 if (err) {
-                    return alert(err.responseText);
+                    return MainController.errorAlert(err);
                 }
                 self.addNodeToQueryElement(self.currentQueryElement, node, "toNode");
 
@@ -521,7 +521,7 @@ var KGquery = (function () {
                 self.message("", true);
                 if (err) {
                     if (err.responseText) {
-                        return alert(err.responseText);
+                        return MainController.errorAlert(err);
                     }
                 }
 

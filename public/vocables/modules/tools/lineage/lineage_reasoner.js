@@ -99,7 +99,7 @@ var Lineage_reasoner = (function () {
                 $("#lineage_reasoner_outputDiv").css("display", "block");
             },
             error(err) {
-                alert(err.responseText);
+                MainController.errorAlert(err);
             },
         });
     };
@@ -132,7 +132,7 @@ var Lineage_reasoner = (function () {
                 $("#lineage_reasoner_infosDiv").html(JSON.stringify(data, null, 2));
             },
             error(err) {
-                alert(err.responseText);
+                MainController.errorAlert(err);
             },
         });
     };
@@ -173,7 +173,7 @@ var Lineage_reasoner = (function () {
                 JstreeWidget.loadJsTree("reasonerTreeContainerDiv", jstreeData, options);
             },
             error(err) {
-                alert(err.responseText);
+                MainController.errorAlert(err);
             },
         });
     };
@@ -229,7 +229,7 @@ var Lineage_reasoner = (function () {
                 });
             },
             error(err) {
-                alert(err.responseText);
+                MainController.errorAlert(err);
                 if (callback) {
                     return callback(err);
                 }
@@ -251,7 +251,7 @@ var Lineage_reasoner = (function () {
             self.currentInferencePredicates = predicates;
             self.runInference(predicates, function (err, result) {
                 if (err) {
-                    return alert(err);
+                    return MainController.errorAlert(err);
                 }
                 self.inferenceData = result;
                 self.listInferenceSubjects();

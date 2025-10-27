@@ -66,7 +66,7 @@ $("#sourceDivControlPanelDiv").html(html);*/
             },
             error: function (err) {
                 console.error("Error", err);
-                alert(err);
+                MainController.errorAlert(err);
             },
         });
     };
@@ -238,7 +238,7 @@ $("#sourceDivControlPanelDiv").html(html);*/
         if (propId && inversePropId) {
             Sparql_OWL.generateInverseRestrictions(source, propId, inversePropId, function (err, result) {
                 if (err) {
-                    return alert(err.responseText || err);
+                    return MainController.errorAlert(err.responseText || err);
                 }
                 UI.message(result + " restrictions created");
             });
@@ -259,7 +259,7 @@ $("#sourceDivControlPanelDiv").html(html);*/
         }
         OntologyModels.clearOntologyModelCache(source, function (err, result) {
             if (err) {
-                return alert(err.responseText || err);
+                return MainController.errorAlert(err.responseText || err);
             }
 
             UI.message("DONE");
@@ -388,7 +388,7 @@ $("#sourceDivControlPanelDiv").html(html);*/
                 UI.message("source " + source + " copied", true);
             },
             error: function (err) {
-                return alert(err.responseText);
+                return MainController.errorAlert(err.responseText);
             },
         });
     };
@@ -422,7 +422,7 @@ $("#sourceDivControlPanelDiv").html(html);*/
 
         Sparql_OWL.clearGraph(graphUri, function (err, result) {
             if (err) {
-                return alert(err);
+                return MainController.errorAlert(err);
             }
             return UI.message("graph source " + source + " cleared ", true);
         });
@@ -444,7 +444,7 @@ $("#sourceDivControlPanelDiv").html(html);*/
             return;
         }
         Sparql_OWL.createSkgFromOntology(source, skgGraphUri, function (err, result) {
-            alert(err ? err.responseText : result);
+            MainController.errorAlert(err ? err : result);
         });
     };
     return self;

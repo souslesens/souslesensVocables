@@ -22,7 +22,7 @@ var Lineage_linkedData_query = (function () {
             self.isLoaded = true;
             Lineage_linkedData_mappings.getSourceJoinsMappings(Lineage_sources.activeSource, {}, function (err, joinsMap) {
                 if (err) {
-                    return alert(err.responseText);
+                    return MainController.errorAlert(err);
                 }
                 if (Object.keys(joinsMap).length == 0) {
                     return $("#Lineage_linkedData_query_relations").html("No linked Data declared  for source " + Lineage_sources.activeSource);
@@ -64,7 +64,7 @@ var Lineage_linkedData_query = (function () {
         if (!self.databasesMap[database].model) {
             KGcreator.listTables(self.currentDatabase, function (err, model) {
                 if (err) {
-                    return alert(err.responseText);
+                    return MainController.errorAlert(err);
                 }
                 self.databasesMap[database].model = model;
 
@@ -375,7 +375,7 @@ var Lineage_linkedData_query = (function () {
             },
             error(err) {
                 $("#waitImg").css("display", "none");
-                return alert(err.responseText);
+                return MainController.errorAlert(err);
             },
         });
     };

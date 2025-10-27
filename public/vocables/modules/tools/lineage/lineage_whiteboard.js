@@ -165,7 +165,7 @@ var Lineage_whiteboard = (function () {
     self.loadSources = function (options) {
         Lineage_sources.loadSources(MainController.currentSource, function (err) {
             if (err) {
-                return alert(err.responseText);
+                return MainController.errorAlert(err);
             }
             $("#lateralPanelDiv").load("./modules/tools/lineage/html/lateralPanel.html", function () {
                 Lineage_whiteboard.initWhiteboardTab();
@@ -450,7 +450,7 @@ var Lineage_whiteboard = (function () {
                     self.drawTopConcepts(source, options, graphDiv, function (err, result) {
                         if (err) {
                             if (err.response) {
-                                return alert(err.response);
+                                return MainController.errorAlert(err.response);
                             } else {
                                 return;
                             }
@@ -513,7 +513,7 @@ var Lineage_whiteboard = (function () {
                     return callback(err, topConcepts);
                 }
                 if (err) {
-                    return alert(err), topConcepts;
+                    return MainController.errorAlert(err), topConcepts;
                 }
             },
         );
@@ -695,7 +695,7 @@ var Lineage_whiteboard = (function () {
                     if (err == " ") {
                         return;
                     }
-                    return alert(err);
+                    return MainController.errorAlert(err);
                 }
                 //   UI.message("", true)
                 //  self.drawNewGraph(visjsData);
@@ -1112,7 +1112,7 @@ var Lineage_whiteboard = (function () {
 
         SearchUtil.getSimilarLabelsInSources(fromSource, [toSource], labels, ids, "exactMatch", null, function (err, result) {
             if (err) {
-                return alert(err.responseText);
+                return MainController.errorAlert(err);
             }
 
             var existingNodes = self.lineageVisjsGraph.getExistingIdsMap();
@@ -3481,7 +3481,7 @@ self.zoomGraphOnNode(node.data[0].id, false);
         }
         KGquery_graph.getImplicitModelVisjsData(source, function (err, visjsData) {
             if (err) {
-                return alert(err.responseText);
+                return MainController.errorAlert(err);
             }
             if (!self.lineageVisjsGraph.isGraphNotEmpty()) {
                 Lineage_whiteboard.drawNewGraph(visjsData);
@@ -4043,7 +4043,7 @@ self.zoomGraphOnNode(node.data[0].id, false);
                 if (confirm("delete selected relation ?")) {
                     Lineage_createRelation.deleteRestriction(edge.data.source, edge, function (err, result) {
                         if (err) {
-                            return alert(err.responseText);
+                            return MainController.errorAlert(err);
                         }
                         self.lineageVisjsGraph.data.edges.remove(edge.id);
                     });
@@ -4066,7 +4066,7 @@ self.zoomGraphOnNode(node.data[0].id, false);
             if (confirm("Delete object property " + edge.data.propLabel)) {
                 Sparql_generic.deleteTriples(edge.data.source, edge.data.from, edge.data.prop, edge.data.to, function (err, _result) {
                     if (err) {
-                        return alert(err.responseText);
+                        return MainController.errorAlert(err);
                     }
                     self.lineageVisjsGraph.data.edges.remove(edge.id);
                 });
@@ -4093,7 +4093,7 @@ self.zoomGraphOnNode(node.data[0].id, false);
                 }
                 Lineage_createRelation.createSubProperty(Lineage_sources.activeSource, edge.data.propertyId, subPropertyLabel, true, function (err, result) {
                     if (err) {
-                        return alert(err);
+                        return MainController.errorAlert(err);
                     }
 
                     var subPropertyId = result.uri;
@@ -4115,11 +4115,11 @@ self.zoomGraphOnNode(node.data[0].id, false);
 
                     Lineage_createRelation.createRelation(Lineage_sources.activeSource, subPropertyId, sourceNode, targetNode, true, true, {}, function (err, _result) {
                         if (err) {
-                            alert(err);
+                            MainController.errorAlert(err);
                         }
                         Lineage_createRelation.deleteRestriction(Lineage_sources.activeSource, self.currentGraphEdge, function (err) {
                             if (err) {
-                                alert(err);
+                                MainController.errorAlert(err);
                             }
                         });
                         UI.message("relation replaced", true);
@@ -4487,7 +4487,7 @@ attrs.color=self.getSourceColor(superClassValue)
                 //UserDataWidget.currentTreeNode = null;
                 UserDataWidget.showSaveDialog(data_path, data, null, function (err, result) {
                     if (err) {
-                        return alert(err.responseText);
+                        return MainController.errorAlert(err);
                     }
                     UI.message("Graph saved successfully");
                 });
@@ -4518,12 +4518,12 @@ attrs.color=self.getSourceColor(superClassValue)
                 },
                 function (err, result) {
                     if (err) {
-                        return alert(err.responseText);
+                        return MainController.errorAlert(err);
                     }
                     if (result && result.id) {
                         UserDataWidget.loadUserDatabyId(result.id, function (err, result) {
                             if (err) {
-                                return alert(err.responseText);
+                                return MainController.errorAlert(err);
                             }
                             if (result?.data_content) {
                                 self.loadGraphFromJSON(result.data_content);
@@ -4573,7 +4573,7 @@ attrs.color=self.getSourceColor(superClassValue)
         importWhiteboard: function () {
             ImportFileWidget.showImportDialog(function (err, result) {
                 if (err) {
-                    return alert(err);
+                    return MainController.errorAlert(err);
                 }
                 var data = JSON.parse(result);
                 if (data.nodes.length == 0) {

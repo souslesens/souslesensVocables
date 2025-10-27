@@ -53,7 +53,7 @@ var Containers_widget = (function () {
             types.splice(0, 0, { id: "all", label: "all" });
 
             Containers_query.getTopContainer(source, {}, function (err, result) {
-                if (err) return alert(err.responseText || err);
+                if (err) return MainController.errorAlert(err.responseText || err);
                 result.results.bindings.forEach(function (item) {
                     types.push({ id: item.member.value, label: item.memberLabel ? item.memberLabel.value : Sparql_common.getLabelFromURI(item.member.value) });
                 });
@@ -84,7 +84,7 @@ var Containers_widget = (function () {
         if (term) {
             Containers_tree.drawContainerAndAncestorsJsTree(Lineage_sources.activeSource, term, {}, function (err, result) {
                 if (err) {
-                    return alert(err.responseText);
+                    return MainController.errorAlert(err);
                 }
             });
         } else {

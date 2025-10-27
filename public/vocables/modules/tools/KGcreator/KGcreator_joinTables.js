@@ -14,7 +14,7 @@ var KGcreator_joinTables = (function () {
             $("#joinTablesWidgetDialog_toTableId").html(toTable);
             SQLquery_run.getDBmodel(dataSourceConfig, function (err, model) {
                 if (err) {
-                    return alert(err);
+                    return MainController.errorAlert(err);
                 }
                 self.model = model;
 

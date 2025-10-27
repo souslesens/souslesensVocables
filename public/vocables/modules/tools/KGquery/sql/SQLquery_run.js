@@ -156,7 +156,7 @@ var SQLquery_run = (function () {
                 if (callback) {
                     return callback(err);
                 }
-                alert(err.responseText);
+                MainController.errorAlert(err);
             },
         });
     };

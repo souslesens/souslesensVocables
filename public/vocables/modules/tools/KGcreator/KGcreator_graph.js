@@ -364,7 +364,7 @@ var KGcreator_graph = (function () {
 
                 KGcreator.saveSlsvSourceConfig(function (err, result) {
                     if (err) {
-                        return alert(err);
+                        return MainController.errorAlert(err);
                     }
 
                     UI.message("join saved");

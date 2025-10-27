@@ -284,7 +284,7 @@ var PredicatesSelectorWidget = (function () {
         } else {
             OntologyModels.registerSourcesModel([vocabulary], null, function (err, result) {
                 if (err) {
-                    return alert(err.responseText);
+                    return MainController.errorAlert(err);
                 }
                 if (Config.ontologiesVocabularyModels[vocabulary] && Config.ontologiesVocabularyModels[vocabulary].classesCount <= Config.ontologyModelMaxClasses) {
                     var classes = [];

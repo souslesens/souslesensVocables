@@ -167,7 +167,7 @@ var CreateSLSVsource_bot = (function () {
                 ],
                 function (err) {
                     if (err) {
-                        alert(err.responseText);
+                        MainController.errorAlert(err);
                         return self.myBotEngine.reset();
                     }
                     return self.myBotEngine.nextStep();
@@ -193,7 +193,7 @@ var CreateSLSVsource_bot = (function () {
                 ],
                 function (err) {
                     if (err) {
-                        alert(err.responseText);
+                        MainController.errorAlert(err);
                         return self.myBotEngine.reset();
                     }
                     return self.myBotEngine.nextStep();
@@ -250,7 +250,7 @@ var CreateSLSVsource_bot = (function () {
                     return self.myBotEngine.nextStep();
                 },
                 error: function (err) {
-                    return alert(err.responseText);
+                    return MainController.errorAlert(err);
                 },
             });
         },
@@ -313,7 +313,7 @@ var CreateSLSVsource_bot = (function () {
                         return self.myBotEngine.nextStep();
                     },
                     error: function (err) {
-                        alert(err.responseText);
+                        MainController.errorAlert(err);
                         return self.myBotEngine.previousStep();
                     },
                 });
@@ -341,7 +341,7 @@ var CreateSLSVsource_bot = (function () {
                     return self.myBotEngine.nextStep();
                 },
                 error: function (err) {
-                    alert(err.responseText);
+                    MainController.errorAlert(err);
                     return self.myBotEngine.previousStep();
                 },
             });
@@ -368,7 +368,7 @@ var CreateSLSVsource_bot = (function () {
                     setLoading(false);
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
-                    alert(jqXHR.responseText || errorThrown);
+                    MainController.errorAlert(jqXHR); 
                     setLoading(false);
                     return self.myBotEngine.previousStep();
                 },

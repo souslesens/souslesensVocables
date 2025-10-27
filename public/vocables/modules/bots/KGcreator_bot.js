@@ -69,7 +69,7 @@ var KGcreator_bot = (function () {
         }
         CommonBotFunctions.loadSourceOntologyModel(self.params.source, true, function (err) {
             if (err) {
-                return alert(err.responseText);
+                return MainController.errorAlert(err);
             }
 
             KGcreator_mappings.showMappingDialog(null, null, function () {
@@ -356,7 +356,7 @@ var KGcreator_bot = (function () {
                 self.params.predicateObjectColumnClass = null; // not used after properties are found
 
                 if (err) {
-                    return alert(err);
+                    return MainController.errorAlert(err);
                 }
                 var properties = [];
                 for (var key in result.constraints) {
@@ -720,7 +720,7 @@ var KGcreator_bot = (function () {
             KGcreator.currentConfig.currentMappings[self.params.table].tripleModels = self.params.tripleModels;
             KGcreator.saveDataSourceMappings(self.params.source, self.params.datasource.name, KGcreator.currentConfig.currentMappings, function (err, result) {
                 if (err) {
-                    return callback ? callback(err) : alert(err);
+                    return callback ? callback(err) : MainController.errorAlert(err);
                 }
                 _botEngine.message("mapping Saved");
                 return callback ? callback() : _botEngine.nextStep();

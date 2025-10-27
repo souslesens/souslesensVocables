@@ -95,7 +95,7 @@ var TripleFactory = (function () {
         try {
             var offset = parseInt($("#mappingTripleFactory_offset").val());
         } catch (err) {
-            return alert(err);
+            return MainController.errorAlert(err);
         }
 
         TripleFactory.createTriples(
@@ -107,7 +107,7 @@ var TripleFactory = (function () {
             },
             function (err, result) {
                 if (err) {
-                    alert(err.responseText || err);
+                    MainController.errorAlert(err);
                 } else {
                     // UI.message("Done", true);
                     var indexAuto = $("#MappingModeler_indexAutoCBX").prop("checked");
@@ -230,7 +230,7 @@ var TripleFactory = (function () {
                 if (callback) {
                     return callback(err);
                 } else {
-                    alert(err.responseText);
+                    MainController.errorAlert(err);
                 }
                 UI.message(err.responseText);
             },
@@ -318,7 +318,7 @@ var TripleFactory = (function () {
                 if (callback) {
                     return callback(err.responseText);
                 }
-                return alert(err.responseText);
+                return MainController.errorAlert(err);
             },
         });
     };

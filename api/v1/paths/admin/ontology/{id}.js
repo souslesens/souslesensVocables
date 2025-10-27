@@ -13,7 +13,8 @@ module.exports = function () {
                 res.status(200).send(result);
             });
         } catch (error) {
-            res.status(error.status || 500).json(error);next(error);
+            res.status(error.status || 500).json(error);
+            next(error);
         }
     }
     GET.apiDoc = {

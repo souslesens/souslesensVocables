@@ -60,7 +60,6 @@ var MappingModeler_bot = (function () {
                     chooseDatatypeSourceFn: {
                         createDatatypePropertyFn: {},
                     },
-                    
                 },
                 "add LookUp": {
                     addLookUpFn: {},

@@ -153,7 +153,6 @@ var NodeInfosWidget = (function () {
             });
         } else {
             $("#" + divId).load("modules/uiWidgets/html/nodeInfosWidget.html", function (err) {
-                UI.setDialogTitle("#" + divId, " Node infos :");
                 $("#addPredicateButton").remove();
                 $("#deleteButton").remove();
                 $("#" + divId).dialog("close");
@@ -166,7 +165,7 @@ var NodeInfosWidget = (function () {
                         $("#deleteButton").remove();
                     },
                 });
-                $("#" + divId).dialog("open");
+                UI.openDialog(divId, {title: " Node infos :"});
                 $(".nodeInfosWidget_tabDiv").css("margin", "0px");
                 $("[aria-selected='true']").addClass("nodesInfos-selectedTab");
                 callback();
@@ -1568,14 +1567,13 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
     self.showCreateEntityDialog = function () {
         var divId = "smallDialogDiv";
         var sourceLabel = Lineage_sources.activeSource;
-        UI.setDialogTitle("#" + divId, " Node infos :"); // source " + sourceLabel);
-        $("#" + divId).dialog("open");
+        UI.openDialog(divId, {title: " Node infos :"});
         self.getCreateEntityDialog(sourceLabel, divId);
     };
 
     self.getCreateEntityDialog = function (source, divId) {
         self.currentSource = source;
-        $("#" + divId).dialog("open");
+        UI.openDialog(divId);
         var html =
             "rdfs:label <input style='width:200px' id='nodeInfosWidget_newEntityLabel'/>" +
             "<br></br>" +
@@ -1740,7 +1738,7 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
 
             if (!targetDiv) {
                 targetDiv = "smallDialogDiv";
-                $("#" + targetDiv).dialog("open");
+                UI.openDialog(targetDiv);
                 $("#addPredicateButton").remove();
 
                 $("#deleteButton").remove();

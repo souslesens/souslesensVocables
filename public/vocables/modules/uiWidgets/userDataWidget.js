@@ -369,7 +369,7 @@ var UserDataWidget = (function () {
             }
 
             if (divId == "smallDialogDiv") {
-                $("#" + divId).dialog("open");
+                UI.openDialog(divId);
             }
 
             if (callback) {

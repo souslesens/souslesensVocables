@@ -41,9 +41,8 @@ var Lineage_relations = (function () {
         self.drawRelationCurrentCaller = caller;
         self.currentQueryInfos = { predicate: "", filter: {} };
 
-        UI.setDialogTitle("#mainDialogDiv", "Query");
         $("#mainDialogDiv").load("modules/tools/lineage/html/relationsDialog.html", function () {
-            $("#mainDialogDiv").dialog("open");
+            UI.openDialog("mainDialogDiv", {title: "Query"});
 
             $("#LineageRelations_searchJsTreeInput").keypress(function (e) {
                 if (e.which == 13 || e.which == 9) {

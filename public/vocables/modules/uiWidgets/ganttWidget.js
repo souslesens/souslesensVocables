@@ -18,7 +18,7 @@ var GanttWidget = (function () {
 
         $("#" + divId).load("modules/uiWidgets/html/ganttWidget.html", function (err) {
             if (divId == "mainDialogDiv") {
-                $("#" + divId).dialog("open");
+                UI.openDialog(divId);
             }
 
             self.initWidget(implicitModel);

@@ -40,6 +40,7 @@ module.exports = function () {
             const users = await this.filterUserByGroup(allUsers, profileNames);
             res.status(200).json(successfullyFetched(sortObjectByKey(users)));
         } catch (error) {
+            res.status(error.status || 500).json(error);
             next(error);
         }
     }

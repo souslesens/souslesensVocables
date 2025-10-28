@@ -367,6 +367,21 @@ var MainController = (function () {
             callback();
         }
     };
+    self.errorAlert = function (err) {
+        var message = "";
+        // rajouter le status de l'erreur
+        if (typeof err == "object") {
+            message = (err.status || "500") + " : " + (err.responseText || err.message);
+        } else if (typeof err == "string") {
+            message = err;
+        } else {
+            message = "An error occurred";
+        }
+        if (!message || message == "") {
+            message = "An error occurred";
+        }
+        alert(message);
+    };
 
     return self;
 })();

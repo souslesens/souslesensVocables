@@ -253,7 +253,7 @@ var Lineage_selection = (function () {
                 return;
                 KGcreator.getSourcePropertiesAndObjectLists(Lineage_sources.activeSource, Config.currentTopLevelOntology, { withoutSourceObjects: 1 }, function (err, result) {
                     if (err) {
-                        return alert(err.responseText);
+                        return MainController.errorAlert(err);
                     }
                     common.fillSelectOptions("Lineage_filterBy_propertySelect", result.predicates, true, "label", "id");
                 });
@@ -508,12 +508,12 @@ var Lineage_selection = (function () {
                             UI.message("Decoration deleted");
                         },
                         error(err) {
-                            return alert(err);
+                            return MainController.errorAlert(err);
                         },
                     });
                 },
                 error(err) {
-                    return alert(err);
+                    return MainController.errorAlert(err);
                 },
             });
         },
@@ -527,7 +527,7 @@ var Lineage_selection = (function () {
                 return;
                 KGcreator.getSourcePropertiesAndObjectLists(Lineage_sources.activeSource, Config.currentTopLevelOntology, { withoutSourceObjects: 1 }, function (err, result) {
                     if (err) {
-                        return alert(err.responseText);
+                        return MainController.errorAlert(err);
                     }
 
                     common.fillSelectOptions("lineage_selection_modifyPredicate_propertySelect", result.predicates, true, "label", "id");
@@ -571,7 +571,7 @@ var Lineage_selection = (function () {
 
             Sparql_generic.insertTriples(Lineage_sources.activeSource, triples, null, function (err, result) {
                 if (err) {
-                    return alert(err.responseText);
+                    return MainController.errorAlert(err);
                 }
                 UI.message("predicate added to container " + containerName);
             });
@@ -591,7 +591,7 @@ var Lineage_selection = (function () {
             }
 
             Sparql_generic.deleteTriples(Lineage_sources.activeSource, nodeIds, property, object, function (err, result) {
-                return alert(err.responseText);
+                return MainController.errorAlert(err);
                 UI.message(nodeIds.length + " nodes deleted  ");
             });
         },
@@ -606,11 +606,11 @@ var Lineage_selection = (function () {
 
             Sparql_generic.deleteTriples(Lineage_sources.activeSource, nodeIds, null, null, function (err, result) {
                 if (err) {
-                    return alert(err.responseText);
+                    return MainController.errorAlert(err);
                 }
                 Sparql_generic.deleteTriples(Lineage_sources.activeSource, null, null, nodeIds, function (err, result) {
                     if (err) {
-                        return alert(err.responseText);
+                        return MainController.errorAlert(err);
                     }
                     UI.message(nodeIds.length + " nodes deleted  ");
                 });

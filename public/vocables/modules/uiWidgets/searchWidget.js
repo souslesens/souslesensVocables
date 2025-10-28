@@ -167,9 +167,9 @@ var SearchWidget = (function () {
         SearchUtil.getSimilarLabelsInSources(null, searchedSources, [term], null, mode, options, function (_err, result) {
             if (_err) {
                 if (callback) {
-                    return callback(_err.responseText || _err);
+                    return callback(_err);
                 }
-                return alert(_err.responseText || _err);
+                return MainController.errorAlert(_err);
             }
 
             if (callback) {
@@ -181,7 +181,7 @@ var SearchWidget = (function () {
 
             SearchWidget.searchResultToJstree(options.jstreeDiv || self.currentTargetDiv, result, options, function (err, _result) {
                 if (err) {
-                    return alert(err.responseText || err);
+                    return MainController.errorAlert(err);
                 }
             });
         });

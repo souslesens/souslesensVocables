@@ -10,6 +10,7 @@ module.exports = function () {
             const tools = toolModel.allTools;
             resourceFetched(res, tools);
         } catch (error) {
+            res.status(error.status || 500).json(error);
             next(error);
         }
     }

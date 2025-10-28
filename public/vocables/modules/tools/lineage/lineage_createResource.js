@@ -295,7 +295,7 @@ var Lineage_createResource = (function () {
     self.writeResourceFromUI = function () {
         self.writeResource(self.currentSource, self.currentResourceTriples, function (err, result) {
             if (err) {
-                return alert(err.responseText);
+                return MainController.errorAlert(err);
             }
             UI.message("resource Created");
             var nodeData = {
@@ -472,7 +472,7 @@ var Lineage_createResource = (function () {
         // verify if node is owl:Class
         Sparql_OWL.getNodeInfos(source, superClassUri, null, function (err, result) {
             if (err) {
-                return alert(err);
+                return MainController.errorAlert(err);
             }
             if (result.length == 0) {
                 return alert("node is not a class");
@@ -488,7 +488,7 @@ var Lineage_createResource = (function () {
             var triples = Lineage_createResource.getResourceTriples(source, "owl:Class", null, label, superClassUri);
             Lineage_createResource.writeResource(source, triples, function (err, resourceId) {
                 if (err) {
-                    return alert(err);
+                    return MainController.errorAlert(err);
                 }
                 UI.message("subClass created");
                 var nodeData = {

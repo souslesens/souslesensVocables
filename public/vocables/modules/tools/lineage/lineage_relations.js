@@ -145,7 +145,7 @@ var Lineage_relations = (function () {
                 ],
                 function (err) {
                     if (err) {
-                        return alert(err.responseText);
+                        return MainController.errorAlert(err);
                     }
                 },
             );
@@ -849,7 +849,7 @@ var Lineage_relations = (function () {
         $("#lineageRelations_history_deleteBtn").css("display", "inline");
         Sparql_CRUD.loadItem(id, {}, function (err, result) {
             if (err) {
-                return alert(err.responseText);
+                return MainController.errorAlert(err);
             }
             $("#lineageRelations_propertiesJstreeDiv").jstree().uncheck_all();
             $("#lineageRelations_propertiesJstreeDiv").jstree().check_node(result.propIds);
@@ -880,7 +880,7 @@ var Lineage_relations = (function () {
         };
         Sparql_CRUD.save("STORED_QUERIES", null, data, "private", function (err, result) {
             if (err) {
-                return alert(err.responseText);
+                return MainController.errorAlert(err);
             }
             $("#lineageRelations_savedQueriesSelect").append("<option value='" + result.id + "'>" + result.label + "</option>");
         });
@@ -898,7 +898,7 @@ var Lineage_relations = (function () {
         if (confirm("delete query")) {
             Sparql_CRUD.delete("STORED_QUERIES", id, function (err, result) {
                 if (err) {
-                    return alert(err.responseText);
+                    return MainController.errorAlert(err);
                 }
                 self.loadUserQueries();
                 $("#lineageRelations_history_deleteBtn").css("display", "none");

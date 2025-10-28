@@ -41,7 +41,7 @@ var Lineage_similars = (function () {
 
         Similars_bot.start(null, null, function (err, result) {
             if (err) {
-                return alert(err);
+                return MainController.errorAlert(err);
             }
         });
         return;
@@ -232,7 +232,7 @@ var Lineage_similars = (function () {
             },
             function (err) {
                 if (err) {
-                    return alert(err.reason);
+                    return MainController.errorAlert(err.reason);
                 }
                 var existingNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
 
@@ -421,7 +421,7 @@ var Lineage_similars = (function () {
                 });
                 Sparql_generic.insertTriples(targetSource, triples, null, function (err, result) {
                     if (err) {
-                        return alert(err);
+                        return MainController.errorAlert(err);
                     }
                     return UI.message(result + " inserted in source " + targetSource, true);
                 });
@@ -724,7 +724,7 @@ var Lineage_similars = (function () {
 
             Sparql_generic.insertTriples(source, triples, null, function (err, result) {
                 if (err) {
-                    return alert(err);
+                    return MainController.errorAlert(err);
                 }
                 UI.message("Successfully saved similars");
                 $("#smallDialogDiv").dialog("close");

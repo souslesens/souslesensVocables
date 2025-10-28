@@ -85,7 +85,7 @@ self.graphTable(KGcreator.currentTreeNode);
             node.data = { id: column };
         }
         KGcreator.showSampleData(node, allColumns, 100, function (err, result) {
-            if (err) return alert(err.responseText);
+            if (err) return MainController.errorAlert(err);
 
             result = result.replace(/\n/g, "</td><tr><td>");
             result = result.replace(/\t/g, "</td><td>");
@@ -135,7 +135,7 @@ self.graphTable(KGcreator.currentTreeNode);
 
         if (confirm("link " + columnObj.table + "." + columnObj.column + " to node" + graphNode.data.label))
             self.writeColumnMapping(graphNode.data, columnObj, function (err, result) {
-                if (err) return alert(err.responseText);
+                if (err) return MainController.errorAlert(err);
                 var columnUri = result.columnUri;
                 var visjsData = { nodes: [], edges: [] };
                 var existingNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
@@ -201,7 +201,7 @@ self.graphTable(KGcreator.currentTreeNode);
                 database: self.currentDatabase,
             },
             function (err, columns) {
-                if (err) return alert(err.responseText);
+                if (err) return MainController.errorAlert(err);
                 for (var col in columns) {
                     if (columns[col].subject == relation.from) {
                         relation.fromColumn = columns[col];
@@ -362,7 +362,7 @@ self.graphTable(KGcreator.currentTreeNode);
                 alert("Join OK, found joins : " + count);
             },
             error(err) {
-                return alert(err.responseText);
+                return MainController.errorAlert(err);
             },
         });
     };
@@ -873,7 +873,7 @@ self.graphTable(KGcreator.currentTreeNode);
                 },
             ],
             function (err) {
-                if (err) return alert(err.responseText);
+                if (err) return MainController.errorAlert(err);
 
                 if (mappingIds.length == 0) $("#Lineage_mappingsTreeDiv").jstree().delete_node(mappingIds[0]);
                 return alert("mappings deleted");

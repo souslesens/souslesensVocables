@@ -122,7 +122,7 @@ var MappingModelerRelations = (function () {
     self.drawPossibleRelations = function () {
         var jstreeData = self.listPossibleRelations(function (err, jstreeData) {
             if (err) {
-                alert(err);
+                MainController.errorAlert(err);
             }
             var jstreeOptions = {
                 openAll: true,

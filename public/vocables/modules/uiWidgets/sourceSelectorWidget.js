@@ -327,7 +327,7 @@ var SourceSelectorWidget = (function () {
         window.history.replaceState(null, "", `?${params.toString()}`);
         MainController.initTool(MainController.currentTool, function (err, result) {
             if (err) {
-                return alert(err.responseText);
+                return MainController.errorAlert(err);
             }
             UI.resetWindowSize();
         });
@@ -350,7 +350,7 @@ var SourceSelectorWidget = (function () {
         //  $("#mainDialogDiv").parent().hide();
         Lineage_sources.loadSources(MainController.currentSource, function (err) {
             if (err) {
-                return alert(err.responseText);
+                return MainController.errorAlert(err);
             }
         });
     };

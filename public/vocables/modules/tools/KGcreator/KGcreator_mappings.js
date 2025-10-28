@@ -362,7 +362,7 @@ tripleObj.objectIsSpecificUri = true;
         try {
             json = self.transformJsonEditor.get();
         } catch (e) {
-            return alert(e);
+            return MainController.errorAlert(e);
         }
         KGcreator.currentConfig.currentMappings[self.currentTable].transform = json;
         KGcreator.saveDataSourceMappings();
@@ -378,7 +378,7 @@ tripleObj.objectIsSpecificUri = true;
         try {
             newColumnMappings = self.columnJsonEditor.get();
         } catch (e) {
-            return alert(e);
+            return MainController.errorAlert(e);
         }
 
         //concat new triples from editor with other mappings in table
@@ -449,7 +449,7 @@ tripleObj.objectIsSpecificUri = true;
     self.setPredicatesBetweenColumnsInTable = function (columnFromData, columnToData, foreignKey, callback) {
         OntologyModels.registerSourcesModel(KGcreator.currentSlsvSource, null, function (err, result) {
             if (err) {
-                return alert(err.responseText);
+                return MainController.errorAlert(err.responseText);
             }
 
             var fromClass = KGcreator.getColumnClass(columnFromData.table, columnFromData.id);
@@ -637,7 +637,7 @@ tripleObj.objectIsSpecificUri = true;
         try {
             mappings = self.jsonEditor.get();
         } catch (e) {
-            return alert(e);
+            return MainController.errorAlert(e);
         }
         if (self.currentEditingTable) {
             KGcreator_mappings.saveTableMappings(self.currentEditingTable, mappings);

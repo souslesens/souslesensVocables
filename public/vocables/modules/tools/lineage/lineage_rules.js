@@ -93,7 +93,7 @@ var Lineage_rules = (function () {
         }
         Sparql_OWL.getDictionary(Lineage_sources.activeSource, { filter: filter, selectGraph: 1, withoutImports: 1 }, null, function (err, result) {
             if (err) {
-                return alert(err.responseText);
+                return MainController.errorAlert(err);
             }
             var jstreeData = [];
             result.forEach(function (item) {
@@ -421,7 +421,7 @@ var Lineage_rules = (function () {
 
             success: function (data, _textStatus, _jqXHR) {},
             error(err) {
-                return alert(err.responseText);
+                return MainController.errorAlert(err);
                 if (callback) {
                     return callback(err);
                 }

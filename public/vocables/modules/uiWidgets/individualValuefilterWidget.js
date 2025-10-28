@@ -134,7 +134,7 @@ var IndividualValueFilterWidget = (function () {
         var term = "*";
         self.getClassLabelsJstreeData(term, self.classId, function (err, jstreeData) {
             if (err) {
-                return alert(err.responseText);
+                return MainController.errorAlert(err);
             }
             var options = {
                 openAll: true,

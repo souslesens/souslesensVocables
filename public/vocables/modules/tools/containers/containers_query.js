@@ -33,7 +33,7 @@ var Containers_query = (function () {
 
         Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: source }, function (err, result) {
             if (err) {
-                return alert(err);
+                return MainController.errorAlert(err);
             }
             callback(err, result);
         });

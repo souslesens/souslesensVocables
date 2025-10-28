@@ -55,7 +55,7 @@ var Axiom_activeLegend = (function () {
                     var domainClassUri = self.getRestrictionAncestorClass(Axioms_graph.currentGraphNode.id);
                     Axioms_suggestions.getClassMatchingPropertiesRangeAndDomain(self.currentSource, siblingObjectPropertyUri, domainClassUri, null, function (err, classes) {
                         if (err) {
-                            return alert(err);
+                            return MainController.errorAlert(err);
                         }
                         // Axioms_suggestions.getValidClassesForProperty(siblingObjectPropertyUri, function (err, classes) {
                         self.setSuggestionsSelect(classes, true, newObject);
@@ -193,7 +193,7 @@ var Axiom_activeLegend = (function () {
                 var domainClassUri = self.getRestrictionAncestorClass(Axioms_graph.currentGraphNode.id);
                 Axioms_suggestions.getClassMatchingPropertiesRangeAndDomain(self.currentSource, siblingObjectPropertyUri, domainClassUri, null, function (err, classes) {
                     if (err) {
-                        return alert(err);
+                        return MainController.errorAlert(err);
                     }
 
                     self.showCreateResourceBot("Class", classes);
@@ -211,7 +211,7 @@ var Axiom_activeLegend = (function () {
             if (Axioms_graph.currentGraphNode.data.type == "Restriction" && domainClassUri) {
                 Axioms_suggestions.getValidPropertiesForClasses(self.currentSource, domainClassUri, rangeClassUri, {}, function (err, properties) {
                     if (err) {
-                        return alert(err);
+                        return MainController.errorAlert(err);
                     }
                     self.showCreateResourceBot("ObjectProperty", properties);
                 });
@@ -619,14 +619,14 @@ var Axiom_activeLegend = (function () {
                    if (err) {
                        //machstersyntax dont work yet with cardinality restrictions but we store the triples anyway
                        if (!hasCardinalityRestriction) {
-                           return alert(err);
+                           return MainController.errorAlert(err);
                        }
                    }*/
 
             var triples = self.visjsGraphToTriples();
             Sparql_generic.insertTriples(self.currentSource, triples, {}, function (err, result) {
                 if (err) {
-                    return alert(err.responseText);
+                    return MainController.errorAlert(err.responseText);
                 }
                 UI.message("axiom saved");
                 var divId = "nodeInfosAxioms_graphDiv";
@@ -634,7 +634,7 @@ var Axiom_activeLegend = (function () {
 
                 AxiomExtractor.addTriplesToBasicAxioms(self.currentResource.data.source, triples, function (err, result) {
                     if (err) {
-                        return alert(err.responseText || err);
+                        return MainController.errorAlert(err.responseText || err);
                     }
 
                     Axioms_graph.drawNodeAxioms2(self.currentResource.data.source, self.currentResource.data.id, triples, divId, options, function (err, triples) {});
@@ -682,7 +682,7 @@ var Axiom_activeLegend = (function () {
                 if (callback) {
                     return callback(err);
                 }
-                return alert(err);
+                return MainController.errorAlert(err);
             }
             if (!result) {
                 var message = "Error : cannot generate manchester form";
@@ -853,7 +853,7 @@ var Axiom_activeLegend = (function () {
         var params = { source: self.currentSource, filteredUris: filteredUris };
         return CreateAxiomResource_bot.start(botWorkFlow, params, function (err, result) {
             if (err) {
-                return alert(err);
+                return MainController.errorAlert(err);
             }
             // update Axiom_manager
             if (resourceType == "Class") {

@@ -72,7 +72,7 @@ var Lineage_relationIndividualsFilter = (function () {
     self.searchClassIndividuals = function (term) {
         var classId = $("#lineage_relationIndividuals_filterRoleSelect").val();
         IndividualValueFilterWidget.getClassLabelsJstreeData(term, classId, function (err, jstreeData) {
-            if (err) return alert(err.responseText);
+            if (err) return MainController.errorAlert(err);
             var options = {
                 openAll: true,
                 withCheckboxes: true,

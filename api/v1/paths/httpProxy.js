@@ -26,6 +26,7 @@ module.exports = function () {
                 });
             }
         } catch (err) {
+            res.status(err.status || 500).json(err);
             next(err);
         }
     }
@@ -48,6 +49,7 @@ module.exports = function () {
                 processResponse(res, err, result);
             });
         } catch (e) {
+            res.status(e.status || 500).json(e);
             next(e);
         }
     }

@@ -26,6 +26,7 @@ module.exports = function () {
             var url = jowlConfig.url + "SWRL/" + req.query.operation + "?filePath=" + req.query.url;
             HttpProxy.post(jowlConfig.url, {}, function (err, result) {
                 if (err) {
+                    res.status(err.status || 500).json(err);
                     next(err);
                 } else {
                     return processResponse(res, err, JSON.parse(result));

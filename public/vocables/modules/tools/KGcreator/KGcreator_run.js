@@ -36,7 +36,7 @@ var KGcreator_run = (function () {
             KGcreator_mappings.currentMappingsSelection = null;
             return json;
         } catch (e) {
-            return alert(e);
+            return MainController.errorAlert(e);
         }
     };
 
@@ -149,7 +149,7 @@ var KGcreator_run = (function () {
                 if (callback) {
                     return callback(err.responseText);
                 }
-                return alert(err.responseText);
+                return MainController.errorAlert(err.responseText);
             },
         });
     };
@@ -198,7 +198,7 @@ var KGcreator_run = (function () {
                     if (callback) {
                         return callback(err.responseText);
                     }
-                    return alert(err.responseText);
+                    return MainController.errorAlert(err.responseText);
                 }
                 $("#KGcreator_infosDiv").val("indexed graph " + Config.sources[graphSource].graphUri + " in index " + graphSource.toLowerCase());
                 if (callback) {
@@ -231,7 +231,7 @@ var KGcreator_run = (function () {
                 if (callback) {
                     return callback(err);
                 }
-                return alert(err);
+                return MainController.errorAlert(err);
             } else {
                 if (callback) {
                     return callback();
@@ -276,7 +276,8 @@ var KGcreator_run = (function () {
                 if (callback) {
                     return callback(err);
                 }
-                UI.message(err.responseText);
+                MainController.errorAlert(err);
+                return err;
             },
         });
     };

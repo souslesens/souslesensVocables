@@ -373,23 +373,6 @@ var MappingsDetails = (function () {
 
         var rdfObjectsType = ["owl:NamedIndividual", "owl:Class"];
 
-        // var columnDataTable = [];
-        // var allColumns = MappingColumnsGraph.getNodesOfType(MappingModeler.columnsMappingsObjects);
-        // for (let i = 0; i < allColumns.length; i++) {
-        //     var col = allColumns[i];
-
-        //     if (!col || !col.data) continue;
-
-            
-        //     if (col.data.dataTable === column.data.dataTable) {
-                
-        //         var columnName = col.label;
-        //         if (columnName === undefined || columnName === null) {
-        //             columnName = col.data.label;
-        //         }
-        //         columnDataTable.push(columnName);
-        //     }
-        // }
 
 
         var columns = JSON.parse(JSON.stringify(MappingModeler.currentTable.columns));
@@ -448,6 +431,7 @@ var MappingsDetails = (function () {
     function vhToPx(v) { return Math.round(window.innerHeight * (v / 200)); }
     function vwToPx(v) { return Math.round(window.innerWidth  * (v / 150)); }
 
+
     var dialogHeightPx = vhToPx(80);
     var dialogWidthPx  = vwToPx(75);
 
@@ -471,11 +455,13 @@ var MappingsDetails = (function () {
         }
     );
     $(window).off("resize.mcgTechDlg").on("resize.mcgTechDlg", function () {
-        $("#mainDialogDiv").dialog("option", {
+        $("#smallDialogDiv").dialog("option", {
         width:  vwToPx(75),
         height: vhToPx(80)
         });
     });
+
+
     };
 
 

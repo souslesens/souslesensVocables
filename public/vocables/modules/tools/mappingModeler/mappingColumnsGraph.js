@@ -1814,6 +1814,8 @@ var MappingColumnsGraph = (function () {
              
 
                 var implicitOptions = {
+
+                visjsOptions: { autoResize: true, width: "100%", height: "100%" },
                 onclickFn: function (node, event, options) {
                     
 
@@ -1843,8 +1845,7 @@ var MappingColumnsGraph = (function () {
                     };
 
                     var obj={};
-                    var button=[];
-                    button[0]=0;
+
                     obj.node={};
                     
                     var dataSource= node.data.datasource;
@@ -1885,44 +1886,22 @@ var MappingColumnsGraph = (function () {
                         },
                     });
 
-                    }
-                    
-                    if(callbackSeries){
+                    }else {                                              
+                        obj.node.data.id=dataSource;
+                        DataSourceManager.onDataSourcesJstreeSelect(undefined,obj,function(){
+                            MappingsDetails.openColumnTechDialog(dialogNode,function(){
+                                    });
+                                })
                         
+                          
+                           
+
                     }
-                        
-
-
-                    
-                    // if(MappingModeler.currentTable.name == node.data.dataTable){
-                    //     $("#MappingModeler_leftTabs").tabs("option", "active", 3);
-                    //     UIcontroller.onActivateLeftPanelTab("MappingModeler_technicalDetailTab",function(){
-                    //         MappingsDetails.showColumnTechnicalMappingsDialog(
-                    //         "detailedMappings_techDetailsDiv",
-                    //         dialogNode,
-                    //         function () {
-                    //             MappingModeler.currentTreeNode = MappingColumnsGraph.visjsGraph.data.nodes.get(node.id);
-                    //             MappingsDetails.showDetailsDialog(null, function () {
-                    //                 var afterSave = null;
-                    //                 afterSave = MappingsDetails.afterSaveColumnTechnicalMappingsDialog;
-                    //                 MappingsDetails.showColumnTechnicalMappingsDialog(
-                    //                 "detailedMappings_techDetailsDiv",
-                    //                 MappingModeler.currentTreeNode,
-                    //                 afterSave
-                    //                 );
-                    //             });
-                                
-                    //         }
-                    //     );
-                    //     });
-
-                    // } 
-
-    MappingsDetails.openColumnTechDialog(dialogNode);
-  
-
- 
+    
                 },
+
+                    
+                
 
                 onRightClickFn: function (node, point, event) {
                     self.showImplicitGraphPopupMenu(node, point, event);

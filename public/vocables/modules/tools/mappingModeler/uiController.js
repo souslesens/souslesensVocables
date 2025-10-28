@@ -83,6 +83,8 @@ var UIcontroller = (function () {
         $("#MappingModeler_leftTabs").tabs("option", "active", tabsArray.indexOf(target));
     };
 
+    // self.
+
     /**
      * Activates the specified right panel based on the provided panel label.
      * It controls the visibility of different right panels like "Data Sources", "Column Mappings", and "Technical Mappings".

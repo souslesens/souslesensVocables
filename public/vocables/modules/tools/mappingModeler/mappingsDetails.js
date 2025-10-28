@@ -5,6 +5,7 @@ import TripleFactory from "./tripleFactory.js";
 import MappingTransform from "./mappingTransform.js";
 import UIcontroller from "./uiController.js";
 import DataSourceManager from "./dataSourcesManager.js";
+import MappingColumnsGraph from "./mappingColumnsGraph.js";
 
 /**
  * MappingsDetails manages technical mappings (non structural mappings)
@@ -410,6 +411,55 @@ var MappingsDetails = (function () {
         console.log(column);
     };
 
+    self.openColumnTechDialog = function (dialogNode,callback) {
+
+    var html =
+        '<div style="height:80vh">' +
+        '  <div style="display:flex; flex-direction:row">' +
+        '    <div>' +
+        '      <div id="detailedMappings_techDetailsDiv" style="background-color:#fff; padding:5px; border:2px #278ecc solid"></div>' +
+        '      <div id="detailedMappingsGraphDiv" style="width:70vw; height:65vh"></div>' +
+        '    </div>' +
+        '  </div>' +
+        '</div>';
+
+
+    function vhToPx(v) { return Math.round(window.innerHeight * (v / 200)); }
+    function vwToPx(v) { return Math.round(window.innerWidth  * (v / 150)); }
+
+
+    var dialogHeightPx = vhToPx(80);
+    var dialogWidthPx  = vwToPx(75);
+
+
+    $("#smallDialogDiv").html(html);
+    $("#smallDialogDiv").dialog("option", {
+        title: "Column Technical Mappings",
+        resizable: true,
+        draggable: true,
+        modal: false,
+        width: dialogWidthPx, 
+        height: dialogHeightPx,
+        position: { my: "center", at: "center", of: window }
+    }).dialog("open");
+
+
+    self.showColumnTechnicalMappingsDialog(
+        "detailedMappings_techDetailsDiv",
+        dialogNode,
+        function () {
+        }
+    );
+    $(window).off("resize.mcgTechDlg").on("resize.mcgTechDlg", function () {
+        $("#smallDialogDiv").dialog("option", {
+        width:  vwToPx(75),
+        height: vhToPx(80)
+        });
+    });
+
+
+    };
+
     /**
      * Saves the mapping details to the Vis.js graph for a specific column.
      * It updates the column's URI type, RDF type, and rdfs:label based on the user's selection,
@@ -543,8 +593,8 @@ var MappingsDetails = (function () {
      * @param {string} columnId - The ID of the column for which the specific mappings are to be configured.
      * @returns {void}
      */
-    self.showSpecificMappingsBot = function (columnId) {
-        MappingColumnsGraph.currentGraphNode = MappingColumnsGraph.visjsGraph.data.nodes.get(columnId);
+    self.showSpecificMappingsBotGlobal = function (columnId) {
+        MappingColumnsGraph.currentGraphNode = MappingColumnsGraph.implicitModelVisjsGraph.data.nodes.get(columnId);
 
         var params = {
             source: MappingModeler.currentSLSsource,

@@ -33,31 +33,24 @@ const KGbuilder_triplesWriter = {
         }
 
         var totalTriples = 0;
-        var countTriples = allTriples.length;
-        //  console.log("all triples count "+countTriples)
-        var slices = util.sliceArray(allTriples, 500);
-        //  console.log("number of slices  "+slices.length)
 
-        // var  slices=[allTriples]
+        var slices = util.sliceArray(allTriples, 200);
 
-        countTriples = 0;
         async.eachSeries(
             slices,
             function (triples, callbackEach) {
                 var insertTriplesStr = "";
                 triples.forEach(function (triple) {
+                    //   var str = triple.s + " " + triple.p + " " + triple.o + ". ";
                     var str = triple + ". ";
                     insertTriplesStr += str;
-                    countTriples += 1;
                 });
 
-                // console.log("triples in slice "+triples.length)
                 var queryGraph = KGbuilder_triplesWriter.getSparqlPrefixesStr();
 
-                //  graphUri=graphUri+"test/"
                 //  queryGraph += " WITH GRAPH  <" + graphUri + ">  " + "INSERT DATA" + "  {" + insertTriplesStr + "  }";
                 // insert data does not work with bNodes
-                queryGraph += " WITH GRAPH  <" + graphUri + "" + ">  " + "INSERT " + "  {" + insertTriplesStr + "  }";
+                queryGraph += " WITH GRAPH  <" + graphUri + ">  " + "INSERT " + "  {" + insertTriplesStr + "  }";
 
                 var params = { query: queryGraph };
 
@@ -69,25 +62,17 @@ const KGbuilder_triplesWriter = {
                     };
                 }
 
-                var regex = /([0-9]+)/;
-                httpProxy.post(sparqlServerUrl, null, params, function (err, result) {
+                httpProxy.post(sparqlServerUrl, null, params, function (err, _result) {
                     if (err) {
                         var x = queryGraph;
-                        return callbackEach(err);
+                        return callback(err);
                     }
-
-                    var array = regex.exec(result.results.bindings[0]["callret-0"].value);
-
-                    if (array && array.length == 2) var triplesWritten = parseInt(array[1]);
-
-                    if (triplesWritten < triples.length - 10) var x = 3;
-                    totalTriples += triplesWritten;
-                    //   console.log("triples writen "+totalTriples)
+                    totalTriples += triples.length;
                     return callbackEach(null, totalTriples);
                 });
             },
             function (err) {
-                return callback(err, totalTriples);
+                return callback(null, totalTriples);
             },
         );
     },
@@ -140,16 +125,7 @@ const KGbuilder_triplesWriter = {
             },
         );
     },
-    /**
-     * Deletes KGcreator-produced triples from a SPARQL endpoint, scoped to a named graph.
-     * If `table` is provided, only triples whose subject has TriplesMaker.mappingFilePredicate = 'table' are deleted;
-     * otherwise, all KGcreator triples in the graph are deleted. Runs in batches (LIMIT 10000) and reports progress.
-     * @param {string}   sparqlServerUrl  SPARQL endpoint URL for HTTP POST updates.
-     * @param {string}   graphUri         Target named graph IRI to operate on.
-     * @param {string=}  table            Table/mapping name to filter deletions; omit to delete all KGcreator triples.
-     * @param {Object}   options          Extra options (e.g., { clientSocketId?: string } for progress messages).
-     * @param {Function} callback         Node-style callback (err: any, totalDeleted: number).
-     */
+
     deleteKGBuilderTriples: function (sparqlServerUrl, graphUri, table, options, callback) {
         const TriplesMaker = require("./triplesMaker");
         var query = "";
@@ -184,6 +160,8 @@ const KGbuilder_triplesWriter = {
                         var x = query;
                         return callbackWhilst(err);
                     }
+
+                    //return callback(null, result.results.bindings[0]["callret-0"].value);
 
                     var result = result.results.bindings[0]["callret-0"].value;
 

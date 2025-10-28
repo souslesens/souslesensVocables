@@ -45,7 +45,7 @@ var KGqueryAggregateWidget = (function () {
                         item.data.nonObjectProperties.forEach(function (prop) {
                             var label = (item.alias || item.label) + "_" + prop.label;
 
-                            var obj = { label: label, item: item, prop: prop, classLabel: item.data.label };
+                            var obj = { valueLabel: label, item: item, prop: prop, classLabel: item.data.label };
 
                             self.allProperties[label] = obj;
                             if (groupByTypes.indexOf(prop.datatype) > -1) {
@@ -138,31 +138,42 @@ var KGqueryAggregateWidget = (function () {
         if (error) {
             return alert(error);
         }
-
-        //  var groupByObj = self.groupByVarsMap[$("#KGqueryAggregate_groupBySelect").val()];
-        //  var groupFunctions = $("#KGqueryAggregate_groupFunctionSelect").val();
-
-        // var fnVarObj = self.numericVarsMap[value] || self.groupByVarsMap[value];
-
+        var aggregateClauses = self.getAggregateQueryClauses(groupByNodes, functionNodes, groupFnVars);
+        $("#" + self.divId).dialog("close");
+        $("#" + "smallDialogDiv").dialog("option", "title", "");
+        if (self.validateFn) {
+            return self.validateFn(null, aggregateClauses);
+        }
+    };
+    /**
+     *
+     * @param groupByNodes
+     * @param functionNodes
+     * @param groupFnVars
+     * @return {{select: string, orderBy: string, where: string, groupBy: string}}
+     */
+    self.getAggregateQueryClauses = function (groupByNodes, functionNodes, groupFnVars) {
         var selectStr = "";
         var groupByStr = "";
         var whereStr = "";
         var orderByStr = "";
 
         function getWhereClause(obj) {
-            return "?" + Sparql_common.formatStringForTriple(obj.item.label, true) + " <" + obj.prop.id + "> " + "?" + Sparql_common.formatStringForTriple(obj.label, true) + ".\n ";
+            return "?" + Sparql_common.formatStringForTriple(obj.classLabel, true) + " <" + obj.prop.id + "> " + "?" + Sparql_common.formatStringForTriple(obj.valueLabel, true) + ".\n ";
+
+            //  return "?" + Sparql_common.formatStringForTriple(obj.item.label, true) + " <" + obj.prop.id + "> " + "?" + Sparql_common.formatStringForTriple(obj.label, true) + ".\n ";
         }
 
         groupByNodes.forEach(function (node) {
             whereStr += getWhereClause(node);
-            selectStr += " ?" + Sparql_common.formatStringForTriple(node.label, true);
-            groupByStr += " ?" + Sparql_common.formatStringForTriple(node.label, true); // + " ?" +
+            selectStr += " ?" + Sparql_common.formatStringForTriple(node.valueLabel, true);
+            groupByStr += " ?" + Sparql_common.formatStringForTriple(node.valueLabel, true); // + " ?" +
         });
 
         whereStr += getWhereClause(groupFnVars[0]);
 
         functionNodes.forEach(function (fn, index) {
-            var fnVar = Sparql_common.formatStringForTriple(groupFnVars[0].label, true);
+            var fnVar = Sparql_common.formatStringForTriple(groupFnVars[0].valueLabel, true);
 
             if (fn == "concat") {
                 selectStr += "(GROUP_CONCAT(distinct ?" + fnVar + ';SEPARATOR=",") AS ?concat_' + fnVar + ")";
@@ -182,12 +193,7 @@ var KGqueryAggregateWidget = (function () {
             where: whereStr,
             orderBy: orderByStr,
         };
-
-        $("#" + self.divId).dialog("close");
-        $("#" + "smallDialogDiv").dialog("option", "title", "");
-        if (self.validateFn) {
-            return self.validateFn(null, aggregateClauses);
-        }
+        return aggregateClauses;
     };
 
     self.loadJstree = function (dataMap, divId, options) {

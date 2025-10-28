@@ -19,35 +19,6 @@ var TripleFactory = (function () {
     var self = {};
 
     /**
-     * Displays a dialog with sample triples for the current table.
-     * It checks if the current table is valid before proceeding to show the sample triples.
-     * @function
-     * @name showTripleSample
-     * @memberof module:TripleFactory
-     */
-    self.showTripleSample = function () {
-        if (!self.checkCurrentTable()) {
-            return;
-        }
-
-        self.initFilterMappingDialog(true);
-    };
-
-    /**
-     * Writes the RDF triples for the current table after filtering them based on the user-defined criteria.
-     * It checks if the current table is valid before proceeding to write the triples.
-     * @function
-     * @name writeTriples
-     * @memberof module:TripleFactory
-     */
-    self.writeTriples = function () {
-        if (!self.checkCurrentTable()) {
-            return;
-        }
-        self.initFilterMappingDialog(false);
-    };
-
-    /**
      * Indexes the RDF graph using the KGcreator_run module.
      * @function
      * @name indexGraph
@@ -83,7 +54,7 @@ var TripleFactory = (function () {
      * @name runSlsFilteredMappings
      * @memberof module:TripleFactory
      */
-    self.runSlsFilteredMappings = function () {
+    self.runSlsFilteredMappings = function (isSample) {
         var checkedNodes = JstreeWidget.getjsTreeCheckedNodes("detailedMappings_filterMappingsTree");
         if (checkedNodes.length == 0) {
             return alert(" no mappings selected");
@@ -99,7 +70,7 @@ var TripleFactory = (function () {
         }
 
         TripleFactory.createTriples(
-            self.filterMappingIsSample,
+            isSample,
             MappingModeler.currentTable.name,
             {
                 filterMappingIds: filterMappingIds,
@@ -384,6 +355,8 @@ var TripleFactory = (function () {
     };
 
     self.showFilterMappingsDialog = function (divId, table) {
+        if (!divId) divId = "detailedMappings_filterMappingsTree";
+        if (!table) table = MappingModeler.currentTable.name;
         var nodes = MappingColumnsGraph.visjsGraph.data.nodes.get();
         var edges = MappingColumnsGraph.visjsGraph.data.edges.get();
 
@@ -395,7 +368,7 @@ var TripleFactory = (function () {
             },
             {
                 id: "Columns",
-                text: "Column",
+                text: "Columns",
                 parent: "root",
             },
             {
@@ -407,14 +380,16 @@ var TripleFactory = (function () {
 
         self.columnsMap = {};
         nodes.forEach(function (node) {
-            if (node.data && MappingModeler.columnsMappingsObjects.includes(node?.data?.type) && node.data.dataTable == table) {
+            if (node.data && MappingModeler.columnsMappingsObjects.includes(node.data.type) && node.data.dataTable == table) {
                 self.columnsMap[node.id] = node;
-                treeData.push({
-                    id: node.id,
-                    text: node.label,
-                    parent: "Columns",
-                    data: node.data,
-                });
+                if (!node.data.definedInColumn) {
+                    treeData.push({
+                        id: node.id,
+                        text: node.label,
+                        parent: "Columns",
+                        data: node.data,
+                    });
+                }
             }
         });
 
@@ -454,6 +429,10 @@ var TripleFactory = (function () {
             $("#detailedMappings_treeContainer").css("overflow", "unset");
         });
     };
+
+    /* self.showFilterMappingsDialog=function(){
+        TripleFactory.initFilterMappingDialog()
+    }*/
 
     return self;
 })();

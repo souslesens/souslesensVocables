@@ -65,7 +65,7 @@ var MappingParser = {
         });
         mappingData.edges.forEach(function (edge) {
             var fromNodeData = nodesMap[edge.from];
-            if (fromNodeData.definedInColumn) {
+            if (fromNodeData && fromNodeData.definedInColumn) {
                 fromNodeData = allColumnsMappings[fromNodeData.definedInColumn];
             }
             if (fromNodeData && fromNodeData.type == "Column") {

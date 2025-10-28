@@ -372,7 +372,6 @@ var MainController = (function () {
         // rajouter le status de l'erreur
         if (typeof err == "object") {
             message = (err.status || "500") + " : " + (err.responseText || err.message);
-
         } else if (typeof err == "string") {
             message = err;
         } else {

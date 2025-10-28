@@ -1227,6 +1227,23 @@ var KGquery_graph = (function () {
             }
         });
     };
+    self.deleteGraph = function () {
+        var confirm = window.confirm("Are you sure you want to delete the graph?");
+        if (!confirm) {
+            return;
+        }
+        var confirm = window.confirm("your actual model graph will be deleted, are you really sure?");
+        if (!confirm) {
+            return;
+        }
+        self.visjsData = { nodes: [], edges: [] };
+
+        self.KGqueryGraph = null;
+        self.drawModel(null, function () {
+            KGquery_graph.message("Graph deleted", true);
+            KGquery_graph.saveVisjsModelGraph();
+        });
+    };
 
     return self;
 })();

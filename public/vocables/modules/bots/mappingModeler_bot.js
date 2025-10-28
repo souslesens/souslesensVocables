@@ -57,7 +57,9 @@ var MappingModeler_bot = (function () {
                     listTableColumnsFn: { listDatatypePropertyRangeFn: { labelFn: {} } },
                 },
                 "create  datatypeProperty": {
-                    createDatatypePropertyFn: {},
+                    chooseDatatypeSourceFn: {
+                        createDatatypePropertyFn: {},
+                    },
                 },
                 "add LookUp": {
                     addLookUpFn: {},
@@ -102,7 +104,7 @@ var MappingModeler_bot = (function () {
         choosedateTypeFn: "Choose date format",
         addTransformFn: "add Transformation Function",
         setSubClassOfFn: "add rdfs:subClassOf predicate",
-
+        chooseDatatypeSourceFn: "Choose a source for creating datatypeProperty",
         /*  listVocabsFn: "Choose a source",
         listResourceTypesFn: "Choose a resource type",
         listListDataSourceType: " Choose a data source type",
@@ -197,10 +199,13 @@ var MappingModeler_bot = (function () {
         },
         createDatatypePropertyFn: function () {
             var classId = self.params.columnClass;
+            if (!self.params.datatypePropertySource) {
+                return self.myBotEngine.previousStep("no source choosed for creating datatypeProperty");
+            }
             CreateResource_bot.start(
                 CreateResource_bot.workFlowDatatypeProperty,
                 {
-                    source: self.params.source,
+                    source: self.params.datatypePropertySource,
                     datatypePropertyDomain: classId,
                 },
                 function (err, result) {
@@ -232,6 +237,9 @@ var MappingModeler_bot = (function () {
                     return alert(err);
                 }
             });
+        },
+        chooseDatatypeSourceFn: function () {
+            CommonBotFunctions_class.listVocabsFn(self.myBotEngine, self.params.source, "datatypePropertySource");
         },
     };
 

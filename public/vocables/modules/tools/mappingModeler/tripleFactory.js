@@ -18,7 +18,6 @@ import MappingColumnsGraph from "./mappingColumnsGraph.js";
 var TripleFactory = (function () {
     var self = {};
 
-
     /**
      * Indexes the RDF graph using the KGcreator_run module.
      * @function
@@ -356,10 +355,8 @@ var TripleFactory = (function () {
     };
 
     self.showFilterMappingsDialog = function (divId, table) {
-        if(!divId)
-            divId="detailedMappings_filterMappingsTree"
-        if(!table)
-            table=MappingModeler.currentTable.name
+        if (!divId) divId = "detailedMappings_filterMappingsTree";
+        if (!table) table = MappingModeler.currentTable.name;
         var nodes = MappingColumnsGraph.visjsGraph.data.nodes.get();
         var edges = MappingColumnsGraph.visjsGraph.data.edges.get();
 
@@ -385,8 +382,7 @@ var TripleFactory = (function () {
         nodes.forEach(function (node) {
             if (node.data && MappingModeler.columnsMappingsObjects.includes(node.data.type) && node.data.dataTable == table) {
                 self.columnsMap[node.id] = node;
-                if(!node.data.definedInColumn) {
-
+                if (!node.data.definedInColumn) {
                     treeData.push({
                         id: node.id,
                         text: node.label,
@@ -434,7 +430,7 @@ var TripleFactory = (function () {
         });
     };
 
-   /* self.showFilterMappingsDialog=function(){
+    /* self.showFilterMappingsDialog=function(){
         TripleFactory.initFilterMappingDialog()
     }*/
 

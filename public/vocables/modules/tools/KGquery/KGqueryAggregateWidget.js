@@ -138,13 +138,13 @@ var KGqueryAggregateWidget = (function () {
         if (error) {
             return alert(error);
         }
-       var aggregateClauses= self.getAggregateQueryClauses(groupByNodes,functionNodes,groupFnVars)
+        var aggregateClauses = self.getAggregateQueryClauses(groupByNodes, functionNodes, groupFnVars);
         $("#" + self.divId).dialog("close");
         $("#" + "smallDialogDiv").dialog("option", "title", "");
         if (self.validateFn) {
             return self.validateFn(null, aggregateClauses);
         }
-    }
+    };
     /**
      *
      * @param groupByNodes
@@ -152,10 +152,7 @@ var KGqueryAggregateWidget = (function () {
      * @param groupFnVars
      * @return {{select: string, orderBy: string, where: string, groupBy: string}}
      */
-    self.getAggregateQueryClauses=function(groupByNodes,functionNodes,groupFnVars){
-
-
-
+    self.getAggregateQueryClauses = function (groupByNodes, functionNodes, groupFnVars) {
         var selectStr = "";
         var groupByStr = "";
         var whereStr = "";
@@ -164,7 +161,7 @@ var KGqueryAggregateWidget = (function () {
         function getWhereClause(obj) {
             return "?" + Sparql_common.formatStringForTriple(obj.classLabel, true) + " <" + obj.prop.id + "> " + "?" + Sparql_common.formatStringForTriple(obj.valueLabel, true) + ".\n ";
 
-          //  return "?" + Sparql_common.formatStringForTriple(obj.item.label, true) + " <" + obj.prop.id + "> " + "?" + Sparql_common.formatStringForTriple(obj.label, true) + ".\n ";
+            //  return "?" + Sparql_common.formatStringForTriple(obj.item.label, true) + " <" + obj.prop.id + "> " + "?" + Sparql_common.formatStringForTriple(obj.label, true) + ".\n ";
         }
 
         groupByNodes.forEach(function (node) {
@@ -197,8 +194,6 @@ var KGqueryAggregateWidget = (function () {
             orderBy: orderByStr,
         };
         return aggregateClauses;
-
-
     };
 
     self.loadJstree = function (dataMap, divId, options) {

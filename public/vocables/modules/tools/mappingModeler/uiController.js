@@ -52,12 +52,13 @@ var UIcontroller = (function () {
         } else if (tabId == "MappingModeler_RelationsTab") {
             MappingModelerRelations.drawPossibleRelations(callback);
         } else if (tabId == "MappingModeler_tripleFactoryTab") {
-            // avoid multiple technical graph 
-            mappingModeler_structuralPanel
+            
+        }
+        // avoid multiple technical graph 
+            // mappingModeler_structuralPanel
             if(tabId!="MappingModeler_technicalDetailTab"){
                 $("#mappingModeler_genericPanel").empty();
             }
-        }
     };
 
     /**

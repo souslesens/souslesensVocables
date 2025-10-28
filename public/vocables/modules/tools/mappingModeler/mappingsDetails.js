@@ -589,8 +589,8 @@ var MappingsDetails = (function () {
      * @param {string} columnId - The ID of the column for which the specific mappings are to be configured.
      * @returns {void}
      */
-    self.showSpecificMappingsBotGlobal = function (columnId) {
-        MappingColumnsGraph.currentGraphNode = MappingColumnsGraph.implicitModelVisjsGraph.data.nodes.get(columnId);
+    self.showSpecificMappingsBot = function (columnId) {
+        MappingColumnsGraph.currentGraphNode = MappingColumnsGraph.visjsGraph.data.nodes.get(columnId);
 
         var params = {
             source: MappingModeler.currentSLSsource,

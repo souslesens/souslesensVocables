@@ -1641,12 +1641,7 @@ var MappingColumnsGraph = (function () {
                                 label: displayLabel,
                                 shape: "box",
                                 color: columnColor,
-                                data: {
-                                    id: columnId,
-                                    label: columnLabel,
-                                    type: "Column",
-                                    dataTable: dataTable,
-                                },
+                                data: column.data,
                             });
                             uniqueNodes[columnId] = 1;
                         }
@@ -1794,12 +1789,14 @@ var MappingColumnsGraph = (function () {
                     $("#mainDialogDiv").dialog("open");
 
                     var implicitOptions = {
+                        visjsOptions: { autoResize: true, width: "100%", height: "100%" },
                         onclickFn: function (node, event, options) {
                             if (!node) return;
                             self.currentGraphNode = node;
 
                             if (!node.data) return;
-                            if (node.data.type !== "Column") return;
+
+                            if (!MappingModeler.columnsMappingsObjects.includes(node.data.type)) return;
 
                             var baseLabel = null;
                             if (node.data && node.data.label) {
@@ -1814,24 +1811,51 @@ var MappingColumnsGraph = (function () {
                             var dialogNode = {
                                 id: node.id,
                                 label: baseLabel,
-                                data: {
-                                    id: node.id,
-                                    label: baseLabel,
-                                    type: "Column",
-                                    dataTable: parentTable,
-                                },
+                                data: node.data,
                             };
-                            if (MappingModeler.currentTable.name == node.data.dataTable) {
-                                $("#MappingModeler_leftTabs").tabs("option", "active", 3);
-                                UIcontroller.onActivateLeftPanelTab("MappingModeler_technicalDetailTab", function () {
-                                    MappingsDetails.showColumnTechnicalMappingsDialog("detailedMappings_techDetailsDiv", dialogNode, function () {
-                                        MappingModeler.currentTreeNode = MappingColumnsGraph.visjsGraph.data.nodes.get(node.id);
-                                        MappingsDetails.showDetailsDialog(null, function () {
-                                            var afterSave = null;
-                                            afterSave = MappingsDetails.afterSaveColumnTechnicalMappingsDialog;
-                                            MappingsDetails.showColumnTechnicalMappingsDialog("detailedMappings_techDetailsDiv", MappingModeler.currentTreeNode, afterSave);
+
+                            var obj = {};
+
+                            obj.node = {};
+
+                            var dataSource = node.data.datasource;
+                            var csvSource = DataSourceManager.currentConfig.csvSources;
+                            var dataBaseSource = DataSourceManager.currentConfig.databaseSources;
+                            obj.node.id = dataSource;
+                            obj.node.data = {};
+                            Object.keys(dataBaseSource).forEach(function (key) {
+                                if (key == dataSource) {
+                                    obj.node.data.type = "databaseSource";
+                                }
+                            });
+                            Object.keys(csvSource).forEach(function (key) {
+                                if (key == dataSource) {
+                                    obj.node.data.type = "csvSource";
+                                }
+                            });
+                            if (obj.node.data.type == "databaseSource") {
+                                $.ajax({
+                                    type: "GET",
+                                    url: Config.apiUrl + "/databases/" + dataSource,
+                                    dataType: "json",
+                                    success: function (data, _textStatus, _jqXHR) {
+                                        obj.node.data.id = data.name;
+                                        obj.node.data.sqlType = data.driver;
+                                        DataSourceManager.onDataSourcesJstreeSelect(undefined, obj, function () {
+                                            var obj2 = { node: { label: node.data.dataTable, data: { type: "table", id: node.data.dataTable, label: node.data.dataTable } } };
+                                            DataSourceManager.onDataSourcesJstreeSelect(undefined, obj2, function () {
+                                                MappingsDetails.openColumnTechDialog(dialogNode, function () {});
+                                            });
                                         });
-                                    });
+                                    },
+                                    error: function (err) {
+                                        return callbackSeries(err);
+                                    },
+                                });
+                            } else {
+                                obj.node.data.id = dataSource;
+                                DataSourceManager.onDataSourcesJstreeSelect(undefined, obj, function () {
+                                    MappingsDetails.openColumnTechDialog(dialogNode, function () {});
                                 });
                             }
                         },

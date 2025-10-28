@@ -18,13 +18,13 @@ var UIcontroller = (function () {
      * @param {string} tabId - The ID of the tab to activate.
      * @memberof module:UIcontroller
      */
-    self.onActivateLeftPanelTab = function (tabId,callback) {
+    self.onActivateLeftPanelTab = function (tabId, callback) {
         $("#mappingModeler_relationInfos").html("");
         //  $(".mappingModeler_rightPanel").css("display", "none");
         if (tabId == "MappingModeler_dataSourcesTab") {
             $("#mappingModeler_structuralPanel").css("display", "block");
             $("#rightControlPanelDiv").load("./modules/tools/mappingModeler/html/mappingsGraphButtons.html", function (err) {
-                if(callback){
+                if (callback) {
                     callback();
                 }
             });
@@ -33,32 +33,27 @@ var UIcontroller = (function () {
             return alert("select a table");
         }
         if (tabId == "MappingModeler_columnsTab") {
-  
             //$("#MappingModeler_currentDataSource").html(DataSourceManager.currentConfig.currentDataSource.name);
             $("#rightControlPanelDiv").load("./modules/tools/mappingModeler/html/mappingsGraphButtons.html", function (err) {
-                 $("#mappingModeler_structuralPanel").css("display", "block");
-                MappingModeler.initActiveLegend(MappingModeler.legendGraphDivId,function(){
-                    MappingModeler.loadSuggestionSelectJstree(MappingModeler.currentTable.columns, "Columns",callback);
+                $("#mappingModeler_structuralPanel").css("display", "block");
+                MappingModeler.initActiveLegend(MappingModeler.legendGraphDivId, function () {
+                    MappingModeler.loadSuggestionSelectJstree(MappingModeler.currentTable.columns, "Columns", callback);
                 });
-
             });
         } else if (tabId == "MappingModeler_technicalDetailTab") {
-            
             //  $("#rightControlPanelDiv").load("./modules/tools/mappingModeler/html/detailsGraphButtons.html", function (err) {});
             $("#rightControlPanelDiv").load("./modules/tools/mappingModeler/html/mappingsGraphButtons.html", function (err) {
                 MappingsDetails.showDetailsDialog(null, callback);
-
             });
         } else if (tabId == "MappingModeler_RelationsTab") {
             MappingModelerRelations.drawPossibleRelations(callback);
         } else if (tabId == "MappingModeler_tripleFactoryTab") {
-            
         }
-        // avoid multiple technical graph 
-            // mappingModeler_structuralPanel
-            if(tabId!="MappingModeler_technicalDetailTab"){
-                $("#mappingModeler_genericPanel").empty();
-            }
+        // avoid multiple technical graph
+        // mappingModeler_structuralPanel
+        if (tabId != "MappingModeler_technicalDetailTab") {
+            $("#mappingModeler_genericPanel").empty();
+        }
     };
 
     /**

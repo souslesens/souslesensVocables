@@ -129,7 +129,7 @@ var MappingModelerRelations = (function () {
                 withCheckboxes: true,
             };
 
-            JstreeWidget.loadJsTree("mappingModelerRelations_jstreeDiv", jstreeData, jstreeOptions,callback);
+            JstreeWidget.loadJsTree("mappingModelerRelations_jstreeDiv", jstreeData, jstreeOptions, callback);
         });
         // Draw the relations using the jstreeData
     };

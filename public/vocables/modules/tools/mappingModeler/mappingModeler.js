@@ -277,7 +277,7 @@ var MappingModeler = (function () {
      * @param {Array<Object>} objects - The objects to populate the tree with.
      * @param {string} parentName - The name of the parent node.
      */
-    self.loadSuggestionSelectJstree = function (objects, parentName,callback) {
+    self.loadSuggestionSelectJstree = function (objects, parentName, callback) {
         if ($("#suggestionsSelectJstreeDiv").jstree()) {
             try {
                 $("#suggestionsSelectJstreeDiv").jstree().empty();
@@ -449,7 +449,7 @@ var MappingModeler = (function () {
 
         JstreeWidget.loadJsTree("suggestionsSelectJstreeDiv", jstreeData, options, function () {
             $("#suggestionsSelectJstreeDiv").css("overflow", "unset");
-             if(callback){
+            if (callback) {
                 callback();
             }
         });
@@ -462,7 +462,7 @@ var MappingModeler = (function () {
      * @memberof module:MappingModeler
      * @param {string} divId - The ID of the container where the legend will be displayed.
      */
-    self.initActiveLegend = function (divId,callback) {
+    self.initActiveLegend = function (divId, callback) {
         var options = {
             onLegendNodeClick: self.onLegendNodeClick,
             showLegendGraphPopupMenu: self.showLegendGraphPopupMenu,
@@ -477,9 +477,9 @@ var MappingModeler = (function () {
 
         Axiom_activeLegend.drawLegend("nodeInfosAxioms_activeLegendDiv", self.legendItemsArray, options, function () {
             $("#nodeInfosAxioms_activeLegendDiv").find("canvas").addClass("coloredContainerImportant");
-                if(callback){
-                    callback();
-                }
+            if (callback) {
+                callback();
+            }
         });
     };
 

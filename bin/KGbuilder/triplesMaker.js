@@ -22,7 +22,7 @@ var TriplesMaker = {
      * @param processor function that create the triples
      * @param callback
      */
-    readAndProcessData: async function (user,tableProcessingParams, options, callback) {
+    readAndProcessData: async function (user, tableProcessingParams, options, callback) {
         var totalTriplesCount = 0;
         sampleTriples = [];
         var processedRecords = 0;
@@ -131,7 +131,7 @@ var TriplesMaker = {
 
             const conn = await databaseModel.getUserConnection(user, tableInfos.dbID);
             databaseModel
-                .batchSelect(conn,tableInfos.table, {
+                .batchSelect(conn, tableInfos.table, {
                     limit: TriplesMaker.batchSize,
                     noRecurs: true,
                     //  offset: offset,
@@ -158,7 +158,7 @@ var TriplesMaker = {
                     async.eachSeries(
                         slices,
                         function (data, callbackEach) {
-                            if ( options) {
+                            if (options) {
                                 options.currentBatchRowIndex = currentBatchRowIndex;
                             }
                             TriplesMaker.buildTriples(data, tableProcessingParams, options, function (err, batchTriples) {
@@ -184,7 +184,7 @@ var TriplesMaker = {
                                         false,
                                     );
 
-                                     KGbuilder_triplesWriter.writeTriples(
+                                    KGbuilder_triplesWriter.writeTriples(
                                         batchTriples,
                                         tableProcessingParams.sourceInfos.graphUri,
                                         tableProcessingParams.sourceInfos.sparqlServerUrl,

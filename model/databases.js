@@ -326,7 +326,7 @@ class DatabaseModel {
 
             let offset = 0;
             while (true) {
-                if (offset + batchSize >= size) {
+                if (offset  >= size) {
                     return connection.select(select).from(tableName).orderBy(columnsKeys[0]).limit(batchSize).offset(offset);
                 }
                 yield await connection.select(select).from(tableName).orderBy(columnsKeys[0]).limit(batchSize).offset(offset);

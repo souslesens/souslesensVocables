@@ -317,24 +317,23 @@ class DatabaseModel {
      * @params {number} batchSize - batch size
      */
     batchSelectGenerator = async function* (connection, tableName, { select = "*", batchSize = 1000 }) {
-        try{
+        try {
             const columns = await connection(tableName).columnInfo();
             const columnsKeys = Object.keys(columns);
 
-            const resSize = await connection.count('*').from(tableName);
+            const resSize = await connection.count("*").from(tableName);
             const size = parseInt(resSize[0].count);
 
             let offset = 0;
             while (true) {
-                if (offset  >= size) {
+                if (offset >= size) {
                     return connection.select(select).from(tableName).orderBy(columnsKeys[0]).limit(batchSize).offset(offset);
                 }
                 yield await connection.select(select).from(tableName).orderBy(columnsKeys[0]).limit(batchSize).offset(offset);
                 offset += batchSize;
             }
-        }
-        catch(err){
-            KGbuilder_socket.message(options.clientSocketId, "ERROR : offset "+offset+",error in database reading " + err, true);
+        } catch (err) {
+            KGbuilder_socket.message(options.clientSocketId, "ERROR : offset " + offset + ",error in database reading " + err, true);
             // error catch of readAndProcessData
             throw err;
         }

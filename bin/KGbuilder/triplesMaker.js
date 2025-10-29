@@ -49,7 +49,6 @@ var TriplesMaker = {
         if (tableProcessingParams.tableInfos.csvDataFilePath) {
             KGbuilder_socket.message(options.clientSocketId, "loading data from csv file " + tableInfos.table, false);
             TriplesMaker.readCsv(tableInfos.csvDataFilePath, options.sampleSize, function (err, result) {
-               
                 if (err) {
                     KGbuilder_socket.message(options.clientSocketId, err, true);
                     return callback(err);
@@ -59,7 +58,6 @@ var TriplesMaker = {
                 result.data.forEach((dataset) => {
                     totalRecordsCount += dataset.length;
                 });
-
 
                 var currentTime = new Date();
                 message.tableTotalRecords = totalRecordsCount;
@@ -76,7 +74,6 @@ var TriplesMaker = {
                             options.currentBatchRowIndex = currentBatchRowIndex;
                         }
                         TriplesMaker.buildTriples(data, tableProcessingParams, options, function (err, batchTriples) {
-
                             //  totalTriplesCount += batchTriples.length;
                             var currentTime = new Date();
                             currentBatchRowIndex += data.length;
@@ -105,7 +102,6 @@ var TriplesMaker = {
                                     tableProcessingParams.sourceInfos.graphUri,
                                     tableProcessingParams.sourceInfos.sparqlServerUrl,
                                     function (err, writtenTriples) {
-
                                         if (err) {
                                             return callbackEach(err);
                                         }
@@ -145,7 +141,7 @@ var TriplesMaker = {
 
             var select = [];
             var databaseErrors = 0;
-           
+
             for (var columnId in tableProcessingParams.tableColumnsMappings) {
                 var column = tableProcessingParams.tableColumnsMappings[columnId];
                 if (column.type == "Column") {
@@ -196,10 +192,9 @@ var TriplesMaker = {
                 }
 
                 // KGbuilder_socket.message(options.clientSocketId, processedRecords + "  records loaded from table " + tableInfos.table, false);
-                try{
+                try {
                     var batchTriples = await TriplesMaker.buildTriplesAsync(data, tableProcessingParams, options);
                     //console.log("   triples builded ", batchTriples.length);
-               
 
                     currentBatchRowIndex = offset;
                     var currentTime = new Date();
@@ -215,18 +210,14 @@ var TriplesMaker = {
                         // sample dont write triples return batchTriples
                         // only one batch for sample triples
                         sampleTriples = batchTriples;
-                        
-                        return callback(null, { sampleTriples: sampleTriples, totalTriplesCount: sampleTriples.length });
 
-                        
+                        return callback(null, { sampleTriples: sampleTriples, totalTriplesCount: sampleTriples.length });
                     } else {
-                        
-                        try{
+                        try {
                             var batchTriplesCount = await KGbuilder_triplesWriter.writeTriplesAsync(
                                 batchTriples,
                                 tableProcessingParams.sourceInfos.graphUri,
                                 tableProcessingParams.sourceInfos.sparqlServerUrl,
-                                
                             );
                             //console.log("   triples written ", batchTriplesCount);
                             /*if (err) {
@@ -244,8 +235,8 @@ var TriplesMaker = {
                             message.totalDuration += message.operationDuration;
                             KGbuilder_socket.message(options.clientSocketId, message);
                             oldTime = new Date();
-                        } catch(err){
-                            if(err){
+                        } catch (err) {
+                            if (err) {
                                 console.log(err);
                                 console.log("offest " + offset);
                                 offset -= limitSize;
@@ -254,12 +245,12 @@ var TriplesMaker = {
                             }
                         }
                     }
-                } catch(err){
-                   if(err){
+                } catch (err) {
+                    if (err) {
                         offset -= limitSize;
                         KGbuilder_socket.message(options.clientSocketId, "stopped at offset : " + offset + " error in building triples " + err, true);
                         return callback(err);
-                   }
+                    }
                 }
             }
             message.operation = "finished";
@@ -268,8 +259,7 @@ var TriplesMaker = {
             return callback(null, { sampleTriples: sampleTriples, totalTriplesCount: totalTriplesCount });
         }
     },
-    
-   
+
     buildTriples: function (data, tableProcessingParams, options, callback) {
         var columnMappings = tableProcessingParams.tableColumnsMappings;
 

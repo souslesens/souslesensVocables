@@ -220,14 +220,12 @@ var TripleFactory = (function () {
             success: function (result, _textStatus, _jqXHR) {
                 MappingModeler.clearSourceClasses(DataSourceManager.currentSlsvSource);
                 if (callback) {
-                    
                     return callback();
                 } else {
                     alert(result.result);
                 }
                 UI.message(result.result);
-                 self.refreshTabStat();
-
+                self.refreshTabStat();
 
                 // JstreeWidget.loadJsTree(jstreeDiv, jstreeData, options, function () {
                 //     $("#MappingModeler_dataSourcesTab").css("margin-top", "0px");
@@ -243,17 +241,16 @@ var TripleFactory = (function () {
             },
         });
     };
-    self.refreshTabStat=function(callback){
-                var tableStatsMap={};
-                
-                DataSourceManager.getTriplesStats(DataSourceManager.currentSlsvSource, function (err, result) {
-                tableStatsMap = result || {};
-                });
-                DataSourceManager.loaDataSourcesJstree(MappingModeler.jstreeDivId, tableStatsMap, function (err) {
-                    return callback;
-                });
+    self.refreshTabStat = function (callback) {
+        var tableStatsMap = {};
 
-    }
+        DataSourceManager.getTriplesStats(DataSourceManager.currentSlsvSource, function (err, result) {
+            tableStatsMap = result || {};
+        });
+        DataSourceManager.loaDataSourcesJstree(MappingModeler.jstreeDivId, tableStatsMap, function (err) {
+            return callback;
+        });
+    };
 
     /**
      * Creates triples for a given table using the selected mappings.

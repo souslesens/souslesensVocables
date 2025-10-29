@@ -196,6 +196,11 @@ var TripleFactory = (function () {
                     alert(result.result);
                 }
                 UI.message(result.result);
+                self.refreshTabStat();
+
+                // JstreeWidget.loadJsTree(jstreeDiv, jstreeData, options, function () {
+                //     $("#MappingModeler_dataSourcesTab").css("margin-top", "0px");
+                // });
             },
             error: function (err) {
                 if (callback) {
@@ -205,6 +210,16 @@ var TripleFactory = (function () {
                 }
                 UI.message(err.responseText);
             },
+        });
+    };
+    self.refreshTabStat = function (callback) {
+        var tableStatsMap = {};
+
+        DataSourceManager.getTriplesStats(DataSourceManager.currentSlsvSource, function (err, result) {
+            tableStatsMap = result || {};
+            DataSourceManager.loaDataSourcesJstree(MappingModeler.jstreeDivId, tableStatsMap, function (err) {
+                return callback;
+            });
         });
     };
 
@@ -277,6 +292,7 @@ var TripleFactory = (function () {
                         UI.message(result.result, true);
                     } else {
                         var message = result.totalTriplesCount[MappingModeler.currentTable.name] + " triples created in graph " + DataSourceManager.currentConfig.graphUri;
+                        TripleFactory.refreshTabStat();
                         alert(message);
                         //  UI.message(message, true);
                     }

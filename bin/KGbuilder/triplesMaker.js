@@ -49,15 +49,21 @@ var TriplesMaker = {
         if (tableProcessingParams.tableInfos.csvDataFilePath) {
             KGbuilder_socket.message(options.clientSocketId, "loading data from csv file " + tableInfos.table, false);
             TriplesMaker.readCsv(tableInfos.csvDataFilePath, options.sampleSize, function (err, result) {
+               
                 if (err) {
                     KGbuilder_socket.message(options.clientSocketId, err, true);
                     return callback(err);
                 }
 
+                var totalRecordsCount = 0;
+                result.data.forEach((dataset) => {
+                    totalRecordsCount += dataset.length;
+                });
+
+
                 var currentTime = new Date();
-                message.tableTotalRecords = result.data[0].length;
+                message.tableTotalRecords = totalRecordsCount;
                 message.operation = "records";
-                message.processedRecords += 0;
                 message.operationDuration = currentTime - oldTime;
                 message.totalDuration += message.operationDuration;
                 KGbuilder_socket.message(options.clientSocketId, message);
@@ -70,10 +76,12 @@ var TriplesMaker = {
                             options.currentBatchRowIndex = currentBatchRowIndex;
                         }
                         TriplesMaker.buildTriples(data, tableProcessingParams, options, function (err, batchTriples) {
+
                             //  totalTriplesCount += batchTriples.length;
                             var currentTime = new Date();
                             currentBatchRowIndex += data.length;
                             message.operation = "buildTriples";
+                            message.processedRecords += data.length;
                             message.totalTriples = totalTriplesCount;
                             message.batchTriples = batchTriples.length;
                             message.operationDuration = currentTime - oldTime;
@@ -97,12 +105,13 @@ var TriplesMaker = {
                                     tableProcessingParams.sourceInfos.graphUri,
                                     tableProcessingParams.sourceInfos.sparqlServerUrl,
                                     function (err, writtenTriples) {
+
                                         if (err) {
                                             return callbackEach(err);
                                         }
                                         totalTriplesCount += writtenTriples;
                                         var currentTime = new Date();
-
+                                        message.batchTriples = writtenTriples;
                                         message.operation = "writeTriples";
                                         message.operationDuration = currentTime - oldTime;
                                         message.totalDuration += message.operationDuration;
@@ -195,7 +204,7 @@ var TriplesMaker = {
                     currentBatchRowIndex = offset;
                     var currentTime = new Date();
 
-                    message.operation = "records";
+                    message.operation = "buildTriples";
                     message.processedRecords += data.length;
                     message.operationDuration = currentTime - oldTime;
                     message.totalDuration += message.operationDuration;

@@ -76,6 +76,20 @@ const KGbuilder_triplesWriter = {
             },
         );
     },
+    writeTriplesAsync: async function (allTriples, graphUri, sparqlServerUrl, callback) {
+        return new Promise((resolve, reject) => {
+            KGbuilder_triplesWriter.writeTriples(
+                allTriples,
+                graphUri,
+                sparqlServerUrl,
+                function(err, writtenTriples) {
+                    if (err) return reject(err);
+                    
+                    resolve(writtenTriples);
+                }
+            );
+        });
+    },
 
     /**
      * Delete graph named <graphUri> from sparql endpoint at <sparqlServerUrl>

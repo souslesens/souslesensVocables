@@ -250,7 +250,18 @@ var TriplesMaker = {
                 }
 
                 // KGbuilder_socket.message(options.clientSocketId, processedRecords + "  records loaded from table " + tableInfos.table, false);
-                var batchTriples = await TriplesMaker.buildTriplesAsync(data, tableProcessingParams, options);
+                try{
+                    var batchTriples = await TriplesMaker.buildTriplesAsync(data, tableProcessingParams, options);
+                }
+                catch(err){
+                    
+                   
+                    offset -= limitSize;
+                    KGbuilder_socket.message(options.clientSocketId, "stopped at offset : " + offset+"error in building triples " + err, true);
+                    return callback(err);
+                    
+
+                }
                 console.log("   triples builded ", batchTriples.length);
                 /*if (err) {
                     if (err == "!!!") {
@@ -277,13 +288,23 @@ var TriplesMaker = {
                     
                 } else {
                     
-
+                    try{
                     var batchTriplesCount = await KGbuilder_triplesWriter.writeTriplesAsync(
                         batchTriples,
                         tableProcessingParams.sourceInfos.graphUri,
                         tableProcessingParams.sourceInfos.sparqlServerUrl,
                         
                     );
+                    }
+                    catch(err){
+                        
+                        console.log(err);
+                        console.log("offest " + offset);
+                         offset -= limitSize;
+                        KGbuilder_socket.message(options.clientSocketId, "stopped at offset : " + offset+"error in writing triples " + err, true);
+                        return callback(err);
+                    
+                    }
                     console.log("   triples written ", batchTriplesCount);
                     /*if (err) {
                         console.log(err);

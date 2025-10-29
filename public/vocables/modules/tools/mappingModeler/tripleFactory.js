@@ -98,7 +98,6 @@ var TripleFactory = (function () {
                                     dataType: "json",
                                     success: function (result, _textStatus, _jqXHR) {
                                         delete Config.ontologiesVocabularyModels[MappingModeler.currentSLSsource];
-                                        
 
                                         //    UI.message("ALL DONE");
                                     },
@@ -222,7 +221,6 @@ var TripleFactory = (function () {
                 return callback;
             });
         });
-
     };
 
     /**
@@ -300,7 +298,6 @@ var TripleFactory = (function () {
                     }
                 }
                 if (callback) {
-                    
                     return callback();
                 }
             },

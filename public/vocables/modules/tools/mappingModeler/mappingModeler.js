@@ -662,7 +662,7 @@ var MappingModeler = (function () {
                     label: resourceUri,
                     type: self.currentResourceType,
                     dataTable: self.currentTable.name,
-                    datasource: self.currentTreeNode.parent,
+                    datasource: self.currentTreeNode.currentDataSource,
                 },
             };
             MappingColumnsGraph.drawResource(newResource, null, function (err) {

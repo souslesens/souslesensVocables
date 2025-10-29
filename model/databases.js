@@ -320,15 +320,15 @@ class DatabaseModel {
         const columns = await connection(tableName).columnInfo();
         const columnsKeys = Object.keys(columns);
 
-        const resSize = await connection.count(select).from(tableName);
+        const resSize = await connection.count('*').from(tableName);
         const size = parseInt(resSize[0].count);
 
         let offset = 0;
         while (true) {
             if (offset + batchSize >= size) {
-                return connection.select(select).from(tableName).orderBy(columnsKeys).limit(batchSize).offset(offset);
+                return connection.select(select).from(tableName).orderBy(columnsKeys[0]).limit(batchSize).offset(offset);
             }
-            yield await connection.select(select).from(tableName).orderBy(columnsKeys).limit(batchSize).offset(offset);
+            yield await connection.select(select).from(tableName).orderBy(columnsKeys[0]).limit(batchSize).offset(offset);
             offset += batchSize;
         }
     };

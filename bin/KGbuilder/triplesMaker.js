@@ -125,108 +125,69 @@ var TriplesMaker = {
                 );
             });
         } else if (true) {
-            /// tedmporary fix batchselect problem
-            //!!!!!!!!!! temporary to cure batchselect bug
-            //  var slices=common.array.slice(data,300)
-
             const conn = await databaseModel.getUserConnection(user, tableInfos.dbID);
-            databaseModel
-                .batchSelect(conn, tableInfos.table, {
-                    limit: TriplesMaker.batchSize,
-                    noRecurs: true,
-                    //  offset: offset,
-                    select: select,
-                })
-                .then((result) => {
-                    //  async.eachSeries(slices,function(data,callbackEachDataSlice){
-                    KGbuilder_socket.message(options.clientSocketId, "loading data from database table " + tableInfos.table, false);
+            const generator = databaseModel.batchSelectGenerator(conn, tableInfos.table, { select: select, batchSize: 5000 });
 
-                    if (options.sampleSize) {
-                        result = result.slice(0, options.sampleSize);
-                    }
+            KGbuilder_socket.message(options.clientSocketId, "loading data from database table " + tableInfos.table, false);
+            for await (const batch of generator) {
+                const currentTime = new Date();
+                console.log("batch with size", batch.length);
+                const slices = util.sliceArray(batch, 500);
 
-                    var slices = util.sliceArray(result, 300);
-                    var currentTime = new Date();
-                    message.tableTotalRecords = slices[0].length;
-                    message.operation = "records";
-                    message.processedRecords += 0;
-                    message.operationDuration = currentTime - oldTime;
-                    message.totalDuration += message.operationDuration;
-                    KGbuilder_socket.message(options.clientSocketId, message);
-                    oldTime = new Date();
+                message.tableTotalRecords = slices[0].length;
+                message.operation = "records";
+                message.processedRecords += 0;
+                message.operationDuration = currentTime - oldTime;
+                message.totalDuration += message.operationDuration;
+                KGbuilder_socket.message(options.clientSocketId, message);
 
-                    async.eachSeries(
-                        slices,
-                        function (data, callbackEach) {
-                            if (options) {
-                                options.currentBatchRowIndex = currentBatchRowIndex;
-                            }
-                            TriplesMaker.buildTriples(data, tableProcessingParams, options, function (err, batchTriples) {
-                                //  totalTriplesCount += batchTriples.length;
+                oldTime = new Date();
+
+                for (const i in slices) {
+                    const slice = slices[i];
+                    console.log("  slice of size", slice.length);
+                    const data = slice; //XXX: rename data to slice
+                    TriplesMaker.buildTriples(data, tableProcessingParams, options, function (err, batchTriples) {
+                        console.log("    number of triples", batchTriples.length);
+                        var currentTime = new Date();
+                        currentBatchRowIndex += data.length;
+                        message.operation = "buildTriples";
+                        message.totalTriples = totalTriplesCount;
+                        message.batchTriples = batchTriples.length;
+                        message.operationDuration = currentTime - oldTime;
+                        message.totalDuration += message.operationDuration;
+                        KGbuilder_socket.message(options.clientSocketId, message);
+                        oldTime = new Date();
+
+                        KGbuilder_socket.message(options.clientSocketId, " writing " + processedRecords + " records  from " + tableInfos.table + " : " + batchTriples.length + " triples", false);
+
+                        KGbuilder_triplesWriter.writeTriples(
+                            batchTriples,
+                            tableProcessingParams.sourceInfos.graphUri,
+                            tableProcessingParams.sourceInfos.sparqlServerUrl,
+                            function (err, writtenTriples) {
+                                if (err) {
+                                    throw err;
+                                }
+                                totalTriplesCount += writtenTriples;
                                 var currentTime = new Date();
-                                currentBatchRowIndex += data.length;
-                                message.operation = "buildTriples";
-                                message.totalTriples = totalTriplesCount;
-                                message.batchTriples = batchTriples.length;
+
+                                message.operation = "writeTriples";
                                 message.operationDuration = currentTime - oldTime;
                                 message.totalDuration += message.operationDuration;
                                 KGbuilder_socket.message(options.clientSocketId, message);
                                 oldTime = new Date();
+                            },
+                        );
+                    });
+                }
+            }
+            message.operation = "finished";
+            message.totalTriples = totalTriplesCount;
+            KGbuilder_socket.message(options.clientSocketId, message);
+            // KGbuilder_socket.message(options.clientSocketId, " DONE " + processedRecords + "records  from " + tableInfos.table + " : " + (totalTriplesCount) + " triples", false);
 
-                                if (options.sampleSize) {
-                                    // sample dont write triples return batchTriples
-                                    sampleTriples = sampleTriples.concat(batchTriples);
-                                    callbackEach();
-                                } else {
-                                    KGbuilder_socket.message(
-                                        options.clientSocketId,
-                                        " writing " + processedRecords + " records  from " + tableInfos.table + " : " + batchTriples.length + " triples",
-                                        false,
-                                    );
-
-                                    KGbuilder_triplesWriter.writeTriples(
-                                        batchTriples,
-                                        tableProcessingParams.sourceInfos.graphUri,
-                                        tableProcessingParams.sourceInfos.sparqlServerUrl,
-                                        function (err, writtenTriples) {
-                                            if (err) {
-                                                return callbackEach(err);
-                                            }
-                                            totalTriplesCount += writtenTriples;
-                                            var currentTime = new Date();
-
-                                            message.operation = "writeTriples";
-                                            message.operationDuration = currentTime - oldTime;
-                                            message.totalDuration += message.operationDuration;
-                                            KGbuilder_socket.message(options.clientSocketId, message);
-                                            oldTime = new Date();
-                                            return callbackEach();
-                                        },
-                                    );
-                                }
-                            });
-                        },
-                        function (err) {
-                            message.operation = "finished";
-                            message.totalTriples = totalTriplesCount;
-                            KGbuilder_socket.message(options.clientSocketId, message);
-                            // KGbuilder_socket.message(options.clientSocketId, " DONE " + processedRecords + "records  from " + tableInfos.table + " : " + (totalTriplesCount) + " triples", false);
-
-                            return callback(err, { sampleTriples: sampleTriples, totalTriplesCount: totalTriplesCount });
-                        },
-                    );
-                })
-                .catch((err) => {
-                    console.log(err);
-                    if (databaseErrors < 5) {
-                        databaseErrors += 1;
-                        databaseModel.refreshConnection(tableInfos.dbID, function () {
-                            callback();
-                        });
-                    } else {
-                        return callback(err);
-                    }
-                });
+            return callback(err, { sampleTriples: sampleTriples, totalTriplesCount: totalTriplesCount });
         }
 
         // usual case for DB temporay disabled because pb with batchSelect

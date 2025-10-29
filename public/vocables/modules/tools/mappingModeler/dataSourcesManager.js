@@ -272,7 +272,6 @@ var DataSourceManager = (function () {
         );
     };
 
-    
     /**
      * Initializes a new data source, updating the current configuration.
      * This function handles both CSV and non-CSV sources by adding them to the Jstree and updating the current data source configuration.

@@ -289,38 +289,41 @@ var TriplesMaker = {
                 } else {
                     
                     try{
-                    var batchTriplesCount = await KGbuilder_triplesWriter.writeTriplesAsync(
-                        batchTriples,
-                        tableProcessingParams.sourceInfos.graphUri,
-                        tableProcessingParams.sourceInfos.sparqlServerUrl,
-                        
-                    );
+                        var batchTriplesCount = await KGbuilder_triplesWriter.writeTriplesAsync(
+                            batchTriples,
+                            tableProcessingParams.sourceInfos.graphUri,
+                            tableProcessingParams.sourceInfos.sparqlServerUrl,
+                            
+                        );
+                        console.log("   triples written ", batchTriplesCount);
+                        /*if (err) {
+                            console.log(err);
+                            console.log("offest " + offset);
+                            return callbackWhilst(err);
+                        }*/
+
+                        var currentTime = new Date();
+                        totalTriplesCount += batchTriplesCount;
+                        message.totalTriples = totalTriplesCount;
+                        message.operation = "writeTriples";
+                        message.batchTriples = batchTriplesCount;
+                        message.operationDuration = currentTime - oldTime;
+                        message.totalDuration += message.operationDuration;
+                        KGbuilder_socket.message(options.clientSocketId, message);
+                        oldTime = new Date();
                     }
                     catch(err){
-                        
-                        console.log(err);
-                        console.log("offest " + offset);
-                         offset -= limitSize;
-                        KGbuilder_socket.message(options.clientSocketId, "stopped at offset : " + offset+"error in writing triples " + err, true);
-                        return callback(err);
+                        if(err){
+                            console.log(err);
+                            console.log("offest " + offset);
+                            offset -= limitSize;
+                            KGbuilder_socket.message(options.clientSocketId, "stopped at offset : " + offset+"error in writing triples " + err, true);
+                            return callback(err);
+                        }
+                       
                     
                     }
-                    console.log("   triples written ", batchTriplesCount);
-                    /*if (err) {
-                        console.log(err);
-                        console.log("offest " + offset);
-                        return callbackWhilst(err);
-                    }*/
-
-                    var currentTime = new Date();
-                    totalTriplesCount += batchTriplesCount;
-                    message.totalTriples = totalTriplesCount;
-                    message.operation = "writeTriples";
-                    message.batchTriples = batchTriplesCount;
-                    message.operationDuration = currentTime - oldTime;
-                    message.totalDuration += message.operationDuration;
-                    KGbuilder_socket.message(options.clientSocketId, message);
-                    oldTime = new Date();
+                    
                 
                 
                                 

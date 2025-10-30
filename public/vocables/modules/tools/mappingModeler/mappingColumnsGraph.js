@@ -1709,7 +1709,7 @@ var MappingColumnsGraph = (function () {
                                 label: String(columnLalbel),
                                 shape: "box",
                                 color: "#eaf4ff",
-                                data: { id: columnId, label: String(columnLalbel), type: "Column", dataTable: dataTable },
+                                data: column.data,
                             });
                             uniqueNodes[columnId] = 1;
                         }

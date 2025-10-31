@@ -13,7 +13,7 @@ var DateWidget = (function () {
             self.divId = divId;
         }
         $("#" + divId).load("modules/uiWidgets/html/dateWidget.html", function () {
-            UI.openDialog("smallDialogDiv");
+            UI.openDialog("smallDialogDiv", {title: "Date Filter"});
             DateWidget.setDatePickerOnInput("dateWidget_input", null, function (date) {});
         });
     };
@@ -78,7 +78,7 @@ var DateWidget = (function () {
         if (!maxDate) maxDate = new Date(2035, 11, 31);
 
         $("#" + divId).load("/vocables/modules/uiWidgets/rangeWidget.html", function () {
-            UI.openDialog(divId);
+            UI.openDialog(divId, {title: " Date Range"});
             $("#slider").dateRangeSlider({
                 wheelMode: "scroll",
                 wheelSpeed: 1,

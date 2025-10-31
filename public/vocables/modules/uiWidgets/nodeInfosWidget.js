@@ -1573,7 +1573,7 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
 
     self.getCreateEntityDialog = function (source, divId) {
         self.currentSource = source;
-        UI.openDialog(divId);
+        UI.openDialog(divId, {title: "Create New Entity"});
         var html =
             "rdfs:label <input style='width:200px' id='nodeInfosWidget_newEntityLabel'/>" +
             "<br></br>" +
@@ -1738,7 +1738,7 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
 
             if (!targetDiv) {
                 targetDiv = "smallDialogDiv";
-                UI.openDialog(targetDiv);
+                UI.openDialog(targetDiv, {title: " Node Restrictions"});
                 $("#addPredicateButton").remove();
 
                 $("#deleteButton").remove();

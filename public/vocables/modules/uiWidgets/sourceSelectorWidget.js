@@ -42,7 +42,7 @@ var SourceSelectorWidget = (function () {
 
         $("#" + targetDivId).load("./modules/uiWidgets/html/sourceSelector.html", function (err) {
             try {
-                UI.openDialog(targetDivId);
+                UI.openDialog(targetDivId, {title: "Source Selector"});
             } catch (e) {}
             self.loadSourcesTreeDiv("sourceSelector_jstreeDiv", jsTreeOptions);
             $("#sourceSelector_searchInput").trigger("focus");
@@ -61,7 +61,7 @@ var SourceSelectorWidget = (function () {
             }
 
             if (isDialog) {
-                UI.openDialog(targetDivId);
+                UI.openDialog(targetDivId, {title: "Select Data Source"});
             }
             if (callback) {
                 callback();

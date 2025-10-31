@@ -1331,7 +1331,7 @@ var MappingModeler = (function () {
      */
     self.predicateFunctionShowDialog = function () {
         $("#smallDialogDiv").load("./modules/tools/mappingModeler/html/functionDialog.html", function () {
-            UI.openDialog("smallDialogDiv");
+            UI.openDialog("smallDialogDiv", {title: " Mapping Function"});
         });
     };
 

@@ -709,7 +709,7 @@ var MappingColumnsGraph = (function () {
         showColumnDetails: function (node) {
             var divId = "columnMappingDetailsDiv";
             $("#smallDialogDiv").html("<div id='" + divId + "'></div>");
-            $("#smallDialogDiv").dialog("option", "title", "Column Technical Mappings");
+            UI.setDialogTitle("#smallDialogDiv", "Column Technical Mappings");
             $("#smallDialogDiv").dialog("open");
             MappingsDetails.showColumnTechnicalMappingsDialog(divId, node || self.currentGraphNode, function () {
                 $("#smallDialogDiv").dialog("close");

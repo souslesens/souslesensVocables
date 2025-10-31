@@ -202,7 +202,15 @@ var UserRequestFiltering = {
             });
         }
     },
+    filterSparqlRequestAsync : async function (query, userSourcesMap, userInfo) {
+        return new Promise((resolve, reject) => {
+            UserRequestFiltering.filterSparqlRequest(query, userSourcesMap, userInfo, function (err, result) {
+                if (err) return reject(err);
 
+                resolve(result);
+            });
+        });
+    },
     validateElasticSearchIndices: function (userInfo, indices, userSourcesMap, acl, callback) {
         var indicesMap = {};
         for (var source in userSourcesMap) {

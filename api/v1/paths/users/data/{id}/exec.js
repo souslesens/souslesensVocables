@@ -3,18 +3,25 @@ const { readMainConfig } = require("../../../../../../model/config");
 const { userDataModel } = require("../../../../../../model/userData");
 const { RdfDataModel } = require("../../../../../../model/rdfData");
 const userManager = require("../../../../../../bin/user.");
+const UserRequestFiltering = require("../../../../../../bin/userRequestFiltering..js");
+const ConfigManager = require("../../../../../../bin/configManager.");
 
 module.exports = () => {
     GET = async (req, res, _next) => {
         try {
             const userInfo = await userManager.getUser(req.user);
             const userData = await userDataModel.find(req.params.id, userInfo.user);
-            if (userData.data_type === "sparqlQuery") {
+            if (userData.data_type === "savedQueries") {
                 let query;
                 if (userDataModel._mainConfig.userData.location === "file") {
                     query = fs.readFileSync(userData.data_content);
                 } else {
-                    query = userData.data_content.query;
+                    if (userData.data_content.sparqlQuery) {
+                        query = userData.data_content.sparqlQuery.query;
+                    } else {
+                        res.status(400).json({ message: "This userData is not a sparqlQuery" });
+                        return;
+                    }
                 }
                 // replace query params
                 if (req.query.params) {
@@ -24,6 +31,13 @@ module.exports = () => {
                 }
                 const config = readMainConfig();
                 const rdfDataModel = new RdfDataModel(config.sparql_server.url, config.sparql_server.user, config.sparql_server.password);
+                var userSources= await ConfigManager.getUserSources(req, res);
+                const user = await ConfigManager.getUser(req, res);
+                // check that query is confom before execute
+                const filteredQuery = await UserRequestFiltering.filterSparqlRequestAsync(query, userSources, user);
+                if (filteredQuery.parsingError) {
+                    return processResponse(res, filteredQuery.parsingError, null);
+                }
                 const jsonResult = await rdfDataModel.execQuery(query);
                 res.status(200).json(jsonResult);
             } else {

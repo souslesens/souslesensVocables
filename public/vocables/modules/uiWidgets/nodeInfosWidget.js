@@ -165,7 +165,7 @@ var NodeInfosWidget = (function () {
                         $("#deleteButton").remove();
                     },
                 });
-                UI.openDialog(divId, {title: " Node infos :"});
+                UI.openDialog(divId, { title: " Node infos :" });
                 $(".nodeInfosWidget_tabDiv").css("margin", "0px");
                 $("[aria-selected='true']").addClass("nodesInfos-selectedTab");
                 callback();
@@ -1567,7 +1567,7 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
     self.showCreateEntityDialog = function () {
         var divId = "smallDialogDiv";
         var sourceLabel = Lineage_sources.activeSource;
-        UI.openDialog(divId, {title: " Node infos :"});
+        UI.openDialog(divId, { title: " Node infos :" });
         self.getCreateEntityDialog(sourceLabel, divId);
     };
 

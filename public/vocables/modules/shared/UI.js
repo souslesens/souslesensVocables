@@ -463,8 +463,8 @@ var UI = (function () {
             divId = "#" + divId;
         }
         $("#" + divId).dialog("open");
-        var title = '';
-        if(options.title){
+        var title = "";
+        if (options.title) {
             title = options.title;
         }
         self.setDialogTitle(divId, title);

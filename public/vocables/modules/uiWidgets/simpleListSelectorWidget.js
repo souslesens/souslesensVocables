@@ -30,7 +30,7 @@ var SimpleListSelectorWidget = (function () {
         self.divId = divId;
 
         $("#" + divId).html(html);
-        UI.openDialog(divId, options.title ? {title: options.title} : {});
+        UI.openDialog(divId, options.title ? { title: options.title } : {});
 
         loadFn(function (data) {
             if (typeof data[0] === "object") {

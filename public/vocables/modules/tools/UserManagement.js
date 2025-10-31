@@ -12,7 +12,7 @@ const UserManagement = (() => {
         setTimeout(() => {
             $("#mainDialogDiv").on("dialogclose", (event, ui) => self.unload());
             $("#mainDialogDiv").html(`<div style="width:90vw;height:80vh"><div id="mount-user-management-here"></div></div>`);
-            UI.openDialog("mainDialogDiv", {title: "User Management"});
+            UI.openDialog("mainDialogDiv", { title: "User Management" });
 
             self.mountApp = self.createApp();
         }, 200);

@@ -46,13 +46,13 @@ class BotEngineClass {
             divId = "botDiv";
             this.divId = "botDiv";
 
-            UI.setDialogTitle("#botPanel", this.currentBot.title);
+            //UI.setDialogTitle("#botPanel", this.currentBot.title);
             $("#botPanel").parent().find("#BotUpperButtons").remove();
         }
 
         $("#" + divId).load("./modules/uiWidgets/html/bot.html", () => {
             if (!options.divId) {
-                UI.openDialog("botPanel", {title: "Bot Engine"});
+                UI.openDialog("botPanel", {title: this.currentBot.title || "Bot Engine"});
             }
             if (window.location.href.indexOf("localhost") < 0) {
                 $("#KGcreatorBot_exportToGraph").css("display", "none");

@@ -462,7 +462,7 @@ var UI = (function () {
         if (!divId.startsWith("#")) {
             divId = "#" + divId;
         }
-        $("#" + divId).dialog("open");
+        $(divId).dialog("open");
         var title = "";
         if (options.title) {
             title = options.title;

@@ -45,13 +45,13 @@ var _botEngine = (function () {
                 // change div bot
                 _botEngine.resetOldStateFn();
             });
-            UI.setDialogTitle("#botPanel", _botEngine.currentBot.title);
+            //UI.setDialogTitle("#botPanel", _botEngine.currentBot.title);
             $("#botPanel").parent().find("#BotUpperButtons").remove();
         }
 
         $("#" + divId).load("./modules/uiWidgets/html/bot.html", function () {
             if (!options.divId) {
-                UI.openDialog("botPanel", {title: "Bot Engine"});
+                UI.openDialog("botPanel", {title: _botEngine.currentBot.title || "Bot Engine"});
             }
             if (window.location.href.indexOf("localhost") < 0) {
                 $("#KGcreatorBot_exportToGraph").css("display", "none");

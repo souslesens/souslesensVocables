@@ -3794,7 +3794,7 @@ self.zoomGraphOnNode(node.data[0].id, false);
          */
         showAxioms: function () {
             if (self.currentGraphNode) {
-                $("#smallDialogDiv").dialog("option", "title", "Axioms of resource " + self.currentGraphNode.data.label);
+                UI.setDialogTitle("#smallDialogDiv", "Axioms of resource " + self.currentGraphNode.data.label);
 
                 NodeInfosAxioms.init(self.currentGraphNode.data.source, self.currentGraphNode, "smallDialogDiv");
             }

@@ -45,7 +45,7 @@ var _botEngine = (function () {
                 // change div bot
                 _botEngine.resetOldStateFn();
             });
-            $("#botPanel").dialog("option", "title", _botEngine.currentBot.title);
+            UI.setDialogTitle("#botPanel", _botEngine.currentBot.title);
             $("#botPanel").parent().find("#BotUpperButtons").remove();
         }
 

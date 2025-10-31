@@ -35,7 +35,7 @@ var Lineage_createResource = (function () {
         self.selectedNode = Lineage_whiteboard.currentGraphNode;
         self.currentSource = Lineage_sources.activeSource;
 
-        $("#LineagePopup").dialog("option", "title", "Create resource in source " + self.currentSource);
+        UI.setDialogTitle("#LineagePopup", "Create resource in source " + self.currentSource);
 
         $("#LineagePopup").load("modules/tools/lineage/html/createResourceDialog.html", function () {
             $("#LineagePopup").dialog("open");

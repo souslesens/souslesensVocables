@@ -80,7 +80,7 @@ var JstreeWidget = (function () {
             jstreeDiv = self.jstreeDiv;
             self.dialogDiv = "smallDialogDiv";
 
-            $("#smallDialogDiv").dialog("option", "title", "Select items");
+            UI.setDialogTitle("#smallDialogDiv", "Select items");
 
             $("#smallDialogDiv").load("modules/uiWidgets/html/jsTreeWidget.html", function () {
                 $("#smallDialogDiv").dialog("open");

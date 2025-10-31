@@ -942,7 +942,7 @@ var MappingsDetails = (function () {
             }
             $("#smallDialogDiv").load("./modules/tools/mappingModeler/html/transformColumnDialog.html", function (err) {
                 $("#smallDialogDiv").dialog("open");
-                $("#smallDialogDiv").dialog("option", "title", "Transform for " + column);
+                UI.setDialogTitle("#smallDialogDiv", "Transform for " + column);
                 self.transformColumn = column;
                 if (callback) {
                     callback();

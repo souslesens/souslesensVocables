@@ -145,6 +145,17 @@ var MappingColumnsGraph = (function () {
         };
         return edge;
     };
+    /**
+     * @function
+     * @name getVisjsDatatypePropertyEdgeBetweenClassAndRange
+     * @memberof module:MappingColumnsGraph
+     * Builds a Vis.js edge for a DatatypeProperty between a class node and a literal/range node.
+     * @param {string} domainId - Source (domain) node id (class/column).
+     * @param {string} rangeId - Target (range) node id (literal holder).
+     * @param {string} propUri - Datatype property URI (stored in `data.id`).
+     * @param {string} propLabel - Human-readable edge label.
+     * @returns {Object} Vis.js edge config (arrowed, curved, purple, width 3) with `data.type = "DatatypeProperty"`.
+     */
 
     self.getVisjsDatatypePropertyEdgeBetweenClassAndRange = function (domainId, rangeId, propUri, propLabel) {
         return {
@@ -160,15 +171,6 @@ var MappingColumnsGraph = (function () {
         };
     };
 
-    /**
-     * return a visJsEdge for DatatypeProperty
-     * @param {string} from  node id (subject column)
-     * @param {string} to    node id (object/value column)
-     * @param {string} label property label
-     * @param {Object|string} property  either {id,label,source} or a URI string
-     * @param {string} uri   property URI (if property is string, this is redundant but accepted)
-     * @param {string} color edge color
-     */
 
     /**
      * Draws a new resource node in the Vis.js graph.
@@ -479,6 +481,17 @@ var MappingColumnsGraph = (function () {
             self.relationMessage();
         }
     };
+    /**
+     * @function
+     * @name showImplicitGraphPopupMenu
+     * @memberof module:MappingColumnsGraph
+     * Displays a minimal context menu for implicit-model nodes (Class/superClass only).
+     * Sets `currentGraphNode`, renders a “Node Infos” action, and positions the popup at the event coordinates.
+     * @param {Object} node - Vis.js node object; must include `data.type`.
+     * @param {{x:number,y:number}} point - Screen point (will be updated from `event`).
+     * @param {{x:number,y:number}} event - Mouse event with screen coordinates.
+     * @returns {void}
+     */
 
     self.showImplicitGraphPopupMenu = function (node, point, event) {
         if (!node || !node.data) return;
@@ -1488,6 +1501,16 @@ var MappingColumnsGraph = (function () {
             });
         });
     };
+    /**
+     * @function
+     * @name hideNodesFromOtherTables
+     * @memberof module:MappingColumnsGraph
+     * Hides all nodes not belonging to the specified table, while keeping table nodes and their typed class targets visible.
+     * Scans nodes to mark everything hidden by default, then unhides: table nodes and any `rdf:type`/`owl:Class` targets linked from them.
+     * Finally performs a batch `.update()` on the Vis.js DataSet.
+     * @param {string} table - Table name to keep visible.
+     * @returns {void}
+     */
 
     self.hideNodesFromOtherTables = function (table) {
         var nodes = MappingColumnsGraph.visjsGraph.data.nodes.get();
@@ -1529,6 +1552,15 @@ var MappingColumnsGraph = (function () {
         }
         $("#mappingModeler_relationInfos").html("from: <b>" + (fromLabel ?? "None") + "</b> to: <b>" + (toLabel ?? "None") + "</b>");
     };
+    /**
+     * @function
+     * @name drawClassesGraph
+     * @memberof module:MappingColumnsGraph
+     * Builds and displays an “implicit model” graph of classes linked via column mappings, including datatype edges.
+     * Gathers class-to-class links from column edges, creates a compact Vis.js dataset, and opens it in a dialog.
+     * Node click opens column tech details (via DataSourceManager/MappingsDetails); right-click shows a minimal popup.
+     * @returns {void}
+     */
 
     self.drawClassesGraph = function () {
         var columns = self.getNodesOfType(MappingModeler.columnsMappingsObjects);
@@ -1875,6 +1907,15 @@ var MappingColumnsGraph = (function () {
             function (err) {},
         );
     };
+    /**
+     * @function
+     * @name getNodesOfType
+     * @memberof module:MappingColumnsGraph
+     * Returns nodes (or their ids) whose `data.type` matches one or more requested types.
+     * @param {string|string[]} types - Type name or list of types to include.
+     * @param {boolean} [onlyIds=false] - If true, returns node ids instead of full node objects.
+     * @returns {Array<string|Object>} Array of nodes or ids filtered by type; empty array if none.
+     */
 
     self.getNodesOfType = function (types, onlyIds) {
         if (!types) {
@@ -1900,7 +1941,14 @@ var MappingColumnsGraph = (function () {
         });
         return filteredNodes;
     };
-
+    /**
+     * @function
+     * @name getNodesMap
+     * @memberof module:MappingColumnsGraph
+     * Builds a map of nodeId → node, optionally filtering by a specific `data.type`.
+     * @param {string} [type] - If provided, only nodes with `data.type === type` are included.
+     * @returns {Object<string,Object>} Map of node ids to node objects.
+     */
     self.getNodesMap = function (type) {
         var nodes = self.visjsGraph.data.nodes.get();
         var map = {};
@@ -1911,6 +1959,15 @@ var MappingColumnsGraph = (function () {
         });
         return map;
     };
+    /**
+     * @function
+     * @name getEdgesMap
+     * @memberof module:MappingColumnsGraph
+     * Groups edges by a chosen key, returning a map key → Array<edge>.
+     * @param {string} [key="id"] - Edge property to group by (e.g., "from", "to", "id").
+     * @returns {Object<string,Array<Object>>} Map of group key to edges sharing that key.
+     */
+
     self.getEdgesMap = function (key) {
         var edges = self.visjsGraph.data.edges.get();
         var map = {};

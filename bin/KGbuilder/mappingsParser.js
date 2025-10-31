@@ -2,6 +2,22 @@ const path = require("path");
 const async = require("async");
 const fs = require("fs");
 
+/**
+
+@module MappingParser
+
+@description Loads Vis.js mapping graphs and derives column-level mapping models.
+
+Exposes: getMappingsData, getColumnsMap, setAllColumnsLabelAndType, setTableColumnsOtherPredicates.
+
+Extracts rdf:type/rdfs:label triples, column-to-column edges (with restriction detection), and other predicates.
+
+Utilities: isConstantUri, isConstantPrefixedUri, getTypeAndLabelMappings, getOtherPredicates.
+
+Builds executable per-column transform functions from strings (getJsFunctionsMap).
+
+Depends on: path, fs, async.
+*/
 var MappingParser = {
     columnsMappingsObjects: ["Column", "RowIndex", "VirtualColumn", "URI"],
     getMappingsData: function (source, callback) {
@@ -85,6 +101,14 @@ var MappingParser = {
             }
         });
     },
+    /**
+     * @function
+     * @name setTableColumnsOtherPredicates
+     * @memberof module:MappingParser
+     * Appends "otherPredicates" triples to each column’s `mappings`, tagging constants (URI or prefixed URI).
+     * @param {Object<string,Object>} tablecolumnsMap - Map of columnId → column data; each entry must have a `mappings` array.
+     * @returns {void}
+     */
 
     setTableColumnsOtherPredicates: function (tablecolumnsMap) {
         for (var columnId in tablecolumnsMap) {
@@ -145,6 +169,17 @@ var MappingParser = {
 
         return mappings;
     },
+    /**
+     * @function
+     * @name getColumnToColumnMappings
+     * @memberof module:MappingParser
+     * Extracts column-to-column edges for a given table, filtering by `filterMappingIds`, and flags OWL restriction edges.
+     * @param {{nodes:Array<Object>,edges:Array<Object>}} mappingData - Vis.js graph data (nodes/edges).
+     * @param {string} table - Table name; only columns from this table are considered.
+     * @param {Array<string>} filterMappingIds - Allowed edge IDs to include.
+     * @param {Object<string,Object>} allColumnsMappings - Map of columnId → column data (for `definedInColumn` resolution).
+     * @returns {Object<string,Object>} Map of edgeId → edge (with `isRestriction` when both ends are `owl:Class`).
+     */
 
     getColumnToColumnMappings: function (mappingData, table, filterMappingIds, allColumnsMappings) {
         var columnsMap = {};
@@ -175,6 +210,15 @@ var MappingParser = {
         });
         return edgeMap;
     },
+    /**
+     * @function
+     * @name getOtherPredicates
+     * @memberof module:MappingParser
+     * Builds mapping triples from a column’s `otherPredicates` (p/o), adding `dataType` (defaults to `xsd:string` if range includes “Resource”) and `dateFormat`.
+     * @param {Object} columnData - Column data with `id` and optional `otherPredicates` items `{property, object, range, dateFormat}`.
+     * @returns {Array<{s:string,p:string,o:string,dataType?:string,dateFormat?:string}>} Triples mapped for this column.
+     */
+
     getOtherPredicates: function (columnData) {
         var mappings = [];
         if (columnData.otherPredicates) {

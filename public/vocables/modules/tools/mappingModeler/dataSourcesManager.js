@@ -728,6 +728,15 @@ var DataSourceManager = (function () {
             // Not done because road don't exist
         });
     };
+    /**
+     * @function
+     * @name deleteTableMappings
+     * @memberof module:DataSourceManager
+     * Deletes all mappings (nodes and connected edges) for the currently selected table after double confirmation.
+     * Removes Vis.js nodes whose `data.dataTable` matches the table, removes their connected edges, then saves the graph.
+     * Finally refreshes the table label in the datasource tree (removes blue styling).
+     * @returns {void}
+     */
 
     self.deleteTableMappings = function () {
         var tableNode = MappingModeler.currentTreeNode;

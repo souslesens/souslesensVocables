@@ -43,7 +43,7 @@ return alert("select a field (column)");
         //$("#smallDialogDiv").parent().css("left", "10%");
         /*$("#smallDialogDiv").css('left','10%');*/
         $("#smallDialogDiv").load("./modules/tools/KGcreator/html/columnMappingsDialog.html", function () {
-            UI.openDialog("smallDialogDiv", {title: "Mapping " + columnNode.data.table + "." + columnNode.data.id});
+            UI.openDialog("smallDialogDiv", { title: "Mapping " + columnNode.data.table + "." + columnNode.data.id });
             $("#LinkColumn_rightPanel").show();
             $("#LinkColumn_basicTypeSelect").show();
             $("#LinkColumn_basicTypeSelect").parent().find("span").show();
@@ -549,7 +549,7 @@ tripleObj.objectIsSpecificUri = true;
         //$("#smallDialogDiv").parent().css("left", "10%");
 
         $("#smallDialogDiv").load("./modules/tools/KGcreator/html/lookupDialog.html", function () {
-            UI.openDialog("smallDialogDiv", {title: "Lookups for " + table});
+            UI.openDialog("smallDialogDiv", { title: "Lookups for " + table });
             $("#KGCreator_lookupName").val(table);
             $("#KGCreator_lookupTable").val(table);
 
@@ -569,7 +569,7 @@ tripleObj.objectIsSpecificUri = true;
         self.currentTable = table;
 
         $("#smallDialogDiv").load("./modules/tools/KGcreator/html/transformDialog.html", function () {
-            UI.openDialog("smallDialogDiv", {title: "Lookups for " + table});
+            UI.openDialog("smallDialogDiv", { title: "Lookups for " + table });
             var columns = [];
             KGcreator.currentConfig.currentDataSource.tables[table].forEach(function (column) {
                 columns.push(column);

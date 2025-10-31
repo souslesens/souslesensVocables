@@ -185,11 +185,7 @@ var UserDataWidget = (function () {
                 }
             });
         }
-        self.showDialog(divId, "list", null, function () {
-            if (options.title) {
-                var div = divId || "smallDialogDiv";
-                UI.setDialogTitle(div, options.title);
-            }
+        self.showDialog(divId, "list", options, function () {
             $.ajax({
                 type: "GET",
                 url: `${Config.apiUrl}/users/data`,
@@ -337,9 +333,6 @@ var UserDataWidget = (function () {
         }
         self.divId = divId;
         $("#" + divId).load("modules/uiWidgets/html/userDataWidget.html", function () {
-            if (options.title) {
-                UI.setDialogTitle(divId, options.title);
-            }
             if (mode == "save") {
                 $("#userDataWidget_saveDiv").css("display", "block");
             } else if (mode == "list") {
@@ -354,7 +347,7 @@ var UserDataWidget = (function () {
             }
 
             if (divId == "smallDialogDiv") {
-                UI.openDialog(divId);
+                UI.openDialog(divId, options);
             }
 
             if (callback) {

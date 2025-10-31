@@ -9,9 +9,8 @@ var Containers_widget = (function () {
     self.showDialog = function (source, options, validateFn) {
         self.validateFn = validateFn;
 
-        UI.setDialogTitle("#mainDialogDiv", "Containers widget");
         $("#mainDialogDiv").load("modules/tools/containers/containers_widget.html", function () {
-            $("#mainDialogDiv").dialog("open");
+            UI.openDialog("mainDialogDiv", { title: "Containers widget" });
 
             //   $("#mainDialogDiv").addClass("zIndexTop-10");
             Containers_tree.search(self.jstreeDivId, options);
@@ -46,9 +45,8 @@ var Containers_widget = (function () {
 
         //  var rootNodes = JstreeWidget.getNodeDescendants("lineage_containers_containersJstree", "#", 1);
 
-        $("#smallDialogDiv").dialog("open");
-        UI.setDialogTitle("#smallDialogDiv", "Parent Containers Type");
         $("#smallDialogDiv").load("./modules/tools/lineage/html/parentContainers.html", function () {
+            UI.openDialog("smallDialogDiv", { title: "Parent Containers Type" });
             var types = [];
             types.splice(0, 0, { id: "all", label: "all" });
 

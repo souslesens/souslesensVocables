@@ -16,8 +16,7 @@ var KGqueryAggregateWidget = (function () {
             self.divId = divId;
         }
         $("#" + divId).load("modules/tools/KGquery/html/KGqueryAggregateWidget.html", function () {
-            $("#" + divId).dialog("open");
-            UI.setDialogTitle("#" + divId, "Aggregate Query");
+            UI.openDialog(divId, { title: "Aggregate Query" });
             loadClassesFn(function (data) {
                 self.groupByVarsMap = {};
                 self.numericVarsMap = {};

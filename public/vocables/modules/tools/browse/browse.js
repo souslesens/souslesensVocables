@@ -59,8 +59,7 @@ var Browse = (function () {
                 return MainController.errorAlert(err)
             }*/
         $("#mainDialogDiv").load("modules/tools/browse/html/browseDialog.html", function () {
-            $("#mainDialogDiv").dialog("open");
-            UI.setDialogTitle("#mainDialogDiv", "");
+            UI.openDialog("mainDialogDiv", { title: "" });
             self.init(mainSource);
         });
         //   })

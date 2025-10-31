@@ -36,11 +36,10 @@ var Lineage_createRelation = (function () {
      */
     self.showAddEdgeFromGraphDialog = function (edgeData, callback) {
         self.callbackFn = callback;
-        UI.setDialogTitle("#smallDialogDiv", "Create relation in source " + Lineage_sources.activeSource);
         Lineage_sources.showHideEditButtons(Lineage_sources.activeSource);
         var allLabelsMap = {};
         $("#smallDialogDiv").load("modules/tools/lineage/html/lineageAddEdgeDialog.html", function () {
-            $("#smallDialogDiv").dialog("open");
+            UI.openDialog("smallDialogDiv", { title: "Create relation in source " + Lineage_sources.activeSource });
             self.sourceNode = edgeData.from; // Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(edgeData.from).data;
             self.targetNode = edgeData.to; //Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(edgeData.to).data;
 

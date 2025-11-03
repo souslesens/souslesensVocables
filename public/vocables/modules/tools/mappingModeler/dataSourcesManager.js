@@ -604,8 +604,8 @@ var DataSourceManager = (function () {
                 });
             },
         });
-       
-        UI.openDialog("smallDialogDiv", {title: "Add DataBase"});
+
+        UI.openDialog("smallDialogDiv", { title: "Add DataBase" });
     };
 
     /**

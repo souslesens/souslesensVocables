@@ -18,7 +18,7 @@ var GanttWidget = (function () {
 
         $("#" + divId).load("modules/uiWidgets/html/ganttWidget.html", function (err) {
             if (divId == "mainDialogDiv") {
-                UI.openDialog(divId, {title: "Gantt Widget"});
+                UI.openDialog(divId, { title: "Gantt Widget" });
             }
 
             self.initWidget(implicitModel);

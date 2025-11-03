@@ -1785,7 +1785,7 @@ var MappingColumnsGraph = (function () {
                     //  classVisjsData={nodes:[], edges:[]}
                     var html = "<div style='width:1000px;height:800px' id='mappingModeler_implicitModelGraph'></div>";
                     $("#mainDialogDiv").html(html);
-                    UI.openDialog("mainDialogDiv", {title: "Implicit Model"});
+                    UI.openDialog("mainDialogDiv", { title: "Implicit Model" });
 
                     var implicitOptions = {
                         visjsOptions: { autoResize: true, width: "100%", height: "100%" },

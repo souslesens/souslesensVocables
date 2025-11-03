@@ -194,29 +194,6 @@ var KGbuilder = {
         //  console.log("missing TOTAL objects IDs " + JSON.stringify(missingTotalObjects));
         callback(null, { triples: triples, urisMap: options.existingUrisMap });
     },
-<<<<<<< HEAD
-
-    /**
-     * @function
-     * @name generateAdlSqlTriples
-     * @memberof module:KGbuilder
-     * Generates RDF triples from an ADL mapping file and source SQL data, then writes them to a SPARQL graph.
-     * Optionally clears the target graph, loads ARDL/local and One Model reference dictionaries, and reuses existing URIs.
-     * Streams table rows in batches, calls `generateMappingFileTriples`, de-duplicates, and performs SPARQL INSERTs.
-     * Updates the mapping file `data.build` metadata (date, triple count, graph URI) upon completion.
-     * @param {string} mappingFilePath - Absolute/relative path to the JSON mapping file.
-     * @param {string} KGgraphUri - Target named graph URI where triples will be written.
-     * @param {Object} [options] - Execution options.
-     * @param {string} options.sparqlServerUrl - SPARQL endpoint URL (timeout/debug flags are appended).
-     * @param {boolean} [options.replaceGraph=false] - When true, clears the graph before inserting.
-     * @param {Object} [options.dataSource] - DB config; may include `dbName` and `local_dictionary` {table,idColumn,labelColumn}.
-     * @param {number} [options.startOffset=0] - Row offset to start processing from.
-     * @param {Function} callback - Node-style callback `(err)`.
-     * @returns {void}
-     */
-
-=======
->>>>>>> parent of a33888d09 (Documentation KGbuilder)
     generateAdlSqlTriples: function (mappingFilePath, KGgraphUri, options, callback) {
         if (!options) options = {};
         options.sparqlServerUrl += "?timeout=600000&debug=on";
@@ -490,21 +467,6 @@ var KGbuilder = {
             },
         );
     },
-<<<<<<< HEAD
-    /**
-     * @function
-     * @name getExistingLabelUriMap
-     * @memberof module:KGbuilder
-     * Retrieves existing subject URIs from a SPARQL graph, keyed by their original IDs (values of `originalKGproperty`).
-     * Paginates with LIMIT/OFFSET until exhaustion, building a map: `{ originalId: subjectUri }`.
-     * @param {string} sparqlUrl - SPARQL endpoint URL.
-     * @param {string} graphUri - Named graph to scan for existing IDs.
-     * @param {*} [type] - Unused parameter (reserved for future filtering).
-     * @param {Function} callbackX - Node-style callback `(err, existingUrisMap)`.
-     * @returns {void}
-     */
-=======
->>>>>>> parent of a33888d09 (Documentation KGbuilder)
 
     getExistingLabelUriMap: function (sparqlUrl, graphUri, type, callbackX) {
         var fetchLimit = 10000;

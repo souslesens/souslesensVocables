@@ -160,19 +160,6 @@ var MappingColumnsGraph = (function () {
         };
     };
 
-<<<<<<< HEAD
-=======
-    /**
-     * return a visJsEdge for DatatypeProperty
-     * @param {string} from  node id (subject column)
-     * @param {string} to    node id (object/value column)
-     * @param {string} label property label
-     * @param {Object|string} property  either {id,label,source} or a URI string
-     * @param {string} uri   property URI (if property is string, this is redundant but accepted)
-     * @param {string} color edge color
-     */
-
->>>>>>> parent of a33888d09 (Documentation KGbuilder)
     /**
      * Draws a new resource node in the Vis.js graph.
      * Positions the node dynamically and links it with existing nodes if necessary.
@@ -483,7 +470,6 @@ var MappingColumnsGraph = (function () {
             self.relationMessage();
         }
     };
-<<<<<<< HEAD
 
     self.activeSourceFromNode = function (node, callback) {
         var obj = {};
@@ -536,8 +522,6 @@ var MappingColumnsGraph = (function () {
      * @param {{x:number,y:number}} event - Mouse event with screen coordinates.
      * @returns {void}
      */
-=======
->>>>>>> parent of a33888d09 (Documentation KGbuilder)
 
     self.showImplicitGraphPopupMenu = function (node, point, event) {
         if (!node || !node.data) return;
@@ -1911,7 +1895,6 @@ var MappingColumnsGraph = (function () {
             function (err) {},
         );
     };
-<<<<<<< HEAD
 
     /**
      * @function
@@ -1922,8 +1905,6 @@ var MappingColumnsGraph = (function () {
      * @param {boolean} [onlyIds=false] - If true, returns node ids instead of full node objects.
      * @returns {Array<string|Object>} Array of nodes or ids filtered by type; empty array if none.
      */
-=======
->>>>>>> parent of a33888d09 (Documentation KGbuilder)
 
     self.getNodesOfType = function (types, onlyIds) {
         if (!types) {

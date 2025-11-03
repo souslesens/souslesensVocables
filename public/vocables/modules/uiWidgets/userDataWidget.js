@@ -164,7 +164,6 @@ var UserDataWidget = (function () {
         self.saveUI();
     };
     self.showSaveDialog = function (data_type, jsonContent, divId, options, callbackFn) {
-        
         self.data_type = data_type;
         self.jsonContent = jsonContent;
         self.callbackFn = callbackFn;
@@ -186,9 +185,9 @@ var UserDataWidget = (function () {
                 }
             });
         }
-        self.showDialog(divId, "list", null,function () {
-            if(options.title){
-                var div= divId || 'smallDialogDiv';
+        self.showDialog(divId, "list", null, function () {
+            if (options.title) {
+                var div = divId || "smallDialogDiv";
                 UI.setDialogTitle(div, options.title);
             }
             $.ajax({

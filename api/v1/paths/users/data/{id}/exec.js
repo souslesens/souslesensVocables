@@ -11,7 +11,7 @@ module.exports = () => {
         try {
             const userInfo = await userManager.getUser(req.user);
             const userData = await userDataModel.find(req.params.id, userInfo.user);
-            if (userData.data_type === "savedQueries") {
+            if (userData.data_type === "sparqlQuery") {
                 let query;
                 if (userDataModel._mainConfig.userData.location === "file") {
                     query = fs.readFileSync(userData.data_content);

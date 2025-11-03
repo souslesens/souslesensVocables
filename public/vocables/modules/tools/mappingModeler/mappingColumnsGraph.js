@@ -1304,13 +1304,19 @@ var MappingColumnsGraph = (function () {
         var distinctEdges = {};
         var dataSources={};
         var dataTables = self.getDatasourceTablesFromVisjsGraph();
-        data.nodes.forEach(function(node){    
-            if(node && node.data&& node.data.type=="Column"){
-                if(node.data.dataTable && node.data.datasource){
-                    dataSources[node.data.dataTable]=node.data.datasource;
+
+
+        if (data && data.nodes) {
+            data.nodes.forEach(function (node) {
+                if (node && node.data && MappingModeler.columnsMappingsObjects.indexOf(node.data.type) !== -1) {
+                    if (node.data.dataTable && (node.data.datasource || node.data.dataSource)) {
+                        dataSources[node.data.dataTable] = node.data.datasource || node.data.dataSource;
+                    }
                 }
-            }
-        })
+            });
+        }
+
+
         data.nodes.forEach(function(node){    
             if(node && node.data&& node.data.type=="Table"){
                     if (Object.keys(dataSources).indexOf(node.id) !== -1) {

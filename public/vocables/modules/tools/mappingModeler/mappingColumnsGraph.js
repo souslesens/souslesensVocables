@@ -752,8 +752,7 @@ var MappingColumnsGraph = (function () {
         showColumnDetails: function (node) {
             var divId = "columnMappingDetailsDiv";
             $("#smallDialogDiv").html("<div id='" + divId + "'></div>");
-            $("#smallDialogDiv").dialog("option", "title", "Column Technical Mappings");
-            $("#smallDialogDiv").dialog("open");
+            UI.openDialog("smallDialogDiv", { title: "Column Technical Mappings" });
             MappingsDetails.showColumnTechnicalMappingsDialog(divId, node || self.currentGraphNode, function () {
                 $("#smallDialogDiv").dialog("close");
             });
@@ -1848,7 +1847,7 @@ var MappingColumnsGraph = (function () {
                     //  classVisjsData={nodes:[], edges:[]}
                     var html = "<div style='width:1000px;height:800px' id='mappingModeler_implicitModelGraph'></div>";
                     $("#mainDialogDiv").html(html);
-                    $("#mainDialogDiv").dialog("open");
+                    UI.openDialog("mainDialogDiv", { title: "Implicit Model" });
 
                     var implicitOptions = {
                         visjsOptions: { autoResize: true, width: "100%", height: "100%" },

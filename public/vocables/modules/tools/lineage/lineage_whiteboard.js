@@ -3794,7 +3794,7 @@ self.zoomGraphOnNode(node.data[0].id, false);
          */
         showAxioms: function () {
             if (self.currentGraphNode) {
-                $("#smallDialogDiv").dialog("option", "title", "Axioms of resource " + self.currentGraphNode.data.label);
+                UI.setDialogTitle("#smallDialogDiv", "Axioms of resource " + self.currentGraphNode.data.label);
 
                 NodeInfosAxioms.init(self.currentGraphNode.data.source, self.currentGraphNode, "smallDialogDiv");
             }
@@ -4493,11 +4493,11 @@ attrs.color=self.getSourceColor(superClassValue)
                 };
                 var data_path = "savedWhiteboards";
                 //UserDataWidget.currentTreeNode = null;
-                UserDataWidget.showSaveDialog(data_path, data, null, function (err, result) {
+                UserDataWidget.showSaveDialog(data_path, data, null, { title: "Save Whiteboard" }, function (err, result) {
                     if (err) {
                         return MainController.errorAlert(err);
                     }
-                    UI.message("Graph saved successfully");
+                    UI.message("Whiteboard saved successfully");
                 });
 
                 //Lineage_whiteboard.lineageVisjsGraph.saveGraph(visjsFileName);
@@ -4523,6 +4523,7 @@ attrs.color=self.getSourceColor(superClassValue)
                         data_source: MainController.currentSource,
                         data_tool: "lineage",
                     },
+                    title: "Load saved Whiteboard",
                 },
                 function (err, result) {
                     if (err) {

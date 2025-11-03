@@ -80,10 +80,8 @@ var JstreeWidget = (function () {
             jstreeDiv = self.jstreeDiv;
             self.dialogDiv = "smallDialogDiv";
 
-            $("#smallDialogDiv").dialog("option", "title", "Select items");
-
             $("#smallDialogDiv").load("modules/uiWidgets/html/jsTreeWidget.html", function () {
-                $("#smallDialogDiv").dialog("open");
+                UI.openDialog("smallDialogDiv", { title: "Select items" });
                 if (options && options.additionalHTMLComponent) {
                     try {
                         $(options.additionalHTMLComponent).insertBefore("#jstreeWidget_okButton");

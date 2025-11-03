@@ -392,7 +392,7 @@ var SparqlQuery_bot = (function () {
                         "<button onclick='SparqlQuery_bot.functions.afterChooseBindingPredicates()'>OK</button>",
                 );
                 $("#botPanel").css("display", "none");
-                $("#smallDialogDiv").dialog("open");
+                UI.openDialog("smallDialogDiv", { title: "Binding Predicates" });
                 var options = { openAll: true, withCheckboxes: true };
                 JstreeWidget.loadJsTree("sparqlQueryBot_bindingPredJstree", jstreeData, options);
             });
@@ -825,6 +825,7 @@ var SparqlQuery_bot = (function () {
                         data_source: Lineage_sources.activeSource,
                     },
                     removeSaveDiv: true,
+                    title: "Load SPARQL Query",
                 },
                 function (err, result) {
                     if (result.id) {
@@ -1207,7 +1208,7 @@ var SparqlQuery_bot = (function () {
                 "<button onclick='SparqlQuery_bot.functions.onValidateSparqlQuery()'>Execute</button>" +
                 "<button style='float: right' onclick='SparqlQuery_bot.saveQuery()'>SaveQuery</button>",
         );
-        $("#smallDialogDiv").dialog("open");
+        UI.openDialog("smallDialogDiv", { title: "Edit and Execute SPARQL Query" });
         $("#sparqlQueryBot_outputTypeSelect").css("z-index", 101);
         $("#sparqlQueryBot_queryTitle").html(title || "");
         $("#sparqlQueryBot_queryDescription").html(description || "");
@@ -1322,7 +1323,7 @@ var SparqlQuery_bot = (function () {
         var query = $("#sparqlQueryBot_textArea").text();
         var data = { sparqlQuery: query };
 
-        UserDataWidget.showSaveDialog("savedQueries", data, null, function (err, result) {
+        UserDataWidget.showSaveDialog("savedQueries", data, null, { title: "Save SPARQL Query" }, function (err, result) {
             if (err) {
                 return MainController.errorAlert(err);
             }

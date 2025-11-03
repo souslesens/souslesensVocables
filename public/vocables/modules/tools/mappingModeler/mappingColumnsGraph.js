@@ -463,7 +463,10 @@ var MappingColumnsGraph = (function () {
                 var tableSourceType = node.id.indexOf(".") > -1 ? "csvSource" : "table";
 
                 if (tableSourceType == "table" && !DataSourceManager.currentConfig.currentDataSource) {
-                    return alert("choose a data source first");
+                    // return alert("choose a data source first");
+                    MappingColumnsGraph.activeSourceFromNode(node,function(){
+
+                    })
                 }
 
                 var obj = {
@@ -479,6 +482,47 @@ var MappingColumnsGraph = (function () {
 
             MappingModeler.currentRelation = null;
             self.relationMessage();
+        }
+    };
+
+    self.activeSourceFromNode=function(node, callback){
+        var obj = {};
+        obj.node = {};
+        var dataSource = node.data.datasource;
+        var csvSource = DataSourceManager.currentConfig.csvSources;
+        var dataBaseSource = DataSourceManager.currentConfig.databaseSources;
+        obj.node.id = dataSource;
+        obj.node.data = {};
+        Object.keys(dataBaseSource).forEach(function (key) {
+            if (key == dataSource) {
+                obj.node.data.type = "databaseSource";
+            }
+        });
+        Object.keys(csvSource).forEach(function (key) {
+            if (key == dataSource) {
+                obj.node.data.type = "csvSource";
+            }
+        });
+        if (obj.node.data.type == "databaseSource") {
+            $.ajax({
+                type: "GET",
+                url: Config.apiUrl + "/databases/" + dataSource,
+                dataType: "json",
+                success: function (data, _textStatus, _jqXHR) {
+                    obj.node.data.id = data.name;
+                    obj.node.data.sqlType = data.driver;
+                    DataSourceManager.onDataSourcesJstreeSelect(undefined, obj, function () {
+                        var obj2 = { node: { label: node.data.dataTable, data: { type: "table", id: node.data.dataTable, label: node.data.dataTable } } };
+                        DataSourceManager.onDataSourcesJstreeSelect(undefined, obj2, callback);
+                    });
+                },
+                error: function (err) {
+                    return callbackSeries(err);
+                },
+            });
+        } else {
+            obj.node.data.id = dataSource;
+            DataSourceManager.onDataSourcesJstreeSelect(undefined, obj,callback);
         }
     };
     /**
@@ -1258,7 +1302,22 @@ var MappingColumnsGraph = (function () {
         data.positions = {};
         var isHierarchical = visjsOptions.layout && visjsOptions.layout.hierarchical;
         var distinctEdges = {};
+        var dataSources={};
         var dataTables = self.getDatasourceTablesFromVisjsGraph();
+        data.nodes.forEach(function(node){    
+            if(node && node.data&& node.data.type=="Column"){
+                if(node.data.dataTable && node.data.datasource){
+                    dataSources[node.data.dataTable]=node.data.datasource;
+                }
+            }
+        })
+        data.nodes.forEach(function(node){    
+            if(node && node.data&& node.data.type=="Table"){
+                    if (Object.keys(dataSources).indexOf(node.id) !== -1) {
+                        node.data.datasource=dataSources[node.id]
+                    }
+            }
+        })
         if (true || !isHierarchical) {
             var tables = {};
             var nodesMap = {};
@@ -1845,51 +1904,10 @@ var MappingColumnsGraph = (function () {
                                 label: baseLabel,
                                 data: node.data,
                             };
+                            MappingColumnsGraph.activeSourceFromNode(dialogNode,function () {
+                                MappingsDetails.openColumnTechDialog(dialogNode, function (){});
+                                })
 
-                            var obj = {};
-
-                            obj.node = {};
-
-                            var dataSource = node.data.datasource;
-                            var csvSource = DataSourceManager.currentConfig.csvSources;
-                            var dataBaseSource = DataSourceManager.currentConfig.databaseSources;
-                            obj.node.id = dataSource;
-                            obj.node.data = {};
-                            Object.keys(dataBaseSource).forEach(function (key) {
-                                if (key == dataSource) {
-                                    obj.node.data.type = "databaseSource";
-                                }
-                            });
-                            Object.keys(csvSource).forEach(function (key) {
-                                if (key == dataSource) {
-                                    obj.node.data.type = "csvSource";
-                                }
-                            });
-                            if (obj.node.data.type == "databaseSource") {
-                                $.ajax({
-                                    type: "GET",
-                                    url: Config.apiUrl + "/databases/" + dataSource,
-                                    dataType: "json",
-                                    success: function (data, _textStatus, _jqXHR) {
-                                        obj.node.data.id = data.name;
-                                        obj.node.data.sqlType = data.driver;
-                                        DataSourceManager.onDataSourcesJstreeSelect(undefined, obj, function () {
-                                            var obj2 = { node: { label: node.data.dataTable, data: { type: "table", id: node.data.dataTable, label: node.data.dataTable } } };
-                                            DataSourceManager.onDataSourcesJstreeSelect(undefined, obj2, function () {
-                                                MappingsDetails.openColumnTechDialog(dialogNode, function () {});
-                                            });
-                                        });
-                                    },
-                                    error: function (err) {
-                                        return callbackSeries(err);
-                                    },
-                                });
-                            } else {
-                                obj.node.data.id = dataSource;
-                                DataSourceManager.onDataSourcesJstreeSelect(undefined, obj, function () {
-                                    MappingsDetails.openColumnTechDialog(dialogNode, function () {});
-                                });
-                            }
                         },
 
                         onRightClickFn: function (node, point, event) {
@@ -1907,6 +1925,7 @@ var MappingColumnsGraph = (function () {
             function (err) {},
         );
     };
+    
     /**
      * @function
      * @name getNodesOfType

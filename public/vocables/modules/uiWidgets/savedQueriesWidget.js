@@ -138,7 +138,12 @@ var SavedQueriesWidget = (function () {
         ];
         UserDataWidget.showListDialog(
             null,
-            { filter: { data_type: "sparqlQuery", data_tool: "KGquery", data_source: MainController.currentSource }, removeSaveDiv: true, additionalContextMenu: additionalContextMenu ,title: "Load KGquery Query"},
+            {
+                filter: { data_type: "sparqlQuery", data_tool: "KGquery", data_source: MainController.currentSource },
+                removeSaveDiv: true,
+                additionalContextMenu: additionalContextMenu,
+                title: "Load KGquery Query",
+            },
             function (err, result) {
                 if (result.id) {
                     UserDataWidget.loadUserDatabyId(result.id, function (err, result) {

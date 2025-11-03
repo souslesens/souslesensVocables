@@ -1566,15 +1566,7 @@ var MappingModeler = (function () {
             alert("Comming Soon...");
         }
     };
-    /**
-     * @function
-     * @name visjsDataToClassDiagram
-     * @memberof module:MappingColumnsGraph
-     * Converts the current (or provided) Vis.js graph into a PlantUML class diagram.
-     * If `visjsData` is not provided, reads nodes/edges from the live Vis.js instance.
-     * @param {{nodes:Array<Object>,edges:Array<Object>}} [visjsData] - Optional Vis.js data bundle.
-     * @returns {void}
-     */
+
     self.visjsDataToClassDiagram = function (visjsData) {
         if (!visjsData) {
             visjsData = {
@@ -1584,16 +1576,6 @@ var MappingModeler = (function () {
         }
         PlantUmlTransformer.visjsDataToClassDiagram(visjsData);
     };
-
-    /**
-     * @function
-     * @name refreshSourceOntologyModel
-     * @memberof module:MappingColumnsGraph
-     * Reloads the source ontology model: clears tree, re-initializes resources, and re-selects the current legend type if relevant.
-     * Invokes `callback` after the model and UI are refreshed.
-     * @param {Function} [callback] - Called when refresh completes.
-     * @returns {void}
-     */
     self.refreshSourceOntologyModel = function (callback) {
         OntologyModels.unRegisterSourceModel();
         JstreeWidget.clear("mappingModelerRelations_jstreeDiv");
@@ -1606,15 +1588,7 @@ var MappingModeler = (function () {
             if (callback) callback();
         });
     };
-    /**
-     * @function
-     * @name socketMessage
-     * @memberof module:MappingColumnsGraph
-     * Displays progress or status messages from long-running tasks (CSV/DB processing).
-     * Accepts either a plain string or a progress object and formats a human-readable update.
-     * @param {string|Object} message - A text message or a progress payload ({processedRecords, tableTotalRecords, operation, ...}).
-     * @returns {void}
-     */
+
     self.socketMessage = function (message) {
         if (typeof message == "string") {
             UI.message(message);

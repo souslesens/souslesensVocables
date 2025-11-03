@@ -32,29 +32,6 @@ var KGbuilder = {
         return callback(null, data);
     },
 
-    /**
-     * @function
-     * @name generateMappingFileTriples
-     * @memberof module:TriplesMaker
-     * Builds RDF triples from tabular `data` according to `mappings`, generating/looking up subject URIs and labels.
-     * Handles class typing via one-model semantics (“ARDL-SPECIFIC”, “REFERENCE”, “NO-SUBCLASSES”), datatype/object properties, and typed literals.
-     * Reuses or populates `options.existingUrisMap`, using `KGgraphUri` as base for new URIs (optionally random with `options.generateIds`).
-     * Honors orphan policies (`options.skipLocalDictionaryOrphans`, `options.skipOneModelOrphans`) using `options.ARDLdictionary`, `options.oneModelReferenceDictionary`, and `options.oneModelSuperClasses`.
-     * @param {Array<Object>} mappings - Mapping rules ({subject, predicate, object}) to apply.
-     * @param {Array<Object>} data - Source rows (field names may be normalized to lowercase).
-     * @param {string} KGgraphUri - Base URI used to mint resources.
-     * @param {Object} [options] - Execution options and dictionaries.
-     * @param {Object<string,string>} [options.existingUrisMap] - Cache of subjectValue → subjectUri.
-     * @param {Object<string,string>} [options.ARDLdictionary] - Local value → label dictionary for ARDL-specific classes.
-     * @param {Object<string,Object<string,{classUri:string,classLabel:string}>>} [options.oneModelReferenceDictionary] - Reference lookups by class.
-     * @param {Object<string,string>} [options.oneModelSuperClasses] - Class → mode (“ARDL-SPECIFIC”|“REFERENCE”|“NO-SUBCLASSES”).
-     * @param {boolean} [options.skipLocalDictionaryOrphans] - Skip rows missing ARDL dictionary entries.
-     * @param {boolean} [options.skipOneModelOrphans] - Skip rows missing reference entries.
-     * @param {number} [options.generateIds] - Size for random ID minting when needed.
-     * @param {Function} callback - Node-style callback `(err, {triples:Array<Object>, urisMap:Object})`.
-     * @returns {void}
-     */
-
     generateMappingFileTriples(mappings, data, KGgraphUri, options, callback) {
         if (!options) options = {};
 
@@ -217,6 +194,7 @@ var KGbuilder = {
         //  console.log("missing TOTAL objects IDs " + JSON.stringify(missingTotalObjects));
         callback(null, { triples: triples, urisMap: options.existingUrisMap });
     },
+<<<<<<< HEAD
 
     /**
      * @function
@@ -237,6 +215,8 @@ var KGbuilder = {
      * @returns {void}
      */
 
+=======
+>>>>>>> parent of a33888d09 (Documentation KGbuilder)
     generateAdlSqlTriples: function (mappingFilePath, KGgraphUri, options, callback) {
         if (!options) options = {};
         options.sparqlServerUrl += "?timeout=600000&debug=on";
@@ -510,6 +490,7 @@ var KGbuilder = {
             },
         );
     },
+<<<<<<< HEAD
     /**
      * @function
      * @name getExistingLabelUriMap
@@ -522,6 +503,8 @@ var KGbuilder = {
      * @param {Function} callbackX - Node-style callback `(err, existingUrisMap)`.
      * @returns {void}
      */
+=======
+>>>>>>> parent of a33888d09 (Documentation KGbuilder)
 
     getExistingLabelUriMap: function (sparqlUrl, graphUri, type, callbackX) {
         var fetchLimit = 10000;
@@ -581,17 +564,6 @@ var KGbuilder = {
             },
         );
     },
-    /**
-     * @function
-     * @name buidlKG
-     * @memberof module:KGbuilder
-     * Builds a KG from mapping files run in series (only the first may `replaceGraph`); resolves `.json` paths and inserts triples into `graphUri` via `sparqlServerUrl` using `generateAdlSqlTriples`.
-     * @param {string[]} mappingFilePaths - Mapping file paths.
-     * @param {string} sparqlServerUrl - SPARQL endpoint; @param {string} graphUri - target graph; @param {boolean} replaceGraph - clear first run.
-     * @param {Object} dataSource - DB config; @param {*} _options - passthrough; @param {Function} callback - Node-style `(err)`.
-     * @returns {void}
-     */
-
     buidlKG: function (mappingFilePaths, sparqlServerUrl, graphUri, replaceGraph, dataSource, _options, callback) {
         var count = 0;
         async.eachSeries(

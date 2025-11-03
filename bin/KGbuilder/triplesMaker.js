@@ -9,22 +9,6 @@ const dataController = require("../dataController.");
 const path = require("path");
 const MappingParser = require("./mappingsParser.js");
 
-/**
-
-@module TriplesMaker
-
-@description Reads CSV/DB data in batches, builds RDF triples from mappings, and writes them to a SPARQL endpoint.
-
-Exposes: readAndProcessData, buildTriples, buildTriplesAsync, getColumnUri, getPropertyUri, getFormatedLiteral.
-
-Features: column-to-column edges, OWL restriction triples, per-row metadata, de-duplication, sample mode, progress via sockets.
-
-Utilities: stringToNumber, getRestrictionTriples, getMetaDataTriples, readCsv.
-
-Uses per-table random IDs and blank nodes for URI construction; supports data typing and date normalization.
-
-@requires KGbuilder_socket databaseModel csvCrawler async sqlServerProxy util KGbuilder_triplesWriter dataController path MappingParser
-*/
 var TriplesMaker = {
     batchSize: 500,
     mappingFilePredicate: "http://souslesens.org/KGcreator#mappingFile",
@@ -275,17 +259,6 @@ var TriplesMaker = {
             return callback(null, { sampleTriples: sampleTriples, totalTriplesCount: totalTriplesCount });
         }
     },
-    /**
-     * @function
-     * @name buildTriples
-     * @memberof module:TriplesMaker
-     * Builds RDF triples for a data batch using per-column mappings, deduplicating and adding row metadata.
-     * @param {Array<Object>} data - Array of rows to transform (stringified values, dates ISO-formatted).
-     * @param {Object} tableProcessingParams - Context incl. `tableColumnsMappings`, `uniqueTriplesMap`, `tableInfos`, `columnToColumnEdgesMap`, `jsFunctionsMap`, flags.
-     * @param {Object} options - Execution options (e.g., `currentBatchRowIndex`, `filterMappingIds`).
-     * @param {Function} callback - Node-style callback `(err, batchTriples)`; `batchTriples` is an array of N-Triples strings.
-     * @returns {void}
-     */
 
     buildTriples: function (data, tableProcessingParams, options, callback) {
         var columnMappings = tableProcessingParams.tableColumnsMappings;
@@ -600,17 +573,6 @@ var TriplesMaker = {
             return property;
         }
     },
-    /**
-     * @function
-     * @name getFormatedLiteral
-     * @memberof module:TriplesMaker
-     * Formats a cell value as a typed RDF literal based on `mapping.dataType` and optional `mapping.dateFormat`.
-     * Handles xsd:date/xsd:dateTime normalization (ISO, custom formats), and numeric coercions (int/float).
-     * Falls back to `xsd:string` when datatype is missing/unsupported; returns `null` for empty/invalid values.
-     * @param {Object} dataItem - Row object providing raw values (indexed by `mapping.o`).
-     * @param {{o:string,dataType?:string,dateFormat?:string}} mapping - Literal mapping descriptor.
-     * @returns {string|null} A typed literal like `"42"^^xsd:int` or `null` if not representable.
-     */
 
     getFormatedLiteral: function (dataItem, mapping) {
         var objectStr = null;
@@ -688,18 +650,6 @@ var TriplesMaker = {
         }
         return objectStr;
     },
-    /**
-     * @function
-     * @name getRestrictionTriples
-     * @memberof module:TriplesMaker
-     * Builds OWL restriction triples using a fresh blank node and links it via `rdfs:subClassOf`.
-     * @param {string} subjectUri - Class URI receiving the restriction (as subject of `rdfs:subClassOf`).
-     * @param {string} predicateUri - Property URI used in `owl:onProperty`.
-     * @param {string} objectUri - Filler class/individual for the restriction.
-     * @param {string} [restrictionType="http://www.w3.org/2002/07/owl#someValuesFrom"] - OWL restriction predicate.
-     * @param {Object} [options] - Reserved for future use.
-     * @returns {Array<{s:string,p:string,o:string}>} Triples describing the restriction and subclass axiom.
-     */
 
     getRestrictionTriples: function (subjectUri, predicateUri, objectUri, restrictionType, options) {
         if (!options) {
@@ -738,18 +688,6 @@ var TriplesMaker = {
 
         return triples;
     },
-    /**
-     * @function
-     * @name getMetaDataTriples
-     * @memberof module:TriplesMaker
-     * Produces metadata triples for a subject: creation timestamp and source table tag; supports custom predicates.
-     * @param {string} subjectUri - Subject URI to annotate.
-     * @param {string} table - Source table/file name stored via `mappingFilePredicate`.
-     * @param {Object} [options] - Optional settings.
-     * @param {Object<string,string>} [options.customMetaData] - Extra predicate→object pairs to append (objects must be SPARQL-ready).
-     * @returns {Array<string>} N-Triples strings (e.g., `<s> <p> "..."^^xsd:dateTime`).
-     */
-
     getMetaDataTriples: function (subjectUri, table, options) {
         var creator = "KGcreator";
         var dateTime = "'" + util.dateToRDFString(new Date(), true) + "'^^xsd:dateTime";
@@ -769,16 +707,6 @@ var TriplesMaker = {
 
         return metaDataTriples;
     },
-    /**
-     * @function
-     * @name readCsv
-     * @memberof module:TriplesMaker
-     * Reads a CSV file (via `csvCrawler.readCsv`) and returns headers and data rows, optionally limited by `maxLines`.
-     * @param {string} filePath - Absolute or relative path to the CSV file.
-     * @param {number} [maxLines] - Maximum number of lines to read (per csvCrawler semantics).
-     * @param {Function} callback - Node-style callback `(err, {headers:Array<string>, data:Array<Array<string>>})`.
-     * @returns {void}
-     */
 
     readCsv: function (filePath, maxLines, callback) {
         csvCrawler.readCsv({ filePath: filePath }, maxLines, function (err, result) {

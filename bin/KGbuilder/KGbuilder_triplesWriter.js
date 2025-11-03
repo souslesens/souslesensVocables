@@ -3,22 +3,6 @@ const httpProxy = require("../httpProxy..js");
 const async = require("async");
 const util = require("../util.");
 const KGbuilder_socket = require("./KGbuilder_socket.js");
-/**
-
-@module KGbuilder_triplesWriter
-
-@description Writes and manages RDF triples on a SPARQL endpoint (insert, delete, clear).
-
-Provides batched writes with prefixes (writeTriples, writeTriplesAsync).
-
-Supports graph clearing (clearGraph) and targeted deletes (deleteTriples).
-
-Performs incremental deletions by mapping table with progress (deleteKGBuilderTriples).
-
-Utility to render PREFIX blocks (getSparqlPrefixesStr).
-
-@requires ConfigManager httpProxy async util KGbuilder_socket
-*/
 
 const KGbuilder_triplesWriter = {
     sparqlPrefixes: {
@@ -92,18 +76,6 @@ const KGbuilder_triplesWriter = {
             },
         );
     },
-    /**
-     * @function
-     * @name writeTriplesAsync
-     * @memberof module:KGbuilder_triplesWriter
-     * Promise-based wrapper that writes RDF triples to a SPARQL graph.
-     * @param {Array<string|Object>} allTriples - Triples to insert (string "s p o." or objects consumed by `writeTriples`).
-     * @param {string} graphUri - Target named graph URI.
-     * @param {string} sparqlServerUrl - SPARQL endpoint URL.
-     * @param {Function} [callback] - Unused; kept for API symmetry.
-     * @returns {Promise<number>} Resolves to the count of written triples.
-     */
-
     writeTriplesAsync: async function (allTriples, graphUri, sparqlServerUrl, callback) {
         return new Promise((resolve, reject) => {
             KGbuilder_triplesWriter.writeTriples(allTriples, graphUri, sparqlServerUrl, function (err, writtenTriples) {
@@ -162,19 +134,6 @@ const KGbuilder_triplesWriter = {
             },
         );
     },
-    /**
-     * @function
-     * @name deleteKGBuilderTriples
-     * @memberof module:KGbuilder_triplesWriter
-     * Deletes triples from a SPARQL graph in batches, optionally scoped to a specific mapping table via `TriplesMaker.mappingFilePredicate`.
-     * Streams repeated DELETE operations until no results remain, emitting progress via `KGbuilder_socket`.
-     * @param {string} sparqlServerUrl - SPARQL endpoint URL.
-     * @param {string} graphUri - Named graph URI to delete from.
-     * @param {string} [table] - Table name to filter subjects; if omitted, deletes all mapped subjects.
-     * @param {Object} options - Execution options (e.g., `{clientSocketId}` for progress).
-     * @param {Function} callback - Node-style callback `(err, totalDeleted)`.
-     * @returns {void}
-     */
 
     deleteKGBuilderTriples: function (sparqlServerUrl, graphUri, table, options, callback) {
         const TriplesMaker = require("./triplesMaker");
@@ -235,17 +194,6 @@ const KGbuilder_triplesWriter = {
             },
         );
     },
-    /**
-     * @function
-     * @name deleteTriples
-     * @memberof module:KGbuilder_triplesWriter
-     * Deletes the provided triples from a named graph using a SPARQL `DELETE DATA` query with PREFIXes.
-     * @param {Array<{s:string,p:string,o:string}>} triples - Triples to remove (subject, predicate, object).
-     * @param {string} graphUri - Target named graph URI.
-     * @param {string} sparqlServerUrl - SPARQL endpoint URL.
-     * @param {Function} callback - Node-style callback `(err, deletedCount)`.
-     * @returns {void}
-     */
 
     deleteTriples: function (triples, graphUri, sparqlServerUrl, callback) {
         var insertTriplesStr = "";
@@ -274,13 +222,6 @@ const KGbuilder_triplesWriter = {
             return callback(null, totalTriples);
         });
     },
-    /**
-     * @function
-     * @name getSparqlPrefixesStr
-     * @memberof module:KGbuilder_triplesWriter
-     * Builds a single SPARQL PREFIX block string from `sparqlPrefixes` (e.g., "PREFIX rdf: <...> ").
-     * @returns {string} Concatenated PREFIX declarations suitable to prepend to SPARQL queries.
-     */
 
     getSparqlPrefixesStr: function () {
         var str = "";

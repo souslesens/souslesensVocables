@@ -67,9 +67,9 @@ The DELETE route `/api/v1/users/data/{id}` (replace `{id}` with a _UserData_
 ## Execute a SPARQL query stored in a _UserData_
 
 The GET route `/api/v1/users/data/{id}/exec` (replace `{id}` with a _UserData_) will execute the
-`data_content` on the SPARQL server. The _UserData_ `data_type` must be `SparqlQuery` and the
-`data_content` must be an object with a `query` key containing the query. For example:
+`data_content` on the SPARQL server. If you want to execute some query registred with KGquey, KGquery gives the link of the API to request with the id of the query registred. The _UserData_ `data_type` must be `SparqlQuery` and the
+`data_content` must be an object with a `sparqlQuery` object containing the query. For example:
 
 ```json
-{ "query": "SELECT * WHERE { ?s ?p ?o .} LIMIT 10" }
+{ "sparqlQuery": { "query": "SELECT * WHERE { ?s ?p ?o .} LIMIT 10" } }
 ```

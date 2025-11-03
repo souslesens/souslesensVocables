@@ -52,7 +52,7 @@ class BotEngineClass {
 
         $("#" + divId).load("./modules/uiWidgets/html/bot.html", () => {
             if (!options.divId) {
-                UI.openDialog("botPanel", {title: this.currentBot.title || "Bot Engine"});
+                UI.openDialog("botPanel", { title: this.currentBot.title || "Bot Engine" });
             }
             if (window.location.href.indexOf("localhost") < 0) {
                 $("#KGcreatorBot_exportToGraph").css("display", "none");
@@ -645,7 +645,7 @@ class BotEngineClass {
         $("#mainDialogDiv").html(
             "" + "<div><button onclick='  Lineage_whiteboard.lineageVisjsGraph.toSVG();'>toSVG</button> </div>" + "<div id='botGraphDiv' style='width:1200px;height:800px'></div>",
         );
-        UI.openDialog("mainDialogDiv", {title: "Bot Workflow Visualization"});
+        UI.openDialog("mainDialogDiv", { title: "Bot Workflow Visualization" });
         //  $("#mainDialogDiv").parent().css("z-index", 1);
         Lineage_whiteboard.drawNewGraph(visjsData, "botGraphDiv", {
             layoutHierarchical: { levelSeparation: 150, nodeSpacing: 50, direction: "LR" },

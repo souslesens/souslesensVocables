@@ -237,7 +237,6 @@ var KGbuilder = {
      * @returns {void}
      */
 
-
     generateAdlSqlTriples: function (mappingFilePath, KGgraphUri, options, callback) {
         if (!options) options = {};
         options.sparqlServerUrl += "?timeout=600000&debug=on";
@@ -511,18 +510,18 @@ var KGbuilder = {
             },
         );
     },
-/**
- * @function
- * @name getExistingLabelUriMap
- * @memberof module:KGbuilder
- * Retrieves existing subject URIs from a SPARQL graph, keyed by their original IDs (values of `originalKGproperty`).
- * Paginates with LIMIT/OFFSET until exhaustion, building a map: `{ originalId: subjectUri }`.
- * @param {string} sparqlUrl - SPARQL endpoint URL.
- * @param {string} graphUri - Named graph to scan for existing IDs.
- * @param {*} [type] - Unused parameter (reserved for future filtering).
- * @param {Function} callbackX - Node-style callback `(err, existingUrisMap)`.
- * @returns {void}
- */
+    /**
+     * @function
+     * @name getExistingLabelUriMap
+     * @memberof module:KGbuilder
+     * Retrieves existing subject URIs from a SPARQL graph, keyed by their original IDs (values of `originalKGproperty`).
+     * Paginates with LIMIT/OFFSET until exhaustion, building a map: `{ originalId: subjectUri }`.
+     * @param {string} sparqlUrl - SPARQL endpoint URL.
+     * @param {string} graphUri - Named graph to scan for existing IDs.
+     * @param {*} [type] - Unused parameter (reserved for future filtering).
+     * @param {Function} callbackX - Node-style callback `(err, existingUrisMap)`.
+     * @returns {void}
+     */
 
     getExistingLabelUriMap: function (sparqlUrl, graphUri, type, callbackX) {
         var fetchLimit = 10000;

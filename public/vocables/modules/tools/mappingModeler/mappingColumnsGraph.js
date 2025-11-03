@@ -171,7 +171,6 @@ var MappingColumnsGraph = (function () {
         };
     };
 
-
     /**
      * Draws a new resource node in the Vis.js graph.
      * Positions the node dynamically and links it with existing nodes if necessary.
@@ -464,9 +463,7 @@ var MappingColumnsGraph = (function () {
 
                 if (tableSourceType == "table" && !DataSourceManager.currentConfig.currentDataSource) {
                     // return alert("choose a data source first");
-                    MappingColumnsGraph.activeSourceFromNode(node,function(){
-
-                    })
+                    MappingColumnsGraph.activeSourceFromNode(node, function () {});
                 }
 
                 var obj = {
@@ -485,7 +482,7 @@ var MappingColumnsGraph = (function () {
         }
     };
 
-    self.activeSourceFromNode=function(node, callback){
+    self.activeSourceFromNode = function (node, callback) {
         var obj = {};
         obj.node = {};
         var dataSource = node.data.datasource;
@@ -522,7 +519,7 @@ var MappingColumnsGraph = (function () {
             });
         } else {
             obj.node.data.id = dataSource;
-            DataSourceManager.onDataSourcesJstreeSelect(undefined, obj,callback);
+            DataSourceManager.onDataSourcesJstreeSelect(undefined, obj, callback);
         }
     };
     /**
@@ -1302,9 +1299,8 @@ var MappingColumnsGraph = (function () {
         data.positions = {};
         var isHierarchical = visjsOptions.layout && visjsOptions.layout.hierarchical;
         var distinctEdges = {};
-        var dataSources={};
+        var dataSources = {};
         var dataTables = self.getDatasourceTablesFromVisjsGraph();
-
 
         if (data && data.nodes) {
             data.nodes.forEach(function (node) {
@@ -1316,14 +1312,13 @@ var MappingColumnsGraph = (function () {
             });
         }
 
-
-        data.nodes.forEach(function(node){    
-            if(node && node.data&& node.data.type=="Table"){
-                    if (Object.keys(dataSources).indexOf(node.id) !== -1) {
-                        node.data.datasource=dataSources[node.id]
-                    }
+        data.nodes.forEach(function (node) {
+            if (node && node.data && node.data.type == "Table") {
+                if (Object.keys(dataSources).indexOf(node.id) !== -1) {
+                    node.data.datasource = dataSources[node.id];
+                }
             }
-        })
+        });
         if (true || !isHierarchical) {
             var tables = {};
             var nodesMap = {};
@@ -1910,10 +1905,9 @@ var MappingColumnsGraph = (function () {
                                 label: baseLabel,
                                 data: node.data,
                             };
-                            MappingColumnsGraph.activeSourceFromNode(dialogNode,function () {
-                                MappingsDetails.openColumnTechDialog(dialogNode, function (){});
-                                })
-
+                            MappingColumnsGraph.activeSourceFromNode(dialogNode, function () {
+                                MappingsDetails.openColumnTechDialog(dialogNode, function () {});
+                            });
                         },
 
                         onRightClickFn: function (node, point, event) {
@@ -1931,7 +1925,7 @@ var MappingColumnsGraph = (function () {
             function (err) {},
         );
     };
-    
+
     /**
      * @function
      * @name getNodesOfType

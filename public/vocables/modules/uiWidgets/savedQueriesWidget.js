@@ -122,25 +122,31 @@ var SavedQueriesWidget = (function () {
         if (!targetSelect) {
             targetSelect = "SavedQueriesComponent_itemsSelect";
         }
-        var additionalContextMenu=[
-            {label:'Get API link',
-            action:function(node){
-                var link=self.getLinkSPARQLAPI(node.id);
-                common.copyTextToClipboard(link,function(err){
-                    if(err){
-                        return MainController.errorAlert(err);
-                    }
-                    alert("Link copied to clipboard: " + link);
-                });
-            }}
+        var additionalContextMenu = [
+            {
+                label: "Get API link",
+                action: function (node) {
+                    var link = self.getLinkSPARQLAPI(node.id);
+                    common.copyTextToClipboard(link, function (err) {
+                        if (err) {
+                            return MainController.errorAlert(err);
+                        }
+                        alert("Link copied to clipboard: " + link);
+                    });
+                },
+            },
         ];
-        UserDataWidget.showListDialog(null, { filter: { data_type: "sparqlQuery", data_tool: "KGquery", data_source: MainController.currentSource }, removeSaveDiv: true,additionalContextMenu:additionalContextMenu }, function (err, result) {
-            if (result.id) {
-                UserDataWidget.loadUserDatabyId(result.id, function (err, result) {
-                    self.loadItem(result.id);
-                });
-            }
-        });
+        UserDataWidget.showListDialog(
+            null,
+            { filter: { data_type: "sparqlQuery", data_tool: "KGquery", data_source: MainController.currentSource }, removeSaveDiv: true, additionalContextMenu: additionalContextMenu },
+            function (err, result) {
+                if (result.id) {
+                    UserDataWidget.loadUserDatabyId(result.id, function (err, result) {
+                        self.loadItem(result.id);
+                    });
+                }
+            },
+        );
     };
     self.loadItem = function (userDataId, options, callback) {
         UserDataWidget.loadUserDatabyId(userDataId, function (err, result) {
@@ -268,12 +274,12 @@ var SavedQueriesWidget = (function () {
                 .remove();
         });
     };
-    self.getLinkSPARQLAPI= function (userDataId) {
-        var url = Config.apiUrl + '/users/data/{id}/exec';
+    self.getLinkSPARQLAPI = function (userDataId) {
+        var url = Config.apiUrl + "/users/data/{id}/exec";
         var baseUrl = window.location.origin;
-        url = url.replace('{id}', userDataId);
+        url = url.replace("{id}", userDataId);
         return baseUrl + url;
-    }
+    };
     return self;
 })();
 

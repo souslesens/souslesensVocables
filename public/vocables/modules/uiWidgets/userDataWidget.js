@@ -264,7 +264,7 @@ var UserDataWidget = (function () {
                         },
                         contextMenu: function (node) {
                             var items = {};
-                            if(!node.data ){
+                            if (!node.data) {
                                 return items;
                             }
                             if (self.callbackFn) {
@@ -311,17 +311,17 @@ var UserDataWidget = (function () {
                                     });
                                 },
                             };
-                            if(self.options.additionalContextMenu && self.options.additionalContextMenu.length>0){
-                               self.options.additionalContextMenu.forEach(function(item){
-                                   if(item.action && item.label){
-                                        items[item.label]={
-                                            label:item.label,
-                                            action:function(_e){
+                            if (self.options.additionalContextMenu && self.options.additionalContextMenu.length > 0) {
+                                self.options.additionalContextMenu.forEach(function (item) {
+                                    if (item.action && item.label) {
+                                        items[item.label] = {
+                                            label: item.label,
+                                            action: function (_e) {
                                                 item.action(node);
-                                            }
-                                        }
+                                            },
+                                        };
                                     }
-                               })
+                                });
                             }
                             return items;
                         },

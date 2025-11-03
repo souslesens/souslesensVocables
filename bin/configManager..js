@@ -176,7 +176,7 @@ var ConfigManager = {
         const userManager = require(path.resolve("bin/user."));
         try {
             const userInfo = await userManager.getUser(req.user || null);
-            if(next){
+            if (next) {
                 return next(null, userInfo);
             }
             return userInfo;
@@ -192,7 +192,7 @@ var ConfigManager = {
             const userManager = require(path.resolve("bin/user."));
             const userInfo = await userManager.getUser(req.user || null);
             const allowedSources = await sourceModel.getUserSources(userInfo.user);
-            if(next){
+            if (next) {
                 return next(null, allowedSources);
             }
             return allowedSources;

@@ -31,7 +31,7 @@ module.exports = () => {
                 }
                 const config = readMainConfig();
                 const rdfDataModel = new RdfDataModel(config.sparql_server.url, config.sparql_server.user, config.sparql_server.password);
-                var userSources= await ConfigManager.getUserSources(req, res);
+                var userSources = await ConfigManager.getUserSources(req, res);
                 const user = await ConfigManager.getUser(req, res);
                 // check that query is confom before execute
                 const filteredQuery = await UserRequestFiltering.filterSparqlRequestAsync(query, userSources, user);

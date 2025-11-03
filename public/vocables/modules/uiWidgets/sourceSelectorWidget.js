@@ -61,7 +61,7 @@ var SourceSelectorWidget = (function () {
             }
 
             if (isDialog) {
-                UI.openDialog(targetDivId, {title: "Select Data Source"});
+                UI.openDialog(targetDivId, {title: "Source Selector"});
             }
             if (callback) {
                 callback();

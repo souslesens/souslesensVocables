@@ -91,11 +91,11 @@ var TriplesMaker = {
                                 sampleTriples = batchTriples;
                                 callbackEach();
                             } else {
-                                KGbuilder_socket.message(
+                                /*KGbuilder_socket.message(
                                     options.clientSocketId,
                                     " writing " + processedRecords + " records  from " + tableInfos.table + " : " + batchTriples.length + " triples",
                                     false,
-                                );
+                                );*/
 
                                 KGbuilder_triplesWriter.writeTriples(
                                     batchTriples,

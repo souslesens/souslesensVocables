@@ -802,6 +802,7 @@ var Sparql_OWL = (function () {
                 result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["class", "superClass", "superClassSubClass"], { source: sourceLabel });
 
                 var hierarchies = {};
+                
 
                 if (!options.descendants) {
                     classIds.forEach(function (id) {

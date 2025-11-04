@@ -5,44 +5,42 @@ const { RdfDataModel } = require("../../../../../../model/rdfData");
 const userManager = require("../../../../../../bin/user.");
 const UserRequestFiltering = require("../../../../../../bin/userRequestFiltering..js");
 const ConfigManager = require("../../../../../../bin/configManager.");
-
+const { Template } = require("@huggingface/jinja");
 module.exports = () => {
     GET = async (req, res, _next) => {
         try {
             const userInfo = await userManager.getUser(req.user);
             const userData = await userDataModel.find(req.params.id, userInfo.user);
-            if (userData.data_type === "sparqlQuery") {
-                let query;
-                if (userDataModel._mainConfig.userData.location === "file") {
-                    query = fs.readFileSync(userData.data_content);
-                } else {
-                    if (userData.data_content.sparqlQuery) {
-                        query = userData.data_content.sparqlQuery.query;
-                    } else {
-                        res.status(400).json({ message: "This userData is not a sparqlQuery" });
-                        return;
-                    }
-                }
-                // replace query params
-                if (req.query.params) {
-                    for (const [key, value] of Object.entries(JSON.parse(req.query.params))) {
-                        query = query.replace(`{{${key}}}`, value);
-                    }
-                }
-                const config = readMainConfig();
-                const rdfDataModel = new RdfDataModel(config.sparql_server.url, config.sparql_server.user, config.sparql_server.password);
-                var userSources = await ConfigManager.getUserSources(req, res);
-                const user = await ConfigManager.getUser(req, res);
-                // check that query is confom before execute
-                const filteredQuery = await UserRequestFiltering.filterSparqlRequestAsync(query, userSources, user);
-                if (filteredQuery.parsingError) {
-                    return processResponse(res, filteredQuery.parsingError, null);
-                }
-                const jsonResult = await rdfDataModel.execQuery(query);
-                res.status(200).json(jsonResult);
-            } else {
+
+            if (userData.data_type !== "sparqlQuery") {
                 res.status(400).json({ message: "This userData is not a sparqlQuery" });
+                return;
             }
+            if (!userData.data_content.sparqlQuery) {
+                res.status(400).json({ message: "Nothing on sparqlQuery" });
+                return;
+            }
+
+            const query = userData.data_content.sparqlQuery;
+
+            // replace query params
+            const template = new Template(query);
+            const renderedQuery = template.render(req.query);
+
+            // check that query is confom before execute
+            const userSources = await ConfigManager.getUserSources(req, res);
+            const user = await ConfigManager.getUser(req, res);
+            const filteredQuery = await UserRequestFiltering.filterSparqlRequestAsync(query, userSources, user);
+            if (filteredQuery.parsingError) {
+                return processResponse(res, filteredQuery.parsingError, null);
+            }
+
+            // exec query
+            const config = readMainConfig();
+            const rdfDataModel = new RdfDataModel(config.sparql_server.url, config.sparql_server.user, config.sparql_server.password);
+            const jsonResult = await rdfDataModel.execQuery(renderedQuery);
+            res.status(200).json(jsonResult);
+            return;
         } catch (error) {
             if (error.cause !== undefined) {
                 res.status(error.cause).json({ message: error.message });

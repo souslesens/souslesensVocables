@@ -6,6 +6,7 @@ const userManager = require("../../../../../../bin/user.");
 const UserRequestFiltering = require("../../../../../../bin/userRequestFiltering..js");
 const ConfigManager = require("../../../../../../bin/configManager.");
 const { Template } = require("@huggingface/jinja");
+const { RDF_FORMATS_MIMETYPES } = require("../../../../../../model/utils");
 module.exports = () => {
     GET = async (req, res, _next) => {
         try {
@@ -23,6 +24,13 @@ module.exports = () => {
 
             const query = userData.data_content.sparqlQuery;
 
+            // get format and remove it from query
+            let format = "json";
+            if ("format" in req.query) {
+                format = req.query.format;
+                delete req.query["format"];
+            }
+
             // replace query params
             const template = new Template(query);
             const renderedQuery = template.render(req.query);
@@ -38,8 +46,12 @@ module.exports = () => {
             // exec query
             const config = readMainConfig();
             const rdfDataModel = new RdfDataModel(config.sparql_server.url, config.sparql_server.user, config.sparql_server.password);
-            const jsonResult = await rdfDataModel.execQuery(renderedQuery);
-            res.status(200).json(jsonResult);
+            const result = await rdfDataModel.execQuery(renderedQuery, format);
+            if (format === "json") {
+                res.status(200).json(result);
+            } else {
+                res.status(200).set("content-Type", RDF_FORMATS_MIMETYPES[format]).send(result);
+            }
             return;
         } catch (error) {
             if (error.cause !== undefined) {
@@ -64,7 +76,7 @@ module.exports = () => {
             {
                 type: "string",
                 in: "query",
-                name: "params",
+                name: "format",
                 required: false,
             },
         ],

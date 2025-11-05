@@ -3461,7 +3461,9 @@ restrictionSource = Config.predicatesSource;
                 Lineage_whiteboard.addVisDataToGraph(visjsData);
                 self.lineageVisjsGraph.data.edges.add(visjsData.edges);
                 if (callback) {
-                    return callback(null, visjsData);
+                    // if(conceptType=="NamedIndividual"){
+                        // return
+                  callback(null, visjsData);
                 }
             }
 

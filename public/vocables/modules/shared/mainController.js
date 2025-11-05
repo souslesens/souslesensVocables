@@ -245,6 +245,17 @@ var MainController = (function () {
             }
         }
     };
+    self.onUserMenuSelect = function (value) {
+        if (value === "logout") {
+            authentication.logout();
+            return;
+        }
+        if (value === "usersettings") {
+            self.onToolSelect("UserSettings");
+            return;
+        }
+        console.error("unknown action");
+    };
     self.onToolSelect = function (toolId, event, callback) {
         if (event) {
             var clickedElement = event.target;

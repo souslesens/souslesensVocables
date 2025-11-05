@@ -941,8 +941,8 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         var newNodes = [];
         nodes.forEach(function (/** @type {{ data: { label: string; }; id: any; }} */ node) {
             var shape = self.defaultShape;
-            if(node.shape && node.shape!="star"){
-                shape=node.shape;
+            if (node.shape && node.shape != "star") {
+                shape = node.shape;
             }
             var size = self.defaultNodeSize;
             var ok = false;

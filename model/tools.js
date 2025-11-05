@@ -30,7 +30,7 @@ const NATIVE_TOOLS = [
     { name: "GraphManagement", controller: "GraphManagement", useSource: false, multiSources: false, toTools: {}, resetURLParamsDiv: "mainDialogDiv" },
     // { name: "Standardizer", controller: "Standardizer", useSource: true, multiSources: false, toTools: {} },
     //{ name: "TSF_Dictionary", controller: "Lineage_dictionary", useSource: false, multiSources: false, toTools: {} },
-    { name: "UserManagement", controller: "UserManagement", useSource: false, multiSources: false, toTools: {} },
+    { name: "UserSettings", controller: "UserSettings", useSource: false, multiSources: false, toTools: {} },
     { name: "Browse", controller: "Browse", useSource: false, multiSources: false, toTools: {} },
 
     { name: "Weaver", controller: "Weaver", useSource: true, multiSources: false, toTools: {}, displayImports: true },

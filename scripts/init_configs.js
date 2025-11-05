@@ -76,7 +76,7 @@ if (!profileModel.getOneProfile("admin")) {
     const profile_json = {
         label: "admin",
         theme: "Sea Breeze",
-        allowedTools: ["admin", "ConfigEditor", "GraphManagement", "lineage", "KGcreator", "KGquery", "OntoCreator", "SourcesManagement", "Standardizer", "UserManagement"],
+        allowedTools: ["admin", "ConfigEditor", "GraphManagement", "lineage", "KGcreator", "KGquery", "OntoCreator", "SourcesManagement", "Standardizer", "UserSettings"],
         sourcesAccessControl: {},
         schema_types: ["OWL", "SKOS"],
     };

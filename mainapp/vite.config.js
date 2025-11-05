@@ -14,7 +14,7 @@ export default defineConfig({
                 upload_graph_modal: path.resolve(__dirname, "src/Component/UploadGraphModal.tsx"),
                 kg_upload_app: path.resolve(__dirname, "src/kg-upload-app.tsx"),
                 graph_management: path.resolve(__dirname, "src/graph-management.tsx"),
-                user_management: path.resolve(__dirname, "src/user-management.tsx"),
+                user_settings: path.resolve(__dirname, "src/user-settings.tsx"),
                 mappingModeler_upload_app: path.resolve(__dirname, "src/mappingModeler-upload-app.tsx"),
                 metadata_dialog: path.resolve(__dirname, "src/Component/MetadataModal.tsx"),
             },
@@ -23,7 +23,7 @@ export default defineConfig({
             },
         },
         commonjsOptions: {
-            strictRequires: 'auto',
+            strictRequires: "auto",
         },
         minify: false,
         sourcemap: true,

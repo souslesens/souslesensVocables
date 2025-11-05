@@ -26,7 +26,7 @@ A JSON object following:
 }
 ```
 
-| clé               | description                                            | example                                             |
+| key               | description                                            | example                                             |
 | ----------------- | ------------------------------------------------------ | --------------------------------------------------- |
 | `data_type`       | The data type                                          | `SparqlQuery`                                       |
 | `data_label`      | A label describing the data                            | `Requête SPARQL numéro 1`                           |
@@ -66,10 +66,29 @@ The DELETE route `/api/v1/users/data/{id}` (replace `{id}` with a _UserData_
 
 ## Execute a SPARQL query stored in a _UserData_
 
-The GET route `/api/v1/users/data/{id}/exec` (replace `{id}` with a _UserData_) will execute the
-`data_content` on the SPARQL server. If you want to execute some query registred with KGquey, KGquery gives the link of the API to request with the id of the query registred. The _UserData_ `data_type` must be `SparqlQuery` and the
-`data_content` must be an object with a `sparqlQuery` object containing the query. For example:
+The GET route `/api/v1/users/data/{id}/exec` (replace `{id}` with a _UserData_)
+will execute the `data_content` on the SPARQL server.
+The _UserData_ `data_type` must be `sparqlQuery` and the `data_content` must be
+an object with a `sparqlQuery` object containing the query. For example:
 
 ```json
-{ "sparqlQuery": { "query": "SELECT * WHERE { ?s ?p ?o .} LIMIT 10" } }
+{ "sparqlQuery": "SELECT * WHERE { ?s ?p ?o .} LIMIT 10" }
+```
+
+If you want to execute some query registred with KGquey, KGquery gives the link
+of the API to request with the id of the query registred.
+
+## Execute a SPARQL query template with HTTP query parameters
+
+The `data_content` can contains variables with [jinja](https://jinja.palletsprojects.com/en/stable/)
+syntax.
+
+```jinja
+{ "sparqlQuery": "SELECT * WHERE { <{{ subject }}> ?p ?o .} LIMIT 10" }
+```
+
+Use HTTP query parameters to replace the variable with a value :
+
+```bash
+curl http://sls.example.org/api/v1/users/data/1/exec?subject=http://sls.example.org/toto
 ```

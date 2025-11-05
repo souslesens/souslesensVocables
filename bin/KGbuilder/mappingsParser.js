@@ -68,7 +68,7 @@ var MappingParser = {
             if (fromNodeData && fromNodeData.definedInColumn) {
                 fromNodeData = allColumnsMappings[fromNodeData.definedInColumn];
             }
-            if (fromNodeData && fromNodeData.type == "Column") {
+            if (fromNodeData && MappingParser.columnsMappingsObjects.includes(fromNodeData.type)) {
                 if (allColumnsMappings[edge.from].mappings.length == 0) {
                     var toNodeData = nodesMap[edge.to];
 

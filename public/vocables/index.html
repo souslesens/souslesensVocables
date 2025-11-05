@@ -482,9 +482,9 @@
                     </div>
                     <div class="w3-bar-item w3-right w3-dropdown-hover" style="margin-right: 10px" id="dropdownMenuLink">
                         <div class="w3-button slsv-right-top-bar-button" id="user-username">User</div>
-                        <div class="w3-dropdown-content Lineage_PopUpStyle PopUpBorder" style="max-height: 40px">
-                            <select class="Lineage_PopUpStyle" size="8" onclick="authentication.logout()" style="overflow: auto">
-                                <option>Logout</option>
+                        <div class="w3-dropdown-content Lineage_PopUpStyle PopUpBorder" style="max-height: 80px">
+                            <select id="user-menu-selector" class="Lineage_PopUpStyle" size="8" onclick="MainController.onUserMenuSelect($(this).val())" style="overflow: auto">
+                                <option value="logout">Logout</option>
                             </select>
                         </div>
                     </div>

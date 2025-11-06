@@ -70,8 +70,10 @@ var KGquery_controlPanel = (function () {
      */
     self.addQueryElementToCurrentSet = function (querySetDivId, color) {
         var queryElementDivId = "queryElementDiv_" + common.getRandomHexaId(5);
-        var html =
-            "<div  class='KGquery_pathDiv'  style='border:solid 2px " +
+        var sliderId = "slider_" + common.getRandomHexaId(5);
+        var html
+        if(KGquery.currentQuerySet.elements.length == 0){
+            html= "<div  class='KGquery_pathDiv'  style='border:solid 2px " +
             color +
             "' id='" +
             queryElementDivId +
@@ -82,9 +84,32 @@ var KGquery_controlPanel = (function () {
             "\") '></button>" +
             "&nbsp;<input type='checkbox' id='KGquery_setOptionalCBX'  onchange='KGquery_controlPanel.onSetOptionalChange($(this).val()," +
             querySetDivId +
-            "," +
-            queryElementDivId +
-            ")' >Optional";
+            "," ;
+
+        }else{
+            html =
+                "<div  class='KGquery_pathDiv'  style='border:solid 2px " +
+                color +
+                "' id='" +
+                queryElementDivId +
+                "'>" +
+                "&nbsp;<button class=' titleboxButtons KGquery_smallButton  deleteIcon' " +
+                "onclick='KGquery.removeQueryElement( \"" +
+                queryElementDivId +
+                "\") '></button>" +
+                "&nbsp;<label class='kgquery-optional-slider'>" +
+                "<input type='checkbox' id='" +
+                sliderId +
+                "' onchange='KGquery_controlPanel.onSetOptionalChange(this.checked, \"" +
+                querySetDivId +
+                "\", \"" +
+                queryElementDivId +
+                "\")' />" +
+                "<span class='kgquery-slider'></span>" +
+                "<span class='kgquery-slider-label'>Optional</span>" +
+                "</label>";
+        }
+
 
         ("</div>");
         $("#" + querySetDivId).append(html);

@@ -189,9 +189,9 @@ var KGquery_controlPanel = (function () {
     };
 
     self.onSetOptionalChange = function (state, querySetDivId, queryElementDivId) {
-        var querySet = KGquery.divsMap[querySetDivId.id];
+        var querySet = KGquery.divsMap[querySetDivId];
         querySet.elements.forEach(function (element) {
-            if (element.divId == queryElementDivId.id) element.isOptional = state == "on";
+            if (element.divId == queryElementDivId) element.isOptional = state == "on";
         });
     };
 

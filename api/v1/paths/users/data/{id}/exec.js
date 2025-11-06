@@ -30,6 +30,16 @@ module.exports = () => {
                 format = req.query.format;
                 delete req.query["format"];
             }
+            if ("limit" in req.query) {
+                if (!req.query.limit.toLowerCase().includes("limit")) {
+                    req.query.limit = "LIMIT " + req.query.limit;
+                }
+            }
+            if ("offset" in req.query) {
+                if (!req.query.offset.toLowerCase().includes("offset")) {
+                    req.query.offset = "OFFSET " + req.query.offset;
+                }
+            }
 
             // replace query params
             const template = new Template(query);

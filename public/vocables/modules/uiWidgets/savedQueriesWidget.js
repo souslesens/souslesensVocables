@@ -181,6 +181,11 @@ var SavedQueriesWidget = (function () {
                 slsvSource = self.slsvSource;
             }
 
+            if (data.sparqlQuery && data.sparqlQuery.query) {
+                data.sparqlQuery.query += "{{limit}} {{offset}}";
+                data.sparqlQuery = data.sparqlQuery.query;
+            }
+
             //UserDataWidget.currentTreeNode = null;
             UserDataWidget.showSaveDialog("sparqlQuery", data, null, { title: "Save KGquery Query" }, function (err, result) {
                 if (err) {

@@ -92,3 +92,21 @@ Use HTTP query parameters to replace the variable with a value :
 ```bash
 curl http://sls.example.org/api/v1/users/data/1/exec?subject=http://sls.example.org/toto
 ```
+
+Format parameter can be used to specify the format of the result. Default is `json`.
+
+```bash
+curl http://sls.example.org/api/v1/users/data/1/exec?subject=http://sls.example.org/toto&format=csv
+```
+
+KGQuery saved queries return a link to this API to request with the id of the query registred.
+For this kind of queries, limit and offset variables are added to the query automatically.
+
+Use HTTP query parameters to replace the variable with a value :
+
+```bash
+curl http://sls.example.org/api/v1/users/data/1/exec?subject=http://sls.example.org/toto&limit=10&offset=0
+```
+
+By default, limit is set to 20000 and offset to 0.
+

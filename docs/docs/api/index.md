@@ -11,3 +11,5 @@ For other routes, refer to the OpenAPI documentation available on the Swagger in
 :maxdepth: 3
 userdata.md
 ```
+
+For some routes, authentication is required. UserManagement profile tab gives a API key to use these routes as a Bearer token.

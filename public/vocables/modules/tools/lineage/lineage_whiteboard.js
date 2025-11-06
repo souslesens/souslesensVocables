@@ -2550,8 +2550,13 @@ var Lineage_whiteboard = (function () {
                             if (type.indexOf("Class") > -1) {
                                 rdfType = "Class";
                             }
+<<<<<<< HEAD
                             if(item.subjectType.value.indexOf("NamedIndividual")){
                                 rdfType="NamedIndividual";
+=======
+                            if (item.subjectType.value.indexOf("NamedIndividual")) {
+                                rdfType = "NamedIndividual";
+>>>>>>> jb/graphactionNameIndividuel
                             }
 
                             if (item.object.type == "bnode") {
@@ -3463,7 +3468,9 @@ restrictionSource = Config.predicatesSource;
                 Lineage_whiteboard.addVisDataToGraph(visjsData);
                 self.lineageVisjsGraph.data.edges.add(visjsData.edges);
                 if (callback) {
-                    return callback(null, visjsData);
+                    // if(conceptType=="NamedIndividual"){
+                    // return
+                    callback(null, visjsData);
                 }
             }
 

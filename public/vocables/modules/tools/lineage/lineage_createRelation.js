@@ -176,16 +176,14 @@ var Lineage_createRelation = (function () {
                         callbackSeries();
                     },
 
-
-                    
                     function (callbackSeries) {
-                        var sourceNodeId=self.sourceNode.id;
-                        var targetNodeId=self.targetNode.id;
-                        if(self.sourceNode.rdfType && self.sourceNode.rdfType== "NamedIndividual" && self.sourceNode.parentClass){
-                            sourceNodeId=self.sourceNode.parentClass
+                        var sourceNodeId = self.sourceNode.id;
+                        var targetNodeId = self.targetNode.id;
+                        if (self.sourceNode.rdfType && self.sourceNode.rdfType == "NamedIndividual" && self.sourceNode.parentClass) {
+                            sourceNodeId = self.sourceNode.parentClass;
                         }
-                        if(self.targetNode.rdfType && self.targetNode.rdfType== "NamedIndividual" && self.targetNode.parentClass){
-                            targetNodeId=self.targetNode.parentClass
+                        if (self.targetNode.rdfType && self.targetNode.rdfType == "NamedIndividual" && self.targetNode.parentClass) {
+                            targetNodeId = self.targetNode.parentClass;
                         }
                         OntologyModels.getAllowedPropertiesBetweenNodes(source, sourceNodeId, targetNodeId, { keepSuperClasses: true }, function (err, result) {
                             if (err) {
@@ -219,17 +217,17 @@ var Lineage_createRelation = (function () {
 
                                 var html = "Ancestors<br>";
                                 var str;
-                                var sourceNameIndividual =false;
-                                var sourceNameIndividual1 =false;
-                                if(self.sourceNode.rdfType && self.sourceNode.rdfType== "NamedIndividual" && self.sourceNode.parentClass){
+                                var sourceNameIndividual = false;
+                                var sourceNameIndividual1 = false;
+                                if (self.sourceNode.rdfType && self.sourceNode.rdfType == "NamedIndividual" && self.sourceNode.parentClass) {
                                     str = "<b>";
-                                    str +=self.sourceNode.label; 
+                                    str += self.sourceNode.label;
                                     str += "</b>";
-                                    sourceNameIndividual=true;
-                                }else{
-                                    str=""
+                                    sourceNameIndividual = true;
+                                } else {
+                                    str = "";
                                 }
-                                 //"<b>" + self.sourceNode.label + "</b>";
+                                //"<b>" + self.sourceNode.label + "</b>";
                                 result.nodes.startNode.forEach(function (item, index) {
                                     if (index == 0 && !sourceNameIndividual) {
                                         str += "<b>";
@@ -248,14 +246,14 @@ var Lineage_createRelation = (function () {
                                 html += str;
                                 html += "<br>";
 
-                                var str ; //"<b>" + self.targetNode.label + "</b>";
-                                if(self.targetNode.rdfType && self.targetNode.rdfType== "NamedIndividual" && self.targetNode.parentClass){
+                                var str; //"<b>" + self.targetNode.label + "</b>";
+                                if (self.targetNode.rdfType && self.targetNode.rdfType == "NamedIndividual" && self.targetNode.parentClass) {
                                     str = "<b>";
-                                    str +=self.targetNode.label;
+                                    str += self.targetNode.label;
                                     str += "</b>";
-                                    sourceNameIndividual1 =true;
-                                }else{
-                                    str="";
+                                    sourceNameIndividual1 = true;
+                                } else {
+                                    str = "";
                                 }
                                 result.nodes.endNode.forEach(function (item, index) {
                                     if (index == 0 && !sourceNameIndividual1) {

@@ -2550,8 +2550,8 @@ var Lineage_whiteboard = (function () {
                             if (type.indexOf("Class") > -1) {
                                 rdfType = "Class";
                             }
-                            if(item.subjectType.value.indexOf("NamedIndividual")){
-                                rdfType="NamedIndividual";
+                            if (item.subjectType.value.indexOf("NamedIndividual")) {
+                                rdfType = "NamedIndividual";
                             }
 
                             if (item.object.type == "bnode") {

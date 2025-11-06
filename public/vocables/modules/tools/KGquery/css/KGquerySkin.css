@@ -76,3 +76,85 @@
     margin-top: 20px;
     width: 90%;
 }
+
+/* ========================================
+   Slider pour Optional - Variables CSS
+   Modifiez ces variables pour personnaliser facilement
+   ======================================== */
+.kgquery-optional-slider {
+    --slider-width: 44px; /* Largeur du slider */
+    --slider-height: 22px; /* Hauteur du slider */
+    --slider-bg-off: #ccc; /* Couleur fond OFF */
+    --slider-bg-on: currentColor; /* Couleur fond ON - hérite du parent */
+    --slider-toggle-size: 18px; /* Taille du bouton rond */
+    --slider-toggle-color: white; /* Couleur du bouton */
+    --slider-border-radius: 22px; /* Arrondi du slider */
+    --slider-transition: 0.3s; /* Vitesse d'animation */
+    --label-margin: 8px; /* Espace entre slider et texte */
+    --label-font-size: 13px; /* Taille du texte */
+
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+}
+
+/* Cache la checkbox native */
+.kgquery-optional-slider input[type="checkbox"] {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    position: absolute;
+}
+
+/* Le slider (fond) */
+.kgquery-slider {
+    position: relative;
+    display: inline-block;
+    width: var(--slider-width);
+    height: var(--slider-height);
+    background-color: var(--slider-bg-off);
+    border-radius: var(--slider-border-radius);
+    transition: background-color var(--slider-transition);
+}
+
+/* Le bouton rond qui glisse */
+.kgquery-slider:before {
+    content: "";
+    position: absolute;
+    height: var(--slider-toggle-size);
+    width: var(--slider-toggle-size);
+    left: 2px;
+    bottom: 2px;
+    background-color: var(--slider-toggle-color);
+    border-radius: 50%;
+    transition: transform var(--slider-transition);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* État activé (checked) */
+.kgquery-optional-slider input:checked + .kgquery-slider {
+    background-color: var(--slider-bg-on);
+}
+
+.kgquery-optional-slider input:checked + .kgquery-slider:before {
+    transform: translateX(calc(var(--slider-width) - var(--slider-toggle-size) - 4px));
+}
+
+/* Effet hover */
+.kgquery-optional-slider:hover .kgquery-slider {
+    opacity: 0.9;
+}
+
+/* Effet focus (accessibilité) */
+.kgquery-optional-slider input:focus + .kgquery-slider {
+    box-shadow: 0 0 4px currentColor;
+}
+
+/* Le label texte "Optional" */
+.kgquery-slider-label {
+    margin-left: var(--label-margin);
+    font-size: var(--label-font-size);
+    vertical-align: middle;
+}

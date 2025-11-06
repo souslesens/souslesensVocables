@@ -89,25 +89,26 @@ var KGquery_controlPanel = (function () {
         } else {
             html =
                 "<div  class='KGquery_pathDiv'  style='border:solid 2px " +
-                color +
-                "' id='" +
-                queryElementDivId +
-                "'>" +
-                "&nbsp;<button class=' titleboxButtons KGquery_smallButton  deleteIcon' " +
-                "onclick='KGquery.removeQueryElement( \"" +
-                queryElementDivId +
-                "\") '></button>" +
-                "&nbsp;<label class='kgquery-optional-slider'>" +
-                "<input type='checkbox' id='" +
-                sliderId +
-                "' onchange='KGquery_controlPanel.onSetOptionalChange(this.checked, \"" +
-                querySetDivId +
-                '", "' +
-                queryElementDivId +
-                "\")' />" +
-                "<span class='kgquery-slider'></span>" +
-                "<span class='kgquery-slider-label'>Optional</span>" +
-                "</label>";
+            color +
+            "' id='" +
+            queryElementDivId +
+            "'>" +
+            "&nbsp;<button class=' titleboxButtons KGquery_smallButton  deleteIcon' " +
+            "onclick='KGquery.removeQueryElement( \"" +
+            queryElementDivId +
+            "\") '></button>" +
+            "&nbsp;<label class='kgquery-optional-slider'>" +
+            "<input type='checkbox' id='" +
+            sliderId +
+            "' onchange='KGquery_controlPanel.onSetOptionalChange(this.checked, \"" +
+            querySetDivId +
+            "\", \"" +
+            queryElementDivId +
+            "\")' />" +
+            "<span class='kgquery-slider'></span>" +
+            "<span class='kgquery-slider-label'>Optional</span>" +
+            "</label>";
+
         }
 
         ("</div>");
@@ -191,7 +192,7 @@ var KGquery_controlPanel = (function () {
     self.onSetOptionalChange = function (state, querySetDivId, queryElementDivId) {
         var querySet = KGquery.divsMap[querySetDivId];
         querySet.elements.forEach(function (element) {
-            if (element.divId == queryElementDivId) element.isOptional = state == "on";
+            if (element.divId == queryElementDivId) element.isOptional = state ;
         });
     };
 

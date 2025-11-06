@@ -252,10 +252,20 @@ var NodeInfosWidget = (function () {
                     });
                 },
                 function (callbackSeries) {
-                    if (types.indexOf("http://www.w3.org/2002/07/owl#Class") < 0) {
+                    if (types.indexOf("http://www.w3.org/2002/07/owl#Class") < 0 && types.indexOf("http://www.w3.org/2002/07/owl#NamedIndividual") < 0) {
                         return callbackSeries();
                     }
-                    self.showClassesBreakDown(self.currentNodeRealSource, nodeId, "nodeInfos_classHierarchyDiv", function (err) {
+
+                    var sourceNodeId = nodeId;
+                    var nameindividual = "http://www.w3.org/2002/07/owl#NamedIndividual";
+                    if (types.includes(nameindividual)) {
+                        var position = types.indexOf(nameindividual);
+                        if (position !== -1) {
+                            types.splice(position, 1);
+                        }
+                        sourceNodeId = types;
+                    }
+                    self.showClassesBreakDown(self.currentNodeRealSource, sourceNodeId, "nodeInfos_classHierarchyDiv", function (err) {
                         callbackSeries(err);
                     });
                 },

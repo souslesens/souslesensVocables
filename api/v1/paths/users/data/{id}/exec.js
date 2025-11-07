@@ -31,27 +31,26 @@ module.exports = () => {
                 delete req.query["format"];
             }
             // query limit and offset gestion if they are in the query
-            if(query.indexOf('{{limit}}')>0){
+            if (query.indexOf("{{limit}}") > 0) {
                 if ("limit" in req.query) {
                     if (!req.query.limit.toLowerCase().includes("limit")) {
                         req.query.limit = "LIMIT " + req.query.limit;
                     }
-                }else{
-                    req.query.limit="LIMIT 10000";
+                } else {
+                    req.query.limit = "LIMIT 10000";
                 }
             }
 
-            if(query.indexOf('{{offset}}')>0){
+            if (query.indexOf("{{offset}}") > 0) {
                 if ("offset" in req.query) {
                     if (!req.query.offset.toLowerCase().includes("offset")) {
                         req.query.offset = "OFFSET " + req.query.offset;
                     }
-                }else{
-                    req.query.offset="OFFSET 0";
+                } else {
+                    req.query.offset = "OFFSET 0";
                 }
             }
-            
-         
+
             // replace query params
             const template = new Template(query);
             const renderedQuery = template.render(req.query);

@@ -3131,7 +3131,6 @@ restrictionSource = Config.predicatesSource;
             html += '    <span class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.listClusterContent();"> list cluster content</span>';
             html += '    <span class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.listClusterToClipboard();"> list to clipboard</span>';
         } else if (node.from && node.data.bNodeId) {
-            
             html += '    <span class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.showPropertyInfos();"> restriction Infos</span>';
             html += '    <span class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.showRestrictionPropertyNodeInfos();"> property Infos</span>';
             if (Lineage_sources.isSourceEditableForUser(node.data.source)) {
@@ -3188,7 +3187,7 @@ restrictionSource = Config.predicatesSource;
         }
         if (node && !node.from) {
             html += '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.showHierarchicalView();">Horizontal view </span>';
-            html += '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.showVerticalView();">Vertical view </span>'
+            html += '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.showVerticalView();">Vertical view </span>';
             html += '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.listAllNodeRelations();">List All relations </span>';
         }
 
@@ -4003,15 +4002,15 @@ self.zoomGraphOnNode(node.data[0].id, false);
             if (!Lineage_whiteboard.currentGraphNode.id) {
                 return;
             }
-            var horizontalView=false;
-            Lineage_nodeCentricGraph.draw(Lineage_whiteboard.currentGraphNode.id,horizontalView);
+            var horizontalView = false;
+            Lineage_nodeCentricGraph.draw(Lineage_whiteboard.currentGraphNode.id, horizontalView);
         },
         showVerticalView: function () {
             if (!Lineage_whiteboard.currentGraphNode.id) {
                 return;
             }
-            var verticalView=true;
-            Lineage_nodeCentricGraph.draw(Lineage_whiteboard.currentGraphNode.id,verticalView);
+            var verticalView = true;
+            Lineage_nodeCentricGraph.draw(Lineage_whiteboard.currentGraphNode.id, verticalView);
         },
         listAllNodeRelations: function () {
             if (!Lineage_whiteboard.currentGraphNode.id) {

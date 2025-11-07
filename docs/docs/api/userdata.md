@@ -108,5 +108,5 @@ Use HTTP query parameters to replace the variable with a value :
 curl http://sls.example.org/api/v1/users/data/1/exec?subject=http://sls.example.org/toto&limit=10&offset=0
 ```
 
-By default, limit is set to 20000 and offset to 0.
+By default, limit is set to 10000 and offset to 0.
 

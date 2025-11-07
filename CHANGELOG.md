@@ -2,6 +2,33 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.18.0](https://github.com/souslesens/souslesensVocables/compare/2.17.0...2.18.0) (2025-11-07)
+
+> [!IMPORTANT]
+> Updating to 2.18.0 require a data migration. Execute the following script after upgrade.
+
+```bash
+npm run migrate
+```
+
+
+### ⚠ BREAKING CHANGES
+
+* **api:** add format parameters to the exec query
+
+### Features
+
+* add UserSettings link on user-menu ([5f9b4a2](https://github.com/souslesens/souslesensVocables/commit/5f9b4a2962ec096d8f30af41a706b91f3b771b0f))
+* **api:** add format parameters to the exec query ([43acd7c](https://github.com/souslesens/souslesensVocables/commit/43acd7cec3410369caa4db3614694f18b4484a22))
+* rename UserManagement to UserSettings ([4e880bb](https://github.com/souslesens/souslesensVocables/commit/4e880bbc95b1b28d79132ef78cd8b145ef020370))
+
+
+### Bug Fixes
+
+* **auth:** auth0: fetch groups only if useAuth0Roles ([f29b997](https://github.com/souslesens/souslesensVocables/commit/f29b99745332da78fb23f6150b3acf7995eb3f1e))
+* **auth:** auth0: fix logout url ([2ac14d1](https://github.com/souslesens/souslesensVocables/commit/2ac14d1d91395504c2adffa200ebec75317fe05f))
+* **model/databases:** batchSelectGenerator take a connection, not a databaseId ([5eca546](https://github.com/souslesens/souslesensVocables/commit/5eca5460ead805efe00fba436f0a014a2e33c2da))
+
 ## [2.17.0](https://github.com/souslesens/souslesensVocables/compare/2.16.0...2.17.0) (2025-10-28)
 
 > [!IMPORTANT]

@@ -82,11 +82,11 @@ var Lineage_nodeCentricGraph = (function () {
         return { nodes: newNodes, edges: newEdges };
     };
 
-    self.draw = function (rootNodeId, options) {
+    self.draw = function (rootNodeId, updown) {
         var visjsData = self.getHierarchicalViewVisjsdata(rootNodeId);
         var directionGraph;
         var forceDirectionGraph;
-        if (options) {
+        if (updown) {
             directionGraph = "UD";
             forceDirectionGraph = "vertical";
         } else {

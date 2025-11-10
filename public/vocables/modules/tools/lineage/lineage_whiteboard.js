@@ -2550,6 +2550,9 @@ var Lineage_whiteboard = (function () {
                             if (type.indexOf("Class") > -1) {
                                 rdfType = "Class";
                             }
+                            if (item.subjectType.value.indexOf("NamedIndividual")) {
+                                rdfType = "NamedIndividual";
+                            }
 
                             if (item.object.type == "bnode") {
                                 label = "";
@@ -3108,8 +3111,7 @@ restrictionSource = Config.predicatesSource;
         }
         graphContext.clickOptions = event;
         var html = "";
-
-        if ((node && !node.from && node.data && node.data.type == "http://www.w3.org/2002/07/owl#ObjectProperty") || node.data.type == "DatatypeProperty") {
+        if (node && ((!node.from && node.data && node.data.type == "http://www.w3.org/2002/07/owl#ObjectProperty") || node.data.type == "DatatypeProperty")) {
             html =
                 '    <span class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.showNodeInfos();"> Node infos</span>' +
                 '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.removeFromGraph();">Remove from graph</span>';
@@ -3184,7 +3186,8 @@ restrictionSource = Config.predicatesSource;
             }
         }
         if (node && !node.from) {
-            html += '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.showHierarchicalView();">Hierarchical view </span>';
+            html += '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.showHierarchicalView();">Horizontal view </span>';
+            html += '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.showVerticalView();">Vertical view </span>';
             html += '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.listAllNodeRelations();">List All relations </span>';
         }
 
@@ -3461,7 +3464,9 @@ restrictionSource = Config.predicatesSource;
                 Lineage_whiteboard.addVisDataToGraph(visjsData);
                 self.lineageVisjsGraph.data.edges.add(visjsData.edges);
                 if (callback) {
-                    return callback(null, visjsData);
+                    // if(conceptType=="NamedIndividual"){
+                    // return
+                    callback(null, visjsData);
                 }
             }
 
@@ -3997,7 +4002,15 @@ self.zoomGraphOnNode(node.data[0].id, false);
             if (!Lineage_whiteboard.currentGraphNode.id) {
                 return;
             }
-            Lineage_nodeCentricGraph.draw(Lineage_whiteboard.currentGraphNode.id);
+            var horizontalView = false;
+            Lineage_nodeCentricGraph.draw(Lineage_whiteboard.currentGraphNode.id, horizontalView);
+        },
+        showVerticalView: function () {
+            if (!Lineage_whiteboard.currentGraphNode.id) {
+                return;
+            }
+            var verticalView = true;
+            Lineage_nodeCentricGraph.draw(Lineage_whiteboard.currentGraphNode.id, verticalView);
         },
         listAllNodeRelations: function () {
             if (!Lineage_whiteboard.currentGraphNode.id) {

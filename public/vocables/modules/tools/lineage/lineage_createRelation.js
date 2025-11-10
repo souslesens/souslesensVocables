@@ -177,7 +177,15 @@ var Lineage_createRelation = (function () {
                     },
 
                     function (callbackSeries) {
-                        OntologyModels.getAllowedPropertiesBetweenNodes(source, self.sourceNode.id, self.targetNode.id, { keepSuperClasses: true }, function (err, result) {
+                        var sourceNodeId = self.sourceNode.id;
+                        var targetNodeId = self.targetNode.id;
+                        if (self.sourceNode.rdfType && self.sourceNode.rdfType == "NamedIndividual" && self.sourceNode.parentClass) {
+                            sourceNodeId = self.sourceNode.parentClass;
+                        }
+                        if (self.targetNode.rdfType && self.targetNode.rdfType == "NamedIndividual" && self.targetNode.parentClass) {
+                            targetNodeId = self.targetNode.parentClass;
+                        }
+                        OntologyModels.getAllowedPropertiesBetweenNodes(source, sourceNodeId, targetNodeId, { keepSuperClasses: true }, function (err, result) {
                             if (err) {
                                 return callbackSeries(err);
                             }
@@ -208,9 +216,20 @@ var Lineage_createRelation = (function () {
                                 authorizedProps = result.constraints;
 
                                 var html = "Ancestors<br>";
-                                var str = ""; //"<b>" + self.sourceNode.label + "</b>";
+                                var str;
+                                var sourceNameIndividual = false;
+                                var sourceNameIndividual1 = false;
+                                if (self.sourceNode.rdfType && self.sourceNode.rdfType == "NamedIndividual" && self.sourceNode.parentClass) {
+                                    str = "<b>";
+                                    str += self.sourceNode.label;
+                                    str += "</b>";
+                                    sourceNameIndividual = true;
+                                } else {
+                                    str = "";
+                                }
+                                //"<b>" + self.sourceNode.label + "</b>";
                                 result.nodes.startNode.forEach(function (item, index) {
-                                    if (index == 0) {
+                                    if (index == 0 && !sourceNameIndividual) {
                                         str += "<b>";
                                     } else {
                                         str += "->";
@@ -220,16 +239,24 @@ var Lineage_createRelation = (function () {
                                     } else {
                                         str += Sparql_common.getLabelFromURI(item);
                                     }
-                                    if (index == 0) {
+                                    if (index == 0 && !sourceNameIndividual) {
                                         str += "</b>";
                                     }
                                 });
                                 html += str;
                                 html += "<br>";
 
-                                var str = ""; //"<b>" + self.targetNode.label + "</b>";
+                                var str; //"<b>" + self.targetNode.label + "</b>";
+                                if (self.targetNode.rdfType && self.targetNode.rdfType == "NamedIndividual" && self.targetNode.parentClass) {
+                                    str = "<b>";
+                                    str += self.targetNode.label;
+                                    str += "</b>";
+                                    sourceNameIndividual1 = true;
+                                } else {
+                                    str = "";
+                                }
                                 result.nodes.endNode.forEach(function (item, index) {
-                                    if (index == 0) {
+                                    if (index == 0 && !sourceNameIndividual1) {
                                         str += "<b>";
                                     } else {
                                         str += "->";
@@ -239,7 +266,7 @@ var Lineage_createRelation = (function () {
                                     } else {
                                         str += Sparql_common.getLabelFromURI(item);
                                     }
-                                    if (index == 0) {
+                                    if (index == 0 && !sourceNameIndividual1) {
                                         str += "</b>";
                                     }
                                 });

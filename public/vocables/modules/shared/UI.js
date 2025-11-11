@@ -110,17 +110,27 @@ var UI = (function () {
             const tools = Config.tools_available || [];
             tools.forEach((tool) => {
                 if (tool in Config.userTools) {
-                    let rowLogo = document.createElement("div");
-                    rowLogo.setAttribute("class", `${tool}-logo`);
-                    let rowText = document.createElement("div");
-                    rowText.appendChild(document.createTextNode(tool));
-                    rowText.setAttribute("value", tool);
+                    if (tool === "UserSettings") {
+                        // UserSettings is not on the toolmenu, but on the usermenu
+                        const selector = document.getElementById("user-menu-selector");
+                        console.log("selector", selector);
+                        const elem = document.createElement("option");
+                        elem.setAttribute("value", "usersettings");
+                        elem.append("UserSettings");
+                        selector.appendChild(elem);
+                    } else {
+                        let rowLogo = document.createElement("div");
+                        rowLogo.setAttribute("class", `${tool}-logo`);
+                        let rowText = document.createElement("div");
+                        rowText.appendChild(document.createTextNode(tool));
+                        rowText.setAttribute("value", tool);
 
-                    let row = document.createElement("div");
-                    row.setAttribute("class", "Lineage_PopUpStyleDiv");
-                    row.appendChild(rowLogo);
-                    row.appendChild(rowText);
-                    selector.appendChild(row);
+                        let row = document.createElement("div");
+                        row.setAttribute("class", "Lineage_PopUpStyleDiv");
+                        row.appendChild(rowLogo);
+                        row.appendChild(rowText);
+                        selector.appendChild(row);
+                    }
                 }
             });
         }
@@ -442,7 +452,33 @@ var UI = (function () {
             selectList.height(optionHeight * maxSize);
         }
     };
-
+    self.setDialogTitle = function (div, title) {
+        // accept "" title
+        if (!div || title === undefined || title === null) {
+            return;
+        }
+        if (!div.startsWith("#")) {
+            div = "#" + div;
+        }
+        $(div).dialog("option", "title", title);
+    };
+    self.openDialog = function (divId, options) {
+        if (!divId) {
+            return;
+        }
+        if (!options) {
+            options = {};
+        }
+        if (!divId.startsWith("#")) {
+            divId = "#" + divId;
+        }
+        $(divId).dialog("open");
+        var title = "";
+        if (options.title) {
+            title = options.title;
+        }
+        self.setDialogTitle(divId, title);
+    };
     return self;
 })();
 export default UI;

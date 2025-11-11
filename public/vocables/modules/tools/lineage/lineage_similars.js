@@ -46,7 +46,7 @@ var Lineage_similars = (function () {
         });
         return;
 
-        $("#smallDialogDiv").dialog("option", "title", "Similars");
+        UI.setDialogTitle("#smallDialogDiv", "Similars");
         self.parentClassJstreeLoaded = false;
         $("#smallDialogDiv").load("modules/tools/lineage/html/lineageSimilarsDialog.html", function () {
             $("#smallDialogDiv").dialog("open");
@@ -566,10 +566,9 @@ var Lineage_similars = (function () {
     };
     self.save = {
         showDialog: function () {
-            $("#smallDialogDiv").dialog("option", "title", "Save Similars");
             self.parentClassJstreeLoaded = false;
             $("#smallDialogDiv").load("modules/tools/lineage/html/lineageSimilarsSaveDialog.html", function () {
-                $("#smallDialogDiv").dialog("open");
+                UI.openDialog("smallDialogDiv", { title: "Save Similars" });
                 self.save.drawWhiteboardSimilarsTaxonomy(function () {});
             });
         },

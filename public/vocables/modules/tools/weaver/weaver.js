@@ -263,7 +263,7 @@ var Weaver = (function () {
         items.axioms = {
             label: "Node axioms",
             action: function (e) {
-                $("#mainDialogDiv").dialog("option", "title", "Axioms of resource " + SearchWidget.currentTreeNode.data.label);
+                UI.setDialogTitle("#mainDialogDiv", "Axioms of resource " + SearchWidget.currentTreeNode.data.label);
 
                 NodeInfosAxioms.init(SearchWidget.currentTreeNode.data.source, SearchWidget.currentTreeNode, "mainDialogDiv");
             },

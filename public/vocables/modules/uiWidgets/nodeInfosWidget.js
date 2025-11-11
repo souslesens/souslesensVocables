@@ -128,7 +128,7 @@ var NodeInfosWidget = (function () {
                     if (ui.newPanel.selector == "#nodeInfosWidget_AxiomsTabDiv") {
                         var source = self.currentSource;
                         // source = Lineage_sources.mainSource;
-                        $("#smallDialogDiv").dialog("option", "title", "Axioms of resource " + self.currentNode.data.label);
+                        UI.setDialogTitle("#smallDialogDiv", "Axioms of resource " + self.currentNode.data.label);
                         NodeInfosAxioms.init(source, self.currentNode, "smallDialogDiv");
                     }
                     if (ui.newPanel.selector == "#nodeInfosWidget_relationsDiv") {
@@ -153,7 +153,6 @@ var NodeInfosWidget = (function () {
             });
         } else {
             $("#" + divId).load("modules/uiWidgets/html/nodeInfosWidget.html", function (err) {
-                $("#" + divId).dialog("option", "title", " Node infos :");
                 $("#addPredicateButton").remove();
                 $("#deleteButton").remove();
                 $("#" + divId).dialog("close");
@@ -166,7 +165,7 @@ var NodeInfosWidget = (function () {
                         $("#deleteButton").remove();
                     },
                 });
-                $("#" + divId).dialog("open");
+                UI.openDialog(divId, { title: " Node infos :" });
                 $(".nodeInfosWidget_tabDiv").css("margin", "0px");
                 $("[aria-selected='true']").addClass("nodesInfos-selectedTab");
                 callback();
@@ -253,10 +252,20 @@ var NodeInfosWidget = (function () {
                     });
                 },
                 function (callbackSeries) {
-                    if (types.indexOf("http://www.w3.org/2002/07/owl#Class") < 0) {
+                    if (types.indexOf("http://www.w3.org/2002/07/owl#Class") < 0 && types.indexOf("http://www.w3.org/2002/07/owl#NamedIndividual") < 0) {
                         return callbackSeries();
                     }
-                    self.showClassesBreakDown(self.currentNodeRealSource, nodeId, "nodeInfos_classHierarchyDiv", function (err) {
+
+                    var sourceNodeId = nodeId;
+                    var nameindividual = "http://www.w3.org/2002/07/owl#NamedIndividual";
+                    if (types.includes(nameindividual)) {
+                        var position = types.indexOf(nameindividual);
+                        if (position !== -1) {
+                            types.splice(position, 1);
+                        }
+                        sourceNodeId = types;
+                    }
+                    self.showClassesBreakDown(self.currentNodeRealSource, sourceNodeId, "nodeInfos_classHierarchyDiv", function (err) {
                         callbackSeries(err);
                     });
                 },
@@ -1568,14 +1577,13 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
     self.showCreateEntityDialog = function () {
         var divId = "smallDialogDiv";
         var sourceLabel = Lineage_sources.activeSource;
-        $("#" + divId).dialog("option", "title", " Node infos :"); // source " + sourceLabel);
-        $("#" + divId).dialog("open");
+        UI.openDialog(divId, { title: " Node infos :" });
         self.getCreateEntityDialog(sourceLabel, divId);
     };
 
     self.getCreateEntityDialog = function (source, divId) {
         self.currentSource = source;
-        $("#" + divId).dialog("open");
+        UI.openDialog(divId, { title: "Create New Entity" });
         var html =
             "rdfs:label <input style='width:200px' id='nodeInfosWidget_newEntityLabel'/>" +
             "<br></br>" +
@@ -1740,7 +1748,7 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
 
             if (!targetDiv) {
                 targetDiv = "smallDialogDiv";
-                $("#" + targetDiv).dialog("open");
+                UI.openDialog(targetDiv, { title: " Node Restrictions" });
                 $("#addPredicateButton").remove();
 
                 $("#deleteButton").remove();

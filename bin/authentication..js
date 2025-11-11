@@ -121,15 +121,12 @@ if (config.auth == "keycloak") {
             async function (_accessToken, _refreshToken, response, profile, done) {
                 const accessToken = await fetchAccessTokenFromAPI(config.auth0.domain, config.auth0.api.clientID || config.auth0.clientID, config.auth0.api.clientSecret || config.auth0.clientSecret);
 
-                const roles = await fetchUserRolesFromAPI(config.auth0.domain, profile.user_id, accessToken);
-
-                const available_groups = Object.keys(await profileModel.getAllProfiles());
-
-                const groups = roles.filter((role) => available_groups.includes(role.name)).map((role) => role.name);
-
                 const userAccount = await getUserAccount("auth0", profile._json[config.auth0.usernameMapping]);
 
                 if (config.auth0.useAuth0Roles) {
+                    const roles = await fetchUserRolesFromAPI(config.auth0.domain, profile.user_id, accessToken);
+                    const available_groups = Object.keys(await profileModel.getAllProfiles());
+                    const groups = roles.filter((role) => available_groups.includes(role.name)).map((role) => role.name);
                     userAccount.groups = groups;
                     userModel.updateUserAccount(userAccount);
                 }

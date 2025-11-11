@@ -5,7 +5,7 @@ import { Delete, Edit } from "@mui/icons-material";
 import { DeleteDialog } from "./DeleteDialog";
 import { getSourcesForUser, ServerSource } from "../Source";
 import { cleanUpText, fetchMe } from "../Utils";
-import { Severity } from "../user-management";
+import { Severity } from "../user-settings";
 import { EditSourceDialog } from "./EditSourceDialog";
 
 type DialogType = "delete" | "edit";

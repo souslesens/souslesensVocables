@@ -19,12 +19,11 @@ var SPARQL_endpoint = (function () {
         //  self.currentSparql_server = Config.sparql_server.urlsparql_server;
         //localStorage.clear();
 
-        $("#mainDialogDiv").dialog("option", "title", "SPARQL endpoint");
         //$("#mainDialogDiv").parent().css("left", "100px");
         $("#mainDialogDiv").css("width", "1000px");
         $("#graphDiv").html("");
         $("#mainDialogDiv").load("modules/tools/SPARQL/SPARQLendpoint.html", function () {
-            $("#mainDialogDiv").dialog("open");
+            UI.openDialog("mainDialogDiv", { title: "SPARQL endpoint" });
             self.initYasGui();
         });
     };

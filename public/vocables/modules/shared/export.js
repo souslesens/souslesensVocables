@@ -459,7 +459,7 @@ fixedColumns: true*/
         self.dataTable = $("#dataTableDivExport").DataTable(params);
         if (div.indexOf("DialogDiv") > -1) {
             //open the dialog after the datatable is loaded to be on center
-            $("#" + div).dialog("open");
+            UI.openDialog(div, { title: "DataTable" });
         }
         if (callback) {
             return callback(null, self.dataTable);

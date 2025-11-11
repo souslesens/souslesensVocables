@@ -82,14 +82,22 @@ var Lineage_nodeCentricGraph = (function () {
         return { nodes: newNodes, edges: newEdges };
     };
 
-    self.draw = function (rootNodeId) {
+    self.draw = function (rootNodeId, updown) {
         var visjsData = self.getHierarchicalViewVisjsdata(rootNodeId);
-
+        var directionGraph;
+        var forceDirectionGraph;
+        if (updown) {
+            directionGraph = "UD";
+            forceDirectionGraph = "vertical";
+        } else {
+            directionGraph = "LR";
+            forceDirectionGraph = "horizontal";
+        }
         var xOffset = 110;
         var yOffset = 90;
         var options = {
             layoutHierarchical: {
-                direction: "LR",
+                direction: directionGraph,
                 sortMethod: "hubsize",
                 levelSeparation: xOffset,
                 // parentCentralization: false,
@@ -104,7 +112,7 @@ var Lineage_nodeCentricGraph = (function () {
                 smooth: {
                     type: "cubicBezier",
                     // type: "diagonalCross",
-                    forceDirection: "horizontal",
+                    forceDirection: forceDirectionGraph,
 
                     roundness: 0.4,
                 },

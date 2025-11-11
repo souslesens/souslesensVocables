@@ -1,7 +1,7 @@
 const { readMainConfig } = require("./config");
 const DigestClient = require("digest-fetch");
 const fetch = require("node-fetch");
-
+const { RDF_FORMATS_MIMETYPES } = require("./utils");
 class RdfDataModel {
     /**
      * @param {string} endpointUrl - url of endpoint
@@ -15,13 +15,18 @@ class RdfDataModel {
     }
     /**
      * @param {string} query - SPARQL query string
-     * @param {boolean} jsonOutput - JSON output format (false = nt)
-     * @returns {Promise<any>} json results
+     * @param {string} format - output format (json, csv, nt, ttl)
+     * @returns {Promise<any>} results
      */
-    execQuery = async (query, jsonOutput = true) => {
+    execQuery = async (query, format = "json") => {
+        if (!(format in RDF_FORMATS_MIMETYPES)) {
+            const message = `${format} is not a valid format (${Object.keys(RDF_FORMATS_MIMETYPES).join(", ")})`;
+            throw Error(message, { cause: 400 });
+        }
+
         const urlParams = new URLSearchParams({
             query: query,
-            format: jsonOutput ? "application/sparql-results+json" : "text/plain",
+            format: RDF_FORMATS_MIMETYPES[format],
         });
         const url = new URL(`${this.endpointUrl}?${urlParams.toString()}`).href;
         let response;
@@ -34,7 +39,7 @@ class RdfDataModel {
         if (response.status !== 200) {
             throw new Error(await response.text());
         }
-        if (jsonOutput) {
+        if (format === "json") {
             const json = await response.json();
             const bindings = json["results"]["bindings"];
             return bindings;
@@ -203,7 +208,7 @@ class RdfDataModel {
                        WHERE { ?s ?p ?o .}
                        LIMIT ${limit}
                        OFFSET ${offset}`;
-        const json = await this.execQuery(query, jsonOutput);
+        const json = await this.execQuery(query, jsonOutput ? "json" : "nt");
         return json;
     };
 
@@ -224,7 +229,7 @@ class RdfDataModel {
      */
     loadGraph = async (graphUri, graphPath) => {
         const query = `LOAD <${graphPath}> INTO GRAPH <${graphUri}>`;
-        const json = await this.execQuery(query, true);
+        const json = await this.execQuery(query);
         return json;
     };
 }

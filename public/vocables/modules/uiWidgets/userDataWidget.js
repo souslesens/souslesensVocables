@@ -163,11 +163,11 @@ var UserDataWidget = (function () {
         }
         self.saveUI();
     };
-    self.showSaveDialog = function (data_type, jsonContent, divId, callbackFn) {
+    self.showSaveDialog = function (data_type, jsonContent, divId, options, callbackFn) {
         self.data_type = data_type;
         self.jsonContent = jsonContent;
         self.callbackFn = callbackFn;
-        self.showDialog(divId, "save");
+        self.showDialog(divId, "save", options);
     };
 
     self.showListDialog = function (divId, options, callbackFn) {
@@ -185,7 +185,7 @@ var UserDataWidget = (function () {
                 }
             });
         }
-        self.showDialog(divId, "list", function () {
+        self.showDialog(divId, "list", options, function () {
             $.ajax({
                 type: "GET",
                 url: `${Config.apiUrl}/users/data`,
@@ -264,6 +264,9 @@ var UserDataWidget = (function () {
                         },
                         contextMenu: function (node) {
                             var items = {};
+                            if (!node.data) {
+                                return items;
+                            }
                             if (self.callbackFn) {
                                 items.open = {
                                     label: "Open",
@@ -308,6 +311,18 @@ var UserDataWidget = (function () {
                                     });
                                 },
                             };
+                            if (self.options.additionalContextMenu && self.options.additionalContextMenu.length > 0) {
+                                self.options.additionalContextMenu.forEach(function (item) {
+                                    if (item.action && item.label) {
+                                        items[item.label] = {
+                                            label: item.label,
+                                            action: function (_e) {
+                                                item.action(node);
+                                            },
+                                        };
+                                    }
+                                });
+                            }
                             return items;
                         },
                     };
@@ -324,7 +339,10 @@ var UserDataWidget = (function () {
         });
     };
 
-    self.showDialog = function (divId, mode, callback) {
+    self.showDialog = function (divId, mode, options, callback) {
+        if (!options) {
+            options = {};
+        }
         if (!divId) {
             divId = "smallDialogDiv";
         }
@@ -344,7 +362,7 @@ var UserDataWidget = (function () {
             }
 
             if (divId == "smallDialogDiv") {
-                $("#" + divId).dialog("open");
+                UI.openDialog(divId, options);
             }
 
             if (callback) {

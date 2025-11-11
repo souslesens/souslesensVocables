@@ -108,7 +108,7 @@ var Sparql_common = (function () {
                     }
                     var conceptWordStr = "";
                     words.forEach(function (word, _index) {
-                        if (word.length > 1) {
+                        if (word.length > 0) {
                             if (options.exactMatch) {
                                 if (conceptWordStr != "") {
                                     // conceptWordStr += "|";

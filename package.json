@@ -1,6 +1,6 @@
 {
     "name": "souslesensvocables",
-    "version": "2.17.0",
+    "version": "2.18.0",
     "private": true,
     "workspaces": [
         "mainapp"
@@ -52,6 +52,7 @@
     },
     "dependencies": {
         "@elastic/elasticsearch": "^8.18.2",
+        "@huggingface/jinja": "^0.5.1",
         "@sentry/node": "^9.22.0",
         "@zazuko/env-node": "^2.1.5",
         "antlr4": "^4.13.2",

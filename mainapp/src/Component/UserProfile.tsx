@@ -3,7 +3,7 @@ import { useState, useEffect, MouseEvent } from "react";
 import { Button, IconButton, InputAdornment, InputLabel, OutlinedInput, FormControl, Stack } from "@mui/material";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import CheckIcon from "@mui/icons-material/Check";
-import { Severity } from "../user-management";
+import { Severity } from "../user-settings";
 import { fetchMe } from "../Utils";
 
 type User = {

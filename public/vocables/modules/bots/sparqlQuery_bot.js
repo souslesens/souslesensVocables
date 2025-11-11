@@ -26,7 +26,7 @@ var SparqlQuery_bot = (function () {
             self.params = {
                 source: Lineage_sources.activeSource,
                 labelsMap: {},
-                maxPredicates: 1500,
+                maxPredicates: 10000,
                 currentClass: "",
                 currentFilter: "",
             };
@@ -306,11 +306,7 @@ var SparqlQuery_bot = (function () {
         },
 
         listObjectPropertiesFn: function () {
-            var options = {};
-            if (self.params.queryScope == "activeSource") {
-                options.withoutImports = 1;
-            }
-            var filter = "";
+
             var properties = self.filterObjectProperties(self.params.currentClass, null);
             common.array.sort(properties, "label");
 
@@ -683,7 +679,7 @@ var SparqlQuery_bot = (function () {
         },
 
         chooseConstraintClassFn: function () {
-            self.getResourcesList("Class", "subject", null, { withoutImports: 1 }, function (err, result) {
+            self.getResourcesList("Class", "subject", null, { withoutImports: 0}, function (err, result) {
                 if (err) {
                     MainController.errorAlert(err);
                     return self.myBotEngine.previousStep();
@@ -751,6 +747,11 @@ var SparqlQuery_bot = (function () {
                         filter = "FILTER (?object=<" + self.params.constraintClass + "> )";
                     }
                 }
+                if (self.params.constraintObject == "ObjectProperty") {
+                    if (constraintType == " subClassOfRestriction") {
+                        filter = "FILTER (?predicate=<" + self.params.constraintObjectProperty + ">)"
+                    }
+                }
                 self.getResourcesList("Restriction", null, filter, { withoutImports: 0 }, function (err, result) {
                     if (err) {
                         MainController.errorAlert(err);
@@ -760,7 +761,7 @@ var SparqlQuery_bot = (function () {
                     self.params.queryResult = result;
                     return self.functions.showResultFn();
                 });
-            } else {
+            }  else {
                 if (self.params.constraintObject == "Whiteboard nodes") {
                     var nodeIds = Lineage_whiteboard.lineageVisjsGraph.data.nodes.getIds();
                     filter += Sparql_common.setFilter("subject", nodeIds);

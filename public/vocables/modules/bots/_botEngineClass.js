@@ -404,6 +404,8 @@ class BotEngineClass {
             });
     }
     filterList(evt) {
+        if(!this.lastFilterListStr)
+            this.lastFilterListStr=""
         //var str = $(this).val();
         var str = $(evt.currentTarget).val();
         if (!str && this.lastFilterListStr.length < str.length) {
@@ -418,7 +420,7 @@ class BotEngineClass {
         str = str.toLowerCase();
         var selection = [];
         this.currentList.forEach(function (item) {
-            if (item.label.toLowerCase().indexOf(str) > -1) {
+            if (item.label && item.label.toLowerCase().indexOf(str) > -1) {
                 selection.push(item);
             }
         });

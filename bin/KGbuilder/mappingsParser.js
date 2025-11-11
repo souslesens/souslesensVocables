@@ -161,9 +161,13 @@ var MappingParser = {
                 var toColumn = columnsMap[edge.to];
                 if (fromColumn.data.definedInColumn) {
                     fromColumn = allColumnsMappings[fromColumn.data.definedInColumn];
+                }else{
+                    fromColumn= fromColumn.data
                 }
                 if (toColumn.data.definedInColumn) {
                     toColumn = allColumnsMappings[toColumn.data.definedInColumn];
+                }else{
+                    toColumn= toColumn.data
                 }
                 //if edge is not from rdf, rdfs or owl   and if fome and to are rdf;typeClass the edge represents a restriction
                 if (edge.data.id.indexOf("owl") < 0 && edge.data.id.indexOf("rdf") < 0) {

@@ -219,12 +219,7 @@ var TriplesMaker = {
                                 tableProcessingParams.sourceInfos.graphUri,
                                 tableProcessingParams.sourceInfos.sparqlServerUrl,
                             );
-                            //console.log("   triples written ", batchTriplesCount);
-                            /*if (err) {
-                                console.log(err);
-                                console.log("offest " + offset);
-                                return callbackWhilst(err);
-                            }*/
+
 
                             var currentTime = new Date();
                             totalTriplesCount += batchTriplesCount;

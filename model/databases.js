@@ -4,6 +4,7 @@ const { Lock } = require("async-await-mutex-lock");
 
 const { configDatabasesPath } = require("./config");
 const { profileModel } = require("./profiles");
+const { KGbuilder_socket } = require("../bin/KGbuilder/KGbuilder_socket.js");
 
 /**
  * @typedef {import("./UserTypes").UserAccount} UserAccount

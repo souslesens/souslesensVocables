@@ -4,7 +4,7 @@ const { Lock } = require("async-await-mutex-lock");
 
 const { configDatabasesPath } = require("./config");
 const { profileModel } = require("./profiles");
-const { KGbuilder_socket } = require("../bin/KGbuilder/KGbuilder_socket.js");
+const KGbuilder_socket = require("../bin/KGbuilder/KGbuilder_socket");
 
 /**
  * @typedef {import("./UserTypes").UserAccount} UserAccount
@@ -334,7 +334,9 @@ class DatabaseModel {
                 offset += batchSize;
             }
         } catch (err) {
+            console.error("ERROR : offset " + offset + ",error in database reading " + err);
             KGbuilder_socket.message(options.clientSocketId, "ERROR : offset " + offset + ",error in database reading " + err, true);
+
             // error catch of readAndProcessData
             throw err;
         }

@@ -1090,18 +1090,19 @@ var MappingModeler = (function () {
             result.forEach(function (item) {
                 self.allResourcesMap[item.id] = item;
             });
-        });
-        self.getAllProperties(source, function (err, result) {
-            if (err) {
-                return callback(err);
-            }
-            result.forEach(function (item) {
-                self.allResourcesMap[item.id] = item;
+            self.getAllProperties(source, function (err, result) {
+                if (err) {
+                    return callback(err);
+                }
+                result.forEach(function (item) {
+                    self.allResourcesMap[item.id] = item;
+                });
+                if (callback) {
+                    return callback(err, result);
+                }
             });
-            if (callback) {
-                return callback(err, result);
-            }
         });
+       
     };
 
     /**

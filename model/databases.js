@@ -318,6 +318,7 @@ class DatabaseModel {
      * @params {number} batchSize - batch size
      */
     batchSelectGenerator = async function* (connection, tableName, { select = "*", batchSize = 1000 }) {
+        let offset = 0;
         try {
             const columns = await connection(tableName).columnInfo();
             const columnsKeys = Object.keys(columns);
@@ -325,7 +326,6 @@ class DatabaseModel {
             const resSize = await connection.count("*").from(tableName);
             const size = parseInt(resSize[0].count);
 
-            let offset = 0;
             while (true) {
                 if (offset >= size) {
                     return connection.select(select).from(tableName).orderBy(columnsKeys[0]).limit(batchSize).offset(offset);

@@ -3,7 +3,7 @@ import { useEffect, useState, SyntheticEvent } from "react";
 
 import { Alert, Snackbar, Stack, Tab, Tabs } from "@mui/material";
 
-import { UserProfile } from "./Component/UserProfile";
+import { UserInfo } from "./Component/UserInfo";
 import { UserSources } from "./Component/UserSources";
 
 declare global {
@@ -15,7 +15,7 @@ declare global {
 }
 
 enum Sections {
-    Profile = "profile",
+    Settings = "settings",
     Sources = "sources",
 }
 
@@ -29,13 +29,13 @@ type SnackInfo = {
 
 interface DispatcherProps {
     handleSnackbar: (msg: string, severity?: Severity) => void;
-    selectedTab: Sections.Profile | Sections.Sources;
+    selectedTab: Sections.Settings | Sections.Sources;
 }
 
 const Dispatcher = ({ handleSnackbar, selectedTab }: DispatcherProps) => {
     switch (selectedTab) {
-        case Sections.Profile:
-            return <UserProfile handleSnackbar={handleSnackbar} />;
+        case Sections.Settings:
+            return <UserInfo handleSnackbar={handleSnackbar} />;
         case Sections.Sources:
             return <UserSources handleSnackbar={handleSnackbar} />;
     }
@@ -83,7 +83,7 @@ export default function UserSettings() {
                 sx={{ bgcolor: "Background.paper", borderBottom: 1, borderColor: "divider" }}
                 value={selectedTab}
             >
-                <Tab label="Profile" value={Sections.Profile} />
+                <Tab label="API token" value={Sections.Settings} />
                 <Tab label="Sources" value={Sections.Sources} />
             </Tabs>
             <Dispatcher handleSnackbar={handleSnackbar} selectedTab={selectedTab} />

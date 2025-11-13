@@ -318,7 +318,7 @@ class BotEngineClass {
 
     abort(message) {
         alert(message);
-        this.close();
+        this.end();
     }
 
     reset() {

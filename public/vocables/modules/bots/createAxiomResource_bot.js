@@ -101,7 +101,7 @@ var CreateAxiomResource_bot = (function () {
             });
             Lineage_createResource.writeResource(self.source, triples, function (err, resourceId) {
                 if (err) {
-                    _botEngine.abort(err.responseText);
+                    self.myBotEngine.abort(err.responseText);
                 }
                 self.params.newObject = {
                     id: resourceId,
@@ -127,7 +127,7 @@ var CreateAxiomResource_bot = (function () {
 
             Lineage_createRelation.createSubProperty(self.params.source, self.params.superResourceId, propLabel, true, function (err, result) {
                 if (err) {
-                    _botEngine.abort(err.responseText);
+                    self.myBotEngine.abort(err.responseText);
                 }
                 self.params.newObject = {
                     id: result.uri,

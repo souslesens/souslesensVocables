@@ -11,11 +11,11 @@ type User = {
     token: string;
 };
 
-interface UserProfileProps {
+interface UserInfoProps {
     handleSnackbar: (msg: string, severity?: Severity) => void;
 }
 
-const UserProfile = ({ handleSnackbar }: UserProfileProps) => {
+const UserInfo = ({ handleSnackbar }: UserInfoProps) => {
     const [currentUser, setCurrentUser] = useState<User>({ login: "", token: "" });
     const [copied, setCopied] = useState<boolean>(false);
 
@@ -75,4 +75,4 @@ const UserProfile = ({ handleSnackbar }: UserProfileProps) => {
     );
 };
 
-export { UserProfile };
+export { UserInfo };

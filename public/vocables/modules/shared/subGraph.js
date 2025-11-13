@@ -65,7 +65,7 @@ var SubGraph = (function () {
                                 "  } limit 10000";
                             self.query(sourceLabel, query, function (err, result) {
                                 if (err) {
-                                    return alert(err);
+                                    return MainController.errorAlert(err);
                                 }
                                 currentClasses = [];
                                 result.results.bindings.forEach(function (item) {
@@ -151,7 +151,7 @@ var SubGraph = (function () {
                         "} limit 10000";
                     self.query(sourceLabel, query, function (err, result) {
                         if (err) {
-                            return alert(err);
+                            return MainController.errorAlert(err);
                         }
                         result.results.bindings.forEach(function (item) {
                             if (allClasses[item.s.value]) {

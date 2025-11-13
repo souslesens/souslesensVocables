@@ -72,7 +72,7 @@ var KGcreator = (function () {
     self.loadSource = function () {
         Lineage_sources.loadSources(MainController.currentSource, function (err) {
             if (err) {
-                return alert(err.responseText);
+                return MainController.errorAlert(err.responseText);
             }
             $("#graphDiv").load("./modules/tools/KGcreator/html/centralPanel.html", function () {
                 $("#lateralPanelDiv").load("./modules/tools/KGcreator/html/leftPanel.html", function () {
@@ -100,7 +100,7 @@ var KGcreator = (function () {
 
         self.initSlsvSourceConfig(self.currentSlsvSource, function (err, result) {
             if (err) {
-                return alert(err);
+                return MainController.errorAlert(err);
             }
             //  KGcreator_graph.drawOntologyModel(self.currentSlsvSource);
         });
@@ -549,7 +549,7 @@ var KGcreator = (function () {
                 if (callback) {
                     return callback(err);
                 }
-                alert(err);
+                MainController.errorAlert(err);
             },
         });
     };
@@ -591,7 +591,7 @@ var KGcreator = (function () {
                     ],
                     function (err) {
                         if (err) {
-                            return alert(err);
+                            return MainController.errorAlert(err);
                         }
                         if (callback) {
                             callback();
@@ -694,7 +694,7 @@ var KGcreator = (function () {
                     if (callback) {
                         return callback(err);
                     }
-                    return alert(err);
+                    return MainController.errorAlert(err);
                 }
                 if (callback) {
                     return callback(null, jstreeData);
@@ -930,7 +930,7 @@ var KGcreator = (function () {
         self.rawConfig.databaseSources[datasource.id] = { name: datasource.name };
         self.saveSlsvSourceConfig(function (err, result) {
             if (err) {
-                return alert(err);
+                return MainController.errorAlert(err);
             }
             self.addDataSourceToJstree("databaseSource", datasource, "sql.sqlserver");
         });
@@ -950,13 +950,13 @@ var KGcreator = (function () {
 
         self.saveSlsvSourceConfig(function (err, result) {
             if (err) {
-                return alert(err);
+                return MainController.errorAlert(err);
             }
             self.addDataSourceToJstree("csvSource", datasourceName);
             self.initDataSource(datasourceName, "csvSource", "csv");
             self.loadCsvSource(self.currentSlsvSource, datasourceName, true, function (err, result) {
                 if (err) {
-                    return alert(err.responseText);
+                    return MainController.errorAlert(err.responseText);
                 }
             });
         });
@@ -1069,7 +1069,7 @@ var KGcreator = (function () {
                     showTable(data.rows);
                 },
                 error(err) {
-                    return alert(err.responseText);
+                    return MainController.errorAlert(err.responseText);
                 },
             });
         } else if (self.currentConfig.currentDataSource.type == "csvSource") {
@@ -1084,7 +1084,7 @@ var KGcreator = (function () {
         var json = {};
         KGcreator.getAllTriplesMappingsOld(slsvSource, function (err, mappingObjects) {
             if (err) {
-                return alert(err);
+                return MainController.errorAlert(err);
             }
             for (var key in mappingObjects) {
                 var item = mappingObjects[key];

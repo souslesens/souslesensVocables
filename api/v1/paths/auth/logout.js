@@ -12,6 +12,7 @@ module.exports = function () {
         if (config.auth !== "disabled") {
             req.logout(function (err) {
                 if (err) {
+                    res.status(err.status || 500).json(err);
                     return next(err);
                 }
             });
@@ -19,6 +20,9 @@ module.exports = function () {
 
         if (config.auth === "keycloak") {
             result.redirect = config.keycloak.authServerURL + "/realms/" + config.keycloak.realm + "/protocol/openid-connect/logout?redirect_uri=" + config.souslesensUrl;
+        } else if (config.auth === "auth0") {
+            const logoutUrl = `https://${config.auth0.domain}/oidc/logout`;
+            result.redirect = logoutUrl;
         } else if (config.auth === "local" || config.auth === "database") {
             result.redirect = "/login";
         } else {

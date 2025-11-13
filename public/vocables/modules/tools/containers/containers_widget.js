@@ -9,9 +9,8 @@ var Containers_widget = (function () {
     self.showDialog = function (source, options, validateFn) {
         self.validateFn = validateFn;
 
-        $("#mainDialogDiv").dialog("option", "title", "Containers widget");
         $("#mainDialogDiv").load("modules/tools/containers/containers_widget.html", function () {
-            $("#mainDialogDiv").dialog("open");
+            UI.openDialog("mainDialogDiv", { title: "Containers widget" });
 
             //   $("#mainDialogDiv").addClass("zIndexTop-10");
             Containers_tree.search(self.jstreeDivId, options);
@@ -46,14 +45,13 @@ var Containers_widget = (function () {
 
         //  var rootNodes = JstreeWidget.getNodeDescendants("lineage_containers_containersJstree", "#", 1);
 
-        $("#smallDialogDiv").dialog("open");
-        $("#smallDialogDiv").dialog("option", "title", "Parent Containers Type");
         $("#smallDialogDiv").load("./modules/tools/lineage/html/parentContainers.html", function () {
+            UI.openDialog("smallDialogDiv", { title: "Parent Containers Type" });
             var types = [];
             types.splice(0, 0, { id: "all", label: "all" });
 
             Containers_query.getTopContainer(source, {}, function (err, result) {
-                if (err) return alert(err.responseText || err);
+                if (err) return MainController.errorAlert(err.responseText || err);
                 result.results.bindings.forEach(function (item) {
                     types.push({ id: item.member.value, label: item.memberLabel ? item.memberLabel.value : Sparql_common.getLabelFromURI(item.member.value) });
                 });
@@ -84,7 +82,7 @@ var Containers_widget = (function () {
         if (term) {
             Containers_tree.drawContainerAndAncestorsJsTree(Lineage_sources.activeSource, term, {}, function (err, result) {
                 if (err) {
-                    return alert(err.responseText);
+                    return MainController.errorAlert(err);
                 }
             });
         } else {

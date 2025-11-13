@@ -78,6 +78,7 @@ var KGbuilder_main = {
             tableProcessingParams.uniqueTriplesMap = {};
             var sampleTriples = [];
             var totalTriplesCount = {};
+            var tableMappings = {};
 
             /**
              * for each table get columnsMappingMap and create tripels
@@ -97,7 +98,6 @@ var KGbuilder_main = {
 
                                     tableProcessingParams.allColumnsMappings = allColumnsMappings;
 
-                                    var tableMappings = {};
                                     for (var columnId in allColumnsMappings) {
                                         if (allColumnsMappings[columnId].dataTable == tables[0]) {
                                             tableMappings[columnId] = allColumnsMappings[columnId];
@@ -109,9 +109,26 @@ var KGbuilder_main = {
                                 });
                             },
 
+                            //set label and type for classes referenced by sevral columns
+                            function (callbackSeries) {
+                                MappingsParser.setAllColumnsLabelAndType(mappingData, tableProcessingParams.allColumnsMappings);
+
+                                callbackSeries();
+                            },
+                            function (callbackSeries) {
+                                MappingsParser.setTableColumnsOtherPredicates(tableMappings);
+
+                                callbackSeries();
+                            },
+
                             //getColumnToColumnMappings
                             function (callbackSeries) {
-                                tableProcessingParams.columnToColumnEdgesMap = MappingsParser.getColumnToColumnMappings(mappingData, tables[0], options.filterMappingIds);
+                                tableProcessingParams.columnToColumnEdgesMap = MappingsParser.getColumnToColumnMappings(
+                                    mappingData,
+                                    tables[0],
+                                    options.filterMappingIds,
+                                    tableProcessingParams.allColumnsMappings,
+                                );
                                 callbackSeries();
                             },
 

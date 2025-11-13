@@ -245,6 +245,17 @@ var MainController = (function () {
             }
         }
     };
+    self.onUserMenuSelect = function (value) {
+        if (value === "logout") {
+            authentication.logout();
+            return;
+        }
+        if (value === "usersettings") {
+            self.onToolSelect("UserSettings");
+            return;
+        }
+        console.error("unknown action");
+    };
     self.onToolSelect = function (toolId, event, callback) {
         if (event) {
             var clickedElement = event.target;
@@ -366,6 +377,21 @@ var MainController = (function () {
         if (callback) {
             callback();
         }
+    };
+    self.errorAlert = function (err) {
+        var message = "";
+        // rajouter le status de l'erreur
+        if (typeof err == "object") {
+            message = (err.status || "500") + " : " + (err.responseText || err.message);
+        } else if (typeof err == "string") {
+            message = err;
+        } else {
+            message = "An error occurred";
+        }
+        if (!message || message == "") {
+            message = "An error occurred";
+        }
+        alert(message);
     };
 
     return self;

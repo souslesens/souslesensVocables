@@ -2,6 +2,80 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.18.0](https://github.com/souslesens/souslesensVocables/compare/2.17.0...2.18.0) (2025-11-07)
+
+> [!IMPORTANT]
+> Updating to 2.18.0 require a data migration. Execute the following script after upgrade.
+
+```bash
+npm run migrate
+```
+
+
+### ⚠ BREAKING CHANGES
+
+* **api:** add format parameters to the exec query
+
+### Features
+
+* add UserSettings link on user-menu ([5f9b4a2](https://github.com/souslesens/souslesensVocables/commit/5f9b4a2962ec096d8f30af41a706b91f3b771b0f))
+* **api:** add format parameters to the exec query ([43acd7c](https://github.com/souslesens/souslesensVocables/commit/43acd7cec3410369caa4db3614694f18b4484a22))
+* rename UserManagement to UserSettings ([4e880bb](https://github.com/souslesens/souslesensVocables/commit/4e880bbc95b1b28d79132ef78cd8b145ef020370))
+
+
+### Bug Fixes
+
+* **auth:** auth0: fetch groups only if useAuth0Roles ([f29b997](https://github.com/souslesens/souslesensVocables/commit/f29b99745332da78fb23f6150b3acf7995eb3f1e))
+* **auth:** auth0: fix logout url ([2ac14d1](https://github.com/souslesens/souslesensVocables/commit/2ac14d1d91395504c2adffa200ebec75317fe05f))
+* **model/databases:** batchSelectGenerator take a connection, not a databaseId ([5eca546](https://github.com/souslesens/souslesensVocables/commit/5eca5460ead805efe00fba436f0a014a2e33c2da))
+
+## [2.17.0](https://github.com/souslesens/souslesensVocables/compare/2.16.0...2.17.0) (2025-10-28)
+
+> [!IMPORTANT]
+> Updating to 2.17.0 require a data migration. Execute the following script after upgrade.
+
+```bash
+npm run migrate
+```
+
+
+### ⚠ BREAKING CHANGES
+
+* **model/databases:** replace refreshConnection with refreshAdminConnection and refreshUserConnection
+* **model/databases:** batchSelect function take a database connection instead of a database id
+* **model/databases:** query function take a database connection instead of a database id
+* **model/databases:** replace getConnection with getUserConnection and getAdminConnection
+
+### Features
+
+* **api:** /api/v1/database/{id} return info only if database is allowed. ([5b3a2d5](https://github.com/souslesens/souslesensVocables/commit/5b3a2d5b66f4212bdf8839afd9457b352ba99675))
+* **api:** /api/v1/databases return authorized databases ([ee627a1](https://github.com/souslesens/souslesensVocables/commit/ee627a10686246bf435680c8b17e7dcf2a84c215))
+* **api:** /api/v1/test/{id} use getAdminConnection to connect to the database ([4e8e080](https://github.com/souslesens/souslesensVocables/commit/4e8e080dd8ebc04fa4825a8f9d4e3363ba00d322))
+* **appjs:** add Allowed Databases form tho the profile form ([4075bbd](https://github.com/souslesens/souslesensVocables/commit/4075bbd0b5956a0858ca7bdcf48f2fc8890c61d7))
+* **appjs:** add allowedDatabases to the data model ([e91b074](https://github.com/souslesens/souslesensVocables/commit/e91b074f8d106d272c7b00abfe27a85686aec3c9))
+* **appjs:** add useDatabase hook to get all databases ([3d87dd9](https://github.com/souslesens/souslesensVocables/commit/3d87dd9c7c75d88464bc9ca077ae3b508cac4835))
+* **appjs:** better render databases value on the allowed databases form ([0a30451](https://github.com/souslesens/souslesensVocables/commit/0a304513c49a01944cab2f881714bd1d7d8ca27f))
+* **migrations:** add allowed_databases column to profiles table ([d354a52](https://github.com/souslesens/souslesensVocables/commit/d354a52c06bd444ebddb0fb8ffb520b95f8302ba))
+* **model/databases:** add a batchSelectGenerator function ([e51f17b](https://github.com/souslesens/souslesensVocables/commit/e51f17b38da2376362ceb7fa52f40046cd05ed70))
+* **model/databases:** add isDatabaseAllowed function to check if a user can access a database ([969b107](https://github.com/souslesens/souslesensVocables/commit/969b1078232ca6d9246203a9b3ef74a9a9ac9dfc))
+* **model/databases:** batchSelect function take a database connection instead of a database id ([293965b](https://github.com/souslesens/souslesensVocables/commit/293965b00201ad766f0b76405ac007770c3039b3))
+* **model/databases:** query function take a database connection instead of a database id ([a9b6857](https://github.com/souslesens/souslesensVocables/commit/a9b685733bf261c731a792b03d54e2dd155e65db))
+* **model/databases:** replace getConnection with getUserConnection and getAdminConnection ([19dbc9d](https://github.com/souslesens/souslesensVocables/commit/19dbc9d78e34dff29c92bdc5c922dcc9547b2268))
+* **model/databases:** replace refreshConnection with refreshAdminConnection and refreshUserConnection ([d9fc0bc](https://github.com/souslesens/souslesensVocables/commit/d9fc0bcbb5737d8a07a3f8574cd097ccc2a87697))
+* use getUserConnection on KGbuilder ([775530b](https://github.com/souslesens/souslesensVocables/commit/775530b9d0f7515680c3cb6f1ddf97b5020e4057))
+* **utils:** add redoIfFailure function ([bb7596e](https://github.com/souslesens/souslesensVocables/commit/bb7596e1e44328d9e664f4cf1277ee1466aef8aa))
+
+
+### Bug Fixes
+
+* **api:** remove /api/v1/kg/database route ([731730b](https://github.com/souslesens/souslesensVocables/commit/731730b990df58b39a5a53509d6f6565cc9e4276))
+* **mainapp:** fix filterSearchBar function on user table ([b11b441](https://github.com/souslesens/souslesensVocables/commit/b11b441d4a7abdaed2ecd2be070174736a71bb8c))
+* **migrations:** remove console.log ([bfdcb3c](https://github.com/souslesens/souslesensVocables/commit/bfdcb3c569005b0ea55cc3bffeda3865ed3f2cdb))
+* **migrations:** sort migrations script with -V (sort by version number) ([1efec87](https://github.com/souslesens/souslesensVocables/commit/1efec871f2d97eda3a950802e65199efab68af9e))
+* **model/database:** always sort query results in batchSelect ([07f2a12](https://github.com/souslesens/souslesensVocables/commit/07f2a12635944a804cddae6491941249192481de))
+* **model/databases:** remove databaseID from batchSelect and recurseBatchSelect functions ([d465035](https://github.com/souslesens/souslesensVocables/commit/d465035e54a56355043bda5af7a75b23c33e18ad))
+* **model/databases:** s/getAdminConnection/getAdminRestrictedConnection/ ([57a7ca6](https://github.com/souslesens/souslesensVocables/commit/57a7ca6e9da9742f79d772e004e0f2a1a6b678c7))
+
 ## [2.16.0](https://github.com/souslesens/souslesensVocables/compare/2.15.0...2.16.0) (2025-10-20)
 
 > [!IMPORTANT]

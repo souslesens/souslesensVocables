@@ -63,7 +63,7 @@ var CommonBotFunctions_class = (function () {
     self.listVocabClasses = function (botEngineClass, vocab, varToFill, includeOwlThing, classes, callback) {
         OntologyModels.registerSourcesModel(vocab, null, function (err, result) {
             if (err) {
-                return alert(err.responseText);
+                return MainController.errorAlert(err);
             }
             if (!classes) {
                 classes = [];

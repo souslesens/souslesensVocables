@@ -12,6 +12,7 @@ module.exports = function () {
             const blenderSourcesData = await blenderSources.get();
             res.status(200).json(successfullyFetched(blenderSourcesData));
         } catch (error) {
+            res.status(error.status || 500).json(error);
             next(error);
         }
     }
@@ -29,6 +30,7 @@ module.exports = function () {
                 processResponse(res, err, result);
             });
         } catch (error) {
+            res.status(error.status || 500).json(error);
             next(error);
         }
     }
@@ -60,6 +62,7 @@ module.exports = function () {
                 processResponse(res, err, result);
             });
         } catch (error) {
+            res.status(error.status || 500).json(error);
             next(error);
         }
     }

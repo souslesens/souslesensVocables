@@ -782,7 +782,7 @@ var visjsGraph = (function () {
                 UI.message("graph saved");
             },
             error(err) {
-                return alert(err);
+                return MainController.errorAlert(err);
             },
         });
     };
@@ -858,7 +858,7 @@ var visjsGraph = (function () {
                 }
             },
             error(err) {
-                return alert(err);
+                return MainController.errorAlert(err);
             },
         });
     };
@@ -885,7 +885,7 @@ var visjsGraph = (function () {
             },
             error(_jqXHR, _status, err) {
                 if (callback) return callback(err);
-                return alert(err);
+                return MainController.errorAlert(err);
             },
         });
     };

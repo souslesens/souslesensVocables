@@ -189,7 +189,7 @@ var AxiomExtractor = (function () {
                 function (err) {
                     UI.message("", true);
                     if (err) {
-                        return callback ? callback(err) : alert(err);
+                        return callback ? callback(err) : MainController.errorAlert(err);
                     }
 
                     self.basicAxioms[source] = basicAxioms;
@@ -256,13 +256,13 @@ var AxiomExtractor = (function () {
 
         self.getBasicAxioms(source, function (err, basicAxioms) {
             if (err) {
-                return callback ? callback(err) : alert(err);
+                return callback ? callback(err) : MainController.errorAlert(err);
             }
             self.basicAxioms[source] = basicAxioms;
             var classURI = "https://spec.industrialontologies.org/ontology/core/Core/BusinessProcess";
             var axioms = self.getClassAxioms(source, classURI, function (err, visjsData) {
                 if (err) {
-                    return alert(err);
+                    return MainController.errorAlert(err);
                 }
                 self.drawGraphCanvas("graphDiv", visjsData);
             });

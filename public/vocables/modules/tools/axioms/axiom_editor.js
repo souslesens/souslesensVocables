@@ -14,7 +14,7 @@ const Axiom_editor = (function () {
     self.onLoaded = function () {
         self.showSourcesDialog(function (err, source) {
             if (err) {
-                return alert(err);
+                return MainController.errorAlert(err);
             }
             if (!source) {
                 return alert("choose a source");
@@ -223,13 +223,13 @@ const Axiom_editor = (function () {
         } else {
             Axioms_suggestions.getManchesterParserSuggestions(text, false, false, function (err, suggestions) {
                 if (err) {
-                    return alert(err.responseText);
+                    return MainController.errorAlert(err.responseText);
                 }
 
                 self.currentSuggestions = suggestions;
                 self.drawSuggestions(suggestions);
                 if (err) {
-                    alert(err);
+                    MainController.errorAlert(err);
                 }
             });
         }
@@ -251,13 +251,13 @@ const Axiom_editor = (function () {
     self.showAllResource = function () {
         Axioms_suggestions.getManchesterParserSuggestions(Axioms_suggestions.currentObject, true, true, function (err, suggestions) {
             if (err) {
-                return alert(err.responseText);
+                return MainController.errorAlert(err.responseText);
             }
 
             self.currentSuggestions = suggestions;
             self.drawSuggestions(suggestions);
             if (err) {
-                alert(err);
+                MainController.errorAlert(err);
             }
         });
     };
@@ -435,7 +435,7 @@ const Axiom_editor = (function () {
                 if (callback) {
                     return callback(err);
                 } else {
-                    alert(err.responseText);
+                    MainController.errorAlert(err);
                 }
             },
         });
@@ -566,7 +566,7 @@ const Axiom_editor = (function () {
     self.drawTriples = function () {
         Axiom_manager.generateTriples(function (err, triples) {
             if (err) {
-                return alert(err.responseText);
+                return MainController.errorAlert(err.responseText);
             }
             Axioms_graph.drawNodeAxioms2(self.currentSource, self.currentNode.id, triples, "axiomGraphDiv", {}, function (err) {});
         });
@@ -574,7 +574,7 @@ const Axiom_editor = (function () {
     self.listTriples = function () {
         Axiom_manager.generateTriples(function (err, triples) {
             if (err) {
-                return alert(err.responseText);
+                return MainController.errorAlert(err.responseText);
             }
             Axiom_editor.showTriplesInDataTable("Axioms_editor_triplesDataTableDiv", triples);
         });

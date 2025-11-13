@@ -41,12 +41,12 @@ var Lineage_similars = (function () {
 
         Similars_bot.start(null, null, function (err, result) {
             if (err) {
-                return alert(err);
+                return MainController.errorAlert(err);
             }
         });
         return;
 
-        $("#smallDialogDiv").dialog("option", "title", "Similars");
+        UI.setDialogTitle("#smallDialogDiv", "Similars");
         self.parentClassJstreeLoaded = false;
         $("#smallDialogDiv").load("modules/tools/lineage/html/lineageSimilarsDialog.html", function () {
             $("#smallDialogDiv").dialog("open");
@@ -232,7 +232,7 @@ var Lineage_similars = (function () {
             },
             function (err) {
                 if (err) {
-                    return alert(err.reason);
+                    return MainController.errorAlert(err.reason);
                 }
                 var existingNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
 
@@ -421,7 +421,7 @@ var Lineage_similars = (function () {
                 });
                 Sparql_generic.insertTriples(targetSource, triples, null, function (err, result) {
                     if (err) {
-                        return alert(err);
+                        return MainController.errorAlert(err);
                     }
                     return UI.message(result + " inserted in source " + targetSource, true);
                 });
@@ -566,10 +566,9 @@ var Lineage_similars = (function () {
     };
     self.save = {
         showDialog: function () {
-            $("#smallDialogDiv").dialog("option", "title", "Save Similars");
             self.parentClassJstreeLoaded = false;
             $("#smallDialogDiv").load("modules/tools/lineage/html/lineageSimilarsSaveDialog.html", function () {
-                $("#smallDialogDiv").dialog("open");
+                UI.openDialog("smallDialogDiv", { title: "Save Similars" });
                 self.save.drawWhiteboardSimilarsTaxonomy(function () {});
             });
         },
@@ -724,7 +723,7 @@ var Lineage_similars = (function () {
 
             Sparql_generic.insertTriples(source, triples, null, function (err, result) {
                 if (err) {
-                    return alert(err);
+                    return MainController.errorAlert(err);
                 }
                 UI.message("Successfully saved similars");
                 $("#smallDialogDiv").dialog("close");

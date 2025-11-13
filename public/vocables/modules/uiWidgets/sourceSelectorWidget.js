@@ -42,7 +42,7 @@ var SourceSelectorWidget = (function () {
 
         $("#" + targetDivId).load("./modules/uiWidgets/html/sourceSelector.html", function (err) {
             try {
-                $("#" + targetDivId).dialog("open");
+                UI.openDialog(targetDivId, { title: "Source Selector" });
             } catch (e) {}
             self.loadSourcesTreeDiv("sourceSelector_jstreeDiv", jsTreeOptions);
             $("#sourceSelector_searchInput").trigger("focus");
@@ -61,7 +61,7 @@ var SourceSelectorWidget = (function () {
             }
 
             if (isDialog) {
-                $("#" + targetDivId).dialog("open");
+                UI.openDialog(targetDivId, { title: "Source Selector" });
             }
             if (callback) {
                 callback();
@@ -327,7 +327,7 @@ var SourceSelectorWidget = (function () {
         window.history.replaceState(null, "", `?${params.toString()}`);
         MainController.initTool(MainController.currentTool, function (err, result) {
             if (err) {
-                return alert(err.responseText);
+                return MainController.errorAlert(err);
             }
             UI.resetWindowSize();
         });
@@ -350,7 +350,7 @@ var SourceSelectorWidget = (function () {
         //  $("#mainDialogDiv").parent().hide();
         Lineage_sources.loadSources(MainController.currentSource, function (err) {
             if (err) {
-                return alert(err.responseText);
+                return MainController.errorAlert(err);
             }
         });
     };

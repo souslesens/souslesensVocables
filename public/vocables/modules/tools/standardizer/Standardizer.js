@@ -387,7 +387,7 @@ var Standardizer = (function () {
             },
             function (err) {
                 self.isWorking = null;
-                if (err) return alert(err);
+                if (err) return MainController.errorAlert(err);
                 UI.message("DONE, total processed items: " + totalProcessed, true);
                 setTimeout(function () {
                     $(".matrixCell").bind("click", Standardizer.onMatrixCellClick);
@@ -488,7 +488,7 @@ var Standardizer = (function () {
             },
             function (err) {
                 self.isWorking = null;
-                if (err) return alert(err);
+                if (err) return MainController.errorAlert(err);
                 UI.message("DONE, total processed items: " + totalProcessed++, true);
 
                 setTimeout(function () {
@@ -797,13 +797,13 @@ var Standardizer = (function () {
         ElasticSearchProxy.queryElastic(query, [source.toLowerCase()], function (err, result) {
             if (err) {
                 if (callback) return callback(err);
-                return alert(err);
+                return MainController.errorAlert(err);
             }
 
             if (callback) {
                 return callback(null, result.hits ? result.hits.hits : []);
             } else {
-                if (err) return alert(err);
+                if (err) return MainController.errorAlert(err);
                 var str = "";
                 if (!result.hits) return alert(JSON.stringify(result, null, 2));
                 result.hits.hits.forEach(function (hit) {
@@ -1563,7 +1563,7 @@ sortMethod: "hubsize",
             slices,
             function (words, callbackEach) {
                 SearchUtil.getElasticSearchMatches(words, indexes, searchType, 0, 10000, {}, function (err, result) {
-                    if (err) return alert(err);
+                    if (err) return MainController.errorAlert(err);
                     var entities = [];
                     if (!result.forEach || result.hits) return UI.message("no result");
                     result.forEach(function (item) {
@@ -1722,7 +1722,7 @@ sortMethod: "hubsize",
                 });
             },
             function (err) {
-                if (err) return alert(err);
+                if (err) return MainController.errorAlert(err);
 
                 UI.message("extracted nouns : " + Object.keys(allTokens).length);
                 var str = "";
@@ -1960,7 +1960,7 @@ sortMethod: "hubsize",
                 },
             ],
             function (err) {
-                if (err) return alert(err);
+                if (err) return MainController.errorAlert(err);
 
                 UI.message(totalCreated + " relations created in " + dictionarySourceLabel, true);
             },

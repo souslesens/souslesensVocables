@@ -10,6 +10,7 @@ module.exports = function () {
             const databases = await databaseModel.getAllDatabases();
             resourceFetched(res, databases);
         } catch (error) {
+            res.status(error.status || 500).json(error);
             next(error);
         }
     }
@@ -35,6 +36,7 @@ module.exports = function () {
                 const databases = await databaseModel.getAllDatabases();
                 resourceFetched(res, databases);
             } catch (error) {
+                res.status(error.status || 500).json(error);
                 next(error);
             }
         }

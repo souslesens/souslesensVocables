@@ -108,7 +108,7 @@ var Sparql_common = (function () {
                     }
                     var conceptWordStr = "";
                     words.forEach(function (word, _index) {
-                        if (word.length > 1) {
+                        if (word.length > 0) {
                             if (options.exactMatch) {
                                 if (conceptWordStr != "") {
                                     // conceptWordStr += "|";
@@ -861,6 +861,19 @@ var Sparql_common = (function () {
     self.getIntFromTypeLiteral = function (value) {
         var valueStr = value.split("^")[0];
         return parseInt(valueStr);
+    };
+
+    self.getPrefixedLabelFromURI = function (source, uri) {
+        if (!uri) {
+            return "";
+        }
+        if (!source) {
+            return uri;
+        }
+
+        var sourcePrefix = source.substring(0, 3);
+        var label = self.getLabelFromURI(uri);
+        return sourcePrefix + ":" + label;
     };
 
     return self;

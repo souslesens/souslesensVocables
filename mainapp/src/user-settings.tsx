@@ -8,7 +8,7 @@ import { UserSources } from "./Component/UserSources";
 
 declare global {
     interface Window {
-        UserManagement: {
+        UserSettings: {
             createApp: () => void;
         };
     }
@@ -43,7 +43,7 @@ const Dispatcher = ({ handleSnackbar, selectedTab }: DispatcherProps) => {
 
 const initialSnackInfo: SnackInfo = { isOpen: false, message: "", severity: "success" };
 
-export default function UserManagement() {
+export default function UserSettings() {
     const [selectedTab, setSelectedTab] = useState<Sections>(Sections.Sources);
     const [snackInfo, setSnackInfo] = useState<SnackInfo>(initialSnackInfo);
 
@@ -91,10 +91,10 @@ export default function UserManagement() {
     );
 }
 
-window.UserManagement.createApp = function createApp() {
-    const container = document.getElementById("mount-user-management-here");
+window.UserSettings.createApp = function createApp() {
+    const container = document.getElementById("mount-user-settings-here");
 
     const root = createRoot(container!);
-    root.render(<UserManagement />);
+    root.render(<UserSettings />);
     return root.unmount.bind(root);
 };

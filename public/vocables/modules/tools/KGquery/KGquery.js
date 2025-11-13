@@ -139,7 +139,7 @@ var KGquery = (function () {
         KGquery.currentSource = MainController.currentSource;
         Lineage_sources.loadSources(MainController.currentSource, function (err) {
             if (err) {
-                return alert(err.responseText);
+                return MainController.errorAlert(err);
             }
             $("#graphDiv").load("./modules/tools/KGquery/html/KGquery_centralPanel.html", function () {
                 $("#lateralPanelDiv").load("./modules/tools/KGquery/html/KGquery_leftPanel.html", function () {
@@ -297,7 +297,7 @@ var KGquery = (function () {
             //   $("#KGquery_SetsControlsDiv").show();
             KGquery_paths.getNearestNodeId(node.id, self.currentQuerySet, excludeSelf, function (err, nearestNodeId) {
                 if (err) {
-                    return alert(err.responseText);
+                    return MainController.errorAlert(err);
                 }
 
                 self.addNodeToQueryElement(self.currentQueryElement, node, "fromNode");
@@ -306,7 +306,7 @@ var KGquery = (function () {
 
                 KGquery_paths.setQueryElementPath(self.currentQueryElement, function (err, result) {
                     if (err) {
-                        return alert(err.responseText);
+                        return MainController.errorAlert(err);
                     }
 
                     var predicateLabel = KGquery_controlPanel.getQueryElementPredicateLabel(self.currentQueryElement);
@@ -332,7 +332,7 @@ var KGquery = (function () {
             self.currentQueryElement.toNode = node;
             KGquery_paths.setQueryElementPath(self.currentQueryElement, function (err, result) {
                 if (err) {
-                    return alert(err.responseText);
+                    return MainController.errorAlert(err);
                 }
                 self.addNodeToQueryElement(self.currentQueryElement, node, "toNode");
 
@@ -521,7 +521,7 @@ var KGquery = (function () {
                 self.message("", true);
                 if (err) {
                     if (err.responseText) {
-                        return alert(err.responseText);
+                        return MainController.errorAlert(err);
                     }
                 }
 
@@ -576,10 +576,15 @@ var KGquery = (function () {
         var data;
         var labelFromURIToDisplay = [];
         var sampleSize;
+        var distinctSetTypes;
         async.series(
             [
                 function (callbackSeries) {
-                    query = KGquery_predicates.buildQuery(self.querySets, {});
+                    var queryResult = KGquery_predicates.buildQuery(self.querySets, {});
+                    query = queryResult.query;
+                    isUnion = queryResult.isUnion;
+                    isJoin = queryResult.isJoin;
+                    distinctSetTypes = queryResult.distinctSetTypes;
                     return callbackSeries();
                 },
                 //execute query
@@ -668,7 +673,9 @@ var KGquery = (function () {
 
                     dataByQuerySet.forEach(function (setData, index) {
                         if (joinedData) {
-                            var commonKeys = Object.keys(distinctSetTypes[index]).filter((key) => key in distinctSetTypes[index - 1]);
+                            var keysCurrentSet = distinctSetTypes[index];
+                            var keysPreviousSet = distinctSetTypes[index - 1];
+                            var commonKeys = keysCurrentSet.filter((key) => keysPreviousSet.includes(key));
                             commonKeys = commonKeys.map((str) => str.replace(/\?/g, ""));
                             joinedData = common.array.fullOuterJoin(joinedData, setData, commonKeys);
                         } else {
@@ -872,7 +879,7 @@ var KGquery = (function () {
             tableData.push(line);
         });
 
-        $("#KGquery_dataTableDialogDiv").dialog("option", "title", "Query result size: " + tableData.length);
+        UI.setDialogTitle("#KGquery_dataTableDialogDiv", "Query result size: " + tableData.length);
 
         //$("#KGquery_dataTableDialogDiv").css("left", "10px");
         //$("#KGquery_dataTableDialogDiv").width("90vW");

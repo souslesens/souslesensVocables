@@ -119,17 +119,17 @@ var MappingModelerRelations = (function () {
             return;
         });
     };
-    self.drawPossibleRelations = function () {
+    self.drawPossibleRelations = function (callback) {
         var jstreeData = self.listPossibleRelations(function (err, jstreeData) {
             if (err) {
-                alert(err);
+                MainController.errorAlert(err);
             }
             var jstreeOptions = {
                 openAll: true,
                 withCheckboxes: true,
             };
 
-            JstreeWidget.loadJsTree("mappingModelerRelations_jstreeDiv", jstreeData, jstreeOptions);
+            JstreeWidget.loadJsTree("mappingModelerRelations_jstreeDiv", jstreeData, jstreeOptions, callback);
         });
         // Draw the relations using the jstreeData
     };

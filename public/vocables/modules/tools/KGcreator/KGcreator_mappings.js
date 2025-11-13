@@ -39,12 +39,11 @@ return alert("select a field (column)");
         }
         $("#smallDialogDiv").parent().css("z-index", 100);
 
-        $("#smallDialogDiv").dialog("option", "title", "Mapping " + columnNode.data.table + "." + columnNode.data.id);
         $("#smallDialogDiv").css("height", "700px");
         //$("#smallDialogDiv").parent().css("left", "10%");
         /*$("#smallDialogDiv").css('left','10%');*/
         $("#smallDialogDiv").load("./modules/tools/KGcreator/html/columnMappingsDialog.html", function () {
-            $("#smallDialogDiv").dialog("open");
+            UI.openDialog("smallDialogDiv", { title: "Mapping " + columnNode.data.table + "." + columnNode.data.id });
             $("#LinkColumn_rightPanel").show();
             $("#LinkColumn_basicTypeSelect").show();
             $("#LinkColumn_basicTypeSelect").parent().find("span").show();
@@ -362,7 +361,7 @@ tripleObj.objectIsSpecificUri = true;
         try {
             json = self.transformJsonEditor.get();
         } catch (e) {
-            return alert(e);
+            return MainController.errorAlert(e);
         }
         KGcreator.currentConfig.currentMappings[self.currentTable].transform = json;
         KGcreator.saveDataSourceMappings();
@@ -378,7 +377,7 @@ tripleObj.objectIsSpecificUri = true;
         try {
             newColumnMappings = self.columnJsonEditor.get();
         } catch (e) {
-            return alert(e);
+            return MainController.errorAlert(e);
         }
 
         //concat new triples from editor with other mappings in table
@@ -449,7 +448,7 @@ tripleObj.objectIsSpecificUri = true;
     self.setPredicatesBetweenColumnsInTable = function (columnFromData, columnToData, foreignKey, callback) {
         OntologyModels.registerSourcesModel(KGcreator.currentSlsvSource, null, function (err, result) {
             if (err) {
-                return alert(err.responseText);
+                return MainController.errorAlert(err.responseText);
             }
 
             var fromClass = KGcreator.getColumnClass(columnFromData.table, columnFromData.id);
@@ -548,10 +547,9 @@ tripleObj.objectIsSpecificUri = true;
         var table = node.data.id;
 
         //$("#smallDialogDiv").parent().css("left", "10%");
-        $("#smallDialogDiv").dialog("option", "title", "Lookups for " + table);
 
         $("#smallDialogDiv").load("./modules/tools/KGcreator/html/lookupDialog.html", function () {
-            $("#smallDialogDiv").dialog("open");
+            UI.openDialog("smallDialogDiv", { title: "Lookups for " + table });
             $("#KGCreator_lookupName").val(table);
             $("#KGCreator_lookupTable").val(table);
 
@@ -570,10 +568,8 @@ tripleObj.objectIsSpecificUri = true;
         var table = node.data.id;
         self.currentTable = table;
 
-        $("#smallDialogDiv").dialog("option", "title", "Lookups for " + table);
-
         $("#smallDialogDiv").load("./modules/tools/KGcreator/html/transformDialog.html", function () {
-            $("#smallDialogDiv").dialog("open");
+            UI.openDialog("smallDialogDiv", { title: "Lookups for " + table });
             var columns = [];
             KGcreator.currentConfig.currentDataSource.tables[table].forEach(function (column) {
                 columns.push(column);
@@ -637,7 +633,7 @@ tripleObj.objectIsSpecificUri = true;
         try {
             mappings = self.jsonEditor.get();
         } catch (e) {
-            return alert(e);
+            return MainController.errorAlert(e);
         }
         if (self.currentEditingTable) {
             KGcreator_mappings.saveTableMappings(self.currentEditingTable, mappings);

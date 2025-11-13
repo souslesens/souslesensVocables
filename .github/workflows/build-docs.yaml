@@ -11,24 +11,13 @@ jobs:
         environment:
             name: github-pages
             url: ${{ steps.deployment.outputs.page_url }}
-        strategy:
-            matrix:
-                node-version: [22.x]
+        container:
+            image: astral/uv:python3.11-trixie-slim
         steps:
             - uses: actions/checkout@v4
-            - name: Use Node.js ${{ matrix.node-version }}
-              uses: actions/setup-node@v4
-              with:
-                  node-version: ${{ matrix.node-version }}
-                  cache: "npm"
-            - run: npm ci
             - run: |
                   cd docs
-                  python3 -m venv venv
-                  . ./venv/bin/activate
-                  pip install -U poetry
-                  poetry install --without=dev
-                  poetry run make html
+                  uv run sphinx-build docs _build/html
             - name: Upload
               uses: actions/upload-pages-artifact@v3
               with:

@@ -123,7 +123,7 @@ var KGquery_graph = (function () {
                         options.saveGraph = true;
                         return self.drawVisjsModel("inferred", options);
                     }
-                    return alert(err.responseText || err);
+                    return MainController.errorAlert(err.responseText || err);
                 }
                 self.drawModel(options.displayGraphInList);
 
@@ -207,6 +207,8 @@ var KGquery_graph = (function () {
      * @memberof module:KGquery_graph
      * @returns {void}
      */
+    // Deprecated method replaced by hypergraphMaker_bot
+    /* 
     self.DrawImportsCommonGraph = function () {
         var source = KGquery.currentSource;
         var sources = [];
@@ -214,8 +216,6 @@ var KGquery_graph = (function () {
         if (imports) {
             sources = sources.concat(imports);
         }
-
-        self.saveVisjsModelGraph();
         var visjsData = { nodes: [], edges: [] };
         var uniqueNodes = {};
         self.KGqueryGraph = new VisjsGraphClass("KGquery_graphDiv", { nodes: [], edges: [] }, self.visjsOptions);
@@ -224,49 +224,39 @@ var KGquery_graph = (function () {
 
             function (source, callbackEach) {
                 var visjsDataSource = { nodes: [], edges: [] };
-                UserDataWidget.listUserData(null, function (err, result) {
-                    if (err) {
+                self.downloadVisjsGraph(source, function (err, result) {
+                    if (err && err != "notFound") {
                         return alert(err || err.responseText);
                     }
-                    // order to get last saved instance of our graph in user_data
-                    result = result.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-                    //if graph loaded with loadSaved --> display=checkBox displayGraphInList else last instance graph
-                    var resultId = null;
-                    result.forEach(function (item) {
-                        if (item.data_label == source + "_model") {
-                            resultId = item.id;
-                        }
-                    });
-                    if (resultId) {
-                        UserDataWidget.loadUserDatabyId(resultId, function (err, result) {
-                            if (result && result.data && result.data.data_content) {
-                                visjsDataSource = result.data.data_content;
+
+                    if (result) {
+                        visjsDataSource.nodes = result.nodes;
+                        visjsDataSource.edges = result.edges;
+                    }
+                    if (visjsDataSource.nodes) {
+                        visjsDataSource.nodes.forEach(function (node) {
+                            if (!uniqueNodes[node.id]) {
+                                uniqueNodes[node.id] = 1;
+                                node.x = null;
+                                node.y = null;
+                                //node.fixed = false;
+                                visjsData.nodes.push(node);
                             }
-                            if (!err && visjsDataSource.nodes) {
-                                visjsDataSource.nodes.forEach(function (node) {
-                                    if (!uniqueNodes[node.id]) {
-                                        uniqueNodes[node.id] = 1;
-                                        node.x = null;
-                                        node.y = null;
-                                        //node.fixed = false;
-                                        visjsData.nodes.push(node);
-                                    }
-                                });
-                                visjsDataSource.edges.forEach(function (edge) {
-                                    if (!uniqueNodes[edge.id]) {
-                                        uniqueNodes[edge.id] = 1;
-                                        visjsData.edges.push(edge);
-                                    }
-                                });
+                        });
+                        visjsDataSource.edges.forEach(function (edge) {
+                            if (!uniqueNodes[edge.id]) {
+                                uniqueNodes[edge.id] = 1;
+                                visjsData.edges.push(edge);
                             }
-                            callbackEach();
                         });
                     }
+                    self.visjsData = null;
+                    callbackEach();
                 });
             },
             function (err) {
                 if (err) {
-                    return alert(err);
+                    return MainController.errorAlert(err);
                 }
 
                 self.KGqueryGraph = new VisjsGraphClass("KGquery_graphDiv", visjsData, self.visjsOptions);
@@ -284,7 +274,7 @@ var KGquery_graph = (function () {
             },
         );
     };
-
+    */
     /**
      * Gets the implicit model data in Vis.js format.
      * @function
@@ -736,7 +726,7 @@ var KGquery_graph = (function () {
         }
         UserDataWidget.saveMetadata(label, data_type, data, group, function (err, result) {
             if (err) {
-                return alert(err.responseText || err);
+                return MainController.errorAlert(err.responseText || err);
             }
             $("#KGquery_messageDiv").text("saved graph");
             self.currentUserDataModel = { id: result?.id };
@@ -817,7 +807,7 @@ var KGquery_graph = (function () {
             },
             function (err) {
                 if (err) {
-                    return alert(err);
+                    return MainController.errorAlert(err);
                 }
                 var fileName = MainController.currentSource + "_decoration.json";
                 var payload = {
@@ -924,7 +914,7 @@ var KGquery_graph = (function () {
                 },
                 function (err, result) {
                     if (err) {
-                        return alert(err || err.responseText);
+                        return MainController.errorAlert(err || err.responseText);
                     }
                     if (result.length > 0) {
                         // new method in userData
@@ -991,9 +981,9 @@ var KGquery_graph = (function () {
             [
                 function (callbackSeries) {
                     KGquery_graph.message("generating tbox graph from abox graph");
-                    self.getImplicitModelVisjsData(KGquery.currentSource, function (err, result2) {
+                    self.getImplicitModelVisjsData(source, function (err, result2) {
                         if (err) {
-                            return alert(err);
+                            return MainController.errorAlert(err);
                         }
 
                         if (result2 === null) {
@@ -1114,7 +1104,7 @@ var KGquery_graph = (function () {
     self.importKGmodel = function () {
         ImportFileWidget.showImportDialog(function (err, result) {
             if (err) {
-                return alert(err);
+                return MainController.errorAlert(err);
             }
             var data = JSON.parse(result);
             if (!data.nodes || data.nodes.length == 0) {
@@ -1148,8 +1138,8 @@ var KGquery_graph = (function () {
      *    - Node positions and scaling
      *    - Font settings
 
-     */
-    self.drawModel = function (displayGraphInList) {
+         */
+    self.drawModel = function (displayGraphInList, callback) {
         if (!self.visjsData) {
             return alert("no graph model");
         }
@@ -1232,6 +1222,26 @@ var KGquery_graph = (function () {
                 }
             });
             self.KGqueryGraph.data.nodes.update(nodes_fonts);
+            if (callback) {
+                callback();
+            }
+        });
+    };
+    self.deleteGraph = function () {
+        var confirm = window.confirm("Are you sure you want to delete the graph?");
+        if (!confirm) {
+            return;
+        }
+        var confirm = window.confirm("your actual model graph will be deleted, are you really sure?");
+        if (!confirm) {
+            return;
+        }
+        self.visjsData = { nodes: [], edges: [] };
+
+        self.KGqueryGraph = null;
+        self.drawModel(null, function () {
+            KGquery_graph.message("Graph deleted", true);
+            KGquery_graph.saveVisjsModelGraph();
         });
     };
 

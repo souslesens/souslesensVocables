@@ -19,35 +19,6 @@ var TripleFactory = (function () {
     var self = {};
 
     /**
-     * Displays a dialog with sample triples for the current table.
-     * It checks if the current table is valid before proceeding to show the sample triples.
-     * @function
-     * @name showTripleSample
-     * @memberof module:TripleFactory
-     */
-    self.showTripleSample = function () {
-        if (!self.checkCurrentTable()) {
-            return;
-        }
-
-        self.initFilterMappingDialog(true);
-    };
-
-    /**
-     * Writes the RDF triples for the current table after filtering them based on the user-defined criteria.
-     * It checks if the current table is valid before proceeding to write the triples.
-     * @function
-     * @name writeTriples
-     * @memberof module:TripleFactory
-     */
-    self.writeTriples = function () {
-        if (!self.checkCurrentTable()) {
-            return;
-        }
-        self.initFilterMappingDialog(false);
-    };
-
-    /**
      * Indexes the RDF graph using the KGcreator_run module.
      * @function
      * @name indexGraph
@@ -83,7 +54,7 @@ var TripleFactory = (function () {
      * @name runSlsFilteredMappings
      * @memberof module:TripleFactory
      */
-    self.runSlsFilteredMappings = function () {
+    self.runSlsFilteredMappings = function (isSample) {
         var checkedNodes = JstreeWidget.getjsTreeCheckedNodes("detailedMappings_filterMappingsTree");
         if (checkedNodes.length == 0) {
             return alert(" no mappings selected");
@@ -95,11 +66,11 @@ var TripleFactory = (function () {
         try {
             var offset = parseInt($("#mappingTripleFactory_offset").val());
         } catch (err) {
-            return alert(err);
+            return MainController.errorAlert(err);
         }
 
         TripleFactory.createTriples(
-            self.filterMappingIsSample,
+            isSample,
             MappingModeler.currentTable.name,
             {
                 filterMappingIds: filterMappingIds,
@@ -107,7 +78,7 @@ var TripleFactory = (function () {
             },
             function (err, result) {
                 if (err) {
-                    alert(err.responseText || err);
+                    MainController.errorAlert(err);
                 } else {
                     // UI.message("Done", true);
                     var indexAuto = $("#MappingModeler_indexAutoCBX").prop("checked");
@@ -225,15 +196,30 @@ var TripleFactory = (function () {
                     alert(result.result);
                 }
                 UI.message(result.result);
+                self.refreshTabStat();
+
+                // JstreeWidget.loadJsTree(jstreeDiv, jstreeData, options, function () {
+                //     $("#MappingModeler_dataSourcesTab").css("margin-top", "0px");
+                // });
             },
             error: function (err) {
                 if (callback) {
                     return callback(err);
                 } else {
-                    alert(err.responseText);
+                    MainController.errorAlert(err);
                 }
                 UI.message(err.responseText);
             },
+        });
+    };
+    self.refreshTabStat = function (callback) {
+        var tableStatsMap = {};
+
+        DataSourceManager.getTriplesStats(DataSourceManager.currentSlsvSource, function (err, result) {
+            tableStatsMap = result || {};
+            DataSourceManager.loaDataSourcesJstree(MappingModeler.jstreeDivId, tableStatsMap, function (err) {
+                return callback;
+            });
         });
     };
 
@@ -306,6 +292,7 @@ var TripleFactory = (function () {
                         UI.message(result.result, true);
                     } else {
                         var message = result.totalTriplesCount[MappingModeler.currentTable.name] + " triples created in graph " + DataSourceManager.currentConfig.graphUri;
+                        TripleFactory.refreshTabStat();
                         alert(message);
                         //  UI.message(message, true);
                     }
@@ -318,7 +305,7 @@ var TripleFactory = (function () {
                 if (callback) {
                     return callback(err.responseText);
                 }
-                return alert(err.responseText);
+                return MainController.errorAlert(err);
             },
         });
     };
@@ -384,6 +371,8 @@ var TripleFactory = (function () {
     };
 
     self.showFilterMappingsDialog = function (divId, table) {
+        if (!divId) divId = "detailedMappings_filterMappingsTree";
+        if (!table) table = MappingModeler.currentTable.name;
         var nodes = MappingColumnsGraph.visjsGraph.data.nodes.get();
         var edges = MappingColumnsGraph.visjsGraph.data.edges.get();
 
@@ -395,7 +384,7 @@ var TripleFactory = (function () {
             },
             {
                 id: "Columns",
-                text: "Column",
+                text: "Columns",
                 parent: "root",
             },
             {
@@ -407,14 +396,17 @@ var TripleFactory = (function () {
 
         self.columnsMap = {};
         nodes.forEach(function (node) {
-            if (node.data && MappingModeler.columnsMappingsObjects.includes(node?.data?.type) && node.data.dataTable == table) {
+            if (node.data && MappingModeler.columnsMappingsObjects.includes(node.data.type) && node.data.dataTable == table) {
                 self.columnsMap[node.id] = node;
-                treeData.push({
-                    id: node.id,
-                    text: node.label,
-                    parent: "Columns",
-                    data: node.data,
-                });
+                // add node to treeData only if node master or if he adding a new other predicate compared to the master node
+                if (!node.data.definedInColumn || (node.data.otherPredicates && node.data.otherPredicates.length > 0)) {
+                    treeData.push({
+                        id: node.id,
+                        text: node.label,
+                        parent: "Columns",
+                        data: node.data,
+                    });
+                }
             }
         });
 
@@ -454,6 +446,10 @@ var TripleFactory = (function () {
             $("#detailedMappings_treeContainer").css("overflow", "unset");
         });
     };
+
+    /* self.showFilterMappingsDialog=function(){
+        TripleFactory.initFilterMappingDialog()
+    }*/
 
     return self;
 })();

@@ -12,6 +12,7 @@ module.exports = function () {
             const databases = await databaseModel.getUserDatabasesName(userInfo.user);
             resourceFetched(res, databases);
         } catch (error) {
+            res.status(error.status || 500).json(error);
             next(error);
         }
     }

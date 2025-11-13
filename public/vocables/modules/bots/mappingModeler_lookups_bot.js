@@ -182,7 +182,7 @@ var Lookups_bot = (function () {
             DataSourceManager.currentConfig.currentDataSource = self.currentDataSource;
             MappingColumnsGraph.saveVisjsGraph(function (err, result) {
                 if (err) {
-                    return alert(err);
+                    return MainController.errorAlert(err);
                 }
                 self.myBotEngine.nextStep();
                 if (MappingsDetails.afterSaveColumnTechnicalMappingsDialog) {

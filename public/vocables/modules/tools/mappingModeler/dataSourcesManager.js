@@ -361,7 +361,7 @@ var DataSourceManager = (function () {
                     if (callback) {
                         return callback(err);
                     }
-                    return alert(err);
+                    return MainController.errorAlert(err);
                 }
                 if (callback) {
                     return callback(null, columns);
@@ -448,7 +448,7 @@ var DataSourceManager = (function () {
                     ],
                     function (err) {
                         if (err) {
-                            return alert(err);
+                            return MainController.errorAlert(err);
                         }
                         if (callback) {
                             callback();
@@ -478,7 +478,8 @@ var DataSourceManager = (function () {
 
         if (obj.node.data.type == "databaseSource") {
             DataSourceManager.initNewDataSource(obj.node.id, "databaseSource", obj.node.data.sqlType, obj.node.data.table);
-            DataSourceManager.loadDataBaseSource(DataSourceManager.currentSlsvSource, obj.node.id, obj.node.data.sqlType);
+
+            DataSourceManager.loadDataBaseSource(DataSourceManager.currentSlsvSource, obj.node.id, obj.node.data.sqlType, callback);
         } else if (obj.node.data.type == "csvSource") {
             DataSourceManager.initNewDataSource(obj.node.id, "csvSource", obj.node.data.sqlType, obj.node.id);
             var fileName = DataSourceManager.currentSlsvSource;
@@ -494,7 +495,8 @@ var DataSourceManager = (function () {
                     columns: columns,
                 };
                 $("#MappingModeler_leftTabs").tabs("option", "active", 1);
-                UIcontroller.onActivateLeftPanelTab("MappingModeler_columnsTab");
+
+                UIcontroller.onActivateLeftPanelTab("MappingModeler_columnsTab", callback);
             });
         } else if (obj.node.data.type == "table") {
             MappingModeler.currentTable = {
@@ -507,7 +509,7 @@ var DataSourceManager = (function () {
             //self.hideForbiddenResources("Table");
             MappingModeler.currentResourceType = "Column";
             $("#MappingModeler_leftTabs").tabs("option", "active", 1);
-            UIcontroller.onActivateLeftPanelTab("MappingModeler_columnsTab");
+            UIcontroller.onActivateLeftPanelTab("MappingModeler_columnsTab", callback);
         }
 
         if (obj.node.data.type == "table" || obj.node.data.type == "csvSource") {
@@ -527,9 +529,9 @@ var DataSourceManager = (function () {
                 MappingColumnsGraph.drawResource(tableNode);
             }
         }
-        if (callback) {
+        /*if (callback) {
             callback();
-        }
+        }*/
     };
 
     /**
@@ -602,7 +604,8 @@ var DataSourceManager = (function () {
                 });
             },
         });
-        $("#smallDialogDiv").dialog("open");
+
+        UI.openDialog("smallDialogDiv", { title: "Add DataBase" });
     };
 
     /**
@@ -630,7 +633,7 @@ var DataSourceManager = (function () {
         DataSourceManager.rawConfig.databaseSources[datasource.id] = { name: datasource.name };
         DataSourceManager.saveSlsvSourceConfig(function (err, result) {
             if (err) {
-                return alert(err);
+                return MainController.errorAlert(err);
             }
             MappingModeler.onLoaded();
             // self.addDataSourceToJstree("databaseSource", datasource, "sql.sqlserver");
@@ -660,7 +663,7 @@ var DataSourceManager = (function () {
 
         DataSourceManager.saveSlsvSourceConfig(function (err, result) {
             if (err) {
-                return alert(err);
+                return MainController.errorAlert(err);
             }
             MappingModeler.onLoaded();
         });
@@ -696,7 +699,7 @@ var DataSourceManager = (function () {
 
         DataSourceManager.saveSlsvSourceConfig(function (err, result) {
             if (err) {
-                return alert(err);
+                return MainController.errorAlert(err);
             }
             // Delete all nodes/edges from this DataSource
 
@@ -762,7 +765,7 @@ var DataSourceManager = (function () {
         var query =
             "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
-            "SELECT count(?sub) as ?triples ?table  " +
+            "SELECT (count(?sub) as ?triples) ?table  " +
             fromStr +
             " WHERE {\n" +
             "  ?sub ?pred ?obj . ?sub <http://souslesens.org/KGcreator#mappingFile> ?table\n" +

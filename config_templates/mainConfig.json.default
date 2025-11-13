@@ -29,7 +29,7 @@
         "admin",
         "ConfigEditor",
         "GraphManagement",
-        "UserManagement",
+        "UserSettings",
         "OntoCreator"
     ],
     "auth0": {

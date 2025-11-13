@@ -28,7 +28,7 @@ var Weaver = (function () {
     self.loadSources = function () {
         Lineage_sources.loadSources(MainController.currentSource, function (err) {
             if (err) {
-                return alert(err.responseText);
+                return MainController.errorAlert(err);
             }
             $("#lateralPanelDiv").load("./modules/tools/weaver/html/lateralPanel.html", function () {
                 Lineage_whiteboard.initWhiteboardTab();
@@ -44,7 +44,7 @@ var Weaver = (function () {
     self.loadTopClasses = function () {
         self.getTopClasses(Lineage_sources.activeSource, {}, function (err, result) {
             if (err) {
-                alert(err);
+                MainController.errorAlert(err);
             }
             self.nodeIds = result.nodeIds;
             self.currentDepth = result.currentDepth;
@@ -263,7 +263,7 @@ var Weaver = (function () {
         items.axioms = {
             label: "Node axioms",
             action: function (e) {
-                $("#mainDialogDiv").dialog("option", "title", "Axioms of resource " + SearchWidget.currentTreeNode.data.label);
+                UI.setDialogTitle("#mainDialogDiv", "Axioms of resource " + SearchWidget.currentTreeNode.data.label);
 
                 NodeInfosAxioms.init(SearchWidget.currentTreeNode.data.source, SearchWidget.currentTreeNode, "mainDialogDiv");
             },

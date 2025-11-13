@@ -295,7 +295,7 @@ var Lineage_graphTraversal = (function () {
         if (fromUri == toUri) return alert(" from node and to node must be different");
 
         self.getShortestPathObjects(source, fromUri, toUri, {}, function (err, relations) {
-            if (err) return alert(err.responseText);
+            if (err) return MainController.errorAlert(err);
 
             var html = "";
             var previousTo = null;
@@ -427,7 +427,7 @@ var Lineage_graphTraversal = (function () {
         if (!numberOfPathes) numberOfPathes = parseInt($("#Lineage_graphTraversal_numberOfPathes").val());
 
         self.getShortestPathObjects(source, fromUri, toUri, { numberOfPathes: numberOfPathes }, function (err, relations) {
-            if (err) return alert(err.responseText);
+            if (err) return MainController.errorAlert(err);
             self.drawPathesOnWhiteboard(relations);
             $("#mainDialogDiv").dialog("close");
         });
@@ -449,7 +449,7 @@ var Lineage_graphTraversal = (function () {
         if (fromUri == toUri) return alert(" from node and to node must be different");
 
         self.getShortestPathObjects(source, fromUri, toUri, {}, function (err, relations) {
-            if (err) return alert(err.responseText);
+            if (err) return MainController.errorAlert(err);
             self.drawPathesOnWhiteboard(relations);
             $("#mainDialogDiv").dialog("close");
         });

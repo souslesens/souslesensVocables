@@ -35,53 +35,69 @@ var MappingParser = {
             edgesFromMap[edge.from].push(edge);
         });
         mappingData.nodes.forEach(function (node) {
-            if (node.data.type == "Class") {
-                nodesMap[node.id] = node;
+            nodesMap[node.id] = node;
+            if (node.data.type == "Column") {
+                columnsMap[node.id] = node.data;
+            } else if (node.data.type == "RowIndex") {
+                columnsMap[node.id] = node.data;
+            } else if (node.data.type == "VirtualColumn") {
+                columnsMap[node.id] = node.data;
+            } else if (node.data.type == "URI") {
+                columnsMap[node.id] = node.data;
             }
-            if (true || !table || node.data.dataTable == table) {
-                nodesMap[node.id] = node;
-                if (node.data.type == "Column") {
-                    columnsMap[node.id] = node.data;
-                } else if (node.data.type == "RowIndex") {
-                    columnsMap[node.id] = node.data;
-                } else if (node.data.type == "VirtualColumn") {
-                    columnsMap[node.id] = node.data;
-                } else if (node.data.type == "URI") {
-                    columnsMap[node.id] = node.data;
-                }
+            if (columnsMap[node.id]) {
+                columnsMap[node.id].mappings = [];
             }
         });
-
-        for (var columnId in columnsMap) {
-            var fromNodeData = columnsMap[columnId];
-            var columnMappings = [];
-            var edges = edgesFromMap[columnId];
-            if (edges) {
-                edges.forEach(function (edge) {
-                    var toNode = nodesMap[edge.to];
-                    var toNodeData = toNode ? toNode.data : {};
-                    if (toNodeData.type == "Class") {
-                        mappings = MappingParser.getTypeAndLabelMappings(fromNodeData, toNodeData);
-                        columnMappings = columnMappings.concat(mappings);
-                    } else {
-                    }
-                });
-            }
-
-            mappings = MappingParser.getOtherPredicates(fromNodeData);
-            columnMappings = columnMappings.concat(mappings);
-
-            columnMappings.forEach(function (mapping) {
-                mapping.isConstantUri = MappingParser.isConstantUri(mapping.o);
-                mapping.isConstantPrefixedUri = MappingParser.isConstantPrefixedUri(mapping.o);
-            });
-
-            columnsMap[columnId].mappings = columnMappings;
-        }
 
         return callback(null, columnsMap);
     },
 
+    /**
+     *  add basic mappings : rdf:type(s), label, [subClassOf], to all caolumns ids including  columns  in another column (definedInColumn)
+     * @param mappingData
+     * @param allColumnsMappings
+     */
+    setAllColumnsLabelAndType: function (mappingData, allColumnsMappings) {
+        var nodesMap = {};
+        mappingData.nodes.forEach(function (node) {
+            nodesMap[node.id] = node.data;
+        });
+        mappingData.edges.forEach(function (edge) {
+            var fromNodeData = nodesMap[edge.from];
+            if (fromNodeData && fromNodeData.definedInColumn) {
+                fromNodeData = allColumnsMappings[fromNodeData.definedInColumn];
+            }
+            if (fromNodeData && MappingParser.columnsMappingsObjects.includes(fromNodeData.type)) {
+                if (allColumnsMappings[edge.from].mappings.length == 0) {
+                    var toNodeData = nodesMap[edge.to];
+
+                    if (toNodeData && toNodeData.type == "Class") {
+                        mappings = MappingParser.getTypeAndLabelMappings(fromNodeData, toNodeData);
+                        mappings.forEach(function (mapping) {
+                            mapping.isConstantUri = MappingParser.isConstantUri(mapping.o);
+                            mapping.isConstantPrefixedUri = MappingParser.isConstantPrefixedUri(mapping.o);
+                        });
+                        allColumnsMappings[edge.from].mappings = allColumnsMappings[edge.from].mappings.concat(mappings);
+                    } else {
+                    }
+                }
+            }
+        });
+    },
+
+    setTableColumnsOtherPredicates: function (tablecolumnsMap) {
+        for (var columnId in tablecolumnsMap) {
+            var fromNodeData = tablecolumnsMap[columnId];
+            mappings = MappingParser.getOtherPredicates(fromNodeData);
+            mappings.forEach(function (mapping) {
+                mapping.isConstantUri = MappingParser.isConstantUri(mapping.o);
+                mapping.isConstantPrefixedUri = MappingParser.isConstantPrefixedUri(mapping.o);
+            });
+
+            tablecolumnsMap[columnId].mappings = tablecolumnsMap[columnId].mappings.concat(mappings);
+        }
+    },
     isConstantUri: function (str) {
         if (str && str.startsWith("http")) {
             return true;
@@ -94,25 +110,28 @@ var MappingParser = {
         }
         return false;
     },
-
-    /* Builds triples linking `from` to `to`: rdfs:subClassOf if from.rdfType is owl:Class, else rdf:type.
-    Always asserts the subject’s own rdf:type and optionally an rdfs:label when provided.
-    Inputs: fromNodeData {id, rdfType, rdfsLabel}, toNodeData {id}; returns an array of {s,p,o,isString?}.
-    Used to serialize type hierarchy and labels during mapping generation. */
+    /**
+     *   //if edge is not from rdf, rdfs or owl   and if fome and to are rdf;typeClass the edge represents a restriction
+     * @param fromNodeData
+     * @param toNodeData
+     * @return {*[]}
+     */
     getTypeAndLabelMappings: function (fromNodeData, toNodeData) {
         var mappings = [];
 
-        var type = fromNodeData.rdfType == "owl;Class" ? "rdfs:subClassOf" : "rdf:type";
+        var type = fromNodeData.rdfType == "owl:Class" ? "rdfs:subClassOf" : "rdf:type";
 
         mappings.push({
             s: fromNodeData.id,
             p: type,
             o: toNodeData.id,
+            isConstantUri: true,
         });
         mappings.push({
             s: fromNodeData.id,
             p: "rdf:type",
             o: fromNodeData.rdfType,
+            isConstantUri: true,
         });
 
         if (fromNodeData.rdfsLabel) {
@@ -126,11 +145,8 @@ var MappingParser = {
 
         return mappings;
     },
-    /** Extract column-to-column candidates for a specific table from the mapping graph.
-   Builds a columnsMap keyed by node id for nodes whose type is in columnsMappingsObjects
-   and whose dataTable equals the provided table; edgeMap will hold links discovered later.
-   Intended as the first pass before computing inter-column edges (optionally filtered by IDs). */
-    getColumnToColumnMappings: function (mappingData, table, filterMappingIds) {
+
+    getColumnToColumnMappings: function (mappingData, table, filterMappingIds, allColumnsMappings) {
         var columnsMap = {};
         var edgeMap = {};
         mappingData.nodes.forEach(function (node) {
@@ -141,18 +157,24 @@ var MappingParser = {
 
         mappingData.edges.forEach(function (edge) {
             if (columnsMap[edge.from] && columnsMap[edge.to] && filterMappingIds.indexOf(edge.id) > -1) {
-                var isRestriction = columnsMap[edge.from].data.rdfType == "owl:Class" && columnsMap[edge.to].data.rdfType == "owl:Class";
-                edge.isRestriction = isRestriction;
+                var fromColumn = columnsMap[edge.from];
+                var toColumn = columnsMap[edge.to];
+                if (fromColumn.data.definedInColumn) {
+                    fromColumn = allColumnsMappings[fromColumn.data.definedInColumn];
+                }
+                if (toColumn.data.definedInColumn) {
+                    toColumn = allColumnsMappings[toColumn.data.definedInColumn];
+                }
+                //if edge is not from rdf, rdfs or owl   and if fome and to are rdf;typeClass the edge represents a restriction
+                if (edge.data.id.indexOf("owl") < 0 && edge.data.id.indexOf("rdf") < 0) {
+                    var isRestriction = fromColumn.rdfType == "owl:Class" && toColumn.rdfType == "owl:Class";
+                    edge.isRestriction = isRestriction;
+                }
                 edgeMap[edge.id] = edge;
             }
         });
         return edgeMap;
     },
-
-    /**  Build triples from a column’s `otherPredicates` array (non-type properties).
-   @param {Object} columnData  Column mapping object; needs `id` and optionally `otherPredicates[]`.
-   @returns {Array<Object>}    List of triples {s,p,o, dataType?, dateFormat?} derived from predicates.
-   If a predicate.range contains "Resource", dataType is normalized to "xsd:string"; else the range is kept. */
     getOtherPredicates: function (columnData) {
         var mappings = [];
         if (columnData.otherPredicates) {

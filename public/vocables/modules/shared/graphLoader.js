@@ -19,7 +19,7 @@ var GraphLoader = (function () {
         UI.message("loading ontology ...");
         GraphLoader.loadGraphFromUrl(source, rdfUrl, graphUri, reload, editable, group, options, function (err, result) {
             if (err) {
-                alert(err);
+                MainController.errorAlert(err);
                 callback(err);
             }
             UI.message("Graph loaded", true);

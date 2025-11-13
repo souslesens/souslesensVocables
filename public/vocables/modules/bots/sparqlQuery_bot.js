@@ -287,7 +287,7 @@ var SparqlQuery_bot = (function () {
             self.params.whiteboardNodes = nodeIds;
             Sparql_OWL.getIndividualsType(self.params.source, nodeIds, null, function (err, result) {
                 if (err) {
-                    alert(err.responseText || err);
+                    MainController.errorAlert(err);
                     return self.myBotEngine.end();
                 }
                 self.params.currentClass = null;
@@ -326,7 +326,7 @@ var SparqlQuery_bot = (function () {
             var nonObjectPropertyFilterWorklow = new NonObjectPropertyFilterWorklow(self.implicitModel, self.params, self.myBotEngine);
             nonObjectPropertyFilterWorklow.listNonObjectPropertiesFn(function (err, filter) {
                 if (err) {
-                    alert(err.responseText || err);
+                    MainController.errorAlert(err);
                     return self.myBotEngine.previousStep();
                 }
                 self.params.nonObjectPropertyFilter = filter;
@@ -375,7 +375,7 @@ var SparqlQuery_bot = (function () {
             }
             self.getResourcesList("Predicate", "predicate", filter, {}, function (err, result) {
                 if (err) {
-                    alert(err.responseText || err);
+                    MainController.errorAlert(err);
                     return self.myBotEngine.previousStep();
                 }
 
@@ -392,7 +392,7 @@ var SparqlQuery_bot = (function () {
                         "<button onclick='SparqlQuery_bot.functions.afterChooseBindingPredicates()'>OK</button>",
                 );
                 $("#botPanel").css("display", "none");
-                $("#smallDialogDiv").dialog("open");
+                UI.openDialog("smallDialogDiv", { title: "Binding Predicates" });
                 var options = { openAll: true, withCheckboxes: true };
                 JstreeWidget.loadJsTree("sparqlQueryBot_bindingPredJstree", jstreeData, options);
             });
@@ -635,7 +635,7 @@ var SparqlQuery_bot = (function () {
 
             self.getResourcesList("Predicate", role, filter, options, function (err, result) {
                 if (err) {
-                    alert(err.responseText || err);
+                    MainController.errorAlert(err);
                     return self.myBotEngine.previousStep();
                 }
 
@@ -686,7 +686,7 @@ var SparqlQuery_bot = (function () {
         chooseConstraintClassFn: function () {
             self.getResourcesList("Class", "subject", null, { withoutImports: 1 }, function (err, result) {
                 if (err) {
-                    alert(err.responseText || err);
+                    MainController.errorAlert(err);
                     return self.myBotEngine.previousStep();
                 }
 
@@ -706,7 +706,7 @@ var SparqlQuery_bot = (function () {
             var filter = "  ?subject rdf:type owl:ObjectProperty   filter( ?predicate=rdf:type)";
             self.getResourcesList("Predicate", "subject", filter, { withoutImports: 0 }, function (err, result) {
                 if (err) {
-                    alert(err.responseText || err);
+                    MainController.errorAlert(err);
                     return self.myBotEngine.previousStep();
                 }
 
@@ -754,7 +754,7 @@ var SparqlQuery_bot = (function () {
                 }
                 self.getResourcesList("Restriction", null, filter, { withoutImports: 0 }, function (err, result) {
                     if (err) {
-                        alert(err.responseText || err);
+                        MainController.errorAlert(err);
                         return self.myBotEngine.previousStep();
                     }
 
@@ -783,7 +783,7 @@ var SparqlQuery_bot = (function () {
 
                 self.getResourcesList("Predicate", null, filter, { withoutImports: 0 }, function (err, result) {
                     if (err) {
-                        alert(err.responseText || err);
+                        MainController.errorAlert(err);
                         return self.myBotEngine.previousStep();
                     }
 
@@ -825,6 +825,7 @@ var SparqlQuery_bot = (function () {
                         data_source: Lineage_sources.activeSource,
                     },
                     removeSaveDiv: true,
+                    title: "Load SPARQL Query",
                 },
                 function (err, result) {
                     if (result.id) {
@@ -1207,7 +1208,7 @@ var SparqlQuery_bot = (function () {
                 "<button onclick='SparqlQuery_bot.functions.onValidateSparqlQuery()'>Execute</button>" +
                 "<button style='float: right' onclick='SparqlQuery_bot.saveQuery()'>SaveQuery</button>",
         );
-        $("#smallDialogDiv").dialog("open");
+        UI.openDialog("smallDialogDiv", { title: "Edit and Execute SPARQL Query" });
         $("#sparqlQueryBot_outputTypeSelect").css("z-index", 101);
         $("#sparqlQueryBot_queryTitle").html(title || "");
         $("#sparqlQueryBot_queryDescription").html(description || "");
@@ -1322,9 +1323,9 @@ var SparqlQuery_bot = (function () {
         var query = $("#sparqlQueryBot_textArea").text();
         var data = { sparqlQuery: query };
 
-        UserDataWidget.showSaveDialog("savedQueries", data, null, function (err, result) {
+        UserDataWidget.showSaveDialog("savedQueries", data, null, { title: "Save SPARQL Query" }, function (err, result) {
             if (err) {
-                return alert(err);
+                return MainController.errorAlert(err);
             }
             //console.log(result);
             $("#KGquery_messageDiv").text("saved query");

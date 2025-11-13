@@ -1,5 +1,14 @@
 const knex = require("knex");
 
+const RDF_FORMATS_MIMETYPES = {
+    json: "application/sparql-results+json",
+    nt: "text/plain",
+    ttl: "text/turtle",
+    csv: "text/csv",
+    tsv: "text/tab-separated-values",
+    xml: "application/rdf+xml",
+};
+
 /**
  * Recall a function if it fail.
  *
@@ -107,4 +116,4 @@ const cleanupConnection = (connection) => {
     return connection.destroy && connection.destroy();
 };
 
-module.exports = { cleanupConnection, convertType, chunk, getKnexConnection, redoIfFailure };
+module.exports = { cleanupConnection, convertType, chunk, getKnexConnection, redoIfFailure, RDF_FORMATS_MIMETYPES };

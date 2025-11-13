@@ -128,7 +128,7 @@ var NodeInfosWidget = (function () {
                     if (ui.newPanel.selector == "#nodeInfosWidget_AxiomsTabDiv") {
                         var source = self.currentSource;
                         // source = Lineage_sources.mainSource;
-                        $("#smallDialogDiv").dialog("option", "title", "Axioms of resource " + self.currentNode.data.label);
+                        UI.setDialogTitle("#smallDialogDiv", "Axioms of resource " + self.currentNode.data.label);
                         NodeInfosAxioms.init(source, self.currentNode, "smallDialogDiv");
                     }
                     if (ui.newPanel.selector == "#nodeInfosWidget_relationsDiv") {
@@ -153,7 +153,6 @@ var NodeInfosWidget = (function () {
             });
         } else {
             $("#" + divId).load("modules/uiWidgets/html/nodeInfosWidget.html", function (err) {
-                $("#" + divId).dialog("option", "title", " Node infos :");
                 $("#addPredicateButton").remove();
                 $("#deleteButton").remove();
                 $("#" + divId).dialog("close");
@@ -166,7 +165,7 @@ var NodeInfosWidget = (function () {
                         $("#deleteButton").remove();
                     },
                 });
-                $("#" + divId).dialog("open");
+                UI.openDialog(divId, { title: " Node infos :" });
                 $(".nodeInfosWidget_tabDiv").css("margin", "0px");
                 $("[aria-selected='true']").addClass("nodesInfos-selectedTab");
                 callback();
@@ -253,10 +252,20 @@ var NodeInfosWidget = (function () {
                     });
                 },
                 function (callbackSeries) {
-                    if (types.indexOf("http://www.w3.org/2002/07/owl#Class") < 0) {
+                    if (types.indexOf("http://www.w3.org/2002/07/owl#Class") < 0 && types.indexOf("http://www.w3.org/2002/07/owl#NamedIndividual") < 0) {
                         return callbackSeries();
                     }
-                    self.showClassesBreakDown(self.currentNodeRealSource, nodeId, "nodeInfos_classHierarchyDiv", function (err) {
+
+                    var sourceNodeId = nodeId;
+                    var nameindividual = "http://www.w3.org/2002/07/owl#NamedIndividual";
+                    if (types.includes(nameindividual)) {
+                        var position = types.indexOf(nameindividual);
+                        if (position !== -1) {
+                            types.splice(position, 1);
+                        }
+                        sourceNodeId = types;
+                    }
+                    self.showClassesBreakDown(self.currentNodeRealSource, sourceNodeId, "nodeInfos_classHierarchyDiv", function (err) {
                         callbackSeries(err);
                     });
                 },
@@ -1148,7 +1157,7 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
 
             Sparql_generic.insertTriples(self.currentSource, triples, {}, function (err, _result) {
                 if (err) {
-                    return alert(err);
+                    return MainController.errorAlert(err);
                 }
                 // store Annotator infos in source/userGraph
                 if (authentication.currentUser.groupes.indexOf("Annotator") > -1) {
@@ -1236,7 +1245,7 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
                         }
                         Sparql_generic.deleteTriples(self.currentSource, self.currentNodeId, currentEditingItem.item.prop.value, object, function (err, _result) {
                             if (err) {
-                                return alert(err);
+                                return MainController.errorAlert(err);
                             }
                             result = _result;
                             return callbackSeries();
@@ -1260,7 +1269,7 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
                 ],
                 function (err) {
                     if (err) {
-                        return alert(err);
+                        return MainController.errorAlert(err);
                     }
 
                     self.showNodeInfos(self.currentSource, self.currentNode, "mainDialogDiv");
@@ -1386,7 +1395,7 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
                 ],
                 function (err) {
                     if (err) {
-                        return alert(err);
+                        return MainController.errorAlert(err);
                     }
                     $("#" + self.divId).dialog("close");
                     UI.message("node deleted");
@@ -1408,14 +1417,14 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
 
                 SearchUtil.addPropertiesToIndex(self.currentSource, data, function (err, _result) {
                     if (err) {
-                        return alert(err);
+                        return MainController.errorAlert(err);
                     }
                 });
             }
 
             SearchUtil.addObjectsToIndex(self.currentSource, self.currentNodeId, function (err, _result) {
                 if (err) {
-                    return alert(err);
+                    return MainController.errorAlert(err);
                 }
             });
         }
@@ -1444,11 +1453,11 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
         }
         Sparql_generic.deleteTriples(self.currentSource, self.currentNodeId, self.currentEditingItem.item.prop.value, oldValue, function (err, _result) {
             if (err) {
-                return alert(err);
+                return MainController.errorAlert(err);
             }
             self.addPredicate(self.currentEditingItem.item.prop.value, newValue, self.currentSource, false, function (err, result) {
                 if (err) {
-                    return alert(err.responseText);
+                    return MainController.errorAlert(err);
                 }
                 if (self.currentEditingItem.item.prop.value.indexOf("label") > -1) {
                     if (self.currentNodeId.from) {
@@ -1568,14 +1577,13 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
     self.showCreateEntityDialog = function () {
         var divId = "smallDialogDiv";
         var sourceLabel = Lineage_sources.activeSource;
-        $("#" + divId).dialog("option", "title", " Node infos :"); // source " + sourceLabel);
-        $("#" + divId).dialog("open");
+        UI.openDialog(divId, { title: " Node infos :" });
         self.getCreateEntityDialog(sourceLabel, divId);
     };
 
     self.getCreateEntityDialog = function (source, divId) {
         self.currentSource = source;
-        $("#" + divId).dialog("open");
+        UI.openDialog(divId, { title: "Create New Entity" });
         var html =
             "rdfs:label <input style='width:200px' id='nodeInfosWidget_newEntityLabel'/>" +
             "<br></br>" +
@@ -1619,7 +1627,7 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
 
         Sparql_generic.insertTriples(source, triples, {}, function (err, result) {
             if (err) {
-                alert(err.responseText);
+                MainController.errorAlert(err);
             }
 
             var node = {
@@ -1638,7 +1646,7 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
             });
             SearchUtil.generateElasticIndex(source, { ids: [proposedUri] }, function (err, result) {
                 if (err) {
-                    return alert(err.responseText);
+                    return MainController.errorAlert(err);
                 }
                 UI.message("node Created and Indexed");
             });
@@ -1740,7 +1748,7 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
 
             if (!targetDiv) {
                 targetDiv = "smallDialogDiv";
-                $("#" + targetDiv).dialog("open");
+                UI.openDialog(targetDiv, { title: " Node Restrictions" });
                 $("#addPredicateButton").remove();
 
                 $("#deleteButton").remove();
@@ -1772,7 +1780,7 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
 
         Lineage_createRelation.deleteRestriction(self.currentSource, restrictionNode, function (err, result) {
             if (err) {
-                return alert(err.responseText || err);
+                return MainController.errorAlert(err);
             }
             self.showRestrictionInfos(self.currentNode, "nodeInfos_restrictionsDiv", false);
         });

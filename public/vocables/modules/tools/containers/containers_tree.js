@@ -36,7 +36,7 @@ var Containers_tree = (function () {
         if (term) {
             Containers_tree.drawContainerAndAncestorsJsTree(self.currentSource, term, {}, function (err, result) {
                 if (err) {
-                    return alert(err.responseText);
+                    return MainController.errorAlert(err.responseText);
                 }
             });
         } else {
@@ -168,7 +168,7 @@ var Containers_tree = (function () {
             },
             function (err, result) {
                 if (err) {
-                    return alert(err.responsetext);
+                    return MainController.errorAlert(err.responsetext);
                 }
 
                 if (result.length == 0) {
@@ -416,7 +416,7 @@ var Containers_tree = (function () {
                 var graphNodeData = Lineage_whiteboard.currentGraphNode.data;
                 Containers_tree.menuActions.addResourcesToContainer(self.currentSource, self.currentContainer, graphNodeData, false, function (err, result) {
                     if (err) {
-                        return alert(err.responseText || err);
+                        return MainController.errorAlert(err.responseText || err);
                     }
                     Containers_graph.graphResources(self.currentSource, self.currentContainer.data, { leaves: true });
                 });
@@ -490,7 +490,7 @@ var Containers_tree = (function () {
         });
         Sparql_generic.insertTriples(source, triples, null, function (err, result) {
             if (err) {
-                return alert(err.responseText);
+                return MainController.errorAlert(err.responseText);
             }
             var parent = self.currentContainer || "#";
             var newNode = {
@@ -572,7 +572,7 @@ var Containers_tree = (function () {
                 if (callback) {
                     return callback(err);
                 }
-                return alert(err.responseText);
+                return MainController.errorAlert(err.responseText);
             }
             UI.message("nodes added to container " + container.label);
             var jstreeData = [];
@@ -661,7 +661,7 @@ var Containers_tree = (function () {
         self.currentContainer = null;
         Sparql_generic.deleteTriples(source, container.data.id, null, null, function (err) {
             if (err) {
-                return alert(err.responseText);
+                return MainController.errorAlert(err.responseText);
             }
 
             Sparql_generic.deleteTriples(source, null, null, container.data.id, function (err) {

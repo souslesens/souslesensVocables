@@ -339,7 +339,7 @@ var MergeNodes = (function () {
                             return callback(err, sourceMessage);
                         }
                         if (err) {
-                            return alert(err.responseText);
+                            return MainController.errorAlert(err);
                         }
                         alert(message);
                         return UI.message("ALL DONE", true);

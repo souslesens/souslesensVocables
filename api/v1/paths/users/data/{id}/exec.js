@@ -3,32 +3,76 @@ const { readMainConfig } = require("../../../../../../model/config");
 const { userDataModel } = require("../../../../../../model/userData");
 const { RdfDataModel } = require("../../../../../../model/rdfData");
 const userManager = require("../../../../../../bin/user.");
-
+const UserRequestFiltering = require("../../../../../../bin/userRequestFiltering..js");
+const ConfigManager = require("../../../../../../bin/configManager.");
+const { Template } = require("@huggingface/jinja");
+const { RDF_FORMATS_MIMETYPES } = require("../../../../../../model/utils");
 module.exports = () => {
     GET = async (req, res, _next) => {
         try {
             const userInfo = await userManager.getUser(req.user);
             const userData = await userDataModel.find(req.params.id, userInfo.user);
-            if (userData.data_type === "sparqlQuery") {
-                let query;
-                if (userDataModel._mainConfig.userData.location === "file") {
-                    query = fs.readFileSync(userData.data_content);
-                } else {
-                    query = userData.data_content.query;
-                }
-                // replace query params
-                if (req.query.params) {
-                    for (const [key, value] of Object.entries(JSON.parse(req.query.params))) {
-                        query = query.replace(`{{${key}}}`, value);
-                    }
-                }
-                const config = readMainConfig();
-                const rdfDataModel = new RdfDataModel(config.sparql_server.url, config.sparql_server.user, config.sparql_server.password);
-                const jsonResult = await rdfDataModel.execQuery(query);
-                res.status(200).json(jsonResult);
-            } else {
+
+            if (userData.data_type !== "sparqlQuery") {
                 res.status(400).json({ message: "This userData is not a sparqlQuery" });
+                return;
             }
+            if (!userData.data_content.sparqlQuery) {
+                res.status(400).json({ message: "Nothing on sparqlQuery" });
+                return;
+            }
+
+            const query = userData.data_content.sparqlQuery;
+
+            // get format and remove it from query
+            let format = "json";
+            if ("format" in req.query) {
+                format = req.query.format;
+                delete req.query["format"];
+            }
+            // query limit and offset gestion if they are in the query
+            if (query.indexOf("{{limit}}") > 0) {
+                if ("limit" in req.query) {
+                    if (!req.query.limit.toLowerCase().includes("limit")) {
+                        req.query.limit = "LIMIT " + req.query.limit;
+                    }
+                } else {
+                    req.query.limit = "LIMIT 10000";
+                }
+            }
+
+            if (query.indexOf("{{offset}}") > 0) {
+                if ("offset" in req.query) {
+                    if (!req.query.offset.toLowerCase().includes("offset")) {
+                        req.query.offset = "OFFSET " + req.query.offset;
+                    }
+                } else {
+                    req.query.offset = "OFFSET 0";
+                }
+            }
+
+            // replace query params
+            const template = new Template(query);
+            const renderedQuery = template.render(req.query);
+
+            // check that query is confom before execute
+            const userSources = await ConfigManager.getUserSources(req, res);
+            const user = await ConfigManager.getUser(req, res);
+            const filteredQuery = await UserRequestFiltering.filterSparqlRequestAsync(query, userSources, user);
+            if (filteredQuery.parsingError) {
+                return processResponse(res, filteredQuery.parsingError, null);
+            }
+
+            // exec query
+            const config = readMainConfig();
+            const rdfDataModel = new RdfDataModel(config.sparql_server.url, config.sparql_server.user, config.sparql_server.password);
+            const result = await rdfDataModel.execQuery(renderedQuery, format);
+            if (format === "json") {
+                res.status(200).json(result);
+            } else {
+                res.status(200).set("content-Type", RDF_FORMATS_MIMETYPES[format]).send(result);
+            }
+            return;
         } catch (error) {
             if (error.cause !== undefined) {
                 res.status(error.cause).json({ message: error.message });
@@ -52,7 +96,7 @@ module.exports = () => {
             {
                 type: "string",
                 in: "query",
-                name: "params",
+                name: "format",
                 required: false,
             },
         ],

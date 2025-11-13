@@ -11,8 +11,6 @@ const GraphManagement = (function () {
         $("#accordion").accordion("option", { active: 2 });
 
         setTimeout(function () {
-            $("#mainDialogDiv").dialog("option", "title", "Graph Management");
-
             $("#mainDialogDiv").on("dialogclose", function (event, ui) {
                 self.umountKGUploadApp();
             });
@@ -23,7 +21,7 @@ const GraphManagement = (function () {
             $("#mainDialogDiv").html(`
                     <div style="width:90vw;height: 90vh"><div id="mount-graph-management-here"></div></div>
             `);
-            $("#mainDialogDiv").dialog("open");
+            UI.openDialog("mainDialogDiv", { title: "Graph Management" });
             self.umountKGUploadApp = self.createApp();
         }, 200);
     };

@@ -36,10 +36,9 @@ var Lineage_reasoner = (function () {
      * @returns {void}
      */
     self.showReasonerDialog = function () {
-        $("#smallDialogDiv").dialog("option", "title", "Reasoner");
         self.currentSource = Lineage_sources.activeSource;
         $("#smallDialogDiv").load("modules/tools/lineage/html/lineage_reasoner.html", function () {
-            $("#smallDialogDiv").dialog("open");
+            UI.openDialog("smallDialogDiv", { title: "Reasoner" });
             if (!self.loaded) {
                 self.loaded = true;
                 $("#lineage_reasoner_outputDiv").css("display", "none");
@@ -99,7 +98,7 @@ var Lineage_reasoner = (function () {
                 $("#lineage_reasoner_outputDiv").css("display", "block");
             },
             error(err) {
-                alert(err.responseText);
+                MainController.errorAlert(err);
             },
         });
     };
@@ -132,7 +131,7 @@ var Lineage_reasoner = (function () {
                 $("#lineage_reasoner_infosDiv").html(JSON.stringify(data, null, 2));
             },
             error(err) {
-                alert(err.responseText);
+                MainController.errorAlert(err);
             },
         });
     };
@@ -173,7 +172,7 @@ var Lineage_reasoner = (function () {
                 JstreeWidget.loadJsTree("reasonerTreeContainerDiv", jstreeData, options);
             },
             error(err) {
-                alert(err.responseText);
+                MainController.errorAlert(err);
             },
         });
     };
@@ -229,7 +228,7 @@ var Lineage_reasoner = (function () {
                 });
             },
             error(err) {
-                return alert(err.responseText);
+                MainController.errorAlert(err);
                 if (callback) {
                     return callback(err);
                 }
@@ -251,7 +250,7 @@ var Lineage_reasoner = (function () {
             self.currentInferencePredicates = predicates;
             self.runInference(predicates, function (err, result) {
                 if (err) {
-                    return alert(err);
+                    return MainController.errorAlert(err);
                 }
                 self.inferenceData = result;
                 self.listInferenceSubjects();

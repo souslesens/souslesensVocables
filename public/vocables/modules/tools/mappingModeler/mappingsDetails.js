@@ -5,6 +5,7 @@ import TripleFactory from "./tripleFactory.js";
 import MappingTransform from "./mappingTransform.js";
 import UIcontroller from "./uiController.js";
 import DataSourceManager from "./dataSourcesManager.js";
+import MappingColumnsGraph from "./mappingColumnsGraph.js";
 
 /**
  * MappingsDetails manages technical mappings (non structural mappings)
@@ -305,7 +306,7 @@ var MappingsDetails = (function () {
                             MappingColumnsGraph.currentGraphNode = MappingColumnsGraph.visjsGraph.data.nodes.get(node.parent);
                             Lookups_bot.start(Lookups_bot.lookUpWorkflow, {}, function (err, result) {
                                 if (err) {
-                                    return alert(err);
+                                    return MainController.errorAlert(err);
                                 }
                             });
                         },
@@ -408,6 +409,51 @@ var MappingsDetails = (function () {
 
         self.setMappingDefaultFieds(column);
         console.log(column);
+    };
+
+    self.openColumnTechDialog = function (dialogNode, callback) {
+        var html =
+            '<div style="height:80vh">' +
+            '  <div style="display:flex; flex-direction:row">' +
+            "    <div>" +
+            '      <div id="detailedMappings_techDetailsDiv" style="background-color:#fff; padding:5px; border:2px #278ecc solid"></div>' +
+            '      <div id="detailedMappingsGraphDiv" style="width:70vw; height:65vh"></div>' +
+            "    </div>" +
+            "  </div>" +
+            "</div>";
+
+        function vhToPx(v) {
+            return Math.round(window.innerHeight * (v / 200));
+        }
+        function vwToPx(v) {
+            return Math.round(window.innerWidth * (v / 150));
+        }
+
+        var dialogHeightPx = vhToPx(80);
+        var dialogWidthPx = vwToPx(75);
+
+        $("#smallDialogDiv").html(html);
+        $("#smallDialogDiv")
+            .dialog("option", {
+                title: "Column Technical Mappings",
+                resizable: true,
+                draggable: true,
+                modal: false,
+                width: dialogWidthPx,
+                height: dialogHeightPx,
+                position: { my: "center", at: "center", of: window },
+            })
+            .dialog("open");
+
+        self.showColumnTechnicalMappingsDialog("detailedMappings_techDetailsDiv", dialogNode, function () {});
+        $(window)
+            .off("resize.mcgTechDlg")
+            .on("resize.mcgTechDlg", function () {
+                $("#smallDialogDiv").dialog("option", {
+                    width: vwToPx(75),
+                    height: vhToPx(80),
+                });
+            });
     };
 
     /**
@@ -895,8 +941,7 @@ var MappingsDetails = (function () {
                 column = MappingColumnsGraph.currentGraphNode.label;
             }
             $("#smallDialogDiv").load("./modules/tools/mappingModeler/html/transformColumnDialog.html", function (err) {
-                $("#smallDialogDiv").dialog("open");
-                $("#smallDialogDiv").dialog("option", "title", "Transform for " + column);
+                UI.openDialog("smallDialogDiv", { title: "Transform for " + column });
                 self.transformColumn = column;
                 if (callback) {
                     callback();

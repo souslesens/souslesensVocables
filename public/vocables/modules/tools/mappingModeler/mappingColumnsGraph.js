@@ -161,16 +161,6 @@ var MappingColumnsGraph = (function () {
     };
 
     /**
-     * return a visJsEdge for DatatypeProperty
-     * @param {string} from  node id (subject column)
-     * @param {string} to    node id (object/value column)
-     * @param {string} label property label
-     * @param {Object|string} property  either {id,label,source} or a URI string
-     * @param {string} uri   property URI (if property is string, this is redundant but accepted)
-     * @param {string} color edge color
-     */
-
-    /**
      * Draws a new resource node in the Vis.js graph.
      * Positions the node dynamically and links it with existing nodes if necessary.
      * @function
@@ -461,7 +451,8 @@ var MappingColumnsGraph = (function () {
                 var tableSourceType = node.id.indexOf(".") > -1 ? "csvSource" : "table";
 
                 if (tableSourceType == "table" && !DataSourceManager.currentConfig.currentDataSource) {
-                    return alert("choose a data source first");
+                    // return alert("choose a data source first");
+                    MappingColumnsGraph.activeSourceFromNode(node, function () {});
                 }
 
                 var obj = {
@@ -479,6 +470,58 @@ var MappingColumnsGraph = (function () {
             self.relationMessage();
         }
     };
+
+    self.activeSourceFromNode = function (node, callback) {
+        var obj = {};
+        obj.node = {};
+        var dataSource = node.data.datasource;
+        var csvSource = DataSourceManager.currentConfig.csvSources;
+        var dataBaseSource = DataSourceManager.currentConfig.databaseSources;
+        obj.node.id = dataSource;
+        obj.node.data = {};
+        Object.keys(dataBaseSource).forEach(function (key) {
+            if (key == dataSource) {
+                obj.node.data.type = "databaseSource";
+            }
+        });
+        Object.keys(csvSource).forEach(function (key) {
+            if (key == dataSource) {
+                obj.node.data.type = "csvSource";
+            }
+        });
+        if (obj.node.data.type == "databaseSource") {
+            $.ajax({
+                type: "GET",
+                url: Config.apiUrl + "/databases/" + dataSource,
+                dataType: "json",
+                success: function (data, _textStatus, _jqXHR) {
+                    obj.node.data.id = data.name;
+                    obj.node.data.sqlType = data.driver;
+                    DataSourceManager.onDataSourcesJstreeSelect(undefined, obj, function () {
+                        var obj2 = { node: { label: node.data.dataTable, data: { type: "table", id: node.data.dataTable, label: node.data.dataTable } } };
+                        DataSourceManager.onDataSourcesJstreeSelect(undefined, obj2, callback);
+                    });
+                },
+                error: function (err) {
+                    return callbackSeries(err);
+                },
+            });
+        } else {
+            obj.node.data.id = dataSource;
+            DataSourceManager.onDataSourcesJstreeSelect(undefined, obj, callback);
+        }
+    };
+    /**
+     * @function
+     * @name showImplicitGraphPopupMenu
+     * @memberof module:MappingColumnsGraph
+     * Displays a minimal context menu for implicit-model nodes (Class/superClass only).
+     * Sets `currentGraphNode`, renders a “Node Infos” action, and positions the popup at the event coordinates.
+     * @param {Object} node - Vis.js node object; must include `data.type`.
+     * @param {{x:number,y:number}} point - Screen point (will be updated from `event`).
+     * @param {{x:number,y:number}} event - Mouse event with screen coordinates.
+     * @returns {void}
+     */
 
     self.showImplicitGraphPopupMenu = function (node, point, event) {
         if (!node || !node.data) return;
@@ -602,7 +645,7 @@ var MappingColumnsGraph = (function () {
             };
             Sparql_OWL.getFilteredTriples(MappingModeler.currentSLSsource, self.currentGraphNode.data.id, "http://www.w3.org/2000/01/rdf-schema#subClassOf", null, options, function (err, result) {
                 if (err) {
-                    return alert(err);
+                    return MainController.errorAlert(err);
                 }
                 if (result.length == 0) {
                     return alert("no superClass");
@@ -709,8 +752,7 @@ var MappingColumnsGraph = (function () {
         showColumnDetails: function (node) {
             var divId = "columnMappingDetailsDiv";
             $("#smallDialogDiv").html("<div id='" + divId + "'></div>");
-            $("#smallDialogDiv").dialog("option", "title", "Column Technical Mappings");
-            $("#smallDialogDiv").dialog("open");
+            UI.openDialog("smallDialogDiv", { title: "Column Technical Mappings" });
             MappingsDetails.showColumnTechnicalMappingsDialog(divId, node || self.currentGraphNode, function () {
                 $("#smallDialogDiv").dialog("close");
             });
@@ -760,7 +802,7 @@ var MappingColumnsGraph = (function () {
             },
             function (err) {
                 if (err) {
-                    return alert(err);
+                    return MainController.errorAlert(err);
                 }
                 var classNodes = nodes.filter(function (node) {
                     return node.data.type == "Class";
@@ -992,11 +1034,11 @@ var MappingColumnsGraph = (function () {
                     }
                 },
                 error(err) {
-                    return alert(err);
+                    return MainController.errorAlert(err);
                 },
             });
         } catch (e) {
-            return alert(e);
+            return MainController.errorAlert(e);
         }
     };
 
@@ -1245,7 +1287,26 @@ var MappingColumnsGraph = (function () {
         data.positions = {};
         var isHierarchical = visjsOptions.layout && visjsOptions.layout.hierarchical;
         var distinctEdges = {};
+        var dataSources = {};
         var dataTables = self.getDatasourceTablesFromVisjsGraph();
+
+        if (data && data.nodes) {
+            data.nodes.forEach(function (node) {
+                if (node && node.data && MappingModeler.columnsMappingsObjects.indexOf(node.data.type) !== -1) {
+                    if (node.data.dataTable && (node.data.datasource || node.data.dataSource)) {
+                        dataSources[node.data.dataTable] = node.data.datasource || node.data.dataSource;
+                    }
+                }
+            });
+        }
+
+        data.nodes.forEach(function (node) {
+            if (node && node.data && node.data.type == "Table") {
+                if (Object.keys(dataSources).indexOf(node.id) !== -1) {
+                    node.data.datasource = dataSources[node.id];
+                }
+            }
+        });
         if (true || !isHierarchical) {
             var tables = {};
             var nodesMap = {};
@@ -1364,7 +1425,7 @@ var MappingColumnsGraph = (function () {
                         if (err.responseJSON == "file does not exist") {
                             return;
                         }
-                        return alert(err);
+                        return MainController.errorAlert(err);
                     },
                 });
             });
@@ -1373,7 +1434,7 @@ var MappingColumnsGraph = (function () {
         self.importMappingsFromJSONFile = function () {
             ImportFileWidget.showImportDialog(function (err, result) {
                 if (err) {
-                    return alert(err);
+                    return MainController.errorAlert(err);
                 }
                 var data = JSON.parse(result);
                 if (data.nodes.length == 0) {
@@ -1398,7 +1459,7 @@ var MappingColumnsGraph = (function () {
                         MappingModeler.onLoaded();
                     },
                     error(err) {
-                        return alert(err);
+                        return MainController.errorAlert(err);
                     },
                 });
             });
@@ -1418,7 +1479,7 @@ var MappingColumnsGraph = (function () {
     self.importMappingsFromJSONFile = function () {
         ImportFileWidget.showImportDialog(function (err, result) {
             if (err) {
-                return alert(err);
+                return MainController.errorAlert(err);
             }
             var data = JSON.parse(result);
             if (data.nodes.length == 0) {
@@ -1443,7 +1504,7 @@ var MappingColumnsGraph = (function () {
                     MappingModeler.onLoaded();
                 },
                 error(err) {
-                    return alert(err);
+                    return MainController.errorAlert(err);
                 },
             });
         });
@@ -1483,7 +1544,7 @@ var MappingColumnsGraph = (function () {
                     if (err.responseJSON == "file does not exist") {
                         return;
                     }
-                    return alert(err);
+                    return MainController.errorAlert(err);
                 },
             });
         });
@@ -1641,12 +1702,7 @@ var MappingColumnsGraph = (function () {
                                 label: displayLabel,
                                 shape: "box",
                                 color: columnColor,
-                                data: {
-                                    id: columnId,
-                                    label: columnLabel,
-                                    type: "Column",
-                                    dataTable: dataTable,
-                                },
+                                data: column.data,
                             });
                             uniqueNodes[columnId] = 1;
                         }
@@ -1714,7 +1770,7 @@ var MappingColumnsGraph = (function () {
                                 label: String(columnLalbel),
                                 shape: "box",
                                 color: "#eaf4ff",
-                                data: { id: columnId, label: String(columnLalbel), type: "Column", dataTable: dataTable },
+                                data: column.data,
                             });
                             uniqueNodes[columnId] = 1;
                         }
@@ -1791,15 +1847,17 @@ var MappingColumnsGraph = (function () {
                     //  classVisjsData={nodes:[], edges:[]}
                     var html = "<div style='width:1000px;height:800px' id='mappingModeler_implicitModelGraph'></div>";
                     $("#mainDialogDiv").html(html);
-                    $("#mainDialogDiv").dialog("open");
+                    UI.openDialog("mainDialogDiv", { title: "Implicit Model" });
 
                     var implicitOptions = {
+                        visjsOptions: { autoResize: true, width: "100%", height: "100%" },
                         onclickFn: function (node, event, options) {
                             if (!node) return;
                             self.currentGraphNode = node;
 
                             if (!node.data) return;
-                            if (node.data.type !== "Column") return;
+
+                            if (!MappingModeler.columnsMappingsObjects.includes(node.data.type)) return;
 
                             var baseLabel = null;
                             if (node.data && node.data.label) {
@@ -1814,26 +1872,11 @@ var MappingColumnsGraph = (function () {
                             var dialogNode = {
                                 id: node.id,
                                 label: baseLabel,
-                                data: {
-                                    id: node.id,
-                                    label: baseLabel,
-                                    type: "Column",
-                                    dataTable: parentTable,
-                                },
+                                data: node.data,
                             };
-                            if (MappingModeler.currentTable.name == node.data.dataTable) {
-                                $("#MappingModeler_leftTabs").tabs("option", "active", 3);
-                                UIcontroller.onActivateLeftPanelTab("MappingModeler_technicalDetailTab", function () {
-                                    MappingsDetails.showColumnTechnicalMappingsDialog("detailedMappings_techDetailsDiv", dialogNode, function () {
-                                        MappingModeler.currentTreeNode = MappingColumnsGraph.visjsGraph.data.nodes.get(node.id);
-                                        MappingsDetails.showDetailsDialog(null, function () {
-                                            var afterSave = null;
-                                            afterSave = MappingsDetails.afterSaveColumnTechnicalMappingsDialog;
-                                            MappingsDetails.showColumnTechnicalMappingsDialog("detailedMappings_techDetailsDiv", MappingModeler.currentTreeNode, afterSave);
-                                        });
-                                    });
-                                });
-                            }
+                            MappingColumnsGraph.activeSourceFromNode(dialogNode, function () {
+                                MappingsDetails.openColumnTechDialog(dialogNode, function () {});
+                            });
                         },
 
                         onRightClickFn: function (node, point, event) {
@@ -1851,6 +1894,16 @@ var MappingColumnsGraph = (function () {
             function (err) {},
         );
     };
+
+    /**
+     * @function
+     * @name getNodesOfType
+     * @memberof module:MappingColumnsGraph
+     * Returns nodes (or their ids) whose `data.type` matches one or more requested types.
+     * @param {string|string[]} types - Type name or list of types to include.
+     * @param {boolean} [onlyIds=false] - If true, returns node ids instead of full node objects.
+     * @returns {Array<string|Object>} Array of nodes or ids filtered by type; empty array if none.
+     */
 
     self.getNodesOfType = function (types, onlyIds) {
         if (!types) {

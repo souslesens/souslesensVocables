@@ -35,10 +35,8 @@ var Lineage_createResource = (function () {
         self.selectedNode = Lineage_whiteboard.currentGraphNode;
         self.currentSource = Lineage_sources.activeSource;
 
-        $("#LineagePopup").dialog("option", "title", "Create resource in source " + self.currentSource);
-
         $("#LineagePopup").load("modules/tools/lineage/html/createResourceDialog.html", function () {
-            $("#LineagePopup").dialog("open");
+            UI.openDialog("LineagePopup", { title: "Create resource in source " + self.currentSource });
             $("#editPredicate_mainDiv").remove();
             //AxiomEditor.init(Lineage_sources.activeSource)
             // $("#lineageCreateResource_labelInput") .trigger( "focus" );
@@ -295,7 +293,7 @@ var Lineage_createResource = (function () {
     self.writeResourceFromUI = function () {
         self.writeResource(self.currentSource, self.currentResourceTriples, function (err, result) {
             if (err) {
-                return alert(err.responseText);
+                return MainController.errorAlert(err);
             }
             UI.message("resource Created");
             var nodeData = {
@@ -472,7 +470,7 @@ var Lineage_createResource = (function () {
         // verify if node is owl:Class
         Sparql_OWL.getNodeInfos(source, superClassUri, null, function (err, result) {
             if (err) {
-                return alert(err);
+                return MainController.errorAlert(err);
             }
             if (result.length == 0) {
                 return alert("node is not a class");
@@ -488,7 +486,7 @@ var Lineage_createResource = (function () {
             var triples = Lineage_createResource.getResourceTriples(source, "owl:Class", null, label, superClassUri);
             Lineage_createResource.writeResource(source, triples, function (err, resourceId) {
                 if (err) {
-                    return alert(err);
+                    return MainController.errorAlert(err);
                 }
                 UI.message("subClass created");
                 var nodeData = {

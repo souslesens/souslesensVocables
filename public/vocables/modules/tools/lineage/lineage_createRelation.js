@@ -36,11 +36,10 @@ var Lineage_createRelation = (function () {
      */
     self.showAddEdgeFromGraphDialog = function (edgeData, callback) {
         self.callbackFn = callback;
-        $("#smallDialogDiv").dialog("option", "title", "Create relation in source " + Lineage_sources.activeSource);
         Lineage_sources.showHideEditButtons(Lineage_sources.activeSource);
         var allLabelsMap = {};
         $("#smallDialogDiv").load("modules/tools/lineage/html/lineageAddEdgeDialog.html", function () {
-            $("#smallDialogDiv").dialog("open");
+            UI.openDialog("smallDialogDiv", { title: "Create relation in source " + Lineage_sources.activeSource });
             self.sourceNode = edgeData.from; // Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(edgeData.from).data;
             self.targetNode = edgeData.to; //Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(edgeData.to).data;
 
@@ -178,7 +177,15 @@ var Lineage_createRelation = (function () {
                     },
 
                     function (callbackSeries) {
-                        OntologyModels.getAllowedPropertiesBetweenNodes(source, self.sourceNode.id, self.targetNode.id, { keepSuperClasses: true }, function (err, result) {
+                        var sourceNodeId = self.sourceNode.id;
+                        var targetNodeId = self.targetNode.id;
+                        if (self.sourceNode.rdfType && self.sourceNode.rdfType == "NamedIndividual" && self.sourceNode.parentClass) {
+                            sourceNodeId = self.sourceNode.parentClass;
+                        }
+                        if (self.targetNode.rdfType && self.targetNode.rdfType == "NamedIndividual" && self.targetNode.parentClass) {
+                            targetNodeId = self.targetNode.parentClass;
+                        }
+                        OntologyModels.getAllowedPropertiesBetweenNodes(source, sourceNodeId, targetNodeId, { keepSuperClasses: true }, function (err, result) {
                             if (err) {
                                 return callbackSeries(err);
                             }
@@ -209,9 +216,20 @@ var Lineage_createRelation = (function () {
                                 authorizedProps = result.constraints;
 
                                 var html = "Ancestors<br>";
-                                var str = ""; //"<b>" + self.sourceNode.label + "</b>";
+                                var str;
+                                var sourceNameIndividual = false;
+                                var sourceNameIndividual1 = false;
+                                if (self.sourceNode.rdfType && self.sourceNode.rdfType == "NamedIndividual" && self.sourceNode.parentClass) {
+                                    str = "<b>";
+                                    str += self.sourceNode.label;
+                                    str += "</b>";
+                                    sourceNameIndividual = true;
+                                } else {
+                                    str = "";
+                                }
+                                //"<b>" + self.sourceNode.label + "</b>";
                                 result.nodes.startNode.forEach(function (item, index) {
-                                    if (index == 0) {
+                                    if (index == 0 && !sourceNameIndividual) {
                                         str += "<b>";
                                     } else {
                                         str += "->";
@@ -221,16 +239,24 @@ var Lineage_createRelation = (function () {
                                     } else {
                                         str += Sparql_common.getLabelFromURI(item);
                                     }
-                                    if (index == 0) {
+                                    if (index == 0 && !sourceNameIndividual) {
                                         str += "</b>";
                                     }
                                 });
                                 html += str;
                                 html += "<br>";
 
-                                var str = ""; //"<b>" + self.targetNode.label + "</b>";
+                                var str; //"<b>" + self.targetNode.label + "</b>";
+                                if (self.targetNode.rdfType && self.targetNode.rdfType == "NamedIndividual" && self.targetNode.parentClass) {
+                                    str = "<b>";
+                                    str += self.targetNode.label;
+                                    str += "</b>";
+                                    sourceNameIndividual1 = true;
+                                } else {
+                                    str = "";
+                                }
                                 result.nodes.endNode.forEach(function (item, index) {
-                                    if (index == 0) {
+                                    if (index == 0 && !sourceNameIndividual1) {
                                         str += "<b>";
                                     } else {
                                         str += "->";
@@ -240,7 +266,7 @@ var Lineage_createRelation = (function () {
                                     } else {
                                         str += Sparql_common.getLabelFromURI(item);
                                     }
-                                    if (index == 0) {
+                                    if (index == 0 && !sourceNameIndividual1) {
                                         str += "</b>";
                                     }
                                 });
@@ -393,7 +419,7 @@ var Lineage_createRelation = (function () {
                     }
                     Lineage_createRelation.createSubProperty(Lineage_sources.activeSource, self.currentPropertiesTreeNode.data.id, subPropertyLabel, true, function (err, result) {
                         if (err) {
-                            return alert(err);
+                            return MainController.errorAlert(err);
                         }
 
                         if (!self.domainOntologyProperties) {
@@ -536,7 +562,7 @@ var Lineage_createRelation = (function () {
             var xsdType = prompt("DatatypeProperty range xsd:type");
 
             self.createDataTypeProperty(Lineage_sources.activeSource, propLabel, null, xsdType, function (err, result) {
-                if (err) return alert(err.responseText);
+                if (err) return MainController.errorAlert(err);
                 $("#smallDialogDiv").dialog("close");
                 return UI.message("annotation property created", true);
             });
@@ -607,7 +633,7 @@ var Lineage_createRelation = (function () {
                             if (confirm("delete previous relation " + oldRelations[0].data.propertyLabel)) {
                                 Lineage_createRelation.deleteRestriction(Lineage_sources.activeSource, oldRelations[0], function (err) {
                                     if (err) {
-                                        alert(err);
+                                        MainController.errorAlert(err);
                                     }
                                 });
                             }
@@ -945,7 +971,7 @@ var Lineage_createRelation = (function () {
                     if (callback) {
                         return callback(err);
                     }
-                    return alert(err);
+                    return MainController.errorAlert(err);
                 }
 
                 if (callback) {

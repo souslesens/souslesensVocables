@@ -8,6 +8,7 @@ module.exports = function () {
             const users = await userModel.getUserAccounts();
             res.status(200).json(successfullyFetched(sortObjectByKey(users)));
         } catch (error) {
+            res.status(error.status || 500).json(error);
             next(error);
         }
     }
@@ -34,6 +35,7 @@ module.exports = function () {
             const users = await userModel.getUserAccounts();
             res.status(200).json(successfullyUpdated(users));
         } catch (error) {
+            res.status(error.status || 500).json(error);
             next(error);
         }
     }

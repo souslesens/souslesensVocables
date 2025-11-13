@@ -167,9 +167,9 @@ var SearchWidget = (function () {
         SearchUtil.getSimilarLabelsInSources(null, searchedSources, [term], null, mode, options, function (_err, result) {
             if (_err) {
                 if (callback) {
-                    return callback(_err.responseText || _err);
+                    return callback(_err);
                 }
-                return alert(_err.responseText || _err);
+                return MainController.errorAlert(_err);
             }
 
             if (callback) {
@@ -181,7 +181,7 @@ var SearchWidget = (function () {
 
             SearchWidget.searchResultToJstree(options.jstreeDiv || self.currentTargetDiv, result, options, function (err, _result) {
                 if (err) {
-                    return alert(err.responseText || err);
+                    return MainController.errorAlert(err);
                 }
             });
         });
@@ -507,7 +507,7 @@ var SearchWidget = (function () {
         items.axioms = {
             label: "Node axioms",
             action: function (e) {
-                $("#smallDialogDiv").dialog("option", "title", "Axioms of resource " + self.currentTreeNode.data.label);
+                UI.setDialogTitle("#smallDialogDiv", "Axioms of resource " + self.currentTreeNode.data.label);
 
                 NodeInfosAxioms.init(self.currentTreeNode.data.source, self.currentTreeNode, "smallDialogDiv");
             },
@@ -526,7 +526,7 @@ var SearchWidget = (function () {
             label: "Descendants axioms",
             action: function (e) {
                 $("#mainDialogDiv").dialog("open");
-                $("#mainDialogDiv").dialog("option", "title", "Axioms of resource " + self.currentTreeNode.data.label);
+                UI.setDialogTitle("#mainDialogDiv", "Axioms of resource " + self.currentTreeNode.data.label);
                 var descendants = JstreeWidget.getNodeDescendants("LineageNodesJsTreeDiv", self.currentTreeNode.id);
                 descendants.push(self.currentTreeNode);
                 NodeInfosAxioms.showResourceDescendantsAxioms(self.currentTreeNode.data.source, self.currentTreeNode, descendants, "mainDialogDiv");

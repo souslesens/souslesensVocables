@@ -26,7 +26,7 @@ var IndividualValueFilterWidget = (function () {
             self.divId = divId;
         }
         $("#" + divId).load("snippets/individualValueFilterWidget.html", function () {
-            $("#smallDialogDiv").dialog("open");
+            UI.openDialog("smallDialogDiv", { title: "Filter widget" });
             if (datatype) {
                 if (datatype.indexOf("dateTime") > -1) {
                     DateWidget.setDatePickerOnInput("individualValueFilter_objectValue", null, function (date) {
@@ -134,7 +134,7 @@ var IndividualValueFilterWidget = (function () {
         var term = "*";
         self.getClassLabelsJstreeData(term, self.classId, function (err, jstreeData) {
             if (err) {
-                return alert(err.responseText);
+                return MainController.errorAlert(err);
             }
             var options = {
                 openAll: true,

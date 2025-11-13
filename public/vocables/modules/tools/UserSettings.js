@@ -1,8 +1,8 @@
-const UserManagement = (() => {
+const UserSettings = (() => {
     const self = {};
     self.createApp = null;
     self.mountApp = null;
-    import("/assets/user_management.js");
+    import("/assets/user_settings.js");
 
     self.onSourceSelect = () => {};
 
@@ -10,10 +10,9 @@ const UserManagement = (() => {
         $("#accordion").accordion("option", { active: 2 });
 
         setTimeout(() => {
-            $("#mainDialogDiv").dialog("option", "title", "User Management");
             $("#mainDialogDiv").on("dialogclose", (event, ui) => self.unload());
-            $("#mainDialogDiv").html(`<div style="width:90vw;height:80vh"><div id="mount-user-management-here"></div></div>`);
-            $("#mainDialogDiv").dialog("open");
+            $("#mainDialogDiv").html(`<div style="width:90vw;height:80vh"><div id="mount-user-settings-here"></div></div>`);
+            UI.openDialog("mainDialogDiv", { title: "User Settings" });
 
             self.mountApp = self.createApp();
         }, 200);
@@ -24,6 +23,6 @@ const UserManagement = (() => {
     return self;
 })();
 
-export default UserManagement;
+export default UserSettings;
 
-window.UserManagement = UserManagement;
+window.UserSettings = UserSettings;

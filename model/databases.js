@@ -317,10 +317,9 @@ class DatabaseModel {
      * @params {string} select - select query
      * @params {number} batchSize - batch size
      */
-    batchSelectGenerator = async function* (connection, tableName, { select = "*", batchSize = 1000,startingOffset=0 }) {
+    batchSelectGenerator = async function* (connection, tableName, { select = "*", batchSize = 1000, startingOffset = 0 }) {
         let offset = startingOffset;
-        
-        
+
         const columns = await connection(tableName).columnInfo();
         const columnsKeys = Object.keys(columns);
 
@@ -334,7 +333,7 @@ class DatabaseModel {
             yield await connection.select(select).from(tableName).orderBy(columnsKeys[0]).limit(batchSize).offset(offset);
             offset += batchSize;
         }
-        // Error gestion should be outside the function because this function has no callback 
+        // Error gestion should be outside the function because this function has no callback
     };
 
     /**

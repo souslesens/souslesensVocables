@@ -178,6 +178,7 @@ var MappingsDetails = (function () {
         });
         var columnsMap = Object.fromEntries(Object.values(uniqueSubjects).map((obj) => [obj.id, obj]));
         var columnMappings = MappingTransform.mappingsToKGcreatorJson(columnsMap, { getColumnMappingsOnly: true });
+        var seenColumnMappings = {};
         columnMappings.forEach(function (mapping) {
             if (!mapping.s || !mapping.p || !mapping.o) {
                 return;
@@ -192,15 +193,15 @@ var MappingsDetails = (function () {
                 });
                 propertyLabel = allPropertiesCorrespondance.length > 0 ? allPropertiesCorrespondance[0].label : mapping.p;
             }
-            var subjectId = uniqueSubjects[mapping.s]?.id;
-            var objectId = uniqueSubjects[mapping.o]?.id;
+            var subjectId = uniqueSubjects[mappingS]?.id;
+            var objectId = uniqueSubjects[mappingO]?.id;
             if (!subjectId) {
                 return;
             }
-            var objectLabel = mapping.o;
-            if (!objectId && mapping.o.indexOf("http://") === 0) {
+            var objectLabel = mappingO;
+            if (!objectId && mappingO.indexOf("http://") === 0) {
                 var object = MappingModeler.allClasses.find(function (item) {
-                    return item.id == mapping.o;
+                    return item.id == mappingO;
                 });
                 if (object) {
                     objectId = object.id;
@@ -210,15 +211,19 @@ var MappingsDetails = (function () {
             if (!objectId) {
                 return;
             }
+            if (seenColumnMappings[mappingS + "-->" + mapping.p + "-->" + mappingO]) {
+                return;
+            }
+            seenColumnMappings[mappingS + "-->" + mapping.p + "-->" + mappingO] = true;
             // mapping.s is a column no label case
             jstreeData.push({
-                id: mapping.s + "-->" + mapping.p + "-->" + mapping.o,
-                text: mapping.s + "-->" + propertyLabel + "-->" + objectLabel,
+                id: mappingS + "-->" + mapping.p + "-->" + mappingO,
+                text: mappingS + "-->" + propertyLabel + "-->" + objectLabel,
                 parent: subjectId,
                 data: {
-                    fromNodeColumn: mapping.s,
+                    fromNodeColumn: mappingS,
                     fromNodeId: subjectId,
-                    toNodeColumn: mapping.o,
+                    toNodeColumn: mappingO,
                     toNodeId: objectId,
                     toNodeLabel: objectLabel,
                     propertyId: mapping.p,
@@ -1139,16 +1144,45 @@ var MappingsDetails = (function () {
             MappingColumnsGraph.visjsGraph.data.nodes.get().forEach(function (node) {
                 if (node.data && node.data.type == "Class" && node.data.id == columnClass) {
                     var sameClassColumns = MappingColumnsGraph.getClassColumns(node);
+                    var sameClassColumns = sameClassColumns.filter(function (column) {
+                        return MappingModeler.columnsMappingsObjects.includes(column.data.type) && column.data.type != "URI";
+                    });
+
                     if (sameClassColumns && sameClassColumns.length > 0) {
                         var stop = false;
+                        // Assure there is a main column,
+                        // if not set the first classNode shown on technical mappings as main
+                        var mainColumns = sameClassColumns.filter(function (column){
+                            return column.data.isMainColumn;
+                        })
+                        if(mainColumns.length == 0){
+                            columnNode.data.isMainColumn = true;
+                        }
+                        // treat all classNodes isMainColumn, definedInColumn supposing there
+                        // is only one main column
                         sameClassColumns.forEach(function (column2) {
                             if (stop) {
                                 return;
                             }
+                            // same node no treat
+                            if (column2.id == columnNode.id) {
+                                return;
+                            }
                             var table2 = column2.data.dataTable;
-                            if (column2.data.isMainColumn && table2 != columnNode.data.dataTable) {
+                            // same table classNodes implies mapping error or voluntary mapping to let
+                            if(table2 == columnNode.data.dataTable){
+                                return;
+                            }
+                            if(columnNode.data.isMainColumn && column2.data.isMainColumn) {
+                                // This case is not expected but in case there is two main columns in different tables
+                                // we set the definedInColumn to the first main column found to not break the mapping
+                                column2.data.definedInColumn = columnNode.id;
+                                delete column2.data.isMainColumn;
+                                delete columnNode.data.definedInColumn;
+                            }else if (column2.data.isMainColumn) {
                                 columnNode.data.definedInColumn = column2.id;
-                                stop = true;
+                                delete column2.data.definedInColumn;
+                                //stop = true;
                                 /*
                                   delete columnNode.data.uriType
                                   delete columnNode.data.baseURI
@@ -1159,12 +1193,14 @@ var MappingsDetails = (function () {
                               }*/
 
                                 table = table2;
-                            } else {
-                                if (columnNode.data.uriType) {
-                                    columnNode.data.isMainColumn = true;
-                                }
+                            } else if(columnNode.data.isMainColumn){
+                                column2.data.definedInColumn = columnNode.id;
+                                delete columnNode.data.definedInColumn;
+                               
                             }
                         });
+                       
+
                     }
                 }
             });

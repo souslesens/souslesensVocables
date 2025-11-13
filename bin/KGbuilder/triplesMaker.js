@@ -158,7 +158,7 @@ var TriplesMaker = {
             var message = {
                 table: tableInfos.table,
                 tableTotalRecords: tableProcessingParams.tableInfos.tableTotalRecords,
-                processedRecords: offset ,
+                processedRecords: offset,
                 totalTriples: 0,
                 batchTriples: 0,
                 operation: "startProcessing",
@@ -168,7 +168,7 @@ var TriplesMaker = {
             const conn = await databaseModel.getUserConnection(user, tableInfos.dbID);
             let generator;
             try {
-                generator = databaseModel.batchSelectGenerator(conn, tableInfos.table, { select: select, batchSize: limitSize,startingOffset:offset });
+                generator = databaseModel.batchSelectGenerator(conn, tableInfos.table, { select: select, batchSize: limitSize, startingOffset: offset });
             } catch (error) {
                 console.error("ERROR : offset " + offset + ",error in database reading " + error);
                 KGbuilder_socket.message(options.clientSocketId, "ERROR : offset " + offset + ",error in database reading " + error, true);
@@ -225,8 +225,9 @@ var TriplesMaker = {
                                 tableProcessingParams.sourceInfos.graphUri,
                                 tableProcessingParams.sourceInfos.sparqlServerUrl,
                             );
-                            /*
+
                             //console.log("   triples written ", batchTriplesCount);
+                            /*
                             if (err) {
                                 console.log(err);
                                 console.log("offest " + offset);

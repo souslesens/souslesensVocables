@@ -1102,7 +1102,6 @@ var MappingModeler = (function () {
                 }
             });
         });
-       
     };
 
     /**

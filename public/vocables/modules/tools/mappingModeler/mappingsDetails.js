@@ -1152,10 +1152,10 @@ var MappingsDetails = (function () {
                         var stop = false;
                         // Assure there is a main column,
                         // if not set the first classNode shown on technical mappings as main
-                        var mainColumns = sameClassColumns.filter(function (column){
+                        var mainColumns = sameClassColumns.filter(function (column) {
                             return column.data.isMainColumn;
-                        })
-                        if(mainColumns.length == 0){
+                        });
+                        if (mainColumns.length == 0) {
                             columnNode.data.isMainColumn = true;
                         }
                         // treat all classNodes isMainColumn, definedInColumn supposing there
@@ -1170,16 +1170,16 @@ var MappingsDetails = (function () {
                             }
                             var table2 = column2.data.dataTable;
                             // same table classNodes implies mapping error or voluntary mapping to let
-                            if(table2 == columnNode.data.dataTable){
+                            if (table2 == columnNode.data.dataTable) {
                                 return;
                             }
-                            if(columnNode.data.isMainColumn && column2.data.isMainColumn) {
+                            if (columnNode.data.isMainColumn && column2.data.isMainColumn) {
                                 // This case is not expected but in case there is two main columns in different tables
                                 // we set the definedInColumn to the first main column found to not break the mapping
                                 column2.data.definedInColumn = columnNode.id;
                                 delete column2.data.isMainColumn;
                                 delete columnNode.data.definedInColumn;
-                            }else if (column2.data.isMainColumn) {
+                            } else if (column2.data.isMainColumn) {
                                 columnNode.data.definedInColumn = column2.id;
                                 delete column2.data.definedInColumn;
                                 //stop = true;
@@ -1193,14 +1193,11 @@ var MappingsDetails = (function () {
                               }*/
 
                                 table = table2;
-                            } else if(columnNode.data.isMainColumn){
+                            } else if (columnNode.data.isMainColumn) {
                                 column2.data.definedInColumn = columnNode.id;
                                 delete columnNode.data.definedInColumn;
-                               
                             }
                         });
-                       
-
                     }
                 }
             });

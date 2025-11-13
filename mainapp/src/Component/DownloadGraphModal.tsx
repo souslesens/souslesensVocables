@@ -22,6 +22,7 @@ import { writeLog } from "../Log";
 import { createRoot } from "react-dom/client";
 
 interface DownloadGraphModalProps {
+    apiUrl: string;
     onClose: () => void;
     open: boolean;
     sourceName: string;
@@ -40,35 +41,21 @@ type ApiServerResponseError = {
 
 type ApiServerResponse = ApiServerResponseError | ApiServerResponseOk;
 
-export function DownloadGraphModal({ onClose, open, sourceName }: DownloadGraphModalProps) {
+export function DownloadGraphModal({ apiUrl, onClose, open, sourceName }: DownloadGraphModalProps) {
     const [currentUser, setCurrentUser] = useState<{ login: string; token: string } | null>(null);
     const [transferPercent, setTransferPercent] = useState(0);
     const [errorMessage, setErrorMessage] = useState("");
     const cancelCurrentOperation = useRef(false);
-    const [slsPyApiBaseUrl, setSlsPyApiBaseUrl] = useState("");
     const [currentDownloadFormat, setCurrentDownloadFormat] = useState("nt");
     const [skipNamedIndividuals, setSkipNamedIndividuals] = useState(false);
 
     useEffect(() => {
-        void fetchConfig();
         const fetchAll = async () => {
             const response = await fetchMe();
             setCurrentUser(response.user);
         };
         void fetchAll();
     }, []);
-
-    const fetchConfig = async () => {
-        const response = await fetch("/api/v1/config");
-        const json = (await response.json()) as { slsPyApi: { enabled: boolean; url: string } };
-        const slsPyApi = json.slsPyApi;
-        if (slsPyApi.enabled && slsPyApi.url) {
-            // force presence of trailing /
-            setSlsPyApiBaseUrl(json.slsPyApi.url.replace(/\/$/, "").concat("/"));
-            return;
-        }
-        setSlsPyApiBaseUrl("/");
-    };
 
     const handleCancelOperation = () => {
         cancelCurrentOperation.current = true;
@@ -84,12 +71,9 @@ export function DownloadGraphModal({ onClose, open, sourceName }: DownloadGraphM
     };
 
     const fetchGraphPartUsingPythonApi = async (name: string, offset: number, format = "nt", identifier = "", skipNamedIndividuals = false) => {
-        const response = await fetch(
-            `${slsPyApiBaseUrl}api/v1/rdf/graph?source=${name}&offset=${offset}&format=${format}&identifier=${identifier}&skipNamedIndividuals=${String(skipNamedIndividuals)}`,
-            {
-                headers: { Authorization: `Bearer ${currentUser?.token ?? ""}` },
-            },
-        );
+        const response = await fetch(`${apiUrl}api/v1/rdf/graph?source=${name}&offset=${offset}&format=${format}&identifier=${identifier}&skipNamedIndividuals=${String(skipNamedIndividuals)}`, {
+            headers: { Authorization: `Bearer ${currentUser?.token ?? ""}` },
+        });
         const json = (await response.json()) as ApiServerResponse;
         if (response.status !== 200) {
             return { status: response.status, message: (json as ApiServerResponseError).detail ?? "Internal serveur error" };
@@ -171,7 +155,7 @@ export function DownloadGraphModal({ onClose, open, sourceName }: DownloadGraphM
 
             let blobParts: BlobPart[] | null;
             let message = "ok";
-            if (slsPyApiBaseUrl === "/") {
+            if (apiUrl === "/") {
                 const graphInfo = await fetchSourceInfo(sourceName);
                 const graphSize = graphInfo.graphSize;
                 const pageSize = graphInfo.pageSize;
@@ -230,10 +214,10 @@ export function DownloadGraphModal({ onClose, open, sourceName }: DownloadGraphM
                                 <MenuItem disabled={transferPercent > 0} value={"nt"}>
                                     N-triples
                                 </MenuItem>
-                                <MenuItem disabled={transferPercent > 0 || slsPyApiBaseUrl === "/"} value={"xml"}>
+                                <MenuItem disabled={transferPercent > 0 || apiUrl === "/"} value={"xml"}>
                                     RDF/XML
                                 </MenuItem>
-                                <MenuItem disabled={transferPercent > 0 || slsPyApiBaseUrl === "/"} value={"ttl"}>
+                                <MenuItem disabled={transferPercent > 0 || apiUrl === "/"} value={"ttl"}>
                                     Turtle
                                 </MenuItem>
                             </Select>
@@ -244,7 +228,7 @@ export function DownloadGraphModal({ onClose, open, sourceName }: DownloadGraphM
                                 control={
                                     <Checkbox
                                         checked={skipNamedIndividuals}
-                                        disabled={transferPercent > 0 || slsPyApiBaseUrl === "/"}
+                                        disabled={transferPercent > 0 || apiUrl === "/"}
                                         onChange={(event) => {
                                             setSkipNamedIndividuals(event.currentTarget.checked);
                                         }}

@@ -1,6 +1,8 @@
 import { useState, useEffect, MouseEvent } from "react";
 
 import { Button, IconButton, InputAdornment, InputLabel, OutlinedInput, FormControl, Stack } from "@mui/material";
+import Typography from "@mui/material/Typography";
+import Link from "@mui/material/Link";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import CheckIcon from "@mui/icons-material/Check";
 import { Severity } from "../user-settings";
@@ -51,6 +53,21 @@ const UserInfo = ({ handleSnackbar }: UserInfoProps) => {
 
     return (
         <Stack spacing={{ xs: 2 }} sx={{ m: 4 }}>
+            <Stack direction="column" spacing={{ xs: 1 }} sx={{ m: 4 }} useFlexGap>
+                <Typography variant="body1" gutterBottom>
+                    SousLeSens provide API routes with OpenAPI standards. A Swagger interface is available at <Link href="/api/v1">/api/v1</Link>. Most routes are intended to be used by SousLeSens
+                    application, but some can be used outside SousLeSens.
+                </Typography>
+
+                <Typography variant="body1" gutterBottom>
+                    Use the following token to authenticate (Bearer auth) and use the routes.
+                </Typography>
+
+                <Typography variant="body1" gutterBottom>
+                    A more detailed documentation can be found at{" "}
+                    <Link href="https://souslesens.github.io/souslesensVocables/api/index.html">https://souslesens.github.io/souslesensVocables/api/index.html</Link>.
+                </Typography>
+            </Stack>
             <Stack direction="row" spacing={{ xs: 1 }} sx={{ m: 4 }} useFlexGap>
                 <FormControl sx={{ flex: 1 }} variant="outlined">
                     <InputLabel htmlFor="outlined-adornment-token">API Key</InputLabel>

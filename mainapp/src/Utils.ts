@@ -72,4 +72,15 @@ function jsonToDownloadUrl(json: unknown): string {
     return URL.createObjectURL(file);
 }
 
+export const getApiUrl = async () => {
+    const response = await fetch("/api/v1/config");
+    const json = (await response.json()) as { slsPyApi: { enabled: boolean; url: string } };
+    const slsPyApi = json.slsPyApi;
+    if (slsPyApi.enabled && slsPyApi.url) {
+        // force presence of trailing /
+        return json.slsPyApi.url.replace(/\/$/, "").concat("/");
+    }
+    return "/";
+};
+
 export { fetchMe, identity, joinWhenArray, sanitizeValue, exhaustiveCheck, style, VisuallyHiddenInput, humanizeSize, cleanUpText, jsonToDownloadUrl };

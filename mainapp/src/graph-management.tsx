@@ -4,7 +4,7 @@ import { createRoot } from "react-dom/client";
 import { Button, Chip, Link, Paper, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableSortLabel, TextField, Typography } from "@mui/material";
 import CsvDownloader from "react-csv-downloader";
 
-import { humanizeSize, cleanUpText } from "./Utils";
+import { humanizeSize, cleanUpText, getApiUrl } from "./Utils";
 
 import { getGraphSize, GraphInfo, ServerSource } from "./Source";
 import { UploadGraphModal } from "./Component/UploadGraphModal";
@@ -22,6 +22,9 @@ declare global {
 type OrderBy = "name" | "graphUri" | "graphSize" | "group";
 
 export default function GraphManagement() {
+    // api url
+    const [apiUrl, setApiUrl] = useState<string>("/");
+
     // sources fetched from server
     const [sources, setSources] = useState<Record<string, ServerSource>>({});
 
@@ -48,6 +51,11 @@ export default function GraphManagement() {
     const [filteringChars, setFilteringChars] = useState("");
 
     useEffect(() => {
+        const fetchAll = async () => {
+            const apiUrl = await getApiUrl();
+            setApiUrl(apiUrl);
+        };
+        void fetchAll();
         void fetchSources();
         void fetchGraphsInfo();
     }, []);
@@ -82,8 +90,8 @@ export default function GraphManagement() {
 
     return (
         <>
-            {displayModal === "upload" && currentSource ? <UploadGraphModal indexAfterSuccess={true} open={true} onClose={() => setDisplayModal(null)} sourceName={currentSource.name} /> : null}{" "}
-            {displayModal === "download" && currentSource ? <DownloadGraphModal open={true} onClose={() => setDisplayModal(null)} sourceName={currentSource.name} /> : null}
+            {displayModal === "upload" && currentSource ? <UploadGraphModal apiUrl={apiUrl} indexAfterSuccess={true} open={true} onClose={() => setDisplayModal(null)} sourceName={currentSource.name} /> : null}{" "}
+            {displayModal === "download" && currentSource ? <DownloadGraphModal apiUrl={apiUrl} open={true} onClose={() => setDisplayModal(null)} sourceName={currentSource.name} /> : null}
             {displayModal === "metadata" && currentSource ? (
                 <MetadataModal open={true} onClose={() => setDisplayModal(null)} sourceName={currentSource.name} isReadOnly={currentSource.accessControl !== "readwrite"} />
             ) : null}

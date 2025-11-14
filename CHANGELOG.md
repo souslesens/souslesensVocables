@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.19.0](https://github.com/souslesens/souslesensVocables/compare/2.18.0...2.19.0) (2025-11-14)
+
+
+### Features
+
+* **userSettings:** add docs ([ccc66c0](https://github.com/souslesens/souslesensVocables/commit/ccc66c003d22c381c4d8b97b5259fcffbcbd05b1))
+* **userSettings:** Rename Profile to API Token ([cb42cc3](https://github.com/souslesens/souslesensVocables/commit/cb42cc3693cacb93563973e556a5b3783bf1d6b2))
+
 ## [2.18.0](https://github.com/souslesens/souslesensVocables/compare/2.17.0...2.18.0) (2025-11-07)
 
 > [!IMPORTANT]

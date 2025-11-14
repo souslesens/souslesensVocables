@@ -1157,6 +1157,7 @@ var MappingsDetails = (function () {
                         });
                         if (mainColumns.length == 0) {
                             columnNode.data.isMainColumn = true;
+                            delete columnNode.data.definedInColumn
                         }
                         // treat all classNodes isMainColumn, definedInColumn supposing there
                         // is only one main column

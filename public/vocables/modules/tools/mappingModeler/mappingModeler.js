@@ -630,6 +630,12 @@ var MappingModeler = (function () {
                 self.onLegendNodeClick({ id: "Column" });
             }, 500);
         } else if (self.currentResourceType == "RowIndex") {
+            var nodeInVisjsGraph = MappingColumnsGraph.visjsGraph.data.nodes.get().filter(function (node) {
+                return node.data.dataTable == self.currentTable.name && node.data.type == "RowIndex";
+            });
+            if (nodeInVisjsGraph.length > 0) {
+                return alert("Row index already exists in the graph");
+            }
             newResource = {
                 id: id,
                 label: "#",

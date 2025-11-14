@@ -530,7 +530,7 @@ var MappingModeler = (function () {
         } else if (self.currentResourceType == "Column") {
             // Verify that he not already exists
             var nodeInVisjsGraph = MappingColumnsGraph.visjsGraph.data.nodes.get().filter(function (node) {
-                return node.data.dataTable == self.currentTable.name && node.type == "Column" && resourceUri == node.label;
+                return node.data.dataTable == self.currentTable.name && node.data.type == "Column" && resourceUri == node.label;
             });
             if (nodeInVisjsGraph.length > 0) {
                 return alert("Column already exists in the graph");
@@ -630,6 +630,12 @@ var MappingModeler = (function () {
                 self.onLegendNodeClick({ id: "Column" });
             }, 500);
         } else if (self.currentResourceType == "RowIndex") {
+            var nodeInVisjsGraph = MappingColumnsGraph.visjsGraph.data.nodes.get().filter(function (node) {
+                return node.data.dataTable == self.currentTable.name && node.data.type == "RowIndex";
+            });
+            if (nodeInVisjsGraph.length > 0) {
+                return alert("Row index already exists in the graph");
+            }
             newResource = {
                 id: id,
                 label: "#",
@@ -650,6 +656,13 @@ var MappingModeler = (function () {
                 self.onLegendNodeClick({ id: "Class" });
             }, 500);
         } else if (self.currentResourceType == "VirtualColumn") {
+            // Verify that he not already exists
+            var nodeInVisjsGraph = MappingColumnsGraph.visjsGraph.data.nodes.get().filter(function (node) {
+                return node.data.dataTable == self.currentTable.name && node.data.type == "VirtualColumn" && resourceUri == node.label;
+            });
+            if (nodeInVisjsGraph.length > 0) {
+                return alert("Column already exists in the graph");
+            }
             newResource = {
                 id: id,
                 label: resourceUri,
@@ -1083,17 +1096,17 @@ var MappingModeler = (function () {
             result.forEach(function (item) {
                 self.allResourcesMap[item.id] = item;
             });
-        });
-        self.getAllProperties(source, function (err, result) {
-            if (err) {
-                return callback(err);
-            }
-            result.forEach(function (item) {
-                self.allResourcesMap[item.id] = item;
+            self.getAllProperties(source, function (err, result) {
+                if (err) {
+                    return callback(err);
+                }
+                result.forEach(function (item) {
+                    self.allResourcesMap[item.id] = item;
+                });
+                if (callback) {
+                    return callback(err, result);
+                }
             });
-            if (callback) {
-                return callback(err, result);
-            }
         });
     };
 

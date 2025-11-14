@@ -33,9 +33,9 @@ A node can be of four types:
 Typically, a column is linked to a class node via an rdf:type relation,
 which is the standard semantic link for defining types.
 
-**Virtual Column** – Used to model intermediate or implicit objects not
-explicitly described in the data source. For example, creating a class
-for a job acquisition event that is implied but not present as a column.
+**Virtual Column** – Used to model intermediate or implicit objects that are not explicitly described in the data source. 
+It often corresponds to a group of columns whose combination conveys additional information. 
+For example, defining a class for a job acquisition event that is implied but not present as a dedicated column.
 
 **Row Index** – Represents an individual row of the dataset. It is
 useful when each row carries meaningful information and must be

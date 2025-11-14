@@ -4,6 +4,7 @@ const { Lock } = require("async-await-mutex-lock");
 
 const { configDatabasesPath } = require("./config");
 const { profileModel } = require("./profiles");
+const KGbuilder_socket = require("../bin/KGbuilder/KGbuilder_socket");
 
 /**
  * @typedef {import("./UserTypes").UserAccount} UserAccount
@@ -316,27 +317,23 @@ class DatabaseModel {
      * @params {string} select - select query
      * @params {number} batchSize - batch size
      */
-    batchSelectGenerator = async function* (connection, tableName, { select = "*", batchSize = 1000 }) {
-        try {
-            const columns = await connection(tableName).columnInfo();
-            const columnsKeys = Object.keys(columns);
+    batchSelectGenerator = async function* (connection, tableName, { select = "*", batchSize = 1000, startingOffset = 0 }) {
+        let offset = startingOffset;
 
-            const resSize = await connection.count("*").from(tableName);
-            const size = parseInt(resSize[0].count);
+        const columns = await connection(tableName).columnInfo();
+        const columnsKeys = Object.keys(columns);
 
-            let offset = 0;
-            while (true) {
-                if (offset >= size) {
-                    return connection.select(select).from(tableName).orderBy(columnsKeys[0]).limit(batchSize).offset(offset);
-                }
-                yield await connection.select(select).from(tableName).orderBy(columnsKeys[0]).limit(batchSize).offset(offset);
-                offset += batchSize;
+        const resSize = await connection.count("*").from(tableName);
+        const size = parseInt(resSize[0].count);
+
+        while (true) {
+            if (offset >= size) {
+                return connection.select(select).from(tableName).orderBy(columnsKeys[0]).limit(batchSize).offset(offset);
             }
-        } catch (err) {
-            KGbuilder_socket.message(options.clientSocketId, "ERROR : offset " + offset + ",error in database reading " + err, true);
-            // error catch of readAndProcessData
-            throw err;
+            yield await connection.select(select).from(tableName).orderBy(columnsKeys[0]).limit(batchSize).offset(offset);
+            offset += batchSize;
         }
+        // Error gestion should be outside the function because this function has no callback
     };
 
     /**

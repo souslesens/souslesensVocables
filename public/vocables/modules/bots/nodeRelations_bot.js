@@ -112,7 +112,7 @@ var NodeRelations_bot = (function () {
             Sparql_OWL.getFilteredTriples2(self.params.source, self.params.currentClass, null, null, { distinct: "?prop ?propLabel" }, function (err, result) {
                 if (err) {
                     console.log(err.responseText);
-                    return _botEngine.reset();
+                    return self.myBotEngine.reset();
                 }
                 var properties = [];
                 result.forEach(function (item) {
@@ -121,7 +121,7 @@ var NodeRelations_bot = (function () {
                     }
                 });
                 properties.splice(0, 0, { id: "AnyProperty", label: "Any Property" });
-                _botEngine.showList(properties, "currentProperty", null, true);
+                self.myBotEngine.showList(properties, "currentProperty", null, true);
             });
         },
 
@@ -142,7 +142,7 @@ var NodeRelations_bot = (function () {
             //    Lineage_whiteboard.drawRestrictions( self.params.source,  self.params.currentClass, null, null, {  }, function (err, result) {
             Sparql_OWL.getObjectRestrictions(self.params.source, self.params.currentClass, { listPropertiesOnly: true }, function (err, result) {
                 if (result.length == 0) {
-                    return _botEngine.abort("no data found");
+                    return self.myBotEngine.abort("no data found");
                 }
                 var properties = [];
                 result.forEach(function (item) {
@@ -151,7 +151,7 @@ var NodeRelations_bot = (function () {
                     }
                 });
                 properties.splice(0, 0, { id: "AnyProperty", label: "Any Property" });
-                _botEngine.showList(properties, "currentProperty", null, true);
+                self.myBotEngine.showList(properties, "currentProperty", null, true);
             });
         },
         listInverseRestrictions: function () {
@@ -164,7 +164,7 @@ var NodeRelations_bot = (function () {
                     }
                 });
                 properties.splice(0, 0, { id: "AnyProperty", label: "Any Property" });
-                _botEngine.showList(properties, "currentProperty", null, true);
+                self.myBotEngine.showList(properties, "currentProperty", null, true);
             });
         },
 
@@ -303,7 +303,7 @@ var NodeRelations_bot = (function () {
                     limit = parseInt(sampleSize);
                 } catch (e) {
                     alert("wrong number for sampleSize");
-                    return _botEngine.reset();
+                    return self.myBotEngine.reset();
                 }
             } else {
                 filter = setAnnotationPropertyFilter() || getPathFilter() + " " + getIndividualsFilter();

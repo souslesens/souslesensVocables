@@ -97,11 +97,24 @@ var NodeRelations_bot = (function () {
             self.myBotEngine.nextStep();
         },
         listVocabsFn: function () {
-            CommonBotFunctions_class.listVocabsFn(self.myBotEngine, Lineage_sources.activeSource, "currentVocab", true);
+            CommonBotFunctions_class.listVocabsFn(Lineage_sources.activeSource, true, function (err, vocabs) {
+                if (err) {
+                    return self.myBotEngine.abort(err);
+                }
+                if (vocabs.length == 0) {
+                    return self.myBotEngine.previousStep("no values found, try another option");
+                }
+                self.myBotEngine.showList(vocabs, "currentVocab");
+            });
         },
 
         listClassesFn: function () {
-            CommonBotFunctions_class.listVocabClasses(self.myBotEngine, self.params.currentVocab, "currentClass", true, [{ label: "_Any Class", id: "AnyClass" }]);
+            CommonBotFunctions_class.listVocabClasses(self.params.currentVocab, true, [{ label: "_Any Class", id: "AnyClass" }], function (err, classes) {
+                if (err) {
+                    return self.myBotEngine.abort(err);
+                }
+                self.myBotEngine.showList(classes, "currentClass");
+            });
         },
 
         listPredicatePathsFn: function () {
@@ -126,12 +139,28 @@ var NodeRelations_bot = (function () {
         },
 
         listAnnotationPropertiesVocabsFn: function () {
-            CommonBotFunctions_class.listVocabsFn(self.myBotEngine, self.params.source, "annotationPropertyVocab", true);
+            CommonBotFunctions_class.listVocabsFn(self.params.source, true, function (err, vocabs) {
+                if (err) {
+                    return self.myBotEngine.abort(err);
+                }
+                if (vocabs.length == 0) {
+                    return self.myBotEngine.previousStep("no values found, try another option");
+                }
+                self.myBotEngine.showList(vocabs, "annotationPropertyVocab");
+            });
         },
 
         listAnnotationPropertiesFn: function () {
             // filter properties compatible with
-            CommonBotFunctions_class.listNonObjectPropertiesFn(self.myBotEngine, self.params.annotationPropertyVocab, "annotationPropertyId");
+            CommonBotFunctions_class.listNonObjectPropertiesFn([self.params.annotationPropertyVocab], null, function (err, props) {
+                if (err) {
+                    return self.myBotEngine.abort(err);
+                }
+                if (props.length == 0) {
+                    return self.myBotEngine.previousStep("no values found, try another option");
+                }
+                self.myBotEngine.showList(props, "annotationPropertyId");
+            });
         },
 
         promptAnnotationPropertyValue: function () {

@@ -1,7 +1,7 @@
 import Axioms_manager from "./axioms_manager.js";
 
 import Axioms_graph from "./axioms_graph.js";
-import CommonBotFunctions from "../../bots/_commonBotFunctions.js";
+import CommonBotFunctions_class from "../../bots/_commonBotFunctions_class.js";
 import axioms_graph from "./axioms_graph.js";
 import Axiom_activeLegend from "./axiom_activeLegend.js";
 
@@ -53,7 +53,7 @@ var NodeInfosAxioms = (function () {
     };
     self.initSourceClassesMap = function (source, callback) {
         self.allClassesMap = {};
-        CommonBotFunctions.listSourceAllClasses(source, null, false, [], function (err, result) {
+        CommonBotFunctions_class.listSourceAllClasses(source, false, [], function (err, result) {
             if (err) {
                 return callback(err.responseText);
             }

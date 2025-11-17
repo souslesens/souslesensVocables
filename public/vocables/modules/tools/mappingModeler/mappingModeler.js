@@ -4,7 +4,7 @@ import SourceSelectorWidget from "../../uiWidgets/sourceSelectorWidget.js";
 import VisjsGraphClass from "../../graph/VisjsGraphClass.js";
 import Axioms_graph from "../axioms/axioms_graph.js";
 import Axioms_suggestions from "../axioms/axioms_suggestions.js";
-import CommonBotFunctions from "../../bots/_commonBotFunctions.js";
+import CommonBotFunctions_class from "../../bots/_commonBotFunctions_class.js";
 import common from "../../shared/common.js";
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 import Clipboard from "../../shared/clipboard.js";
@@ -890,7 +890,7 @@ var MappingModeler = (function () {
      *
      * @description
      * - If the classes are already cached in `self.allClasses`, returns the cached list.
-     * - Otherwise, fetches all classes using `CommonBotFunctions.listSourceAllClasses`.
+     * - Otherwise, fetches all classes using `CommonBotFunctions_class.listSourceAllClasses`.
      * - Filters out duplicate class IDs and formats labels with source prefixes.
      * - The resulting class list is sorted alphabetically by label.
      * - Calls the callback with the formatted list or an error if the API call fails.
@@ -900,7 +900,7 @@ var MappingModeler = (function () {
             source = MappingModeler.currentSLSsource;
         }
         if (!self.allClasses) {
-            CommonBotFunctions.listSourceAllClasses(source, null, false, [], function (err, result) {
+            CommonBotFunctions_class.listSourceAllClasses(source, false, [], function (err, result) {
                 if (err) {
                     return callback(err.responseText);
                 }
@@ -957,7 +957,7 @@ var MappingModeler = (function () {
      *
      * @description
      * - If the properties are already cached in `self.allProperties`, returns the cached list.
-     * - Otherwise, fetches all object properties using `CommonBotFunctions.listSourceAllObjectProperties`.
+     * - Otherwise, fetches all object properties using `CommonBotFunctions_class.listSourceAllObjectProperties`.
      * - Filters out duplicate property IDs and prepares labels for each property.
      * - Sorts the resulting property list alphabetically by label.
      * - Calls the callback with the formatted list or an error if the API call fails.
@@ -977,7 +977,7 @@ var MappingModeler = (function () {
         }
 
         if (!self.allProperties) {
-            CommonBotFunctions.listSourceAllObjectProperties(source, null, false, function (err, result) {
+            CommonBotFunctions_class.listSourceAllObjectProperties(source, null, function (err, result) {
                 if (err) {
                     return callback(err.responseText);
                 }

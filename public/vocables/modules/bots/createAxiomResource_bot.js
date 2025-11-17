@@ -56,7 +56,15 @@ var CreateAxiomResource_bot = (function () {
             if (self.params.filteredUris && self.params.filteredUris.length > 0) {
                 self.myBotEngine.nextStep();
             } else {
-                CommonBotFunctions_class.listVocabsFn(self.myBotEngine, self.source, "currentVocab");
+                CommonBotFunctions_class.listVocabsFn(self.source, false, function (err, vocabs) {
+                    if (err) {
+                        return self.myBotEngine.abort(err);
+                    }
+                    if (vocabs.length == 0) {
+                        return self.myBotEngine.previousStep("no values found, try another option");
+                    }
+                    self.myBotEngine.showList(vocabs, "currentVocab");
+                });
             }
         },
 
@@ -71,7 +79,12 @@ var CreateAxiomResource_bot = (function () {
             if (self.params.filteredUris && self.params.filteredUris.length > 0) {
                 self.myBotEngine.showList(self.params.filteredUris, "superResourceId");
             } else {
-                CommonBotFunctions_class.listVocabClasses(self.myBotEngine, self.params.currentVocab, "superResourceId", true);
+                CommonBotFunctions_class.listVocabClasses(self.params.currentVocab, true, null, function (err, classes) {
+                    if (err) {
+                        return self.myBotEngine.abort(err);
+                    }
+                    self.myBotEngine.showList(classes, "superResourceId");
+                });
             }
         },
 
@@ -79,7 +92,15 @@ var CreateAxiomResource_bot = (function () {
             if (self.params.filteredUris && self.params.filteredUris.length > 0) {
                 self.myBotEngine.showList(self.params.filteredUris, "superResourceId");
             } else {
-                CommonBotFunctions_class.listVocabPropertiesFn(self.myBotEngine, self.params.currentVocab, "superResourceId");
+                CommonBotFunctions_class.listVocabPropertiesFn(self.params.currentVocab, null, function (err, props) {
+                    if (err) {
+                        return self.myBotEngine.abort(err);
+                    }
+                    if (props.length == 0) {
+                        return self.myBotEngine.previousStep("no values found, try another option");
+                    }
+                    self.myBotEngine.showList(props, "superResourceId");
+                });
             }
         },
 

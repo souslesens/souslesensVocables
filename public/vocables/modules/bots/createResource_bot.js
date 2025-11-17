@@ -88,7 +88,15 @@ var CreateResource_bot = (function () {
         },
 
         listVocabsFn: function () {
-            CommonBotFunctions_class.listVocabsFn(self.myBotEngine, self.source, "currentVocab");
+            CommonBotFunctions_class.listVocabsFn(self.source, false, function (err, vocabs) {
+                if (err) {
+                    return self.myBotEngine.abort(err);
+                }
+                if (vocabs.length == 0) {
+                    return self.myBotEngine.previousStep("no values found, try another option");
+                }
+                self.myBotEngine.showList(vocabs, "currentVocab");
+            });
         },
 
         promptResourceLabelFn: function () {
@@ -99,7 +107,12 @@ var CreateResource_bot = (function () {
         },
 
         listSuperClassesFn: function () {
-            CommonBotFunctions_class.listVocabClasses(self.myBotEngine, self.params.currentVocab, "resourceId", true);
+            CommonBotFunctions_class.listVocabClasses(self.params.currentVocab, true, null, function (err, classes) {
+                if (err) {
+                    return self.myBotEngine.abort(err);
+                }
+                self.myBotEngine.showList(classes, "resourceId");
+            });
         },
         listClassTypesFn: function () {
             self.functions.listSuperClassesFn();
@@ -168,7 +181,12 @@ var CreateResource_bot = (function () {
 
         listDatatypePropertyDomainFn: function () {
             if (self.params.datatypePropertyDomain) return self.myBotEngine.nextStep();
-            CommonBotFunctions_class.listVocabClasses(self.myBotEngine, self.params.source, "datatypePropertyDomain", false, [{ id: "", label: "none" }]);
+            CommonBotFunctions_class.listVocabClasses(self.params.source, false, [{ id: "", label: "none" }], function (err, classes) {
+                if (err) {
+                    return self.myBotEngine.abort(err);
+                }
+                self.myBotEngine.showList(classes, "datatypePropertyDomain");
+            });
         },
         listDatatypePropertyRangeFn: function () {
             var choices = ["", "xsd:string", "xsd:int", "xsd:float", "xsd:dateTime"];

@@ -1,4 +1,4 @@
-import CommonBotFunctions from "../../bots/_commonBotFunctions.js";
+import CommonBotFunctions_class from "../../bots/_commonBotFunctions_class.js";
 import Axioms_graph from "./axioms_graph.js";
 import Export from "../../shared/export.js";
 import SourceSelectorWidget from "../../uiWidgets/sourceSelectorWidget.js";
@@ -112,7 +112,7 @@ const Axiom_editor = (function () {
             source = self.currentSource;
         }
         if (!self.allClasses) {
-            CommonBotFunctions.listSourceAllClasses(source, null, false, [], function (err, result) {
+            CommonBotFunctions_class.listSourceAllClasses(source, false, [], function (err, result) {
                 if (err) {
                     return callback(err.responseText);
                 }
@@ -143,7 +143,7 @@ const Axiom_editor = (function () {
         if (!source) source = self.currentSource;
 
         if (!self.allProperties) {
-            CommonBotFunctions.listSourceAllObjectProperties(source, null, false, function (err, result) {
+            CommonBotFunctions_class.listSourceAllObjectProperties(source, null, function (err, result) {
                 if (err) {
                     return callback(err.responseText);
                 }

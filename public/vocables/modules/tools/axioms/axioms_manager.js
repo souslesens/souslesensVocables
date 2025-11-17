@@ -1,4 +1,4 @@
-import CommonBotFunctions from "../../bots/_commonBotFunctions.js";
+import CommonBotFunctions_class from "../../bots/_commonBotFunctions_class.js";
 import NodeInfosAxioms from "./nodeInfosAxioms.js";
 
 var Axioms_manager = (function () {
@@ -33,7 +33,7 @@ var Axioms_manager = (function () {
             source = self.currentSource;
         }
         if (!self.allClasses) {
-            CommonBotFunctions.listSourceAllClasses(source, null, false, [], function (err, result) {
+            CommonBotFunctions_class.listSourceAllClasses(source, false, [], function (err, result) {
                 if (err) {
                     return callback(err.responseText);
                 }
@@ -64,7 +64,7 @@ var Axioms_manager = (function () {
         if (!source) source = self.currentSource;
 
         if (!self.allProperties) {
-            CommonBotFunctions.listSourceAllObjectProperties(source, null, false, function (err, result) {
+            CommonBotFunctions_class.listSourceAllObjectProperties(source, null, function (err, result) {
                 if (err) {
                     return callback(err.responseText);
                 }

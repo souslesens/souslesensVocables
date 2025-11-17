@@ -1,6 +1,4 @@
-import botEngine from "./_botEngine.js";
 import Sparql_common from "../sparqlProxies/sparql_common.js";
-import KGquery from "../tools/KGquery/KGquery.js";
 import SparqlQuery_bot from "./sparqlQuery_bot.js";
 
 var KGquery_annotations_bot = (function () {

@@ -1,7 +1,6 @@
 import Sparql_common from "../sparqlProxies/sparql_common.js";
 import SparqlQuery_bot from "./sparqlQuery_bot.js";
 import BotEngineClass from "./_botEngineClass.js";
-import CommonBotFunctions_class from "./_commonBotFunctions_class.js";
 import Sparql_OWL from "../sparqlProxies/sparql_OWL.js";
 import KGquery_graph from "../tools/KGquery/KGquery_graph.js";
 import common from "../shared/common.js";

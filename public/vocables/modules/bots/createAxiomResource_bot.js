@@ -1,6 +1,6 @@
 import Sparql_common from "../sparqlProxies/sparql_common.js";
 import BotEngineClass from "./_botEngineClass.js";
-import CommonBotFunctions_class from "./_commonBotFunctions_class.js";
+import CommonBotFunctions from "./_commonBotFunctions.js";
 import Lineage_createRelation from "../tools/lineage/lineage_createRelation.js";
 import common from "../shared/common.js";
 import Lineage_createResource from "../tools/lineage/lineage_createResource.js";
@@ -56,7 +56,7 @@ var CreateAxiomResource_bot = (function () {
             if (self.params.filteredUris && self.params.filteredUris.length > 0) {
                 self.myBotEngine.nextStep();
             } else {
-                CommonBotFunctions_class.listVocabsFn(self.source, false, function (err, vocabs) {
+                CommonBotFunctions.listVocabsFn(self.source, false, function (err, vocabs) {
                     if (err) {
                         return self.myBotEngine.abort(err);
                     }
@@ -79,7 +79,7 @@ var CreateAxiomResource_bot = (function () {
             if (self.params.filteredUris && self.params.filteredUris.length > 0) {
                 self.myBotEngine.showList(self.params.filteredUris, "superResourceId");
             } else {
-                CommonBotFunctions_class.listVocabClasses(self.params.currentVocab, true, null, function (err, classes) {
+                CommonBotFunctions.listVocabClasses(self.params.currentVocab, true, null, function (err, classes) {
                     if (err) {
                         return self.myBotEngine.abort(err);
                     }
@@ -92,7 +92,7 @@ var CreateAxiomResource_bot = (function () {
             if (self.params.filteredUris && self.params.filteredUris.length > 0) {
                 self.myBotEngine.showList(self.params.filteredUris, "superResourceId");
             } else {
-                CommonBotFunctions_class.listVocabPropertiesFn(self.params.currentVocab, null, function (err, props) {
+                CommonBotFunctions.listVocabPropertiesFn(self.params.currentVocab, null, function (err, props) {
                     if (err) {
                         return self.myBotEngine.abort(err);
                     }

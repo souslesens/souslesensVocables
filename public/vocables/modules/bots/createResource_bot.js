@@ -2,7 +2,7 @@ import Sparql_common from "../sparqlProxies/sparql_common.js";
 import BotEngineClass from "./_botEngineClass.js";
 import Lineage_sources from "../tools/lineage/lineage_sources.js";
 import Lineage_whiteboard from "../tools/lineage/lineage_whiteboard.js";
-import CommonBotFunctions_class from "./_commonBotFunctions_class.js";
+import CommonBotFunctions from "./_commonBotFunctions.js";
 import Lineage_createRelation from "../tools/lineage/lineage_createRelation.js";
 import common from "../shared/common.js";
 import Sparql_generic from "../sparqlProxies/sparql_generic.js";
@@ -88,7 +88,7 @@ var CreateResource_bot = (function () {
         },
 
         listVocabsFn: function () {
-            CommonBotFunctions_class.listVocabsFn(self.source, false, function (err, vocabs) {
+            CommonBotFunctions.listVocabsFn(self.source, false, function (err, vocabs) {
                 if (err) {
                     return self.myBotEngine.abort(err);
                 }
@@ -107,7 +107,7 @@ var CreateResource_bot = (function () {
         },
 
         listSuperClassesFn: function () {
-            CommonBotFunctions_class.listVocabClasses(self.params.currentVocab, true, null, function (err, classes) {
+            CommonBotFunctions.listVocabClasses(self.params.currentVocab, true, null, function (err, classes) {
                 if (err) {
                     return self.myBotEngine.abort(err);
                 }
@@ -181,7 +181,7 @@ var CreateResource_bot = (function () {
 
         listDatatypePropertyDomainFn: function () {
             if (self.params.datatypePropertyDomain) return self.myBotEngine.nextStep();
-            CommonBotFunctions_class.listVocabClasses(self.params.source, false, [{ id: "", label: "none" }], function (err, classes) {
+            CommonBotFunctions.listVocabClasses(self.params.source, false, [{ id: "", label: "none" }], function (err, classes) {
                 if (err) {
                     return self.myBotEngine.abort(err);
                 }

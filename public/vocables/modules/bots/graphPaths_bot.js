@@ -1,7 +1,6 @@
 import Sparql_common from "../sparqlProxies/sparql_common.js";
 
 import BotEngineClass from "./_botEngineClass.js";
-import CommonBotFunctions_class from "./_commonBotFunctions_class.js";
 import Lineage_graphPaths from "../tools/lineage/lineage_graphPaths.js";
 
 var GraphPaths_bot = (function () {

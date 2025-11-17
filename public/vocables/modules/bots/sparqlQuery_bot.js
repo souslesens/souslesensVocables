@@ -5,7 +5,6 @@ import CommonBotFunctions from "./_commonBotFunctions.js";
 import OntologyModels from "../shared/ontologyModels.js";
 import NonObjectPropertyFilterWorklow from "./_nonObjectPropertyFilterWorklow.js";
 //importmysBotEngine from "./self.myBotEngine.js";
-import botEngine from "./_botEngineClass.js";
 import Export from "../shared/export.js";
 import KGquery from "../tools/KGquery/KGquery.js";
 import _commonBotFunctions from "./_commonBotFunctions.js";

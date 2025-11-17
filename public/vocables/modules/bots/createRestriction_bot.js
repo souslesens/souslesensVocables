@@ -1,6 +1,6 @@
 import Sparql_common from "../sparqlProxies/sparql_common.js";
 import BotEngineClass from "./_botEngineClass.js";
-import CommonBotFunctions_class from "./_commonBotFunctions_class.js";
+import CommonBotFunctions from "./_commonBotFunctions.js";
 import Lineage_createRelation from "../tools/lineage/lineage_createRelation.js";
 import common from "../shared/common.js";
 import Sparql_generic from "../sparqlProxies/sparql_generic.js";
@@ -67,7 +67,7 @@ var CreateRestriction_bot = (function () {
         },
 
         listVocabsFn: function () {
-            CommonBotFunctions_class.listVocabsFn(self.params.source, false, function (err, vocabs) {
+            CommonBotFunctions.listVocabsFn(self.params.source, false, function (err, vocabs) {
                 if (err) {
                     return self.myBotEngine.abort(err);
                 }
@@ -79,7 +79,7 @@ var CreateRestriction_bot = (function () {
         },
 
         listTargetClassFn: function () {
-            CommonBotFunctions_class.listVocabClasses(self.params.currentVocab, true, null, function (err, classes) {
+            CommonBotFunctions.listVocabClasses(self.params.currentVocab, true, null, function (err, classes) {
                 if (err) {
                     return self.myBotEngine.abort(err);
                 }
@@ -87,7 +87,7 @@ var CreateRestriction_bot = (function () {
             });
         },
         listTargetPropertyFn: function () {
-            CommonBotFunctions_class.listVocabPropertiesFn(self.params.currentVocab, null, function (err, props) {
+            CommonBotFunctions.listVocabPropertiesFn(self.params.currentVocab, null, function (err, props) {
                 if (err) {
                     return self.myBotEngine.abort(err);
                 }

@@ -1,118 +1,203 @@
-import _botEngine from "./_botEngine.js";
-import CommonBotFunctions_class from "./_commonBotFunctions_class.js";
+import OntologyModels from "../shared/ontologyModels.js";
 
 var CommonBotFunctions = (function () {
     var self = {};
 
-    self.sortList = CommonBotFunctions_class.sortList;
-
-    self.loadSourceOntologyModel = function (sourceLabel, withImports, callback) {
-        CommonBotFunctions_class.loadSourceOntologyModel(sourceLabel, function (err) {
-            if (err) {
-                if (!callback) {
-                    alert(err);
-                    return _botEngine.end();
-                }
+    self.sortList = function (list) {
+        list.sort(function (a, b) {
+            if (a.label > b.label) {
+                return 1;
             }
-            return callback(err);
+            if (a.label < b.label) {
+                return -1;
+            }
+            return 0;
         });
     };
 
-    self.listVocabsFn = function (sourceLabel, varToFill, includeBasicVocabs, callback) {
-        CommonBotFunctions_class.listVocabsFn(sourceLabel, includeBasicVocabs, function (err, vocabs) {
+    self.loadSourceOntologyModel = function (sourceLabel, callback) {
+        var sources = [sourceLabel];
+        if (!Config.sources[sourceLabel]) {
+            return callback("Source not recognized");
+        }
+        if (Config.sources[sourceLabel].imports) {
+            sources = sources.concat(Config.sources[sourceLabel].imports);
+        }
+        async.eachSeries(
+            sources,
+            function (source, callbackEach) {
+                OntologyModels.registerSourcesModel(source, null, function (err, result) {
+                    callbackEach(err);
+                });
+            },
+            function (err) {
+                return callback(err);
+            },
+        );
+    };
+
+    self.listVocabsFn = function (sourceLabel, includeBasicVocabs, callback) {
+        var vocabs = [{ id: sourceLabel, label: sourceLabel }];
+        var imports = Config.sources[sourceLabel].imports;
+        if (imports) {
+            imports.forEach(function (importSource) {
+                vocabs.push({ id: importSource, label: importSource });
+            });
+        }
+        if (includeBasicVocabs) {
+            for (var key in Config.basicVocabularies) {
+                vocabs.push({ id: key, label: key });
+            }
+        }
+        return callback(null, vocabs);
+    };
+
+    self.listVocabClasses = function (vocab, includeOwlThing, classes, callback) {
+        OntologyModels.registerSourcesModel(vocab, null, function (err, result) {
             if (err) {
-                if (callback) {
+                return callback(err);
+            }
+            if (!classes) {
+                classes = [];
+            }
+
+            for (var key in Config.ontologiesVocabularyModels[vocab].classes) {
+                var obj = Config.ontologiesVocabularyModels[vocab].classes[key];
+                if (obj && obj.id.indexOf("http") == 0) classes.push({ id: obj.id, label: obj.label, source: vocab });
+            }
+
+            self.sortList(classes);
+            if (includeOwlThing || classes.length == 0) {
+                classes.splice(0, 0, { id: "owl:Thing", label: "owl:Thing" });
+            }
+            return callback(null, classes);
+        });
+    };
+
+    self.listVocabPropertiesFn = function (vocab, props, callback) {
+        OntologyModels.registerSourcesModel(vocab, null, function (err, result) {
+            if (err) {
+                return callback(err);
+            }
+            if (!props) {
+                props = [];
+            }
+            for (var key in Config.ontologiesVocabularyModels[vocab].properties) {
+                var prop = Config.ontologiesVocabularyModels[vocab].properties[key];
+                props.push({ id: prop.id, label: prop.label, source: vocab });
+            }
+
+            self.sortList(props);
+            return callback(null, props);
+        });
+    };
+
+    self.listNonObjectPropertiesFn = function (vocabs, domain, callback) {
+        if (!vocabs) {
+            vocabs = Object.keys(Config.ontologiesVocabularyModels);
+        }
+        if (!Array.isArray(vocabs)) {
+            vocabs = [vocabs];
+        }
+        var props = [];
+        async.eachSeries(
+            vocabs,
+            function (vocab, callbackEach) {
+                OntologyModels.registerSourcesModel(vocab, null, function (err, result) {
+                    if (err) {
+                        return callbackEach(err);
+                    }
+                    var props2 = Config.ontologiesVocabularyModels[vocab].nonObjectProperties;
+                    for (var key in props2) {
+                        var prop = props2[key];
+                        if (!domain || !prop.domain || domain == prop.domain || prop.domain == "http://www.w3.org/2000/01/rdf-schema#Resource") {
+                            props.push({ id: prop.id, label: vocab + ":" + prop.label, domain: prop.domain, range: prop.range, source: vocab });
+                        }
+                    }
+                    callbackEach();
+                });
+            },
+            function (err) {
+                if (err) {
                     return callback(err);
                 }
-                return _botEngine.previousStep(err);
-            }
-            if (vocabs.length == 0) {
-                if (callback) {
-                    return callback(null, vocabs);
-                }
-                return _botEngine.previousStep("no values found, try another option");
-            }
-            if (callback) {
-                return callback(null, vocabs);
-            }
-            _botEngine.showList(vocabs, varToFill);
-        });
+                self.sortList(props);
+                return callback(null, props);
+            },
+        );
     };
 
-    self.listVocabClasses = function (vocab, varToFill, includeOwlThing, classes, callback) {
-        CommonBotFunctions_class.listVocabClasses(vocab, includeOwlThing, classes, function (err, result) {
-            if (err) {
-                if (callback) {
-                    return callback(err);
+    self.listSourceAllClasses = function (source, includeOwlThing, classes, callback) {
+        var sources = self.getSourceAndImports(source);
+        var allClasses = [];
+        async.eachSeries(
+            sources,
+            function (source, callbackEach) {
+                self.listVocabClasses(source, includeOwlThing, classes, function (err, classes) {
+                    if (err) {
+                        return callbackEach(err);
+                    }
+                    allClasses = allClasses.concat(classes);
+                    callbackEach();
+                });
+            },
+            function (err) {
+                return callback(err, allClasses);
+            },
+        );
+    };
+    self.listSourceAllObjectProperties = function (source, props, callback) {
+        var sources = self.getSourceAndImports(source);
+        var allProps = [];
+        async.eachSeries(
+            sources,
+            function (source, callbackEach) {
+                self.listVocabPropertiesFn(source, props, function (err, props) {
+                    if (err) {
+                        return callbackEach(err);
+                    }
+                    allProps = allProps.concat(props);
+                    callbackEach();
+                });
+            },
+            function (err) {
+                return callback(err, allProps);
+            },
+        );
+    };
+    self.listSourceAllObjectPropertiesConstraints = function (source, callback) {
+        var sources = self.getSourceAndImports(source);
+        var allConstraints = {};
+        async.eachSeries(
+            sources,
+            function (source, callbackEach) {
+                var constraints = Config.ontologiesVocabularyModels[source].constraints;
+                if (err) {
+                    return callbackEach(err);
                 }
-                return MainController.errorAlert(err);
-            }
-            if (callback) {
-                return callback(null, result);
-            }
-            _botEngine.showList(result, varToFill);
-        });
+                for (var prop in constraints) {
+                    allConstraints[prop] = constraints[prop];
+                }
+
+                callbackEach();
+            },
+
+            function (err) {
+                return callback(err, allConstraints);
+            },
+        );
     };
 
-    self.listVocabPropertiesFn = function (vocab, varToFill, props, callback) {
-        CommonBotFunctions_class.listVocabPropertiesFn(vocab, props, function (err, result) {
-            if (err) {
-                if (callback) {
-                    return callback(err);
-                }
-                return MainController.errorAlert(err);
-            }
-            if (result.length == 0) {
-                if (callback) {
-                    return callback(null, result);
-                }
-                return _botEngine.previousStep("no values found, try another option");
-            }
-            if (callback) {
-                return callback(null, result);
-            }
-            _botEngine.showList(result, varToFill);
-        });
+    self.getSourceAndImports = function (source) {
+        var sources = [source];
+        var imports = Config.sources[source].imports;
+        if (imports) {
+            imports.forEach(function (importSource) {
+                sources.push(importSource);
+            });
+        }
+        return sources;
     };
-
-    self.listNonObjectPropertiesFn = function (vocabs, varToFill, domain, callback) {
-        CommonBotFunctions_class.listNonObjectPropertiesFn(vocabs, domain, function (err, result) {
-            if (err) {
-                if (callback) {
-                    return callback(err);
-                }
-                return MainController.errorAlert(err);
-            }
-            if (result.length == 0) {
-                if (callback) {
-                    return callback(null, result);
-                }
-                return _botEngine.previousStep("no values found, try another option");
-            }
-            if (callback) {
-                return callback(null, result);
-            }
-            _botEngine.showList(result, varToFill);
-        });
-    };
-
-    self.listSourceAllClasses = function (source, varToFill, includeOwlThing, classes, callback) {
-        CommonBotFunctions_class.listSourceAllClasses(source, includeOwlThing, classes, function (err, result) {
-            return callback(err, result);
-        });
-    };
-    self.listSourceAllObjectProperties = function (source, varToFill, props, callback) {
-        CommonBotFunctions_class.listSourceAllObjectProperties(source, props, function (err, result) {
-            return callback(err, result);
-        });
-    };
-    self.listSourceAllObjectPropertiesConstraints = function (source, varToFill, callback) {
-        CommonBotFunctions_class.listSourceAllObjectPropertiesConstraints(source, function (err, result) {
-            return callback(err, result);
-        });
-    };
-
-    self.getSourceAndImports = CommonBotFunctions_class.getSourceAndImports;
 
     return self;
 })();

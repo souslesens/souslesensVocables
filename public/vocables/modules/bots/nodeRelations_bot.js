@@ -3,7 +3,7 @@ import Sparql_OWL from "../sparqlProxies/sparql_OWL.js";
 import Lineage_whiteboard from "../tools/lineage/lineage_whiteboard.js";
 import Sparql_common from "../sparqlProxies/sparql_common.js";
 import BotEngineClass from "./_botEngineClass.js";
-import CommonBotFunctions_class from "./_commonBotFunctions_class.js";
+import CommonBotFunctions from "./_commonBotFunctions.js";
 import Containers_graph from "../tools/containers/containers_graph.js";
 import Containers_widget from "../tools/containers/containers_widget.js";
 import Axioms_graph from "../tools/axioms/axioms_graph.js";
@@ -97,7 +97,7 @@ var NodeRelations_bot = (function () {
             self.myBotEngine.nextStep();
         },
         listVocabsFn: function () {
-            CommonBotFunctions_class.listVocabsFn(Lineage_sources.activeSource, true, function (err, vocabs) {
+            CommonBotFunctions.listVocabsFn(Lineage_sources.activeSource, true, function (err, vocabs) {
                 if (err) {
                     return self.myBotEngine.abort(err);
                 }
@@ -109,7 +109,7 @@ var NodeRelations_bot = (function () {
         },
 
         listClassesFn: function () {
-            CommonBotFunctions_class.listVocabClasses(self.params.currentVocab, true, [{ label: "_Any Class", id: "AnyClass" }], function (err, classes) {
+            CommonBotFunctions.listVocabClasses(self.params.currentVocab, true, [{ label: "_Any Class", id: "AnyClass" }], function (err, classes) {
                 if (err) {
                     return self.myBotEngine.abort(err);
                 }
@@ -139,7 +139,7 @@ var NodeRelations_bot = (function () {
         },
 
         listAnnotationPropertiesVocabsFn: function () {
-            CommonBotFunctions_class.listVocabsFn(self.params.source, true, function (err, vocabs) {
+            CommonBotFunctions.listVocabsFn(self.params.source, true, function (err, vocabs) {
                 if (err) {
                     return self.myBotEngine.abort(err);
                 }
@@ -152,7 +152,7 @@ var NodeRelations_bot = (function () {
 
         listAnnotationPropertiesFn: function () {
             // filter properties compatible with
-            CommonBotFunctions_class.listNonObjectPropertiesFn([self.params.annotationPropertyVocab], null, function (err, props) {
+            CommonBotFunctions.listNonObjectPropertiesFn([self.params.annotationPropertyVocab], null, function (err, props) {
                 if (err) {
                     return self.myBotEngine.abort(err);
                 }

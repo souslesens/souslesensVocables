@@ -1,5 +1,5 @@
 import BotEngineClass from "./_botEngineClass.js";
-import CommonBotFunctions_class from "./_commonBotFunctions_class.js";
+import CommonBotFunctions from "./_commonBotFunctions.js";
 import CreateResource_bot from "./createResource_bot.js";
 import MappingsDetails from "../tools/mappingModeler/mappingsDetails.js";
 
@@ -139,7 +139,7 @@ var MappingModeler_bot = (function () {
             self.myBotEngine.promptValue("enter resource label", "rdfsLabel");
         },
         listNonObjectPropertiesVocabsFn: function () {
-            CommonBotFunctions_class.listVocabsFn(self.params.source, true, function (err, vocabs) {
+            CommonBotFunctions.listVocabsFn(self.params.source, true, function (err, vocabs) {
                 if (err) {
                     return self.myBotEngine.abort(err);
                 }
@@ -151,7 +151,7 @@ var MappingModeler_bot = (function () {
         },
         listNonObjectPropertiesFn: function () {
             var columnRdfType = null;
-            CommonBotFunctions_class.listNonObjectPropertiesFn([self.params.nonObjectPropertyVocab], columnRdfType, function (err, props) {
+            CommonBotFunctions.listNonObjectPropertiesFn([self.params.nonObjectPropertyVocab], columnRdfType, function (err, props) {
                 if (err) {
                     return self.myBotEngine.abort(err);
                 }
@@ -237,7 +237,7 @@ var MappingModeler_bot = (function () {
             if (self.params.filteredUris && self.params.filteredUris.length > 0) {
                 self.myBotEngine.nextStep();
             } else {
-                CommonBotFunctions_class.listVocabsFn(self.params.source, false, function (err, vocabs) {
+                CommonBotFunctions.listVocabsFn(self.params.source, false, function (err, vocabs) {
                     if (err) {
                         return self.myBotEngine.abort(err);
                     }
@@ -249,7 +249,7 @@ var MappingModeler_bot = (function () {
             }
         },
         listSuperClassesFn: function () {
-            CommonBotFunctions_class.listVocabClasses(self.params.currentVocab, true, null, function (err, classes) {
+            CommonBotFunctions.listVocabClasses(self.params.currentVocab, true, null, function (err, classes) {
                 if (err) {
                     return self.myBotEngine.abort(err);
                 }
@@ -268,7 +268,7 @@ var MappingModeler_bot = (function () {
             });
         },
         chooseDatatypeSourceFn: function () {
-            CommonBotFunctions_class.listVocabsFn(self.params.source, false, function (err, vocabs) {
+            CommonBotFunctions.listVocabsFn(self.params.source, false, function (err, vocabs) {
                 if (err) {
                     return self.myBotEngine.abort(err);
                 }

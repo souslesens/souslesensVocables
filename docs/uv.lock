@@ -527,8 +527,7 @@ dependencies = [
     { name = "myst-parser" },
     { name = "sphinx" },
     { name = "sphinx-book-theme" },
-    { name = "sphinxnotes-isso", version = "1.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12'" },
-    { name = "sphinxnotes-isso", version = "2.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
+    { name = "sphinxnotes-isso" },
 ]
 
 [package.dev-dependencies]
@@ -542,7 +541,7 @@ requires-dist = [
     { name = "myst-parser", specifier = ">=4.0.1" },
     { name = "sphinx", specifier = ">=8.2.3" },
     { name = "sphinx-book-theme", specifier = ">=1.1.4" },
-    { name = "sphinxnotes-isso", specifier = ">=1.2" },
+    { name = "sphinxnotes-isso", specifier = "==2.0a2" },
 ]
 
 [package.metadata.requires-dev]
@@ -692,32 +691,14 @@ wheels = [
 
 [[package]]
 name = "sphinxnotes-isso"
-version = "1.2"
+version = "2.0a2"
 source = { registry = "https://pypi.org/simple" }
-resolution-markers = [
-    "python_full_version < '3.12'",
-]
 dependencies = [
-    { name = "sphinx", marker = "python_full_version < '3.12'" },
+    { name = "sphinx" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/a6/d7/8efa63736ddfab6a1f5b70e77fc4b123435b16f8bcac5d048d90077aa222/sphinxnotes_isso-1.2.tar.gz", hash = "sha256:f86e665742d42e4a216a22daf14e4e5ab4dc71a673cf6e4b59e48f24c2550840", size = 32774 }
+sdist = { url = "https://files.pythonhosted.org/packages/d4/3a/bea6a7dae37c09252bb9eba74311476acb70065aa4401c3c15404288d5bb/sphinxnotes_isso-2.0a2.tar.gz", hash = "sha256:1b76713adfdb95591b701c3fe6220fde049dd3011a7aea50ffbc29bb10329a02", size = 32021 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/41/15/c64e51a3ad84b59e9a7f7ac508876bacc2072573dd44eaebde3a6d5fb3b5/sphinxnotes_isso-1.2-py3-none-any.whl", hash = "sha256:dad09e019201d42b3294f59c25a6b676bdbab89e13dd8ec3dfc16ee82fe8b8a0", size = 5096 },
-]
-
-[[package]]
-name = "sphinxnotes-isso"
-version = "2.0"
-source = { registry = "https://pypi.org/simple" }
-resolution-markers = [
-    "python_full_version >= '3.12'",
-]
-dependencies = [
-    { name = "sphinx", marker = "python_full_version >= '3.12'" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/65/3a/dde61a2431cb976239038e82dcd32190a9f4bfc645a46afcd2af6ddc0ea9/sphinxnotes_isso-2.0.tar.gz", hash = "sha256:5ef86cacb5d23ea617d590d44cac4bd7ccb082d5acd5abfd3881abd90d45cef9", size = 33018 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/85/c4/5d1282a69f72a0200742a1d7bf60e273ee6bc89eb13ccb7970f90c568e3b/sphinxnotes_isso-2.0-py3-none-any.whl", hash = "sha256:502bfab879647886583ff9a05b7ad6682ef44fc92cd768de68c42828b640588d", size = 5974 },
+    { url = "https://files.pythonhosted.org/packages/3c/ff/116df26d2ae3ada711564b7a63d2ce171b8c5700f191ead8b42b96d42340/sphinxnotes_isso-2.0a2-py3-none-any.whl", hash = "sha256:de3db0d342f6bfe837d4117138b52b5e2cf3fe29d86b31697c67784b7182a0f1", size = 5198 },
 ]
 
 [[package]]

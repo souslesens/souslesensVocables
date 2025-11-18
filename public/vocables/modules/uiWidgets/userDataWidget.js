@@ -16,6 +16,11 @@ var UserDataWidget = (function () {
 
         var group = $("#userDataWidget_group").val();
         var comment = $("#userDataWidget_comment").val();
+        var sparqlQuery 
+        if($("#userDataWidget_query").val()){
+            sparqlQuery=$("#userDataWidget_query").val();
+        }
+        self.jsonContent.sparqlQuery=sparqlQuery;
         self.saveMetadata(label, data_type, self.jsonContent, group, comment, function (err, result) {
             $("#" + self.divId).dialog("close");
             UI.message(err || result);
@@ -163,10 +168,35 @@ var UserDataWidget = (function () {
         }
         self.saveUI();
     };
+
+        self.resetQuery=function(){
+            
+        // Si la ligne existe déjà, on la montre et on s'arrête
+    if ($("#userDataWidget_queryRow").length > 0) {
+        $("#userDataWidget_queryRow").show();
+        return;
+    }
+var queryText=KGquery.currentSparqlQuery.query;
+        if (queryText) {
+            $("#userDataWidget_query").val(queryText); 
+        }
+        $("#userDataWidget_query").focus();
+    var queryRowHtml =
+        '<tr id="userDataWidget_queryRow">' +
+            '<td>Query</td>' +
+            '<td><textarea id="userDataWidget_query" style="width: 250px" rows="5"></textarea></td>' +
+        '</tr>';
+    // On insère juste après la ligne "Description"
+    $("#userDataWidget_comment").closest("tr").after(queryRowHtml);
+    var queryText = KGquery && KGquery.currentSparqlQuery ? KGquery.currentSparqlQuery.query : "";
+    $("#userDataWidget_query").val(queryText).focus();
+    };
     self.showSaveDialog = function (data_type, jsonContent, divId, options, callbackFn) {
+
         self.data_type = data_type;
         self.jsonContent = jsonContent;
         self.callbackFn = callbackFn;
+
         self.showDialog(divId, "save", options);
     };
 
@@ -360,7 +390,13 @@ var UserDataWidget = (function () {
                 $("#userDataWidget_group").val(self.currentTreeNode.data.data_group);
                 $("#userDataWidget_comment").val(self.currentTreeNode.data.data_comment);
             }
-
+            if(options && options.additionalButton){
+                options.additionalButton.forEach(function(button){
+                    $("#userDataWidget_saveNewButton").insertAfter(button);
+                })
+                
+               
+            }
             if (divId == "smallDialogDiv") {
                 UI.openDialog(divId, options);
             }

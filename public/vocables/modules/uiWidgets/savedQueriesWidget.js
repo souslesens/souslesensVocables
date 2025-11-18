@@ -186,8 +186,27 @@ var SavedQueriesWidget = (function () {
                 data.sparqlQuery = data.sparqlQuery.query;
             }
 
+
+             var additionalButton = [
+                // {
+                //     label: "Reset query",
+                //     action: function (node) {
+                //         var btn = document.getElementById("userDataWidget_resetQuery");
+                //         if (!btn) {
+                //             return MainController.errorAlert("Bouton Edit query introuvable");
+                //         }
+
+                //         // On l’affiche
+                //         btn.style.display = "inline-block"; // ou "block" selon ton layout
+
+                //         // Si tu veux déclencher directement l'action du bouton :
+                //         // btn.click();
+                //     }
+                // }
+                `<button style="display: none" id="userDataWidget_resetQuery" onclick="UserDataWidget.resetQuery()">Edit query</button>`
+        ];
             //UserDataWidget.currentTreeNode = null;
-            UserDataWidget.showSaveDialog("sparqlQuery", data, null, { title: "Save KGquery Query" }, function (err, result) {
+            UserDataWidget.showSaveDialog("sparqlQuery", data, null, { title: "Save KGquery Query",additionalButton : additionalButton}, function (err, result) {
                 if (err) {
                     return MainController.errorAlert(err);
                 }
@@ -263,6 +282,11 @@ var SavedQueriesWidget = (function () {
             });
             */
     };
+
+
+
+
+
 
     self.delete = function (userDataId, callback) {
         if (!userDataId) {

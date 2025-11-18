@@ -186,8 +186,7 @@ var SavedQueriesWidget = (function () {
                 data.sparqlQuery = data.sparqlQuery.query;
             }
 
-
-             var additionalButton = [
+            var additionalButton = [
                 // {
                 //     label: "Reset query",
                 //     action: function (node) {
@@ -203,13 +202,13 @@ var SavedQueriesWidget = (function () {
                 //         // btn.click();
                 //     }
                 // }
-                `<button id="userDataWidget_resetQuery" onclick="UserDataWidget.resetQuery()">Edit query</button>`
-        ];
-        if(UserDataWidget.currentTreeNode){
-            additionalButton="";
-        }
+                `<button id="userDataWidget_resetQuery" onclick="UserDataWidget.resetQuery()">Edit query</button>`,
+            ];
+            if (UserDataWidget.currentTreeNode) {
+                additionalButton = "";
+            }
             //UserDataWidget.currentTreeNode = null;
-            UserDataWidget.showSaveDialog("sparqlQuery", data, null, { title: "Save KGquery Query",additionalButton : additionalButton}, function (err, result) {
+            UserDataWidget.showSaveDialog("sparqlQuery", data, null, { title: "Save KGquery Query", additionalButton: additionalButton }, function (err, result) {
                 if (err) {
                     return MainController.errorAlert(err);
                 }
@@ -285,11 +284,6 @@ var SavedQueriesWidget = (function () {
             });
             */
     };
-
-
-
-
-
 
     self.delete = function (userDataId, callback) {
         if (!userDataId) {

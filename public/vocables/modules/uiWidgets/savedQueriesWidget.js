@@ -203,8 +203,11 @@ var SavedQueriesWidget = (function () {
                 //         // btn.click();
                 //     }
                 // }
-                `<button style="display: none" id="userDataWidget_resetQuery" onclick="UserDataWidget.resetQuery()">Edit query</button>`
+                `<button id="userDataWidget_resetQuery" onclick="UserDataWidget.resetQuery()">Edit query</button>`
         ];
+        if(UserDataWidget.currentTreeNode){
+            additionalButton="";
+        }
             //UserDataWidget.currentTreeNode = null;
             UserDataWidget.showSaveDialog("sparqlQuery", data, null, { title: "Save KGquery Query",additionalButton : additionalButton}, function (err, result) {
                 if (err) {

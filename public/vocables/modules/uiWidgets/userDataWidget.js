@@ -19,8 +19,9 @@ var UserDataWidget = (function () {
         var sparqlQuery 
         if($("#userDataWidget_query").val()){
             sparqlQuery=$("#userDataWidget_query").val();
+            self.jsonContent.sparqlQuery=sparqlQuery;
         }
-        self.jsonContent.sparqlQuery=sparqlQuery;
+        
         self.saveMetadata(label, data_type, self.jsonContent, group, comment, function (err, result) {
             $("#" + self.divId).dialog("close");
             UI.message(err || result);
@@ -169,28 +170,114 @@ var UserDataWidget = (function () {
         self.saveUI();
     };
 
-        self.resetQuery=function(){
+    self.resetQuery = function (callback) {
+
+    let queryText = (KGquery && KGquery.currentSparqlQuery && KGquery.currentSparqlQuery.query) || "";
+
+    async.series(
+        [
+        
+        function ensureRow(callbackseries) {
+            if ($("#userDataWidget_queryRow").length === 0) {
+            const queryRowHtml =
+                '<tr id="userDataWidget_queryRow">' +
+                '<td>Query</td>' +
+                '<td><textarea id="userDataWidget_query" style="width: 250px" rows="5"></textarea></td>' +
+                "</tr>";
+
+            $("#userDataWidget_comment").closest("tr").after(queryRowHtml);
+            }
+
+            $("#userDataWidget_queryRow").show();
+            return callbackseries(); 
+        },
+
+        function maybeLoadUserData(callbackseries) {
+            if (!UserDataWidget.currentTreeNode) return callbackseries();
+
+            UserDataWidget.loadUserDatabyId(UserDataWidget.currentTreeNode.id, function (err, result) {
+            if (err) return callbackseries(err);
+
+            if (result && result.data_content && result.data_content.sparqlQuery) {
+                queryText = result.data_content.sparqlQuery;
+            }
+            return callbackseries();
+            });
+        },
+
+        function fillAndFocus(callbackSeries) {
+            const $queryField = $("#userDataWidget_query");
             
-        // Si la ligne existe déjà, on la montre et on s'arrête
-    if ($("#userDataWidget_queryRow").length > 0) {
-        $("#userDataWidget_queryRow").show();
-        return;
-    }
-var queryText=KGquery.currentSparqlQuery.query;
-        if (queryText) {
-            $("#userDataWidget_query").val(queryText); 
+            // Vérifie si le champ est vide avant d'ajouter queryText
+            if ($queryField.val().trim() === "") {
+                $queryField.val(queryText || "");
+            }
+
+            $queryField.focus();
+            return callbackSeries();
+        },
+        ],
+        function (err) {
+        if (typeof callback === "function") return callback(err);
         }
-        $("#userDataWidget_query").focus();
-    var queryRowHtml =
-        '<tr id="userDataWidget_queryRow">' +
-            '<td>Query</td>' +
-            '<td><textarea id="userDataWidget_query" style="width: 250px" rows="5"></textarea></td>' +
-        '</tr>';
-    // On insère juste après la ligne "Description"
-    $("#userDataWidget_comment").closest("tr").after(queryRowHtml);
-    var queryText = KGquery && KGquery.currentSparqlQuery ? KGquery.currentSparqlQuery.query : "";
-    $("#userDataWidget_query").val(queryText).focus();
+    )
     };
+
+
+    // self.resetQuery=function(callback){
+    //      async.series(
+    //         [
+    //             function (callbackSeries) {
+    //                 if ($("#userDataWidget_queryRow").length > 0) {
+    //                     $("#userDataWidget_queryRow").show();
+    //                     return;
+    //                 }
+    //                 return callbackSeries();
+    //             },
+    //             //execute query
+    //             function (callbackSeries) {
+    //                 var queryText=KGquery.currentSparqlQuery.query;
+    //                 return callbackSeries();
+    //             },
+    //             function (callbackSeries) {
+    //                 if(UserDataWidget.currentTreeNode){
+    //                     UserDataWidget.loadUserDatabyId(UserDataWidget.currentTreeNode.id, function (err, result) {
+    //                         if (err) {
+    //                             return ;
+    //                         }
+    //                         if (result && result?.data_content?.sparqlQuery) {   
+    //                             queryText= result.data_content.sparqlQuery;
+    //                             return callbackSeries();
+    //                         }
+    //                     });
+    //                 }
+                    
+    //                         },
+    //             function (callbackSeries) {
+    //                 if (queryText) {
+    //                     $("#userDataWidget_query").val(queryText); 
+    //                 }
+    //                 $("#userDataWidget_query").focus();
+    //                 var queryRowHtml =
+    //                 '<tr id="userDataWidget_queryRow">' +
+    //                     '<td>Query</td>' +
+    //                     '<td><textarea id="userDataWidget_query" style="width: 250px" rows="5"></textarea></td>' +
+    //                 '</tr>';
+    //                 // On insère juste après la ligne "Description"
+    //                 $("#userDataWidget_comment").closest("tr").after(queryRowHtml);
+    //                 var queryText = KGquery && KGquery.currentSparqlQuery ? KGquery.currentSparqlQuery.query : "";
+    //                 $("#userDataWidget_query").val(queryText).focus();
+    //                 return callbackSeries();
+    //                 }
+
+    //      ],
+    //         function (err) {
+    //             callback(err);
+    //         },
+    //     );
+    // };
+
+
     self.showSaveDialog = function (data_type, jsonContent, divId, options, callbackFn) {
 
         self.data_type = data_type;
@@ -390,13 +477,23 @@ var queryText=KGquery.currentSparqlQuery.query;
                 $("#userDataWidget_group").val(self.currentTreeNode.data.data_group);
                 $("#userDataWidget_comment").val(self.currentTreeNode.data.data_comment);
             }
-            if(options && options.additionalButton){
-                options.additionalButton.forEach(function(button){
-                    $("#userDataWidget_saveNewButton").insertAfter(button);
-                })
-                
-               
-            }
+
+
+        var saveNewButton = $("#userDataWidget_saveDiv button").first();
+
+        if (options && options.additionalButton) {
+            options.additionalButton.forEach(function (buttonHtml) {
+                var $btn = $(buttonHtml);
+
+                $btn.css({
+                    display: "block"
+                });
+
+                $btn.insertAfter(saveNewButton);
+                // si tu veux être certain qu'il soit visible :
+                // $btn.show();
+            });
+        }
             if (divId == "smallDialogDiv") {
                 UI.openDialog(divId, options);
             }

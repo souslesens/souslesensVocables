@@ -434,9 +434,9 @@ var TripleFactory = (function () {
             selectTreeNodeFn: function (event, obj) {
                 // add otherpredicates onclick
                 if (obj.node.parent == "Columns") {
+                    var jstreeData = [];
                     var otherPredicates = obj.node.data.otherPredicates;
                     if (otherPredicates) {
-                        var jstreeData = [];
                         otherPredicates.forEach(function (item) {
                             jstreeData.push({
                                 id: item.property,
@@ -445,8 +445,26 @@ var TripleFactory = (function () {
                                 data: { type: "otherPredicate" },
                             });
                         });
-                        JstreeWidget.addNodesToJstree(divId, obj.node.id, jstreeData);
+                       
                     }
+                    if(obj.node.data.rdfsLabel){
+                        //separate with > because he can't be used on uri
+                        jstreeData.push({
+                            id: obj.node.id+'>'+ 'rdfs:label',
+                            text: "rdfs:label",
+                            parent: obj.node.id,
+                            data: { type: "rdfsLabel" },
+                        });
+                    }
+                    if(obj.node.data.rdfType){
+                        jstreeData.push({
+                            id: obj.node.id+'>'+ 'rdf:type',
+                            text: "rdf:type",
+                            parent: obj.node.id,
+                            data: { type: "rdfType" },
+                        });
+                    }
+                    JstreeWidget.addNodesToJstree(divId, obj.node.id, jstreeData);
                 }
             },
         };

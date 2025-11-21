@@ -1,6 +1,6 @@
 import Sparql_common from "../sparqlProxies/sparql_common.js";
 import BotEngineClass from "./_botEngineClass.js";
-import CommonBotFunctions_class from "./_commonBotFunctions_class.js";
+import CommonBotFunctions from "./_commonBotFunctions.js";
 import Lineage_createRelation from "../tools/lineage/lineage_createRelation.js";
 import common from "../shared/common.js";
 import Sparql_generic from "../sparqlProxies/sparql_generic.js";
@@ -67,14 +67,35 @@ var CreateRestriction_bot = (function () {
         },
 
         listVocabsFn: function () {
-            CommonBotFunctions_class.listVocabsFn(self.params.source, "currentVocab");
+            CommonBotFunctions.listVocabsFn(self.params.source, false, function (err, vocabs) {
+                if (err) {
+                    return self.myBotEngine.abort(err);
+                }
+                if (vocabs.length == 0) {
+                    return self.myBotEngine.previousStep("no values found, try another option");
+                }
+                self.myBotEngine.showList(vocabs, "currentVocab");
+            });
         },
 
         listTargetClassFn: function () {
-            CommonBotFunctions_class.listVocabClasses(self.params.currentVocab, "targetClassUri", true);
+            CommonBotFunctions.listVocabClasses(self.params.currentVocab, true, null, function (err, classes) {
+                if (err) {
+                    return self.myBotEngine.abort(err);
+                }
+                self.myBotEngine.showList(classes, "targetClassUri");
+            });
         },
         listTargetPropertyFn: function () {
-            CommonBotFunctions_class.listVocabPropertiesFn(self.params.currentVocab, "objectPropertyUri");
+            CommonBotFunctions.listVocabPropertiesFn(self.params.currentVocab, null, function (err, props) {
+                if (err) {
+                    return self.myBotEngine.abort(err);
+                }
+                if (props.length == 0) {
+                    return self.myBotEngine.previousStep("no values found, try another option");
+                }
+                self.myBotEngine.showList(props, "objectPropertyUri");
+            });
         },
 
         chooseCardinalityTypeFn: function () {

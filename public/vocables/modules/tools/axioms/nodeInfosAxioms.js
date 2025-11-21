@@ -53,7 +53,7 @@ var NodeInfosAxioms = (function () {
     };
     self.initSourceClassesMap = function (source, callback) {
         self.allClassesMap = {};
-        CommonBotFunctions.listSourceAllClasses(source, null, false, [], function (err, result) {
+        CommonBotFunctions.listSourceAllClasses(source, false, [], function (err, result) {
             if (err) {
                 return callback(err.responseText);
             }

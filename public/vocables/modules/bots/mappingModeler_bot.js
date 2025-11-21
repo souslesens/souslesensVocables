@@ -1,5 +1,5 @@
 import BotEngineClass from "./_botEngineClass.js";
-import CommonBotFunctions_class from "./_commonBotFunctions_class.js";
+import CommonBotFunctions from "./_commonBotFunctions.js";
 import CreateResource_bot from "./createResource_bot.js";
 import MappingsDetails from "../tools/mappingModeler/mappingsDetails.js";
 
@@ -139,11 +139,27 @@ var MappingModeler_bot = (function () {
             self.myBotEngine.promptValue("enter resource label", "rdfsLabel");
         },
         listNonObjectPropertiesVocabsFn: function () {
-            CommonBotFunctions_class.listVocabsFn(self.myBotEngine, self.params.source, "nonObjectPropertyVocab", true);
+            CommonBotFunctions.listVocabsFn(self.params.source, true, function (err, vocabs) {
+                if (err) {
+                    return self.myBotEngine.abort(err);
+                }
+                if (vocabs.length == 0) {
+                    return self.myBotEngine.previousStep("no values found, try another option");
+                }
+                self.myBotEngine.showList(vocabs, "nonObjectPropertyVocab");
+            });
         },
         listNonObjectPropertiesFn: function () {
             var columnRdfType = null;
-            CommonBotFunctions_class.listNonObjectPropertiesFn(self.myBotEngine, self.params.nonObjectPropertyVocab, "nonObjectPropertyId", columnRdfType);
+            CommonBotFunctions.listNonObjectPropertiesFn([self.params.nonObjectPropertyVocab], columnRdfType, function (err, props) {
+                if (err) {
+                    return self.myBotEngine.abort(err);
+                }
+                if (props.length == 0) {
+                    return self.myBotEngine.previousStep("no values found, try another option");
+                }
+                self.myBotEngine.showList(props, "nonObjectPropertyId");
+            });
         },
         choosedateTypeFn: function () {
             var datatypePropertyRange = self.myBotEngine.currentBot.params.datatypePropertyRange;
@@ -221,11 +237,24 @@ var MappingModeler_bot = (function () {
             if (self.params.filteredUris && self.params.filteredUris.length > 0) {
                 self.myBotEngine.nextStep();
             } else {
-                CommonBotFunctions_class.listVocabsFn(self.myBotEngine, self.params.source, "currentVocab");
+                CommonBotFunctions.listVocabsFn(self.params.source, false, function (err, vocabs) {
+                    if (err) {
+                        return self.myBotEngine.abort(err);
+                    }
+                    if (vocabs.length == 0) {
+                        return self.myBotEngine.previousStep("no values found, try another option");
+                    }
+                    self.myBotEngine.showList(vocabs, "currentVocab");
+                });
             }
         },
         listSuperClassesFn: function () {
-            CommonBotFunctions_class.listVocabClasses(self.myBotEngine, self.params.currentVocab, "superClassId", true);
+            CommonBotFunctions.listVocabClasses(self.params.currentVocab, true, null, function (err, classes) {
+                if (err) {
+                    return self.myBotEngine.abort(err);
+                }
+                self.myBotEngine.showList(classes, "superClassId");
+            });
         },
         setSubClassOfFn: function () {
             self.params.addingSubClassOf = self.params.superClassId;
@@ -239,7 +268,15 @@ var MappingModeler_bot = (function () {
             });
         },
         chooseDatatypeSourceFn: function () {
-            CommonBotFunctions_class.listVocabsFn(self.myBotEngine, self.params.source, "datatypePropertySource");
+            CommonBotFunctions.listVocabsFn(self.params.source, false, function (err, vocabs) {
+                if (err) {
+                    return self.myBotEngine.abort(err);
+                }
+                if (vocabs.length == 0) {
+                    return self.myBotEngine.previousStep("no values found, try another option");
+                }
+                self.myBotEngine.showList(vocabs, "datatypePropertySource");
+            });
         },
     };
 

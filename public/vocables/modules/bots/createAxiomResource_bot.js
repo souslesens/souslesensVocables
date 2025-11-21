@@ -1,6 +1,6 @@
 import Sparql_common from "../sparqlProxies/sparql_common.js";
 import BotEngineClass from "./_botEngineClass.js";
-import CommonBotFunctions_class from "./_commonBotFunctions_class.js";
+import CommonBotFunctions from "./_commonBotFunctions.js";
 import Lineage_createRelation from "../tools/lineage/lineage_createRelation.js";
 import common from "../shared/common.js";
 import Lineage_createResource from "../tools/lineage/lineage_createResource.js";
@@ -56,7 +56,15 @@ var CreateAxiomResource_bot = (function () {
             if (self.params.filteredUris && self.params.filteredUris.length > 0) {
                 self.myBotEngine.nextStep();
             } else {
-                CommonBotFunctions_class.listVocabsFn(self.myBotEngine, self.source, "currentVocab");
+                CommonBotFunctions.listVocabsFn(self.source, false, function (err, vocabs) {
+                    if (err) {
+                        return self.myBotEngine.abort(err);
+                    }
+                    if (vocabs.length == 0) {
+                        return self.myBotEngine.previousStep("no values found, try another option");
+                    }
+                    self.myBotEngine.showList(vocabs, "currentVocab");
+                });
             }
         },
 
@@ -71,7 +79,12 @@ var CreateAxiomResource_bot = (function () {
             if (self.params.filteredUris && self.params.filteredUris.length > 0) {
                 self.myBotEngine.showList(self.params.filteredUris, "superResourceId");
             } else {
-                CommonBotFunctions_class.listVocabClasses(self.myBotEngine, self.params.currentVocab, "superResourceId", true);
+                CommonBotFunctions.listVocabClasses(self.params.currentVocab, true, null, function (err, classes) {
+                    if (err) {
+                        return self.myBotEngine.abort(err);
+                    }
+                    self.myBotEngine.showList(classes, "superResourceId");
+                });
             }
         },
 
@@ -79,7 +92,15 @@ var CreateAxiomResource_bot = (function () {
             if (self.params.filteredUris && self.params.filteredUris.length > 0) {
                 self.myBotEngine.showList(self.params.filteredUris, "superResourceId");
             } else {
-                CommonBotFunctions_class.listVocabPropertiesFn(self.myBotEngine, self.params.currentVocab, "superResourceId");
+                CommonBotFunctions.listVocabPropertiesFn(self.params.currentVocab, null, function (err, props) {
+                    if (err) {
+                        return self.myBotEngine.abort(err);
+                    }
+                    if (props.length == 0) {
+                        return self.myBotEngine.previousStep("no values found, try another option");
+                    }
+                    self.myBotEngine.showList(props, "superResourceId");
+                });
             }
         },
 
@@ -101,7 +122,7 @@ var CreateAxiomResource_bot = (function () {
             });
             Lineage_createResource.writeResource(self.source, triples, function (err, resourceId) {
                 if (err) {
-                    _botEngine.abort(err.responseText);
+                    self.myBotEngine.abort(err.responseText);
                 }
                 self.params.newObject = {
                     id: resourceId,
@@ -127,7 +148,7 @@ var CreateAxiomResource_bot = (function () {
 
             Lineage_createRelation.createSubProperty(self.params.source, self.params.superResourceId, propLabel, true, function (err, result) {
                 if (err) {
-                    _botEngine.abort(err.responseText);
+                    self.myBotEngine.abort(err.responseText);
                 }
                 self.params.newObject = {
                     id: result.uri,

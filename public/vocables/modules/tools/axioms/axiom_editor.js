@@ -112,7 +112,7 @@ const Axiom_editor = (function () {
             source = self.currentSource;
         }
         if (!self.allClasses) {
-            CommonBotFunctions.listSourceAllClasses(source, null, false, [], function (err, result) {
+            CommonBotFunctions.listSourceAllClasses(source, false, [], function (err, result) {
                 if (err) {
                     return callback(err.responseText);
                 }
@@ -143,7 +143,7 @@ const Axiom_editor = (function () {
         if (!source) source = self.currentSource;
 
         if (!self.allProperties) {
-            CommonBotFunctions.listSourceAllObjectProperties(source, null, false, function (err, result) {
+            CommonBotFunctions.listSourceAllObjectProperties(source, null, function (err, result) {
                 if (err) {
                     return callback(err.responseText);
                 }

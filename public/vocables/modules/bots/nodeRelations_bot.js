@@ -3,7 +3,7 @@ import Sparql_OWL from "../sparqlProxies/sparql_OWL.js";
 import Lineage_whiteboard from "../tools/lineage/lineage_whiteboard.js";
 import Sparql_common from "../sparqlProxies/sparql_common.js";
 import BotEngineClass from "./_botEngineClass.js";
-import CommonBotFunctions_class from "./_commonBotFunctions_class.js";
+import CommonBotFunctions from "./_commonBotFunctions.js";
 import Containers_graph from "../tools/containers/containers_graph.js";
 import Containers_widget from "../tools/containers/containers_widget.js";
 import Axioms_graph from "../tools/axioms/axioms_graph.js";
@@ -97,11 +97,24 @@ var NodeRelations_bot = (function () {
             self.myBotEngine.nextStep();
         },
         listVocabsFn: function () {
-            CommonBotFunctions_class.listVocabsFn(self.myBotEngine, Lineage_sources.activeSource, "currentVocab", true);
+            CommonBotFunctions.listVocabsFn(Lineage_sources.activeSource, true, function (err, vocabs) {
+                if (err) {
+                    return self.myBotEngine.abort(err);
+                }
+                if (vocabs.length == 0) {
+                    return self.myBotEngine.previousStep("no values found, try another option");
+                }
+                self.myBotEngine.showList(vocabs, "currentVocab");
+            });
         },
 
         listClassesFn: function () {
-            CommonBotFunctions_class.listVocabClasses(self.myBotEngine, self.params.currentVocab, "currentClass", true, [{ label: "_Any Class", id: "AnyClass" }]);
+            CommonBotFunctions.listVocabClasses(self.params.currentVocab, true, [{ label: "_Any Class", id: "AnyClass" }], function (err, classes) {
+                if (err) {
+                    return self.myBotEngine.abort(err);
+                }
+                self.myBotEngine.showList(classes, "currentClass");
+            });
         },
 
         listPredicatePathsFn: function () {
@@ -112,7 +125,7 @@ var NodeRelations_bot = (function () {
             Sparql_OWL.getFilteredTriples2(self.params.source, self.params.currentClass, null, null, { distinct: "?prop ?propLabel" }, function (err, result) {
                 if (err) {
                     console.log(err.responseText);
-                    return _botEngine.reset();
+                    return self.myBotEngine.reset();
                 }
                 var properties = [];
                 result.forEach(function (item) {
@@ -121,17 +134,33 @@ var NodeRelations_bot = (function () {
                     }
                 });
                 properties.splice(0, 0, { id: "AnyProperty", label: "Any Property" });
-                _botEngine.showList(properties, "currentProperty", null, true);
+                self.myBotEngine.showList(properties, "currentProperty", null, true);
             });
         },
 
         listAnnotationPropertiesVocabsFn: function () {
-            CommonBotFunctions_class.listVocabsFn(self.myBotEngine, self.params.source, "annotationPropertyVocab", true);
+            CommonBotFunctions.listVocabsFn(self.params.source, true, function (err, vocabs) {
+                if (err) {
+                    return self.myBotEngine.abort(err);
+                }
+                if (vocabs.length == 0) {
+                    return self.myBotEngine.previousStep("no values found, try another option");
+                }
+                self.myBotEngine.showList(vocabs, "annotationPropertyVocab");
+            });
         },
 
         listAnnotationPropertiesFn: function () {
             // filter properties compatible with
-            CommonBotFunctions_class.listNonObjectPropertiesFn(self.myBotEngine, self.params.annotationPropertyVocab, "annotationPropertyId");
+            CommonBotFunctions.listNonObjectPropertiesFn([self.params.annotationPropertyVocab], null, function (err, props) {
+                if (err) {
+                    return self.myBotEngine.abort(err);
+                }
+                if (props.length == 0) {
+                    return self.myBotEngine.previousStep("no values found, try another option");
+                }
+                self.myBotEngine.showList(props, "annotationPropertyId");
+            });
         },
 
         promptAnnotationPropertyValue: function () {
@@ -142,7 +171,7 @@ var NodeRelations_bot = (function () {
             //    Lineage_whiteboard.drawRestrictions( self.params.source,  self.params.currentClass, null, null, {  }, function (err, result) {
             Sparql_OWL.getObjectRestrictions(self.params.source, self.params.currentClass, { listPropertiesOnly: true }, function (err, result) {
                 if (result.length == 0) {
-                    return _botEngine.abort("no data found");
+                    return self.myBotEngine.abort("no data found");
                 }
                 var properties = [];
                 result.forEach(function (item) {
@@ -151,7 +180,7 @@ var NodeRelations_bot = (function () {
                     }
                 });
                 properties.splice(0, 0, { id: "AnyProperty", label: "Any Property" });
-                _botEngine.showList(properties, "currentProperty", null, true);
+                self.myBotEngine.showList(properties, "currentProperty", null, true);
             });
         },
         listInverseRestrictions: function () {
@@ -164,7 +193,7 @@ var NodeRelations_bot = (function () {
                     }
                 });
                 properties.splice(0, 0, { id: "AnyProperty", label: "Any Property" });
-                _botEngine.showList(properties, "currentProperty", null, true);
+                self.myBotEngine.showList(properties, "currentProperty", null, true);
             });
         },
 
@@ -303,7 +332,7 @@ var NodeRelations_bot = (function () {
                     limit = parseInt(sampleSize);
                 } catch (e) {
                     alert("wrong number for sampleSize");
-                    return _botEngine.reset();
+                    return self.myBotEngine.reset();
                 }
             } else {
                 filter = setAnnotationPropertyFilter() || getPathFilter() + " " + getIndividualsFilter();

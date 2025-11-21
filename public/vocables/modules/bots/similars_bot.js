@@ -1,6 +1,5 @@
 import Lineage_similars from "../tools/lineage/lineage_similars.js";
 import BotEngineClass from "./_botEngineClass.js";
-import CommonBotFunctions_class from "./_commonBotFunctions_class.js";
 
 var Similars_bot = (function () {
     var self = {};

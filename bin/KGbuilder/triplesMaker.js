@@ -419,26 +419,26 @@ var TriplesMaker = {
                     });
                 }
 
-                var filteredBasicProperties=null;
-                if(options.filterMappingIds){
-                    filteredBasicProperties=options.filterMappingIds.filter(function(mapping){
-                        return mapping.split('>')[0]==columnId && mapping.split('>')[1];
+                var filteredBasicProperties = null;
+                if (options.filterMappingIds) {
+                    filteredBasicProperties = options.filterMappingIds.filter(function (mapping) {
+                        return mapping.split(">")[0] == columnId && mapping.split(">")[1];
                     });
-                    filteredBasicProperties=filteredBasicProperties.map(function(mapping){
-                        return mapping.split('>')[1];
+                    filteredBasicProperties = filteredBasicProperties.map(function (mapping) {
+                        return mapping.split(">")[1];
                     });
-                    if(filteredBasicProperties.length==0){
-                        filteredBasicProperties=null;
+                    if (filteredBasicProperties.length == 0) {
+                        filteredBasicProperties = null;
                     }
                 }
-                if(filteredBasicProperties){
+                if (filteredBasicProperties) {
                     var mappings = columnMappings[columnId].mappings;
-                    var filteredMappings=mappings.filter(function(mapping){
-                        return filteredBasicProperties.indexOf(mapping.p)>-1;
+                    var filteredMappings = mappings.filter(function (mapping) {
+                        return filteredBasicProperties.indexOf(mapping.p) > -1;
                     });
-                    filteredMappings.forEach(function(mapping){
+                    filteredMappings.forEach(function (mapping) {
                         var subjectUri = TriplesMaker.getColumnUri(line, columnId, columnMappings, rowIndex, tableProcessingParams);
-                        
+
                         var property = TriplesMaker.getPropertyUri(mapping.p);
                         if (!line[mapping.o]) {
                             if (mapping.isConstantUri) {
@@ -453,19 +453,18 @@ var TriplesMaker = {
                                     return;
                                 }
                             }
-                        }
-                        else if (mapping.isString) {
+                        } else if (mapping.isString) {
                             var objStr = line[mapping.o];
                             object = '"' + util.formatStringForTriple(objStr) + '"';
                         } else if (columnMappings[mapping.objColId]) {
-                        // if object is a column
+                            // if object is a column
                             object = TriplesMaker.getColumnUri(line, mapping.objColId, columnMappings, rowIndex, tableProcessingParams);
                         }
-                        if(!object || !property || !subjectUri){
+                        if (!object || !property || !subjectUri) {
                             return;
                         }
                         addTriple(subjectUri, property, object);
-                    })
+                    });
                 }
             }
         });

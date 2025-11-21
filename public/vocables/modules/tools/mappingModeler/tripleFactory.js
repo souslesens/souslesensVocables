@@ -445,20 +445,19 @@ var TripleFactory = (function () {
                                 data: { type: "otherPredicate" },
                             });
                         });
-                       
                     }
-                    if(obj.node.data.rdfsLabel){
+                    if (obj.node.data.rdfsLabel) {
                         //separate with > because he can't be used on uri
                         jstreeData.push({
-                            id: obj.node.id+'>'+ 'rdfs:label',
+                            id: obj.node.id + ">" + "rdfs:label",
                             text: "rdfs:label",
                             parent: obj.node.id,
                             data: { type: "rdfsLabel" },
                         });
                     }
-                    if(obj.node.data.rdfType){
+                    if (obj.node.data.rdfType) {
                         jstreeData.push({
-                            id: obj.node.id+'>'+ 'rdf:type',
+                            id: obj.node.id + ">" + "rdf:type",
                             text: "rdf:type",
                             parent: obj.node.id,
                             data: { type: "rdfType" },

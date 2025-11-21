@@ -208,50 +208,21 @@ const KGbuilder_triplesWriter = {
     //     );
     // },
 
-
     deleteKGBuilderTriples: function (sparqlServerUrl, graphUri, table, options, callback) {
         const TriplesMaker = require("./triplesMaker");
         var message = {};
         var query = "";
         if (table) {
-            query +=
-                "with  GRAPH <" +
-                graphUri +
-                "> " +
-                "delete {?s ?p ?o} where {?s ?p ?o. ?s <" +
-                TriplesMaker.mappingFilePredicate +
-                "> '" +
-                table +
-                "'}";
+            query += "with  GRAPH <" + graphUri + "> " + "delete {?s ?p ?o} where {?s ?p ?o. ?s <" + TriplesMaker.mappingFilePredicate + "> '" + table + "'}";
         } else {
-            query +=
-                "with  <" +
-                graphUri +
-                "> " +
-                "delete {?s ?p ?o} where {?s ?p ?o. ?s <" +
-                TriplesMaker.mappingFilePredicate +
-                "> ?table }";
+            query += "with  <" + graphUri + "> " + "delete {?s ?p ?o} where {?s ?p ?o. ?s <" + TriplesMaker.mappingFilePredicate + "> ?table }";
         }
 
         var tableTotalRecords;
         if (table) {
-            tableTotalRecords =
-                "SELECT (COUNT(*) AS ?count) FROM <" +
-                graphUri +
-                "> " +
-                "WHERE { ?s ?p ?o. ?s <" +
-                TriplesMaker.mappingFilePredicate +
-                "> '" +
-                table +
-                "' }";
+            tableTotalRecords = "SELECT (COUNT(*) AS ?count) FROM <" + graphUri + "> " + "WHERE { ?s ?p ?o. ?s <" + TriplesMaker.mappingFilePredicate + "> '" + table + "' }";
         } else {
-            tableTotalRecords =
-                "SELECT (COUNT(*) AS ?count) FROM <" +
-                graphUri +
-                "> " +
-                "WHERE { ?s ?p ?o. ?s <" +
-                TriplesMaker.mappingFilePredicate +
-                "> ?table }";
+            tableTotalRecords = "SELECT (COUNT(*) AS ?count) FROM <" + graphUri + "> " + "WHERE { ?s ?p ?o. ?s <" + TriplesMaker.mappingFilePredicate + "> ?table }";
         }
 
         var paramsCount = { query: tableTotalRecords };
@@ -270,7 +241,6 @@ const KGbuilder_triplesWriter = {
 
             var totalRecords = 0;
             try {
-                
                 var binding = countResult.results.bindings[0];
                 if (binding.count) {
                     totalRecords = parseInt(binding.count.value, 10);
@@ -282,12 +252,10 @@ const KGbuilder_triplesWriter = {
                 totalRecords = 0;
             }
 
-        
             message.tableTotalRecords = totalRecords;
             message.operation = "deleteTriples";
             message.processedRecords = 0;
 
-        
             var limit = 10000;
             var resultSize = 1;
             var totalSize = 0;
@@ -328,7 +296,6 @@ const KGbuilder_triplesWriter = {
                         totalSize += resultSize;
                         message.totalSize = totalSize;
 
-                        
                         message.processedRecords = totalSize;
 
                         KGbuilder_socket.message(options.clientSocketId, message, false);

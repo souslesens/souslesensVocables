@@ -1635,9 +1635,6 @@ var MappingModeler = (function () {
         return minutes + "m " + seconds + "s";
     };
 
-
-
-
     self.socketMessage = function (message) {
         if (typeof message == "string") {
             UI.message(message);
@@ -1646,18 +1643,10 @@ var MappingModeler = (function () {
 
         var percent = 0;
         if (message.tableTotalRecords && message.tableTotalRecords > 0) {
-            percent = Math.round(
-                (message.processedRecords / message.tableTotalRecords) * 100
-            );
+            percent = Math.round((message.processedRecords / message.tableTotalRecords) * 100);
         }
 
-        if (
-            message.operation == "records" ||
-            message.operation == "buildTriples" ||
-            message.operation == "writeTriples" ||
-            message.operation == "finished" ||
-            message.operation == "deleteTriples"
-        ) {
+        if (message.operation == "records" || message.operation == "buildTriples" || message.operation == "writeTriples" || message.operation == "finished" || message.operation == "deleteTriples") {
             var progressBar = document.getElementById("progressBar");
             if (!progressBar) {
                 var messageDiv = $("#messageDiv");
@@ -1674,8 +1663,7 @@ var MappingModeler = (function () {
                         wrapper = $("#progressWrapper");
                     }
 
-                    $('<progress id="progressBar" max="100" value="0" style="width:200px; display:none;"></progress>')
-                        .prependTo(wrapper);
+                    $('<progress id="progressBar" max="100" value="0" style="width:200px; display:none;"></progress>').prependTo(wrapper);
 
                     progressBar = document.getElementById("progressBar");
                 }
@@ -1699,10 +1687,8 @@ var MappingModeler = (function () {
 
         if (message.operation == "records") {
             return;
-
         } else if (message.operation == "buildTriples") {
             return;
-
         } else if (message.operation == "writeTriples") {
             var remainingText = "";
 
@@ -1716,9 +1702,7 @@ var MappingModeler = (function () {
             }
 
             messageStr = "totalTriples created " + message.totalTriples + remainingText;
-
         } else if (message.operation == "deleteTriples") {
-            
             var remainingText = "";
 
             if (self.mappingStartTime && percent > 0 && percent < 100) {
@@ -1730,15 +1714,9 @@ var MappingModeler = (function () {
                 remainingText = " – estimated remaining time: " + self.formatDuration(remaining);
             }
 
-    
             var deletedSoFar = message.totalSize || message.processedRecords || 0;
 
-            messageStr =
-                "triples deleted " +
-                deletedSoFar +
-                " / " +
-                (message.tableTotalRecords || 0) +
-                remainingText;
+            messageStr = "triples deleted " + deletedSoFar + " / " + (message.tableTotalRecords || 0) + remainingText;
 
             if (percent >= 100) {
                 var pb = document.getElementById("progressBar");
@@ -1752,14 +1730,8 @@ var MappingModeler = (function () {
                     waitImgEl.style.display = "block";
                 }
             }
-
         } else if (message.operation == "finished") {
-
-            messageStr =
-                "totalTriples created " +
-                message.totalTriples +
-                " – total duration: " +
-                self.formatDuration(message.totalDuration);
+            messageStr = "totalTriples created " + message.totalTriples + " – total duration: " + self.formatDuration(message.totalDuration);
 
             var progressBar2 = document.getElementById("progressBar");
             if (progressBar2) {
@@ -1776,8 +1748,6 @@ var MappingModeler = (function () {
             UI.message(messageStr);
         }
     };
-
-
 
     return self;
 })();

@@ -30,6 +30,7 @@ var UI = (function () {
             waitImgDiv.css("display", "block");
         }
     };
+    
 
     self.setCredits = function () {
         var LateralPanelWidth = $("#lateralPanelDiv").width();

@@ -1602,152 +1602,205 @@ var MappingModeler = (function () {
         });
     };
 
-    // self.socketMessage = function (message) {
-    //     if (typeof message == "string") {
-    //         UI.message(message);
-    //     } else {
-    //         var percent = Math.round((message.processedRecords / message.tableTotalRecords) * 100);
-    //         var messageStr = percent + "% :";
-
-    //         if (message.operation == "records") {
-    //             return;
-    //             messageStr += message.processedRecords + " records loaded from table " + message.table + " on " + message.tableTotalRecords + " in " + message.operationDuration + "msec";
-    //         } else if (message.operation == "buildTriples") {
-    //             return;
-    //             messageStr += message.batchTriples + " triples created in " + message.operationDuration + "msec";
-    //         } else if (message.operation == "writeTriples") {
-    //             messageStr += message.batchTriples + " triples writen in " + message.operationDuration + "msec. totalTriples created " + message.totalTriples;
-    //         } else if (message.operation == "finished") {
-    //             messageStr += message.totalTriples + " triples writen in " + message.totalDuration + "msec";
-    //         }
-    //         UI.message(messageStr);
-    //     }
-    // };
-
-    self.formatDuration = function (ms) {
-        var totalSeconds = Math.round(ms / 1000);
-        var minutes = Math.floor(totalSeconds / 60);
-        var seconds = totalSeconds % 60;
-
-        if (minutes <= 0) {
-            return seconds + "s";
-        }
-        return minutes + "m " + seconds + "s";
-    };
-
     self.socketMessage = function (message) {
         if (typeof message == "string") {
             UI.message(message);
-            return;
-        }
+        } else {
+            var percent = Math.round((message.processedRecords / message.tableTotalRecords) * 100);
+            var messageStr = percent + "% :";
 
-        var percent = 0;
-        if (message.tableTotalRecords && message.tableTotalRecords > 0) {
-            percent = Math.round((message.processedRecords / message.tableTotalRecords) * 100);
-        }
-
-        if (message.operation == "records" || message.operation == "buildTriples" || message.operation == "writeTriples" || message.operation == "finished" || message.operation == "deleteTriples") {
-            var progressBar = document.getElementById("progressBar");
-            if (!progressBar) {
-                var messageDiv = $("#messageDiv");
-                var waitImgDiv = $("#waitImg");
-                if (messageDiv.length == 0 || waitImgDiv.length == 0) {
-                    messageDiv = $("#KGquery_messageDiv");
-                    waitImgDiv = $("#KGquery_waitImg");
-                }
-
-                if (messageDiv.length > 0) {
-                    var wrapper = $("#progressWrapper");
-                    if (wrapper.length == 0) {
-                        messageDiv.wrap('<div id="progressWrapper" style="display:inline-flex; align-items:center; gap:8px;"></div>');
-                        wrapper = $("#progressWrapper");
-                    }
-
-                    $('<progress id="progressBar" max="100" value="0" style="width:200px; display:none;"></progress>').prependTo(wrapper);
-
-                    progressBar = document.getElementById("progressBar");
-                }
+            if (message.operation == "records") {
+                return;
+                messageStr += message.processedRecords + " records loaded from table " + message.table + " on " + message.tableTotalRecords + " in " + message.operationDuration + "msec";
+            } else if (message.operation == "buildTriples") {
+                return;
+                messageStr += message.batchTriples + " triples created in " + message.operationDuration + "msec";
+            } else if (message.operation == "writeTriples") {
+                messageStr += message.batchTriples + " triples writen in " + message.operationDuration + "msec. totalTriples created " + message.totalTriples;
+            } else if (message.operation == "finished") {
+                messageStr += message.totalTriples + " triples writen in " + message.totalDuration + "msec";
             }
-
-            if (progressBar) {
-                progressBar.style.display = "block";
-                progressBar.value = percent;
-                var waitImgEl = document.getElementById("waitImg") || document.getElementById("KGquery_waitImg");
-                if (waitImgEl) {
-                    waitImgEl.style.display = "none";
-                }
-            }
-
-            if (!self.mappingStartTime && percent > 0 && percent < 100) {
-                self.mappingStartTime = Date.now();
-            }
-        }
-
-        var messageStr = "";
-
-        if (message.operation == "records") {
-            return;
-        } else if (message.operation == "buildTriples") {
-            return;
-        } else if (message.operation == "writeTriples") {
-            var remainingText = "";
-
-            if (self.mappingStartTime && percent > 0 && percent < 100) {
-                var now = Date.now();
-                var elapsed = now - self.mappingStartTime;
-                var estimatedTotal = (elapsed * 100) / percent;
-                var remaining = Math.max(0, estimatedTotal - elapsed);
-
-                remainingText = " – estimated remaining time: " + self.formatDuration(remaining);
-            }
-
-            messageStr = "totalTriples created " + message.totalTriples + remainingText;
-        } else if (message.operation == "deleteTriples") {
-            var remainingText = "";
-
-            if (self.mappingStartTime && percent > 0 && percent < 100) {
-                var now = Date.now();
-                var elapsed = now - self.mappingStartTime;
-                var estimatedTotal = (elapsed * 100) / percent;
-                var remaining = Math.max(0, estimatedTotal - elapsed);
-
-                remainingText = " – estimated remaining time: " + self.formatDuration(remaining);
-            }
-
-            var deletedSoFar = message.totalSize || message.processedRecords || 0;
-
-            messageStr = "triples deleted " + deletedSoFar + " / " + (message.tableTotalRecords || 0) + remainingText;
-
-            if (percent >= 100) {
-                var pb = document.getElementById("progressBar");
-                if (pb) {
-                    pb.style.display = "none";
-                }
-                self.mappingStartTime = null;
-
-                var waitImgEl = document.getElementById("waitImg") || document.getElementById("KGquery_waitImg");
-                if (waitImgEl) {
-                    waitImgEl.style.display = "block";
-                }
-            }
-        } else if (message.operation == "finished") {
-            messageStr = "totalTriples created " + message.totalTriples + " – total duration: " + self.formatDuration(message.totalDuration);
-
-            var progressBar2 = document.getElementById("progressBar");
-            if (progressBar2) {
-                progressBar2.style.display = "none";
-            }
-            self.mappingStartTime = null;
-            var waitImgEl = document.getElementById("waitImg") || document.getElementById("KGquery_waitImg");
-            if (waitImgEl) {
-                waitImgEl.style.display = "block";
-            }
-        }
-
-        if (messageStr) {
             UI.message(messageStr);
         }
     };
+
+//     self.formatDuration = function (ms) {
+//         var totalSeconds = Math.round(ms / 1000);
+//         var minutes = Math.floor(totalSeconds / 60);
+//         var seconds = totalSeconds % 60;
+
+//         if (minutes <= 0) {
+//             return seconds + "s";
+//         }
+//         return minutes + "m " + seconds + "s";
+//     };
+
+// self.socketMessage = function (message) {
+//     if (typeof message == "string") {
+//         UI.message(message);
+//         return;
+//     }
+
+//     // ----- calcul du "processed" selon l'opération -----
+//     var processed = 0;
+//     if (message.operation == "deleteTriples") {
+//         // pour la suppression : on utilise totalSize
+//         processed = message.totalSize || 0;
+//     } else {
+//         // pour le reste (mapping, etc.), on continue d'utiliser processedRecords
+//         processed = message.processedRecords || 0;
+//     }
+
+//     // ----- calcul du pourcentage -----
+//     var percent = 0;
+//     if (message.tableTotalRecords && message.tableTotalRecords > 0) {
+//         percent = Math.round((processed / message.tableTotalRecords) * 100);
+//     }
+
+//     var hasTotalRecords = message.tableTotalRecords && message.tableTotalRecords > 0;
+
+//     // ----- gestion de la barre de progression -----
+//     if (
+//         message.operation == "records" ||
+//         message.operation == "buildTriples" ||
+//         message.operation == "writeTriples" ||
+//         message.operation == "finished" ||
+//         (message.operation == "deleteTriples" && hasTotalRecords) // barre pour deleteTriples seulement si > 0
+//     ) {
+//         var progressBar = document.getElementById("progressBar");
+//         if (!progressBar) {
+//             var messageDiv = $("#messageDiv");
+//             var waitImgDiv = $("#waitImg");
+//             if (messageDiv.length == 0 || waitImgDiv.length == 0) {
+//                 messageDiv = $("#KGquery_messageDiv");
+//                 waitImgDiv = $("#KGquery_waitImg");
+//             }
+
+//             if (messageDiv.length > 0) {
+//                 var wrapper = $("#progressWrapper");
+//                 if (wrapper.length == 0) {
+//                     messageDiv.wrap('<div id="progressWrapper" style="display:inline-flex; align-items:center; gap:8px;"></div>');
+//                     wrapper = $("#progressWrapper");
+//                 }
+
+//                 $('<progress id="progressBar" max="100" value="0" style="width:200px; display:none;"></progress>')
+//                     .prependTo(wrapper);
+
+//                 progressBar = document.getElementById("progressBar");
+//             }
+//         }
+
+//         if (progressBar) {
+//             progressBar.style.display = "block";
+//             progressBar.value = percent;
+
+//             var waitImgEl = document.getElementById("waitImg") || document.getElementById("KGquery_waitImg");
+//             if (waitImgEl) {
+//                 waitImgEl.style.display = "none";
+//             }
+//         }
+
+//         if (!self.mappingStartTime && percent > 0 && percent < 100) {
+//             self.mappingStartTime = Date.now();
+//         }
+//     }
+
+//     // ----- texte à afficher -----
+//     var messageStr = "";
+
+//     if (message.operation == "records") {
+//         return;
+
+//     } else if (message.operation == "buildTriples") {
+//         return;
+
+//     } else if (message.operation == "writeTriples") {
+//         var remainingText = "";
+
+//         if (self.mappingStartTime && percent > 0 && percent < 100) {
+//             var now = Date.now();
+//             var elapsed = now - self.mappingStartTime;
+//             var estimatedTotal = (elapsed * 100) / percent;
+//             var remaining = Math.max(0, estimatedTotal - elapsed);
+
+//             remainingText = " – estimated remaining time: " + self.formatDuration(remaining);
+//         }
+
+//         messageStr = "totalTriples created " + message.totalTriples + remainingText;
+
+//     } else if (message.operation == "deleteTriples") {
+
+//         // CAS 0 triple à supprimer : pas de barre, on remet l'image
+//         if (!hasTotalRecords) {
+//             var waitImgEl0 = document.getElementById("waitImg") || document.getElementById("KGquery_waitImg");
+//             if (waitImgEl0) {
+//                 waitImgEl0.style.display = "block";
+//             }
+//             messageStr = "0 triples to delete";
+//             self.mappingStartTime = null;
+//         } else {
+//             // CAS normal : il y a des triples à supprimer
+//             var remainingTextDelete = "";
+
+//             if (self.mappingStartTime && percent > 0 && percent < 100) {
+//                 var nowDel = Date.now();
+//                 var elapsedDel = nowDel - self.mappingStartTime;
+//                 var estimatedTotalDel = (elapsedDel * 100) / percent;
+//                 var remainingDel = Math.max(0, estimatedTotalDel - elapsedDel);
+
+//                 remainingTextDelete = " – estimated remaining time: " + self.formatDuration(remainingDel);
+//             }
+
+//             var deletedSoFar = message.totalSize || 0;
+
+//             messageStr =
+//                 "triples deleted " +
+//                 deletedSoFar +
+//                 " / " +
+//                 (message.tableTotalRecords || 0) +
+//                 remainingTextDelete;
+
+//             // si on a fini la suppression
+//             if (percent >= 100) {
+//                 var pb = document.getElementById("progressBar");
+//                 if (pb) {
+//                     pb.style.display = "none";
+//                 }
+//                 self.mappingStartTime = null;
+
+//                 var waitImgEl2 = document.getElementById("waitImg") || document.getElementById("KGquery_waitImg");
+//                 if (waitImgEl2) {
+//                     waitImgEl2.style.display = "block";
+//                 }
+//             }
+//         }
+
+//     } else if (message.operation == "finished") {
+
+//         messageStr =
+//             "totalTriples created " +
+//             message.totalTriples +
+//             " – total duration: " +
+//             self.formatDuration(message.totalDuration);
+
+//         var progressBar2 = document.getElementById("progressBar");
+//         if (progressBar2) {
+//             progressBar2.style.display = "none";
+//         }
+//         self.mappingStartTime = null;
+//         var waitImgEl3 = document.getElementById("waitImg") || document.getElementById("KGquery_waitImg");
+//         if (waitImgEl3) {
+//             waitImgEl3.style.display = "block";
+//         }
+//     }
+
+//     if (messageStr) {
+//         UI.message(messageStr);
+//     }
+// };
+
+
+
 
     return self;
 })();

@@ -1641,17 +1641,13 @@ var MappingModeler = (function () {
             return;
         }
 
-        
         var processed = 0;
         if (message.operation == "deleteTriples") {
-            
             processed = message.totalSize || 0;
         } else {
-            
             processed = message.processedRecords || 0;
         }
 
-        
         var percent = 0;
         if (message.tableTotalRecords && message.tableTotalRecords > 0) {
             percent = Math.round((processed / message.tableTotalRecords) * 100);
@@ -1659,13 +1655,12 @@ var MappingModeler = (function () {
 
         var hasTotalRecords = message.tableTotalRecords && message.tableTotalRecords > 0;
 
-        
         if (
             message.operation == "records" ||
             message.operation == "buildTriples" ||
             message.operation == "writeTriples" ||
             message.operation == "finished" ||
-            (message.operation == "deleteTriples" && hasTotalRecords) 
+            (message.operation == "deleteTriples" && hasTotalRecords)
         ) {
             var progressBar = document.getElementById("progressBar");
             if (!progressBar) {
@@ -1683,8 +1678,7 @@ var MappingModeler = (function () {
                         wrapper = $("#progressWrapper");
                     }
 
-                    $('<progress id="progressBar" max="100" value="0" style="width:200px; display:none;"></progress>')
-                        .prependTo(wrapper);
+                    $('<progress id="progressBar" max="100" value="0" style="width:200px; display:none;"></progress>').prependTo(wrapper);
 
                     progressBar = document.getElementById("progressBar");
                 }
@@ -1705,15 +1699,12 @@ var MappingModeler = (function () {
             }
         }
 
-    
         var messageStr = "";
 
         if (message.operation == "records") {
             return;
-
         } else if (message.operation == "buildTriples") {
             return;
-
         } else if (message.operation == "writeTriples") {
             var remainingText = "";
 
@@ -1727,10 +1718,7 @@ var MappingModeler = (function () {
             }
 
             messageStr = "totalTriples created " + message.totalTriples + remainingText;
-
         } else if (message.operation == "deleteTriples") {
-
-            
             if (!hasTotalRecords) {
                 var waitImgEl0 = document.getElementById("waitImg") || document.getElementById("KGquery_waitImg");
                 if (waitImgEl0) {
@@ -1739,7 +1727,6 @@ var MappingModeler = (function () {
                 messageStr = "0 triples to delete";
                 self.mappingStartTime = null;
             } else {
-                
                 var remainingTextDelete = "";
 
                 if (self.mappingStartTime && percent > 0 && percent < 100) {
@@ -1753,14 +1740,8 @@ var MappingModeler = (function () {
 
                 var deletedSoFar = message.totalSize || 0;
 
-                messageStr =
-                    "triples deleted " +
-                    deletedSoFar +
-                    " / " +
-                    (message.tableTotalRecords || 0) +
-                    remainingTextDelete;
+                messageStr = "triples deleted " + deletedSoFar + " / " + (message.tableTotalRecords || 0) + remainingTextDelete;
 
-            
                 if (percent >= 100) {
                     var pb = document.getElementById("progressBar");
                     if (pb) {
@@ -1774,14 +1755,8 @@ var MappingModeler = (function () {
                     }
                 }
             }
-
         } else if (message.operation == "finished") {
-
-            messageStr =
-                "totalTriples created " +
-                message.totalTriples +
-                " – total duration: " +
-                self.formatDuration(message.totalDuration);
+            messageStr = "totalTriples created " + message.totalTriples + " – total duration: " + self.formatDuration(message.totalDuration);
 
             var progressBar2 = document.getElementById("progressBar");
             if (progressBar2) {
@@ -1798,9 +1773,6 @@ var MappingModeler = (function () {
             UI.message(messageStr);
         }
     };
-
-
-
 
     return self;
 })();

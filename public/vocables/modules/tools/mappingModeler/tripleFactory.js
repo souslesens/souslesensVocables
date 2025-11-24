@@ -36,15 +36,15 @@ var TripleFactory = (function () {
      * @memberof module:TripleFactory
      * @param {boolean} isSample - If true, the dialog is for displaying sample mappings; if false, for writing actual triples.
      */
-    self.initFilterMappingDialog = function (isSample,isDelete) {
+    self.initFilterMappingDialog = function (isSample, isDelete) {
         self.filterMappingIsSample = isSample;
         self.filterMappingIsDelete = isDelete;
         UIcontroller.activateRightPanel("generic");
         // save current mappings before opening the dialog
         MappingColumnsGraph.saveVisjsGraph(function () {
-            var htmlToLoad=  "./modules/tools/mappingModeler/html/filterMappingDialog.html";
-            if(isDelete){
-                htmlToLoad= "./modules/tools/mappingModeler/html/specificMappingDelete.html";
+            var htmlToLoad = "./modules/tools/mappingModeler/html/filterMappingDialog.html";
+            if (isDelete) {
+                htmlToLoad = "./modules/tools/mappingModeler/html/specificMappingDelete.html";
             }
             $("#mappingModeler_genericPanel").load(htmlToLoad, function () {
                 self.showFilterMappingsDialog("detailedMappings_filterMappingsTree", MappingModeler.currentTable.name);
@@ -451,81 +451,74 @@ var TripleFactory = (function () {
             $("#detailedMappings_treeContainer").css("overflow", "unset");
         });
     };
-    
+
     self.deleteSpecificTriples = function () {
-        self.initFilterMappingDialog(false,true);
-    }
-    self.runDeleteSpecificTriples = function (isSampleData,callback) {
-        var confirm=true;
-        if(!isSampleData){
+        self.initFilterMappingDialog(false, true);
+    };
+    self.runDeleteSpecificTriples = function (isSampleData, callback) {
+        var confirm = true;
+        if (!isSampleData) {
             confirm = window.confirm("Are you sure you want to delete these triples?");
-        } 
+        }
         if (!confirm) {
             return;
         }
-         var checkedNodes = JstreeWidget.getjsTreeCheckedNodes("detailedMappings_filterMappingsTree");
+        var checkedNodes = JstreeWidget.getjsTreeCheckedNodes("detailedMappings_filterMappingsTree");
         if (checkedNodes.length == 0) {
             return alert(" no mappings selected");
         }
         var filterMappingIds = [];
         //don't select parent node when datatype property is selected
-        var nodeIdsToFilter={};
-        var mappingNodes=MappingColumnsGraph.getNodesMap();
+        var nodeIdsToFilter = {};
+        var mappingNodes = MappingColumnsGraph.getNodesMap();
         checkedNodes.forEach(function (item) {
-            if(item.parent=='Relations'){
+            if (item.parent == "Relations") {
                 var edge = MappingColumnsGraph.getEdgesMap("id")[item.id];
-                if(!edge){
+                if (!edge) {
                     return;
                 }
-                edge=edge[0]
+                edge = edge[0];
                 var startingClass;
-                if(edge.from && mappingNodes[edge.from]){
-                    startingClass=MappingColumnsGraph.getColumnClass(mappingNodes[edge.from]);
+                if (edge.from && mappingNodes[edge.from]) {
+                    startingClass = MappingColumnsGraph.getColumnClass(mappingNodes[edge.from]);
                 }
                 var endingClass;
-                if(edge.to && mappingNodes[edge.to]){
-                    endingClass=MappingColumnsGraph.getColumnClass(mappingNodes[edge.to]);
+                if (edge.to && mappingNodes[edge.to]) {
+                    endingClass = MappingColumnsGraph.getColumnClass(mappingNodes[edge.to]);
                 }
-                if(startingClass && endingClass){
-                    filterMappingIds.push({id:item.id,type:"Relation",startingClass:startingClass,endingClass:endingClass,propertyUri:edge.data.id});
-                }
-
-            }
-
-            if(!item.data || !item.data.type){
-               return;
-            }
-            if(item.data.type=="otherPredicate"){
-                var parentNode=$('#detailedMappings_filterMappingsTree').jstree("get_node", item.parent);
-                var columnClassPredicate=MappingColumnsGraph.getColumnClass(parentNode);
-                if(columnClassPredicate){
-                    filterMappingIds.push({id:item.id,type:"otherPredicate",classUri:columnClassPredicate});
-                    nodeIdsToFilter[item.parent]=true;
-                }
-                
-                
-            }
-            if(MappingModeler.columnsMappingsObjects.includes(item.data.type)){
-                var columnClass=MappingColumnsGraph.getColumnClass(item);
-                if(columnClass){
-                        filterMappingIds.push({id:item.id,type:'Class',classUri:columnClass});
+                if (startingClass && endingClass) {
+                    filterMappingIds.push({ id: item.id, type: "Relation", startingClass: startingClass, endingClass: endingClass, propertyUri: edge.data.id });
                 }
             }
-            
 
-
-
+            if (!item.data || !item.data.type) {
+                return;
+            }
+            if (item.data.type == "otherPredicate") {
+                var parentNode = $("#detailedMappings_filterMappingsTree").jstree("get_node", item.parent);
+                var columnClassPredicate = MappingColumnsGraph.getColumnClass(parentNode);
+                if (columnClassPredicate) {
+                    filterMappingIds.push({ id: item.id, type: "otherPredicate", classUri: columnClassPredicate });
+                    nodeIdsToFilter[item.parent] = true;
+                }
+            }
+            if (MappingModeler.columnsMappingsObjects.includes(item.data.type)) {
+                var columnClass = MappingColumnsGraph.getColumnClass(item);
+                if (columnClass) {
+                    filterMappingIds.push({ id: item.id, type: "Class", classUri: columnClass });
+                }
+            }
         });
-        var filterMappingsIds=filterMappingIds.filter(function(item){
+        var filterMappingsIds = filterMappingIds.filter(function (item) {
             return !nodeIdsToFilter[item.id];
         });
-        var options={isSample:isSampleData,filterMappingIds:filterMappingsIds,clientSocketId:Config.clientSocketId};
+        var options = { isSample: isSampleData, filterMappingIds: filterMappingsIds, clientSocketId: Config.clientSocketId };
 
-        var payload={
-            options:JSON.stringify(options),
-            source:MappingModeler.currentSLSsource,
-            tables:JSON.stringify([MappingModeler.currentTable.name])
-        }
+        var payload = {
+            options: JSON.stringify(options),
+            source: MappingModeler.currentSLSsource,
+            tables: JSON.stringify([MappingModeler.currentTable.name]),
+        };
         $.ajax({
             type: "DELETE",
             url: `${Config.apiUrl}/kg/triples`,
@@ -536,10 +529,9 @@ var TripleFactory = (function () {
                     UIcontroller.activateRightPanel("generic");
                     self.showTriplesInDataTable(result, "mappingModeler_genericPanel");
                     //   UI.message("", true);
-                }else{
-                    alert('triples deleted: '+result.triplesDeleted);
+                } else {
+                    alert("triples deleted: " + result.triplesDeleted);
                 }
-                
             },
             error: function (err) {
                 if (callback) {
@@ -550,8 +542,7 @@ var TripleFactory = (function () {
                 UI.message(err.responseText);
             },
         });
-
-    }
+    };
 
     /* self.showFilterMappingsDialog=function(){
         TripleFactory.initFilterMappingDialog()

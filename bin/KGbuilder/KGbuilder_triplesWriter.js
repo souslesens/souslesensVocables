@@ -290,71 +290,85 @@ const KGbuilder_triplesWriter = {
             otherPredicate: function () {
                 return {
                     selectVars: "?s ?value",
-                    whereClause: "WHERE { " +
-                        "GRAPH <" + graphUri + "> { " +
+                    whereClause:
+                        "WHERE { " +
+                        "GRAPH <" +
+                        graphUri +
+                        "> { " +
                         "{ " +
                         "SELECT ?s ?value " +
                         "WHERE { " +
-                        "?s rdf:type <" + item.classUri + "> . " +
-                        "?s <" + item.id + "> ?value . " +
+                        "?s rdf:type <" +
+                        item.classUri +
+                        "> . " +
+                        "?s <" +
+                        item.id +
+                        "> ?value . " +
                         "} " +
-                        "LIMIT " + batchSize + " " +
+                        "LIMIT " +
+                        batchSize +
+                        " " +
                         "} " +
                         "} " +
                         "}",
-                    deleteClause: "DELETE { " +
-                        "GRAPH <" + graphUri + "> { " +
-                        "?s <" + item.id + "> ?value . " +
-                        "} " +
-                        "}",
+                    deleteClause: "DELETE { " + "GRAPH <" + graphUri + "> { " + "?s <" + item.id + "> ?value . " + "} " + "}",
                 };
             },
             Class: function () {
                 return {
                     selectVars: "?instance ?p ?o ?s ?p2",
-                    whereClause: "WHERE { " +
-                        "GRAPH <" + graphUri + "> { " +
+                    whereClause:
+                        "WHERE { " +
+                        "GRAPH <" +
+                        graphUri +
+                        "> { " +
                         "{ " +
                         "SELECT DISTINCT ?instance " +
                         "WHERE { " +
-                        "?instance rdf:type <" + item.classUri + "> . " +
+                        "?instance rdf:type <" +
+                        item.classUri +
+                        "> . " +
                         "} " +
-                        "LIMIT " + batchSize + " " +
+                        "LIMIT " +
+                        batchSize +
+                        " " +
                         "} " +
                         "{ ?instance ?p ?o . } " +
                         "UNION " +
                         "{ ?s ?p2 ?instance . } " +
                         "} " +
                         "}",
-                    deleteClause: "DELETE { " +
-                        "GRAPH <" + graphUri + "> { " +
-                        "?instance ?p ?o . " +
-                        "?s ?p2 ?instance . " +
-                        "} " +
-                        "}",
+                    deleteClause: "DELETE { " + "GRAPH <" + graphUri + "> { " + "?instance ?p ?o . " + "?s ?p2 ?instance . " + "} " + "}",
                 };
             },
             Relation: function () {
                 return {
                     selectVars: "?sub ?obj",
-                    whereClause: "WHERE { " +
-                        "GRAPH <" + graphUri + "> { " +
+                    whereClause:
+                        "WHERE { " +
+                        "GRAPH <" +
+                        graphUri +
+                        "> { " +
                         "{ " +
                         "SELECT ?sub ?obj " +
                         "WHERE { " +
-                        "?sub <" + item.propertyUri + "> ?obj . " +
-                        "?sub rdf:type <" + item.startingClass + "> . " +
-                        "?obj rdf:type <" + item.endingClass + "> . " +
+                        "?sub <" +
+                        item.propertyUri +
+                        "> ?obj . " +
+                        "?sub rdf:type <" +
+                        item.startingClass +
+                        "> . " +
+                        "?obj rdf:type <" +
+                        item.endingClass +
+                        "> . " +
                         "} " +
-                        "LIMIT " + batchSize + " " +
+                        "LIMIT " +
+                        batchSize +
+                        " " +
                         "} " +
                         "} " +
                         "}",
-                    deleteClause: "DELETE { " +
-                        "GRAPH <" + graphUri + "> { " +
-                        "?sub <" + item.propertyUri + "> ?obj . " +
-                        "} " +
-                        "}",
+                    deleteClause: "DELETE { " + "GRAPH <" + graphUri + "> { " + "?sub <" + item.propertyUri + "> ?obj . " + "} " + "}",
                 };
             },
         };
@@ -369,7 +383,7 @@ const KGbuilder_triplesWriter = {
 
     deleteSpecficMappings: function (isSample, graphUri, sparqlServerUrl, filterMappings, options, callback) {
         if (!filterMappings || filterMappings.length === 0) {
-            return callback('no mappings selected');
+            return callback("no mappings selected");
         }
 
         var totalDeleted = 0;
@@ -386,10 +400,10 @@ const KGbuilder_triplesWriter = {
                 var mappingTotal = 0;
                 var iteration = 0;
                 var batchSize = isSample ? 1000 : 10000;
-                if(item.type=="Class"){
-                    // limit number of items treated to each subject has all 
+                if (item.type == "Class") {
+                    // limit number of items treated to each subject has all
                     // his triples treated at same time to avoid problems
-                    batchSize=100;
+                    batchSize = 100;
                 }
 
                 async.whilst(
@@ -429,14 +443,14 @@ const KGbuilder_triplesWriter = {
                                 if (err) {
                                     return callbackWhilst(err);
                                 }
-                                if(!result.results || !result.results.bindings){
+                                if (!result.results || !result.results.bindings) {
                                     return callbackWhilst(null, 0);
                                 }
                                 if (isSample) {
                                     var bindings = result.results.bindings;
                                     var sampleTriples = KGbuilder_triplesWriter.formatSampleTriples(bindings, item);
 
-                                    sampleResults = {sampleTriples: sampleTriples, totalTriples: sampleTriples.length};
+                                    sampleResults = { sampleTriples: sampleTriples, totalTriples: sampleTriples.length };
 
                                     if (options && options.clientSocketId) {
                                         var identifier = item.classUri || item.propertyUri || item.type;
@@ -476,10 +490,10 @@ const KGbuilder_triplesWriter = {
                 if (err) {
                     return callback(err);
                 }
-                return callback(null, isSample ? sampleResults : {triplesDeleted:totalDeleted});
+                return callback(null, isSample ? sampleResults : { triplesDeleted: totalDeleted });
             },
         );
-    }
+    },
 };
 
 module.exports = KGbuilder_triplesWriter;

@@ -232,11 +232,22 @@ var KGbuilder_main = {
      * @param callback
      */,
     deleteKGBuilderTriples: function (source, tables, options, callback) {
+        if (!options) {
+            options = {};
+        }
+        
         KGbuilder_main.getSourceConfig(source, function (err, sourceMainJson) {
             if (err) {
                 return callback(err);
             }
-
+            if(options.filterMappingIds){
+                return KGbuilder_triplesWriter.deleteSpecficMappings(options.isSample, sourceMainJson.graphUri, sourceMainJson.sparqlServerUrl, options.filterMappingIds, options, function (err, result) {
+                    if (err) {
+                        return callback(err);
+                    }
+                    return callback(null,  result );
+                });
+            }
             //delete allKGbuilderC triples
             if (!tables || tables.length == 0) {
                 KGbuilder_triplesWriter.deleteKGBuilderTriples(sourceMainJson.sparqlServerUrl, sourceMainJson.graphUri, null, options, function (err, result) {

@@ -450,7 +450,7 @@ const KGbuilder_triplesWriter = {
                                     var bindings = result.results.bindings;
                                     var sampleTriples = KGbuilder_triplesWriter.formatSampleTriples(bindings, item);
 
-                                    sampleResults = { sampleTriples: sampleTriples, totalTriples: sampleTriples.length };
+                                    sampleResults = sampleTriples.concat(sampleResults);
 
                                     if (options && options.clientSocketId) {
                                         var identifier = item.classUri || item.propertyUri || item.type;
@@ -490,6 +490,7 @@ const KGbuilder_triplesWriter = {
                 if (err) {
                     return callback(err);
                 }
+                sampleResults = { sampleTriples: sampleResults, totalTriples: sampleResults.length };
                 return callback(null, isSample ? sampleResults : { triplesDeleted: totalDeleted });
             },
         );

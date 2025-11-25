@@ -11,6 +11,7 @@ module.exports = function () {
     let operations = {
         GET,
         POST,
+        DELETE,
     };
 
     async function GET(req, res, _next) {
@@ -105,6 +106,34 @@ module.exports = function () {
         }
     }
 
+    async function DELETE(req, res, next) {
+        const sourceName = req.body.source;
+
+        const userInfo = await userManager.getUser(req.user);
+        const userSources = await sourceModel.getUserSources(userInfo.user);
+
+        if (!(sourceName in userSources)) {
+            res.status(404).send({ error: `${sourceName} not found` });
+            return;
+        }
+
+        try {
+            if (!Object.keys(userSources).includes(sourceName)) {
+                if (userSources[sourceName].accessControl != "readwrite") {
+                    res.status(503).send({ error: `Not authorized to delete ${sourceName}` });
+                }
+                return;
+            }
+
+            const graphUri = userSources[sourceName].graphUri;
+            await rdfDataModel.clearGraph(graphUri);
+            res.status(200).send({ message: `${sourceName} deleted` });
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ error: error.message });
+        }
+    }
+
     POST.apiDoc = {
         security: [{ restrictLoggedUser: [] }],
         summary: "Post a RDF graph",
@@ -192,6 +221,27 @@ module.exports = function () {
                 schema: {
                     type: "object",
                 },
+            },
+        },
+        tags: ["RDF"],
+    };
+
+    DELETE.apiDoc = {
+        security: [{ restrictLoggedUser: [] }],
+        summary: "DELETE a RDF graph",
+        parameters: [
+            {
+                name: "source",
+                description: "Source name of the graph to delete",
+                in: "formData",
+                required: true,
+                type: "string",
+            },
+        ],
+        responses: {
+            200: {
+                description: "delete OK",
+                schema: { type: "object" },
             },
         },
         tags: ["RDF"],

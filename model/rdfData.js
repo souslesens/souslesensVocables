@@ -232,6 +232,16 @@ class RdfDataModel {
         const json = await this.execQuery(query);
         return json;
     };
+
+    /**
+     * @param {string} graphUri - The Graph URI
+     * @returns {Promise<any>} - response
+     */
+    clearGraph = async (graphUri) => {
+        const query = `CLEAR GRAPH <${graphUri}>`;
+        const json = await this.execQuery(query);
+        return json;
+    };
 }
 
 const config = readMainConfig();

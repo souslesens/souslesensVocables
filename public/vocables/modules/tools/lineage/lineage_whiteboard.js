@@ -3313,75 +3313,69 @@ restrictionSource = Config.predicatesSource;
 
             var conceptType = "Class";
             if (result.length == 0) {
-                if(nodes[0].type=="Class"){
-
+                if (nodes[0].type == "Class") {
                     existingNodes = self.lineageVisjsGraph.getExistingIdsMap();
                     if (!existingNodes[nodes[0].data.source]) {
                         visjsData.nodes.forEach(function (_item) {
                             // pass
                         });
                     }
-                   
-                    if(!existingNodes[nodes[0].id]){
-                        existingNodes[nodes[0].id]=1;
-                         visjsData.nodes.push({
-                        id: nodes[0].data.id,
-                        label: nodes[0].data.label,
-                        data: {
-                            id: nodes[0].data.id ,
+
+                    if (!existingNodes[nodes[0].id]) {
+                        existingNodes[nodes[0].id] = 1;
+                        visjsData.nodes.push({
+                            id: nodes[0].data.id,
                             label: nodes[0].data.label,
-                            source: nodes[0].data.source,
-                            type: conceptType,
-                            rdfType: conceptType,
-                        },
-                        shadow: self.nodeShadow,
-                        level: options.startLevel || 0,
-                        shape: self.defaultShape,
-                        color: self.getSourceColor(nodes[0].data.source, nodes[0].id),
-                        size: Lineage_whiteboard.defaultShapeSize,
-                    });
-                    newNodeIds.push(nodes[0].id);
+                            data: {
+                                id: nodes[0].data.id,
+                                label: nodes[0].data.label,
+                                source: nodes[0].data.source,
+                                type: conceptType,
+                                rdfType: conceptType,
+                            },
+                            shadow: self.nodeShadow,
+                            level: options.startLevel || 0,
+                            shape: self.defaultShape,
+                            color: self.getSourceColor(nodes[0].data.source, nodes[0].id),
+                            size: Lineage_whiteboard.defaultShapeSize,
+                        });
+                        newNodeIds.push(nodes[0].id);
                     }
-                       
 
-
-                if (!options) {
-                    options = {};
-                }
-                if (callback) {
-                    if (!options.drawBeforeCallback) {
-                        return callback(null, visjsData);
+                    if (!options) {
+                        options = {};
                     }
-                }
-
-                //Lineage_sources.registerSource(source);
-
-                if (!self.lineageVisjsGraph.isGraphNotEmpty()) {
-                    self.drawNewGraph(visjsData, null, options, function () {
-                        if (callback) {
+                    if (callback) {
+                        if (!options.drawBeforeCallback) {
                             return callback(null, visjsData);
                         }
-                    });
-                } else {
-                    Lineage_whiteboard.addVisDataToGraph(visjsData);
-                    self.lineageVisjsGraph.data.edges.add(visjsData.edges);
-                    if (callback) {
-                        // if(conceptType=="NamedIndividual"){
-                        // return
-                        callback(null, visjsData);
                     }
-                }
-                }else
-                    {
+
+                    //Lineage_sources.registerSource(source);
+
+                    if (!self.lineageVisjsGraph.isGraphNotEmpty()) {
+                        self.drawNewGraph(visjsData, null, options, function () {
+                            if (callback) {
+                                return callback(null, visjsData);
+                            }
+                        });
+                    } else {
+                        Lineage_whiteboard.addVisDataToGraph(visjsData);
+                        self.lineageVisjsGraph.data.edges.add(visjsData.edges);
+                        if (callback) {
+                            // if(conceptType=="NamedIndividual"){
+                            // return
+                            callback(null, visjsData);
+                        }
+                    }
+                } else {
                     if (callback) {
-                    return callback("No data found");
+                        return callback("No data found");
                     }
                     $("#waitImg").css("display", "none");
                     return UI.message("No data found", true);
-                 }
-                
+                }
             }
-
 
             result.forEach(function (item) {
                 //if (item.subjectType && item.subjectType.value.indexOf("NamedIndividual") > -1) {

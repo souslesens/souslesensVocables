@@ -61,27 +61,25 @@ var LegendWidget = (function () {
         Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(newNodes);
     };
 
-    self.getEdgeBetweenLegendAndNodes=function(legend,callback){
-        if(!legend){
+    self.getEdgeBetweenLegendAndNodes = function (legend, callback) {
+        if (!legend) {
             return;
         }
-        var edgeLegendNodes= [] ;
-        var allNodes=Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
-        if(legend && legend.original &&legend.original.color){
-            allNodes.forEach(function(node){
-                if(node && node.id){        
-                        if(legend.original.color==node.color){
-                            edgeLegendNodes.push(node);
-                        }
-            
+        var edgeLegendNodes = [];
+        var allNodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
+        if (legend && legend.original && legend.original.color) {
+            allNodes.forEach(function (node) {
+                if (node && node.id) {
+                    if (legend.original.color == node.color) {
+                        edgeLegendNodes.push(node);
+                    }
                 }
-
-        })
+            });
         }
-        if(callback){
-            return callback(null,edgeLegendNodes);
+        if (callback) {
+            return callback(null, edgeLegendNodes);
         }
-    }
+    };
 
     self.getLegendJstreeContextMenu = function () {
         var items = {};
@@ -90,19 +88,19 @@ var LegendWidget = (function () {
             label: "Group nodes",
             action: function (_e) {
                 var node = self.currentLegendNode;
-                 self.getEdgeBetweenLegendAndNodes(node,function(err, result){
-                    if(err){
-                        return
+                self.getEdgeBetweenLegendAndNodes(node, function (err, result) {
+                    if (err) {
+                        return;
                     }
-                    if(result){
+                    if (result) {
                         PopupMenuWidget.hidePopup("popupMenuWidgetDiv");
-                        var edgelegend=result;
+                        var edgelegend = result;
                         var color2 = common.colorToRgba(node.original.color, 0.6);
                         var visjsData = { nodes: [], edges: [] };
                         var existingNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
 
                         for (var nodeId of result) {
-                            if(nodeId.id in existingNodes){
+                            if (nodeId.id in existingNodes) {
                                 var edgeId = nodeId.id + "_" + node.id;
                                 if (!existingNodes[edgeId]) {
                                     existingNodes[nodeId] = 1;
@@ -118,12 +116,10 @@ var LegendWidget = (function () {
                                     };
                                     visjsData.edges.push(edge);
                                 }
-                            }     
-                            
+                            }
                         }
                         if (!existingNodes[node.id]) {
                             existingNodes[node.id] = 1;
-
 
                             const text = node.original.text;
                             const div = document.createElement("div");
@@ -143,8 +139,8 @@ var LegendWidget = (function () {
                         }
                         Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(visjsData.nodes);
                         Lineage_whiteboard.lineageVisjsGraph.data.edges.update(visjsData.edges);
-                            }
-                 });
+                    }
+                });
             },
         };
         items.Hide = {
@@ -153,19 +149,19 @@ var LegendWidget = (function () {
                 var currentNode = self.currentLegendNode;
                 var allNodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
                 var newNodes = [];
-                var hide=true;
+                var hide = true;
                 allNodes.forEach(function (node) {
-                    if (currentNode.original.color==node.color) {
+                    if (currentNode.original.color == node.color) {
                         newNodes.push({
                             id: node.id,
                             hidden: hide,
                         });
-                    }else {
-                        if(currentNode.id==node.id){
+                    } else {
+                        if (currentNode.id == node.id) {
                             newNodes.push({
-                            id: node.id,
-                            hidden: hide,
-                        });
+                                id: node.id,
+                                hidden: hide,
+                            });
                         }
                         newNodes.push(node);
                     }
@@ -185,24 +181,24 @@ var LegendWidget = (function () {
                 var currentNode = self.currentLegendNode;
                 var allNodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
                 var newNodes = [];
-                var hide=false;
+                var hide = false;
                 allNodes.forEach(function (node) {
-                    if (currentNode.original.color==node.color) {
+                    if (currentNode.original.color == node.color) {
                         newNodes.push({
                             id: node.id,
                             hidden: hide,
                         });
-                    }else {
-                        if(currentNode.id==node.id){
+                    } else {
+                        if (currentNode.id == node.id) {
                             newNodes.push({
-                            id: node.id,
-                            hidden: hide,
-                        });
+                                id: node.id,
+                                hidden: hide,
+                            });
                         }
                     }
                 });
                 Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(newNodes);
-               
+
                 if (hide) {
                     $("#Lineage_source_" + Lineage_sources.activeSource).addClass("lineage_hiddenSource");
                 } else {
@@ -214,10 +210,9 @@ var LegendWidget = (function () {
             label: "Ungroup nodes",
             action: function (_e) {
                 var node = self.currentLegendNode;
-                if(node && node.id){
+                if (node && node.id) {
                     Lineage_whiteboard.lineageVisjsGraph.data.nodes.remove(node.id);
                 }
-                
             },
         };
         return items;

@@ -126,7 +126,7 @@ var KGquery_filter = (function () {
             },
 
             validateFn: function (checkedNodes) {
-                KGquery_filter.getOptionalPredicates(checkedNodes, function (err, result) {
+                KGquery_filter.getOptionalPredicates(checkedNodes,null, function (err, result) {
                     return callback(err, result);
                 });
             },
@@ -184,13 +184,18 @@ var KGquery_filter = (function () {
      * @name getOptionalPredicates
      * @memberof module:KGquery_filter
      * @param {Array} propertyNodes - Array of selected property nodes
+     * @param {Object} options
+     * @param {boolean} options.noConfirm 
      * @param {Function} callback - Callback function called with (err, result)
      * @param {Object} callback.result - The result object containing:
      * @param {string} callback.result.optionalPredicatesSparql - The OPTIONAL clauses in SPARQL
      * @param {string} callback.result.selectClauseSparql - The SELECT clause variables
      * @returns {void}
      */
-    self.getOptionalPredicates = function (propertyNodes, callback) {
+    self.getOptionalPredicates = function (propertyNodes,options, callback) {
+        if(!options){
+            options={}
+        }
         var selectedPropertyNodes = [];
         var selectClauseSparql = "";
         if (!propertyNodes || propertyNodes.length == 0) {
@@ -210,11 +215,16 @@ var KGquery_filter = (function () {
         });
 
         if (selectedPropertyNodes.length > KGquery.maxOptionalPredicatesInQuery) {
-            if (confirm("many properties have been selected. Query may take time or abort, Continue anyway?")) {
+            if(options.noConfirm){
+                
+            }else{
+                if (confirm("many properties have been selected. Query may take time or abort, Continue anyway?")) {
                 //  return callback(null, queryNonObjectProperties);
-            } else {
-                return callback("query aborted");
+                } else {
+                    return callback("query aborted");
+                }
             }
+            
         }
 
         function addToStringIfNotExists(str, text) {
@@ -301,6 +311,36 @@ var KGquery_filter = (function () {
     };
 
     /**
+     * Applies the filter result to a node and updates the UI.
+     * @function
+     * @name applyFilterToNode
+     * @memberof module:KGquery_filter
+     * @param {string} classDivId - The ID of the class div
+     * @param {Object} aClass - The class object
+     * @param {number} classSetIndex - The index of the class set
+     * @param {Object} result - The filter result object
+     * @param {string} result.filter - The filter string
+     * @param {string} result.filterLabel - The filter label
+     * @param {string} addTojsTreeNode - The node to add the filter to (optional)
+     * @returns {void}
+     */
+    self.applyFilterToNode = function (classDivId, aClass, classSetIndex, result, addTojsTreeNode) {
+        KGquery.querySets.sets[classSetIndex].classFiltersMap[classDivId] = { class: aClass, filter: result.filter };
+        $("#" + classDivId + "_filter").text(result.filterLabel || result.filter);
+
+        if (addTojsTreeNode) {
+            var jstreeData = [
+                {
+                    id: classDivId + "_filter",
+                    text: result.filterLabel || result.filter,
+                    parent: addTojsTreeNode,
+                },
+            ];
+            jstreeWidget.addNodesToJstree(null, addTojsTreeNode, jstreeData);
+        }
+    };
+
+    /**
      * Adds a filter to a node based on a property.
      * @function
      * @name addNodeFilter
@@ -310,7 +350,10 @@ var KGquery_filter = (function () {
      * @param {string} propertyId - The ID of the property to filter on
      * @returns {void}
      */
-    self.addNodeFilter = function (classDivId, addTojsTreeNode, propertyId) {
+    self.addNodeFilter = function (classDivId, addTojsTreeNode, propertyId,options) {
+        if(!options){
+            options={}
+        }
         var aClass = KGquery.divsMap[classDivId];
         var classSetIndex = aClass.data.setIndex;
         if (KGquery.querySets.sets[classSetIndex].classFiltersMap[classDivId]) {
@@ -328,25 +371,16 @@ var KGquery_filter = (function () {
             property: propertyId,
             varName: KGquery.getVarName(aClass, true),
         };
-
-        KGquery_filter_bot.start(aClass.data, currentFilterQuery, function (err, result) {
-            if (err) {
-                return MainController.errorAlert(err);
-            }
-            KGquery.querySets.sets[classSetIndex].classFiltersMap[classDivId] = { class: aClass, filter: result.filter };
-            $("#" + classDivId + "_filter").text(result.filterLabel || result.filter);
-
-            if (addTojsTreeNode) {
-                var jstreeData = [
-                    {
-                        id: classDivId + "_filter",
-                        text: result.filterLabel || result.filter,
-                        parent: addTojsTreeNode,
-                    },
-                ];
-                jstreeWidget.addNodesToJstree(null, addTojsTreeNode, jstreeData);
-            }
-        });
+        if(options.filter){
+            self.applyFilterToNode(classDivId, aClass, classSetIndex, options.filter, addTojsTreeNode);
+        }else{
+            KGquery_filter_bot.start(aClass.data, currentFilterQuery, function (err, result) {
+                if (err) {
+                    return MainController.errorAlert(err);
+                }
+                self.applyFilterToNode(classDivId, aClass, classSetIndex, result, addTojsTreeNode);
+            });
+        }
     };
 
     self.setKGquerySampleSize = function () {

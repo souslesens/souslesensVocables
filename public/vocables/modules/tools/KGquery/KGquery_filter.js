@@ -126,7 +126,7 @@ var KGquery_filter = (function () {
             },
 
             validateFn: function (checkedNodes) {
-                KGquery_filter.getOptionalPredicates(checkedNodes,null, function (err, result) {
+                KGquery_filter.getOptionalPredicates(checkedNodes, null, function (err, result) {
                     return callback(err, result);
                 });
             },
@@ -185,16 +185,16 @@ var KGquery_filter = (function () {
      * @memberof module:KGquery_filter
      * @param {Array} propertyNodes - Array of selected property nodes
      * @param {Object} options
-     * @param {boolean} options.noConfirm 
+     * @param {boolean} options.noConfirm
      * @param {Function} callback - Callback function called with (err, result)
      * @param {Object} callback.result - The result object containing:
      * @param {string} callback.result.optionalPredicatesSparql - The OPTIONAL clauses in SPARQL
      * @param {string} callback.result.selectClauseSparql - The SELECT clause variables
      * @returns {void}
      */
-    self.getOptionalPredicates = function (propertyNodes,options, callback) {
-        if(!options){
-            options={}
+    self.getOptionalPredicates = function (propertyNodes, options, callback) {
+        if (!options) {
+            options = {};
         }
         var selectedPropertyNodes = [];
         var selectClauseSparql = "";
@@ -215,16 +215,14 @@ var KGquery_filter = (function () {
         });
 
         if (selectedPropertyNodes.length > KGquery.maxOptionalPredicatesInQuery) {
-            if(options.noConfirm){
-                
-            }else{
+            if (options.noConfirm) {
+            } else {
                 if (confirm("many properties have been selected. Query may take time or abort, Continue anyway?")) {
-                //  return callback(null, queryNonObjectProperties);
+                    //  return callback(null, queryNonObjectProperties);
                 } else {
                     return callback("query aborted");
                 }
             }
-            
         }
 
         function addToStringIfNotExists(str, text) {
@@ -350,9 +348,9 @@ var KGquery_filter = (function () {
      * @param {string} propertyId - The ID of the property to filter on
      * @returns {void}
      */
-    self.addNodeFilter = function (classDivId, addTojsTreeNode, propertyId,options) {
-        if(!options){
-            options={}
+    self.addNodeFilter = function (classDivId, addTojsTreeNode, propertyId, options) {
+        if (!options) {
+            options = {};
         }
         var aClass = KGquery.divsMap[classDivId];
         var classSetIndex = aClass.data.setIndex;
@@ -371,9 +369,9 @@ var KGquery_filter = (function () {
             property: propertyId,
             varName: KGquery.getVarName(aClass, true),
         };
-        if(options.filter){
+        if (options.filter) {
             self.applyFilterToNode(classDivId, aClass, classSetIndex, options.filter, addTojsTreeNode);
-        }else{
+        } else {
             KGquery_filter_bot.start(aClass.data, currentFilterQuery, function (err, result) {
                 if (err) {
                     return MainController.errorAlert(err);

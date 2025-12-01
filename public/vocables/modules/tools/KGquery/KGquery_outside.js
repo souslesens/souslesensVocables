@@ -1,34 +1,25 @@
-
-
-var KGquery_outside=(function () {
+var KGquery_outside = (function () {
     var self = {};
 
-    self.init=function(source,callback){
-       
-       KGquery.currentSource=source;
-       KGquery_graph.downloadVisjsGraph(source,function(){
-            try{
+    self.init = function (source, callback) {
+        KGquery.currentSource = source;
+        KGquery_graph.downloadVisjsGraph(source, function () {
+            try {
                 // the function crash but init necessary variables for KGquery
-                  KGquery_graph.drawModel();
-            }catch{
-               
-            }
+                KGquery_graph.drawModel();
+            } catch {}
             KGquery.initVarNamesMap();
-            if(callback){
+            if (callback) {
                 callback();
             }
-          
-       });
-      
-
-
-    }
+        });
+    };
     /**
      * Sequentially adds nodes from an array of identifiers to KGquery using KGquery.addNode
      * @param {Array<string>} nodeIds - Array of node or edge identifiers from the graph
      * @param {Function} callback - Callback function called at the end with (err, result)
      */
-    self.addNodesToKGquery = function(nodeIds, callback) {
+    self.addNodesToKGquery = function (nodeIds, callback) {
         if (!nodeIds || !Array.isArray(nodeIds)) {
             return callback("nodeIds must be an array");
         }
@@ -43,13 +34,13 @@ var KGquery_outside=(function () {
         }
 
         var nodesMap = {};
-        graph.nodes.forEach(function(node) {
+        graph.nodes.forEach(function (node) {
             nodesMap[node.id] = node;
         });
 
         var edgesMap = {};
         if (graph.edges) {
-            graph.edges.forEach(function(edge) {
+            graph.edges.forEach(function (edge) {
                 edgesMap[edge.id] = edge;
             });
         }
@@ -57,11 +48,11 @@ var KGquery_outside=(function () {
         var addedNodes = [];
         var errors = [];
 
-        var processNodeId = function(nodeId, callback) {
+        var processNodeId = function (nodeId, callback) {
             self.addSingleNode(nodeId, nodesMap, edgesMap, addedNodes, errors, callback);
         };
 
-        async.eachSeries(nodeIds, processNodeId, function(err) {
+        async.eachSeries(nodeIds, processNodeId, function (err) {
             if (err) {
                 return callback(err);
             }
@@ -70,7 +61,7 @@ var KGquery_outside=(function () {
                 success: true,
                 addedNodes: addedNodes,
                 errors: errors.length > 0 ? errors : null,
-                message: "Added " + addedNodes.length + " node(s) out of " + nodeIds.length + " requested"
+                message: "Added " + addedNodes.length + " node(s) out of " + nodeIds.length + " requested",
             };
 
             callback(null, result);
@@ -86,7 +77,7 @@ var KGquery_outside=(function () {
      * @param {Array} errors - Array to track errors
      * @param {Function} callback - Callback function
      */
-    self.addSingleNode = function(nodeId, nodesMap, edgesMap, addedNodes, errors, callback) {
+    self.addSingleNode = function (nodeId, nodesMap, edgesMap, addedNodes, errors, callback) {
         var node = nodesMap[nodeId];
         var edge = edgesMap[nodeId];
 
@@ -104,15 +95,15 @@ var KGquery_outside=(function () {
                 return callback();
             }
 
-            KGquery.addNode(fromNode, {}, function() {
-                KGquery.addNode(toNode, {}, function() {
-                    addedNodes.push({ from: fromNode.id, to: toNode.id, type: 'edge' });
+            KGquery.addNode(fromNode, {}, function () {
+                KGquery.addNode(toNode, {}, function () {
+                    addedNodes.push({ from: fromNode.id, to: toNode.id, type: "edge" });
                     callback();
                 });
             });
         } else {
-            KGquery.addNode(node, {}, function() {
-                addedNodes.push({ id: node.id, type: 'node' });
+            KGquery.addNode(node, {}, function () {
+                addedNodes.push({ id: node.id, type: "node" });
                 callback();
             });
         }
@@ -122,15 +113,15 @@ var KGquery_outside=(function () {
      * Sets optional predicates for nodes based on a map of node IDs to property IDs
      * @param {Object} nodesPropertiesMap - Map where key is node ID from KGquery_graph.visjsData and value is array of property IDs to select (or null for all properties)
      */
-    self.setOptionalPredicates = function(nodesPropertiesMap, options, callback) {
+    self.setOptionalPredicates = function (nodesPropertiesMap, options, callback) {
         // Handle optional options parameter
-        if (typeof options === 'function') {
+        if (typeof options === "function") {
             callback = options;
             options = {};
         }
         options = options || {};
 
-        if (!nodesPropertiesMap || typeof nodesPropertiesMap !== 'object') {
+        if (!nodesPropertiesMap || typeof nodesPropertiesMap !== "object") {
             return callback("nodesPropertiesMap must be an object");
         }
 
@@ -146,13 +137,12 @@ var KGquery_outside=(function () {
         var initialSelectClause = "";
         var initialOptionalPredicates = "";
 
-
         // Build property nodes structure expected by KGquery_filter.getOptionalPredicates
         var propertyNodes = [];
 
-        Object.keys(nodesPropertiesMap).forEach(function(nodeId) {
+        Object.keys(nodesPropertiesMap).forEach(function (nodeId) {
             // Find the node in the graph
-            var graphNode = graph.nodes.find(function(n) {
+            var graphNode = graph.nodes.find(function (n) {
                 return n.id === nodeId;
             });
 
@@ -167,11 +157,11 @@ var KGquery_outside=(function () {
             }
 
             // Get the variable name for this node
-            var varName = KGquery.classToVarNameMap[nodeId]
+            var varName = KGquery.classToVarNameMap[nodeId];
 
             // Find the nodeDivId from KGquery.divsMap
             var nodeDivId = null;
-            Object.keys(KGquery.divsMap).forEach(function(key) {
+            Object.keys(KGquery.divsMap).forEach(function (key) {
                 if (KGquery.divsMap[key].id === nodeId) {
                     nodeDivId = key;
                 }
@@ -183,16 +173,15 @@ var KGquery_outside=(function () {
 
             if (propertiesToInclude && Array.isArray(propertiesToInclude)) {
                 // Filter properties based on provided IDs
-                properties = properties.filter(function(prop) {
+                properties = properties.filter(function (prop) {
                     return propertiesToInclude.includes(prop.id);
                 });
             }
 
             // Create property nodes in the format expected by getOptionalPredicates
-            properties.forEach(function(property) {
-                
+            properties.forEach(function (property) {
                 var propertyNodeId = varName + "_" + property.label;
-                propertyNodeId=propertyNodeId.replaceAll('?','');
+                propertyNodeId = propertyNodeId.replaceAll("?", "");
 
                 // Build queryElementData with all required properties
                 var queryElementData = {
@@ -201,17 +190,17 @@ var KGquery_outside=(function () {
                     id: nodeId,
                     label: graphNode.label,
                     setIndex: graphNode.data.setIndex !== undefined ? graphNode.data.setIndex : 0,
-                    nodeDivId: nodeDivId
+                    nodeDivId: nodeDivId,
                 };
-                varName=varName.replaceAll('?','')
+                varName = varName.replaceAll("?", "");
                 propertyNodes.push({
                     id: propertyNodeId,
                     parents: ["root", "#"], // Correct order: root first, then #
                     data: {
                         varName: varName,
                         property: property,
-                        queryElementData: queryElementData
-                    }
+                        queryElementData: queryElementData,
+                    },
                 });
             });
         });
@@ -229,12 +218,12 @@ var KGquery_outside=(function () {
                 selectClauseSparql: initialSelectClause,
                 optionalPredicatesSparql: initialOptionalPredicates,
                 optionalPredicatesSubjecstMap: {},
-                labelFromURIToDisplay: []
+                labelFromURIToDisplay: [],
             });
         }
 
         // Call KGquery_filter.getOptionalPredicates with the constructed property nodes
-        KGquery_filter.getOptionalPredicates(propertyNodes,{noConfirm:true}, function(err, result) {
+        KGquery_filter.getOptionalPredicates(propertyNodes, { noConfirm: true }, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -260,8 +249,8 @@ var KGquery_outside=(function () {
      * @param {Object} nodeFiltersMap - Map where key is node ID from KGquery_graph and value is filter configuration
      * @param {Function} callback - Callback function called with (err, result)
      */
-    self.addNodeFilters = function(nodeFiltersMap, callback) {
-        if (!nodeFiltersMap || typeof nodeFiltersMap !== 'object') {
+    self.addNodeFilters = function (nodeFiltersMap, callback) {
+        if (!nodeFiltersMap || typeof nodeFiltersMap !== "object") {
             return callback("nodeFiltersMap must be an object");
         }
 
@@ -274,52 +263,56 @@ var KGquery_outside=(function () {
         var errors = [];
 
         // Process each filter in the map
-        async.eachSeries(Object.keys(nodeFiltersMap), function(nodeId, callbackEach) {
-            // Find the node in the graph
-            var graphNode = graph.nodes.find(function(n) {
-                return n.id === nodeId;
-            });
+        async.eachSeries(
+            Object.keys(nodeFiltersMap),
+            function (nodeId, callbackEach) {
+                // Find the node in the graph
+                var graphNode = graph.nodes.find(function (n) {
+                    return n.id === nodeId;
+                });
 
-            if (!graphNode) {
-                errors.push("Node not found in graph: " + nodeId);
-                return callbackEach();
-            }
-
-            // Find the corresponding divId in KGquery.divsMap
-            var divId = null;
-            Object.keys(KGquery.divsMap).forEach(function(key) {
-                if (KGquery.divsMap[key].id === nodeId) {
-                    divId = key;
+                if (!graphNode) {
+                    errors.push("Node not found in graph: " + nodeId);
+                    return callbackEach();
                 }
-            });
 
-            if (!divId) {
-                errors.push("No div found for node: " + nodeId);
-                return callbackEach();
-            }
+                // Find the corresponding divId in KGquery.divsMap
+                var divId = null;
+                Object.keys(KGquery.divsMap).forEach(function (key) {
+                    if (KGquery.divsMap[key].id === nodeId) {
+                        divId = key;
+                    }
+                });
 
-            var filterConfig = nodeFiltersMap[nodeId];
+                if (!divId) {
+                    errors.push("No div found for node: " + nodeId);
+                    return callbackEach();
+                }
 
-            // Apply the filter using KGquery_filter.addNodeFilter
-            try {
-                KGquery_filter.addNodeFilter(divId, null, null, { filter: filterConfig });
-                results.push({ nodeId: nodeId, divId: divId, success: true });
-            } catch (err) {
-                errors.push("Error adding filter for node " + nodeId + ": " + err);
-            }
+                var filterConfig = nodeFiltersMap[nodeId];
 
-            callbackEach();
-        }, function(err) {
-            if (err) {
-                return callback(err);
-            }
+                // Apply the filter using KGquery_filter.addNodeFilter
+                try {
+                    KGquery_filter.addNodeFilter(divId, null, null, { filter: filterConfig });
+                    results.push({ nodeId: nodeId, divId: divId, success: true });
+                } catch (err) {
+                    errors.push("Error adding filter for node " + nodeId + ": " + err);
+                }
 
-            callback(null, {
-                success: true,
-                results: results,
-                errors: errors.length > 0 ? errors : null
-            });
-        });
+                callbackEach();
+            },
+            function (err) {
+                if (err) {
+                    return callback(err);
+                }
+
+                callback(null, {
+                    success: true,
+                    results: results,
+                    errors: errors.length > 0 ? errors : null,
+                });
+            },
+        );
     };
 
     return self;

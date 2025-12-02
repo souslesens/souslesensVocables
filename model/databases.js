@@ -5,6 +5,7 @@ const { Lock } = require("async-await-mutex-lock");
 const { configDatabasesPath } = require("./config");
 const { profileModel } = require("./profiles");
 const KGbuilder_socket = require("../bin/KGbuilder/KGbuilder_socket");
+const modelUtils = require("./utils");
 
 /**
  * @typedef {import("./UserTypes").UserAccount} UserAccount
@@ -302,6 +303,26 @@ class DatabaseModel {
     };
 
     /**
+     * Regenerate a database connection after a failure
+     * @param {UserAccount} user - a user account
+     * @param {string} databaseId - a database identifier
+     * @param {any} oldConnection - the old connection to close
+     * @returns {Promise<any>} new database connection
+     */
+    regenerateConnection = async (user, databaseId, oldConnection) => {
+        console.log(`Regenerating database connection for ${databaseId} due to error...`);
+        try {
+            await this.refreshUserConnection(user, databaseId);
+            const newConnection = await this.getUserConnection(user, databaseId);
+            console.log(`Database connection regenerated successfully for ${databaseId}`);
+            return newConnection;
+        } catch (e) {
+            console.warn('Error regenerating connection:', e);
+            throw e;
+        }
+    };
+
+    /**
      * @param {any} connection - a database connection
      * @param {string} query - a sql query
      * @returns {Promise<any>} query result
@@ -312,12 +333,21 @@ class DatabaseModel {
     };
 
     /**
-     * @param {any} connection - a database connection
+     * @param {any} connectionObject - a connexion object with knex connection , user and dbId parameters
      * @param {string} tableName - the database table name
      * @params {string} select - select query
      * @params {number} batchSize - batch size
      */
-    batchSelectGenerator = async function* (connection, tableName, { select = "*", batchSize = 1000, startingOffset = 0 }) {
+    batchSelectGenerator = async function* (connectionObject, tableName, { select = "*", batchSize = 1000, startingOffset = 0 }) {
+        var connection;
+        if(connectionObject.connection){
+            connection=connectionObject.connection
+        }else if(connectionObject.user && connectionObject.dbId){
+            connection = await databaseModel.getUserConnection(connectionObject.user, connectionObject.dbId);
+        }else{
+            return;
+        }
+
         let offset = startingOffset;
 
         const columns = await connection(tableName).columnInfo();
@@ -326,11 +356,36 @@ class DatabaseModel {
         const resSize = await connection.count("*").from(tableName);
         const size = parseInt(resSize[0].count);
 
+        // Callback pour régénérer la connexion en cas d'échec
+        const onFailure = async (error) => {
+            if (connectionObject.user && connectionObject.dbId) {
+                connection = await databaseModel.regenerateConnection(connectionObject.user, connectionObject.dbId, connection);
+            }
+        };
+
         while (true) {
             if (offset >= size) {
-                return connection.select(select).from(tableName).orderBy(columnsKeys[0]).limit(batchSize).offset(offset);
+                const result = await modelUtils.redoIfFailure(
+                    async function() {
+                        return await connection.select(select).from(tableName).orderBy(columnsKeys[0]).limit(batchSize).offset(offset);
+                    },
+                    10,         
+                    5,          
+                    onFailure   
+                );
+                return result;
             }
-            yield await connection.select(select).from(tableName).orderBy(columnsKeys[0]).limit(batchSize).offset(offset);
+
+            const result = await modelUtils.redoIfFailure(
+                async function() {
+                    return await connection.select(select).from(tableName).orderBy(columnsKeys[0]).limit(batchSize).offset(offset);
+                },
+                10,         
+                5,          
+                onFailure   
+            );
+
+            yield result;
             offset += batchSize;
         }
         // Error gestion should be outside the function because this function has no callback

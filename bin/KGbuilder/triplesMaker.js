@@ -167,11 +167,11 @@ var TriplesMaker = {
                 totalDuration: 0,
             };
             const conn = await databaseModel.getUserConnection(user, tableInfos.dbID);
+            var connectionObject = {connection:conn,user:user,dbId:tableInfos.dbID}
             let generator;
             try {
-                await modelUtils.redoIfFailure(async function(){
-                    generator = databaseModel.batchSelectGenerator(conn, tableInfos.table, { select: select, batchSize: limitSize, startingOffset: offset });
-                })
+                generator = databaseModel.batchSelectGenerator(connectionObject, tableInfos.table, { select: select, batchSize: limitSize, startingOffset: offset });
+                
                  
             } catch (error) {
                 console.error("ERROR : offset " + offset + ",error in database reading " + error);

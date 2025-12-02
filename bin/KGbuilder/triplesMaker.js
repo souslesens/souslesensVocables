@@ -119,7 +119,7 @@ var TriplesMaker = {
                                     },
                                     batchTriples,
                                     tableProcessingParams.sourceInfos.graphUri,
-                                    tableProcessingParams.sourceInfos.sparqlServerUrl
+                                    tableProcessingParams.sourceInfos.sparqlServerUrl,
                                 );
                             }
                         });
@@ -171,12 +171,10 @@ var TriplesMaker = {
                 totalDuration: 0,
             };
             const conn = await databaseModel.getUserConnection(user, tableInfos.dbID);
-            var connectionObject = {connection:conn,user:user,dbId:tableInfos.dbID}
+            var connectionObject = { connection: conn, user: user, dbId: tableInfos.dbID };
             let generator;
             try {
                 generator = databaseModel.batchSelectGenerator(connectionObject, tableInfos.table, { select: select, batchSize: limitSize, startingOffset: offset });
-                
-                 
             } catch (error) {
                 console.error("ERROR : offset " + offset + ",error in database reading " + error);
                 KGbuilder_socket.message(options.clientSocketId, "ERROR : offset " + offset + ",error in database reading " + error, true);
@@ -228,13 +226,13 @@ var TriplesMaker = {
                         return callback(null, { sampleTriples: sampleTriples, totalTriplesCount: sampleTriples.length });
                     } else {
                         try {
-                            await modelUtils.redoIfFailure(async function(){
+                            await modelUtils.redoIfFailure(async function () {
                                 batchTriplesCount = await KGbuilder_triplesWriter.writeTriplesAsync(
-                                batchTriples,
-                                tableProcessingParams.sourceInfos.graphUri,
-                                tableProcessingParams.sourceInfos.sparqlServerUrl,
-                              )}
-                            )
+                                    batchTriples,
+                                    tableProcessingParams.sourceInfos.graphUri,
+                                    tableProcessingParams.sourceInfos.sparqlServerUrl,
+                                );
+                            });
 
                             //console.log("   triples written ", batchTriplesCount);
                             /*

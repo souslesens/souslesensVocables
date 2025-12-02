@@ -34,11 +34,11 @@ const redoIfFailure = async (func, maxRedo = 10, sleepTime = 5, callbackFailure 
             console.warn(`Fail to execute ${func.name}. Retrying in ${newSleepTime} secs…`);
             await sleep(newSleepTime);
             newSleepTime = newSleepTime * 2;
-            if (callbackFailure && typeof callbackFailure === 'function') {
+            if (callbackFailure && typeof callbackFailure === "function") {
                 try {
                     await callbackFailure(e);
                 } catch (callbackError) {
-                    console.warn('Error in callbackFailure:', callbackError);
+                    console.warn("Error in callbackFailure:", callbackError);
                 }
             }
             continue;
@@ -59,7 +59,7 @@ const redoIfFailure = async (func, maxRedo = 10, sleepTime = 5, callbackFailure 
  * @param {...any} args - other parameters to pass to the func (before the callback)
  *
  * @example
- * 
+ *
  **/
 const redoIfFailureCallback = (func, maxRedo = 10, sleepTime = 5, callbackFailure = null, finalCallback, ...args) => {
     const promisifiedFunc = (...funcArgs) => {

@@ -317,7 +317,7 @@ class DatabaseModel {
             console.log(`Database connection regenerated successfully for ${databaseId}`);
             return newConnection;
         } catch (e) {
-            console.warn('Error regenerating connection:', e);
+            console.warn("Error regenerating connection:", e);
             throw e;
         }
     };
@@ -340,11 +340,11 @@ class DatabaseModel {
      */
     batchSelectGenerator = async function* (connectionObject, tableName, { select = "*", batchSize = 1000, startingOffset = 0 }) {
         var connection;
-        if(connectionObject.connection){
-            connection=connectionObject.connection
-        }else if(connectionObject.user && connectionObject.dbId){
+        if (connectionObject.connection) {
+            connection = connectionObject.connection;
+        } else if (connectionObject.user && connectionObject.dbId) {
             connection = await databaseModel.getUserConnection(connectionObject.user, connectionObject.dbId);
-        }else{
+        } else {
             return;
         }
 
@@ -365,23 +365,23 @@ class DatabaseModel {
         while (true) {
             if (offset >= size) {
                 const result = await modelUtils.redoIfFailure(
-                    async function() {
+                    async function () {
                         return await connection.select(select).from(tableName).orderBy(columnsKeys[0]).limit(batchSize).offset(offset);
                     },
-                    10,         
-                    5,          
-                    onFailure   
+                    10,
+                    5,
+                    onFailure,
                 );
                 return result;
             }
 
             const result = await modelUtils.redoIfFailure(
-                async function() {
+                async function () {
                     return await connection.select(select).from(tableName).orderBy(columnsKeys[0]).limit(batchSize).offset(offset);
                 },
-                10,         
-                5,          
-                onFailure   
+                10,
+                5,
+                onFailure,
             );
 
             yield result;

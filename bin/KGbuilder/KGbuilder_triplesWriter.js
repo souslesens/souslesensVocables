@@ -196,7 +196,7 @@ const KGbuilder_triplesWriter = {
                     },
                     sparqlServerUrl,
                     null,
-                    params
+                    params,
                 );
             },
             function (err) {
@@ -238,7 +238,7 @@ const KGbuilder_triplesWriter = {
             },
             sparqlServerUrl,
             null,
-            params
+            params,
         );
     },
 

@@ -98,12 +98,11 @@ var TriplesMaker = {
                                     false,
                                 );*/
 
-                                // Appliquer redoIfFailureCallback sur writeTriples
                                 modelUtils.redoIfFailureCallback(
                                     KGbuilder_triplesWriter.writeTriples,
-                                    10,         // maxRedo
-                                    5,          // sleepTime
-                                    null,       // callbackFailure
+                                    10,
+                                    5,
+                                    null,
                                     function (err, writtenTriples) {
                                         if (err) {
                                             return callbackEach(err);
@@ -118,7 +117,6 @@ var TriplesMaker = {
                                         oldTime = new Date();
                                         return callbackEach();
                                     },
-                                    // Arguments pour writeTriples
                                     batchTriples,
                                     tableProcessingParams.sourceInfos.graphUri,
                                     tableProcessingParams.sourceInfos.sparqlServerUrl

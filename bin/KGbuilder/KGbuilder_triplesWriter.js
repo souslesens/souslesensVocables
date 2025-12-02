@@ -165,12 +165,11 @@ const KGbuilder_triplesWriter = {
                     };
                 }
 
-                // Appliquer redoIfFailureCallback sur httpProxy.post
                 modelUtils.redoIfFailureCallback(
                     httpProxy.post,
-                    10,         // maxRedo
-                    5,          // sleepTime
-                    null,       // callbackFailure (pas de régénération ici)
+                    10,
+                    5,
+                    null,
                     function (err, result) {
                         if (err) {
                             var x = query;
@@ -195,7 +194,6 @@ const KGbuilder_triplesWriter = {
                         KGbuilder_socket.message(options.clientSocketId, "" + totalSize + " triples deleted from table " + table, false);
                         return callbackWhilst(err);
                     },
-                    // Arguments pour httpProxy.post
                     sparqlServerUrl,
                     null,
                     params
@@ -225,12 +223,11 @@ const KGbuilder_triplesWriter = {
             };
         }
 
-        // Appliquer redoIfFailureCallback sur httpProxy.post
         modelUtils.redoIfFailureCallback(
             httpProxy.post,
-            10,         // maxRedo
-            5,          // sleepTime
-            null,       // callbackFailure (pas de régénération ici)
+            10,
+            5,
+            null,
             function (err, _result) {
                 if (err) {
                     var x = query;
@@ -239,7 +236,6 @@ const KGbuilder_triplesWriter = {
                 totalTriples += triples.length;
                 return callback(null, totalTriples);
             },
-            // Arguments pour httpProxy.post
             sparqlServerUrl,
             null,
             params

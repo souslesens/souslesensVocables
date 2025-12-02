@@ -356,7 +356,6 @@ class DatabaseModel {
         const resSize = await connection.count("*").from(tableName);
         const size = parseInt(resSize[0].count);
 
-        // Callback pour régénérer la connexion en cas d'échec
         const onFailure = async (error) => {
             if (connectionObject.user && connectionObject.dbId) {
                 connection = await databaseModel.regenerateConnection(connectionObject.user, connectionObject.dbId, connection);

@@ -8,6 +8,7 @@ const KGbuilder_triplesWriter = require("./KGbuilder_triplesWriter");
 const dataController = require("../dataController.");
 const path = require("path");
 const MappingParser = require("./mappingsParser.js");
+const modelUtils = require("../../model/utils.js");
 
 var TriplesMaker = {
     batchSize: 500,
@@ -168,7 +169,10 @@ var TriplesMaker = {
             const conn = await databaseModel.getUserConnection(user, tableInfos.dbID);
             let generator;
             try {
-                generator = databaseModel.batchSelectGenerator(conn, tableInfos.table, { select: select, batchSize: limitSize, startingOffset: offset });
+                await modelUtils.redoIfFailure(async function(){
+                    generator = databaseModel.batchSelectGenerator(conn, tableInfos.table, { select: select, batchSize: limitSize, startingOffset: offset });
+                })
+                 
             } catch (error) {
                 console.error("ERROR : offset " + offset + ",error in database reading " + error);
                 KGbuilder_socket.message(options.clientSocketId, "ERROR : offset " + offset + ",error in database reading " + error, true);
@@ -220,11 +224,13 @@ var TriplesMaker = {
                         return callback(null, { sampleTriples: sampleTriples, totalTriplesCount: sampleTriples.length });
                     } else {
                         try {
-                            var batchTriplesCount = await KGbuilder_triplesWriter.writeTriplesAsync(
+                            await modelUtils.redoIfFailure(async function(){
+                                batchTriplesCount = await KGbuilder_triplesWriter.writeTriplesAsync(
                                 batchTriples,
                                 tableProcessingParams.sourceInfos.graphUri,
                                 tableProcessingParams.sourceInfos.sparqlServerUrl,
-                            );
+                              )}
+                            )
 
                             //console.log("   triples written ", batchTriplesCount);
                             /*

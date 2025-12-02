@@ -18,7 +18,7 @@ const RDF_FORMATS_MIMETYPES = {
  * @param {object} args - other parameters to pass to the func
  * @returns {Any} - Return of the func
  */
-const redoIfFailure = async (func, maxRedo = 3, sleepTime = 5, ...args) => {
+const redoIfFailure = async (func, maxRedo = 10, sleepTime = 10, ...args) => {
     let i = 0;
     let newSleepTime = sleepTime;
     while (true) {

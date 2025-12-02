@@ -503,7 +503,7 @@ var TriplesMaker = {
                 if (!value) {
                     return;
                 }
-                value = columnId + ":" + value;
+                value = columnId + ":" + rowIndex;
                 bNode = tableProcessingParams.blankNodesMap[value];
             } else {
                 // virtual columns hasn't associated data column so we use rowIndex as value with the id of the virtual column

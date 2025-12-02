@@ -1387,6 +1387,7 @@ var OntologyModels = (function () {
             "   bind (datatype(?v) as ?datatype)\n" +
             "  filter (?prop not in (<http://souslesens.org/KGcreator#mappingFile>,<http://purl.org/dc/terms/created>))\n" +
             "\n" +
+            filterStr +
             "}";
 
         let url = Config.sparql_server.url + "?format=json&query=";

@@ -91,7 +91,7 @@ const redoIfFailureCallback = (func, maxRedo = 10, sleepTime = 5, callbackFailur
  * @returns {Promise}
  */
 const sleep = (sec) => {
-    return new Promise((r) => setTimeout(r, sec * 1000));
+    return new Promise((r) => setTimeout(r, sec * 60));
 };
 
 /**

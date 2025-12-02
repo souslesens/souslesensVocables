@@ -68,7 +68,7 @@ var KGquery_filter_bot = (function () {
     self.functions = {}; //SparqlQuery_bot.functions;
 
     self.functions.listIndividualsFn = function () {
-        Sparql_OWL.getDistinctClassLabels(self.params.source, [self.params.currentClass], {otherProperty : self.params.property}, function (err, result) {
+        Sparql_OWL.getDistinctClassLabels(self.params.source, [self.params.currentClass], { otherProperty: self.params.property }, function (err, result) {
             if (err) {
                 return MainController.errorAlert(err);
             }

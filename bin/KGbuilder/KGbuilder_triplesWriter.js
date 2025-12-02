@@ -3,6 +3,7 @@ const httpProxy = require("../httpProxy..js");
 const async = require("async");
 const util = require("../util.");
 const KGbuilder_socket = require("./KGbuilder_socket.js");
+const modelUtils = require("../../model/utils.js");
 
 const KGbuilder_triplesWriter = {
     sparqlPrefixes: {
@@ -164,30 +165,39 @@ const KGbuilder_triplesWriter = {
                     };
                 }
 
-                httpProxy.post(sparqlServerUrl, null, params, function (err, result) {
-                    if (err) {
-                        var x = query;
+                modelUtils.redoIfFailureCallback(
+                    httpProxy.post,
+                    10,
+                    5,
+                    null,
+                    function (err, result) {
+                        if (err) {
+                            var x = query;
+                            return callbackWhilst(err);
+                        }
+
+                        //return callback(null, result.results.bindings[0]["callret-0"].value);
+
+                        var result = result.results.bindings[0]["callret-0"].value;
+
+                        try {
+                            var regex = / (\d+)/;
+                            resultSize = result.match(regex)[1];
+                            if (resultSize) resultSize = parseInt(resultSize);
+                        } catch (e) {
+                            console.log(e);
+                            resultSize = -1;
+                        }
+
+                        totalSize += resultSize;
+
+                        KGbuilder_socket.message(options.clientSocketId, "" + totalSize + " triples deleted from table " + table, false);
                         return callbackWhilst(err);
-                    }
-
-                    //return callback(null, result.results.bindings[0]["callret-0"].value);
-
-                    var result = result.results.bindings[0]["callret-0"].value;
-
-                    try {
-                        var regex = / (\d+)/;
-                        resultSize = result.match(regex)[1];
-                        if (resultSize) resultSize = parseInt(resultSize);
-                    } catch (e) {
-                        console.log(e);
-                        resultSize = -1;
-                    }
-
-                    totalSize += resultSize;
-
-                    KGbuilder_socket.message(options.clientSocketId, "" + totalSize + " triples deleted from table " + table, false);
-                    return callbackWhilst(err);
-                });
+                    },
+                    sparqlServerUrl,
+                    null,
+                    params,
+                );
             },
             function (err) {
                 return callback(err, totalSize);
@@ -213,14 +223,23 @@ const KGbuilder_triplesWriter = {
             };
         }
 
-        httpProxy.post(sparqlServerUrl, null, params, function (err, _result) {
-            if (err) {
-                var x = query;
-                return callback(err);
-            }
-            totalTriples += triples.length;
-            return callback(null, totalTriples);
-        });
+        modelUtils.redoIfFailureCallback(
+            httpProxy.post,
+            10,
+            5,
+            null,
+            function (err, _result) {
+                if (err) {
+                    var x = query;
+                    return callback(err);
+                }
+                totalTriples += triples.length;
+                return callback(null, totalTriples);
+            },
+            sparqlServerUrl,
+            null,
+            params,
+        );
     },
 
     getSparqlPrefixesStr: function () {

@@ -8,6 +8,7 @@ const KGbuilder_triplesWriter = require("./KGbuilder_triplesWriter");
 const dataController = require("../dataController.");
 const path = require("path");
 const MappingParser = require("./mappingsParser.js");
+const modelUtils = require("../../model/utils.js");
 
 var TriplesMaker = {
     batchSize: 500,
@@ -97,10 +98,11 @@ var TriplesMaker = {
                                     false,
                                 );*/
 
-                                KGbuilder_triplesWriter.writeTriples(
-                                    batchTriples,
-                                    tableProcessingParams.sourceInfos.graphUri,
-                                    tableProcessingParams.sourceInfos.sparqlServerUrl,
+                                modelUtils.redoIfFailureCallback(
+                                    KGbuilder_triplesWriter.writeTriples,
+                                    10,
+                                    5,
+                                    null,
                                     function (err, writtenTriples) {
                                         if (err) {
                                             return callbackEach(err);
@@ -115,6 +117,9 @@ var TriplesMaker = {
                                         oldTime = new Date();
                                         return callbackEach();
                                     },
+                                    batchTriples,
+                                    tableProcessingParams.sourceInfos.graphUri,
+                                    tableProcessingParams.sourceInfos.sparqlServerUrl,
                                 );
                             }
                         });
@@ -166,9 +171,10 @@ var TriplesMaker = {
                 totalDuration: 0,
             };
             const conn = await databaseModel.getUserConnection(user, tableInfos.dbID);
+            var connectionObject = { connection: conn, user: user, dbId: tableInfos.dbID };
             let generator;
             try {
-                generator = databaseModel.batchSelectGenerator(conn, tableInfos.table, { select: select, batchSize: limitSize, startingOffset: offset });
+                generator = databaseModel.batchSelectGenerator(connectionObject, tableInfos.table, { select: select, batchSize: limitSize, startingOffset: offset });
             } catch (error) {
                 console.error("ERROR : offset " + offset + ",error in database reading " + error);
                 KGbuilder_socket.message(options.clientSocketId, "ERROR : offset " + offset + ",error in database reading " + error, true);
@@ -220,11 +226,13 @@ var TriplesMaker = {
                         return callback(null, { sampleTriples: sampleTriples, totalTriplesCount: sampleTriples.length });
                     } else {
                         try {
-                            var batchTriplesCount = await KGbuilder_triplesWriter.writeTriplesAsync(
-                                batchTriples,
-                                tableProcessingParams.sourceInfos.graphUri,
-                                tableProcessingParams.sourceInfos.sparqlServerUrl,
-                            );
+                            await modelUtils.redoIfFailure(async function () {
+                                batchTriplesCount = await KGbuilder_triplesWriter.writeTriplesAsync(
+                                    batchTriples,
+                                    tableProcessingParams.sourceInfos.graphUri,
+                                    tableProcessingParams.sourceInfos.sparqlServerUrl,
+                                );
+                            });
 
                             //console.log("   triples written ", batchTriplesCount);
                             /*
@@ -495,7 +503,7 @@ var TriplesMaker = {
                 if (!value) {
                     return;
                 }
-                value = columnId + ":" + value;
+                value = columnId + ":" + rowIndex;
                 bNode = tableProcessingParams.blankNodesMap[value];
             } else {
                 // virtual columns hasn't associated data column so we use rowIndex as value with the id of the virtual column

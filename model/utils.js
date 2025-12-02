@@ -10,15 +10,16 @@ const RDF_FORMATS_MIMETYPES = {
 };
 
 /**
- * Recall a function if it fail.
+ * Recall a function if it fail (Promise-based version).
  *
- * @param {function} func - The function to redo if it fail
+ * @param {function} func - The async function to redo if it fails (must return a Promise)
  * @param {number} maxRedo - number of try before raise the error
- * @param {number} sleepTime - number of second to wait between each try.
+ * @param {number} sleepTime - number of seconds to wait between each try
+ * @param {function} callbackFailure - optional callback to execute after each failure (before retry). Receives the error as parameter.
  * @param {object} args - other parameters to pass to the func
- * @returns {Any} - Return of the func
+ * @returns {Promise<Any>} - Return of the func
  */
-const redoIfFailure = async (func, maxRedo = 3, sleepTime = 5, ...args) => {
+const redoIfFailure = async (func, maxRedo = 10, sleepTime = 5, callbackFailure = null, ...args) => {
     let i = 0;
     let newSleepTime = sleepTime;
     while (true) {
@@ -33,19 +34,64 @@ const redoIfFailure = async (func, maxRedo = 3, sleepTime = 5, ...args) => {
             console.warn(`Fail to execute ${func.name}. Retrying in ${newSleepTime} secs…`);
             await sleep(newSleepTime);
             newSleepTime = newSleepTime * 2;
+            if (callbackFailure && typeof callbackFailure === "function") {
+                try {
+                    await callbackFailure(e);
+                } catch (callbackError) {
+                    console.warn("Error in callbackFailure:", callbackError);
+                }
+            }
             continue;
         }
     }
 };
 
 /**
+ * Recall a function if it fail (Callback-based version).
+ * This version works with Node.js style callbacks (err, result).
+ * Internally uses redoIfFailure by wrapping the callback function in a Promise.
+ *
+ * @param {function} func - The function to redo if it fails (must accept a callback as last parameter)
+ * @param {number} maxRedo - number of try before raise the error
+ * @param {number} sleepTime - number of seconds to wait between each try
+ * @param {function} callbackFailure - optional callback to execute after each failure (before retry). Receives the error as parameter.
+ * @param {function} finalCallback - the final callback to call with (err, result)
+ * @param {...any} args - other parameters to pass to the func (before the callback)
+ *
+ * @example
+ *
+ **/
+const redoIfFailureCallback = (func, maxRedo = 10, sleepTime = 5, callbackFailure = null, finalCallback, ...args) => {
+    const promisifiedFunc = (...funcArgs) => {
+        return new Promise((resolve, reject) => {
+            func(...funcArgs, (err, result) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(result);
+                }
+            });
+        });
+    };
+
+    // Utiliser redoIfFailure avec la version promisifiée
+    redoIfFailure(promisifiedFunc, maxRedo, sleepTime, callbackFailure, ...args)
+        .then((result) => {
+            finalCallback(null, result);
+        })
+        .catch((err) => {
+            finalCallback(err);
+        });
+};
+
+/**
  * Wait
  *
  * @param {number} sec - the number of seconds to wait
- * @returns {Any}
+ * @returns {Promise}
  */
 const sleep = (sec) => {
-    new Promise((r) => setTimeout(r, sec * 60));
+    return new Promise((r) => setTimeout(r, sec * 60));
 };
 
 /**
@@ -116,4 +162,4 @@ const cleanupConnection = (connection) => {
     return connection.destroy && connection.destroy();
 };
 
-module.exports = { cleanupConnection, convertType, chunk, getKnexConnection, redoIfFailure, RDF_FORMATS_MIMETYPES };
+module.exports = { cleanupConnection, convertType, chunk, getKnexConnection, redoIfFailure, redoIfFailureCallback, RDF_FORMATS_MIMETYPES };

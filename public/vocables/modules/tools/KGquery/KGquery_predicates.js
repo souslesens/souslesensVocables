@@ -28,7 +28,9 @@ var KGquery_predicates = (function () {
         var subjectUri = queryElement.fromNode.id;
 
         var predicate = subjectVarName + "  rdf:type <" + subjectUri + ">. ";
-        predicatesSubjectsMap[subjectVarName].predicates.push(predicate);
+        if (predicatesSubjectsMap[subjectVarName].predicates.indexOf(predicate) < 0) {
+            predicatesSubjectsMap[subjectVarName].predicates.push(predicate);
+        }
 
         if (queryElement.toNode) {
             var objectVarName = KGquery.getVarName(queryElement.toNode);
@@ -40,7 +42,9 @@ var KGquery_predicates = (function () {
             }
             var objectUri = queryElement.toNode.id;
             var predicate = objectVarName + "  rdf:type <" + objectUri + ">.";
-            predicatesSubjectsMap[objectVarName].predicates.push(predicate);
+            if (predicatesSubjectsMap[objectVarName].predicates.indexOf(predicate) < 0) {
+                predicatesSubjectsMap[objectVarName].predicates.push(predicate);
+            }
         }
         return predicatesSubjectsMap;
     };
@@ -62,7 +66,7 @@ var KGquery_predicates = (function () {
             }
 
             if (!predicatesSubjectsMap[startVarName]) {
-                predicatesSubjectsMap[startVarName] = { isOptional: false, predicates: [] };
+                predicatesSubjectsMap[startVarName] = {isOptional: false, predicates: []};
                 // for transitive nodes of path that are note already typed
                 var itemUri = KGquery.varNameToClassMap[startVarName];
                 var predicate = startVarName + "  rdf:type <" + itemUri + ">.";
@@ -129,6 +133,11 @@ var KGquery_predicates = (function () {
 
             // set rdftype and predicates between classes
             querySet.elements.forEach(function (queryElement, queryElementIndex) {
+
+                if (!queryElement.fromNode || !queryElement.toNode) {
+                    return;
+                }
+
                 KGquery_predicates.setRdfTypePredicates(queryElement, predicatesSubjectsMap);
 
                 var filterClassLabels = {};
@@ -235,7 +244,7 @@ var KGquery_predicates = (function () {
 
         query += " " + groupByStr; // + " limit 10000";
 
-        return { query: query, isUnion: isUnion, isJoin: isJoin, distinctSetTypes: distinctSetTypes };
+        return {query: query, isUnion: isUnion, isJoin: isJoin, distinctSetTypes: distinctSetTypes};
     };
     /**
      *  !!! if a variable is optio,nall all predicates tha contains this variable as subject have to be in nthe optional clause

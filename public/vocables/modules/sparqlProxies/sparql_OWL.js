@@ -2754,22 +2754,23 @@ var Sparql_OWL = (function () {
         var selectStr;
         if (options.otherProperty) {
             labelProperty = "<" + options.otherProperty + ">";
-            selectStr="?label";
-        }else {
-            selectStr="?label ?id";
+            selectStr = "?label";
+        } else {
+            selectStr = "?label ?id";
         }
         var query =
-                    "PREFIX owl: <http://www.w3.org/2002/07/owl#> " +
-                    "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
-                    "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> " +
-                    "SELECT distinct " + selectStr +
-                    fromStr +
-                    "" +
-                    " WHERE {{ ?id rdf:type ?type. " +
-                    filterStr +
-                    "?id " +
-                    labelProperty +
-                    " ?label  }} limit 10000";
+            "PREFIX owl: <http://www.w3.org/2002/07/owl#> " +
+            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
+            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> " +
+            "SELECT distinct " +
+            selectStr +
+            fromStr +
+            "" +
+            " WHERE {{ ?id rdf:type ?type. " +
+            filterStr +
+            "?id " +
+            labelProperty +
+            " ?label  }} limit 10000";
 
         var url = Config.sparql_server.url + "?format=json&query=";
         Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, _result) {

@@ -368,7 +368,7 @@ const DatabasesTable = () => {
                                                                 <Download />
                                                             </IconButton>
                                                             <DatabaseFormDialog database={database} me={me} />
-                                                            <ButtonWithConfirmation label="Delete" msg={() => handleDeleteDatabase(database, updateModel)} />
+                                                            <ButtonWithConfirmation label="Delete" func={handleDeleteDatabase} args={[database, updateModel]} />
                                                         </Stack>
                                                     </TableCell>
                                                 </TableRow>

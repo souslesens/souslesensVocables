@@ -193,7 +193,7 @@ const ProfilesTable = () => {
                                                     <TableCell align="center">
                                                         <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
                                                             <ProfileForm profile={profile} me={me} />
-                                                            <ButtonWithConfirmation label="Delete" msg={() => handleDeleteProfile(profile, updateModel)} />
+                                                            <ButtonWithConfirmation label="Delete" func={handleDeleteProfile} args={[profile, updateModel]} />
                                                         </Stack>
                                                     </TableCell>
                                                 </TableRow>

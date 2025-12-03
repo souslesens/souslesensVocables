@@ -196,12 +196,10 @@ var TripleFactory = (function () {
                     alert(result.result);
                 }
                 MappingModeler.socketMessage({
-                    operation:"finished"
-
-                })
+                    operation: "finished",
+                });
                 UI.message(result.result);
                 self.refreshTabStat();
-                
 
                 // JstreeWidget.loadJsTree(jstreeDiv, jstreeData, options, function () {
                 //     $("#MappingModeler_dataSourcesTab").css("margin-top", "0px");

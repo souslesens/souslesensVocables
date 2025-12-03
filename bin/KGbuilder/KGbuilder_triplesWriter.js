@@ -299,7 +299,6 @@ const KGbuilder_triplesWriter = {
                                 console.log(e);
                                 resultSize = -1;
                             }
-                        
 
                             totalSize += resultSize;
                             message.totalSize = totalSize;
@@ -311,11 +310,11 @@ const KGbuilder_triplesWriter = {
                         null,
                         params,
                     );
-              },
-            function (err) {
-                return callback(err, totalSize);
-            },
-           )
+                },
+                function (err) {
+                    return callback(err, totalSize);
+                },
+            );
         });
     },
 

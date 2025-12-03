@@ -68,7 +68,11 @@ var KGquery_filter_bot = (function () {
     self.functions = {}; //SparqlQuery_bot.functions;
 
     self.functions.listIndividualsFn = function () {
-        Sparql_OWL.getDistinctClassLabels(self.params.source, [self.params.currentClass], { otherProperty: self.params.property }, function (err, result) {
+        var options={};
+        if(self.params.property && self.params.property!= "http://www.w3.org/2000/01/rdf-schema#label"){
+            options.otherProperty=self.params.property;
+        }
+        Sparql_OWL.getDistinctClassLabels(self.params.source, [self.params.currentClass], options, function (err, result) {
             if (err) {
                 return MainController.errorAlert(err);
             }
@@ -238,7 +242,7 @@ var KGquery_filter_bot = (function () {
         } else if (individualsFilterType == "label") {
             self.filterItems.push(filterBooleanOperator + "regex(?" + varName + 'Label , "' + individualsFilterValue + '","i")');
         } else if (individualsFilterType == "labelsList" && individualsFilterValue) {
-            if (self.params.property) {
+            if (self.params.property!="http://www.w3.org/2000/01/rdf-schema#label") {
                 var propertyLabel;
                 var dataType;
                 KGquery_graph.visjsData.nodes.forEach(function (node) {

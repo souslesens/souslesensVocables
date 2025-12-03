@@ -195,8 +195,13 @@ var TripleFactory = (function () {
                 } else {
                     alert(result.result);
                 }
+                MappingModeler.socketMessage({
+                    operation:"finished"
+
+                })
                 UI.message(result.result);
                 self.refreshTabStat();
+                
 
                 // JstreeWidget.loadJsTree(jstreeDiv, jstreeData, options, function () {
                 //     $("#MappingModeler_dataSourcesTab").css("margin-top", "0px");

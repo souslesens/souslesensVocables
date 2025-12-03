@@ -232,7 +232,7 @@ export const UsersTable = () => {
                                                             <IconButton aria-label="edit" color="primary" onClick={() => setUserDialogState({ open: true, user: user })} size="small" title="Edit">
                                                                 <Edit />
                                                             </IconButton>
-                                                            <ButtonWithConfirmation label="Delete" msg={() => handleDeleteUser(user, updateModel)} />
+                                                            <ButtonWithConfirmation label="Delete" func={handleDeleteUser} args={[user, updateModel]} />
                                                         </Stack>
                                                     </TableCell>
                                                 </TableRow>

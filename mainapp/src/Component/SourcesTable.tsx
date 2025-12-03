@@ -352,7 +352,7 @@ const SourcesTable = () => {
                                                             <IconButton aria-label="edit" color="primary" onClick={() => handleOpenModal(source, true)} size="small" title={"Edit Repository"}>
                                                                 <Edit />
                                                             </IconButton>
-                                                            <ButtonWithConfirmation label="Delete" msg={() => handleDeleteSource(source)} />
+                                                            <ButtonWithConfirmation label="Delete" func={handleDeleteSource} args={[source]} />
                                                         </Stack>
                                                     </TableCell>
                                                 </TableRow>

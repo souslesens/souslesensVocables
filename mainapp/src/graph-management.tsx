@@ -4,12 +4,13 @@ import { createRoot } from "react-dom/client";
 import { Button, Chip, Link, Paper, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableSortLabel, TextField, Typography } from "@mui/material";
 import CsvDownloader from "react-csv-downloader";
 
-import { humanizeSize, cleanUpText, getApiUrl } from "./Utils";
+import { humanizeSize, cleanUpText, getApiUrl, fetchMe } from "./Utils";
 
 import { getGraphSize, GraphInfo, ServerSource } from "./Source";
 import { UploadGraphModal } from "./Component/UploadGraphModal";
 import { MetadataModal } from "./Component/MetadataModal";
 import { DownloadGraphModal } from "./Component/DownloadGraphModal";
+import { ButtonWithConfirmation } from "./Component/ButtonWithConfirmation";
 
 declare global {
     interface Window {
@@ -22,6 +23,9 @@ declare global {
 type OrderBy = "name" | "graphUri" | "graphSize" | "group";
 
 export default function GraphManagement() {
+    // user
+    const [currentUser, setCurrentUser] = useState<{ login: string; token: string } | null>(null);
+
     // api url
     const [apiUrl, setApiUrl] = useState<string>("/");
 
@@ -53,6 +57,8 @@ export default function GraphManagement() {
     useEffect(() => {
         const fetchAll = async () => {
             const apiUrl = await getApiUrl();
+            const response = await fetchMe();
+            setCurrentUser(response.user);
             setApiUrl(apiUrl);
         };
         void fetchAll();
@@ -70,6 +76,13 @@ export default function GraphManagement() {
         const response = await fetch("/api/v1/sparql/graphs");
         const json = (await response.json()) as GraphInfo[];
         setGraphs(json);
+    };
+
+    const deleteGraph = async (source: ServerSource) => {
+        const formData = new FormData();
+        formData.append("source", source.name);
+        await fetch(`${apiUrl}api/v1/rdf/graph`, { method: "DELETE", headers: { Authorization: `Bearer ${currentUser?.token}` }, body: formData });
+        await fetchSources();
     };
 
     const memoizedSources = useMemo(
@@ -90,7 +103,9 @@ export default function GraphManagement() {
 
     return (
         <>
-            {displayModal === "upload" && currentSource ? <UploadGraphModal apiUrl={apiUrl} indexAfterSuccess={true} open={true} onClose={() => setDisplayModal(null)} sourceName={currentSource.name} /> : null}{" "}
+            {displayModal === "upload" && currentSource ? (
+                <UploadGraphModal apiUrl={apiUrl} indexAfterSuccess={true} open={true} onClose={() => setDisplayModal(null)} sourceName={currentSource.name} />
+            ) : null}{" "}
             {displayModal === "download" && currentSource ? <DownloadGraphModal apiUrl={apiUrl} open={true} onClose={() => setDisplayModal(null)} sourceName={currentSource.name} /> : null}
             {displayModal === "metadata" && currentSource ? (
                 <MetadataModal open={true} onClose={() => setDisplayModal(null)} sourceName={currentSource.name} isReadOnly={currentSource.accessControl !== "readwrite"} />
@@ -183,6 +198,7 @@ export default function GraphManagement() {
                                                     >
                                                         Download
                                                     </Button>
+                                                    <ButtonWithConfirmation label="Delete" func={deleteGraph} args={[source]} />
                                                 </Stack>
                                             </TableCell>
                                         </TableRow>

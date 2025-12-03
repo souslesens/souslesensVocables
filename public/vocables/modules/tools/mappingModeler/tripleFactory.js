@@ -195,6 +195,9 @@ var TripleFactory = (function () {
                 } else {
                     alert(result.result);
                 }
+                MappingModeler.socketMessage({
+                    operation: "finished",
+                });
                 UI.message(result.result);
                 self.refreshTabStat();
 

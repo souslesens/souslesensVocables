@@ -136,8 +136,82 @@ const KGbuilder_triplesWriter = {
         );
     },
 
+    // deleteKGBuilderTriples: function (sparqlServerUrl, graphUri, table, options, callback) {
+    //     const TriplesMaker = require("./triplesMaker");
+    //     var message = {};
+    //     var query = "";
+    //     if (table) {
+    //         query += "with  GRAPH <" + graphUri + "> " + "delete {?s ?p ?o} where {?s ?p ?o. ?s <" + TriplesMaker.mappingFilePredicate + "> '" + table + "'}";
+    //     } else {
+    //         query += "with  <" + graphUri + "> " + "delete {?s ?p ?o} where {?s ?p ?o. ?s <" + TriplesMaker.mappingFilePredicate + "> ?table }";
+    //     }
+    //     var tableTotalRecords;
+    //     if (table) {
+    //         tableTotalRecords =
+    //             "SELECT (COUNT(*) AS ?count) FROM <" + graphUri + "> " +
+    //             "WHERE { ?s ?p ?o. ?s <" + TriplesMaker.mappingFilePredicate + "> '" + table + "' }";
+    //     } else {
+    //         tableTotalRecords =
+    //             "SELECT (COUNT(*) AS ?count) FROM <" + graphUri + "> " +
+    //             "WHERE { ?s ?p ?o. ?s <" + TriplesMaker.mappingFilePredicate + "> ?table }";
+    //     }
+    //     message.tableTotalRecords=tableTotalRecords;
+    //     message.operation="deleteTriples"
+    //     var limit = 10000;
+    //     var resultSize = 1;
+    //     var totalSize = 0;
+
+    //             async.whilst(
+    //         function (callbackTest) {
+    //             callbackTest(null, resultSize > 0);
+    //         },
+
+    //         function (callbackWhilst) {
+    //             var queryOffest = query + " limit " + limit;
+    //             var params = { query: queryOffest };
+    //             if (ConfigManager.config && ConfigManager.config.sparql_server.user) {
+    //                 params.auth = {
+    //                     user: ConfigManager.config.sparql_server.user,
+    //                     pass: ConfigManager.config.sparql_server.password,
+    //                     sendImmediately: false,
+    //                 };
+    //             }
+
+    //             httpProxy.post(sparqlServerUrl, null, params, function (err, result) {
+    //                 if (err) {
+    //                     var x = query;
+    //                     return callbackWhilst(err);
+    //                 }
+
+    //                 //return callback(null, result.results.bindings[0]["callret-0"].value);
+
+    //                 var result = result.results.bindings[0]["callret-0"].value;
+
+    //                 try {
+    //                     var regex = / (\d+)/;
+    //                     resultSize = result.match(regex)[1];
+    //                     if (resultSize) resultSize = parseInt(resultSize);
+    //                 } catch (e) {
+    //                     console.log(e);
+    //                     resultSize = -1;
+    //                 }
+
+    //                 totalSize += resultSize;
+    //                 message.totalSize=totalSize;
+
+    //                 KGbuilder_socket.message(options.clientSocketId, message, false);
+    //                 return callbackWhilst(err);
+    //             });
+    //         },
+    //         function (err) {
+    //             return callback(err, totalSize);
+    //         },
+    //     );
+    // },
+
     deleteKGBuilderTriples: function (sparqlServerUrl, graphUri, table, options, callback) {
         const TriplesMaker = require("./triplesMaker");
+        var message = {};
         var query = "";
         if (table) {
             query += "with  GRAPH <" + graphUri + "> " + "delete {?s ?p ?o} where {?s ?p ?o. ?s <" + TriplesMaker.mappingFilePredicate + "> '" + table + "'}";
@@ -145,64 +219,104 @@ const KGbuilder_triplesWriter = {
             query += "with  <" + graphUri + "> " + "delete {?s ?p ?o} where {?s ?p ?o. ?s <" + TriplesMaker.mappingFilePredicate + "> ?table }";
         }
 
-        var limit = 10000;
-        var resultSize = 1;
-        var totalSize = 0;
+        var tableTotalRecords;
+        if (table) {
+            tableTotalRecords = "SELECT (COUNT (*) AS ?count) FROM <" + graphUri + "> " + "WHERE { ?s ?p ?o. ?s <" + TriplesMaker.mappingFilePredicate + "> '" + table + "' }";
+        } else {
+            tableTotalRecords = "SELECT (COUNT (*) AS ?count) FROM <" + graphUri + "> " + "WHERE { ?s ?p ?o. ?s <" + TriplesMaker.mappingFilePredicate + "> ?table }";
+        }
 
-        async.whilst(
-            function (callbackTest) {
-                callbackTest(null, resultSize > 0);
-            },
+        var paramsCount = { query: tableTotalRecords };
+        if (ConfigManager.config && ConfigManager.config.sparql_server.user) {
+            paramsCount.auth = {
+                user: ConfigManager.config.sparql_server.user,
+                pass: ConfigManager.config.sparql_server.password,
+                sendImmediately: false,
+            };
+        }
 
-            function (callbackWhilst) {
-                var queryOffest = query + " limit " + limit;
-                var params = { query: queryOffest };
-                if (ConfigManager.config && ConfigManager.config.sparql_server.user) {
-                    params.auth = {
-                        user: ConfigManager.config.sparql_server.user,
-                        pass: ConfigManager.config.sparql_server.password,
-                        sendImmediately: false,
-                    };
+        httpProxy.post(sparqlServerUrl, null, paramsCount, function (err, countResult) {
+            if (err) {
+                return callback(err);
+            }
+
+            var totalRecords = 0;
+            try {
+                var binding = countResult.results.bindings[0];
+                if (binding.count) {
+                    totalRecords = parseInt(binding.count.value, 10);
+                } else if (binding["callret-0"]) {
+                    totalRecords = parseInt(binding["callret-0"].value, 10);
                 }
+            } catch (e) {
+                console.log("error parsing countResult", e);
+                totalRecords = 0;
+            }
 
-                modelUtils.redoIfFailureCallback(
-                    httpProxy.post,
-                    10,
-                    5,
-                    null,
-                    function (err, result) {
-                        if (err) {
-                            var x = query;
+            message.tableTotalRecords = totalRecords;
+            message.operation = "deleteTriples";
+
+            var limit = 10000;
+            var resultSize = 1;
+            var totalSize = 0;
+
+            async.whilst(
+                function (callbackTest) {
+                    callbackTest(null, resultSize > 0);
+                },
+
+                function (callbackWhilst) {
+                    var queryOffest = query + " limit " + limit;
+                    var params = { query: queryOffest };
+                    if (ConfigManager.config && ConfigManager.config.sparql_server.user) {
+                        params.auth = {
+                            user: ConfigManager.config.sparql_server.user,
+                            pass: ConfigManager.config.sparql_server.password,
+                            sendImmediately: false,
+                        };
+                    }
+
+                    modelUtils.redoIfFailureCallback(
+                        httpProxy.post,
+                        10,
+                        5,
+                        null,
+                        function (err, result) {
+                            if (err) {
+                                var x = query;
+                                return callbackWhilst(err);
+                            }
+
+                            //return callback(null, result.results.bindings[0]["callret-0"].value);
+
+                            var result = result.results.bindings[0]["callret-0"].value;
+
+                            try {
+                                var regex = / (\d+)/;
+                                resultSize = result.match(regex)[1];
+                                if (resultSize) resultSize = parseInt(resultSize);
+                            } catch (e) {
+                                console.log(e);
+                                resultSize = -1;
+                            }
+                        
+
+                            totalSize += resultSize;
+                            message.totalSize = totalSize;
+
+                            KGbuilder_socket.message(options.clientSocketId, message, false);
                             return callbackWhilst(err);
-                        }
-
-                        //return callback(null, result.results.bindings[0]["callret-0"].value);
-
-                        var result = result.results.bindings[0]["callret-0"].value;
-
-                        try {
-                            var regex = / (\d+)/;
-                            resultSize = result.match(regex)[1];
-                            if (resultSize) resultSize = parseInt(resultSize);
-                        } catch (e) {
-                            console.log(e);
-                            resultSize = -1;
-                        }
-
-                        totalSize += resultSize;
-
-                        KGbuilder_socket.message(options.clientSocketId, "" + totalSize + " triples deleted from table " + table, false);
-                        return callbackWhilst(err);
-                    },
-                    sparqlServerUrl,
-                    null,
-                    params,
-                );
-            },
+                        },
+                        sparqlServerUrl,
+                        null,
+                        params,
+                    );
+              },
             function (err) {
                 return callback(err, totalSize);
             },
-        );
+           )
+        });
     },
 
     deleteTriples: function (triples, graphUri, sparqlServerUrl, callback) {

@@ -180,7 +180,7 @@ var SourceSelectorWidget = (function () {
             treeData.unshift({ id: "Recent", text: "Recent", type: "Folder", parent: "#" });
             for (let i = self.recentSources.length - 1; i >= 0; i--) {
                 var source = self.recentSources[i];
-                treeData.push({ id: source, text: source, type: "Source", parent: "Recent", data: { type: "source", label: source, id: source } });
+                treeData.push({ id: "Recent " + source, text: source, type: "Source", parent: "Recent", data: { type: "source", label: source, id: source } });
             }
         }
         return treeData;

@@ -440,6 +440,8 @@ var KGquery = (function () {
 
         self.querySets.sets.forEach(function (querySet) {
             querySet.elements.forEach(function (queryElement, queryElementIndex) {
+                if (!queryElement.fromNode || !queryElement.toNode) return;
+
                 if (queryElement.fromNode) {
                     var key = queryElement.fromNode.alias || queryElement.fromNode.label;
                     varsMap[key] = queryElement.fromNode;

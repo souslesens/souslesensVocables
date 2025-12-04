@@ -28,7 +28,9 @@ var KGquery_predicates = (function () {
         var subjectUri = queryElement.fromNode.id;
 
         var predicate = subjectVarName + "  rdf:type <" + subjectUri + ">. ";
-        predicatesSubjectsMap[subjectVarName].predicates.push(predicate);
+        if (predicatesSubjectsMap[subjectVarName].predicates.indexOf(predicate) < 0) {
+            predicatesSubjectsMap[subjectVarName].predicates.push(predicate);
+        }
 
         if (queryElement.toNode) {
             var objectVarName = KGquery.getVarName(queryElement.toNode);
@@ -40,7 +42,9 @@ var KGquery_predicates = (function () {
             }
             var objectUri = queryElement.toNode.id;
             var predicate = objectVarName + "  rdf:type <" + objectUri + ">.";
-            predicatesSubjectsMap[objectVarName].predicates.push(predicate);
+            if (predicatesSubjectsMap[objectVarName].predicates.indexOf(predicate) < 0) {
+                predicatesSubjectsMap[objectVarName].predicates.push(predicate);
+            }
         }
         return predicatesSubjectsMap;
     };
@@ -129,6 +133,10 @@ var KGquery_predicates = (function () {
 
             // set rdftype and predicates between classes
             querySet.elements.forEach(function (queryElement, queryElementIndex) {
+                if (!queryElement.fromNode || !queryElement.toNode) {
+                    return;
+                }
+
                 KGquery_predicates.setRdfTypePredicates(queryElement, predicatesSubjectsMap);
 
                 var filterClassLabels = {};

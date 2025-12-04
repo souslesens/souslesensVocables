@@ -732,7 +732,7 @@ var DataSourceManager = (function () {
 
     self.deleteTableMappings = function () {
         var tableNode = MappingModeler.currentTreeNode;
-        var table = tableNode.id;
+        var table = tableNode.data.id;
         if (!confirm("delete all mappings for table" + table)) {
             return;
         } else if (!confirm("are you sure ? this table mappings will be lost")) {

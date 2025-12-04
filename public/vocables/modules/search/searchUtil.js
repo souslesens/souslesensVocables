@@ -478,7 +478,9 @@ indexes.push(source.toLowerCase());
     self.getElasticSearchMatches = function (words, indexes, mode, from, size, options, callback) {
         $("#waitImg").css("display", "block");
         //   UI.message("Searching exact matches ")
-
+        if (!Array.isArray(words)) {
+            words = [words];
+        }
         self.entitiesMap = {};
         var bulQueryStr = "";
         var slices = common.array.slice(words, 100);
@@ -591,7 +593,9 @@ indexes.push(source.toLowerCase());
                                 async.eachSeries(
                                     slices,
                                     function (data, callbackEach) {
-                                        if (data.length == 0) return callbackEach();
+                                        if (data.length == 0) {
+                                            return callbackEach();
+                                        }
 
                                         var replaceIndex = false;
                                         if (index++ == 0 && !options.ids) {

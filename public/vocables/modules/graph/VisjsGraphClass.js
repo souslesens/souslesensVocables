@@ -927,7 +927,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
                 return;
             }
         }
-        if (!self.data && !self.data.nodes) {
+        if (!self.data || !self.data.nodes) {
             return;
         }
         var nodes = self.data.nodes.get();

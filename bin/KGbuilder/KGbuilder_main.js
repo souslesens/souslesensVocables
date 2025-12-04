@@ -19,7 +19,6 @@ const TriplesMaker = require("./triplesMaker.js");
 const TripleMaker = require("./triplesMaker.js");
 const { databaseModel } = require("../../model/databases.js");
 
-
 var KGbuilder_main = {
     /**
      * Generate triples from a CSV file or database

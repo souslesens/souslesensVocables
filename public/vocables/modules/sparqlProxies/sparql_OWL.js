@@ -1612,7 +1612,6 @@ var Sparql_OWL = (function () {
         );
     };
 
-
     self.getNamedIndividuals = function (sourceLabel, ids, options, callback) {
         if (!options) {
             options = {};

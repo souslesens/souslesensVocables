@@ -503,7 +503,7 @@ var TriplesMaker = {
                 if (!value) {
                     return;
                 }
-             //   value = columnId + ":" + value;
+                //   value = columnId + ":" + value;
                 value = columnId + ":" + rowIndex;
                 bNode = tableProcessingParams.blankNodesMap[value];
             } else {

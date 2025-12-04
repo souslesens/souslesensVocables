@@ -66,7 +66,7 @@ var KGquery_predicates = (function () {
             }
 
             if (!predicatesSubjectsMap[startVarName]) {
-                predicatesSubjectsMap[startVarName] = {isOptional: false, predicates: []};
+                predicatesSubjectsMap[startVarName] = { isOptional: false, predicates: [] };
                 // for transitive nodes of path that are note already typed
                 var itemUri = KGquery.varNameToClassMap[startVarName];
                 var predicate = startVarName + "  rdf:type <" + itemUri + ">.";
@@ -133,7 +133,6 @@ var KGquery_predicates = (function () {
 
             // set rdftype and predicates between classes
             querySet.elements.forEach(function (queryElement, queryElementIndex) {
-
                 if (!queryElement.fromNode || !queryElement.toNode) {
                     return;
                 }
@@ -244,7 +243,7 @@ var KGquery_predicates = (function () {
 
         query += " " + groupByStr; // + " limit 10000";
 
-        return {query: query, isUnion: isUnion, isJoin: isJoin, distinctSetTypes: distinctSetTypes};
+        return { query: query, isUnion: isUnion, isJoin: isJoin, distinctSetTypes: distinctSetTypes };
     };
     /**
      *  !!! if a variable is optio,nall all predicates tha contains this variable as subject have to be in nthe optional clause

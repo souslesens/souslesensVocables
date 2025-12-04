@@ -1559,18 +1559,16 @@ var MappingColumnsGraph = (function () {
         var tableNodes = {};
 
         nodes.forEach(function (node) {
-            var hidden=true
+            var hidden = true;
             if (node.data && node.data.dataTable) {
                 if (node.data.dataTable == table) {
                     tableNodes[node.id] = node;
-                    hidden=false
+                    hidden = false;
                 }
-
             }
             newNodesMap[node.id] = { id: node.id, hidden: hidden };
-
         });
-      //show classes linked to column
+        //show classes linked to column
         var edgesFromClassMap = {};
         edges.forEach(function (edge) {
             if (edge.data && (edge.data.type == "rdf:type" || edge.data.type == "owl:Class")) {

@@ -306,7 +306,6 @@ var SparqlQuery_bot = (function () {
         },
 
         listObjectPropertiesFn: function () {
-
             var properties = self.filterObjectProperties(self.params.currentClass, null);
             common.array.sort(properties, "label");
 
@@ -679,7 +678,7 @@ var SparqlQuery_bot = (function () {
         },
 
         chooseConstraintClassFn: function () {
-            self.getResourcesList("Class", "subject", null, { withoutImports: 0}, function (err, result) {
+            self.getResourcesList("Class", "subject", null, { withoutImports: 0 }, function (err, result) {
                 if (err) {
                     MainController.errorAlert(err);
                     return self.myBotEngine.previousStep();
@@ -749,7 +748,7 @@ var SparqlQuery_bot = (function () {
                 }
                 if (self.params.constraintObject == "ObjectProperty") {
                     if (constraintType == " subClassOfRestriction") {
-                        filter = "FILTER (?predicate=<" + self.params.constraintObjectProperty + ">)"
+                        filter = "FILTER (?predicate=<" + self.params.constraintObjectProperty + ">)";
                     }
                 }
                 self.getResourcesList("Restriction", null, filter, { withoutImports: 0 }, function (err, result) {
@@ -761,7 +760,7 @@ var SparqlQuery_bot = (function () {
                     self.params.queryResult = result;
                     return self.functions.showResultFn();
                 });
-            }  else {
+            } else {
                 if (self.params.constraintObject == "Whiteboard nodes") {
                     var nodeIds = Lineage_whiteboard.lineageVisjsGraph.data.nodes.getIds();
                     filter += Sparql_common.setFilter("subject", nodeIds);

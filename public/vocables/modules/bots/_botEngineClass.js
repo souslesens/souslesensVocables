@@ -404,8 +404,7 @@ class BotEngineClass {
             });
     }
     filterList(evt) {
-        if(!this.lastFilterListStr)
-            this.lastFilterListStr=""
+        if (!this.lastFilterListStr) this.lastFilterListStr = "";
         //var str = $(this).val();
         var str = $(evt.currentTarget).val();
         if (!str && this.lastFilterListStr.length < str.length) {

@@ -229,8 +229,8 @@ indexes.push(source.toLowerCase());
 
                             const payload = {
                                 method: "POST",
-                                headers: {"content-type": "application/json"},
-                                body: JSON.stringify({indices: indexes, uris: ids}),
+                                headers: { "content-type": "application/json" },
+                                body: JSON.stringify({ indices: indexes, uris: ids }),
                             };
 
                             fetch(`${Config.apiUrl}/elasticsearch/search`, payload)
@@ -290,7 +290,7 @@ indexes.push(source.toLowerCase());
                 slices,
                 function (ids, callbackEach) {
                     var str = "";
-                    var header = {index: indexes};
+                    var header = { index: indexes };
 
                     ids.forEach(function (id) {
                         var query = {
@@ -323,7 +323,7 @@ indexes.push(source.toLowerCase());
                 },
             );
         } else {
-            var queryObj = {match_all: {}};
+            var queryObj = { match_all: {} };
 
             var query = {
                 query: queryObj,
@@ -333,7 +333,7 @@ indexes.push(source.toLowerCase());
                     excludes: ["attachment.content"],
                 },
                 sort: {
-                    "label.keyword": {order: "asc"},
+                    "label.keyword": { order: "asc" },
                 },
             };
 
@@ -475,12 +475,11 @@ indexes.push(source.toLowerCase());
         return queryObj;
     };
 
-
     self.getElasticSearchMatches = function (words, indexes, mode, from, size, options, callback) {
         $("#waitImg").css("display", "block");
         //   UI.message("Searching exact matches ")
         if (!Array.isArray(words)) {
-            words = [words]
+            words = [words];
         }
         self.entitiesMap = {};
         var bulQueryStr = "";
@@ -500,7 +499,7 @@ indexes.push(source.toLowerCase());
                     var queryObj = self.getWordBulkQuery(word, mode, indexes, options);
                     var header = {};
                     if (indexes) {
-                        header = {index: indexes};
+                        header = { index: indexes };
                     }
 
                     var query = {
@@ -535,7 +534,7 @@ indexes.push(source.toLowerCase());
         if (data.length == 0) {
             return callback();
         }
-        var options = {replaceIndex: replaceIndex, owltype: "Class"};
+        var options = { replaceIndex: replaceIndex, owltype: "Class" };
         var payload = {
             indexName: indexName,
             data: data,
@@ -902,7 +901,7 @@ indexes.push(source.toLowerCase());
                 },
             ],
             function (err) {
-                return callback(err, {data: allData, labelsMap: allLabelsMap});
+                return callback(err, { data: allData, labelsMap: allLabelsMap });
             },
         );
     };

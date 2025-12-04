@@ -44,6 +44,7 @@ type ApiServerResponse = ApiServerResponseError | ApiServerResponseOk;
 export function DownloadGraphModal({ apiUrl, onClose, open, sourceName }: DownloadGraphModalProps) {
     const [currentUser, setCurrentUser] = useState<{ login: string; token: string } | null>(null);
     const [transferPercent, setTransferPercent] = useState(0);
+    const [transferState, setTransferState] = useState<"init" | "downloading" | "processing" | "done">("init");
     const [errorMessage, setErrorMessage] = useState("");
     const cancelCurrentOperation = useRef(false);
     const [currentDownloadFormat, setCurrentDownloadFormat] = useState("nt");
@@ -60,6 +61,7 @@ export function DownloadGraphModal({ apiUrl, onClose, open, sourceName }: Downlo
     const handleCancelOperation = () => {
         cancelCurrentOperation.current = true;
         setTransferPercent(0);
+        setTransferState("init");
         setErrorMessage("");
         onClose();
     };
@@ -86,6 +88,7 @@ export function DownloadGraphModal({ apiUrl, onClose, open, sourceName }: Downlo
         let identifier = "";
         const blobParts: BlobPart[] = [];
         setTransferPercent(1);
+        setTransferState("processing");
         while (offset !== null) {
             if (cancelCurrentOperation.current) {
                 cancelCurrentOperation.current = false;
@@ -107,6 +110,7 @@ export function DownloadGraphModal({ apiUrl, onClose, open, sourceName }: Downlo
             identifier = message.identifier;
         }
         setTransferPercent(100);
+        setTransferState("done");
         return { blobParts: blobParts, message: "ok" };
     };
 
@@ -151,6 +155,7 @@ export function DownloadGraphModal({ apiUrl, onClose, open, sourceName }: Downlo
             await writeLog(currentUser.login, "GraphManagement", "download", sourceName);
 
             setTransferPercent(0);
+            setTransferState("init");
             cancelCurrentOperation.current = false;
 
             let blobParts: BlobPart[] | null;
@@ -240,8 +245,10 @@ export function DownloadGraphModal({ apiUrl, onClose, open, sourceName }: Downlo
                     </Stack>
                     {transferPercent > 0 && !errorMessage ? (
                         <Stack alignItems="center" direction="row" spacing={2} useFlexGap>
-                            <LinearProgress id={`progress-${sourceName}`} sx={{ flex: 1 }} value={transferPercent} variant="determinate" />
-                            <Typography variant="body2">{transferPercent === 100 ? (!errorMessage ? "Completed" : "") : `${transferPercent}%`}</Typography>
+                            <LinearProgress id={`progress-${sourceName}`} sx={{ flex: 1 }} value={transferPercent} variant={transferState === "processing" ? "indeterminate" : "determinate"} />
+                            <Typography variant="body2">
+                                {transferState === "processing" ? "Processing" : transferPercent === 100 ? (!errorMessage ? "Completed" : "") : `${transferPercent}%`}
+                            </Typography>
                         </Stack>
                     ) : null}
                 </Stack>
@@ -249,7 +256,7 @@ export function DownloadGraphModal({ apiUrl, onClose, open, sourceName }: Downlo
             <DialogActions>
                 <Stack direction="row" gap={1}>
                     <Alert sx={{ padding: "0px 16px" }} severity="info">
-                        {`Download can take a long time and remain blocked at 1% for several minutes`}
+                        {`Download can take a long time and remain blocked at processing step for several minutes`}
                     </Alert>
                 </Stack>
                 <Stack direction="row" gap={1}>

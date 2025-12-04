@@ -68,16 +68,27 @@ var KGquery_filter_bot = (function () {
     self.functions = {}; //SparqlQuery_bot.functions;
 
     self.functions.listIndividualsFn = function () {
-        Sparql_OWL.getDistinctClassLabels(self.params.source, [self.params.currentClass], {}, function (err, result) {
+        var options = {};
+        if (self.params.property && self.params.property != "http://www.w3.org/2000/01/rdf-schema#label") {
+            options.otherProperty = self.params.property;
+        }
+        Sparql_OWL.getDistinctClassLabels(self.params.source, [self.params.currentClass], options, function (err, result) {
             if (err) {
                 return MainController.errorAlert(err);
             }
             var individuals = [];
             result.forEach(function (item) {
-                individuals.push({
-                    id: item.id.value,
-                    label: item.label.value,
-                });
+                if (!item.id) {
+                    individuals.push({
+                        id: item.label.value,
+                        label: item.label.value,
+                    });
+                } else {
+                    individuals.push({
+                        id: item.id.value,
+                        label: item.label.value,
+                    });
+                }
             });
 
             individuals.sort(function (a, b) {
@@ -231,7 +242,24 @@ var KGquery_filter_bot = (function () {
         } else if (individualsFilterType == "label") {
             self.filterItems.push(filterBooleanOperator + "regex(?" + varName + 'Label , "' + individualsFilterValue + '","i")');
         } else if (individualsFilterType == "labelsList" && individualsFilterValue) {
-            self.filterItems.push(filterBooleanOperator + " ?" + varName + " =<" + individualsFilterValue + ">");
+            if (self.params.property != "http://www.w3.org/2000/01/rdf-schema#label") {
+                var propertyLabel;
+                var dataType;
+                KGquery_graph.visjsData.nodes.forEach(function (node) {
+                    if (node.id == self.data.id) {
+                        node.data.nonObjectProperties.forEach(function (item) {
+                            if (item.id == self.params.property) {
+                                propertyLabel = item.label;
+                                dataType = item.datatype;
+                            }
+                        });
+                    }
+                });
+                // individualsFilterValue=self.params.property;
+                self.filterItems.push(filterBooleanOperator + " ?" + varName + "_" + propertyLabel + " ='" + individualsFilterValue + "'" + "^^<" + dataType + ">");
+            } else {
+                self.filterItems.push(filterBooleanOperator + " ?" + varName + " =<" + individualsFilterValue + ">");
+            }
         } else {
             self.myBotEngine.abort("filter type not implemented");
         }

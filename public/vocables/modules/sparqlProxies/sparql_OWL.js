@@ -2751,14 +2751,19 @@ var Sparql_OWL = (function () {
         var fromStr = Sparql_common.getFromStr(sourceLabel);
         var filterStr = Sparql_common.setFilter("type", classIds);
         var labelProperty = "rdfs:label";
+        var selectStr;
         if (options.otherProperty) {
             labelProperty = "<" + options.otherProperty + ">";
+            selectStr = "?label";
+        } else {
+            selectStr = "?label ?id";
         }
         var query =
             "PREFIX owl: <http://www.w3.org/2002/07/owl#> " +
             "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> " +
-            "SELECT distinct ?label ?id" +
+            "SELECT distinct " +
+            selectStr +
             fromStr +
             "" +
             " WHERE {{ ?id rdf:type ?type. " +
@@ -2766,6 +2771,7 @@ var Sparql_OWL = (function () {
             "?id " +
             labelProperty +
             " ?label  }} limit 10000";
+
         var url = Config.sparql_server.url + "?format=json&query=";
         Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, _result) {
             if (err) {

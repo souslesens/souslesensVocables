@@ -1,4 +1,4 @@
-var KGquery_outside = (function () {
+var KGquery_proxy = (function () {
     var self = {};
 
     self.init = function (source, callback) {
@@ -318,5 +318,5 @@ var KGquery_outside = (function () {
     return self;
 })();
 
-export default KGquery_outside;
-window.KGquery_outside = KGquery_outside;
+export default KGquery_proxy;
+window.KGquery_proxy = KGquery_proxy;

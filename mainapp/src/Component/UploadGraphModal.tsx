@@ -27,6 +27,7 @@ interface UploadGraphModalProps {
 export function UploadGraphModal({ apiUrl, onClose, open, sourceName, indexAfterSuccess = false }: UploadGraphModalProps) {
     const [currentUser, setCurrentUser] = useState<{ login: string; token: string } | null>(null);
     const [transferPercent, setTransferPercent] = useState(0);
+    const [transferState, setTransferState] = useState<"init" | "uploading" | "processing" | "done">("init");
     const [uploadfile, setUploadFile] = useState<File[]>([]);
     const [replaceGraph, setReplaceGraph] = useState<boolean>(true);
     const [errorMessage, setErrorMessage] = useState("");
@@ -113,6 +114,7 @@ export function UploadGraphModal({ apiUrl, onClose, open, sourceName, indexAfter
         try {
             // init progress bar
             setTransferPercent(0);
+            setTransferState("uploading");
             cancelCurrentOperation.current = false;
 
             // get file
@@ -129,7 +131,7 @@ export function UploadGraphModal({ apiUrl, onClose, open, sourceName, indexAfter
             for (let start = 0; start < fileSize; start += chunkSize) {
                 // set percent for progress bar
                 const percent = (start * 100) / fileSize;
-                setTransferPercent(Math.min(95, Math.round(percent)));
+                setTransferPercent(Math.round(percent));
 
                 // slice file
                 const end = start + chunkSize;
@@ -137,6 +139,9 @@ export function UploadGraphModal({ apiUrl, onClose, open, sourceName, indexAfter
 
                 // last ?
                 const lastChunk = start + chunkSize >= fileSize ? true : false;
+                if (lastChunk) {
+                    setTransferState("processing");
+                }
 
                 // build formData
                 const formData = new FormData();
@@ -154,6 +159,7 @@ export function UploadGraphModal({ apiUrl, onClose, open, sourceName, indexAfter
                 if (cancelCurrentOperation.current) {
                     formData.set("clean", String(true));
                     await fetch(`${apiUrl}api/v1/rdf/graph`, { method: "post", headers: { Authorization: `Bearer ${userToken}` }, body: formData });
+                    setTransferState("init");
                     return;
                 }
 
@@ -163,6 +169,7 @@ export function UploadGraphModal({ apiUrl, onClose, open, sourceName, indexAfter
                     const message = (await res.json()) as { error?: string; detail?: string };
                     console.error(message);
                     setErrorMessage(message.error ?? message.detail ?? "Internal server error");
+                    setTransferState("init");
                     return;
                 } else {
                     const json = (await res.json()) as { identifier: string };
@@ -172,9 +179,11 @@ export function UploadGraphModal({ apiUrl, onClose, open, sourceName, indexAfter
                 }
             }
             setTransferPercent(100);
+            setTransferState("done");
         } catch (error) {
             console.error(error);
             setErrorMessage((error as Error).message);
+            setTransferState("init");
         }
     };
 
@@ -225,8 +234,15 @@ export function UploadGraphModal({ apiUrl, onClose, open, sourceName, indexAfter
                     </Stack>
                     {transferPercent > 0 && !errorMessage ? (
                         <Stack alignItems="center" direction="row" spacing={2} useFlexGap>
-                            <LinearProgress id={`progress-${sourceName}`} sx={{ flex: 1 }} value={transferPercent} variant="determinate" />
-                            <Typography variant="body2">{transferPercent === 100 ? (!errorMessage ? "Completed" : "") : `${transferPercent}%`}</Typography>
+                            <LinearProgress
+                                id={`progress-${sourceName}`}
+                                sx={{ flex: 1 }}
+                                value={transferState === "processing" ? undefined : transferPercent}
+                                variant={transferState === "processing" ? "indeterminate" : "determinate"}
+                            />
+                            <Typography variant="body2">
+                                {transferState === "processing" ? "Processing" : transferPercent === 100 ? (!errorMessage ? "Completed" : "") : `${transferPercent}%`}
+                            </Typography>
                         </Stack>
                     ) : null}
                 </Stack>
@@ -234,7 +250,7 @@ export function UploadGraphModal({ apiUrl, onClose, open, sourceName, indexAfter
             <DialogActions>
                 <Stack direction="row" gap={1}>
                     <Alert sx={{ padding: "0px 16px" }} severity="info">
-                        {`Upload can take a long time and remain blocked at 95% for several minutes`}
+                        {`Upload can take a long time and remain blocked at processing step for several minutes`}
                     </Alert>
                 </Stack>
                 <Stack direction="row" gap={1}>

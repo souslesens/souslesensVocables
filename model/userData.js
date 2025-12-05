@@ -103,7 +103,14 @@ class UserDataModel {
         return user;
     };
 
-    all = async (user) => {
+    /**
+     * Get all usersData (without data_content)
+     *
+     * @param {User} user – the user received from the request content
+     * @param {Record<string, string>} - filters object
+     * @returns {UserDataObject[]} – list of usersData
+     */
+    all = async (user, filters = {}) => {
         const connection = getKnexConnection(this._mainConfig.database);
         const currentUser = this._getUser(user);
         const fields = [
@@ -126,8 +133,14 @@ class UserDataModel {
         let currentUserData = await connection
             .select(...fields)
             .from("user_data")
-            .where("owned_by", parseInt(currentUser.id))
-            .orWhere("is_shared", true);
+            .where((builder) => {
+                Object.entries(filters).forEach(([key, value]) => {
+                    builder.where(key, "like", `%${value}%`);
+                });
+            })
+            .andWhere((builder) => {
+                builder.where("owned_by", parseInt(currentUser.id)).orWhere("is_shared", true);
+            });
         currentUserData = currentUserData
             .map((data) => {
                 const result = this._convertToJSON(data);

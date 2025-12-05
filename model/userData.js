@@ -103,16 +103,47 @@ class UserDataModel {
         return user;
     };
 
-    all = async (user) => {
+    /**
+     * Get all usersData (without data_content)
+     *
+     * @param {User} user – the user received from the request content
+     * @param {Record<string, string>} - filters object
+     * @returns {UserDataObject[]} – list of usersData
+     */
+    all = async (user, filters = {}) => {
         const connection = getKnexConnection(this._mainConfig.database);
         const currentUser = this._getUser(user);
-        let currentUserData = await connection.select("*").from("user_data").where("owned_by", parseInt(currentUser.id)).orWhere("is_shared", true);
+        const fields = [
+            "id",
+            "data_type",
+            "data_label",
+            "data_comment",
+            "data_group",
+            "is_shared",
+            "shared_profiles",
+            "shared_users",
+            "created_at",
+            "owned_by",
+            "data_tool",
+            "data_source",
+            "modification_date",
+            "readwrite",
+        ];
+
+        let currentUserData = await connection
+            .select(...fields)
+            .from("user_data")
+            .where((builder) => {
+                Object.entries(filters).forEach(([key, value]) => {
+                    builder.where(key, "like", `%${value}%`);
+                });
+            })
+            .andWhere((builder) => {
+                builder.where("owned_by", parseInt(currentUser.id)).orWhere("is_shared", true);
+            });
         currentUserData = currentUserData
             .map((data) => {
                 const result = this._convertToJSON(data);
-                // all route don't expose content
-                delete result.data_content;
-                delete result.data_path;
                 return result;
             })
             .filter((data) => {

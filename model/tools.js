@@ -28,6 +28,7 @@ const NATIVE_TOOLS = [
     { name: "admin", label: "Admin", controller: "Admin", useSource: false, multiSources: false, toTools: {}, publicTool: false },
     { name: "ConfigEditor", controller: "ConfigEditor", useSource: false, multiSources: false, toTools: {}, resetURLParamsDiv: "mainDialogDiv", publicTool: false },
     { name: "GraphManagement", controller: "GraphManagement", useSource: false, multiSources: false, toTools: {}, resetURLParamsDiv: "mainDialogDiv", publicTool: false },
+    { name: "UsersDataManagement", controller: "UsersDataManagement", useSource: false, multiSources: false, toTools: {}, resetURLParamsDiv: "mainDialogDiv", publicTool: false },
     // { name: "Standardizer", controller: "Standardizer", useSource: true, multiSources: false, toTools: {}, publicTool: false },
     //{ name: "TSF_Dictionary", controller: "Lineage_dictionary", useSource: false, multiSources: false, toTools: {}, publicTool: false },
     { name: "UserSettings", controller: "UserSettings", useSource: false, multiSources: false, toTools: {}, publicTool: true },

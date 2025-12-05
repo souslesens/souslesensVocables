@@ -6,32 +6,7 @@ module.exports = () => {
     GET = async (req, res, _next) => {
         try {
             const userInfo = await userManager.getUser(req.user);
-            let userDatas = await userDataModel.all(userInfo.user);
-            if (req.query.data_label) {
-                userDatas = Object.values(userDatas).filter((data) => {
-                    return data.data_label?.includes(req.query.data_label);
-                });
-            }
-            if (req.query.data_group) {
-                userDatas = Object.values(userDatas).filter((data) => {
-                    return data.data_group?.includes(req.query.data_group);
-                });
-            }
-            if (req.query.data_type) {
-                userDatas = Object.values(userDatas).filter((data) => {
-                    return data.data_type?.includes(req.query.data_type);
-                });
-            }
-            if (req.query.data_tool) {
-                userDatas = Object.values(userDatas).filter((data) => {
-                    return data.data_tool?.includes(req.query.data_tool);
-                });
-            }
-            if (req.query.data_source) {
-                userDatas = Object.values(userDatas).filter((data) => {
-                    return data.data_source?.includes(req.query.data_source);
-                });
-            }
+            let userDatas = await userDataModel.all(userInfo.user, req.query);
             res.status(200).json(userDatas);
         } catch (error) {
             console.error(error);

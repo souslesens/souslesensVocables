@@ -287,7 +287,7 @@ var KGquery = (function () {
         if (self.currentQuerySet.elements.length == 0) {
             self.currentQueryElement = self.addQueryElementToQuerySet(self.currentQuerySet);
         }
-        if(self.currentQuerySet&& !self.currentQueryElement){
+        if (self.currentQuerySet && !self.currentQueryElement) {
             self.currentQueryElement = self.addQueryElementToQuerySet(self.currentQuerySet);
         }
         if (self.currentQueryElement.toNode) {
@@ -376,10 +376,10 @@ var KGquery = (function () {
          * - It calls `self.addNode` to ensure the node is created/registered, then fills the
          *   query element with both fromNode and toNode and builds the corresponding path.
          */
-        if(self.currentQuerySet.elements && self.currentQuerySet.elements.length==1){
-            if(self.currentQuerySet.elements[0].toNode=="" &&self.currentQuerySet.elements[0].from !=""){
-                return self.addNode(fromNode,null,function(){
-                     var queryElement = self.addQueryElementToQuerySet(self.currentQuerySet);
+        if (self.currentQuerySet.elements && self.currentQuerySet.elements.length == 1) {
+            if (self.currentQuerySet.elements[0].toNode == "" && self.currentQuerySet.elements[0].from != "") {
+                return self.addNode(fromNode, null, function () {
+                    var queryElement = self.addQueryElementToQuerySet(self.currentQuerySet);
                     self.addNodeToQueryElement(queryElement, fromNode, "fromNode");
                     self.addNodeToQueryElement(queryElement, toNode, "toNode");
                     var subPath = [edge.from, edge.to, edge.data.propertyId];
@@ -389,7 +389,6 @@ var KGquery = (function () {
                     queryElement.paths = pathWithVarNames;
                 });
             }
-            
         }
         var queryElement = self.addQueryElementToQuerySet(self.currentQuerySet);
         self.addNodeToQueryElement(queryElement, fromNode, "fromNode");

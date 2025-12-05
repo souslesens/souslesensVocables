@@ -287,6 +287,9 @@ var KGquery = (function () {
         if (self.currentQuerySet.elements.length == 0) {
             self.currentQueryElement = self.addQueryElementToQuerySet(self.currentQuerySet);
         }
+        if(self.currentQuerySet&& !self.currentQueryElement){
+            self.currentQueryElement = self.addQueryElementToQuerySet(self.currentQuerySet);
+        }
         if (self.currentQueryElement.toNode) {
             self.currentQueryElement = self.addQueryElementToQuerySet(self.currentQuerySet);
         }
@@ -299,7 +302,9 @@ var KGquery = (function () {
                 if (err) {
                     return MainController.errorAlert(err);
                 }
-
+                // if(self.currentQuerySet&& self.currentQueryElement){
+                //     self.currentQueryElement = self.addQueryElementToQuerySet(self.currentQuerySet);
+                // }
                 self.addNodeToQueryElement(self.currentQueryElement, node, "fromNode");
                 var nearestNode = self.classeMap[nearestNodeId];
                 self.addNodeToQueryElement(self.currentQueryElement, nearestNode, "toNode");
@@ -359,7 +364,33 @@ var KGquery = (function () {
         if (!self.currentQuerySet) {
             self.currentQuerySet = self.addQuerySet();
         }
+        /**
+         * Handles the case where we already have a single query element in the current set
+         * that contains a 'from' node but no 'to' node yet.
+         *
+         * When a user clicks a node and then draws/creates a relation, this branch is used
+         * to add the missing 'toNode' to the existing query element instead of creating a new one.
+         *
+         * @remarks
+         * - Called in the flow when adding an edge after a node click.
+         * - It calls `self.addNode` to ensure the node is created/registered, then fills the
+         *   query element with both fromNode and toNode and builds the corresponding path.
+         */
+        if(self.currentQuerySet.elements && self.currentQuerySet.elements.length==1){
+            if(self.currentQuerySet.elements[0].toNode=="" &&self.currentQuerySet.elements[0].from !=""){
+                return self.addNode(fromNode,null,function(){
+                     var queryElement = self.addQueryElementToQuerySet(self.currentQuerySet);
+                    self.addNodeToQueryElement(queryElement, fromNode, "fromNode");
+                    self.addNodeToQueryElement(queryElement, toNode, "toNode");
+                    var subPath = [edge.from, edge.to, edge.data.propertyId];
 
+                    var path = [subPath];
+                    var pathWithVarNames = KGquery_paths.substituteClassIdToVarNameInPath(queryElement, path);
+                    queryElement.paths = pathWithVarNames;
+                });
+            }
+            
+        }
         var queryElement = self.addQueryElementToQuerySet(self.currentQuerySet);
         self.addNodeToQueryElement(queryElement, fromNode, "fromNode");
         self.addNodeToQueryElement(queryElement, toNode, "toNode");
@@ -368,7 +399,7 @@ var KGquery = (function () {
         var path = [subPath];
         var pathWithVarNames = KGquery_paths.substituteClassIdToVarNameInPath(queryElement, path);
         queryElement.paths = pathWithVarNames;
-        self.addQueryElementToQuerySet(self.currentQuerySet);
+        // self.addQueryElementToQuerySet(self.currentQuerySet);
     };
 
     /**

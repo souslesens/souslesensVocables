@@ -106,14 +106,33 @@ class UserDataModel {
     all = async (user) => {
         const connection = getKnexConnection(this._mainConfig.database);
         const currentUser = this._getUser(user);
-        let currentUserData = await connection.select("*").from("user_data").where("owned_by", parseInt(currentUser.id)).orWhere("is_shared", true);
+        const fields = [
+            "id",
+            "data_type",
+            "data_label",
+            "data_comment",
+            "data_group",
+            "is_shared",
+            "shared_profiles",
+            "shared_users",
+            "created_at",
+            "owned_by",
+            "data_tool",
+            "data_source",
+            "modification_date",
+            "readwrite",
+        ];
+
+        let currentUserData = await connection
+            .select(...fields)
+            .from("user_data")
+            .where("owned_by", parseInt(currentUser.id))
+            .orWhere("is_shared", true);
         currentUserData = currentUserData
             .map((data) => {
                 const result = this._convertToJSON(data);
-                // all route don't expose content
-                delete result.data_content;
-                delete result.data_path;
-                return result;
+                const { data_content, ...restOfProperties } = result;
+                return restOfProperties;
             })
             .filter((data) => {
                 const isOwner = data.owned_by === parseInt(currentUser.id);

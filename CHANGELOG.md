@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.20.0](https://github.com/souslesens/souslesensVocables/compare/2.19.0...2.20.0) (2025-12-05)
+
+
+### Features
+
+* **api:** DELETE /rdf/graph route ([444a657](https://github.com/souslesens/souslesensVocables/commit/444a657335a1ba746c11ba41529698e92b455ee1))
+* **appjs/UploadGraphModal:** add a processing state ([db98519](https://github.com/souslesens/souslesensVocables/commit/db985197234345731288408bb21008a7e727c021))
+* **graph-management:** add a Delete Graph button ([da9f739](https://github.com/souslesens/souslesensVocables/commit/da9f7394c3f59a366932c703ce690e70b7d01c24))
+* **mainapp/DownloadGraphModal:** add a processing step ([8530e79](https://github.com/souslesens/souslesensVocables/commit/8530e79f925ecb785aafcd35ca95da0ea8a140aa))
+
 ## [2.19.0](https://github.com/souslesens/souslesensVocables/compare/2.18.0...2.19.0) (2025-11-14)
 
 

@@ -88,10 +88,7 @@ export default function GraphManagement() {
     };
 
     const deleteGraph = async (source: ServerSource) => {
-        const formData = new FormData();
-        formData.append("source", source.name);
-        const response = await fetch(`${apiUrl}api/v1/rdf/graph`, { method: "DELETE", headers: { Authorization: `Bearer ${currentUser?.token}` }, body: formData });
-
+        const response = await fetch(`${apiUrl}api/v1/rdf/graph?source=${source.name}`, { method: "DELETE", headers: { Authorization: `Bearer ${currentUser?.token}` } });
         if (!response.ok) {
             const message = `Error when deleting RDF graph: ${response.statusText}`;
             setSnackInfo({ isOpen: true, message: message, severity: "error" });

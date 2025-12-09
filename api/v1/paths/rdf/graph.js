@@ -106,8 +106,8 @@ module.exports = function () {
         }
     }
 
-    async function DELETE(req, res, next) {
-        const sourceName = req.body.source;
+    async function DELETE(req, res, _next) {
+        const sourceName = req.query.source;
 
         const userInfo = await userManager.getUser(req.user);
         const userSources = await sourceModel.getUserSources(userInfo.user);
@@ -233,9 +233,9 @@ module.exports = function () {
             {
                 name: "source",
                 description: "Source name of the graph to delete",
-                in: "formData",
-                required: true,
+                in: "query",
                 type: "string",
+                required: true,
             },
         ],
         responses: {

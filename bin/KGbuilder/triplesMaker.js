@@ -251,7 +251,8 @@ var TriplesMaker = {
                                 console.log(err);
                                 console.log("offest " + offset);
                                 offset -= limitSize;
-                                KGbuilder_socket.message(options.clientSocketId, "stopped at offset : " + offset + " error in writing triples " + err, true);
+                                var errorWritingTriples= "stopped at offset : " + offset + " error in writing triples " 
+                                KGbuilder_socket.message(options.clientSocketId,errorWritingTriples, true);
                                 return callback(err);
                             }
                         }
@@ -259,15 +260,17 @@ var TriplesMaker = {
                 } catch (err) {
                     if (err) {
                         offset -= limitSize;
-                        KGbuilder_socket.message(options.clientSocketId, "stopped at offset : " + offset + " error in building triples " + err, true);
-                        return callback(err);
+                        var errorMessageBuilder = "stopped at offset : " + offset + " error in building triples " 
+                        KGbuilder_socket.message(errorMessageBuilder, true);
+                        return callback(errorMessageBuilder);
                     }
                 }
               }
             } catch (error) {
-                console.error("ERROR : offset " + offset + ",error in database reading/processing " + error);
-                KGbuilder_socket.message(options.clientSocketId, "ERROR : offset " + offset + ",error in database reading/processing " + error, true);
-                return callback(error);
+                var errorMessageReading = "ERROR : offset " + offset + ",error in database reading/processing "
+                console.error(errorMessageReading);
+                KGbuilder_socket.message(options.clientSocketId, errorMessageReading, true);
+                return callback(errorMessageReading);
             }
             message.operation = "finished";
             message.totalTriples = totalTriplesCount;

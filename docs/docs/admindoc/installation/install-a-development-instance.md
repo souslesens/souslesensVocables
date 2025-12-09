@@ -114,7 +114,7 @@ The following command will build and watch the react app and run and watch the n
 ```bash
 npm run build
 
-npm run start
+npm run mainapp:build
 
 ```
 

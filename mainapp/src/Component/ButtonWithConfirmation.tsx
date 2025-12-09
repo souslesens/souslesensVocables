@@ -11,13 +11,18 @@ type ButtonWithConfirmationProps = {
 };
 
 const ButtonWithConfirmation = ({ func, args, label, disabled }: ButtonWithConfirmationProps) => {
-    const [btnState, setBtnState] = useState<"initial" | "confirm" | "loading" | "done">("initial");
+    const [btnState, setBtnState] = useState<"initial" | "confirm" | "loading" | "done" | "error">("initial");
 
     const handleConfirm = async () => {
         setBtnState("loading");
-        /* eslint-disable @typescript-eslint/no-unsafe-argument */
-        await func(...args);
-        setBtnState("done");
+        try {
+            /* eslint-disable @typescript-eslint/no-unsafe-argument */
+            await func(...args);
+            setBtnState("done");
+        } catch (error) {
+            console.error(error);
+            setBtnState("error");
+        }
     };
 
     if (btnState === "initial") {
@@ -43,7 +48,7 @@ const ButtonWithConfirmation = ({ func, args, label, disabled }: ButtonWithConfi
             </Button>
         );
     }
-    if (btnState === "done") {
+    if (btnState === "done" || btnState === "error") {
         return (
             <Button
                 variant="outlined"
@@ -52,7 +57,7 @@ const ButtonWithConfirmation = ({ func, args, label, disabled }: ButtonWithConfi
                     setBtnState("initial");
                 }}
             >
-                Done
+                {btnState === "done" ? "Done" : "Error"}
             </Button>
         );
     }

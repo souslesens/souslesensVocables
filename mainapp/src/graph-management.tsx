@@ -94,8 +94,13 @@ export default function GraphManagement() {
             setSnackInfo({ isOpen: true, message: message, severity: "error" });
             throw Error(message);
         } else {
-            await fetchSources();
+            await fetchGraphsInfo();
         }
+    };
+
+    const handleCloseModal = async () => {
+        setDisplayModal(null);
+        await fetchGraphsInfo();
     };
 
     const memoizedSources = useMemo(
@@ -121,10 +126,8 @@ export default function GraphManagement() {
                     {snackInfo.message}
                 </Alert>
             </Snackbar>
-            {displayModal === "upload" && currentSource ? (
-                <UploadGraphModal apiUrl={apiUrl} indexAfterSuccess={true} open={true} onClose={() => setDisplayModal(null)} sourceName={currentSource.name} />
-            ) : null}{" "}
-            {displayModal === "download" && currentSource ? <DownloadGraphModal apiUrl={apiUrl} open={true} onClose={() => setDisplayModal(null)} sourceName={currentSource.name} /> : null}
+            {displayModal === "upload" && currentSource ? <UploadGraphModal apiUrl={apiUrl} indexAfterSuccess={true} open={true} onClose={handleCloseModal} sourceName={currentSource.name} /> : null}{" "}
+            {displayModal === "download" && currentSource ? <DownloadGraphModal apiUrl={apiUrl} open={true} onClose={handleCloseModal} sourceName={currentSource.name} /> : null}
             {displayModal === "metadata" && currentSource ? (
                 <MetadataModal open={true} onClose={() => setDisplayModal(null)} sourceName={currentSource.name} isReadOnly={currentSource.accessControl !== "readwrite"} />
             ) : null}

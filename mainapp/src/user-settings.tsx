@@ -21,7 +21,7 @@ enum Sections {
 
 export type Severity = "error" | "info" | "success" | "warning";
 
-type SnackInfo = {
+export type SnackInfo = {
     isOpen: boolean;
     message: string;
     severity: Severity;
@@ -41,7 +41,7 @@ const Dispatcher = ({ handleSnackbar, selectedTab }: DispatcherProps) => {
     }
 };
 
-const initialSnackInfo: SnackInfo = { isOpen: false, message: "", severity: "success" };
+export const initialSnackInfo: SnackInfo = { isOpen: false, message: "", severity: "success" };
 
 export default function UserSettings() {
     const [selectedTab, setSelectedTab] = useState<Sections>(Sections.Sources);

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 
-import { Button, Chip, Link, Paper, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableSortLabel, TextField, Typography } from "@mui/material";
+import { Button, Chip, Link, Paper, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableSortLabel, TextField, Typography, Alert, Snackbar } from "@mui/material";
 import CsvDownloader from "react-csv-downloader";
 
 import { humanizeSize, cleanUpText, getApiUrl, fetchMe } from "./Utils";
@@ -11,6 +11,7 @@ import { UploadGraphModal } from "./Component/UploadGraphModal";
 import { MetadataModal } from "./Component/MetadataModal";
 import { DownloadGraphModal } from "./Component/DownloadGraphModal";
 import { ButtonWithConfirmation } from "./Component/ButtonWithConfirmation";
+import { SnackInfo, initialSnackInfo } from "./user-settings";
 
 declare global {
     interface Window {
@@ -54,6 +55,14 @@ export default function GraphManagement() {
     // search
     const [filteringChars, setFilteringChars] = useState("");
 
+    // error message
+    const [snackInfo, setSnackInfo] = useState<SnackInfo>(initialSnackInfo);
+    const onSnackbarClose = (_event: React.SyntheticEvent | Event, reason?: string) => {
+        if (reason !== "clickaway") {
+            setSnackInfo({ ...snackInfo, isOpen: false });
+        }
+    };
+
     useEffect(() => {
         const fetchAll = async () => {
             const apiUrl = await getApiUrl();
@@ -81,8 +90,15 @@ export default function GraphManagement() {
     const deleteGraph = async (source: ServerSource) => {
         const formData = new FormData();
         formData.append("source", source.name);
-        await fetch(`${apiUrl}api/v1/rdf/graph`, { method: "DELETE", headers: { Authorization: `Bearer ${currentUser?.token}` }, body: formData });
-        await fetchSources();
+        const response = await fetch(`${apiUrl}api/v1/rdf/graph`, { method: "DELETE", headers: { Authorization: `Bearer ${currentUser?.token}` }, body: formData });
+
+        if (!response.ok) {
+            const message = `Error when deleting RDF graph: ${response.statusText}`;
+            setSnackInfo({ isOpen: true, message: message, severity: "error" });
+            throw Error(message);
+        } else {
+            await fetchSources();
+        }
     };
 
     const memoizedSources = useMemo(
@@ -103,6 +119,11 @@ export default function GraphManagement() {
 
     return (
         <>
+            <Snackbar autoHideDuration={6000} open={snackInfo.isOpen} onClose={onSnackbarClose}>
+                <Alert onClose={onSnackbarClose} severity={snackInfo.severity} sx={{ width: "100%" }}>
+                    {snackInfo.message}
+                </Alert>
+            </Snackbar>
             {displayModal === "upload" && currentSource ? (
                 <UploadGraphModal apiUrl={apiUrl} indexAfterSuccess={true} open={true} onClose={() => setDisplayModal(null)} sourceName={currentSource.name} />
             ) : null}{" "}

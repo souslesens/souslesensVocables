@@ -243,7 +243,7 @@ class DatabaseModel {
             const database = await this.getDatabase(databaseId);
             const dbClient = this.getClientDriver(database.driver);
             this.knexClients[databaseId] = knex({
-                acquireConnectionTimeout: 5000,
+                acquireConnectionTimeout: 60000, // Augmenté à 60s
                 client: dbClient,
                 connection: {
                     host: database.host,
@@ -251,6 +251,16 @@ class DatabaseModel {
                     user: database.user,
                     password: database.password,
                     database: database.database,
+                },
+                pool: {
+                    min: 2,
+                    max: 20, 
+                    acquireTimeoutMillis: 60000,
+                    createTimeoutMillis: 30000,
+                    idleTimeoutMillis: 30000,
+                    reapIntervalMillis: 1000,
+                    createRetryIntervalMillis: 200,
+                    propagateCreateError: false, 
                 },
             });
         }
@@ -279,9 +289,17 @@ class DatabaseModel {
     refreshAdminConnection = async (databaseId, callback) => {
         const client = this.knexClients[databaseId];
         if (client) {
-            await client.destroy();
-            delete this.knexClients[databaseId];
-            console.log(`Connexion fermée pour la base ${databaseId}`);
+            try {
+                // Attendre que toutes les connexions du pool soient fermées
+                await client.destroy();
+                console.log(`Connexion fermée pour la base ${databaseId}`);
+            } catch (e) {
+                console.warn(`Erreur lors de la fermeture de la connexion ${databaseId}:`, e);
+            } finally {
+                delete this.knexClients[databaseId];
+            }
+            // Attendre un peu pour être sûr que le pool est complètement vidé
+            await new Promise(resolve => setTimeout(resolve, 1000));
         }
         await this.getAdminRestrictedConnection(databaseId);
         console.log(`Connexion ouverte pour la base ${databaseId}`);
@@ -368,8 +386,8 @@ class DatabaseModel {
                     async function () {
                         return await connection.select(select).from(tableName).orderBy(columnsKeys[0]).limit(batchSize).offset(offset);
                     },
-                    10,
-                    5,
+                    5, // maxRedo: 5 tentatives
+                    5, // sleepTime: 5 secondes entre les tentatives
                     onFailure,
                 );
                 return result;
@@ -379,8 +397,8 @@ class DatabaseModel {
                 async function () {
                     return await connection.select(select).from(tableName).orderBy(columnsKeys[0]).limit(batchSize).offset(offset);
                 },
-                10,
-                5,
+                5, // maxRedo: 5 tentatives
+                5, // sleepTime: 5 secondes entre les tentatives
                 onFailure,
             );
 

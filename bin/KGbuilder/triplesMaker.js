@@ -172,17 +172,12 @@ var TriplesMaker = {
             };
             const conn = await databaseModel.getUserConnection(user, tableInfos.dbID);
             var connectionObject = { connection: conn, user: user, dbId: tableInfos.dbID };
-            let generator;
-            try {
-                generator = databaseModel.batchSelectGenerator(connectionObject, tableInfos.table, { select: select, batchSize: limitSize, startingOffset: offset });
-            } catch (error) {
-                console.error("ERROR : offset " + offset + ",error in database reading " + error);
-                KGbuilder_socket.message(options.clientSocketId, "ERROR : offset " + offset + ",error in database reading " + error, true);
-                return callback(error);
-            }
+            let generator = databaseModel.batchSelectGenerator(connectionObject, tableInfos.table, { select: select, batchSize: limitSize, startingOffset: offset });
+
             KGbuilder_socket.message(options.clientSocketId, "loading data from database table " + tableInfos.table, false);
             console.log("start");
-            for await (const batch of generator) {
+            try {
+                for await (const batch of generator) {
                 // console.log("select time " + duration)
                 var data = batch;
                 resultSize = data.length;
@@ -268,6 +263,11 @@ var TriplesMaker = {
                         return callback(err);
                     }
                 }
+              }
+            } catch (error) {
+                console.error("ERROR : offset " + offset + ",error in database reading/processing " + error);
+                KGbuilder_socket.message(options.clientSocketId, "ERROR : offset " + offset + ",error in database reading/processing " + error, true);
+                return callback(error);
             }
             message.operation = "finished";
             message.totalTriples = totalTriplesCount;

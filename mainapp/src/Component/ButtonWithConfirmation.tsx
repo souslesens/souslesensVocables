@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Button } from "@mui/material";
+import { Button, Box, CircularProgress } from "@mui/material";
+import { red } from "@mui/material/colors";
 
 type ButtonWithConfirmationProps = {
     /* eslint-disable  @typescript-eslint/no-explicit-any */
@@ -35,9 +36,24 @@ const ButtonWithConfirmation = ({ func, args, label, disabled }: ButtonWithConfi
 
     if (btnState === "loading") {
         return (
-            <Button disabled={true} variant="contained" color="error">
-                …
-            </Button>
+            <>
+                <Box sx={{ position: "relative" }}>
+                    <Button disabled={true} variant="contained" color="error">
+                        Loading
+                    </Button>
+                    <CircularProgress
+                        size={24}
+                        sx={{
+                            color: red[500],
+                            position: "absolute",
+                            top: "50%",
+                            left: "50%",
+                            marginTop: "-12px",
+                            marginLeft: "-12px",
+                        }}
+                    />
+                </Box>
+            </>
         );
     }
 

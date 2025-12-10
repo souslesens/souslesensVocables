@@ -485,7 +485,7 @@ var TriplesMaker = {
 
         if (columnParams.type == "URI") {
             // same fixed uri for all amappings
-            return "<" + graphUri + util.formatStringForTriple(columnParams.id, true) + ">";
+            return "<" + util.formatStringForTriple(columnParams.id, true) + ">";
         } else if (columnParams.uriType == "blankNode" || columnParams.type == "VirtualColumn") {
             /*
               don't work

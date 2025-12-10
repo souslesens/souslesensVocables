@@ -396,7 +396,8 @@ const KGbuilder_triplesWriter = {
             otherPredicate: function () {
                 bindings.forEach(function (binding) {
                     var subjectUri = "<" + binding.s.value + ">";
-                    var predicateUri = "<" + item.id + ">";
+                    // Si item.id ne commence pas par http, c'est un préfixe (rdfs:label) sans chevrons
+                    var predicateUri = item.id.startsWith("http") ? "<" + item.id + ">" : item.id;
                     var objectUri = binding.value.value;
                     sampleTriples.push(subjectUri + " " + predicateUri + " " + objectUri);
                 });
@@ -420,6 +421,8 @@ const KGbuilder_triplesWriter = {
     getDeleteQuery: function (itemType, item, graphUri, batchSize, callback) {
         var patternGenerators = {
             otherPredicate: function () {
+                // For prefixed rdfs:label
+                var formattedPredicate = item.id.startsWith("http") ? "<" + item.id + ">" : item.id;
                 return {
                     selectVars: "?s ?value",
                     whereClause:
@@ -433,9 +436,9 @@ const KGbuilder_triplesWriter = {
                         "?s rdf:type <" +
                         item.classUri +
                         "> . " +
-                        "?s <" +
-                        item.id +
-                        "> ?value . " +
+                        "?s " +
+                        formattedPredicate +
+                        " ?value . " +
                         "} " +
                         "LIMIT " +
                         batchSize +
@@ -443,7 +446,7 @@ const KGbuilder_triplesWriter = {
                         "} " +
                         "} " +
                         "}",
-                    deleteClause: "DELETE { " + "GRAPH <" + graphUri + "> { " + "?s <" + item.id + "> ?value . " + "} " + "}",
+                    deleteClause: "DELETE { " + "GRAPH <" + graphUri + "> { " + "?s " + formattedPredicate + " ?value . " + "} " + "}",
                 };
             },
             Class: function () {

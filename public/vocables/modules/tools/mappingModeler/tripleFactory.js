@@ -514,11 +514,16 @@ var TripleFactory = (function () {
             if (!item.data || !item.data.type) {
                 return;
             }
-            if (item.data.type == "otherPredicate") {
+            if (item.data.type == "otherPredicate" || item.data.type == "rdfsLabel" || item.data.type == "rdfType") {
                 var parentNode = $("#detailedMappings_filterMappingsTree").jstree("get_node", item.parent);
                 var columnClassPredicate = MappingColumnsGraph.getColumnClass(parentNode);
                 if (columnClassPredicate) {
-                    filterMappingIds.push({ id: item.id, type: "otherPredicate", classUri: columnClassPredicate });
+                    // Pour rdfsLabel et rdfType, l'id contient "parentId>predicate", donc on prend la partie après ">"
+                    var predicateId = item.id;
+                    if (item.data.type == "rdfsLabel" || item.data.type == "rdfType") {
+                        predicateId = item.id.split(">")[1];
+                    }
+                    filterMappingIds.push({ id: predicateId, type: "otherPredicate", classUri: columnClassPredicate });
                     nodeIdsToFilter[item.parent] = true;
                 }
             }

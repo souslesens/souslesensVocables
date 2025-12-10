@@ -243,7 +243,7 @@ class DatabaseModel {
             const database = await this.getDatabase(databaseId);
             const dbClient = this.getClientDriver(database.driver);
             this.knexClients[databaseId] = knex({
-                acquireConnectionTimeout: 60000, // Augmenté à 60s
+                acquireConnectionTimeout: 60000,
                 client: dbClient,
                 connection: {
                     host: database.host,
@@ -290,19 +290,17 @@ class DatabaseModel {
         const client = this.knexClients[databaseId];
         if (client) {
             try {
-                // Attendre que toutes les connexions du pool soient fermées
                 await client.destroy();
-                console.log(`Connexion fermée pour la base ${databaseId}`);
+                console.log(`Connection closed for database ${databaseId}`);
             } catch (e) {
-                console.warn(`Erreur lors de la fermeture de la connexion ${databaseId}:`, e);
+                console.warn(`Error closing connection ${databaseId}:`, e);
             } finally {
                 delete this.knexClients[databaseId];
             }
-            // Attendre un peu pour être sûr que le pool est complètement vidé
             await new Promise((resolve) => setTimeout(resolve, 1000));
         }
         await this.getAdminRestrictedConnection(databaseId);
-        console.log(`Connexion ouverte pour la base ${databaseId}`);
+        console.log(`Connection opened for database ${databaseId}`);
         if (callback) {
             callback();
         }

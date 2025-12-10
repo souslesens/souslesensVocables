@@ -74,7 +74,6 @@ const redoIfFailureCallback = (func, maxRedo = 10, sleepTime = 5, callbackFailur
         });
     };
 
-    // Utiliser redoIfFailure avec la version promisifiée
     redoIfFailure(promisifiedFunc, maxRedo, sleepTime, callbackFailure, ...args)
         .then((result) => {
             finalCallback(null, result);

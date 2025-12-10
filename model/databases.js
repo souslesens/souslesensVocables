@@ -254,13 +254,13 @@ class DatabaseModel {
                 },
                 pool: {
                     min: 2,
-                    max: 20, 
+                    max: 20,
                     acquireTimeoutMillis: 60000,
                     createTimeoutMillis: 30000,
                     idleTimeoutMillis: 30000,
                     reapIntervalMillis: 1000,
                     createRetryIntervalMillis: 200,
-                    propagateCreateError: false, 
+                    propagateCreateError: false,
                 },
             });
         }
@@ -299,7 +299,7 @@ class DatabaseModel {
                 delete this.knexClients[databaseId];
             }
             // Attendre un peu pour être sûr que le pool est complètement vidé
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            await new Promise((resolve) => setTimeout(resolve, 1000));
         }
         await this.getAdminRestrictedConnection(databaseId);
         console.log(`Connexion ouverte pour la base ${databaseId}`);

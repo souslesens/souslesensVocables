@@ -538,85 +538,149 @@ const KGbuilder_triplesWriter = {
                     batchSize = 100;
                 }
 
-                async.whilst(
-                    function (callbackTest) {
-                        if (isSample) {
-                            callbackTest(null, iteration === 0);
-                        } else {
-                            callbackTest(null, resultSize > 0);
-                        }
-                    },
-                    function (callbackWhilst) {
-                        iteration++;
+                var message = {};
+                message.operation = "deleteTriples";
 
-                        KGbuilder_triplesWriter.getDeleteQuery(item.type, item, graphUri, batchSize, function (err, patterns) {
-                            if (err) {
-                                return callbackWhilst(err);
-                            }
-
-                            var query;
-                            if (isSample) {
-                                query = KGbuilder_triplesWriter.getSparqlPrefixesStr() + "SELECT " + patterns.selectVars + " " + patterns.whereClause;
-                            } else {
-                                query = KGbuilder_triplesWriter.getSparqlPrefixesStr() + patterns.deleteClause + " " + patterns.whereClause;
-                            }
-
-                            var params = { query: query };
-
-                            if (ConfigManager.config && ConfigManager.config.sparql_server.user) {
-                                params.auth = {
-                                    user: ConfigManager.config.sparql_server.user,
-                                    pass: ConfigManager.config.sparql_server.password,
-                                    sendImmediately: false,
-                                };
-                            }
-
-                            httpProxy.post(sparqlServerUrl, null, params, function (err, result) {
-                                if (err) {
-                                    return callbackWhilst(err);
-                                }
-                                if (!result.results || !result.results.bindings) {
-                                    return callbackWhilst(null, 0);
-                                }
-                                if (isSample) {
-                                    var bindings = result.results.bindings;
-                                    var sampleTriples = KGbuilder_triplesWriter.formatSampleTriples(bindings, item);
-
-                                    sampleResults = sampleTriples.concat(sampleResults);
-
-                                    if (options && options.clientSocketId) {
-                                        var identifier = item.classUri || item.propertyUri || item.type;
-                                        KGbuilder_socket.message(options.clientSocketId, "Sample: " + sampleTriples.length + " triples found for " + identifier, false);
-                                    }
-                                } else {
-                                    var resultValue = "";
-                                    if (result.results && result.results.bindings && result.results.bindings[0] && result.results.bindings[0]["callret-0"]) {
-                                        resultValue = result.results.bindings[0]["callret-0"].value;
-                                    }
-                                    var regex = / (\d+)/;
-                                    var match = resultValue.match(regex);
-                                    resultSize = match ? parseInt(match[1]) : 0;
-
-                                    mappingTotal += resultSize;
-                                    totalDeleted += resultSize;
-
-                                    if (options && options.clientSocketId) {
-                                        var identifier = item.classUri || item.propertyUri || item.type;
-                                        KGbuilder_socket.message(options.clientSocketId, mappingTotal + " triples deleted for " + identifier, false);
-                                    }
-                                }
-
-                                return callbackWhilst();
-                            });
-                        });
-                    },
-                    function (err) {
+                // Get total count before deletion (similar to deleteKGBuilderTriples)
+                if (!isSample) {
+                    KGbuilder_triplesWriter.getDeleteQuery(item.type, item, graphUri, batchSize, function (err, patterns) {
                         if (err) {
                             return callbackEach(err);
                         }
-                        return callbackEach();
-                    },
-                );
+
+                        var countQuery = KGbuilder_triplesWriter.getSparqlPrefixesStr() + "SELECT (COUNT(*) AS ?count) " + patterns.whereClause;
+                        var paramsCount = { query: countQuery };
+
+                        if (ConfigManager.config && ConfigManager.config.sparql_server.user) {
+                            paramsCount.auth = {
+                                user: ConfigManager.config.sparql_server.user,
+                                pass: ConfigManager.config.sparql_server.password,
+                                sendImmediately: false,
+                            };
+                        }
+
+                        httpProxy.post(sparqlServerUrl, null, paramsCount, function (err, countResult) {
+                            if (err) {
+                                return callbackEach(err);
+                            }
+
+                            var totalRecords = 0;
+                            try {
+                                var binding = countResult.results.bindings[0];
+                                if (binding.count) {
+                                    totalRecords = parseInt(binding.count.value, 10);
+                                } else if (binding["callret-0"]) {
+                                    totalRecords = parseInt(binding["callret-0"].value, 10);
+                                }
+                            } catch (e) {
+                                console.log("error parsing countResult", e);
+                                totalRecords = 0;
+                            }
+
+                            message.tableTotalRecords = totalRecords;
+
+                            // Send initial message with total records count
+                            if (options && options.clientSocketId) {
+                                KGbuilder_socket.message(options.clientSocketId, message, false);
+                            }
+
+                            executeWhilst();
+                        });
+                    });
+                } else {
+                    executeWhilst();
+                }
+
+                function executeWhilst() {
+                    async.whilst(
+                        function (callbackTest) {
+                            if (isSample) {
+                                callbackTest(null, iteration === 0);
+                            } else {
+                                callbackTest(null, resultSize > 0);
+                            }
+                        },
+                        function (callbackWhilst) {
+                            iteration++;
+
+                            KGbuilder_triplesWriter.getDeleteQuery(item.type, item, graphUri, batchSize, function (err, patterns) {
+                                if (err) {
+                                    return callbackWhilst(err);
+                                }
+
+                                var query;
+                                if (isSample) {
+                                    query = KGbuilder_triplesWriter.getSparqlPrefixesStr() + "SELECT " + patterns.selectVars + " " + patterns.whereClause;
+                                } else {
+                                    query = KGbuilder_triplesWriter.getSparqlPrefixesStr() + patterns.deleteClause + " " + patterns.whereClause;
+                                }
+
+                                var params = { query: query };
+
+                                if (ConfigManager.config && ConfigManager.config.sparql_server.user) {
+                                    params.auth = {
+                                        user: ConfigManager.config.sparql_server.user,
+                                        pass: ConfigManager.config.sparql_server.password,
+                                        sendImmediately: false,
+                                    };
+                                }
+
+                                modelUtils.redoIfFailureCallback(
+                                    httpProxy.post,
+                                    10,
+                                    5,
+                                    null,
+                                    function (err, result) {
+                                        if (err) {
+                                            return callbackWhilst(err);
+                                        }
+                                        if (!result.results || !result.results.bindings) {
+                                            return callbackWhilst(null, 0);
+                                        }
+                                        if (isSample) {
+                                            var bindings = result.results.bindings;
+                                            var sampleTriples = KGbuilder_triplesWriter.formatSampleTriples(bindings, item);
+
+                                            sampleResults = sampleTriples.concat(sampleResults);
+
+                                            if (options && options.clientSocketId) {
+                                                var identifier = item.classUri || item.propertyUri || item.type;
+                                                KGbuilder_socket.message(options.clientSocketId, "Sample: " + sampleTriples.length + " triples found for " + identifier, false);
+                                            }
+                                        } else {
+                                            var resultValue = "";
+                                            if (result.results && result.results.bindings && result.results.bindings[0] && result.results.bindings[0]["callret-0"]) {
+                                                resultValue = result.results.bindings[0]["callret-0"].value;
+                                            }
+                                            var regex = / (\d+)/;
+                                            var match = resultValue.match(regex);
+                                            resultSize = match ? parseInt(match[1]) : 0;
+
+                                            mappingTotal += resultSize;
+                                            totalDeleted += resultSize;
+
+                                            if (options && options.clientSocketId) {
+                                                message.totalSize = mappingTotal;
+                                                KGbuilder_socket.message(options.clientSocketId, message, false);
+                                            }
+                                        }
+
+                                        return callbackWhilst();
+                                    },
+                                    sparqlServerUrl,
+                                    null,
+                                    params,
+                                );
+                            });
+                        },
+                        function (err) {
+                            if (err) {
+                                return callbackEach(err);
+                            }
+                            return callbackEach();
+                        },
+                    );
+                }
             },
             function (err) {
                 if (err) {

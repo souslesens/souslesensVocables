@@ -410,8 +410,8 @@ var TriplesMaker = {
                     otherPredicates.forEach(function (item) {
                         if (options.filterMappingIds && options.filterMappingIds.indexOf(item.property) > -1) {
                             var subjectUri = TriplesMaker.getColumnUri(line, columnId, columnMappings, rowIndex, tableProcessingParams);
-
-                            object = TriplesMaker.getFormatedLiteral(line, { dataType: item.range, o: item.object });
+                            //item.dateFormat
+                            object = TriplesMaker.getFormatedLiteral(line, { dataType: item.range, o: item.object,dateFormat:item.dateFormat });
 
                             var property = TriplesMaker.getPropertyUri(item.property);
                             addTriple(subjectUri, property, object);

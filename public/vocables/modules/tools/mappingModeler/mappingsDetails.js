@@ -359,7 +359,12 @@ var MappingsDetails = (function () {
         var html = `<tr><td>Table column</td><td><span id='class-column' ><b> ${column.text || column.label} </b></span> </td></tr>`;
 
         if (isColumnAllreadyMapped) {
-            html += "<tr><td></td><td> column already defined in table " + isColumnAllreadyMapped + "</td></tr>";
+            html +=
+                "<tr><td></td><td> column already defined in table " +
+                isColumnAllreadyMapped +
+                "</td></tr> " +
+                `<tr><td><button class='slsv-button-1' id='class-datatype' style='padding:6px 6px;margin:0px;' onclick='MappingsDetails.setNodeAsMainColumn("${column.id}")'>set as mainColumn </button> </td>` +
+                " </tr>";
         } else {
             html += `<tr></tr>`;
             html += `<tr><td>URI syntax*</td><td><select id='columnDetails-UriType' onchange='MappingsDetails.onChangeUriType()' style='padding:6px 6px'> </select>  </td></tr>`;
@@ -1140,6 +1145,7 @@ var MappingsDetails = (function () {
         if (!columnClass) {
             columnClass = MappingColumnsGraph.getColumnClass(columnNode);
         }
+        var sameTableMainColumnIds = [];
         if (columnClass) {
             MappingColumnsGraph.visjsGraph.data.nodes.get().forEach(function (node) {
                 if (node.data && node.data.type == "Class" && node.data.id == columnClass) {
@@ -1170,8 +1176,13 @@ var MappingsDetails = (function () {
                                 return;
                             }
                             var table2 = column2.data.dataTable;
-                            // same table classNodes implies mapping error or voluntary mapping to let
+                            // let them all as mainColumnClass and make them has the same basic properties
                             if (table2 == columnNode.data.dataTable) {
+                                delete columnNode.data.definedInColumn;
+                                delete column2.data.definedInColumn;
+                                column2.data.isMainColumn = true;
+                                columnNode.data.isMainColumn = true;
+                                self.copyUriProperties(node, column2);
                                 return;
                             }
                             if (columnNode.data.isMainColumn && column2.data.isMainColumn) {
@@ -1203,6 +1214,7 @@ var MappingsDetails = (function () {
                 }
             });
         }
+        self.setDefinedInColumnNodesProperties();
         return table;
     };
 
@@ -1211,6 +1223,95 @@ var MappingsDetails = (function () {
             if (node.data && node.data.type == "Column" && node.data.rdfsLabel) {
                 node.data.isMainColumn = true;
             }
+        });
+    };
+    // Helper function to copy URI properties from reference node to target node
+    self.copyUriProperties = function (targetNodeData, referenceNodeData) {
+        var uriProperties = ["prefixURI", "suffixURI", "baseURI", "uriType"];
+        var updated = false;
+        uriProperties.forEach(function (prop) {
+            if (referenceNodeData[prop] !== undefined) {
+                targetNodeData[prop] = referenceNodeData[prop];
+                updated = true;
+            }
+        });
+        return updated;
+    };
+
+    /**
+     * Updates URI properties of nodes that reference other nodes via definedInColumn.
+     * For each node with data.definedInColumn, copies prefixURI, suffixURI, baseURI, and uriType
+     * from the referenced node. Also processes edges' fromNode and toNode if they have definedInColumn.
+     * @function
+     * @name setDefinedInColumnNodesProperties
+     * @memberof module:MappingsDetails
+     * @returns {void}
+     */
+    self.setDefinedInColumnNodesProperties = function () {
+        var nodes = MappingColumnsGraph.visjsGraph.data.nodes.get();
+        var edges = MappingColumnsGraph.visjsGraph.data.edges.get();
+
+        // Process nodes with definedInColumn
+        nodes.forEach(function (node) {
+            if (node.data && node.data.definedInColumn) {
+                var referenceNode = MappingColumnsGraph.visjsGraph.data.nodes.get(node.data.definedInColumn);
+                if (referenceNode && referenceNode.data) {
+                    self.copyUriProperties(node.data, referenceNode.data);
+                    MappingColumnsGraph.updateNode(node);
+                }
+            }
+        });
+
+        // Process edges with fromNode or toNode containing definedInColumn
+        edges.forEach(function (edge) {
+            var edgeUpdated = false;
+
+            // Check fromNode
+            if (edge.fromNode && edge.fromNode.data && edge.fromNode.data.definedInColumn) {
+                var fromReferenceNode = MappingColumnsGraph.visjsGraph.data.nodes.get(edge.fromNode.data.definedInColumn);
+                if (fromReferenceNode && fromReferenceNode.data) {
+                    edgeUpdated = self.copyUriProperties(edge.fromNode.data, fromReferenceNode.data) || edgeUpdated;
+                }
+            }
+
+            // Check toNode
+            if (edge.toNode && edge.toNode.data && edge.toNode.data.definedInColumn) {
+                var toReferenceNode = MappingColumnsGraph.visjsGraph.data.nodes.get(edge.toNode.data.definedInColumn);
+                if (toReferenceNode && toReferenceNode.data) {
+                    edgeUpdated = self.copyUriProperties(edge.toNode.data, toReferenceNode.data) || edgeUpdated;
+                }
+            }
+
+            // Update the edge if any changes were made
+            if (edgeUpdated) {
+                MappingColumnsGraph.updateEdge(edge);
+            }
+        });
+    };
+
+    /**
+     * Sets a node as the main column for its class.
+     * Removes definedInColumn reference, sets isMainColumn to true, and reapplies mapping logic.
+     * @function
+     * @name setNodeAsMainColumn
+     * @memberof module:MappingsDetails
+     * @param {string} nodeId - The ID of the node to set as main column
+     * @returns {void}
+     */
+    self.setNodeAsMainColumn = function (nodeId) {
+        var node = MappingColumnsGraph.visjsGraph.data.nodes.get(nodeId);
+
+        if (!node || !node.data) {
+            return;
+        }
+
+        delete node.data.definedInColumn;
+        node.data.isMainColumn = true;
+
+        MappingColumnsGraph.updateNode(node, function () {
+            self.isColumnAllreadyMappedInAnotherTable(node);
+            self.showDetailedMappingsTree();
+            self.showColumnTechnicalMappingsDialog("detailedMappings_techDetailsDiv", node, function () {});
         });
     };
 

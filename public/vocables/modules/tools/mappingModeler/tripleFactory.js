@@ -36,12 +36,17 @@ var TripleFactory = (function () {
      * @memberof module:TripleFactory
      * @param {boolean} isSample - If true, the dialog is for displaying sample mappings; if false, for writing actual triples.
      */
-    self.initFilterMappingDialog = function (isSample) {
+    self.initFilterMappingDialog = function (isSample, isDelete) {
         self.filterMappingIsSample = isSample;
+        self.filterMappingIsDelete = isDelete;
         UIcontroller.activateRightPanel("generic");
         // save current mappings before opening the dialog
         MappingColumnsGraph.saveVisjsGraph(function () {
-            $("#mappingModeler_genericPanel").load("./modules/tools/mappingModeler/html/filterMappingDialog.html", function () {
+            var htmlToLoad = "./modules/tools/mappingModeler/html/filterMappingDialog.html";
+            if (isDelete) {
+                htmlToLoad = "./modules/tools/mappingModeler/html/specificMappingDelete.html";
+            }
+            $("#mappingModeler_genericPanel").load(htmlToLoad, function () {
                 self.showFilterMappingsDialog("detailedMappings_filterMappingsTree", MappingModeler.currentTable.name);
             });
         });
@@ -429,9 +434,9 @@ var TripleFactory = (function () {
             selectTreeNodeFn: function (event, obj) {
                 // add otherpredicates onclick
                 if (obj.node.parent == "Columns") {
+                    var jstreeData = [];
                     var otherPredicates = obj.node.data.otherPredicates;
                     if (otherPredicates) {
-                        var jstreeData = [];
                         otherPredicates.forEach(function (item) {
                             jstreeData.push({
                                 id: item.property,
@@ -440,13 +445,127 @@ var TripleFactory = (function () {
                                 data: { type: "otherPredicate" },
                             });
                         });
-                        JstreeWidget.addNodesToJstree(divId, obj.node.id, jstreeData);
                     }
+                    if (obj.node.data.rdfsLabel) {
+                        //separate with > because he can't be used on uri
+                        jstreeData.push({
+                            id: obj.node.id + ">" + "rdfs:label",
+                            text: "rdfs:label",
+                            parent: obj.node.id,
+                            data: { type: "rdfsLabel" },
+                        });
+                    }
+                    if (obj.node.data.rdfType) {
+                        jstreeData.push({
+                            id: obj.node.id + ">" + "rdf:type",
+                            text: "rdf:type",
+                            parent: obj.node.id,
+                            data: { type: "rdfType" },
+                        });
+                    }
+                    JstreeWidget.addNodesToJstree(divId, obj.node.id, jstreeData);
                 }
             },
         };
         JstreeWidget.loadJsTree(divId, treeData, options, function () {
             $("#detailedMappings_treeContainer").css("overflow", "unset");
+        });
+    };
+
+    self.deleteSpecificTriples = function () {
+        self.initFilterMappingDialog(false, true);
+    };
+    self.runDeleteSpecificTriples = function (isSampleData, callback) {
+        var confirm = true;
+        if (!isSampleData) {
+            confirm = window.confirm("Are you sure you want to delete these triples?");
+        }
+        if (!confirm) {
+            return;
+        }
+        var checkedNodes = JstreeWidget.getjsTreeCheckedNodes("detailedMappings_filterMappingsTree");
+        if (checkedNodes.length == 0) {
+            return alert(" no mappings selected");
+        }
+        var filterMappingIds = [];
+        //don't select parent node when datatype property is selected
+        var nodeIdsToFilter = {};
+        var mappingNodes = MappingColumnsGraph.getNodesMap();
+        checkedNodes.forEach(function (item) {
+            if (item.parent == "Relations") {
+                var edge = MappingColumnsGraph.getEdgesMap("id")[item.id];
+                if (!edge) {
+                    return;
+                }
+                edge = edge[0];
+                var startingClass;
+                if (edge.from && mappingNodes[edge.from]) {
+                    startingClass = MappingColumnsGraph.getColumnClass(mappingNodes[edge.from]);
+                }
+                var endingClass;
+                if (edge.to && mappingNodes[edge.to]) {
+                    endingClass = MappingColumnsGraph.getColumnClass(mappingNodes[edge.to]);
+                }
+                if (startingClass && endingClass) {
+                    filterMappingIds.push({ id: item.id, type: "Relation", startingClass: startingClass, endingClass: endingClass, propertyUri: edge.data.id });
+                }
+            }
+
+            if (!item.data || !item.data.type) {
+                return;
+            }
+            if (item.data.type == "otherPredicate" || item.data.type == "rdfsLabel" || item.data.type == "rdfType") {
+                var parentNode = $("#detailedMappings_filterMappingsTree").jstree("get_node", item.parent);
+                var columnClassPredicate = MappingColumnsGraph.getColumnClass(parentNode);
+                if (columnClassPredicate) {
+                    // Pour rdfsLabel et rdfType, l'id contient "parentId>predicate", donc on prend la partie après ">"
+                    var predicateId = item.id;
+                    if (item.data.type == "rdfsLabel" || item.data.type == "rdfType") {
+                        predicateId = item.id.split(">")[1];
+                    }
+                    filterMappingIds.push({ id: predicateId, type: "otherPredicate", classUri: columnClassPredicate });
+                    nodeIdsToFilter[item.parent] = true;
+                }
+            }
+            if (MappingModeler.columnsMappingsObjects.includes(item.data.type)) {
+                var columnClass = MappingColumnsGraph.getColumnClass(item);
+                if (columnClass) {
+                    filterMappingIds.push({ id: item.id, type: "Class", classUri: columnClass });
+                }
+            }
+        });
+        var filterMappingsIds = filterMappingIds.filter(function (item) {
+            return !nodeIdsToFilter[item.id];
+        });
+        var options = { isSample: isSampleData, filterMappingIds: filterMappingsIds, clientSocketId: Config.clientSocketId };
+
+        var payload = {
+            options: JSON.stringify(options),
+            source: MappingModeler.currentSLSsource,
+            tables: JSON.stringify([MappingModeler.currentTable.name]),
+        };
+        $.ajax({
+            type: "DELETE",
+            url: `${Config.apiUrl}/kg/triples`,
+            data: payload,
+            dataType: "json",
+            success: function (result, _textStatus, _jqXHR) {
+                if (isSampleData) {
+                    UIcontroller.activateRightPanel("generic");
+                    self.showTriplesInDataTable(result, "mappingModeler_genericPanel");
+                    //   UI.message("", true);
+                } else {
+                    alert("triples deleted: " + result.triplesDeleted);
+                }
+            },
+            error: function (err) {
+                if (callback) {
+                    return callback(err);
+                } else {
+                    MainController.errorAlert(err);
+                }
+                UI.message(err.responseText);
+            },
         });
     };
 

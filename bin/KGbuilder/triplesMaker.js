@@ -402,7 +402,7 @@ var TriplesMaker = {
                 }
             }
 
-            // isolated other predicates (dont want to duplicate label, type...
+            // isolated predicates (dont want to duplicate label, type...
             for (var columnId in columnMappings) {
                 // filter columns
                 var otherPredicates = columnMappings[columnId].otherPredicates;
@@ -410,12 +410,60 @@ var TriplesMaker = {
                     otherPredicates.forEach(function (item) {
                         if (options.filterMappingIds && options.filterMappingIds.indexOf(item.property) > -1) {
                             var subjectUri = TriplesMaker.getColumnUri(line, columnId, columnMappings, rowIndex, tableProcessingParams);
-
-                            object = TriplesMaker.getFormatedLiteral(line, { dataType: item.range, o: item.object });
+                            //item.dateFormat
+                            object = TriplesMaker.getFormatedLiteral(line, { dataType: item.range, o: item.object, dateFormat: item.dateFormat });
 
                             var property = TriplesMaker.getPropertyUri(item.property);
                             addTriple(subjectUri, property, object);
                         }
+                    });
+                }
+
+                var filteredBasicProperties = null;
+                if (options.filterMappingIds) {
+                    filteredBasicProperties = options.filterMappingIds.filter(function (mapping) {
+                        return mapping.split(">")[0] == columnId && mapping.split(">")[1];
+                    });
+                    filteredBasicProperties = filteredBasicProperties.map(function (mapping) {
+                        return mapping.split(">")[1];
+                    });
+                    if (filteredBasicProperties.length == 0) {
+                        filteredBasicProperties = null;
+                    }
+                }
+                if (filteredBasicProperties) {
+                    var mappings = columnMappings[columnId].mappings;
+                    var filteredMappings = mappings.filter(function (mapping) {
+                        return filteredBasicProperties.indexOf(mapping.p) > -1;
+                    });
+                    filteredMappings.forEach(function (mapping) {
+                        var subjectUri = TriplesMaker.getColumnUri(line, columnId, columnMappings, rowIndex, tableProcessingParams);
+
+                        var property = TriplesMaker.getPropertyUri(mapping.p);
+                        if (!line[mapping.o]) {
+                            if (mapping.isConstantUri) {
+                                // uri
+                                object = "<" + mapping.o + ">";
+                            } else if (mapping.isConstantPrefixedUri) {
+                                //prefix
+                                object = mapping.o;
+                            } else {
+                                object = TriplesMaker.getColumnUri(line, mapping.objColId, columnMappings, rowIndex, tableProcessingParams);
+                                if (!object) {
+                                    return;
+                                }
+                            }
+                        } else if (mapping.isString) {
+                            var objStr = line[mapping.o];
+                            object = '"' + util.formatStringForTriple(objStr) + '"';
+                        } else if (columnMappings[mapping.objColId]) {
+                            // if object is a column
+                            object = TriplesMaker.getColumnUri(line, mapping.objColId, columnMappings, rowIndex, tableProcessingParams);
+                        }
+                        if (!object || !property || !subjectUri) {
+                            return;
+                        }
+                        addTriple(subjectUri, property, object);
                     });
                 }
             }
@@ -485,7 +533,7 @@ var TriplesMaker = {
 
         if (columnParams.type == "URI") {
             // same fixed uri for all amappings
-            return "<" + graphUri + util.formatStringForTriple(columnParams.id, true) + ">";
+            return "<" + util.formatStringForTriple(columnParams.id, true) + ">";
         } else if (columnParams.uriType == "blankNode" || columnParams.type == "VirtualColumn") {
             /*
               don't work

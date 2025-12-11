@@ -138,6 +138,23 @@ var KGqueryAggregateWidget = (function () {
             return alert(error);
         }
         var aggregateClauses = self.getAggregateQueryClauses(groupByNodes, functionNodes, groupFnVars);
+
+        KGquery.querySets.sets.forEach(function (set) {
+            for (var key in set.classFiltersMap) {
+                var filter = set.classFiltersMap[key].filter;
+                var regex = /\?(\w+?)[^\w]/gm;
+                var matches = filter.matchAll(regex);
+                for (const match of matches) {
+                    if (match) {
+                        var property = match[1];
+                    }
+                }
+                if (self.groupByVarsMap[property]) {
+                    aggregateClauses.where += " ?" + set.classFiltersMap[key].class.label + " <" + self.groupByVarsMap[property].prop.id + "> ?" + property + ".\n";
+                }
+            }
+        });
+
         $("#" + self.divId).dialog("close");
         $("#" + "smallDialogDiv").dialog("option", "title", "");
         if (self.validateFn) {

@@ -134,6 +134,7 @@ var MappingModeler = (function () {
                 // refuse access if another lastUpdate.user is too recent on mappingFile
                 // concurencial access
                 function (callbackSeries) {
+                    /*
                     if (dataSourcesManager?.currentConfig?.lastUpdate && authentication?.currentUser?.identifiant) {
                         if (dataSourcesManager.currentConfig.lastUpdate.user != authentication?.currentUser?.identifiant) {
                             var currentTime = new Date();
@@ -147,7 +148,7 @@ var MappingModeler = (function () {
                                 }
                             }
                         }
-                    }
+                    }*/
                     return callbackSeries();
                 },
                 //load visjs mapping graph

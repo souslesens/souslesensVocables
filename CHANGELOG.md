@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.21.0](https://github.com/souslesens/souslesensVocables/compare/2.20.0...2.21.0) (2025-12-11)
+
+
+### ⚠ BREAKING CHANGES
+
+* **api/mainapp:** DELETE route can't have a body, pass source with query
+
+### Features
+
+* **mainapp:** add an error state to the ButtonWithConfirmation ([a0b54a0](https://github.com/souslesens/souslesensVocables/commit/a0b54a0f035a7aa01bb7cbefe29fcb607252c382))
+* **mainapp:** ButtonWithConfirmation have a spinner at loading state ([5a69dff](https://github.com/souslesens/souslesensVocables/commit/5a69dff58dfba9c807ae98b1bfae8e81757c06f4))
+* **mainapp:** graph-management display an error when delete btn fail ([61c4039](https://github.com/souslesens/souslesensVocables/commit/61c4039217cc68f1479a0d1ac4cb407c8f396ef4))
+* **mainapp:** graphManagement: reload graphSize on upload / delete ([6fe0197](https://github.com/souslesens/souslesensVocables/commit/6fe019726bf6ccdca17d8228a5f343298c77f92c))
+* **model/rdfData:** deleteGraphWithApi method ([bd8b5a1](https://github.com/souslesens/souslesensVocables/commit/bd8b5a1429907f6ed0125bbead1d86f1598da8c9))
+
+
+### Bug Fixes
+
+* **api/mainapp:** DELETE route can't have a body, pass source with query ([52a3919](https://github.com/souslesens/souslesensVocables/commit/52a3919932a396cea3e7fbe06eeee496b64545ff))
+
 ## [2.20.0](https://github.com/souslesens/souslesensVocables/compare/2.19.0...2.20.0) (2025-12-05)
 
 

@@ -1,7 +1,7 @@
 const { readMainConfig } = require("./config");
 const DigestClient = require("digest-fetch");
 const fetch = require("node-fetch");
-const { RDF_FORMATS_MIMETYPES } = require("./utils");
+const { RDF_FORMATS_MIMETYPES, sleep } = require("./utils");
 class RdfDataModel {
     /**
      * @param {string} endpointUrl - url of endpoint
@@ -237,10 +237,41 @@ class RdfDataModel {
      * @param {string} graphUri - The Graph URI
      * @returns {Promise<any>} - response
      */
-    clearGraph = async (graphUri) => {
+    deleteGraph = async (graphUri) => {
+        if (this.endpointUser && this.endpointPassword) {
+            this._deleteGraphWithApi(graphUri);
+        } else {
+            this._clearGraph(graphUri);
+        }
+    };
+    /**
+     * @param {string} graphUri - The Graph URI
+     * @returns {Promise<any>} - response
+     */
+    _clearGraph = async (graphUri) => {
         const query = `CLEAR GRAPH <${graphUri}>`;
         const json = await this.execQuery(query);
         return json;
+    };
+
+    /**
+     * @param {string} graphUri - The Graph URI
+     * @returns {Promise<any>} - response
+     */
+    _deleteGraphWithApi = async (graphUri) => {
+        const virtuosoUrl = this.endpointUrl.replace("/sparql", "");
+        const urlParams = new URLSearchParams({
+            graph: graphUri,
+        });
+        const url = new URL(`${virtuosoUrl}/sparql-graph-crud-auth?${urlParams.toString()}`).href;
+        const client = new DigestClient(this.endpointUser, this.endpointPassword, { basic: false });
+        const response = await client.fetch(url, { method: "DELETE" });
+        await sleep(3); // give virtuoso little rest
+
+        if (![200, 201, 404].includes(response.status)) {
+            const message = await response.text();
+            throw new Error(message);
+        }
     };
 }
 

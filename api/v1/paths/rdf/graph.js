@@ -126,7 +126,7 @@ module.exports = function () {
             }
 
             const graphUri = userSources[sourceName].graphUri;
-            await rdfDataModel.clearGraph(graphUri);
+            await rdfDataModel.deleteGraph(graphUri);
             res.status(200).send({ message: `${sourceName} deleted` });
         } catch (error) {
             console.error(error);

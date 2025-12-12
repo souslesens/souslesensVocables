@@ -118,7 +118,7 @@ class UserModel {
      */
     getUserAccounts = async () => {
         const conn = getKnexConnection(this._mainConfig.database);
-        const results = await conn.select("*").from("public_users_list");
+        const results = await conn.select("*").from("users");
         cleanupConnection(conn);
 
         return Object.fromEntries(results.map((user) => this._convertToLegacy(user)));

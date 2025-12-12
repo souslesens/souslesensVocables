@@ -14,7 +14,7 @@ window.DownloadGraphModal = (function () {
         }
         root.unmount();
     };
-    self.open = (sourceName) => {
+    self.open = (sourceName, apiUrl) => {
         if (createApp === null) {
             throw new Error("React app is not ready");
         }
@@ -23,7 +23,7 @@ window.DownloadGraphModal = (function () {
             elemDiv.id = divId;
             document.body.appendChild(elemDiv);
         }
-        root = createApp({ sourceName, onClose: self.close });
+        root = createApp({ apiUrl, sourceName, onClose: self.close });
     };
     return self;
 })();

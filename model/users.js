@@ -200,6 +200,11 @@ class UserModel {
             throw Error("The user already exists, try updating it");
         }
 
+        // generate token if empty
+        if (!user.token) {
+            user.token = this.generateUserToken(user.login);
+        }
+
         results = await conn.insert(this._convertToDatabase(data)).into("users");
         cleanupConnection(conn);
         return results[0];

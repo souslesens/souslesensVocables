@@ -42,6 +42,7 @@ var MainController = (function () {
                 Config.currentTopLevelOntology = serverConfig.currentTopLevelOntology;
                 Config.tools_available = serverConfig.tools_available;
                 Config.theme = serverConfig.theme;
+                Config.slsPyApi = serverConfig.slsPyApi;
                 //  Config.userTools = serverConfig.tools_available;
 
                 // display version number

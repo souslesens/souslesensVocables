@@ -1038,7 +1038,8 @@ var Lineage_sources = (function () {
          * @returns {void}
          */
         downloadGraph: function () {
-            window.DownloadGraphModal.open(Lineage_sources.activeSource);
+            const apiUrl = Config.slsPyApi.enabled ? Config.slsPyApi.url.replace(/\/$/, "").concat("/") : "/";
+            window.DownloadGraphModal.open(Lineage_sources.activeSource, apiUrl);
         },
         /**
          * Opens the graph download modal.

@@ -8,6 +8,7 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
+import { ButtonWithConfirmation } from "./Component/ButtonWithConfirmation";
 
 interface UsersData {
     id: number;
@@ -43,6 +44,11 @@ export default function UsersDataManagement() {
         setUsersData(data);
     };
 
+    const deleteUserData = async (userDataId: number) => {
+        await fetch(`/api/v1/users/data/${userDataId}`, { method: "DELETE" });
+        await fetchUsersData();
+    };
+
     useEffect(() => {
         void fetchUsersData();
     }, []);
@@ -65,6 +71,9 @@ export default function UsersDataManagement() {
                         <TableCell style={{ fontWeight: "bold" }} align="right">
                             Source
                         </TableCell>
+                        <TableCell style={{ fontWeight: "bold" }} align="right">
+                            Actions
+                        </TableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>
@@ -77,6 +86,9 @@ export default function UsersDataManagement() {
                             <TableCell align="right">{row.data_type}</TableCell>
                             <TableCell align="right">{row.data_tool}</TableCell>
                             <TableCell align="right">{row.data_source}</TableCell>
+                            <TableCell align="right">
+                                <ButtonWithConfirmation func={deleteUserData} label="Delete" args={[row.id]} />
+                            </TableCell>
                         </TableRow>
                     ))}
                 </TableBody>

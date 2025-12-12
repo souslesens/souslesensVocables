@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button, Box, CircularProgress } from "@mui/material";
+import { Button, Box, CircularProgress, ButtonGroup } from "@mui/material";
 import { red } from "@mui/material/colors";
 
 type ButtonWithConfirmationProps = {
@@ -59,9 +59,20 @@ const ButtonWithConfirmation = ({ func, args, label, disabled }: ButtonWithConfi
 
     if (btnState === "confirm") {
         return (
-            <Button variant="contained" color="error" onClick={handleConfirm}>
-                Confirm?
-            </Button>
+            <ButtonGroup variant="contained" aria-label="Basic button group" color="error">
+                <Button variant="contained" color="error" onClick={handleConfirm}>
+                    Ok
+                </Button>
+                <Button
+                    variant="outlined"
+                    color="error"
+                    onClick={() => {
+                        setBtnState("initial");
+                    }}
+                >
+                    No
+                </Button>
+            </ButtonGroup>
         );
     }
     if (btnState === "done" || btnState === "error") {

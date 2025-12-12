@@ -114,11 +114,13 @@ class UserModel {
     };
 
     /**
+     * @param {boolean} hideSensitiveData - don't return passwords and tokens
      * @returns {Promise<Record<string,UserAccount>>} a collection of UserAccount
      */
-    getUserAccounts = async () => {
+    getUserAccounts = async (hideSensitiveData = true) => {
         const conn = getKnexConnection(this._mainConfig.database);
-        const results = await conn.select("*").from("public_users_list");
+        const table = hideSensitiveData ? "public_users_list" : "users";
+        const results = await conn.select("*").from(table);
         cleanupConnection(conn);
 
         return Object.fromEntries(results.map((user) => this._convertToLegacy(user)));

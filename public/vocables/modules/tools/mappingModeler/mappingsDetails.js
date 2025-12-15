@@ -1137,7 +1137,7 @@ var MappingsDetails = (function () {
             });
         }
     };
-        /**
+    /**
      * Checks whether a column belonging to a given class is already mapped
      * in another data table and enforces mapping consistency rules.
      *
@@ -1208,7 +1208,6 @@ var MappingsDetails = (function () {
                             var table2 = column2.data.dataTable;
                             // nodes which are same columnClass and in the same table and one of them is mainColumn
                             if (table2 == columnNode.data.dataTable && (node.data.isMainColumn || column2.data.isMainColumn)) {
-                                
                                 delete columnNode.data.definedInColumn;
                                 delete column2.data.definedInColumn;
                                 column2.data.isMainColumn = true;
@@ -1217,8 +1216,8 @@ var MappingsDetails = (function () {
                                 return;
                             }
                             //pass others nodess
-                            if(table2 == columnNode.data.dataTable){
-                                return
+                            if (table2 == columnNode.data.dataTable) {
+                                return;
                             }
 
                             if (columnNode.data.isMainColumn && column2.data.isMainColumn) {

@@ -1,4 +1,5 @@
 import { MouseEvent, useEffect, useState } from "react";
+import { getApiUrl } from "../Utils";
 
 import {
     Accordion,
@@ -59,6 +60,18 @@ export const SourcesDialog = ({ edit, me, onClose, onSubmit, open, selectedSourc
     const [users, setUsers] = useState<User[]>([]);
     const [uploadGraphModal, setUploadGraphModal] = useState(false);
     const [sourceName, setSourceName] = useState("");
+
+    // api url
+    const [apiUrl, setApiUrl] = useState<string>("/");
+
+    const getAndSetApiUrl = async () => {
+        const apiUrl = await getApiUrl();
+        setApiUrl(apiUrl);
+    };
+
+    useEffect(() => {
+        void getAndSetApiUrl();
+    }, []);
 
     const handleField = (key: string, value: string | string[] | Record<string, string> | boolean | null) => {
         if (key.startsWith("predicates")) {
@@ -568,7 +581,7 @@ export const SourcesDialog = ({ edit, me, onClose, onSubmit, open, selectedSourc
                     </Button>
                 </DialogActions>
             </Dialog>
-            {uploadGraphModal && source ? <UploadGraphModal indexAfterSuccess={true} open={true} onClose={() => setUploadGraphModal(false)} sourceName={sourceName} /> : null}{" "}
+            {uploadGraphModal && source ? <UploadGraphModal apiUrl={apiUrl} indexAfterSuccess={true} open={true} onClose={() => setUploadGraphModal(false)} sourceName={sourceName} /> : null}{" "}
         </>
     );
 };

@@ -566,6 +566,7 @@ var MappingColumnsGraph = (function () {
         if (node.from) {
             //edge
             html = '    <span class="popupMenuItem" onclick="MappingColumnsGraph.graphActions.removeNodeEdgeGraph();"> Remove Edge</span>';
+             html += '    <span class="popupMenuItem" onclick="MappingColumnsGraph.graphActions.showPropertyInfos()">NodeInfos</span>';
         } else {
             html = '    <span class="popupMenuItem" onclick="MappingColumnsGraph.graphActions.removeNodeFromGraph();"> Remove Node</span>';
         }
@@ -616,6 +617,27 @@ var MappingColumnsGraph = (function () {
                 self.removeNode(self.currentGraphNode.id);
             }
         },
+
+               /**
+         * Removes an edge from the graph after user confirmation.
+         * @function
+         * @name showPropertyInfos
+         * @memberof module:MappingColumnsGraph
+         * @returns {void}
+         */
+        showPropertyInfos: function () {
+            var property= MappingModeler.allProperties;
+            for(var i=0; i<property.length; i++){
+                if(property[i].label == self.currentGraphNode.label){
+                        NodeInfosWidget.showNodeInfos(property[i].source, self.currentGraphNode.data.id, "mainDialogDiv");
+                        break
+                }
+            }
+            
+        },
+    
+
+
 
         /**
          * Removes an edge from the graph after user confirmation.

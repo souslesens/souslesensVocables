@@ -31,7 +31,8 @@
         "SQLquery",
         "SPARQL",
         "admin",
-        "ConfigEditor"
+        "ConfigEditor",
+        "UserSettings"
     ],
     "cookieSameSite": "",
     "cookieMaxAge": 2629800000,

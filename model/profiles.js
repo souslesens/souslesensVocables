@@ -137,7 +137,12 @@ class ProfileModel {
             const userProfiles = await this.getUserProfiles(user);
             const allowedToolsOrAll = new Set(Object.values(userProfiles).flatMap((v) => v.allowedTools));
             const allowedTools = allowedToolsOrAll.has("ALL") ? availableToolsNames : allowedToolsOrAll;
-            return this._toolModel.allTools.filter((tool) => allowedTools.has(tool.name));
+
+            // add publicTool if missing
+            const publicTools = this._toolModel.allTools.filter((tool) => tool.publicTool && availableToolsNames.has(tool.name)).map((tool) => tool.name);
+            const allowedToolsWithPublicTools = new Set([...allowedTools, ...publicTools]);
+
+            return this._toolModel.allTools.filter((tool) => allowedToolsWithPublicTools.has(tool.name));
         } catch (error) {
             console.log(error);
         }

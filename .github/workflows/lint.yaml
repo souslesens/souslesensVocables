@@ -24,3 +24,4 @@ jobs:
                   cache: "npm"
             - run: npm ci
             - run: npm run tools:eslint
+            - run: npm run tools:tsc

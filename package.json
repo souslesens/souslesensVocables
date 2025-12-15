@@ -17,7 +17,7 @@
         "prettier:write": "prettier -w ./public/vocables ./model ./api ./bin ./tests",
         "test:jest": "jest --coverage --rootDir tests",
         "tools:ncu": "ncu",
-        "tools:tsc": "tsc",
+        "tools:tsc": "tsc --jsx preserve",
         "tools:eslint": "eslint mainapp/src",
         "tools:jsdoc": "jsdoc",
         "tools:jsdoc2md": "jsdoc2md --configure docs/jsdoc/jsdoc.json  --template docs/jsdoc/jsdoc.hbs  --no-cache",

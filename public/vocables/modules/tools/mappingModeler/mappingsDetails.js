@@ -1137,6 +1137,36 @@ var MappingsDetails = (function () {
             });
         }
     };
+        /**
+     * Checks whether a column belonging to a given class is already mapped
+     * in another data table and enforces mapping consistency rules.
+     *
+     * This function ensures that, for a given class:
+     * - There is always exactly one logical "main column" (`isMainColumn`).
+     * - Columns belonging to the same class but different tables are properly
+     *   linked using `definedInColumn`.
+     * - Conflicts where multiple main columns exist across tables are resolved
+     *   automatically to preserve mapping integrity.
+     *
+     * During execution, the function may mutate the provided column node and
+     * other related column nodes by:
+     * - Assigning or removing the `isMainColumn` flag.
+     * - Setting or deleting the `definedInColumn` reference.
+     * - Synchronizing URI-related properties to the mainColumnClass.
+     *
+     * @param {Object} columnNode
+     *   The column node currently being processed. This object may be modified
+     *   by the function to reflect updated main/dependent column relationships.
+     *
+     * @param {string} [columnClass]
+     *   The identifier of the class to which the column belongs. If not provided,
+     *   it is automatically resolved from the given column node.
+     *
+     * @returns {string|false}
+     *   Returns the name/identifier of the data table in which a conflicting
+     *   main column already exists, if the column is already mapped in another
+     *   table. Returns `false` if no such conflict is detected.
+     */
 
     self.isColumnAllreadyMappedInAnotherTable = function (columnNode, columnClass) {
         var table = false;
@@ -1176,8 +1206,9 @@ var MappingsDetails = (function () {
                                 return;
                             }
                             var table2 = column2.data.dataTable;
-                            // let them all as mainColumnClass and make them has the same basic properties
-                            if (table2 == columnNode.data.dataTable) {
+                            // nodes which are same columnClass and in the same table and one of them is mainColumn
+                            if (table2 == columnNode.data.dataTable && (node.data.isMainColumn || column2.data.isMainColumn)) {
+                                
                                 delete columnNode.data.definedInColumn;
                                 delete column2.data.definedInColumn;
                                 column2.data.isMainColumn = true;
@@ -1185,6 +1216,11 @@ var MappingsDetails = (function () {
                                 self.copyUriProperties(node, column2);
                                 return;
                             }
+                            //pass others nodess
+                            if(table2 == columnNode.data.dataTable){
+                                return
+                            }
+
                             if (columnNode.data.isMainColumn && column2.data.isMainColumn) {
                                 // This case is not expected but in case there is two main columns in different tables
                                 // we set the definedInColumn to the first main column found to not break the mapping

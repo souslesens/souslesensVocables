@@ -81,7 +81,7 @@ export async function saveProfile(body: Profile, mode: Mode, updateModel: React.
             } else {
                 updateModel({ type: "profiles", payload: success(mapProfiles(resources)) });
             }
-            updateLocal({ type: Type.UserClickedModal, payload: false });
+            updateLocal({ type: Type.UserClickedModal, payload: { modal: false, profileForm: undefined } });
         } else {
             updateModel({ type: "profiles", payload: failure(`${response.status}, ${message}`) });
         }

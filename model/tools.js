@@ -16,25 +16,25 @@ const { configPluginsConfig, configPluginsRepository, directoryPlugins, director
  */
 
 const NATIVE_TOOLS = [
-    { name: "lineage", controller: "Lineage_whiteboard", useSource: true, multiSources: false, toTools: {}, displayImports: true },
-    // { name: "AxiomEditor", controller: "Axiom_editor", useSource: false, multiSources: false, toTools: {} },
-    //{ name: "KGcreator", controller: "KGcreator", useSource: true, multiSources: false, toTools: {} },
-    { name: "KGquery", controller: "KGquery", useSource: true, multiSources: false, toTools: {} },
-    { name: "MappingModeler", controller: "MappingModeler", useSource: true, multiSources: false, toTools: {} },
-    //{ name: "KGconstraintsModeler", controller: "KGconstraintsModeler", useSource: true, multiSources: false, toTools: {} },
-    //{ name: "KGconstraints_editor", controller: "KGconstraints_editor", useSource: true, multiSources: false, toTools: {} },
-    { name: "SPARQL", label: "SPARQL endpoint", controller: "SPARQL_endpoint", useSource: false, multiSources: false, toTools: {}, resetURLParamsDiv: "mainDialogDiv" },
-    { name: "OntoCreator", controller: "Lineage_createSLSVsource", useSource: false, multiSources: false, toTools: {}, resetURLParamsDiv: "botPanel" },
-    { name: "admin", label: "Admin", controller: "Admin", useSource: false, multiSources: false, toTools: {} },
-    { name: "ConfigEditor", controller: "ConfigEditor", useSource: false, multiSources: false, toTools: {}, resetURLParamsDiv: "mainDialogDiv" },
-    { name: "GraphManagement", controller: "GraphManagement", useSource: false, multiSources: false, toTools: {}, resetURLParamsDiv: "mainDialogDiv" },
-    // { name: "Standardizer", controller: "Standardizer", useSource: true, multiSources: false, toTools: {} },
-    //{ name: "TSF_Dictionary", controller: "Lineage_dictionary", useSource: false, multiSources: false, toTools: {} },
-    { name: "UserSettings", controller: "UserSettings", useSource: false, multiSources: false, toTools: {} },
-    { name: "Browse", controller: "Browse", useSource: false, multiSources: false, toTools: {} },
+    { name: "lineage", controller: "Lineage_whiteboard", useSource: true, multiSources: false, toTools: {}, displayImports: true, publicTool: false },
+    // { name: "AxiomEditor", controller: "Axiom_editor", useSource: false, multiSources: false, toTools: {} , publicTool: false},
+    //{ name: "KGcreator", controller: "KGcreator", useSource: true, multiSources: false, toTools: {} , publicTool: false},
+    { name: "KGquery", controller: "KGquery", useSource: true, multiSources: false, toTools: {}, publicTool: false },
+    { name: "MappingModeler", controller: "MappingModeler", useSource: true, multiSources: false, toTools: {}, publicTool: false },
+    //{ name: "KGconstraintsModeler", controller: "KGconstraintsModeler", useSource: true, multiSources: false, toTools: {}, publicTool: false },
+    //{ name: "KGconstraints_editor", controller: "KGconstraints_editor", useSource: true, multiSources: false, toTools: {}, publicTool: false },
+    { name: "SPARQL", label: "SPARQL endpoint", controller: "SPARQL_endpoint", useSource: false, multiSources: false, toTools: {}, resetURLParamsDiv: "mainDialogDiv", publicTool: false },
+    { name: "OntoCreator", controller: "Lineage_createSLSVsource", useSource: false, multiSources: false, toTools: {}, resetURLParamsDiv: "botPanel", publicTool: false },
+    { name: "admin", label: "Admin", controller: "Admin", useSource: false, multiSources: false, toTools: {}, publicTool: false },
+    { name: "ConfigEditor", controller: "ConfigEditor", useSource: false, multiSources: false, toTools: {}, resetURLParamsDiv: "mainDialogDiv", publicTool: false },
+    { name: "GraphManagement", controller: "GraphManagement", useSource: false, multiSources: false, toTools: {}, resetURLParamsDiv: "mainDialogDiv", publicTool: false },
+    // { name: "Standardizer", controller: "Standardizer", useSource: true, multiSources: false, toTools: {}, publicTool: false },
+    //{ name: "TSF_Dictionary", controller: "Lineage_dictionary", useSource: false, multiSources: false, toTools: {}, publicTool: false },
+    { name: "UserSettings", controller: "UserSettings", useSource: false, multiSources: false, toTools: {}, publicTool: true },
+    { name: "Browse", controller: "Browse", useSource: false, multiSources: false, toTools: {}, publicTool: false },
 
-    { name: "Weaver", controller: "Weaver", useSource: true, multiSources: false, toTools: {}, displayImports: true },
-    // { name: "Lifex_cost", controller: "Lifex_cost", useSource: false, multiSources: false, toTools: {} },
+    { name: "Weaver", controller: "Weaver", useSource: true, multiSources: false, toTools: {}, displayImports: true, publicTool: false },
+    // { name: "Lifex_cost", controller: "Lifex_cost", useSource: false, multiSources: false, toTools: {}, publicTool: false },
 ].map((tool) => ({ type: "tool", label: tool.label ?? tool.name, ...tool }));
 
 const lock = new Lock();

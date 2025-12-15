@@ -24,6 +24,7 @@ describe("ToolModel", () => {
             expect(tool).toHaveProperty("useSource");
             expect(tool).toHaveProperty("multiSources");
             expect(tool).toHaveProperty("toTools");
+            expect(tool).toHaveProperty("publicTool");
         }
     });
 

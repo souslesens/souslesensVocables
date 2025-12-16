@@ -327,31 +327,26 @@ var MappingModeler = (function () {
                         }
                     }
 
-                    
-                        if (node.data && node.data.resourceType == "Class"){
-                            items.showNodeInfos = {
+                    if (node.data && node.data.resourceType == "Class") {
+                        items.showNodeInfos = {
                             label: "NodeInfos",
                             action: function (_e) {
-                                NodeInfosWidget.showNodeInfos(node.parent, node,"mainDialogDiv");
+                                NodeInfosWidget.showNodeInfos(node.parent, node, "mainDialogDiv");
                             },
-                            };
-                        }
-                        
-
-                }
-
-                if (self.currentResourceType == "ObjectProperty") { 
-                    if (node.data && node.data.resourceType == "ObjectProperty"){
-                        items.showNodeInfos = {
-                        label: "NodeInfos",
-                        action: function (_e) {
-                            NodeInfosWidget.showNodeInfos(node.parent, node,"mainDialogDiv");
-                        },
                         };
                     }
-                    
-                    
+                }
+
+                if (self.currentResourceType == "ObjectProperty") {
+                    if (node.data && node.data.resourceType == "ObjectProperty") {
+                        items.showNodeInfos = {
+                            label: "NodeInfos",
+                            action: function (_e) {
+                                NodeInfosWidget.showNodeInfos(node.parent, node, "mainDialogDiv");
+                            },
+                        };
                     }
+                }
                 return items;
             },
             selectTreeNodeFn: self.onSuggestionsSelect,

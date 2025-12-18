@@ -551,7 +551,8 @@ var TriplesMaker = {
             // blank nodes uriType should have an associated data column so a value
             if (columnParams.uriType == "blankNode") {
                 value = dataItem[columnParams.id];
-                if (!value) {
+                //if (!value) {
+                if (!value && value!=0) {
                     return;
                 }
                 //   value = columnId + ":" + value;

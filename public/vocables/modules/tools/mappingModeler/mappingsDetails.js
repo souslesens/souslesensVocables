@@ -359,10 +359,7 @@ var MappingsDetails = (function () {
         var html = `<table><tr><td>Table column</td></tr><tr><td><span id='class-column' ><b> ${column.text || column.label} </b></span> </td></tr>`;
 
         if (isColumnAllreadyMapped) {
-            html +=
-                "<tr><td> column already defined in table " +
-                isColumnAllreadyMapped +
-                "</td></tr>";
+            html += "<tr><td> column already defined in table " + isColumnAllreadyMapped + "</td></tr>";
         } else {
             html += `<tr></tr>`;
             html += `<tr><td>URI syntax*</td><td><select id='columnDetails-UriType' onchange='MappingsDetails.onChangeUriType()' style='padding:6px 6px'> </select>  </td></tr>`;
@@ -374,8 +371,10 @@ var MappingsDetails = (function () {
             html += `<tr><td>rdfs:label column</td><td><select id='columnDetails-rdfsLabel' style='padding:6px 6px'> </select> </td></tr>`;
         }
 
-        html+='<tr><td >'
-        html += (isColumnAllreadyMapped ? `<button class='slsv-button-1' id='class-datatype' style='padding:6px 6px;margin:0px;margin-right: 5px;' onclick='MappingsDetails.setNodeAsMainColumn("${column.id}")'>set as mainColumn </button>` : '');
+        html += "<tr><td >";
+        html += isColumnAllreadyMapped
+            ? `<button class='slsv-button-1' id='class-datatype' style='padding:6px 6px;margin:0px;margin-right: 5px;' onclick='MappingsDetails.setNodeAsMainColumn("${column.id}")'>set as mainColumn </button>`
+            : "";
         html += `<button class='slsv-button-1' id='class-datatype' style='padding:6px 6px;margin:0px;margin-right: 5px;' onclick='MappingsDetails.showSpecificMappingsBot("${column.id}")'> More mappings... </button>`;
         html += `<button class='slsv-button-1' id='class-datatype' style='padding:6px 6px;margin:0px;margin-right: 5px;' onclick='MappingsDetails.saveMappingsDetailsToVisjsGraph("${column.id}");MappingsDetails.afterSaveColumnTechnicalMappingsDialog() '> Save </button> </td></tr></table>`;
 

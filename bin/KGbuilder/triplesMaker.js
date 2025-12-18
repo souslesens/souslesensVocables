@@ -552,7 +552,8 @@ var TriplesMaker = {
             if (columnParams.uriType == "blankNode") {
                 value = dataItem[columnParams.id];
                 //if (!value) {
-                if (!value && value!=0) {
+                // protect from null values but not for "",0,0.0 and other null values for different javascript types
+                if (value == undefined || value == null) {
                     return;
                 }
                 //   value = columnId + ":" + value;

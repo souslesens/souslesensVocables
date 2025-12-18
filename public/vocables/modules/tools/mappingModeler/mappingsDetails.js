@@ -371,7 +371,7 @@ var MappingsDetails = (function () {
             html += `<tr><td>rdfs:label column</td><td><select id='columnDetails-rdfsLabel' style='padding:6px 6px'> </select> </td></tr>`;
         }
 
-        html += "<tr><td >";
+        html += "<tr><td style='display:flex' >";
         html += isColumnAllreadyMapped
             ? `<button class='slsv-button-1' id='class-datatype' style='padding:6px 6px;margin:0px;margin-right: 5px;' onclick='MappingsDetails.setNodeAsMainColumn("${column.id}")'>set as mainColumn </button>`
             : "";

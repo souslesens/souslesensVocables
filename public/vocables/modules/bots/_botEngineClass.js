@@ -86,6 +86,63 @@ class BotEngineClass {
             }
         });
     }
+
+   promptTextarea(message, varToFill, defaultValue, callback) {
+        $("#" + this.divId).find("#bot_resourcesProposalSelect").hide();
+
+        // Message bot
+        this.insertBotMessage(message, { isQuestion: true });
+
+        const textareaId = "botPromptTextarea";
+        $("#" + this.divId).find("#" + textareaId).remove();
+
+        const textarea = $(`
+            <textarea
+                id="${textareaId}"
+                style="width:100%; min-height:120px; margin-top:8px;"
+                placeholder="Enter description..."
+            ></textarea>
+        `);
+
+        $("#" + this.divId).find("#bot_input").before(textarea);
+
+        textarea.val(defaultValue || "").focus();
+
+        textarea.on("keydown", (evt) => {
+            if (evt.keyCode === 13 && evt.ctrlKey) {
+                evt.preventDefault();
+
+                const value = textarea.val().trim();
+                if (!value) {
+                    return this.previousStep();
+                }
+
+                this.history.VarFilling[this.history.currentIndex] = {
+                    VarFilled: varToFill,
+                    valueFilled: value,
+                };
+
+                this.currentBot.params[varToFill] = value;
+                this.insertBotMessage(value);
+
+                textarea.remove();
+
+                if (callback) {
+                    const ret = callback(value);
+                    if (ret === false) {
+                        return;
+                    }
+                }
+                this.nextStep();
+            }
+        });
+
+        if (!this.history.step.includes(this.history.currentIndex)) {
+            this.history.step.push(this.history.currentIndex);
+        }
+    }
+
+
     // see if is necessary when botEngine is removed and bot work with botEngineClass
     botClickGestion() {
         // find if bot is in dialog

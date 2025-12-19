@@ -34,11 +34,18 @@ var CreateSLSVsource_bot = (function () {
         _OR: {
             "Upload graph from file": { uploadFromFileFn: self.loadingWorkflow },
             "Upload graph from URL": { uploadFromUrlFn: self.loadingWorkflow },
-            "Add description": { addMetadata: self.workflowUpload },
+            "Add description": { addMetadata: self.workflowUploadwithoutDescription },
             Finish: self.loadingWorkflow,
         },
     };
 
+    self.workflowUploadwithoutDescription = {
+        _OR: {
+            "Upload graph from file": { uploadFromFileFn: self.loadingWorkflow },
+            "Upload graph from URL": { uploadFromUrlFn: self.loadingWorkflow },
+            Finish: self.loadingWorkflow,
+        },
+    };
     self.workflow2 = {
         _OR: {
             "Add import": { listImportsFn: { afterImportFn: {} } },
@@ -115,51 +122,51 @@ var CreateSLSVsource_bot = (function () {
             self.myBotEngine.nextStep();
         },
 
-        addMetadata: function () {
-            self.myBotEngine.promptValue("Ontology description", "Ontology description", "", null, function (value) {
-                if (!value) {
-                    return self.myBotEngine.previousStep();
+       addMetadata: function () {   
+
+            self.myBotEngine.promptTextarea(
+                "Ontology description (Ctrl + Enter to validate)",
+                "ontologyDescription",
+                "",
+                function (value) {
+
+                    self.params.ontologyDescription = value;
+                    const removedData = [];
+                    const addDataWithType = [
+                        {
+                            metadata: "http://purl.org/dc/elements/1.1/description",
+                            value: value,
+                            type: "literal",
+                            "xml:lang": "en",
+                        },
+                    ];
+
+                    $.ajax({
+                        type: "POST",
+                        url: `/api/v1/rdf/graph/metadata?source=${self.params.sourceLabel}`,
+                        data: JSON.stringify({
+                            addedData: addDataWithType,
+                            removedData: [],
+                        }),
+                        contentType: "application/json",
+                        success: function () {
+                            UI.message("Ontology description added", true);
+                            self.myBotEngine.currentObj = self.workflowUploadwithoutDescription;
+                            self.myBotEngine.nextStep();
+                        },
+                        error: function (err) {
+                            MainController.errorAlert(err);
+
+                            self.myBotEngine.currentObj = self.workflowUpload;
+                            self.myBotEngine.nextStep();
+                        },
+                    });
+
+                    return false;
                 }
-
-                self.params.ontologyDescription = value;
-
-                const addDataWithType = [
-                    {
-                        id: 1,
-                        metadata: "http://purl.org/dc/elements/1.1/description",
-                        value: value,
-                        isNew: false,
-                        type: "literal",
-                        "xml:lang": "en",
-                    },
-                ];
-
-                const removedDataWithType = [];
-
-                $.ajax({
-                    type: "POST",
-                    url: `/api/v1/rdf/graph/metadata?source=${self.params.sourceLabel ?? ""}`,
-                    data: JSON.stringify({
-                        addedData: addDataWithType,
-                        removedData: removedDataWithType,
-                    }),
-                    contentType: "application/json",
-
-                    success: function () {
-                        UI.message("Ontology description added", true);
-                        self.myBotEngine.currentObj = self.workflowUpload;
-                        self.myBotEngine.nextStep(self.workflowUpload);
-                    },
-                    error: function (err) {
-                        MainController.errorAlert(err);
-                        self.myBotEngine.currentObj = self.workflowUpload;
-                        self.myBotEngine.nextStep(self.workflowUpload);
-
-                        return err;
-                    },
-                });
-            });
+                );
         },
+
 
         listImportsFn: function () {
             var sources = Object.keys(Config.sources);

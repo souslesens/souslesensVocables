@@ -87,60 +87,86 @@ class BotEngineClass {
         });
     }
 
-   promptTextarea(message, varToFill, defaultValue, callback) {
+    promptTextarea(message, varToFill, defaultValue, callback) {
         $("#" + this.divId).find("#bot_resourcesProposalSelect").hide();
 
         // Message bot
         this.insertBotMessage(message, { isQuestion: true });
 
         const textareaId = "botPromptTextarea";
-        $("#" + this.divId).find("#" + textareaId).remove();
+        const sendBtnId = "botPromptTextareaSend";
 
-        const textarea = $(`
-            <textarea
-                id="${textareaId}"
-                style="width:100%; min-height:120px; margin-top:8px;"
-                placeholder="Enter description..."
-            ></textarea>
+        $("#" + this.divId).find("#" + textareaId).parent().remove();
+
+        const container = $(`
+            <div style="position:relative; width:100%; margin-top:8px;">
+                <textarea
+                    id="${textareaId}"
+                    style="
+                        width:100%;
+                        min-height:120px;
+                        padding:10px 40px 10px 10px;
+                        resize:vertical;
+                    "
+                    placeholder="Enter description..."
+                ></textarea>
+
+                <button
+                    id="${sendBtnId}"
+                    style="
+                        position:absolute;
+                        bottom:10px;
+                        right:10px;
+                        border:none;
+                        background:none;
+                        cursor:pointer;
+                        font-size:18px;
+                    "
+                    title="Validate"
+                >
+                    ▶
+                </button>
+            </div>
         `);
 
-        $("#" + this.divId).find("#bot_input").before(textarea);
+        $("#" + this.divId).find("#bot_input").before(container);
+
+        const textarea = container.find("#" + textareaId);
+        const sendBtn = container.find("#" + sendBtnId);
 
         textarea.val(defaultValue || "").focus();
 
-        textarea.on("keydown", (evt) => {
-            if (evt.keyCode === 13 && evt.ctrlKey) {
-                evt.preventDefault();
-
-                const value = textarea.val().trim();
-                if (!value) {
-                    return this.previousStep();
-                }
-
-                this.history.VarFilling[this.history.currentIndex] = {
-                    VarFilled: varToFill,
-                    valueFilled: value,
-                };
-
-                this.currentBot.params[varToFill] = value;
-                this.insertBotMessage(value);
-
-                textarea.remove();
-
-                if (callback) {
-                    const ret = callback(value);
-                    if (ret === false) {
-                        return;
-                    }
-                }
-                this.nextStep();
+        const validate = () => {
+            const value = textarea.val().trim();
+            if (!value) {
+                return this.previousStep();
             }
-        });
 
-        if (!this.history.step.includes(this.history.currentIndex)) {
-            this.history.step.push(this.history.currentIndex);
-        }
+            this.history.VarFilling[this.history.currentIndex] = {
+                VarFilled: varToFill,
+                valueFilled: value,
+            };
+
+            this.currentBot.params[varToFill] = value;
+            this.insertBotMessage(value);
+
+            container.remove();
+
+            if (callback) {
+                const ret = callback(value);
+                if (ret === false) {
+                    return;
+                }
+            }
+
+            this.nextStep();
+        };
+
+        sendBtn.on("click", validate);
+
+
     }
+
 
 
     // see if is necessary when botEngine is removed and bot work with botEngineClass

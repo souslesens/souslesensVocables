@@ -123,48 +123,41 @@ var CreateSLSVsource_bot = (function () {
         },
 
         addMetadata: function () {
+            self.myBotEngine.promptTextarea("Ontology description", "ontologyDescription", "", function (value) {
+                const removeData = [];
+                const addDataWithType = [
+                    {
+                        metadata: "http://purl.org/dc/elements/1.1/description",
+                        value: value,
+                        type: "literal",
+                        "xml:lang": "en",
+                    },
+                ];
 
-            self.myBotEngine.promptTextarea(
-                "Ontology description",
-                "ontologyDescription",
-                "",
-                function (value) {
-                    const removeData = [];
-                    const addDataWithType = [
-                        {
-                            metadata: "http://purl.org/dc/elements/1.1/description",
-                            value: value,
-                            type: "literal",
-                            "xml:lang": "en",
-                        },
-                    ];
+                $.ajax({
+                    type: "POST",
+                    url: `/api/v1/rdf/graph/metadata?source=${self.params.sourceLabel}`,
+                    data: JSON.stringify({
+                        addedData: addDataWithType,
+                        removedData: [],
+                    }),
+                    contentType: "application/json",
 
-                    $.ajax({
-                        type: "POST",
-                        url: `/api/v1/rdf/graph/metadata?source=${self.params.sourceLabel}`,
-                        data: JSON.stringify({
-                            addedData: addDataWithType,
-                            removedData: [],
-                        }),
-                        contentType: "application/json",
+                    success: function () {
+                        UI.message("Ontology description added", true);
+                        self.myBotEngine.currentObj = self.workflowUploadwithoutDescription;
+                        self.myBotEngine.nextStep();
+                    },
 
-                        success: function () {
-                            UI.message("Ontology description added", true);
-                            self.myBotEngine.currentObj = self.workflowUploadwithoutDescription;
-                            self.myBotEngine.nextStep();
-                        },
-
-                        error: function (err) {
-                            MainController.errorAlert(err);
-                            self.myBotEngine.currentObj = self.workflowUploadwithoutDescription;
-                            self.myBotEngine.nextStep();
-                        },
-                    });
-                    return false;
-                }
-            );
+                    error: function (err) {
+                        MainController.errorAlert(err);
+                        self.myBotEngine.currentObj = self.workflowUploadwithoutDescription;
+                        self.myBotEngine.nextStep();
+                    },
+                });
+                return false;
+            });
         },
-
 
         listImportsFn: function () {
             var sources = Object.keys(Config.sources);

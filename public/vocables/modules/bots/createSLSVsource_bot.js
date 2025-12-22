@@ -122,16 +122,14 @@ var CreateSLSVsource_bot = (function () {
             self.myBotEngine.nextStep();
         },
 
-       addMetadata: function () {   
+        addMetadata: function () {
 
             self.myBotEngine.promptTextarea(
-                "Ontology description (Ctrl + Enter to validate)",
+                "Ontology description",
                 "ontologyDescription",
                 "",
                 function (value) {
-
-                    self.params.ontologyDescription = value;
-                    const removedData = [];
+                    const removeData = [];
                     const addDataWithType = [
                         {
                             metadata: "http://purl.org/dc/elements/1.1/description",
@@ -149,22 +147,22 @@ var CreateSLSVsource_bot = (function () {
                             removedData: [],
                         }),
                         contentType: "application/json",
+
                         success: function () {
                             UI.message("Ontology description added", true);
                             self.myBotEngine.currentObj = self.workflowUploadwithoutDescription;
                             self.myBotEngine.nextStep();
                         },
+
                         error: function (err) {
                             MainController.errorAlert(err);
-
-                            self.myBotEngine.currentObj = self.workflowUpload;
+                            self.myBotEngine.currentObj = self.workflowUploadwithoutDescription;
                             self.myBotEngine.nextStep();
                         },
                     });
-
                     return false;
                 }
-                );
+            );
         },
 
 

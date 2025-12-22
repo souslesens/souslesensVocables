@@ -88,7 +88,9 @@ class BotEngineClass {
     }
 
     promptTextarea(message, varToFill, defaultValue, callback) {
-        $("#" + this.divId).find("#bot_resourcesProposalSelect").hide();
+        $("#" + this.divId)
+            .find("#bot_resourcesProposalSelect")
+            .hide();
 
         // Message bot
         this.insertBotMessage(message, { isQuestion: true });
@@ -96,7 +98,10 @@ class BotEngineClass {
         const textareaId = "botPromptTextarea";
         const sendBtnId = "botPromptTextareaSend";
 
-        $("#" + this.divId).find("#" + textareaId).parent().remove();
+        $("#" + this.divId)
+            .find("#" + textareaId)
+            .parent()
+            .remove();
 
         const container = $(`
             <div style="position:relative; width:100%; margin-top:8px;">
@@ -129,7 +134,9 @@ class BotEngineClass {
             </div>
         `);
 
-        $("#" + this.divId).find("#bot_input").before(container);
+        $("#" + this.divId)
+            .find("#bot_input")
+            .before(container);
 
         const textarea = container.find("#" + textareaId);
         const sendBtn = container.find("#" + sendBtnId);
@@ -163,11 +170,7 @@ class BotEngineClass {
         };
 
         sendBtn.on("click", validate);
-
-
     }
-
-
 
     // see if is necessary when botEngine is removed and bot work with botEngineClass
     botClickGestion() {

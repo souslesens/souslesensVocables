@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.22.0](https://github.com/souslesens/souslesensVocables/compare/2.21.0...2.22.0) (2025-12-23)
+
+> [!IMPORTANT]
+> Updating to 2.22.0 require a data migration. Execute the following script after upgrade.
+
+```bash
+npm run migrate
+```
+
+
+### Features
+
+* **migrations:** add missing tokens to users ([9f5656f](https://github.com/souslesens/souslesensVocables/commit/9f5656f3fbdbd8e2c3e10973ba647189b34117a3))
+* **model/tools:** add publicTool boolean to the NATIVE_TOOLs const ([36a2986](https://github.com/souslesens/souslesensVocables/commit/36a2986c370e7099588ebb664c40e35bcdbe0b4d))
+* **model/users:** add option to get users from users table and not view ([ef4ddc6](https://github.com/souslesens/souslesensVocables/commit/ef4ddc60431e30f11486c2ebe3a144804f092661))
+
+
+### Bug Fixes
+
+* **Lineage:** pass apiUrl to the download component ([467a896](https://github.com/souslesens/souslesensVocables/commit/467a89688d2a7c1dc6a78d47fecb7246400e583e))
+* **mainapp:** fix typing error ([00d8fa2](https://github.com/souslesens/souslesensVocables/commit/00d8fa2ee1ea494304e86df224a8b13f2aebf2b3))
+* **mainapp:** pass apiUrl to uploadGraphModal on configEditor ([0393bfc](https://github.com/souslesens/souslesensVocables/commit/0393bfcce8dd4d07f53d1367b686c63559b3a6c1))
+
 ## [2.21.0](https://github.com/souslesens/souslesensVocables/compare/2.20.0...2.21.0) (2025-12-11)
 
 

@@ -85,12 +85,6 @@ var KGquery_filter = (function () {
 
                 // });
             });
-
-            if (querySet.classFiltersMap) {
-                for (var key in querySet.classFiltersMap) {
-                    // to be finished
-                }
-            }
         });
 
         var jstreeData = [];
@@ -135,6 +129,26 @@ var KGquery_filter = (function () {
         var sampleSizeHtml = '<div style="margin-right: 10px;">' + '  <button onclick="KGquery_filter.setKGquerySampleSize()"> Sample</button></div>`;';
 
         jstreeOptions.additionalHTMLComponent = sampleSizeHtml;
+
+        KGquery.querySets.sets.forEach(function (querySet) {
+            if (querySet.classFiltersMap) {
+                for (var key in querySet.classFiltersMap) {
+                    var filter = querySet.classFiltersMap[key].filter;
+                    var regex = /\?(\w+?)[^\w]/gm;
+                    var matches = filter.matchAll(regex);
+                    for (const match of matches) {
+                        if (match) {
+                            var property = match[1];
+                        }
+                    }
+                    for (var i = 0; i < jstreeData.length; i++) {
+                        if (jstreeData[i].id == property) {
+                            jstreeData[i].state = { disabled: true };
+                        }
+                    }
+                }
+            }
+        });
 
         JstreeWidget.loadJsTree(null, jstreeData, jstreeOptions, function () {
             JstreeWidget.openNodeDescendants(null, "root");
@@ -232,7 +246,21 @@ var KGquery_filter = (function () {
                 return text + str;
             }
         }
-
+        var filterProperties = {};
+        KGquery.querySets.sets.forEach(function (querySet) {
+            if (querySet.classFiltersMap) {
+                for (var key in querySet.classFiltersMap) {
+                    var filter = querySet.classFiltersMap[key].filter;
+                    var regex = /\?(\w+?)[^\w]/gm;
+                    var matches = filter.matchAll(regex);
+                    for (const match of matches) {
+                        if (match) {
+                            filterProperties[key] = match[1];
+                        }
+                    }
+                }
+            }
+        });
         var optionalPredicatesSparql = "";
 
         var optionalPredicatesSubjecstMap = {};
@@ -246,8 +274,11 @@ var KGquery_filter = (function () {
             } else {
                 propertyStr = data.property.id;
             }
-
-            var predicate = optionalStr + " {?" + data.varName + " " + propertyStr + " ?" + data.varName + "_" + data.property.label + ".}\n";
+            if (Object.values(filterProperties).includes(propertyNode.id)) {
+                var predicate = " ?" + data.varName + " " + propertyStr + " ?" + data.varName + "_" + data.property.label + ".\n";
+            } else {
+                var predicate = optionalStr + " {?" + data.varName + " " + propertyStr + " ?" + data.varName + "_" + data.property.label + ".}\n";
+            }
 
             optionalPredicatesSparql = addToStringIfNotExists(predicate, optionalPredicatesSparql);
             if (!optionalPredicatesSubjecstMap["?" + data.varName]) {

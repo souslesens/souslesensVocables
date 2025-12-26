@@ -398,6 +398,8 @@ var Export = (function () {
         }
         var dataTableDivId = 'dataTableDiv'
         if(options.dataTableDivId){
+            // this is to support multiple datatables in different divs
+            // use it with different div ids to avoid conflicts
             dataTableDivId=options.dataTableDivId;
         }
         if (self.dataTable && !options.notDestroy) {

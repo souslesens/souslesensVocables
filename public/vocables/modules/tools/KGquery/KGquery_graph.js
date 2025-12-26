@@ -1172,6 +1172,36 @@ var KGquery_graph = (function () {
     };
 
     /**
+     * Gets the original label of an edge (without cardinality suffix)
+     * @function
+     * @name getEdgeOriginalLabel
+     * @memberof module:KGquery_graph
+     * @param {Object|string} edge - The edge object or edge ID
+     * @returns {string} The original label without cardinality
+     *
+     * @description
+     * This function retrieves the original label of an edge before cardinality
+     * was added. It's useful when you need the property name without the "(1)" or "(n)" suffix.
+     */
+    self.getEdgeOriginalLabel = function(edge) {
+        var edgeObj = edge;
+
+        // If edge is a string (ID), find the edge object
+        if (typeof edge === 'string') {
+            edgeObj = self.visjsData.edges.find(function(e) {
+                return e.id === edge;
+            });
+        }
+
+        if (!edgeObj) {
+            return '';
+        }
+        var baseLabel = edgeObj.data.originalLabel || edgeObj.data.propertyLabel || edgeObj.label;
+        return baseLabel;
+    };
+
+    
+    /**
      * Exports the current graph model by saving it first and then downloading it.
      * @function
      * @name exportVisjsGraph
@@ -1253,7 +1283,28 @@ var KGquery_graph = (function () {
         });
 
         self.visjsData.edges.forEach(function (item) {
-            self.labelsMap[item.id] = item.label || item.id;
+            // Preserve original label if not already saved
+            if (!item.data) {
+                item.data = {};
+            }
+            if (!item.data.originalLabel && item.label) {
+                item.data.originalLabel = item.label;
+            }
+
+            // Get the base label (from original label, propertyLabel, or current label)
+            var baseLabel = item.data.originalLabel || item.data.propertyLabel || item.label;
+
+            // Enrich label with cardinality if available
+            if (item.data.maxCardinality !== undefined) {
+                var cardinalityLabel = item.data.maxCardinality === 1 ? "1" : "n";
+                item.label = baseLabel + " : " + cardinalityLabel;
+            } else {
+                // No cardinality calculated, use base label
+                item.label = baseLabel;
+            }
+
+            // Update labelsMap with enriched label
+            self.labelsMap[item.id] = item.label;
         });
 
         var display = "graph";

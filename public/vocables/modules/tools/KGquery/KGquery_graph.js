@@ -9,6 +9,7 @@ import UserDataWidget from "../../uiWidgets/userDataWidget.js";
 import DataSourceManager from "../mappingModeler/dataSourcesManager.js";
 import MainController from "../../shared/mainController.js";
 import ImportFileWidget from "../../uiWidgets/importFileWidget.js";
+import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
 
 var KGquery_graph = (function () {
     var self = {};
@@ -1042,7 +1043,20 @@ var KGquery_graph = (function () {
                         });
                         callbackSeries();
                     });
-                }, //Add decoration data from decorate file
+                }, 
+                // add cardinalities
+                function(callbackSeries) {
+                    self.addCardinalityToEdges(source, visjsData, function(err) {
+                        if (err) {
+                            console.log("Error adding cardinalities:", err);
+                        }
+                        callbackSeries(err);
+                    });
+                },
+                
+                
+                
+                //Add decoration data from decorate file
                 function (callbackSeries) {
                     self.fillDecoration(function (err) {
                         if (err) {
@@ -1071,6 +1085,90 @@ var KGquery_graph = (function () {
                 return callback(err, visjsData);
             },
         );
+    };
+
+    /**
+     * Calculates and adds cardinality information to graph edges
+     * @function
+     * @name addCardinalityToEdges
+     * @memberof module:KGquery_graph
+     * @param {string} source - The data source name
+     * @param {Object} visjsData - The graph data containing nodes and edges
+     * @param {Function} callback - Callback function (err)
+     * @returns {void}
+     *
+     * @description
+     * This function calculates the maximum cardinality for each edge in the graph
+     * by querying the SPARQL endpoint. The cardinality represents the maximum number
+     * of instances of the target class that can be related to a single instance of
+     * the source class via the edge's property.
+     */
+    self.addCardinalityToEdges = function(source, visjsData, callback) {
+        if (!visjsData || !visjsData.edges || visjsData.edges.length === 0) {
+            return callback();
+        }
+
+        KGquery_graph.message("calculating cardinalities for edges");
+
+        // Process edges sequentially to avoid overwhelming the SPARQL endpoint
+        async.eachSeries(visjsData.edges, function(edge, callbackEach) {
+            // Skip edges without propertyId
+            if (!edge.data || !edge.data.propertyId) {
+                return callbackEach();
+            }
+
+            var startClass = edge.from;
+            var endClass = edge.to;
+            var propertyId = edge.data.propertyId;
+            var fromStr = Sparql_common.getFromStr(source);
+            // Build SPARQL query to get max cardinality
+            var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
+                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> " +
+                "SELECT (MAX(?count) AS ?maxCardinality) " +
+                fromStr+
+                "WHERE { " +
+                "{ " +
+                "SELECT (COUNT(DISTINCT ?endingInstance) AS ?count) " +
+                "WHERE { " +
+                "?startingInstance rdf:type <" + startClass + ">. " +
+                "?startingInstance <" + propertyId + "> ?endingInstance. " +
+                "?endingInstance rdf:type <" + endClass + ">. " +
+                "} " +
+                "GROUP BY ?startingInstance " +
+                "ORDER BY DESC(?count) " +
+                "} " +
+                "}";
+
+            var url = Config.sources[source].sparql_server.url + "?format=json&query=";         
+            // Execute SPARQL query
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source:source}, function(err, cardinalityResult) {
+                if (err) {
+                    console.log("Error calculating cardinality for edge " + edge.id + ":", err);
+                    // Set default cardinality on error
+                    edge.data.maxCardinality = 1;
+                    return callbackEach();
+                }
+
+                // Extract and store cardinality in edge data
+                var cardinality = 1;
+                if (cardinalityResult &&
+                    cardinalityResult.results &&
+                    cardinalityResult.results.bindings &&
+                    cardinalityResult.results.bindings.length > 0 &&
+                    cardinalityResult.results.bindings[0].maxCardinality) {
+                    cardinality = parseInt(cardinalityResult.results.bindings[0].maxCardinality.value);
+                }
+
+                edge.data.maxCardinality = cardinality;
+                callbackEach();
+            });
+        }, function(err) {
+            if (err) {
+                console.log("Error processing edge cardinalities:", err);
+            }
+            KGquery_graph.message("");
+            callback(err);
+        });
     };
 
     /**
@@ -1222,6 +1320,7 @@ var KGquery_graph = (function () {
                 }
             });
             self.KGqueryGraph.data.nodes.update(nodes_fonts);
+            
             if (callback) {
                 callback();
             }

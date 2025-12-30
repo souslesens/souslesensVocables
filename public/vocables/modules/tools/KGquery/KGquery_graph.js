@@ -1277,10 +1277,13 @@ var KGquery_graph = (function () {
         }
 
         KGquery_graph.message("drawing graph");
-
+        self.visjsData.nodes = common.removeDuplicatesFromArray(self.visjsData.nodes, "id");
+        self.visjsData.edges = common.removeDuplicatesFromArray(self.visjsData.edges, "id");
         self.visjsData.nodes.forEach(function (item) {
             self.labelsMap[item.id] = item.label || item.id;
         });
+
+        
 
         self.visjsData.edges.forEach(function (item) {
             // Preserve original label if not already saved
@@ -1342,12 +1345,13 @@ var KGquery_graph = (function () {
         });
 
         self.KGqueryGraph = new VisjsGraphClass("KGquery_graphDiv", self.visjsData, self.visjsOptions);
-
+            
         // cannot get colors from loadGraph ???!!
         self.KGqueryGraph.draw(function () {
             self.simulationOn = true;
             var newNodes = [];
             self.visjsData.nodes.forEach(function (node) {
+                
                 newNodes.push({ id: node.id, color: node.color, shape: node.shape });
             });
             KGquery_graph.message("", true);

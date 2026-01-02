@@ -1043,19 +1043,17 @@ var KGquery_graph = (function () {
                         });
                         callbackSeries();
                     });
-                }, 
+                },
                 // add cardinalities
-                function(callbackSeries) {
-                    self.addCardinalityToEdges(source, visjsData, function(err) {
+                function (callbackSeries) {
+                    self.addCardinalityToEdges(source, visjsData, function (err) {
                         if (err) {
                             console.log("Error adding cardinalities:", err);
                         }
                         callbackSeries(err);
                     });
                 },
-                
-                
-                
+
                 //Add decoration data from decorate file
                 function (callbackSeries) {
                     self.fillDecoration(function (err) {
@@ -1103,7 +1101,7 @@ var KGquery_graph = (function () {
      * of instances of the target class that can be related to a single instance of
      * the source class via the edge's property.
      */
-    self.addCardinalityToEdges = function(source, visjsData, callback) {
+    self.addCardinalityToEdges = function (source, visjsData, callback) {
         if (!visjsData || !visjsData.edges || visjsData.edges.length === 0) {
             return callback();
         }
@@ -1111,64 +1109,77 @@ var KGquery_graph = (function () {
         KGquery_graph.message("calculating cardinalities for edges");
 
         // Process edges sequentially to avoid overwhelming the SPARQL endpoint
-        async.eachSeries(visjsData.edges, function(edge, callbackEach) {
-            // Skip edges without propertyId
-            if (!edge.data || !edge.data.propertyId) {
-                return callbackEach();
-            }
-
-            var startClass = edge.from;
-            var endClass = edge.to;
-            var propertyId = edge.data.propertyId;
-            var fromStr = Sparql_common.getFromStr(source);
-            // Build SPARQL query to get max cardinality
-            var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
-                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> " +
-                "SELECT (MAX(?count) AS ?maxCardinality) " +
-                fromStr+
-                "WHERE { " +
-                "{ " +
-                "SELECT (COUNT(DISTINCT ?endingInstance) AS ?count) " +
-                "WHERE { " +
-                "?startingInstance rdf:type <" + startClass + ">. " +
-                "?startingInstance <" + propertyId + "> ?endingInstance. " +
-                "?endingInstance rdf:type <" + endClass + ">. " +
-                "} " +
-                "GROUP BY ?startingInstance " +
-                "ORDER BY DESC(?count) " +
-                "} " +
-                "}";
-
-            var url = Config.sources[source].sparql_server.url + "?format=json&query=";         
-            // Execute SPARQL query
-            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source:source}, function(err, cardinalityResult) {
-                if (err) {
-                    console.log("Error calculating cardinality for edge " + edge.id + ":", err);
-                    // Set default cardinality on error
-                    edge.data.maxCardinality = 1;
+        async.eachSeries(
+            visjsData.edges,
+            function (edge, callbackEach) {
+                // Skip edges without propertyId
+                if (!edge.data || !edge.data.propertyId) {
                     return callbackEach();
                 }
 
-                // Extract and store cardinality in edge data
-                var cardinality = 1;
-                if (cardinalityResult &&
-                    cardinalityResult.results &&
-                    cardinalityResult.results.bindings &&
-                    cardinalityResult.results.bindings.length > 0 &&
-                    cardinalityResult.results.bindings[0].maxCardinality) {
-                    cardinality = parseInt(cardinalityResult.results.bindings[0].maxCardinality.value);
-                }
+                var startClass = edge.from;
+                var endClass = edge.to;
+                var propertyId = edge.data.propertyId;
+                var fromStr = Sparql_common.getFromStr(source);
+                // Build SPARQL query to get max cardinality
+                var query =
+                    "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
+                    "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> " +
+                    "SELECT (MAX(?count) AS ?maxCardinality) " +
+                    fromStr +
+                    "WHERE { " +
+                    "{ " +
+                    "SELECT (COUNT(DISTINCT ?endingInstance) AS ?count) " +
+                    "WHERE { " +
+                    "?startingInstance rdf:type <" +
+                    startClass +
+                    ">. " +
+                    "?startingInstance <" +
+                    propertyId +
+                    "> ?endingInstance. " +
+                    "?endingInstance rdf:type <" +
+                    endClass +
+                    ">. " +
+                    "} " +
+                    "GROUP BY ?startingInstance " +
+                    "ORDER BY DESC(?count) " +
+                    "} " +
+                    "}";
 
-                edge.data.maxCardinality = cardinality;
-                callbackEach();
-            });
-        }, function(err) {
-            if (err) {
-                console.log("Error processing edge cardinalities:", err);
-            }
-            KGquery_graph.message("");
-            callback(err);
-        });
+                var url = Config.sources[source].sparql_server.url + "?format=json&query=";
+                // Execute SPARQL query
+                Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: source }, function (err, cardinalityResult) {
+                    if (err) {
+                        console.log("Error calculating cardinality for edge " + edge.id + ":", err);
+                        // Set default cardinality on error
+                        edge.data.maxCardinality = 1;
+                        return callbackEach();
+                    }
+
+                    // Extract and store cardinality in edge data
+                    var cardinality = 1;
+                    if (
+                        cardinalityResult &&
+                        cardinalityResult.results &&
+                        cardinalityResult.results.bindings &&
+                        cardinalityResult.results.bindings.length > 0 &&
+                        cardinalityResult.results.bindings[0].maxCardinality
+                    ) {
+                        cardinality = parseInt(cardinalityResult.results.bindings[0].maxCardinality.value);
+                    }
+
+                    edge.data.maxCardinality = cardinality;
+                    callbackEach();
+                });
+            },
+            function (err) {
+                if (err) {
+                    console.log("Error processing edge cardinalities:", err);
+                }
+                KGquery_graph.message("");
+                callback(err);
+            },
+        );
     };
 
     /**
@@ -1183,24 +1194,23 @@ var KGquery_graph = (function () {
      * This function retrieves the original label of an edge before cardinality
      * was added. It's useful when you need the property name without the "(1)" or "(n)" suffix.
      */
-    self.getEdgeOriginalLabel = function(edge) {
+    self.getEdgeOriginalLabel = function (edge) {
         var edgeObj = edge;
 
         // If edge is a string (ID), find the edge object
-        if (typeof edge === 'string') {
-            edgeObj = self.visjsData.edges.find(function(e) {
+        if (typeof edge === "string") {
+            edgeObj = self.visjsData.edges.find(function (e) {
                 return e.id === edge;
             });
         }
 
         if (!edgeObj) {
-            return '';
+            return "";
         }
         var baseLabel = edgeObj.data.originalLabel || edgeObj.data.propertyLabel || edgeObj.label;
         return baseLabel;
     };
 
-    
     /**
      * Exports the current graph model by saving it first and then downloading it.
      * @function
@@ -1283,8 +1293,6 @@ var KGquery_graph = (function () {
             self.labelsMap[item.id] = item.label || item.id;
         });
 
-        
-
         self.visjsData.edges.forEach(function (item) {
             // Preserve original label if not already saved
             if (!item.data) {
@@ -1345,13 +1353,12 @@ var KGquery_graph = (function () {
         });
 
         self.KGqueryGraph = new VisjsGraphClass("KGquery_graphDiv", self.visjsData, self.visjsOptions);
-            
+
         // cannot get colors from loadGraph ???!!
         self.KGqueryGraph.draw(function () {
             self.simulationOn = true;
             var newNodes = [];
             self.visjsData.nodes.forEach(function (node) {
-                
                 newNodes.push({ id: node.id, color: node.color, shape: node.shape });
             });
             KGquery_graph.message("", true);
@@ -1375,7 +1382,7 @@ var KGquery_graph = (function () {
                 }
             });
             self.KGqueryGraph.data.nodes.update(nodes_fonts);
-            
+
             if (callback) {
                 callback();
             }

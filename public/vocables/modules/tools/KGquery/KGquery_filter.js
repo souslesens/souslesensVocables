@@ -236,6 +236,7 @@ var KGquery_filter = (function () {
         var optionalPredicatesSparql = "";
 
         var optionalPredicatesSubjecstMap = {};
+        var filteredPropertiesMap = self.getFilteredPropertiesMap();
         selectedPropertyNodes.forEach(function (propertyNode) {
             var optionalStr = " OPTIONAL ";
             var data = propertyNode.data;
@@ -246,9 +247,17 @@ var KGquery_filter = (function () {
             } else {
                 propertyStr = data.property.id;
             }
+            var filteredProperties = filteredPropertiesMap[data.varName] || [];
+            var findedFilteredProperty = filteredProperties.find(function (prop) {
+                return "<" + prop.id + ">" == propertyStr;
+            });
 
-            var predicate = optionalStr + " {?" + data.varName + " " + propertyStr + " ?" + data.varName + "_" + data.property.label + ".}\n";
-
+            //var predicate = optionalStr + " {?" + data.varName + " " + propertyStr + " ?" + data.varName + "_" + data.property.label + ".}\n";
+            var predicate = "?" + data.varName + " " + propertyStr + " ?" + data.varName + "_" + data.property.label + ".";
+            if (!findedFilteredProperty) {
+                predicate = optionalStr + " {" + predicate + "}";
+            }
+            predicate += "\n";
             optionalPredicatesSparql = addToStringIfNotExists(predicate, optionalPredicatesSparql);
             if (!optionalPredicatesSubjecstMap["?" + data.varName]) {
                 optionalPredicatesSubjecstMap["?" + data.varName] = "";
@@ -394,7 +403,38 @@ var KGquery_filter = (function () {
             JstreeWidget.validateSelfDialog();
         }
     };
-
+    self.getFilteredPropertiesMap = function () {
+        var filteredPropertiesMap = {};
+        KGquery.querySets.sets.forEach(function (set) {
+            for (var key in set.classFiltersMap) {
+                var filter = set.classFiltersMap[key].filter;
+                var classObj = set.classFiltersMap[key].class.data.label;
+                var nonObjectProperties = set.classFiltersMap[key].class.data.nonObjectProperties;
+                if (!nonObjectProperties || nonObjectProperties.length == 0) {
+                    continue;
+                }
+                // Extract property name from filter string using regex
+                // Pattern: ?ClassName_propertyName
+                var regex = new RegExp("\\?" + classObj + "_([a-zA-Z0-9_]+)");
+                var match = filter.match(regex);
+                if (match) {
+                    var propertyName = match[1];
+                    if (!filteredPropertiesMap[classObj]) {
+                        filteredPropertiesMap[classObj] = [];
+                    }
+                    if (filteredPropertiesMap[classObj].indexOf(propertyName) === -1) {
+                        var property = nonObjectProperties.find(function (nonObjectProperty) {
+                            return nonObjectProperty.label == propertyName;
+                        });
+                        if (property) {
+                            filteredPropertiesMap[classObj].push(property);
+                        }
+                    }
+                }
+            }
+        });
+        return filteredPropertiesMap;
+    };
     return self;
 })();
 

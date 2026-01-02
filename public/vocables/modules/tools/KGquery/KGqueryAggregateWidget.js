@@ -62,7 +62,7 @@ var KGqueryAggregateWidget = (function () {
                 var options = {
                     selectTreeNodeFn: function (event, obj) {
                         var groupFnsMap = {};
-                        if (self.numericVarsMap[obj.node.label]) {
+                        if (self.numericVarsMap[obj.node.text]) {
                             groupFnsMap = self.groupFunctions;
                         } else {
                             groupFnsMap = { COUNT: 1, concat: 1 };

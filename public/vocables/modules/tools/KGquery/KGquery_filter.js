@@ -203,7 +203,12 @@ var KGquery_filter = (function () {
             return callback("no properties selected");
         }
         var labelFromURIToDisplay = [];
+        var uniqueProps = {};
         propertyNodes.forEach(function (node) {
+            if (uniqueProps[node.id]) {
+                return;
+            }
+            uniqueProps[node.id] = true;
             if (node?.data?.property && node?.data?.property?.id == "labelFromURI") {
                 labelFromURIToDisplay.push(node?.data?.varName);
                 return;

@@ -5,7 +5,7 @@ import Sparql_OWL from "../sparqlProxies/sparql_OWL.js";
 import KGquery_graph from "../tools/KGquery/KGquery_graph.js";
 import common from "../shared/common.js";
 
-var KGquery_HyperGraphMaker_bot = (function () {
+var KGquery_composite_graph_bot = (function () {
     var self = {};
     self.title = "HyperGraphMaker";
     self.myBotEngine = new BotEngineClass();
@@ -16,7 +16,7 @@ var KGquery_HyperGraphMaker_bot = (function () {
     self.start = function (workflow, _params, callbackFn) {
         var startParams = self.myBotEngine.fillStartParams(arguments);
 
-        self.myBotEngine.init(KGquery_HyperGraphMaker_bot, self.workflow_HyperGraphMaker, null, function () {
+        self.myBotEngine.init(KGquery_composite_graph_bot, self.workflow_HyperGraphMaker, null, function () {
             self.myBotEngine.startParams = startParams;
             self.myBotEngine.currentBot.params.source = _params.source;
 
@@ -225,5 +225,5 @@ var KGquery_HyperGraphMaker_bot = (function () {
     };
     return self;
 })();
-export default KGquery_HyperGraphMaker_bot;
-window.KGquery_HyperGraphMaker_bot = KGquery_HyperGraphMaker_bot;
+export default KGquery_composite_graph_bot;
+window.KGquery_composite_graph_bot = KGquery_composite_graph_bot;

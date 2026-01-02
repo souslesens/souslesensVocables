@@ -396,9 +396,15 @@ var Export = (function () {
         if (!options) {
             options = {};
         }
-        if (self.dataTable) {
+        var dataTableDivId = "dataTableDiv";
+        if (options.dataTableDivId) {
+            // this is to support multiple datatables in different divs
+            // use it with different div ids to avoid conflicts
+            dataTableDivId = options.dataTableDivId;
+        }
+        if (self.dataTable && !options.notDestroy) {
             self.dataTable.destroy();
-            $("#dataTableDiv").html("");
+            $("#" + dataTableDivId).html("");
         }
         if (options.divId) {
             div = options.divId;
@@ -412,7 +418,7 @@ var Export = (function () {
         var height = "75vh";
         if (options.height) height = options.height;
 
-        $("#" + div).html("<div style='width: " + width + ";height:" + height + "'> <table class='cell-border' id='dataTableDivExport'></table></div>");
+        $("#" + div).html("<div style='width: " + width + ";height:" + height + "'> <table class='cell-border' id='" + dataTableDivId + "Export" + "'></table></div>");
         //  $("#" + div).html("<div style='width: 97%;height:75vh'> <table class='cell-border' id='dataTableDivExport'></table></div>");
 
         if (!buttons) {
@@ -456,7 +462,11 @@ fixedColumns: true*/
         if (options && options.paging) {
             params.paging = true;
         }
-        self.dataTable = $("#dataTableDivExport").DataTable(params);
+        self.dataTable = $("#" + dataTableDivId + "Export").DataTable(params);
+        //if(options.dataTabe$('')
+        if (options.dataTableDivId) {
+            $("#" + options.dataTableDivId + "Export_wrapper").css({ width: "100%", height: "100%", overflow: "auto" });
+        }
         if (div.indexOf("DialogDiv") > -1) {
             //open the dialog after the datatable is loaded to be on center
             UI.openDialog(div, { title: "DataTable" });

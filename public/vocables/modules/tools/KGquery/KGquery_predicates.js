@@ -133,9 +133,10 @@ var KGquery_predicates = (function () {
 
             // set rdftype and predicates between classes
             querySet.elements.forEach(function (queryElement, queryElementIndex) {
-                if (!queryElement.fromNode || !queryElement.toNode) {
+                /*if (!queryElement.fromNode || !queryElement.toNode) {
                     return;
-                }
+                }*/
+                // need this case for single class query
 
                 KGquery_predicates.setRdfTypePredicates(queryElement, predicatesSubjectsMap);
 

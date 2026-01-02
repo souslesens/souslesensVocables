@@ -348,7 +348,8 @@ var TriplesMaker = {
                     // the other cases need a value for the mapping object
                     // no value case should implements blank nodes,virtual columns,rowIndex ...
                     // getColumnUri function handle all cases
-                    if (!line[mapping.o]) {
+                    // protect from null values from others javascript types
+                    if (line[mapping.o] == undefined || line[mapping.o] == null) {
                         if (mapping.isConstantUri) {
                             // uri
                             object = "<" + mapping.o + ">";
@@ -551,7 +552,9 @@ var TriplesMaker = {
             // blank nodes uriType should have an associated data column so a value
             if (columnParams.uriType == "blankNode") {
                 value = dataItem[columnParams.id];
-                if (!value) {
+                //if (!value) {
+                // protect from null values but not for "",0,0.0 and other null values for different javascript types
+                if (value == undefined || value == null) {
                     return;
                 }
                 //   value = columnId + ":" + value;
@@ -646,7 +649,7 @@ var TriplesMaker = {
         var objectStr = null;
         if (mapping.dataType) {
             var str = dataItem[mapping.o];
-            if (!str || str == "null") {
+            if (str == undefined || str == null) {
                 return null;
             }
             if (mapping.dataType.startsWith("xsd:date")) {
@@ -687,7 +690,7 @@ var TriplesMaker = {
             if (!mapping.dataType.startsWith("xsd:")) {
                 mapping.dataType = "xsd:string";
             }
-            if (!str || str == "null") {
+            if (str == undefined || str == null) {
                 return null;
             }
             if (mapping.dataType == "xsd:string") {

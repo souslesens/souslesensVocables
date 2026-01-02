@@ -151,7 +151,7 @@ var Containers_tree = (function () {
 
     self.menuActions = {};
 
-    self.listContainerResources = function (container, jstreeDivId) {
+    self.listContainerResources = function (container, jstreeDivId,callback) {
         var source = container.data.source;
         // if container clicked don't click again on because no restrictions on container and class URIs (same class can be drawed n times in arborescence) anymore
         if (self.clickedContainers[container.id]) {
@@ -231,7 +231,7 @@ var Containers_tree = (function () {
                     });
                 });
                 //var parent = self.idsMap[container.data.id];
-                JstreeWidget.addNodesToJstree(jstreeDivId || self.jstreeDivId, parent, jstreeData);
+                JstreeWidget.addNodesToJstree(jstreeDivId || self.jstreeDivId, parent, jstreeData,null,callback);
             },
         );
     };

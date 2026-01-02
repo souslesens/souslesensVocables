@@ -248,13 +248,13 @@ var KGquery_filter = (function () {
                 propertyStr = data.property.id;
             }
             var filteredProperties = filteredPropertiesMap[data.varName] || [];
-            var findedFilteredProperty = filteredProperties.find(function(prop){
-                return "<"+prop.id+">"==propertyStr;
+            var findedFilteredProperty = filteredProperties.find(function (prop) {
+                return "<" + prop.id + ">" == propertyStr;
             });
 
             //var predicate = optionalStr + " {?" + data.varName + " " + propertyStr + " ?" + data.varName + "_" + data.property.label + ".}\n";
             var predicate = "?" + data.varName + " " + propertyStr + " ?" + data.varName + "_" + data.property.label + ".";
-            if(!findedFilteredProperty){
+            if (!findedFilteredProperty) {
                 predicate = optionalStr + " {" + predicate + "}";
             }
             predicate += "\n";
@@ -423,8 +423,10 @@ var KGquery_filter = (function () {
                         filteredPropertiesMap[classObj] = [];
                     }
                     if (filteredPropertiesMap[classObj].indexOf(propertyName) === -1) {
-                        var property = nonObjectProperties.find(function(nonObjectProperty){return nonObjectProperty.label==propertyName});
-                        if(property){
+                        var property = nonObjectProperties.find(function (nonObjectProperty) {
+                            return nonObjectProperty.label == propertyName;
+                        });
+                        if (property) {
                             filteredPropertiesMap[classObj].push(property);
                         }
                     }
@@ -433,7 +435,7 @@ var KGquery_filter = (function () {
         });
         return filteredPropertiesMap;
     };
-        return self;
+    return self;
 })();
 
 export default KGquery_filter;

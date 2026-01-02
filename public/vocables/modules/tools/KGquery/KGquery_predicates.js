@@ -135,8 +135,8 @@ var KGquery_predicates = (function () {
             querySet.elements.forEach(function (queryElement, queryElementIndex) {
                 /*if (!queryElement.fromNode || !queryElement.toNode) {
                     return;
-                }*/ 
-               // need this case for single class query
+                }*/
+                // need this case for single class query
 
                 KGquery_predicates.setRdfTypePredicates(queryElement, predicatesSubjectsMap);
 

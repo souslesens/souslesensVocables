@@ -24,6 +24,15 @@ var AxiomExtractor = (function () {
                 return callback(null, result);
             });
         },
+        function getSubProperties(source, callback) {
+            var query = self.prefixes + "SELECT distinct *  " + self.getFromStr(source) + "\n" + "WHERE { ?s rdfs:subPropertyOf ?o bind( rdfs:subPropertyOf as ?p) }";
+            self.execQuery(query, function (err, result) {
+                if (err) {
+                    return callback(err);
+                }
+                return callback(null, result);
+            });
+        },
         function getEquivalentClasses(source, callback) {
             var query = self.prefixes + "SELECT distinct *  " + self.getFromStr(source) + "\n" + "WHERE { ?s owl:equivalentClass ?o  bind( owl:equivalentClass as ?p) }";
             self.execQuery(query, function (err, result) {
@@ -44,7 +53,7 @@ var AxiomExtractor = (function () {
                 "   ?subject ?constraintType ?object." +
                 " ?object rdf:type ?objectType." +
                 "optional {?subject ?cardinalityType ?cardinalityValue " +
-                " FILTER (?cardinalityType in (owl:maxCardinality,owl:minCardinality,owl:cardinality,owl:qualifiedCardinality ))} " +
+                " FILTER (?cardinalityType in (owl:maxCardinality,owl:minCardinality,owl:cardinality,owl:qualifiedCardinality,maxQualifiedCardinality,minQualifiedCardinality ))} " +
                 " filter (?constraintType in (owl:someValuesFrom, owl:allValuesFrom,owl:hasValue,owl:onClass)) " +
                 "" +
                 " } ";
@@ -78,15 +87,7 @@ var AxiomExtractor = (function () {
                 return callback(null, result);
             });
         },
-        function getUnions(source, callback) {
-            var query = self.prefixes + "SELECT distinct *  " + self.getFromStr(source) + "\n" + "WHERE { ?s owl:unionOf  ?o bind( owl:unionOf as ?p)} ";
-            self.execQuery(query, function (err, result) {
-                if (err) {
-                    return callback(err);
-                }
-                return callback(null, result);
-            });
-        },
+
         function getUnions(source, callback) {
             var query = self.prefixes + "SELECT distinct *  " + self.getFromStr(source) + "\n" + "WHERE { ?s owl:unionOf  ?o bind( owl:unionOf as ?p)} ";
             self.execQuery(query, function (err, result) {

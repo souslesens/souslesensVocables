@@ -7,11 +7,28 @@ const UserRequestFiltering = require("../../../../../../bin/userRequestFiltering
 const ConfigManager = require("../../../../../../bin/configManager.");
 const { Template } = require("@huggingface/jinja");
 const { RDF_FORMATS_MIMETYPES } = require("../../../../../../model/utils");
+//const RemoteCodeRunner = require("../../../../../bin/remoteCodeRunner.js.");
+
 module.exports = () => {
     GET = async (req, res, _next) => {
         try {
             const userInfo = await userManager.getUser(req.user);
             const userData = await userDataModel.find(req.params.id, userInfo.user);
+
+            if (userData.data_type == "jsFunction") {
+                res.status(400).json({ message: err });
+                return;
+
+                //to be done
+                /*  RemoteCodeRunner.runUserDataFunction(userData,function(err, result){
+                    if( err){
+                        res.status(400).json({ message: err });
+                        return;
+                    }
+                    res.status(200).json(result);
+                    return;
+                })*/
+            }
 
             if (userData.data_type !== "sparqlQuery") {
                 res.status(400).json({ message: "This userData is not a sparqlQuery" });

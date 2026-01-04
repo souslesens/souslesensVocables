@@ -100,9 +100,9 @@ var CreateRestriction_bot = (function () {
 
         chooseCardinalityTypeFn: function () {
             var choices = [
-                { id: "owl:maxCardinality", label: "owl:maxCardinality" },
-                { id: "owl:minCardinality", label: "owl:minCardinality" },
-                { id: "owl:cardinality", label: "owl:cardinality" },
+                { id: "owl:maxQualifiedCardinality", label: "owl:maxQualifiedCardinality" },
+                { id: "owl:minQualifiedCardinality", label: "owl:minQualifiedCardinality" },
+                { id: "owl:qualifiedCardinality", label: "owl:qualifiedCardinality" },
             ];
             self.myBotEngine.showList(choices, "cardinalityType");
         },
@@ -111,9 +111,9 @@ var CreateRestriction_bot = (function () {
                 { id: "owl:someValuesFrom", label: "owl:someValuesFrom" },
                 { id: "owl:allValuesFrom ", label: "owl:allValuesFrom " },
                 { id: "owl:hasValue ", label: "owl:hasValue " },
-                { id: "owl:maxCardinality", label: "owl:maxCardinality" },
-                { id: "owl:minCardinality", label: "owl:minCardinality" },
-                { id: "owl:cardinality", label: "owl:cardinality" },
+                { id: "owl:maxQualifiedCardinality", label: "owl:maxQualifiedCardinality" },
+                { id: "owl:minQualifiedCardinality", label: "owl:minQualifiedCardinality" },
+                { id: "owl:qualifiedCardinality", label: "owl:qualifiedCardinality" },
             ];
             self.myBotEngine.showList(choices, "constraintType");
         },

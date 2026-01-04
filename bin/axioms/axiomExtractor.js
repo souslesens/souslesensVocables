@@ -8,7 +8,7 @@ var AxiomExtractor = {
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
             "SELECT distinct *  FROM   <https://spec.industrialontologies.org/ontology/202401/core/Core/> \n" +
             "WHERE {{ ?subject rdfs:subClassOf ?node.  ?node rdf:type owl:Restriction.  ?node owl:onProperty ?prop .\n" +
-            "    ?node ?constraintType ?value. optional {?node ?cardinalityType ?cardinalityValue filter (?cardinalityType in (owl:maxCardinality,owl:minCardinality,owl:cardinality ))}  filter (?constraintType in (owl:someValuesFrom, owl:allValuesFrom,owl:hasValue,owl:onClass))  } } limit 10000";
+            "    ?node ?constraintType ?value. optional {?node ?cardinalityType ?cardinalityValue filter (?cardinalityType in (owl:maxCardinality,owl:minCardinality,owl:cardinality,maxQualifiedCardinality,minQualifiedCardinality,qualifiedCardinality ))}  filter (?constraintType in (owl:someValuesFrom, owl:allValuesFrom,owl:hasValue,owl:onClass))  } } limit 10000";
 
         var queryDisjoint =
             "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +

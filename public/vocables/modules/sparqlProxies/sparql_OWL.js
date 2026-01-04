@@ -2240,6 +2240,7 @@ var Sparql_OWL = (function () {
         });
     };
 
+
     self.generateInverseRestrictions = function (source, propId, inversePropId, cardinality, callback) {
         var filter = "filter (?prop=<" + propId + ">)";
         self.getObjectRestrictions(source, null, { filter: filter }, function (err, result) {

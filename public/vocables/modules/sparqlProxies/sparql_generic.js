@@ -474,7 +474,7 @@ var Sparql_generic = (function () {
             var langStr = "@" + item.lang;
             objectStr = "'" + item.object + "'" + langStr;
         }
-        if (object.isString) {
+        if (item.isString) {
             objectStr = '"' + item.object + '"';
         } else {
             // console.log(item.object + " is not a String ");

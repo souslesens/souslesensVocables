@@ -61,7 +61,7 @@ var SubGraph = (function () {
                                 filter +
                                 filterPropStr +
                                 optionalStr +
-                                " { ?o owl:onProperty ?property. ?o owl:someValuesFrom|owl:onClass ?targetClass  optional { ?o ?cardinalityType  ?cardinalityValue. filter (?cardinalityType in (owl:minCardinality,owl:maxCardinality,owl:cardinality,maxQualifiedCardinality,minQualifiedCardinality,qualifiedCardinality))}}\n" +
+                                " { ?o owl:onProperty ?property. ?o owl:someValuesFrom|owl:onClass ?targetClass  optional { ?o ?cardinalityType  ?cardinalityValue. filter (?cardinalityType in (owl:minCardinality,owl:maxCardinality,owl:cardinality,owl:maxQualifiedCardinality,owl:minQualifiedCardinality,owl:qualifiedCardinality))}}\n" +
                                 "  } limit 10000";
                             self.query(sourceLabel, query, function (err, result) {
                                 if (err) {

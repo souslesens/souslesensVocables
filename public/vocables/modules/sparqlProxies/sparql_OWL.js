@@ -1529,7 +1529,7 @@ var Sparql_OWL = (function () {
         query += "    ?node ?constraintType ?value. ";
 
         query +=
-            "optional {?node ?cardinalityType ?cardinalityValue filter (?cardinalityType in (owl:maxCardinality,owl:minCardinality,owl:cardinality,maxQualifiedCardinality,minQualifiedCardinality,qualifiedCardinality ))}";
+            "optional {?node ?cardinalityType ?cardinalityValue filter (?cardinalityType in (owl:maxCardinality,owl:minCardinality,owl:cardinality,owl:maxQualifiedCardinality,owl:minQualifiedCardinality,owl:qualifiedCardinality ))}";
 
         if (options.someValuesFrom) {
             query += " filter (?constraintType in (owl:someValuesFrom, owl:onClass))";
@@ -1835,7 +1835,7 @@ var Sparql_OWL = (function () {
             "  ?sourceClass " +
             Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel) +
             " ?restriction." +
-            "  OPTIONAL {?restriction ?constraintType ?targetClass. filter (?constraintType in (owl:someValuesFrom, owl:allValuesFrom,owl:hasValue,owl:maxCardinality,owl:minCardinality,owl:cardinality,maxQualifiedCardinality,minQualifiedCardinality,qualifiedCardinality))}";
+            "  OPTIONAL {?restriction ?constraintType ?targetClass. filter (?constraintType in (owl:someValuesFrom, owl:allValuesFrom,owl:hasValue,owl:maxCardinality,owl:minCardinality,owl:cardinality,owl:maxQualifiedCardinality,owl:minQualifiedCardinality,owl:qualifiedCardinality))}";
         "  OPTIONAL {?targetClass rdfs:label ?targetClassLabel}}" + "  OPTIONAL {?sourceClass rdfs:label ?sourceClassLabel}" + "  OPTIONAL {?prop rdfs:label ?propLabel}";
         var limit = options.limit || Config.queryLimit;
         query += " }";
@@ -2239,7 +2239,6 @@ var Sparql_OWL = (function () {
             return callback(null, result.results.bindings);
         });
     };
-
 
     self.generateInverseRestrictions = function (source, propId, inversePropId, cardinality, callback) {
         var filter = "filter (?prop=<" + propId + ">)";

@@ -53,7 +53,7 @@ var AxiomExtractor = (function () {
                 "   ?subject ?constraintType ?object." +
                 " ?object rdf:type ?objectType." +
                 "optional {?subject ?cardinalityType ?cardinalityValue " +
-                " FILTER (?cardinalityType in (owl:maxCardinality,owl:minCardinality,owl:cardinality,owl:qualifiedCardinality,maxQualifiedCardinality,minQualifiedCardinality ))} " +
+                " FILTER (?cardinalityType in (owl:maxCardinality,owl:minCardinality,owl:cardinality,owl:qualifiedCardinality,owl:maxQualifiedCardinality,owl:minQualifiedCardinality ))} " +
                 " filter (?constraintType in (owl:someValuesFrom, owl:allValuesFrom,owl:hasValue,owl:onClass)) " +
                 "" +
                 " } ";

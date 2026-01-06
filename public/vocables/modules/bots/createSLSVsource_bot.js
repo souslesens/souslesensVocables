@@ -146,7 +146,8 @@ var CreateSLSVsource_bot = (function () {
             });
         },
         uploadFromFileFn: function () {
-            window.UploadGraphModal.open(self.params.sourceLabel, () => {
+            const apiUrl = Config.slsPyApi.enabled ? Config.slsPyApi.url.replace(/\/$/, "").concat("/") : "/";
+            window.UploadGraphModal.open(apiUrl, self.params.sourceLabel, () => {
                 self.myBotEngine.currentObj = self.workflowUpload;
                 self.myBotEngine.nextStep(self.workflowUpload);
             });

@@ -1168,7 +1168,7 @@ var SparqlQuery_bot = (function () {
             }
         });
 
-        Export.showDataTable("mainDailogDiv", cols, dataset);
+        Export.showDataTable("graphDiv", cols, dataset);
     };
 
     self.exportResultToCSV = function (queryResult) {

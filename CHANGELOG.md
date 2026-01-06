@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.23.1](https://github.com/souslesens/souslesensVocables/compare/2.23.0...2.23.1) (2026-01-06)
+
+
+### Bug Fixes
+
+* **uploadModal:** on Ontocreator tool ([589154d](https://github.com/souslesens/souslesensVocables/commit/589154dc01f9c32af216fceb56b45ac3ba1c2473))
+
+## [2.23.0](https://github.com/souslesens/souslesensVocables/compare/2.22.0...2.23.0) (2026-01-06)
+
 ## [2.22.0](https://github.com/souslesens/souslesensVocables/compare/2.21.0...2.22.0) (2025-12-23)
 
 > [!IMPORTANT]

@@ -13,7 +13,7 @@ window.UploadGraphModal = (function () {
         }
         root.unmount();
     };
-    self.open = (sourceName, onClose) => {
+    self.open = (apiUrl, sourceName, onClose) => {
         if (createApp === null) {
             throw new Error("React app is not ready");
         }
@@ -23,6 +23,7 @@ window.UploadGraphModal = (function () {
             document.body.appendChild(elemDiv);
         }
         root = createApp({
+            apiUrl,
             sourceName,
             onClose: () => {
                 self.close();

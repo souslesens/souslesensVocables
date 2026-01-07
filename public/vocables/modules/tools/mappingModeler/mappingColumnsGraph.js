@@ -187,7 +187,7 @@ var MappingColumnsGraph = (function () {
     const btn = document.createElement("button");
     btn.id = BTN_ID;
     btn.type = "button";
-    btn.innerText = "📘 Légende";
+    btn.innerText = "📘 Legend";
     btn.style.cssText = `
         cursor:pointer;
         border:1px solid #ddd;
@@ -213,7 +213,7 @@ var MappingColumnsGraph = (function () {
     panel.innerHTML = `
         
 
-        <div style="font-weight:700; margin:8px 0 6px;">Nœuds</div>
+        <div style="font-weight:700; margin:8px 0 6px;">Nodes</div>
 
         <div style="display:flex; align-items:center; gap:8px; margin:4px 0;">
         <span style="width:12px;height:12px;background:#00AFEF;display:inline-block;border-radius:2px;"></span>
@@ -235,41 +235,41 @@ var MappingColumnsGraph = (function () {
         <span>URI</span>
         </div>
 
-        <div style="font-weight:700; margin:10px 0 6px;">Liens</div>
+        <div style="font-weight:700; margin:10px 0 6px;">Edges</div>
 
         <div style="display:flex; align-items:center; gap:8px; margin:4px 0;">
         <span style="width:14px;height:3px;background:#409304;display:inline-block;border-radius:2px;"></span>
-        <span>Relation (propriété)</span>
+        <span>ObjectProperty (relation)</span>
         </div>
 
         <div style="display:flex; align-items:center; gap:8px; margin:4px 0;">
         <span style="width:14px;height:3px;background:#333333;display:inline-block;border-radius:2px;"></span>
-        <span>Relation non contrainte (ex: rdfs:member)</span>
+        <span>Other relation (e.g., rdfs:member)</span>
         </div>
 
         <div style="display:flex; align-items:center; gap:8px; margin:4px 0;">
         <span style="width:14px;height:3px;background:#00AFEF;display:inline-block;border-radius:2px;"></span>
-        <span>Lien “type” (association)</span>
+        <span>rdf:type / rdfs:subClassOf link</span>
         </div>
 
         <div style="display:flex; align-items:center; gap:8px; margin:4px 0;">
         <span style="width:14px;height:3px;background:#CCCCCC;display:inline-block;border-radius:2px;"></span>
-        <span>Lien automatique / neutre</span>
+        <span>System / default edge</span>
         </div>
 
         <div style="display:flex; align-items:center; gap:8px; margin:4px 0;">
         <span style="width:14px;height:3px;background:#8F8A8C;display:inline-block;border-radius:2px;"></span>
-        <span>Lien structurel (Table → Colonne)</span>
+        <span>Structural link (Table → Column)</span>
         </div>
 
         <div style="display:flex; align-items:center; gap:8px; margin:4px 0;">
         <span style="width:14px;height:0;display:inline-block;border-top:3px dashed #9B59B6;"></span>
-        <span>Attribut (datatype) — violet pointillé (si présent)</span>
+        <span>DatatypeProperty (if present)</span>
         </div>
 
         <div style="display:flex; align-items:center; gap:8px; margin:4px 0;">
         <span style="width:14px;height:3px;background:#EF4270;display:inline-block;border-radius:2px;"></span>
-        <span>Lien technique</span>
+        <span>Technical link</span>
         </div>
     `;
 
@@ -1810,7 +1810,13 @@ var MappingColumnsGraph = (function () {
                                             type: "arrow",
                                         },
                                     },
+                                    
+                                //  NEW: propagate original edge style from Mapping Modeler
+                                color: edge.color,
+                                width: edge.width || 3,
+
                                 };
+                                
                                 classVisjsData.edges.push(edge2);
                             }
                         });
@@ -2044,8 +2050,10 @@ var MappingColumnsGraph = (function () {
 
                     <!-- Datatype node -->
                     <div style="display:flex; align-items:center; gap:8px; margin:4px 0;">
-                    <span style="width:12px;height:12px;background:#8F8F8F;display:inline-block;border-radius:2px;"></span>
+                    <span id="implicitLegendDpNodeSwatch"
+                        style="width:12px;height:12px;background:#DDDDDD;display:inline-block;border-radius:2px;"></span>
                     <span>DatatypeProperty</span>
+
                     </div>
 
                     <div style="display:flex; align-items:center; gap:8px; margin:4px 0;">
@@ -2056,12 +2064,12 @@ var MappingColumnsGraph = (function () {
                     
                     <div style="display:flex; align-items:center; gap:8px; margin:4px 0; opacity:.65;">
                         <span style="width:12px;height:12px;background:#CB9801;display:inline-block;border-radius:2px;"></span>
-                        <span>VirtualColumn (si présent) (à confirmer)</span>
+                        <span>VirtualColumn (if present) (to confirm)</span>
                     </div>
 
                     <div style="display:flex; align-items:center; gap:8px; margin:4px 0; opacity:.65;">
                         <span style="width:12px;height:12px;background:#CB9801;display:inline-block;border-radius:2px;"></span>
-                        <span>RowIndex (si présent) (à confirmer)</span>
+                        <span>RowIndex (if present) (to confirm)</span>
                     </div>
 
                     <!-- ===================== -->
@@ -2074,20 +2082,31 @@ var MappingColumnsGraph = (function () {
                     <!-- Colonne -> Classe : mapping -->
                     <div style="display:flex; align-items:center; gap:8px; margin:4px 0;">
                     <span style="width:14px;height:3px;background:#00AFEF;display:inline-block;border-radius:2px;"></span>
-                    <span>Column → Class (mapping / rdf:type)</span>
+                    <span> mapping / rdf:type (Column → Class)</span>
                     </div>
 
-                    <!-- Class -> Class : relations (style par défaut) -->
+
+                    <!-- Class -> Class : ObjectProperty (color inherited from source edge) -->
                     <div style="display:flex; align-items:center; gap:8px; margin:4px 0;">
-                    <span style="width:14px;height:2px;background:#00AFEF;display:inline-block;border-radius:2px; opacity:.65;"></span>
-                    <span>Class → Class (relation : rdfs:member, is about, …)</span>
+                    <span style="width:14px;height:3px;background:${(MappingModeler.propertyColor || "#409304")};display:inline-block;border-radius:2px;"></span>
+                    <span>ObjectProperty (Class → Class)</span>
                     </div>
+
+                    <!-- Class -> Class : other relation / predicate (color inherited from source edge) -->
+                    <div style="display:flex; align-items:center; gap:8px; margin:4px 0;">
+                    <span style="width:14px;height:3px;background:#333333;display:inline-block;border-radius:2px;"></span>
+                    <span>Other relation (e.g., rdfs:member) (Class → Class)</span>
+                    </div>
+
 
                     <!-- Datatype : pointillé -->
                     <div style="display:flex; align-items:center; gap:8px; margin:4px 0;">
-                    <span style="width:14px;height:0;display:inline-block;border-top:3px dashed #8F8F8F;"></span>
-                    <span>Column → DatatypeProperty (attribut)</span>
+                    
+                    <span id="implicitLegendDpEdgeSwatch"
+                        style="width:14px;height:0;display:inline-block;border-top:3px dashed #9B59B6;"></span>
+                    <span id="implicitLegendDpEdgeLabel">Column → DatatypeProperty (dashed, configurable color)</span>
                     </div>
+
 
 
 
@@ -2203,20 +2222,7 @@ var MappingColumnsGraph = (function () {
                         }
                     });
                                         
-                    // DEBUG TEMPORAIRE : cliquer un lien pour afficher ses infos
-                    setTimeout(function () {
-                    const g = self.implicitModelVisjsGraph;
-                    if (!g || !g.network || !g.data || !g.data.edges) return;
-
-                    g.network.off("click.debugEdges");
-                    g.network.on("click", function (params) {
-                        if (!params || !params.edges || params.edges.length === 0) return;
-
-                        const edgeId = params.edges[0];
-                        const edgeObj = g.data.edges.get(edgeId);
-                        console.log("EDGE CLICKED:", edgeObj);
-                    });
-                    }, 200);
+                    
 
 
                     // Construit la partie HTML
@@ -2245,6 +2251,68 @@ var MappingColumnsGraph = (function () {
                         <div style="font-weight:700; margin:10px 0 6px;">Columns (color= table)</div>
                         ${entries || "<div style='opacity:.7'>No columns detected</div>"}
                     `;
+                    
+                    // ----------------------------
+                    // DatatypeProperty: auto legend color (edge + node)
+                    // ----------------------------
+                    const edges = g.data.edges.get();
+
+                    // 1) find one DatatypeProperty edge (it has data.type === "DatatypeProperty" and dashes === true)
+                    const dpEdge = edges.find(e => e && e.data && e.data.type === "DatatypeProperty" && e.dashes === true);
+
+                    // Extract color (can be string or object depending on vis settings)
+                    let dpEdgeColor = "#9B59B6";
+                    if (dpEdge) {
+                    if (typeof dpEdge.color === "string") {
+                        dpEdgeColor = dpEdge.color;
+                    } else if (dpEdge.color && typeof dpEdge.color.color === "string") {
+                        dpEdgeColor = dpEdge.color.color;
+                    }
+                    }
+
+                    // Update swatch + label
+                    
+                    const dpEdgeSwatch = document.getElementById("implicitLegendDpEdgeSwatch");
+                    const dpEdgeLabel = document.getElementById("implicitLegendDpEdgeLabel");
+
+                    // Normalize hex color (ensure it starts with '#') BEFORE using it in CSS
+                    if (dpEdgeColor && typeof dpEdgeColor === "string") {
+                    dpEdgeColor = dpEdgeColor.trim();
+                    if (dpEdgeColor && !dpEdgeColor.startsWith("#")) {
+                        dpEdgeColor = "#" + dpEdgeColor;
+                    }
+                    }
+
+                    // Apply style AFTER normalization
+                    if (dpEdgeSwatch) {
+                    dpEdgeSwatch.style.borderTop = `3px dashed ${dpEdgeColor}`;
+                    }
+
+                    if (dpEdgeLabel) {
+                    dpEdgeLabel.textContent =
+                        `Column → DatatypeProperty`;
+                    }
+
+
+                    // 2) find one DatatypeProperty node and set its swatch color (nodes are created as #ddd in code)
+                    const dpNode = nodes.find(n => n && n.data && n.data.type === "DatatypeProperty");
+                    let dpNodeColor = "#DDDDDD";
+                    if (dpNode) {
+                    if (typeof dpNode.color === "string") {
+                        dpNodeColor = dpNode.color;
+                    } else if (dpNode.color && typeof dpNode.color.background === "string") {
+                        dpNodeColor = dpNode.color.background;
+                    }
+                    }
+
+                    const dpNodeSwatch = document.getElementById("implicitLegendDpNodeSwatch");
+                    if (dpNodeSwatch) {
+                    // On aligne visuellement la pastille DatatypeProperty avec la couleur du lien DatatypeProperty
+                    dpNodeSwatch.style.background = dpEdgeColor;
+                    dpNodeSwatch.style.border = `1px solid ${dpEdgeColor}`;
+                    }
+
+
                     };
                     self.updateImplicitLegendFromGraph();
 

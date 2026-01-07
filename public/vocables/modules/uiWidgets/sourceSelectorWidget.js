@@ -234,7 +234,6 @@ var SourceSelectorWidget = (function () {
             show_only_matches: true,
         };
 
-
         JstreeWidget.loadJsTree(treeDiv, treeData, jstreeOptions, function () {
             var openedTypes = Config.preferredSchemaType;
             $("#" + treeDiv)

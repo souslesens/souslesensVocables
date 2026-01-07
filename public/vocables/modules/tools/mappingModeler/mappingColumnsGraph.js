@@ -162,33 +162,33 @@ var MappingColumnsGraph = (function () {
 
     // LÉGENDE - Mapping Modeler (vue principale) avec bouton ouvrir/fermer
     self.injectMappingLegend = function (containerId) {
-    const container = document.getElementById(containerId);
-    if (!container) return;
+        const container = document.getElementById(containerId);
+        if (!container) return;
 
-    // ID unique du wrapper
-    const WRAP_ID = "mappingLegendWrapper";
-    const PANEL_ID = "mappingLegendPanel";
-    const BTN_ID = "mappingLegendToggleBtn";
+        // ID unique du wrapper
+        const WRAP_ID = "mappingLegendWrapper";
+        const PANEL_ID = "mappingLegendPanel";
+        const BTN_ID = "mappingLegendToggleBtn";
 
-    // évite doublon
-    if (container.querySelector("#" + WRAP_ID)) return;
+        // évite doublon
+        if (container.querySelector("#" + WRAP_ID)) return;
 
-    container.style.position = "relative";
+        container.style.position = "relative";
 
-    // wrapper
-    const wrapper = document.createElement("div");
-    wrapper.id = WRAP_ID;
-    wrapper.style.cssText = `
+        // wrapper
+        const wrapper = document.createElement("div");
+        wrapper.id = WRAP_ID;
+        wrapper.style.cssText = `
         position:absolute; top:10px; right:10px; z-index:10;
         display:block;
     `;
 
-    // bouton toggle (toujours visible)
-    const btn = document.createElement("button");
-    btn.id = BTN_ID;
-    btn.type = "button";
-    btn.innerText = "📘 Legend";
-    btn.style.cssText = `
+        // bouton toggle (toujours visible)
+        const btn = document.createElement("button");
+        btn.id = BTN_ID;
+        btn.type = "button";
+        btn.innerText = "📘 Legend";
+        btn.style.cssText = `
         cursor:pointer;
         border:1px solid #ddd;
         background:#fff;
@@ -199,18 +199,18 @@ var MappingColumnsGraph = (function () {
         margin-bottom:6px;
     `;
 
-    // panel (contenu de la légende)
-    const panel = document.createElement("div");
-    panel.id = PANEL_ID;
-    panel.style.cssText = `
+        // panel (contenu de la légende)
+        const panel = document.createElement("div");
+        panel.id = PANEL_ID;
+        panel.style.cssText = `
         background:#fff; border:1px solid #ddd; border-radius:8px;
         padding:10px 12px; font-size:12px;
         box-shadow:0 2px 10px rgba(0,0,0,0.08);
         min-width:260px;
     `;
 
-    // ✅ Ton contenu fidèle (identique à ta capture)
-    panel.innerHTML = `
+        // ✅ Ton contenu fidèle (identique à ta capture)
+        panel.innerHTML = `
         
 
         <div style="font-weight:700; margin:8px 0 6px;">Nodes</div>
@@ -273,21 +273,20 @@ var MappingColumnsGraph = (function () {
         </div>
     `;
 
-    // Assemble
-    wrapper.appendChild(btn);
-    wrapper.appendChild(panel);
-    container.appendChild(wrapper);
+        // Assemble
+        wrapper.appendChild(btn);
+        wrapper.appendChild(panel);
+        container.appendChild(wrapper);
 
-    // état (ouvert par défaut)
-    self.mappingLegendExpanded = true;
+        // état (ouvert par défaut)
+        self.mappingLegendExpanded = true;
 
-    // Action bouton
-    btn.addEventListener("click", function () {
-        self.mappingLegendExpanded = !self.mappingLegendExpanded;
-        panel.style.display = self.mappingLegendExpanded ? "block" : "none";
-    });
+        // Action bouton
+        btn.addEventListener("click", function () {
+            self.mappingLegendExpanded = !self.mappingLegendExpanded;
+            panel.style.display = self.mappingLegendExpanded ? "block" : "none";
+        });
     };
-
 
     /**
      * Draws a new resource node in the Vis.js graph.
@@ -464,9 +463,7 @@ var MappingColumnsGraph = (function () {
             if (callback) {
                 return callback();
             }
-            });
-
-
+        });
     };
 
     self.getColumnsClasses = function (nodes) {
@@ -637,16 +634,15 @@ var MappingColumnsGraph = (function () {
                     });
                 },
 
-                error: function(err) {
-                console.error("activeSourceFromNode ajax error:", err);
-                // si un callback existe, on l'appelle, sinon on ne casse pas l'appli
-                if (typeof callback === "function") {
-                    return callback(err);
-                }
-                // sinon on sort proprement
-                return;
-                }
-
+                error: function (err) {
+                    console.error("activeSourceFromNode ajax error:", err);
+                    // si un callback existe, on l'appelle, sinon on ne casse pas l'appli
+                    if (typeof callback === "function") {
+                        return callback(err);
+                    }
+                    // sinon on sort proprement
+                    return;
+                },
             });
         } else {
             obj.node.data.id = dataSource;
@@ -894,7 +890,7 @@ var MappingColumnsGraph = (function () {
         showColumnDetails: function (node) {
             var divId = "columnMappingDetailsDiv";
             $("#smallDialogDiv").html("<div id='" + divId + "'></div>");
-            
+
             UI.openDialog("smallDialogDiv", { title: "Column Technical Mappings" });
             MappingsDetails.showColumnTechnicalMappingsDialog(divId, node || self.currentGraphNode, function () {
                 $("#smallDialogDiv").dialog("close");
@@ -1810,13 +1806,12 @@ var MappingColumnsGraph = (function () {
                                             type: "arrow",
                                         },
                                     },
-                                    
-                                //  NEW: propagate original edge style from Mapping Modeler
-                                color: edge.color,
-                                width: edge.width || 3,
 
+                                    //  NEW: propagate original edge style from Mapping Modeler
+                                    color: edge.color,
+                                    width: edge.width || 3,
                                 };
-                                
+
                                 classVisjsData.edges.push(edge2);
                             }
                         });
@@ -1999,8 +1994,7 @@ var MappingColumnsGraph = (function () {
                 function (callbackSeries) {
                     //  classVisjsData={nodes:[], edges:[]}
 
-
-                var html = `
+                    var html = `
                 <div style="position:relative; width:1000px; height:800px;">
 
                 <!--  Wrapper (id unique) + bouton toujours visible -->
@@ -2088,7 +2082,7 @@ var MappingColumnsGraph = (function () {
 
                     <!-- Class -> Class : ObjectProperty (color inherited from source edge) -->
                     <div style="display:flex; align-items:center; gap:8px; margin:4px 0;">
-                    <span style="width:14px;height:3px;background:${(MappingModeler.propertyColor || "#409304")};display:inline-block;border-radius:2px;"></span>
+                    <span style="width:14px;height:3px;background:${MappingModeler.propertyColor || "#409304"};display:inline-block;border-radius:2px;"></span>
                     <span>ObjectProperty (Class → Class)</span>
                     </div>
 
@@ -2124,48 +2118,46 @@ var MappingColumnsGraph = (function () {
                 </div>
                 `;
 
-
                     $("#mainDialogDiv").html(html);
                     console.log(" Implicit Model dialog opened (MappingColumnsGraph)");
                     UI.openDialog("mainDialogDiv", { title: "Implicit Model" });
-                    
-                    
+
                     // ==============================
                     // Toggle légende - Implicit Model
                     // ==============================
                     self.implicitLegendExpanded = true;
 
                     setTimeout(function () {
-                    const btn = document.getElementById("implicitLegendToggleBtn");
-                    const panel = document.getElementById("implicitLegend");
+                        const btn = document.getElementById("implicitLegendToggleBtn");
+                        const panel = document.getElementById("implicitLegend");
 
-                    if (!btn || !panel) return;
+                        if (!btn || !panel) return;
 
-                    // état initial
-                    panel.style.display = self.implicitLegendExpanded ? "block" : "none";
-
-                    // clic = toggle
-                    btn.onclick = function () {
-                        self.implicitLegendExpanded = !self.implicitLegendExpanded;
+                        // état initial
                         panel.style.display = self.implicitLegendExpanded ? "block" : "none";
-                    };
+
+                        // clic = toggle
+                        btn.onclick = function () {
+                            self.implicitLegendExpanded = !self.implicitLegendExpanded;
+                            panel.style.display = self.implicitLegendExpanded ? "block" : "none";
+                        };
                     }, 0);
 
                     // Masquer la légende du Mapping Modeler quand on ouvre l'Implicit Model
                     const mainLegend = document.getElementById("mappingLegendWrapper");
                     if (mainLegend) {
-                    mainLegend.style.display = "none";
+                        mainLegend.style.display = "none";
                     }
 
                     // Réafficher quand on ferme le dialog Implicit Model
                     $("#mainDialogDiv")
-                    .off("dialogclose.mappingLegend")
-                    .on("dialogclose.mappingLegend", function () {
-                        const mainLegend2 = document.getElementById("mappingLegendWrapper");
-                        if (mainLegend2) {
-                        mainLegend2.style.display = "block";
-                        }
-                    });
+                        .off("dialogclose.mappingLegend")
+                        .on("dialogclose.mappingLegend", function () {
+                            const mainLegend2 = document.getElementById("mappingLegendWrapper");
+                            if (mainLegend2) {
+                                mainLegend2.style.display = "block";
+                            }
+                        });
 
                     var implicitOptions = {
                         visjsOptions: { autoResize: true, width: "100%", height: "100%" },
@@ -2204,123 +2196,114 @@ var MappingColumnsGraph = (function () {
 
                     self.implicitModelVisjsGraph = new VisjsGraphClass("mappingModeler_implicitModelGraph", classVisjsData, implicitOptions);
                     self.implicitModelVisjsGraph.draw(function () {
-                                            // Après le draw() du graphe implicit model
-                    self.updateImplicitLegendFromGraph = function () {
-                    const g = self.implicitModelVisjsGraph;
-                    const legendDiv = document.getElementById("implicitLegend");
-                    if (!g?.data?.nodes || !legendDiv) return;
+                        // Après le draw() du graphe implicit model
+                        self.updateImplicitLegendFromGraph = function () {
+                            const g = self.implicitModelVisjsGraph;
+                            const legendDiv = document.getElementById("implicitLegend");
+                            if (!g?.data?.nodes || !legendDiv) return;
 
-                    const nodes = g.data.nodes.get();
+                            const nodes = g.data.nodes.get();
 
-                    // Regroupe les colonnes par table (dataTable) et récupère leur couleur
-                    const tableToColor = {};
-                    nodes.forEach(n => {
-                        if (n?.data?.type === "Column" && n?.data?.dataTable) {
-                        if (!tableToColor[n.data.dataTable]) {
-                            tableToColor[n.data.dataTable] = n.color; // couleur actuelle affichée
-                        }
-                        }
-                    });
-                                        
-                    
+                            // Regroupe les colonnes par table (dataTable) et récupère leur couleur
+                            const tableToColor = {};
+                            nodes.forEach((n) => {
+                                if (n?.data?.type === "Column" && n?.data?.dataTable) {
+                                    if (!tableToColor[n.data.dataTable]) {
+                                        tableToColor[n.data.dataTable] = n.color; // couleur actuelle affichée
+                                    }
+                                }
+                            });
 
-
-                    // Construit la partie HTML
-                    const entries = Object.entries(tableToColor)
-                        .sort((a,b) => a[0].localeCompare(b[0]))
-                        .map(([table, color]) => {
-                        // couleur peut être une string ou un objet vis-network, on prend le fond si besoin
-                        const bg = (typeof color === "string") ? color : (color?.background || "#ddd");
-                        return `
+                            // Construit la partie HTML
+                            const entries = Object.entries(tableToColor)
+                                .sort((a, b) => a[0].localeCompare(b[0]))
+                                .map(([table, color]) => {
+                                    // couleur peut être une string ou un objet vis-network, on prend le fond si besoin
+                                    const bg = typeof color === "string" ? color : color?.background || "#ddd";
+                                    return `
                             <div style="display:flex; align-items:center; gap:8px; margin:4px 0;">
                             <span style="width:12px;height:12px;background:${bg};display:inline-block;border-radius:2px;"></span>
                             <span>${table}</span>
                             </div>`;
-                        })
-                        .join("");
+                                })
+                                .join("");
 
-                    // Injecte / met à jour un bloc "Colonnes par table"
-                    let block = legendDiv.querySelector("#implicitLegendTables");
-                    if (!block) {
-                        block = document.createElement("div");
-                        block.id = "implicitLegendTables";
-                        block.style.marginTop = "10px";
-                        legendDiv.appendChild(block);
-                    }
-                    block.innerHTML = `
+                            // Injecte / met à jour un bloc "Colonnes par table"
+                            let block = legendDiv.querySelector("#implicitLegendTables");
+                            if (!block) {
+                                block = document.createElement("div");
+                                block.id = "implicitLegendTables";
+                                block.style.marginTop = "10px";
+                                legendDiv.appendChild(block);
+                            }
+                            block.innerHTML = `
                         <div style="font-weight:700; margin:10px 0 6px;">Columns (color= table)</div>
                         ${entries || "<div style='opacity:.7'>No columns detected</div>"}
                     `;
-                    
-                    // ----------------------------
-                    // DatatypeProperty: auto legend color (edge + node)
-                    // ----------------------------
-                    const edges = g.data.edges.get();
 
-                    // 1) find one DatatypeProperty edge (it has data.type === "DatatypeProperty" and dashes === true)
-                    const dpEdge = edges.find(e => e && e.data && e.data.type === "DatatypeProperty" && e.dashes === true);
+                            // ----------------------------
+                            // DatatypeProperty: auto legend color (edge + node)
+                            // ----------------------------
+                            const edges = g.data.edges.get();
 
-                    // Extract color (can be string or object depending on vis settings)
-                    let dpEdgeColor = "#9B59B6";
-                    if (dpEdge) {
-                    if (typeof dpEdge.color === "string") {
-                        dpEdgeColor = dpEdge.color;
-                    } else if (dpEdge.color && typeof dpEdge.color.color === "string") {
-                        dpEdgeColor = dpEdge.color.color;
-                    }
-                    }
+                            // 1) find one DatatypeProperty edge (it has data.type === "DatatypeProperty" and dashes === true)
+                            const dpEdge = edges.find((e) => e && e.data && e.data.type === "DatatypeProperty" && e.dashes === true);
 
-                    // Update swatch + label
-                    
-                    const dpEdgeSwatch = document.getElementById("implicitLegendDpEdgeSwatch");
-                    const dpEdgeLabel = document.getElementById("implicitLegendDpEdgeLabel");
+                            // Extract color (can be string or object depending on vis settings)
+                            let dpEdgeColor = "#9B59B6";
+                            if (dpEdge) {
+                                if (typeof dpEdge.color === "string") {
+                                    dpEdgeColor = dpEdge.color;
+                                } else if (dpEdge.color && typeof dpEdge.color.color === "string") {
+                                    dpEdgeColor = dpEdge.color.color;
+                                }
+                            }
 
-                    // Normalize hex color (ensure it starts with '#') BEFORE using it in CSS
-                    if (dpEdgeColor && typeof dpEdgeColor === "string") {
-                    dpEdgeColor = dpEdgeColor.trim();
-                    if (dpEdgeColor && !dpEdgeColor.startsWith("#")) {
-                        dpEdgeColor = "#" + dpEdgeColor;
-                    }
-                    }
+                            // Update swatch + label
 
-                    // Apply style AFTER normalization
-                    if (dpEdgeSwatch) {
-                    dpEdgeSwatch.style.borderTop = `3px dashed ${dpEdgeColor}`;
-                    }
+                            const dpEdgeSwatch = document.getElementById("implicitLegendDpEdgeSwatch");
+                            const dpEdgeLabel = document.getElementById("implicitLegendDpEdgeLabel");
 
-                    if (dpEdgeLabel) {
-                    dpEdgeLabel.textContent =
-                        `Column → DatatypeProperty`;
-                    }
+                            // Normalize hex color (ensure it starts with '#') BEFORE using it in CSS
+                            if (dpEdgeColor && typeof dpEdgeColor === "string") {
+                                dpEdgeColor = dpEdgeColor.trim();
+                                if (dpEdgeColor && !dpEdgeColor.startsWith("#")) {
+                                    dpEdgeColor = "#" + dpEdgeColor;
+                                }
+                            }
 
+                            // Apply style AFTER normalization
+                            if (dpEdgeSwatch) {
+                                dpEdgeSwatch.style.borderTop = `3px dashed ${dpEdgeColor}`;
+                            }
 
-                    // 2) find one DatatypeProperty node and set its swatch color (nodes are created as #ddd in code)
-                    const dpNode = nodes.find(n => n && n.data && n.data.type === "DatatypeProperty");
-                    let dpNodeColor = "#DDDDDD";
-                    if (dpNode) {
-                    if (typeof dpNode.color === "string") {
-                        dpNodeColor = dpNode.color;
-                    } else if (dpNode.color && typeof dpNode.color.background === "string") {
-                        dpNodeColor = dpNode.color.background;
-                    }
-                    }
+                            if (dpEdgeLabel) {
+                                dpEdgeLabel.textContent = `Column → DatatypeProperty`;
+                            }
 
-                    const dpNodeSwatch = document.getElementById("implicitLegendDpNodeSwatch");
-                    if (dpNodeSwatch) {
-                    // On aligne visuellement la pastille DatatypeProperty avec la couleur du lien DatatypeProperty
-                    dpNodeSwatch.style.background = dpEdgeColor;
-                    dpNodeSwatch.style.border = `1px solid ${dpEdgeColor}`;
-                    }
+                            // 2) find one DatatypeProperty node and set its swatch color (nodes are created as #ddd in code)
+                            const dpNode = nodes.find((n) => n && n.data && n.data.type === "DatatypeProperty");
+                            let dpNodeColor = "#DDDDDD";
+                            if (dpNode) {
+                                if (typeof dpNode.color === "string") {
+                                    dpNodeColor = dpNode.color;
+                                } else if (dpNode.color && typeof dpNode.color.background === "string") {
+                                    dpNodeColor = dpNode.color.background;
+                                }
+                            }
 
+                            const dpNodeSwatch = document.getElementById("implicitLegendDpNodeSwatch");
+                            if (dpNodeSwatch) {
+                                // On aligne visuellement la pastille DatatypeProperty avec la couleur du lien DatatypeProperty
+                                dpNodeSwatch.style.background = dpEdgeColor;
+                                dpNodeSwatch.style.border = `1px solid ${dpEdgeColor}`;
+                            }
+                        };
+                        self.updateImplicitLegendFromGraph();
 
-                    };
-                    self.updateImplicitLegendFromGraph();
-
-                    // self.drawGraphCanvas(self.graphDiv, classVisjsData);
-                    callbackSeries();
+                        // self.drawGraphCanvas(self.graphDiv, classVisjsData);
+                        callbackSeries();
                     });
-                    
-
                 },
             ],
             function (err) {},

@@ -1193,7 +1193,7 @@ var Lineage_createRelation = (function () {
             restrictionsTriples.push({
                 subject: blankNode,
                 predicate: cardinality.type,
-                object: '"' + cardinality.value + '^^http://www.w3.org/2001/XMLSchema#nonNegativeInteger"',
+                object: '"' + cardinality.value  +'"'+ '^^<http://www.w3.org/2001/XMLSchema#nonNegativeInteger>',
             });
             restrictionsTriples.push({
                 subject: blankNode,

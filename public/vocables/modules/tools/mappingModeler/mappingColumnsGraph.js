@@ -182,6 +182,79 @@ var MappingColumnsGraph = (function () {
         position:absolute; top:10px; right:10px; z-index:10;
         display:block;
     `;
+    
+        // Met à jour la légende (Mapping Modeler) pour n'afficher QUE ce qui est visible à l'écran
+        self.updateMappingLegendVisibilityFromGraph = function () {
+        const panel = document.getElementById("mappingLegendPanel");
+        if (!panel || !self.visjsGraph?.data?.nodes || !self.visjsGraph?.data?.edges) return;
+
+        // 1) On ne garde que ce qui est affiché (hidden !== true)
+        const visibleNodes = self.visjsGraph.data.nodes.get().filter(n => n && n.hidden !== true);
+        const visibleEdges = self.visjsGraph.data.edges.get().filter(e => e && e.hidden !== true);
+
+        // 2) Types de nodes présents
+        const nodeTypes = new Set(
+            visibleNodes.map(n => n?.data?.type).filter(Boolean)
+        );
+
+        // 3) Catégories d'edges présentes (heuristiques simples)
+        const edgeCats = new Set();
+
+        visibleEdges.forEach(e => {
+            const t = e?.data?.type;
+
+            // rdf:type / rdfs:subClassOf
+            if (t === "rdf:type" || t === "rdfs:subClassOf") {
+            edgeCats.add("RdfType");
+            return;
+            }
+
+            // DatatypeProperty : soit explicite, soit dashes
+            if (t === "DatatypeProperty" || e.dashes === true) {
+            edgeCats.add("DatatypeProperty");
+            return;
+            }
+
+            // Couleur (pour distinguer datasource/technical si data.type absent)
+            const c = (typeof e.color === "string")
+            ? e.color.toLowerCase()
+            : (e.color?.color || "").toLowerCase();
+
+            if (c === "#8f8a8c") edgeCats.add("DatasourceLink");
+            if (c === "#ef4270") edgeCats.add("TechnicalLink");
+
+            // Other relation (rdfs:member etc.)
+            if (typeof t === "string" && t.startsWith("rdfs:")) {
+            edgeCats.add("OtherRelation");
+            return;
+            }
+
+            // ObjectProperty (si on a un type non système)
+            if (t) {
+            edgeCats.add("ObjectProperty");
+            return;
+            }
+
+            // Sinon: edge par défaut
+            edgeCats.add("SystemDefault");
+        });
+
+        // 4) Appliquer visibilité des lignes de légende
+        panel.querySelectorAll("[data-legend-kind]").forEach(row => {
+            const kind = row.getAttribute("data-legend-kind");
+
+            if (kind === "node") {
+            const type = row.getAttribute("data-node-type");
+            row.style.display = nodeTypes.has(type) ? "flex" : "none";
+            }
+
+            if (kind === "edge") {
+            const cat = row.getAttribute("data-edge-cat");
+            row.style.display = edgeCats.has(cat) ? "flex" : "none";
+            }
+        });
+        };
+
 
         // bouton toggle (toujours visible)
         const btn = document.createElement("button");
@@ -215,62 +288,59 @@ var MappingColumnsGraph = (function () {
 
         <div style="font-weight:700; margin:8px 0 6px;">Nodes</div>
 
-        <div style="display:flex; align-items:center; gap:8px; margin:4px 0;">
+        <div data-legend-kind="node" data-node-type="Class" style="display:flex; align-items:center; gap:8px; margin:4px 0;">
         <span style="width:12px;height:12px;background:#00AFEF;display:inline-block;border-radius:2px;"></span>
         <span>Class</span>
         </div>
 
-        <div style="display:flex; align-items:center; gap:8px; margin:4px 0;">
+        <div data-legend-kind="node" data-node-type="Column" style="display:flex; align-items:center; gap:8px; margin:4px 0;">
         <span style="width:12px;height:12px;background:#CB9801;display:inline-block;border-radius:2px;"></span>
         <span>Column</span>
         </div>
 
-        <div style="display:flex; align-items:center; gap:8px; margin:4px 0;">
+        <div data-legend-kind="node" data-node-type="Table" style="display:flex; align-items:center; gap:8px; margin:4px 0;">
         <span style="width:12px;height:12px;background:#D8CACD;display:inline-block;border-radius:2px;"></span>
         <span>Table</span>
         </div>
 
-        <div style="display:flex; align-items:center; gap:8px; margin:4px 0;">
+        <div data-legend-kind="node" data-node-type="URI" style="display:flex; align-items:center; gap:8px; margin:4px 0;">
         <span style="width:12px;height:12px;background:#BC7DEC;display:inline-block;border-radius:2px;"></span>
         <span>URI</span>
         </div>
 
         <div style="font-weight:700; margin:10px 0 6px;">Edges</div>
 
-        <div style="display:flex; align-items:center; gap:8px; margin:4px 0;">
+        <div data-legend-kind="edge" data-edge-cat="ObjectProperty" style="display:flex; align-items:center; gap:8px; margin:4px 0;">
         <span style="width:14px;height:3px;background:#409304;display:inline-block;border-radius:2px;"></span>
         <span>ObjectProperty (relation)</span>
         </div>
 
-        <div style="display:flex; align-items:center; gap:8px; margin:4px 0;">
+        <div data-legend-kind="edge" data-edge-cat="OtherRelation" style="display:flex; align-items:center; gap:8px; margin:4px 0;">
         <span style="width:14px;height:3px;background:#333333;display:inline-block;border-radius:2px;"></span>
         <span>Other relation (e.g., rdfs:member)</span>
         </div>
 
-        <div style="display:flex; align-items:center; gap:8px; margin:4px 0;">
+        <div data-legend-kind="edge" data-edge-cat="rdf:type" style="display:flex; align-items:center; gap:8px; margin:4px 0;">
         <span style="width:14px;height:3px;background:#00AFEF;display:inline-block;border-radius:2px;"></span>
         <span>rdf:type / rdfs:subClassOf link</span>
         </div>
 
-        <div style="display:flex; align-items:center; gap:8px; margin:4px 0;">
+        <div data-legend-kind="edge" data-edge-cat="default" style="display:flex; align-items:center; gap:8px; margin:4px 0;">
         <span style="width:14px;height:3px;background:#CCCCCC;display:inline-block;border-radius:2px;"></span>
         <span>System / default edge</span>
         </div>
 
-        <div style="display:flex; align-items:center; gap:8px; margin:4px 0;">
+        <div data-legend-kind="edge" data-edge-cat="structural" style="display:flex; align-items:center; gap:8px; margin:4px 0;">
         <span style="width:14px;height:3px;background:#8F8A8C;display:inline-block;border-radius:2px;"></span>
         <span>Structural link (Table → Column)</span>
         </div>
 
-        <div style="display:flex; align-items:center; gap:8px; margin:4px 0;">
+        <div data-legend-kind="edge" data-edge-cat="datatypeProperty" style="display:flex; align-items:center; gap:8px; margin:4px 0;">
         <span style="width:14px;height:0;display:inline-block;border-top:3px dashed #9B59B6;"></span>
         <span>DatatypeProperty (if present)</span>
         </div>
 
-        <div style="display:flex; align-items:center; gap:8px; margin:4px 0;">
-        <span style="width:14px;height:3px;background:#EF4270;display:inline-block;border-radius:2px;"></span>
-        <span>Technical link</span>
-        </div>
+
     `;
 
         // Assemble
@@ -459,11 +529,13 @@ var MappingColumnsGraph = (function () {
         self.visjsGraph.draw(function () {
             // Réinjecte la légende après draw (important pour éviter le clignotement)
             self.injectMappingLegend(graphDiv);
+            self.updateMappingLegendVisibilityFromGraph();
 
             if (callback) {
                 return callback();
             }
         });
+
     };
 
     self.getColumnsClasses = function (nodes) {
@@ -1723,6 +1795,7 @@ var MappingColumnsGraph = (function () {
         }
 
         MappingColumnsGraph.visjsGraph.data.nodes.update(newNodes);
+        self.updateMappingLegendVisibilityFromGraph();
     };
 
     self.relationMessage = function (fromLabel, toLabel) {

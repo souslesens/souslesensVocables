@@ -799,7 +799,7 @@ var Axiom_activeLegend = (function () {
                     triples.push({
                         subject: fromNode.data.bNodeid || fromNode.data.id,
                         predicate: fromNode.data.subType,
-                        object: '"' + fromNode.data.cardinality + '^^http://www.w3.org/2001/XMLSchema#nonNegativeInteger"',
+                        object: '"' + fromNode.data.cardinality + '"' + "^^<http://www.w3.org/2001/XMLSchema#nonNegativeInteger>",
                     });
                 }
 

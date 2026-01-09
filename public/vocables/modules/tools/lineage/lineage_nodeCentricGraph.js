@@ -12,6 +12,17 @@ var Lineage_nodeCentricGraph = (function () {
 
     self.levelsSelection = [];
 
+    /**
+     * Builds a hierarchical sub‑graph of a Vis.js network starting from a given root node
+     * It collects reachable nodes and edges, assigns a level depth to each node, and also
+     * identifies orphan nodes that are not reachable from the root
+     * @function
+     * @name getHierarchicalViewVisjsdata
+     * @memberof module:lineage_nodeCentricGraph
+     * @param {string} rootNodeId Identifier of the node that serves as the graph's root
+     * @returns {object} nodes: newNodes, edges: newEdges, hierarchical sub‑graph
+     * (nodes with level, and the traversed edges)
+     */
     self.getHierarchicalViewVisjsdata = function (rootNodeId) {
         var edgesFromMap = {};
         var edgesToMap = {};
@@ -82,6 +93,16 @@ var Lineage_nodeCentricGraph = (function () {
         return { nodes: newNodes, edges: newEdges };
     };
 
+    /**
+     * Builds a hierarchical Vis.js graph configuration based on a root node and
+     * a directional flag, then renders the graph on a whiteboard
+     * Draws a hierarchical Vis.js graph for a given root node
+     * @function 
+     * @name draw
+     * @memberof module:lineage_nodeCentricGraph
+     * @param {string} rootNodeId Identifier of the node that serves as the graph's root
+     * @param {boolean} updown If true, graph flows top‑to‑bottom (UD); otherwise left‑to‑right (LR)
+     */
     self.draw = function (rootNodeId, updown) {
         var visjsData = self.getHierarchicalViewVisjsdata(rootNodeId);
         var directionGraph;
@@ -123,6 +144,15 @@ var Lineage_nodeCentricGraph = (function () {
         Lineage_whiteboard.lineageVisjsGraph.network.setOptions(Lineage_whiteboard.lineageVisjsGraph.options.visjsOptions);
     };
 
+    /**
+     * Defines a method `listAllNodeRelations` on the `self` object. It extracts
+     * the current Vis.js graph nodes and edges, packages them, and hands them off
+     * to `GraphPaths_bot.start` for further processing
+     * @function 
+     * @name listAllNodeRelations
+     * @memberof module:lineage_nodeCentricGraph
+     * @param {string} rootNodeId Identifier of the node that serves as the graph's root
+     */
     self.listAllNodeRelations = function (rootNodeId) {
         var nodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
         var edges = Lineage_whiteboard.lineageVisjsGraph.data.edges.get();

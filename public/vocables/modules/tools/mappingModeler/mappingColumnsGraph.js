@@ -1476,39 +1476,116 @@ var MappingColumnsGraph = (function () {
      * @memberof module:MappingColumnsGraph
      * @returns {void}
      */
+
     self.importMappingsFromJSONFile = function () {
         ImportFileWidget.showImportDialog(function (err, result) {
             if (err) {
                 return MainController.errorAlert(err);
             }
+
             var data = JSON.parse(result);
+
             if (data.nodes.length == 0) {
                 return alert("no nodes in file");
             }
+
             if (data?.options?.config?.graphUri != Config.sources[MainController.currentSource].graphUri) {
                 return alert("graphUri in file is not the same as the current graphUri, update graphURI in JSON file");
             }
-            var fileName = "mappings_" + MappingModeler.currentSLSsource + "_ALL" + ".json";
-            var payload = {
-                dir: "graphs/",
-                fileName: fileName,
-                data: JSON.stringify(data, null, 2),
-            };
+            console.log("IMPORT MAPPING: fonction importMappingsFromJSONFile exécutée ");
 
-            $.ajax({
-                type: "POST",
-                url: `${Config.apiUrl}/data/file`,
-                data: payload,
-                dataType: "json",
-                success: function (result, _textStatus, _jqXHR) {
-                    MappingModeler.onLoaded();
-                },
-                error(err) {
-                    return MainController.errorAlert(err);
-                },
+            // >>> START CHECK DB (fix #1660 - DB d'abord)
+            // 1) Récupérer les DB requises (depuis la config + les nodes)
+            const requiredDbIdsSet = new Set(
+                Object.keys(data?.options?.config?.databaseSources || {})
+            );
+
+            // On ajoute aussi celles trouvées dans les nodes, mais uniquement si ça ressemble à une DB déjà déclarée
+            // (comme ça on n'attrape pas les CSV, qui sont des noms de fichiers).
+            (data.nodes || []).forEach((n) => {
+                const ds = n?.data?.datasource;
+                if (ds && requiredDbIdsSet.has(ds)) requiredDbIdsSet.add(ds);
             });
+
+            const requiredDbIds = Array.from(requiredDbIdsSet);
+
+            // Si le mapping n'utilise pas de DB, on ne bloque pas (DB d'abord)
+            if (requiredDbIds.length > 0) {
+                // 2) Appeler l'API qui liste les DB accessibles à l'utilisateur courant (rôles inclus)
+                $.ajax({
+                    type: "GET",
+                    url: `${Config.apiUrl}/databases`,
+                    dataType: "json",
+                    success: function (resp) {
+                        // Format attendu: { message: "...", resources: [ {id, database}, ... ] }
+                        const available = (resp && resp.resources) ? resp.resources : [];
+                        const availableIds = new Set(available.map((x) => x.id));
+
+                        const missing = requiredDbIds.filter((id) => !availableIds.has(id));
+
+                        if (missing.length > 0) {
+                            // Construire un message actionnable
+                            const namesFromFile = data?.options?.config?.databaseSources || {};
+                            const missingLines = missing.map((id) => {
+                                const name = namesFromFile[id]?.name ? namesFromFile[id].name : "(nom inconnu)";
+                                return `- ${id} — ${name}`;
+                            }).join("\n");
+
+                            const msg =
+                                "Import impossible : datasource(s) base de données indisponible(s) sur ce serveur.\n" +
+                                "Elles sont soit absentes, soit non autorisées pour votre profil.\n\n" +
+                                "Bases manquantes :\n" + missingLines + "\n\n" +
+                                "Pour résoudre :\n" +
+                                "1) Créer/ajouter ces bases sur le serveur cible (admin/Databases).\n" +
+                                "2) Donner l’accès à votre compte (profils/allowedDatabases).\n" +
+                                "3) Ou modifier le JSON importé pour pointer vers un id existant.\n";
+
+                            alert(msg);
+                            return; // STOP : on ne fait pas le POST /data/file
+                        }
+
+                        // 3) Si tout est OK, on continue l'import (on passe à l'étape POST)
+                        doImportPost(data);
+                    },
+                    error: function (e) {
+                        // En cas d'erreur API, on stop aussi (sinon import incohérent)
+                        return MainController.errorAlert(e);
+                    },
+                });
+
+                // On sort ici car le POST sera déclenché dans success() via doImportPost()
+                return;
+            }
+            // >>> END CHECK DB
+
+            // Si aucune DB à vérifier, on continue normalement
+            doImportPost(data);
+
+            // Fonction utilitaire pour éviter dupliquer le POST
+            function doImportPost(dataToSave) {
+                var fileName = "mappings_" + MappingModeler.currentSLSsource + "_ALL" + ".json";
+                var payload = {
+                    dir: "graphs/",
+                    fileName: fileName,
+                    data: JSON.stringify(dataToSave, null, 2),
+                };
+
+                $.ajax({
+                    type: "POST",
+                    url: `${Config.apiUrl}/data/file`,
+                    data: payload,
+                    dataType: "json",
+                    success: function (_result, _textStatus, _jqXHR) {
+                        MappingModeler.onLoaded();
+                    },
+                    error: function (err) {
+                        return MainController.errorAlert(err);
+                    },
+                });
+            }
         });
     };
+
 
     /**
      * Exports the current mappings from the Vis.js graph to a JSON file.

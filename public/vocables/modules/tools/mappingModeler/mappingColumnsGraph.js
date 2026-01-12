@@ -799,13 +799,9 @@ var MappingColumnsGraph = (function () {
                 },
 
                 error: function (err) {
-                    console.error("activeSourceFromNode ajax error:", err);
-                    // If a callback exists, call it; otherwise do not break the application
-                    if (typeof callback === "function") {
-                        return callback(err);
-                    }
-                    // Otherwise, exist cleanly
-                    return;
+                    
+                    if (callback) return callback(err);
+                    return MainController.errorAlert(err);
                 },
             });
         } else {
@@ -1766,6 +1762,7 @@ var MappingColumnsGraph = (function () {
                     return MainController.errorAlert(err);
                 }
                 var data = JSON.parse(result);
+                var rawJson = result;
                 if (data.nodes.length == 0) {
                     return alert("no nodes in file");
                 }
@@ -1783,18 +1780,121 @@ var MappingColumnsGraph = (function () {
                     delete data.options.config.lastUpdate;
                 }
 
-                // 1) Extraire les IDs de DB requis depuis options.config.databaseSources
-                var requiredDbIdsSet = new Set(Object.keys(data?.options?.config?.databaseSources || {}));
 
-                // 2) Vérifier aussi dans les nodes (exigence ticket) : nodes[].data.datasource
-                // On ne retient que ceux qui sont déjà dans databaseSources (donc pas les CSV)
-                (data.nodes || []).forEach(function (n) {
-                    var ds = n && n.data ? n.data.datasource : null;
-                    if (ds && requiredDbIdsSet.has(ds)) requiredDbIdsSet.add(ds);
+                // 1) Helpers pour calculer les numéros de ligne dans le JSON importé
+                function lineOfIndex(idx) {
+                if (idx < 0) return null;
+                return rawJson.slice(0, idx).split("\n").length; // 1-based
+                }
+
+                // Ligne d’une clé dans options.config.<sectionName>.<key>
+                function findConfigKeyLine(sectionName, key) {
+                var sectionNeedle = `"${sectionName}": {`;
+                var sectionPos = rawJson.indexOf(sectionNeedle);
+                if (sectionPos < 0) return null;
+
+                var window = rawJson.slice(sectionPos, sectionPos + 20000);
+                var keyNeedle = `"${key}"`;
+                var keyPosLocal = window.indexOf(keyNeedle);
+                if (keyPosLocal < 0) return null;
+
+                return lineOfIndex(sectionPos + keyPosLocal);
+                }
+
+                // Ligne d’une occurrence nodes[i].data.datasource
+                function findNodeDatasourceLine(nodeId, dsValue) {
+                var idNeedle = `"id": "${nodeId}"`;
+                var idPos = rawJson.indexOf(idNeedle);
+                if (idPos < 0) return null;
+
+                var window = rawJson.slice(idPos, idPos + 4000);
+                var dsNeedle = `"datasource": "${dsValue}"`;
+                var dsPosLocal = window.indexOf(dsNeedle);
+
+                var finalPos = (dsPosLocal >= 0) ? (idPos + dsPosLocal) : idPos;
+                return lineOfIndex(finalPos);
+                }
+
+                // 2) Lire la config du fichier importé (DB et CSV)
+                var dbSourcesFromFile = data?.options?.config?.databaseSources || {};
+                var csvSourcesFromFile = data?.options?.config?.csvSources || {};
+                var dbIdsFromConfig = Object.keys(dbSourcesFromFile);
+                var csvIdsFromConfig = Object.keys(csvSourcesFromFile);
+
+                // 3) Collecter toutes les datasources réellement utilisées dans nodes[]
+                //    et garder leurs emplacements (nodes[i] + ligne)
+                var dsUsages = {}; // { dsId: [ {nodeIndex,nodeId,nodeType,dataTable,line} ] }
+                (data.nodes || []).forEach(function (n, i) {
+                var ds = n && n.data ? n.data.datasource : null;
+                if (!ds) return;
+
+                if (!dsUsages[ds]) dsUsages[ds] = [];
+                dsUsages[ds].push({
+                    nodeIndex: i,
+                    nodeId: n.id,
+                    nodeType: n.data.type,
+                    dataTable: n.data.dataTable,
+                    line: findNodeDatasourceLine(n.id, ds),
                 });
-                var requiredDbIds = Array.from(requiredDbIdsSet);
+                });
 
-                // Petite fonction utilitaire pour faire le POST (appelée seulement si OK)
+                var dsUsedIds = Object.keys(dsUsages);
+
+                // 4) Cas JSON incohérent : datasource utilisée dans nodes[] mais absente de la config
+                var unknownIds = dsUsedIds.filter(function (id) {
+                return dbIdsFromConfig.indexOf(id) < 0 && csvIdsFromConfig.indexOf(id) < 0;
+                });
+
+                // 5) Les DB à vérifier côté serveur = celles déclarées comme DB dans la config
+                var requiredDbIds = dbIdsFromConfig.slice();
+
+                
+                function showImportBlockingDialog(title, htmlBody) {
+                var html =
+                    "<div style='font-size:13px;line-height:1.45'>" +
+                    htmlBody +
+                    "</div>";
+                $("#mainDialogDiv").html(html);
+                UI.openDialog("mainDialogDiv", { title: title });
+                }
+
+                // Si le JSON est incohérent : datasource utilisée dans nodes[] mais pas déclarée dans config
+                if (unknownIds.length > 0) {
+                var unknownHtml = unknownIds
+                    .map(function (id) {
+                    var occ = (dsUsages[id] || []).slice(0, 5).map(function (o) {
+                        return (
+                        "&nbsp;&nbsp;• <code>nodes[" +
+                        o.nodeIndex +
+                        "].data.datasource</code> (ligne " +
+                        (o.line || "?") +
+                        ") — type=" +
+                        o.nodeType +
+                        (o.dataTable ? " — table=" + o.dataTable : "")
+                        );
+                    }).join("<br>");
+
+                    var more =
+                        dsUsages[id] && dsUsages[id].length > 5
+                        ? "<br>&nbsp;&nbsp;… (+" + (dsUsages[id].length - 5) + " autres occurrences)"
+                        : "";
+
+                    return "<li><b>" + id + "</b><br>" + occ + more + "</li>";
+                    })
+                    .join("");
+
+                showImportBlockingDialog(
+                    "Import impossible — datasource inconnue dans le JSON",
+                    "<p>Ces datasources sont utilisées dans <code>nodes[].data.datasource</code> mais ne sont déclarées ni dans <code>options.config.databaseSources</code> ni dans <code>options.config.csvSources</code>.</p>" +
+                    "<ul>" +
+                    unknownHtml +
+                    "</ul>" +
+                    "<p><b>Correction :</b> ajoute ces ids dans la config, ou remplace la valeur dans les nodes indiqués.</p>"
+                );
+                return; // STOP
+                }
+
+                // fonction utilitaire pour faire le POST (appelée seulement si OK)
                 function doImportPost(dataToSave) {
                     var fileName = "mappings_" + MappingModeler.currentSLSsource + "_ALL" + ".json";
                     var payload = {
@@ -1802,6 +1902,8 @@ var MappingColumnsGraph = (function () {
                         fileName: fileName,
                         data: JSON.stringify(dataToSave, null, 2),
                     };
+
+
 
                     $.ajax({
                         type: "POST",
@@ -1828,29 +1930,71 @@ var MappingColumnsGraph = (function () {
                     url: `${Config.apiUrl}/databases`,
                     dataType: "json",
                     success: function (resp) {
-                        var available = (resp && resp.resources) ? resp.resources : [];
+                        var available = Array.isArray(resp) ? resp : (resp && resp.resources ? resp.resources : []);
                         var availableIds = new Set(available.map(function (x) { return x.id; }));
 
                         var missing = requiredDbIds.filter(function (id) { return !availableIds.has(id); });
 
-                        if (missing.length > 0) {
-                            var namesFromFile = data?.options?.config?.databaseSources || {};
-                            var missingLines = missing.map(function (id) {
-                                var name = (namesFromFile[id] && namesFromFile[id].name) ? namesFromFile[id].name : "(nom inconnu)";
-                                return "- " + id + " — " + name;
-                            }).join("\n");
 
-                            var msg =
-                                "Import impossible : datasource(s) base de données indisponible(s) sur ce serveur.\n" +
-                                "Elles sont soit absentes, soit non autorisées pour votre profil.\n\n" +
-                                "Bases manquantes :\n" + missingLines + "\n\n" +
-                                "Pour résoudre :\n" +
-                                "1) Créer/ajouter ces bases sur le serveur cible (admin > Databases).\n" +
-                                "2) Donner l’accès à votre compte (profils/allowedDatabases).\n" +
-                                "3) Ou modifier le JSON importé pour pointer vers un id existant.\n";
-                            alert(msg);
-                            return; // STOP: on n’écrit pas /data/file
+                        if (missing.length > 0) {
+                        var missingHtml = missing
+                            .map(function (id) {
+                            var name =
+                                dbSourcesFromFile[id] && dbSourcesFromFile[id].name
+                                ? dbSourcesFromFile[id].name
+                                : "(nom inconnu)";
+
+                            var cfgLine = findConfigKeyLine("databaseSources", id);
+
+                            var occ = (dsUsages[id] || []).slice(0, 5).map(function (o) {
+                                return (
+                                "&nbsp;&nbsp;• <code>nodes[" +
+                                o.nodeIndex +
+                                "].data.datasource</code> (ligne " +
+                                (o.line || "?") +
+                                ") — type=" +
+                                o.nodeType +
+                                (o.dataTable ? " — table=" + o.dataTable : "")
+                                );
+                            }).join("<br>");
+
+                            var more =
+                                dsUsages[id] && dsUsages[id].length > 5
+                                ? "<br>&nbsp;&nbsp;… (+" + (dsUsages[id].length - 5) + " autres occurrences)"
+                                : "";
+
+                            return (
+                                "<li><b>" +
+                                id +
+                                "</b> — " +
+                                name +
+                                "<br>Déclarée dans le fichier : <code>options.config.databaseSources." +
+                                id +
+                                "</code> (ligne " +
+                                (cfgLine || "?") +
+                                ")" +
+                                "<br>" +
+                                occ +
+                                more +
+                                "</li>"
+                            );
+                            })
+                            .join("");
+
+                        showImportBlockingDialog(
+                            "Import impossible — base(s) de données absente(s) sur ce serveur",
+                            "<p>Ces bases sont référencées par le mapping mais ne sont pas disponibles sur ce serveur (absentes ou non autorisées).</p>" +
+                            "<ul>" +
+                            missingHtml +
+                            "</ul>" +
+                            "<p><b>Pour résoudre :</b><br>" +
+                            "1) Créer/ajouter ces bases sur le serveur cible (Admin ▸ Databases).<br>" +
+                            "2) Donner l’accès à votre compte (profils/allowedDatabases).<br>" +
+                            "3) Ou modifier le JSON importé pour pointer vers un id existant.</p>"
+                        );
+                        return; // STOP: on n'écrit pas /data/file
                         }
+
 
                         // OK => on importe
                         return doImportPost(data);

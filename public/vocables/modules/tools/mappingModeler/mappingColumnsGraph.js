@@ -1772,25 +1772,94 @@ var MappingColumnsGraph = (function () {
                 if (data.options?.config?.lastUpdate) {
                     delete data.options.config.lastUpdate;
                 }
-                var fileName = "mappings_" + MappingModeler.currentSLSsource + "_ALL" + ".json";
-                var payload = {
-                    dir: "graphs/",
-                    fileName: fileName,
-                    data: JSON.stringify(data, null, 2),
-                };
+                if (data?.options?.config?.graphUri != Config.sources[MainController.currentSource].graphUri) {
+                return alert("graphUri in file is not the same as the current graphUri, update graphURI in JSON file");
+                }
 
+                // --- #1660: Vérif DB avant import (DB-first) ---
+
+                // On enlève lastUpdate du fichier importé (évite d’écraser l’historique)
+                if (data?.options?.config?.lastUpdate) {
+                    delete data.options.config.lastUpdate;
+                }
+
+                // 1) Extraire les IDs de DB requis depuis options.config.databaseSources
+                var requiredDbIdsSet = new Set(Object.keys(data?.options?.config?.databaseSources || {}));
+
+                // 2) Vérifier aussi dans les nodes (exigence ticket) : nodes[].data.datasource
+                // On ne retient que ceux qui sont déjà dans databaseSources (donc pas les CSV)
+                (data.nodes || []).forEach(function (n) {
+                    var ds = n && n.data ? n.data.datasource : null;
+                    if (ds && requiredDbIdsSet.has(ds)) requiredDbIdsSet.add(ds);
+                });
+                var requiredDbIds = Array.from(requiredDbIdsSet);
+
+                // Petite fonction utilitaire pour faire le POST (appelée seulement si OK)
+                function doImportPost(dataToSave) {
+                    var fileName = "mappings_" + MappingModeler.currentSLSsource + "_ALL" + ".json";
+                    var payload = {
+                        dir: "graphs/",
+                        fileName: fileName,
+                        data: JSON.stringify(dataToSave, null, 2),
+                    };
+
+                    $.ajax({
+                        type: "POST",
+                        url: `${Config.apiUrl}/data/file`,
+                        data: payload,
+                        dataType: "json",
+                        success: function (_result, _textStatus, _jqXHR) {
+                            MappingModeler.onLoaded();
+                        },
+                        error: function (err) {
+                            return MainController.errorAlert(err);
+                        },
+                    });
+                }
+
+                // Si aucune DB n’est déclarée dans le mapping, on continue
+                if (requiredDbIds.length === 0) {
+                    return doImportPost(data);
+                }
+
+                // 3) Appeler l’API liste des DB accessibles à l’utilisateur (rôles inclus)
                 $.ajax({
-                    type: "POST",
-                    url: `${Config.apiUrl}/data/file`,
-                    data: payload,
+                    type: "GET",
+                    url: `${Config.apiUrl}/databases`,
                     dataType: "json",
-                    success: function (result, _textStatus, _jqXHR) {
-                        MappingModeler.onLoaded();
+                    success: function (resp) {
+                        var available = (resp && resp.resources) ? resp.resources : [];
+                        var availableIds = new Set(available.map(function (x) { return x.id; }));
+
+                        var missing = requiredDbIds.filter(function (id) { return !availableIds.has(id); });
+
+                        if (missing.length > 0) {
+                            var namesFromFile = data?.options?.config?.databaseSources || {};
+                            var missingLines = missing.map(function (id) {
+                                var name = (namesFromFile[id] && namesFromFile[id].name) ? namesFromFile[id].name : "(nom inconnu)";
+                                return "- " + id + " — " + name;
+                            }).join("\n");
+
+                            var msg =
+                                "Import impossible : datasource(s) base de données indisponible(s) sur ce serveur.\n" +
+                                "Elles sont soit absentes, soit non autorisées pour votre profil.\n\n" +
+                                "Bases manquantes :\n" + missingLines + "\n\n" +
+                                "Pour résoudre :\n" +
+                                "1) Créer/ajouter ces bases sur le serveur cible (admin > Databases).\n" +
+                                "2) Donner l’accès à votre compte (profils/allowedDatabases).\n" +
+                                "3) Ou modifier le JSON importé pour pointer vers un id existant.\n";
+                            alert(msg);
+                            return; // STOP: on n’écrit pas /data/file
+                        }
+
+                        // OK => on importe
+                        return doImportPost(data);
                     },
-                    error(err) {
-                        return MainController.errorAlert(err);
+                    error: function (e) {
+                        return MainController.errorAlert(e);
                     },
                 });
+
             });
         };
 
@@ -1800,161 +1869,84 @@ var MappingColumnsGraph = (function () {
      * Imports mappings from a JSON file into the Vis.js graph file.
      * Opens a file import dialog, parses the JSON content, and uploads the data to the graphs in instance data repository.
      *
-     * @function
-     * @name importMappingsFromJSONFile
-     * @memberof module:MappingColumnsGraph
-     * @returns {void}
-     */
+    //  * @function
+    //  * @name importMappingsFromJSONFile
+    //  * @memberof module:MappingColumnsGraph
+    //  * @returns {void}
+    //  */
+    // self.importMappingsFromJSONFile = function () {
+    //     ImportFileWidget.showImportDialog(function (err, result) {
+    //         if (err) {
+    //             return MainController.errorAlert(err);
+    //         }
+    //         var data = JSON.parse(result);
+    //         if (data.nodes.length == 0) {
+    //             return alert("no nodes in file");
+    //         }
+    //         if (data?.options?.config?.graphUri != Config.sources[MainController.currentSource].graphUri) {
+    //             return alert("graphUri in file is not the same as the current graphUri, update graphURI in JSON file");
+    //         }
+    //         var fileName = "mappings_" + MappingModeler.currentSLSsource + "_ALL" + ".json";
+    //         var payload = {
+    //             dir: "graphs/",
+    //             fileName: fileName,
+    //             data: JSON.stringify(data, null, 2),
+    //         };
 
-    self.importMappingsFromJSONFile = function () {
-        ImportFileWidget.showImportDialog(function (err, result) {
-            if (err) {
-                return MainController.errorAlert(err);
-            }
+    //         $.ajax({
+    //             type: "POST",
+    //             url: `${Config.apiUrl}/data/file`,
+    //             data: payload,
+    //             dataType: "json",
+    //             success: function (result, _textStatus, _jqXHR) {
+    //                 MappingModeler.onLoaded();
+    //             },
+    //             error(err) {
+    //                 return MainController.errorAlert(err);
+    //             },
+    //         });
+    //     });
+    // };
 
-            var data = JSON.parse(result);
+    // /**
+    //  * Exports the current mappings from the Vis.js graph to a JSON file.
+    //  * Saves the graph data before exporting
+    //  *
+    //  *
+    //  * @function
+    //  * @name exportMappings
+    //  * @memberof module:MappingColumnsGraph
+    //  * @returns {void}
+    //  */
+    // self.exportMappings = function () {
+    //     self.saveVisjsGraph(function (err) {
+    //         var fileName = "mappings_" + MappingModeler.currentSLSsource + "_ALL" + ".json";
+    //         var payload = {
+    //             dir: "graphs/",
+    //             fileName: fileName,
+    //         };
 
-            if (data.nodes.length == 0) {
-                return alert("no nodes in file");
-            }
-
-            if (data?.options?.config?.graphUri != Config.sources[MainController.currentSource].graphUri) {
-                return alert("graphUri in file is not the same as the current graphUri, update graphURI in JSON file");
-            }
-            console.log("IMPORT MAPPING: fonction importMappingsFromJSONFile exécutée ");
-
-            // >>> START CHECK DB (fix #1660 - DB d'abord)
-            // 1) Récupérer les DB requises (depuis la config + les nodes)
-            const requiredDbIdsSet = new Set(
-                Object.keys(data?.options?.config?.databaseSources || {})
-            );
-
-            // On ajoute aussi celles trouvées dans les nodes, mais uniquement si ça ressemble à une DB déjà déclarée
-            // (comme ça on n'attrape pas les CSV, qui sont des noms de fichiers).
-            (data.nodes || []).forEach((n) => {
-                const ds = n?.data?.datasource;
-                if (ds && requiredDbIdsSet.has(ds)) requiredDbIdsSet.add(ds);
-            });
-
-            const requiredDbIds = Array.from(requiredDbIdsSet);
-
-            // Si le mapping n'utilise pas de DB, on ne bloque pas (DB d'abord)
-            if (requiredDbIds.length > 0) {
-                // 2) Appeler l'API qui liste les DB accessibles à l'utilisateur courant (rôles inclus)
-                $.ajax({
-                    type: "GET",
-                    url: `${Config.apiUrl}/databases`,
-                    dataType: "json",
-                    success: function (resp) {
-                        // Format attendu: { message: "...", resources: [ {id, database}, ... ] }
-                        const available = (resp && resp.resources) ? resp.resources : [];
-                        const availableIds = new Set(available.map((x) => x.id));
-
-                        const missing = requiredDbIds.filter((id) => !availableIds.has(id));
-
-                        if (missing.length > 0) {
-                            // Construire un message actionnable
-                            const namesFromFile = data?.options?.config?.databaseSources || {};
-                            const missingLines = missing.map((id) => {
-                                const name = namesFromFile[id]?.name ? namesFromFile[id].name : "(nom inconnu)";
-                                return `- ${id} — ${name}`;
-                            }).join("\n");
-
-                            const msg =
-                                "Import impossible : datasource(s) base de données indisponible(s) sur ce serveur.\n" +
-                                "Elles sont soit absentes, soit non autorisées pour votre profil.\n\n" +
-                                "Bases manquantes :\n" + missingLines + "\n\n" +
-                                "Pour résoudre :\n" +
-                                "1) Créer/ajouter ces bases sur le serveur cible (admin/Databases).\n" +
-                                "2) Donner l’accès à votre compte (profils/allowedDatabases).\n" +
-                                "3) Ou modifier le JSON importé pour pointer vers un id existant.\n";
-
-                            alert(msg);
-                            return; // STOP : on ne fait pas le POST /data/file
-                        }
-
-                        // 3) Si tout est OK, on continue l'import (on passe à l'étape POST)
-                        doImportPost(data);
-                    },
-                    error: function (e) {
-                        // En cas d'erreur API, on stop aussi (sinon import incohérent)
-                        return MainController.errorAlert(e);
-                    },
-                });
-
-                // On sort ici car le POST sera déclenché dans success() via doImportPost()
-                return;
-            }
-            // >>> END CHECK DB
-
-            // Si aucune DB à vérifier, on continue normalement
-            doImportPost(data);
-
-            // Fonction utilitaire pour éviter dupliquer le POST
-            function doImportPost(dataToSave) {
-                var fileName = "mappings_" + MappingModeler.currentSLSsource + "_ALL" + ".json";
-                var payload = {
-                    dir: "graphs/",
-                    fileName: fileName,
-                    data: JSON.stringify(dataToSave, null, 2),
-                };
-
-                $.ajax({
-                    type: "POST",
-                    url: `${Config.apiUrl}/data/file`,
-                    data: payload,
-                    dataType: "json",
-                    success: function (_result, _textStatus, _jqXHR) {
-                        MappingModeler.onLoaded();
-                    },
-                    error: function (err) {
-                        return MainController.errorAlert(err);
-                    },
-                });
-            }
-        });
-    };
-
-
-    /**
-     * Exports the current mappings from the Vis.js graph to a JSON file.
-     * Saves the graph data before exporting
-     *
-     *
-     * @function
-     * @name exportMappings
-     * @memberof module:MappingColumnsGraph
-     * @returns {void}
-     */
-    self.exportMappings = function () {
-        self.saveVisjsGraph(function (err) {
-            var fileName = "mappings_" + MappingModeler.currentSLSsource + "_ALL" + ".json";
-            var payload = {
-                dir: "graphs/",
-                fileName: fileName,
-            };
-
-            $.ajax({
-                type: "GET",
-                url: `${Config.apiUrl}/data/file`,
-                data: payload,
-                dataType: "json",
-                success: function (result, _textStatus, _jqXHR) {
-                    var data = JSON.parse(result);
-                    Export.downloadJSON(data, fileName);
-                },
-                error(err) {
-                    if (callback) {
-                        return callback(err);
-                    }
-                    if (err.responseJSON == "file does not exist") {
-                        return;
-                    }
-                    return MainController.errorAlert(err);
-                },
-            });
-        });
-    };
+    //         $.ajax({
+    //             type: "GET",
+    //             url: `${Config.apiUrl}/data/file`,
+    //             data: payload,
+    //             dataType: "json",
+    //             success: function (result, _textStatus, _jqXHR) {
+    //                 var data = JSON.parse(result);
+    //                 Export.downloadJSON(data, fileName);
+    //             },
+    //             error(err) {
+    //                 if (callback) {
+    //                     return callback(err);
+    //                 }
+    //                 if (err.responseJSON == "file does not exist") {
+    //                     return;
+    //                 }
+    //                 return MainController.errorAlert(err);
+    //             },
+    //         });
+    //     });
+    // };
 
     self.hideNodesFromOtherTables = function (table) {
         var nodes = MappingColumnsGraph.visjsGraph.data.nodes.get();

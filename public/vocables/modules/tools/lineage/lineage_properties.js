@@ -1179,6 +1179,16 @@ var Lineage_properties = (function () {
         );
     };
 
+    /**
+     * builds and displays a matrix that maps OWL classes to each other using inferred property
+     * domains and ranges. It orchestrates three asynchronous steps with async.series and finally
+     * renders the result with Export.showDataTable
+     * @function
+     * @name drawPropsRangeAndDomainMatrix
+     * @memberof module:lineage_properties
+     * @param {string} source - SPARQL endpoint or graph identifier to query
+     * @returns {Object} Export.showDataTable
+     */
     self.drawPropsRangeAndDomainMatrix = function (source) {
         var classes = [];
         var matrixMap = {};
@@ -1269,6 +1279,16 @@ var Lineage_properties = (function () {
         );
     };
 
+    /**
+     * Handles UI‑driven actions (relations, predicates, restrictions, ranges/domains) by gathering
+     * selected properties or graph nodes and delegating to various drawing utilities
+     * @function
+     * @name onPropertyActionClick
+     * @memberof module:lineage_properties
+     * @param {string} action one of "relations", "predicates", "restrictions", "rangesAndDomains"
+     * @param {string} target rendering destination, either "visj" (graph) or "table"
+     * @returns {None} 
+     */
     self.onPropertyActionClick = function (action, target) {
         var properties = null;
         if ($("#Lineage_propertiesTree").jstree().get_checked) {
@@ -1331,6 +1351,16 @@ var Lineage_properties = (function () {
             }
         }
     };
+
+    /**
+     * defines a method on the `self` object that toggles CSS classes on the child element(s)
+     * of a supplied DIV to reflect a property‑icon state
+     * @function
+     * @name changeIconForPropertiesGraphAction
+     * @memberof module:lineage_properties
+     * @param {Dom element} DOM element whose direct child holds the icon classes.</param>
+     * @returns {None} DOM is updated in place
+     */
     self.changeIconForPropertiesGraphAction = function (div) {
         var icon = $(div).children().attr("class");
         if (icon == "allPropertyIcon slsv-invisible-button" || icon == "slsv-invisible-button allPropertyIcon") {

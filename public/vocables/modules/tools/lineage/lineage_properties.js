@@ -557,6 +557,17 @@ var Lineage_properties = (function () {
         });
     };
 
+    /**
+     * Exports a tab‑separated list of property range/domain information, optionally filtered
+     * to nodes currently displayed in a Vis.js graph. It builds the output string line‑by‑line
+     * and copies it to the clipboard
+     * @function
+     * @name exportRangeAndDomainsGraph
+     * @memberof module:lineage_properties
+     * @param {string, URI} property URI (or identifier) of the property whose range/domain data is 
+     * requested
+     * @returns {void}
+    */
     self.exportRangeAndDomainsGraph = function (property) {
         var source = Lineage_sources.activeSource;
         var targetnodes = null;
@@ -609,6 +620,7 @@ var Lineage_properties = (function () {
             common.copyTextToClipboard(strAll);
         });
     };
+
     /**
      *
      * draws  graph of properties ranges and domains depending on
@@ -1060,6 +1072,16 @@ var Lineage_properties = (function () {
         }
     };
 
+    /**
+     * defines a simple object `graphActions` on `self` with two action methods for a graph UI
+     * @function
+     * @name  graphActions
+     * @memberof module:lineage_properties
+     * @param {Object} node node object that should be expanded/redrawn
+     * @param {*} _point (Unused) placeholder for potential future coordinate data
+     * @param {*} _event (Unused) placeholder for the originating event object
+     * @returns {void}
+    */
     self.graphActions = {
         expandNode: function (node, _point, _event) {
             self.drawGraph(node);

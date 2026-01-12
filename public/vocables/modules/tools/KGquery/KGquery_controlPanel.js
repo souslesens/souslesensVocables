@@ -188,6 +188,18 @@ var KGquery_controlPanel = (function () {
         return predicateLabel;
     };
 
+    /**
+     * defines a method `onSetOptionalChange` on the `self` object that toggles the `isOptional` flag
+     * of a specific query element within a query set identified by DOM IDs
+     * updates the `isOptional` flag of a specific query element identified by its div ID
+     * @function
+     * @name onSetOptionalChange
+     * @memberof module:KGquery_controlPanel
+     * @param {boolean} state desired optional flag state for the element
+     * @param {string} querySetDivId identifier of the query set container (key into KGquery.divsMap)
+     * @param {string} queryElementDivId identifier of the target query element within the set
+     * @returns {void}
+     */
     self.onSetOptionalChange = function (state, querySetDivId, queryElementDivId) {
         var querySet = KGquery.divsMap[querySetDivId];
         querySet.elements.forEach(function (element) {

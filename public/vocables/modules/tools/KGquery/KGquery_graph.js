@@ -738,6 +738,16 @@ var KGquery_graph = (function () {
         });
         return;*/
     };
+
+    /**
+     * collects a property URI and label via synchronous prompts, constructs an edge object
+     * with a random ID, and adds it to the KGquery graph
+     * @function
+     * @name addInterGraphProperty
+     * @memberof module:KGquery_graph
+     * @param {Object} edgeData Information about the source and target nodes ({ from, to })
+     * @returns {void}
+     */
     self.addInterGraphProperty = function (edgeData) {
         var propertyId = prompt("enter property URI");
         if (!propertyId) {

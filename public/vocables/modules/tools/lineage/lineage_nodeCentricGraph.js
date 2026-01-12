@@ -13,7 +13,7 @@ var Lineage_nodeCentricGraph = (function () {
     self.levelsSelection = [];
 
     /**
-     * Builds a hierarchical sub‑graph of a Vis.js network starting from a given root node
+     * Builds a hierarchical sub‑graph of a Vis.js starting from a given root node
      * It collects reachable nodes and edges, assigns a level depth to each node, and also
      * identifies orphan nodes that are not reachable from the root
      * @function

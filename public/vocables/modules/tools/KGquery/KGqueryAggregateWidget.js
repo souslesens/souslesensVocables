@@ -6,6 +6,19 @@ var KGqueryAggregateWidget = (function () {
     var self = {};
     self.groupFunctions = { COUNT: 1, SUM: 1, MAX: 1, MIN: 1, AVG: 1, concat: 1 };
 
+    /**
+     * It dynamically loads an aggregate query dialog, fetches class/property metadata, and
+     * populates several jstree widgets for user selection. While it accomplishes its goal,
+     * it mixes UI handling, data processing, and widget initialization in a single large callback
+     * @function
+     * @name showDialog
+     * @memberof module:KGqueryAggregateWidget
+     * @param {String} divId Target div id for the dialog; defaults to "smallDialogDiv" if falsy
+     * @param {String} message optional message to display in the dialog
+     * @param {function} loadClassesFn async function that provides class/property data via a callback
+     * @param {function} validateFn Validation callback stored for later use
+     * @returns {void}
+     */
     self.showDialog = function (divId, loadClassesFn, validateFn, message) {
         self.validateFn = validateFn;
         self.functionVarClasses = [];
@@ -103,6 +116,15 @@ var KGqueryAggregateWidget = (function () {
         });
     };
 
+    /**
+     * This handler assembles user‑selected grouping and aggregation options from several jstree widgets,
+     * validates the selections, constructs aggregate query clauses, augments them with class‑filter
+     * constraints, closes the UI dialog, and finally forwards the result to an optional validation callback
+     * @function
+     * @name onOKbutton
+     * @memberof module:KGqueryAggregateWidget
+     * @returns {void}
+     */
     self.onOKbutton = function () {
         var groupByNodes = [];
         $("#KGqueryAggregate_groupBySelect")
@@ -161,6 +183,7 @@ var KGqueryAggregateWidget = (function () {
             return self.validateFn(null, aggregateClauses);
         }
     };
+
     /**
      *
      * @param groupByNodes
@@ -212,6 +235,18 @@ var KGqueryAggregateWidget = (function () {
         return aggregateClauses;
     };
 
+    /**
+     * Builds a simple jsTree data array from an object map and delegates rendering to JstreeWidget
+     * It assumes all entries are root nodes (parent "#") and forces the tree to be fully expanded
+     * via options.openAll
+     * @function
+     * @name loadJstree
+     * @memberof module:KGqueryAggregateWidget
+     * @param {Object} dataMap map where each key becomes a node id/text
+     * @param {String} divId DOM element ID where the tree will be rendered
+     * @param {Object, optionnal} options configuration for the jsTree; `openAll` is forced true
+     * @returns {void}
+     */
     self.loadJstree = function (dataMap, divId, options) {
         var jstreeData = [];
         for (var key in dataMap) {

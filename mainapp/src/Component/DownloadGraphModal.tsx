@@ -83,16 +83,14 @@ export function DownloadGraphModal({ apiUrl, onClose, open, sourceName }: Downlo
         return { status: response.status, message: json as ApiServerResponseOk };
     };
 
-    const downloadSourceUsingPythonApi = async (name: string) => {
+    const downloadSourceUsingPythonApi = async (name: string, basePercent: number, sourceWeight: number) => {
         let offset = 0;
         let identifier = "";
         const blobParts: BlobPart[] = [];
-        setTransferPercent(1);
-        setTransferState("processing");
+        setTransferState("downloading");
         while (offset !== null) {
             if (cancelCurrentOperation.current) {
-                cancelCurrentOperation.current = false;
-                return { blobParts: [], message: "ok" };
+                return { blobParts: null, message: "cancelled" };
             }
             const response = await fetchGraphPartUsingPythonApi(name, offset, currentDownloadFormat, identifier, skipNamedIndividuals);
             const status = response.status;
@@ -101,16 +99,15 @@ export function DownloadGraphModal({ apiUrl, onClose, open, sourceName }: Downlo
                 return { blobParts: null, message: errorMessage };
             }
             const message = response.message as ApiServerResponseOk;
-            // percent
-            const percent = Math.min(100, (offset * 100) / message.filesize);
-            setTransferPercent(percent);
+            // percent within this source (0-100), then scaled to the source's weight
+            const sourcePercent = message.filesize > 0 ? Math.min(100, (offset * 100) / message.filesize) : 0;
+            const globalPercent = Math.min(100, basePercent + (sourcePercent * sourceWeight) / 100);
+            setTransferPercent(Math.round(globalPercent));
 
             blobParts.push(message.data);
             offset = message.next_offset;
             identifier = message.identifier;
         }
-        setTransferPercent(100);
-        setTransferState("done");
         return { blobParts: blobParts, message: "ok" };
     };
 
@@ -119,25 +116,33 @@ export function DownloadGraphModal({ apiUrl, onClose, open, sourceName }: Downlo
         return await response.text();
     };
 
-    const recursDownloadSource = async (name: string, offset: number, graphSize: number, pageSize: number, blobParts: BlobPart[]) => {
-        // percent
-        const percent = Math.min(Math.round((offset * 100) / graphSize), 100);
-        setTransferPercent(percent);
+    const recursDownloadSource = async (
+        name: string,
+        offset: number,
+        graphSize: number,
+        pageSize: number,
+        blobParts: BlobPart[],
+        basePercent: number,
+        sourceWeight: number
+    ) => {
+        // percent within this source, then scaled to global progress
+        const sourcePercent = graphSize > 0 ? Math.min(Math.round((offset * 100) / graphSize), 100) : 0;
+        const globalPercent = Math.min(100, basePercent + (sourcePercent * sourceWeight) / 100);
+        setTransferPercent(Math.round(globalPercent));
 
         if (cancelCurrentOperation.current) {
-            cancelCurrentOperation.current = false;
             return [];
         }
 
         if (offset < graphSize) {
             const data = await fetchGraphPart(name, pageSize, offset);
             blobParts.push(data);
-            blobParts = await recursDownloadSource(name, offset + pageSize, graphSize, pageSize, blobParts);
+            blobParts = await recursDownloadSource(name, offset + pageSize, graphSize, pageSize, blobParts, basePercent, sourceWeight);
         }
         return blobParts;
     };
 
-    const downloadSource = async (e: MouseEvent) => {
+    const submitDownloadSource = async (e: MouseEvent) => {
         e.preventDefault();
         if (!currentUser) {
             console.error("No user");
@@ -151,6 +156,7 @@ export function DownloadGraphModal({ apiUrl, onClose, open, sourceName }: Downlo
             return;
         }
 
+        
         try {
             await writeLog(currentUser.login, "GraphManagement", "download", sourceName);
 
@@ -158,26 +164,21 @@ export function DownloadGraphModal({ apiUrl, onClose, open, sourceName }: Downlo
             setTransferState("init");
             cancelCurrentOperation.current = false;
 
-            let blobParts: BlobPart[] | null;
-            let message = "ok";
-            if (apiUrl === "/") {
-                const graphInfo = await fetchSourceInfo(sourceName);
-                const graphSize = graphInfo.graphSize;
-                const pageSize = graphInfo.pageSize;
+            const downloadResult = await downloadSourceTriples();
+            const blobParts = downloadResult.blobParts;
+            const message = downloadResult.message;
 
-                blobParts = await recursDownloadSource(sourceName, 0, graphSize, pageSize, []);
-            } else {
-                const result = await downloadSourceUsingPythonApi(sourceName);
-                blobParts = result.blobParts;
-                message = result.message;
+            // If cancelled, just return silently (handleCancelOperation already reset state)
+            if (message === "cancelled") {
+                return;
             }
 
-            if (message != "ok") {
+            if (message !== "ok") {
                 setErrorMessage(message);
                 return;
             }
 
-            if (!blobParts || blobParts.length == 0) {
+            if (!blobParts || blobParts.length === 0) {
                 setErrorMessage("Receive empty data from the API");
                 return;
             }
@@ -193,6 +194,88 @@ export function DownloadGraphModal({ apiUrl, onClose, open, sourceName }: Downlo
             console.error(error);
             setErrorMessage((error as Error).message);
         }
+    };
+    const downloadSourceTriples = async () => {
+        let blobParts: BlobPart[] | null;
+        let message = "ok";
+        let sources = [sourceName];
+        const imports = (window?.Config.sources[sourceName]?.imports as string[]) || [];
+        sources = sources.concat(imports);
+        blobParts = [];
+        let blobPartsSource: BlobPart[] = [];
+
+        // First, fetch the size of all sources to calculate proportional weights
+        const sourceSizes: { source: string; graphSize: number; pageSize: number }[] = [];
+        let totalSize = 0;
+
+        setTransferState("downloading");
+        
+
+        for (const source of sources) {
+            if (apiUrl === "/") {
+                const graphInfo = await fetchSourceInfo(source);
+                sourceSizes.push({ source, graphSize: graphInfo.graphSize, pageSize: graphInfo.pageSize });
+                totalSize += graphInfo.graphSize;
+            } else {
+                // For Python API, we get the filesize during download, so use equal weight as fallback
+                // We'll update progress based on actual filesize during download
+                sourceSizes.push({ source, graphSize: 0, pageSize: 0 });
+            }
+        }
+
+        // Calculate proportional weights based on actual sizes
+        // Use 99 as max during download to reserve 100 for completion
+        const maxPercentDuringDownload = 99;
+        let cumulativePercent = 0;
+
+        for (let i = 0; i < sources.length; i++) {
+            // Check for cancellation before each source
+            if (cancelCurrentOperation.current) {
+                return { blobParts: null, message: "cancelled" };
+            }
+
+            const sourceInfo = sourceSizes[i];
+            const source = sourceInfo.source;
+
+            // Calculate this source's weight as percentage of total (scaled to max 99%)
+            const sourceWeight = totalSize > 0
+                ? (sourceInfo.graphSize / totalSize) * maxPercentDuringDownload
+                : maxPercentDuringDownload / sources.length;
+            const basePercent = cumulativePercent;
+
+            if (apiUrl === "/") {
+                blobPartsSource = await recursDownloadSource(
+                    source,
+                    0,
+                    sourceInfo.graphSize,
+                    sourceInfo.pageSize,
+                    [],
+                    basePercent,
+                    sourceWeight
+                );
+                // Check if cancelled (empty array returned)
+                if (cancelCurrentOperation.current) {
+                    return { blobParts: null, message: "cancelled" };
+                }
+                blobParts = blobParts!.concat(blobPartsSource);
+            } else {
+                const result = await downloadSourceUsingPythonApi(source, basePercent, sourceWeight);
+                if (result.message === "cancelled" || result.blobParts === null) {
+                    return { blobParts: null, message: "cancelled" };
+                }
+                blobPartsSource = result.blobParts || [];
+                blobParts = blobParts!.concat(blobPartsSource);
+
+                message = result.message;
+                if (message !== "ok") {
+                    return { blobParts: blobParts, message: message };
+                }
+            }
+            cumulativePercent += sourceWeight;
+        }
+        setTransferPercent(100);
+        setTransferState("done");
+        return { blobParts: blobParts, message: message };
     };
 
     return (
@@ -261,7 +344,7 @@ export function DownloadGraphModal({ apiUrl, onClose, open, sourceName }: Downlo
                 </Stack>
                 <Stack direction="row" gap={1}>
                     {transferPercent === 0 ? (
-                        <Button color="primary" disabled={currentDownloadFormat === null} onClick={downloadSource} startIcon={<Done />} type="submit" variant="contained">
+                        <Button color="primary" disabled={currentDownloadFormat === null} onClick={submitDownloadSource} startIcon={<Done />} type="submit" variant="contained">
                             Submit
                         </Button>
                     ) : (

@@ -1069,6 +1069,18 @@ var Lineage_properties = (function () {
         },
     };
 
+    /**
+     * builds a jsTree of property nodes by searching one or more ontology sources based on user input
+     * @function
+     * @name searchTermInSources
+     * @memberof module:lineage_properties
+     * @param {string} term optional search string; if omitted, reads from the UI input field
+     * @param {bool} inCurrentSource if true, restricts search to the active source; otherwise
+     * may search all
+     * @param {bool} exactMatch forces exact match; overridden when a wildcard (*) is present
+     * @param {string} searchType type of search (e.g., label, uri); defaults to UI selection
+    * @returns {void} updates UI directly
+    */
     self.searchTermInSources = function (term, inCurrentSource, exactMatch, searchType) {
         if (!term) term = $("#LineageProperties_searchAllSourcesTermInput").val();
         if (!exactMatch) {

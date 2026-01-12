@@ -69,18 +69,28 @@ var KGquery_composite_graph_bot = (function () {
                 alert("Please select a graph");
                 return self.myBotEngine.previousStep();
             }
-            if (self.myBotEngine.currentBot.params.visjsData && self.myBotEngine.currentBot.params.visjsData.nodes.length > 0) {
+            // Check if there's an existing graph with nodes BEFORE adding the new one
+            var hasExistingGraph = self.myBotEngine.currentBot.params.visjsData && self.myBotEngine.currentBot.params.visjsData.nodes && self.myBotEngine.currentBot.params.visjsData.nodes.length > 0;
+
+            if (hasExistingGraph) {
+                // There's an existing graph, concatenate with the new one
                 KGquery_graph.visjsData.nodes = self.myBotEngine.currentBot.params.visjsData.nodes.concat(self.myBotEngine.currentBot.params.selectedGraph.nodes);
                 KGquery_graph.visjsData.edges = self.myBotEngine.currentBot.params.visjsData.edges.concat(self.myBotEngine.currentBot.params.selectedGraph.edges);
-                return KGquery_graph.drawModel(false, function () {
-                    self.myBotEngine.nextStep();
-                });
             } else {
+                // No existing graph, use the selected graph directly
                 KGquery_graph.visjsData = self.myBotEngine.currentBot.params.selectedGraph;
-                return KGquery_graph.drawModel(false, function () {
-                    self.myBotEngine.nextStep();
-                });
             }
+
+            return KGquery_graph.drawModel(false, function () {
+                if (hasExistingGraph) {
+                    // Existing graph was present: proceed to join steps
+                    self.myBotEngine.nextStep();
+                } else {
+                    // No existing graph: skip join steps, go directly to loopChoice
+                    self.myBotEngine.currentObj = self.loopChoice;
+                    self.myBotEngine.nextStep(self.loopChoice);
+                }
+            });
         },
         // choose a source common class key to joins graphs
         chooseSourceCommonClassKeyFn: function () {
@@ -90,14 +100,35 @@ var KGquery_composite_graph_bot = (function () {
                 self.myBotEngine.nextStep(self.loopChoice);
                 return;
             }
-            var sourceNodes = self.myBotEngine.currentBot.params.visjsData.nodes;
-            var prefixedSourcesNodesIds = [];
-            sourceNodes.forEach(function (node) {
-                var prefixedLabel = Sparql_common.getPrefixedLabelFromURI(node.data.source, node.id);
-                self.myBotEngine.currentBot.params.classMap[prefixedLabel] = node.id;
-                prefixedSourcesNodesIds.push(prefixedLabel);
+
+            // Check if graphs already share common URIs (natural join already exists)
+            var existingNodeIds = {};
+            self.myBotEngine.currentBot.params.visjsData.nodes.forEach(function (node) {
+                existingNodeIds[node.id] = true;
             });
-            self.myBotEngine.showList(prefixedSourcesNodesIds, "sourceCommonClass");
+
+            var selectedGraphNodes = self.myBotEngine.currentBot.params.selectedGraph ? self.myBotEngine.currentBot.params.selectedGraph.nodes : [];
+            var hasCommonNodes = selectedGraphNodes.some(function (node) {
+                return existingNodeIds[node.id];
+            });
+
+            // If graphs share common URIs, skip join steps (fusion is already natural)
+            if (hasCommonNodes) {
+                self.myBotEngine.currentObj = self.loopChoice;
+                self.myBotEngine.nextStep(self.loopChoice);
+                return;
+            }
+
+            var sourceNodes = self.myBotEngine.currentBot.params.visjsData.nodes;
+            var labeledSourcesNodesIds = [];
+            sourceNodes.forEach(function (node) {
+                // Use full source name instead of 3-letter prefix
+                var nodeLabel = node.label || Sparql_common.getLabelFromURI(node.id);
+                var fullLabel = node.data.source + ":" + nodeLabel;
+                self.myBotEngine.currentBot.params.classMap[fullLabel] = node.id;
+                labeledSourcesNodesIds.push(fullLabel);
+            });
+            self.myBotEngine.showList(labeledSourcesNodesIds, "sourceCommonClass");
         },
         // choose a target common class key to joins graphs
         chooseTargetCommonClassKeyFn: function () {
@@ -107,13 +138,15 @@ var KGquery_composite_graph_bot = (function () {
                 return;
             }
             var hyperGraphNodes = self.myBotEngine.currentBot.params.selectedGraph.nodes;
-            var prefixedHyperGraphNodesIds = [];
+            var labeledHyperGraphNodesIds = [];
             hyperGraphNodes.forEach(function (node) {
-                var prefixedLabel = Sparql_common.getPrefixedLabelFromURI(node.data.source, node.id);
-                self.myBotEngine.currentBot.params.classMap[prefixedLabel] = node.id;
-                prefixedHyperGraphNodesIds.push(prefixedLabel);
+                // Use full source name instead of 3-letter prefix
+                var nodeLabel = node.label || Sparql_common.getLabelFromURI(node.id);
+                var fullLabel = node.data.source + ":" + nodeLabel;
+                self.myBotEngine.currentBot.params.classMap[fullLabel] = node.id;
+                labeledHyperGraphNodesIds.push(fullLabel);
             });
-            self.myBotEngine.showList(prefixedHyperGraphNodesIds, "targetCommonClass");
+            self.myBotEngine.showList(labeledHyperGraphNodesIds, "targetCommonClass");
         },
         // choose a source to import on the hypergraph
         listImportsSourcesFn: function () {

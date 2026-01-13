@@ -1287,7 +1287,7 @@ var Lineage_properties = (function () {
      * @memberof module:lineage_properties
      * @param {string} action one of "relations", "predicates", "restrictions", "rangesAndDomains"
      * @param {string} target rendering destination, either "visj" (graph) or "table"
-     * @returns {None} 
+     * @returns {None}
      */
     self.onPropertyActionClick = function (action, target) {
         var properties = null;

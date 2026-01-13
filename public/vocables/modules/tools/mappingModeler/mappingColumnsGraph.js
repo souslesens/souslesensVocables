@@ -423,7 +423,7 @@ var MappingColumnsGraph = (function () {
         //add relation between columns
         if (options.ctrlKey) {
             if (!DataSourceManager.currentConfig.currentDataSource) {
-                return alert("choose a data source first");
+                return alert("Choose a data source first");
             }
 
             if (!MappingModeler.currentRelation) {
@@ -437,7 +437,7 @@ var MappingColumnsGraph = (function () {
                 if (node.data.dataTable && node.data.dataTable != MappingModeler.currentRelation.from.dataTable) {
                     MappingModeler.currentRelation = null;
                     self.relationMessage();
-                    return alert("Relations between Columns from different datbels are not possible");
+                    return alert("Relations between columns from different tables are not possible");
                 }
                 MappingModeler.currentRelation.to = { id: node.id, classId: self.getColumnClass(node) };
                 if (MappingModeler.currentRelation.type != "Class" && node.data.type == "Class") {
@@ -612,7 +612,7 @@ var MappingColumnsGraph = (function () {
          * @returns {void}
          */
         removeNodeFromGraph: function () {
-            if (confirm("delete node")) {
+            if (confirm("Delete node?")) {
                 var edges = self.visjsGraph.network.getConnectedEdges(self.currentGraphNode.id);
                 self.removeEdge(edges);
                 self.removeNode(self.currentGraphNode.id);
@@ -627,7 +627,7 @@ var MappingColumnsGraph = (function () {
          * @returns {void}
          */
         removeNodeEdgeGraph: function () {
-            if (confirm("delete edge")) {
+            if (confirm("Delete edge?")) {
                 self.removeEdge(self.currentGraphNode.id);
             }
         },
@@ -650,7 +650,7 @@ var MappingColumnsGraph = (function () {
                     return MainController.errorAlert(err);
                 }
                 if (result.length == 0) {
-                    return alert("no superClass");
+                    return alert("No superClass");
                 }
                 var item = result[0];
 
@@ -1001,7 +1001,7 @@ var MappingColumnsGraph = (function () {
             options: { config: config },
         };
         if (!fileName) {
-            fileName = prompt("graph name");
+            fileName = prompt("Graph name");
         }
         if (!fileName || fileName == "") {
             return;
@@ -1030,7 +1030,7 @@ var MappingColumnsGraph = (function () {
                 dataType: "json",
                 success: function (_result, _textStatus, _jqXHR) {
                     $("#visjsGraph_savedGraphsSelect").append($("<option></option>").attr("value", fileName).text(fileName));
-                    UI.message("graph saved");
+                    UI.message("Graph saved");
                     if (callback) {
                         callback();
                     }
@@ -1433,6 +1433,43 @@ var MappingColumnsGraph = (function () {
             });
         };
 
+                    /**
+             * Imports mappings from a JSON file into the Vis.js graph file.
+             * Opens a file import dialog, parses the JSON content, and uploads the data to the graphs in instance data repository.
+             *
+            //  * @function
+            //  * @name importMappingsFromJSONFile
+            //  * @memberof module:MappingColumnsGraph
+            //  * @returns {void}
+            //  */
+        /**
+         * Import mappings from a JSON file into the current mapping graph (pre-checks data sources).
+         *
+         * (No id databases: crash)
+         * When importing mappings created on another server, the target server may not contain the same
+         * database source ids. This function prevents crashes by validating required database sources
+         * *before* writing the mapping graph file.
+         *
+         * ### What is validated
+         * 1) JSON integrity: detects any `nodes[i].data.datasource` value that is not declared in
+         *    `options.config.databaseSources` nor `options.config.csvSources`.
+         * 2) Target server availability: calls `GET /databases` and checks that every id declared in
+         *    `options.config.databaseSources` is available (exists and/or is authorized for the user).
+         *
+         * ### User feedback
+         * - Shows a short-title dialog (**Import blocked**) with an explicit reason and actionable steps.
+         * - Pinpoints locations in the imported JSON by attempting to compute line numbers for:
+         *   - `options.config.databaseSources.<id>`
+         *   - `nodes[i].data.datasource` occurrences
+         *   If line numbers cannot be determined (e.g., minified JSON), `?` is shown.
+         *
+         * @function
+         * @name importMappingsFromJSONFile
+         * @memberof module:MappingColumnsGraph
+         * @returns {void}
+         */
+
+
         self.importMappingsFromJSONFile = function () {
             ImportFileWidget.showImportDialog(function (err, result) {
                 if (err) {
@@ -1450,7 +1487,7 @@ var MappingColumnsGraph = (function () {
                 return alert("graphUri in file is not the same as the current graphUri, update graphURI in JSON file");
                 }
 
-                // --- #1660: Vérif DB avant import (DB-first) ---
+                // --- Vérif DB avant import (DB-first) ---
 
                 // On enlève lastUpdate du fichier importé (évite d’écraser l’historique)
                 if (data?.options?.config?.lastUpdate) {
@@ -1459,12 +1496,26 @@ var MappingColumnsGraph = (function () {
 
 
                 // 1) Helpers pour calculer les numéros de ligne dans le JSON importé
+                /**
+                 * Compute a 1-based line number from a character index in the imported JSON text.
+                 * Returns null if the index is invalid.
+                 * @param {number} idx
+                 * @returns {number|null}
+                 */
                 function lineOfIndex(idx) {
                 if (idx < 0) return null;
                 return rawJson.slice(0, idx).split("\n").length; // 1-based
                 }
 
                 // Ligne d’une clé dans options.config.<sectionName>.<key>
+
+                /**
+                 * Try to locate the line number of a key inside `options.config.<sectionName>` in the imported JSON.
+                 * This relies on textual search in the raw JSON (may return null on minified/unexpected formatting).
+                 * @param {string} sectionName
+                 * @param {string} key
+                 * @returns {number|null}
+                 */
                 function findConfigKeyLine(sectionName, key) {
                 var sectionNeedle = `"${sectionName}": {`;
                 var sectionPos = rawJson.indexOf(sectionNeedle);
@@ -1479,6 +1530,14 @@ var MappingColumnsGraph = (function () {
                 }
 
                 // Ligne d’une occurrence nodes[i].data.datasource
+
+                /**
+                 * Try to locate the line number of a `nodes[i].data.datasource` occurrence for a given node id and datasource id.
+                 * This relies on textual search in the raw JSON (may return null on minified/unexpected formatting).
+                 * @param {string} nodeId
+                 * @param {string} dsValue
+                 * @returns {number|null}
+                 */
                 function findNodeDatasourceLine(nodeId, dsValue) {
                 var idNeedle = `"id": "${nodeId}"`;
                 var idPos = rawJson.indexOf(idNeedle);
@@ -1525,6 +1584,14 @@ var MappingColumnsGraph = (function () {
                 // 5) Les DB à vérifier côté serveur = celles déclarées comme DB dans la config
                 var requiredDbIds = dbIdsFromConfig.slice();
 
+                /**
+                 * Display a blocking dialog during import validation.
+                 * The dialog title is intentionally short to avoid UI ellipsis.
+                 * @param {string} title
+                 * @param {string} htmlBody
+                 * @returns {void}
+                 */
+
                 
                 function showImportBlockingDialog(title, htmlBody) {
                 var html =
@@ -1543,7 +1610,7 @@ var MappingColumnsGraph = (function () {
                         return (
                         "&nbsp;&nbsp;• <code>nodes[" +
                         o.nodeIndex +
-                        "].data.datasource</code> (ligne " +
+                        "].data.datasource</code> (line " +
                         (o.line || "?") +
                         ") — type=" +
                         o.nodeType +
@@ -1553,7 +1620,7 @@ var MappingColumnsGraph = (function () {
 
                     var more =
                         dsUsages[id] && dsUsages[id].length > 5
-                        ? "<br>&nbsp;&nbsp;… (+" + (dsUsages[id].length - 5) + " autres occurrences)"
+                        ? "<br>&nbsp;&nbsp;… (+" + (dsUsages[id].length - 5) + " more occurrences)"
                         : "";
 
                     return "<li><b>" + id + "</b><br>" + occ + more + "</li>";
@@ -1561,12 +1628,12 @@ var MappingColumnsGraph = (function () {
                     .join("");
 
                 showImportBlockingDialog(
-                    "Import impossible — datasource inconnue dans le JSON",
-                    "<p>Ces datasources sont utilisées dans <code>nodes[].data.datasource</code> mais ne sont déclarées ni dans <code>options.config.databaseSources</code> ni dans <code>options.config.csvSources</code>.</p>" +
+                    "Import blocked",
+                    "<p>These data sources are used in <code>nodes[].data.datasource</code> but are declared neither in <code>options.config.databaseSources</code> nor in <code>options.config.csvSources</code>.</p>" +
                     "<ul>" +
                     unknownHtml +
                     "</ul>" +
-                    "<p><b>Correction :</b> ajoute ces ids dans la config, ou remplace la valeur dans les nodes indiqués.</p>"
+                    "<p><b>Fix:</b> add these ids to the config, or replace the value in the nodes listed below.</p>"
                 );
                 return; // STOP
                 }
@@ -1619,7 +1686,7 @@ var MappingColumnsGraph = (function () {
                             var name =
                                 dbSourcesFromFile[id] && dbSourcesFromFile[id].name
                                 ? dbSourcesFromFile[id].name
-                                : "(nom inconnu)";
+                                : "(unknown name)";
 
                             var cfgLine = findConfigKeyLine("databaseSources", id);
 
@@ -1627,8 +1694,8 @@ var MappingColumnsGraph = (function () {
                                 return (
                                 "&nbsp;&nbsp;• <code>nodes[" +
                                 o.nodeIndex +
-                                "].data.datasource</code> (ligne " +
-                                (o.line || "?") +
+                                "].data.datasource</code> (line " +
+                                (o.line || "1") +
                                 ") — type=" +
                                 o.nodeType +
                                 (o.dataTable ? " — table=" + o.dataTable : "")
@@ -1637,7 +1704,7 @@ var MappingColumnsGraph = (function () {
 
                             var more =
                                 dsUsages[id] && dsUsages[id].length > 5
-                                ? "<br>&nbsp;&nbsp;… (+" + (dsUsages[id].length - 5) + " autres occurrences)"
+                                ? "<br>&nbsp;&nbsp;… (+" + (dsUsages[id].length - 5) + " more occurrences)"
                                 : "";
 
                             return (
@@ -1645,9 +1712,9 @@ var MappingColumnsGraph = (function () {
                                 id +
                                 "</b> — " +
                                 name +
-                                "<br>Déclarée dans le fichier : <code>options.config.databaseSources." +
+                                "<br>Declared in file: <code>options.config.databaseSources." +
                                 id +
-                                "</code> (ligne " +
+                                "</code> (line " +
                                 (cfgLine || "?") +
                                 ")" +
                                 "<br>" +
@@ -1659,15 +1726,15 @@ var MappingColumnsGraph = (function () {
                             .join("");
 
                         showImportBlockingDialog(
-                            "Import impossible — base(s) de données absente(s) sur ce serveur",
-                            "<p>Ces bases sont référencées par le mapping mais ne sont pas disponibles sur ce serveur (absentes ou non autorisées).</p>" +
+                            "Import blocked",
+                            "<p>These databases are referenced by the mapping but are not available on this server (missing or not authorized).</p>" +
                             "<ul>" +
                             missingHtml +
                             "</ul>" +
-                            "<p><b>Pour résoudre :</b><br>" +
-                            "1) Créer/ajouter ces bases sur le serveur cible (Admin ▸ Databases).<br>" +
-                            "2) Donner l’accès à votre compte (profils/allowedDatabases).<br>" +
-                            "3) Ou modifier le JSON importé pour pointer vers un id existant.</p>"
+                            "<p><b>To fix:</b><br>" +
+                            "1) Create/add these databases on the target server (ConfigEditor ▸ Databases).<br>" +
+                            "2) Grant access to your account (ConfigEditor ▸ profiles/allowedDatabases).<br>" +
+                            "3) Or edit the imported JSON to point to an existing id.</p>"
                         );
                         return; // STOP: on n'écrit pas /data/file
                         }
@@ -1676,9 +1743,22 @@ var MappingColumnsGraph = (function () {
                         // OK => on importe
                         return doImportPost(data);
                     },
+
                     error: function (e) {
-                        return MainController.errorAlert(e);
-                    },
+                    // Cas Offline / API down : e.responseJSON est souvent undefined
+                    var status = (e && typeof e.status !== "undefined") ? e.status : 0;
+
+                    var details =
+                        (e && e.responseJSON && (e.responseJSON.message || e.responseJSON.error)) ||
+                        (e && e.responseText) ||
+                        (e && e.statusText) ||
+                        "Unable to reach the /databases API (offline or server unavailable).";
+
+                    return MainController.errorAlert(
+                        "Database validation failed (status=" + status + ") : " + details
+                    );
+                    }
+
                 });
 
             });

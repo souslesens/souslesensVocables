@@ -63,7 +63,7 @@ var KGquery_predicates = (function () {
         return predicatesSubjectsMap;
     };
 
-     /**
+    /**
      * populates a map (predicatesSubjectsMap) with SPARQL‑like predicate strings for each
      * path defined in a query element. It builds subject‑wise collections of required triples,
      * handling optional direction (inverse) and ensuring a rdf:type triple for each start
@@ -107,7 +107,7 @@ var KGquery_predicates = (function () {
         return predicatesSubjectsMap;
     };
 
-     /**
+    /**
      * Enriches a SPARQL predicate map with rdfs:member path constraints based on a container filter
      * It mutates the provided predicatesSubjectsMap in‑place and returns it
      * @function
@@ -340,7 +340,7 @@ var KGquery_predicates = (function () {
      * @function
      * @name buildAggregateQuery
      * @memberof module:KGquery_predicates
-     * @param {Object} querySets containing `elements` (array of query elements) and `classFiltersMap` 
+     * @param {Object} querySets containing `elements` (array of query elements) and `classFiltersMap`
      *   (map of class filters)
      * @param {Object} aggregateClauses object with `select`, `where`, `groupBy`, and `orderBy` string
      *   used in the aggregate part of the query

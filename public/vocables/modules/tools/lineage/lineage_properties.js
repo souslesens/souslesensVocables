@@ -564,10 +564,10 @@ var Lineage_properties = (function () {
      * @function
      * @name exportRangeAndDomainsGraph
      * @memberof module:lineage_properties
-     * @param {string, URI} property URI (or identifier) of the property whose range/domain data is 
+     * @param {string, URI} property URI (or identifier) of the property whose range/domain data is
      * requested
      * @returns {void}
-    */
+     */
     self.exportRangeAndDomainsGraph = function (property) {
         var source = Lineage_sources.activeSource;
         var targetnodes = null;
@@ -1081,7 +1081,7 @@ var Lineage_properties = (function () {
      * @param {*} _point (Unused) placeholder for potential future coordinate data
      * @param {*} _event (Unused) placeholder for the originating event object
      * @returns {void}
-    */
+     */
     self.graphActions = {
         expandNode: function (node, _point, _event) {
             self.drawGraph(node);
@@ -1101,8 +1101,8 @@ var Lineage_properties = (function () {
      * may search all
      * @param {bool} exactMatch forces exact match; overridden when a wildcard (*) is present
      * @param {string} searchType type of search (e.g., label, uri); defaults to UI selection
-    * @returns {void} updates UI directly
-    */
+     * @returns {void} updates UI directly
+     */
     self.searchTermInSources = function (term, inCurrentSource, exactMatch, searchType) {
         if (!term) term = $("#LineageProperties_searchAllSourcesTermInput").val();
         if (!exactMatch) {
@@ -1321,7 +1321,7 @@ var Lineage_properties = (function () {
      * @memberof module:lineage_properties
      * @param {string} action one of "relations", "predicates", "restrictions", "rangesAndDomains"
      * @param {string} target rendering destination, either "visj" (graph) or "table"
-     * @returns {None} 
+     * @returns {None}
      */
     self.onPropertyActionClick = function (action, target) {
         var properties = null;

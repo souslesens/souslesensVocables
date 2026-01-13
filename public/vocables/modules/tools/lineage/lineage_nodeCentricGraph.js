@@ -97,7 +97,7 @@ var Lineage_nodeCentricGraph = (function () {
      * Builds a hierarchical Vis.js graph configuration based on a root node and
      * a directional flag, then renders the graph on a whiteboard
      * Draws a hierarchical Vis.js graph for a given root node
-     * @function 
+     * @function
      * @name draw
      * @memberof module:lineage_nodeCentricGraph
      * @param {string} rootNodeId Identifier of the node that serves as the graph's root
@@ -148,7 +148,7 @@ var Lineage_nodeCentricGraph = (function () {
      * Defines a method `listAllNodeRelations` on the `self` object. It extracts
      * the current Vis.js graph nodes and edges, packages them, and hands them off
      * to `GraphPaths_bot.start` for further processing
-     * @function 
+     * @function
      * @name listAllNodeRelations
      * @memberof module:lineage_nodeCentricGraph
      * @param {string} rootNodeId Identifier of the node that serves as the graph's root

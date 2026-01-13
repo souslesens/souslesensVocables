@@ -209,7 +209,7 @@ var CreateRestriction_bot = (function () {
         triples.push({
             subject: restrictionId,
             predicate: cardinalityType,
-            object: '"' + value + '^^http://www.w3.org/2001/XMLSchema#nonNegativeInteger"',
+            object: '"' + value + '"' + "^^<http://www.w3.org/2001/XMLSchema#nonNegativeInteger>",
         });
 
         Sparql_generic.insertTriples(source, triples, {}, function (err, result) {

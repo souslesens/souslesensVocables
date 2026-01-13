@@ -63,36 +63,29 @@ var KGquery_composite_graph_bot = (function () {
         chooseColorForSelectedGraphFn: "Choose a color for the selected graph",
     };
     self.functions = {
-        // add a new graph to current hypergraph source
         drawHyperGraphFn: function () {
             if (!self.myBotEngine.currentBot.params.selectedGraph) {
                 alert("Please select a graph");
                 return self.myBotEngine.previousStep();
             }
-            // Check if there's an existing graph with nodes BEFORE adding the new one
             var hasExistingGraph = self.myBotEngine.currentBot.params.visjsData && self.myBotEngine.currentBot.params.visjsData.nodes && self.myBotEngine.currentBot.params.visjsData.nodes.length > 0;
 
             if (hasExistingGraph) {
-                // There's an existing graph, concatenate with the new one
                 KGquery_graph.visjsData.nodes = self.myBotEngine.currentBot.params.visjsData.nodes.concat(self.myBotEngine.currentBot.params.selectedGraph.nodes);
                 KGquery_graph.visjsData.edges = self.myBotEngine.currentBot.params.visjsData.edges.concat(self.myBotEngine.currentBot.params.selectedGraph.edges);
             } else {
-                // No existing graph, use the selected graph directly
                 KGquery_graph.visjsData = self.myBotEngine.currentBot.params.selectedGraph;
             }
 
             return KGquery_graph.drawModel(false, function () {
                 if (hasExistingGraph) {
-                    // Existing graph was present: proceed to join steps
                     self.myBotEngine.nextStep();
                 } else {
-                    // No existing graph: skip join steps, go directly to loopChoice
                     self.myBotEngine.currentObj = self.loopChoice;
                     self.myBotEngine.nextStep(self.loopChoice);
                 }
             });
         },
-        // choose a source common class key to joins graphs
         chooseSourceCommonClassKeyFn: function () {
             self.myBotEngine.currentBot.params.classMap = {};
             if (!self.myBotEngine.currentBot.params.visjsData) {
@@ -101,7 +94,6 @@ var KGquery_composite_graph_bot = (function () {
                 return;
             }
 
-            // Check if graphs already share common URIs (natural join already exists)
             var existingNodeIds = {};
             self.myBotEngine.currentBot.params.visjsData.nodes.forEach(function (node) {
                 existingNodeIds[node.id] = true;
@@ -112,7 +104,6 @@ var KGquery_composite_graph_bot = (function () {
                 return existingNodeIds[node.id];
             });
 
-            // If graphs share common URIs, skip join steps (fusion is already natural)
             if (hasCommonNodes) {
                 self.myBotEngine.currentObj = self.loopChoice;
                 self.myBotEngine.nextStep(self.loopChoice);
@@ -122,7 +113,6 @@ var KGquery_composite_graph_bot = (function () {
             var sourceNodes = self.myBotEngine.currentBot.params.visjsData.nodes;
             var labeledSourcesNodesIds = [];
             sourceNodes.forEach(function (node) {
-                // Use full source name instead of 3-letter prefix
                 var nodeLabel = node.label || Sparql_common.getLabelFromURI(node.id);
                 var fullLabel = node.data.source + ":" + nodeLabel;
                 self.myBotEngine.currentBot.params.classMap[fullLabel] = node.id;
@@ -130,7 +120,6 @@ var KGquery_composite_graph_bot = (function () {
             });
             self.myBotEngine.showList(labeledSourcesNodesIds, "sourceCommonClass");
         },
-        // choose a target common class key to joins graphs
         chooseTargetCommonClassKeyFn: function () {
             if (!self.myBotEngine.currentBot.params.selectedGraph) {
                 self.myBotEngine.currentObj = self.loopChoice;
@@ -140,7 +129,6 @@ var KGquery_composite_graph_bot = (function () {
             var hyperGraphNodes = self.myBotEngine.currentBot.params.selectedGraph.nodes;
             var labeledHyperGraphNodesIds = [];
             hyperGraphNodes.forEach(function (node) {
-                // Use full source name instead of 3-letter prefix
                 var nodeLabel = node.label || Sparql_common.getLabelFromURI(node.id);
                 var fullLabel = node.data.source + ":" + nodeLabel;
                 self.myBotEngine.currentBot.params.classMap[fullLabel] = node.id;
@@ -148,7 +136,6 @@ var KGquery_composite_graph_bot = (function () {
             });
             self.myBotEngine.showList(labeledHyperGraphNodesIds, "targetCommonClass");
         },
-        // choose a source to import on the hypergraph
         listImportsSourcesFn: function () {
             var source = self.myBotEngine.currentBot.params.source;
             if (!source) {
@@ -165,7 +152,6 @@ var KGquery_composite_graph_bot = (function () {
 
             self.myBotEngine.showList(sources, "selectedSource");
         },
-        // download file graph of selected source
         downloadSelectedGraphFn: function () {
             if (!self.myBotEngine.currentBot.params.selectedSource) {
                 alert("Please select a source");
@@ -197,12 +183,10 @@ var KGquery_composite_graph_bot = (function () {
                 self.myBotEngine.nextStep();
             });
         },
-        // choose between source and target common class to keep in the hypergraph to finalize join
         chooseCommonClassMainFn: function () {
             var nodesIds = [self.myBotEngine.currentBot.params.sourceCommonClass, self.myBotEngine.currentBot.params.targetCommonClass];
             self.myBotEngine.showList(nodesIds, "mainCommonClass");
         },
-        // make join between source and target common class
         drawCommonClassJoinFn: function () {
             if (!self.myBotEngine.currentBot.params.sourceCommonClass || !self.myBotEngine.currentBot.params.targetCommonClass || !self.myBotEngine.currentBot.params.mainCommonClass) {
                 self.myBotEngine.currentObj = self.loopChoice;
@@ -214,14 +198,12 @@ var KGquery_composite_graph_bot = (function () {
                 return self.myBotEngine.currentBot.params.classMap[id];
             });
             var mainCommonClassId = self.myBotEngine.currentBot.params.classMap[self.myBotEngine.currentBot.params.mainCommonClass];
-            // remove nodes that are join class but not the main common class
             KGquery_graph.visjsData.nodes = KGquery_graph.visjsData.nodes.filter(function (node) {
                 if (joinClassesIds.includes(node.id)) {
                     return node.id == mainCommonClassId;
                 }
                 return true;
             });
-            // replace join class targets with main common class
             KGquery_graph.visjsData.edges.forEach(function (edge) {
                 if (joinClassesIds.includes(edge.from)) {
                     edge.from = mainCommonClassId;
@@ -234,18 +216,15 @@ var KGquery_composite_graph_bot = (function () {
                 self.myBotEngine.nextStep();
             });
         },
-        // save hypergraph
         saveVisjsModelGraphFn: function () {
             KGquery_graph.saveVisjsModelGraph(function () {
                 self.myBotEngine.nextStep();
             });
         },
-        // recurse to next step
         loopChoiceFn: function () {
             self.myBotEngine.currentObj = self.loopChoice;
             self.myBotEngine.nextStep(self.loopChoice);
         },
-        // choose color for selected graph to add on hypergraph
         chooseColorForSelectedGraphFn: function () {
             self.myBotEngine.showList(common.paletteIntense, "selectedColor", null, null, function (color) {
                 self.myBotEngine.currentBot.params.selectedGraph.nodes.forEach(function (node) {

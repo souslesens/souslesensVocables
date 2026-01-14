@@ -1550,7 +1550,7 @@ var MappingColumnsGraph = (function () {
         try {
             self.visjsGraph.data.edges.add(edge);
         } catch (e) {
-            console.log(e);
+            // Ignore duplicate/invalid edge addition
         }
         self.saveVisjsGraph();
 
@@ -1713,7 +1713,11 @@ var MappingColumnsGraph = (function () {
             data.context.options.layoutHierarchical = self.layoutHierarchical;
             data.nodes = self.sortVisjsColumns(data.nodes);
         }
-        /**
+
+
+        return data;
+    };
+            /**
          * Exports the current mappings from the Vis.js graph to a JSON file.
          * Saves the graph data before exporting
          * Handles errors during the export process and displays appropriate messages.
@@ -1792,14 +1796,81 @@ var MappingColumnsGraph = (function () {
          * @returns {void}
          */
 
+                function getLineNumberFromIndex(jsonText, idx) {
+                    if (!jsonText || typeof idx !== "number" || idx < 0) {
+                        return null;
+                    }
+                    return jsonText.slice(0, idx).split("\n").length; 
+                }
+
+
+
+                function findConfigKeyLine(jsonText, sectionName, key) {
+                    var sectionNeedle = `"${sectionName}": {`;
+                    var sectionPos = jsonText.indexOf(sectionNeedle);
+                    if (sectionPos < 0) return null;
+
+                    var windowText = jsonText.slice(sectionPos, sectionPos + 20000);
+                    var keyNeedle = `"${key}"`;
+                    var keyPosLocal = windowText.indexOf(keyNeedle);
+                    if (keyPosLocal < 0) return null;
+
+                    return getLineNumberFromIndex(jsonText, sectionPos + keyPosLocal);
+                }
+
+
+
+                function findNodeDatasourceLine(jsonText, nodeId, datasourceId) {
+                    var idNeedle = `"id": "${nodeId}"`;
+                    var idPos = jsonText.indexOf(idNeedle);
+                    if (idPos < 0) return null;
+
+                    var windowText = jsonText.slice(idPos, idPos + 4000);
+                    var dsNeedle = `"datasource": "${datasourceId}"`;
+                    var dsPosLocal = windowText.indexOf(dsNeedle);
+
+                    var finalPos = dsPosLocal >= 0 ? idPos + dsPosLocal : idPos;
+                    return getLineNumberFromIndex(jsonText, finalPos);
+                }
+
+
+                function showImportBlockingDialog(title, htmlBody) {
+                var html =
+                    "<div style='font-size:13px;line-height:1.45'>" +
+                    htmlBody +
+                    "</div>";
+                $("#mainDialogDiv").html(html);
+                UI.openDialog("mainDialogDiv", { title: title });
+                };
+
+                function doImportPost(dataToSave) {
+                    var fileName = "mappings_" + MappingModeler.currentSLSsource + "_ALL" + ".json";
+                    var payload = {
+                        dir: "graphs/",
+                        fileName: fileName,
+                        data: JSON.stringify(dataToSave, null, 2),
+                    };
+                    $.ajax({
+                        type: "POST",
+                        url: `${Config.apiUrl}/data/file`,
+                        data: payload,
+                        dataType: "json",
+                        success: function (_result, _textStatus, _jqXHR) {
+                            MappingModeler.onLoaded();
+                        },
+                        error: function (err) {
+                            return MainController.errorAlert(err);
+                        },
+                    });
+                }                
 
         self.importMappingsFromJSONFile = function () {
-            ImportFileWidget.showImportDialog(function (err, result) {
+            ImportFileWidget.showImportDialog(function (err, importedJsonText) {
                 if (err) {
                     return MainController.errorAlert(err);
                 }
-                var data = JSON.parse(result);
-                var rawJson = result;
+                var data = JSON.parse(importedJsonText);
+                
                 if (data.nodes.length == 0) {
                     return alert("no nodes in file");
                 }
@@ -1810,27 +1881,16 @@ var MappingColumnsGraph = (function () {
                 return alert("graphUri in file is not the same as the current graphUri, update graphURI in JSON file");
                 }
 
-                // --- Vérif DB avant import (DB-first) ---
 
-                // On enlève lastUpdate du fichier importé (évite d’écraser l’historique)
-                if (data?.options?.config?.lastUpdate) {
-                    delete data.options.config.lastUpdate;
-                }
-
-
-                // 1) Helpers pour calculer les numéros de ligne dans le JSON importé
+                
                 /**
                  * Compute a 1-based line number from a character index in the imported JSON text.
                  * Returns null if the index is invalid.
                  * @param {number} idx
                  * @returns {number|null}
                  */
-                function lineOfIndex(idx) {
-                if (idx < 0) return null;
-                return rawJson.slice(0, idx).split("\n").length; // 1-based
-                }
 
-                // Ligne d’une clé dans options.config.<sectionName>.<key>
+
 
                 /**
                  * Try to locate the line number of a key inside `options.config.<sectionName>` in the imported JSON.
@@ -1839,20 +1899,9 @@ var MappingColumnsGraph = (function () {
                  * @param {string} key
                  * @returns {number|null}
                  */
-                function findConfigKeyLine(sectionName, key) {
-                var sectionNeedle = `"${sectionName}": {`;
-                var sectionPos = rawJson.indexOf(sectionNeedle);
-                if (sectionPos < 0) return null;
 
-                var window = rawJson.slice(sectionPos, sectionPos + 20000);
-                var keyNeedle = `"${key}"`;
-                var keyPosLocal = window.indexOf(keyNeedle);
-                if (keyPosLocal < 0) return null;
 
-                return lineOfIndex(sectionPos + keyPosLocal);
-                }
-
-                // Ligne d’une occurrence nodes[i].data.datasource
+       
 
                 /**
                  * Try to locate the line number of a `nodes[i].data.datasource` occurrence for a given node id and datasource id.
@@ -1861,50 +1910,37 @@ var MappingColumnsGraph = (function () {
                  * @param {string} dsValue
                  * @returns {number|null}
                  */
-                function findNodeDatasourceLine(nodeId, dsValue) {
-                var idNeedle = `"id": "${nodeId}"`;
-                var idPos = rawJson.indexOf(idNeedle);
-                if (idPos < 0) return null;
 
-                var window = rawJson.slice(idPos, idPos + 4000);
-                var dsNeedle = `"datasource": "${dsValue}"`;
-                var dsPosLocal = window.indexOf(dsNeedle);
 
-                var finalPos = (dsPosLocal >= 0) ? (idPos + dsPosLocal) : idPos;
-                return lineOfIndex(finalPos);
-                }
-
-                // 2) Lire la config du fichier importé (DB et CSV)
+               
                 var dbSourcesFromFile = data?.options?.config?.databaseSources || {};
                 var csvSourcesFromFile = data?.options?.config?.csvSources || {};
                 var dbIdsFromConfig = Object.keys(dbSourcesFromFile);
                 var csvIdsFromConfig = Object.keys(csvSourcesFromFile);
 
-                // 3) Collecter toutes les datasources réellement utilisées dans nodes[]
-                //    et garder leurs emplacements (nodes[i] + ligne)
-                var dsUsages = {}; // { dsId: [ {nodeIndex,nodeId,nodeType,dataTable,line} ] }
-                (data.nodes || []).forEach(function (n, i) {
-                var ds = n && n.data ? n.data.datasource : null;
-                if (!ds) return;
+         
+                var datasourceUsagesById = {}; // { dsId: [ {nodeIndex,nodeId,nodeType,dataTable,line} ] }
+                (data.nodes || []).forEach(function (node, nodeIndex) {
+                var datasourceId = node && node.data ? (node.data.datasource || node.data.dataSource) : null;
+                if (!datasourceId) return;
 
-                if (!dsUsages[ds]) dsUsages[ds] = [];
-                dsUsages[ds].push({
-                    nodeIndex: i,
-                    nodeId: n.id,
-                    nodeType: n.data.type,
-                    dataTable: n.data.dataTable,
-                    line: findNodeDatasourceLine(n.id, ds),
+                if (!datasourceUsagesById[datasourceId]) datasourceUsagesById[datasourceId] = [];
+                datasourceUsagesById[datasourceId].push({
+                    nodeIndex: nodeIndex,
+                    nodeId: node.id,
+                    nodeType: node.data.type,
+                    dataTable: node.data.dataTable,
+                    line: findNodeDatasourceLine(importedJsonText, node.id, datasourceId),
                 });
                 });
 
-                var dsUsedIds = Object.keys(dsUsages);
+                var dsUsedIds = Object.keys(datasourceUsagesById);
 
-                // 4) Cas JSON incohérent : datasource utilisée dans nodes[] mais absente de la config
+      
                 var unknownIds = dsUsedIds.filter(function (id) {
                 return dbIdsFromConfig.indexOf(id) < 0 && csvIdsFromConfig.indexOf(id) < 0;
                 });
 
-                // 5) Les DB à vérifier côté serveur = celles déclarées comme DB dans la config
                 var requiredDbIds = dbIdsFromConfig.slice();
 
                 /**
@@ -1916,37 +1952,28 @@ var MappingColumnsGraph = (function () {
                  */
 
                 
-                function showImportBlockingDialog(title, htmlBody) {
-                var html =
-                    "<div style='font-size:13px;line-height:1.45'>" +
-                    htmlBody +
-                    "</div>";
-                $("#mainDialogDiv").html(html);
-                UI.openDialog("mainDialogDiv", { title: title });
-                }
 
-                // Si le JSON est incohérent : datasource utilisée dans nodes[] mais pas déclarée dans config
                 if (unknownIds.length > 0) {
                 var unknownHtml = unknownIds
                     .map(function (id) {
-                    var occ = (dsUsages[id] || []).slice(0, 5).map(function (o) {
+                    var occurrences = (datasourceUsagesById[id] || []).slice(0, 5).map(function (usage) {
                         return (
                         "&nbsp;&nbsp;• <code>nodes[" +
-                        o.nodeIndex +
+                        usage.nodeIndex +
                         "].data.datasource</code> (line " +
-                        (o.line || "?") +
+                        (usage.line || "?") +
                         ") — type=" +
-                        o.nodeType +
-                        (o.dataTable ? " — table=" + o.dataTable : "")
+                        usage.nodeType +
+                        (usage.dataTable ? " — table=" + usage.dataTable : "")
                         );
                     }).join("<br>");
 
                     var more =
-                        dsUsages[id] && dsUsages[id].length > 5
-                        ? "<br>&nbsp;&nbsp;… (+" + (dsUsages[id].length - 5) + " more occurrences)"
+                        datasourceUsagesById[id] && datasourceUsagesById[id].length > 5
+                        ? "<br>&nbsp;&nbsp;… (+" + (datasourceUsagesById[id].length - 5) + " more occurrences)"
                         : "";
 
-                    return "<li><b>" + id + "</b><br>" + occ + more + "</li>";
+                    return "<li><b>" + id + "</b><br>" + occurrences + more + "</li>";
                     })
                     .join("");
 
@@ -1961,44 +1988,23 @@ var MappingColumnsGraph = (function () {
                 return; // STOP
                 }
 
-                // fonction utilitaire pour faire le POST (appelée seulement si OK)
-                function doImportPost(dataToSave) {
-                    var fileName = "mappings_" + MappingModeler.currentSLSsource + "_ALL" + ".json";
-                    var payload = {
-                        dir: "graphs/",
-                        fileName: fileName,
-                        data: JSON.stringify(dataToSave, null, 2),
-                    };
 
 
 
-                    $.ajax({
-                        type: "POST",
-                        url: `${Config.apiUrl}/data/file`,
-                        data: payload,
-                        dataType: "json",
-                        success: function (_result, _textStatus, _jqXHR) {
-                            MappingModeler.onLoaded();
-                        },
-                        error: function (err) {
-                            return MainController.errorAlert(err);
-                        },
-                    });
-                }
 
-                // Si aucune DB n’est déclarée dans le mapping, on continue
+
+
                 if (requiredDbIds.length === 0) {
                     return doImportPost(data);
                 }
 
-                // 3) Appeler l’API liste des DB accessibles à l’utilisateur (rôles inclus)
                 $.ajax({
                     type: "GET",
                     url: `${Config.apiUrl}/databases`,
                     dataType: "json",
                     success: function (resp) {
                         var available = Array.isArray(resp) ? resp : (resp && resp.resources ? resp.resources : []);
-                        var availableIds = new Set(available.map(function (x) { return x.id; }));
+                        var availableIds = new Set(available.map(function (db) { return db.id; }));
 
                         var missing = requiredDbIds.filter(function (id) { return !availableIds.has(id); });
 
@@ -2011,9 +2017,9 @@ var MappingColumnsGraph = (function () {
                                 ? dbSourcesFromFile[id].name
                                 : "(unknown name)";
 
-                            var cfgLine = findConfigKeyLine("databaseSources", id);
+                            var cfgLine = findConfigKeyLine(importedJsonText, "databaseSources", id);
 
-                            var occ = (dsUsages[id] || []).slice(0, 5).map(function (o) {
+                            var occurrences = (datasourceUsagesById[id] || []).slice(0, 5).map(function (o) {
                                 return (
                                 "&nbsp;&nbsp;• <code>nodes[" +
                                 o.nodeIndex +
@@ -2026,8 +2032,8 @@ var MappingColumnsGraph = (function () {
                             }).join("<br>");
 
                             var more =
-                                dsUsages[id] && dsUsages[id].length > 5
-                                ? "<br>&nbsp;&nbsp;… (+" + (dsUsages[id].length - 5) + " more occurrences)"
+                                datasourceUsagesById[id] && datasourceUsagesById[id].length > 5
+                                ? "<br>&nbsp;&nbsp;… (+" + (datasourceUsagesById[id].length - 5) + " more occurrences)"
                                 : "";
 
                             return (
@@ -2041,7 +2047,7 @@ var MappingColumnsGraph = (function () {
                                 (cfgLine || "?") +
                                 ")" +
                                 "<br>" +
-                                occ +
+                                occurrences +
                                 more +
                                 "</li>"
                             );
@@ -2059,16 +2065,16 @@ var MappingColumnsGraph = (function () {
                             "2) Grant access to your account (ConfigEditor ▸ profiles/allowedDatabases).<br>" +
                             "3) Or edit the imported JSON to point to an existing id.</p>"
                         );
-                        return; // STOP: on n'écrit pas /data/file
+                        return; 
                         }
 
 
-                        // OK => on importe
+                        
                         return doImportPost(data);
                     },
 
                     error: function (e) {
-                    // Cas Offline / API down : e.responseJSON est souvent undefined
+    
                     var status = (e && typeof e.status !== "undefined") ? e.status : 0;
 
                     var details =
@@ -2086,9 +2092,6 @@ var MappingColumnsGraph = (function () {
 
             });
         };
-
-        return data;
-    };
     /**
      * Imports mappings from a JSON file into the Vis.js graph file.
      * Opens a file import dialog, parses the JSON content, and uploads the data to the graphs in instance data repository.
@@ -2098,79 +2101,7 @@ var MappingColumnsGraph = (function () {
     //  * @memberof module:MappingColumnsGraph
     //  * @returns {void}
     //  */
-    // self.importMappingsFromJSONFile = function () {
-    //     ImportFileWidget.showImportDialog(function (err, result) {
-    //         if (err) {
-    //             return MainController.errorAlert(err);
-    //         }
-    //         var data = JSON.parse(result);
-    //         if (data.nodes.length == 0) {
-    //             return alert("no nodes in file");
-    //         }
-    //         if (data?.options?.config?.graphUri != Config.sources[MainController.currentSource].graphUri) {
-    //             return alert("graphUri in file is not the same as the current graphUri, update graphURI in JSON file");
-    //         }
-    //         var fileName = "mappings_" + MappingModeler.currentSLSsource + "_ALL" + ".json";
-    //         var payload = {
-    //             dir: "graphs/",
-    //             fileName: fileName,
-    //             data: JSON.stringify(data, null, 2),
-    //         };
 
-    //         $.ajax({
-    //             type: "POST",
-    //             url: `${Config.apiUrl}/data/file`,
-    //             data: payload,
-    //             dataType: "json",
-    //             success: function (result, _textStatus, _jqXHR) {
-    //                 MappingModeler.onLoaded();
-    //             },
-    //             error(err) {
-    //                 return MainController.errorAlert(err);
-    //             },
-    //         });
-    //     });
-    // };
-
-    // /**
-    //  * Exports the current mappings from the Vis.js graph to a JSON file.
-    //  * Saves the graph data before exporting
-    //  *
-    //  *
-    //  * @function
-    //  * @name exportMappings
-    //  * @memberof module:MappingColumnsGraph
-    //  * @returns {void}
-    //  */
-    // self.exportMappings = function () {
-    //     self.saveVisjsGraph(function (err) {
-    //         var fileName = "mappings_" + MappingModeler.currentSLSsource + "_ALL" + ".json";
-    //         var payload = {
-    //             dir: "graphs/",
-    //             fileName: fileName,
-    //         };
-
-    //         $.ajax({
-    //             type: "GET",
-    //             url: `${Config.apiUrl}/data/file`,
-    //             data: payload,
-    //             dataType: "json",
-    //             success: function (result, _textStatus, _jqXHR) {
-    //                 var data = JSON.parse(result);
-    //                 Export.downloadJSON(data, fileName);
-    //             },
-    //             error(err) {
-    //                 if (callback) {
-    //                     return callback(err);
-    //                 }
-    //                 if (err.responseJSON == "file does not exist") {
-    //                     return;
-    //                 }
-    //                 return MainController.errorAlert(err);
-    //             },
-    //         });
-    //     });
-    // };
 
     self.hideNodesFromOtherTables = function (table) {
         var nodes = MappingColumnsGraph.visjsGraph.data.nodes.get();
@@ -2380,11 +2311,11 @@ var MappingColumnsGraph = (function () {
                             return;
                         }
 
-                        // columnLalbel
-                        var columnLalbel = columnId;
+                        // columnLabel
+                        var columnLabel = columnId;
                         if (column) {
                             if (column.label) {
-                                columnLalbel = String(column.label);
+                                columnLabel = String(column.label);
                             }
                         }
 
@@ -2397,7 +2328,7 @@ var MappingColumnsGraph = (function () {
                         if (!uniqueNodes[columnId]) {
                             classVisjsData.nodes.push({
                                 id: columnId,
-                                label: String(columnLalbel),
+                                label: String(columnLabel),
                                 shape: "box",
                                 color: "#eaf4ff",
                                 data: column.data,
@@ -2428,7 +2359,7 @@ var MappingColumnsGraph = (function () {
                             }
 
                             // create node if not existing
-                            if (!uniqueNodes[dpColumnId] && !uniqueNodes[dpColumnId]) {
+                            if (!uniqueNodes[dpColumnId] ) {
                                 classVisjsData.nodes.push({
                                     id: dpColumnId,
                                     label: dpColumnId,
@@ -2445,7 +2376,7 @@ var MappingColumnsGraph = (function () {
                                     },
                                 });
                                 uniqueNodes[dpColumnId] = 1;
-                                uniqueNodes[dpColumnId] = 1;
+                                
                             }
 
                             // edge from datatype propertie to column

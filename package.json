@@ -10,7 +10,7 @@
         "dev:server": "NODE_ENV=development nodemon ./bin/www",
         "dev:fullstack": "concurrently --names 'NODE,REACT' -c 'green.bold,blue.bold' 'npm run dev:server' 'npm run mainapp:watch'",
         "mainapp:build": "vite build mainapp",
-        "mainapp:watch": "NODE_ENV=development vite build mainapp --watch --minify false --mode development",
+        "mainapp:watch": " vite build mainapp --watch --minify false --mode development",
         "mainapp:dev": "NODE_ENV=development vite mainapp",
         "migrate": "sh scripts/run-migrations.sh",
         "prettier:check": "prettier --check ./public/vocables ./model ./api ./bin ./tests",

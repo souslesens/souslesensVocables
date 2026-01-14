@@ -21,6 +21,10 @@ import { MouseEvent, useEffect, useRef, useState } from "react";
 import { writeLog } from "../Log";
 import { createRoot } from "react-dom/client";
 
+declare const Config: {
+    sources: Record<string, { imports?: string[]; baseUri?: string }>;
+};
+
 interface DownloadGraphModalProps {
     apiUrl: string;
     onClose: () => void;
@@ -40,6 +44,89 @@ type ApiServerResponseError = {
 };
 
 type ApiServerResponse = ApiServerResponseError | ApiServerResponseOk;
+
+const addImportsAndContributor = (
+    blobParts: BlobPart[],
+    sourceName: string,
+    userLogin: string,
+    format: string
+): BlobPart[] => {
+    const content = blobParts.map((part) => (typeof part === "string" ? part : "")).join("");
+    const contributorUri = "http://purl.org/dc/elements/1.1/contributor";
+    const owlImportsUri = "http://www.w3.org/2002/07/owl#imports";
+    const hasContributor = content.includes(contributorUri);
+    const hasImports = content.includes(owlImportsUri);
+
+    const sourceConfig = Config.sources[sourceName];
+    const imports = sourceConfig?.imports ?? [];
+    if (!sourceConfig || !sourceConfig.baseUri) {
+        return blobParts;
+    }
+    const baseUri = sourceConfig?.baseUri;
+
+    const additionalTriples: string[] = [];
+
+    if (format === "nt") {
+        if (!hasImports) {
+            imports.forEach((importName) => {
+                const importBaseUri = Config.sources[importName]?.baseUri;
+                if (importBaseUri) {
+                    additionalTriples.push(`<${baseUri}> <${owlImportsUri}> <${importBaseUri}> .`);
+                }
+            });
+        }
+        if (!hasContributor) {
+            additionalTriples.push(`<${baseUri}> <${contributorUri}> "${userLogin}" .`);
+        }
+    } else if (format === "ttl") {
+        const importsToAdd: string[] = [];
+        if (!hasImports) {
+            imports.forEach((importName) => {
+                const importBaseUri = Config.sources[importName]?.baseUri;
+                if (importBaseUri) {
+                    importsToAdd.push(importBaseUri);
+                }
+            });
+        }
+        if (importsToAdd.length > 0 || !hasContributor) {
+            additionalTriples.push(`@prefix owl: <http://www.w3.org/2002/07/owl#> .`);
+            additionalTriples.push(`@prefix dc: <http://purl.org/dc/elements/1.1/> .`);
+            importsToAdd.forEach((importBaseUri) => {
+                additionalTriples.push(`<${baseUri}> owl:imports <${importBaseUri}> .`);
+            });
+            if (!hasContributor) {
+                additionalTriples.push(`<${baseUri}> dc:contributor "${userLogin}" .`);
+            }
+        }
+    } else if (format === "xml") {
+        const xmlTriples: string[] = [];
+        if (!hasImports) {
+            imports.forEach((importName) => {
+                const importBaseUri = Config.sources[importName]?.baseUri;
+                if (importBaseUri) {
+                    xmlTriples.push(`  <owl:imports rdf:resource="${importBaseUri}"/>`);
+                }
+            });
+        }
+        if (!hasContributor) {
+            xmlTriples.push(`  <dc:contributor>${userLogin}</dc:contributor>`);
+        }
+        if (xmlTriples.length > 0) {
+            const rdfAbout = `<rdf:Description rdf:about="${baseUri}">\n${xmlTriples.join("\n")}\n</rdf:Description>`;
+            const closingTag = "</rdf:RDF>";
+            if (content.includes(closingTag)) {
+                const enrichedContent = content.replace(closingTag, `${rdfAbout}\n${closingTag}`);
+                return [enrichedContent];
+            }
+        }
+    }
+
+    if (additionalTriples.length > 0 && format !== "xml") {
+        return [...blobParts, "\n" + additionalTriples.join("\n") + "\n"];
+    }
+
+    return blobParts;
+};
 
 export function DownloadGraphModal({ apiUrl, onClose, open, sourceName }: DownloadGraphModalProps) {
     const [currentUser, setCurrentUser] = useState<{ login: string; token: string } | null>(null);
@@ -176,14 +263,16 @@ export function DownloadGraphModal({ apiUrl, onClose, open, sourceName }: Downlo
                 setErrorMessage(message);
                 return;
             }
-
+            
             if (!blobParts || blobParts.length == 0) {
                 setErrorMessage("Receive empty data from the API");
                 return;
             }
 
+            const enrichedBlobParts = addImportsAndContributor(blobParts, sourceName, currentUser.login, currentDownloadFormat);
+
             // create a blob and a link to dwl data, autoclick to autodownload
-            const blob = new Blob(blobParts, { type: "text/plain" });
+            const blob = new Blob(enrichedBlobParts, { type: "text/plain" });
             const link = document.createElement("a");
             link.download = `${sourceName}.${currentDownloadFormat}`;
             link.href = URL.createObjectURL(blob);

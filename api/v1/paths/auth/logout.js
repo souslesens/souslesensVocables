@@ -1,4 +1,4 @@
-import { mainConfigModel } from '../../../../model/mainConfig';
+import { mainConfigModel } from '../../../../model/mainConfig.js';
 
 module.exports = function () {
     let operations = {

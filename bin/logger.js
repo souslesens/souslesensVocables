@@ -16,7 +16,7 @@ import winston from 'winston';
 import 'winston-daily-rotate-file';
 import { createLogger, format } from 'winston';
 const { combine, timestamp, json } = format;
-import { readMainConfig } from '../model/config';
+import { readMainConfig } from '../model/config.js';
 
 const config = readMainConfig();
 

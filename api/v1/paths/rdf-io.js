@@ -1,5 +1,5 @@
 import { default as rdfParser } from 'rdf-parse';
-import { processResponse } from './utils';
+import { processResponse } from './utils.js';
 module.exports = function () {
     let operations = {
         GET,

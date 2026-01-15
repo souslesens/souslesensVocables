@@ -1,4 +1,4 @@
-import { indexModel } from '../../../../model/index';
+import { indexModel } from '../../../../model/index.js';
 
 module.exports = function () {
     const operations = {

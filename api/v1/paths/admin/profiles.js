@@ -1,5 +1,5 @@
-import { profileModel } from '../../../../model/profiles';
-import { resourceFetched, responseSchema, resourceCreated } from '../utils';
+import { profileModel } from '../../../../model/profiles.js';
+import { resourceFetched, responseSchema, resourceCreated } from '../utils.js';
 import userManager from '../../../../bin/user.js';
 
 module.exports = function () {

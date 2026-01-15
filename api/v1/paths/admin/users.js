@@ -1,4 +1,4 @@
-import { userModel } from '../../../../model/users';
+import { userModel } from '../../../../model/users.js';
 
 import {
     sortObjectByKey,
@@ -6,7 +6,7 @@ import {
     successfullyUpdated,
     successfullyCreated,
     successfullyFetched,
-} from '../utils';
+} from '../utils.js';
 
 module.exports = function () {
     ///// GET api/v1/admin/users

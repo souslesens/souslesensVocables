@@ -1,4 +1,4 @@
-import { sourceModel } from '../../../../model/sources';
+import { sourceModel } from '../../../../model/sources.js';
 import userManager from '../../../../bin/user.js';
 
 module.exports = function () {

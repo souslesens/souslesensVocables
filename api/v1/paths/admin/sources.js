@@ -1,7 +1,7 @@
 import path from 'path';
-import { sourceModel } from '../../../../model/sources';
-import { userModel } from '../../../../model/users';
-import { responseSchema } from './../utils';
+import { sourceModel } from '../../../../model/sources.js';
+import { userModel } from '../../../../model/users.js';
+import { responseSchema } from './../utils.js';
 const userManager = require(path.resolve("bin/user.js"));
 import { successfullyFetched, successfullyCreated, fixBooleanInObject } from './../utils.js';
 module.exports = function () {

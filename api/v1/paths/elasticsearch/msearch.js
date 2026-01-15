@@ -2,7 +2,7 @@ import path from 'path';
 const elasticRestProxy = require(path.resolve("bin/elasticRestProxy..js"));
 import ConfigManager from '../../../../bin/configManager.js';
 import UserRequestFiltering from '../../../../bin/userRequestFiltering.js';
-import { processResponse } from '../utils';
+import { processResponse } from '../utils.js';
 
 module.exports = function () {
     let operations = {

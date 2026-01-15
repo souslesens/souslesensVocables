@@ -1,5 +1,5 @@
-import { userModel } from './users';
-import { profileModel } from './profiles';
+import { userModel } from './users.js';
+import { profileModel } from './profiles.js';
 
 class CleanUserData {
     _remove_not_existing_users_from_shared_users = async (shared_users) => {

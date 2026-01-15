@@ -1,4 +1,4 @@
-const { processResponse } = require("./utils");
+const { processResponse } = require("./utils.js");
 const rdf = require("../../../bin/RDF_IO..js");
 const { NamedNode, BlankNode, Literal, Graph } = rdf;
 

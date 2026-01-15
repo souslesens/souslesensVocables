@@ -5,7 +5,7 @@ import async from 'async';
 import util from './util.js';
 import httpProxy from './httpProxy.js';
 import sqlServerProxy from './KG/SQLserverConnector.js';
-import { databaseModel } from '../model/databases';
+import { databaseModel } from '../model/databases.js';
 import ConfigManager from './configManager.js';
 import SocketManager from './socketManager.js';
 

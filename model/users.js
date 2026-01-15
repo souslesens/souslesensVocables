@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt';
-import { readMainConfig } from './config';
-import { cleanupConnection, getKnexConnection } from './utils';
-import { userDataModel } from './userData';
+import { readMainConfig } from './config.js';
+import { cleanupConnection, getKnexConnection } from './utils.js';
+import { userDataModel } from './userData.js';
 import ULID from 'ulid';
 import { createHash } from 'crypto';
 import z from 'zod';

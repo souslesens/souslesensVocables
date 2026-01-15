@@ -1,6 +1,6 @@
-import { rdfDataModel } from '../../../../../model/rdfData';
+import { rdfDataModel } from '../../../../../model/rdfData.js';
 import userManager from '../../../../../bin/user.js';
-import { sourceModel } from '../../../../../model/sources';
+import { sourceModel } from '../../../../../model/sources.js';
 
 module.exports = function () {
     let operations = {

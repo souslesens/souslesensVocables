@@ -1,5 +1,5 @@
-const { userModel } = require("./users");
-const { profileModel } = require("./profiles");
+import { userModel } from './users';
+import { profileModel } from './profiles';
 
 class CleanUserData {
     _remove_not_existing_users_from_shared_users = async (shared_users) => {

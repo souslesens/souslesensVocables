@@ -1,7 +1,7 @@
-const { readMainConfig } = require("./config");
-const DigestClient = require("digest-fetch");
-const fetch = require("node-fetch");
-const { RDF_FORMATS_MIMETYPES, sleep } = require("./utils");
+import { readMainConfig } from './config';
+import DigestClient from 'digest-fetch';
+import fetch from 'node-fetch';
+import { RDF_FORMATS_MIMETYPES, sleep } from './utils';
 class RdfDataModel {
     /**
      * @param {string} endpointUrl - url of endpoint

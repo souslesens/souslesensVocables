@@ -1,4 +1,4 @@
-import { processResponse } from './utils';
+import { processResponse } from './utils.js';
 import ExportGraph from '../../../bin/exportGraph.js';
 
 module.exports = function () {

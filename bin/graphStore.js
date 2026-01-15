@@ -1,11 +1,11 @@
 import async from 'async';
 import httpProxy from './httpProxy.js';
 import path from 'path';
-import jsonFileStorage from './jsonFileStorage';
+import jsonFileStorage from './jsonFileStorage.js';
 import request from 'request';
 import Util from './util.js';
 import fs from 'fs';
-import { processResponse } from '../api/v1/paths/utils';
+import { processResponse } from '../api/v1/paths/utils.js';
 import ConfigManager from './configManager.js';
 import { exec } from 'child_process';
 

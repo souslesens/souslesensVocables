@@ -1,4 +1,4 @@
-import { processResponse } from './utils';
+import { processResponse } from './utils.js';
 import GraphTraversal from '../../../bin/graphTraversal.js';
 import ConfigManager from '../../../bin/configManager.js';
 import UserRequestFiltering from '../../../bin/userRequestFiltering.js';

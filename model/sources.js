@@ -1,7 +1,7 @@
 import fs from 'fs';
 import { Lock } from 'async-await-mutex-lock';
-import { config, configSourcesPath } from './config';
-import { profileModel } from './profiles';
+import { config, configSourcesPath } from './config.js';
+import { profileModel } from './profiles.js';
 
 /**
  * @typedef {import("./UserTypes").UserAccount} UserAccount

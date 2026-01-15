@@ -1,5 +1,5 @@
 import ConfigManager from '../../../../bin/configManager.js';
-import { processResponse } from '../utils';
+import { processResponse } from '../utils.js';
 import request from 'request';
 
 module.exports = function () {

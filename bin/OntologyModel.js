@@ -2,7 +2,7 @@ import async from 'async';
 import httpProxy from './httpProxy.js';
 import request from 'request';
 import fs from 'fs';
-//const sources=require("../model/sources")
+//const sources=require("../model/sources.js")
 
 var OntologyModel = {
     instances: {},

@@ -1,5 +1,5 @@
 import DirContentAnnotator from '../../../../bin/annotator/dirContentAnnotator.js';
-import { processResponse } from '../utils';
+import { processResponse } from '../utils.js';
 
 module.exports = function () {
     let operations = {

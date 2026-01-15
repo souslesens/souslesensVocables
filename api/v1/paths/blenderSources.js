@@ -1,6 +1,6 @@
-import { blenderSources } from '../../../model/blenderSources';
+import { blenderSources } from '../../../model/blenderSources.js';
 import configManager from '../../../bin/configManager.js';
-import { responseSchema, processResponse, successfullyFetched } from './utils';
+import { responseSchema, processResponse, successfullyFetched } from './utils.js';
 module.exports = function () {
     let operations = {
         GET,

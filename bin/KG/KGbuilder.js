@@ -16,7 +16,7 @@ import httpProxy from '../httpProxy.js';
 import sqlConnector from './KGSqlConnector.js';
 import SQLserverConnector from './SQLserverConnector.js';
 import socket from '../socketManager.js';
-import { databaseModel } from '../../model/databases';
+import { databaseModel } from '../../model/databases.js';
 import KGcontroller from './KGcontroller.js';
 
 var originalKGproperty = "http://data.total.com/resource/one-model#originalIdOf";

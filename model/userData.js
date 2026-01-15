@@ -2,8 +2,8 @@ import fs from 'fs';
 import path from 'path';
 import ULID from 'ulid';
 import { z } from 'zod';
-import { cleanupConnection, getKnexConnection } from './utils';
-import { readMainConfig } from './config';
+import { cleanupConnection, getKnexConnection } from './utils.js';
+import { readMainConfig } from './config.js';
 
 const UserDataObject = z
     .object({

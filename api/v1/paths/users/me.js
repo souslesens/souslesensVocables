@@ -1,5 +1,5 @@
-import { userModel } from '../../../../model/users';
-import { mainConfigModel } from '../../../../model/mainConfig';
+import { userModel } from '../../../../model/users.js';
+import { mainConfigModel } from '../../../../model/mainConfig.js';
 
 module.exports = function () {
     let operations = {

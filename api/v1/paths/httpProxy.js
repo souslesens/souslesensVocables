@@ -1,4 +1,4 @@
-import { processResponse } from './utils';
+import { processResponse } from './utils.js';
 import httpProxy from '../../../bin/httpProxy.js';
 
 module.exports = function () {

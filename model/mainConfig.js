@@ -1,7 +1,7 @@
 import { readFile, writeFile } from 'fs/promises';
 import { Lock } from 'async-await-mutex-lock';
-import { mainConfigPath } from './config';
-import { toolModel } from './tools';
+import { mainConfigPath } from './config.js';
+import { toolModel } from './tools.js';
 
 const lock = new Lock();
 

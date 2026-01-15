@@ -1,5 +1,5 @@
 import KGtripleBuilder from '../../../../bin/KGtripleBuilder.js';
-import { processResponse } from '../utils';
+import { processResponse } from '../utils.js';
 
 module.exports = function () {
     let operations = {

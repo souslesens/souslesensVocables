@@ -1,5 +1,5 @@
-import { toolModel } from '../../../../model/tools';
-import { responseSchema } from '../utils';
+import { toolModel } from '../../../../model/tools.js';
+import { responseSchema } from '../utils.js';
 
 module.exports = function () {
     const operations = { GET };

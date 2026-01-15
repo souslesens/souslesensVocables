@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { processResponse, sanitizePath } from '../utils';
+import { processResponse, sanitizePath } from '../utils.js';
 
 module.exports = function () {
     let operations = {

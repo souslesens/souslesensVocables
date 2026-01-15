@@ -1,4 +1,4 @@
-import { processResponse } from '../../../utils';
+import { processResponse } from '../../../utils.js';
 import configManager from '../../../../../../bin/configManager.js';
 module.exports = function () {
     let operations = {

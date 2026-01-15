@@ -1,4 +1,4 @@
-const path = require("path");
+import path from 'path';
 const kGcontroller = require(path.resolve("bin/KG/KGcontroller."));
 
 module.exports = function () {

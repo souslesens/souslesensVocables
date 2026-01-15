@@ -1,8 +1,8 @@
-var fs = require("fs");
-var Util = require("../util..js");
-var tripleBuilder = require("../KGtripleBuilder.");
-const util = require("../util.");
-const async = require("async");
+import fs from 'fs';
+import Util from '../util..js';
+import tripleBuilder from '../KGtripleBuilder.';
+import util from '../util.';
+import async from 'async';
 
 var clusterQuery =
     "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +

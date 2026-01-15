@@ -1,5 +1,5 @@
-const { processResponse } = require("../../../utils");
-const configManager = require("../../../../../../bin/configManager.");
+import { processResponse } from '../../../utils';
+import configManager from '../../../../../../bin/configManager.';
 module.exports = function () {
     let operations = {
         POST,

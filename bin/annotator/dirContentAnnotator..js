@@ -1,15 +1,16 @@
-var fs = require("fs");
-var path = require("path");
+import fs from 'fs';
+import path from 'path';
 
 //var TikaClient = require("@futpib/tika-server-client");
 //var tika = new TikaClient("http://localhost:41000");
 //const TikaServer = require("tika-server");
-var util = require("../util.");
-var httpProxy = require("../httpProxy.");
-var socket = require("../socketManager.");
-const ConfigManager = require("../configManager.");
-var etl = require("etl");
-var async = require("async");
+import util from '../util.';
+
+import httpProxy from '../httpProxy.';
+import socket from '../socketManager.';
+import ConfigManager from '../configManager.';
+import etl from 'etl';
+import async from 'async';
 
 var acceptedExtensions = ["ttl", "doc", "docx", "xls", "xslx", "pdf", "odt", "ods", "ppt", "pptx", "html", "htm", "txt", "csv"];
 var base64Extensions = ["doc", "docx", "xls", "xslx", "pdf", "odt", "ods", "ppt", "pptx"];
@@ -20,10 +21,12 @@ const spacyServerUrl = "";
 
 var parsedDocumentsHomeDir = null; //"../../data/annotator/parsedDocuments"
 var uploadDirPath = null; //"../../data/annotator/temp"
-var Inflector = require("inflected");
+import Inflector from 'inflected';
 var tikaServer = null;
+
 // var tikaserverStarted = false;
-var unzipper = require("unzipper");
+import unzipper from 'unzipper';
+
 var jsonData = {};
 var DirContentAnnotator = {
     socket: {

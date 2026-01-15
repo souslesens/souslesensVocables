@@ -10,14 +10,14 @@
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-var jsonFileStorage = require("./jsonFileStorage");
-var SourceManager = require("./sourceManager.");
-var path = require("path");
-var async = require("async");
-var fs = require("fs");
+import jsonFileStorage from './jsonFileStorage';
 
-const { configPath, config } = require("../model/config");
-const { SourceModel, sourceModel } = require("../model/sources.js");
+import SourceManager from './sourceManager.';
+import path from 'path';
+import async from 'async';
+import fs from 'fs';
+import { configPath, config } from '../model/config';
+import { SourceModel, sourceModel } from '../model/sources.js';
 //const { getAllowedSources, filterSources, sortObjectByKey, resourceFetched } = require("../api/v1/paths/utils");
 //const util = require("util");
 

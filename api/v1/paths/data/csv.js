@@ -1,4 +1,4 @@
-const dataController = require("../../../../bin/dataController.");
+import dataController from '../../../../bin/dataController.';
 
 module.exports = function () {
     let operations = {

@@ -1,10 +1,10 @@
-const httpProxy = require("./httpProxy.");
-const rdfParser = require("rdf-parse").default;
-var fs = require("fs");
-var path = require("path");
-const async = require("async");
-var util = require("./util.");
-const N3 = require("n3");
+import httpProxy from './httpProxy.';
+import rdfParser from 'rdf-parse';
+import fs from 'fs';
+import path from 'path';
+import async from 'async';
+import util from './util.';
+import N3 from 'n3';
 
 var graphUrisMap = {};
 

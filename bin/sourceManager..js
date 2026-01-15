@@ -1,7 +1,7 @@
-var httpProxy = require("./httpProxy.");
-var async = require("async");
-var util = require("./util.");
-var fs = require("fs");
+import httpProxy from './httpProxy.';
+import async from 'async';
+import util from './util.';
+import fs from 'fs';
 var SourceManager = {
     createNewOwlSourceGraph: function (_sourceName, _graphUri, _targetSparqlServerUrl, _options, _callback) {
         // do nothing ? XXX

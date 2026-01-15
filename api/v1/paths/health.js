@@ -1,4 +1,4 @@
-const { mainConfigModel } = require("../../../model/mainConfig");
+import { mainConfigModel } from '../../../model/mainConfig';
 
 module.exports = function () {
     let operations = {

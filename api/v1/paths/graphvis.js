@@ -1,5 +1,5 @@
 // const { graphviz } = require("node-graphviz");
-const { processResponse } = require("./utils");
+import { processResponse } from './utils';
 
 module.exports = function () {
     let operations = {

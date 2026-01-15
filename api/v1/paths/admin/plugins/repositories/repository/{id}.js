@@ -1,6 +1,6 @@
-const { toolModel } = require("../../../../../../../model/tools");
-const { mainConfigModel } = require("../../../../../../../model/mainConfig");
-const { responseSchema } = require("../../../../utils");
+import { toolModel } from '../../../../../../../model/tools';
+import { mainConfigModel } from '../../../../../../../model/mainConfig';
+import { responseSchema } from '../../../../utils';
 
 module.exports = function () {
     const operations = { DELETE, PUT };

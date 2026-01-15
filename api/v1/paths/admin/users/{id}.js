@@ -1,5 +1,5 @@
-const fs = require("fs");
-const { userModel } = require("../../../../../model/users");
+import fs from 'fs';
+import { userModel } from '../../../../../model/users';
 
 module.exports = function () {
     let operations = {

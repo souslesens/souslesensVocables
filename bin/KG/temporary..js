@@ -1,5 +1,5 @@
-const xlsx2json = require("../xlsx2json.");
-const fs = require("fs");
+import xlsx2json from '../xlsx2json.';
+import fs from 'fs';
 
 var xlsxFilePath = "D:\\NLP\\ontologies\\ONE MODEL\\dictionary2.xlsx";
 //var xlsxFilePath="D:\\NLP\\ontologies\\dictionaryExample.xlsx"

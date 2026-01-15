@@ -1,6 +1,6 @@
-const { databaseModel } = require("../../../../model/databases");
-const { responseSchema } = require("../utils");
-const userManager = require("../../../../bin/user.");
+import { databaseModel } from '../../../../model/databases';
+import { responseSchema } from '../utils';
+import userManager from '../../../../bin/user.';
 
 module.exports = function () {
     let operations = { GET };

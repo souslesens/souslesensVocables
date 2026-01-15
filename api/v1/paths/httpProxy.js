@@ -1,5 +1,5 @@
-const { processResponse } = require("./utils");
-const httpProxy = require("../../../bin/httpProxy.");
+import { processResponse } from './utils';
+import httpProxy from '../../../bin/httpProxy.';
 
 module.exports = function () {
     let operations = {

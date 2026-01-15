@@ -1,5 +1,5 @@
-const { config } = require("../model/config");
-const { userModel } = require("../model/users");
+import { config } from '../model/config';
+import { userModel } from '../model/users';
 
 const user = {
     getUser: async (reqUser) => {

@@ -1,6 +1,6 @@
-var httpProxy = require("../../httpProxy.");
-var async = require("async");
-var fs = require("fs");
+import httpProxy from '../../httpProxy.';
+import async from 'async';
+import fs from 'fs';
 var PIbuilder = {
     buildPIcsv: function () {
         var query =

@@ -1,4 +1,4 @@
-var fs = require("fs");
+import fs from 'fs';
 //var reader=require("../SQLutil.")
 
 var filePath = "D:\\NLP\\ontologies\\OntoGaia\\validationXDB3.csv";

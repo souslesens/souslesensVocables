@@ -9,15 +9,14 @@
 
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-const fs = require("fs");
-const path = require("path");
+import fs from 'fs';
 
-const winston = require("winston");
-require("winston-daily-rotate-file");
-
-const { createLogger, format } = require("winston");
+import path from 'path';
+import winston from 'winston';
+import 'winston-daily-rotate-file';
+import { createLogger, format } from 'winston';
 const { combine, timestamp, json } = format;
-const { readMainConfig } = require("../model/config");
+import { readMainConfig } from '../model/config';
 
 const config = readMainConfig();
 

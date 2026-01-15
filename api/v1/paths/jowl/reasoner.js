@@ -1,9 +1,9 @@
-const HttpProxy = require("../../../../bin/httpProxy.");
-const ConfigManager = require("../../../../bin/configManager.");
-const { processResponse } = require("../utils");
-const request = require("request");
-const async = require("async");
-const httpProxy = require("../../../../bin/httpProxy..js");
+import HttpProxy from '../../../../bin/httpProxy.';
+import ConfigManager from '../../../../bin/configManager.';
+import { processResponse } from '../utils';
+import request from 'request';
+import async from 'async';
+import httpProxy from '../../../../bin/httpProxy..js';
 
 //https://jena.apache.org/documentation/inference/
 

@@ -1,7 +1,7 @@
-const fs = require("fs");
-const { Lock } = require("async-await-mutex-lock");
-const { config, configSourcesPath } = require("./config");
-const { profileModel } = require("./profiles");
+import fs from 'fs';
+import { Lock } from 'async-await-mutex-lock';
+import { config, configSourcesPath } from './config';
+import { profileModel } from './profiles';
 
 /**
  * @typedef {import("./UserTypes").UserAccount} UserAccount

@@ -10,29 +10,9 @@ import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import { ButtonWithConfirmation } from "./Component/ButtonWithConfirmation";
 import Button from "@mui/material/Button";
-import Modal from "@mui/material/Modal";
 import Stack from "@mui/material/Stack";
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
 
-import { style } from "./Utils";
-
-interface UsersData {
-    id: number;
-    data_type: string;
-    data_label: string;
-    data_comment: string;
-    data_group: string;
-    data_tool: string;
-    data_source: string;
-    is_shared: boolean;
-    shared_profiles: string[];
-    shared_users: string[];
-    readwrite: boolean;
-    created_at: string;
-    modification_date: string;
-    owned_by: number;
-}
+import { UserData, UserDataDialog } from "./Component/UserDataDialog";
 
 declare global {
     interface Window {
@@ -43,12 +23,13 @@ declare global {
 }
 
 export default function UsersDataManagement() {
-    const [usersData, setUsersData] = useState<UsersData[]>([]);
+    const [usersData, setUsersData] = useState<UserData[]>([]);
     const [displayModal, setDisplayModal] = useState<boolean>(false);
+    const [editingUser, setEditingUser] = useState<UserData | null>(null);
 
     const fetchUsersData = async () => {
         const response = await fetch("/api/v1/users/data");
-        const data = (await response.json()) as UsersData[];
+        const data = (await response.json()) as UserData[];
         setUsersData(data);
     };
 
@@ -58,8 +39,33 @@ export default function UsersDataManagement() {
     };
 
     const handleOpenCreateModal = () => {
-	setDisplayModal(true);
+        setEditingUser(null);
+        setDisplayModal(true);
     };
+
+    const handleCloseDialog = () => setDisplayModal(false);
+
+    const handleSave = async (newData: UserData) => {
+        if (editingUser) {
+            // update
+            await fetch(`/api/v1/users/data/${editingUser.id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(newData),
+            });
+        } else {
+            // create
+            await fetch(`/api/v1/users/data`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(newData),
+            });
+        }
+        await fetchUsersData();
+        handleCloseDialog();
+    };
+
+    const defaultUserValue = editingUser ? { ...editingUser, id: String(editingUser.id) } : {};
 
     useEffect(() => {
         void fetchUsersData();
@@ -114,23 +120,8 @@ export default function UsersDataManagement() {
                     </Button>
                 </Stack>
             </Stack>
-            <Modal
-                open={displayModal}
-                onClose={() => {
-                    setDisplayModal(false);
-                }}
-                aria-labelledby="modal-modal-title"
-                aria-describedby="modal-modal-description"
-            >
-                <Box sx={style} style={{ maxHeight: "100%", overflow: "auto" }}>
-                    <Typography id="modal-modal-title" variant="h6" component="h2">
-                        Text in a modal
-                    </Typography>
-                    <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-                        Duis mollis, est non commodo luctus, nisi erat porttitor ligula.
-                    </Typography>
-                </Box>
-            </Modal>
+
+            <UserDataDialog open={displayModal} onClose={handleCloseDialog} onSave={handleSave} defaultValue={defaultUserValue} />
         </>
     );
 }

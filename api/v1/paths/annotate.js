@@ -1,7 +1,7 @@
 import path from 'path';
 const annotatorLive = require(path.resolve("bin/annotatorLive.js"));
 
-module.exports = function () {
+export default function () {
     let operations = {
         POST,
     };

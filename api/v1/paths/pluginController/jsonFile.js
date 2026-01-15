@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { processResponse, sanitizePath } from '../utils.js';
 
-module.exports = function () {
+export default function () {
     let operations = {
         GET,
     };

@@ -6,7 +6,7 @@ import { processResponse } from '../utils.js';
 import { sourceModel } from '../../../../model/sources.js';
 import async from 'async';
 
-module.exports = function () {
+export default function () {
     let operations = {
         POST,
     };

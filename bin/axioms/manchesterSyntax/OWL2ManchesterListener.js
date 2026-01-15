@@ -19,4 +19,4 @@ class OWL2ManchesterListener extends antlr4.ParseTreeListener {
     exitAxiom(ctx) {}
 }
 
-module.exports = OWL2ManchesterListener;
+export default OWL2ManchesterListener;

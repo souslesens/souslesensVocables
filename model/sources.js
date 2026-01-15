@@ -297,4 +297,4 @@ class SourceModel {
 
 const sourceModel = new SourceModel(profileModel, configSourcesPath);
 
-module.exports = { SourceModel, sourceModel };
+export {  SourceModel, sourceModel  };

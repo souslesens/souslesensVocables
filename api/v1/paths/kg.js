@@ -1,7 +1,7 @@
 import path from 'path';
 const kGbuilder = require(path.resolve("bin/KG/KGbuilder.js"));
 
-module.exports = function () {
+export default function () {
     let operations = {
         POST,
     };

@@ -1299,4 +1299,4 @@ callbackEach();
     },
 };
 
-module.exports = KGtripleBuilder;
+export default KGtripleBuilder;

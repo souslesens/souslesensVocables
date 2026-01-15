@@ -1,7 +1,7 @@
 import { userModel } from '../../../../model/users.js';
 import { mainConfigModel } from '../../../../model/mainConfig.js';
 
-module.exports = function () {
+export default function () {
     let operations = {
         GET,
     };

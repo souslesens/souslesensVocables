@@ -472,8 +472,7 @@ var SourceIntegrator = {
         });
     },
 };
-module.exports = SourceIntegrator;
-
+export default SourceIntegrator;
 if (false) {
     SourceIntegrator.jenaParse("https://rds.posccaesar.org/ontology/plm/ont/equipment/0.9.0/plm-equipment.rdf", { extractUriRoots: 1 }, function (err, result) {});
 }

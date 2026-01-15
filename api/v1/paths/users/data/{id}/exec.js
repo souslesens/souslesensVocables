@@ -9,7 +9,7 @@ import { Template } from '@huggingface/jinja';
 import { RDF_FORMATS_MIMETYPES } from '../../../../../../model/utils.js';
 //const RemoteCodeRunner = require("../../../../../bin/remoteCodeRunner.js.js");
 
-module.exports = () => {
+export default () => {
     GET = async (req, res, _next) => {
         try {
             const userInfo = await userManager.getUser(req.user);

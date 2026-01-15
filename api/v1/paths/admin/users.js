@@ -8,7 +8,7 @@ import {
     successfullyFetched,
 } from '../utils.js';
 
-module.exports = function () {
+export default function () {
     ///// GET api/v1/admin/users
     async function GET(req, res, next) {
         try {

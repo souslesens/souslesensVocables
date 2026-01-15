@@ -7,7 +7,7 @@ import httpProxy from '../../../../bin/httpProxy.js';
 import Util from '../../../../bin/util.js';
 import { sourceModel } from '../../../../model/sources.js';
 
-module.exports = function () {
+export default function () {
     let operations = {
         POST,
     };

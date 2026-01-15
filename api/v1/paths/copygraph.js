@@ -1,7 +1,7 @@
 import { processResponse } from './utils.js';
 import ExportGraph from '../../../bin/exportGraph.js';
 
-module.exports = function () {
+export default function () {
     let operations = {
         POST,
     };

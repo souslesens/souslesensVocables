@@ -258,6 +258,5 @@ var MappingParser = {
     },
 };
 
-module.exports = MappingParser;
-
+export default MappingParser;
 //MappingParser.getColumnsMap("PAZFLOR_ABOX", null, function (err, result) {

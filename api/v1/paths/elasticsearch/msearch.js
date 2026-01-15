@@ -4,7 +4,7 @@ import ConfigManager from '../../../../bin/configManager.js';
 import UserRequestFiltering from '../../../../bin/userRequestFiltering.js';
 import { processResponse } from '../utils.js';
 
-module.exports = function () {
+export default function () {
     let operations = {
         POST,
     };

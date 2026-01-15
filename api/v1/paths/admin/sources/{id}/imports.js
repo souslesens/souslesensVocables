@@ -1,6 +1,6 @@
 import { processResponse } from '../../../utils.js';
 import configManager from '../../../../../../bin/configManager.js';
-module.exports = function () {
+export default function () {
     let operations = {
         POST,
     };

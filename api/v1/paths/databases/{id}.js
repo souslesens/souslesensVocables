@@ -2,7 +2,7 @@ import { databaseModel } from '../../../../model/databases.js';
 import { responseSchema } from '../utils.js';
 import userManager from '../../../../bin/user.js';
 
-module.exports = function () {
+export default function () {
     let operations = { GET };
 
     async function GET(req, res, _next) {

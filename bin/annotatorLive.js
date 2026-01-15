@@ -153,6 +153,5 @@ var annotatorLive = {
         });
     },
 };
-module.exports = annotatorLive;
-
+export default annotatorLive;
 //annotatorLive.test()

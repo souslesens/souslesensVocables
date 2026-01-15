@@ -1,7 +1,7 @@
 import { processResponse } from './utils.js';
 import SourceIntegrator from '../../../bin/sourceIntegrator.js';
 
-module.exports = function () {
+export default function () {
     let operations = {
         POST,
     };

@@ -59,6 +59,5 @@ var PIbuilder = {
     },
 };
 
-module.exports = PIbuilder;
-
+export default PIbuilder;
 PIbuilder.buildPIcsv();

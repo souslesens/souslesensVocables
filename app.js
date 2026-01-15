@@ -312,4 +312,4 @@ async function loadDefaultGraphs() {
 
 void loadDefaultGraphs();
 
-module.exports = app;
+export default app;

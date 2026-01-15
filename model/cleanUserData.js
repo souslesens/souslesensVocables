@@ -32,4 +32,4 @@ class CleanUserData {
 }
 
 const cleanUserData = new CleanUserData();
-module.exports = { cleanUserData };
+export {  cleanUserData  };

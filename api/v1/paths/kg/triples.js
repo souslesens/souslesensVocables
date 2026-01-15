@@ -2,7 +2,7 @@ import KGbuilder_main from '../../../../bin/KGbuilder/KGbuilder_main.js';
 import { processResponse } from '../utils.js';
 import userManager from '../../../../bin/user.js';
 
-module.exports = function () {
+export default function () {
     let operations = {
         POST,
         DELETE,

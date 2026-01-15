@@ -375,4 +375,4 @@ class ToolModel {
 
 const toolModel = new ToolModel(path.join(process.cwd(), "/plugins"));
 
-module.exports = { ToolModel, toolModel };
+export {  ToolModel, toolModel  };

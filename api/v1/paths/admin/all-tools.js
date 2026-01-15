@@ -1,7 +1,7 @@
 import { toolModel } from '../../../../model/tools.js';
 import { resourceFetched, responseSchema } from '../utils.js';
 
-module.exports = function () {
+export default function () {
     let operations = { GET };
 
     // GET /api/v1/admin/all-tools

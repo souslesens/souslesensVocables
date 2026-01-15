@@ -1,5 +1,5 @@
 import path from 'path';
-const kGcontroller = require(path.resolve("bin/KG/KGcontroller."));
+const kGcontroller = require(path.resolve("bin/KG/KGcontroller.js"));
 
 module.exports = function () {
     let operations = {

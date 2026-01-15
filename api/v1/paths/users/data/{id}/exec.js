@@ -2,12 +2,12 @@ import fs from 'node:fs';
 import { readMainConfig } from '../../../../../../model/config';
 import { userDataModel } from '../../../../../../model/userData';
 import { RdfDataModel } from '../../../../../../model/rdfData';
-import userManager from '../../../../../../bin/user.';
+import userManager from '../../../../../../bin/user.js';
 import UserRequestFiltering from '../../../../../../bin/userRequestFiltering..js';
-import ConfigManager from '../../../../../../bin/configManager.';
+import ConfigManager from '../../../../../../bin/configManager.js';
 import { Template } from '@huggingface/jinja';
 import { RDF_FORMATS_MIMETYPES } from '../../../../../../model/utils';
-//const RemoteCodeRunner = require("../../../../../bin/remoteCodeRunner.js.");
+//const RemoteCodeRunner = require("../../../../../bin/remoteCodeRunner.js.js");
 
 module.exports = () => {
     GET = async (req, res, _next) => {

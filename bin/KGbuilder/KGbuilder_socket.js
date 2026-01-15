@@ -1,4 +1,4 @@
-import SocketManager from '../socketManager.';
+import SocketManager from '../socketManager.js';
 
 var KGbuilder_socket = {
     message: function (clientSocketId, content, isError) {

@@ -1,13 +1,13 @@
 import fs from 'fs';
 import path from 'path';
-import csvCrawler from './_csvCrawler.';
+import csvCrawler from './_csvCrawler.js';
 import async from 'async';
-import util from './util.';
-import httpProxy from './httpProxy.';
-import sqlServerProxy from './KG/SQLserverConnector.';
+import util from './util.js';
+import httpProxy from './httpProxy.js';
+import sqlServerProxy from './KG/SQLserverConnector.js';
 import { databaseModel } from '../model/databases';
-import ConfigManager from './configManager.';
-import SocketManager from './socketManager.';
+import ConfigManager from './configManager.js';
+import SocketManager from './socketManager.js';
 
 //var rootDir = "D:\\NLP\\ontologies\\CFIHOS\\CFIHOS V1.5\\CFIHOS V1.5 RDL";
 

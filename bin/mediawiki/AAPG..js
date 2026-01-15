@@ -11,7 +11,7 @@
  */
 import fs from 'fs';
 
-//var httpProxy = require("../../httpProxy.");
+//var httpProxy = require("../../httpProxy.js");
 import async from 'async';
 
 var AAPG = {

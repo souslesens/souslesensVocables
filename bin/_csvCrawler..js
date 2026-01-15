@@ -1,10 +1,10 @@
 import async from 'async';
-import util from './util.';
-import socket from './socketManager.';
+import util from './util.js';
+import socket from './socketManager.js';
 import request from 'request';
 import fs from 'fs';
 import csv from 'csv-parser';
-import common from './util.';
+import common from './util.js';
 
 var csvCrawler = {
     indexSource: function (config, callback) {

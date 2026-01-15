@@ -1,5 +1,5 @@
 import { userDataModel } from '../../../../../model/userData';
-import userManager from '../../../../../bin/user.';
+import userManager from '../../../../../bin/user.js';
 
 module.exports = () => {
     DELETE = async (req, res, _next) => {

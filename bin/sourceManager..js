@@ -1,6 +1,6 @@
-import httpProxy from './httpProxy.';
+import httpProxy from './httpProxy.js';
 import async from 'async';
-import util from './util.';
+import util from './util.js';
 import fs from 'fs';
 var SourceManager = {
     createNewOwlSourceGraph: function (_sourceName, _graphUri, _targetSparqlServerUrl, _options, _callback) {

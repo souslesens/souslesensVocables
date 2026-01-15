@@ -1,5 +1,5 @@
 import path from 'path';
-const userManager = require(path.resolve("bin/user."));
+const userManager = require(path.resolve("bin/user.js"));
 
 module.exports = function () {
     let operations = {

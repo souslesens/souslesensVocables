@@ -1,5 +1,5 @@
 import { processResponse } from './utils';
-import SourceIntegrator from '../../../bin/sourceIntegrator.';
+import SourceIntegrator from '../../../bin/sourceIntegrator.js';
 
 module.exports = function () {
     let operations = {

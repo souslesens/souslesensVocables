@@ -11,8 +11,8 @@
 import async from 'async';
 
 import fs from 'fs';
-import httpProxy from './httpProxy.';
-import util from './util.';
+import httpProxy from './httpProxy.js';
+import util from './util.js';
 import path from 'path';
 
 //const { configPath } = require("../model/config");

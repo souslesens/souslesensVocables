@@ -1,4 +1,4 @@
-import sqlServer from './SQLserverConnector.';
+import sqlServer from './SQLserverConnector.js';
 import fs from 'fs';
 import async from 'async';
 

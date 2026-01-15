@@ -1,7 +1,7 @@
 import { processResponse, responseSchema } from './utils';
-import httpProxy from '../../../bin/httpProxy.';
-import ConfigManager from '../../../bin/configManager.';
-import UserRequestFiltering from '../../../bin/userRequestFiltering.';
+import httpProxy from '../../../bin/httpProxy.js';
+import ConfigManager from '../../../bin/configManager.js';
+import UserRequestFiltering from '../../../bin/userRequestFiltering.js';
 
 module.exports = function () {
     let operations = {

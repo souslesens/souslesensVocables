@@ -7,7 +7,7 @@ const { userModel } = require(rootPath+"model\\users");
 
  */
 
-import ConfigManager from '../bin/configManager.';
+import ConfigManager from '../bin/configManager.js';
 
 import async from 'async';
 import { Parser as SparqlParser } from 'sparqljs';

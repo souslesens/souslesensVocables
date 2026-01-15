@@ -1,5 +1,5 @@
-import csvCrawler from '../../bin/_csvCrawler.';
-import elasticRestProxy from '../../bin/elasticRestProxy.';
+import csvCrawler from '../../bin/_csvCrawler.js';
+import elasticRestProxy from '../../bin/elasticRestProxy.js';
 import fs from 'fs';
 import async from 'async';
 var dictionaryMatcher = {

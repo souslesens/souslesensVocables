@@ -1,5 +1,5 @@
 import { processResponse } from './utils';
-import ExportGraph from '../../../bin/exportGraph.';
+import ExportGraph from '../../../bin/exportGraph.js';
 
 module.exports = function () {
     let operations = {

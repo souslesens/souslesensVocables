@@ -1,4 +1,4 @@
-import KGtripleBuilder from '../../../../bin/KGtripleBuilder.';
+import KGtripleBuilder from '../../../../bin/KGtripleBuilder.js';
 import { processResponse } from '../utils';
 
 module.exports = function () {

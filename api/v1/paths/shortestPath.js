@@ -1,7 +1,7 @@
 import { processResponse } from './utils';
-import GraphTraversal from '../../../bin/graphTraversal.';
-import ConfigManager from '../../../bin/configManager.';
-import UserRequestFiltering from '../../../bin/userRequestFiltering.';
+import GraphTraversal from '../../../bin/graphTraversal.js';
+import ConfigManager from '../../../bin/configManager.js';
+import UserRequestFiltering from '../../../bin/userRequestFiltering.js';
 
 module.exports = function () {
     let operations = {

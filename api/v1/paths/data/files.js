@@ -1,5 +1,5 @@
 import path from 'path';
-const dataController = require(path.resolve("bin/dataController."));
+const dataController = require(path.resolve("bin/dataController.js"));
 
 module.exports = function () {
     let operations = {

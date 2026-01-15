@@ -1,6 +1,6 @@
-import { toolModel } from '../../../../../../../model/tools';
-import { mainConfigModel } from '../../../../../../../model/mainConfig';
-import { responseSchema } from '../../../../utils';
+import { toolModel } from '../../../../../../../model/tools.js';
+import { mainConfigModel } from '../../../../../../../model/mainConfig.js';
+import { responseSchema } from '../../../../utils.js';
 
 module.exports = function () {
     const operations = { DELETE, PUT };

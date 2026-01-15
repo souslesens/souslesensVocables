@@ -1,5 +1,5 @@
-import { toolModel } from '../../../../model/tools';
-import { resourceFetched, responseSchema } from '../utils';
+import { toolModel } from '../../../../model/tools.js';
+import { resourceFetched, responseSchema } from '../utils.js';
 
 module.exports = function () {
     let operations = { GET };

@@ -1,11 +1,11 @@
-import { processResponse } from '../utils';
+import { processResponse } from '../utils.js';
 import ConfigManager from '../../../../bin/configManager.js';
 import GraphStore from '../../../../bin/graphStore.js';
 import async2 from 'async';
 import request from 'request';
 import httpProxy from '../../../../bin/httpProxy.js';
 import Util from '../../../../bin/util.js';
-import { sourceModel } from '../../../../model/sources';
+import { sourceModel } from '../../../../model/sources.js';
 
 module.exports = function () {
     let operations = {

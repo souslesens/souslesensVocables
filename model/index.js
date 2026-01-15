@@ -1,6 +1,6 @@
-import { readMainConfig } from './config';
+import { readMainConfig } from './config.js';
 import { Client as Client7 } from 'es7';
-import { chunk } from './utils';
+import { chunk } from './utils.js';
 
 class IndexModel {
     /**

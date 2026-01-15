@@ -10,15 +10,15 @@
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import jsonFileStorage from './jsonFileStorage';
+import jsonFileStorage from './jsonFileStorage.js';
 
 import SourceManager from './sourceManager.js';
 import path from 'path';
 import async from 'async';
 import fs from 'fs';
-import { configPath, config } from '../model/config';
+import { configPath, config } from '../model/config.js';
 import { SourceModel, sourceModel } from '../model/sources.js';
-//const { getAllowedSources, filterSources, sortObjectByKey, resourceFetched } = require("../api/v1/paths/utils");
+//const { getAllowedSources, filterSources, sortObjectByKey, resourceFetched } = require("../api/v1/paths/utils.js");
 //const util = require("util");
 
 var ConfigManager = {
@@ -188,7 +188,7 @@ var ConfigManager = {
 
     getUserSources: async function (req, res, next) {
         try {
-            const { sourceModel, SourceModel } = require("../model/sources");
+            const { sourceModel, SourceModel } = require("../model/sources.js");
             const userManager = require(path.resolve("bin/user.js"));
             const userInfo = await userManager.getUser(req.user || null);
             const allowedSources = await sourceModel.getUserSources(userInfo.user);
@@ -202,11 +202,11 @@ var ConfigManager = {
             next(err);
         }
         if (false) {
-            const { configPath, config } = require("../model/config");
+            const { configPath, config } = require("../model/config.js");
             const sourcesJSON = path.resolve(configPath + "/sources.json");
             const profilesJSON = path.resolve(configPath + "/profiles.json");
             const util = require("util");
-            const { readResource, writeResource, resourceCreated, responseSchema, resourceFetched } = require("../api/v1/paths/utils");
+            const { readResource, writeResource, resourceCreated, responseSchema, resourceFetched } = require("../api/v1/paths/utils.js");
             const userManager = require(path.resolve("bin/user.js"));
             const read = util.promisify(fs.readFile);
             const { getAllowedSources, filterSources, sortObjectByKey } = require("../api/v1/paths/utils.js");

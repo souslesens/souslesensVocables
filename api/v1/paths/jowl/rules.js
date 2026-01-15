@@ -3,7 +3,7 @@ import ConfigManager from '../../../../bin/configManager.js';
 import GraphStore from '../../../../bin/graphStore.js';
 import Util from '../../../../bin/util.js';
 import fs from 'fs';
-import { processResponse } from '../utils';
+import { processResponse } from '../utils.js';
 import request from 'request';
 import async from 'async';
 

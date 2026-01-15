@@ -15,8 +15,8 @@ import httpProxy from './httpProxy.js';
 import util from './util.js';
 import path from 'path';
 
-//const { configPath } = require("../model/config");
-import jsonFileStorage from './jsonFileStorage';
+//const { configPath } = require("../model/config.js");
+import jsonFileStorage from './jsonFileStorage.js';
 
 var ExportGraph = {
     execute: function (sparqlUrl, graphUri, filePath, callback) {

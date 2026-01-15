@@ -1,6 +1,6 @@
-import { profileModel } from '../../../model/profiles';
-import { userModel } from '../../../model/users';
-import { resourceFetched, responseSchema } from './utils';
+import { profileModel } from '../../../model/profiles.js';
+import { userModel } from '../../../model/users.js';
+import { resourceFetched, responseSchema } from './utils.js';
 import userManager from '../../../bin/user.js';
 
 module.exports = function () {

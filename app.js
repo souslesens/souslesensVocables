@@ -8,12 +8,12 @@ import morganLogger from 'morgan';
 import fileUpload from 'express-fileupload';
 import openapi from 'express-openapi';
 import swaggerUi from 'swagger-ui-express';
-const httpProxy = require(path.resolve("bin/httpProxy."));
-const userManager = require(path.resolve("bin/user."));
+const httpProxy = require(path.resolve("bin/httpProxy.js"));
+const userManager = require(path.resolve("bin/user.js"));
 import querystring from 'querystring';
-import './bin/authentication.';
+import './bin/authentication.js';
 import { checkMainConfig, readMainConfig } from './model/config';
-import util from './bin/util.';
+import util from './bin/util.js';
 
 const app = express();
 import Sentry from '@sentry/node';

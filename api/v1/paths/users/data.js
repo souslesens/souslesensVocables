@@ -1,6 +1,6 @@
 import { userDataModel } from '../../../../model/userData';
 import { cleanUserData } from '../../../../model/cleanUserData';
-import userManager from '../../../../bin/user.';
+import userManager from '../../../../bin/user.js';
 
 module.exports = () => {
     GET = async (req, res, _next) => {

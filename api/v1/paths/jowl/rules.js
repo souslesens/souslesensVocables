@@ -1,7 +1,7 @@
-import HttpProxy from '../../../../bin/httpProxy.';
-import ConfigManager from '../../../../bin/configManager.';
-import GraphStore from '../../../../bin/graphStore.';
-import Util from '../../../../bin/util.';
+import HttpProxy from '../../../../bin/httpProxy.js';
+import ConfigManager from '../../../../bin/configManager.js';
+import GraphStore from '../../../../bin/graphStore.js';
+import Util from '../../../../bin/util.js';
 import fs from 'fs';
 import { processResponse } from '../utils';
 import request from 'request';

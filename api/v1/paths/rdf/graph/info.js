@@ -1,5 +1,5 @@
 import { rdfDataModel } from '../../../../../model/rdfData';
-import userManager from '../../../../../bin/user.';
+import userManager from '../../../../../bin/user.js';
 import { sourceModel } from '../../../../../model/sources';
 
 module.exports = function () {

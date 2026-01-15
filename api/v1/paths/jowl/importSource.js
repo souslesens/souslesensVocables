@@ -1,10 +1,10 @@
 import { processResponse } from '../utils';
-import ConfigManager from '../../../../bin/configManager.';
-import GraphStore from '../../../../bin/graphStore.';
+import ConfigManager from '../../../../bin/configManager.js';
+import GraphStore from '../../../../bin/graphStore.js';
 import async2 from 'async';
 import request from 'request';
-import httpProxy from '../../../../bin/httpProxy.';
-import Util from '../../../../bin/util.';
+import httpProxy from '../../../../bin/httpProxy.js';
+import Util from '../../../../bin/util.js';
 
 module.exports = function () {
     let operations = {

@@ -1,9 +1,9 @@
-import httpProxy from './httpProxy.';
+import httpProxy from './httpProxy.js';
 import rdfParser from 'rdf-parse';
 import fs from 'fs';
 import path from 'path';
 import async from 'async';
-import util from './util.';
+import util from './util.js';
 import N3 from 'n3';
 
 var graphUrisMap = {};

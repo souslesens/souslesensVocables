@@ -1,5 +1,5 @@
 import { processResponse } from '../../../utils';
-import configManager from '../../../../../../bin/configManager.';
+import configManager from '../../../../../../bin/configManager.js';
 module.exports = function () {
     let operations = {
         POST,

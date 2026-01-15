@@ -1,7 +1,7 @@
-import ConfigManager from '../configManager.';
+import ConfigManager from '../configManager.js';
 import httpProxy from '../httpProxy..js';
 import async from 'async';
-import util from '../util.';
+import util from '../util.js';
 import KGbuilder_socket from './KGbuilder_socket.js';
 import modelUtils from '../../model/utils.js';
 

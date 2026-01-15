@@ -1,10 +1,10 @@
 import async from 'async';
-import httpProxy from './httpProxy.';
+import httpProxy from './httpProxy.js';
 import path from 'path';
 import jsonFileStorage from './jsonFileStorage';
 import request from 'request';
-import Util from './util.';
-import ConfigManager from './configManager.';
+import Util from './util.js';
+import ConfigManager from './configManager.js';
 import { exec } from 'child_process';
 
 var SourceIntegrator = {

@@ -1,7 +1,7 @@
 import fs from 'fs';
 import Util from '../util..js';
-import tripleBuilder from '../KGtripleBuilder.';
-import util from '../util.';
+import tripleBuilder from '../KGtripleBuilder.js';
+import util from '../util.js';
 import async from 'async';
 
 var clusterQuery =

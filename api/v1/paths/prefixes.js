@@ -1,6 +1,6 @@
 import prefixes from '../../../model/prefixes.json';
 
-module.exports = function () {
+export default function () {
     async function GET(req, res, next) {
         return res.status(200).json(prefixes);
     }

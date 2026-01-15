@@ -1,7 +1,7 @@
 import KGtripleBuilder from '../../../../bin/KGtripleBuilder.js';
 import { processResponse } from '../utils.js';
 
-module.exports = function () {
+export default function () {
     let operations = {
         POST,
     };

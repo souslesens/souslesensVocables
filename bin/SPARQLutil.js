@@ -81,4 +81,4 @@ var SPARQLutil = {
         );
     },
 };
-module.exports = SPARQLutil;
+export default SPARQLutil;

@@ -90,4 +90,4 @@ class IndexModel {
 const config = readMainConfig();
 const indexModel = new IndexModel(config.ElasticSearch.url, config.ElasticSearch.user, config.ElasticSearch.password, config.ElasticSearch.skipSslVerify, config.ElasticSearch.searchChunkSize || 20);
 
-module.exports = { IndexModel, indexModel };
+export {  IndexModel, indexModel  };

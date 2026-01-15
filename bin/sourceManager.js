@@ -193,5 +193,5 @@ var SourceManager = {
     },
 };
 
-module.exports = SourceManager;
+export default SourceManager;
 //SourceManager.sourcesToCsv();

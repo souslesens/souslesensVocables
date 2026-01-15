@@ -146,7 +146,7 @@ var KGSqlConnector = {
         });
     },
 };
-module.exports = KGSqlConnector;
+export default KGSqlConnector;
 /*
 if (false) {
     KGSqlConnector.get("tag", {

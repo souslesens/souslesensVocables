@@ -63,4 +63,4 @@ OWL2ManchesterLexer.WS = 15;
 OWL2ManchesterLexer.LPAREN = 16;
 OWL2ManchesterLexer.RPAREN = 17;
 
-module.exports = OWL2ManchesterLexer;
+export default OWL2ManchesterLexer;

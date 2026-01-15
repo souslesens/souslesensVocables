@@ -389,8 +389,7 @@ return callbackSeries()
     },
 };
 
-module.exports = TagAnalyzer;
-
+export default TagAnalyzer;
 //TagAnalyzer.deconcat()
 //TagAnalyzer.processTags("5FY1043")
 

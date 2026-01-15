@@ -5,7 +5,7 @@ import ManchesterSyntaxEngine from '../../../../bin/axioms/manchesterSyntaxEngin
 import httpProxy from '../../../../bin/httpProxy..js';
 
 import { processResponse } from '../utils.js';
-module.exports = function () {
+export default function () {
     let operations = {
         GET,
     };

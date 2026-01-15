@@ -1,7 +1,7 @@
 import { processResponse } from './utils.js';
 import httpProxy from '../../../bin/httpProxy.js';
 
-module.exports = function () {
+export default function () {
     let operations = {
         POST,
         GET,

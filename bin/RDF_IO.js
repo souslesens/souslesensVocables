@@ -278,6 +278,5 @@ var RDF_IO = {
             });
     },
 };
-module.exports = RDF_IO;
-
+export default RDF_IO;
 //test()

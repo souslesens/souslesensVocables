@@ -155,8 +155,7 @@ var gaiaToSkos = {
     },
 };
 
-module.exports = gaiaToSkos;
-
+export default gaiaToSkos;
 //gaiaToSkos.parseTxt()
 
 gaiaToSkos.writeAcronymsTriples();

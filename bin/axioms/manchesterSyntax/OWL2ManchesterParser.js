@@ -435,4 +435,4 @@ class AxiomContext extends antlr4.ParserRuleContext {
 OWL2ManchesterParser.ClassExpressionContext = ClassExpressionContext;
 OWL2ManchesterParser.AxiomContext = AxiomContext;
 
-module.exports = OWL2ManchesterParser;
+export default OWL2ManchesterParser;

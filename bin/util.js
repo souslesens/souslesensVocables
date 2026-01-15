@@ -725,6 +725,5 @@ var util = {
     },
 };
 
-module.exports = util;
-
+export default util;
 util.convertISOStringDateForTriple("2022-12-31T230000.000Z");

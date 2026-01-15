@@ -696,4 +696,4 @@ const KGbuilder_triplesWriter = {
     },
 };
 
-module.exports = KGbuilder_triplesWriter;
+export default KGbuilder_triplesWriter;

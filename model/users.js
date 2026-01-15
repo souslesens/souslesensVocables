@@ -297,4 +297,4 @@ class UserModel {
 
 const userModel = new UserModel();
 
-module.exports = { UserModel, userModel };
+export {  UserModel, userModel  };

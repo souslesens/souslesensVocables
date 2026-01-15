@@ -717,8 +717,7 @@ var DirContentAnnotator = {
     },
 };
 DirContentAnnotator.init();
-module.exports = DirContentAnnotator;
-
+export default DirContentAnnotator;
 /*
 if (false) {
     DirContentAnnotator.getDirContent("D:\\NLP\\ontologies");

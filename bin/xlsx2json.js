@@ -126,4 +126,4 @@ var xlsx2json = {
     },
 };
 
-module.exports = xlsx2json;
+export default xlsx2json;

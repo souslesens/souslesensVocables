@@ -263,7 +263,6 @@ if(c1!=c2)
 
 str = str.replace(/\$/gm, "\\\$")
 console.log(str)*/
-module.exports = KGcontroller;
-
+export default KGcontroller;
 KGcontroller.getKGschema("MDM_2.3_AFTWIN");
 //KGcontroller.getAssetGlobalMappings("MDM")

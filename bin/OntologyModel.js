@@ -473,6 +473,5 @@ Sparql_OWL.getDictionary(source, { lang: Config.default_lang, filter: filter }, 
     },
 };
 
-module.exports = OntologyModel;
-
+export default OntologyModel;
 OntologyModel.loadBasicVocabularies();

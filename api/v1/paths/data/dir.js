@@ -1,6 +1,6 @@
 import dataController from '../../../../bin/dataController.js';
 
-module.exports = function () {
+export default function () {
     const operations = {
         POST,
     };

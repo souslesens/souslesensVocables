@@ -253,4 +253,4 @@ var ConfigManager = {
     },
 };
 ConfigManager.getGeneralConfig();
-module.exports = ConfigManager;
+export default ConfigManager;

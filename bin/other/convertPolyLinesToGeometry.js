@@ -1,4 +1,4 @@
-var csv_crawler = require("../_csvCrawler..js");
+import csv_crawler from '../_csvCrawler..js';
 
 /*
 DECLARE @g geometry;

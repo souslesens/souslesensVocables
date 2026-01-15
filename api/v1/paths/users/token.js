@@ -1,4 +1,4 @@
-const { userModel } = require("../../../../model/users");
+import { userModel } from '../../../../model/users';
 
 module.exports = function () {
     let operations = {

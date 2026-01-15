@@ -1,4 +1,4 @@
-const path = require("path");
+import path from 'path';
 const userManager = require(path.resolve("bin/user."));
 
 module.exports = function () {

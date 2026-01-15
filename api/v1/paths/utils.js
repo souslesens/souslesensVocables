@@ -1,8 +1,8 @@
-const fs = require("fs");
-const util = require("util");
+import fs from 'fs';
+import util from 'util';
 const readFile = util.promisify(fs.readFile);
 const writeFile = util.promisify(fs.writeFile);
-const path = require("path");
+import path from 'path';
 const sanitizePath = (/** @type {string} */ user_input) => {
     if (user_input.indexOf("\0") !== -1) {
         throw Error("Bad Input");

@@ -8,14 +8,16 @@
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-const async = require("async");
-var fs = require("fs");
-var httpProxy = require("./httpProxy.");
-var util = require("./util.");
+import async from 'async';
 
-const path = require("path");
+import fs from 'fs';
+import httpProxy from './httpProxy.';
+import util from './util.';
+import path from 'path';
+
 //const { configPath } = require("../model/config");
-const jsonFileStorage = require("./jsonFileStorage");
+import jsonFileStorage from './jsonFileStorage';
+
 var ExportGraph = {
     execute: function (sparqlUrl, graphUri, filePath, callback) {
         var limit = 2000;

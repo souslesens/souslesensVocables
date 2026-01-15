@@ -1,6 +1,6 @@
-const { rdfDataModel } = require("../../../../../model/rdfData");
-const userManager = require("../../../../../bin/user.");
-const { sourceModel } = require("../../../../../model/sources");
+import { rdfDataModel } from '../../../../../model/rdfData';
+import userManager from '../../../../../bin/user.';
+import { sourceModel } from '../../../../../model/sources';
 
 module.exports = function () {
     let operations = {

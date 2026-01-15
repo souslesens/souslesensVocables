@@ -1,7 +1,7 @@
-const { processResponse, responseSchema } = require("./utils");
-const httpProxy = require("../../../bin/httpProxy.");
-const ConfigManager = require("../../../bin/configManager.");
-const UserRequestFiltering = require("../../../bin/userRequestFiltering.");
+import { processResponse, responseSchema } from './utils';
+import httpProxy from '../../../bin/httpProxy.';
+import ConfigManager from '../../../bin/configManager.';
+import UserRequestFiltering from '../../../bin/userRequestFiltering.';
 
 module.exports = function () {
     let operations = {

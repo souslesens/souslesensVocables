@@ -1,7 +1,7 @@
-var csvCrawler = require("../bin/_csvCrawler.");
-const util = require("./util.");
-var async = require("async");
-var sql = require("./KG/SQLserverConnector.");
+import csvCrawler from '../bin/_csvCrawler.';
+import util from './util.';
+import async from 'async';
+import sql from './KG/SQLserverConnector.';
 const Csv2Sql = {
     readCsv: function (filePath, lines, callback) {
         csvCrawler.readCsv({ filePath: filePath }, 500000, function (err, result) {

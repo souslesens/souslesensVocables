@@ -1,6 +1,6 @@
-const path = require("path");
-const async = require("async");
-const fs = require("fs");
+import path from 'path';
+import async from 'async';
+import fs from 'fs';
 
 var MappingParser = {
     columnsMappingsObjects: ["Column", "RowIndex", "VirtualColumn", "URI"],

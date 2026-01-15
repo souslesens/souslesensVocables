@@ -1,5 +1,5 @@
-const { userDataModel } = require("../../../../../model/userData");
-const userManager = require("../../../../../bin/user.");
+import { userDataModel } from '../../../../../model/userData';
+import userManager from '../../../../../bin/user.';
 
 module.exports = () => {
     DELETE = async (req, res, _next) => {

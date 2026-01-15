@@ -1,4 +1,4 @@
-const prefixes = require("../../../model/prefixes.json", { with: { type: "json" } });
+import prefixes from '../../../model/prefixes.json';
 
 module.exports = function () {
     async function GET(req, res, next) {

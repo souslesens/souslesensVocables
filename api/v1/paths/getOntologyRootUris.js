@@ -1,5 +1,5 @@
-const { processResponse } = require("./utils");
-const SourceIntegrator = require("../../../bin/sourceIntegrator.");
+import { processResponse } from './utils';
+import SourceIntegrator from '../../../bin/sourceIntegrator.';
 
 module.exports = function () {
     let operations = {

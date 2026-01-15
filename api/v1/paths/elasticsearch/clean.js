@@ -1,5 +1,5 @@
-const { sourceModel } = require("../../../../model/sources");
-const { indexModel } = require("../../../../model/index");
+import { sourceModel } from '../../../../model/sources';
+import { indexModel } from '../../../../model/index';
 
 module.exports = function () {
     let operations = {

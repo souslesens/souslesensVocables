@@ -1,4 +1,4 @@
-const path = require("path");
+import path from 'path';
 const dataController = require(path.resolve("bin/dataController."));
 
 module.exports = function () {

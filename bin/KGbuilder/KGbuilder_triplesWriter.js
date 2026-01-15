@@ -1,9 +1,9 @@
-const ConfigManager = require("../configManager.");
-const httpProxy = require("../httpProxy..js");
-const async = require("async");
-const util = require("../util.");
-const KGbuilder_socket = require("./KGbuilder_socket.js");
-const modelUtils = require("../../model/utils.js");
+import ConfigManager from '../configManager.';
+import httpProxy from '../httpProxy..js';
+import async from 'async';
+import util from '../util.';
+import KGbuilder_socket from './KGbuilder_socket.js';
+import modelUtils from '../../model/utils.js';
 
 const KGbuilder_triplesWriter = {
     sparqlPrefixes: {

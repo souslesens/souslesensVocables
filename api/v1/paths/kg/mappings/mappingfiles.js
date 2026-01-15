@@ -1,4 +1,4 @@
-const path = require("path");
+import path from 'path';
 const KGbuilder_main = require(path.resolve("bin/KGbuilder/KGbuilder_main.js"));
 
 module.exports = function () {

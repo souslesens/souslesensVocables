@@ -1,4 +1,4 @@
-const { databaseModel } = require("../../../../../../model/databases");
+import { databaseModel } from '../../../../../../model/databases';
 
 module.exports = function () {
     let operations = { GET };

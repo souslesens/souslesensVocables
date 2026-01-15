@@ -1,4 +1,4 @@
-const path = require("path");
+import path from 'path';
 const annotatorLive = require(path.resolve("bin/annotatorLive."));
 
 module.exports = function () {

@@ -8,16 +8,16 @@
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-var fs = require("fs");
-const util = require("../util.");
-const async = require("async");
-var httpProxy = require("../httpProxy.");
-var sqlConnector = require("./KGSqlConnector.");
-var SQLserverConnector = require("./SQLserverConnector.");
-var socket = require("../socketManager.");
-const { databaseModel } = require("../../model/databases");
+import fs from 'fs';
 
-var KGcontroller = require("./KGcontroller.");
+import util from '../util.';
+import async from 'async';
+import httpProxy from '../httpProxy.';
+import sqlConnector from './KGSqlConnector.';
+import SQLserverConnector from './SQLserverConnector.';
+import socket from '../socketManager.';
+import { databaseModel } from '../../model/databases';
+import KGcontroller from './KGcontroller.';
 
 var originalKGproperty = "http://data.total.com/resource/one-model#originalIdOf";
 // var totalRdlIdProperty = "http://data.total.com/resource/one-model#hasTotalRdlId";

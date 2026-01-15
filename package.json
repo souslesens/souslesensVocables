@@ -30,6 +30,7 @@
         "@typescript-eslint/eslint-plugin": "^8.32.1",
         "@typescript-eslint/parser": "^8.32.1",
         "@vitejs/plugin-react": "4.5.0",
+        "5to6-codemod": "^1.8.0",
         "clean-jsdoc-theme": "^4.3.0",
         "eslint": "^9.27.0",
         "eslint-config-prettier": "^10.1.5",

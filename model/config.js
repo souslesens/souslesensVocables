@@ -196,7 +196,7 @@ const readMainConfig = (path = mainConfigPath) => {
 };
 const config = readMainConfig();
 
-module.exports = {
+export {
     MainConfigObject,
     checkMainConfig,
     checkMainConfigSection,

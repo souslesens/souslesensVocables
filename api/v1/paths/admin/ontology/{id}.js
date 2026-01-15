@@ -1,4 +1,4 @@
-import RDF_IO from '../../../../../bin/RDF_IO.';
+import RDF_IO from '../../../../../bin/RDF_IO.js';
 
 module.exports = function () {
     let operations = {

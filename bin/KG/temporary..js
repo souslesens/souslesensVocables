@@ -1,4 +1,4 @@
-import xlsx2json from '../xlsx2json.';
+import xlsx2json from '../xlsx2json.js';
 import fs from 'fs';
 
 var xlsxFilePath = "D:\\NLP\\ontologies\\ONE MODEL\\dictionary2.xlsx";

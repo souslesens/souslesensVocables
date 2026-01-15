@@ -2,7 +2,7 @@ import path from 'path';
 import { sourceModel } from '../../../../model/sources';
 import { userModel } from '../../../../model/users';
 import { responseSchema } from './../utils';
-const userManager = require(path.resolve("bin/user."));
+const userManager = require(path.resolve("bin/user.js"));
 import { successfullyFetched, successfullyCreated, fixBooleanInObject } from './../utils.js';
 module.exports = function () {
     let operations = {

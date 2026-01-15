@@ -11,10 +11,10 @@
  */
 import request from 'request';
 
-import ConfigManager from './configManager.';
+import ConfigManager from './configManager.js';
 import async from 'async';
 import { Client } from '@elastic/elasticsearch';
-import util from './util.';
+import util from './util.js';
 
 // elasticdump       --input=cfihos_data_index.json --output=http://opeppa-updtlb03:9200/cfihos --type=data
 

@@ -1,6 +1,6 @@
 import { processResponse } from '../utils';
-import ConfigManager from '../../../../bin/configManager.';
-import GraphStore from '../../../../bin/graphStore.';
+import ConfigManager from '../../../../bin/configManager.js';
+import GraphStore from '../../../../bin/graphStore.js';
 
 module.exports = function () {
     let operations = {

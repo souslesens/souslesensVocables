@@ -1,6 +1,6 @@
 import { successfullyFetched } from './utils.js';
 import { profileModel } from '../../../model/profiles';
-import userManager from '../../../bin/user.';
+import userManager from '../../../bin/user.js';
 
 module.exports = function () {
     let operations = {

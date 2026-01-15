@@ -1,4 +1,4 @@
-import dataController from '../../../../bin/dataController.';
+import dataController from '../../../../bin/dataController.js';
 
 module.exports = function () {
     const operations = {

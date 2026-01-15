@@ -1,7 +1,7 @@
-import csvCrawler from '../bin/_csvCrawler.';
-import util from './util.';
+import csvCrawler from '../bin/_csvCrawler.js';
+import util from './util.js';
 import async from 'async';
-import sql from './KG/SQLserverConnector.';
+import sql from './KG/SQLserverConnector.js';
 const Csv2Sql = {
     readCsv: function (filePath, lines, callback) {
         csvCrawler.readCsv({ filePath: filePath }, 500000, function (err, result) {

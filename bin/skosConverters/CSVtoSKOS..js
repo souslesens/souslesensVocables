@@ -9,7 +9,7 @@
  */
 import async from 'async';
 
-import util from '../util.';
+import util from '../util.js';
 import fs from 'fs';
 import csv from 'csv-parser';
 

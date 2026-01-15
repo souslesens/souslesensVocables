@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import csvCrawler from '../bin/_csvCrawler.';
+import csvCrawler from '../bin/_csvCrawler.js';
 
 var DataController = {
     /**

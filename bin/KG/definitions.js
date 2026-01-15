@@ -1,7 +1,7 @@
 import fs from 'fs';
-import util from '../util.';
+import util from '../util.js';
 import async from 'async';
-import httpProxy from '../httpProxy.';
+import httpProxy from '../httpProxy.js';
 
 var uris = [
     "<http://data.posccaesar.org/dm/CartesianProductOfQuantityKind>",

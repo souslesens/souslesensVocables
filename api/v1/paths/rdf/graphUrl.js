@@ -1,6 +1,6 @@
 import { rdfDataModel } from '../../../../model/rdfData';
 import { mainConfigModel } from '../../../../model/mainConfig';
-import userManager from '../../../../bin/user.';
+import userManager from '../../../../bin/user.js';
 import { sourceModel } from '../../../../model/sources';
 import path from 'path';
 import fs from 'fs';

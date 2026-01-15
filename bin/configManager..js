@@ -12,7 +12,7 @@
 
 import jsonFileStorage from './jsonFileStorage';
 
-import SourceManager from './sourceManager.';
+import SourceManager from './sourceManager.js';
 import path from 'path';
 import async from 'async';
 import fs from 'fs';
@@ -173,7 +173,7 @@ var ConfigManager = {
     },
 
     getUser: async function (req, res, next) {
-        const userManager = require(path.resolve("bin/user."));
+        const userManager = require(path.resolve("bin/user.js"));
         try {
             const userInfo = await userManager.getUser(req.user || null);
             if (next) {
@@ -189,7 +189,7 @@ var ConfigManager = {
     getUserSources: async function (req, res, next) {
         try {
             const { sourceModel, SourceModel } = require("../model/sources");
-            const userManager = require(path.resolve("bin/user."));
+            const userManager = require(path.resolve("bin/user.js"));
             const userInfo = await userManager.getUser(req.user || null);
             const allowedSources = await sourceModel.getUserSources(userInfo.user);
             if (next) {
@@ -207,7 +207,7 @@ var ConfigManager = {
             const profilesJSON = path.resolve(configPath + "/profiles.json");
             const util = require("util");
             const { readResource, writeResource, resourceCreated, responseSchema, resourceFetched } = require("../api/v1/paths/utils");
-            const userManager = require(path.resolve("bin/user."));
+            const userManager = require(path.resolve("bin/user.js"));
             const read = util.promisify(fs.readFile);
             const { getAllowedSources, filterSources, sortObjectByKey } = require("../api/v1/paths/utils.js");
             try {

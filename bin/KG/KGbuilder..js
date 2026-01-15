@@ -10,14 +10,14 @@
 
 import fs from 'fs';
 
-import util from '../util.';
+import util from '../util.js';
 import async from 'async';
-import httpProxy from '../httpProxy.';
-import sqlConnector from './KGSqlConnector.';
-import SQLserverConnector from './SQLserverConnector.';
-import socket from '../socketManager.';
+import httpProxy from '../httpProxy.js';
+import sqlConnector from './KGSqlConnector.js';
+import SQLserverConnector from './SQLserverConnector.js';
+import socket from '../socketManager.js';
 import { databaseModel } from '../../model/databases';
-import KGcontroller from './KGcontroller.';
+import KGcontroller from './KGcontroller.js';
 
 var originalKGproperty = "http://data.total.com/resource/one-model#originalIdOf";
 // var totalRdlIdProperty = "http://data.total.com/resource/one-model#hasTotalRdlId";

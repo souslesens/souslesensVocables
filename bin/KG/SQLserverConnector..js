@@ -12,7 +12,7 @@
 
 import sql from 'mssql';
 
-import ConfigManager from '../configManager.';
+import ConfigManager from '../configManager.js';
 
 //update dbo.QUANTUM_BOMST_TPUK_ELFR set breakdown= left (Functional_Location,(LEN(Functional_Location) -  CHARINDEX('/', REVERSE(Functional_Location))))
 //update dbo.QUANTUM_BOMST_TPUK_ELFR set tag= RIGHT(Functional_Location, CHARINDEX('/', REVERSE('/' + Functional_Location)) - 1)

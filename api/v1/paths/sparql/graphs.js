@@ -1,4 +1,4 @@
-import userManager from '../../../../bin/user.';
+import userManager from '../../../../bin/user.js';
 import { rdfDataModel } from '../../../../model/rdfData';
 import { sourceModel } from '../../../../model/sources';
 

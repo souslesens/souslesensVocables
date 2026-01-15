@@ -1,4 +1,4 @@
-import ConfigManager from '../../../../bin/configManager.';
+import ConfigManager from '../../../../bin/configManager.js';
 import { processResponse } from '../utils';
 import request from 'request';
 

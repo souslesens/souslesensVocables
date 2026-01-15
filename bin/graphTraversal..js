@@ -1,4 +1,4 @@
-import httpProxy from './httpProxy.';
+import httpProxy from './httpProxy.js';
 import async from 'async';
 var GraphTraversal = {
     graphViscinityArraysMap: {},

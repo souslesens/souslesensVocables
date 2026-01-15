@@ -93,6 +93,5 @@ var Parliament = {
         return newQuery;
     },
 };
-module.exports = Parliament;
-
+export default Parliament;
 //Parliament.execPostQuery()

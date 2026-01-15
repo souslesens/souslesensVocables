@@ -248,7 +248,7 @@ function fixBooleanInObject(obj, depth) {
     return obj;
 }
 
-module.exports = {
+export { 
     writeResource,
     failure,
     responseSchema,
@@ -267,4 +267,4 @@ module.exports = {
     filterSources,
     sortObjectByKey,
     fixBooleanInObject,
-};
+ };

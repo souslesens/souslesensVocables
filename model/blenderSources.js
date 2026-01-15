@@ -63,4 +63,4 @@ class BlenderSources {
 
 const blenderSources = new BlenderSources("config");
 
-module.exports = { blenderSources, BlenderSources };
+export {  blenderSources, BlenderSources  };

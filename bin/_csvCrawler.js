@@ -181,4 +181,4 @@ var csvCrawler = {
         });
     },
 };
-module.exports = csvCrawler;
+export default csvCrawler;

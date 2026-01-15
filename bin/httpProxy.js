@@ -154,6 +154,5 @@ var httpProxy = {
     },
 };
 
-module.exports = httpProxy;
-
+export default httpProxy;
 //httpProxy.get()

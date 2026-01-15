@@ -71,8 +71,7 @@ var AAPG = {
     },
 };
 
-module.exports = AAPG;
-
+export default AAPG;
 //AAPG.getLinks()
 //AAPG.linksToRdf();
 

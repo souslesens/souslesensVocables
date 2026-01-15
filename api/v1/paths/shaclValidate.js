@@ -7,7 +7,7 @@ import("../../../bin/shacl/validator.mjs").then((mod) => {
     Validator = mod; // true
 });
 
-module.exports = function () {
+export default function () {
     let operations = {
         GET,
         POST,

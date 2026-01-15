@@ -161,8 +161,7 @@ var xsdToSkos = {
     },
 };
 
-module.exports = xsdToSkos;
-
+export default xsdToSkos;
 var xsdPath = "D:\\NLP\\importedResources\\energistics\\resqmlv2\\v2.0.1\\xsd_schemas\\";
 var scheme = "Reservoir";
 //var xsdPath = "D:\\NLP\\importedResources\\energistics\\common\\v2.1\\xsd_schemas\\";var scheme="Common"

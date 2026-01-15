@@ -318,7 +318,7 @@ var tulsaToSkos = {
     // checkOrphans: function () {},
 };
 
-module.exports = tulsaToSkos;
+export default tulsaToSkos;
 /*
 if (false) {
     var jsonArray = tulsaToSkos.parseTxt();

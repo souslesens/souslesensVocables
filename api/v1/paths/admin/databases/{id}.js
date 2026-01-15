@@ -1,6 +1,6 @@
 import { databaseModel } from '../../../../../model/databases.js';
 
-module.exports = function () {
+export default function () {
     let operations = { DELETE, GET, PUT };
 
     async function GET(req, res, _next) {

@@ -2,7 +2,7 @@ import path from 'path';
 import fsSync from 'fs';
 import fs from 'fs/promises';
 
-module.exports = function () {
+export default function () {
     let operations = {
         POST,
     };

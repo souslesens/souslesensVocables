@@ -51,8 +51,7 @@ var AxiomExtractor = {
     },
 };
 
-module.exports = AxiomExtractor;
-
+export default AxiomExtractor;
 if (false) {
     var input =
         "Axiom:EquivalentClasses(<https://spec.industrialontologies.org/ontology/core/Core/GainOfRole> ObjectIntersectionOf(<http://purl.obolibrary.org/obo/BFO_0000015> ObjectIntersectionOf(ObjectSomeValuesFrom(<http://purl.obolibrary.org/obo/BFO_0000199> ObjectIntersectionOf(<http://purl.obolibrary.org/obo/BFO_0000202> ObjectUnionOf(ObjectSomeValuesFrom(<https://spec.industrialontologies.org/ontology/core/Core/meets> ObjectIntersectionOf(<http://purl.obolibrary.org/obo/BFO_0000202> ObjectSomeValuesFrom(ObjectInverseOf(<http://purl.obolibrary.org/obo/BFO_0000108>) <http://purl.obolibrary.org/obo/BFO_0000023>))) ObjectSomeValuesFrom(<https://spec.industrialontologies.org/ontology/core/Core/temporallyOverlaps> ObjectIntersectionOf(<http://purl.obolibrary.org/obo/BFO_0000202> ObjectSomeValuesFrom(ObjectInverseOf(<http://purl.obolibrary.org/obo/BFO_0000108>) <http://purl.obolibrary.org/obo/BFO_0000023>))) ObjectSomeValuesFrom(<https://spec.industrialontologies.org/ontology/core/Core/temporallyStarts> ObjectIntersectionOf(<http://purl.obolibrary.org/obo/BFO_0000202> ObjectSomeValuesFrom(ObjectInverseOf(<http://purl.obolibrary.org/obo/BFO_0000108>) <http://purl.obolibrary.org/obo/BFO_0000023>)))))) ObjectSomeValuesFrom(<https://spec.industrialontologies.org/ontology/core/Core/hasOutput> <http://purl.obolibrary.org/obo/BFO_0000023>)) ObjectSomeValuesFrom(<http://purl.obolibrary.org/obo/BFO_0000167> ObjectIntersectionOf(<http://purl.obolibrary.org/obo/BFO_0000004> ObjectComplementOf(<http://purl.obolibrary.org/obo/BFO_0000006>)))))";

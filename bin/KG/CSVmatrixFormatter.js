@@ -101,6 +101,5 @@ var CSVmatrixFormatter = {
     },
 };
 
-module.exports = CSVmatrixFormatter;
-
+export default CSVmatrixFormatter;
 CSVmatrixFormatter.transform("D:\\webstorm\\souslesensVocables\\data\\CSV\\UNIK\\fluidDesignCapacities.csv", ["fluid", "designCapacity"], function (err) {});

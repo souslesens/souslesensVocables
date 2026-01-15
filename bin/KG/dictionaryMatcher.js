@@ -166,8 +166,7 @@ var dictionaryMatcher = {
     },
 };
 
-module.exports = dictionaryMatcher;
-
+export default dictionaryMatcher;
 /*
 if (false) {
     var file = "D:\\NLP\\ontologies\\dictionaries\\bomaftwinequip2.csv_orphans.json";

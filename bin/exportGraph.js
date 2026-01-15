@@ -240,6 +240,5 @@ var ExportGraph = {
         );
     },
 };
-module.exports = ExportGraph;
-
+export default ExportGraph;
 return;

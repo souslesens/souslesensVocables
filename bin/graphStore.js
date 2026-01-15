@@ -499,4 +499,4 @@ var GraphStore = {
     },
 };
 
-module.exports = GraphStore;
+export default GraphStore;

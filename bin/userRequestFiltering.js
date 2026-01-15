@@ -250,4 +250,4 @@ var UserRequestFiltering = {
         return callback(error, indices);
     },
 };
-module.exports = UserRequestFiltering;
+export default UserRequestFiltering;

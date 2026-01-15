@@ -460,4 +460,4 @@ class DatabaseModel {
 }
 const databaseModel = new DatabaseModel(configDatabasesPath);
 
-module.exports = { DatabaseModel, databaseModel };
+export {  DatabaseModel, databaseModel  };

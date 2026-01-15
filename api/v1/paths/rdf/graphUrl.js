@@ -5,7 +5,7 @@ import { sourceModel } from '../../../../model/sources.js';
 import path from 'path';
 import fs from 'fs';
 
-module.exports = function () {
+export default function () {
     let operations = {
         POST,
     };

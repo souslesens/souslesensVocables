@@ -89,4 +89,4 @@ var mySQLproxy = {
     },
 };
 
-module.exports = mySQLproxy;
+export default mySQLproxy;

@@ -925,7 +925,7 @@ var onTheFlyTagger = {
         });
     },
 };
-module.exports = onTheFlyTagger;
+export default onTheFlyTagger;
 /*
 if (false) {
     var wikiPageUri = "https://wiki.aapg.org/3-D_seismic_data_views";

@@ -1,4 +1,4 @@
-const { processResponse } = require("./utils");
+import { processResponse } from './utils';
 
 var ontologyModelsCache = {};
 module.exports = function () {

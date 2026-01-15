@@ -1,4 +1,4 @@
-const path = require("path");
+import path from 'path';
 const dirContentAnnotator = require(path.resolve("bin/annotator/dirContentAnnotator."));
 
 module.exports = function () {

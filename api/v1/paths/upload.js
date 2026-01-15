@@ -1,6 +1,6 @@
-const path = require("path");
-const fsSync = require("fs");
-const fs = require("fs/promises");
+import path from 'path';
+import fsSync from 'fs';
+import fs from 'fs/promises';
 
 module.exports = function () {
     let operations = {

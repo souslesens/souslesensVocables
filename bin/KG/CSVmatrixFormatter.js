@@ -1,6 +1,6 @@
-var fs = require("fs");
-var async = require("async");
-const csv = require("csv-parser");
+import fs from 'fs';
+import async from 'async';
+import csv from 'csv-parser';
 
 var CSVmatrixFormatter = {
     transform: function (filePath, columnsFields, callback) {

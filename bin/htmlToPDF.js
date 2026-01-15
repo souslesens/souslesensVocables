@@ -1,5 +1,5 @@
-var wkhtmltopdf = require("wkhtmltopdf");
-var fs = require("fs");
+import wkhtmltopdf from 'wkhtmltopdf';
+import fs from 'fs';
 
 var HtmlToPDF = {
     writePdf: function (html, pdfFileName) {

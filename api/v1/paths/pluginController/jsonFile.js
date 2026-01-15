@@ -1,6 +1,6 @@
-const fs = require("fs");
-const path = require("path");
-const { processResponse, sanitizePath } = require("../utils");
+import fs from 'fs';
+import path from 'path';
+import { processResponse, sanitizePath } from '../utils';
 
 module.exports = function () {
     let operations = {

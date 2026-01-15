@@ -1,7 +1,7 @@
-const { processResponse } = require("../utils");
-const ConfigManager = require("../../../../bin/configManager.");
-const GraphStore = require("../../../../bin/graphStore.");
-const async2 = require("async");
+import { processResponse } from '../utils';
+import ConfigManager from '../../../../bin/configManager.';
+import GraphStore from '../../../../bin/graphStore.';
+import async2 from 'async';
 
 module.exports = function () {
     let operations = {

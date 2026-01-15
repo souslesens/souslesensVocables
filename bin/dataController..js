@@ -1,6 +1,6 @@
-var fs = require("fs");
-var path = require("path");
-var csvCrawler = require("../bin/_csvCrawler.");
+import fs from 'fs';
+import path from 'path';
+import csvCrawler from '../bin/_csvCrawler.';
 
 var DataController = {
     /**

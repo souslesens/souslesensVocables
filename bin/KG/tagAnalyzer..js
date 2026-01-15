@@ -1,6 +1,6 @@
-var fs = require("fs");
-var async = require("async");
-var SQLserverConnector = require("./SQLserverConnector.");
+import fs from 'fs';
+import async from 'async';
+import SQLserverConnector from './SQLserverConnector.';
 
 var TagAnalyzer = {
     analyzeTag: function (tag) {

@@ -1,7 +1,7 @@
-const async = require("async");
-const httpProxy = require("./httpProxy.");
-const request = require("request");
-const fs = require("fs");
+import async from 'async';
+import httpProxy from './httpProxy.';
+import request from 'request';
+import fs from 'fs';
 //const sources=require("../model/sources")
 
 var OntologyModel = {

@@ -1,10 +1,10 @@
-const path = require("path");
+import path from 'path';
 const elasticRestProxy = require(path.resolve("bin/elasticRestProxy..js"));
-const ConfigManager = require("../../../../bin/configManager.");
-const UserRequestFiltering = require("../../../../bin/userRequestFiltering.");
-const { processResponse } = require("../utils");
-const { sourceModel } = require("../../../../model/sources");
-const async = require("async");
+import ConfigManager from '../../../../bin/configManager.';
+import UserRequestFiltering from '../../../../bin/userRequestFiltering.';
+import { processResponse } from '../utils';
+import { sourceModel } from '../../../../model/sources';
+import async from 'async';
 
 module.exports = function () {
     let operations = {

@@ -1,4 +1,4 @@
-var csvCrawler = require("./_csvCrawler.");
+import csvCrawler from './_csvCrawler.';
 var filePath = "D:\\Total\\2021\\JeanCharles\\users.csv";
 
 csvCrawler.readCsv({ filePath: filePath }, 500000, function (err, result) {

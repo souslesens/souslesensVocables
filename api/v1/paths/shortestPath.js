@@ -1,7 +1,7 @@
-const { processResponse } = require("./utils");
-const GraphTraversal = require("../../../bin/graphTraversal.");
-const ConfigManager = require("../../../bin/configManager.");
-const UserRequestFiltering = require("../../../bin/userRequestFiltering.");
+import { processResponse } from './utils';
+import GraphTraversal from '../../../bin/graphTraversal.';
+import ConfigManager from '../../../bin/configManager.';
+import UserRequestFiltering from '../../../bin/userRequestFiltering.';
 
 module.exports = function () {
     let operations = {

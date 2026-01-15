@@ -1,7 +1,7 @@
-const autosuggest = require("antlr4-autosuggest");
-const OWL2ManchesterParser = require("./manchesterSyntax/OWL2ManchesterParser.js");
-const OWL2ManchesterLexer = require("./manchesterSyntax/OWL2ManchesterLexer.js");
-const antlr4 = require("antlr4");
+import autosuggest from 'antlr4-autosuggest';
+import OWL2ManchesterParser from './manchesterSyntax/OWL2ManchesterParser.js';
+import OWL2ManchesterLexer from './manchesterSyntax/OWL2ManchesterLexer.js';
+import antlr4 from 'antlr4';
 
 //const MyErrorListener=require("./manchesterSyntax/myErroListener.js")
 

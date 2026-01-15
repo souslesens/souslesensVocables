@@ -1,5 +1,5 @@
-var httpProxy = require("./httpProxy.");
-var async = require("async");
+import httpProxy from './httpProxy.';
+import async from 'async';
 var GraphTraversal = {
     graphViscinityArraysMap: {},
 

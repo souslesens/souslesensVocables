@@ -1,6 +1,6 @@
-const ConfigManager = require("../../../../bin/configManager.");
-const { processResponse } = require("../utils");
-const request = require("request");
+import ConfigManager from '../../../../bin/configManager.';
+import { processResponse } from '../utils';
+import request from 'request';
 
 module.exports = function () {
     let operations = {

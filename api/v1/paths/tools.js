@@ -1,6 +1,6 @@
-const { successfullyFetched } = require("./utils.js");
-const { profileModel } = require("../../../model/profiles");
-const userManager = require("../../../bin/user.");
+import { successfullyFetched } from './utils.js';
+import { profileModel } from '../../../model/profiles';
+import userManager from '../../../bin/user.';
 
 module.exports = function () {
     let operations = {

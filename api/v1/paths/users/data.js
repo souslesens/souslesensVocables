@@ -1,6 +1,6 @@
-const { userDataModel } = require("../../../../model/userData");
-const { cleanUserData } = require("../../../../model/cleanUserData");
-const userManager = require("../../../../bin/user.");
+import { userDataModel } from '../../../../model/userData';
+import { cleanUserData } from '../../../../model/cleanUserData';
+import userManager from '../../../../bin/user.';
 
 module.exports = () => {
     GET = async (req, res, _next) => {

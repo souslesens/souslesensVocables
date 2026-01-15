@@ -1,5 +1,5 @@
-const DirContentAnnotator = require("../../../../bin/annotator/dirContentAnnotator.");
-const { processResponse } = require("../utils");
+import DirContentAnnotator from '../../../../bin/annotator/dirContentAnnotator.';
+import { processResponse } from '../utils';
 
 module.exports = function () {
     let operations = {

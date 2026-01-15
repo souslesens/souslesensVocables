@@ -1,7 +1,7 @@
-const path = require("path");
-const { mainConfigModel } = require("../../../model/mainConfig");
+import path from 'path';
+import { mainConfigModel } from '../../../model/mainConfig';
 const logger = require(path.resolve("bin/logger..js"));
-const fs = require("fs");
+import fs from 'fs';
 
 module.exports = function () {
     let operations = {

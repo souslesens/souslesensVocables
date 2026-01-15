@@ -1,5 +1,5 @@
-const { processResponse } = require("./utils");
-const ExportGraph = require("../../../bin/exportGraph.");
+import { processResponse } from './utils';
+import ExportGraph from '../../../bin/exportGraph.';
 
 module.exports = function () {
     let operations = {

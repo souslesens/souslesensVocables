@@ -3,7 +3,7 @@ import ConfigManager from '../../../../bin/configManager.js';
 import GraphStore from '../../../../bin/graphStore.js';
 import async2 from 'async';
 
-module.exports = function () {
+export default function () {
     let operations = {
         POST,
     };

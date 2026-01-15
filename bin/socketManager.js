@@ -14,4 +14,4 @@ var SocketManager = {
         }
     },
 };
-module.exports = SocketManager;
+export default SocketManager;

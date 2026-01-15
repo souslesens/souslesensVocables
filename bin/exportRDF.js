@@ -97,7 +97,7 @@ var exportRDF = {
         );
     },
 };
-module.exports = exportRDF;
+export default exportRDF;
 /*
  * var graphUri = "http://data.total.com/quantum/vocab/";
 

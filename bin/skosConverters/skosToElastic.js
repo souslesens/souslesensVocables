@@ -369,8 +369,7 @@ var skosToElastic = {
     },
 };
 
-module.exports = skosToElastic;
-
+export default skosToElastic;
 /*
 function getThesaurusListFromNlp2App() {
     var listPath = "D:\\GitHub\\nlp2\\public\\skosEditor\\js\\theaususList.js";

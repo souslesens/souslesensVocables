@@ -228,8 +228,7 @@ var RcReportsTriples = {
         });
     },
 };
-module.exports = RcReportsTriples;
-
+export default RcReportsTriples;
 //RcReportsTriples.csvToTriples("D:\\Total\\2020\\Pierre\\RcReportsExtracts.txt")
 
 RcReportsTriples.csvToTriples("D:\\Total\\2020\\Pierre\\report_notification_Failure_Mechanism.csv");

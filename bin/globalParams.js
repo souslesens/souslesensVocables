@@ -34,4 +34,4 @@ var globalParams = {
 
 
 }*/
-module.exports = globalParams;
+export default globalParams;

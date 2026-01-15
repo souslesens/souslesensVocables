@@ -1,6 +1,6 @@
 import { indexModel } from '../../../../model/index.js';
 
-module.exports = function () {
+export default function () {
     const operations = {
         POST,
     };

@@ -210,7 +210,7 @@ var SQLserverConnector = {
         });
     },
 };
-module.exports = SQLserverConnector;
+export default SQLserverConnector;
 //SQLserverConnector.getKGmodel()
 
 //SQLserverConnector.test()

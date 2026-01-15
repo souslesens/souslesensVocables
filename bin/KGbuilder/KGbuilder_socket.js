@@ -13,4 +13,4 @@ var KGbuilder_socket = {
     },
 };
 
-module.exports = KGbuilder_socket;
+export default KGbuilder_socket;

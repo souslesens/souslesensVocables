@@ -1,7 +1,7 @@
 // const { graphviz } = require("node-graphviz");
 import { processResponse } from './utils.js';
 
-module.exports = function () {
+export default function () {
     let operations = {
         GET,
     };

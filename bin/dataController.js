@@ -114,7 +114,6 @@ var DataController = {
     },
 };
 
-module.exports = DataController;
-
+export default DataController;
 //DataController.getFilesList("graphs")
 //DataController.saveDataToFile("graphs","requirementsGraphXX.json","sdfgdfgdgdfgdf")

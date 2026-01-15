@@ -2,7 +2,7 @@ import { processResponse } from './utils.js';
 import rdf from '../../../bin/RDF_IO..js';
 const { NamedNode, BlankNode, Literal, Graph } = rdf;
 
-module.exports = function () {
+export default function () {
     let operations = {
         GET,
         POST,

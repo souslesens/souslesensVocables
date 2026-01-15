@@ -1,7 +1,7 @@
 import { sourceModel } from '../../../../model/sources.js';
 import { indexModel } from '../../../../model/index.js';
 
-module.exports = function () {
+export default function () {
     let operations = {
         GET,
         POST,

@@ -279,4 +279,4 @@ const config = readMainConfig();
 
 const rdfDataModel = new RdfDataModel(config.sparql_server.url, config.sparql_server.user, config.sparql_server.password);
 
-module.exports = { RdfDataModel, rdfDataModel };
+export {  RdfDataModel, rdfDataModel  };

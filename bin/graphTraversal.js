@@ -236,8 +236,7 @@ var GraphTraversal = {
         return this;
     },
 };
-module.exports = GraphTraversal;
-
+export default GraphTraversal;
 if (false) {
     /*g.addNode("A");
 g.addNode("B");

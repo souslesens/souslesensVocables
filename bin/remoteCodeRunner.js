@@ -24,7 +24,7 @@ const RemoteCodeRunner = {
     },
 };
 
-module.exports = RemoteCodeRunner;
+export default RemoteCodeRunner;
 var userData = {
     data_content: {
         modulePath: "../plugins/Lifex_PAZFLOR/public/js/serverFunctions.mjs",

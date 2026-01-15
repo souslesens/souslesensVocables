@@ -3,7 +3,7 @@ import httpProxy from '../../../bin/httpProxy.js';
 import ConfigManager from '../../../bin/configManager.js';
 import UserRequestFiltering from '../../../bin/userRequestFiltering.js';
 
-module.exports = function () {
+export default function () {
     let operations = {
         POST,
         GET,

@@ -2,7 +2,7 @@ import { profileModel } from '../../../../model/profiles.js';
 import { resourceFetched, responseSchema, resourceCreated } from '../utils.js';
 import userManager from '../../../../bin/user.js';
 
-module.exports = function () {
+export default function () {
     let operations = {
         GET,
         POST,

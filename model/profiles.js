@@ -254,4 +254,4 @@ class ProfileModel {
 
 const profileModel = new ProfileModel(toolModel);
 
-module.exports = { ProfileModel, profileModel };
+export {  ProfileModel, profileModel  };

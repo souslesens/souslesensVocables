@@ -9,7 +9,7 @@ import async from 'async';
 
 //https://jena.apache.org/documentation/inference/
 
-module.exports = function () {
+export default function () {
     let operations = {
         GET,
     };

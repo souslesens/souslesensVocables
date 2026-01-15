@@ -139,7 +139,7 @@ var mediawikiStats = {
     },
 };
 
-module.exports = mediawikiStats;
+export default mediawikiStats;
 /*
 if (false) {
     //mediawikiStats.generateCatWordsMatrix("aapg", "gemet", function (err, result) {

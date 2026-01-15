@@ -1,7 +1,7 @@
 import DirContentAnnotator from '../../../../bin/annotator/dirContentAnnotator.js';
 import { processResponse } from '../utils.js';
 
-module.exports = function () {
+export default function () {
     let operations = {
         POST,
     };

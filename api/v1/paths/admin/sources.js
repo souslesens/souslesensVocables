@@ -4,7 +4,7 @@ import { userModel } from '../../../../model/users.js';
 import { responseSchema } from './../utils.js';
 const userManager = require(path.resolve("bin/user.js"));
 import { successfullyFetched, successfullyCreated, fixBooleanInObject } from './../utils.js';
-module.exports = function () {
+export default function () {
     let operations = {
         GET,
         POST,

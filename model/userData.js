@@ -362,4 +362,4 @@ class UserDataModel {
 }
 
 const userDataModel = new UserDataModel();
-module.exports = { UserDataModel, userDataModel };
+export {  UserDataModel, userDataModel  };

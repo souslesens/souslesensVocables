@@ -566,7 +566,7 @@ var KGbuilder = {
     },
 };
 
-module.exports = KGbuilder;
+export default KGbuilder;
 /*
 if (false) {
     // eslint-disable-next-line no-constant-condition

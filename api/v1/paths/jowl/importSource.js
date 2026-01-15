@@ -6,7 +6,7 @@ import request from 'request';
 import httpProxy from '../../../../bin/httpProxy.js';
 import Util from '../../../../bin/util.js';
 
-module.exports = function () {
+export default function () {
     let operations = {
         POST,
     };

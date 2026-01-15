@@ -1,7 +1,7 @@
 import { userDataModel } from '../../../../../model/userData.js';
 import userManager from '../../../../../bin/user.js';
 
-module.exports = () => {
+export default () => {
     DELETE = async (req, res, _next) => {
         try {
             const userInfo = await userManager.getUser(req.user);

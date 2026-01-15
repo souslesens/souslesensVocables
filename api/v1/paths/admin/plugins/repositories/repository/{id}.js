@@ -2,7 +2,7 @@ import { toolModel } from '../../../../../../../model/tools.js';
 import { mainConfigModel } from '../../../../../../../model/mainConfig.js';
 import { responseSchema } from '../../../../utils.js';
 
-module.exports = function () {
+export default function () {
     const operations = { DELETE, PUT };
 
     // DELETE /api/v1/admin/plugins/repositories/repository/{id}

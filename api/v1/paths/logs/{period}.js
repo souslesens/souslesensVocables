@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { mainConfigModel } from '../../../../model/mainConfig.js';
 
-module.exports = () => {
+export default () => {
     const operations = { GET };
 
     async function GET(req, res, _next) {

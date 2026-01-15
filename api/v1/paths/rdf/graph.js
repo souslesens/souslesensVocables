@@ -7,7 +7,7 @@ import path from 'path';
 import fs from 'fs';
 import os from 'node:os';
 
-module.exports = function () {
+export default function () {
     let operations = {
         GET,
         POST,

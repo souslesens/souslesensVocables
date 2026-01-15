@@ -11,7 +11,7 @@ import {
 
 const userManager = require(path.resolve("bin/user.js"));
 
-module.exports = function () {
+export default function () {
     let operations = {
         GET,
         POST,

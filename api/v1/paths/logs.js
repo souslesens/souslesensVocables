@@ -3,7 +3,7 @@ import { mainConfigModel } from '../../../model/mainConfig.js';
 const logger = require(path.resolve("bin/logger..js"));
 import fs from 'fs';
 
-module.exports = function () {
+export default function () {
     let operations = {
         POST,
         GET,

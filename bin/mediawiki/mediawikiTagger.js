@@ -991,8 +991,7 @@ var mediaWikiTagger = {
     },
 };
 
-module.exports = mediaWikiTagger;
-
+export default mediaWikiTagger;
 //mediaWikiTagger.createMediawikiIndex()
 
 /*

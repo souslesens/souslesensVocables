@@ -1,6 +1,6 @@
 import RDF_IO from '../../../../../bin/RDF_IO.js';
 
-module.exports = function () {
+export default function () {
     let operations = {
         GET,
     };

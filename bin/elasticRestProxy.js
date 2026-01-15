@@ -482,6 +482,5 @@ var elasticRestProxy = {
     },
 };
 
-module.exports = elasticRestProxy;
-
+export default elasticRestProxy;
 //elasticRestProxy.listIndexes("http://164.132.194.227:2009/");

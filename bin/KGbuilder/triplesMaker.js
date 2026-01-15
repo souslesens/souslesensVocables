@@ -785,4 +785,4 @@ var TriplesMaker = {
     },
 };
 
-module.exports = TriplesMaker;
+export default TriplesMaker;

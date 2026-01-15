@@ -1,7 +1,7 @@
 import path from 'path';
 const KGbuilder_main = require(path.resolve("bin/KGbuilder/KGbuilder_main.js"));
 
-module.exports = function () {
+export default function () {
     let operations = {
         GET,
     };

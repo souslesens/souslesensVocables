@@ -1,7 +1,7 @@
 import path from 'path';
 const dataController = require(path.resolve("bin/dataController.js"));
 
-module.exports = function () {
+export default function () {
     let operations = {
         GET,
     };

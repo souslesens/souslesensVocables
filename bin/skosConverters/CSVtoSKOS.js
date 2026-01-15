@@ -190,7 +190,7 @@ var CSVtoSKOS = {
         });
     },
 };
-module.exports = CSVtoSKOS;
+export default CSVtoSKOS;
 /*
 if (false) {
     CSVtoSKOS.getCSVColumns("D:\\NLP\\importedResources\\iec.csv", function (_err, _result) {

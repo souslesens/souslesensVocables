@@ -310,8 +310,7 @@ var KGbuilder_main = {
     },
 };
 
-module.exports = KGbuilder_main;
-
+export default KGbuilder_main;
 if (false) {
     KGbuilder_main.importTriplesFromCsvOrTable("PAZFLOR_ABOX", "01K1TNFHADVTT7PHJF0AJ4GFRX", "subpackage", options, function (err, result) {
         console.log(err);

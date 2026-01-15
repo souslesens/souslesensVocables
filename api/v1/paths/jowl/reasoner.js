@@ -7,7 +7,7 @@ import httpProxy from '../../../../bin/httpProxy..js';
 
 //https://jena.apache.org/documentation/inference/
 
-module.exports = function () {
+export default function () {
     let operations = {
         GET,
     };

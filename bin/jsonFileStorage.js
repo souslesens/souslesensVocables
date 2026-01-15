@@ -40,4 +40,4 @@ var jsonFileStorage = {
         fs.unlink(filePath, callback);
     },
 };
-module.exports = jsonFileStorage;
+export default jsonFileStorage;

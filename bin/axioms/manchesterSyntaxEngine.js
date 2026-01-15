@@ -65,5 +65,5 @@ const ManchesterSyntaxEngine = {
     },
 };
 
-module.exports = ManchesterSyntaxEngine;
+export default ManchesterSyntaxEngine;
 //export default ManchesterSyntaxEngine;

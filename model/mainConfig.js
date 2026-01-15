@@ -44,4 +44,4 @@ class MainConfigModel {
 
 const mainConfigModel = new MainConfigModel(mainConfigPath);
 
-module.exports = { mainConfigModel };
+export {  mainConfigModel  };

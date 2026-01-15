@@ -4,13 +4,11 @@ var KGbuilder_socket = {
     message: function (clientSocketId, content, isError) {
         try {
             if (clientSocketId) {
-                
                 SocketManager.message(clientSocketId, "KGbuilder", content);
             } else {
                 console.log(content);
             }
         } catch (e) {
-            
             console.log(content);
         }
 

@@ -11,7 +11,7 @@ module.exports = function () {
     async function POST(req, res, next) {
         try {
             const userInfo = await userManager.getUser(req.user);
-             KGbuilder_main.importTriplesFromCsvOrTable(userInfo.user, req.body.source, req.body.datasource, req.body.table, JSON.parse(req.body.options), function (err, result) {
+            KGbuilder_main.importTriplesFromCsvOrTable(userInfo.user, req.body.source, req.body.datasource, req.body.table, JSON.parse(req.body.options), function (err, result) {
                 processResponse(res, err, result);
             });
         } catch (e) {

@@ -34,12 +34,12 @@ var KGbuilder_main = {
         //  var sparqlServerUrl;
         var output = "";
         options = options || {};
-    
+
         if (typeof options.filterMappingIds === "undefined") {
             options.filterMappingIds = null;
-        }   
+        }
         var clientSocketId = options.clientSocketId;
-        
+
         var tableMappingsToProcess = [];
         var sourceMappingsDir = path.join(__dirname, "../../data/mappings/" + source + "/");
 
@@ -51,20 +51,13 @@ var KGbuilder_main = {
 
         KGbuilder_main.stopCreateTriples = false;
 
-        if (
-    options &&
-    options.clientSocketId &&
-    SocketManager &&
-    SocketManager.clientSockets &&
-    SocketManager.clientSockets[options.clientSocketId]
-) {
-    SocketManager.clientSockets[options.clientSocketId].on("KGbuilder", function (message) {
-        if (message == "stopCreateTriples") {
-            KGbuilder_main.stopCreateTriples = true;
+        if (options && options.clientSocketId && SocketManager && SocketManager.clientSockets && SocketManager.clientSockets[options.clientSocketId]) {
+            SocketManager.clientSockets[options.clientSocketId].on("KGbuilder", function (message) {
+                if (message == "stopCreateTriples") {
+                    KGbuilder_main.stopCreateTriples = true;
+                }
+            });
         }
-    });
-}
-
 
         if (!Array.isArray(tables)) {
             tables = [tables];

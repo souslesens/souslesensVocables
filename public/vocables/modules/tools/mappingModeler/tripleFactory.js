@@ -318,10 +318,6 @@ var TripleFactory = (function () {
         });
     };
 
- 
-
-
-
     function getCurrentSource() {
         if (DataSourceManager && DataSourceManager.currentSlsvSource) {
             return DataSourceManager.currentSlsvSource;
@@ -331,12 +327,7 @@ var TripleFactory = (function () {
 
     function getDbTables() {
         try {
-            if (
-                DataSourceManager &&
-                DataSourceManager.currentConfig &&
-                DataSourceManager.currentConfig.currentDataSource &&
-                DataSourceManager.currentConfig.currentDataSource.tables
-            ) {
+            if (DataSourceManager && DataSourceManager.currentConfig && DataSourceManager.currentConfig.currentDataSource && DataSourceManager.currentConfig.currentDataSource.tables) {
                 return Object.keys(DataSourceManager.currentConfig.currentDataSource.tables);
             }
         } catch (e) {}
@@ -345,11 +336,7 @@ var TripleFactory = (function () {
 
     function getCsvTables() {
         try {
-            if (
-                DataSourceManager &&
-                DataSourceManager.currentConfig &&
-                DataSourceManager.currentConfig.csvSources
-            ) {
+            if (DataSourceManager && DataSourceManager.currentConfig && DataSourceManager.currentConfig.csvSources) {
                 return Object.keys(DataSourceManager.currentConfig.csvSources);
             }
         } catch (e) {}
@@ -406,13 +393,11 @@ var TripleFactory = (function () {
                 return;
             }
 
-        
             UI.message("Delete progress: " + msg.totalSize + " / " + msg.tableTotalRecords);
         };
 
         SocketManager.socket.on("KGbuilder", handler);
 
-    
         return function detach() {
             try {
                 SocketManager.socket.off("KGbuilder", handler);
@@ -424,13 +409,12 @@ var TripleFactory = (function () {
         };
     }
 
-
     self.recreateAllTablesTriples = function (source, optionsObj) {
         var payload = {
             source: source,
             options: JSON.stringify(optionsObj || {}),
         };
-    var detach = attachRecreateDeleteProgressListener();
+        var detach = attachRecreateDeleteProgressListener();
         ajaxRecreate(
             payload,
             function (data) {
@@ -439,7 +423,7 @@ var TripleFactory = (function () {
             function (xhr, msg) {
                 console.error("Recreate ALL ERROR", xhr);
                 alert(msg);
-            }
+            },
         );
     };
 
@@ -449,7 +433,7 @@ var TripleFactory = (function () {
             table: table,
             options: JSON.stringify(optionsObj || {}),
         };
-    var detach = attachRecreateDeleteProgressListener();
+        var detach = attachRecreateDeleteProgressListener();
         ajaxRecreate(
             payload,
             function (data) {
@@ -460,7 +444,7 @@ var TripleFactory = (function () {
                 console.error("Recreate table ERROR:", table, xhr);
                 alert("Error recreating table " + table + "\n\n" + msg);
                 if (doneCb) doneCb(new Error(msg));
-            }
+            },
         );
     };
 
@@ -481,7 +465,7 @@ var TripleFactory = (function () {
             i++;
 
             self.recreateOneTableTriples(source, t, optionsObj, function (err) {
-                if (err) return; 
+                if (err) return;
                 next();
             });
         }
@@ -489,7 +473,7 @@ var TripleFactory = (function () {
         next();
     };
 
-   /**
+    /**
      * Generates KGcreator triples for the entire datasource, deleting any previous triples before creating new ones.
      * It proceeds with a series of steps: deleting old triples, creating new triples, and reindexing the graph.
      *
@@ -538,10 +522,10 @@ var TripleFactory = (function () {
                     id: t,
                     parent: source,
                     text: label,
-                    type: (csvTables.indexOf(t) > -1 ? "CSV" : "Table"),
+                    type: csvTables.indexOf(t) > -1 ? "CSV" : "Table",
                     data: {
                         tableName: t,
-                        isCsv: (csvTables.indexOf(t) > -1),
+                        isCsv: csvTables.indexOf(t) > -1,
                     },
                 });
             });
@@ -571,7 +555,7 @@ var TripleFactory = (function () {
                             return alert("Select at least one table");
                         }
 
-                        var allSelected = (selectedIds.length === allTables.length);
+                        var allSelected = selectedIds.length === allTables.length;
 
                         if (allSelected) {
                             return self.recreateAllTablesTriples(source, optionsObj);
@@ -597,8 +581,6 @@ var TripleFactory = (function () {
             alert(e.message || String(e));
         }
     };
-
-
 
     /**
      * Displays the triples data in a table format within the specified div element.

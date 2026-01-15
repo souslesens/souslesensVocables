@@ -94,17 +94,10 @@ function getAllTablesFromMappings(mappingData) {
 
 function importAsync(user, source, datasource, table, options) {
     return new Promise(function (resolve, reject) {
-        KGbuilder_main.importTriplesFromCsvOrTable(
-            user,
-            source,
-            datasource,
-            table ? [table] : null,
-            options,
-            function (err, result) {
-                if (err) return reject(err);
-                return resolve(result);
-            }
-        );
+        KGbuilder_main.importTriplesFromCsvOrTable(user, source, datasource, table ? [table] : null, options, function (err, result) {
+            if (err) return reject(err);
+            return resolve(result);
+        });
     });
 }
 

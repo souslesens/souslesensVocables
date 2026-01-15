@@ -191,7 +191,6 @@ var MappingParser = {
         return edgeMap;
     },
 
-
     getOtherPredicates: function (columnData) {
         var mappings = [];
         if (columnData.otherPredicates) {

@@ -1,5 +1,5 @@
-import { userDataModel } from '../../../../model/userData';
-import { cleanUserData } from '../../../../model/cleanUserData';
+import { userDataModel } from '../../../../model/userData.js';
+import { cleanUserData } from '../../../../model/cleanUserData.js';
 import userManager from '../../../../bin/user.js';
 
 module.exports = () => {

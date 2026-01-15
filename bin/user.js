@@ -1,5 +1,5 @@
-import { config } from '../model/config';
-import { userModel } from '../model/users';
+import { config } from '../model/config.js';
+import { userModel } from '../model/users.js';
 
 const user = {
     getUser: async (reqUser) => {

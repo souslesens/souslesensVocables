@@ -1,6 +1,6 @@
-import { userModel } from '../../../model/users';
-import { sortObjectByKey, responseSchema, successfullyFetched } from './utils';
-import { profileModel } from '../../../model/profiles';
+import { userModel } from '../../../model/users.js';
+import { sortObjectByKey, responseSchema, successfullyFetched } from './utils.js';
+import { profileModel } from '../../../model/profiles.js';
 import userManager from '../../../bin/user.js';
 
 module.exports = function () {

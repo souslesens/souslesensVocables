@@ -1,4 +1,4 @@
-import { userDataModel } from '../../../../../model/userData';
+import { userDataModel } from '../../../../../model/userData.js';
 import userManager from '../../../../../bin/user.js';
 
 module.exports = () => {

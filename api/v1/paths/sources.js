@@ -1,6 +1,6 @@
 import path from 'path';
-import { sourceModel } from '../../../model/sources';
-import { userModel } from '../../../model/users';
+import { sourceModel } from '../../../model/sources.js';
+import { userModel } from '../../../model/users.js';
 
 import {
     responseSchema,

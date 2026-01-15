@@ -1,5 +1,5 @@
 import fs from 'fs';
-import { userModel } from '../../../../../model/users';
+import { userModel } from '../../../../../model/users.js';
 
 module.exports = function () {
     let operations = {

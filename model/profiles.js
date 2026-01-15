@@ -1,10 +1,10 @@
 const z = require("zod");
 
-const { readMainConfig } = require("./config");
-const { toolModel } = require("./tools");
-const { cleanupConnection, getKnexConnection } = require("./utils");
-const { userDataModel } = require("./userData");
-const { userModel } = require("./users");
+const { readMainConfig } = require("./config.js");
+const { toolModel } = require("./tools.js");
+const { cleanupConnection, getKnexConnection } = require("./utils.js");
+const { userDataModel } = require("./userData.js");
+const { userModel } = require("./users.js");
 
 /**
  * @typedef {import("./UserTypes").UserAccount} UserAccount

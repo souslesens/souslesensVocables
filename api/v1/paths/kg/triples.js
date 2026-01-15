@@ -1,5 +1,5 @@
-import KGbuilder_main from '../../../../bin/KGbuilder/KGbuilder_main';
-import { processResponse } from '../utils';
+import KGbuilder_main from '../../../../bin/KGbuilder/KGbuilder_main.js';
+import { processResponse } from '../utils.js';
 import userManager from '../../../../bin/user.js';
 
 module.exports = function () {

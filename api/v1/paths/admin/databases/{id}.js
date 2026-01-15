@@ -1,4 +1,4 @@
-import { databaseModel } from '../../../../../model/databases';
+import { databaseModel } from '../../../../../model/databases.js';
 
 module.exports = function () {
     let operations = { DELETE, GET, PUT };

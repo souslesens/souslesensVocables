@@ -3,14 +3,14 @@ import fs from 'fs';
 import path from 'path';
 import { Lock } from 'async-await-mutex-lock';
 import { simpleGit, GitError } from 'simple-git';
-import { convertType } from './utils';
+import { convertType } from './utils.js';
 
 import {
     configPluginsConfig,
     configPluginsRepository,
     directoryPlugins,
     directoryPluginsRepositories,
-} from './config';
+} from './config.js';
 
 /**
  * @typedef {import("./ToolTypes").Tool} Tool

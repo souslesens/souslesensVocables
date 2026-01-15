@@ -1,5 +1,5 @@
-const fs = require("fs");
-const z = require("zod");
+import fs from 'fs';
+import z from 'zod';
 
 const configPath = process.env.CONFIG_PATH || "config";
 const mainConfigPath = `${configPath}/mainConfig.json`;

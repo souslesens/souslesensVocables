@@ -1,11 +1,16 @@
-const fg = require("fast-glob");
-const fs = require("fs");
-const path = require("path");
-const { Lock } = require("async-await-mutex-lock");
-const { simpleGit, GitError } = require("simple-git");
+import fg from 'fast-glob';
+import fs from 'fs';
+import path from 'path';
+import { Lock } from 'async-await-mutex-lock';
+import { simpleGit, GitError } from 'simple-git';
+import { convertType } from './utils';
 
-const { convertType } = require("./utils");
-const { configPluginsConfig, configPluginsRepository, directoryPlugins, directoryPluginsRepositories } = require("./config");
+import {
+    configPluginsConfig,
+    configPluginsRepository,
+    directoryPlugins,
+    directoryPluginsRepositories,
+} from './config';
 
 /**
  * @typedef {import("./ToolTypes").Tool} Tool

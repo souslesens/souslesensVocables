@@ -1,5 +1,5 @@
-const fs = require("fs");
-const { Lock } = require("async-await-mutex-lock");
+import fs from 'fs';
+import { Lock } from 'async-await-mutex-lock';
 
 /**
  * @typedef {Object} BlenderSource

@@ -4,7 +4,7 @@ import csvCrawler from '../_csvCrawler..js';
 import async from 'async';
 import sqlServerProxy from '../KG/SQLserverConnector.js';
 import util from '../util.js';
-import KGbuilder_triplesWriter from './KGbuilder_triplesWriter';
+import KGbuilder_triplesWriter from './KGbuilder_triplesWriter.js';
 import dataController from '../dataController.js';
 import path from 'path';
 import MappingParser from './mappingsParser.js';

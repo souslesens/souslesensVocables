@@ -1,5 +1,5 @@
 const yargs = require("yargs");
-const { UserModel } = require("../../model/users");
+const { UserModel } = require("../../model/users.js");
 
 const addMissingTokenToUsers = async (_configDirectory, writeMode) => {
     const userModel = new UserModel();

@@ -1,4 +1,4 @@
-import { processResponse } from '../utils';
+import { processResponse } from '../utils.js';
 import ConfigManager from '../../../../bin/configManager.js';
 import GraphStore from '../../../../bin/graphStore.js';
 

@@ -1,5 +1,5 @@
-import { databaseModel } from '../../../../model/databases';
-import { responseSchema } from '../utils';
+import { databaseModel } from '../../../../model/databases.js';
+import { responseSchema } from '../utils.js';
 import userManager from '../../../../bin/user.js';
 
 module.exports = function () {

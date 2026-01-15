@@ -1,5 +1,5 @@
-import { sourceModel } from '../../../../model/sources';
-import { indexModel } from '../../../../model/index';
+import { sourceModel } from '../../../../model/sources.js';
+import { indexModel } from '../../../../model/index.js';
 
 module.exports = function () {
     let operations = {

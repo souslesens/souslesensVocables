@@ -2,8 +2,8 @@ import path from 'path';
 const elasticRestProxy = require(path.resolve("bin/elasticRestProxy..js"));
 import ConfigManager from '../../../../bin/configManager.js';
 import UserRequestFiltering from '../../../../bin/userRequestFiltering.js';
-import { processResponse } from '../utils';
-import { sourceModel } from '../../../../model/sources';
+import { processResponse } from '../utils.js';
+import { sourceModel } from '../../../../model/sources.js';
 import async from 'async';
 
 module.exports = function () {

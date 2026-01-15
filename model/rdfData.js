@@ -1,7 +1,7 @@
-import { readMainConfig } from './config';
+import { readMainConfig } from './config.js';
 import DigestClient from 'digest-fetch';
 import fetch from 'node-fetch';
-import { RDF_FORMATS_MIMETYPES, sleep } from './utils';
+import { RDF_FORMATS_MIMETYPES, sleep } from './utils.js';
 class RdfDataModel {
     /**
      * @param {string} endpointUrl - url of endpoint

@@ -1,4 +1,4 @@
-import { processResponse } from './utils';
+import { processResponse } from './utils.js';
 import SourceIntegrator from '../../../bin/sourceIntegrator.js';
 
 module.exports = function () {

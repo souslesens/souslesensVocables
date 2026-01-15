@@ -137,7 +137,7 @@ const KGbuilder_triplesWriter = {
     },
 
     // deleteKGBuilderTriples: function (sparqlServerUrl, graphUri, table, options, callback) {
-    //     const TriplesMaker = require("./triplesMaker");
+    //     const TriplesMaker = require("./triplesMaker.js");
     //     var message = {};
     //     var query = "";
     //     if (table) {
@@ -210,7 +210,7 @@ const KGbuilder_triplesWriter = {
     // },
 
     deleteKGBuilderTriples: function (sparqlServerUrl, graphUri, table, options, callback) {
-        const TriplesMaker = require("./triplesMaker");
+        const TriplesMaker = require("./triplesMaker.js");
         var message = {};
         var query = "";
         if (table) {

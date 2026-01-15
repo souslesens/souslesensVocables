@@ -12,15 +12,15 @@ const httpProxy = require(path.resolve("bin/httpProxy.js"));
 const userManager = require(path.resolve("bin/user.js"));
 import querystring from 'querystring';
 import './bin/authentication.js';
-import { checkMainConfig, readMainConfig } from './model/config';
+import { checkMainConfig, readMainConfig } from './model/config.js';
 import util from './bin/util.js';
 
 const app = express();
 import Sentry from '@sentry/node';
-import { userModel } from './model/users';
-import { profileModel } from './model/profiles';
-import { sourceModel } from './model/sources';
-import { rdfDataModel } from './model/rdfData';
+import { userModel } from './model/users.js';
+import { profileModel } from './model/profiles.js';
+import { sourceModel } from './model/sources.js';
+import { rdfDataModel } from './model/rdfData.js';
 
 const config = readMainConfig();
 const isValid = checkMainConfig(config);

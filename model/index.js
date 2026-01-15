@@ -1,6 +1,6 @@
-const { readMainConfig } = require("./config");
-const { Client: Client7 } = require("es7");
-const { chunk } = require("./utils");
+import { readMainConfig } from './config';
+import { Client as Client7 } from 'es7';
+import { chunk } from './utils';
 
 class IndexModel {
     /**

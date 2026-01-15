@@ -1,10 +1,10 @@
-const bcrypt = require("bcrypt");
-const { readMainConfig } = require("./config");
-const { cleanupConnection, getKnexConnection } = require("./utils");
-const { userDataModel } = require("./userData");
-const ULID = require("ulid");
-const { createHash } = require("crypto");
-const z = require("zod");
+import bcrypt from 'bcrypt';
+import { readMainConfig } from './config';
+import { cleanupConnection, getKnexConnection } from './utils';
+import { userDataModel } from './userData';
+import ULID from 'ulid';
+import { createHash } from 'crypto';
+import z from 'zod';
 
 /**
  * @typedef {import("./UserTypes").UserAccountWithPassword} UserAccountWithPassword

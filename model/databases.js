@@ -1,11 +1,10 @@
-const fs = require("fs");
-const knex = require("knex");
-const { Lock } = require("async-await-mutex-lock");
-
-const { configDatabasesPath } = require("./config");
-const { profileModel } = require("./profiles");
-const KGbuilder_socket = require("../bin/KGbuilder/KGbuilder_socket");
-const modelUtils = require("./utils");
+import fs from 'fs';
+import knex from 'knex';
+import { Lock } from 'async-await-mutex-lock';
+import { configDatabasesPath } from './config';
+import { profileModel } from './profiles';
+import KGbuilder_socket from '../bin/KGbuilder/KGbuilder_socket';
+import modelUtils from './utils';
 
 /**
  * @typedef {import("./UserTypes").UserAccount} UserAccount

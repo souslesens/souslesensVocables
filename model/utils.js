@@ -1,4 +1,4 @@
-const knex = require("knex");
+import knex from 'knex';
 
 const RDF_FORMATS_MIMETYPES = {
     json: "application/sparql-results+json",

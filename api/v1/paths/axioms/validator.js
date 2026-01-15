@@ -1,9 +1,10 @@
-const ManchesterSyntaxEngine = require("../../../../bin/axioms/manchesterSyntaxEngine.js");
+import ManchesterSyntaxEngine from '../../../../bin/axioms/manchesterSyntaxEngine.js';
 
 //import    ManchesterSyntaxEngine from  "../../../../bin/axioms/manchesterSyntaxEngine.js";
 
-const httpProxy = require("../../../../bin/httpProxy..js");
-const { processResponse } = require("../utils.js");
+import httpProxy from '../../../../bin/httpProxy..js';
+
+import { processResponse } from '../utils.js';
 module.exports = function () {
     let operations = {
         GET,

@@ -1,6 +1,6 @@
-const { blenderSources } = require("../../../model/blenderSources");
-const configManager = require("../../../bin/configManager.");
-const { responseSchema, processResponse, successfullyFetched } = require("./utils");
+import { blenderSources } from '../../../model/blenderSources';
+import configManager from '../../../bin/configManager.';
+import { responseSchema, processResponse, successfullyFetched } from './utils';
 module.exports = function () {
     let operations = {
         GET,

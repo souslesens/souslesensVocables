@@ -1,5 +1,5 @@
-const { profileModel } = require("../../../../model/profiles");
-const userManager = require("../../../../bin/user.");
+import { profileModel } from '../../../../model/profiles';
+import userManager from '../../../../bin/user.';
 
 module.exports = function () {
     let operations = { GET };

@@ -1,4 +1,4 @@
-var fs = require("fs");
+import fs from 'fs';
 
 var path = "C:\\Users\\claud\\Downloads\\classeur3.csv";
 var str = "" + fs.readFileSync(path);

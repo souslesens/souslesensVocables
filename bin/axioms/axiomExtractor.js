@@ -1,4 +1,4 @@
-var util = require("../util..js");
+import util from '../util..js';
 
 var AxiomExtractor = {
     xxx: function () {

@@ -1,10 +1,10 @@
-const async = require("async");
-const util = require("./util.");
-const socket = require("./socketManager.");
-const request = require("request");
-const fs = require("fs");
-const csv = require("csv-parser");
-const common = require("./util.");
+import async from 'async';
+import util from './util.';
+import socket from './socketManager.';
+import request from 'request';
+import fs from 'fs';
+import csv from 'csv-parser';
+import common from './util.';
 
 var csvCrawler = {
     indexSource: function (config, callback) {

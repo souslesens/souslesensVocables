@@ -1,5 +1,12 @@
-const { userModel } = require("../../../../model/users");
-const { sortObjectByKey, responseSchema, successfullyUpdated, successfullyCreated, successfullyFetched } = require("../utils");
+import { userModel } from '../../../../model/users';
+
+import {
+    sortObjectByKey,
+    responseSchema,
+    successfullyUpdated,
+    successfullyCreated,
+    successfullyFetched,
+} from '../utils';
 
 module.exports = function () {
     ///// GET api/v1/admin/users

@@ -1,5 +1,5 @@
-const KGtripleBuilder = require("../../../../bin/KGtripleBuilder.");
-const { processResponse } = require("../utils");
+import KGtripleBuilder from '../../../../bin/KGtripleBuilder.';
+import { processResponse } from '../utils';
 
 module.exports = function () {
     let operations = {

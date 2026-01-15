@@ -1,11 +1,11 @@
-const { rdfDataModel } = require("../../../../model/rdfData");
-const { mainConfigModel } = require("../../../../model/mainConfig");
-const userManager = require("../../../../bin/user.");
-const { sourceModel } = require("../../../../model/sources");
-const { ulid } = require("ulid");
-const path = require("path");
-const fs = require("fs");
-const os = require("node:os");
+import { rdfDataModel } from '../../../../model/rdfData';
+import { mainConfigModel } from '../../../../model/mainConfig';
+import userManager from '../../../../bin/user.';
+import { sourceModel } from '../../../../model/sources';
+import { ulid } from 'ulid';
+import path from 'path';
+import fs from 'fs';
+import os from 'node:os';
 
 module.exports = function () {
     let operations = {

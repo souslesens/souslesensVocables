@@ -1,5 +1,5 @@
-const { userModel } = require("../../../../model/users");
-const { mainConfigModel } = require("../../../../model/mainConfig");
+import { userModel } from '../../../../model/users';
+import { mainConfigModel } from '../../../../model/mainConfig';
 
 module.exports = function () {
     let operations = {

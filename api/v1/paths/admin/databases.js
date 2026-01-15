@@ -1,5 +1,5 @@
-const { databaseModel } = require("../../../../model/databases");
-const { resourceFetched, responseSchema } = require("../utils");
+import { databaseModel } from '../../../../model/databases';
+import { resourceFetched, responseSchema } from '../utils';
 
 module.exports = function () {
     let operations = { GET, POST };

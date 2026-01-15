@@ -1,5 +1,5 @@
-const { default: rdfParser } = require("rdf-parse");
-const { processResponse } = require("./utils");
+import { default as rdfParser } from 'rdf-parse';
+import { processResponse } from './utils';
 module.exports = function () {
     let operations = {
         GET,

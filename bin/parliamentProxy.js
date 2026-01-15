@@ -1,4 +1,4 @@
-const http = require("http");
+import http from 'http';
 
 /**
  * docker run -d --name="parliament2" -p 8089:8089 --volume /var/parliament-data:/var/parliament-data 8073cc026a93 -d

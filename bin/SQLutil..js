@@ -1,6 +1,6 @@
-const fs = require("fs");
-const csv = require("csv-parser");
-const util = require("./util.");
+import fs from 'fs';
+import csv from 'csv-parser';
+import util from './util.';
 
 var SQLutil = {
     csvToJson: function (csvFilePath, sliceLength, callback) {

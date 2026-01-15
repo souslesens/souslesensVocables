@@ -1,6 +1,6 @@
-const { processResponse } = require("../utils");
-const request = require("request");
-const ConfigManager = require("../../../../bin/configManager.");
+import { processResponse } from '../utils';
+import request from 'request';
+import ConfigManager from '../../../../bin/configManager.';
 
 //https://jena.apache.org/documentation/inference/
 

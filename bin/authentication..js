@@ -10,17 +10,18 @@
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-const { userModel } = require("../model/users");
-const { profileModel } = require("../model/profiles");
+import { userModel } from '../model/users';
 
-const passport = require("passport");
-const LocalStrategy = require("passport-local");
-const Auth0Strategy = require("passport-auth0");
-const KeyCloakStrategy = require("passport-keycloak-oauth2-oidc").Strategy;
-const ULID = require("ulid");
+import { profileModel } from '../model/profiles';
+import passport from 'passport';
+import LocalStrategy from 'passport-local';
+import Auth0Strategy from 'passport-auth0';
+import { Strategy as KeyCloakStrategy } from 'passport-keycloak-oauth2-oidc';
+import ULID from 'ulid';
 
 // Get config
-const { readMainConfig } = require("../model/config");
+import { readMainConfig } from '../model/config';
+
 const config = readMainConfig();
 
 const getUserAccount = async (source, username) => {

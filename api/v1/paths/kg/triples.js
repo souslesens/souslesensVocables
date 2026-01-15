@@ -1,6 +1,6 @@
-const KGbuilder_main = require("../../../../bin/KGbuilder/KGbuilder_main");
-const { processResponse } = require("../utils");
-const userManager = require("../../../../bin/user.");
+import KGbuilder_main from '../../../../bin/KGbuilder/KGbuilder_main';
+import { processResponse } from '../utils';
+import userManager from '../../../../bin/user.';
 
 module.exports = function () {
     let operations = {

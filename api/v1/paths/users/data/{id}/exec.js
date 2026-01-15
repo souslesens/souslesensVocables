@@ -1,12 +1,12 @@
-const fs = require("node:fs");
-const { readMainConfig } = require("../../../../../../model/config");
-const { userDataModel } = require("../../../../../../model/userData");
-const { RdfDataModel } = require("../../../../../../model/rdfData");
-const userManager = require("../../../../../../bin/user.");
-const UserRequestFiltering = require("../../../../../../bin/userRequestFiltering..js");
-const ConfigManager = require("../../../../../../bin/configManager.");
-const { Template } = require("@huggingface/jinja");
-const { RDF_FORMATS_MIMETYPES } = require("../../../../../../model/utils");
+import fs from 'node:fs';
+import { readMainConfig } from '../../../../../../model/config';
+import { userDataModel } from '../../../../../../model/userData';
+import { RdfDataModel } from '../../../../../../model/rdfData';
+import userManager from '../../../../../../bin/user.';
+import UserRequestFiltering from '../../../../../../bin/userRequestFiltering..js';
+import ConfigManager from '../../../../../../bin/configManager.';
+import { Template } from '@huggingface/jinja';
+import { RDF_FORMATS_MIMETYPES } from '../../../../../../model/utils';
 //const RemoteCodeRunner = require("../../../../../bin/remoteCodeRunner.js.");
 
 module.exports = () => {

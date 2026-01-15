@@ -1,5 +1,5 @@
-const { toolModel } = require("../../../../../model/tools");
-const { responseSchema } = require("../../utils");
+import { toolModel } from '../../../../../model/tools';
+import { responseSchema } from '../../utils';
 
 module.exports = function () {
     const operations = { GET, PUT };

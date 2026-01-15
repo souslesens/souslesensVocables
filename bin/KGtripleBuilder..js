@@ -1,14 +1,13 @@
-var fs = require("fs");
-var path = require("path");
-var csvCrawler = require("./_csvCrawler.");
-var async = require("async");
-var util = require("./util.");
-var httpProxy = require("./httpProxy.");
-var sqlServerProxy = require("./KG/SQLserverConnector.");
-const { databaseModel } = require("../model/databases");
-
-var ConfigManager = require("./configManager.");
-const SocketManager = require("./socketManager.");
+import fs from 'fs';
+import path from 'path';
+import csvCrawler from './_csvCrawler.';
+import async from 'async';
+import util from './util.';
+import httpProxy from './httpProxy.';
+import sqlServerProxy from './KG/SQLserverConnector.';
+import { databaseModel } from '../model/databases';
+import ConfigManager from './configManager.';
+import SocketManager from './socketManager.';
 
 //var rootDir = "D:\\NLP\\ontologies\\CFIHOS\\CFIHOS V1.5\\CFIHOS V1.5 RDL";
 

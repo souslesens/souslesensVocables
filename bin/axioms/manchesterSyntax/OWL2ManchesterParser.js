@@ -3,8 +3,9 @@
 // import antlr4 from 'antlr4';
 // import OWL2ManchesterListener from './OWL2ManchesterListener.js';
 
-const antlr4 = require("antlr4");
-const OWL2ManchesterListener = require("./OWL2ManchesterListener.js");
+import antlr4 from 'antlr4';
+
+import OWL2ManchesterListener from './OWL2ManchesterListener.js';
 
 const serializedATN = [
     4, 1, 17, 62, 2, 0, 7, 0, 2, 1, 7, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 3, 0, 28, 8, 0, 1,

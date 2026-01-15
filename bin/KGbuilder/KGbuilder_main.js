@@ -1,23 +1,19 @@
-var fs = require("fs");
-var path = require("path");
-var async = require("async");
-
-var csvCrawler = require("../_csvCrawler.");
-var util = require("../util.");
-var httpProxy = require("../httpProxy.");
-const ConfigManager = require("../configManager.");
-
-const SocketManager = require("../socketManager.");
-const KGbuilder_triplesWriter = require("./KGbuilder_triplesWriter");
-const KGbuilder_socket = require("./KGbuilder_socket");
-const dbConnector = require("../KG/dbConnector");
-const DatabaseModel = require("../../model/databases").databaseModel;
-
-const MappingsParser = require("./mappingsParser.js");
-const TriplesMaker = require("./triplesMaker.js");
-
-const TripleMaker = require("./triplesMaker.js");
-const { databaseModel } = require("../../model/databases.js");
+import fs from 'fs';
+import path from 'path';
+import async from 'async';
+import csvCrawler from '../_csvCrawler.';
+import util from '../util.';
+import httpProxy from '../httpProxy.';
+import ConfigManager from '../configManager.';
+import SocketManager from '../socketManager.';
+import KGbuilder_triplesWriter from './KGbuilder_triplesWriter';
+import KGbuilder_socket from './KGbuilder_socket';
+import dbConnector from '../KG/dbConnector';
+import { databaseModel as DatabaseModel } from '../../model/databases';
+import MappingsParser from './mappingsParser.js';
+import TriplesMaker from './triplesMaker.js';
+import TripleMaker from './triplesMaker.js';
+import { databaseModel } from '../../model/databases.js';
 
 var KGbuilder_main = {
     /**

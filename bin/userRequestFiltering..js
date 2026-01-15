@@ -7,9 +7,10 @@ const { userModel } = require(rootPath+"model\\users");
 
  */
 
-const ConfigManager = require("../bin/configManager.");
-const async = require("async");
-const SparqlParser = require("sparqljs").Parser;
+import ConfigManager from '../bin/configManager.';
+
+import async from 'async';
+import { Parser as SparqlParser } from 'sparqljs';
 const parser = new SparqlParser({ skipValidation: true });
 
 var UserRequestFiltering = {

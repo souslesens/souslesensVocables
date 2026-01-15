@@ -1,5 +1,5 @@
-const { toolModel } = require("../../../../model/tools");
-const { resourceFetched, responseSchema } = require("../utils");
+import { toolModel } from '../../../../model/tools';
+import { resourceFetched, responseSchema } from '../utils';
 
 module.exports = function () {
     let operations = { GET };

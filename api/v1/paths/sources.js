@@ -1,8 +1,14 @@
-const path = require("path");
+import path from 'path';
+import { sourceModel } from '../../../model/sources';
+import { userModel } from '../../../model/users';
 
-const { sourceModel } = require("../../../model/sources");
-const { userModel } = require("../../../model/users");
-const { responseSchema, successfullyFetched, successfullyCreated, fixBooleanInObject } = require("./utils.js");
+import {
+    responseSchema,
+    successfullyFetched,
+    successfullyCreated,
+    fixBooleanInObject,
+} from './utils.js';
+
 const userManager = require(path.resolve("bin/user."));
 
 module.exports = function () {

@@ -1,15 +1,13 @@
-var async = require("async");
-var httpProxy = require("./httpProxy.");
-
-const path = require("path");
-const jsonFileStorage = require("./jsonFileStorage");
-
-const request = require("request");
-const Util = require("./util.");
-const fs = require("fs");
-const { processResponse } = require("../api/v1/paths/utils");
-const ConfigManager = require("./configManager.");
-var exec = require("child_process").exec;
+import async from 'async';
+import httpProxy from './httpProxy.';
+import path from 'path';
+import jsonFileStorage from './jsonFileStorage';
+import request from 'request';
+import Util from './util.';
+import fs from 'fs';
+import { processResponse } from '../api/v1/paths/utils';
+import ConfigManager from './configManager.';
+import { exec } from 'child_process';
 
 var GraphStore = {
     exportGraph: function (sparqlServerConnection, graphUri, callback) {

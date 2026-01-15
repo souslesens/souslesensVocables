@@ -1,4 +1,4 @@
-const { indexModel } = require("../../../../model/index");
+import { indexModel } from '../../../../model/index';
 
 module.exports = function () {
     let operations = {

@@ -1,4 +1,4 @@
-const SocketManager = require("../socketManager.");
+import SocketManager from '../socketManager.';
 
 var KGbuilder_socket = {
     message: function (clientSocketId, content, isError) {

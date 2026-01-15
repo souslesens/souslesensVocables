@@ -1,7 +1,6 @@
-const fs = require("fs");
-const path = require("path");
-
-const { mainConfigModel } = require("../../../../model/mainConfig");
+import fs from 'fs';
+import path from 'path';
+import { mainConfigModel } from '../../../../model/mainConfig';
 
 module.exports = () => {
     const operations = { GET };

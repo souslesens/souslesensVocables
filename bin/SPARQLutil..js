@@ -1,6 +1,6 @@
-const async = require("async");
-var util = require("../bin/util.");
-var httpProxy = require("../bin/httpProxy.");
+import async from 'async';
+import util from '../bin/util.';
+import httpProxy from '../bin/httpProxy.';
 
 var SPARQLutil = {
     generateTriples: function (graphUri, triples, replaceGraph, callback) {

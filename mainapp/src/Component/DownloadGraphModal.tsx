@@ -153,6 +153,7 @@ export function DownloadGraphModal({ apiUrl, onClose, open, sourceName }: Downlo
     const cancelCurrentOperation = useRef(false);
     const [currentDownloadFormat, setCurrentDownloadFormat] = useState("nt");
     const [skipNamedIndividuals, setSkipNamedIndividuals] = useState(false);
+    const [includeImports, setIncludeImports] = useState(false);
 
     useEffect(() => {
         const fetchAll = async () => {
@@ -305,8 +306,10 @@ export function DownloadGraphModal({ apiUrl, onClose, open, sourceName }: Downlo
         let blobParts: BlobPart[] | null;
         let message = "ok";
         let sources = [sourceName];
-        const imports = (window?.Config.sources[sourceName]?.imports as string[]) || [];
-        sources = sources.concat(imports);
+        if (includeImports) {
+            const imports = (window?.Config.sources[sourceName]?.imports as string[]) || [];
+            sources = sources.concat(imports);
+        }
         blobParts = [];
         let blobPartsSource: BlobPart[] = [];
 
@@ -429,6 +432,21 @@ export function DownloadGraphModal({ apiUrl, onClose, open, sourceName }: Downlo
                                     />
                                 }
                                 label="Ignore the namedIndividuals in this download"
+                            />
+                        </FormControl>
+                        <FormControl fullWidth>
+                            <FormControlLabel
+                                id={`include-imports-switch-${sourceName}`}
+                                control={
+                                    <Checkbox
+                                        checked={includeImports}
+                                        disabled={transferPercent > 0}
+                                        onChange={(event) => {
+                                            setIncludeImports(event.currentTarget.checked);
+                                        }}
+                                    />
+                                }
+                                label="Add imports in this download"
                             />
                         </FormControl>
                     </Stack>

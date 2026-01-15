@@ -1,6 +1,6 @@
 import { databaseModel } from '../../../../model/databases';
 import { responseSchema } from '../utils';
-import userManager from '../../../../bin/user.';
+import userManager from '../../../../bin/user.js';
 
 module.exports = function () {
     let operations = { GET };

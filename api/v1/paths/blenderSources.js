@@ -1,5 +1,5 @@
 import { blenderSources } from '../../../model/blenderSources';
-import configManager from '../../../bin/configManager.';
+import configManager from '../../../bin/configManager.js';
 import { responseSchema, processResponse, successfullyFetched } from './utils';
 module.exports = function () {
     let operations = {

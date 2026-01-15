@@ -1,6 +1,6 @@
 import { processResponse } from '../utils';
 import request from 'request';
-import ConfigManager from '../../../../bin/configManager.';
+import ConfigManager from '../../../../bin/configManager.js';
 
 //https://jena.apache.org/documentation/inference/
 

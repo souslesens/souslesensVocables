@@ -9,8 +9,8 @@
  */
 import async from 'async';
 
-import httpProxy from '../httpProxy.';
-import elasticRestProxy from '../elasticRestProxy.';
+import httpProxy from '../httpProxy.js';
+import elasticRestProxy from '../elasticRestProxy.js';
 import fs from 'fs';
 var onTheFlyTagger = {
     mediawikistopWords: [

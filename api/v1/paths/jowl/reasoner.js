@@ -1,5 +1,5 @@
-import HttpProxy from '../../../../bin/httpProxy.';
-import ConfigManager from '../../../../bin/configManager.';
+import HttpProxy from '../../../../bin/httpProxy.js';
+import ConfigManager from '../../../../bin/configManager.js';
 import { processResponse } from '../utils';
 import request from 'request';
 import async from 'async';

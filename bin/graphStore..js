@@ -1,12 +1,12 @@
 import async from 'async';
-import httpProxy from './httpProxy.';
+import httpProxy from './httpProxy.js';
 import path from 'path';
 import jsonFileStorage from './jsonFileStorage';
 import request from 'request';
-import Util from './util.';
+import Util from './util.js';
 import fs from 'fs';
 import { processResponse } from '../api/v1/paths/utils';
-import ConfigManager from './configManager.';
+import ConfigManager from './configManager.js';
 import { exec } from 'child_process';
 
 var GraphStore = {

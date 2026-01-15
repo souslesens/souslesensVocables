@@ -4,11 +4,11 @@ import path from 'path';
 //var TikaClient = require("@futpib/tika-server-client");
 //var tika = new TikaClient("http://localhost:41000");
 //const TikaServer = require("tika-server");
-import util from '../util.';
+import util from '../util.js';
 
-import httpProxy from '../httpProxy.';
-import socket from '../socketManager.';
-import ConfigManager from '../configManager.';
+import httpProxy from '../httpProxy.js';
+import socket from '../socketManager.js';
+import ConfigManager from '../configManager.js';
 import etl from 'etl';
 import async from 'async';
 

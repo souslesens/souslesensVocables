@@ -1,5 +1,5 @@
 import { processResponse } from './utils';
-import httpProxy from '../../../bin/httpProxy.';
+import httpProxy from '../../../bin/httpProxy.js';
 
 module.exports = function () {
     let operations = {

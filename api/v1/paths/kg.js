@@ -1,5 +1,5 @@
 import path from 'path';
-const kGbuilder = require(path.resolve("bin/KG/KGbuilder."));
+const kGbuilder = require(path.resolve("bin/KG/KGbuilder.js"));
 
 module.exports = function () {
     let operations = {

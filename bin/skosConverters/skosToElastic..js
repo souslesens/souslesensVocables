@@ -11,8 +11,8 @@ import fs from 'fs';
 
 import async from 'async';
 import request from 'request';
-import skosReader from '../backoffice/skosReader.';
-import indexer from '../backoffice/indexer.';
+import skosReader from '../backoffice/skosReader.js';
+import indexer from '../backoffice/indexer.js';
 import ndjson from 'ndjson';
 
 var elasticUrl = "http://localhost:9200/";

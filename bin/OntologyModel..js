@@ -1,5 +1,5 @@
 import async from 'async';
-import httpProxy from './httpProxy.';
+import httpProxy from './httpProxy.js';
 import request from 'request';
 import fs from 'fs';
 //const sources=require("../model/sources")

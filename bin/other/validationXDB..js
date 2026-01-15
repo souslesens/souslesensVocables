@@ -1,5 +1,5 @@
 import fs from 'fs';
-//var reader=require("../SQLutil.")
+//var reader=require("../SQLutil.js")
 
 var filePath = "D:\\NLP\\ontologies\\OntoGaia\\validationXDB3.csv";
 /*csvCrawler.readCsv({ filePath: filePath }, 500000, function (err, result) {

@@ -1,6 +1,6 @@
 import { processResponse } from '../utils';
-import ConfigManager from '../../../../bin/configManager.';
-import GraphStore from '../../../../bin/graphStore.';
+import ConfigManager from '../../../../bin/configManager.js';
+import GraphStore from '../../../../bin/graphStore.js';
 import async2 from 'async';
 
 module.exports = function () {

@@ -62,67 +62,84 @@ const addImportsAndContributor = (
     if (!sourceConfig || !sourceConfig.baseUri) {
         return blobParts;
     }
-    const baseUri = sourceConfig?.baseUri;
+    const baseUri = sourceConfig.baseUri;
+    const importsToAdd: string[] = [];
+    if (!hasImports) {
+        imports.forEach((importName) => {
+            const importBaseUri = Config.sources[importName]?.baseUri;
+            if (importBaseUri) {
+                importsToAdd.push(importBaseUri);
+            }
+        });
+    }
+    
 
-    const additionalTriples: string[] = [];
+    if (importsToAdd.length === 0 && hasContributor) {
+        return blobParts;
+    }
 
     if (format === "nt") {
-        if (!hasImports) {
-            imports.forEach((importName) => {
-                const importBaseUri = Config.sources[importName]?.baseUri;
-                if (importBaseUri) {
-                    additionalTriples.push(`<${baseUri}> <${owlImportsUri}> <${importBaseUri}> .`);
-                }
-            });
-        }
+        const additionalTriples: string[] = [];
+        importsToAdd.forEach((importBaseUri) => {
+            additionalTriples.push(`<${baseUri}> <${owlImportsUri}> <${importBaseUri}> .`);
+        });
         if (!hasContributor) {
             additionalTriples.push(`<${baseUri}> <${contributorUri}> "${userLogin}" .`);
         }
-    } else if (format === "ttl") {
-        const importsToAdd: string[] = [];
-        if (!hasImports) {
-            imports.forEach((importName) => {
-                const importBaseUri = Config.sources[importName]?.baseUri;
-                if (importBaseUri) {
-                    importsToAdd.push(importBaseUri);
-                }
-            });
+        if (additionalTriples.length > 0) {
+            return [...blobParts, "\n" + additionalTriples.join("\n") + "\n"];
         }
-        if (importsToAdd.length > 0 || !hasContributor) {
-            additionalTriples.push(`@prefix owl: <http://www.w3.org/2002/07/owl#> .`);
-            additionalTriples.push(`@prefix dc: <http://purl.org/dc/elements/1.1/> .`);
-            importsToAdd.forEach((importBaseUri) => {
-                additionalTriples.push(`<${baseUri}> owl:imports <${importBaseUri}> .`);
-            });
-            if (!hasContributor) {
-                additionalTriples.push(`<${baseUri}> dc:contributor "${userLogin}" .`);
+    } else if (format === "ttl") {
+    
+        const escapedBaseUri = baseUri.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+        //<http:\/\/purl\.obolibrary\.org\/obo\/bfo\.owl>(?:(?:"[^"]*"|<[^>]*>|[^.])*)\.
+        const baseUriPattern = new RegExp(`(<${escapedBaseUri}>(?:(?:"[^"]*"|<[^>]*>|[^.])*))(\.)`, "gm");
+
+        for (let i = 0; i < blobParts.length; i++) {
+            const part = blobParts[i];
+            if (typeof part !== "string") continue;
+
+            const match = part.match(baseUriPattern);
+            if (match) {
+                let insertions = "";
+                importsToAdd.forEach((importBaseUri) => {
+                    insertions += ` ;\n    owl:imports <${importBaseUri}>`;
+                });
+                if (!hasContributor) {
+                    insertions += ` ;\n    dc:contributor "${userLogin}"`;
+                }
+                const modifiedPart = part.replace(baseUriPattern, `$1${insertions}\n$2`);
+                const result = [...blobParts];
+                result[i] = modifiedPart;
+                return result;
             }
         }
     } else if (format === "xml") {
-        const xmlTriples: string[] = [];
-        if (!hasImports) {
-            imports.forEach((importName) => {
-                const importBaseUri = Config.sources[importName]?.baseUri;
-                if (importBaseUri) {
-                    xmlTriples.push(`  <owl:imports rdf:resource="${importBaseUri}"/>`);
+        
+        const escapedBaseUri = baseUri.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        // Pattern XML: <rdf:Description rdf:about="baseUri"> ... </rdf:Description>
+        const descriptionPattern = new RegExp(`(<rdf:Description rdf:about="${escapedBaseUri}"[^>]*>[\s\S]*?)(<\/rdf:Description>)`, "gm");
+
+        for (let i = 0; i < blobParts.length; i++) {
+            const part = blobParts[i];
+            if (typeof part !== "string") continue;
+
+            const match = part.match(descriptionPattern);
+            if (match) {
+                let insertions = "";
+                importsToAdd.forEach((importBaseUri) => {
+                    insertions += `\n    <owl:imports rdf:resource="${importBaseUri}"/>`;
+                });
+                if (!hasContributor) {
+                    insertions += `\n    <dc:contributor>${userLogin}</dc:contributor>`;
                 }
-            });
-        }
-        if (!hasContributor) {
-            xmlTriples.push(`  <dc:contributor>${userLogin}</dc:contributor>`);
-        }
-        if (xmlTriples.length > 0) {
-            const rdfAbout = `<rdf:Description rdf:about="${baseUri}">\n${xmlTriples.join("\n")}\n</rdf:Description>`;
-            const closingTag = "</rdf:RDF>";
-            if (content.includes(closingTag)) {
-                const enrichedContent = content.replace(closingTag, `${rdfAbout}\n${closingTag}`);
-                return [enrichedContent];
+                const modifiedPart = part.replace(descriptionPattern, `$1${insertions}\n$2`);
+                const result = [...blobParts];
+                result[i] = modifiedPart;
+                return result;
             }
         }
-    }
-
-    if (additionalTriples.length > 0 && format !== "xml") {
-        return [...blobParts, "\n" + additionalTriples.join("\n") + "\n"];
     }
 
     return blobParts;

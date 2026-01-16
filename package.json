@@ -16,7 +16,7 @@
         "migrate": "sh scripts/run-migrations.sh",
         "prettier:check": "prettier --check ./public/vocables ./model ./api ./bin ./tests",
         "prettier:write": "prettier -w ./public/vocables ./model ./api ./bin ./tests",
-        "test:jest": "NODE_OPTIONS='--experimental-vm-modules' jest --coverage --rootDir tests",
+        "test:jest": "jest --coverage --rootDir tests",
         "tools:ncu": "ncu",
         "tools:tsc": "tsc --jsx preserve",
         "tools:eslint": "eslint mainapp/src",

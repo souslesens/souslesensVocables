@@ -1,6 +1,7 @@
 {
     "name": "souslesensvocables",
     "version": "2.23.1",
+    "type": "module",
     "private": true,
     "workspaces": [
         "mainapp"

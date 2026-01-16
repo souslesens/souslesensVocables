@@ -482,6 +482,109 @@ var TripleFactory = (function () {
      * @memberof module:TripleFactory
      */
 
+
+
+    function getCurrentSource() {
+        if (DataSourceManager && DataSourceManager.currentSlsvSource) {
+            return DataSourceManager.currentSlsvSource;
+        }
+        return null;
+    }
+
+    function getDbTables() {
+        try {
+            if (
+                DataSourceManager &&
+                DataSourceManager.currentConfig &&
+                DataSourceManager.currentConfig.currentDataSource &&
+                DataSourceManager.currentConfig.currentDataSource.tables
+            ) {
+                return Object.keys(DataSourceManager.currentConfig.currentDataSource.tables);
+            }
+        } catch (e) {}
+        return [];
+    }
+
+    function getCsvTables() {
+        try {
+            if (DataSourceManager && DataSourceManager.currentConfig && DataSourceManager.currentConfig.csvSources) {
+                return Object.keys(DataSourceManager.currentConfig.csvSources);
+            }
+        } catch (e) {}
+        return [];
+    }
+
+    function getStatsMap() {
+        if (DataSourceManager && DataSourceManager.statsMap) {
+            return DataSourceManager.statsMap;
+        }
+        return {};
+    }
+
+    function buildOptions() {
+        var options = {};
+        if (typeof Config !== "undefined" && Config && Config.clientSocketId) {
+            options.clientSocketId = Config.clientSocketId;
+        }
+        return options;
+    }
+
+  
+    function getTablesWithMappingsMap() {
+        var map = {};
+        try {
+            if (
+                !MappingColumnsGraph ||
+                !MappingColumnsGraph.visjsGraph ||
+                !MappingColumnsGraph.visjsGraph.data ||
+                !MappingColumnsGraph.visjsGraph.data.nodes
+            ) {
+                return map;
+            }
+
+            var nodes = MappingColumnsGraph.visjsGraph.data.nodes.get();
+            if (!Array.isArray(nodes)) {
+                return map;
+            }
+
+          
+            var allowedTypes = [];
+            if (MappingModeler && Array.isArray(MappingModeler.columnsMappingsObjects)) {
+                allowedTypes = MappingModeler.columnsMappingsObjects;
+            }
+
+            nodes.forEach(function (n) {
+                if (!n || !n.data) return;
+
+               
+                if (allowedTypes.length > 0) {
+                    if (allowedTypes.indexOf(n.data.type) < 0) return;
+                }
+
+                
+                if (n.data.dataTable) {
+                    map[n.data.dataTable] = true;
+                }
+            });
+        } catch (e) {}
+        return map;
+    }
+
+
+    function filterTablesHavingMappings(allTables) {
+        var tablesWithMappings = getTablesWithMappingsMap();
+        var out = [];
+
+        allTables.forEach(function (t) {
+            if (tablesWithMappings[t]) {
+                out.push(t);
+            }
+        });
+
+        return out;
+    }
+
+
     self.recreateGraphSelectTables = function () {
         try {
             var source = getCurrentSource();
@@ -489,17 +592,31 @@ var TripleFactory = (function () {
                 return alert("Missing DataSourceManager.currentSlsvSource");
             }
 
-            var dbTables = getDbTables();
-            var csvTables = getCsvTables();
-            var allTables = dbTables.concat(csvTables);
+        var dbTables = getDbTables();
+        var csvTables = getCsvTables();
+
+        var merged = mergeUniqueTables(dbTables, csvTables);
+        var allTables = merged.tables;
+
 
             if (!allTables || allTables.length === 0) {
                 return alert("No tables found for this source");
             }
 
+            
+            var filteredTables = filterTablesHavingMappings(allTables);
+
+            if (!filteredTables || filteredTables.length === 0) {
+                return alert("Aucune table avec mappings trouvée (le graphe de mappings n'est peut-être pas chargé).");
+            }
+
+            
             var statsMap = getStatsMap();
 
+        
             var jstreeData = [];
+
+            // Root = source
             jstreeData.push({
                 id: source,
                 parent: "#",
@@ -507,7 +624,10 @@ var TripleFactory = (function () {
                 type: "Source",
             });
 
-            allTables.forEach(function (t) {
+        
+            var tablesDisplayed = filteredTables.slice();
+
+            tablesDisplayed.forEach(function (t) {
                 var count = null;
                 if (statsMap && typeof statsMap === "object" && statsMap[t]) {
                     count = statsMap[t];
@@ -518,18 +638,21 @@ var TripleFactory = (function () {
                     label = t + " " + count + " Triples";
                 }
 
+                var isCsv = (csvTables.indexOf(t) > -1);
+
                 jstreeData.push({
                     id: t,
                     parent: source,
                     text: label,
-                    type: csvTables.indexOf(t) > -1 ? "CSV" : "Table",
+                    type: (isCsv ? "CSV" : "Table"),
                     data: {
                         tableName: t,
-                        isCsv: csvTables.indexOf(t) > -1,
+                        isCsv: isCsv,
                     },
                 });
             });
 
+            
             var optionsObj = buildOptions();
 
             var options = {
@@ -543,10 +666,13 @@ var TripleFactory = (function () {
                         var selectedIds = [];
                         if (Array.isArray(selected)) {
                             selected.forEach(function (node) {
-                                if (node && node.id) selectedIds.push(node.id);
+                                if (node && node.id) {
+                                    selectedIds.push(node.id);
+                                }
                             });
                         }
 
+                    
                         selectedIds = selectedIds.filter(function (id) {
                             return id !== source;
                         });
@@ -555,11 +681,14 @@ var TripleFactory = (function () {
                             return alert("Select at least one table");
                         }
 
-                        var allSelected = selectedIds.length === allTables.length;
+                        // all selected ?
+                        var allSelected = (selectedIds.length === tablesDisplayed.length);
 
                         if (allSelected) {
+                            
                             return self.recreateAllTablesTriples(source, optionsObj);
                         } else {
+                            
                             return self.recreateSelectedTablesTriples(source, selectedIds, optionsObj);
                         }
                     } catch (e) {
@@ -569,7 +698,9 @@ var TripleFactory = (function () {
                 },
             };
 
+            
             JstreeWidget.loadJsTree(null, jstreeData, options, function () {
+            
                 setTimeout(function () {
                     try {
                         $("#jstreeWidget_okButton").html("Recreate");
@@ -581,6 +712,56 @@ var TripleFactory = (function () {
             alert(e.message || String(e));
         }
     };
+
+    function normalizeTableName(name) {
+        if (!name) return "";
+        return String(name).trim();
+    }
+
+    function mergeUniqueTables(dbTables, csvTables) {
+        var csvMap = {};
+        var dbMap = {};
+        var seen = {};
+        var out = [];
+
+        (csvTables || []).forEach(function (t) {
+            var n = normalizeTableName(t);
+            if (n) csvMap[n] = true;
+        });
+
+        (dbTables || []).forEach(function (t) {
+            var n = normalizeTableName(t);
+            if (n) dbMap[n] = true;
+        });
+
+        
+        (dbTables || []).forEach(function (t) {
+            var n = normalizeTableName(t);
+            if (!n) return;
+            if (!seen[n]) {
+                seen[n] = true;
+                out.push(n);
+            }
+        });
+
+        (csvTables || []).forEach(function (t) {
+            var n = normalizeTableName(t);
+            if (!n) return;
+            if (!seen[n]) {
+                seen[n] = true;
+                out.push(n);
+            }
+        });
+
+        return {
+            tables: out,
+            isCsv: function (tableName) {
+                var n = normalizeTableName(tableName);
+                return !!csvMap[n]; 
+            },
+        };
+    }
+
 
     /**
      * Displays the triples data in a table format within the specified div element.

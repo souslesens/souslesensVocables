@@ -13,7 +13,6 @@ module.exports = function () {
         try {
             var body = req.body || {};
             var source = body.source;
-            var table = body.table;
 
             if (!source) {
                 return res.status(400).json({ error: "Parameter 'source' is required" });
@@ -30,7 +29,6 @@ module.exports = function () {
             const out = await recreateGraph.recreateGraphTriples({
                 user: userInfo.user,
                 source: source,
-                table: table,
                 body: body,
             });
 
@@ -41,6 +39,7 @@ module.exports = function () {
                 deleteResult: out.deleteResult,
                 result: out.result,
                 mode: out.mode,
+                tablesProcessed: out.tablesProcessed,
             });
         } catch (e) {
             return res.status(500).json({
@@ -52,20 +51,14 @@ module.exports = function () {
     POST.apiDoc = {
         security: [{ restrictLoggedUser: [] }],
         summary: "delete and recreate triples",
-        description: `
-Deletes existing KGbuilder triples then regenerates them from mappings.
-
-Behavior:
-- If "table" is NOT provided: deletes ALL triples for the source, then recreates triples for ALL mapped tables (one by one).
-- If "table" IS provided: deletes triples for this table only, then recreates triples for this table.
-
-Notes:
-- "options" is a JSON string. It is optional. It can include "clientSocketId" for progress messages (optional).
-- "skipDelete" can be used to skip the delete phase (useful if you manage deletion separately).
-`,
+        description:
+            "Delete and recreate KGBuilder triples.\n\n" +
+            "- If body.table is omitted or []: deletes ALL triples created by KGBuilder for this source, then recreates triples for every table of the source.\n" +
+            "- If body.table is an array of tables: deletes triples for these tables only, then recreates triples for these tables only.\n\n" +
+            "options is optional; clientSocketId is optional (API works in Postman without it).",
         tags: ["KG"],
         consumes: ["application/json"],
-        produces: ["application/json"],
+
         parameters: [
             {
                 name: "body",
@@ -77,63 +70,55 @@ Notes:
                     properties: {
                         source: {
                             type: "string",
-                            description: "SLS source name (must exist in server sources config). Example: 'NEW_PRODOM_IOF'.",
-                            example: "NEW_PRODOM_IOF",
+                            description: "Source identifier (ex: NEW_PRODOM_IOF).",
                         },
-
                         table: {
-                            type: "string",
-                            description: "Optional. If provided: delete + recreate triples ONLY for this table. If omitted: delete + recreate ALL tables of the source.",
-                            example: "document_step_period",
+                            type: "array",
+                            items: { type: "string" },
+                            description:
+                                "Array of tables.\n" +
+                                "- [] or omitted => ALL tables\n" +
+                                '- ["t1"] => only t1\n' +
+                                '- ["t1","t2"] => only t1 and t2',
                         },
-
                         options: {
                             type: "string",
-                            description: `Optional. JSON string passed to the KGbuilder import flow.
-Common fields:
-- clientSocketId (string): enables progress messages through socket (optional).
-Other fields may be supported depending on KGbuilder implementation.
-
-Example: '{"clientSocketId":"abc123"}'`,
-                            example: '{"clientSocketId":"abc123"}',
+                            description:
+                                'Optional JSON string. Example: {"clientSocketId":"..."}.\n' +
+                                "If not provided, the API still works.",
                         },
-
                         skipDelete: {
                             type: "boolean",
-                            description: "Optional. Default false. If true, the API will NOT delete existing triples and will only run the recreate/import phase.",
-                            example: false,
+                            description: "If true, skip deletion step (debug). Default false.",
                         },
                     },
-                    additionalProperties: false,
                 },
             },
         ],
 
         responses: {
             200: {
-                description: "Triples regenerated",
+                description: "Triples deleted (unless skipDelete) then recreated.",
                 schema: {
                     type: "object",
                     properties: {
                         message: { type: "string" },
                         source: { type: "string" },
-                        table: { type: "string", description: "Returned as 'ALL' or the table name." },
-                        mode: {
-                            type: "string",
-                            description: "ONE_TABLE or ALL_TABLES",
-                            enum: ["ONE_TABLE", "ALL_TABLES"],
+                        table: {
+                            description: '"ALL" or array of tables processed.',
+                            type: "object",
                         },
-                        deleteResult: {
-                            description: "Result returned by delete phase (can be null if skipDelete=true).",
-                        },
-                        result: {
-                            description: "Import result. For ONE_TABLE: result object. For ALL_TABLES: map of table->result.",
+                        mode: { type: "string" },
+                        deleteResult: { type: "object" },
+                        result: { type: "object" },
+                        tablesProcessed: {
+                            type: "array",
+                            items: { type: "string" },
                         },
                     },
                 },
             },
-
-            400: { description: "Bad request (missing source)" },
+            400: { description: "Bad request" },
             404: { description: "Source not found" },
             500: { description: "Server error" },
         },
@@ -141,3 +126,4 @@ Example: '{"clientSocketId":"abc123"}'`,
 
     return operations;
 };
+ 

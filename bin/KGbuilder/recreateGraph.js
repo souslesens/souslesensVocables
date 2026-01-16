@@ -28,29 +28,23 @@ function getMappingsDataAsync(source) {
 }
 
 function getOptionsFromBody(body) {
-    var options = {};
-    if (!body || body.options == null) return options;
+    let options = {};
+    if (!body || !body.options) return options;
 
     if (typeof body.options === "string") {
-        var str = body.options.trim();
-        if (!str) return options;
-
         try {
-            var parsed = JSON.parse(str);
+            var parsed = JSON.parse(body.options);
             if (parsed && typeof parsed === "object") {
-                return parsed;
+                options = parsed;
+            } else {
+                options.clientSocketId = body.options;
             }
         } catch (e) {
-            options.clientSocketId = str;
-            return options;
+            options.clientSocketId = body.options;
         }
-        return options;
+    } else if (typeof body.options === "object") {
+        options = body.options;
     }
-
-    if (typeof body.options === "object") {
-        return body.options || {};
-    }
-
     return options;
 }
 
@@ -73,6 +67,7 @@ function getAllTablesFromMappings(mappingData) {
 
     (mappingData.nodes || []).forEach(function (n) {
         if (!n || !n.data) return;
+
         if (MappingParser.columnsMappingsObjects.indexOf(n.data.type) > -1 && n.data.dataTable) {
             tablesWithColumns[n.data.dataTable] = 1;
         }
@@ -80,6 +75,7 @@ function getAllTablesFromMappings(mappingData) {
 
     (mappingData.nodes || []).forEach(function (n) {
         if (!n || !n.data) return;
+
         if (n.data.type === "Table" && n.data.dataTable) {
             if (tablesWithColumns[n.data.dataTable]) {
                 if (tables.indexOf(n.data.dataTable) < 0) {
@@ -92,63 +88,73 @@ function getAllTablesFromMappings(mappingData) {
     return tables;
 }
 
-function importAsync(user, source, datasource, table, options) {
+function normalizeTablesParam(tableParam) {
+ 
+    if (!tableParam) return [];
+    if (Array.isArray(tableParam)) return tableParam;
+    return [tableParam];
+}
+
+function importAsync(user, source, datasource, tablesArray, options) {
     return new Promise(function (resolve, reject) {
-        KGbuilder_main.importTriplesFromCsvOrTable(user, source, datasource, table ? [table] : null, options, function (err, result) {
+        KGbuilder_main.importTriplesFromCsvOrTable(user, source, datasource, tablesArray, options, function (err, result) {
             if (err) return reject(err);
             return resolve(result);
         });
     });
 }
 
+/**
+ * Recreate triples:
+ * - body.table = [] ou absent => delete all + recreate all tables
+ * - body.table = ["t1","t2"]  => delete t1,t2 + recreate t1,t2
+ */
 async function recreateGraphTriples(params) {
     var user = params.user;
     var source = params.source;
-    var table = params.table;
     var body = params.body || {};
-
     var skipDelete = body.skipDelete === true;
 
+  
     let options = getOptionsFromBody(body);
-    options.filterMappingIds = null;
 
+
+    if (typeof options.filterMappingIds === "undefined") {
+        options.filterMappingIds = null;
+    } else {
+        options.filterMappingIds = options.filterMappingIds || null;
+    }
+
+    // mappings
     const mappingData = await getMappingsDataAsync(source);
+
+    
+    var requestedTables = normalizeTablesParam(body.table);
+
+    
+    var targetTables = requestedTables;
+    if (!targetTables || targetTables.length === 0) {
+        targetTables = getAllTablesFromMappings(mappingData);
+    }
 
     // DELETE
     var deleteResult = null;
     if (!skipDelete) {
-        // IMPORTANT: null => delete ALL
-        var tablesArg = table ? [table] : null;
-        deleteResult = await deleteKGBuilderTriplesAsync(source, tablesArg, options);
+        var tablesArgForDelete = requestedTables && requestedTables.length > 0 ? targetTables : [];
+        deleteResult = await deleteKGBuilderTriplesAsync(source, tablesArgForDelete, options);
     }
 
-    // RECREATE
-    if (table) {
-        let datasource = getDatasourceFromMappings(mappingData, table);
-        const importResult = await importAsync(user, source, datasource, table, options);
-        return {
-            deleteResult: deleteResult,
-            result: importResult,
-            mode: "ONE_TABLE",
-            table: table,
-        };
-    }
+ 
+    var datasource = null;
 
-    const tables = getAllTablesFromMappings(mappingData);
-
-    var resultsByTable = {};
-    for (var i = 0; i < tables.length; i++) {
-        var t = tables[i];
-        let datasource = getDatasourceFromMappings(mappingData, t);
-        const r = await importAsync(user, source, datasource, t, options);
-        resultsByTable[t] = r;
-    }
+    const importResult = await importAsync(user, source, datasource, targetTables, options);
 
     return {
         deleteResult: deleteResult,
-        result: resultsByTable,
-        mode: "ALL_TABLES",
-        table: "ALL",
+        result: importResult,
+        mode: requestedTables && requestedTables.length > 0 ? "SELECTED_TABLES" : "ALL_TABLES",
+        table: requestedTables && requestedTables.length > 0 ? targetTables : "ALL",
+        tablesProcessed: targetTables,
     };
 }
 

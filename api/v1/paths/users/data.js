@@ -1,6 +1,6 @@
-import { userDataModel } from '../../../../model/userData.js';
-import { cleanUserData } from '../../../../model/cleanUserData.js';
-import userManager from '../../../../bin/user.js';
+import { userDataModel } from "../../../../model/userData.js";
+import { cleanUserData } from "../../../../model/cleanUserData.js";
+import userManager from "../../../../bin/user.js";
 
 export default () => {
     const GET = async (req, res, _next) => {

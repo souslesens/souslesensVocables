@@ -1,10 +1,10 @@
-import ConfigManager from '../configManager.js';
-import httpProxy from '../httpProxy.js';
-import async from 'async';
-import util from '../util.js';
-import KGbuilder_socket from './KGbuilder_socket.js';
-import * as modelUtils from '../../model/utils.js';
-import TriplesMaker from './triplesMaker.js';
+import ConfigManager from "../configManager.js";
+import httpProxy from "../httpProxy.js";
+import async from "async";
+import util from "../util.js";
+import KGbuilder_socket from "./KGbuilder_socket.js";
+import * as modelUtils from "../../model/utils.js";
+import TriplesMaker from "./triplesMaker.js";
 
 const KGbuilder_triplesWriter = {
     sparqlPrefixes: {

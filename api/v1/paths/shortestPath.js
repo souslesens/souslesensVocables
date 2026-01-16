@@ -1,7 +1,7 @@
-import { processResponse } from './utils.js';
-import GraphTraversal from '../../../bin/graphTraversal.js';
-import ConfigManager from '../../../bin/configManager.js';
-import UserRequestFiltering from '../../../bin/userRequestFiltering.js';
+import { processResponse } from "./utils.js";
+import GraphTraversal from "../../../bin/graphTraversal.js";
+import ConfigManager from "../../../bin/configManager.js";
+import UserRequestFiltering from "../../../bin/userRequestFiltering.js";
 
 export default function () {
     let operations = {
@@ -99,4 +99,4 @@ export default function () {
     };
 
     return operations;
-};
+}

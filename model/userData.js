@@ -1,9 +1,9 @@
-import fs from 'fs';
-import path from 'path';
-import ULID from 'ulid';
-import { z } from 'zod';
-import { cleanupConnection, getKnexConnection } from './utils.js';
-import { readMainConfig } from './config.js';
+import fs from "fs";
+import path from "path";
+import ULID from "ulid";
+import { z } from "zod";
+import { cleanupConnection, getKnexConnection } from "./utils.js";
+import { readMainConfig } from "./config.js";
 
 const UserDataObject = z
     .object({
@@ -362,4 +362,4 @@ class UserDataModel {
 }
 
 const userDataModel = new UserDataModel();
-export {  UserDataModel, userDataModel  };
+export { UserDataModel, userDataModel };

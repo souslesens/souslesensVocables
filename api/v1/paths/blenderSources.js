@@ -1,6 +1,6 @@
-import { blenderSources } from '../../../model/blenderSources.js';
-import configManager from '../../../bin/configManager.js';
-import { responseSchema, processResponse, successfullyFetched } from './utils.js';
+import { blenderSources } from "../../../model/blenderSources.js";
+import configManager from "../../../bin/configManager.js";
+import { responseSchema, processResponse, successfullyFetched } from "./utils.js";
 export default function () {
     let operations = {
         GET,
@@ -88,4 +88,4 @@ export default function () {
         tags: ["Sources"],
     };
     return operations;
-};
+}

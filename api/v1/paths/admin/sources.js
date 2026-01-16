@@ -1,8 +1,9 @@
-import path from 'path';
-import { sourceModel } from '../../../../model/sources.js';
-import { userModel } from '../../../../model/users.js';
-import { responseSchema } from './../utils.js';import userManager from "../../../../bin/user.js";
-import { successfullyFetched, successfullyCreated, fixBooleanInObject } from './../utils.js';
+import path from "path";
+import { sourceModel } from "../../../../model/sources.js";
+import { userModel } from "../../../../model/users.js";
+import { responseSchema } from "./../utils.js";
+import userManager from "../../../../bin/user.js";
+import { successfullyFetched, successfullyCreated, fixBooleanInObject } from "./../utils.js";
 export default function () {
     let operations = {
         GET,
@@ -87,4 +88,4 @@ export default function () {
     };
 
     return operations;
-};
+}

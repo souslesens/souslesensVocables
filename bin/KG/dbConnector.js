@@ -1,4 +1,4 @@
-import knex from 'knex';
+import knex from "knex";
 
 function getConnection(database, driver) {
     return knex({

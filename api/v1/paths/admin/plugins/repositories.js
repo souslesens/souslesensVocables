@@ -1,5 +1,5 @@
-import { toolModel } from '../../../../../model/tools.js';
-import { responseSchema } from '../../utils.js';
+import { toolModel } from "../../../../../model/tools.js";
+import { responseSchema } from "../../utils.js";
 
 export default function () {
     const operations = { GET };
@@ -23,4 +23,4 @@ export default function () {
     };
 
     return operations;
-};
+}

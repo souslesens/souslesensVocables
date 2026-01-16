@@ -1,13 +1,9 @@
-import path from 'path';
-import { sourceModel } from '../../../model/sources.js';
-import { userModel } from '../../../model/users.js';
+import path from "path";
+import { sourceModel } from "../../../model/sources.js";
+import { userModel } from "../../../model/users.js";
 
-import {
-    responseSchema,
-    successfullyFetched,
-    successfullyCreated,
-    fixBooleanInObject,
-} from './utils.js';import userManager from "../../../bin/user.js";
+import { responseSchema, successfullyFetched, successfullyCreated, fixBooleanInObject } from "./utils.js";
+import userManager from "../../../bin/user.js";
 
 export default function () {
     let operations = {
@@ -97,4 +93,4 @@ export default function () {
     };
 
     return operations;
-};
+}

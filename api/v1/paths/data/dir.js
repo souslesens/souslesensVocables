@@ -1,4 +1,4 @@
-import dataController from '../../../../bin/dataController.js';
+import dataController from "../../../../bin/dataController.js";
 
 export default function () {
     const operations = {
@@ -50,4 +50,4 @@ export default function () {
         tags: ["Data"],
     };
     return operations;
-};
+}

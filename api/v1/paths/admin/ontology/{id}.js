@@ -1,4 +1,4 @@
-import RDF_IO from '../../../../../bin/RDF_IO.js';
+import RDF_IO from "../../../../../bin/RDF_IO.js";
 
 export default function () {
     let operations = {
@@ -41,4 +41,4 @@ export default function () {
         tags: ["Ontology"],
     };
     return operations;
-};
+}

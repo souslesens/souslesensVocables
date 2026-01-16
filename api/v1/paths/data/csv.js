@@ -1,4 +1,4 @@
-import dataController from '../../../../bin/dataController.js';
+import dataController from "../../../../bin/dataController.js";
 
 export default function () {
     let operations = {
@@ -61,4 +61,4 @@ export default function () {
     };
 
     return operations;
-};
+}

@@ -10,17 +10,17 @@
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { userModel } from '../model/users.js';
+import { userModel } from "../model/users.js";
 
-import { profileModel } from '../model/profiles.js';
-import passport from 'passport';
-import LocalStrategy from 'passport-local';
-import Auth0Strategy from 'passport-auth0';
-import { Strategy as KeyCloakStrategy } from 'passport-keycloak-oauth2-oidc';
-import ULID from 'ulid';
+import { profileModel } from "../model/profiles.js";
+import passport from "passport";
+import LocalStrategy from "passport-local";
+import Auth0Strategy from "passport-auth0";
+import { Strategy as KeyCloakStrategy } from "passport-keycloak-oauth2-oidc";
+import ULID from "ulid";
 
 // Get config
-import { readMainConfig } from '../model/config.js';
+import { readMainConfig } from "../model/config.js";
 
 const config = readMainConfig();
 

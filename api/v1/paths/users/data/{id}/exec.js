@@ -1,12 +1,12 @@
-import fs from 'node:fs';
-import { readMainConfig } from '../../../../../../model/config.js';
-import { userDataModel } from '../../../../../../model/userData.js';
-import { RdfDataModel } from '../../../../../../model/rdfData.js';
-import userManager from '../../../../../../bin/user.js';
-import UserRequestFiltering from '../../../../../../bin/userRequestFiltering.js';
-import ConfigManager from '../../../../../../bin/configManager.js';
-import { Template } from '@huggingface/jinja';
-import { RDF_FORMATS_MIMETYPES } from '../../../../../../model/utils.js';
+import fs from "node:fs";
+import { readMainConfig } from "../../../../../../model/config.js";
+import { userDataModel } from "../../../../../../model/userData.js";
+import { RdfDataModel } from "../../../../../../model/rdfData.js";
+import userManager from "../../../../../../bin/user.js";
+import UserRequestFiltering from "../../../../../../bin/userRequestFiltering.js";
+import ConfigManager from "../../../../../../bin/configManager.js";
+import { Template } from "@huggingface/jinja";
+import { RDF_FORMATS_MIMETYPES } from "../../../../../../model/utils.js";
 //const RemoteCodeRunner = require("../../../../../bin/remoteCodeRunner.js.js");
 
 export default () => {

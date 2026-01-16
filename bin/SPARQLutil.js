@@ -1,6 +1,6 @@
-import async from 'async';
-import util from '../bin/util.js';
-import httpProxy from '../bin/httpProxy.js';
+import async from "async";
+import util from "../bin/util.js";
+import httpProxy from "../bin/httpProxy.js";
 
 var SPARQLutil = {
     generateTriples: function (graphUri, triples, replaceGraph, callback) {

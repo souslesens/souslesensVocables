@@ -1,4 +1,4 @@
-import { mainConfigModel } from '../../../model/mainConfig.js';
+import { mainConfigModel } from "../../../model/mainConfig.js";
 
 export default function () {
     let operations = {
@@ -71,4 +71,4 @@ export default function () {
     };
 
     return operations;
-};
+}

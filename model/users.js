@@ -1,10 +1,10 @@
-import bcrypt from 'bcrypt';
-import { readMainConfig } from './config.js';
-import { cleanupConnection, getKnexConnection } from './utils.js';
-import { userDataModel } from './userData.js';
-import ULID from 'ulid';
-import { createHash } from 'crypto';
-import z from 'zod';
+import bcrypt from "bcrypt";
+import { readMainConfig } from "./config.js";
+import { cleanupConnection, getKnexConnection } from "./utils.js";
+import { userDataModel } from "./userData.js";
+import ULID from "ulid";
+import { createHash } from "crypto";
+import z from "zod";
 
 /**
  * @typedef {import("./UserTypes").UserAccountWithPassword} UserAccountWithPassword
@@ -297,4 +297,4 @@ class UserModel {
 
 const userModel = new UserModel();
 
-export {  UserModel, userModel  };
+export { UserModel, userModel };

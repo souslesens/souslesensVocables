@@ -1,4 +1,4 @@
-import { indexModel } from '../../../../model/index.js';
+import { indexModel } from "../../../../model/index.js";
 
 export default function () {
     const operations = {
@@ -40,4 +40,4 @@ export default function () {
         tags: ["ElasticSearch"],
     };
     return operations;
-};
+}

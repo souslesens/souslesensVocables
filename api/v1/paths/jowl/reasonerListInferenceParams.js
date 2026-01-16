@@ -1,6 +1,6 @@
-import ConfigManager from '../../../../bin/configManager.js';
-import { processResponse } from '../utils.js';
-import request from 'request';
+import ConfigManager from "../../../../bin/configManager.js";
+import { processResponse } from "../utils.js";
+import request from "request";
 
 export default function () {
     let operations = {
@@ -43,4 +43,4 @@ export default function () {
     };
 
     return operations;
-};
+}

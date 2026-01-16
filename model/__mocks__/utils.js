@@ -1,7 +1,7 @@
-import fs from 'fs';
-import os from 'os';
-import path from 'path';
-import knex from 'knex';
+import fs from "fs";
+import os from "os";
+import path from "path";
+import knex from "knex";
 
 const utils = jest.createMockFromModule("./utils");
 

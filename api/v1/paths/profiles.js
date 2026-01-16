@@ -1,7 +1,7 @@
-import { profileModel } from '../../../model/profiles.js';
-import { userModel } from '../../../model/users.js';
-import { resourceFetched, responseSchema } from './utils.js';
-import userManager from '../../../bin/user.js';
+import { profileModel } from "../../../model/profiles.js";
+import { userModel } from "../../../model/users.js";
+import { resourceFetched, responseSchema } from "./utils.js";
+import userManager from "../../../bin/user.js";
 
 export default function () {
     let operations = {
@@ -32,4 +32,4 @@ export default function () {
         tags: ["Profiles"],
     };
     return operations;
-};
+}

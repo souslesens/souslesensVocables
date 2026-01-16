@@ -1,6 +1,6 @@
-import fs from 'fs';
-import path from 'path';
-import { mainConfigModel } from '../../../../model/mainConfig.js';
+import fs from "fs";
+import path from "path";
+import { mainConfigModel } from "../../../../model/mainConfig.js";
 
 export default () => {
     const operations = { GET };

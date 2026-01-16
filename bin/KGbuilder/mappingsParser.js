@@ -1,8 +1,8 @@
-import path from 'path';
-import async from 'async';
-import fs from 'fs';
+import path from "path";
+import async from "async";
+import fs from "fs";
 
-import { fileURLToPath } from 'url';
+import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 

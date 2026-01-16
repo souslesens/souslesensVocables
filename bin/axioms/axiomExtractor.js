@@ -1,5 +1,5 @@
-import util from '../util.js';
-import { parseString } from 'xml2js';
+import util from "../util.js";
+import { parseString } from "xml2js";
 
 var AxiomExtractor = {
     xxx: function () {
@@ -89,7 +89,8 @@ var directDraw = function () {
 
 directDraw();
 
-/**import fs from "fs";
+/**
+import fs from "fs";
  var file="C:\\Users\\claud\\Downloads\\VaccineOntology.ttl"
 
  var str=""+fs.readFileSync(file)

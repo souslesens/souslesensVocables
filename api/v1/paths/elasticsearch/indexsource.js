@@ -1,9 +1,10 @@
-import path from 'path';import elasticRestProxy from "../../../../bin/elasticRestProxy.js";
-import ConfigManager from '../../../../bin/configManager.js';
-import UserRequestFiltering from '../../../../bin/userRequestFiltering.js';
-import { processResponse } from '../utils.js';
-import { sourceModel } from '../../../../model/sources.js';
-import async from 'async';
+import path from "path";
+import elasticRestProxy from "../../../../bin/elasticRestProxy.js";
+import ConfigManager from "../../../../bin/configManager.js";
+import UserRequestFiltering from "../../../../bin/userRequestFiltering.js";
+import { processResponse } from "../utils.js";
+import { sourceModel } from "../../../../model/sources.js";
+import async from "async";
 
 export default function () {
     let operations = {
@@ -166,4 +167,4 @@ export default function () {
     };
 
     return operations;
-};
+}

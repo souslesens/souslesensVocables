@@ -1,5 +1,5 @@
-import { sourceModel } from '../../../../model/sources.js';
-import userManager from '../../../../bin/user.js';
+import { sourceModel } from "../../../../model/sources.js";
+import userManager from "../../../../bin/user.js";
 
 export default function () {
     let operations = {
@@ -81,4 +81,4 @@ export default function () {
         tags: ["Sources"],
     };
     return operations;
-};
+}

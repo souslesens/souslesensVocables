@@ -1,5 +1,5 @@
-import { processResponse } from './utils.js';
-import ExportGraph from '../../../bin/exportGraph.js';
+import { processResponse } from "./utils.js";
+import ExportGraph from "../../../bin/exportGraph.js";
 
 export default function () {
     let operations = {
@@ -46,4 +46,4 @@ export default function () {
     };
 
     return operations;
-};
+}

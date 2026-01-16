@@ -1,4 +1,5 @@
-import path from 'path';import annotatorLive from "../../../bin/annotatorLive.js";
+import path from "path";
+import annotatorLive from "../../../bin/annotatorLive.js";
 
 export default function () {
     let operations = {
@@ -64,4 +65,4 @@ export default function () {
     };
 
     return operations;
-};
+}

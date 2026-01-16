@@ -1,8 +1,8 @@
-import fs from 'fs';
-import path from 'path';
-import csvCrawler from '../bin/_csvCrawler.js';
+import fs from "fs";
+import path from "path";
+import csvCrawler from "../bin/_csvCrawler.js";
 
-import { fileURLToPath } from 'url';
+import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 

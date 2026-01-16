@@ -1,6 +1,6 @@
-import fs from 'fs';
-import csv from 'csv-parser';
-import util from './util.js';
+import fs from "fs";
+import csv from "csv-parser";
+import util from "./util.js";
 
 var SQLutil = {
     csvToJson: function (csvFilePath, sliceLength, callback) {

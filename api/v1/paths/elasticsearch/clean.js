@@ -1,5 +1,5 @@
-import { sourceModel } from '../../../../model/sources.js';
-import { indexModel } from '../../../../model/index.js';
+import { sourceModel } from "../../../../model/sources.js";
+import { indexModel } from "../../../../model/index.js";
 
 export default function () {
     let operations = {
@@ -106,4 +106,4 @@ export default function () {
     };
 
     return operations;
-};
+}

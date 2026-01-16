@@ -1,11 +1,11 @@
-import { rdfDataModel } from '../../../../model/rdfData.js';
-import { mainConfigModel } from '../../../../model/mainConfig.js';
-import userManager from '../../../../bin/user.js';
-import { sourceModel } from '../../../../model/sources.js';
-import { ulid } from 'ulid';
-import path from 'path';
-import fs from 'fs';
-import os from 'node:os';
+import { rdfDataModel } from "../../../../model/rdfData.js";
+import { mainConfigModel } from "../../../../model/mainConfig.js";
+import userManager from "../../../../bin/user.js";
+import { sourceModel } from "../../../../model/sources.js";
+import { ulid } from "ulid";
+import path from "path";
+import fs from "fs";
+import os from "node:os";
 
 export default function () {
     let operations = {
@@ -248,4 +248,4 @@ export default function () {
     };
 
     return operations;
-};
+}

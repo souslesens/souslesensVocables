@@ -1,7 +1,8 @@
-import path from 'path';import elasticRestProxy from "../../../../bin/elasticRestProxy.js";
-import ConfigManager from '../../../../bin/configManager.js';
-import UserRequestFiltering from '../../../../bin/userRequestFiltering.js';
-import { processResponse } from '../utils.js';
+import path from "path";
+import elasticRestProxy from "../../../../bin/elasticRestProxy.js";
+import ConfigManager from "../../../../bin/configManager.js";
+import UserRequestFiltering from "../../../../bin/userRequestFiltering.js";
+import { processResponse } from "../utils.js";
 
 export default function () {
     let operations = {
@@ -80,4 +81,4 @@ export default function () {
     };
 
     return operations;
-};
+}

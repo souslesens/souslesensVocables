@@ -1,4 +1,4 @@
-import { databaseModel } from '../../../../../../model/databases.js';
+import { databaseModel } from "../../../../../../model/databases.js";
 
 export default function () {
     let operations = { GET };
@@ -48,4 +48,4 @@ export default function () {
     };
 
     return operations;
-};
+}

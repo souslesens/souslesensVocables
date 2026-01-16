@@ -8,17 +8,17 @@
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import async from 'async';
+import async from "async";
 
-import fs from 'fs';
-import httpProxy from './httpProxy.js';
-import util from './util.js';
-import path from 'path';
+import fs from "fs";
+import httpProxy from "./httpProxy.js";
+import util from "./util.js";
+import path from "path";
 
 //const { configPath } = require("../model/config.js");
-import jsonFileStorage from './jsonFileStorage.js';
+import jsonFileStorage from "./jsonFileStorage.js";
 
-import { fileURLToPath } from 'url';
+import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 

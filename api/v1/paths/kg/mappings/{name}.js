@@ -1,4 +1,5 @@
-import path from 'path';import kGcontroller from "../../../../../bin/KG/KGcontroller.js";
+import path from "path";
+import kGcontroller from "../../../../../bin/KG/KGcontroller.js";
 
 export default function () {
     let operations = {
@@ -41,4 +42,4 @@ export default function () {
     };
 
     return operations;
-};
+}

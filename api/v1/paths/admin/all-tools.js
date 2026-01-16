@@ -1,5 +1,5 @@
-import { toolModel } from '../../../../model/tools.js';
-import { resourceFetched, responseSchema } from '../utils.js';
+import { toolModel } from "../../../../model/tools.js";
+import { resourceFetched, responseSchema } from "../utils.js";
 
 export default function () {
     let operations = { GET };
@@ -24,4 +24,4 @@ export default function () {
     };
 
     return operations;
-};
+}

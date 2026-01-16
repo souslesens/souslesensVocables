@@ -1,6 +1,6 @@
-import KGbuilder_main from '../../../../bin/KGbuilder/KGbuilder_main.js';
-import { processResponse } from '../utils.js';
-import userManager from '../../../../bin/user.js';
+import KGbuilder_main from "../../../../bin/KGbuilder/KGbuilder_main.js";
+import { processResponse } from "../utils.js";
+import userManager from "../../../../bin/user.js";
 
 export default function () {
     let operations = {
@@ -107,4 +107,4 @@ export default function () {
     }
 
     return operations;
-};
+}

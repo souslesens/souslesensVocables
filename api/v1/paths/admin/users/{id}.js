@@ -1,5 +1,5 @@
-import fs from 'fs';
-import { userModel } from '../../../../../model/users.js';
+import fs from "fs";
+import { userModel } from "../../../../../model/users.js";
 
 export default function () {
     let operations = {
@@ -72,4 +72,4 @@ export default function () {
     };
 
     return operations;
-};
+}

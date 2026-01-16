@@ -1,12 +1,6 @@
-import { userModel } from '../../../../model/users.js';
+import { userModel } from "../../../../model/users.js";
 
-import {
-    sortObjectByKey,
-    responseSchema,
-    successfullyUpdated,
-    successfullyCreated,
-    successfullyFetched,
-} from '../utils.js';
+import { sortObjectByKey, responseSchema, successfullyUpdated, successfullyCreated, successfullyFetched } from "../utils.js";
 
 export default function () {
     ///// GET api/v1/admin/users
@@ -86,4 +80,4 @@ export default function () {
         POST,
         PUT,
     };
-};
+}

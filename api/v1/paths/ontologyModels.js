@@ -1,4 +1,4 @@
-import { processResponse } from './utils.js';
+import { processResponse } from "./utils.js";
 
 var ontologyModelsCache = {};
 export default function () {
@@ -229,4 +229,4 @@ export default function () {
     }
 
     return operations;
-};
+}

@@ -1,11 +1,11 @@
-import { processResponse } from '../utils.js';
-import ConfigManager from '../../../../bin/configManager.js';
-import GraphStore from '../../../../bin/graphStore.js';
-import async2 from 'async';
-import request from 'request';
-import httpProxy from '../../../../bin/httpProxy.js';
-import Util from '../../../../bin/util.js';
-import { sourceModel } from '../../../../model/sources.js';
+import { processResponse } from "../utils.js";
+import ConfigManager from "../../../../bin/configManager.js";
+import GraphStore from "../../../../bin/graphStore.js";
+import async2 from "async";
+import request from "request";
+import httpProxy from "../../../../bin/httpProxy.js";
+import Util from "../../../../bin/util.js";
+import { sourceModel } from "../../../../model/sources.js";
 
 export default function () {
     let operations = {
@@ -334,4 +334,4 @@ export default function () {
     };
 
     return operations;
-};
+}

@@ -1,7 +1,7 @@
-import { readMainConfig } from './config.js';
-import DigestClient from 'digest-fetch';
-import fetch from 'node-fetch';
-import { RDF_FORMATS_MIMETYPES, sleep } from './utils.js';
+import { readMainConfig } from "./config.js";
+import DigestClient from "digest-fetch";
+import fetch from "node-fetch";
+import { RDF_FORMATS_MIMETYPES, sleep } from "./utils.js";
 class RdfDataModel {
     /**
      * @param {string} endpointUrl - url of endpoint
@@ -279,4 +279,4 @@ const config = readMainConfig();
 
 const rdfDataModel = new RdfDataModel(config.sparql_server.url, config.sparql_server.user, config.sparql_server.password);
 
-export {  RdfDataModel, rdfDataModel  };
+export { RdfDataModel, rdfDataModel };

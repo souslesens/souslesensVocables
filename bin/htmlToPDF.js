@@ -1,5 +1,5 @@
-import wkhtmltopdf from 'wkhtmltopdf';
-import fs from 'fs';
+import wkhtmltopdf from "wkhtmltopdf";
+import fs from "fs";
 
 var HtmlToPDF = {
     writePdf: function (html, pdfFileName) {

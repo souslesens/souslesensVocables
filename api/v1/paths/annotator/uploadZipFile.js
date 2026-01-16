@@ -1,5 +1,5 @@
-import DirContentAnnotator from '../../../../bin/annotator/dirContentAnnotator.js';
-import { processResponse } from '../utils.js';
+import DirContentAnnotator from "../../../../bin/annotator/dirContentAnnotator.js";
+import { processResponse } from "../utils.js";
 
 export default function () {
     let operations = {
@@ -50,4 +50,4 @@ export default function () {
     };
 
     return operations;
-};
+}

@@ -1,5 +1,5 @@
-import { profileModel } from '../../../../../model/profiles.js';
-import userManager from '../../../../../bin/user.js';
+import { profileModel } from "../../../../../model/profiles.js";
+import userManager from "../../../../../bin/user.js";
 
 export default function () {
     let operations = {
@@ -104,4 +104,4 @@ export default function () {
     };
 
     return operations;
-};
+}

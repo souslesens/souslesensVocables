@@ -1,7 +1,7 @@
-import fs from 'fs';
-import { Lock } from 'async-await-mutex-lock';
-import { config, configSourcesPath } from './config.js';
-import { profileModel } from './profiles.js';
+import fs from "fs";
+import { Lock } from "async-await-mutex-lock";
+import { config, configSourcesPath } from "./config.js";
+import { profileModel } from "./profiles.js";
 
 /**
  * @typedef {import("./UserTypes").UserAccount} UserAccount
@@ -297,4 +297,4 @@ class SourceModel {
 
 const sourceModel = new SourceModel(profileModel, configSourcesPath);
 
-export {  SourceModel, sourceModel  };
+export { SourceModel, sourceModel };

@@ -1,10 +1,10 @@
-import ManchesterSyntaxEngine from '../../../../bin/axioms/manchesterSyntaxEngine.js';
+import ManchesterSyntaxEngine from "../../../../bin/axioms/manchesterSyntaxEngine.js";
 
 //import    ManchesterSyntaxEngine from  "../../../../bin/axioms/manchesterSyntaxEngine.js";
 
-import httpProxy from '../../../../bin/httpProxy.js';
+import httpProxy from "../../../../bin/httpProxy.js";
 
-import { processResponse } from '../utils.js';
+import { processResponse } from "../utils.js";
 export default function () {
     let operations = {
         GET,
@@ -75,4 +75,4 @@ export default function () {
     };
 
     return operations;
-};
+}

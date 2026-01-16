@@ -1,6 +1,6 @@
-import { rdfDataModel } from '../../../../../model/rdfData.js';
-import userManager from '../../../../../bin/user.js';
-import { sourceModel } from '../../../../../model/sources.js';
+import { rdfDataModel } from "../../../../../model/rdfData.js";
+import userManager from "../../../../../bin/user.js";
+import { sourceModel } from "../../../../../model/sources.js";
 
 export default function () {
     let operations = {
@@ -120,4 +120,4 @@ export default function () {
     };
 
     return operations;
-};
+}

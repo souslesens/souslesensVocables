@@ -27,7 +27,7 @@ jobs:
                   cache: "npm"
             - run: npm ci
             - run: mkdir -p ./tests/coverage
-            - run: NODE_OPTIONS="--experimental-vm-modules" npx jest --coverage --rootDir tests --coverageReporters json-summary text --all | tee ./tests/coverage/coverage.txt && exit ${PIPESTATUS[0]}
+            - run: npx jest --coverage --rootDir tests --coverageReporters json-summary text --all | tee ./tests/coverage/coverage.txt && exit ${PIPESTATUS[0]}
             - name: Jest Coverage Comment
               uses: MishaKav/jest-coverage-comment@main
               with:

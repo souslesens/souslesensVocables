@@ -149,6 +149,12 @@ var MappingParser = {
     getColumnToColumnMappings: function (mappingData, table, filterMappingIds, allColumnsMappings) {
         var columnsMap = {};
         var edgeMap = {};
+
+        // ✅ filterMappingIds peut être: null / undefined / [] / array non vide
+        // - si array non vide => on filtre
+        // - sinon => on ne filtre pas (on garde toutes les edges column->column)
+        var hasFilter = Array.isArray(filterMappingIds) && filterMappingIds.length > 0;
+
         mappingData.nodes.forEach(function (node) {
             if (node.data && MappingParser.columnsMappingsObjects.includes(node.data.type) && node.data.dataTable == table) {
                 columnsMap[node.id] = node;
@@ -156,29 +162,35 @@ var MappingParser = {
         });
 
         mappingData.edges.forEach(function (edge) {
-            if (columnsMap[edge.from] && columnsMap[edge.to] && filterMappingIds.indexOf(edge.id) > -1) {
+            if (columnsMap[edge.from] && columnsMap[edge.to] && (!hasFilter || filterMappingIds.indexOf(edge.id) > -1)) {
                 var fromColumn = columnsMap[edge.from];
                 var toColumn = columnsMap[edge.to];
+
                 if (fromColumn.data.definedInColumn) {
                     fromColumn = allColumnsMappings[fromColumn.data.definedInColumn];
                 } else {
                     fromColumn = fromColumn.data;
                 }
+
                 if (toColumn.data.definedInColumn) {
                     toColumn = allColumnsMappings[toColumn.data.definedInColumn];
                 } else {
                     toColumn = toColumn.data;
                 }
-                //if edge is not from rdf, rdfs or owl   and if fome and to are rdf;typeClass the edge represents a restriction
-                if (edge.data.id.indexOf("owl") < 0 && edge.data.id.indexOf("rdf") < 0) {
+
+                //if edge is not from rdf, rdfs or owl and if from and to are rdf:typeClass the edge represents a restriction
+                if (edge.data && edge.data.id && edge.data.id.indexOf("owl") < 0 && edge.data.id.indexOf("rdf") < 0) {
                     var isRestriction = fromColumn.rdfType == "owl:Class" && toColumn.rdfType == "owl:Class";
                     edge.isRestriction = isRestriction;
                 }
+
                 edgeMap[edge.id] = edge;
             }
         });
+
         return edgeMap;
     },
+
     getOtherPredicates: function (columnData) {
         var mappings = [];
         if (columnData.otherPredicates) {

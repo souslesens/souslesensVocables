@@ -318,17 +318,419 @@ var TripleFactory = (function () {
         });
     };
 
+    function getCurrentSource() {
+        if (DataSourceManager && DataSourceManager.currentSlsvSource) {
+            return DataSourceManager.currentSlsvSource;
+        }
+        return null;
+    }
+
+    function getDbTables() {
+        try {
+            if (DataSourceManager && DataSourceManager.currentConfig && DataSourceManager.currentConfig.currentDataSource && DataSourceManager.currentConfig.currentDataSource.tables) {
+                return Object.keys(DataSourceManager.currentConfig.currentDataSource.tables);
+            }
+        } catch (e) {}
+        return [];
+    }
+
+    function getCsvTables() {
+        try {
+            if (DataSourceManager && DataSourceManager.currentConfig && DataSourceManager.currentConfig.csvSources) {
+                return Object.keys(DataSourceManager.currentConfig.csvSources);
+            }
+        } catch (e) {}
+        return [];
+    }
+
+    function getStatsMap() {
+        if (DataSourceManager && DataSourceManager.statsMap) {
+            return DataSourceManager.statsMap;
+        }
+        return {};
+    }
+
+    function buildOptions() {
+        var options = {};
+        if (typeof Config !== "undefined" && Config && Config.clientSocketId) {
+            options.clientSocketId = Config.clientSocketId;
+        }
+        return options;
+    }
+
+    function ajaxRecreate(payload, onSuccess, onError) {
+        $.ajax({
+            type: "POST",
+            url: "/api/v1/kg/mappings/recreateTriples",
+            data: JSON.stringify(payload),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (data) {
+                if (onSuccess) onSuccess(data);
+            },
+            error: function (xhr) {
+                var msg = "Internal Server Error";
+                try {
+                    if (xhr && xhr.responseJSON && xhr.responseJSON.error) {
+                        msg = xhr.responseJSON.error;
+                    } else if (xhr && xhr.responseText) {
+                        msg = xhr.responseText;
+                    }
+                } catch (e) {}
+                if (onError) onError(xhr, msg);
+            },
+        });
+    }
+
+    function attachRecreateDeleteProgressListener() {
+        if (!window.SocketManager || !SocketManager.socket) {
+            return null;
+        }
+
+        var handler = function (msg) {
+            // msg = {tableTotalRecords, operation:'deleteTriples', totalSize}
+            if (!msg || msg.operation !== "deleteTriples") {
+                return;
+            }
+
+            UI.message("Delete progress: " + msg.totalSize + " / " + msg.tableTotalRecords);
+        };
+
+        SocketManager.socket.on("KGbuilder", handler);
+
+        return function detach() {
+            try {
+                SocketManager.socket.off("KGbuilder", handler);
+            } catch (e) {
+                try {
+                    SocketManager.socket.removeListener("KGbuilder", handler);
+                } catch (e2) {}
+            }
+        };
+    }
+
+    self.recreateAllTablesTriples = function (source, optionsObj) {
+        var payload = {
+            source: source,
+            options: JSON.stringify(optionsObj || {}),
+        };
+        var detach = attachRecreateDeleteProgressListener();
+        ajaxRecreate(
+            payload,
+            function (data) {
+                console.log("Recreate ALL OK", data);
+            },
+            function (xhr, msg) {
+                console.error("Recreate ALL ERROR", xhr);
+                alert(msg);
+            },
+        );
+    };
+
+    self.recreateOneTableTriples = function (source, table, optionsObj, doneCb) {
+        var payload = {
+            source: source,
+            table: table,
+            options: JSON.stringify(optionsObj || {}),
+        };
+        var detach = attachRecreateDeleteProgressListener();
+        ajaxRecreate(
+            payload,
+            function (data) {
+                console.log("Recreate table OK:", table, data);
+                if (doneCb) doneCb(null, data);
+            },
+            function (xhr, msg) {
+                console.error("Recreate table ERROR:", table, xhr);
+                alert("Error recreating table " + table + "\n\n" + msg);
+                if (doneCb) doneCb(new Error(msg));
+            },
+        );
+    };
+
+    self.recreateSelectedTablesTriples = function (source, tables, optionsObj) {
+        if (!Array.isArray(tables) || tables.length === 0) {
+            return alert("No table selected");
+        }
+
+        var i = 0;
+
+        function next() {
+            if (i >= tables.length) {
+                console.log("Recreate selected finished");
+                return;
+            }
+
+            var t = tables[i];
+            i++;
+
+            self.recreateOneTableTriples(source, t, optionsObj, function (err) {
+                if (err) return;
+                next();
+            });
+        }
+
+        next();
+    };
+
     /**
      * Generates KGcreator triples for the entire datasource, deleting any previous triples before creating new ones.
      * It proceeds with a series of steps: deleting old triples, creating new triples, and reindexing the graph.
      *
      * @function
-     * @name createAllMappingsTriples
+     * @name recreateGraphSelectTables
      * @memberof module:TripleFactory
      */
-    self.createAllMappingsTriples = function () {
-        alert("under construction");
+
+    function getCurrentSource() {
+        if (DataSourceManager && DataSourceManager.currentSlsvSource) {
+            return DataSourceManager.currentSlsvSource;
+        }
+        return null;
+    }
+
+    function getDbTables() {
+        try {
+            if (DataSourceManager && DataSourceManager.currentConfig && DataSourceManager.currentConfig.currentDataSource && DataSourceManager.currentConfig.currentDataSource.tables) {
+                return Object.keys(DataSourceManager.currentConfig.currentDataSource.tables);
+            }
+        } catch (e) {}
+        return [];
+    }
+
+    function getCsvTables() {
+        try {
+            if (DataSourceManager && DataSourceManager.currentConfig && DataSourceManager.currentConfig.csvSources) {
+                return Object.keys(DataSourceManager.currentConfig.csvSources);
+            }
+        } catch (e) {}
+        return [];
+    }
+
+    function getStatsMap() {
+        if (DataSourceManager && DataSourceManager.statsMap) {
+            return DataSourceManager.statsMap;
+        }
+        return {};
+    }
+
+    function buildOptions() {
+        var options = {};
+        if (typeof Config !== "undefined" && Config && Config.clientSocketId) {
+            options.clientSocketId = Config.clientSocketId;
+        }
+        return options;
+    }
+
+    function getTablesWithMappingsMap() {
+        var map = {};
+        try {
+            if (!MappingColumnsGraph || !MappingColumnsGraph.visjsGraph || !MappingColumnsGraph.visjsGraph.data || !MappingColumnsGraph.visjsGraph.data.nodes) {
+                return map;
+            }
+
+            var nodes = MappingColumnsGraph.visjsGraph.data.nodes.get();
+            if (!Array.isArray(nodes)) {
+                return map;
+            }
+
+            var allowedTypes = [];
+            if (MappingModeler && Array.isArray(MappingModeler.columnsMappingsObjects)) {
+                allowedTypes = MappingModeler.columnsMappingsObjects;
+            }
+
+            nodes.forEach(function (n) {
+                if (!n || !n.data) return;
+
+                if (allowedTypes.length > 0) {
+                    if (allowedTypes.indexOf(n.data.type) < 0) return;
+                }
+
+                if (n.data.dataTable) {
+                    map[n.data.dataTable] = true;
+                }
+            });
+        } catch (e) {}
+        return map;
+    }
+
+    function filterTablesHavingMappings(allTables) {
+        var tablesWithMappings = getTablesWithMappingsMap();
+        var out = [];
+
+        allTables.forEach(function (t) {
+            if (tablesWithMappings[t]) {
+                out.push(t);
+            }
+        });
+
+        return out;
+    }
+
+    self.recreateGraphSelectTables = function () {
+        try {
+            var source = getCurrentSource();
+            if (!source) {
+                return alert("Missing DataSourceManager.currentSlsvSource");
+            }
+
+            var dbTables = getDbTables();
+            var csvTables = getCsvTables();
+
+            var merged = mergeUniqueTables(dbTables, csvTables);
+            var allTables = merged.tables;
+
+            if (!allTables || allTables.length === 0) {
+                return alert("No tables found for this source");
+            }
+
+            var filteredTables = filterTablesHavingMappings(allTables);
+
+            if (!filteredTables || filteredTables.length === 0) {
+                return alert("Aucune table avec mappings trouvée (le graphe de mappings n'est peut-être pas chargé).");
+            }
+
+            var statsMap = getStatsMap();
+
+            var jstreeData = [];
+
+            // Root = source
+            jstreeData.push({
+                id: source,
+                parent: "#",
+                text: source,
+                type: "Source",
+            });
+
+            var tablesDisplayed = filteredTables.slice();
+
+            tablesDisplayed.forEach(function (t) {
+                var count = null;
+                if (statsMap && typeof statsMap === "object" && statsMap[t]) {
+                    count = statsMap[t];
+                }
+
+                var label = t;
+                if (count) {
+                    label = t + " " + count + " Triples";
+                }
+
+                var isCsv = csvTables.indexOf(t) > -1;
+
+                jstreeData.push({
+                    id: t,
+                    parent: source,
+                    text: label,
+                    type: isCsv ? "CSV" : "Table",
+                    data: {
+                        tableName: t,
+                        isCsv: isCsv,
+                    },
+                });
+            });
+
+            var optionsObj = buildOptions();
+
+            var options = {
+                withCheckboxes: true,
+                openAll: true,
+                selectDescendants: true,
+                tie_selection: false,
+
+                validateFn: function (selected) {
+                    try {
+                        var selectedIds = [];
+                        if (Array.isArray(selected)) {
+                            selected.forEach(function (node) {
+                                if (node && node.id) {
+                                    selectedIds.push(node.id);
+                                }
+                            });
+                        }
+
+                        selectedIds = selectedIds.filter(function (id) {
+                            return id !== source;
+                        });
+
+                        if (!selectedIds || selectedIds.length === 0) {
+                            return alert("Select at least one table");
+                        }
+
+                        // all selected ?
+                        var allSelected = selectedIds.length === tablesDisplayed.length;
+
+                        if (allSelected) {
+                            return self.recreateAllTablesTriples(source, optionsObj);
+                        } else {
+                            return self.recreateSelectedTablesTriples(source, selectedIds, optionsObj);
+                        }
+                    } catch (e) {
+                        console.error(e);
+                        alert(e.message || String(e));
+                    }
+                },
+            };
+
+            JstreeWidget.loadJsTree(null, jstreeData, options, function () {
+                setTimeout(function () {
+                    try {
+                        $("#jstreeWidget_okButton").html("Recreate");
+                    } catch (e) {}
+                }, 50);
+            });
+        } catch (e) {
+            console.error(e);
+            alert(e.message || String(e));
+        }
     };
+
+    function normalizeTableName(name) {
+        if (!name) return "";
+        return String(name).trim();
+    }
+
+    function mergeUniqueTables(dbTables, csvTables) {
+        var csvMap = {};
+        var dbMap = {};
+        var seen = {};
+        var out = [];
+
+        (csvTables || []).forEach(function (t) {
+            var n = normalizeTableName(t);
+            if (n) csvMap[n] = true;
+        });
+
+        (dbTables || []).forEach(function (t) {
+            var n = normalizeTableName(t);
+            if (n) dbMap[n] = true;
+        });
+
+        (dbTables || []).forEach(function (t) {
+            var n = normalizeTableName(t);
+            if (!n) return;
+            if (!seen[n]) {
+                seen[n] = true;
+                out.push(n);
+            }
+        });
+
+        (csvTables || []).forEach(function (t) {
+            var n = normalizeTableName(t);
+            if (!n) return;
+            if (!seen[n]) {
+                seen[n] = true;
+                out.push(n);
+            }
+        });
+
+        return {
+            tables: out,
+            isCsv: function (tableName) {
+                var n = normalizeTableName(tableName);
+                return !!csvMap[n];
+            },
+        };
+    }
 
     /**
      * Displays the triples data in a table format within the specified div element.

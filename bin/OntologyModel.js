@@ -435,9 +435,7 @@ Sparql_OWL.getDictionary(source, { lang: Config.default_lang, filter: filter }, 
         },
     },
 
-    initConfig: function () {
-        const fs = require("fs");
-        const path = require("path");
+    initConfig: function () {import fs from "fs";import path from "path";
         OntologyModel.Config = JSON.parse("" + fs.readFileSync(path.resolve("../../config/mainConfig.json")));
         OntologyModel.Config.sources = JSON.parse("" + fs.readFileSync(path.resolve("../../config/sources.json")));
 

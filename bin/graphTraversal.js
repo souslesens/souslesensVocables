@@ -259,7 +259,7 @@ g.addEdge("D", "C", 3);*/
 
       console.log(g.floydWarshallAlgorithm());*/
 }
-return;
+/*
 //GraphTraversal.getShortestPath(
 GraphTraversal.getAllShortestPath(
     "",
@@ -272,3 +272,4 @@ GraphTraversal.getAllShortestPath(
         var x = result;
     },
 );
+*/

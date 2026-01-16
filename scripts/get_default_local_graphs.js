@@ -1,4 +1,4 @@
-const fs = require("fs");
+import fs from "fs";
 
 const sourcesTemplatePath = "config_templates/sources.json.default";
 fs.readFile(sourcesTemplatePath, (_err, data) => {

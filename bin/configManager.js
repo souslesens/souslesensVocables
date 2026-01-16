@@ -18,6 +18,11 @@ import async from 'async';
 import fs from 'fs';
 import { configPath, config } from '../model/config.js';
 import { SourceModel, sourceModel } from '../model/sources.js';
+import userManager from './user.js';
+import { fileURLToPath } from 'url';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 //const { getAllowedSources, filterSources, sortObjectByKey, resourceFetched } = require("../api/v1/paths/utils.js");
 //const util = require("util");
 
@@ -172,8 +177,7 @@ var ConfigManager = {
         });
     },
 
-    getUser: async function (req, res, next) {
-        const userManager = require(path.resolve("bin/user.js"));
+    getUser: async function (req, res, next) {
         try {
             const userInfo = await userManager.getUser(req.user || null);
             if (next) {
@@ -187,9 +191,7 @@ var ConfigManager = {
     },
 
     getUserSources: async function (req, res, next) {
-        try {
-            const { sourceModel, SourceModel } = require("../model/sources.js");
-            const userManager = require(path.resolve("bin/user.js"));
+        try {
             const userInfo = await userManager.getUser(req.user || null);
             const allowedSources = await sourceModel.getUserSources(userInfo.user);
             if (next) {
@@ -201,15 +203,10 @@ var ConfigManager = {
             res.status(err.status || 500).json(err);
             next(err);
         }
-        if (false) {
-            const { configPath, config } = require("../model/config.js");
+        if (false) {
             const sourcesJSON = path.resolve(configPath + "/sources.json");
-            const profilesJSON = path.resolve(configPath + "/profiles.json");
-            const util = require("util");
-            const { readResource, writeResource, resourceCreated, responseSchema, resourceFetched } = require("../api/v1/paths/utils.js");
-            const userManager = require(path.resolve("bin/user.js"));
-            const read = util.promisify(fs.readFile);
-            const { getAllowedSources, filterSources, sortObjectByKey } = require("../api/v1/paths/utils.js");
+            const profilesJSON = path.resolve(configPath + "/profiles.json");
+            const read = util.promisify(fs.readFile);
             try {
                 const userInfo = await userManager.getUser(req.user || null);
 

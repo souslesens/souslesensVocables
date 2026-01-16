@@ -1,9 +1,9 @@
 // Generated from parser/OWL2Manchester.g4 by ANTLR 4.13.1
 // jshint ignore: start
-// import antlr4 from 'antlr4';
+// import * as antlr4 from 'antlr4';
 // import OWL2ManchesterListener from './OWL2ManchesterListener.js';
 
-import antlr4 from 'antlr4';
+import * as antlr4 from 'antlr4';
 
 import OWL2ManchesterListener from './OWL2ManchesterListener.js';
 

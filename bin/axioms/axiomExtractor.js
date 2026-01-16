@@ -1,4 +1,5 @@
-import util from '../util..js';
+import util from '../util.js';
+import { parseString } from 'xml2js';
 
 var AxiomExtractor = {
     xxx: function () {
@@ -43,7 +44,7 @@ var AxiomExtractor = {
         axiomText = axiomText.replace(/</g, "").replace(/>/g, "");
 
         var str = axiomText.replace(/\(/g, "<xx>").replace(/\)/g, "</xx>");
-        var parseString = require("xml2js").parseString;
+        // parseString imported at top of file
         var xml = "<xml>" + str + "</xml>";
         parseString(xml, function (err, result) {
             recurse(result);
@@ -88,8 +89,7 @@ directDraw = function () {
 
 directDraw();
 
-/**
- var fs=require('fs')
+/**import fs from "fs";
  var file="C:\\Users\\claud\\Downloads\\VaccineOntology.ttl"
 
  var str=""+fs.readFileSync(file)

@@ -1,9 +1,10 @@
 import ConfigManager from '../configManager.js';
-import httpProxy from '../httpProxy..js';
+import httpProxy from '../httpProxy.js';
 import async from 'async';
 import util from '../util.js';
 import KGbuilder_socket from './KGbuilder_socket.js';
-import modelUtils from '../../model/utils.js';
+import * as modelUtils from '../../model/utils.js';
+import TriplesMaker from './triplesMaker.js';
 
 const KGbuilder_triplesWriter = {
     sparqlPrefixes: {
@@ -210,7 +211,6 @@ const KGbuilder_triplesWriter = {
     // },
 
     deleteKGBuilderTriples: function (sparqlServerUrl, graphUri, table, options, callback) {
-        const TriplesMaker = require("./triplesMaker.js");
         var message = {};
         var query = "";
         if (table) {

@@ -27,6 +27,10 @@ var tikaServer = null;
 // var tikaserverStarted = false;
 import unzipper from 'unzipper';
 
+import { fileURLToPath } from 'url';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 var jsonData = {};
 var DirContentAnnotator = {
     socket: {

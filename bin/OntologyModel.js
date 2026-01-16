@@ -2,7 +2,12 @@ import async from "async";
 import httpProxy from "./httpProxy.js";
 import request from "request";
 import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 //const sources=require("../model/sources.js")
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 var OntologyModel = {
     instances: {},
@@ -436,10 +441,16 @@ Sparql_OWL.getDictionary(source, { lang: Config.default_lang, filter: filter }, 
     },
 
     initConfig: function () {
-        import fs from "fs";
-        import path from "path";
-        OntologyModel.Config = JSON.parse("" + fs.readFileSync(path.resolve("../../config/mainConfig.json")));
-        OntologyModel.Config.sources = JSON.parse("" + fs.readFileSync(path.resolve("../../config/sources.json")));
+        const configPath = path.resolve(__dirname, "../config/mainConfig.json");
+        const sourcesPath = path.resolve(__dirname, "../config/sources.json");
+        try {
+            OntologyModel.Config = JSON.parse("" + fs.readFileSync(configPath));
+            OntologyModel.Config.sources = JSON.parse("" + fs.readFileSync(sourcesPath));
+        } catch (e) {
+            // Config files may not exist in all environments
+            OntologyModel.Config = {};
+            OntologyModel.Config.sources = {};
+        }
 
         OntologyModel.Config.default_lang = "en";
         OntologyModel.Config.topLevelOntologies = {

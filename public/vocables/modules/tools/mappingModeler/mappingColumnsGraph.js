@@ -1523,7 +1523,190 @@ var MappingColumnsGraph = (function () {
                             return MainController.errorAlert(err);
                         },
                     });
-                }                
+                }
+                
+                /**
+                 * Parses and validates the imported mapping JSON text.
+                 * Removes lastUpdate and ensures graphUri matches current source.
+                 * @returns {{data:Object|null, error:string|null}}
+                 */
+                function parseAndSanitizeImport(importedJsonText) {
+                var data = null;
+
+                try {
+                    data = JSON.parse(importedJsonText);
+                } catch (e) {
+                    return { data: null, error: "Invalid JSON: " + (e && e.message ? e.message : e) };
+                }
+
+                // Basic validation
+                if (!data || !data.nodes) {
+                    return { data: null, error: "Invalid mapping file: missing nodes." };
+                }
+
+                // Remove lastUpdate if present
+                if (data.options && data.options.config && data.options.config.lastUpdate) {
+                    delete data.options.config.lastUpdate;
+                }
+
+                // Check graphUri match (same behavior as before)
+                var currentGraphUri = Config.sources[MainController.currentSource].graphUri;
+                if (data.options && data.options.config && data.options.config.graphUri != currentGraphUri) {
+                    return {
+                    data: null,
+                    error: "graphUri in file is not the same as the current graphUri, update graphURI in JSON file",
+                    };
+                }
+
+                return { data: data, error: null };
+                }
+
+                /**
+                 * Builds an index of datasource usages in nodes.
+                 * @param {Object} data Parsed mapping JSON object.
+                 * @param {string} importedJsonText Raw JSON text (used to locate approximate line numbers).
+                 * @returns {Object<string, Array>} Map datasourceId -> usage occurrences.
+                 */
+                function indexDatasourceUsages(data, importedJsonText) {
+                var datasourceUsagesById = {}; // { dsId: [ {nodeIndex,nodeId,nodeType,dataTable,line} ] }
+
+                (data.nodes || []).forEach(function (node, nodeIndex) {
+                    // datasourceId peut être stocké sous datasource ou dataSource selon les versions
+                    var datasourceId = node && node.data ? (node.data.datasource || node.data.dataSource) : null;
+                    if (!datasourceId) return;
+
+                    if (!datasourceUsagesById[datasourceId]) datasourceUsagesById[datasourceId] = [];
+
+                    datasourceUsagesById[datasourceId].push({
+                    nodeIndex: nodeIndex,
+                    nodeId: node.id,
+                    nodeType: node.data.type,
+                    dataTable: node.data.dataTable,
+                    line: findNodeDatasourceLine(importedJsonText, node.id, datasourceId),
+                    });
+                });
+                return datasourceUsagesById;
+                }
+                
+                /**
+                 * Checks that datasource ids used in nodes are declared in options.config (databaseSources/csvSources).
+                 */
+                function validateDatasourcesDeclared(data, datasourceUsagesById) {
+                var cfg = (data && data.options && data.options.config) ? data.options.config : {};
+
+                var dbSourcesFromFile = cfg.databaseSources || {};
+                var csvSourcesFromFile = cfg.csvSources || {};
+
+                var dbIdsFromConfig = Object.keys(dbSourcesFromFile);
+                var csvIdsFromConfig = Object.keys(csvSourcesFromFile);
+
+                var usedIds = Object.keys(datasourceUsagesById || {});
+                var unknownIds = usedIds.filter(function (id) {
+                    return dbIdsFromConfig.indexOf(id) < 0 && csvIdsFromConfig.indexOf(id) < 0;
+                });
+                // returns: { unknownIds, dbSourcesFromFile, csvSourcesFromFile, requiredDbIds }
+                return {
+                    unknownIds: unknownIds,
+                    dbSourcesFromFile: dbSourcesFromFile,
+                    csvSourcesFromFile: csvSourcesFromFile,
+                    requiredDbIds: dbIdsFromConfig.slice(),
+                };
+                }
+                
+                /**
+                 * Renders up to 5 occurrences of datasource usage in nodes[].
+                 * @param {Array<Object>} usages
+                 * @returns {string} HTML fragment
+                 */
+                function renderDatasourceOccurrences(usages) {
+                return (usages || [])
+                    .slice(0, 5)
+                    .map(function (usage) {
+                    return (
+                        " • <code>nodes[" +
+                        usage.nodeIndex +
+                        "].data.datasource</code> (line " +
+                        (usage.line || "?") +
+                        ") — type=" +
+                        usage.nodeType +
+                        (usage.dataTable ? " — table=" + usage.dataTable : "")
+                    );
+                    })
+                    .join("<br>");
+                }
+
+                /**
+                 * Builds the HTML list for unknown datasources.
+                 * @param {string[]} unknownIds
+                 * @param {Object<string,Array>} datasourceUsagesById
+                 * @returns {string} HTML <li>...</li> list
+                 */
+                function renderUnknownDatasourcesHtml(unknownIds, datasourceUsagesById) {
+                return (unknownIds || [])
+                    .map(function (id) {
+                    var usages = (datasourceUsagesById && datasourceUsagesById[id]) ? datasourceUsagesById[id] : [];
+                    var occurrences = renderDatasourceOccurrences(usages);
+                    var more =
+                        usages.length > 5 ? "<br> … (+" + (usages.length - 5) + " more occurrences)" : "";
+                    return "<li><b>" + id + "</b><br>" + occurrences + more + "</li>";
+                    })
+                    .join("");
+                }
+
+                /**
+                 * Builds the HTML list for missing databases on target server.
+                 * @param {string[]} missing
+                 * @param {Object} dbSourcesFromFile
+                 * @param {Object<string,Array>} datasourceUsagesById
+                 * @param {string} importedJsonText
+                 * @returns {string} HTML <li>...</li> list
+                 */
+                function renderMissingDatabasesHtml(missing, dbSourcesFromFile, datasourceUsagesById, importedJsonText) {
+                return (missing || [])
+                    .map(function (id) {
+                    var name =
+                        dbSourcesFromFile && dbSourcesFromFile[id] && dbSourcesFromFile[id].name
+                        ? dbSourcesFromFile[id].name
+                        : "(unknown name)";
+
+                    var cfgLine = findConfigKeyLine(importedJsonText, "databaseSources", id);
+
+                    var usages = (datasourceUsagesById && datasourceUsagesById[id]) ? datasourceUsagesById[id] : [];
+                    var occurrences = renderDatasourceOccurrences(usages);
+                    var more =
+                        usages.length > 5 ? "<br> … (+" + (usages.length - 5) + " more occurrences)" : "";
+
+                    return (
+                        "<li><b>" +
+                        id +
+                        "</b> — " +
+                        name +
+                        "<br>Declared in file: <code>options.config.databaseSources." +
+                        id +
+                        "</code> (line " +
+                        (cfgLine || "?") +
+                        ")" +
+                        "<br>" +
+                        occurrences +
+                        more +
+                        "</li>"
+                    );
+                    })
+                    .join("");
+                }
+                
+                /**
+                 * Computes which database ids declared in the file are missing on the target server.
+                 * @param {string[]} requiredDbIds
+                 * @param {Object|Array} resp API response from GET /databases
+                 * @returns {{missing: string[]}}
+                 */
+                function validateDatabasesAvailable(requiredDbIds, resp) {
+                var available = Array.isArray(resp) ? resp : (resp && resp.resources ? resp.resources : []);
+                var availableIds = new Set(available.map(function (db) { return db.id; }));
+                var missing = (requiredDbIds || []).filter(function (id) { return !availableIds.has(id); });
+                return { missing: missing };
+                }
 
                 /**
                 * @function
@@ -1542,78 +1725,30 @@ var MappingColumnsGraph = (function () {
                 * If validation fails, an "Import blocked" dialog is shown with actionable guidance (and tries to display approximate JSON line numbers when possible).
                 * @returns {void}
                 */
-
         self.importMappingsFromJSONFile = function () {
             ImportFileWidget.showImportDialog(function (err, importedJsonText) {
                 if (err) {
                     return MainController.errorAlert(err);
                 }
-                var data = JSON.parse(importedJsonText);
-                
-                if (data.nodes.length == 0) {
-                    return alert("no nodes in file");
-                }
-                if (data.options?.config?.lastUpdate) {
-                    delete data.options.config.lastUpdate;
-                }
-                if (data?.options?.config?.graphUri != Config.sources[MainController.currentSource].graphUri) {
-                return alert("graphUri in file is not the same as the current graphUri, update graphURI in JSON file");
-                }
 
+                var parsed = parseAndSanitizeImport(importedJsonText);
+                if (parsed.error) {
+                return alert(parsed.error);
+                }
+                var data = parsed.data;
                
-                var dbSourcesFromFile = data?.options?.config?.databaseSources || {};
-                var csvSourcesFromFile = data?.options?.config?.csvSources || {};
-                var dbIdsFromConfig = Object.keys(dbSourcesFromFile);
-                var csvIdsFromConfig = Object.keys(csvSourcesFromFile);
 
-         
-                var datasourceUsagesById = {}; // { dsId: [ {nodeIndex,nodeId,nodeType,dataTable,line} ] }
-                (data.nodes || []).forEach(function (node, nodeIndex) {
-                var datasourceId = node && node.data ? (node.data.datasource || node.data.dataSource) : null;
-                if (!datasourceId) return;
+                var datasourceUsagesById = indexDatasourceUsages(data, importedJsonText);
 
-                if (!datasourceUsagesById[datasourceId]) datasourceUsagesById[datasourceId] = [];
-                datasourceUsagesById[datasourceId].push({
-                    nodeIndex: nodeIndex,
-                    nodeId: node.id,
-                    nodeType: node.data.type,
-                    dataTable: node.data.dataTable,
-                    line: findNodeDatasourceLine(importedJsonText, node.id, datasourceId),
-                });
-                });
+                var declared = validateDatasourcesDeclared(data, datasourceUsagesById);
+                var unknownIds = declared.unknownIds;
+                var dbSourcesFromFile = declared.dbSourcesFromFile;
+                var csvSourcesFromFile = declared.csvSourcesFromFile; 
+                var requiredDbIds = declared.requiredDbIds;
 
-                var dsUsedIds = Object.keys(datasourceUsagesById);
-
-      
-                var unknownIds = dsUsedIds.filter(function (id) {
-                return dbIdsFromConfig.indexOf(id) < 0 && csvIdsFromConfig.indexOf(id) < 0;
-                });
-
-                var requiredDbIds = dbIdsFromConfig.slice();
                 // Block import and show actionable guidance if datasource validation fails.
                 if (unknownIds.length > 0) {
-                var unknownHtml = unknownIds
-                    .map(function (id) {
-                    var occurrences = (datasourceUsagesById[id] || []).slice(0, 5).map(function (usage) {
-                        return (
-                        "&nbsp;&nbsp;• <code>nodes[" +
-                        usage.nodeIndex +
-                        "].data.datasource</code> (line " +
-                        (usage.line || "?") +
-                        ") — type=" +
-                        usage.nodeType +
-                        (usage.dataTable ? " — table=" + usage.dataTable : "")
-                        );
-                    }).join("<br>");
-
-                    var more =
-                        datasourceUsagesById[id] && datasourceUsagesById[id].length > 5
-                        ? "<br>&nbsp;&nbsp;… (+" + (datasourceUsagesById[id].length - 5) + " more occurrences)"
-                        : "";
-
-                    return "<li><b>" + id + "</b><br>" + occurrences + more + "</li>";
-                    })
-                    .join("");
+                var unknownHtml = renderUnknownDatasourcesHtml(unknownIds, datasourceUsagesById);
 
                 showImportBlockingDialog(
                     "Import blocked",
@@ -1635,56 +1770,11 @@ var MappingColumnsGraph = (function () {
                     url: `${Config.apiUrl}/databases`,
                     dataType: "json",
                     success: function (resp) {
-                        var available = Array.isArray(resp) ? resp : (resp && resp.resources ? resp.resources : []);
-                        var availableIds = new Set(available.map(function (db) { return db.id; }));
-
-                        var missing = requiredDbIds.filter(function (id) { return !availableIds.has(id); });
-
+                        var check = validateDatabasesAvailable(requiredDbIds, resp);
+                        var missing = check.missing;
 
                         if (missing.length > 0) {
-                        var missingHtml = missing
-                            .map(function (id) {
-                            var name =
-                                dbSourcesFromFile[id] && dbSourcesFromFile[id].name
-                                ? dbSourcesFromFile[id].name
-                                : "(unknown name)";
-
-                            var cfgLine = findConfigKeyLine(importedJsonText, "databaseSources", id);
-
-                            var occurrences = (datasourceUsagesById[id] || []).slice(0, 5).map(function (o) {
-                                return (
-                                "&nbsp;&nbsp;• <code>nodes[" +
-                                o.nodeIndex +
-                                "].data.datasource</code> (line " +
-                                (o.line || "1") +
-                                ") — type=" +
-                                o.nodeType +
-                                (o.dataTable ? " — table=" + o.dataTable : "")
-                                );
-                            }).join("<br>");
-
-                            var more =
-                                datasourceUsagesById[id] && datasourceUsagesById[id].length > 5
-                                ? "<br>&nbsp;&nbsp;… (+" + (datasourceUsagesById[id].length - 5) + " more occurrences)"
-                                : "";
-
-                            return (
-                                "<li><b>" +
-                                id +
-                                "</b> — " +
-                                name +
-                                "<br>Declared in file: <code>options.config.databaseSources." +
-                                id +
-                                "</code> (line " +
-                                (cfgLine || "?") +
-                                ")" +
-                                "<br>" +
-                                occurrences +
-                                more +
-                                "</li>"
-                            );
-                            })
-                            .join("");
+                        var missingHtml = renderMissingDatabasesHtml(missing, dbSourcesFromFile, datasourceUsagesById, importedJsonText);
 
                         showImportBlockingDialog(
                             "Import blocked",
@@ -1699,9 +1789,6 @@ var MappingColumnsGraph = (function () {
                         );
                         return; 
                         }
-
-
-                        
                         return doImportPost(data);
                     },
 

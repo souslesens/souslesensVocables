@@ -1436,7 +1436,11 @@ var MappingColumnsGraph = (function () {
                 });
             });
         };
-                
+            
+// -------------------------------
+// Mapping import helpers
+// -------------------------------
+
                 /**
                  * Returns the 1-based line number for a character index in a JSON text.
                  * Used to provide approximate locations in user-imported JSON files.
@@ -1590,6 +1594,7 @@ var MappingColumnsGraph = (function () {
                 
                 /**
                  * Checks that datasource ids used in nodes are declared in options.config (databaseSources/csvSources).
+                 * @returns {{unknownIds:string[], dbSourcesFromFile:Object, csvSourcesFromFile:Object, requiredDbIds:string[]}}
                  */
                 function validateDatasourcesDeclared(data, datasourceUsagesById) {
                 var cfg = (data && data.options && data.options.config) ? data.options.config : {};
@@ -1604,7 +1609,6 @@ var MappingColumnsGraph = (function () {
                 var unknownIds = usedIds.filter(function (id) {
                     return dbIdsFromConfig.indexOf(id) < 0 && csvIdsFromConfig.indexOf(id) < 0;
                 });
-                // returns: { unknownIds, dbSourcesFromFile, csvSourcesFromFile, requiredDbIds }
                 return {
                     unknownIds: unknownIds,
                     dbSourcesFromFile: dbSourcesFromFile,

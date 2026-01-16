@@ -8,12 +8,16 @@ import ConfigManager from '../configManager.js';
 import SocketManager from '../socketManager.js';
 import KGbuilder_triplesWriter from './KGbuilder_triplesWriter.js';
 import KGbuilder_socket from './KGbuilder_socket.js';
-import dbConnector from '../KG/dbConnector.js';
+import * as dbConnector from '../KG/dbConnector.js';
 import { databaseModel as DatabaseModel } from '../../model/databases.js';
 import MappingsParser from './mappingsParser.js';
 import TriplesMaker from './triplesMaker.js';
 import TripleMaker from './triplesMaker.js';
 import { databaseModel } from '../../model/databases.js';
+
+import { fileURLToPath } from 'url';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 var KGbuilder_main = {
     /**

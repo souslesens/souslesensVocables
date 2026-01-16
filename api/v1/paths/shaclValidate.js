@@ -1,5 +1,5 @@
-const { processResponse } = require("./utils.js");
-const rdf = require("../../../bin/RDF_IO..js");
+import { processResponse } from "./utils.js";
+import rdf from "../../../bin/RDF_IO.js";
 const { NamedNode, BlankNode, Literal, Graph } = rdf;
 
 var Validator = null;

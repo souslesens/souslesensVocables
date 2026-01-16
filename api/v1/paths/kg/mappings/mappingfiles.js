@@ -1,5 +1,4 @@
-import path from 'path';
-const KGbuilder_main = require(path.resolve("bin/KGbuilder/KGbuilder_main.js"));
+import path from 'path';import KGbuilder_main from "../../../../../bin/KGbuilder/KGbuilder_main.js";
 
 export default function () {
     let operations = {

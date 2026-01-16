@@ -208,9 +208,7 @@ var RcReportsTriples = {
 
         var header =
             "A,report_id,location_id,equipment_id,notif_date,F,concept_Niv1,concept_Niv2,concept_Niv3,concept_Niv4,concept_Niv5,concept_Niv6,,location_site,O,P,equipment_manufacturer,equipment_modelNumber,equipment_category,location_plant_section,location_plant unit\n";
-        outputStream.write(header);
-
-        var readline = require("readline");
+        outputStream.write(header);import readline from "readline";
         const readInterface = readline.createInterface({
             input: fs.createReadStream(filePath),
             output: process.stdout,

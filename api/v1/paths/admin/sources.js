@@ -1,8 +1,7 @@
 import path from 'path';
 import { sourceModel } from '../../../../model/sources.js';
 import { userModel } from '../../../../model/users.js';
-import { responseSchema } from './../utils.js';
-const userManager = require(path.resolve("bin/user.js"));
+import { responseSchema } from './../utils.js';import userManager from "../../../../bin/user.js";
 import { successfullyFetched, successfullyCreated, fixBooleanInObject } from './../utils.js';
 export default function () {
     let operations = {

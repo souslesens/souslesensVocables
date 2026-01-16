@@ -2,6 +2,10 @@ import path from 'path';
 import async from 'async';
 import fs from 'fs';
 
+import { fileURLToPath } from 'url';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 var MappingParser = {
     columnsMappingsObjects: ["Column", "RowIndex", "VirtualColumn", "URI"],
     getMappingsData: function (source, callback) {

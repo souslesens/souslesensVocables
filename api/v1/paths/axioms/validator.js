@@ -2,7 +2,7 @@ import ManchesterSyntaxEngine from '../../../../bin/axioms/manchesterSyntaxEngin
 
 //import    ManchesterSyntaxEngine from  "../../../../bin/axioms/manchesterSyntaxEngine.js";
 
-import httpProxy from '../../../../bin/httpProxy..js';
+import httpProxy from '../../../../bin/httpProxy.js';
 
 import { processResponse } from '../utils.js';
 export default function () {

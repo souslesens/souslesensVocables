@@ -18,6 +18,10 @@ import path from 'path';
 //const { configPath } = require("../model/config.js");
 import jsonFileStorage from './jsonFileStorage.js';
 
+import { fileURLToPath } from 'url';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 var ExportGraph = {
     execute: function (sparqlUrl, graphUri, filePath, callback) {
         var limit = 2000;
@@ -241,4 +245,3 @@ var ExportGraph = {
     },
 };
 export default ExportGraph;
-return;

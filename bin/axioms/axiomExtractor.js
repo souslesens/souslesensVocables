@@ -62,7 +62,7 @@ if (false) {
     AxiomExtractor.axiomTextToTriples(input);
 }
 
-directDraw = function () {
+var directDraw = function () {
     var axiom =
         "<https://spec.industrialontologies.org/ontology/core/Core/ServiceProvider> ObjectIntersectionOf(ObjectUnionOf(<https://spec.industrialontologies.org/ontology/core/Core/Organization> <https://spec.industrialontologies.org/ontology/core/Core/Person>) ObjectSomeValuesFrom(<https://spec.industrialontologies.org/ontology/core/Core/hasRole> <https://spec.industrialontologies.org/ontology/core/Core/ServiceProviderRole>)))";
 

@@ -14,7 +14,7 @@ var ImportFileWidget = (function () {
                 }
                 const reader = new FileReader();
                 reader.onload = function (e) {
-                    console.log("IMPORT FILE WIDGET: reader.onload exécuté ✅");
+                    
                     var fileContent = e.target.result;
                     $("#smallDialogDiv").dialog("close");
 

@@ -146,4 +146,4 @@ const cleanupConnection = (connection) => {
     connection.destroy && connection.destroy();
 };
 
-module.exports = { cleanupConnection, getKnexConnection };
+export { cleanupConnection, getKnexConnection };

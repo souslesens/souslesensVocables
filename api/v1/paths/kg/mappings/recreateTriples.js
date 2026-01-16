@@ -75,17 +75,11 @@ module.exports = function () {
                         table: {
                             type: "array",
                             items: { type: "string" },
-                            description:
-                                "Array of tables.\n" +
-                                "- [] or omitted => ALL tables\n" +
-                                '- ["t1"] => only t1\n' +
-                                '- ["t1","t2"] => only t1 and t2',
+                            description: "Array of tables.\n" + "- [] or omitted => ALL tables\n" + '- ["t1"] => only t1\n' + '- ["t1","t2"] => only t1 and t2',
                         },
                         options: {
                             type: "string",
-                            description:
-                                'Optional JSON string. Example: {"clientSocketId":"..."}.\n' +
-                                "If not provided, the API still works.",
+                            description: 'Optional JSON string. Example: {"clientSocketId":"..."}.\n' + "If not provided, the API still works.",
                         },
                         skipDelete: {
                             type: "boolean",
@@ -126,4 +120,3 @@ module.exports = function () {
 
     return operations;
 };
- 

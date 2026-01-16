@@ -50,13 +50,7 @@ var KGbuilder_main = {
 
         KGbuilder_main.stopCreateTriples = false;
 
-        if (
-            options &&
-            options.clientSocketId &&
-            SocketManager &&
-            SocketManager.clientSockets &&
-            SocketManager.clientSockets[options.clientSocketId]
-        ) {
+        if (options && options.clientSocketId && SocketManager && SocketManager.clientSockets && SocketManager.clientSockets[options.clientSocketId]) {
             SocketManager.clientSockets[options.clientSocketId].on("KGbuilder", function (message) {
                 if (message == "stopCreateTriples") {
                     KGbuilder_main.stopCreateTriples = true;
@@ -98,8 +92,6 @@ var KGbuilder_main = {
             async.eachSeries(
                 tables,
                 function (table, callbackEach) {
-
-                 
                     var tableMappings = {};
 
                     async.series(
@@ -139,7 +131,7 @@ var KGbuilder_main = {
                                     mappingData,
                                     table,
                                     options.filterMappingIds,
-                                    tableProcessingParams.allColumnsMappings
+                                    tableProcessingParams.allColumnsMappings,
                                 );
                                 callbackSeries();
                             },
@@ -224,13 +216,13 @@ var KGbuilder_main = {
                         function (err) {
                             // after all tables
                             callbackEach(err);
-                        }
+                        },
                     );
                 },
 
                 function (err) {
                     return callback(err, { sampleTriples: sampleTriples, totalTriplesCount: totalTriplesCount });
-                }
+                },
             );
 
             return;

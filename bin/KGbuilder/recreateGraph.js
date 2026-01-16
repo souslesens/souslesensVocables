@@ -89,7 +89,6 @@ function getAllTablesFromMappings(mappingData) {
 }
 
 function normalizeTablesParam(tableParam) {
- 
     if (!tableParam) return [];
     if (Array.isArray(tableParam)) return tableParam;
     return [tableParam];
@@ -115,9 +114,7 @@ async function recreateGraphTriples(params) {
     var body = params.body || {};
     var skipDelete = body.skipDelete === true;
 
-  
     let options = getOptionsFromBody(body);
-
 
     if (typeof options.filterMappingIds === "undefined") {
         options.filterMappingIds = null;
@@ -128,10 +125,8 @@ async function recreateGraphTriples(params) {
     // mappings
     const mappingData = await getMappingsDataAsync(source);
 
-    
     var requestedTables = normalizeTablesParam(body.table);
 
-    
     var targetTables = requestedTables;
     if (!targetTables || targetTables.length === 0) {
         targetTables = getAllTablesFromMappings(mappingData);
@@ -144,7 +139,6 @@ async function recreateGraphTriples(params) {
         deleteResult = await deleteKGBuilderTriplesAsync(source, tablesArgForDelete, options);
     }
 
- 
     var datasource = null;
 
     const importResult = await importAsync(user, source, datasource, targetTables, options);

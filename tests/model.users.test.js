@@ -1,14 +1,18 @@
-const bcrypt = require("bcrypt");
-const { createHash } = require("crypto");
-const fs = require("fs");
-const path = require("path");
-const tmp = require("tmp");
+import bcrypt from "bcrypt";
+import { createHash } from "crypto";
+import fs from "fs";
+import path from "path";
+import tmp from "tmp";
+import { fileURLToPath } from "url";
 
-const { cleanupConnection, getKnexConnection } = require("../model/utils");
-const { userModel } = require("../model/users");
-const { userDataModel } = require("../model/userData");
+import { cleanupConnection, getKnexConnection } from "../model/utils.js";
+import { userModel } from "../model/users.js";
+import { userDataModel } from "../model/userData.js";
 
-jest.mock("../model/utils");
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+jest.mock("../model/utils.js");
 
 describe("UserModelJson", () => {
     let dbUsers;

@@ -1,7 +1,7 @@
-const { userModel } = require("../../../../model/users");
-const { mainConfigModel } = require("../../../../model/mainConfig");
+import { userModel } from "../../../../model/users.js";
+import { mainConfigModel } from "../../../../model/mainConfig.js";
 
-module.exports = function () {
+export default function () {
     let operations = {
         GET,
     };
@@ -46,4 +46,4 @@ module.exports = function () {
     };
 
     return operations;
-};
+}

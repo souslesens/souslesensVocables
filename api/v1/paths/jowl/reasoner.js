@@ -1,13 +1,13 @@
-const HttpProxy = require("../../../../bin/httpProxy.");
-const ConfigManager = require("../../../../bin/configManager.");
-const { processResponse } = require("../utils");
-const request = require("request");
-const async = require("async");
-const httpProxy = require("../../../../bin/httpProxy..js");
+import HttpProxy from "../../../../bin/httpProxy.js";
+import ConfigManager from "../../../../bin/configManager.js";
+import { processResponse } from "../utils.js";
+import request from "request";
+import async from "async";
+import httpProxy from "../../../../bin/httpProxy.js";
 
 //https://jena.apache.org/documentation/inference/
 
-module.exports = function () {
+export default function () {
     let operations = {
         GET,
     };
@@ -202,4 +202,4 @@ module.exports = function () {
     };
 
     return operations;
-};
+}

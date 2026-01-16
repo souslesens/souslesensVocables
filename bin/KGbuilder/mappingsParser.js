@@ -1,6 +1,10 @@
-const path = require("path");
-const async = require("async");
-const fs = require("fs");
+import path from "path";
+import async from "async";
+import fs from "fs";
+
+import { fileURLToPath } from "url";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 var MappingParser = {
     columnsMappingsObjects: ["Column", "RowIndex", "VirtualColumn", "URI"],
@@ -246,6 +250,5 @@ var MappingParser = {
     },
 };
 
-module.exports = MappingParser;
-
+export default MappingParser;
 //MappingParser.getColumnsMap("PAZFLOR_ABOX", null, function (err, result) {

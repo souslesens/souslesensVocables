@@ -1,6 +1,6 @@
-const { indexModel } = require("../../../../model/index");
+import { indexModel } from "../../../../model/index.js";
 
-module.exports = function () {
+export default function () {
     let operations = {
         GET,
     };
@@ -37,4 +37,4 @@ module.exports = function () {
     };
 
     return operations;
-};
+}

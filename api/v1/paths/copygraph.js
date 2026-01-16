@@ -1,7 +1,7 @@
-const { processResponse } = require("./utils");
-const ExportGraph = require("../../../bin/exportGraph.");
+import { processResponse } from "./utils.js";
+import ExportGraph from "../../../bin/exportGraph.js";
 
-module.exports = function () {
+export default function () {
     let operations = {
         POST,
     };
@@ -46,4 +46,4 @@ module.exports = function () {
     };
 
     return operations;
-};
+}

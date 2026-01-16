@@ -1,9 +1,10 @@
-const ConfigManager = require("../configManager.");
-const httpProxy = require("../httpProxy..js");
-const async = require("async");
-const util = require("../util.");
-const KGbuilder_socket = require("./KGbuilder_socket.js");
-const modelUtils = require("../../model/utils.js");
+import ConfigManager from "../configManager.js";
+import httpProxy from "../httpProxy.js";
+import async from "async";
+import util from "../util.js";
+import KGbuilder_socket from "./KGbuilder_socket.js";
+import * as modelUtils from "../../model/utils.js";
+import TriplesMaker from "./triplesMaker.js";
 
 const KGbuilder_triplesWriter = {
     sparqlPrefixes: {
@@ -137,7 +138,7 @@ const KGbuilder_triplesWriter = {
     },
 
     // deleteKGBuilderTriples: function (sparqlServerUrl, graphUri, table, options, callback) {
-    //     const TriplesMaker = require("./triplesMaker");
+    //     const TriplesMaker = require("./triplesMaker.js");
     //     var message = {};
     //     var query = "";
     //     if (table) {
@@ -210,7 +211,6 @@ const KGbuilder_triplesWriter = {
     // },
 
     deleteKGBuilderTriples: function (sparqlServerUrl, graphUri, table, options, callback) {
-        const TriplesMaker = require("./triplesMaker");
         var message = {};
         var query = "";
         if (table) {
@@ -696,4 +696,4 @@ const KGbuilder_triplesWriter = {
     },
 };
 
-module.exports = KGbuilder_triplesWriter;
+export default KGbuilder_triplesWriter;

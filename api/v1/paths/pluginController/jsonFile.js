@@ -1,8 +1,8 @@
-const fs = require("fs");
-const path = require("path");
-const { processResponse, sanitizePath } = require("../utils");
+import fs from "fs";
+import path from "path";
+import { processResponse, sanitizePath } from "../utils.js";
 
-module.exports = function () {
+export default function () {
     let operations = {
         GET,
     };
@@ -37,4 +37,4 @@ module.exports = function () {
     };
 
     return operations;
-};
+}

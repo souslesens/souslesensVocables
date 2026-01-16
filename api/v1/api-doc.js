@@ -686,4 +686,4 @@ const apiDoc = {
     ],
 };
 
-module.exports = apiDoc;
+export default apiDoc;

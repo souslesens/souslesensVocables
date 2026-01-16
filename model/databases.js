@@ -1,11 +1,10 @@
-const fs = require("fs");
-const knex = require("knex");
-const { Lock } = require("async-await-mutex-lock");
-
-const { configDatabasesPath } = require("./config");
-const { profileModel } = require("./profiles");
-const KGbuilder_socket = require("../bin/KGbuilder/KGbuilder_socket");
-const modelUtils = require("./utils");
+import fs from "fs";
+import knex from "knex";
+import { Lock } from "async-await-mutex-lock";
+import { configDatabasesPath } from "./config.js";
+import { profileModel } from "./profiles.js";
+import KGbuilder_socket from "../bin/KGbuilder/KGbuilder_socket.js";
+import * as modelUtils from "./utils.js";
 
 /**
  * @typedef {import("./UserTypes").UserAccount} UserAccount
@@ -445,4 +444,4 @@ class DatabaseModel {
 }
 const databaseModel = new DatabaseModel(configDatabasesPath);
 
-module.exports = { DatabaseModel, databaseModel };
+export { DatabaseModel, databaseModel };

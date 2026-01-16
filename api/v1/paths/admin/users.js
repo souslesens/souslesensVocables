@@ -1,7 +1,8 @@
-const { userModel } = require("../../../../model/users");
-const { sortObjectByKey, responseSchema, successfullyUpdated, successfullyCreated, successfullyFetched } = require("../utils");
+import { userModel } from "../../../../model/users.js";
 
-module.exports = function () {
+import { sortObjectByKey, responseSchema, successfullyUpdated, successfullyCreated, successfullyFetched } from "../utils.js";
+
+export default function () {
     ///// GET api/v1/admin/users
     async function GET(req, res, next) {
         try {
@@ -79,4 +80,4 @@ module.exports = function () {
         POST,
         PUT,
     };
-};
+}

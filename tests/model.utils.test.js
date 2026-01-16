@@ -1,4 +1,4 @@
-const { convertType, chunk, cleanupConnection, getKnexConnection, redoIfFailure } = require("../model/utils");
+import { convertType, chunk, cleanupConnection, getKnexConnection, redoIfFailure } from "../model/utils.js";
 
 describe("redoIfFailure", () => {
     test("redo", async () => {

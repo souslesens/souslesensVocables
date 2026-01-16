@@ -1,6 +1,6 @@
-const { indexModel } = require("../../../../model/index");
+import { indexModel } from "../../../../model/index.js";
 
-module.exports = function () {
+export default function () {
     const operations = {
         POST,
     };
@@ -40,4 +40,4 @@ module.exports = function () {
         tags: ["ElasticSearch"],
     };
     return operations;
-};
+}

@@ -1,16 +1,16 @@
-const fs = require("node:fs");
-const { readMainConfig } = require("../../../../../../model/config");
-const { userDataModel } = require("../../../../../../model/userData");
-const { RdfDataModel } = require("../../../../../../model/rdfData");
-const userManager = require("../../../../../../bin/user.");
-const UserRequestFiltering = require("../../../../../../bin/userRequestFiltering..js");
-const ConfigManager = require("../../../../../../bin/configManager.");
-const { Template } = require("@huggingface/jinja");
-const { RDF_FORMATS_MIMETYPES } = require("../../../../../../model/utils");
-//const RemoteCodeRunner = require("../../../../../bin/remoteCodeRunner.js.");
+import fs from "node:fs";
+import { readMainConfig } from "../../../../../../model/config.js";
+import { userDataModel } from "../../../../../../model/userData.js";
+import { RdfDataModel } from "../../../../../../model/rdfData.js";
+import userManager from "../../../../../../bin/user.js";
+import UserRequestFiltering from "../../../../../../bin/userRequestFiltering.js";
+import ConfigManager from "../../../../../../bin/configManager.js";
+import { Template } from "@huggingface/jinja";
+import { RDF_FORMATS_MIMETYPES } from "../../../../../../model/utils.js";
+//const RemoteCodeRunner = require("../../../../../bin/remoteCodeRunner.js.js");
 
-module.exports = () => {
-    GET = async (req, res, _next) => {
+export default () => {
+    const GET = async (req, res, _next) => {
         try {
             const userInfo = await userManager.getUser(req.user);
             const userData = await userDataModel.find(req.params.id, userInfo.user);

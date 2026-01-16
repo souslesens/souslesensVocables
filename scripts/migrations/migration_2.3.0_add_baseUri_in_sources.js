@@ -1,6 +1,6 @@
-const fs = require("fs");
-const path = require("path");
-const yargs = require("yargs");
+import fs from "fs";
+import path from "path";
+import yargs from "yargs";
 
 const argv = yargs.alias("c", "config").describe("c", "Path to config directory").demandOption(["c"]).alias("w", "write").describe("w", "Write to the file").boolean("w").help().argv;
 

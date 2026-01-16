@@ -1,9 +1,9 @@
-const { profileModel } = require("../../../model/profiles");
-const { userModel } = require("../../../model/users");
-const { resourceFetched, responseSchema } = require("./utils");
-const userManager = require("../../../bin/user.");
+import { profileModel } from "../../../model/profiles.js";
+import { userModel } from "../../../model/users.js";
+import { resourceFetched, responseSchema } from "./utils.js";
+import userManager from "../../../bin/user.js";
 
-module.exports = function () {
+export default function () {
     let operations = {
         GET,
     };
@@ -32,4 +32,4 @@ module.exports = function () {
         tags: ["Profiles"],
     };
     return operations;
-};
+}

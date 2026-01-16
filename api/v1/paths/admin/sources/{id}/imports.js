@@ -1,6 +1,6 @@
-const { processResponse } = require("../../../utils");
-const configManager = require("../../../../../../bin/configManager.");
-module.exports = function () {
+import { processResponse } from "../../../utils.js";
+import configManager from "../../../../../../bin/configManager.js";
+export default function () {
     let operations = {
         POST,
     };
@@ -40,4 +40,4 @@ module.exports = function () {
     };
 
     return operations;
-};
+}

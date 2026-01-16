@@ -1,14 +1,14 @@
-const KGbuilder_socket = require("./KGbuilder_socket.js");
-const { databaseModel } = require("../../model/databases.js");
-const csvCrawler = require("../_csvCrawler..js");
-const async = require("async");
-const sqlServerProxy = require("../KG/SQLserverConnector.");
-const util = require("../util.");
-const KGbuilder_triplesWriter = require("./KGbuilder_triplesWriter");
-const dataController = require("../dataController.");
-const path = require("path");
-const MappingParser = require("./mappingsParser.js");
-const modelUtils = require("../../model/utils.js");
+import KGbuilder_socket from "./KGbuilder_socket.js";
+import { databaseModel } from "../../model/databases.js";
+import csvCrawler from "../_csvCrawler.js";
+import async from "async";
+import sqlServerProxy from "../KG/SQLserverConnector.js";
+import util from "../util.js";
+import KGbuilder_triplesWriter from "./KGbuilder_triplesWriter.js";
+import dataController from "../dataController.js";
+import path from "path";
+import MappingParser from "./mappingsParser.js";
+import * as modelUtils from "../../model/utils.js";
 
 var TriplesMaker = {
     batchSize: 500,
@@ -792,4 +792,4 @@ var TriplesMaker = {
     },
 };
 
-module.exports = TriplesMaker;
+export default TriplesMaker;

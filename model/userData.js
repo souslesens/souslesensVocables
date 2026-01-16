@@ -1,11 +1,9 @@
-const fs = require("fs");
-const path = require("path");
-
-const ULID = require("ulid");
-const { z } = require("zod");
-
-const { cleanupConnection, getKnexConnection } = require("./utils");
-const { readMainConfig } = require("./config");
+import fs from "fs";
+import path from "path";
+import ULID from "ulid";
+import { z } from "zod";
+import { cleanupConnection, getKnexConnection } from "./utils.js";
+import { readMainConfig } from "./config.js";
 
 const UserDataObject = z
     .object({
@@ -364,4 +362,4 @@ class UserDataModel {
 }
 
 const userDataModel = new UserDataModel();
-module.exports = { UserDataModel, userDataModel };
+export { UserDataModel, userDataModel };

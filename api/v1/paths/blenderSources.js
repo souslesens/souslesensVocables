@@ -1,7 +1,7 @@
-const { blenderSources } = require("../../../model/blenderSources");
-const configManager = require("../../../bin/configManager.");
-const { responseSchema, processResponse, successfullyFetched } = require("./utils");
-module.exports = function () {
+import { blenderSources } from "../../../model/blenderSources.js";
+import configManager from "../../../bin/configManager.js";
+import { responseSchema, processResponse, successfullyFetched } from "./utils.js";
+export default function () {
     let operations = {
         GET,
         POST,
@@ -88,4 +88,4 @@ module.exports = function () {
         tags: ["Sources"],
     };
     return operations;
-};
+}

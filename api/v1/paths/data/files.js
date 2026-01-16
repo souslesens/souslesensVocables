@@ -1,7 +1,7 @@
-const path = require("path");
-const dataController = require(path.resolve("bin/dataController."));
+import path from "path";
+import dataController from "../../../../bin/dataController.js";
 
-module.exports = function () {
+export default function () {
     let operations = {
         GET,
     };
@@ -46,4 +46,4 @@ module.exports = function () {
     };
 
     return operations;
-};
+}

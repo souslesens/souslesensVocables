@@ -1,11 +1,10 @@
-const path = require("path");
-
-const { sourceModel } = require("../../../../model/sources");
-const { userModel } = require("../../../../model/users");
-const { responseSchema } = require("./../utils");
-const userManager = require(path.resolve("bin/user."));
-const { successfullyFetched, successfullyCreated, fixBooleanInObject } = require("./../utils.js");
-module.exports = function () {
+import path from "path";
+import { sourceModel } from "../../../../model/sources.js";
+import { userModel } from "../../../../model/users.js";
+import { responseSchema } from "./../utils.js";
+import userManager from "../../../../bin/user.js";
+import { successfullyFetched, successfullyCreated, fixBooleanInObject } from "./../utils.js";
+export default function () {
     let operations = {
         GET,
         POST,
@@ -89,4 +88,4 @@ module.exports = function () {
     };
 
     return operations;
-};
+}

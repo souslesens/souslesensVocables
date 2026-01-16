@@ -1,8 +1,8 @@
-const { userDataModel } = require("../../../../../model/userData");
-const userManager = require("../../../../../bin/user.");
+import { userDataModel } from "../../../../../model/userData.js";
+import userManager from "../../../../../bin/user.js";
 
-module.exports = () => {
-    DELETE = async (req, res, _next) => {
+export default () => {
+    const DELETE = async (req, res, _next) => {
         try {
             const userInfo = await userManager.getUser(req.user);
             const userData = await userDataModel.find(req.params.id, userInfo.user);
@@ -78,7 +78,7 @@ module.exports = () => {
         tags: ["UserData"],
     };
 
-    GET = async (req, res, _next) => {
+    const GET = async (req, res, _next) => {
         try {
             const userInfo = await userManager.getUser(req.user);
             const data = await userDataModel.find(req.params.id, userInfo.user);

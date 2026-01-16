@@ -1,7 +1,7 @@
-const { processResponse } = require("./utils");
-const SourceIntegrator = require("../../../bin/sourceIntegrator.");
+import { processResponse } from "./utils.js";
+import SourceIntegrator from "../../../bin/sourceIntegrator.js";
 
-module.exports = function () {
+export default function () {
     let operations = {
         POST,
     };
@@ -43,4 +43,4 @@ module.exports = function () {
     };
 
     return operations;
-};
+}

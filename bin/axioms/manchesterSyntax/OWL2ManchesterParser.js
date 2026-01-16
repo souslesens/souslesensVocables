@@ -1,10 +1,11 @@
 // Generated from parser/OWL2Manchester.g4 by ANTLR 4.13.1
 // jshint ignore: start
-// import antlr4 from 'antlr4';
+// import * as antlr4 from 'antlr4';
 // import OWL2ManchesterListener from './OWL2ManchesterListener.js';
 
-const antlr4 = require("antlr4");
-const OWL2ManchesterListener = require("./OWL2ManchesterListener.js");
+import * as antlr4 from "antlr4";
+
+import OWL2ManchesterListener from "./OWL2ManchesterListener.js";
 
 const serializedATN = [
     4, 1, 17, 62, 2, 0, 7, 0, 2, 1, 7, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 3, 0, 28, 8, 0, 1,
@@ -434,4 +435,4 @@ class AxiomContext extends antlr4.ParserRuleContext {
 OWL2ManchesterParser.ClassExpressionContext = ClassExpressionContext;
 OWL2ManchesterParser.AxiomContext = AxiomContext;
 
-module.exports = OWL2ManchesterParser;
+export default OWL2ManchesterParser;

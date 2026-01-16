@@ -1,8 +1,8 @@
-const ConfigManager = require("../../../../bin/configManager.");
-const { processResponse } = require("../utils");
-const request = require("request");
+import ConfigManager from "../../../../bin/configManager.js";
+import { processResponse } from "../utils.js";
+import request from "request";
 
-module.exports = function () {
+export default function () {
     let operations = {
         GET,
     };
@@ -43,4 +43,4 @@ module.exports = function () {
     };
 
     return operations;
-};
+}

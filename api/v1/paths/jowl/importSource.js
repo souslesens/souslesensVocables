@@ -1,12 +1,12 @@
-const { processResponse } = require("../utils");
-const ConfigManager = require("../../../../bin/configManager.");
-const GraphStore = require("../../../../bin/graphStore.");
-const async2 = require("async");
-const request = require("request");
-const httpProxy = require("../../../../bin/httpProxy.");
-const Util = require("../../../../bin/util.");
+import { processResponse } from "../utils.js";
+import ConfigManager from "../../../../bin/configManager.js";
+import GraphStore from "../../../../bin/graphStore.js";
+import async2 from "async";
+import request from "request";
+import httpProxy from "../../../../bin/httpProxy.js";
+import Util from "../../../../bin/util.js";
 
-module.exports = function () {
+export default function () {
     let operations = {
         POST,
     };
@@ -213,4 +213,4 @@ module.exports = function () {
     };
 
     return operations;
-};
+}

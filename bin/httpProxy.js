@@ -12,7 +12,8 @@
 
 import superagent from 'superagent';
 
-require("superagent-proxy")(superagent);
+import superagent_proxy from "superagent-proxy";
+superagent_proxy(superagent);
 import request from 'request';
 var proxy = null;
 var httpProxy = {

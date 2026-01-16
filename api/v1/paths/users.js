@@ -15,11 +15,11 @@ export default function () {
      * @param {profiles} the group to filter
      * @returns {users} - user objects with matched profiles
      */
-    filterUserByGroup = (users, profiles) => {
+    const filterUserByGroup = (users, profiles) => {
         const userProfiles = Object.fromEntries(Object.entries(users).filter(([_key, value]) => value.groups.some((g) => profiles.includes(g))));
         return this.filterUser(userProfiles);
     };
-    filterUser = (users) => {
+    const filterUser = (users) => {
         return Object.entries(users).map(([key, value]) => ({ [key]: { login: value.login, profiles: value.groups } }));
     };
     ///// GET api/v1/users

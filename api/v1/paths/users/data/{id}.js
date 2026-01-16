@@ -2,7 +2,7 @@ import { userDataModel } from '../../../../../model/userData.js';
 import userManager from '../../../../../bin/user.js';
 
 export default () => {
-    DELETE = async (req, res, _next) => {
+    const DELETE = async (req, res, _next) => {
         try {
             const userInfo = await userManager.getUser(req.user);
             const userData = await userDataModel.find(req.params.id, userInfo.user);
@@ -78,7 +78,7 @@ export default () => {
         tags: ["UserData"],
     };
 
-    GET = async (req, res, _next) => {
+    const GET = async (req, res, _next) => {
         try {
             const userInfo = await userManager.getUser(req.user);
             const data = await userDataModel.find(req.params.id, userInfo.user);

@@ -1,6 +1,5 @@
 import path from 'path';
-import { mainConfigModel } from '../../../model/mainConfig.js';
-const logger = require(path.resolve("bin/logger..js"));
+import { mainConfigModel } from '../../../model/mainConfig.js';import logger from "../../../bin/logger.js";
 import fs from 'fs';
 
 export default function () {

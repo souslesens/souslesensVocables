@@ -1,7 +1,5 @@
-import path from 'path';
-
-const dbConnector = require(path.resolve("bin/KG/dbConnector"));
-const { databaseModel } = require(path.resolve("model/databases"));
+import * as dbConnector from "../../../../bin/KG/dbConnector.js";
+import { databaseModel } from "../../../../model/databases.js";
 
 export default function () {
     let operations = {
@@ -75,4 +73,4 @@ export default function () {
     };
 
     return operations;
-};
+}

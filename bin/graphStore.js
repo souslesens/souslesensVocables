@@ -9,6 +9,10 @@ import { processResponse } from '../api/v1/paths/utils.js';
 import ConfigManager from './configManager.js';
 import { exec } from 'child_process';
 
+import { fileURLToPath } from 'url';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 var GraphStore = {
     exportGraph: function (sparqlServerConnection, graphUri, callback) {
         //curl --verbose --url "http://example.com/sparql-graph-crud?graph-uri=urn:graph:update:test:get"

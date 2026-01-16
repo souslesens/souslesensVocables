@@ -1,4 +1,4 @@
-import prefixes from '../../../model/prefixes.json';
+import prefixes from '../../../model/prefixes.json' with { type: 'json' };
 
 export default function () {
     async function GET(req, res, next) {

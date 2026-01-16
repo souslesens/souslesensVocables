@@ -6,6 +6,11 @@ import async from 'async';
 import util from './util.js';
 import N3 from 'n3';
 
+import streamify_string_module from "streamify-string";
+import { fileURLToPath } from 'url';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 var graphUrisMap = {};
 
 var sparql_server_url = "";
@@ -239,7 +244,7 @@ var RDF_IO = {
         if (sourceType == "File") {
             str = "" + fs.readFileSync(filePath);
         }
-        const textStream = require("streamify-string")(str);
+        const textStream = streamify_string_module(str);
         var triples = "";
 
         rdfParser

@@ -1,4 +1,4 @@
-const { MainConfigObject, checkMainConfig, checkMainConfigSection, colorText, printErrorReport, readMainConfig } = require("../model/config");
+import { MainConfigObject, checkMainConfig, checkMainConfigSection, colorText, printErrorReport, readMainConfig } from "../model/config.js";
 
 const retrieveLogs = (config) => {
     const results = MainConfigObject.safeParse(config);

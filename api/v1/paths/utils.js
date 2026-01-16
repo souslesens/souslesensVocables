@@ -1,8 +1,8 @@
-import fs from 'fs';
-import util from 'util';
+import fs from "fs";
+import util from "util";
 const readFile = util.promisify(fs.readFile);
 const writeFile = util.promisify(fs.writeFile);
-import path from 'path';
+import path from "path";
 const sanitizePath = (/** @type {string} */ user_input) => {
     if (user_input.indexOf("\0") !== -1) {
         throw Error("Bad Input");
@@ -248,7 +248,7 @@ function fixBooleanInObject(obj, depth) {
     return obj;
 }
 
-export { 
+export {
     writeResource,
     failure,
     responseSchema,
@@ -267,4 +267,4 @@ export {
     filterSources,
     sortObjectByKey,
     fixBooleanInObject,
- };
+};

@@ -1,5 +1,5 @@
-import { processResponse } from './utils.js';
-import SourceIntegrator from '../../../bin/sourceIntegrator.js';
+import { processResponse } from "./utils.js";
+import SourceIntegrator from "../../../bin/sourceIntegrator.js";
 
 export default function () {
     let operations = {
@@ -43,4 +43,4 @@ export default function () {
     };
 
     return operations;
-};
+}

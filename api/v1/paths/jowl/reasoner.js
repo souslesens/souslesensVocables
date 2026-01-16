@@ -1,9 +1,9 @@
-import HttpProxy from '../../../../bin/httpProxy.js';
-import ConfigManager from '../../../../bin/configManager.js';
-import { processResponse } from '../utils.js';
-import request from 'request';
-import async from 'async';
-import httpProxy from '../../../../bin/httpProxy.js';
+import HttpProxy from "../../../../bin/httpProxy.js";
+import ConfigManager from "../../../../bin/configManager.js";
+import { processResponse } from "../utils.js";
+import request from "request";
+import async from "async";
+import httpProxy from "../../../../bin/httpProxy.js";
 
 //https://jena.apache.org/documentation/inference/
 
@@ -202,4 +202,4 @@ export default function () {
     };
 
     return operations;
-};
+}

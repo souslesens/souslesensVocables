@@ -1,14 +1,14 @@
-import KGbuilder_socket from './KGbuilder_socket.js';
-import { databaseModel } from '../../model/databases.js';
-import csvCrawler from '../_csvCrawler.js';
-import async from 'async';
-import sqlServerProxy from '../KG/SQLserverConnector.js';
-import util from '../util.js';
-import KGbuilder_triplesWriter from './KGbuilder_triplesWriter.js';
-import dataController from '../dataController.js';
-import path from 'path';
-import MappingParser from './mappingsParser.js';
-import * as modelUtils from '../../model/utils.js';
+import KGbuilder_socket from "./KGbuilder_socket.js";
+import { databaseModel } from "../../model/databases.js";
+import csvCrawler from "../_csvCrawler.js";
+import async from "async";
+import sqlServerProxy from "../KG/SQLserverConnector.js";
+import util from "../util.js";
+import KGbuilder_triplesWriter from "./KGbuilder_triplesWriter.js";
+import dataController from "../dataController.js";
+import path from "path";
+import MappingParser from "./mappingsParser.js";
+import * as modelUtils from "../../model/utils.js";
 
 var TriplesMaker = {
     batchSize: 500,

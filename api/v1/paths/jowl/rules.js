@@ -1,11 +1,11 @@
-import HttpProxy from '../../../../bin/httpProxy.js';
-import ConfigManager from '../../../../bin/configManager.js';
-import GraphStore from '../../../../bin/graphStore.js';
-import Util from '../../../../bin/util.js';
-import fs from 'fs';
-import { processResponse } from '../utils.js';
-import request from 'request';
-import async from 'async';
+import HttpProxy from "../../../../bin/httpProxy.js";
+import ConfigManager from "../../../../bin/configManager.js";
+import GraphStore from "../../../../bin/graphStore.js";
+import Util from "../../../../bin/util.js";
+import fs from "fs";
+import { processResponse } from "../utils.js";
+import request from "request";
+import async from "async";
 
 //https://jena.apache.org/documentation/inference/
 
@@ -165,4 +165,4 @@ export default function () {
     };
 
     return operations;
-};
+}

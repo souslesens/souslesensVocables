@@ -1,6 +1,6 @@
-import { processResponse } from '../utils.js';
-import request from 'request';
-import ConfigManager from '../../../../bin/configManager.js';
+import { processResponse } from "../utils.js";
+import request from "request";
+import ConfigManager from "../../../../bin/configManager.js";
 
 //https://jena.apache.org/documentation/inference/
 
@@ -67,4 +67,4 @@ export default function () {
     };
 
     return operations;
-};
+}

@@ -1,6 +1,7 @@
-import path from 'path';
-import { mainConfigModel } from '../../../model/mainConfig.js';import logger from "../../../bin/logger.js";
-import fs from 'fs';
+import path from "path";
+import { mainConfigModel } from "../../../model/mainConfig.js";
+import logger from "../../../bin/logger.js";
+import fs from "fs";
 
 export default function () {
     let operations = {
@@ -161,4 +162,4 @@ export default function () {
     };
 
     return operations;
-};
+}

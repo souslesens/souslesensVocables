@@ -1,5 +1,5 @@
-import { databaseModel } from '../../../../model/databases.js';
-import { resourceFetched, responseSchema } from '../utils.js';
+import { databaseModel } from "../../../../model/databases.js";
+import { resourceFetched, responseSchema } from "../utils.js";
 
 export default function () {
     let operations = { GET, POST };
@@ -51,4 +51,4 @@ export default function () {
     };
 
     return operations;
-};
+}

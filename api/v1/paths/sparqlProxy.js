@@ -1,8 +1,8 @@
-import { processResponse } from './utils.js';
-import httpProxy from '../../../bin/httpProxy.js';
-import ConfigManager from '../../../bin/configManager.js';
-import UserRequestFiltering from '../../../bin/userRequestFiltering.js';
-import Parliament from '../../../bin/parliamentProxy.js';
+import { processResponse } from "./utils.js";
+import httpProxy from "../../../bin/httpProxy.js";
+import ConfigManager from "../../../bin/configManager.js";
+import UserRequestFiltering from "../../../bin/userRequestFiltering.js";
+import Parliament from "../../../bin/parliamentProxy.js";
 
 export default function () {
     let operations = {
@@ -141,4 +141,4 @@ export default function () {
     };
 
     return operations;
-};
+}

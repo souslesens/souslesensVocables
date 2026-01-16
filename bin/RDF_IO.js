@@ -1,13 +1,13 @@
-import httpProxy from './httpProxy.js';
-import rdfParser from 'rdf-parse';
-import fs from 'fs';
-import path from 'path';
-import async from 'async';
-import util from './util.js';
-import N3 from 'n3';
+import httpProxy from "./httpProxy.js";
+import rdfParser from "rdf-parse";
+import fs from "fs";
+import path from "path";
+import async from "async";
+import util from "./util.js";
+import N3 from "n3";
 
 import streamify_string_module from "streamify-string";
-import { fileURLToPath } from 'url';
+import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 

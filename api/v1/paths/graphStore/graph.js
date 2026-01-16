@@ -1,6 +1,6 @@
-import { processResponse } from '../utils.js';
-import ConfigManager from '../../../../bin/configManager.js';
-import GraphStore from '../../../../bin/graphStore.js';
+import { processResponse } from "../utils.js";
+import ConfigManager from "../../../../bin/configManager.js";
+import GraphStore from "../../../../bin/graphStore.js";
 
 export default function () {
     let operations = {
@@ -115,4 +115,4 @@ export default function () {
     };
 
     return operations;
-};
+}

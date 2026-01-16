@@ -1,13 +1,17 @@
-const bcrypt = require("bcrypt");
-const fs = require("fs");
-const os = require("os");
-const path = require("path");
-const tmp = require("tmp");
+import bcrypt from "bcrypt";
+import fs from "fs";
+import os from "os";
+import path from "path";
+import tmp from "tmp";
+import { fileURLToPath } from "url";
 
-const { cleanupConnection, getKnexConnection } = require("../model/utils");
-const { UserDataModel } = require("../model/userData");
+import { cleanupConnection, getKnexConnection } from "../model/utils.js";
+import { UserDataModel } from "../model/userData.js";
 
-jest.mock("../model/utils");
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+jest.mock("../model/utils.js");
 
 describe("UserDataModel", () => {
     let temporaryDirectory;

@@ -1,10 +1,14 @@
-const fs = require("fs");
-const path = require("path");
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 
-const { profileModel, ProfileModel } = require("../model/profiles");
-const { ToolModel } = require("../model/tools");
+import { profileModel, ProfileModel } from "../model/profiles.js";
+import { ToolModel } from "../model/tools.js";
 
-jest.mock("../model/utils");
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+jest.mock("../model/utils.js");
 
 describe("Test the Profilemodel module", () => {
     let allTools;

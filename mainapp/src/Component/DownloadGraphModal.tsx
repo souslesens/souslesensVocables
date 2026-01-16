@@ -45,12 +45,7 @@ type ApiServerResponseError = {
 
 type ApiServerResponse = ApiServerResponseError | ApiServerResponseOk;
 
-const addImportsAndContributor = (
-    blobParts: BlobPart[],
-    sourceName: string,
-    userLogin: string,
-    format: string
-): BlobPart[] => {
+const addImportsAndContributor = (blobParts: BlobPart[], sourceName: string, userLogin: string, format: string): BlobPart[] => {
     const content = blobParts.map((part) => (typeof part === "string" ? part : "")).join("");
     const contributorUri = "http://purl.org/dc/elements/1.1/contributor";
     const owlImportsUri = "http://www.w3.org/2002/07/owl#imports";
@@ -72,7 +67,6 @@ const addImportsAndContributor = (
             }
         });
     }
-    
 
     if (importsToAdd.length === 0 && hasContributor) {
         return blobParts;
@@ -90,11 +84,10 @@ const addImportsAndContributor = (
             return [...blobParts, "\n" + additionalTriples.join("\n") + "\n"];
         }
     } else if (format === "ttl") {
-    
         const escapedBaseUri = baseUri.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
         //<http:\/\/purl\.obolibrary\.org\/obo\/bfo\.owl>(?:(?:"[^"]*"|<[^>]*>|[^.])*)\.
-        const baseUriPattern = new RegExp(`(<${escapedBaseUri}>(?:(?:"[^"]*"|<[^>]*>|[^.])*))(\.)`, "gm");
+        const baseUriPattern = new RegExp(`(<${escapedBaseUri}>(?:(?:"[^"]*"|<[^>]*>|[^.]))*)(\\.)`, "gm");
 
         for (let i = 0; i < blobParts.length; i++) {
             const part = blobParts[i];
@@ -116,10 +109,9 @@ const addImportsAndContributor = (
             }
         }
     } else if (format === "xml") {
-        
         const escapedBaseUri = baseUri.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
         // Pattern XML: <rdf:Description rdf:about="baseUri"> ... </rdf:Description>
-        const descriptionPattern = new RegExp(`(<rdf:Description rdf:about="${escapedBaseUri}"[^>]*>[\s\S]*?)(<\/rdf:Description>)`, "gm");
+        const descriptionPattern = new RegExp(`(<rdf:Description rdf:about="${escapedBaseUri}"[^>]*>[\\s\\S]*?)(<\\/rdf:Description>)`, "gm");
 
         for (let i = 0; i < blobParts.length; i++) {
             const part = blobParts[i];
@@ -221,15 +213,7 @@ export function DownloadGraphModal({ apiUrl, onClose, open, sourceName }: Downlo
         return await response.text();
     };
 
-    const recursDownloadSource = async (
-        name: string,
-        offset: number,
-        graphSize: number,
-        pageSize: number,
-        blobParts: BlobPart[],
-        basePercent: number,
-        sourceWeight: number
-    ) => {
+    const recursDownloadSource = async (name: string, offset: number, graphSize: number, pageSize: number, blobParts: BlobPart[], basePercent: number, sourceWeight: number) => {
         // percent within this source, then scaled to global progress
         const sourcePercent = graphSize > 0 ? Math.min(Math.round((offset * 100) / graphSize), 100) : 0;
         const globalPercent = Math.min(100, basePercent + (sourcePercent * sourceWeight) / 100);
@@ -261,7 +245,6 @@ export function DownloadGraphModal({ apiUrl, onClose, open, sourceName }: Downlo
             return;
         }
 
-        
         try {
             await writeLog(currentUser.login, "GraphManagement", "download", sourceName);
 
@@ -282,7 +265,7 @@ export function DownloadGraphModal({ apiUrl, onClose, open, sourceName }: Downlo
                 setErrorMessage(message);
                 return;
             }
-            
+
             if (!blobParts || blobParts.length == 0) {
                 setErrorMessage("Receive empty data from the API");
                 return;
@@ -307,7 +290,7 @@ export function DownloadGraphModal({ apiUrl, onClose, open, sourceName }: Downlo
         let message = "ok";
         let sources = [sourceName];
         if (includeImports) {
-            const imports = (window?.Config.sources[sourceName]?.imports as string[]) || [];
+            const imports = window?.Config.sources[sourceName]?.imports || [];
             sources = sources.concat(imports);
         }
         blobParts = [];
@@ -318,7 +301,6 @@ export function DownloadGraphModal({ apiUrl, onClose, open, sourceName }: Downlo
         let totalSize = 0;
 
         setTransferState("downloading");
-        
 
         for (const source of sources) {
             if (apiUrl === "/") {
@@ -347,33 +329,23 @@ export function DownloadGraphModal({ apiUrl, onClose, open, sourceName }: Downlo
             const source = sourceInfo.source;
 
             // Calculate this source's weight as percentage of total (scaled to max 99%)
-            const sourceWeight = totalSize > 0
-                ? (sourceInfo.graphSize / totalSize) * maxPercentDuringDownload
-                : maxPercentDuringDownload / sources.length;
+            const sourceWeight = totalSize > 0 ? (sourceInfo.graphSize / totalSize) * maxPercentDuringDownload : maxPercentDuringDownload / sources.length;
             const basePercent = cumulativePercent;
 
             if (apiUrl === "/") {
-                blobPartsSource = await recursDownloadSource(
-                    source,
-                    0,
-                    sourceInfo.graphSize,
-                    sourceInfo.pageSize,
-                    [],
-                    basePercent,
-                    sourceWeight
-                );
+                blobPartsSource = await recursDownloadSource(source, 0, sourceInfo.graphSize, sourceInfo.pageSize, [], basePercent, sourceWeight);
                 // Check if cancelled (empty array returned)
                 if (cancelCurrentOperation.current) {
                     return { blobParts: null, message: "cancelled" };
                 }
-                blobParts = blobParts!.concat(blobPartsSource);
+                blobParts = blobParts.concat(blobPartsSource);
             } else {
                 const result = await downloadSourceUsingPythonApi(source, basePercent, sourceWeight);
                 if (result.message === "cancelled" || result.blobParts === null) {
                     return { blobParts: null, message: "cancelled" };
                 }
                 blobPartsSource = result.blobParts || [];
-                blobParts = blobParts!.concat(blobPartsSource);
+                blobParts = blobParts.concat(blobPartsSource);
 
                 message = result.message;
                 if (message !== "ok") {

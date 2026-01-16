@@ -1,23 +1,28 @@
-const fs = require("fs");
-const path = require("path");
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 
-const { createTracker, MockClient } = require("knex-mock-client");
+import { createTracker, MockClient } from "knex-mock-client";
+import knex from "knex";
 
-const { ProfileModel } = require("../model/profiles");
-const { SourceModel } = require("../model/sources");
-const { ToolModel } = require("../model/tools");
-const { cleanupConnection, getKnexConnection } = require("../model/utils");
+import { ProfileModel } from "../model/profiles.js";
+import { SourceModel } from "../model/sources.js";
+import { ToolModel } from "../model/tools.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const mockKnexConnection = knex({ client: MockClient, dialect: "pg" });
+
+jest.unstable_mockModule("../model/utils.js", () => ({
+    cleanupConnection: jest.fn().mockReturnThis(),
+    getKnexConnection: mockKnexConnection,
+}));
+
+const { cleanupConnection, getKnexConnection } = await import("../model/utils.js");
 
 const TOOL_MODEL = new ToolModel(path.join(__dirname, "data/plugins"));
 const PROFILE_MODEL = new ProfileModel(TOOL_MODEL, path.join(__dirname, "data/config/profiles.json"));
-
-jest.mock("../model/utils", () => {
-    const knex = require("knex");
-    return {
-        cleanupConnection: jest.fn().mockReturnThis(),
-        getKnexConnection: knex({ client: MockClient, dialect: "pg" }),
-    };
-});
 
 describe("SourceModel", () => {
     let dbProfiles;

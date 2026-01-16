@@ -1,5 +1,4 @@
-import path from 'path';
-const annotatorLive = require(path.resolve("bin/annotatorLive.js"));
+import path from 'path';import annotatorLive from "../../../bin/annotatorLive.js";
 
 export default function () {
     let operations = {

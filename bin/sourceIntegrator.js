@@ -7,6 +7,10 @@ import Util from './util.js';
 import ConfigManager from './configManager.js';
 import { exec } from 'child_process';
 
+import { fileURLToPath } from 'url';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 var SourceIntegrator = {
     creatTriplesFromUrl: function (ontologyUrl, callback) {
         " curl " + "--digest" + " --user dba:dba" + " --verbose" + ' --url "http://example.com/sparql-graph-crud-auth?graph-uri=urn:graph:update:test:put" ' + "/ -T books.ttl";

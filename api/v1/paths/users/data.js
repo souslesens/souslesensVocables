@@ -3,7 +3,7 @@ import { cleanUserData } from '../../../../model/cleanUserData.js';
 import userManager from '../../../../bin/user.js';
 
 export default () => {
-    GET = async (req, res, _next) => {
+    const GET = async (req, res, _next) => {
         try {
             const userInfo = await userManager.getUser(req.user);
             let userDatas = await userDataModel.all(userInfo.user, req.query);
@@ -77,7 +77,7 @@ export default () => {
         tags: ["UserData"],
     };
 
-    POST = async (req, res, _next) => {
+    const POST = async (req, res, _next) => {
         try {
             const userData = await cleanUserData.clean(req.body);
             const userInfo = await userManager.getUser(req.user);
@@ -154,7 +154,7 @@ export default () => {
         tags: ["UserData"],
     };
 
-    PUT = async (req, res, _next) => {
+    const PUT = async (req, res, _next) => {
         try {
             // users can only update their own data
             const userInfo = await userManager.getUser(req.user);

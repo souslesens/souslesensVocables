@@ -2,6 +2,7 @@ import { processResponse } from './utils.js';
 import httpProxy from '../../../bin/httpProxy.js';
 import ConfigManager from '../../../bin/configManager.js';
 import UserRequestFiltering from '../../../bin/userRequestFiltering.js';
+import Parliament from '../../../bin/parliamentProxy.js';
 
 export default function () {
     let operations = {
@@ -15,7 +16,6 @@ export default function () {
                 var body = JSON.parse(req.body.body);
                 var query = body.params.query;
                 if (false && (query.indexOf("http://purl.obolibrary.org/obo/vo.owl") > -1 || query.indexOf("http://purl.obolibrary.org/obo") > -1)) {
-                    const Parliament = require("../../../bin/parliamentProxy.js");
                     try {
                         Parliament.execPostQuery(query, function (err, result) {
                             processResponse(res, err, result);

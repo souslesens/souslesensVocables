@@ -1,7 +1,7 @@
-const fs = require("fs");
-const knex = require("knex");
-const path = require("path");
-const yargs = require("yargs");
+import fs from "fs";
+import knex from "knex";
+import path from "path";
+import yargs from "yargs";
 
 const migrateUsersData = async (configDirectory, writeMode) => {
     const configPath = path.resolve(configDirectory, "mainConfig.json");

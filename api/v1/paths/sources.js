@@ -7,9 +7,7 @@ import {
     successfullyFetched,
     successfullyCreated,
     fixBooleanInObject,
-} from './utils.js';
-
-const userManager = require(path.resolve("bin/user.js"));
+} from './utils.js';import userManager from "../../../bin/user.js";
 
 export default function () {
     let operations = {

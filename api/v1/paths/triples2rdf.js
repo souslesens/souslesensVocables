@@ -1,5 +1,5 @@
 import { processResponse } from './utils.js';
-import rdf from '../../../bin/RDF_IO..js';
+import rdf from '../../../bin/RDF_IO.js';
 const { NamedNode, BlankNode, Literal, Graph } = rdf;
 
 export default function () {

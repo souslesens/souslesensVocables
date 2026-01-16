@@ -5,6 +5,7 @@ import request from 'request';
 import fs from 'fs';
 import csv from 'csv-parser';
 import common from './util.js';
+import elasticRestProxy from './elasticRestProxy.js';
 
 var csvCrawler = {
     indexSource: function (config, callback) {
@@ -78,8 +79,7 @@ var csvCrawler = {
                             request(options, function (error, response, body) {
                                 if (error) {
                                     return callbackEach(error);
-                                }
-                                const elasticRestProxy = require("./elasticRestProxy..js");
+                                }
                                 elasticRestProxy.checkBulkQueryResponse(body, function (err, _result) {
                                     if (err) return callbackEach(err);
                                     var message = "indexed " + totalLines + " records ";

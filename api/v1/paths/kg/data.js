@@ -1,7 +1,5 @@
-import path from 'path';
-
-const dbConnector = require(path.resolve("bin/KG/dbConnector"));
-const { databaseModel } = require(path.resolve("model/databases"));
+import * as dbConnector from "../../../../bin/KG/dbConnector.js";
+import { databaseModel } from "../../../../model/databases.js";
 
 export default function () {
     let operations = {
@@ -17,63 +15,42 @@ export default function () {
             dbConnector.getData(
                 connection,
                 req.query.sqlQuery,
-                (data) => {
-                    // TODO: Adapt the result to send the same structure as the
-                    // previous connectors
-                    res.status(200).json(data);
+                function (result) {
+                    res.status(200).json(result);
                 },
-                (error) => {
-                    console.error(error);
-                    res.status(503).json({
-                        message: "The connection to the database was refused",
-                    });
+                function (error) {
+                    res.status(500).json({ error });
                 },
             );
         } catch (error) {
-            console.error(error);
-            res.status(500).json({ message: error });
+            res.status(error.status || 500).json({ error: error });
         }
     }
 
     GET.apiDoc = {
+        summary: "Retrieve data from a database",
         security: [{ restrictLoggedUser: [] }],
-        summary: "Execute SQL query",
-        description: "Execute SQL query",
-        operationId: "Execute SQL query",
+        operationId: "retrieveDataFromDb",
         parameters: [
             {
-                name: "type",
-                description: "type",
                 in: "query",
-                type: "string",
-                required: true,
-            },
-            {
                 name: "dbName",
-                description: "database name",
-                in: "query",
                 type: "string",
                 required: true,
             },
             {
-                name: "sqlQuery",
-                description: "SQL query to execute",
                 in: "query",
+                name: "sqlQuery",
                 type: "string",
                 required: true,
             },
         ],
-
         responses: {
             200: {
-                description: "Results",
-                schema: {
-                    type: "object",
-                },
+                description: "Results of the SQL query.",
             },
         },
-        tags: ["KG"],
     };
 
     return operations;
-};
+}

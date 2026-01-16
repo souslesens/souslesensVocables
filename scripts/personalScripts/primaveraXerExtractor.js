@@ -1,6 +1,6 @@
 
 
-var fs=require('fs');
+import fs from "fs";
 
 
 

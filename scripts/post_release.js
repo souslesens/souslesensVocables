@@ -1,4 +1,4 @@
-const fs = require("fs");
+import fs from "fs";
 
 const release = process.argv[2];
 const line = parseInt(process.argv[3]);

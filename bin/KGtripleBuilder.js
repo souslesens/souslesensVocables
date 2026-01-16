@@ -9,6 +9,10 @@ import { databaseModel } from '../model/databases.js';
 import ConfigManager from './configManager.js';
 import SocketManager from './socketManager.js';
 
+import { fileURLToPath } from 'url';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 //var rootDir = "D:\\NLP\\ontologies\\CFIHOS\\CFIHOS V1.5\\CFIHOS V1.5 RDL";
 
 var KGtripleBuilder = {

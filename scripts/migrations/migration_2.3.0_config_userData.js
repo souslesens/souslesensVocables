@@ -1,8 +1,8 @@
 /* Add the userData section to the mainConfig.json */
 
-const fs = require("fs");
-const path = require("path");
-const yargs = require("yargs");
+import fs from "fs";
+import path from "path";
+import yargs from "yargs";
 
 const main = async () => {
     const argv = yargs

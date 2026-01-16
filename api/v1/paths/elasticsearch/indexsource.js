@@ -1,5 +1,4 @@
-import path from 'path';
-const elasticRestProxy = require(path.resolve("bin/elasticRestProxy..js"));
+import path from 'path';import elasticRestProxy from "../../../../bin/elasticRestProxy.js";
 import ConfigManager from '../../../../bin/configManager.js';
 import UserRequestFiltering from '../../../../bin/userRequestFiltering.js';
 import { processResponse } from '../utils.js';

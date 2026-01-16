@@ -4,7 +4,7 @@ import { Lock } from 'async-await-mutex-lock';
 import { configDatabasesPath } from './config.js';
 import { profileModel } from './profiles.js';
 import KGbuilder_socket from '../bin/KGbuilder/KGbuilder_socket.js';
-import modelUtils from './utils.js';
+import * as modelUtils from './utils.js';
 
 /**
  * @typedef {import("./UserTypes").UserAccount} UserAccount

@@ -11,7 +11,7 @@
 import fs from 'fs';
 
 import { DOMParser } from 'xmldom';
-import skoReader from '../backoffice/skosReader..js';
+import skoReader from '../backoffice/skosReader.js';
 import async from 'async';
 import request from 'request';
 

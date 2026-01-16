@@ -1,10 +1,10 @@
-const path = require("path");
-const fs = require("fs");
-const ulid = require("ulid");
+import path from "path";
+import fs from "fs";
+import ulid from "ulid";
 const sources = path.resolve("config/sources.json");
 const profiles = path.resolve("config/profiles.json");
 const users = path.resolve("config/users/users.json");
-const bcrypt = require("bcrypt");
+import bcrypt from "bcrypt";
 
 async function sanitize(resource) {
     try {

@@ -2,6 +2,10 @@ import fs from 'fs';
 import path from 'path';
 import csvCrawler from '../bin/_csvCrawler.js';
 
+import { fileURLToPath } from 'url';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 var DataController = {
     /**
      * Gets the list of files in a sub-directory of `data`

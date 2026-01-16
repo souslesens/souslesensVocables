@@ -1759,52 +1759,29 @@ var MappingColumnsGraph = (function () {
                 });
             });
         };
-
-                    /**
-             * Imports mappings from a JSON file into the Vis.js graph file.
-             * Opens a file import dialog, parses the JSON content, and uploads the data to the graphs in instance data repository.
-             *
-            //  * @function
-            //  * @name importMappingsFromJSONFile
-            //  * @memberof module:MappingColumnsGraph
-            //  * @returns {void}
-            //  */
-        /**
-         * Import mappings from a JSON file into the current mapping graph (pre-checks data sources).
-         *
-         * (No id databases: crash)
-         * When importing mappings created on another server, the target server may not contain the same
-         * database source ids. This function prevents crashes by validating required database sources
-         * *before* writing the mapping graph file.
-         *
-         * ### What is validated
-         * 1) JSON integrity: detects any `nodes[i].data.datasource` value that is not declared in
-         *    `options.config.databaseSources` nor `options.config.csvSources`.
-         * 2) Target server availability: calls `GET /databases` and checks that every id declared in
-         *    `options.config.databaseSources` is available (exists and/or is authorized for the user).
-         *
-         * ### User feedback
-         * - Shows a short-title dialog (**Import blocked**) with an explicit reason and actionable steps.
-         * - Pinpoints locations in the imported JSON by attempting to compute line numbers for:
-         *   - `options.config.databaseSources.<id>`
-         *   - `nodes[i].data.datasource` occurrences
-         *   If line numbers cannot be determined (e.g., minified JSON), `?` is shown.
-         *
-         * @function
-         * @name importMappingsFromJSONFile
-         * @memberof module:MappingColumnsGraph
-         * @returns {void}
-         */
-
+                
+                /**
+                 * Returns the 1-based line number for a character index in a JSON text.
+                 * Used to provide approximate locations in user-imported JSON files.
+                 * @param {string} jsonText
+                 * @param {number} idx
+                 * @returns {number|null}
+                 */
                 function getLineNumberFromIndex(jsonText, idx) {
                     if (!jsonText || typeof idx !== "number" || idx < 0) {
                         return null;
                     }
                     return jsonText.slice(0, idx).split("\n").length; 
                 }
-
-
-
+                
+                /**
+                 * Tries to locate the line number of a datasource id under options.config.<sectionName>.
+                 * Best-effort heuristic (may return null if formatting differs or JSON is minified).
+                 * @param {string} jsonText
+                 * @param {string} sectionName
+                 * @param {string} key
+                 * @returns {number|null}
+                 */
                 function findConfigKeyLine(jsonText, sectionName, key) {
                     var sectionNeedle = `"${sectionName}": {`;
                     var sectionPos = jsonText.indexOf(sectionNeedle);
@@ -1817,9 +1794,15 @@ var MappingColumnsGraph = (function () {
 
                     return getLineNumberFromIndex(jsonText, sectionPos + keyPosLocal);
                 }
-
-
-
+                
+                /**
+                 * Tries to locate the line number where a node references a datasource id.
+                 * Best-effort heuristic based on textual search near the node id.
+                 * @param {string} jsonText
+                 * @param {string} nodeId
+                 * @param {string} datasourceId
+                 * @returns {number|null}
+                 */
                 function findNodeDatasourceLine(jsonText, nodeId, datasourceId) {
                     var idNeedle = `"id": "${nodeId}"`;
                     var idPos = jsonText.indexOf(idNeedle);
@@ -1832,8 +1815,8 @@ var MappingColumnsGraph = (function () {
                     var finalPos = dsPosLocal >= 0 ? idPos + dsPosLocal : idPos;
                     return getLineNumberFromIndex(jsonText, finalPos);
                 }
-
-
+                
+                /** Shows a modal dialog explaining why the import is blocked. @returns {void} */
                 function showImportBlockingDialog(title, htmlBody) {
                 var html =
                     "<div style='font-size:13px;line-height:1.45'>" +
@@ -1842,7 +1825,8 @@ var MappingColumnsGraph = (function () {
                 $("#mainDialogDiv").html(html);
                 UI.openDialog("mainDialogDiv", { title: title });
                 };
-
+                
+                /** Posts the imported mapping graph JSON to the backend. @returns {void} */
                 function doImportPost(dataToSave) {
                     var fileName = "mappings_" + MappingModeler.currentSLSsource + "_ALL" + ".json";
                     var payload = {
@@ -1864,6 +1848,24 @@ var MappingColumnsGraph = (function () {
                     });
                 }                
 
+                /**
+                * @function
+                * @name importMappingsFromJSONFile
+                * @memberof module:MappingColumnsGraph
+                * @description
+                * Imports a mappings JSON file into the current mapping graph and saves it on the server.
+                *
+                * To prevent crashes when importing a graph created on another server, this import validates
+                * data source identifiers before writing the graph file:
+                * 1) JSON integrity: each `nodes[i].data.datasource` must be declared in
+                *    `options.config.databaseSources` or `options.config.csvSources`.
+                * 2) Target server availability: if `options.config.databaseSources` contains ids, the import
+                *    calls `GET /databases` and checks that each id exists and/or is authorized.
+                
+                * If validation fails, an "Import blocked" dialog is shown with actionable guidance (and tries to display approximate JSON line numbers when possible).
+                * @returns {void}
+                */
+
         self.importMappingsFromJSONFile = function () {
             ImportFileWidget.showImportDialog(function (err, importedJsonText) {
                 if (err) {
@@ -1880,37 +1882,6 @@ var MappingColumnsGraph = (function () {
                 if (data?.options?.config?.graphUri != Config.sources[MainController.currentSource].graphUri) {
                 return alert("graphUri in file is not the same as the current graphUri, update graphURI in JSON file");
                 }
-
-
-                
-                /**
-                 * Compute a 1-based line number from a character index in the imported JSON text.
-                 * Returns null if the index is invalid.
-                 * @param {number} idx
-                 * @returns {number|null}
-                 */
-
-
-
-                /**
-                 * Try to locate the line number of a key inside `options.config.<sectionName>` in the imported JSON.
-                 * This relies on textual search in the raw JSON (may return null on minified/unexpected formatting).
-                 * @param {string} sectionName
-                 * @param {string} key
-                 * @returns {number|null}
-                 */
-
-
-       
-
-                /**
-                 * Try to locate the line number of a `nodes[i].data.datasource` occurrence for a given node id and datasource id.
-                 * This relies on textual search in the raw JSON (may return null on minified/unexpected formatting).
-                 * @param {string} nodeId
-                 * @param {string} dsValue
-                 * @returns {number|null}
-                 */
-
 
                
                 var dbSourcesFromFile = data?.options?.config?.databaseSources || {};
@@ -1942,17 +1913,7 @@ var MappingColumnsGraph = (function () {
                 });
 
                 var requiredDbIds = dbIdsFromConfig.slice();
-
-                /**
-                 * Display a blocking dialog during import validation.
-                 * The dialog title is intentionally short to avoid UI ellipsis.
-                 * @param {string} title
-                 * @param {string} htmlBody
-                 * @returns {void}
-                 */
-
-                
-
+                // Block import and show actionable guidance if datasource validation fails.
                 if (unknownIds.length > 0) {
                 var unknownHtml = unknownIds
                     .map(function (id) {
@@ -1987,12 +1948,6 @@ var MappingColumnsGraph = (function () {
                 );
                 return; // STOP
                 }
-
-
-
-
-
-
 
                 if (requiredDbIds.length === 0) {
                     return doImportPost(data);
@@ -2092,16 +2047,6 @@ var MappingColumnsGraph = (function () {
 
             });
         };
-    /**
-     * Imports mappings from a JSON file into the Vis.js graph file.
-     * Opens a file import dialog, parses the JSON content, and uploads the data to the graphs in instance data repository.
-     *
-    //  * @function
-    //  * @name importMappingsFromJSONFile
-    //  * @memberof module:MappingColumnsGraph
-    //  * @returns {void}
-    //  */
-
 
     self.hideNodesFromOtherTables = function (table) {
         var nodes = MappingColumnsGraph.visjsGraph.data.nodes.get();

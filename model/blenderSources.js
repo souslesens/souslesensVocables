@@ -1,5 +1,5 @@
-import fs from 'fs';
-import { Lock } from 'async-await-mutex-lock';
+import fs from "fs";
+import { Lock } from "async-await-mutex-lock";
 
 /**
  * @typedef {Object} BlenderSource
@@ -63,4 +63,4 @@ class BlenderSources {
 
 const blenderSources = new BlenderSources("config");
 
-export {  blenderSources, BlenderSources  };
+export { blenderSources, BlenderSources };

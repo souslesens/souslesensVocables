@@ -1,5 +1,5 @@
-import { processResponse } from '../../../utils.js';
-import configManager from '../../../../../../bin/configManager.js';
+import { processResponse } from "../../../utils.js";
+import configManager from "../../../../../../bin/configManager.js";
 export default function () {
     let operations = {
         POST,
@@ -40,4 +40,4 @@ export default function () {
     };
 
     return operations;
-};
+}

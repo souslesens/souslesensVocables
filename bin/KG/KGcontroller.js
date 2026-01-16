@@ -1,7 +1,7 @@
-import fs from 'fs';
-import path from 'path';
-import async from 'async';
-import ConfigManager from '../configManager.js';
+import fs from "fs";
+import path from "path";
+import async from "async";
+import ConfigManager from "../configManager.js";
 
 var KGcontroller = {
     getMappingsDirPath: function () {

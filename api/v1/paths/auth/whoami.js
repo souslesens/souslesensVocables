@@ -1,4 +1,5 @@
-import path from 'path';import userManager from "../../../../bin/user.js";
+import path from "path";
+import userManager from "../../../../bin/user.js";
 
 export default function () {
     let operations = {
@@ -26,4 +27,4 @@ export default function () {
     };
 
     return operations;
-};
+}

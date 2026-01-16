@@ -7,7 +7,7 @@
 
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-import fs from 'fs';
+import fs from "fs";
 
 var RcReportsTriples = {
     csvToJson: function (filePath, sep) {
@@ -208,7 +208,8 @@ var RcReportsTriples = {
 
         var header =
             "A,report_id,location_id,equipment_id,notif_date,F,concept_Niv1,concept_Niv2,concept_Niv3,concept_Niv4,concept_Niv5,concept_Niv6,,location_site,O,P,equipment_manufacturer,equipment_modelNumber,equipment_category,location_plant_section,location_plant unit\n";
-        outputStream.write(header);import readline from "readline";
+        outputStream.write(header);
+        import readline from "readline";
         const readInterface = readline.createInterface({
             input: fs.createReadStream(filePath),
             output: process.stdout,

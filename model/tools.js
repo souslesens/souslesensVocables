@@ -1,16 +1,11 @@
-import fg from 'fast-glob';
-import fs from 'fs';
-import path from 'path';
-import { Lock } from 'async-await-mutex-lock';
-import { simpleGit, GitError } from 'simple-git';
-import { convertType } from './utils.js';
+import fg from "fast-glob";
+import fs from "fs";
+import path from "path";
+import { Lock } from "async-await-mutex-lock";
+import { simpleGit, GitError } from "simple-git";
+import { convertType } from "./utils.js";
 
-import {
-    configPluginsConfig,
-    configPluginsRepository,
-    directoryPlugins,
-    directoryPluginsRepositories,
-} from './config.js';
+import { configPluginsConfig, configPluginsRepository, directoryPlugins, directoryPluginsRepositories } from "./config.js";
 
 /**
  * @typedef {import("./ToolTypes").Tool} Tool
@@ -375,4 +370,4 @@ class ToolModel {
 
 const toolModel = new ToolModel(path.join(process.cwd(), "/plugins"));
 
-export {  ToolModel, toolModel  };
+export { ToolModel, toolModel };

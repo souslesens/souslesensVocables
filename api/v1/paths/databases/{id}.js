@@ -1,6 +1,6 @@
-import { databaseModel } from '../../../../model/databases.js';
-import { responseSchema } from '../utils.js';
-import userManager from '../../../../bin/user.js';
+import { databaseModel } from "../../../../model/databases.js";
+import { responseSchema } from "../utils.js";
+import userManager from "../../../../bin/user.js";
 
 export default function () {
     let operations = { GET };
@@ -28,4 +28,4 @@ export default function () {
     };
 
     return operations;
-};
+}

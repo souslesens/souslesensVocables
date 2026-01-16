@@ -1,6 +1,6 @@
-import sqlServer from './SQLserverConnector.js';
-import fs from 'fs';
-import async from 'async';
+import sqlServer from "./SQLserverConnector.js";
+import fs from "fs";
+import async from "async";
 
 var codeRegExTEPDK = {
     //   "general": /^(?<Location>[\w]{4})-(?<Function>\w{1,5})-(?<SeqNumber>\d+)(?<SubSeqIndex>\w)-?(?<Pos>\w{0,1})(?<optional>\w{0,1})$/,

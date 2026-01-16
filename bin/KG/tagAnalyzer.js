@@ -1,6 +1,6 @@
-import fs from 'fs';
-import async from 'async';
-import SQLserverConnector from './SQLserverConnector.js';
+import fs from "fs";
+import async from "async";
+import SQLserverConnector from "./SQLserverConnector.js";
 
 var TagAnalyzer = {
     analyzeTag: function (tag) {

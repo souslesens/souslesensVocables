@@ -1,6 +1,6 @@
-import fs from 'fs';
-import path from 'path';
-import { processResponse, sanitizePath } from '../utils.js';
+import fs from "fs";
+import path from "path";
+import { processResponse, sanitizePath } from "../utils.js";
 
 export default function () {
     let operations = {
@@ -37,4 +37,4 @@ export default function () {
     };
 
     return operations;
-};
+}

@@ -1,6 +1,6 @@
-import { readMainConfig } from './config.js';
-import { Client as Client7 } from 'es7';
-import { chunk } from './utils.js';
+import { readMainConfig } from "./config.js";
+import { Client as Client7 } from "es7";
+import { chunk } from "./utils.js";
 
 class IndexModel {
     /**
@@ -90,4 +90,4 @@ class IndexModel {
 const config = readMainConfig();
 const indexModel = new IndexModel(config.ElasticSearch.url, config.ElasticSearch.user, config.ElasticSearch.password, config.ElasticSearch.skipSslVerify, config.ElasticSearch.searchChunkSize || 20);
 
-export {  IndexModel, indexModel  };
+export { IndexModel, indexModel };

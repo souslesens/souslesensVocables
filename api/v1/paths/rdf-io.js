@@ -1,5 +1,5 @@
-import { default as rdfParser } from 'rdf-parse';
-import { processResponse } from './utils.js';
+import { default as rdfParser } from "rdf-parse";
+import { processResponse } from "./utils.js";
 import streamify_string_module from "streamify-string";
 export default function () {
     let operations = {
@@ -62,4 +62,4 @@ export default function () {
     };
 
     return operations;
-};
+}

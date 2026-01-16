@@ -1,16 +1,16 @@
-import fs from 'fs';
-import path from 'path';
+import fs from "fs";
+import path from "path";
 
 //var TikaClient = require("@futpib/tika-server-client");
 //var tika = new TikaClient("http://localhost:41000");
 //const TikaServer = require("tika-server");
-import util from '../util.js';
+import util from "../util.js";
 
-import httpProxy from '../httpProxy.js';
-import socket from '../socketManager.js';
-import ConfigManager from '../configManager.js';
-import etl from 'etl';
-import async from 'async';
+import httpProxy from "../httpProxy.js";
+import socket from "../socketManager.js";
+import ConfigManager from "../configManager.js";
+import etl from "etl";
+import async from "async";
 
 var acceptedExtensions = ["ttl", "doc", "docx", "xls", "xslx", "pdf", "odt", "ods", "ppt", "pptx", "html", "htm", "txt", "csv"];
 var base64Extensions = ["doc", "docx", "xls", "xslx", "pdf", "odt", "ods", "ppt", "pptx"];
@@ -21,13 +21,13 @@ const spacyServerUrl = "";
 
 var parsedDocumentsHomeDir = null; //"../../data/annotator/parsedDocuments"
 var uploadDirPath = null; //"../../data/annotator/temp"
-import Inflector from 'inflected';
+import Inflector from "inflected";
 var tikaServer = null;
 
 // var tikaserverStarted = false;
-import unzipper from 'unzipper';
+import unzipper from "unzipper";
 
-import { fileURLToPath } from 'url';
+import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 

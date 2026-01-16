@@ -1,6 +1,6 @@
-import path from 'path';
-import fsSync from 'fs';
-import fs from 'fs/promises';
+import path from "path";
+import fsSync from "fs";
+import fs from "fs/promises";
 
 export default function () {
     let operations = {
@@ -58,4 +58,4 @@ export default function () {
     };
 
     return operations;
-};
+}

@@ -1,7 +1,7 @@
-import csvCrawler from '../../bin/_csvCrawler.js';
-import elasticRestProxy from '../../bin/elasticRestProxy.js';
-import fs from 'fs';
-import async from 'async';
+import csvCrawler from "../../bin/_csvCrawler.js";
+import elasticRestProxy from "../../bin/elasticRestProxy.js";
+import fs from "fs";
+import async from "async";
 var dictionaryMatcher = {
     getSimilars: function (filePath, index, fileField, indexLabelField, indexIdField, callback) {
         var data = [];

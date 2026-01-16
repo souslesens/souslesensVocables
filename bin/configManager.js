@@ -10,16 +10,16 @@
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import jsonFileStorage from './jsonFileStorage.js';
+import jsonFileStorage from "./jsonFileStorage.js";
 
-import SourceManager from './sourceManager.js';
-import path from 'path';
-import async from 'async';
-import fs from 'fs';
-import { configPath, config } from '../model/config.js';
-import { SourceModel, sourceModel } from '../model/sources.js';
-import userManager from './user.js';
-import { fileURLToPath } from 'url';
+import SourceManager from "./sourceManager.js";
+import path from "path";
+import async from "async";
+import fs from "fs";
+import { configPath, config } from "../model/config.js";
+import { SourceModel, sourceModel } from "../model/sources.js";
+import userManager from "./user.js";
+import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -177,7 +177,7 @@ var ConfigManager = {
         });
     },
 
-    getUser: async function (req, res, next) {
+    getUser: async function (req, res, next) {
         try {
             const userInfo = await userManager.getUser(req.user || null);
             if (next) {
@@ -191,7 +191,7 @@ var ConfigManager = {
     },
 
     getUserSources: async function (req, res, next) {
-        try {
+        try {
             const userInfo = await userManager.getUser(req.user || null);
             const allowedSources = await sourceModel.getUserSources(userInfo.user);
             if (next) {
@@ -203,10 +203,12 @@ var ConfigManager = {
             res.status(err.status || 500).json(err);
             next(err);
         }
-        if (false) {
+        if (false) {
             const sourcesJSON = path.resolve(configPath + "/sources.json");
-            const profilesJSON = path.resolve(configPath + "/profiles.json");
-            const read = util.promisify(fs.readFile);
+            const profilesJSON = path.resolve(configPath + "/profiles.json");
+
+            const read = util.promisify(fs.readFile);
+
             try {
                 const userInfo = await userManager.getUser(req.user || null);
 

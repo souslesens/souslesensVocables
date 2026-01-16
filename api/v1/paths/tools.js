@@ -1,6 +1,6 @@
-import { successfullyFetched } from './utils.js';
-import { profileModel } from '../../../model/profiles.js';
-import userManager from '../../../bin/user.js';
+import { successfullyFetched } from "./utils.js";
+import { profileModel } from "../../../model/profiles.js";
+import userManager from "../../../bin/user.js";
 
 export default function () {
     let operations = {
@@ -37,4 +37,4 @@ export default function () {
         tags: ["Tools"],
     };
     return operations;
-};
+}

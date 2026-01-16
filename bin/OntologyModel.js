@@ -1,7 +1,7 @@
-import async from 'async';
-import httpProxy from './httpProxy.js';
-import request from 'request';
-import fs from 'fs';
+import async from "async";
+import httpProxy from "./httpProxy.js";
+import request from "request";
+import fs from "fs";
 //const sources=require("../model/sources.js")
 
 var OntologyModel = {
@@ -435,7 +435,9 @@ Sparql_OWL.getDictionary(source, { lang: Config.default_lang, filter: filter }, 
         },
     },
 
-    initConfig: function () {import fs from "fs";import path from "path";
+    initConfig: function () {
+        import fs from "fs";
+        import path from "path";
         OntologyModel.Config = JSON.parse("" + fs.readFileSync(path.resolve("../../config/mainConfig.json")));
         OntologyModel.Config.sources = JSON.parse("" + fs.readFileSync(path.resolve("../../config/sources.json")));
 

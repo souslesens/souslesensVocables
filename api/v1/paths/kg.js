@@ -1,4 +1,5 @@
-import path from 'path';import kGbuilder from "../../../bin/KG/KGbuilder.js";
+import path from "path";
+import kGbuilder from "../../../bin/KG/KGbuilder.js";
 
 export default function () {
     let operations = {
@@ -74,4 +75,4 @@ export default function () {
     };
 
     return operations;
-};
+}

@@ -50,10 +50,7 @@ const addImportsAndContributor = (blobParts: BlobPart[], sourceName: string, use
     const contributorUri = "http://purl.org/dc/elements/1.1/contributor";
     const owlImportsUri = "http://www.w3.org/2002/07/owl#imports";
     const hasContributor =
-        content.includes(contributorUri) ||
-        content.includes("http://purl.org/dc/terms/contributor") ||
-        /\bdc:contributor\b/.test(content) ||
-        /\bdcterms:contributor\b/.test(content);
+        content.includes(contributorUri) || content.includes("http://purl.org/dc/terms/contributor") || /\bdc:contributor\b/.test(content) || /\bdcterms:contributor\b/.test(content);
     const hasImports = content.includes(owlImportsUri) || /\bowl:imports\b/.test(content);
 
     const sourceConfig = Config.sources[sourceName];

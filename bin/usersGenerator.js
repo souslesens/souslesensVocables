@@ -2,7 +2,7 @@ import csvCrawler from "./_csvCrawler.js";
 var filePath = "D:\\Total\\2021\\JeanCharles\\users.csv";
 
 csvCrawler.readCsv({ filePath: filePath }, 500000, function (err, result) {
-    if (err) return callbackseries(err);
+    if (err) return console.error(err);
     data = result.data;
     headers = result.headers;
 

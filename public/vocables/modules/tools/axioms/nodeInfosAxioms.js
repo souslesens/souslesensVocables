@@ -8,7 +8,9 @@ import Axiom_activeLegend from "./axiom_activeLegend.js";
 var NodeInfosAxioms = (function () {
     var self = {};
 
-    self.init = function (source, resource, divId) {
+    self.init = function (source, resource, divId,options) {
+        if(!options)
+            options={}
         self.currentSource = source;
         self.currentResource = resource;
         self.currentResource.level = 0;
@@ -25,6 +27,9 @@ var NodeInfosAxioms = (function () {
             }
 
             Axioms_manager.initResourcesMap(self.currentResource.data.source, function (err, result) {
+                if(  options.newAxiom){
+                   return  NodeInfosAxioms.newAxiom(true)
+                }
                 AxiomExtractor.getClassAxiomsTriples(self.currentResource.data.source, self.currentResource.data.id, function (err, triples) {
                     var divId = "nodeInfosAxioms_graphDiv";
                     var options = {};
@@ -357,7 +362,7 @@ var NodeInfosAxioms = (function () {
             str += "</ul>";
 
             $("#smallDialogDiv").html(str);
-            $("#smallDialogDiv").dialog("open");
+            $("#axiomsEditor_textDiv").dialog("open");
         },
     };
 

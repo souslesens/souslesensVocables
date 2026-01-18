@@ -603,6 +603,7 @@ enabled:true},*/
 
     self.clearGraph = function () {
         $("#" + self.graphDivId).html("");
+        $("#" + self.graphDivId).html("");
     };
 
     self.outlineNode = function (nodeId) {

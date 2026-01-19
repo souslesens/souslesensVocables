@@ -7,6 +7,7 @@ import DataSourceManager from "./dataSourcesManager.js";
 import MappingModeler from "./mappingModeler.js";
 import Lineage_graphPaths from "../lineage/lineage_graphPaths.js";
 import UIcontroller from "./uiController.js";
+import LegendOverlayWidget from "../../uiWidgets/legendOverlayWidget.js";
 
 /**
  * MappingColumnsGraph module.
@@ -42,6 +43,11 @@ var MappingColumnsGraph = (function () {
      * @memberof module:MappingColumnsGraph
      */
     self.graphDiv = "mappingModeler_graphDiv";
+
+    
+    // Feature flag: keep legacy legend as fallback during migration.
+    self.useLegendOverlayWidget = true;
+
 
     /**
      * X-axis step size for node positioning.
@@ -459,6 +465,10 @@ var MappingColumnsGraph = (function () {
         // MappingModeler.hideForbiddenResources(newResource.data.type);
         JstreeWidget.empty("suggestionsSelectJstreeDiv");
         self.currentGraphNode = newResource;
+        
+        // Refresh legend after resource drawing
+        self.refreshLegend(self.graphDiv);
+
         if (callback) {
             callback();
         }
@@ -527,15 +537,130 @@ var MappingColumnsGraph = (function () {
 
         self.visjsGraph = new VisjsGraphClass(graphDiv, visjsData, self.graphOptions);
         self.visjsGraph.draw(function () {
-            // Réinjecte la légende après draw (important pour éviter le clignotement)
-            self.injectMappingLegend(graphDiv);
-            self.updateMappingLegendVisibilityFromGraph();
+            // Re-render legend after draw (avoid flicker) - legacy fallback kept during migration
+            self.refreshLegend(graphDiv);
 
             if (callback) {
                 return callback();
             }
         });
 
+    };
+
+    /**
+     * Build legend state from a VisjsGraphClass instance.
+     * It inspects currently visible nodes/edges (hidden !== true) and returns presence maps.
+     * IMPORTANT: Legend categories must match LegendOverlayWidget data-edge-cat values.
+     *
+     * @param {Object} visjsGraph - VisjsGraphClass instance.
+     * @returns {{nodeTypesPresent:Object, edgeCatsPresent:Object}}
+     */
+    self.getLegendStateFromVisjsGraph = function (visjsGraph) {
+        var state = {
+            nodeTypesPresent: {},
+            edgeCatsPresent: {},
+        };
+
+        if (!visjsGraph || !visjsGraph.data || !visjsGraph.data.nodes || !visjsGraph.data.edges) {
+            return state;
+        }
+
+        var nodes = visjsGraph.data.nodes.get().filter(function (n) {
+            return n && n.hidden !== true;
+        });
+
+        var edges = visjsGraph.data.edges.get().filter(function (e) {
+            return e && e.hidden !== true;
+        });
+
+        // Node types
+        nodes.forEach(function (n) {
+            if (n.data && n.data.type) {
+                state.nodeTypesPresent[n.data.type] = true;
+            }
+        });
+
+        // Edge categories (must match LegendOverlayWidget default edge cats)
+        edges.forEach(function (e) {
+            var t = e.data ? e.data.type : null;
+
+            // rdf:type / rdfs:subClassOf
+            if (t === "rdf:type" || t === "rdfs:subClassOf") {
+                state.edgeCatsPresent["RdfType"] = true;
+                return;
+            }
+
+            // DatatypeProperty
+            if (t === "DatatypeProperty" || e.dashes === true) {
+                state.edgeCatsPresent["DatatypeProperty"] = true;
+                return;
+            }
+
+            // Color-based (structural / technical)
+            var c = "";
+            if (typeof e.color === "string") {
+                c = e.color.toLowerCase();
+            } else if (e.color && typeof e.color.color === "string") {
+                c = e.color.color.toLowerCase();
+            }
+
+            if (c === "#8f8a8c") {
+                state.edgeCatsPresent["DatasourceLink"] = true;
+                return;
+            }
+            if (c === "#ef4270") {
+                state.edgeCatsPresent["TechnicalLink"] = true;
+                return;
+            }
+
+            // Other rdfs: predicates
+            if (typeof t === "string" && t.indexOf("rdfs:") === 0) {
+                state.edgeCatsPresent["OtherRelation"] = true;
+                return;
+            }
+
+            // Any remaining typed predicate => ObjectProperty
+            if (t) {
+                state.edgeCatsPresent["ObjectProperty"] = true;
+                return;
+            }
+
+            // Default/system edge
+            state.edgeCatsPresent["SystemDefault"] = true;
+        });
+
+        return state;
+    };
+    
+    /**
+     * Refresh the legend (widget or legacy) using current visjsGraph state.
+     * @param {string} containerId
+     * @returns {void}
+     */
+    self.refreshLegend = function (containerId) {
+        if (!containerId) {
+            containerId = self.graphDiv;
+        }
+
+        if (self.useLegendOverlayWidget) {
+            // Render is idempotent (it will not duplicate if already present)
+            LegendOverlayWidget.render(containerId, {
+                idPrefix: "mappingLegend",
+                title: "📘 Legend",
+                initiallyExpanded: true,
+                variant: "mapping",
+                position: "top-right",
+            });
+
+            LegendOverlayWidget.update(containerId, self.getLegendStateFromVisjsGraph(self.visjsGraph));
+            return;
+        }
+
+        // Legacy fallback
+        self.injectMappingLegend(containerId);
+        if (typeof self.updateMappingLegendVisibilityFromGraph === "function") {
+            self.updateMappingLegendVisibilityFromGraph();
+        }
     };
 
     self.getColumnsClasses = function (nodes) {
@@ -1001,7 +1126,7 @@ var MappingColumnsGraph = (function () {
                 if (index == 0) {
                     MappingColumnsGraph.visjsGraph.data.nodes = tableNodes;
                     MappingColumnsGraph.visjsGraph.draw(function () {
-                        MappingColumnsGraph.injectMappingLegend(MappingColumnsGraph.graphDiv);
+                        MappingColumnsGraph.refreshLegend(MappingColumnsGraph.graphDiv);
                         MappingColumnsGraph.visjsGraph.network.fit();
                         callbackEach();
                     });
@@ -1059,7 +1184,7 @@ var MappingColumnsGraph = (function () {
                     MappingColumnsGraph.visjsGraph.data = result;
                     if (result.nodes.length == 0) {
                         return MappingColumnsGraph.visjsGraph.draw(function () {
-                            MappingColumnsGraph.injectMappingLegend(MappingColumnsGraph.graphDiv);
+                            MappingColumnsGraph.refreshLegend(MappingColumnsGraph.graphDiv);
                             if (callback) {
                                 return callback();
                             }
@@ -1294,6 +1419,10 @@ var MappingColumnsGraph = (function () {
             return;
         }
         self.visjsGraph.data.nodes.update(node);
+        
+        // Refresh legend after node update
+        self.refreshLegend(self.graphDiv);
+
         self.saveVisjsGraph(function () {
             if (callback) {
                 callback();
@@ -1315,6 +1444,10 @@ var MappingColumnsGraph = (function () {
         }
 
         self.visjsGraph.data.nodes.remove(node);
+        
+        // Refresh legend after node removal
+        self.refreshLegend(self.graphDiv);
+
         self.saveVisjsGraph(function () {
             if (callback) {
                 callback();
@@ -1353,6 +1486,10 @@ var MappingColumnsGraph = (function () {
                     callback();
                 }
             });
+            
+            // Refresh legend after node changes
+            self.refreshLegend(self.graphDiv);
+
         }
     };
 
@@ -1369,6 +1506,10 @@ var MappingColumnsGraph = (function () {
             return;
         }
         self.visjsGraph.data.edges.update(edge);
+
+        // Refresh legend after edge update
+        self.refreshLegend(self.graphDiv);
+
         self.saveVisjsGraph(function () {
             if (callback) {
                 callback();
@@ -1389,6 +1530,10 @@ var MappingColumnsGraph = (function () {
             return;
         }
         self.visjsGraph.data.edges.remove(edge);
+        
+        // Refresh legend after edge removal
+        self.refreshLegend(self.graphDiv);
+
         self.saveVisjsGraph(function () {
             if (callback) {
                 callback();
@@ -1444,6 +1589,10 @@ var MappingColumnsGraph = (function () {
             console.log(e);
         }
         self.saveVisjsGraph();
+        
+        // Refresh legend after edge changes
+        self.refreshLegend(self.graphDiv);
+
     };
 
     /**
@@ -1795,7 +1944,11 @@ var MappingColumnsGraph = (function () {
         }
 
         MappingColumnsGraph.visjsGraph.data.nodes.update(newNodes);
-        self.updateMappingLegendVisibilityFromGraph();
+        if (self.useLegendOverlayWidget) {
+            LegendOverlayWidget.update(self.graphDiv, self.getLegendStateFromVisjsGraph(self.visjsGraph));
+        } else {
+            self.updateMappingLegendVisibilityFromGraph();
+        }
     };
 
     self.relationMessage = function (fromLabel, toLabel) {

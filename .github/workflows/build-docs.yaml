@@ -11,11 +11,21 @@ jobs:
         environment:
             name: github-pages
             url: ${{ steps.deployment.outputs.page_url }}
-        container:
-            image: astral/uv:python3.11-trixie-slim
         steps:
             - uses: actions/checkout@v4
-            - run: |
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "20"
+                  cache: "npm"
+            - name: Install npm dependencies
+              run: npm ci
+            - name: Generate jsdoc
+              run: npm run tools:jsdoc2md > docs/docs/devdoc/codedoc/jsdoc.md
+            - name: Setup uv
+              uses: astral-sh/setup-uv@v4
+            - name: Build docs with Sphinx
+              run: |
                   cd docs
                   uv run sphinx-build docs _build/html
             - name: Upload

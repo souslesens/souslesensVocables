@@ -1,0 +1,521 @@
+import common from "../shared/common.js";
+
+/**
+ * LegendOverlayWidget
+ *
+ * Purpose:
+ * - Render an informative legend overlay (DOM-based) with an internal toggle (open/close).
+ * - Provide a common base legend (Nodes/Edges) and optional variant-specific sections
+ *   (e.g., Implicit Model: "Columns (color = table)").
+ *
+ * Standards alignment:
+ * - All code/comments in English.
+ * - Module pattern with self methods and dual export.
+ * - HTML is built progressively with '+=' (no large template literals).
+ */
+var LegendOverlayWidget = (function () {
+    var self = {};
+
+    /**
+     * Internal instances map keyed by containerId.
+     * @type {Object<string, {expanded:boolean, ids:Object, options:Object}>}
+     */
+    self.instances = {};
+
+    /**
+     * Default visual constants used by the legend.
+     * Consumers may override colors through options.items if needed.
+     * @type {Object}
+     */
+    self.defaultColors = {
+        node: {
+            Class: "#00AFEF",
+            Column: "#CB9801",
+            Table: "#D8CACD",
+            URI: "#BC7DEC",
+            DatatypeProperty: "#9B59B6",
+        },
+        edge: {
+            ObjectProperty: "#409304",
+            OtherRelation: "#333333",
+            RdfType: "#00AFEF",
+            SystemDefault: "#CCCCCC",
+            DatatypeProperty: "#9B59B6",
+            DatasourceLink: "#8F8A8C",
+            TechnicalLink: "#EF4270",
+        },
+    };
+
+    /**
+     * Build a safe suffix for DOM ids based on a containerId.
+     * @param {string} containerId
+     * @returns {string}
+     */
+    self.getSafeIdSuffix = function (containerId) {
+        if (!containerId) {
+            return "legend";
+        }
+        return String(containerId).replace(/[^a-zA-Z0-9_\-]/g, "_");
+    };
+
+    /**
+     * Minimal HTML escaping for user-controlled strings.
+     * @param {string} str
+     * @returns {string}
+     */
+    self.escapeHtml = function (str) {
+        return String(str)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/\"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    };
+
+    /**
+     * Get default legend item definitions.
+     * @returns {{nodes:Array, edges:Array}}
+     */
+    self.getDefaultItems = function () {
+        return {
+            nodes: [
+                { type: "Class", label: "Class", color: self.defaultColors.node.Class, swatch: "box" },
+                { type: "Column", label: "Column", color: self.defaultColors.node.Column, swatch: "box" },
+                { type: "Table", label: "Table", color: self.defaultColors.node.Table, swatch: "box" },
+                { type: "URI", label: "URI", color: self.defaultColors.node.URI, swatch: "box" },
+            ],
+            edges: [
+                { cat: "ObjectProperty", label: "ObjectProperty (relation)", color: self.defaultColors.edge.ObjectProperty, swatch: "line" },
+                { cat: "OtherRelation", label: "Other relation (e.g., rdfs:member)", color: self.defaultColors.edge.OtherRelation, swatch: "line" },
+                { cat: "RdfType", label: "rdf:type / rdfs:subClassOf link", color: self.defaultColors.edge.RdfType, swatch: "line" },
+                { cat: "SystemDefault", label: "System / default edge", color: self.defaultColors.edge.SystemDefault, swatch: "line" },
+                { cat: "DatasourceLink", label: "Structural link (Table → Column)", color: self.defaultColors.edge.DatasourceLink, swatch: "line" },
+                { cat: "DatatypeProperty", label: "DatatypeProperty (dashed)", color: self.defaultColors.edge.DatatypeProperty, swatch: "dashed" },
+            ],
+        };
+    };
+
+    /**
+     * Compute the DOM ids used by an instance.
+     * @param {string} containerId
+     * @param {Object} options
+     * @returns {Object}
+     */
+    self.getInstanceIds = function (containerId, options) {
+        var suffix = self.getSafeIdSuffix(containerId);
+        var prefix = (options && options.idPrefix) ? String(options.idPrefix) : "legend";
+        var wrapId = prefix + "_wrapper_" + suffix;
+        return {
+            wrapperId: wrapId,
+            buttonId: prefix + "_toggleBtn_" + suffix,
+            panelId: prefix + "_panel_" + suffix,
+            extraSlotId: prefix + "_extraSlot_" + suffix,
+        };
+    };
+
+    /**
+     * Render the legend overlay inside the given container.
+     *
+     * @param {string} containerId - DOM id of the container element.
+     * @param {Object} options
+     * @param {string} [options.title="Legend"] - Button label.
+     * @param {boolean} [options.initiallyExpanded=true] - Initial open/closed state.
+     * @param {string} [options.variant="default"] - Variant name (e.g., mapping, implicit, lineage).
+     * @param {string} [options.position="top-right"] - Overlay position.
+     * @param {Object} [options.items] - Optional override for legend items.
+     * @returns {void}
+     */
+    self.render = function (containerId, options) {
+        if (!containerId) {
+            return;
+        }
+        if (!options) {
+            options = {};
+        }
+
+        var container = document.getElementById(containerId);
+        if (!container) {
+            return;
+        }
+
+        var ids = self.getInstanceIds(containerId, options);
+
+        // Prevent duplicates
+        if (container.querySelector("#" + ids.wrapperId)) {
+            return;
+        }
+
+        // Ensure container is positioned
+        if (!container.style.position || container.style.position === "") {
+            container.style.position = "relative";
+        }
+
+        var expanded = (options.initiallyExpanded !== undefined) ? options.initiallyExpanded : true;
+        var title = options.title ? String(options.title) : "📘 Legend";
+
+        var items = options.items ? options.items : self.getDefaultItems();
+
+        var html = "";
+
+        html += "<div id='" + ids.wrapperId + "'";
+        html += " style='position:absolute; z-index:10;";
+        html += self.getPositionStyle(options.position);
+        html += "'>";
+
+        html += "<button id='" + ids.buttonId + "' type='button'";
+        html += " data-legend-container='" + self.escapeHtml(containerId) + "'";
+        html += " style='cursor:pointer; border:1px solid #ddd; background:#fff;";
+        html += " border-radius:8px; padding:6px 10px; font-size:12px;";
+        html += " box-shadow:0 2px 10px rgba(0,0,0,0.08); margin-bottom:6px;'>";
+        html += self.escapeHtml(title);
+        html += "</button>";
+
+        html += "<div id='" + ids.panelId + "'";
+        html += " style='background:#fff; border:1px solid #ddd; border-radius:8px;";
+        html += " padding:10px 12px; font-size:12px;";
+        html += " box-shadow:0 2px 10px rgba(0,0,0,0.08); min-width:260px;";
+        html += " display:" + (expanded ? "block" : "none") + ";'>";
+
+        html += self.buildNodesSectionHtml(items.nodes);
+        html += self.buildEdgesSectionHtml(items.edges);
+
+        // Variant-specific slot (initially empty; may be filled by update())
+        html += "<div id='" + ids.extraSlotId + "' data-legend-slot='extra'></div>";
+
+        html += "</div>"; // panel
+        html += "</div>"; // wrapper
+
+        container.insertAdjacentHTML("beforeend", html);
+
+        self.instances[containerId] = {
+            expanded: expanded,
+            ids: ids,
+            options: options,
+        };
+
+        self.bindToggle(containerId);
+    };
+
+    /**
+     * Update legend visibility and optional variant content.
+     *
+     * @param {string} containerId
+     * @param {Object} state
+     * @param {Object<string, boolean>} [state.nodeTypesPresent]
+     * @param {Object<string, boolean>} [state.edgeCatsPresent]
+     * @param {Object<string, string>} [state.tableColors] - For implicit variant: map tableName -> color.
+     * @returns {void}
+     */
+    self.update = function (containerId, state) {
+        if (!containerId) {
+            return;
+        }
+        var instance = self.instances[containerId];
+        if (!instance) {
+            return;
+        }
+        var ids = instance.ids;
+        var panel = document.getElementById(ids.panelId);
+        if (!panel) {
+            return;
+        }
+
+        if (!state) {
+            state = {};
+        }
+
+        self.applyRowVisibility(panel, state);
+        self.updateExtraSlot(containerId, state);
+    };
+
+    /**
+     * Show or hide the legend wrapper.
+     * @param {string} containerId
+     * @param {boolean} visible
+     * @returns {void}
+     */
+    self.setVisible = function (containerId, visible) {
+        var instance = self.instances[containerId];
+        if (!instance) {
+            return;
+        }
+        var wrapper = document.getElementById(instance.ids.wrapperId);
+        if (!wrapper) {
+            return;
+        }
+        wrapper.style.display = visible ? "block" : "none";
+    };
+
+    /**
+     * Destroy legend instance from the container.
+     * @param {string} containerId
+     * @returns {void}
+     */
+    self.destroy = function (containerId) {
+        var instance = self.instances[containerId];
+        if (!instance) {
+            return;
+        }
+        var wrapper = document.getElementById(instance.ids.wrapperId);
+        if (wrapper && wrapper.parentNode) {
+            wrapper.parentNode.removeChild(wrapper);
+        }
+        delete self.instances[containerId];
+    };
+
+    /**
+     * Return inline css for desired overlay position.
+     * @param {string} position
+     * @returns {string}
+     */
+    self.getPositionStyle = function (position) {
+        // Default: top-right
+        if (!position) {
+            position = "top-right";
+        }
+        if (position === "top-left") {
+            return " top:10px; left:10px;";
+        }
+        if (position === "bottom-right") {
+            return " bottom:10px; right:10px;";
+        }
+        if (position === "bottom-left") {
+            return " bottom:10px; left:10px;";
+        }
+        return " top:10px; right:10px;";
+    };
+
+    /**
+     * Bind the internal toggle handler.
+     * @param {string} containerId
+     * @returns {void}
+     */
+    self.bindToggle = function (containerId) {
+        var instance = self.instances[containerId];
+        if (!instance) {
+            return;
+        }
+        var btn = document.getElementById(instance.ids.buttonId);
+        if (!btn) {
+            return;
+        }
+        // Avoid multiple bindings
+        btn.removeEventListener("click", self.onToggleClick);
+        btn.addEventListener("click", self.onToggleClick);
+    };
+
+    /**
+     * Toggle click handler (shared for all instances).
+     * @param {Event} event
+     * @returns {void}
+     */
+    self.onToggleClick = function (event) {
+        var btn = event && event.currentTarget ? event.currentTarget : null;
+        if (!btn) {
+            return;
+        }
+        var containerId = btn.getAttribute("data-legend-container");
+        if (!containerId) {
+            return;
+        }
+        var instance = self.instances[containerId];
+        if (!instance) {
+            return;
+        }
+        instance.expanded = !instance.expanded;
+        var panel = document.getElementById(instance.ids.panelId);
+        if (panel) {
+            panel.style.display = instance.expanded ? "block" : "none";
+        }
+    };
+
+    /**
+     * Build HTML for the Nodes section.
+     * @param {Array<Object>} items
+     * @returns {string}
+     */
+    self.buildNodesSectionHtml = function (items) {
+        var html = "";
+        html += "<div style='font-weight:700; margin:8px 0 6px;'>Nodes</div>";
+        if (!items || items.length === 0) {
+            html += "<div style='opacity:.7;'>No node legend items</div>";
+            return html;
+        }
+        items.forEach(function (item) {
+            html += self.buildRowHtml({
+                kind: "node",
+                keyAttr: "data-node-type",
+                key: item.type,
+                label: item.label,
+                swatch: item.swatch,
+                color: item.color,
+            });
+        });
+        return html;
+    };
+
+    /**
+     * Build HTML for the Edges section.
+     * @param {Array<Object>} items
+     * @returns {string}
+     */
+    self.buildEdgesSectionHtml = function (items) {
+        var html = "";
+        html += "<div style='font-weight:700; margin:10px 0 6px;'>Edges</div>";
+        if (!items || items.length === 0) {
+            html += "<div style='opacity:.7;'>No edge legend items</div>";
+            return html;
+        }
+        items.forEach(function (item) {
+            html += self.buildRowHtml({
+                kind: "edge",
+                keyAttr: "data-edge-cat",
+                key: item.cat,
+                label: item.label,
+                swatch: item.swatch,
+                color: item.color,
+            });
+        });
+        return html;
+    };
+
+    /**
+     * Build one legend row.
+     * @param {Object} row
+     * @param {string} row.kind - 'node' or 'edge'.
+     * @param {string} row.keyAttr - attribute holding the key ('data-node-type' or 'data-edge-cat').
+     * @param {string} row.key
+     * @param {string} row.label
+     * @param {string} row.swatch - 'box' | 'line' | 'dashed'.
+     * @param {string} row.color
+     * @returns {string}
+     */
+    self.buildRowHtml = function (row) {
+        var html = "";
+        var swatchHtml = self.getSwatchHtml(row.swatch, row.color);
+        html += "<div data-legend-kind='" + row.kind + "' " + row.keyAttr + "='" + self.escapeHtml(row.key) + "'";
+        html += " style='display:flex; align-items:center; gap:8px; margin:4px 0;'>";
+        html += swatchHtml;
+        html += "<span>" + self.escapeHtml(row.label) + "</span>";
+        html += "</div>";
+        return html;
+    };
+
+    /**
+     * Build the swatch HTML (box/line/dashed).
+     * @param {string} type
+     * @param {string} color
+     * @returns {string}
+     */
+    self.getSwatchHtml = function (type, color) {
+        var html = "";
+        var safeColor = color ? String(color) : "#ddd";
+        if (type === "line") {
+            html += "<span style='width:14px; height:3px; background:" + self.escapeHtml(safeColor) + "; display:inline-block; border-radius:2px;'></span>";
+            return html;
+        }
+        if (type === "dashed") {
+            html += "<span style='width:14px; height:0; display:inline-block; border-top:3px dashed " + self.escapeHtml(safeColor) + ";'></span>";
+            return html;
+        }
+        // default: box
+        html += "<span style='width:12px; height:12px; background:" + self.escapeHtml(safeColor) + "; display:inline-block; border-radius:2px;'></span>";
+        return html;
+    };
+
+    /**
+     * Apply visibility rules based on state maps.
+     * @param {HTMLElement} panel
+     * @param {Object} state
+     * @returns {void}
+     */
+    self.applyRowVisibility = function (panel, state) {
+        var nodeTypesPresent = state.nodeTypesPresent ? state.nodeTypesPresent : {};
+        var edgeCatsPresent = state.edgeCatsPresent ? state.edgeCatsPresent : {};
+
+        var rows = panel.querySelectorAll("[data-legend-kind]");
+        rows.forEach(function (row) {
+            var kind = row.getAttribute("data-legend-kind");
+            if (kind === "node") {
+                var nodeType = row.getAttribute("data-node-type");
+                row.style.display = nodeTypesPresent[nodeType] ? "flex" : "none";
+            }
+            if (kind === "edge") {
+                var edgeCat = row.getAttribute("data-edge-cat");
+                row.style.display = edgeCatsPresent[edgeCat] ? "flex" : "none";
+            }
+        });
+    };
+
+    /**
+     * Update variant-specific content in the extra slot.
+     * Currently used for the 'implicit' variant (table colors).
+     *
+     * @param {string} containerId
+     * @param {Object} state
+     * @returns {void}
+     */
+    self.updateExtraSlot = function (containerId, state) {
+        var instance = self.instances[containerId];
+        if (!instance) {
+            return;
+        }
+        var options = instance.options ? instance.options : {};
+        var slot = document.getElementById(instance.ids.extraSlotId);
+        if (!slot) {
+            return;
+        }
+
+        // Default: clear
+        slot.innerHTML = "";
+
+        // Implicit Model extra section: show table->color mapping
+        if (options.variant === "implicit" && state.tableColors) {
+            slot.innerHTML = self.buildTableColorsSectionHtml(state.tableColors);
+        }
+
+        // Optional custom extra HTML supplied by caller (must be already safe/escaped)
+        if (state.extraHtml) {
+            slot.innerHTML = String(state.extraHtml);
+        }
+    };
+
+    /**
+     * Build the Implicit Model extra section: "Columns (color = table)".
+     * @param {Object<string, string>} tableColors
+     * @returns {string}
+     */
+    self.buildTableColorsSectionHtml = function (tableColors) {
+        var html = "";
+        html += "<div style='margin-top:10px;'>";
+        html += "<div style='font-weight:700; margin:10px 0 6px;'>Columns (color = table)</div>";
+
+        var keys = Object.keys(tableColors);
+        if (keys.length === 0) {
+            html += "<div style='opacity:.7;'>No columns detected</div>";
+            html += "</div>";
+            return html;
+        }
+
+        keys.sort(function (a, b) {
+            return String(a).localeCompare(String(b));
+        });
+
+        keys.forEach(function (table) {
+            var color = tableColors[table];
+            var bg = (typeof color === "string") ? color : "#ddd";
+            html += "<div style='display:flex; align-items:center; gap:8px; margin:4px 0;'>";
+            html += "<span style='width:12px; height:12px; background:" + self.escapeHtml(bg) + "; display:inline-block; border-radius:2px;'></span>";
+            html += "<span>" + self.escapeHtml(table) + "</span>";
+            html += "</div>";
+        });
+
+        html += "</div>";
+        return html;
+    };
+
+    return self;
+})();
+
+export default LegendOverlayWidget;
+window.LegendOverlayWidget = LegendOverlayWidget;

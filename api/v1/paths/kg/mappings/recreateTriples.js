@@ -35,7 +35,7 @@ module.exports = function () {
             return res.status(200).json({
                 message: "Triples successfully regenerated",
                 source: source,
-                table: out.table,
+                tables: out.table,
                 deleteResult: out.deleteResult,
                 result: out.result,
                 mode: out.mode,
@@ -72,7 +72,7 @@ module.exports = function () {
                             type: "string",
                             description: "Source identifier (ex: NEW_PRODOM_IOF).",
                         },
-                        table: {
+                        tables: {
                             type: "array",
                             items: { type: "string" },
                             description: "Array of tables.\n" + "- [] or omitted => ALL tables\n" + '- ["t1"] => only t1\n' + '- ["t1","t2"] => only t1 and t2',

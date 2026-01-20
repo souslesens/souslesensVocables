@@ -72,6 +72,7 @@ var LegendOverlayWidget = (function () {
             .replace(/'/g, "&#039;");
     };
 
+
     /**
      * Get default legend item definitions.
      * @returns {{nodes:Array, edges:Array}}
@@ -418,6 +419,18 @@ var LegendOverlayWidget = (function () {
             html += "<span style='width:14px; height:0; display:inline-block; border-top:3px dashed " + self.escapeHtml(safeColor) + ";'></span>";
             return html;
         }
+        
+        if (type === "rect") {
+            html += "<span style='width:18px; height:10px; background:" + self.escapeHtml(safeColor) + "; display:inline-block; border-radius:2px;'></span>";
+            return html;
+        }
+
+        if (type === "triangle") {
+            // CSS triangle: color comes from border-bottom
+            html += "<span style='width:0; height:0; display:inline-block; border-left:8px solid transparent; border-right:8px solid transparent; border-bottom:14px solid " + self.escapeHtml(safeColor) + ";'></span>";
+            return html;
+        }
+
         // default: box
         html += "<span style='width:12px; height:12px; background:" + self.escapeHtml(safeColor) + "; display:inline-block; border-radius:2px;'></span>";
         return html;

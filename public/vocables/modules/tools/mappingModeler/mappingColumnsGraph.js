@@ -643,13 +643,36 @@ var MappingColumnsGraph = (function () {
         }
 
         if (self.useLegendOverlayWidget) {
-            // Render is idempotent (it will not duplicate if already present)
+            // Render is idempotent (it will not duplicate if already present) 
+            var mappingLegendItems = {
+                nodes: [
+                    // Rectangles (default node appearance in Mapping Modeler)
+                    { type: "Class", label: "Class", color: "#00AFEF", swatch: "rect" },
+                    { type: "Column", label: "Column", color: "#CB9801", swatch: "rect" },
+                    { type: "Table", label: "Table", color: "#D8CACD", swatch: "rect" },
+                    { type: "URI", label: "URI", color: "#BC7DEC", swatch: "rect" },
+
+                    // Special shapes
+                    { type: "VirtualColumn", label: "VirtualColumn", color: "#CB9801", swatch: "box" },
+                    { type: "RowIndex", label: "RowIndex", color: "#CB9801", swatch: "triangle" },
+                ],
+                edges: [
+                    { cat: "ObjectProperty", label: "ObjectProperty (relation)", color: "#409304", swatch: "line" },
+                    { cat: "OtherRelation", label: "Other relation (e.g., rdfs:member)", color: "#333333", swatch: "line" },
+                    { cat: "RdfType", label: "rdf:type / rdfs:subClassOf link", color: "#00AFEF", swatch: "line" },
+                    { cat: "SystemDefault", label: "System / default edge", color: "#CCCCCC", swatch: "line" },
+                    { cat: "DatasourceLink", label: "Structural link (Table → Column)", color: "#8F8A8C", swatch: "line" },
+                    { cat: "DatatypeProperty", label: "DatatypeProperty (dashed)", color: "#9B59B6", swatch: "dashed" },
+                ],
+            };
+
             LegendOverlayWidget.render(containerId, {
                 idPrefix: "mappingLegend",
                 title: "📘 Legend",
                 initiallyExpanded: true,
                 variant: "mapping",
                 position: "top-right",
+                items: mappingLegendItems,
             });
 
             LegendOverlayWidget.update(containerId, self.getLegendStateFromVisjsGraph(self.visjsGraph));

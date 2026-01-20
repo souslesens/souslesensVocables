@@ -62,12 +62,7 @@ var LegendOverlayWidget = (function () {
      * @returns {string}
      */
     self.escapeHtml = function (str) {
-        return String(str)
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/\"/g, "&quot;")
-            .replace(/'/g, "&#039;");
+        return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\"/g, "&quot;").replace(/'/g, "&#039;");
     };
 
     /**
@@ -101,7 +96,7 @@ var LegendOverlayWidget = (function () {
      */
     self.getInstanceIds = function (containerId, options) {
         var suffix = self.getSafeIdSuffix(containerId);
-        var prefix = (options && options.idPrefix) ? String(options.idPrefix) : "legend";
+        var prefix = options && options.idPrefix ? String(options.idPrefix) : "legend";
         var wrapId = prefix + "_wrapper_" + suffix;
         return {
             wrapperId: wrapId,
@@ -148,7 +143,7 @@ var LegendOverlayWidget = (function () {
             container.style.position = "relative";
         }
 
-        var expanded = (options.initiallyExpanded !== undefined) ? options.initiallyExpanded : true;
+        var expanded = options.initiallyExpanded !== undefined ? options.initiallyExpanded : true;
         var title = options.title ? String(options.title) : "📘 Legend";
 
         var items = options.items ? options.items : self.getDefaultItems();
@@ -221,11 +216,10 @@ var LegendOverlayWidget = (function () {
         if (!state) {
             state = {};
         }
-        
+
         self.applyRowVisibility(panel, state);
         self.applyRowStyles(panel, state);
         self.updateExtraSlot(containerId, state);
-
     };
 
     /**
@@ -418,7 +412,7 @@ var LegendOverlayWidget = (function () {
             html += "<span style='width:14px; height:0; display:inline-block; border-top:3px dashed " + self.escapeHtml(safeColor) + ";'></span>";
             return html;
         }
-        
+
         if (type === "rect") {
             html += "<span style='width:18px; height:10px; background:" + self.escapeHtml(safeColor) + "; display:inline-block; border-radius:2px;'></span>";
             return html;
@@ -426,7 +420,10 @@ var LegendOverlayWidget = (function () {
 
         if (type === "triangle") {
             // CSS triangle: color comes from border-bottom
-            html += "<span style='width:0; height:0; display:inline-block; border-left:8px solid transparent; border-right:8px solid transparent; border-bottom:14px solid " + self.escapeHtml(safeColor) + ";'></span>";
+            html +=
+                "<span style='width:0; height:0; display:inline-block; border-left:8px solid transparent; border-right:8px solid transparent; border-bottom:14px solid " +
+                self.escapeHtml(safeColor) +
+                ";'></span>";
             return html;
         }
 
@@ -515,7 +512,7 @@ var LegendOverlayWidget = (function () {
 
         keys.forEach(function (table) {
             var color = tableColors[table];
-            var bg = (typeof color === "string") ? color : "#ddd";
+            var bg = typeof color === "string" ? color : "#ddd";
             html += "<div style='display:flex; align-items:center; gap:8px; margin:4px 0;'>";
             html += "<span style='width:12px; height:12px; background:" + self.escapeHtml(bg) + "; display:inline-block; border-radius:2px;'></span>";
             html += "<span>" + self.escapeHtml(table) + "</span>";
@@ -533,56 +530,56 @@ var LegendOverlayWidget = (function () {
      * @returns {void}
      */
     self.applyRowStyles = function (panel, state) {
-    if (!panel || !state) {
-        return;
-    }
-    var nodeTypeStyles = state.nodeTypeStyles ? state.nodeTypeStyles : {};
-    var edgeCatStyles = state.edgeCatStyles ? state.edgeCatStyles : {};
-
-    var rows = panel.querySelectorAll("[data-legend-kind]");
-    rows.forEach(function (row) {
-        var kind = row.getAttribute("data-legend-kind");
-        var key = null;
-        var styleDef = null;
-
-        if (kind === "node") {
-        key = row.getAttribute("data-node-type");
-        styleDef = nodeTypeStyles[key];
-        } else if (kind === "edge") {
-        key = row.getAttribute("data-edge-cat");
-        styleDef = edgeCatStyles[key];
+        if (!panel || !state) {
+            return;
         }
+        var nodeTypeStyles = state.nodeTypeStyles ? state.nodeTypeStyles : {};
+        var edgeCatStyles = state.edgeCatStyles ? state.edgeCatStyles : {};
 
-        if (!styleDef || !styleDef.color) {
-        return;
-        }
+        var rows = panel.querySelectorAll("[data-legend-kind]");
+        rows.forEach(function (row) {
+            var kind = row.getAttribute("data-legend-kind");
+            var key = null;
+            var styleDef = null;
 
-        // The first child span is the swatch.
-        var swatch = row.querySelector("span");
-        if (!swatch) {
-        return;
-        }
+            if (kind === "node") {
+                key = row.getAttribute("data-node-type");
+                styleDef = nodeTypeStyles[key];
+            } else if (kind === "edge") {
+                key = row.getAttribute("data-edge-cat");
+                styleDef = edgeCatStyles[key];
+            }
 
-        var color = String(styleDef.color);
+            if (!styleDef || !styleDef.color) {
+                return;
+            }
 
-        // Update according to swatch rendering style already used in HTML:
-        // - line: background
-        // - dashed: borderTop
-        // - rect/box: background
-        // - triangle: borderBottom
-        var cssText = swatch.getAttribute("style") || "";
+            // The first child span is the swatch.
+            var swatch = row.querySelector("span");
+            if (!swatch) {
+                return;
+            }
 
-        if (cssText.indexOf("border-top") > -1) {
-        // dashed
-        swatch.style.borderTopColor = color;
-        } else if (cssText.indexOf("border-bottom") > -1) {
-        // triangle
-        swatch.style.borderBottomColor = color;
-        } else {
-        // line / box / rect
-        swatch.style.background = color;
-        }
-    });
+            var color = String(styleDef.color);
+
+            // Update according to swatch rendering style already used in HTML:
+            // - line: background
+            // - dashed: borderTop
+            // - rect/box: background
+            // - triangle: borderBottom
+            var cssText = swatch.getAttribute("style") || "";
+
+            if (cssText.indexOf("border-top") > -1) {
+                // dashed
+                swatch.style.borderTopColor = color;
+            } else if (cssText.indexOf("border-bottom") > -1) {
+                // triangle
+                swatch.style.borderBottomColor = color;
+            } else {
+                // line / box / rect
+                swatch.style.background = color;
+            }
+        });
     };
 
     return self;

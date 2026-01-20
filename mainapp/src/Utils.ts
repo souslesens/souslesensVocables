@@ -83,4 +83,15 @@ export const getApiUrl = async () => {
     return "/";
 };
 
+export const roundMinMax = (x: number, min: number, max: number) => {
+    const round = Math.round(x);
+    if (round < min) {
+        return min;
+    }
+    if (round > max) {
+        return max;
+    }
+    return round;
+};
+
 export { fetchMe, identity, joinWhenArray, sanitizeValue, exhaustiveCheck, style, VisuallyHiddenInput, humanizeSize, cleanUpText, jsonToDownloadUrl };

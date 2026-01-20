@@ -1,5 +1,3 @@
-import common from "../shared/common.js";
-
 /**
  * LegendOverlayWidget
  *
@@ -72,7 +70,6 @@ var LegendOverlayWidget = (function () {
             .replace(/'/g, "&#039;");
     };
 
-
     /**
      * Get default legend item definitions.
      * @returns {{nodes:Array, edges:Array}}
@@ -90,7 +87,7 @@ var LegendOverlayWidget = (function () {
                 { cat: "OtherRelation", label: "Other relation (e.g., rdfs:member)", color: self.defaultColors.edge.OtherRelation, swatch: "line" },
                 { cat: "RdfType", label: "rdf:type / rdfs:subClassOf link", color: self.defaultColors.edge.RdfType, swatch: "line" },
                 { cat: "SystemDefault", label: "System / default edge", color: self.defaultColors.edge.SystemDefault, swatch: "line" },
-                { cat: "DatasourceLink", label: "Structural link (Table → Column)", color: self.defaultColors.edge.DatasourceLink, swatch: "line" },
+                { cat: "DatasourceLink", label: "Datasource (Table → Column)", color: self.defaultColors.edge.DatasourceLink, swatch: "line" },
                 { cat: "DatatypeProperty", label: "DatatypeProperty (dashed)", color: self.defaultColors.edge.DatatypeProperty, swatch: "dashed" },
             ],
         };

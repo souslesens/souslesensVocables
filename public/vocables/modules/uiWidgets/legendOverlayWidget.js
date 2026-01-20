@@ -221,9 +221,11 @@ var LegendOverlayWidget = (function () {
         if (!state) {
             state = {};
         }
-
+        
         self.applyRowVisibility(panel, state);
+        self.applyRowStyles(panel, state);
         self.updateExtraSlot(containerId, state);
+
     };
 
     /**
@@ -522,6 +524,65 @@ var LegendOverlayWidget = (function () {
 
         html += "</div>";
         return html;
+    };
+
+    /**
+     * Apply dynamic swatch styles (colors) based on observed graph styles.
+     * @param {HTMLElement} panel
+     * @param {Object} state
+     * @returns {void}
+     */
+    self.applyRowStyles = function (panel, state) {
+    if (!panel || !state) {
+        return;
+    }
+    var nodeTypeStyles = state.nodeTypeStyles ? state.nodeTypeStyles : {};
+    var edgeCatStyles = state.edgeCatStyles ? state.edgeCatStyles : {};
+
+    var rows = panel.querySelectorAll("[data-legend-kind]");
+    rows.forEach(function (row) {
+        var kind = row.getAttribute("data-legend-kind");
+        var key = null;
+        var styleDef = null;
+
+        if (kind === "node") {
+        key = row.getAttribute("data-node-type");
+        styleDef = nodeTypeStyles[key];
+        } else if (kind === "edge") {
+        key = row.getAttribute("data-edge-cat");
+        styleDef = edgeCatStyles[key];
+        }
+
+        if (!styleDef || !styleDef.color) {
+        return;
+        }
+
+        // The first child span is the swatch.
+        var swatch = row.querySelector("span");
+        if (!swatch) {
+        return;
+        }
+
+        var color = String(styleDef.color);
+
+        // Update according to swatch rendering style already used in HTML:
+        // - line: background
+        // - dashed: borderTop
+        // - rect/box: background
+        // - triangle: borderBottom
+        var cssText = swatch.getAttribute("style") || "";
+
+        if (cssText.indexOf("border-top") > -1) {
+        // dashed
+        swatch.style.borderTopColor = color;
+        } else if (cssText.indexOf("border-bottom") > -1) {
+        // triangle
+        swatch.style.borderBottomColor = color;
+        } else {
+        // line / box / rect
+        swatch.style.background = color;
+        }
+    });
     };
 
     return self;

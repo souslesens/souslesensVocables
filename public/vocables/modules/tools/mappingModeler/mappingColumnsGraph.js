@@ -182,7 +182,7 @@ var MappingColumnsGraph = (function () {
                 type: "arrow",
             },
         };
-        var edgeColor = "#ccc";
+        var edgeColor = "#00afef";
 
         if (self.currentGraphNode && newResource.data.type == "Class") {
             newResource.level = 3;
@@ -344,6 +344,13 @@ var MappingColumnsGraph = (function () {
 
     };
 
+    self.getEdgeColorString = function (edge) {
+    if (!edge) return "";
+    if (typeof edge.color === "string") return edge.color;
+    if (edge.color && typeof edge.color.color === "string") return edge.color.color;
+    return "";
+    };
+
     /**
      * Build legend state from a VisjsGraphClass instance.
      * It inspects currently visible nodes/edges (hidden !== true) and returns presence maps.
@@ -356,6 +363,8 @@ var MappingColumnsGraph = (function () {
         var state = {
             nodeTypesPresent: {},
             edgeCatsPresent: {},
+            nodeTypeStyles: {},
+            edgeCatStyles: {}
         };
 
         if (!visjsGraph || !visjsGraph.data || !visjsGraph.data.nodes || !visjsGraph.data.edges) {
@@ -412,58 +421,137 @@ var MappingColumnsGraph = (function () {
             if (n.data && n.data.type) {
                 state.nodeTypesPresent[n.data.type] = true;
             }
+            if (!state.nodeTypeStyles[n.data.type]) {
+            var nodeColor = "";
+            if (typeof n.color === "string") {
+                nodeColor = n.color;
+            } else if (n.color && typeof n.color.background === "string") {
+                nodeColor = n.color.background;
+            }
+            if (nodeColor) {
+                state.nodeTypeStyles[n.data.type] = { color: nodeColor };
+            }
+            }
         });
 
         // Edge categories (must match LegendOverlayWidget default edge cats)
-        edges.forEach(function (e) {
-            var t = e.data ? e.data.type : null;
+        edges.forEach(function (edge) {
+        var predicateType = edge.data ? edge.data.type : null;
+        var edgeColor = self.getEdgeColorString(edge);
 
-            // rdf:type / rdfs:subClassOf
-            if (t === "rdf:type" || t === "rdfs:subClassOf") {
-                state.edgeCatsPresent["RdfType"] = true;
-                return;
-            }
+        // rdf:type / rdfs:subClassOf
+        if (predicateType === "rdf:type" || predicateType === "rdfs:subClassOf") {
+            state.edgeCatsPresent["RdfType"] = true;
 
-            // DatatypeProperty
-            if (t === "DatatypeProperty" || e.dashes === true) {
-                state.edgeCatsPresent["DatatypeProperty"] = true;
-                return;
+            if (!state.edgeCatStyles["RdfType"] && edgeColor) {
+            state.edgeCatStyles["RdfType"] = { color: edgeColor, dashed: false };
             }
+            return;
+        }
 
-            // Color-based (structural / technical)
-            var c = "";
-            if (typeof e.color === "string") {
-                c = e.color.toLowerCase();
-            } else if (e.color && typeof e.color.color === "string") {
-                c = e.color.color.toLowerCase();
-            }
+        // DatatypeProperty (dashed)
+        if (predicateType === "DatatypeProperty" || edge.dashes === true) {
+            state.edgeCatsPresent["DatatypeProperty"] = true;
 
-            if (c === "#8f8a8c") {
-                state.edgeCatsPresent["DatasourceLink"] = true;
-                return;
+            if (!state.edgeCatStyles["DatatypeProperty"] && edgeColor) {
+            state.edgeCatStyles["DatatypeProperty"] = { color: edgeColor, dashed: edge.dashes === true };
             }
-            if (c === "#ef4270") {
-                state.edgeCatsPresent["TechnicalLink"] = true;
-                return;
-            }
+            return;
+        }
 
-            // Other rdfs: predicates
-            if (typeof t === "string" && t.indexOf("rdfs:") === 0) {
-                state.edgeCatsPresent["OtherRelation"] = true;
-                return;
-            }
+        // Color-based (structural / technical)
+        var normalizedEdgeColor = "";
+        if (typeof edge.color === "string") {
+            normalizedEdgeColor = edge.color.toLowerCase();
+        } else if (edge.color && typeof edge.color.color === "string") {
+            normalizedEdgeColor = edge.color.color.toLowerCase();
+        }
 
-            // Any remaining typed predicate => ObjectProperty
-            if (t) {
-                state.edgeCatsPresent["ObjectProperty"] = true;
-                return;
-            }
+        if (normalizedEdgeColor === "#8f8a8c") {
+            state.edgeCatsPresent["DatasourceLink"] = true;
 
-            // Default/system edge
-            state.edgeCatsPresent["SystemDefault"] = true;
+            if (!state.edgeCatStyles["DatasourceLink"] && edgeColor) {
+            state.edgeCatStyles["DatasourceLink"] = { color: edgeColor, dashed: false };
+            }
+            return;
+        }
+
+        if (normalizedEdgeColor === "#ef4270") {
+            state.edgeCatsPresent["TechnicalLink"] = true;
+
+            if (!state.edgeCatStyles["TechnicalLink"] && edgeColor) {
+            state.edgeCatStyles["TechnicalLink"] = { color: edgeColor, dashed: false };
+            }
+            return;
+        }
+
+        // Other rdfs: predicates
+        if (typeof predicateType === "string" && predicateType.indexOf("rdfs:") === 0) {
+            state.edgeCatsPresent["OtherRelation"] = true;
+
+            if (!state.edgeCatStyles["OtherRelation"] && edgeColor) {
+            state.edgeCatStyles["OtherRelation"] = { color: edgeColor, dashed: false };
+            }
+            return;
+        }
+
+        // Any remaining typed predicate => ObjectProperty
+        if (predicateType) {
+            state.edgeCatsPresent["ObjectProperty"] = true;
+
+            if (!state.edgeCatStyles["ObjectProperty"] && edgeColor) {
+            state.edgeCatStyles["ObjectProperty"] = { color: edgeColor, dashed: false };
+            }
+            return;
+        }
+
+        // Default/system edge
+        state.edgeCatsPresent["SystemDefault"] = true;
+
+        if (!state.edgeCatStyles["SystemDefault"] && edgeColor) {
+            state.edgeCatStyles["SystemDefault"] = { color: edgeColor, dashed: false };
+        }
         });
 
         return state;
+    };
+    
+    /**
+     * Normalize rdf:type / rdfs:subClassOf edge color to blue for consistency.
+     * It updates the edges store in place.
+     * @param {Object} visjsGraph
+     * @returns {void}
+     */
+    self.normalizeRdfTypeEdgesColor = function (visjsGraph) {
+    if (!visjsGraph || !visjsGraph.data || !visjsGraph.data.edges) {
+        return;
+    }
+    var edgesStore = visjsGraph.data.edges;
+    if (!edgesStore || typeof edgesStore.get !== "function" || typeof edgesStore.update !== "function") {
+        return;
+    }
+    var edges = edgesStore.get();
+    var updates = [];
+
+    edges.forEach(function (e) {
+        var t = e && e.data ? e.data.type : null;
+        if (t === "rdf:type" || t === "rdfs:subClassOf") {
+        var currentColor = "";
+        if (typeof e.color === "string") {
+            currentColor = e.color.toLowerCase();
+        } else if (e.color && typeof e.color.color === "string") {
+            currentColor = e.color.color.toLowerCase();
+        }
+        // Update only if not already blue
+        if (currentColor !== "#00afef") {
+            updates.push({ id: e.id, color: "#00afef" });
+        }
+        }
+    });
+
+    if (updates.length > 0) {
+        edgesStore.update(updates);
+    }
     };
     
     /**
@@ -493,6 +581,7 @@ var MappingColumnsGraph = (function () {
                     { cat: "RdfType", label: "rdf:type / rdfs:subClassOf link", color: "#00AFEF", swatch: "line" },
                     { cat: "SystemDefault", label: "System / default edge", color: "#CCCCCC", swatch: "line" },
                     { cat: "DatasourceLink", label: "Datasource (Table → Column)", color: "#8F8A8C", swatch: "line" },
+                    { cat: "TechnicalLink", label: "TechnicalLink", color: "#EF4270", swatch: "line" },
                     { cat: "DatatypeProperty", label: "DatatypeProperty (dashed)", color: "#9B59B6", swatch: "dashed" },
                 ],
             };
@@ -1068,6 +1157,7 @@ var MappingColumnsGraph = (function () {
                         DataSourceManager.currentConfig = result.options.config;
                     }
                     MappingColumnsGraph.visjsGraph.data = result;
+                    self.normalizeRdfTypeEdgesColor(MappingColumnsGraph.visjsGraph);
                     if (result.nodes.length == 0) {
                         return MappingColumnsGraph.visjsGraph.draw(function () {
                             MappingColumnsGraph.refreshLegend(MappingColumnsGraph.graphDiv);

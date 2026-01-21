@@ -1,3 +1,5 @@
+import { jest } from "@jest/globals";
+
 import { MainConfigObject, checkMainConfig, checkMainConfigSection, colorText, printErrorReport, readMainConfig } from "../model/config.js";
 
 const retrieveLogs = (config) => {

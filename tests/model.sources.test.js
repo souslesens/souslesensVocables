@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import { jest } from "@jest/globals";
 
 import { createTracker, MockClient } from "knex-mock-client";
 import knex from "knex";

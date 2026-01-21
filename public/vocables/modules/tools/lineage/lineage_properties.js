@@ -1358,8 +1358,8 @@ var Lineage_properties = (function () {
      * @function
      * @name changeIconForPropertiesGraphAction
      * @memberof module:lineage_properties
-     * @param {Dom element} DOM element whose direct child holds the icon classes.</param>
-     * @returns {None} DOM is updated in place
+     * @param {HTMLElement} div - DOM element whose direct child holds the icon classes.
+     * @returns {void} DOM is updated in place
      */
     self.changeIconForPropertiesGraphAction = function (div) {
         var icon = $(div).children().attr("class");

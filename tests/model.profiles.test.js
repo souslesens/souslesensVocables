@@ -9,6 +9,12 @@ const __dirname = path.dirname(__filename);
 jest.unstable_mockModule("../model/utils.js", () => ({
     cleanupConnection: jest.fn(),
     getKnexConnection: jest.fn(),
+    convertType: jest.fn((value) => value),
+    chunk: jest.fn((list, size) => [list]),
+    redoIfFailure: jest.fn(),
+    redoIfFailureCallback: jest.fn(),
+    sleep: jest.fn(),
+    RDF_FORMATS_MIMETYPES: {},
 }));
 
 const { profileModel, ProfileModel } = await import("../model/profiles.js");

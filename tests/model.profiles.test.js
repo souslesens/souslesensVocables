@@ -3,13 +3,16 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { jest } from "@jest/globals";
 
-import { profileModel, ProfileModel } from "../model/profiles.js";
-import { ToolModel } from "../model/tools.js";
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-jest.mock("../model/utils.js");
+jest.unstable_mockModule("../model/utils.js", () => ({
+    cleanupConnection: jest.fn(),
+    getKnexConnection: jest.fn(),
+}));
+
+const { profileModel, ProfileModel } = await import("../model/profiles.js");
+const { ToolModel } = await import("../model/tools.js");
 
 describe("Test the Profilemodel module", () => {
     let allTools;
@@ -23,8 +26,8 @@ describe("Test the Profilemodel module", () => {
     });
 
     test("can create instance", async () => {
-        const profileModel = new ProfileModel(toolsModel);
-        expect(profileModel._toolModel).toStrictEqual(toolsModel);
+        const profileModelInstance = new ProfileModel(toolsModel);
+        expect(profileModelInstance._toolModel).toStrictEqual(toolsModel);
     });
 
     test("get all the profiles", async () => {

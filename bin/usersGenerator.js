@@ -3,8 +3,8 @@ var filePath = "D:\\Total\\2021\\JeanCharles\\users.csv";
 
 csvCrawler.readCsv({ filePath: filePath }, 500000, function (err, result) {
     if (err) return console.error(err);
-    data = result.data;
-    headers = result.headers;
+    var data = result.data;
+    var headers = result.headers;
 
     var users = {};
     var passwordPrefix = "!ONE-owl_";

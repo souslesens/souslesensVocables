@@ -223,7 +223,7 @@ var TriplesMaker = {
                             try {
                                 var batchTriplesCount;
                                 await modelUtils.redoIfFailure(async function () {
-                                    batchTriplesCount = await KGbuilder_triplesWriter.writeTriplesAsync(
+                                    var batchTriplesCount = await KGbuilder_triplesWriter.writeTriplesAsync(
                                         batchTriples,
                                         tableProcessingParams.sourceInfos.graphUri,
                                         tableProcessingParams.sourceInfos.sparqlServerUrl,

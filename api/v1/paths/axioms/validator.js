@@ -18,7 +18,7 @@ export default function () {
             return res.status(200).json(result);
         };
         if (req.query.options) {
-            options = JSON.parse(req.query.options);
+            var options = JSON.parse(req.query.options);
         }
         if (true) {
             ManchesterSyntaxEngine.validateAxiom(req.query.axiom, callback);

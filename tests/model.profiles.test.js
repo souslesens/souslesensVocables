@@ -3,12 +3,17 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { jest } from "@jest/globals";
 
+import { createTracker, MockClient } from "knex-mock-client";
+import knex from "knex";
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+const mockKnexConnection = knex({ client: MockClient, dialect: "pg" });
+
 jest.unstable_mockModule("../model/utils.js", () => ({
     cleanupConnection: jest.fn(),
-    getKnexConnection: jest.fn(),
+    getKnexConnection: jest.fn(() => mockKnexConnection),
     convertType: jest.fn((value) => value),
     chunk: jest.fn((list, size) => [list]),
     redoIfFailure: jest.fn(),

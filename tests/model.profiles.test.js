@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import { jest } from "@jest/globals";
 
 import { profileModel, ProfileModel } from "../model/profiles.js";
 import { ToolModel } from "../model/tools.js";

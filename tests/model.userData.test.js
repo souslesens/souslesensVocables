@@ -4,6 +4,7 @@ import os from "os";
 import path from "path";
 import tmp from "tmp";
 import { fileURLToPath } from "url";
+import { jest } from "@jest/globals";
 
 import { cleanupConnection, getKnexConnection } from "../model/utils.js";
 import { UserDataModel } from "../model/userData.js";

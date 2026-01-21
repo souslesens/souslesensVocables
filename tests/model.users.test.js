@@ -6,23 +6,26 @@ import tmp from "tmp";
 import { fileURLToPath } from "url";
 import { jest } from "@jest/globals";
 
-import { cleanupConnection, getKnexConnection } from "../model/utils.js";
-import { userModel } from "../model/users.js";
-import { userDataModel } from "../model/userData.js";
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-jest.mock("../model/utils.js");
+jest.unstable_mockModule("../model/utils.js", () => ({
+    cleanupConnection: jest.fn(),
+    getKnexConnection: jest.fn(),
+}));
+
+const { cleanupConnection, getKnexConnection } = await import("../model/utils.js");
+const { userModel } = await import("../model/users.js");
+const { userDataModel } = await import("../model/userData.js");
 
 describe("UserModelJson", () => {
     let dbUsers;
 
     beforeAll(() => {
         dbUsers = JSON.parse(fs.readFileSync(path.join(__dirname, "data", "config", "users", "users.json")));
-        dbPublicUsers = JSON.parse(fs.readFileSync(path.join(__dirname, "data", "config", "users", "users.public.json")));
-        dbUserData = JSON.parse(fs.readFileSync(path.join(__dirname, "data", "config", "users", "userData.json")));
-        dbUserDataList = JSON.parse(fs.readFileSync(path.join(__dirname, "data", "config", "users", "userData.list.json")));
+        const dbPublicUsers = JSON.parse(fs.readFileSync(path.join(__dirname, "data", "config", "users", "users.public.json")));
+        const dbUserData = JSON.parse(fs.readFileSync(path.join(__dirname, "data", "config", "users", "userData.json")));
+        const dbUserDataList = JSON.parse(fs.readFileSync(path.join(__dirname, "data", "config", "users", "userData.list.json")));
     });
 
     test("retrieve the list of all the account without private information", async () => {

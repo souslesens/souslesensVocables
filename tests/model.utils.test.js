@@ -1,3 +1,5 @@
+import { jest } from "@jest/globals";
+
 import { convertType, chunk, cleanupConnection, getKnexConnection, redoIfFailure } from "../model/utils.js";
 
 describe("redoIfFailure", () => {

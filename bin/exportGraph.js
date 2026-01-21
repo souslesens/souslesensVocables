@@ -97,7 +97,7 @@ var ExportGraph = {
                     jsonFileStorage.retrieve(path.resolve(sourcesPath), function (err, _sources) {
                         source = _sources[_source];
                         graphUri = source.graphUri;
-                        configPath = path.join(__dirname, "../" + "config" + "/mainConfig.json");
+                        var configPath = path.join(__dirname, "../" + "config" + "/mainConfig.json");
                         jsonFileStorage.retrieve(path.resolve(configPath), function (err, _config) {
                             Config = _config;
 

@@ -152,7 +152,7 @@ export default function () {
                                     params.auth = sparqlServerConnection.auth;
                                 }
 
-                                sparqlServerUrl = sparqlServerConnection.url;
+                                var sparqlServerUrl = sparqlServerConnection.url;
 
                                 httpProxy.post(sparqlServerUrl, null, params, function (err, _result) {
                                     if (err) {

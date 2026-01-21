@@ -6,13 +6,16 @@ import tmp from "tmp";
 import { fileURLToPath } from "url";
 import { jest } from "@jest/globals";
 
-import { cleanupConnection, getKnexConnection } from "../model/utils.js";
-import { UserDataModel } from "../model/userData.js";
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-jest.mock("../model/utils.js");
+jest.unstable_mockModule("../model/utils.js", () => ({
+    cleanupConnection: jest.fn(),
+    getKnexConnection: jest.fn(),
+}));
+
+const { cleanupConnection, getKnexConnection } = await import("../model/utils.js");
+const { UserDataModel } = await import("../model/userData.js");
 
 describe("UserDataModel", () => {
     let temporaryDirectory;
@@ -377,7 +380,7 @@ describe("UserDataModel", () => {
     });
 
     test("test _check", async () => {
-        data = userDataModel._check({ data_type: "text", owned_by: 1 });
+        const data = userDataModel._check({ data_type: "text", owned_by: 1 });
     });
 
     test("test _check with missing attributes", async () => {

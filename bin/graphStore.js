@@ -315,7 +315,7 @@ var GraphStore = {
                     } else {
                         graphUri = "http://industryportal.enit.fr/ontologies/" + sourceName + "#";
                     }
-                    configPath = path.join(__dirname, "../" + "config" + "/mainConfig.json");
+                    var configPath = path.join(__dirname, "../" + "config" + "/mainConfig.json");
                     jsonFileStorage.retrieve(path.resolve(configPath), function (err, _config) {
                         Config = _config;
                         sparqlServerUrl = options.sparqlServerUrl || Config.sparql_server.url;

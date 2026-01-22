@@ -75,45 +75,6 @@ function analyzeFile(filePath) {
     // Exclut: var/let/const/function, propriétés d'objet (xxx.yyy =), commentaires
 
     /**
-     * Trouve la portée (scope) englobante d'une position dans le fichier.
-     * Retourne les indices de début et fin de la fonction/bloc englobant.
-     */
-    function findEnclosingScope(content, position) {
-        let depth = 0;
-        let scopeStart = 0;
-
-        // Trouver le début de la portée en remontant
-        for (let i = position; i >= 0; i--) {
-            const char = content[i];
-            if (char === "}") depth++;
-            else if (char === "{") {
-                if (depth === 0) {
-                    scopeStart = i;
-                    break;
-                }
-                depth--;
-            }
-        }
-
-        // Trouver la fin de la portée en descendant
-        depth = 0;
-        let scopeEnd = content.length;
-        for (let i = scopeStart; i < content.length; i++) {
-            const char = content[i];
-            if (char === "{") depth++;
-            else if (char === "}") {
-                depth--;
-                if (depth === 0) {
-                    scopeEnd = i;
-                    break;
-                }
-            }
-        }
-
-        return { start: scopeStart, end: scopeEnd };
-    }
-
-    /**
      * Collecte les variables déclarées dans une portion de code (scope).
      */
     function collectDeclaredVarsInScope(scopeContent) {
@@ -188,37 +149,141 @@ function analyzeFile(filePath) {
     }
 
     /**
-     * Vérifie si une variable est déclarée dans la portée englobante
-     * (en remontant jusqu'à la racine du fichier).
+     * Trouve le début de la fonction englobante (pour la portée de var).
+     * Retourne l'index du début de la fonction ou 0 si au niveau module.
      */
-    function isVarDeclaredInScope(content, varName, position) {
-        // D'abord, vérifier le scope du module (tout le contenu avant la position)
-        // C'est important car les variables déclarées au niveau module sont accessibles partout
-        const moduleContent = content.substring(0, position);
-        const moduleVars = collectDeclaredVarsInScope(moduleContent);
-        if (moduleVars.has(varName)) {
-            return true;
-        }
+    function findEnclosingFunctionStart(content, position) {
+        // Trouver toutes les fonctions qui commencent avant cette position
+        // et qui englobent encore cette position (leur accolade fermante est après)
 
-        // Ensuite, vérifier les scopes imbriqués (pour les variables locales)
-        // Trouver toutes les accolades ouvrantes avant cette position
-        const bracePositions = [];
-        for (let i = 0; i < position; i++) {
-            if (content[i] === "{") {
-                bracePositions.push(i);
-            } else if (content[i] === "}") {
-                bracePositions.pop();
+        // Mots-clés de contrôle de flux (pas des fonctions)
+        const controlKeywords = new Set(["if", "else", "for", "while", "switch", "catch", "with", "do"]);
+
+        // Pattern pour trouver les débuts de fonctions
+        const funcPatterns = [
+            { pattern: /function\s*\w*\s*\([^)]*\)\s*\{/g, checkKeyword: false },  // function declarations
+            { pattern: /\([^)]*\)\s*=>\s*\{/g, checkKeyword: false },               // arrow functions with braces
+            { pattern: /(\w+)\s*\([^)]*\)\s*\{/g, checkKeyword: true },             // method shorthand: methodName() {
+            { pattern: /(\w+)\s*:\s*function\s*\([^)]*\)\s*\{/g, checkKeyword: false }, // object method: name: function() {
+        ];
+
+        let enclosingFuncStart = 0; // 0 = module level
+
+        for (const { pattern, checkKeyword } of funcPatterns) {
+            pattern.lastIndex = 0;
+            let match;
+            while ((match = pattern.exec(content)) !== null) {
+                // Vérifier si c'est un mot-clé de contrôle de flux
+                if (checkKeyword && match[1] && controlKeywords.has(match[1])) {
+                    continue; // Ignorer while(), if(), for(), etc.
+                }
+
+                const funcStart = match.index;
+                const braceStart = funcStart + match[0].length - 1;
+
+                if (braceStart >= position) continue; // Function starts after our position
+
+                // Check if this function's closing brace is after our position
+                let depth = 1;
+                let i = braceStart + 1;
+                while (i < content.length && depth > 0) {
+                    if (content[i] === "{") depth++;
+                    else if (content[i] === "}") depth--;
+                    i++;
+                }
+                const funcEnd = i;
+
+                if (funcEnd > position && braceStart > enclosingFuncStart) {
+                    // This function encloses our position and is more nested than previous
+                    enclosingFuncStart = braceStart;
+                }
             }
         }
 
-        // Vérifier chaque scope imbriqué
-        for (let i = bracePositions.length - 1; i >= 0; i--) {
-            const scopeStart = bracePositions[i];
-            const scope = findEnclosingScope(content, scopeStart + 1);
-            const scopeContent = content.substring(scope.start, Math.min(scope.end, position));
+        return enclosingFuncStart;
+    }
 
-            const declaredInScope = collectDeclaredVarsInScope(scopeContent);
-            if (declaredInScope.has(varName)) {
+    /**
+     * Trouve la fin de la fonction qui commence à funcStart.
+     */
+    function findFunctionEnd(content, funcStart) {
+        let depth = 1;
+        let i = funcStart + 1;
+        while (i < content.length && depth > 0) {
+            if (content[i] === "{") depth++;
+            else if (content[i] === "}") depth--;
+            i++;
+        }
+        return i;
+    }
+
+    /**
+     * Vérifie si une variable est déclarée dans la portée englobante
+     * (en remontant jusqu'à la racine du fichier).
+     * Pour `var`, la portée est la fonction englobante, pas le bloc.
+     * Note: var est "hoisted", donc on doit scanner la fonction entière.
+     */
+    function isVarDeclaredInScope(content, varName, position) {
+        // Trouver la fonction englobante (position de l'accolade {)
+        const funcBraceStart = findEnclosingFunctionStart(content, position);
+
+        // Trouver le début réel de la fonction (incluant la signature avec les paramètres)
+        // On cherche "function" ou un identifiant suivi de ":" ou "(" avant l'accolade
+        let funcStart = funcBraceStart;
+        if (funcBraceStart > 0) {
+            // Remonter de max 200 caractères pour trouver le début de la signature
+            const searchStart = Math.max(0, funcBraceStart - 200);
+            const beforeBrace = content.substring(searchStart, funcBraceStart);
+
+            // Chercher "function" ou "name:" ou "name(" en remontant
+            const funcMatch = beforeBrace.match(/(?:function\s*\w*|[\w$]+\s*:\s*function|\w+\s*:\s*async\s*function|[\w$]+)\s*\([^)]*\)\s*(?:=>)?\s*$/);
+            if (funcMatch) {
+                funcStart = searchStart + funcMatch.index;
+            }
+        }
+
+        // Extraire le contenu de la fonction englobante ENTIÈRE (pour le hoisting de var)
+        const funcEnd = funcBraceStart > 0 ? findFunctionEnd(content, funcBraceStart) : content.length;
+        const scopeContent = content.substring(funcStart, funcEnd);
+
+        // Collecter les variables déclarées dans ce scope
+        const declaredVars = collectDeclaredVarsInScope(scopeContent);
+
+        if (declaredVars.has(varName)) {
+            return true;
+        }
+
+        // Si on est dans une fonction imbriquée, vérifier aussi les scopes parents
+        // jusqu'au niveau module
+        if (funcStart > 0) {
+            // Vérifier le niveau module (avant toute fonction)
+            // Mais seulement les déclarations au niveau module, pas dans d'autres fonctions
+
+            // Trouver le contenu au niveau module (entre les fonctions de premier niveau)
+            let moduleContent = "";
+            let depth = 0;
+            let lastEnd = 0;
+
+            for (let i = 0; i < funcStart; i++) {
+                if (content[i] === "{") {
+                    if (depth === 0) {
+                        moduleContent += content.substring(lastEnd, i);
+                    }
+                    depth++;
+                } else if (content[i] === "}") {
+                    depth--;
+                    if (depth === 0) {
+                        lastEnd = i + 1;
+                    }
+                }
+            }
+            // Add remaining module-level content
+            if (depth === 0) {
+                moduleContent += content.substring(lastEnd, funcStart);
+            }
+
+            const moduleVars = collectDeclaredVarsInScope(moduleContent);
+            if (moduleVars.has(varName)) {
                 return true;
             }
         }

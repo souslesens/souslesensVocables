@@ -99,7 +99,7 @@ async function checkForCommonJSPatterns(filePath) {
 
         // Track block comments /* ... */
         if (trimmedLine.startsWith('/*') && !trimmedLine.includes('*/')) {
-            inBlockComment = true;
+            var inBlockComment = true;
             return;
         }
         if (inBlockComment) {

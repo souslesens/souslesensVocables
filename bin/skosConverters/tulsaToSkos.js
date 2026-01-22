@@ -114,7 +114,7 @@ var tulsaToSkos = {
 
                 // var scheme = schemes[parseInt(item.scheme) - 1]
 
-                var entity = {
+                 entity = {
                     prefLabel: item.term,
                     id: item.line,
                     relateds: [],

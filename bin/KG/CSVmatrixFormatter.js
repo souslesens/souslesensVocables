@@ -11,8 +11,8 @@ var CSVmatrixFormatter = {
                 function (callbackSeries) {
                     CSVmatrixFormatter.readCsv(filePath, ";", 500000, function (err, result) {
                         if (err) return callbackSeries(err);
-                        var data = result.data;
-                        var headers = result.headers;
+                         data = result.data;
+                         headers = result.headers;
                         console.log(filePath);
                         return callbackSeries();
                     });

@@ -71,7 +71,7 @@ var CSVtoSKOS = {
                 function (callbackseries) {
                     CSVtoSKOS.readCsv(config, config.maxLines, function (err, result) {
                         if (err) return callbackseries(err);
-                        data = result.data;
+                        var data = result.data;
                         return callbackseries();
                     });
                 },

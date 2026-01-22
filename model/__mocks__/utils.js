@@ -19,8 +19,8 @@ const readSchema = (schema) => {
 
         switch (true) {
             case /create type/.test(line):
-                results = line.match(/create type ([^ ]+) as enum\(([^\)]+)\)/);
-                currentMode = `type-${results[1]}`;
+                var results = line.match(/create type ([^ ]+) as enum\(([^\)]+)\)/);
+                var currentMode = `type-${results[1]}`;
                 elements[currentMode] = results[2];
                 return;
 

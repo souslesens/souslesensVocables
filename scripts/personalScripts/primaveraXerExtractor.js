@@ -45,7 +45,7 @@ lines.forEach(function(line){
         var nLines=0
     }else if(cells[0]=="%F"){
 
-        currentHeaders=line.substring(3);
+        var currentHeaders=line.substring(3);
     }else if(cells[0]=="%R"){
         currentbody+=line.substring(3)
         nLines+=1

@@ -1,19 +1,1353 @@
 {
-  "date": "2026-01-22T10:30:34.051Z",
+  "date": "2026-01-22T11:00:23.384Z",
   "summary": {
-    "total": 2,
-    "safe": 1,
-    "risky": 1
+    "total": 219,
+    "safe": 142,
+    "risky": 77
   },
   "safe": [
+    {
+      "file": "bin\\annotator\\dirContentAnnotator.js",
+      "line": 107,
+      "variable": "tempFileName",
+      "code": "tempFileName = uploadDirPath + shortFileName;"
+    },
+    {
+      "file": "bin\\annotator\\dirContentAnnotator.js",
+      "line": 124,
+      "variable": "fileText",
+      "code": "fileText = text.replace(/\\n/g, \"\").trim();"
+    },
+    {
+      "file": "bin\\annotator\\dirContentAnnotator.js",
+      "line": 716,
+      "variable": "tokens",
+      "code": "tokens = tokens.concat(tokens_2);"
+    },
+    {
+      "file": "bin\\csv2sql.js",
+      "line": 110,
+      "variable": "totalRecords",
+      "code": "totalRecords = sliceIndex * sliceSize;"
+    },
+    {
+      "file": "bin\\exportGraph.js",
+      "line": 57,
+      "variable": "resultSize",
+      "code": "resultSize = result.results.bindings.length;"
+    },
+    {
+      "file": "bin\\exportGraph.js",
+      "line": 98,
+      "variable": "source",
+      "code": "source = _sources[_source];"
+    },
+    {
+      "file": "bin\\exportGraph.js",
+      "line": 99,
+      "variable": "graphUri",
+      "code": "graphUri = source.graphUri;"
+    },
+    {
+      "file": "bin\\exportGraph.js",
+      "line": 146,
+      "variable": "stop",
+      "code": "stop = resultSize < 16;"
+    },
+    {
+      "file": "bin\\exportGraph.js",
+      "line": 176,
+      "variable": "resultSize",
+      "code": "resultSize = result.length;"
+    },
+    {
+      "file": "bin\\exportGraph.js",
+      "line": 177,
+      "variable": "totalResultSize",
+      "code": "totalResultSize = offset + size;"
+    },
+    {
+      "file": "bin\\exportGraph.js",
+      "line": 180,
+      "variable": "triplesStr",
+      "code": "triplesStr = \"\";"
+    },
+    {
+      "file": "bin\\exportGraph.js",
+      "line": 181,
+      "variable": "prefixesStr",
+      "code": "prefixesStr = \"\";"
+    },
+    {
+      "file": "bin\\exportGraph.js",
+      "line": 202,
+      "variable": "prefixesStr",
+      "code": "prefixesStr = prefixesStr.replace(/@/g, \"\");"
+    },
+    {
+      "file": "bin\\exportGraph.js",
+      "line": 206,
+      "variable": "triplesStr",
+      "code": "triplesStr = triplesStr.replace(/\\t/g, \" \");"
+    },
+    {
+      "file": "bin\\exportRDF.js",
+      "line": 83,
+      "variable": "resultSize",
+      "code": "resultSize = data.results.bindings.length;"
+    },
+    {
+      "file": "bin\\exportRDF.js",
+      "line": 84,
+      "variable": "allData",
+      "code": "allData = data.results.bindings;"
+    },
+    {
+      "file": "bin\\graphStore.js",
+      "line": 321,
+      "variable": "sparqlServerUrl",
+      "code": "sparqlServerUrl = options.sparqlServerUrl || Config.sparql_server.url;"
+    },
+    {
+      "file": "bin\\graphStore.js",
+      "line": 329,
+      "variable": "sources",
+      "code": "sources = options.sources;"
+    },
+    {
+      "file": "bin\\graphStore.js",
+      "line": 387,
+      "variable": "graphUri",
+      "code": "graphUri = result.graphUri;"
+    },
+    {
+      "file": "bin\\graphStore.js",
+      "line": 388,
+      "variable": "sparqlInsertStr",
+      "code": "sparqlInsertStr = result.sparqlInsertStr;"
+    },
+    {
+      "file": "bin\\graphStore.js",
+      "line": 389,
+      "variable": "importUris",
+      "code": "importUris = result.imports;"
+    },
+    {
+      "file": "bin\\graphStore.js",
+      "line": 417,
+      "variable": "importsSources",
+      "code": "importsSources = [];"
+    },
+    {
+      "file": "bin\\graphTraversal.js",
+      "line": 96,
+      "variable": "neighbors",
+      "code": "neighbors = graph.neighbors[u];"
+    },
+    {
+      "file": "bin\\KG\\CSVmatrixFormatter.js",
+      "line": 14,
+      "variable": "data",
+      "code": "data = result.data;"
+    },
+    {
+      "file": "bin\\KG\\CSVmatrixFormatter.js",
+      "line": 15,
+      "variable": "headers",
+      "code": "headers = result.headers;"
+    },
+    {
+      "file": "bin\\KG\\dictionaryMatcher.js",
+      "line": 17,
+      "variable": "data",
+      "code": "data = result.data;"
+    },
+    {
+      "file": "bin\\KG\\KGbuilder.js",
+      "line": 302,
+      "variable": "existingUrisMap",
+      "code": "existingUrisMap = result;"
+    },
+    {
+      "file": "bin\\KG\\KGbuilder.js",
+      "line": 316,
+      "variable": "mappings",
+      "code": "mappings = JSON.parse(str);"
+    },
+    {
+      "file": "bin\\KG\\KGbuilder.js",
+      "line": 320,
+      "variable": "sqlTable",
+      "code": "sqlTable = mappings.data.adlTable;"
+    },
+    {
+      "file": "bin\\KG\\KGbuilder.js",
+      "line": 321,
+      "variable": "dbConnection",
+      "code": "dbConnection = mappings.data.adlSource;"
+    },
+    {
+      "file": "bin\\KG\\KGbuilder.js",
+      "line": 514,
+      "variable": "resultSize",
+      "code": "resultSize = result.results.bindings.length;"
+    },
+    {
+      "file": "bin\\KG\\KGbuilder.js",
+      "line": 537,
+      "variable": "mappingFilePath",
+      "code": "mappingFilePath = KGcontroller.getMappingsDirPath() + mappingFilePath;"
+    },
+    {
+      "file": "bin\\KG\\KGSqlConnector.js",
+      "line": 111,
+      "variable": "length",
+      "code": "length = result.length;"
+    },
+    {
+      "file": "bin\\KG\\KGSqlConnector.js",
+      "line": 120,
+      "variable": "allResults",
+      "code": "allResults = allResults.concat(result);"
+    },
+    {
+      "file": "bin\\KGbuilder\\KGbuilder_main.js",
+      "line": 75,
+      "variable": "mappingData",
+      "code": "mappingData = _mappingData;"
+    },
+    {
+      "file": "bin\\KGbuilder\\KGbuilder_main.js",
+      "line": 201,
+      "variable": "sampleTriples",
+      "code": "sampleTriples = result.sampleTriples;"
+    },
+    {
+      "file": "bin\\KGbuilder\\KGbuilder_triplesWriter.js",
+      "line": 109,
+      "variable": "sparqlServerUrl",
+      "code": "sparqlServerUrl = result.sparql_server.url;"
+    },
+    {
+      "file": "bin\\KGbuilder\\KGbuilder_triplesWriter.js",
+      "line": 647,
+      "variable": "sampleResults",
+      "code": "sampleResults = sampleTriples.concat(sampleResults);"
+    },
+    {
+      "file": "bin\\KGbuilder\\KGbuilder_triplesWriter.js",
+      "line": 660,
+      "variable": "resultSize",
+      "code": "resultSize = match ? parseInt(match[1]) : 0;"
+    },
+    {
+      "file": "bin\\KGbuilder\\KGbuilder_triplesWriter.js",
+      "line": 692,
+      "variable": "sampleResults",
+      "code": "sampleResults = { sampleTriples: sampleResults, totalTriples: sampleResults.length };"
+    },
+    {
+      "file": "bin\\KGbuilder\\triplesMaker.js",
+      "line": 92,
+      "variable": "sampleTriples",
+      "code": "sampleTriples = batchTriples;"
+    },
+    {
+      "file": "bin\\KGbuilder\\triplesMaker.js",
+      "line": 183,
+      "variable": "resultSize",
+      "code": "resultSize = data.length;"
+    },
+    {
+      "file": "bin\\KGbuilder\\triplesMaker.js",
+      "line": 386,
+      "variable": "batchTriples",
+      "code": "batchTriples = batchTriples.concat(metaDataTriples);"
+    },
+    {
+      "file": "bin\\KGbuilder\\triplesMaker.js",
+      "line": 459,
+      "variable": "object",
+      "code": "object = '\"' + util.formatStringForTriple(objStr) + '\"';"
+    },
+    {
+      "file": "bin\\KGtripleBuilder.js",
+      "line": 100,
+      "variable": "descriptionMap",
+      "code": "descriptionMap = { filePath: filePath, headers: result.headers, length: result.data[0].length };"
+    },
+    {
+      "file": "bin\\KGtripleBuilder.js",
+      "line": 241,
+      "variable": "csvData",
+      "code": "csvData = result.data;"
+    },
+    {
+      "file": "bin\\KGtripleBuilder.js",
+      "line": 279,
+      "variable": "lines",
+      "code": "lines = result;"
+    },
+    {
+      "file": "bin\\KGtripleBuilder.js",
+      "line": 300,
+      "variable": "target",
+      "code": "target = lookUpMap[lookup].dictionary[value];"
+    },
+    {
+      "file": "bin\\KGtripleBuilder.js",
+      "line": 359,
+      "variable": "subjectStr",
+      "code": "subjectStr = null;"
+    },
+    {
+      "file": "bin\\KGtripleBuilder.js",
+      "line": 360,
+      "variable": "objectStr",
+      "code": "objectStr = null;"
+    },
+    {
+      "file": "bin\\KGtripleBuilder.js",
+      "line": 381,
+      "variable": "subjectStr",
+      "code": "subjectStr = blankNode;"
+    },
+    {
+      "file": "bin\\KGtripleBuilder.js",
+      "line": 388,
+      "variable": "subjectStr",
+      "code": "subjectStr = blankNode;"
+    },
+    {
+      "file": "bin\\KGtripleBuilder.js",
+      "line": 401,
+      "variable": "subjectStr",
+      "code": "subjectStr = blankNode;"
+    },
+    {
+      "file": "bin\\KGtripleBuilder.js",
+      "line": 409,
+      "variable": "subjectStr",
+      "code": "subjectStr = item.s;"
+    },
+    {
+      "file": "bin\\KGtripleBuilder.js",
+      "line": 414,
+      "variable": "subjectStr",
+      "code": "subjectStr = line[item.s];"
+    },
+    {
+      "file": "bin\\KGtripleBuilder.js",
+      "line": 442,
+      "variable": "objectStr",
+      "code": "objectStr = blankNode;"
+    },
+    {
+      "file": "bin\\KGtripleBuilder.js",
+      "line": 459,
+      "variable": "objectStr",
+      "code": "objectStr = blankNode;"
+    },
+    {
+      "file": "bin\\KGtripleBuilder.js",
+      "line": 475,
+      "variable": "objectStr",
+      "code": "objectStr = blankNode;"
+    },
+    {
+      "file": "bin\\KGtripleBuilder.js",
+      "line": 501,
+      "variable": "objectStr",
+      "code": "objectStr = \"'\" + str + \"'^^\" + item.dataType;"
+    },
+    {
+      "file": "bin\\KGtripleBuilder.js",
+      "line": 509,
+      "variable": "objectStr",
+      "code": "objectStr = line[item.o];"
+    },
+    {
+      "file": "bin\\KGtripleBuilder.js",
+      "line": 532,
+      "variable": "subjectStr",
+      "code": "subjectStr = subjectStr.trim();"
+    },
+    {
+      "file": "bin\\KGtripleBuilder.js",
+      "line": 545,
+      "variable": "objectStr",
+      "code": "objectStr = objectStr.trim();"
+    },
+    {
+      "file": "bin\\KGtripleBuilder.js",
+      "line": 715,
+      "variable": "metaDataTriples",
+      "code": "metaDataTriples = metaDataTriples.concat(KGtripleBuilder.getMetaDataTriples(triple.s, { mappingFileName: mapping.fileName }));"
+    },
+    {
+      "file": "bin\\KGtripleBuilder.js",
+      "line": 718,
+      "variable": "triples",
+      "code": "triples = triples.concat(metaDataTriples);"
+    },
+    {
+      "file": "bin\\KGtripleBuilder.js",
+      "line": 1055,
+      "variable": "sparqlServerUrl",
+      "code": "sparqlServerUrl = result.sparql_server.url;"
+    },
+    {
+      "file": "bin\\KGtripleBuilder.js",
+      "line": 1110,
+      "variable": "sparqlServerUrl",
+      "code": "sparqlServerUrl = options.sparqlServerUrl;"
+    },
+    {
+      "file": "bin\\KGtripleBuilder.js",
+      "line": 1117,
+      "variable": "sparqlServerUrl",
+      "code": "sparqlServerUrl = result.sparql_server.url;"
+    },
+    {
+      "file": "bin\\KGtripleBuilder.js",
+      "line": 1138,
+      "variable": "allMappingFiles",
+      "code": "allMappingFiles = [mappingFileName];"
+    },
+    {
+      "file": "bin\\KGtripleBuilder.js",
+      "line": 1177,
+      "variable": "output",
+      "code": "output = result;"
+    },
+    {
+      "file": "bin\\KGtripleBuilder.js",
+      "line": 1270,
+      "variable": "output",
+      "code": "output = result;"
+    },
+    {
+      "file": "bin\\mediawiki\\mediawikiStats.js",
+      "line": 127,
+      "variable": "length",
+      "code": "length = result.results.bindings.length;"
+    },
+    {
+      "file": "bin\\mediawiki\\mediawikiStats.js",
+      "line": 129,
+      "variable": "allBindings",
+      "code": "allBindings = allBindings.concat(result.results.bindings);"
+    },
+    {
+      "file": "bin\\mediawiki\\mediawikiTagger.js",
+      "line": 36,
+      "variable": "rawPageText",
+      "code": "rawPageText = result;"
+    },
+    {
+      "file": "bin\\mediawiki\\mediawikiTagger.js",
+      "line": 46,
+      "variable": "pageText",
+      "code": "pageText = rawPageText.substring(startIndex, endIndex);"
+    },
+    {
+      "file": "bin\\mediawiki\\mediawikiTagger.js",
+      "line": 52,
+      "variable": "pageCategories",
+      "code": "pageCategories = [];"
+    },
+    {
+      "file": "bin\\mediawiki\\mediawikiTagger.js",
+      "line": 152,
+      "variable": "bulkStr",
+      "code": "bulkStr = \"\";"
+    },
+    {
+      "file": "bin\\mediawiki\\mediawikiTagger.js",
+      "line": 279,
+      "variable": "length",
+      "code": "length = result.results.bindings.length;"
+    },
+    {
+      "file": "bin\\mediawiki\\mediawikiTagger.js",
+      "line": 437,
+      "variable": "length",
+      "code": "length = result.results.bindings.length;"
+    },
+    {
+      "file": "bin\\mediawiki\\mediawikiTagger.js",
+      "line": 501,
+      "variable": "rawPageText",
+      "code": "rawPageText = result;"
+    },
+    {
+      "file": "bin\\mediawiki\\mediawikiTagger.js",
+      "line": 502,
+      "variable": "pageText",
+      "code": "pageText = rawPageText;"
+    },
+    {
+      "file": "bin\\mediawiki\\mediawikiTagger.js",
+      "line": 515,
+      "variable": "pageText",
+      "code": "pageText = rawPageText.substring(startIndex, endIndex);"
+    },
+    {
+      "file": "bin\\mediawiki\\mediawikiTagger.js",
+      "line": 684,
+      "variable": "rawPageContent",
+      "code": "rawPageContent = content.replace(/<[^>]*>/gm, \" \");"
+    },
+    {
+      "file": "bin\\mediawiki\\mediawikiTagger.js",
+      "line": 845,
+      "variable": "schemes",
+      "code": "schemes = [];"
+    },
+    {
+      "file": "bin\\RDF_IO.js",
+      "line": 196,
+      "variable": "triples",
+      "code": "triples = result;"
+    },
+    {
+      "file": "bin\\remoteCodeRunner.js",
+      "line": 6,
+      "variable": "myModule",
+      "code": "myModule = mod; //"
+    },
+    {
+      "file": "bin\\skosConverters\\CSVtoSKOS.js",
+      "line": 74,
+      "variable": "data",
+      "code": "data = result.data;"
+    },
+    {
+      "file": "bin\\skosConverters\\onTheFlyTagger.js",
+      "line": 267,
+      "variable": "pageWords",
+      "code": "pageWords = onTheFlyTagger.pageWordsMap[pageUri];"
+    },
+    {
+      "file": "bin\\skosConverters\\onTheFlyTagger.js",
+      "line": 277,
+      "variable": "pageText",
+      "code": "pageText = result;"
+    },
+    {
+      "file": "bin\\skosConverters\\onTheFlyTagger.js",
+      "line": 288,
+      "variable": "pageText",
+      "code": "pageText = pageText.substring(startIndex, endIndex);"
+    },
+    {
+      "file": "bin\\skosConverters\\onTheFlyTagger.js",
+      "line": 407,
+      "variable": "length",
+      "code": "length = result.results.bindings.length;"
+    },
+    {
+      "file": "bin\\skosConverters\\onTheFlyTagger.js",
+      "line": 461,
+      "variable": "pages",
+      "code": "pages = options.pages;"
+    },
+    {
+      "file": "bin\\skosConverters\\onTheFlyTagger.js",
+      "line": 465,
+      "variable": "categories",
+      "code": "categories = options.categories;"
+    },
+    {
+      "file": "bin\\skosConverters\\skosToElastic.js",
+      "line": 55,
+      "variable": "ancestors",
+      "code": "ancestors = ancestors + sep + ancestorsIdsArray2[index] + \";\" + ancestor;"
+    },
+    {
+      "file": "bin\\skosConverters\\skosToElastic.js",
+      "line": 161,
+      "variable": "countCreated",
+      "code": "countCreated = body.items.length;"
+    },
+    {
+      "file": "bin\\skosConverters\\skosToElastic.js",
+      "line": 308,
+      "variable": "hitsIndexSource",
+      "code": "hitsIndexSource = body.hits.hits;"
+    },
+    {
+      "file": "bin\\skosConverters\\skosToElastic.js",
+      "line": 309,
+      "variable": "scroll_id",
+      "code": "scroll_id = body._scroll_id;"
+    },
+    {
+      "file": "bin\\skosConverters\\skosToElastic.js",
+      "line": 337,
+      "variable": "scroll_id",
+      "code": "scroll_id = body._scroll_id;"
+    },
+    {
+      "file": "bin\\skosConverters\\skosToElastic.js",
+      "line": 338,
+      "variable": "scrollSize",
+      "code": "scrollSize = body.hits.hits.length;"
+    },
+    {
+      "file": "bin\\skosConverters\\skosToElastic.js",
+      "line": 339,
+      "variable": "hitsIndexSource",
+      "code": "hitsIndexSource = hitsIndexSource.concat(body.hits.hits);"
+    },
+    {
+      "file": "bin\\skosConverters\\tulsaToSkos.js",
+      "line": 117,
+      "variable": "entity",
+      "code": "entity = {"
+    },
+    {
+      "file": "bin\\sourceIntegrator.js",
+      "line": 322,
+      "variable": "graphUri",
+      "code": "graphUri = result.graphUri;"
+    },
+    {
+      "file": "bin\\sourceIntegrator.js",
+      "line": 323,
+      "variable": "sparqlInsertStr",
+      "code": "sparqlInsertStr = result.sparqlInsertStr;"
+    },
+    {
+      "file": "bin\\sourceIntegrator.js",
+      "line": 324,
+      "variable": "importUris",
+      "code": "importUris = result.imports;"
+    },
+    {
+      "file": "bin\\sourceIntegrator.js",
+      "line": 352,
+      "variable": "importsSources",
+      "code": "importsSources = [];"
+    },
+    {
+      "file": "bin\\sourceIntegrator.js",
+      "line": 445,
+      "variable": "format",
+      "code": "format = \"rdf\";"
+    },
+    {
+      "file": "bin\\sourceManager.js",
+      "line": 49,
+      "variable": "sourceData",
+      "code": "sourceData = result.results.bindings;"
+    },
+    {
+      "file": "bin\\userRequestFiltering.js",
+      "line": 234,
+      "variable": "isWhiteboard_Index",
+      "code": "isWhiteboard_Index = true;"
+    },
+    {
+      "file": "bin\\util.js",
+      "line": 181,
+      "variable": "key2",
+      "code": "key2 = key2.replace(/ /g, \"_\");"
+    },
+    {
+      "file": "bin\\util.js",
+      "line": 288,
+      "variable": "separator",
+      "code": "separator = separators[k];"
+    },
+    {
+      "file": "bin\\util.js",
+      "line": 567,
+      "variable": "month",
+      "code": "month = getMonth(array[1]);"
+    },
+    {
+      "file": "bin\\util.js",
+      "line": 586,
+      "variable": "month",
+      "code": "month = getMonth(array[1]);"
+    },
+    {
+      "file": "bin\\util.js",
+      "line": 607,
+      "variable": "month",
+      "code": "month = getMonth(array[0]);"
+    },
+    {
+      "file": "bin\\util.js",
+      "line": 627,
+      "variable": "month",
+      "code": "month = getMonth(array[1].trim());"
+    },
+    {
+      "file": "bin\\xlsx2json.js",
+      "line": 36,
+      "variable": "allData",
+      "code": "allData = {};"
+    },
+    {
+      "file": "bin\\_csvCrawler.js",
+      "line": 25,
+      "variable": "data",
+      "code": "data = result.data;"
+    },
+    {
+      "file": "bin\\_csvCrawler.js",
+      "line": 26,
+      "variable": "headers",
+      "code": "headers = result.headers;"
+    },
+    {
+      "file": "api\\v1\\paths\\elasticsearch\\indexsource.js",
+      "line": 45,
+      "variable": "userInfo",
+      "code": "userInfo = _userInfo;"
+    },
+    {
+      "file": "api\\v1\\paths\\elasticsearch\\indexsource.js",
+      "line": 72,
+      "variable": "parsingError",
+      "code": "parsingError = _parsingError;"
+    },
+    {
+      "file": "api\\v1\\paths\\elasticsearch\\indexsource.js",
+      "line": 81,
+      "variable": "result",
+      "code": "result = _result;"
+    },
+    {
+      "file": "api\\v1\\paths\\graphStore\\importSource.js",
+      "line": 44,
+      "variable": "graphExists",
+      "code": "graphExists = result;"
+    },
+    {
+      "file": "api\\v1\\paths\\jowl\\importSource.js",
+      "line": 49,
+      "variable": "graphExists",
+      "code": "graphExists = result;"
+    },
+    {
+      "file": "api\\v1\\paths\\jowl\\importSource.js",
+      "line": 68,
+      "variable": "graphExists",
+      "code": "graphExists = false;"
+    },
+    {
+      "file": "api\\v1\\paths\\jowl\\importSource.js",
+      "line": 76,
+      "variable": "ontologyContentEncoded64",
+      "code": "ontologyContentEncoded64 = Buffer.from(body).toString(\"base64\");"
+    },
+    {
+      "file": "api\\v1\\paths\\jowl\\importSource.js",
+      "line": 110,
+      "variable": "allTriples",
+      "code": "allTriples = body;"
+    },
+    {
+      "file": "api\\v1\\paths\\jowl\\importSource.js",
+      "line": 125,
+      "variable": "totalImportedTriples",
+      "code": "totalImportedTriples = -1;"
+    },
+    {
+      "file": "api\\v1\\paths\\jowl\\reasoner.js",
+      "line": 114,
+      "variable": "resultSize",
+      "code": "resultSize = body.length;"
+    },
+    {
+      "file": "api\\v1\\paths\\jowl\\rules.js",
+      "line": 82,
+      "variable": "resultSize",
+      "code": "resultSize = body.length;"
+    },
+    {
+      "file": "api\\v1\\paths\\jowl\\uploadGraph.js",
+      "line": 144,
+      "variable": "graphExists",
+      "code": "graphExists = result;"
+    },
+    {
+      "file": "api\\v1\\paths\\jowl\\uploadGraph.js",
+      "line": 163,
+      "variable": "graphExists",
+      "code": "graphExists = false;"
+    },
+    {
+      "file": "api\\v1\\paths\\jowl\\uploadGraph.js",
+      "line": 173,
+      "variable": "ontologyContentEncoded64",
+      "code": "ontologyContentEncoded64 = Buffer.from(body).toString(\"base64\");"
+    },
+    {
+      "file": "api\\v1\\paths\\jowl\\uploadGraph.js",
+      "line": 184,
+      "variable": "allTriples",
+      "code": "allTriples = triples;"
+    },
+    {
+      "file": "api\\v1\\paths\\jowl\\uploadGraph.js",
+      "line": 192,
+      "variable": "totalImportedTriples",
+      "code": "totalImportedTriples = countTriples;"
+    },
+    {
+      "file": "api\\v1\\paths\\jowl\\uploadGraph.js",
+      "line": 238,
+      "variable": "graphExists",
+      "code": "graphExists = result;"
+    },
+    {
+      "file": "api\\v1\\paths\\jowl\\uploadGraph.js",
+      "line": 257,
+      "variable": "graphExists",
+      "code": "graphExists = false;"
+    },
+    {
+      "file": "api\\v1\\paths\\jowl\\uploadGraph.js",
+      "line": 263,
+      "variable": "ontologyContentEncoded64",
+      "code": "ontologyContentEncoded64 = Buffer.from(data).toString(\"base64\");"
+    },
+    {
+      "file": "api\\v1\\paths\\jowl\\uploadGraph.js",
+      "line": 279,
+      "variable": "allTriples",
+      "code": "allTriples = triples;"
+    },
+    {
+      "file": "api\\v1\\paths\\jowl\\uploadGraph.js",
+      "line": 291,
+      "variable": "totalImportedTriples",
+      "code": "totalImportedTriples = countTriples;"
+    },
+    {
+      "file": "model\\__mocks__\\utils.js",
+      "line": 22,
+      "variable": "results",
+      "code": "results = line.match(/create type ([^ ]+) as enum\\(([^\\)]+)\\)/);"
+    },
+    {
+      "file": "model\\__mocks__\\utils.js",
+      "line": 23,
+      "variable": "currentMode",
+      "code": "currentMode = `type-${results[1]}`;"
+    },
+    {
+      "file": "scripts\\init_configs.js",
+      "line": 67,
+      "variable": "mainConfigJson",
+      "code": "mainConfigJson = merge(mainConfigJson, additionalConfig);"
+    },
     {
       "file": "scripts\\personalScripts\\primaveraXerExtractor.js",
       "line": 48,
       "variable": "currentHeaders",
       "code": "currentHeaders=line.substring(3);"
+    },
+    {
+      "file": "scripts\\test-esm-migration.js",
+      "line": 102,
+      "variable": "inBlockComment",
+      "code": "inBlockComment = true;"
     }
   ],
   "risky": [
+    {
+      "file": "bin\\annotator\\dirContentAnnotator.js",
+      "line": 406,
+      "variable": "files",
+      "code": "files = result;",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 396 (même variable?)"
+    },
+    {
+      "file": "bin\\annotator\\dirContentAnnotator.js",
+      "line": 577,
+      "variable": "files",
+      "code": "files = result;",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 574 (même variable?)"
+    },
+    {
+      "file": "bin\\annotator\\dirContentAnnotator.js",
+      "line": 586,
+      "variable": "files",
+      "code": "files = result;",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 584 (même variable?)"
+    },
+    {
+      "file": "bin\\exportGraph.js",
+      "line": 203,
+      "variable": "prefixesStr",
+      "code": "prefixesStr = prefixesStr.replace(/\\t/g, \" \");",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 202 (même variable?)"
+    },
+    {
+      "file": "bin\\exportGraph.js",
+      "line": 204,
+      "variable": "prefixesStr",
+      "code": "prefixesStr = prefixesStr.replace(/\\.\\n/g, \" \");",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 203 (même variable?)"
+    },
+    {
+      "file": "bin\\exportGraph.js",
+      "line": 207,
+      "variable": "triplesStr",
+      "code": "triplesStr = triplesStr.replace(/\\n/g, \" \");",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 206 (même variable?)"
+    },
+    {
+      "file": "bin\\graphStore.js",
+      "line": 314,
+      "variable": "graphUri",
+      "code": "graphUri = options.graphUri;",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 306 (même variable?)"
+    },
+    {
+      "file": "bin\\graphStore.js",
+      "line": 316,
+      "variable": "graphUri",
+      "code": "graphUri = \"http://industryportal.enit.fr/ontologies/\" + sourceName + \"#\";",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 314 (même variable?)"
+    },
+    {
+      "file": "bin\\graphStore.js",
+      "line": 334,
+      "variable": "sources",
+      "code": "sources = _sources;",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 329 (même variable?)"
+    },
+    {
+      "file": "bin\\graphTraversal.js",
+      "line": 192,
+      "variable": "skipNode",
+      "code": "skipNode = path[path.length - 2][0];",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 185 (même variable?)"
+    },
+    {
+      "file": "bin\\KG\\CSVmatrixFormatter.js",
+      "line": 89,
+      "variable": "jsonDataFetch",
+      "code": "jsonDataFetch = [];",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 88 (même variable?)"
+    },
+    {
+      "file": "bin\\KG\\SQLserverConnector.js",
+      "line": 145,
+      "variable": "data",
+      "code": "data = [];",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 144 (même variable?)"
+    },
+    {
+      "file": "bin\\KG\\tools\\PIbuilder.js",
+      "line": 22,
+      "variable": "data",
+      "code": "data = result.results.bindings;",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 9 (même variable?)"
+    },
+    {
+      "file": "bin\\KGbuilder\\KGbuilder_main.js",
+      "line": 269,
+      "variable": "tables",
+      "code": "tables = [tables];",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 268 (même variable?)"
+    },
+    {
+      "file": "bin\\KGbuilder\\KGbuilder_triplesWriter.js",
+      "line": 296,
+      "variable": "resultSize",
+      "code": "resultSize = result.match(regex)[1];",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 265 (même variable?)"
+    },
+    {
+      "file": "bin\\KGbuilder\\KGbuilder_triplesWriter.js",
+      "line": 300,
+      "variable": "resultSize",
+      "code": "resultSize = -1;",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 297 (même variable?)"
+    },
+    {
+      "file": "bin\\KGbuilder\\triplesMaker.js",
+      "line": 69,
+      "variable": "oldTime",
+      "code": "oldTime = new Date();",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 66 (même variable?)"
+    },
+    {
+      "file": "bin\\KGbuilder\\triplesMaker.js",
+      "line": 88,
+      "variable": "oldTime",
+      "code": "oldTime = new Date();",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 85 (même variable?)"
+    },
+    {
+      "file": "bin\\KGbuilder\\triplesMaker.js",
+      "line": 117,
+      "variable": "oldTime",
+      "code": "oldTime = new Date();",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 114 (même variable?)"
+    },
+    {
+      "file": "bin\\KGbuilder\\triplesMaker.js",
+      "line": 195,
+      "variable": "oldTime",
+      "code": "oldTime = new Date();",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 192 (même variable?)"
+    },
+    {
+      "file": "bin\\KGbuilder\\triplesMaker.js",
+      "line": 206,
+      "variable": "currentBatchRowIndex",
+      "code": "currentBatchRowIndex = offset;",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 198 (même variable?)"
+    },
+    {
+      "file": "bin\\KGbuilder\\triplesMaker.js",
+      "line": 214,
+      "variable": "oldTime",
+      "code": "oldTime = new Date();",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 211 (même variable?)"
+    },
+    {
+      "file": "bin\\KGbuilder\\triplesMaker.js",
+      "line": 219,
+      "variable": "sampleTriples",
+      "code": "sampleTriples = batchTriples;",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 133 (même variable?)"
+    },
+    {
+      "file": "bin\\KGbuilder\\triplesMaker.js",
+      "line": 248,
+      "variable": "oldTime",
+      "code": "oldTime = new Date();",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 245 (même variable?)"
+    },
+    {
+      "file": "bin\\KGbuilder\\triplesMaker.js",
+      "line": 415,
+      "variable": "object",
+      "code": "object = TriplesMaker.getFormatedLiteral(line, { dataType: item.range, o: item.object, dateFormat: item.dateFormat });",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 380 (même variable?)"
+    },
+    {
+      "file": "bin\\KGbuilder\\triplesMaker.js",
+      "line": 447,
+      "variable": "object",
+      "code": "object = \"<\" + mapping.o + \">\";",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 418 (même variable?)"
+    },
+    {
+      "file": "bin\\KGbuilder\\triplesMaker.js",
+      "line": 450,
+      "variable": "object",
+      "code": "object = mapping.o;",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 447 (même variable?)"
+    },
+    {
+      "file": "bin\\KGbuilder\\triplesMaker.js",
+      "line": 452,
+      "variable": "object",
+      "code": "object = TriplesMaker.getColumnUri(line, mapping.objColId, columnMappings, rowIndex, tableProcessingParams);",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 450 (même variable?)"
+    },
+    {
+      "file": "bin\\KGbuilder\\triplesMaker.js",
+      "line": 462,
+      "variable": "object",
+      "code": "object = TriplesMaker.getColumnUri(line, mapping.objColId, columnMappings, rowIndex, tableProcessingParams);",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 459 (même variable?)"
+    },
+    {
+      "file": "bin\\KGbuilder\\triplesMaker.js",
+      "line": 668,
+      "variable": "str",
+      "code": "str = new Date(date).toISOString(); //.slice(0, 10);",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 662 (même variable?)"
+    },
+    {
+      "file": "bin\\KGtripleBuilder.js",
+      "line": 260,
+      "variable": "csvData",
+      "code": "csvData = [result];",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 241 (même variable?)"
+    },
+    {
+      "file": "bin\\KGtripleBuilder.js",
+      "line": 303,
+      "variable": "target",
+      "code": "target = lookUpMap[lookup].transformFn(target);",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 301 (même variable?)"
+    },
+    {
+      "file": "bin\\KGtripleBuilder.js",
+      "line": 365,
+      "variable": "subjectStr",
+      "code": "subjectStr = item.s;",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 359 (même variable?)"
+    },
+    {
+      "file": "bin\\KGtripleBuilder.js",
+      "line": 368,
+      "variable": "subjectStr",
+      "code": "subjectStr = item.s(line, item);",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 365 (même variable?)"
+    },
+    {
+      "file": "bin\\KGtripleBuilder.js",
+      "line": 404,
+      "variable": "subjectStr",
+      "code": "subjectStr = mapping.transform[item.s](line[item.s], \"s\", item.p, line, item);",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 401 (même variable?)"
+    },
+    {
+      "file": "bin\\KGtripleBuilder.js",
+      "line": 425,
+      "variable": "subjectStr",
+      "code": "subjectStr = lookupValue;",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 414 (même variable?)"
+    },
+    {
+      "file": "bin\\KGtripleBuilder.js",
+      "line": 444,
+      "variable": "objectStr",
+      "code": "objectStr = item.o;",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 442 (même variable?)"
+    },
+    {
+      "file": "bin\\KGtripleBuilder.js",
+      "line": 448,
+      "variable": "objectStr",
+      "code": "objectStr = item.o(line, item);",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 444 (même variable?)"
+    },
+    {
+      "file": "bin\\KGtripleBuilder.js",
+      "line": 449,
+      "variable": "objectStr",
+      "code": "objectStr = util.formatStringForTriple(objectStr, false);",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 448 (même variable?)"
+    },
+    {
+      "file": "bin\\KGtripleBuilder.js",
+      "line": 461,
+      "variable": "objectStr",
+      "code": "objectStr = \"<\" + item.o + \">\";",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 459 (même variable?)"
+    },
+    {
+      "file": "bin\\KGtripleBuilder.js",
+      "line": 463,
+      "variable": "objectStr",
+      "code": "objectStr = item.o;",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 461 (même variable?)"
+    },
+    {
+      "file": "bin\\KGtripleBuilder.js",
+      "line": 504,
+      "variable": "objectStr",
+      "code": "objectStr = mapping.transform[item.o](line[item.o], \"o\", item.p, line, item);",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 501 (même variable?)"
+    },
+    {
+      "file": "bin\\KGtripleBuilder.js",
+      "line": 521,
+      "variable": "objectStr",
+      "code": "objectStr = lookupValue;",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 509 (même variable?)"
+    },
+    {
+      "file": "bin\\KGtripleBuilder.js",
+      "line": 535,
+      "variable": "subjectStr",
+      "code": "subjectStr = \"<\" + subjectStr + \">\";",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 534 (même variable?)"
+    },
+    {
+      "file": "bin\\KGtripleBuilder.js",
+      "line": 539,
+      "variable": "subjectStr",
+      "code": "subjectStr = \"<\" + graphUri + util.formatStringForTriple(subjectStr, true) + \">\";",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 536 (même variable?)"
+    },
+    {
+      "file": "bin\\KGtripleBuilder.js",
+      "line": 547,
+      "variable": "objectStr",
+      "code": "objectStr = \"<\" + objectStr + \">\";",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 546 (même variable?)"
+    },
+    {
+      "file": "bin\\KGtripleBuilder.js",
+      "line": 553,
+      "variable": "objectStr",
+      "code": "objectStr = \"'\" + util.formatStringForTriple(objectStr, false) + \"'\";",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 550 (même variable?)"
+    },
+    {
+      "file": "bin\\KGtripleBuilder.js",
+      "line": 556,
+      "variable": "objectStr",
+      "code": "objectStr = \"'\" + util.formatStringForTriple(objectStr, false) + \"'\";",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 555 (même variable?)"
+    },
+    {
+      "file": "bin\\KGtripleBuilder.js",
+      "line": 563,
+      "variable": "objectStr",
+      "code": "objectStr = \"<\" + graphUri + util.formatStringForTriple(objectStr, true) + \">\";",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 562 (même variable?)"
+    },
+    {
+      "file": "bin\\KGtripleBuilder.js",
+      "line": 723,
+      "variable": "triples",
+      "code": "triples = [];",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 720 (même variable?)"
+    },
+    {
+      "file": "bin\\KGtripleBuilder.js",
+      "line": 1273,
+      "variable": "output",
+      "code": "output = { countCreatedTriples: result };",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 1271 (même variable?)"
+    },
+    {
+      "file": "bin\\mediawiki\\AAPG.js",
+      "line": 65,
+      "variable": "key",
+      "code": "key = key.replace(/%20/g, \"_\");",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 64 (même variable?)"
+    },
+    {
+      "file": "bin\\mediawiki\\mediawikiTagger.js",
+      "line": 47,
+      "variable": "pageText",
+      "code": "pageText = pageText.replace(/[\\t]/g, \"\");",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 46 (même variable?)"
+    },
+    {
+      "file": "bin\\mediawiki\\mediawikiTagger.js",
+      "line": 213,
+      "variable": "triples",
+      "code": "triples = [];",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 212 (même variable?)"
+    },
+    {
+      "file": "bin\\mediawiki\\mediawikiTagger.js",
+      "line": 685,
+      "variable": "rawPageContent",
+      "code": "rawPageContent = rawPageContent.replace(/[^A-Za-z0-9 -]/gm, \"\");",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 684 (même variable?)"
+    },
+    {
+      "file": "bin\\skosConverters\\CSVtoSKOS.js",
+      "line": 182,
+      "variable": "jsonDataFetch",
+      "code": "jsonDataFetch = [];",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 181 (même variable?)"
+    },
+    {
+      "file": "bin\\skosConverters\\onTheFlyTagger.js",
+      "line": 641,
+      "variable": "strs",
+      "code": "strs = [];",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 640 (même variable?)"
+    },
+    {
+      "file": "bin\\skosConverters\\skosToElastic.js",
+      "line": 344,
+      "variable": "commonConcepts",
+      "code": "commonConcepts = commonConcepts.concat(result);",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 269 (même variable?)"
+    },
+    {
+      "file": "bin\\skosConverters\\tulsaToSkos.js",
+      "line": 75,
+      "variable": "str",
+      "code": "str = \"\";",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 74 (même variable?)"
+    },
+    {
+      "file": "bin\\sourceIntegrator.js",
+      "line": 447,
+      "variable": "format",
+      "code": "format = \"ttl\";",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 445 (même variable?)"
+    },
+    {
+      "file": "bin\\SQLutil.js",
+      "line": 31,
+      "variable": "jsonDataFetch",
+      "code": "jsonDataFetch = [];",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 30 (même variable?)"
+    },
     {
       "file": "bin\\userRequestFiltering.js",
       "line": 57,
@@ -21,6 +1355,126 @@
       "code": "source = userSourcesMap[key];",
       "risk": "LOCAL_REUSE",
       "reason": "Utilisée avant à la ligne 34 (même variable?)"
+    },
+    {
+      "file": "bin\\userRequestFiltering.js",
+      "line": 243,
+      "variable": "error",
+      "code": "error = \"DATA PROTECTION : index  \" + indexName + \" not allowed to current user\";",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 227 (même variable?)"
+    },
+    {
+      "file": "bin\\userRequestFiltering.js",
+      "line": 246,
+      "variable": "error",
+      "code": "error = \"DATA PROTECTION : user cannot write to index  \" + indexName;",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 243 (même variable?)"
+    },
+    {
+      "file": "bin\\util.js",
+      "line": 20,
+      "variable": "slice",
+      "code": "slice = [];",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 19 (même variable?)"
+    },
+    {
+      "file": "bin\\util.js",
+      "line": 124,
+      "variable": "value",
+      "code": "value = parseFloat(value);",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 123 (même variable?)"
+    },
+    {
+      "file": "bin\\util.js",
+      "line": 126,
+      "variable": "value",
+      "code": "value = parseInt(value);",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 124 (même variable?)"
+    },
+    {
+      "file": "bin\\_csvCrawler.js",
+      "line": 167,
+      "variable": "jsonDataFetch",
+      "code": "jsonDataFetch = [];",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 165 (même variable?)"
+    },
+    {
+      "file": "bin\\_csvCrawler.js",
+      "line": 171,
+      "variable": "jsonDataFetch",
+      "code": "jsonDataFetch = [];",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 169 (même variable?)"
+    },
+    {
+      "file": "api\\v1\\paths\\graphStore\\importSource.js",
+      "line": 61,
+      "variable": "graphExists",
+      "code": "graphExists = false;",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 54 (même variable?)"
+    },
+    {
+      "file": "model\\databases.js",
+      "line": 376,
+      "variable": "connection",
+      "code": "connection = await databaseModel.regenerateConnection(connectionObject.user, connectionObject.dbId, connection);",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 361 (même variable?)"
+    },
+    {
+      "file": "model\\__mocks__\\utils.js",
+      "line": 28,
+      "variable": "results",
+      "code": "results = line.match(/create table if not exists ([^\\(]+)/);",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 24 (même variable?)"
+    },
+    {
+      "file": "model\\__mocks__\\utils.js",
+      "line": 29,
+      "variable": "currentMode",
+      "code": "currentMode = `table-${results[1]}`;",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 24 (même variable?)"
+    },
+    {
+      "file": "model\\__mocks__\\utils.js",
+      "line": 34,
+      "variable": "results",
+      "code": "results = line.match(/create (?:or replace )?view ([^ ]+) as/);",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 29 (même variable?)"
+    },
+    {
+      "file": "model\\__mocks__\\utils.js",
+      "line": 35,
+      "variable": "currentMode",
+      "code": "currentMode = `view-${results[1]}`;",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 30 (même variable?)"
+    },
+    {
+      "file": "model\\__mocks__\\utils.js",
+      "line": 41,
+      "variable": "results",
+      "code": "results = line.trim().replace(/ +/, \" \").replace(/,$/, \"\").split(\" \");",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 35 (même variable?)"
+    },
+    {
+      "file": "scripts\\test-esm-migration.js",
+      "line": 107,
+      "variable": "inBlockComment",
+      "code": "inBlockComment = false;",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 105 (même variable?)"
     }
   ]
 }

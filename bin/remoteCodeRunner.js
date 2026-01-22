@@ -3,7 +3,7 @@ const RemoteCodeRunner = {
         var myModule = null;
 
         import(userData.data_content.modulePath).then((mod) => {
-            myModule = mod; //
+            var myModule = mod; //
 
             try {
                 myModule.run(function (err, result) {

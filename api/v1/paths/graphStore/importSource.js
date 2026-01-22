@@ -41,7 +41,7 @@ export default function () {
                         // check if graphExists
                         function (callbackSeries) {
                             GraphStore.graphExists(sparqlServerConnection, body.graphUri, function (err, result) {
-                                graphExists = result;
+                                var graphExists = result;
                                 return callbackSeries(err);
                             });
                         },

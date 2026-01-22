@@ -33,7 +33,7 @@ var xlsx2json = {
                     callbackSeries();
                 },
                 function (callbackSeries) {
-                    allData = {};
+                    var allData = {};
 
                     for (var sheetKey in sheets) {
                         console.log("processing " + sheetKey);

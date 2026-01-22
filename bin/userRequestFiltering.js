@@ -231,7 +231,7 @@ var UserRequestFiltering = {
         var isWhiteboard_Index = false;
         indices.forEach(function (indexName) {
             if (indexName.startsWith("whiteboard_")) {
-                isWhiteboard_Index = true;
+                var isWhiteboard_Index = true;
             }
         });
         if (isWhiteboard_Index) {

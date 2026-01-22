@@ -319,9 +319,9 @@ var SourceIntegrator = {
                         if (err) {
                             return callbackSeries(err);
                         }
-                        graphUri = result.graphUri;
-                        sparqlInsertStr = result.sparqlInsertStr;
-                        importUris = result.imports;
+                        var graphUri = result.graphUri;
+                        var sparqlInsertStr = result.sparqlInsertStr;
+                        var importUris = result.imports;
                         journal += "     " + result.totalTriples + "triples  imported  in graph " + graphUri + "\n";
                         return callbackSeries();
                     });
@@ -349,7 +349,7 @@ var SourceIntegrator = {
                     return callbackSeries();
 
                     if (options.reload && options.metadata && options.metadata.imports && options.metadata.imports.length > 0) {
-                        importsSources = [];
+                        var importsSources = [];
                         async.eachSeries(
                             options.metadata.imports,
                             function (importUri, callbackEach) {
@@ -442,7 +442,7 @@ var SourceIntegrator = {
                 return callback(err);
             }
             if (body.indexOf("<?xml") == 0) {
-                format = "rdf";
+                var format = "rdf";
             } else {
                 format = "ttl";
             }

@@ -7,6 +7,7 @@ import UserRequestFiltering from "../../../../../../bin/userRequestFiltering.js"
 import ConfigManager from "../../../../../../bin/configManager.js";
 import { Template } from "@huggingface/jinja";
 import { RDF_FORMATS_MIMETYPES } from "../../../../../../model/utils.js";
+import RemoteCodeRunner from "../../../../../../bin/remoteCodeRunner.js";
 //const RemoteCodeRunner = require("../../../../../bin/remoteCodeRunner.js.js");
 
 export default () => {
@@ -16,18 +17,24 @@ export default () => {
             const userData = await userDataModel.find(req.params.id, userInfo.user);
 
             if (userData.data_type == "jsFunction") {
-                res.status(400).json({ message: err });
-                return;
+                /*res.status(400).json({ message: err });
+                return;*/
 
                 //to be done
-                /*  RemoteCodeRunner.runUserDataFunction(userData,function(err, result){
+                RemoteCodeRunner.runUserDataFunction(userData,function(err, result){
                     if( err){
-                        res.status(400).json({ message: err });
+                        var message = "Error during the execution of the js function";
+                        if( err.message){
+                            message= err.message;
+                        }
+
+                        res.status(400).json({ message: message });
                         return;
                     }
                     res.status(200).json(result);
                     return;
-                })*/
+                })
+                return;
             }
 
             if (userData.data_type !== "sparqlQuery") {

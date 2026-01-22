@@ -1,0 +1,26 @@
+{
+  "date": "2026-01-22T10:30:34.051Z",
+  "summary": {
+    "total": 2,
+    "safe": 1,
+    "risky": 1
+  },
+  "safe": [
+    {
+      "file": "scripts\\personalScripts\\primaveraXerExtractor.js",
+      "line": 48,
+      "variable": "currentHeaders",
+      "code": "currentHeaders=line.substring(3);"
+    }
+  ],
+  "risky": [
+    {
+      "file": "bin\\userRequestFiltering.js",
+      "line": 57,
+      "variable": "source",
+      "code": "source = userSourcesMap[key];",
+      "risk": "LOCAL_REUSE",
+      "reason": "Utilisée avant à la ligne 34 (même variable?)"
+    }
+  ]
+}

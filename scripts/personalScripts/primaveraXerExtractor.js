@@ -39,10 +39,10 @@ lines.forEach(function(line){
         var fileName=cells[1].trim()
 
 
-        currentFileName=fileName
-       currentHeaders=""
-        currentbody=""
-        nLines=0
+        var currentFileName=fileName
+       var currentHeaders=""
+        var currentbody=""
+        var nLines=0
     }else if(cells[0]=="%F"){
 
         currentHeaders=line.substring(3);

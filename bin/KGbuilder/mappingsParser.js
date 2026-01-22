@@ -77,7 +77,7 @@ var MappingParser = {
                     var toNodeData = nodesMap[edge.to];
 
                     if (toNodeData && toNodeData.type == "Class") {
-                        mappings = MappingParser.getTypeAndLabelMappings(fromNodeData, toNodeData);
+                        var mappings = MappingParser.getTypeAndLabelMappings(fromNodeData, toNodeData);
                         mappings.forEach(function (mapping) {
                             mapping.isConstantUri = MappingParser.isConstantUri(mapping.o);
                             mapping.isConstantPrefixedUri = MappingParser.isConstantPrefixedUri(mapping.o);
@@ -93,7 +93,7 @@ var MappingParser = {
     setTableColumnsOtherPredicates: function (tablecolumnsMap) {
         for (var columnId in tablecolumnsMap) {
             var fromNodeData = tablecolumnsMap[columnId];
-            mappings = MappingParser.getOtherPredicates(fromNodeData);
+            var mappings = MappingParser.getOtherPredicates(fromNodeData);
             mappings.forEach(function (mapping) {
                 mapping.isConstantUri = MappingParser.isConstantUri(mapping.o);
                 mapping.isConstantPrefixedUri = MappingParser.isConstantPrefixedUri(mapping.o);

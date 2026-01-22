@@ -28,6 +28,8 @@ jest.unstable_mockModule("../model/utils.js", () => ({
 const { cleanupConnection, getKnexConnection } = await import("../model/utils.js");
 const { UserDataModel } = await import("../model/userData.js");
 
+const tracker = createTracker(mockKnexConnection);
+
 describe("UserDataModel", () => {
     let temporaryDirectory;
     let userDataModel;
@@ -43,6 +45,7 @@ describe("UserDataModel", () => {
     });
 
     afterEach(() => {
+        tracker.reset();
         if (fs.existsSync(temporaryDirectory)) {
             fs.rmSync(temporaryDirectory, { recursive: true, force: true });
         }
@@ -313,6 +316,8 @@ describe("UserDataModel", () => {
     });
 
     test("update userData with unknown identifier", async () => {
+        tracker.on.select("user_data").response(undefined);
+
         const updateUserData = {
             id: 10,
             data_type: "data_type",
@@ -324,6 +329,9 @@ describe("UserDataModel", () => {
     });
 
     test("update userData with unknown owner", async () => {
+        tracker.on.select("user_data").response({ id: 1, data_path: "test.json" });
+        tracker.on.select("users_list").response(undefined);
+
         const updateUserData = {
             id: 1,
             data_type: "data_type",
@@ -335,6 +343,9 @@ describe("UserDataModel", () => {
     });
 
     test("update userData with too large file (database)", async () => {
+        tracker.on.select("user_data").response({ id: 1, data_path: "test.json" });
+        tracker.on.select("users_list").response({ id: 2, login: "test" });
+
         userDataModel._mainConfig.userData = {
             location: "database",
             maximumFileSize: 4,

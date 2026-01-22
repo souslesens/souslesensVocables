@@ -1,6 +1,5 @@
 import common from "../../shared/common.js";
 
-self.lineageVisjsGraph;
 import PromptedSelectWidget from "../../uiWidgets/promptedSelectWidget.js";
 
 /**

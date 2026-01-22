@@ -14,7 +14,7 @@ export default function () {
 
     function GET(req, res, next) {
         if (req.query.options) {
-            options = JSON.parse(req.query.options);
+            var options = JSON.parse(req.query.options);
         }
 
         var payload = {

@@ -16,7 +16,7 @@ const __dirname = path.dirname(__filename);
 const rootDir = path.join(__dirname, "..");
 
 // Répertoires à scanner
-const dirsToScan = ["bin", "api"];
+const dirsToScan = ["bin", "api","model","scripts"];
 
 // Extensions à analyser
 const extensions = [".js"];
@@ -74,92 +74,214 @@ function analyzeFile(filePath) {
     // Cherche: début de ligne ou après ; ou { ou }, espaces, puis identifiant = valeur
     // Exclut: var/let/const/function, propriétés d'objet (xxx.yyy =), commentaires
 
-    // Collecter toutes les variables déclarées dans le fichier
-    const declaredVars = new Set();
+    /**
+     * Trouve la portée (scope) englobante d'une position dans le fichier.
+     * Retourne les indices de début et fin de la fonction/bloc englobant.
+     */
+    function findEnclosingScope(content, position) {
+        let depth = 0;
+        let scopeStart = 0;
 
-    // Regex pour les déclarations
-    const declarationPatterns = [
-        /\b(?:var|let|const)\s+(\w+)/g,
-        /\bfunction\s+(\w+)/g,
-        /(\w+)\s*:\s*function/g,  // méthodes d'objet
-        /(\w+)\s*\([^)]*\)\s*\{/g, // méthodes ES6
-    ];
+        // Trouver le début de la portée en remontant
+        for (let i = position; i >= 0; i--) {
+            const char = content[i];
+            if (char === "}") depth++;
+            else if (char === "{") {
+                if (depth === 0) {
+                    scopeStart = i;
+                    break;
+                }
+                depth--;
+            }
+        }
 
-    // Détecter les déclarations groupées: var a, b, c; ou var a = 1, b = 2;
-    // Aussi: var a = [...],\n    b = [...],\n    c;  (déclarations multi-lignes)
-    const groupedDeclarationPattern = /\b(?:var|let|const)\s+([^;]+);/gs;
-    let groupMatch;
-    while ((groupMatch = groupedDeclarationPattern.exec(content)) !== null) {
-        if (groupMatch[1]) {
-            // Parser les déclarations chaînées avec virgule
-            // Attention aux virgules dans les valeurs (arrays, objets, appels de fonction)
-            let depth = 0;
-            let current = "";
-            const parts = [];
+        // Trouver la fin de la portée en descendant
+        depth = 0;
+        let scopeEnd = content.length;
+        for (let i = scopeStart; i < content.length; i++) {
+            const char = content[i];
+            if (char === "{") depth++;
+            else if (char === "}") {
+                depth--;
+                if (depth === 0) {
+                    scopeEnd = i;
+                    break;
+                }
+            }
+        }
 
-            for (const char of groupMatch[1]) {
-                if (char === "(" || char === "[" || char === "{") {
-                    depth++;
-                    current += char;
-                } else if (char === ")" || char === "]" || char === "}") {
-                    depth--;
-                    current += char;
-                } else if (char === "," && depth === 0) {
+        return { start: scopeStart, end: scopeEnd };
+    }
+
+    /**
+     * Collecte les variables déclarées dans une portion de code (scope).
+     */
+    function collectDeclaredVarsInScope(scopeContent) {
+        const declaredVars = new Set();
+
+        // Déclarations var/let/const (simples et groupées)
+        const declPattern = /\b(?:var|let|const)\s+([^;]+)/g;
+        let m;
+        while ((m = declPattern.exec(scopeContent)) !== null) {
+            if (m[1]) {
+                // Parser les déclarations chaînées avec virgule
+                let depth = 0;
+                let current = "";
+                const parts = [];
+
+                for (const char of m[1]) {
+                    if (char === "(" || char === "[" || char === "{") {
+                        depth++;
+                        current += char;
+                    } else if (char === ")" || char === "]" || char === "}") {
+                        depth--;
+                        current += char;
+                    } else if (char === "," && depth === 0) {
+                        parts.push(current.trim());
+                        current = "";
+                    } else {
+                        current += char;
+                    }
+                }
+                if (current.trim()) {
                     parts.push(current.trim());
-                    current = "";
-                } else {
-                    current += char;
                 }
-            }
-            if (current.trim()) {
-                parts.push(current.trim());
-            }
 
-            for (const part of parts) {
-                // Extraire le nom de variable (avant = ou tout le part si pas de =)
-                const varName = part.split(/\s*=/)[0].trim();
-                if (varName && /^\w+$/.test(varName)) {
-                    declaredVars.add(varName);
+                for (const part of parts) {
+                    const varName = part.split(/\s*=/)[0].trim();
+                    if (varName && /^\w+$/.test(varName)) {
+                        declaredVars.add(varName);
+                    }
                 }
             }
         }
+
+        // Paramètres de fonctions dans ce scope
+        const funcParamPattern = /function\s*\w*\s*\(([^)]*)\)/g;
+        while ((m = funcParamPattern.exec(scopeContent)) !== null) {
+            if (m[1]) {
+                m[1].split(",").forEach(p => {
+                    const param = p.trim().split("=")[0].trim();
+                    if (param && /^\w+$/.test(param)) declaredVars.add(param);
+                });
+            }
+        }
+
+        // Arrow functions
+        const arrowParamPattern = /\(([^)]*)\)\s*=>/g;
+        while ((m = arrowParamPattern.exec(scopeContent)) !== null) {
+            if (m[1]) {
+                m[1].split(",").forEach(p => {
+                    const param = p.trim().split("=")[0].trim();
+                    if (param && /^\w+$/.test(param)) declaredVars.add(param);
+                });
+            }
+        }
+
+        // Variables de boucles for..in/of
+        const forInPattern = /for\s*\(\s*(?:var|let|const)?\s*(\w+)\s+(?:in|of)/g;
+        while ((m = forInPattern.exec(scopeContent)) !== null) {
+            if (m[1]) declaredVars.add(m[1]);
+        }
+
+        return declaredVars;
     }
 
-    // Collecter les paramètres de fonction aussi
-    const functionParamPattern = /function\s*\w*\s*\(([^)]*)\)/g;
-    const arrowParamPattern = /\(([^)]*)\)\s*=>/g;
-    const forInPattern = /for\s*\(\s*(?:var|let|const)?\s*(\w+)\s+(?:in|of)/g;
+    /**
+     * Vérifie si une variable est déclarée dans la portée englobante
+     * (en remontant jusqu'à la racine du fichier).
+     */
+    function isVarDeclaredInScope(content, varName, position) {
+        // D'abord, vérifier le scope du module (tout le contenu avant la position)
+        // C'est important car les variables déclarées au niveau module sont accessibles partout
+        const moduleContent = content.substring(0, position);
+        const moduleVars = collectDeclaredVarsInScope(moduleContent);
+        if (moduleVars.has(varName)) {
+            return true;
+        }
 
-    // Première passe: collecter toutes les déclarations
-    for (const pattern of declarationPatterns) {
+        // Ensuite, vérifier les scopes imbriqués (pour les variables locales)
+        // Trouver toutes les accolades ouvrantes avant cette position
+        const bracePositions = [];
+        for (let i = 0; i < position; i++) {
+            if (content[i] === "{") {
+                bracePositions.push(i);
+            } else if (content[i] === "}") {
+                bracePositions.pop();
+            }
+        }
+
+        // Vérifier chaque scope imbriqué
+        for (let i = bracePositions.length - 1; i >= 0; i--) {
+            const scopeStart = bracePositions[i];
+            const scope = findEnclosingScope(content, scopeStart + 1);
+            const scopeContent = content.substring(scope.start, Math.min(scope.end, position));
+
+            const declaredInScope = collectDeclaredVarsInScope(scopeContent);
+            if (declaredInScope.has(varName)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Vérifie si une position est à l'intérieur d'une classe (pour ignorer les class fields)
+     */
+    function isInsideClass(content, position) {
+        // Chercher le mot-clé "class" avant cette position
+        // et vérifier si on est dans le corps de la classe (entre { et })
+        const beforePos = content.substring(0, position);
+
+        // Trouver toutes les déclarations de classe (incluant extends)
+        // Pattern amélioré pour capturer: class Name, class Name extends Parent, etc.
+        const classPattern = /\bclass\s+\w+(?:\s+extends\s+[^\{]+)?\s*\{/g;
         let match;
-        while ((match = pattern.exec(content)) !== null) {
-            if (match[1]) declaredVars.add(match[1]);
+
+        while ((match = classPattern.exec(beforePos)) !== null) {
+            // Position de l'accolade ouvrante de la classe
+            const bracePos = match.index + match[0].length - 1;
+
+            // Vérifier si on est toujours dans cette classe
+            // Compter les accolades depuis le début de la classe jusqu'à la position
+            let depth = 1;
+            for (let i = bracePos + 1; i < position && i < content.length; i++) {
+                if (content[i] === "{") depth++;
+                else if (content[i] === "}") depth--;
+
+                if (depth === 0) {
+                    // On est sorti de la classe
+                    break;
+                }
+            }
+
+            if (depth > 0) {
+                // On est toujours dans une classe
+                // Mais on doit vérifier qu'on n'est pas dans une méthode de la classe
+                // Les class fields sont au niveau 1, les méthodes sont au niveau > 1
+
+                // Recompter depuis le début de la classe
+                depth = 1;
+                for (let i = bracePos + 1; i < position && i < content.length; i++) {
+                    if (content[i] === "{") depth++;
+                    else if (content[i] === "}") depth--;
+                }
+
+                // Si depth === 1, on est au niveau du corps de la classe (class fields)
+                if (depth === 1) {
+                    return true;
+                }
+            }
         }
+
+        return false;
     }
 
-    // Collecter les paramètres de fonctions
-    let match;
-    while ((match = functionParamPattern.exec(content)) !== null) {
-        if (match[1]) {
-            match[1].split(",").forEach(p => {
-                const param = p.trim().split("=")[0].trim();
-                if (param) declaredVars.add(param);
-            });
-        }
-    }
-    while ((match = arrowParamPattern.exec(content)) !== null) {
-        if (match[1]) {
-            match[1].split(",").forEach(p => {
-                const param = p.trim().split("=")[0].trim();
-                if (param) declaredVars.add(param);
-            });
-        }
-    }
-
-    // Collecter les variables de boucles for..in/of
-    while ((match = forInPattern.exec(content)) !== null) {
-        if (match[1]) declaredVars.add(match[1]);
+    // Calculer les positions de chaque ligne dans le fichier (pour la recherche de scope)
+    const linePositions = [0];
+    for (let i = 0; i < lines.length; i++) {
+        linePositions.push(linePositions[i] + lines[i].length + 1); // +1 pour le \n
     }
 
     // Deuxième passe: trouver les assignations sans déclaration
@@ -167,8 +289,6 @@ function analyzeFile(filePath) {
     const insideObjectPattern = /^\s*\w+\s*:\s*/;
 
     let inMultilineComment = false;
-    let braceDepth = 0;
-    let inObjectLiteral = false;
 
     for (let i = 0; i < lines.length; i++) {
         let line = lines[i];
@@ -219,6 +339,23 @@ function analyzeFile(filePath) {
                 continue;
             }
 
+            // Ignorer si fait partie d'une déclaration chaînée multi-lignes:
+            // var a = 1,
+            //     b = 2,  <- cette ligne ne doit pas être détectée
+            //     c = 3;
+            // On vérifie si la ligne précédente se termine par une virgule
+            const prevLineTrimmed = prevLine.replace(/\/\/.*$/, "").trim();
+            if (prevLineTrimmed.endsWith(",")) {
+                continue;
+            }
+
+            // Ignorer si on est à l'intérieur d'une classe (class fields)
+            // Les class fields comme "get = async () => {}" ne doivent pas avoir "var"
+            const posInFile = linePositions[i] + indent.length;
+            if (isInsideClass(content, posInFile)) {
+                continue;
+            }
+
             // Ignorer si c'est une propriété (this.x = ou obj.x =)
             const beforeVar = line.substring(0, line.indexOf(varName));
             if (beforeVar.includes(".") || beforeVar.includes("this")) continue;
@@ -229,8 +366,9 @@ function analyzeFile(filePath) {
             // Ignorer les variables connues comme globales
             if (knownGlobals.has(varName)) continue;
 
-            // Ignorer si déclarée dans ce fichier
-            if (declaredVars.has(varName)) continue;
+            // Calculer la position dans le fichier et vérifier si déclarée dans le scope
+            const positionInFile = linePositions[i] + indent.length;
+            if (isVarDeclaredInScope(content, varName, positionInFile)) continue;
 
             // Ignorer les mots-clés
             if (["if", "else", "for", "while", "switch", "case", "return", "throw", "try", "catch", "finally", "new", "delete", "typeof", "void", "in", "of"].includes(varName)) continue;
@@ -283,7 +421,6 @@ function checkLocalReuse(finding, fileContent) {
 
     // Compter les accolades pour déterminer la portée
     let braceCount = 0;
-    let foundOpening = false;
 
     // Remonter pour trouver le début de la fonction/bloc
     for (let i = startLine; i >= 0; i--) {
@@ -291,13 +428,13 @@ function checkLocalReuse(finding, fileContent) {
         braceCount += (line.match(/\}/g) || []).length;
         braceCount -= (line.match(/\{/g) || []).length;
         if (braceCount < 0) {
-            foundOpening = true;
             break;
         }
     }
 
     // Chercher d'autres utilisations avant cette ligne dans le même bloc
-    const usagePattern = new RegExp(`\\b${varName}\\b`);
+    // Pattern qui exclut les propriétés d'objet (.varName) et les clés d'objet (varName:)
+    const usagePattern = new RegExp(`(?<![.])\\b${varName}\\b(?!\\s*:)`, "g");
     braceCount = 0;
 
     for (let i = startLine - 1; i >= 0 && braceCount >= 0; i--) {
@@ -310,7 +447,16 @@ function checkLocalReuse(finding, fileContent) {
         // Ignorer les déclarations
         if (/\b(?:var|let|const)\s+/.test(line)) continue;
 
-        if (usagePattern.test(line)) {
+        // Ignorer les lignes de commentaires (// ou * ou /**)
+        const trimmedLine = line.trim();
+        if (trimmedLine.startsWith("//") || trimmedLine.startsWith("*") || trimmedLine.startsWith("/*")) {
+            continue;
+        }
+
+        // Ignorer les commentaires inline
+        const lineWithoutComments = line.replace(/\/\/.*$/, "").replace(/\/\*.*?\*\//g, "");
+
+        if (usagePattern.test(lineWithoutComments)) {
             return { reusedBefore: true, line: i + 1 };
         }
     }

@@ -193,7 +193,7 @@ var RDF_IO = {
                         if (err) {
                             return callbackSeries(err);
                         }
-                        var triples = result;
+                        triples = result;
                         callbackSeries();
                     });
                 },

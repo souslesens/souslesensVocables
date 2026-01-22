@@ -78,7 +78,7 @@ var KGbuilder_main = {
                 return callback(err);
             }
 
-            var mappingData = _mappingData;
+            mappingData = _mappingData;
             tableProcessingParams.sourceInfos = mappingData.options.config;
 
             tableProcessingParams.uniqueTriplesMap = {};
@@ -204,7 +204,7 @@ var KGbuilder_main = {
                                     }
                                     if (options.sampleSize) {
                                         // dont write return triples sample
-                                        var sampleTriples = result.sampleTriples;
+                                        sampleTriples = result.sampleTriples;
                                     } else {
                                         if (!totalTriplesCount[table]) totalTriplesCount[table] = 0;
                                         totalTriplesCount[table] += result.totalTriplesCount;

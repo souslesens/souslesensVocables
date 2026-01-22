@@ -111,7 +111,7 @@ export default function () {
                             console.log(error);
                             return callbackWhilst(error);
                         }
-                        var resultSize = body.length;
+                        resultSize = body.length;
                         offset += size;
                         str += body;
                         return callbackWhilst();

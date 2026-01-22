@@ -19,7 +19,7 @@ var elasticUrl = "http://localhost:9200/";
 
 var skosToElastic = {
     load: function (thesaurusPaths, callback) {
-        options = {
+        var options = {
             outputLangage: "en",
             extractedLangages: "en",
             withSynonyms: true,

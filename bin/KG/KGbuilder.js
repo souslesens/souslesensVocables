@@ -299,7 +299,7 @@ var KGbuilder = {
                     socket.message("KGbuild", "loading KG existing IDS ");
                     KGbuilder.getExistingLabelUriMap(options.sparqlServerUrl, KGgraphUri, null, function (err, result) {
                         if (err) return callbackSeries(err);
-                        existingUrisMap = result;
+                        var existingUrisMap = result;
                         callbackSeries();
                     });
                 },
@@ -313,12 +313,12 @@ var KGbuilder = {
                 function (callbackSeries) {
                     try {
                         var str = fs.readFileSync(mappingFilePath);
-                        mappings = JSON.parse(str);
+                        var mappings = JSON.parse(str);
                     } catch (e) {
                         callbackSeries(e);
                     }
-                    sqlTable = mappings.data.adlTable;
-                    dbConnection = mappings.data.adlSource;
+                    var sqlTable = mappings.data.adlTable;
+                    var dbConnection = mappings.data.adlSource;
 
                     mappings.mappings.sort(function (a, b) {
                         var p = a.predicate.indexOf("#type");
@@ -511,7 +511,7 @@ var KGbuilder = {
                     }
 
                     offset += result.results.bindings.length;
-                    resultSize = result.results.bindings.length;
+                    var resultSize = result.results.bindings.length;
 
                     socket.message("KGbuild", "existing ids retrieved " + offset);
 
@@ -534,7 +534,7 @@ var KGbuilder = {
                 if (count++ > 0) replaceGraph = false;
                 socket.message("KGbuild", "-----------Processing " + mappingFilePath1 + "--------------");
 
-                mappingFilePath = KGcontroller.getMappingsDirPath() + mappingFilePath;
+                var mappingFilePath = KGcontroller.getMappingsDirPath() + mappingFilePath;
 
                 if (mappingFilePath.indexOf(".json") < 0) mappingFilePath += ".json";
                 //   mappingFilePath = path.resolve(mappingFilePath);*/

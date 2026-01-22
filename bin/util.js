@@ -178,7 +178,7 @@ var util = {
         for (var key in obj) {
             var key2 = key.replace(/-/g, "_");
 
-            key2 = key2.replace(/ /g, "_");
+            var key2 = key2.replace(/ /g, "_");
             if (key2 != "") {
                 var valueObj = obj[key];
                 if (valueObj) {
@@ -285,7 +285,7 @@ var util = {
                         if (firstLine.indexOf(separators[k]) > -1) {
                             // evaluate separator line is same on the second and first line avoid mistake separators
                             if (firstLine.split(separators[k]).length == secondLine.split(separators[k]).length) {
-                                separator = separators[k];
+                                var separator = separators[k];
                             }
                         }
                     }
@@ -564,7 +564,7 @@ var util = {
                 return null;
             }
             day = getDay(array[0]);
-            month = getMonth(array[1]);
+            var month = getMonth(array[1]);
 
             var hoursArray = array[2].split(" ");
             if (hoursArray.length > 1) {
@@ -583,7 +583,7 @@ var util = {
                 return null;
             }
 
-            month = getMonth(array[1]);
+            var month = getMonth(array[1]);
             year = getYear(array[0]);
 
             var hoursArray = array[2].split("T");
@@ -604,7 +604,7 @@ var util = {
             }
 
             day = getDay(array[1]);
-            month = getMonth(array[0]);
+            var month = getMonth(array[0]);
 
             var hoursArray = array[2].split(" ");
             if (hoursArray.length > 1) {
@@ -624,7 +624,7 @@ var util = {
                 return null;
             }
             day = getDay(array[0].trim());
-            month = getMonth(array[1].trim());
+            var month = getMonth(array[1].trim());
 
             var hoursArray = array[2].split(" ");
             if (hoursArray.length > 1) {

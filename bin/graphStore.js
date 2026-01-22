@@ -318,7 +318,7 @@ var GraphStore = {
                     var configPath = path.join(__dirname, "../" + "config" + "/mainConfig.json");
                     jsonFileStorage.retrieve(path.resolve(configPath), function (err, _config) {
                         Config = _config;
-                        sparqlServerUrl = options.sparqlServerUrl || Config.sparql_server.url;
+                        var sparqlServerUrl = options.sparqlServerUrl || Config.sparql_server.url;
                         return callbackSeries();
                     });
                 },
@@ -326,7 +326,7 @@ var GraphStore = {
                 //get sources
                 function (callbackSeries) {
                     if (options.sources) {
-                        sources = options.sources;
+                        var sources = options.sources;
                         return callbackSeries();
                     }
                     var sourcesPath = path.join(__dirname, "../" + "config/" + options.sourcesJsonFile);
@@ -384,9 +384,9 @@ var GraphStore = {
                         if (err) {
                             return callbackSeries(err);
                         }
-                        graphUri = result.graphUri;
-                        sparqlInsertStr = result.sparqlInsertStr;
-                        importUris = result.imports;
+                        var graphUri = result.graphUri;
+                        var sparqlInsertStr = result.sparqlInsertStr;
+                        var importUris = result.imports;
                         journal += "     " + result.totalTriples + "triples  imported  in graph " + graphUri + "\n";
                         return callbackSeries();
                     });
@@ -414,7 +414,7 @@ var GraphStore = {
                     return callbackSeries();
 
                     if (options.reload && options.metadata && options.metadata.imports && options.metadata.imports.length > 0) {
-                        importsSources = [];
+                        var importsSources = [];
                         async.eachSeries(
                             options.metadata.imports,
                             function (importUri, callbackEach) {

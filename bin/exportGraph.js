@@ -54,7 +54,7 @@ var ExportGraph = {
                     if (typeof result === "string") result = JSON.parse(result);
 
                     offset += result.results.bindings.length;
-                    resultSize = result.results.bindings.length;
+                    var resultSize = result.results.bindings.length;
 
                     result.results.bindings.forEach(function (item) {
                         var value;
@@ -95,8 +95,8 @@ var ExportGraph = {
                 function (callbackSeries0) {
                     var sourcesPath = path.join(__dirname, "../" + "config" + "/sources.json");
                     jsonFileStorage.retrieve(path.resolve(sourcesPath), function (err, _sources) {
-                        source = _sources[_source];
-                        graphUri = source.graphUri;
+                        var source = _sources[_source];
+                        var graphUri = source.graphUri;
                         var configPath = path.join(__dirname, "../" + "config" + "/mainConfig.json");
                         jsonFileStorage.retrieve(path.resolve(configPath), function (err, _config) {
                             Config = _config;
@@ -143,7 +143,7 @@ var ExportGraph = {
                     var stop = false;
                     async.whilst(
                         function (_test) {
-                            stop = resultSize < 16;
+                            var stop = resultSize < 16;
                             return _test(null, !stop); //resultSize < 16;
                         },
 
@@ -173,12 +173,12 @@ var ExportGraph = {
 
                                             if (result.indexOf(" Empty TURTLE") > -1) stop = true;
                                             offset += size;
-                                            resultSize = result.length;
-                                            totalResultSize = offset + size;
+                                            var resultSize = result.length;
+                                            var totalResultSize = offset + size;
                                             console.log(totalResultSize);
 
-                                            triplesStr = "";
-                                            prefixesStr = "";
+                                            var triplesStr = "";
+                                            var prefixesStr = "";
 
                                             var lines = result.split("\n");
                                             lines.forEach(function (line) {
@@ -199,11 +199,11 @@ var ExportGraph = {
                                         if (stop) {
                                             return callbackSeries();
                                         }
-                                        prefixesStr = prefixesStr.replace(/@/g, "");
+                                        var prefixesStr = prefixesStr.replace(/@/g, "");
                                         prefixesStr = prefixesStr.replace(/\t/g, " ");
                                         prefixesStr = prefixesStr.replace(/\.\n/g, " ");
 
-                                        triplesStr = triplesStr.replace(/\t/g, " ");
+                                        var triplesStr = triplesStr.replace(/\t/g, " ");
                                         triplesStr = triplesStr.replace(/\n/g, " ");
                                         //    triplesStr=triplesStr.replace(/\\/g,"")
 

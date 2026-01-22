@@ -94,7 +94,7 @@ var SourceManager = {
                     for (var i = 1; i < 5; i++) {
                         var broader = item["broader" + i];
                         if (broader && item["broader" + i + "Label"].value) {
-                            broaderUri = urisMap[broader.value];
+                            var broaderUri = urisMap[broader.value];
                             if (!broaderUri) {
                                 if (!keepOriginalUris) {
                                     var broaderUri = " <" + graphUri + util.getRandomHexaId(10) + ">";

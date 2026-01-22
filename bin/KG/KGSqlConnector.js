@@ -108,7 +108,7 @@ var KGSqlConnector = {
                         console.log(query2);
                         return callbackWhilst(err);
                     }
-                    var length = result.length;
+                     length = result.length;
                     if (processor) {
                         processor(result, uniqueTriples, function (err, _resultProcessor) {
                             if (err) {
@@ -117,7 +117,7 @@ var KGSqlConnector = {
                             return callbackWhilst();
                         });
                     } else {
-                        var allResults = allResults.concat(result);
+                         allResults = allResults.concat(result);
                         return callbackWhilst();
                     }
                 });

@@ -42,7 +42,7 @@ export default function () {
                         if (err) {
                             return callbackSeries(err);
                         }
-                        var userInfo = _userInfo;
+                        userInfo = _userInfo;
                         callbackSeries();
                     });
                 },
@@ -69,7 +69,7 @@ export default function () {
                         ConfigManager.getUserSources(req, res, function (err, userSources) {
                             UserRequestFiltering.validateElasticSearchIndices(null, [req.body.indexName], userSources, "w", function (_parsingError, _filteredQuery) {
                                 if (_parsingError) {
-                                    var parsingError = _parsingError;
+                                    parsingError = _parsingError;
                                     return callbackSeries();
                                     // return processResponse(res, parsingError, null);
                                 }
@@ -78,7 +78,7 @@ export default function () {
                                     if (err) {
                                         return callbackSeries(err);
                                     }
-                                    var result = _result;
+                                     result = _result;
                                 });
                             });
                         });

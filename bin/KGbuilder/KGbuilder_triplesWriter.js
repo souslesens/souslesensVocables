@@ -106,7 +106,7 @@ const KGbuilder_triplesWriter = {
                         if (err) {
                             return callbackSeries(err);
                         }
-                        var sparqlServerUrl = result.sparql_server.url;
+                        sparqlServerUrl = result.sparql_server.url;
                         callbackSeries();
                     });
                 },
@@ -644,7 +644,7 @@ const KGbuilder_triplesWriter = {
                                             var bindings = result.results.bindings;
                                             var sampleTriples = KGbuilder_triplesWriter.formatSampleTriples(bindings, item);
 
-                                            var sampleResults = sampleTriples.concat(sampleResults);
+                                            sampleResults = sampleTriples.concat(sampleResults);
 
                                             if (options && options.clientSocketId) {
                                                 var identifier = item.classUri || item.propertyUri || item.type;
@@ -657,7 +657,7 @@ const KGbuilder_triplesWriter = {
                                             }
                                             var regex = / (\d+)/;
                                             var match = resultValue.match(regex);
-                                            var resultSize = match ? parseInt(match[1]) : 0;
+                                            resultSize = match ? parseInt(match[1]) : 0;
 
                                             mappingTotal += resultSize;
                                             totalDeleted += resultSize;

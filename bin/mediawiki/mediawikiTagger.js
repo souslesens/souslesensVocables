@@ -33,7 +33,7 @@ var mediaWikiTagger = {
                 function (callbackSeries) {
                     httpProxy.get(wikiUri + pageName, {}, function (err, result) {
                         if (err) return callbackSeries(err);
-                        var rawPageText = result;
+                         rawPageText = result;
                         return callbackSeries();
                     });
                 },
@@ -43,13 +43,13 @@ var mediaWikiTagger = {
                     var endMark = "printfooter";
                     var startIndex = rawPageText.indexOf(strartMark) + 10;
                     var endIndex = rawPageText.indexOf(endMark) + 10;
-                    var pageText = rawPageText.substring(startIndex, endIndex);
+                     pageText = rawPageText.substring(startIndex, endIndex);
                     pageText = pageText.replace(/[\t]/g, "");
                     return callbackSeries();
                 },
                 //getPageCategories
                 function (callbackSeries) {
-                    var pageCategories = [];
+                     pageCategories = [];
                     // var regex = /wgCategories":\[([^\].]*)/m;
                     // var regex = /href="\/Category:([^"]*)/gm;
                     var regex = /<li><a href="\/Category:([^"^]*)/gm;
@@ -149,7 +149,7 @@ var mediaWikiTagger = {
                     var bulkStr = "";
                     //  thesauriiConcepts["test"].subjectsWords.forEach(function (conceptWord) {
                     async.eachSeries(thesaurusGraphUris, function (graphUri, callbackEach) {
-                        var bulkStr = "";
+                        bulkStr = "";
                         var thesaurusPagesMatchCount = [];
                         var conceptsFound = 0;
                         thesauriiConcepts[graphUri].subjects.forEach(function (concept) {
@@ -276,7 +276,7 @@ var mediaWikiTagger = {
                         console.log(params.query);
                         return callback(err);
                     }
-                    var length = result.results.bindings.length;
+                    length = result.results.bindings.length;
                     result.results.bindings.forEach(function (item) {
                         var prefLabel = item.subjectLabel.value.toLowerCase();
                         if (options.withIds)
@@ -434,7 +434,7 @@ var mediaWikiTagger = {
                         console.log(params.query);
                         return callback(err);
                     }
-                    var length = result.results.bindings.length;
+                     length = result.results.bindings.length;
                     result.results.bindings.forEach(function (item) {
                         var concept = item.subject.value.toLowerCase();
                         var category = item.category.value.toLowerCase();
@@ -498,8 +498,8 @@ var mediaWikiTagger = {
                     function (callbackSeries) {
                         httpProxy.get(categoryUrl, {}, function (err, result) {
                             if (err) return callbackSeries(err);
-                            var rawPageText = result;
-                            var pageText = rawPageText;
+                             rawPageText = result;
+                             pageText = rawPageText;
                             return callbackSeries();
                         });
                     },
@@ -512,7 +512,7 @@ var mediaWikiTagger = {
                             console.log("pb  with letter " + letter);
                             return callbackSeries("pb  with letter " + letter);
                         }
-                        var pageText = rawPageText.substring(startIndex, endIndex);
+                         pageText = rawPageText.substring(startIndex, endIndex);
                         return callbackSeries();
                     },
 
@@ -681,7 +681,7 @@ var mediaWikiTagger = {
                         if (error) return callbackSeries(error);
                         var content = body.hits.hits[0]._source.content;
 
-                        var rawPageContent = content.replace(/<[^>]*>/gm, " ");
+                        rawPageContent = content.replace(/<[^>]*>/gm, " ");
                         rawPageContent = rawPageContent.replace(/[^A-Za-z0-9 -]/gm, "");
 
                         callbackSeries();
@@ -842,7 +842,7 @@ var mediaWikiTagger = {
                             console.log(params.query);
                             console.log(err);
                         }
-                        var schemes = [];
+                        schemes = [];
                         result.results.bindings.forEach(function (item) {
                             schemes.push({ id: item.scheme.value, label: item.schemeLabel.value });
                         });

@@ -80,8 +80,8 @@ var exportRDF = {
                 httpProxy.post(url, body.headers, body.params, function (err, data) {
                     console.log("processed " + offset + " lines");
                     if (err) return callbackWhilst(err);
-                    var resultSize = data.results.bindings.length;
-                    var allData = data.results.bindings;
+                    resultSize = data.results.bindings.length;
+                    allData = data.results.bindings;
                     offset += limit;
                     exportRDF.appendToFileStream(stream, allData, function (err, _result) {
                         if (err) return callbackWhilst(err);

@@ -264,7 +264,7 @@ var onTheFlyTagger = {
                 //ask cache
                 function (callbackSeries) {
                     if (onTheFlyTagger.pageWordsMap[pageUri] != null) {
-                        pageWords = onTheFlyTagger.pageWordsMap[pageUri];
+                        var pageWords = onTheFlyTagger.pageWordsMap[pageUri];
                         return callback(null, pageWords);
                     } else {
                         return callbackSeries();
@@ -274,7 +274,7 @@ var onTheFlyTagger = {
                 function (callbackSeries) {
                     httpProxy.get(pageUri, {}, function (err, result) {
                         if (err) return callbackSeries(err);
-                        pageText = result;
+                        var pageText = result;
                         return callbackSeries();
                     });
                 },
@@ -285,7 +285,7 @@ var onTheFlyTagger = {
                     var endMark = "printfooter";
                     var startIndex = pageText.indexOf(strartMark) + 10;
                     var endIndex = pageText.indexOf(endMark) + 10;
-                    pageText = pageText.substring(startIndex, endIndex);
+                    var pageText = pageText.substring(startIndex, endIndex);
 
                     var json = {
                         tokenizer: "standard",
@@ -404,7 +404,7 @@ var onTheFlyTagger = {
                         console.log(params.query);
                         return callbackWhilst(err);
                     }
-                    length = result.results.bindings.length;
+                    var length = result.results.bindings.length;
                     result.results.bindings.forEach(function (item) {
                         if (options.withIds)
                             thesaurusConcepts.push({
@@ -458,11 +458,11 @@ var onTheFlyTagger = {
                 //getCategories
                 function (callbackSeries) {
                     if (options.pages) {
-                        pages = options.pages;
+                        var pages = options.pages;
                         return callbackSeries();
                     }
                     if (options.categories) {
-                        categories = options.categories;
+                        var categories = options.categories;
                         return callbackSeries();
                     } else if (options.subjects) {
                         var pagesData = onTheFlyTagger.csvToJson("D:\\Total\\2020\\Stephanie\\AAPG-Pages.txt");

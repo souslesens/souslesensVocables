@@ -46,7 +46,7 @@ export default function () {
                     // check if graphExists
                     function (callbackSeries) {
                         GraphStore.graphExists(sparqlServerConnection, body.graphUri, function (err, result) {
-                            graphExists = result;
+                            var graphExists = result;
                             return callbackSeries(err);
                         });
                     },
@@ -65,7 +65,7 @@ export default function () {
                                 return callbackSeries(err);
                             }
 
-                            graphExists = false;
+                            var graphExists = false;
                             return callbackSeries();
                         });
                     },
@@ -73,7 +73,7 @@ export default function () {
                     function (callbackSeries) {
                         request(body.rdfUrl, {}, function (error, request, body) {
                             if (error) return callbackSeries();
-                            ontologyContentEncoded64 = Buffer.from(body).toString("base64");
+                            var ontologyContentEncoded64 = Buffer.from(body).toString("base64");
 
                             callbackSeries();
                         });
@@ -107,7 +107,7 @@ export default function () {
                             if (!Array.isArray(body)) {
                                 return callbackSeries(body);
                             }
-                            allTriples = body;
+                            var allTriples = body;
                             if (allTriples.length == 0) {
                                 return callbackSeries("no triples generated for url " + body.rdfUrl);
                             }
@@ -122,7 +122,7 @@ export default function () {
                         }
 
                         var slices = Util.sliceArray(allTriples, 200);
-                        totalImportedTriples = -1;
+                        var totalImportedTriples = -1;
                         async2.eachSeries(
                             slices,
                             function (triples, callbackEach) {

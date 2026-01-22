@@ -106,7 +106,7 @@ const KGbuilder_triplesWriter = {
                         if (err) {
                             return callbackSeries(err);
                         }
-                        sparqlServerUrl = result.sparql_server.url;
+                        var sparqlServerUrl = result.sparql_server.url;
                         callbackSeries();
                     });
                 },
@@ -644,7 +644,7 @@ const KGbuilder_triplesWriter = {
                                             var bindings = result.results.bindings;
                                             var sampleTriples = KGbuilder_triplesWriter.formatSampleTriples(bindings, item);
 
-                                            sampleResults = sampleTriples.concat(sampleResults);
+                                            var sampleResults = sampleTriples.concat(sampleResults);
 
                                             if (options && options.clientSocketId) {
                                                 var identifier = item.classUri || item.propertyUri || item.type;
@@ -657,7 +657,7 @@ const KGbuilder_triplesWriter = {
                                             }
                                             var regex = / (\d+)/;
                                             var match = resultValue.match(regex);
-                                            resultSize = match ? parseInt(match[1]) : 0;
+                                            var resultSize = match ? parseInt(match[1]) : 0;
 
                                             mappingTotal += resultSize;
                                             totalDeleted += resultSize;
@@ -689,7 +689,7 @@ const KGbuilder_triplesWriter = {
                 if (err) {
                     return callback(err);
                 }
-                sampleResults = { sampleTriples: sampleResults, totalTriples: sampleResults.length };
+                var sampleResults = { sampleTriples: sampleResults, totalTriples: sampleResults.length };
                 return callback(null, isSample ? sampleResults : { triplesDeleted: totalDeleted });
             },
         );

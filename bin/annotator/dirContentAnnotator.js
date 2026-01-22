@@ -104,7 +104,7 @@ var DirContentAnnotator = {
                 if (!rootFileName) rootFileName = fileName;
                 var array = fileName.split("/");
                 var shortFileName = array[array.length - 1];
-                tempFileName = uploadDirPath + shortFileName;
+                var tempFileName = uploadDirPath + shortFileName;
 
                 jsonData.files[fileName] = { name: shortFileName };
 
@@ -121,7 +121,7 @@ var DirContentAnnotator = {
                                 DirContentAnnotator.socket.message(fileName + "     extracting text");
                                 DirContentAnnotator.getDocTextContentFromFile(tempFileName, function (err, text) {
                                     if (err) return callbackSeries(err);
-                                    fileText = text.replace(/\n/g, "").trim();
+                                    var fileText = text.replace(/\n/g, "").trim();
                                     jsonData.files[fileName].text = fileText;
                                     return callbackSeries();
                                 });
@@ -713,7 +713,7 @@ var DirContentAnnotator = {
                 tokens.forEach(function (token, index) {
                     if (index > 0) tokens_2.push(tokens[index - 1] + " " + token);
                 });
-                tokens = tokens.concat(tokens_2);
+                var tokens = tokens.concat(tokens_2);
             }
 
             return callback(null, tokens);

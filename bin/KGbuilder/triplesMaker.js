@@ -89,7 +89,7 @@ var TriplesMaker = {
 
                             if (options.sampleSize) {
                                 // sample dont write triples return batchTriples
-                                sampleTriples = batchTriples;
+                                var sampleTriples = batchTriples;
                                 callbackEach();
                             } else {
                                 /*KGbuilder_socket.message(
@@ -180,7 +180,7 @@ var TriplesMaker = {
                 for await (const batch of generator) {
                     // console.log("select time " + duration)
                     var data = batch;
-                    resultSize = data.length;
+                    var resultSize = data.length;
                     //console.log("open batch of size", batch.length);
                     //offset += resultSize;
                     offset += limitSize;
@@ -376,7 +376,7 @@ var TriplesMaker = {
                 if (!tableProcessingParams.isSampleData && !TriplesMaker.uniqueSubjects[columnUri]) {
                     TriplesMaker.uniqueSubjects[columnUri] = 1;
                     var metaDataTriples = TriplesMaker.getMetaDataTriples(columnUri, tableProcessingParams.tableInfos.table, {});
-                    batchTriples = batchTriples.concat(metaDataTriples);
+                    var batchTriples = batchTriples.concat(metaDataTriples);
                 }
             }
             // process columnToColumnMappings
@@ -449,7 +449,7 @@ var TriplesMaker = {
                             }
                         } else if (mapping.isString) {
                             var objStr = line[mapping.o];
-                            object = '"' + util.formatStringForTriple(objStr) + '"';
+                            var object = '"' + util.formatStringForTriple(objStr) + '"';
                         } else if (columnMappings[mapping.objColId]) {
                             // if object is a column
                             object = TriplesMaker.getColumnUri(line, mapping.objColId, columnMappings, rowIndex, tableProcessingParams);

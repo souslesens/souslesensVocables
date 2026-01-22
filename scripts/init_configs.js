@@ -64,7 +64,7 @@ if (!fs.existsSync(mainConfigPath)) {
         vocablesEnvList.forEach(([env, value]) => {
             const entryPath = env.replace("VOCABLES__", "");
             const additionalConfig = convertDotPathToNestedObject(entryPath, value);
-            mainConfigJson = merge(mainConfigJson, additionalConfig);
+            var mainConfigJson = merge(mainConfigJson, additionalConfig);
         });
         // Write config file
         fs.writeFileSync(mainConfigPath, JSON.stringify(mainConfigJson, null, 2));

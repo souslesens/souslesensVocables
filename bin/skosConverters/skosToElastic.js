@@ -52,7 +52,7 @@ var skosToElastic = {
                             for (var i = 0; i <= index; i++) {
                                 sep += "_";
                             }
-                            ancestors = ancestors + sep + ancestorsIdsArray2[index] + ";" + ancestor;
+                            var ancestors = ancestors + sep + ancestorsIdsArray2[index] + ";" + ancestor;
                         });
                         newJson.push({
                             id: item.id,
@@ -158,7 +158,7 @@ var skosToElastic = {
                             errors = errors.slice(0, 20);
                             return callback(errors);
                         }
-                        countCreated = body.items.length;
+                        var countCreated = body.items.length;
                         return callbackSeries(null, body.items.length);
                     });
                 },
@@ -305,8 +305,8 @@ var skosToElastic = {
                             return callbackSeries(json.error);
                         }
 
-                        hitsIndexSource = body.hits.hits;
-                        scroll_id = body._scroll_id;
+                        var hitsIndexSource = body.hits.hits;
+                        var scroll_id = body._scroll_id;
 
                         var scrollSize = 10000;
 
@@ -334,9 +334,9 @@ var skosToElastic = {
                                     if (json.error) {
                                         return callbackWhilst(json.error);
                                     }
-                                    scroll_id = body._scroll_id;
-                                    scrollSize = body.hits.hits.length;
-                                    hitsIndexSource = hitsIndexSource.concat(body.hits.hits);
+                                    var scroll_id = body._scroll_id;
+                                    var scrollSize = body.hits.hits.length;
+                                    var hitsIndexSource = hitsIndexSource.concat(body.hits.hits);
                                     totalHits += body.hits.hits.length;
                                     skosToElastic.getCommonConcepts(hitsIndexSource, indexTarget, function (err, result) {
                                         if (err) return callbackWhilst(err);

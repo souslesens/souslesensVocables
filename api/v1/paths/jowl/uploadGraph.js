@@ -141,7 +141,7 @@ export default function () {
                         // check if graphExists
                         function (callbackSeries) {
                             GraphStore.graphExists(sparqlServerConnection, graphUri, function (err, result) {
-                                graphExists = result;
+                                var graphExists = result;
                                 return callbackSeries(err);
                             });
                         },
@@ -160,7 +160,7 @@ export default function () {
                                     return callbackSeries(err);
                                 }
 
-                                graphExists = false;
+                                var graphExists = false;
                                 return callbackSeries();
                             });
                         },
@@ -170,7 +170,7 @@ export default function () {
                                 if (error) {
                                     return callbackSeries(error);
                                 }
-                                ontologyContentEncoded64 = Buffer.from(body).toString("base64");
+                                var ontologyContentEncoded64 = Buffer.from(body).toString("base64");
 
                                 callbackSeries();
                             });
@@ -181,7 +181,7 @@ export default function () {
                                 if (err) {
                                     return callbackSeries(err);
                                 }
-                                allTriples = triples;
+                                var allTriples = triples;
                                 callbackSeries();
                             });
                         },
@@ -189,7 +189,7 @@ export default function () {
                         //writeTriples
                         function (callbackSeries) {
                             writeTriples(sparqlServerConnection, graphUri, allTriples, function (err, countTriples) {
-                                totalImportedTriples = countTriples;
+                                var totalImportedTriples = countTriples;
                                 callbackSeries(err);
                             });
                         },
@@ -235,7 +235,7 @@ export default function () {
                         // check if graphExists
                         function (callbackSeries) {
                             GraphStore.graphExists(sparqlServerConnection, graphUri, function (err, result) {
-                                graphExists = result;
+                                var graphExists = result;
                                 return callbackSeries(err);
                             });
                         },
@@ -254,13 +254,13 @@ export default function () {
                                     return callbackSeries(err);
                                 }
 
-                                graphExists = false;
+                                var graphExists = false;
                                 return callbackSeries();
                             });
                         },
 
                         function (callbackSeries) {
-                            ontologyContentEncoded64 = Buffer.from(data).toString("base64");
+                            var ontologyContentEncoded64 = Buffer.from(data).toString("base64");
                             callbackSeries();
                         },
 
@@ -276,7 +276,7 @@ export default function () {
                                 if (err) {
                                     return callbackSeries(err);
                                 }
-                                allTriples = triples;
+                                var allTriples = triples;
                                 callbackSeries();
                             });
                         },
@@ -288,7 +288,7 @@ export default function () {
                             }
                             console.log("--------------6---------");
                             writeTriples(sparqlServerConnection, graphUri, allTriples, function (err, countTriples) {
-                                totalImportedTriples = countTriples;
+                                var totalImportedTriples = countTriples;
                                 console.log("--------------7---------");
                                 callbackSeries(err);
                             });

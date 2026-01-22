@@ -14,7 +14,7 @@ var dictionaryMatcher = {
                 function (callbackseries) {
                     csvCrawler.readCsv({ filePath: filePath }, 500000, function (err, result) {
                         if (err) return callbackseries(err);
-                        data = result.data;
+                        var data = result.data;
                         return callbackseries();
                     });
                 },

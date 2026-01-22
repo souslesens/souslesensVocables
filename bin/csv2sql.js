@@ -107,7 +107,7 @@ const Csv2Sql = {
                             return callbackEach();
                         }
 
-                        var totalRecords = sliceIndex * sliceSize;
+                         totalRecords = sliceIndex * sliceSize;
                         console.log("records inserted :" + totalRecords);
 
                         sliceIndex += 1;

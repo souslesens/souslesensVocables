@@ -6,21 +6,112 @@ import UserRequestFiltering from "./userRequestFiltering.js";
 // Register custom loader to remap vocables paths
 register("./remoteCodeRunnerLoader.js", import.meta.url);
 
-// Variable globale pour stocker le callback actif
+// Global variable to store the active callback
+// WARNING: This implementation is NOT safe for concurrent executions.
+// If multiple runUserDataFunction calls overlap, they will share these globals.
+// Consider refactoring to pass context through function parameters if concurrency is needed.
 let activeCallback = null;
 
-// Variable globale pour stocker le contexte utilisateur courant
+// Global variable to store the current user context for SPARQL filtering
 let currentUserContext = null;
 
-// Handler global pour capturer TOUTES les rejections non gérées
-process.on('unhandledRejection', (reason, promise) => {
-    console.error('[RemoteCodeRunner] Unhandled rejection caught:', reason);
+// Global handler to catch ALL unhandled rejections during module execution
+process.on("unhandledRejection", (reason, _promise) => {
+    console.error("[RemoteCodeRunner] Unhandled rejection caught:", reason);
     if (activeCallback) {
         const cb = activeCallback;
         activeCallback = null;
         cb(reason instanceof Error ? reason : new Error(String(reason)));
     }
 });
+
+/**
+ * Format an error for jQuery ajax error callback
+ * @param {Error|string} err - The error to format
+ * @returns {object} Object with responseText property
+ */
+function formatAjaxError(err) {
+    return { responseText: err.toString ? err.toString() : String(err) };
+}
+
+/**
+ * Add authentication to params if using default SPARQL server
+ * @param {string} sparqlUrl - The SPARQL endpoint URL
+ * @param {object} params - The request params to modify
+ */
+function addSparqlAuth(sparqlUrl, params) {
+    if (!globalThis.Config || !globalThis.Config.sparql_server) {
+        return;
+    }
+    if (sparqlUrl.indexOf(globalThis.Config.sparql_server.url) === 0) {
+        if (globalThis.Config.sparql_server.user) {
+            params.auth = {
+                user: globalThis.Config.sparql_server.user,
+                pass: globalThis.Config.sparql_server.password,
+                sendImmediately: false,
+            };
+        }
+    }
+}
+
+/**
+ * Handle SPARQL POST request through httpProxy
+ * @param {object} data - The request data
+ * @param {function} success - Success callback
+ * @param {function} error - Error callback
+ */
+function handleSparqlPost(data, success, error) {
+    const body = JSON.parse(data.body);
+    const sparqlUrl = data.url;
+    const headers = body.headers || {};
+    const params = body.params || {};
+
+    addSparqlAuth(sparqlUrl, params);
+
+    const executeQuery = function (filteredQuery) {
+        params.query = filteredQuery;
+        httpProxy.post(sparqlUrl, headers, params, function (err, result) {
+            if (err) {
+                if (error) error(formatAjaxError(err));
+            } else {
+                if (success) success(result, "success", {});
+            }
+        });
+    };
+
+    if (currentUserContext && currentUserContext.user && currentUserContext.userSources) {
+        // Filter SPARQL request based on user permissions
+        UserRequestFiltering.filterSparqlRequest(params.query, currentUserContext.userSources, currentUserContext.user, function (parsingError, filteredQuery) {
+            if (parsingError) {
+                if (error) error({ responseText: "SPARQL filtering error: " + parsingError });
+                return;
+            }
+            executeQuery(filteredQuery);
+        });
+    } else {
+        // No user context, execute without filtering
+        executeQuery(params.query);
+    }
+}
+
+/**
+ * Handle GET request through httpProxy
+ * @param {object} data - The request data
+ * @param {function} success - Success callback
+ * @param {function} error - Error callback
+ */
+function handleGetRequest(data, success, error) {
+    const getUrl = data.url;
+    const getOptions = data.options ? JSON.parse(data.options) : {};
+
+    httpProxy.get(getUrl, getOptions, function (err, result) {
+        if (err) {
+            if (error) error(formatAjaxError(err));
+        } else {
+            if (success) success(result, "success", {});
+        }
+    });
+}
 
 // Mock browser globals for frontend modules running in Node.js
 if (typeof globalThis.window === "undefined") {
@@ -34,89 +125,26 @@ if (typeof globalThis.window === "undefined") {
     };
 
     // jQuery mock with ajax support that routes to backend code directly
-    const jQueryMock = function(selector) {
+    const jQueryMock = function (_selector) {
         return { remove: () => {}, html: () => {}, css: () => {}, on: () => {}, off: () => {}, prop: () => {} };
     };
 
-    // $.ajax implementation that calls backend code directly
-    // Only for sparqlProxy calls for now
-    jQueryMock.ajax = function(options) {
-        const { type, url, data, success, error } = options;
+    // $.ajax implementation that calls backend code directly (only for sparqlProxy calls)
+    jQueryMock.ajax = function (options) {
+        const { url, data, success, error } = options;
 
-        // Handle sparqlProxy calls
         if (url && url.includes("/sparqlProxy")) {
             try {
                 if (data.POST) {
-                    // POST request to SPARQL endpoint
-                    const body = JSON.parse(data.body);
-                    const sparqlUrl = data.url;
-                    const headers = body.headers || {};
-                    const params = body.params || {};
-
-                    // Add auth if using default sparql server
-                    if (globalThis.Config && globalThis.Config.sparql_server) {
-                        if (sparqlUrl.indexOf(globalThis.Config.sparql_server.url) === 0) {
-                            if (globalThis.Config.sparql_server.user) {
-                                params.auth = {
-                                    user: globalThis.Config.sparql_server.user,
-                                    pass: globalThis.Config.sparql_server.password,
-                                    sendImmediately: false,
-                                };
-                            }
-                        }
-                    }
-                    //params.query = params.query.replace('PREFIX bif: <http://www.openlinksw.com/schemas/bif#>', '');
-
-                    // Apply user request filtering if user context is available
-                    const executeQuery = function(filteredQuery) {
-                        params.query = filteredQuery;
-                        console.log(params.query);
-                        httpProxy.post(sparqlUrl, headers, params, function(err, result) {
-                            if (err) {
-                                if (error) error({ responseText: err.toString ? err.toString() : String(err) });
-                            } else {
-                                if (success) success(result, "success", {});
-                            }
-                        });
-                    };
-
-                    if (currentUserContext && currentUserContext.user && currentUserContext.userSources) {
-                        // Filter SPARQL request based on user permissions
-                        UserRequestFiltering.filterSparqlRequest(
-                            params.query,
-                            currentUserContext.userSources,
-                            currentUserContext.user,
-                            function(parsingError, filteredQuery) {
-                                if (parsingError) {
-                                    if (error) error({ responseText: "SPARQL filtering error: " + parsingError });
-                                    return;
-                                }
-                                executeQuery(filteredQuery);
-                            }
-                        );
-                    } else {
-                        // No user context, execute without filtering
-                        executeQuery(params.query);
-                    }
+                    handleSparqlPost(data, success, error);
                 } else {
-                    // GET request
-                    const getUrl = data.url;
-                    const getOptions = data.options ? JSON.parse(data.options) : {};
-
-                    httpProxy.get(getUrl, getOptions, function(err, result) {
-                        if (err) {
-                            if (error) error({ responseText: err.toString ? err.toString() : String(err) });
-                        } else {
-                            if (success) success(result, "success", {});
-                        }
-                    });
+                    handleGetRequest(data, success, error);
                 }
             } catch (e) {
                 console.error("[$.ajax] Error:", e);
                 if (error) error({ responseText: e.message });
             }
         } else {
-            // For other URLs, log warning and call error
             console.warn("[$.ajax] Unhandled URL:", url);
             if (error) error({ responseText: "Unhandled ajax URL in server context: " + url });
         }
@@ -210,8 +238,8 @@ const RemoteCodeRunner = {
         // Store user context for $.ajax filtering
         currentUserContext = userContext;
 
-        var myModule = null;
-        var params = {};
+        let myModule = null;
+        let params = {};
         if (userData.data_content.params) {
             params = userData.data_content.params;
         }
@@ -226,10 +254,10 @@ const RemoteCodeRunner = {
             callback(err, result);
         };
 
-        // Activer le handler global pour cette exécution
+        // Activate global handler for this execution
         activeCallback = safeCallback;
 
-        // Charger Config puis le module utilisateur
+        // Load Config then the user module
         loadConfig()
             .then(() => import(userData.data_content.modulePath))
             .then((mod) => {
@@ -238,8 +266,8 @@ const RemoteCodeRunner = {
                     const maybePromise = myModule.run(params, function (err, result) {
                         safeCallback(err, result);
                     });
-                    // Si run() retourne une Promise, capturer toute rejection
-                    if (maybePromise && typeof maybePromise.then === 'function') {
+                    // If run() returns a Promise, catch any rejection
+                    if (maybePromise && typeof maybePromise.then === "function") {
                         maybePromise.catch((e) => {
                             safeCallback(e);
                         });
@@ -255,12 +283,3 @@ const RemoteCodeRunner = {
 };
 
 export default RemoteCodeRunner;
-/*
-var userData = {
-    data_content: {
-        modulePath: "../plugins/Lifex_PAZFLOR/public/js/serverFunctions.mjs",
-        fn: "drawGraph",
-    },
-};
-
-RemoteCodeRunner.runUserDataFunction(userData);*/

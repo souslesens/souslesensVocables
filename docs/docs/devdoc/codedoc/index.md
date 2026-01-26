@@ -1,10 +1,12 @@
+<!-- AUTO-GENERATED: do not edit by hand -->
 # Code documentation
 
-The following docs is generated from Javascript docstrings.
-
 ```{toctree}
-:maxdepth: 2
-KGquery.md
-mappingmodeler.md
-jsdoc.md
+:maxdepth: 99
+:caption: Code documentation
+
+jsdoc
+KGquery
+mappingmodeler
+architecture/index
 ```

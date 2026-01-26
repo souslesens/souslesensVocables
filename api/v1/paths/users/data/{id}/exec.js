@@ -17,11 +17,23 @@ export default () => {
             const userData = await userDataModel.find(req.params.id, userInfo.user);
 
             if (userData.data_type == "jsFunction") {
-                /*res.status(400).json({ message: err });
-                return;*/
+                // Get user context for SPARQL request filtering
+                const userSources = await ConfigManager.getUserSources(req, res);
+                const user = await ConfigManager.getUser(req, res);
 
-                //to be done
-                RemoteCodeRunner.runUserDataFunction(userData,function(err, result){
+                // Verify user context is valid - jsFunction requires authentication
+                if (!user || !userSources) {
+                    res.status(401).json({ message: "Authentication required to execute jsFunction" });
+                    return;
+                }
+
+                // Pass user context to RemoteCodeRunner for request filtering
+                const userContext = {
+                    user: user,
+                    userSources: userSources
+                };
+
+                RemoteCodeRunner.runUserDataFunction(userData, userContext, function(err, result){
                     if( err){
                         var message = "Error during the execution of the js function";
                         if( err.message){

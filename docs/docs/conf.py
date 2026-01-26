@@ -18,6 +18,7 @@ suppress_warnings = ["myst.xref_missing"]
 
 templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
+exclude_patterns.append("**/sls/**")
 
 # -- isso config -------------------------------------------------------------
 # https://sphinx.silverrainz.me/isso/index.html

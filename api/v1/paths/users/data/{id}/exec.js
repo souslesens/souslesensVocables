@@ -1,4 +1,3 @@
-import fs from "node:fs";
 import { readMainConfig } from "../../../../../../model/config.js";
 import { userDataModel } from "../../../../../../model/userData.js";
 import { RdfDataModel } from "../../../../../../model/rdfData.js";

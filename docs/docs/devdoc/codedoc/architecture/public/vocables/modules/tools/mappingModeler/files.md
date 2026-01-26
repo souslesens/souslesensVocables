@@ -5,7 +5,7 @@ Directory: `public\vocables\modules\tools\mappingModeler`
 
 ## List
 
-- `dataSourcesManager.js`
+- {ref}`dataSourcesManager.js <mappingmodeler-datasourcemanager>`
 - `mappingColumnsGraph.js`
 - `mappingModeler.js`
 - `mappingModelerRelations.js`

@@ -121,7 +121,7 @@ var DirContentAnnotator = {
                                 DirContentAnnotator.socket.message(fileName + "     extracting text");
                                 DirContentAnnotator.getDocTextContentFromFile(tempFileName, function (err, text) {
                                     if (err) return callbackSeries(err);
-                                     fileText = text.replace(/\n/g, "").trim();
+                                    fileText = text.replace(/\n/g, "").trim();
                                     jsonData.files[fileName].text = fileText;
                                     return callbackSeries();
                                 });

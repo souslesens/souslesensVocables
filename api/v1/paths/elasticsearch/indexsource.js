@@ -78,7 +78,7 @@ export default function () {
                                     if (err) {
                                         return callbackSeries(err);
                                     }
-                                     result = _result;
+                                    result = _result;
                                 });
                             });
                         });

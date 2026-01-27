@@ -235,7 +235,7 @@ export default function () {
                         // check if graphExists
                         function (callbackSeries) {
                             GraphStore.graphExists(sparqlServerConnection, graphUri, function (err, result) {
-                                 graphExists = result;
+                                graphExists = result;
                                 return callbackSeries(err);
                             });
                         },
@@ -254,13 +254,12 @@ export default function () {
                                     return callbackSeries(err);
                                 }
 
-                                 graphExists = false;
+                                graphExists = false;
                                 return callbackSeries();
                             });
                         },
 
                         function (callbackSeries) {
-                            
                             ontologyContentEncoded64 = Buffer.from(data).toString("base64");
                             callbackSeries();
                         },

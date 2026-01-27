@@ -22,8 +22,8 @@ var csvCrawler = {
                 function (callbackseries) {
                     csvCrawler.readCsv(config.connector, 5000000, function (err, result) {
                         if (err) return callbackseries(err);
-                         data = result.data;
-                         headers = result.headers;
+                        data = result.data;
+                        headers = result.headers;
                         return callbackseries();
                     });
                 },

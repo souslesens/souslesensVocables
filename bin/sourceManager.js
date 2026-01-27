@@ -46,7 +46,7 @@ var SourceManager = {
                     httpProxy.post(sourceSparqlUrl, body.headers, body.params, function (err, result) {
                         if (err) return callbackSeries(err);
                         if (typeof result === "string") result = JSON.parse(result);
-                         sourceData = result.results.bindings;
+                        sourceData = result.results.bindings;
                         callbackSeries();
                     });
                 },

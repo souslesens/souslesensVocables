@@ -5,63 +5,59 @@ import { fileURLToPath } from "node:url";
 import path from "node:path";
 
 // Get project root (parent of bin/)
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(__dirname, "..");
 
-// List of browser-only modules that should be stubbed in Node.js
-const browserOnlyModules = [
-    "kg_upload_app.js",
-    "mappingModeler_upload_app.js",
-];
+// Browser-only modules that should be stubbed in Node.js
+const BROWSER_ONLY_MODULES = ["kg_upload_app.js", "mappingModeler_upload_app.js"];
+
+// Stub module returned for browser-only imports
+const STUB_MODULE = { url: "data:text/javascript,export default {};", shortCircuit: true };
+
+/**
+ * Build a file:// URL from an absolute path
+ * @param {string} absolutePath - The absolute file path
+ * @returns {object} Resolver result with url and shortCircuit
+ */
+function buildFileUrl(absolutePath) {
+    const fileUrl = "file:///" + absolutePath.replace(/\\/g, "/");
+    return { url: fileUrl, shortCircuit: true };
+}
+
+/**
+ * Resolve a path segment to a project directory
+ * @param {string} specifier - The import specifier
+ * @param {string} pathSegment - The path segment to find (e.g., "/vocables/")
+ * @param {string[]} targetDirs - The target directories in project (e.g., ["public"])
+ * @param {string[]} excludePatterns - Patterns that indicate path is already resolved
+ * @returns {object|null} Resolver result or null if not matched
+ */
+function resolvePathSegment(specifier, pathSegment, targetDirs, excludePatterns) {
+    const hasSegment = specifier.includes(pathSegment) || specifier.startsWith(pathSegment);
+    const isExcluded = excludePatterns.some((pattern) => specifier.includes(pattern));
+
+    if (hasSegment && !isExcluded) {
+        const segmentIndex = specifier.indexOf(pathSegment);
+        const relativePath = specifier.substring(segmentIndex);
+        const absolutePath = path.join(projectRoot, ...targetDirs, relativePath);
+        return buildFileUrl(absolutePath);
+    }
+    return null;
+}
 
 export async function resolve(specifier, context, nextResolve) {
     // Skip browser-only React apps - return a stub module
-    if (browserOnlyModules.some(mod => specifier.includes(mod))) {
-        // Return a data URL with an empty module
-        return {
-            url: "data:text/javascript,export default {};",
-            shortCircuit: true
-        };
+    if (BROWSER_ONLY_MODULES.some((mod) => specifier.includes(mod))) {
+        return STUB_MODULE;
     }
 
-    // Handle absolute paths like "/vocables/modules/..."
-    // These are browser paths that need to map to public/vocables/...
-    if (specifier.startsWith("/vocables/")) {
-        const absolutePath = path.join(projectRoot, "public", specifier);
-        const fileUrl = "file:///" + absolutePath.replace(/\\/g, "/");
-        return { url: fileUrl, shortCircuit: true };
-    }
+    // Handle /vocables/ paths -> public/vocables/
+    const vocablesResult = resolvePathSegment(specifier, "/vocables/", ["public"], ["public/vocables"]);
+    if (vocablesResult) return vocablesResult;
 
-    // Handle absolute paths like "/assets/..."
-    // These are browser paths that need to map to mainapp/static/assets/...
-    // (React apps built by Vite are served from mainapp/static/)
-    if (specifier.startsWith("/assets/")) {
-        const absolutePath = path.join(projectRoot, "mainapp", "static", specifier);
-        const fileUrl = "file:///" + absolutePath.replace(/\\/g, "/");
-        return { url: fileUrl, shortCircuit: true };
-    }
-
-    // Handle relative paths like "../../../vocables/..." from plugins
-    // These should map to public/vocables/...
-    if (specifier.includes("/vocables/") && !specifier.includes("public/vocables")) {
-        // Extract the vocables path part
-        const vocablesIndex = specifier.indexOf("/vocables/");
-        const vocablesPath = specifier.substring(vocablesIndex);
-        const absolutePath = path.join(projectRoot, "public", vocablesPath);
-        const fileUrl = "file:///" + absolutePath.replace(/\\/g, "/");
-        return { url: fileUrl, shortCircuit: true };
-    }
-
-    // Handle relative paths like "../../../assets/..." from plugins
-    // These should map to mainapp/static/assets/...
-    if (specifier.includes("/assets/") && !specifier.includes("static/assets")) {
-        const assetsIndex = specifier.indexOf("/assets/");
-        const assetsPath = specifier.substring(assetsIndex);
-        const absolutePath = path.join(projectRoot, "mainapp", "static", assetsPath);
-        const fileUrl = "file:///" + absolutePath.replace(/\\/g, "/");
-        return { url: fileUrl, shortCircuit: true };
-    }
+    // Handle /assets/ paths -> mainapp/static/assets/
+    const assetsResult = resolvePathSegment(specifier, "/assets/", ["mainapp", "static"], ["static/assets"]);
+    if (assetsResult) return assetsResult;
 
     return nextResolve(specifier, context);
 }

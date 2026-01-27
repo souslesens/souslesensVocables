@@ -238,11 +238,7 @@ const RemoteCodeRunner = {
         // Store user context for $.ajax filtering
         currentUserContext = userContext;
 
-        let myModule = null;
-        let params = {};
-        if (userData.data_content.params) {
-            params = userData.data_content.params;
-        }
+        const params = userData.data_content.params || {};
 
         let callbackCalled = false;
         const safeCallback = (err, result) => {
@@ -261,24 +257,19 @@ const RemoteCodeRunner = {
         loadConfig()
             .then(() => import(userData.data_content.modulePath))
             .then((mod) => {
-                myModule = mod;
                 try {
-                    const maybePromise = myModule.run(params, function (err, result) {
+                    const maybePromise = mod.run(params, function (err, result) {
                         safeCallback(err, result);
                     });
                     // If run() returns a Promise, catch any rejection
                     if (maybePromise && typeof maybePromise.then === "function") {
-                        maybePromise.catch((e) => {
-                            safeCallback(e);
-                        });
+                        maybePromise.catch((e) => safeCallback(e));
                     }
                 } catch (e) {
                     safeCallback(e);
                 }
             })
-            .catch((e) => {
-                safeCallback(e);
-            });
+            .catch((e) => safeCallback(e));
     },
 };
 

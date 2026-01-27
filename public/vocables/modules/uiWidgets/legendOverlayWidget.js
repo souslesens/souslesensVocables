@@ -478,12 +478,19 @@ var LegendOverlayWidget = (function () {
         // Default: clear
         slot.innerHTML = "";
 
+        // Lineage dynamic legend (generated from state)
+        if (options.variant === "lineage" && state && state.dynamicLegend === true && state.nodeTypeStyles && state.edgeCatStyles) {
+            slot.innerHTML = self.buildDynamicLegendHtmlFromState(state);
+            return;
+        }
+
         // Implicit Model extra section: show table->color mapping
         if (options.variant === "implicit" && state.tableColors) {
             slot.innerHTML = self.buildTableColorsSectionHtml(state.tableColors);
+            return;
         }
 
-        // Optional custom extra HTML supplied by caller (must be already safe/escaped)
+        // Optional custom extra HTML supplied by caller
         if (state.extraHtml) {
             slot.innerHTML = String(state.extraHtml);
         }
@@ -580,6 +587,58 @@ var LegendOverlayWidget = (function () {
                 swatch.style.background = color;
             }
         });
+    };
+
+    /*------------------------------------------------
+    Dynamic legend builder for Lineage (variant:"lineage")
+    Generates HTML rows from state.nodeTypeStyles
+    and state.edgeCatStyles
+    ------------------------------------------------*/
+    self.buildDynamicLegendHtmlFromState = function (state) {
+        var html = "<div class='lineageLegendDyn'>";
+
+        /*-------------------------
+        NODES
+        -------------------------*/
+        html += "<div class='legendSectionTitle'>Nodes</div>";
+
+        Object.keys(state.nodeTypeStyles).forEach(function (key) {
+            var info = state.nodeTypeStyles[key];
+
+            var symbol = "●"; // default
+            if (info.shape === "triangle") symbol = "▲";
+            else if (info.shape === "star") symbol = "★";
+            else if (info.shape === "hexagon") symbol = "⬡";
+            else if (info.shape === "text") symbol = "𝓽";
+
+            // class label (provided by Lineage)
+            var label = info.classLabel || info.type || "Class";
+
+            html +=
+                "<div class='legendRow'>" +
+                "<span class='legendSymbol' style='color:" + info.color + "'>" + symbol + "</span>" +
+                "<span class='legendLabel'>" + label + "</span>" +
+                "</div>";
+        });
+
+        /*-------------------------
+        EDGES
+        -------------------------*/
+        html += "<div class='legendSectionTitle' style='margin-top:8px;'>Edges</div>";
+
+        Object.keys(state.edgeCatStyles).forEach(function (cat) {
+            var e = state.edgeCatStyles[cat];
+            var symbol = e.dashed ? "⋯" : "―";
+
+            html +=
+                "<div class='legendRow'>" +
+                "<span class='legendSymbol' style='color:" + e.color + "'>" + symbol + "</span>" +
+                "<span class='legendLabel'>" + cat + "</span>" +
+                "</div>";
+        });
+
+        html += "</div>";
+        return html;
     };
 
     return self;

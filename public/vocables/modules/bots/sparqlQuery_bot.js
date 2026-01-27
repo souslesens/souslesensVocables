@@ -1169,7 +1169,6 @@ var SparqlQuery_bot = (function () {
         });
 
         Export.showDataTable("mainDialogDiv", cols, dataset);
-
     };
 
     self.exportResultToCSV = function (queryResult) {

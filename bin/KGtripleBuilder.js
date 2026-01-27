@@ -297,7 +297,7 @@ var KGtripleBuilder = {
                                     if (target) {
                                         return;
                                     }
-                                     target = lookUpMap[lookup].dictionary[value];
+                                    target = lookUpMap[lookup].dictionary[value];
                                     if (target && lookUpMap[lookup].transformFn) {
                                         try {
                                             target = lookUpMap[lookup].transformFn(target);
@@ -378,14 +378,14 @@ var KGtripleBuilder = {
                                                                         blankNode = getNewBlankNodeId();
                                                                         blankNodesMap[item.s] = blankNode;
                                                                     }
-                                                                     subjectStr = blankNode;
+                                                                    subjectStr = blankNode;
                                                                 } else if (item.s === "_rowIndex") {
                                                                     var blankNode = blankNodesMap["_rowIndex"];
                                                                     if (!blankNode) {
                                                                         blankNode = getNewBlankNodeId();
                                                                         blankNodesMap["_rowIndex"] = blankNode;
                                                                     }
-                                                                     subjectStr = blankNode;
+                                                                    subjectStr = blankNode;
                                                                 } else if (item.s.endsWith("_$")) {
                                                                     // virtual column
                                                                     if (typeof item.o === "string" && item.o.endsWith("_$") && allColumns[item.o] && !line[item.o]) {
@@ -406,7 +406,7 @@ var KGtripleBuilder = {
                                                                         return (lineError = e + " " + item.s);
                                                                     }
                                                                 } else if (item.s.match(/.+:.+|http.+/)) {
-                                                                     subjectStr = item.s;
+                                                                    subjectStr = item.s;
                                                                 } else {
                                                                     if (!line[item.s]) {
                                                                         return;
@@ -439,7 +439,7 @@ var KGtripleBuilder = {
                                                                         blankNode = getNewBlankNodeId();
                                                                         blankNodesMap["_rowIndex"] = blankNode;
                                                                     }
-                                                                     objectStr = blankNode;
+                                                                    objectStr = blankNode;
                                                                 } else if (item.objectIsSpecificUri) {
                                                                     objectStr = item.o;
                                                                 } else if (typeof item.o === "function") {
@@ -498,7 +498,7 @@ var KGtripleBuilder = {
 
                                                                         item.p = "owl:hasValue";
 
-                                                                         objectStr = "'" + str + "'^^" + item.dataType;
+                                                                        objectStr = "'" + str + "'^^" + item.dataType;
                                                                     } else if (mapping.transform && line[item.o] && mapping.transform[item.o]) {
                                                                         try {
                                                                             objectStr = mapping.transform[item.o](line[item.o], "o", item.p, line, item);
@@ -506,7 +506,7 @@ var KGtripleBuilder = {
                                                                             return (lineError = e + " " + item.o);
                                                                         }
                                                                     } else {
-                                                                         objectStr = line[item.o];
+                                                                        objectStr = line[item.o];
                                                                     }
 
                                                                     if (item.lookup_o) {
@@ -529,7 +529,7 @@ var KGtripleBuilder = {
 
                                                             //format subject
                                                             {
-                                                                 subjectStr = subjectStr.trim();
+                                                                subjectStr = subjectStr.trim();
 
                                                                 if (subjectStr.indexOf && subjectStr.indexOf("http") == 0) {
                                                                     subjectStr = "<" + subjectStr + ">";
@@ -542,7 +542,7 @@ var KGtripleBuilder = {
 
                                                             //format object
                                                             {
-                                                                 objectStr = objectStr.trim();
+                                                                objectStr = objectStr.trim();
                                                                 if (objectStr.indexOf && objectStr.indexOf("http") == 0) {
                                                                     objectStr = "<" + objectStr + ">";
                                                                 } else if (item.datatype) {
@@ -712,7 +712,7 @@ propertyStr = line[item.p];
                                                     if (!uniqueSubjects[triple.s]) {
                                                         uniqueSubjects[triple.s] = 1;
 
-                                                         metaDataTriples = metaDataTriples.concat(KGtripleBuilder.getMetaDataTriples(triple.s, { mappingFileName: mapping.fileName }));
+                                                        metaDataTriples = metaDataTriples.concat(KGtripleBuilder.getMetaDataTriples(triple.s, { mappingFileName: mapping.fileName }));
                                                     }
                                                 });
                                                 triples = triples.concat(metaDataTriples);
@@ -1107,14 +1107,14 @@ callbackEach();
             [
                 function (callbackSeries) {
                     if (options.sparqlServerUrl) {
-                         sparqlServerUrl = options.sparqlServerUrl;
+                        sparqlServerUrl = options.sparqlServerUrl;
                         return callbackSeries();
                     }
                     ConfigManager.getGeneralConfig(function (err, result) {
                         if (err) {
                             return callbackSeries(err);
                         }
-                         sparqlServerUrl = result.sparql_server.url;
+                        sparqlServerUrl = result.sparql_server.url;
                         callbackSeries();
                     });
                 },
@@ -1135,7 +1135,7 @@ callbackEach();
 
                 function (callbackSeries) {
                     if (mappingFileName) {
-                         allMappingFiles = [mappingFileName];
+                        allMappingFiles = [mappingFileName];
 
                         return callbackSeries();
                     }
@@ -1174,7 +1174,7 @@ callbackEach();
                                     if (err) {
                                         return callbackEach(err);
                                     }
-                                     output = result;
+                                    output = result;
                                     return callbackEach(null, "DELETE Mapping File triples  : " + mappings.fileName + "  " + result);
                                 });
                             } else {
@@ -1267,7 +1267,7 @@ callbackEach();
                                         return callbackSeries(err);
                                     }
                                     if (options.sampleSize) {
-                                         output = result;
+                                        output = result;
                                         return callbackEach(err, output);
                                     } else {
                                         output = { countCreatedTriples: result };

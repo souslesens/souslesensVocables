@@ -63,11 +63,12 @@ This module implements a UI component for creating SPARQL aggregate queries. It 
 
 ## Usage
 
-- Load an Ontology Source.
-- Draw the Top Classes.
-- Expand the graph.
-- Process to the require search.
-
+- Load a data source in source selector.
+- Visualize the knowledge graph.
+- Select classes (nodes) and properties (edges).
+- Build query paths and query sets.
+- Apply filters and optional predicates.
+- Generate and execute SPARQL.
 
 <!-- AUTO-DESC:END -->
 

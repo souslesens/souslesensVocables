@@ -12,5 +12,17 @@ This page summarizes the code structure for this directory and its immediate sub
 :maxdepth: 5
 :caption: Contents
 
-files
 ```
+
+<!-- AUTO-INLINE-FILES:START -->
+
+## Files in this directory
+
+- `alpha-horizontal.png`
+- `alpha.png`
+- `hue-horizontal.png`
+- `hue.png`
+- `saturation.png`
+
+<!-- AUTO-INLINE-FILES:END -->
+

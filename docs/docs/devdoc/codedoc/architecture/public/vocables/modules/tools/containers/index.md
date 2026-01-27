@@ -12,5 +12,17 @@ This page summarizes the code structure for this directory and its immediate sub
 :maxdepth: 5
 :caption: Contents
 
-files
 ```
+
+<!-- AUTO-INLINE-FILES:START -->
+
+## Files in this directory
+
+- `containers_graph.js`
+- `containers_query.js`
+- `containers_tree.js`
+- `containers_widget.html`
+- `containers_widget.js`
+
+<!-- AUTO-INLINE-FILES:END -->
+

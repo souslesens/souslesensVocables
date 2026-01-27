@@ -13,5 +13,17 @@ This page summarizes the code structure for this directory and its immediate sub
 :caption: Contents
 
 
-files
 ```
+
+<!-- AUTO-INLINE-FILES:START -->
+
+## Files in this directory
+
+- `KGcreator_graph.js`
+- `KGcreator_joinTables.js`
+- `KGcreator_mappings.js`
+- `KGcreator_run.js`
+- `KGcreator.js`
+
+<!-- AUTO-INLINE-FILES:END -->
+

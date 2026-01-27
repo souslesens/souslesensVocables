@@ -12,5 +12,22 @@ This page summarizes the code structure for this directory and its immediate sub
 :maxdepth: 5
 :caption: Contents
 
-files
 ```
+
+<!-- AUTO-INLINE-FILES:START -->
+
+## Files in this directory
+
+- `OWL2Manchester copy.g4`
+- `OWL2Manchester.g4`
+- `OWL2Manchester.interp`
+- `OWL2Manchester.tokens`
+- `OWL2ManchesterLexer.interp`
+- `OWL2ManchesterLexer.js`
+- `OWL2ManchesterLexer.tokens`
+- `OWL2ManchesterListener.js`
+- `OWL2ManchesterParser.js`
+- `util.js`
+
+<!-- AUTO-INLINE-FILES:END -->
+

@@ -13,5 +13,13 @@ This page summarizes the code structure for this directory and its immediate sub
 :caption: Contents
 
 paths/index
-files
 ```
+
+<!-- AUTO-INLINE-FILES:START -->
+
+## Files in this directory
+
+- `api-doc.js`
+
+<!-- AUTO-INLINE-FILES:END -->
+

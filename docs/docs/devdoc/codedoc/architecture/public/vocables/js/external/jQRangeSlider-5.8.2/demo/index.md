@@ -13,5 +13,18 @@ This page summarizes the code structure for this directory and its immediate sub
 :caption: Contents
 
 
-files
 ```
+
+<!-- AUTO-INLINE-FILES:START -->
+
+## Files in this directory
+
+- `dateSliderDemo.js`
+- `demo.js`
+- `editSliderDemo.js`
+- `index.html`
+- `sliderDemo.js`
+- `style.css`
+
+<!-- AUTO-INLINE-FILES:END -->
+

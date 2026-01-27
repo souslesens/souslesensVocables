@@ -28,5 +28,16 @@ SQLquery/index
 standardizer/index
 UploadGraphModal/index
 weaver/index
-files
 ```
+
+<!-- AUTO-INLINE-FILES:START -->
+
+## Files in this directory
+
+- `ConfigEditor.js`
+- `GraphManagement.js`
+- `sparqlQueryUI.js`
+- `UserSettings.js`
+
+<!-- AUTO-INLINE-FILES:END -->
+

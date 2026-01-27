@@ -12,5 +12,17 @@ This page summarizes the code structure for this directory and its immediate sub
 :maxdepth: 5
 :caption: Contents
 
-files
 ```
+
+<!-- AUTO-INLINE-FILES:START -->
+
+## Files in this directory
+
+- `32px.png`
+- `40px.png`
+- `style.css`
+- `style.min.css`
+- `throbber.gif`
+
+<!-- AUTO-INLINE-FILES:END -->
+

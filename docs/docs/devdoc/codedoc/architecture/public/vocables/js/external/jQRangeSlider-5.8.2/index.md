@@ -13,5 +13,25 @@ This page summarizes the code structure for this directory and its immediate sub
 :caption: Contents
 
 
-files
 ```
+
+<!-- AUTO-INLINE-FILES:START -->
+
+## Files in this directory
+
+- `GPL-License.txt`
+- `History.md`
+- `jQAllRangeSliders-min.js`
+- `jQAllRangeSliders-withRuler-min.js`
+- `jQDateRangeSlider-min.js`
+- `jQDateRangeSlider-withRuler-min.js`
+- `jQEditRangeSlider-min.js`
+- `jQEditRangeSlider-withRuler-min.js`
+- `jQRangeSlider-min.js`
+- `jQRangeSlider-withRuler-min.js`
+- `MIT-License.txt`
+- `mousewheel.min.js`
+- `Readme.md`
+
+<!-- AUTO-INLINE-FILES:END -->
+

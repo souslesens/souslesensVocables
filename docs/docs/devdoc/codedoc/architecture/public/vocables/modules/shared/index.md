@@ -12,5 +12,28 @@ This page summarizes the code structure for this directory and its immediate sub
 :maxdepth: 5
 :caption: Contents
 
-files
 ```
+
+<!-- AUTO-INLINE-FILES:START -->
+
+## Files in this directory
+
+- `authentification.js`
+- `clipboard.js`
+- `common.js`
+- `export.js`
+- `graphController.js`
+- `graphLoader.js`
+- `mainController.js`
+- `ontologyModels.js`
+- `shacl.js`
+- `socketIoProxy.js`
+- `styles.less`
+- `subGraph.js`
+- `subGraphY.js`
+- `treeController.js`
+- `treemap.js`
+- `UI.js`
+
+<!-- AUTO-INLINE-FILES:END -->
+

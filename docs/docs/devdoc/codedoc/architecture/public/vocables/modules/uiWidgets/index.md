@@ -12,5 +12,32 @@ This page summarizes the code structure for this directory and its immediate sub
 :maxdepth: 5
 :caption: Contents
 
-files
 ```
+
+<!-- AUTO-INLINE-FILES:START -->
+
+## Files in this directory
+
+- `dateWidget.js`
+- `FOL2graphWidget.js`
+- `ganttWidget.js`
+- `graphDecorationWidget.js`
+- `importFileWidget.js`
+- `individualValuefilterWidget.js`
+- `jstreeWidget.js`
+- `legendWidget.js`
+- `mergeNodes.js`
+- `nodeInfosWidget.js`
+- `nodeRelationsWidget.js`
+- `popupMenuWidget.js`
+- `predicatesSelectorWidget.js`
+- `promptedSelectWidget.js`
+- `savedQueriesWidget.js`
+- `searchWidget.js`
+- `simpleListFilterWidget.js`
+- `simpleListSelectorWidget.js`
+- `sourceSelectorWidget.js`
+- `userDataWidget.js`
+
+<!-- AUTO-INLINE-FILES:END -->
+

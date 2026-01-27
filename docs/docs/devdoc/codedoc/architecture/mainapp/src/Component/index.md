@@ -12,5 +12,33 @@ This page summarizes the code structure for this directory and its immediate sub
 :maxdepth: 5
 :caption: Contents
 
-files
 ```
+
+<!-- AUTO-INLINE-FILES:START -->
+
+## Files in this directory
+
+- `ButtonWithConfirmation.tsx`
+- `ConfigForm.tsx`
+- `DatabasesTable.tsx`
+- `DeleteDialog.tsx`
+- `DownloadGraphModal.tsx`
+- `EditSourceDialog.tsx`
+- `errorMessage.tsx`
+- `HeadersList.tsx`
+- `HelpModal.tsx`
+- `LogsTable.tsx`
+- `MetadataModal.tsx`
+- `PasswordField.tsx`
+- `PluginsForm.tsx`
+- `ProfilesTable.tsx`
+- `SourcesDialog.tsx`
+- `SourcesTable.tsx`
+- `TestingButton.tsx`
+- `UploadGraphModal.tsx`
+- `UserInfo.tsx`
+- `UserSources.tsx`
+- `UsersTable.tsx`
+
+<!-- AUTO-INLINE-FILES:END -->
+

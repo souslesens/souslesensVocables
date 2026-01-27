@@ -12,5 +12,17 @@ This page summarizes the code structure for this directory and its immediate sub
 :maxdepth: 5
 :caption: Contents
 
-files
 ```
+
+<!-- AUTO-INLINE-FILES:START -->
+
+## Files in this directory
+
+- `KGbuilder_main.js`
+- `KGbuilder_socket.js`
+- `KGbuilder_triplesWriter.js`
+- `mappingsParser.js`
+- `triplesMaker.js`
+
+<!-- AUTO-INLINE-FILES:END -->
+

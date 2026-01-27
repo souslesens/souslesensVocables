@@ -18,5 +18,18 @@ jquery/index
 jsTree/index
 visjs/index
 yasgui/index
-files
 ```
+
+<!-- AUTO-INLINE-FILES:START -->
+
+## Files in this directory
+
+- `async.js`
+- `deflate.js`
+- `download.js`
+- `graph.js`
+- `less.min.js`
+- `sunburst.js`
+
+<!-- AUTO-INLINE-FILES:END -->
+

@@ -12,5 +12,18 @@ This page summarizes the code structure for this directory and its immediate sub
 :maxdepth: 5
 :caption: Contents
 
-files
 ```
+
+<!-- AUTO-INLINE-FILES:START -->
+
+## Files in this directory
+
+- `sparql_common.js`
+- `sparql_generic.js`
+- `sparql_OWL.js`
+- `sparql_proxy.js`
+- `sparql_SKOS.js`
+- `test_sparql.js`
+
+<!-- AUTO-INLINE-FILES:END -->
+

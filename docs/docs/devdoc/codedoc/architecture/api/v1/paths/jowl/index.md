@@ -12,5 +12,22 @@ This page summarizes the code structure for this directory and its immediate sub
 :maxdepth: 5
 :caption: Contents
 
-files
 ```
+
+<!-- AUTO-INLINE-FILES:START -->
+
+## Files in this directory
+
+- `allAxioms.js`
+- `axiomTriples2manchester.js`
+- `classAxioms.js`
+- `importSource.js`
+- `listClassesWithAxioms.js`
+- `manchesterAxiom2triples.js`
+- `reasoner.js`
+- `reasonerListInferenceParams.js`
+- `rules.js`
+- `uploadGraph.js`
+
+<!-- AUTO-INLINE-FILES:END -->
+

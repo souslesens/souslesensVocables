@@ -12,5 +12,14 @@ This page summarizes the code structure for this directory and its immediate sub
 :maxdepth: 5
 :caption: Contents
 
-files
 ```
+
+<!-- AUTO-INLINE-FILES:START -->
+
+## Files in this directory
+
+- `lineage_linkedData_mappings.js`
+- `lineage_linkedData_query.js`
+
+<!-- AUTO-INLINE-FILES:END -->
+

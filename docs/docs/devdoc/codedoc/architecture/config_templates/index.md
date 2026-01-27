@@ -12,5 +12,18 @@ This page summarizes the code structure for this directory and its immediate sub
 :maxdepth: 5
 :caption: Contents
 
-files
 ```
+
+<!-- AUTO-INLINE-FILES:START -->
+
+## Files in this directory
+
+- `databases.json.default`
+- `mainConfig.json.default`
+- `plugins.json.default`
+- `pluginsConfig.json.default`
+- `readme.txt`
+- `sources.json.default`
+
+<!-- AUTO-INLINE-FILES:END -->
+

@@ -12,5 +12,25 @@ This page summarizes the code structure for this directory and its immediate sub
 :maxdepth: 5
 :caption: Contents
 
-files
 ```
+
+<!-- AUTO-INLINE-FILES:START -->
+
+## Files in this directory
+
+- `Classes.png`
+- `Columns.png`
+- `Container.png`
+- `CSVS.png`
+- `databaseSources.png`
+- `DataSource.png`
+- `Default.png`
+- `FileCSV.png`
+- `Folder.png`
+- `Individual.png`
+- `Property.png`
+- `Table.png`
+- `Whiteboard.png`
+
+<!-- AUTO-INLINE-FILES:END -->
+

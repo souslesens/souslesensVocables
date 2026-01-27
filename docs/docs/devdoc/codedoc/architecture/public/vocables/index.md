@@ -18,5 +18,13 @@ images/index
 js/index
 modules/index
 ontocommons/index
-files
 ```
+
+<!-- AUTO-INLINE-FILES:START -->
+
+## Files in this directory
+
+- `index.html`
+
+<!-- AUTO-INLINE-FILES:END -->
+

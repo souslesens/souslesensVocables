@@ -12,5 +12,23 @@ This page summarizes the code structure for this directory and its immediate sub
 :maxdepth: 5
 :caption: Contents
 
-files
 ```
+
+<!-- AUTO-INLINE-FILES:START -->
+
+## Files in this directory
+
+- `browse.png`
+- `circulargraph.png`
+- `description.png`
+- `evaluate.png`
+- `match.png`
+- `souslesensVocables.gif`
+- `souslesensVocables.png`
+- `souslesensVocables2.png`
+- `souslesensVocablesold.png`
+- `taxonomy.png`
+- `waitAnimated.gif`
+
+<!-- AUTO-INLINE-FILES:END -->
+

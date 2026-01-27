@@ -12,5 +12,21 @@ This page summarizes the code structure for this directory and its immediate sub
 :maxdepth: 5
 :caption: Contents
 
-files
 ```
+
+<!-- AUTO-INLINE-FILES:START -->
+
+## Files in this directory
+
+- `CSVtoSKOS..js`
+- `gaiaToSkos..js`
+- `onTheFlyTagger..js`
+- `quantumToSkos..js`
+- `RcReportsTriples..js`
+- `skosToElastic..js`
+- `termScienceToSkos..js`
+- `tulsaToSkos..js`
+- `xsdToSkos2..js`
+
+<!-- AUTO-INLINE-FILES:END -->
+

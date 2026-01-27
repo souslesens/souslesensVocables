@@ -12,5 +12,16 @@ This page summarizes the code structure for this directory and its immediate sub
 :maxdepth: 5
 :caption: Contents
 
-files
 ```
+
+<!-- AUTO-INLINE-FILES:START -->
+
+## Files in this directory
+
+- `bootstrap-colorpicker-plus.js`
+- `bootstrap-colorpicker-plus.min.js`
+- `bootstrap-colorpicker.js`
+- `bootstrap-colorpicker.min.js`
+
+<!-- AUTO-INLINE-FILES:END -->
+

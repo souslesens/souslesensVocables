@@ -12,5 +12,18 @@ This page summarizes the code structure for this directory and its immediate sub
 :maxdepth: 5
 :caption: Contents
 
-files
 ```
+
+<!-- AUTO-INLINE-FILES:START -->
+
+## Files in this directory
+
+- `graph2d.min.css`
+- `License`
+- `vis-network.css`
+- `vis-network.min.2.js`
+- `vis-network.min.js`
+- `vis-timeline.min.js`
+
+<!-- AUTO-INLINE-FILES:END -->
+

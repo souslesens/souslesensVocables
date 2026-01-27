@@ -13,5 +13,19 @@ This page summarizes the code structure for this directory and its immediate sub
 :caption: Contents
 
 
-files
 ```
+
+<!-- AUTO-INLINE-FILES:START -->
+
+## Files in this directory
+
+- `axiom_activeLegend.js`
+- `axiom_editor.js`
+- `axiomExtractor.js`
+- `axioms_graph.js`
+- `axioms_manager.js`
+- `axioms_suggestions.js`
+- `nodeInfosAxioms.js`
+
+<!-- AUTO-INLINE-FILES:END -->
+

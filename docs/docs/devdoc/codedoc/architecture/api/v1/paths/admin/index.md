@@ -18,5 +18,18 @@ plugins/index
 profiles/index
 sources/index
 users/index
-files
 ```
+
+<!-- AUTO-INLINE-FILES:START -->
+
+## Files in this directory
+
+- `all-tools.js`
+- `databases.js`
+- `plugins.js`
+- `profiles.js`
+- `sources.js`
+- `users.js`
+
+<!-- AUTO-INLINE-FILES:END -->
+

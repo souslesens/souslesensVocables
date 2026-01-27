@@ -18,5 +18,13 @@ stylesheets/index
 tutorials/index
 vocables/index
 yasguy/index
-files
 ```
+
+<!-- AUTO-INLINE-FILES:START -->
+
+## Files in this directory
+
+_No files in this directory._
+
+<!-- AUTO-INLINE-FILES:END -->
+

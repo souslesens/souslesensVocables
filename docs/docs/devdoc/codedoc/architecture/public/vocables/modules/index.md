@@ -19,5 +19,13 @@ shared/index
 sparqlProxies/index
 tools/index
 uiWidgets/index
-files
 ```
+
+<!-- AUTO-INLINE-FILES:START -->
+
+## Files in this directory
+
+_No files in this directory._
+
+<!-- AUTO-INLINE-FILES:END -->
+

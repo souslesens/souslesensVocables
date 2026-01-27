@@ -28,5 +28,37 @@ rdf/index
 sources/index
 sparql/index
 users/index
-files
 ```
+
+<!-- AUTO-INLINE-FILES:START -->
+
+## Files in this directory
+
+- `annotate.js`
+- `blenderSources.js`
+- `config.js`
+- `copygraph.js`
+- `databases.js`
+- `getOntologyRootUris.js`
+- `graphvis.js`
+- `health.js`
+- `httpProxy.js`
+- `kg.js`
+- `logs.js`
+- `ontologyModels.js`
+- `prefixes.js`
+- `profiles.js`
+- `rdf-io.js`
+- `shaclValidate.js`
+- `shortestPath.js`
+- `sources.js`
+- `sparqlProxy.js`
+- `tools.js`
+- `triples2rdf.js`
+- `upload.js`
+- `users.js`
+- `utils.js`
+- `yasguiQuery.js`
+
+<!-- AUTO-INLINE-FILES:END -->
+

@@ -14,5 +14,17 @@ This page summarizes the code structure for this directory and its immediate sub
 
 assets/index
 mappings/index
-files
 ```
+
+<!-- AUTO-INLINE-FILES:START -->
+
+## Files in this directory
+
+- `clearGraph.js`
+- `data.js`
+- `mappings.js`
+- `model.js`
+- `triples.js`
+
+<!-- AUTO-INLINE-FILES:END -->
+

@@ -12,5 +12,26 @@ This page summarizes the code structure for this directory and its immediate sub
 :maxdepth: 5
 :caption: Contents
 
-files
 ```
+
+<!-- AUTO-INLINE-FILES:START -->
+
+## Files in this directory
+
+- `index.html`
+- `sparql.ts`
+- `yasgui.bootstrap.css`
+- `yasgui.html`
+- `yasgui.min.css`
+- `yasgui.min.js`
+- `yasgui.min.js.LICENSE`
+- `yasgui.polyfill.min.js`
+- `yasqe.html`
+- `yasqe.min.css`
+- `yasqe.min.js`
+- `yasr.html`
+- `yasr.min.css`
+- `yasr.min.js`
+
+<!-- AUTO-INLINE-FILES:END -->
+

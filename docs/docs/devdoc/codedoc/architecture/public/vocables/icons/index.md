@@ -27,5 +27,14 @@ oldIcons/index
 SeaBreeze/index
 Spatial/index
 TotalEnergies/index
-files
 ```
+
+<!-- AUTO-INLINE-FILES:START -->
+
+## Files in this directory
+
+- `icons.css`
+- `unlock.png`
+
+<!-- AUTO-INLINE-FILES:END -->
+

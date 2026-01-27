@@ -12,5 +12,22 @@ This page summarizes the code structure for this directory and its immediate sub
 :maxdepth: 5
 :caption: Contents
 
-files
 ```
+
+<!-- AUTO-INLINE-FILES:START -->
+
+## Files in this directory
+
+- `canvas2svg.js`
+- `graphDisplayLegend.js`
+- `graphMLexport.js`
+- `plantUmlTransformer.js`
+- `SVGdrawing.js`
+- `SVGexport.js`
+- `SVGexport2.js`
+- `visjsGraph2.js`
+- `VisjsGraphClass.js`
+- `visjsUtil.js`
+
+<!-- AUTO-INLINE-FILES:END -->
+

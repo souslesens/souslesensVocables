@@ -12,5 +12,14 @@ This page summarizes the code structure for this directory and its immediate sub
 :maxdepth: 5
 :caption: Contents
 
-files
 ```
+
+<!-- AUTO-INLINE-FILES:START -->
+
+## Files in this directory
+
+- `lifex_dalia_db (2).json-19-12`
+- `lifex_dalia_db.json-19-12`
+
+<!-- AUTO-INLINE-FILES:END -->
+

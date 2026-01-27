@@ -14,5 +14,18 @@ This page summarizes the code structure for this directory and its immediate sub
 
 src/index
 static/index
-files
 ```
+
+<!-- AUTO-INLINE-FILES:START -->
+
+## Files in this directory
+
+- `.proxyrc`
+- `index.html`
+- `package.json`
+- `tsconfig.json`
+- `tsconfig.node.json`
+- `vite.config.js`
+
+<!-- AUTO-INLINE-FILES:END -->
+

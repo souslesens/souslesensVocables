@@ -12,5 +12,16 @@ This page summarizes the code structure for this directory and its immediate sub
 :maxdepth: 5
 :caption: Contents
 
-files
 ```
+
+<!-- AUTO-INLINE-FILES:START -->
+
+## Files in this directory
+
+- `convertPolyLinesToGeometry.js`
+- `entityLinking_gaia..js`
+- `userArrayToJson.js`
+- `validationXDB..js`
+
+<!-- AUTO-INLINE-FILES:END -->
+

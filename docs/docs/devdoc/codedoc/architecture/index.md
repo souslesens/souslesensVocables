@@ -23,3 +23,12 @@ plugins/index
 public/index
 scripts/index
 ```
+
+<!-- AUTO-INLINE-FILES:START -->
+
+## Files in this directory
+
+_No files in this directory._
+
+<!-- AUTO-INLINE-FILES:END -->
+

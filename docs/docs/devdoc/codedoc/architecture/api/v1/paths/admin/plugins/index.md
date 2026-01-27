@@ -13,5 +13,14 @@ This page summarizes the code structure for this directory and its immediate sub
 :caption: Contents
 
 
-files
 ```
+
+<!-- AUTO-INLINE-FILES:START -->
+
+## Files in this directory
+
+- `config.js`
+- `repositories.js`
+
+<!-- AUTO-INLINE-FILES:END -->
+

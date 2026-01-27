@@ -13,5 +13,13 @@ This page summarizes the code structure for this directory and its immediate sub
 :caption: Contents
 
 external/index
-files
 ```
+
+<!-- AUTO-INLINE-FILES:START -->
+
+## Files in this directory
+
+_No files in this directory._
+
+<!-- AUTO-INLINE-FILES:END -->
+

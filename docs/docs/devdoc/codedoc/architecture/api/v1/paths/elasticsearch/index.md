@@ -12,5 +12,18 @@ This page summarizes the code structure for this directory and its immediate sub
 :maxdepth: 5
 :caption: Contents
 
-files
 ```
+
+<!-- AUTO-INLINE-FILES:START -->
+
+## Files in this directory
+
+- `clean.js`
+- `indexsource.js`
+- `indices.js`
+- `msearch.js`
+- `query.js`
+- `search.js`
+
+<!-- AUTO-INLINE-FILES:END -->
+

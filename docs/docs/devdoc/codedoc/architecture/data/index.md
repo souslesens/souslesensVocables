@@ -20,5 +20,13 @@ graphs/index
 mappings/index
 shacl/index
 uploaded_rdf_data/index
-files
 ```
+
+<!-- AUTO-INLINE-FILES:START -->
+
+## Files in this directory
+
+- `readme.txt`
+
+<!-- AUTO-INLINE-FILES:END -->
+

@@ -12,5 +12,13 @@ This page summarizes the code structure for this directory and its immediate sub
 :maxdepth: 5
 :caption: Contents
 
-files
 ```
+
+<!-- AUTO-INLINE-FILES:START -->
+
+## Files in this directory
+
+- `20250901_DataDomains_stakeholders_and_roles_treated.csv`
+
+<!-- AUTO-INLINE-FILES:END -->
+

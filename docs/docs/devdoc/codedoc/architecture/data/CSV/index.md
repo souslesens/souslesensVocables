@@ -17,5 +17,13 @@ Data_Domains_Stake_Roles_new_ABOX/index
 Data_Domains_Stake_Roles_TBOX/index
 test_source_juste/index
 TESTRML/index
-files
 ```
+
+<!-- AUTO-INLINE-FILES:START -->
+
+## Files in this directory
+
+_No files in this directory._
+
+<!-- AUTO-INLINE-FILES:END -->
+

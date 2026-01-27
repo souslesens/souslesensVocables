@@ -12,5 +12,16 @@ This page summarizes the code structure for this directory and its immediate sub
 :maxdepth: 5
 :caption: Contents
 
-files
 ```
+
+<!-- AUTO-INLINE-FILES:START -->
+
+## Files in this directory
+
+- `20251006_DataDomains_stakeholders_and_roles.csv`
+- `DataDomains_stakeholders_and_roles_20251006_camelcase.csv`
+- `DataDomains_stakeholders_and_roles_20251006_clean.csv`
+- `graph-management.csv`
+
+<!-- AUTO-INLINE-FILES:END -->
+

@@ -29,14 +29,14 @@ export default () => {
                 // Pass user context to RemoteCodeRunner for request filtering
                 const userContext = {
                     user: user,
-                    userSources: userSources
+                    userSources: userSources,
                 };
 
-                RemoteCodeRunner.runUserDataFunction(userData, userContext, function(err, result){
-                    if( err){
+                RemoteCodeRunner.runUserDataFunction(userData, userContext, function (err, result) {
+                    if (err) {
                         var message = "Error during the execution of the js function";
-                        if( err.message){
-                            message= err.message;
+                        if (err.message) {
+                            message = err.message;
                         }
 
                         res.status(400).json({ message: message });
@@ -44,7 +44,7 @@ export default () => {
                     }
                     res.status(200).json(result);
                     return;
-                })
+                });
                 return;
             }
 

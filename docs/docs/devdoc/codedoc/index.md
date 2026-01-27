@@ -2,7 +2,7 @@
 # Code documentation
 
 ```{toctree}
-:maxdepth: 99
+:maxdepth: 7
 :caption: Code documentation
 
 jsdoc

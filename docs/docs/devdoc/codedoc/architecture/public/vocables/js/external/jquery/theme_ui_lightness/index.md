@@ -1,11 +1,17 @@
 <!-- AUTO-GENERATED: do not edit by hand -->
 # Theme ui lightness
 
+<!-- AUTO-DESC:START -->
+
+This page summarizes the code structure for this directory and its immediate subdirectories. It focuses on the `public / vocables / js / external / jquery / theme_ui_lightness` area within the `public` module. Use the table of contents below to navigate deeper.
+
+<!-- AUTO-DESC:END -->
+
+
 ```{toctree}
-:maxdepth: 99
+:maxdepth: 5
 :caption: Contents
 
-external/index
-images/index
+
 files
 ```

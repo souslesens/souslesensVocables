@@ -1,16 +1,17 @@
 <!-- AUTO-GENERATED: do not edit by hand -->
 # Jquery
 
+<!-- AUTO-DESC:START -->
+
+This page summarizes the code structure for this directory and its immediate subdirectories. It focuses on the `public / vocables / js / external / jquery` area within the `public` module. Use the table of contents below to navigate deeper.
+
+<!-- AUTO-DESC:END -->
+
+
 ```{toctree}
-:maxdepth: 99
+:maxdepth: 5
 :caption: Contents
 
-colorPicker/index
-css/index
-external/index
-images/index
-theme_humanity/index
-theme_swanky/index
-theme_ui_lightness/index
+
 files
 ```

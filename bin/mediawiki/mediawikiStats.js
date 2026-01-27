@@ -124,9 +124,9 @@ var mediawikiStats = {
                         console.log(params.query);
                         return callback(err);
                     }
-                     length = result.results.bindings.length;
+                    length = result.results.bindings.length;
 
-                     allBindings = allBindings.concat(result.results.bindings);
+                    allBindings = allBindings.concat(result.results.bindings);
                     console.log(offset + "    " + allBindings.length);
                     callbackWhilst();
                 });

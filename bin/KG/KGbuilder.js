@@ -313,7 +313,7 @@ var KGbuilder = {
                 function (callbackSeries) {
                     try {
                         var str = fs.readFileSync(mappingFilePath);
-                         mappings = JSON.parse(str);
+                        mappings = JSON.parse(str);
                     } catch (e) {
                         callbackSeries(e);
                     }
@@ -511,7 +511,7 @@ var KGbuilder = {
                     }
 
                     offset += result.results.bindings.length;
-                     resultSize = result.results.bindings.length;
+                    resultSize = result.results.bindings.length;
 
                     socket.message("KGbuild", "existing ids retrieved " + offset);
 

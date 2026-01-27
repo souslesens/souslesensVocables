@@ -153,7 +153,11 @@ if (typeof globalThis.window === "undefined") {
     globalThis.$ = jQueryMock;
     globalThis.UI = { message: (msg) => console.log("[UI]", msg) };
     globalThis.alert = (msg) => console.log("[alert]", msg);
-    globalThis.vis = { DataSet: class { add() {} } };
+    globalThis.vis = {
+        DataSet: class {
+            add() {}
+        },
+    };
     globalThis.MainController = { errorAlert: (err) => console.error("[MainController]", err) };
     globalThis.Sparql_common = { getLabelFromURI: (uri) => uri };
 }
@@ -199,7 +203,7 @@ async function loadConfig() {
     for (const sourceName in allSources) {
         if (allSources[sourceName].graphUri) {
             globalThis.Config.ontologiesVocabularyModels[sourceName] = {
-                graphUri: allSources[sourceName].graphUri
+                graphUri: allSources[sourceName].graphUri,
             };
         }
     }
@@ -230,7 +234,7 @@ const RemoteCodeRunner = {
      */
     runUserDataFunction: function (userData, userContext, callback) {
         // Handle optional userContext parameter (backward compatibility)
-        if (typeof userContext === 'function') {
+        if (typeof userContext === "function") {
             callback = userContext;
             userContext = null;
         }

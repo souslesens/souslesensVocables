@@ -33,7 +33,7 @@ var mediaWikiTagger = {
                 function (callbackSeries) {
                     httpProxy.get(wikiUri + pageName, {}, function (err, result) {
                         if (err) return callbackSeries(err);
-                         rawPageText = result;
+                        rawPageText = result;
                         return callbackSeries();
                     });
                 },
@@ -43,13 +43,13 @@ var mediaWikiTagger = {
                     var endMark = "printfooter";
                     var startIndex = rawPageText.indexOf(strartMark) + 10;
                     var endIndex = rawPageText.indexOf(endMark) + 10;
-                     pageText = rawPageText.substring(startIndex, endIndex);
+                    pageText = rawPageText.substring(startIndex, endIndex);
                     pageText = pageText.replace(/[\t]/g, "");
                     return callbackSeries();
                 },
                 //getPageCategories
                 function (callbackSeries) {
-                     pageCategories = [];
+                    pageCategories = [];
                     // var regex = /wgCategories":\[([^\].]*)/m;
                     // var regex = /href="\/Category:([^"]*)/gm;
                     var regex = /<li><a href="\/Category:([^"^]*)/gm;
@@ -434,7 +434,7 @@ var mediaWikiTagger = {
                         console.log(params.query);
                         return callback(err);
                     }
-                     length = result.results.bindings.length;
+                    length = result.results.bindings.length;
                     result.results.bindings.forEach(function (item) {
                         var concept = item.subject.value.toLowerCase();
                         var category = item.category.value.toLowerCase();
@@ -498,8 +498,8 @@ var mediaWikiTagger = {
                     function (callbackSeries) {
                         httpProxy.get(categoryUrl, {}, function (err, result) {
                             if (err) return callbackSeries(err);
-                             rawPageText = result;
-                             pageText = rawPageText;
+                            rawPageText = result;
+                            pageText = rawPageText;
                             return callbackSeries();
                         });
                     },
@@ -512,7 +512,7 @@ var mediaWikiTagger = {
                             console.log("pb  with letter " + letter);
                             return callbackSeries("pb  with letter " + letter);
                         }
-                         pageText = rawPageText.substring(startIndex, endIndex);
+                        pageText = rawPageText.substring(startIndex, endIndex);
                         return callbackSeries();
                     },
 

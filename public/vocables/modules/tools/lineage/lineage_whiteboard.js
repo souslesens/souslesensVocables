@@ -25,6 +25,8 @@ import Lineage_nodeCentricGraph from "./lineage_nodeCentricGraph.js";
 import Browse from "../browse/browse.js";
 import GraphPaths_bot from "../../bots/graphPaths_bot.js";
 import Lineage_graphPaths from "./lineage_graphPaths.js";
+import LegendOverlayWidget from "../../uiWidgets/legendOverlayWidget.js";
+import Lineage_legendOverlay from "./lineage_legendOverlay.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -174,17 +176,37 @@ var Lineage_whiteboard = (function () {
             });
         });
     };
-
+    
     /**
+     * Handle source selection changes.
+     * Resets the current whiteboard so the graph and legend always match the active source context.
+     *
      * @function
      * @name onSourceSelect
      * @memberof module:Lineage_whiteboard
-     * Handles the selection of a source.
-     * @param {string} sourceLabel - The label of the selected source.
-     * @param {Object} event - The event object containing information about the interaction.
+     * @param {string} sourceLabel - Selected source label.
+     * @param {Object} event - UI event.
      * @returns {void}
      */
-    self.onSourceSelect = function (sourceLabel, event) {};
+    self.onSourceSelect = function (sourceLabel, event) {
+    if (!sourceLabel) {
+        return;
+    }
+
+    // Keep the active source consistent for subsequent queries/actions.
+    Lineage_sources.activeSource = sourceLabel;
+
+    // Clear current graph + destroy overlay legend (prevents stale legend content).
+    self.initUI(true);
+
+    // Recreate an empty graph so the overlay is re-initialized in the right container.
+    self.resetVisjsGraph();
+
+    // Refresh the tree for the newly selected source (if available in your UI flow).
+    if (SearchWidget && typeof SearchWidget.showTopConcepts === "function") {
+        SearchWidget.showTopConcepts(sourceLabel);
+    }
+    };
 
     /**
      * @function
@@ -326,6 +348,7 @@ var Lineage_whiteboard = (function () {
     self.initUI = function (clearTree) {
         UI.message("");
         self.lineageVisjsGraph.clearGraph();
+        Lineage_legendOverlay.refresh();
         self.queriesStack = [];
         LegendWidget.clearLegend();
         Lineage_decoration.initLegend();
@@ -405,6 +428,7 @@ var Lineage_whiteboard = (function () {
         });
 
         self.lineageVisjsGraph.data.nodes.update(nodesToHide);
+        Lineage_legendOverlay.refresh();
     };
 
     /**
@@ -830,6 +854,9 @@ var Lineage_whiteboard = (function () {
                             //!self.lineageVisjsGraph.skipColorGraphNodesByType) {
                             //  var nodes = self.lineageVisjsGraph.data.nodes.get(_properties.items);
                         }
+
+                        // Refresh legend overlay after new nodes added
+                        Lineage_legendOverlay.refresh();
                     }
                 },
             };
@@ -918,6 +945,10 @@ var Lineage_whiteboard = (function () {
                 Lineage_decoration.decorateNodeAndDrawLegend(visjsData.nodes, _options.legendType);
                 //  GraphDisplayLegend.drawLegend("Lineage", "LineageVisjsLegendCanvas");
             }
+
+            // Initialize legend overlay
+            Lineage_legendOverlay.init(graphDiv);
+
             if (callback) {
                 callback();
             }
@@ -3244,6 +3275,7 @@ restrictionSource = Config.predicatesSource;
             newNodes.push({ id: node.id, opacity: 1 });
         });
         self.lineageVisjsGraph.data.nodes.update(newNodes);
+        Lineage_legendOverlay.refresh();
     };
 
     /**
@@ -4252,6 +4284,7 @@ self.zoomGraphOnNode(node.data[0].id, false);
                 });
             }
             self.lineageVisjsGraph.data.nodes.update(newNodes);
+            Lineage_legendOverlay.refresh();
         },
         createSubClass: function () {
             var node = self.currentGraphNode;
@@ -4994,6 +5027,9 @@ attrs.color=self.getSourceColor(superClassValue)
             });
             // self.zoomGraphOnNode(visjsData.nodes[0].id)
         }
+
+        // Refresh legend overlay
+        Lineage_legendOverlay.refresh();
     };
 
     self.drawDataTypeProperties = function (source, classIds, options, callback) {

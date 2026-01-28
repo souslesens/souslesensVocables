@@ -221,6 +221,7 @@ var TriplesMaker = {
                             return callback(null, { sampleTriples: sampleTriples, totalTriplesCount: sampleTriples.length });
                         } else {
                             try {
+                                
                                 await modelUtils.redoIfFailure(async function () {
                                     var batchTriplesCount = await KGbuilder_triplesWriter.writeTriplesAsync(
                                         batchTriples,
@@ -228,6 +229,8 @@ var TriplesMaker = {
                                         tableProcessingParams.sourceInfos.sparqlServerUrl,
                                     );
                                 });
+
+                               
 
                                 var currentTime = new Date();
                                 totalTriplesCount += batchTriplesCount;

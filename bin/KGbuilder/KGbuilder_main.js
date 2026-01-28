@@ -33,6 +33,11 @@ var KGbuilder_main = {
     importTriplesFromCsvOrTable: function (user, source, datasource, tables, options, callback) {
         //  var sparqlServerUrl;
         var output = "";
+        options = options || {};
+
+        if (typeof options.filterMappingIds === "undefined") {
+            options.filterMappingIds = null;
+        }
         var clientSocketId = options.clientSocketId;
         var tableMappingsToProcess = [];
         var sourceMappingsDir = path.join(__dirname, "../../data/mappings/" + source + "/");
@@ -44,7 +49,8 @@ var KGbuilder_main = {
         var data = [];
 
         KGbuilder_main.stopCreateTriples = false;
-        if (options.clientSocketId) {
+
+        if (options && options.clientSocketId && SocketManager && SocketManager.clientSockets && SocketManager.clientSockets[options.clientSocketId]) {
             SocketManager.clientSockets[options.clientSocketId].on("KGbuilder", function (message) {
                 if (message == "stopCreateTriples") {
                     KGbuilder_main.stopCreateTriples = true;
@@ -78,7 +84,6 @@ var KGbuilder_main = {
             tableProcessingParams.uniqueTriplesMap = {};
             var sampleTriples = [];
             var totalTriplesCount = {};
-            var tableMappings = {};
 
             /**
              * for each table get columnsMappingMap and create tripels
@@ -87,19 +92,20 @@ var KGbuilder_main = {
             async.eachSeries(
                 tables,
                 function (table, callbackEach) {
+                    var tableMappings = {};
+
                     async.series(
                         [
                             //getColumnsMap
                             function (callbackSeries) {
-                                MappingsParser.getColumnsMap(mappingData, tables[0], function (err, allColumnsMappings) {
+                                MappingsParser.getColumnsMap(mappingData, table, function (err, allColumnsMappings) {
                                     if (err) {
                                         return callbackSeries(err);
                                     }
 
                                     tableProcessingParams.allColumnsMappings = allColumnsMappings;
-
                                     for (var columnId in allColumnsMappings) {
-                                        if (allColumnsMappings[columnId].dataTable == tables[0]) {
+                                        if (allColumnsMappings[columnId].dataTable == table) {
                                             tableMappings[columnId] = allColumnsMappings[columnId];
                                         }
                                     }
@@ -112,12 +118,10 @@ var KGbuilder_main = {
                             //set label and type for classes referenced by sevral columns
                             function (callbackSeries) {
                                 MappingsParser.setAllColumnsLabelAndType(mappingData, tableProcessingParams.allColumnsMappings);
-
                                 callbackSeries();
                             },
                             function (callbackSeries) {
                                 MappingsParser.setTableColumnsOtherPredicates(tableMappings);
-
                                 callbackSeries();
                             },
 
@@ -125,7 +129,7 @@ var KGbuilder_main = {
                             function (callbackSeries) {
                                 tableProcessingParams.columnToColumnEdgesMap = MappingsParser.getColumnToColumnMappings(
                                     mappingData,
-                                    tables[0],
+                                    table,
                                     options.filterMappingIds,
                                     tableProcessingParams.allColumnsMappings,
                                 );
@@ -172,6 +176,7 @@ var KGbuilder_main = {
 
                                 callbackSeries();
                             },
+
                             // countitems in table if database
                             function (callbackSeries) {
                                 if (tableProcessingParams.tableInfos.csvDataFilePath) {
@@ -190,6 +195,7 @@ var KGbuilder_main = {
                                     callbackSeries(err);
                                 }
                             },
+
                             // create the tripels for this table
                             function (callbackSeries) {
                                 TriplesMaker.readAndProcessData(user, tableProcessingParams, options, function (err, result) {
@@ -221,7 +227,9 @@ var KGbuilder_main = {
 
             return;
         });
-    } /**
+    },
+
+    /**
      *
      *
      *
@@ -230,7 +238,7 @@ var KGbuilder_main = {
      * @param tables list of table otherwise if null delete all  triples
      * @param options
      * @param callback
-     */,
+     */
     deleteKGBuilderTriples: function (source, tables, options, callback) {
         if (!options) {
             options = {};

@@ -1,5 +1,5 @@
 <!-- AUTO-GENERATED: do not edit by hand -->
-# UploadGraphModal
+# UploadGraphModal documentation tool
 
 <!-- AUTO-DESC:START -->
 

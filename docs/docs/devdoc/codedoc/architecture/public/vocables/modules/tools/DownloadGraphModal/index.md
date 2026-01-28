@@ -1,9 +1,31 @@
 <!-- AUTO-GENERATED: do not edit by hand -->
-# DownloadGraphModal
+# DownloadGraphModal documentation tool
 
 <!-- AUTO-DESC:START -->
 
-This page summarizes the code structure for this directory and its immediate subdirectories. It focuses on the `public / vocables / modules / tools / DownloadGraphModal` area within the `public` module. Use the table of contents below to navigate deeper.
+## Overview
+
+This module defines a global object called DownloadGraphModal that provides a simple interface for opening and closing a React-based modal used to download a graph.
+
+## Module
+
+### 1. UploadGraphModal
+
+It imports a React application from download_graph_modal.js, and retrieves the createApp function from window.DownloadGraphModal.createApp. It then replaces 
+window.DownloadGraphModal with a custom object exposing two methods open and close.
+
+## Features
+
+- **open**: Ensures the React app is ready, create a container and call createApp
+- **close**: Unmounts the React app.
+
+## Usage
+
+- Launch by the bot createSLSVsource_bot
+- Check that the React app is ready
+- Creates a container in the document body.
+- Calls createApp to mount the React modal into that container
+- Unmounts the React app if it is currently mounted; otherwise, it throws an error.
 
 <!-- AUTO-DESC:END -->
 

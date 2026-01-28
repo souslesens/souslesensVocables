@@ -229,14 +229,6 @@ var TriplesMaker = {
                                     );
                                 });
 
-                                //console.log("   triples written ", batchTriplesCount);
-                                /*
-                            if (err) {
-                                console.log(err);
-                                console.log("offest " + offset);
-                                return callbackWhilst(err);
-                            }*/
-
                                 var currentTime = new Date();
                                 totalTriplesCount += batchTriplesCount;
                                 message.totalTriples = totalTriplesCount;
@@ -298,7 +290,7 @@ var TriplesMaker = {
         }
 
         data.forEach(function (line, index) {
-            if (line.functionallocation == "PAZ/FPSOH/GAS/FLARE/16-VE-HU86139-B063") {
+            if (line.funct_loc == "GIR/FPSOA/CRS/SESD /43-NSD922080") {
                 var x = 3;
             } else {
                 // return

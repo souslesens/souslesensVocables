@@ -25,7 +25,7 @@ It acts as a controller orchestrating the loading, visualization, and interactio
 - Load an Ontology Source.
 - Draw the Top Classes.
 - Expand the graph.
-- Process to the require search.
+- Process to the require search.>
 
 <!-- AUTO-DESC:END -->
 

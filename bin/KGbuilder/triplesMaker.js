@@ -221,7 +221,6 @@ var TriplesMaker = {
                             return callback(null, { sampleTriples: sampleTriples, totalTriplesCount: sampleTriples.length });
                         } else {
                             try {
-                                
                                 await modelUtils.redoIfFailure(async function () {
                                     batchTriplesCount = await KGbuilder_triplesWriter.writeTriplesAsync(
                                         batchTriples,
@@ -229,8 +228,6 @@ var TriplesMaker = {
                                         tableProcessingParams.sourceInfos.sparqlServerUrl,
                                     );
                                 });
-
-                               
 
                                 var currentTime = new Date();
                                 totalTriplesCount += batchTriplesCount;
@@ -293,7 +290,7 @@ var TriplesMaker = {
         }
 
         data.forEach(function (line, index) {
-            if (line.funct_loc  == 'GIR/FPSOA/CRS/SESD /43-NSD922080') {
+            if (line.funct_loc == "GIR/FPSOA/CRS/SESD /43-NSD922080") {
                 var x = 3;
             } else {
                 // return

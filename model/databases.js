@@ -350,7 +350,7 @@ class DatabaseModel {
 
     /**
      * @param {any} connectionObject - a connexion object with knex connection , user and dbId parameters
-     * @param {string} tableName - the database table name
+     * @param {string} tableName - the database table or view name
      * @params {string} select - select query
      * @params {number} batchSize - batch size
      */
@@ -367,6 +367,11 @@ class DatabaseModel {
         let offset = startingOffset;
 
         const columns = await connection(tableName).columnInfo();
+        // ORDER BY all columns to ensure stable ordering for OFFSET/LIMIT pagination.
+        // Known limitations:
+        // - Non-sortable column types (JSON, BLOB, ARRAY, geometry...) may cause query errors
+        // - Perfect duplicate rows (identical on ALL columns) may be read multiple times or skipped,
+        //   but unique rows are guaranteed to be read exactly once
         const columnsKeys = Object.keys(columns);
 
         const resSize = await connection.count("*").from(tableName);
@@ -382,7 +387,7 @@ class DatabaseModel {
             if (offset >= size) {
                 const result = await modelUtils.redoIfFailure(
                     async function () {
-                        return await connection.select(select).from(tableName).orderBy(columnsKeys[0]).limit(batchSize).offset(offset);
+                        return await connection.select(select).from(tableName).orderBy(columnsKeys).limit(batchSize).offset(offset);
                     },
                     5, // maxRedo: 5 tentatives
                     5, // sleepTime: 5 secondes entre les tentatives
@@ -393,7 +398,7 @@ class DatabaseModel {
 
             const result = await modelUtils.redoIfFailure(
                 async function () {
-                    return await connection.select(select).from(tableName).orderBy(columnsKeys[0]).limit(batchSize).offset(offset);
+                    return await connection.select(select).from(tableName).orderBy(columnsKeys).limit(batchSize).offset(offset);
                 },
                 5, // maxRedo: 5 tentatives
                 5, // sleepTime: 5 secondes entre les tentatives

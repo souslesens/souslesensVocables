@@ -14,6 +14,9 @@ import NodeInfosAxioms from "./nodeInfosAxioms.js";
 import Lineage_graphPaths from "../lineage/lineage_graphPaths.js";
 import Axiom_UI from "./axiom_UI.js";
 
+import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
+import NodeInfosAxioms from "./nodeInfosAxioms.js";
+import Lineage_graphPaths from "../lineage/lineage_graphPaths.js";
 
 var Axiom_activeLegend = (function () {
     var self = {};
@@ -406,6 +409,7 @@ var Axiom_activeLegend = (function () {
             edges.forEach(function (edge) {
                 if (edge.from == Axioms_graph.currentGraphNode.id) {
                     if (resourceType != "Class" && nodesMap[edge.to]) {
+                    if (resourceType != "Class" && nodesMap[edge.to]) {
                         var nodeToType = nodesMap[edge.to].data.type;
 
                         hiddenNodes.push(nodeToType);
@@ -502,7 +506,7 @@ var Axiom_activeLegend = (function () {
                 }
             }
 
-            if (node.data.axiomId > -1 || node.data.rootAxiom) {
+            if (node.data.axiomId > -1) {
                 self.selectGraphNodeJstreeTriples(node)
             }
 
@@ -531,61 +535,34 @@ var Axiom_activeLegend = (function () {
         return;
     };
 
-    self.showTriples = function (callback) {
-        self.showTriplesActivated = true;
-        Axiom_UI.setView("showTriples");
+    self.showTriples = function () {
         var triples = []
-
-        if (Axioms_graph.currentAxiomTriples  && ! NodeInfosAxioms.isNewAxiom ) {//saved axiom or new graph with axiomIds
-
+        if (!NodeInfosAxioms.isNewAxiom && Axioms_graph.currentAxiomTriples) {
             triples = Axioms_graph.currentAxiomTriples;
-
-        } else {//new axiom
+        } else {
             triples = self.visjsGraphToTriples();
-
         }
 
-        triples = self.transformBlankNodesToRandomUri(triples);
-
         var jstreeData = [];
-        var rootNodeId = triples[0].subject;
-
-        jstreeData.push({
-            id: "triplesRoot",
-            text: "<b>" + Sparql_common.getLabelFromURI(rootNodeId) + "</b>",
-            parent: "#",
-            data: { id: rootNodeId }
-        });
 
         triples.forEach(function (triple, index) {
             jstreeData.push({
                 id: "triple" + index,
                 text: triple.subject + " <b>" + triple.predicate + "</b> " + triple.object,
-                parent: "triplesRoot",
-                data: {
-                    subject: triple.subject,
-                    predicate: triple.predicate,
-                    object: triple.object,
-                }
-            });
+                parent: "#"
+            })
+
         });
 
 
         var html = "<div style='height:300px;width:100%;overflow:auto;'><div id='axiomsTriplesJstree'></div></div>";
 
         $("#axiomsEditor_textDiv").html(html);
-        JstreeWidget.loadJsTree("axiomsTriplesJstree", jstreeData, {withCheckboxes: true, openAll: true}, function (err, result) {
-            var divId = "nodeInfosAxioms_graphDiv";
-            var options = {};
-            Axioms_graph.drawNodeAxioms2(NodeInfosAxioms.currentSource,rootNodeId,triples, divId,options)
-            if (callback) {
-                return callback(err)
-            }
-        })
+        JstreeWidget.loadJsTree("axiomsTriplesJstree", jstreeData, {withCheckboxes: true})
     };
 
     self.copyTriples = function () {
-        var triples = self.getTriples();
+        var triples = self.visjsGraphToTriples();
         var str = ""
         triples.forEach(function (triple) {
             str += Sparql_generic.triplesObjectToString(triple) + ".\n";
@@ -593,54 +570,7 @@ var Axiom_activeLegend = (function () {
 
         common.copyTextToClipboard(str)
     };
-    self.getTriples = function (options) {
-        if(!options){
-            options = {};
-        }
-        if (!self.showTriplesActivated) {
-            return self.transformBlankNodesToRandomUri(self.visjsGraphToTriples());
-        }
-        var isInitializedJstree = self.isInitializedJstree();
-        if(!isInitializedJstree){
-            return alert('No triples to get, initialize the triples with "Show Triples" button');
-        }
-        var triples = []
-        var checkedNodes = $("#axiomsTriplesJstree").jstree(true).get_checked();
-        //get all nodes by default except type nodes
-        if(checkedNodes.length == 0 || options.all){
-            if(!Axioms_graph.axiomsVisjsGraph && !Axioms_graph.axiomsVisjsGraph.data.nodes){
-                return alert("No axioms graph data available");
-            }
-            var allNodes = Axioms_graph.axiomsVisjsGraph.data.nodes.get();
-            var rootNode = allNodes.find(function(node) { return node.data && node.data.rootAxiom; });
-            if(!rootNode){
-                return alert("no root node found in jstree");
-            }
 
-            self.selectGraphNodeJstreeTriples(rootNode);
-             checkedNodes = $("#axiomsTriplesJstree").jstree(true).get_checked();
-
-
-
-        }
-        checkedNodes.forEach(function (nodeId) {
-            var node = $("#axiomsTriplesJstree").jstree(true).get_node(nodeId);
-            if (node.data && node.data.subject && node.data.predicate && node.data.object) {
-                triples.push(node.data);
-            }
-        });
-        return triples;
-
-
-    }
-    self.isInitializedJstree = function () {
-        var jstree = $("#axiomsTriplesJstree").jstree(true);
-        var response = false;
-        if(jstree && jstree._model.data && Object.values(jstree._model.data).length > 0){
-            response = true;
-        }
-        return response;
-    }
     self.deleteTriples = function () {
 
         var checkedNodes = $("#axiomsTriplesJstree").jstree(true).get_checked()
@@ -648,20 +578,16 @@ var Axiom_activeLegend = (function () {
 
 
 
-        var allTriples = Axioms_graph.currentAxiomTriples
-        var selectedTriples = [];
-
-        allTriples.forEach(function (triple, index) {
-            if (checkedNodes.indexOf("triple" + index) > -1) {
-                selectedTriples.push(triple);
-            }
-        });
+        var triples = Axioms_graph.currentAxiomTriples
 
         var graphUri = Config.sources[NodeInfosAxioms.currentSource].graphUri
         var query = "with graph <" + graphUri + ">\ndelete {\n"
 
-        selectedTriples.forEach(function (triple) {
-            query += Sparql_generic.triplesObjectToString(triple) + "\n";
+        triples.forEach(function (triple, index) {
+            if (checkedNodes.indexOf("triple" + index) > -1) {
+                query += Sparql_generic.triplesObjectToString(triple) + "\n";
+            }
+
         });
         query += "}"
 
@@ -670,29 +596,7 @@ var Axiom_activeLegend = (function () {
             if (err) {
                 return alert(err);
             }
-
-            AxiomExtractor.deleteBasicAxioms(NodeInfosAxioms.currentSource, selectedTriples)
-
-            var remainingTriples = allTriples.filter(function (triple) {
-                return !selectedTriples.some(function (deleted) {
-                    return deleted.subject === triple.subject && deleted.predicate === triple.predicate && deleted.object === triple.object;
-                });
-            });
-
-            var jstreeInstance = $("#axiomsTriplesJstree").jstree(true);
-            checkedNodes.forEach(function (nodeId) {
-                jstreeInstance.delete_node(nodeId);
-            });
-
-            Axioms_graph.clearGraph();
-            if (remainingTriples.length > 0) {
-                Axioms_graph.currentAxiomTriples = remainingTriples;
-                var rootNodeId = remainingTriples[0].subject;
-                var divId = "nodeInfosAxioms_graphDiv";
-                Axioms_graph.drawNodeAxioms2(NodeInfosAxioms.currentSource, rootNodeId, remainingTriples, divId, {});
-            }
-
-            alert("triples deleted")
+            return alert("trples deleted")
         })
 
     };
@@ -700,7 +604,7 @@ var Axiom_activeLegend = (function () {
     self.selectGraphNodeJstreeTriples = function (visjsNode) {
 
 
-        $('#axiomsTriplesJstree').jstree('uncheck_all');
+        $('#axiomsTriplesJstree').jstree(true).deselect_all();
 
         var nodesToDelete = []
         var edgesToDelete = []
@@ -722,13 +626,10 @@ var Axiom_activeLegend = (function () {
         })
 
 
-        if (visjsNode.data.axiomId || visjsNode.data.rootAxiom ) {
-            var visjsData = {
-                nodes: Axioms_graph.axiomsVisjsGraph.data.nodes.get(),
-                edges: Axioms_graph.axiomsVisjsGraph.data.edges.get(),
-            }
+        if (visjsNode.data.axiomId) {
 
-            var toPaths = Lineage_graphPaths.getAllpathsFromNode(visjsData, visjsNode.id)
+
+            var toPaths = Lineage_graphPaths.getAllpathsFromNode(Axioms_graph.currentVisjsData, visjsNode.id)
 
 
             toPaths.forEach(function (path) {
@@ -746,8 +647,8 @@ var Axiom_activeLegend = (function () {
 
             })
 
-            //  Axioms_graph.axiomsVisjsGraph.data.nodes.remove(nodesToDelete)
-            //  Axioms_graph.axiomsVisjsGraph.data.edges.remove(edgesToDelete)
+            Axioms_graph.axiomsVisjsGraph.data.nodes.remove(nodesToDelete)
+            Axioms_graph.axiomsVisjsGraph.data.edges.remove(edgesToDelete)
 
 
             Axioms_graph.currentAxiomTriples.forEach(function (triple, index) {
@@ -760,7 +661,6 @@ var Axiom_activeLegend = (function () {
 
 
         }
-
     }
 
 
@@ -851,111 +751,47 @@ var Axiom_activeLegend = (function () {
     
     self.saveAxiom = function (callback) {
         if (confirm("Save Axiom")) {
-            var triples = self.getTriples({all:true});
-
-            async.series([
-                /*function (callbackSeries) {
-                    return callbackSeries();
-                
-                    self.saveNewNodes(triples.newNodesToStore, function (err, labelsMap) {//new nodes created on the fly
-                        if (err) {
-                            return callbackSeries(err)
-                        }
-                        newNodesLabelsMap = labelsMap;
-                        callbackSeries()
-
-
-                    })
-                },
-                //update  basicAxiomsCache  triples stored into basicAxiomsCache
-                function (callbackSeries) {
-                    if(newNodesLabelsMap){
-
-                        var basicAxiomsTriples = [] //triples stored into basicAxiomsCache
-                        triples.forEach(function (triple) {
-
-                            var item = {
-                                s: triple.subject,
-                                p: triple.predicate,
-                                o: triple.object
-                            }
-
-                            if(newNodesLabelsMap) {
-
-                                if (newNodesLabelsMap[item.s]) {
-                                    item.sLabel = newNodesLabelsMap[item.s];
-                                }
-                                if (newNodesLabelsMap[item.p]) {
-                                    item.pLabel = newNodesLabelsMap[item.p];
-                                }
-                                if (newNodesLabelsMap[item.o]) {
-                                    item.oLabel = newNodesLabelsMap[item.o];
-                                }
-                            }
-                            basicAxiomsTriples.push(item)
-
-                        })
-                    }
-                    AxiomExtractor.addBasicAxioms(self.currentSource, basicAxiomsTriples)
-
-                    callbackSeries()
-                },*/
-
-
-                function (callbackSeries) {
-                    var basicAxiomsTriples = self.convertTriplesToCacheFormat(triples);
-                    AxiomExtractor.addBasicAxioms(self.currentSource, basicAxiomsTriples)
-                    callbackSeries()
-                },
-                  //write axiomtriples
-                function (callbackSeries) {
-                   
-                    Sparql_generic.insertTriples(self.currentSource, triples, {}, function (err, result) {
-                        if (err) {
-                            return callbackSeries(err)
-                            // return MainController.errorAlert(err.responseText);
-                        }
-                        callbackSeries()
-                        /*   UI.message("axiom saved");
-                           var divId = "nodeInfosAxioms_graphDiv";
-                           var options = {};
-
-
-                           AxiomExtractor.addTriplesToBasicAxioms(self.currentResource.data.source, triples, function (err, result) {
-                               if (err) {
-                                   return MainController.errorAlert(err.responseText || err);
-                               }
-
-                               Axioms_graph.drawNodeAxioms2(self.currentResource.data.source, self.currentResource.data.id, triples, divId, options, function (err, triples) {
-                               });
-                           });
-                       })
-                       callbackSeries()*/
-
-                    })
+            var triples = self.visjsGraphToTriples();
+            var hasCardinalityRestriction = false;
+            triples.forEach(function (triple) {
+                if (triple.predicate.indexOf("ardinality") > -1) {
+                    hasCardinalityRestriction = true;
                 }
+            });
 
+            //check manchester Syntax
+            /*   self.axiomTriplesToManchester(triples, function (err, manchesterStr) {
+                   if (err) {
+                       //machstersyntax dont work yet with cardinality restrictions but we store the triples anyway
+                       if (!hasCardinalityRestriction) {
+                           return MainController.errorAlert(err);
+                       }
+                   }*/
 
-            ], function (err) {
+            var triples = self.visjsGraphToTriples();
+            Sparql_generic.insertTriples(self.currentSource, triples, {}, function (err, result) {
                 if (err) {
-                    return MainController.errorAlert(err.responseText || err);
+                    return MainController.errorAlert(err.responseText);
                 }
+                UI.message("axiom saved");
+                var divId = "nodeInfosAxioms_graphDiv";
+                var options = {};
 
-                if (!self.showTriplesActivated) {
-                    Axioms_graph.currentAxiomTriples = triples;
-                    var rootNodeId = triples[0].subject;
-                    var divId = "nodeInfosAxioms_graphDiv";
-                    Axioms_graph.drawNodeAxioms2(self.currentSource, rootNodeId, triples, divId, {});
-                    self.showTriples();
-                }
-
-                if (callback) {
-                    return callback();
-                }
-            })
+                self.saveNewNodes(triples.newNodesToStore, function (err) {//new nodes created on the fly
+                    if (err) {
+                        return MainController.errorAlert(err.responseText || err);
+                    }
 
 
+                    AxiomExtractor.addTriplesToBasicAxioms(self.currentResource.data.source, triples, function (err, result) {
+                        if (err) {
+                            return MainController.errorAlert(err.responseText || err);
+                        }
 
+                        Axioms_graph.drawNodeAxioms2(self.currentResource.data.source, self.currentResource.data.id, triples, divId, options, function (err, triples) {
+                        });
+                    });
+                })
 
 
             //add manchester to Axioms JSTree
@@ -1056,6 +892,7 @@ var Axiom_activeLegend = (function () {
         var newOrphanNodes = []
         nodes.forEach(function (node) {
             var x = node
+            var x = node
             if (node.data.isNew) {// node created on the fly
                 var toNode = edgesFromMap[node.id]
                 if (!toNode) {//if not superClassOr property
@@ -1063,6 +900,7 @@ var Axiom_activeLegend = (function () {
                     newOrphanNodes.push(node)
                 } else {
                     node.data.superEntity = toNode.id
+
                 }
                 newNodesToStore.push(node)
             }
@@ -1199,21 +1037,6 @@ var Axiom_activeLegend = (function () {
 
 
         triples.newNodesToStore = newNodesToStore
-        Axioms_graph.currentAxiomTriples = triples
-
-        //update AxiomIds with triples indexes.
-        triples.forEach(function(triple,index){
-            var node=nodesMap[triple.subject]
-            if( node && !node.data.axiomId){
-                node.data.axiomId=index
-            }
-
-             node=nodesMap[triple.object]
-            if( node && !node.data.axiomId){
-                node.data.axiomId=index
-            }
-        })
-        NodeInfosAxioms.isNewAxiom=false
 
         return triples;
     };
@@ -1221,18 +1044,12 @@ var Axiom_activeLegend = (function () {
     self.saveNewNodes = function (nodes, callback) {// nodes created on the fly
 
         if (!nodes || nodes.length == 0) {
-            return callback();
+            return;
         }
-        var labelsMap = {}
         async.eachSeries(nodes, function (node, callbackEach) {
             if (node.data.type == "Class") {
-                var superClass = node.data.superEntity || "http://www.w3.org/2002/07/owl#Class";
-                var triples = Lineage_createResource.getResourceTriples(self.currentSource, "owl:Class", null, node.data.label, superClass);
-                triples.forEach(function (triple) {
-                    if (triple.predicate.indexOf("label") > -1) {
-                        labelsMap[triple.subject] = triple.object
-                    }
-                })
+                var triples = Lineage_createResource.getResourceTriples(self.currentSource, "owl:Class", null, node.data.label, node.data.superEntity ||
+                    "http://www.w3.org/2002/07/owl#Class");
                 Lineage_createResource.writeResource(self.currentSource, triples, function (err, resourceId) {
                     if (err) {
                         return callbackEach(err)

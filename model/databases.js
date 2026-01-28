@@ -370,6 +370,11 @@ class DatabaseModel {
         let offset = startingOffset;
 
         const columns = await connection(tableName).columnInfo();
+        // ORDER BY all columns to ensure stable ordering for OFFSET/LIMIT pagination.
+        // Known limitations:
+        // - Non-sortable column types (JSON, BLOB, ARRAY, geometry...) may cause query errors
+        // - Perfect duplicate rows (identical on ALL columns) may be read multiple times or skipped,
+        //   but unique rows are guaranteed to be read exactly once
         const columnsKeys = Object.keys(columns);
 
         // ORDER BY columns to ensure stable ordering for OFFSET/LIMIT pagination.

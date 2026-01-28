@@ -1,9 +1,7 @@
 "use strict";
 
-const path = require("path");
-
-const KGbuilder_main = require(path.resolve("bin/KGbuilder/KGbuilder_main.js"));
-const MappingParser = require(path.resolve("bin/KGbuilder/mappingsParser.js"));
+import KGbuilder_main from "./KGbuilder_main.js";
+import MappingParser from "./mappingsParser.js";
 
 function deleteKGBuilderTriplesAsync(source, tables, options) {
     return new Promise(function (resolve, reject) {
@@ -152,12 +150,12 @@ async function recreateGraphTriples(params) {
     };
 }
 
-module.exports = {
-    deleteKGBuilderTriplesAsync: deleteKGBuilderTriplesAsync,
-    getMappingsDataAsync: getMappingsDataAsync,
-    getOptionsFromBody: getOptionsFromBody,
-    getDatasourceFromMappings: getDatasourceFromMappings,
-    getAllTablesFromMappings: getAllTablesFromMappings,
-    importAsync: importAsync,
-    recreateGraphTriples: recreateGraphTriples,
+export default {
+    deleteKGBuilderTriplesAsync,
+    getMappingsDataAsync,
+    getOptionsFromBody,
+    getDatasourceFromMappings,
+    getAllTablesFromMappings,
+    importAsync,
+    recreateGraphTriples,
 };

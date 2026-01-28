@@ -718,7 +718,7 @@ var MappingColumnsGraph = (function () {
         //add relation between columns
         if (options.ctrlKey) {
             if (!DataSourceManager.currentConfig.currentDataSource) {
-                return alert("choose a data source first");
+                return alert("Choose a data source first");
             }
 
             if (!MappingModeler.currentRelation) {
@@ -732,7 +732,7 @@ var MappingColumnsGraph = (function () {
                 if (node.data.dataTable && node.data.dataTable != MappingModeler.currentRelation.from.dataTable) {
                     MappingModeler.currentRelation = null;
                     self.relationMessage();
-                    return alert("Relations between Columns from different datbels are not possible");
+                    return alert("Relations between columns from different tables are not possible");
                 }
                 MappingModeler.currentRelation.to = { id: node.id, classId: self.getColumnClass(node) };
                 if (MappingModeler.currentRelation.type != "Class" && node.data.type == "Class") {
@@ -799,13 +799,8 @@ var MappingColumnsGraph = (function () {
                 },
 
                 error: function (err) {
-                    console.error("activeSourceFromNode ajax error:", err);
-                    // If a callback exists, call it; otherwise do not break the application
-                    if (typeof callback === "function") {
-                        return callback(err);
-                    }
-                    // Otherwise, exist cleanly
-                    return;
+                    if (callback) return callback(err);
+                    return MainController.errorAlert(err);
                 },
             });
         } else {
@@ -912,7 +907,7 @@ var MappingColumnsGraph = (function () {
          * @returns {void}
          */
         removeNodeFromGraph: function () {
-            if (confirm("delete node")) {
+            if (confirm("Delete node?")) {
                 var edges = self.visjsGraph.network.getConnectedEdges(self.currentGraphNode.id);
                 self.removeEdge(edges);
                 self.removeNode(self.currentGraphNode.id);
@@ -927,7 +922,7 @@ var MappingColumnsGraph = (function () {
          * @returns {void}
          */
         removeNodeEdgeGraph: function () {
-            if (confirm("delete edge")) {
+            if (confirm("Delete edge?")) {
                 self.removeEdge(self.currentGraphNode.id);
             }
         },
@@ -950,7 +945,7 @@ var MappingColumnsGraph = (function () {
                     return MainController.errorAlert(err);
                 }
                 if (result.length == 0) {
-                    return alert("no superClass");
+                    return alert("No superClass");
                 }
                 var item = result[0];
 
@@ -1306,7 +1301,7 @@ var MappingColumnsGraph = (function () {
             options: { config: config },
         };
         if (!fileName) {
-            fileName = prompt("graph name");
+            fileName = prompt("Graph name");
         }
         if (!fileName || fileName == "") {
             return;
@@ -1335,7 +1330,7 @@ var MappingColumnsGraph = (function () {
                 dataType: "json",
                 success: function (_result, _textStatus, _jqXHR) {
                     $("#visjsGraph_savedGraphsSelect").append($("<option></option>").attr("value", fileName).text(fileName));
-                    UI.message("graph saved");
+                    UI.message("Graph saved");
                     if (callback) {
                         callback();
                     }
@@ -1554,7 +1549,7 @@ var MappingColumnsGraph = (function () {
         try {
             self.visjsGraph.data.edges.add(edge);
         } catch (e) {
-            console.log(e);
+            // Ignore duplicate/invalid edge addition
         }
         self.saveVisjsGraph();
 
@@ -1717,132 +1712,13 @@ var MappingColumnsGraph = (function () {
             data.context.options.layoutHierarchical = self.layoutHierarchical;
             data.nodes = self.sortVisjsColumns(data.nodes);
         }
-        /**
-         * Exports the current mappings from the Vis.js graph to a JSON file.
-         * Saves the graph data before exporting
-         * Handles errors during the export process and displays appropriate messages.
-         *
-         * @function
-         * @name exportMappings
-         * @memberof module:MappingColumnsGraph
-         * @returns {void}
-         */
-        self.exportMappings = function () {
-            self.saveVisjsGraph(function (err) {
-                var fileName = "mappings_" + MappingModeler.currentSLSsource + "_ALL" + ".json";
-                var payload = {
-                    dir: "graphs/",
-                    fileName: fileName,
-                };
-
-                $.ajax({
-                    type: "GET",
-                    url: `${Config.apiUrl}/data/file`,
-                    data: payload,
-                    dataType: "json",
-                    success: function (result, _textStatus, _jqXHR) {
-                        var data = JSON.parse(result);
-                        if (data?.options?.config?.sparqlServerUrl) {
-                            data.options.config.sparqlServerUrl = "_default";
-                        }
-                        Export.downloadJSON(data, fileName);
-                    },
-                    error(err) {
-                        if (callback) {
-                            return callback(err);
-                        }
-                        if (err.responseJSON == "file does not exist") {
-                            return;
-                        }
-                        return MainController.errorAlert(err);
-                    },
-                });
-            });
-        };
-
-        self.importMappingsFromJSONFile = function () {
-            ImportFileWidget.showImportDialog(function (err, result) {
-                if (err) {
-                    return MainController.errorAlert(err);
-                }
-                var data = JSON.parse(result);
-                if (data.nodes.length == 0) {
-                    return alert("no nodes in file");
-                }
-                if (data.options?.config?.lastUpdate) {
-                    delete data.options.config.lastUpdate;
-                }
-                var fileName = "mappings_" + MappingModeler.currentSLSsource + "_ALL" + ".json";
-                var payload = {
-                    dir: "graphs/",
-                    fileName: fileName,
-                    data: JSON.stringify(data, null, 2),
-                };
-
-                $.ajax({
-                    type: "POST",
-                    url: `${Config.apiUrl}/data/file`,
-                    data: payload,
-                    dataType: "json",
-                    success: function (result, _textStatus, _jqXHR) {
-                        MappingModeler.onLoaded();
-                    },
-                    error(err) {
-                        return MainController.errorAlert(err);
-                    },
-                });
-            });
-        };
 
         return data;
     };
     /**
-     * Imports mappings from a JSON file into the Vis.js graph file.
-     * Opens a file import dialog, parses the JSON content, and uploads the data to the graphs in instance data repository.
-     *
-     * @function
-     * @name importMappingsFromJSONFile
-     * @memberof module:MappingColumnsGraph
-     * @returns {void}
-     */
-    self.importMappingsFromJSONFile = function () {
-        ImportFileWidget.showImportDialog(function (err, result) {
-            if (err) {
-                return MainController.errorAlert(err);
-            }
-            var data = JSON.parse(result);
-            if (data.nodes.length == 0) {
-                return alert("no nodes in file");
-            }
-            if (data?.options?.config?.graphUri != Config.sources[MainController.currentSource].graphUri) {
-                return alert("graphUri in file is not the same as the current graphUri, update graphURI in JSON file");
-            }
-            var fileName = "mappings_" + MappingModeler.currentSLSsource + "_ALL" + ".json";
-            var payload = {
-                dir: "graphs/",
-                fileName: fileName,
-                data: JSON.stringify(data, null, 2),
-            };
-
-            $.ajax({
-                type: "POST",
-                url: `${Config.apiUrl}/data/file`,
-                data: payload,
-                dataType: "json",
-                success: function (result, _textStatus, _jqXHR) {
-                    MappingModeler.onLoaded();
-                },
-                error(err) {
-                    return MainController.errorAlert(err);
-                },
-            });
-        });
-    };
-
-    /**
      * Exports the current mappings from the Vis.js graph to a JSON file.
      * Saves the graph data before exporting
-     *
+     * Handles errors during the export process and displays appropriate messages.
      *
      * @function
      * @name exportMappings
@@ -1864,6 +1740,9 @@ var MappingColumnsGraph = (function () {
                 dataType: "json",
                 success: function (result, _textStatus, _jqXHR) {
                     var data = JSON.parse(result);
+                    if (data?.options?.config?.sparqlServerUrl) {
+                        data.options.config.sparqlServerUrl = "_default";
+                    }
                     Export.downloadJSON(data, fileName);
                 },
                 error(err) {
@@ -1874,6 +1753,377 @@ var MappingColumnsGraph = (function () {
                         return;
                     }
                     return MainController.errorAlert(err);
+                },
+            });
+        });
+    };
+
+    // -------------------------------
+    // Mapping import helpers
+    // -------------------------------
+
+    /**
+     * Returns the 1-based line number for a character index in a JSON text.
+     * Used to provide approximate locations in user-imported JSON files.
+     * @param {string} jsonText
+     * @param {number} idx
+     * @returns {number|null}
+     */
+    function getLineNumberFromIndex(jsonText, idx) {
+        if (!jsonText || typeof idx !== "number" || idx < 0) {
+            return null;
+        }
+        return jsonText.slice(0, idx).split("\n").length;
+    }
+
+    /**
+     * Tries to locate the line number of a datasource id under options.config.<sectionName>.
+     * Best-effort heuristic (may return null if formatting differs or JSON is minified).
+     * @param {string} jsonText
+     * @param {string} sectionName
+     * @param {string} key
+     * @returns {number|null}
+     */
+    function findConfigKeyLine(jsonText, sectionName, key) {
+        var sectionNeedle = `"${sectionName}": {`;
+        var sectionPos = jsonText.indexOf(sectionNeedle);
+        if (sectionPos < 0) return null;
+
+        var windowText = jsonText.slice(sectionPos, sectionPos + 20000);
+        var keyNeedle = `"${key}"`;
+        var keyPosLocal = windowText.indexOf(keyNeedle);
+        if (keyPosLocal < 0) return null;
+
+        return getLineNumberFromIndex(jsonText, sectionPos + keyPosLocal);
+    }
+
+    /**
+     * Tries to locate the line number where a node references a datasource id.
+     * Best-effort heuristic based on textual search near the node id.
+     * @param {string} jsonText
+     * @param {string} nodeId
+     * @param {string} datasourceId
+     * @returns {number|null}
+     */
+    function findNodeDatasourceLine(jsonText, nodeId, datasourceId) {
+        var idNeedle = `"id": "${nodeId}"`;
+        var idPos = jsonText.indexOf(idNeedle);
+        if (idPos < 0) return null;
+
+        var windowText = jsonText.slice(idPos, idPos + 4000);
+        var dsNeedle = `"datasource": "${datasourceId}"`;
+        var dsPosLocal = windowText.indexOf(dsNeedle);
+
+        var finalPos = dsPosLocal >= 0 ? idPos + dsPosLocal : idPos;
+        return getLineNumberFromIndex(jsonText, finalPos);
+    }
+
+    /** Shows a modal dialog explaining why the import is blocked. @returns {void} */
+    function showImportBlockingDialog(title, htmlBody) {
+        var html = "<div style='font-size:13px;line-height:1.45'>" + htmlBody + "</div>";
+        $("#mainDialogDiv").html(html);
+        UI.openDialog("mainDialogDiv", { title: title });
+    }
+
+    /** Posts the imported mapping graph JSON to the backend. @returns {void} */
+    function doImportPost(dataToSave) {
+        var fileName = "mappings_" + MappingModeler.currentSLSsource + "_ALL" + ".json";
+        var payload = {
+            dir: "graphs/",
+            fileName: fileName,
+            data: JSON.stringify(dataToSave, null, 2),
+        };
+        $.ajax({
+            type: "POST",
+            url: `${Config.apiUrl}/data/file`,
+            data: payload,
+            dataType: "json",
+            success: function (_result, _textStatus, _jqXHR) {
+                MappingModeler.onLoaded();
+            },
+            error: function (err) {
+                return MainController.errorAlert(err);
+            },
+        });
+    }
+
+    /**
+     * Parses and validates the imported mapping JSON text.
+     * Removes lastUpdate and ensures graphUri matches current source.
+     * @returns {{data:Object|null, error:string|null}}
+     */
+    function parseAndSanitizeImport(importedJsonText) {
+        var data = null;
+
+        try {
+            data = JSON.parse(importedJsonText);
+        } catch (e) {
+            return { data: null, error: "Invalid JSON: " + (e && e.message ? e.message : e) };
+        }
+
+        // Basic validation
+        if (!data || !data.nodes) {
+            return { data: null, error: "Invalid mapping file: missing nodes." };
+        }
+
+        // Remove lastUpdate if present
+        if (data.options && data.options.config && data.options.config.lastUpdate) {
+            delete data.options.config.lastUpdate;
+        }
+
+        // Check graphUri match (same behavior as before)
+        var currentGraphUri = Config.sources[MainController.currentSource].graphUri;
+        if (data.options && data.options.config && data.options.config.graphUri != currentGraphUri) {
+            return {
+                data: null,
+                error: "graphUri in file is not the same as the current graphUri, update graphURI in JSON file",
+            };
+        }
+
+        return { data: data, error: null };
+    }
+
+    /**
+     * Builds an index of datasource usages in nodes.
+     * @param {Object} data Parsed mapping JSON object.
+     * @param {string} importedJsonText Raw JSON text (used to locate approximate line numbers).
+     * @returns {Object<string, Array>} Map datasourceId -> usage occurrences.
+     */
+    function indexDatasourceUsages(data, importedJsonText) {
+        var datasourceUsagesById = {}; // { dsId: [ {nodeIndex,nodeId,nodeType,dataTable,line} ] }
+
+        (data.nodes || []).forEach(function (node, nodeIndex) {
+            // datasourceId peut être stocké sous datasource ou dataSource selon les versions
+            var datasourceId = node && node.data ? node.data.datasource || node.data.dataSource : null;
+            if (!datasourceId) return;
+
+            if (!datasourceUsagesById[datasourceId]) datasourceUsagesById[datasourceId] = [];
+
+            datasourceUsagesById[datasourceId].push({
+                nodeIndex: nodeIndex,
+                nodeId: node.id,
+                nodeType: node.data.type,
+                dataTable: node.data.dataTable,
+                line: findNodeDatasourceLine(importedJsonText, node.id, datasourceId),
+            });
+        });
+        return datasourceUsagesById;
+    }
+
+    /**
+     * Checks that datasource ids used in nodes are declared in options.config (databaseSources/csvSources).
+     * @returns {{unknownIds:string[], dbSourcesFromFile:Object, csvSourcesFromFile:Object, requiredDbIds:string[]}}
+     */
+    function validateDatasourcesDeclared(data, datasourceUsagesById) {
+        var cfg = data && data.options && data.options.config ? data.options.config : {};
+
+        var dbSourcesFromFile = cfg.databaseSources || {};
+        var csvSourcesFromFile = cfg.csvSources || {};
+
+        var dbIdsFromConfig = Object.keys(dbSourcesFromFile);
+        var csvIdsFromConfig = Object.keys(csvSourcesFromFile);
+
+        var usedIds = Object.keys(datasourceUsagesById || {});
+        var unknownIds = usedIds.filter(function (id) {
+            return dbIdsFromConfig.indexOf(id) < 0 && csvIdsFromConfig.indexOf(id) < 0;
+        });
+        return {
+            unknownIds: unknownIds,
+            dbSourcesFromFile: dbSourcesFromFile,
+            csvSourcesFromFile: csvSourcesFromFile,
+            requiredDbIds: dbIdsFromConfig.slice(),
+        };
+    }
+
+    /**
+     * Renders up to 5 occurrences of datasource usage in nodes[].
+     * @param {Array<Object>} usages
+     * @returns {string} HTML fragment
+     */
+    function renderDatasourceOccurrences(usages) {
+        return (usages || [])
+            .slice(0, 5)
+            .map(function (usage) {
+                return (
+                    " • <code>nodes[" +
+                    usage.nodeIndex +
+                    "].data.datasource</code> (line " +
+                    (usage.line || "?") +
+                    ") — type=" +
+                    usage.nodeType +
+                    (usage.dataTable ? " — table=" + usage.dataTable : "")
+                );
+            })
+            .join("<br>");
+    }
+
+    /**
+     * Builds the HTML list for unknown datasources.
+     * @param {string[]} unknownIds
+     * @param {Object<string,Array>} datasourceUsagesById
+     * @returns {string} HTML <li>...</li> list
+     */
+    function renderUnknownDatasourcesHtml(unknownIds, datasourceUsagesById) {
+        return (unknownIds || [])
+            .map(function (id) {
+                var usages = datasourceUsagesById && datasourceUsagesById[id] ? datasourceUsagesById[id] : [];
+                var occurrences = renderDatasourceOccurrences(usages);
+                var more = usages.length > 5 ? "<br> … (+" + (usages.length - 5) + " more occurrences)" : "";
+                return "<li><b>" + id + "</b><br>" + occurrences + more + "</li>";
+            })
+            .join("");
+    }
+
+    /**
+     * Builds the HTML list for missing databases on target server.
+     * @param {string[]} missing
+     * @param {Object} dbSourcesFromFile
+     * @param {Object<string,Array>} datasourceUsagesById
+     * @param {string} importedJsonText
+     * @returns {string} HTML <li>...</li> list
+     */
+    function renderMissingDatabasesHtml(missing, dbSourcesFromFile, datasourceUsagesById, importedJsonText) {
+        return (missing || [])
+            .map(function (id) {
+                var name = dbSourcesFromFile && dbSourcesFromFile[id] && dbSourcesFromFile[id].name ? dbSourcesFromFile[id].name : "(unknown name)";
+
+                var cfgLine = findConfigKeyLine(importedJsonText, "databaseSources", id);
+
+                var usages = datasourceUsagesById && datasourceUsagesById[id] ? datasourceUsagesById[id] : [];
+                var occurrences = renderDatasourceOccurrences(usages);
+                var more = usages.length > 5 ? "<br> … (+" + (usages.length - 5) + " more occurrences)" : "";
+
+                return (
+                    "<li><b>" +
+                    id +
+                    "</b> — " +
+                    name +
+                    "<br>Declared in file: <code>options.config.databaseSources." +
+                    id +
+                    "</code> (line " +
+                    (cfgLine || "?") +
+                    ")" +
+                    "<br>" +
+                    occurrences +
+                    more +
+                    "</li>"
+                );
+            })
+            .join("");
+    }
+
+    /**
+     * Computes which database ids declared in the file are missing on the target server.
+     * @param {string[]} requiredDbIds
+     * @param {Object|Array} resp API response from GET /databases
+     * @returns {{missing: string[]}}
+     */
+    function validateDatabasesAvailable(requiredDbIds, resp) {
+        var available = Array.isArray(resp) ? resp : resp && resp.resources ? resp.resources : [];
+        var availableIds = new Set(
+            available.map(function (db) {
+                return db.id;
+            }),
+        );
+        var missing = (requiredDbIds || []).filter(function (id) {
+            return !availableIds.has(id);
+        });
+        return { missing: missing };
+    }
+
+    /**
+                * @function
+                * @name importMappingsFromJSONFile
+                * @memberof module:MappingColumnsGraph
+                * @description
+                * Imports a mappings JSON file into the current mapping graph and saves it on the server.
+                *
+                * To prevent crashes when importing a graph created on another server, this import validates
+                * data source identifiers before writing the graph file:
+                * 1) JSON integrity: each `nodes[i].data.datasource` must be declared in
+                *    `options.config.databaseSources` or `options.config.csvSources`.
+                * 2) Target server availability: if `options.config.databaseSources` contains ids, the import
+                *    calls `GET /databases` and checks that each id exists and/or is authorized.
+                
+                * If validation fails, an "Import blocked" dialog is shown with actionable guidance (and tries to display approximate JSON line numbers when possible).
+                * @returns {void}
+                */
+    self.importMappingsFromJSONFile = function () {
+        ImportFileWidget.showImportDialog(function (err, importedJsonText) {
+            if (err) {
+                return MainController.errorAlert(err);
+            }
+
+            var parsed = parseAndSanitizeImport(importedJsonText);
+            if (parsed.error) {
+                return alert(parsed.error);
+            }
+            var data = parsed.data;
+
+            var datasourceUsagesById = indexDatasourceUsages(data, importedJsonText);
+
+            var declared = validateDatasourcesDeclared(data, datasourceUsagesById);
+            var unknownIds = declared.unknownIds;
+            var dbSourcesFromFile = declared.dbSourcesFromFile;
+            var csvSourcesFromFile = declared.csvSourcesFromFile;
+            var requiredDbIds = declared.requiredDbIds;
+
+            // Block import and show actionable guidance if datasource validation fails.
+            if (unknownIds.length > 0) {
+                var unknownHtml = renderUnknownDatasourcesHtml(unknownIds, datasourceUsagesById);
+
+                showImportBlockingDialog(
+                    "Import blocked",
+                    "<p>These data sources are used in <code>nodes[].data.datasource</code> but are declared neither in <code>options.config.databaseSources</code> nor in <code>options.config.csvSources</code>.</p>" +
+                        "<ul>" +
+                        unknownHtml +
+                        "</ul>" +
+                        "<p><b>Fix:</b> add these ids to the config, or replace the value in the nodes listed below.</p>",
+                );
+                return; // STOP
+            }
+
+            if (requiredDbIds.length === 0) {
+                return doImportPost(data);
+            }
+
+            $.ajax({
+                type: "GET",
+                url: `${Config.apiUrl}/databases`,
+                dataType: "json",
+                success: function (resp) {
+                    var check = validateDatabasesAvailable(requiredDbIds, resp);
+                    var missing = check.missing;
+
+                    if (missing.length > 0) {
+                        var missingHtml = renderMissingDatabasesHtml(missing, dbSourcesFromFile, datasourceUsagesById, importedJsonText);
+
+                        showImportBlockingDialog(
+                            "Import blocked",
+                            "<p>These databases are referenced by the mapping but are not available on this server (missing or not authorized).</p>" +
+                                "<ul>" +
+                                missingHtml +
+                                "</ul>" +
+                                "<p><b>To fix:</b><br>" +
+                                "1) Create/add these databases on the target server (ConfigEditor ▸ Databases).<br>" +
+                                "2) Grant access to your account (ConfigEditor ▸ profiles/allowedDatabases).<br>" +
+                                "3) Or edit the imported JSON to point to an existing id.</p>",
+                        );
+                        return;
+                    }
+                    return doImportPost(data);
+                },
+
+                error: function (e) {
+                    var status = e && typeof e.status !== "undefined" ? e.status : 0;
+
+                    var details =
+                        (e && e.responseJSON && (e.responseJSON.message || e.responseJSON.error)) ||
+                        (e && e.responseText) ||
+                        (e && e.statusText) ||
+                        "Unable to reach the /databases API (offline or server unavailable).";
+
+                    return MainController.errorAlert("Database validation failed (status=" + status + ") : " + details);
                 },
             });
         });
@@ -2087,11 +2337,11 @@ var MappingColumnsGraph = (function () {
                             return;
                         }
 
-                        // columnLalbel
-                        var columnLalbel = columnId;
+                        // columnLabel
+                        var columnLabel = columnId;
                         if (column) {
                             if (column.label) {
-                                columnLalbel = String(column.label);
+                                columnLabel = String(column.label);
                             }
                         }
 
@@ -2104,7 +2354,7 @@ var MappingColumnsGraph = (function () {
                         if (!uniqueNodes[columnId]) {
                             classVisjsData.nodes.push({
                                 id: columnId,
-                                label: String(columnLalbel),
+                                label: String(columnLabel),
                                 shape: "box",
                                 color: "#eaf4ff",
                                 data: column.data,
@@ -2135,7 +2385,7 @@ var MappingColumnsGraph = (function () {
                             }
 
                             // create node if not existing
-                            if (!uniqueNodes[dpColumnId] && !uniqueNodes[dpColumnId]) {
+                            if (!uniqueNodes[dpColumnId]) {
                                 classVisjsData.nodes.push({
                                     id: dpColumnId,
                                     label: dpColumnId,
@@ -2151,7 +2401,6 @@ var MappingColumnsGraph = (function () {
                                         dataTable: dataTable,
                                     },
                                 });
-                                uniqueNodes[dpColumnId] = 1;
                                 uniqueNodes[dpColumnId] = 1;
                             }
 

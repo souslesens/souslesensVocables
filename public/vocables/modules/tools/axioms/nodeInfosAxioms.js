@@ -368,6 +368,7 @@ var NodeInfosAxioms = (function () {
 
     self.newAxiom = function (clearAll) {
         if (clearAll) {
+            self.isNewAxiom=true
             Axiom_activeLegend.isLegendActive = false;
             Axioms_graph.clearGraph();
         }

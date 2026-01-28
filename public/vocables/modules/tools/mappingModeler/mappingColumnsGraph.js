@@ -1850,7 +1850,7 @@ var MappingColumnsGraph = (function () {
     /**
      * Parses and validates the imported mapping JSON text.
      * Removes lastUpdate and ensures graphUri matches current source.
-     * @returns {{data:Object|null, error:string|null}}
+     * @returns {{data:Object, error:string}}
      */
     function parseAndSanitizeImport(importedJsonText) {
         var data = null;

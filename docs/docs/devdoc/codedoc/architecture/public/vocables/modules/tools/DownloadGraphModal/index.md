@@ -9,7 +9,7 @@ This module defines a global object called DownloadGraphModal that provides a si
 
 ## Module
 
-### 1. UploadGraphModal
+### 1. DownloadGraphModal
 
 It imports a React application from download_graph_modal.js, and retrieves the createApp function from window.DownloadGraphModal.createApp. It then replaces 
 window.DownloadGraphModal with a custom object exposing two methods open and close.
@@ -21,7 +21,7 @@ window.DownloadGraphModal with a custom object exposing two methods open and clo
 
 ## Usage
 
-- Launch by the bot createSLSVsource_bot
+- Called by the lineage_sources
 - Check that the React app is ready
 - Creates a container in the document body.
 - Calls createApp to mount the React modal into that container

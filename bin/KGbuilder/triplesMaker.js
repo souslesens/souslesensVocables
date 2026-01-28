@@ -230,6 +230,8 @@ var TriplesMaker = {
                                     );
                                 });
 
+                               
+
                                 var currentTime = new Date();
                                 totalTriplesCount += batchTriplesCount;
                                 message.totalTriples = totalTriplesCount;

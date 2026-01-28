@@ -6,6 +6,12 @@ import common from "../../shared/common.js";
 import Lineage_whiteboard from "../lineage/lineage_whiteboard.js";
 import MainController from "../../shared/mainController.js";
 import JstreeWidget from "../../uiWidgets/jstreeWidget.js";
+import Sparql_common from "../../sparqlProxies/sparql_common.js";
+import Lineage_createResource from "../lineage/lineage_createResource.js";
+import Lineage_createRelation from "../lineage/lineage_createRelation.js";
+import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
+import NodeInfosAxioms from "./nodeInfosAxioms.js";
+import Lineage_graphPaths from "../lineage/lineage_graphPaths.js";
 
 var Axiom_activeLegend = (function () {
     var self = {};
@@ -391,7 +397,7 @@ var Axiom_activeLegend = (function () {
         } else {
             edges.forEach(function (edge) {
                 if (edge.from == Axioms_graph.currentGraphNode.id) {
-                    if (resourceType != "Class") {
+                    if (resourceType != "Class" && nodesMap[edge.to]) {
                         var nodeToType = nodesMap[edge.to].data.type;
 
                         hiddenNodes.push(nodeToType);
@@ -484,6 +490,11 @@ var Axiom_activeLegend = (function () {
                     NodeInfosWidget.showNodeInfos(NodeInfosAxioms.currentSource, node, "mainDialogDiv");
                 }
             }
+
+            if (node.data.axiomId > -1) {
+                self.selectGraphNodeJstreeTriples(node)
+            }
+
         } else {
             Axioms_graph.currentGraphNode = null;
             Axioms_graph.currentGraphNode = null;
@@ -510,15 +521,133 @@ var Axiom_activeLegend = (function () {
     };
 
     self.showTriples = function () {
-        var triples = self.visjsGraphToTriples();
-        var str = "<ul>";
-        triples.forEach(function (triple) {
-            str += "<li>" + triple.subject + " <b>" + triple.predicate + "</b> " + triple.object + "</li>";
-        });
-        str += "</ul>";
+        var triples = []
+        if (!NodeInfosAxioms.isNewAxiom && Axioms_graph.currentAxiomTriples) {
+            triples = Axioms_graph.currentAxiomTriples;
+        } else {
+            triples = self.visjsGraphToTriples();
+        }
 
-        $("#axiomsEditor_textDiv").html(str);
+        var jstreeData = [];
+
+        triples.forEach(function (triple, index) {
+            jstreeData.push({
+                id: "triple" + index,
+                text: triple.subject + " <b>" + triple.predicate + "</b> " + triple.object,
+                parent: "#"
+            })
+
+        });
+
+
+        var html = "<div style='height:300px;width:100%;overflow:auto;'><div id='axiomsTriplesJstree'></div></div>";
+
+        $("#axiomsEditor_textDiv").html(html);
+        JstreeWidget.loadJsTree("axiomsTriplesJstree", jstreeData, {withCheckboxes: true})
     };
+
+    self.copyTriples = function () {
+        var triples = self.visjsGraphToTriples();
+        var str = ""
+        triples.forEach(function (triple) {
+            str += Sparql_generic.triplesObjectToString(triple) + ".\n";
+        });
+
+        common.copyTextToClipboard(str)
+    };
+
+    self.deleteTriples = function () {
+
+        var checkedNodes = $("#axiomsTriplesJstree").jstree(true).get_checked()
+
+
+
+
+        var triples = Axioms_graph.currentAxiomTriples
+
+        var graphUri = Config.sources[NodeInfosAxioms.currentSource].graphUri
+        var query = "with graph <" + graphUri + ">\ndelete {\n"
+
+        triples.forEach(function (triple, index) {
+            if (checkedNodes.indexOf("triple" + index) > -1) {
+                query += Sparql_generic.triplesObjectToString(triple) + "\n";
+            }
+
+        });
+        query += "}"
+
+        var url = Config.sparql_server.url;
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {}, function (err, result) {
+            if (err) {
+                return alert(err);
+            }
+            return alert("trples deleted")
+        })
+
+    };
+
+    self.selectGraphNodeJstreeTriples = function (visjsNode) {
+
+
+        $('#axiomsTriplesJstree').jstree(true).deselect_all();
+
+        var nodesToDelete = []
+        var edgesToDelete = []
+
+        if (visjsNode.from) {//selectedNode is a edge
+            edgesToDelete.push(visjsNode.id)
+        }
+
+        var edgesFromMap = {};
+        Axioms_graph.axiomsVisjsGraph.data.edges.get().forEach(function (edge) {
+            edgesFromMap[edge.from] = edge
+            if (edge.to == visjsNode.id) {
+                edgesToDelete[edge]
+            }
+        })
+        var nodesMap = {};
+        Axioms_graph.axiomsVisjsGraph.data.nodes.get().forEach(function (node) {
+            nodesMap[node.id] = node
+        })
+
+
+        if (visjsNode.data.axiomId) {
+
+
+            var toPaths = Lineage_graphPaths.getAllpathsFromNode(Axioms_graph.currentVisjsData, visjsNode.id)
+
+
+            toPaths.forEach(function (path) {
+                path.forEach(function (nodeId) {
+                    var visjsNode = nodesMap[nodeId]
+                    if (visjsNode && visjsNode.color != "#00afef" && visjsNode.color != "#f5ef39") {
+                        if (nodesToDelete.indexOf(visjsNode) < 0) {
+                            nodesToDelete.push(visjsNode.id);
+                        }
+                    }
+                    if (edgesToDelete.indexOf(edgesFromMap[nodeId]) < 0) {
+                        edgesToDelete.push(edgesFromMap[nodeId])
+                    }
+                })
+
+            })
+
+            Axioms_graph.axiomsVisjsGraph.data.nodes.remove(nodesToDelete)
+            Axioms_graph.axiomsVisjsGraph.data.edges.remove(edgesToDelete)
+
+
+            Axioms_graph.currentAxiomTriples.forEach(function (triple, index) {
+
+                if (nodesToDelete.indexOf(triple.subject) > -1 || nodesToDelete.indexOf(triple.object) > -1) {//} && (triple2.predicate.indexOf("owl")>-1 )) {
+                    //   $("#axiomsTriplesJstree").jstree(true).select_node("triple" + index);
+                    $("#axiomsTriplesJstree").jstree(true).check_node("triple" + index);
+                }
+            })
+
+
+        }
+    }
+
 
     /**
      *
@@ -632,13 +761,22 @@ var Axiom_activeLegend = (function () {
                 var divId = "nodeInfosAxioms_graphDiv";
                 var options = {};
 
-                AxiomExtractor.addTriplesToBasicAxioms(self.currentResource.data.source, triples, function (err, result) {
+                self.saveNewNodes(triples.newNodesToStore, function (err) {//new nodes created on the fly
                     if (err) {
                         return MainController.errorAlert(err.responseText || err);
                     }
 
-                    Axioms_graph.drawNodeAxioms2(self.currentResource.data.source, self.currentResource.data.id, triples, divId, options, function (err, triples) {});
-                });
+
+                    AxiomExtractor.addTriplesToBasicAxioms(self.currentResource.data.source, triples, function (err, result) {
+                        if (err) {
+                            return MainController.errorAlert(err.responseText || err);
+                        }
+
+                        Axioms_graph.drawNodeAxioms2(self.currentResource.data.source, self.currentResource.data.id, triples, divId, options, function (err, triples) {
+                        });
+                    });
+                })
+
 
                 //add manchester to Axioms JSTree
                 //  self.addAxiomToAxomsJstree(manchesterStr, triples);
@@ -722,6 +860,37 @@ var Axiom_activeLegend = (function () {
                 edgesFromMap[edge.from].push(edge);
             }
         });
+
+        // check Nodes without superClass to write them in the triplestore
+        var newNodesToStore = []
+        var newOrphanNodes = []
+        nodes.forEach(function (node) {
+            var x = node
+            if (node.data.isNew) {// node created on the fly
+                var toNode = edgesFromMap[node.id]
+                if (!toNode) {//if not superClassOr property
+                    node.data.superEntity = "http://www.w3.org/2002/07/owl#Thing"
+                    newOrphanNodes.push(node)
+                } else {
+                    node.data.superEntity = toNode.id
+
+                }
+                newNodesToStore.push(node)
+            }
+
+        })
+
+        if (newOrphanNodes.length > 0) {
+            var str = ""
+            newOrphanNodes.forEach(function (node) {
+                str += node + ","
+            })
+            if (!confirm("Some nodes have no super class or property, continue aniway ?")) {
+                return;
+            }
+
+        }
+
 
         var triples = [];
 
@@ -825,12 +994,43 @@ var Axiom_activeLegend = (function () {
                     object: nodeTypes[node.data.type] || node.data.type,
                 });
             } else {
-                var x = 3;
+
             }
         }
 
+
+        triples.newNodesToStore = newNodesToStore
+
         return triples;
     };
+
+    self.saveNewNodes = function (nodes, callback) {// nodes created on the fly
+
+        if (!nodes || nodes.length == 0) {
+            return;
+        }
+        async.eachSeries(nodes, function (node, callbackEach) {
+            if (node.data.type == "Class") {
+                var triples = Lineage_createResource.getResourceTriples(self.currentSource, "owl:Class", null, node.data.label, node.data.superEntity ||
+                    "http://www.w3.org/2002/07/owl#Class");
+                Lineage_createResource.writeResource(self.currentSource, triples, function (err, resourceId) {
+                    if (err) {
+                        return callbackEach(err)
+                    }
+                })
+            } else if (node.data.type == "ObjectProperty") {
+                Lineage_createRelation.createSubProperty(self.currentSource, node.data.superEntity, node.data.label, true, function (err, result) {
+                    if (err) {
+                        return callbackEach(err)
+                    }
+
+                })
+            }
+        }, function (err) {
+            return callback(err)
+        })
+    }
+
 
     self.getBlankNodeId = function () {
         if (!self.bNodeCounter) {

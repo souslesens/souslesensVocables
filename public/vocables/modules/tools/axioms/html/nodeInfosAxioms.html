@@ -37,11 +37,18 @@
                     New Axiom<br />
                     <!-- <select id="axioms_legend_suggestionsSelect" size="20" style="width: 250px; overflow: auto"></select>-->
                     <div style="width: 350px; height: 500px; overflow: auto" id="axiomSuggestionsSelectJstreeDiv"></div>
-                    <div>
-                        <button class="w3-button slsv-button-3" onclick="Axiom_activeLegend.clearAxiom()">clear</button>
-                        <button class="w3-button slsv-button-3" onclick="Axiom_activeLegend.showTriples()">triples</button>
-                        <button class="w3-button slsv-button-3" onclick="Axiom_activeLegend.saveAxiom()">save</button>
-                    </div>
+
+                </div>
+            </div>
+            <div>
+                <div id="nodeInfosAxioms_graphDiv" onclick="PopupMenuWidget.hidePopup();"
+                     style="width: 70vw; height: 350px; background-color: #ddd; margin: 5px; padding: 5px; overflow: auto"></div>
+                <div>
+                    <button class="w3-button slsv-button-3" onclick="Axiom_activeLegend.clearAxiom()">clear</button>
+                    <button class="w3-button slsv-button-3" onclick="Axiom_activeLegend.saveAxiom()">save</button>
+                    <button class="w3-button slsv-button-3" onclick="Axiom_activeLegend.showTriples()">show triples</button>
+                    <button class="w3-button slsv-button-3" onclick="Axiom_activeLegend.copyTriples()">copy triples</button>
+                    <button class="w3-button slsv-button-3" onclick="Axiom_activeLegend.deleteTriples()"> delete triples</button>
                 </div>
             </div>
 

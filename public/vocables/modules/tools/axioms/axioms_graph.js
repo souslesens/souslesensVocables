@@ -77,6 +77,8 @@ var Axioms_graph = (function () {
     };
 
     self.drawNodeAxioms2 = function (sourceLabel, rootNodeId, axiomsTriples, divId, options, callback) {
+        self.currentAxiomTriples=axiomsTriples;
+        Axiom_activeLegend.showTriples()
         if (!options) {
             options = {};
         }
@@ -90,7 +92,7 @@ var Axioms_graph = (function () {
                 //format mancheseter triples
                 function (callbackSeries) {
                     var data = [];
-                    axiomsTriples.forEach(function (triple) {
+                    axiomsTriples.forEach(function (triple,axiomIndex) {
                         var s = triple.subject.replace("[OntObject]", "");
                         var p = triple.predicate.replace("[OntObject]", "");
                         var o = triple.object.replace("[OntObject]", "");
@@ -103,7 +105,7 @@ var Axioms_graph = (function () {
                         }
 
                         if (!nodesMap[s]) {
-                            nodesMap[s] = { id: s };
+                            nodesMap[s] = { id: s, axiomId:axiomIndex };
                             if (s.indexOf("http") == 0) {
                                 var obj = Axiom_manager.allResourcesMap[s];
                                 nodesMap[s].label = obj ? obj.label.replace(/_/g, " ") : null;
@@ -123,6 +125,7 @@ var Axioms_graph = (function () {
                                 p: p,
                                 o: o,
                                 pLabel: obj ? obj.label.replace(/_/g, " ") : null,
+                                axiomId:axiomIndex
                             });
                         }
 
@@ -254,6 +257,7 @@ var Axioms_graph = (function () {
                                             edgeLabel = "⊑ ┓";
                                         }
                                     }
+                                    visjsNode.data.axiomId=childNode.axiomId
 
                                     visjsData.nodes.push(visjsNode);
                                 }
@@ -287,6 +291,8 @@ var Axioms_graph = (function () {
                                             id: edgeId,
                                             from: node.id,
                                             to: childNode.id,
+                                            axiomId:predicate.axiomId
+
                                         },
                                     });
 
@@ -488,6 +494,7 @@ var Axioms_graph = (function () {
                     callbackSeries();
                 },
                 //draw graph
+
                 function (callbackSeries) {
                     if (options.addToGraph && self.axiomsVisjsGraph) {
                         if (true) {
@@ -498,6 +505,7 @@ var Axioms_graph = (function () {
                         self.axiomsVisjsGraph.data.edges.add(visjsData.edges);
                         self.switchToHierarchicalLayout(false);
                     } else {
+                        options.onNodeClick=Axiom_activeLegend.onNodeGraphClick
                         self.drawGraph(visjsData, divId, options);
                         self.currentVisjsData = visjsData;
                         self.switchToHierarchicalLayout(false);

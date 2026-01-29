@@ -6,6 +6,7 @@ MappingModeler is a web-based semantic data mapping tool designed to facilitate 
 
 ## Modules
 
+(mappingmodeler-datasourcemanager)=
 ### 1. DataSourceManager
 
 Manages data source configurations and operations.

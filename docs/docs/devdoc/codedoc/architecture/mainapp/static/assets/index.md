@@ -1,0 +1,73 @@
+<!-- AUTO-GENERATED: do not edit by hand -->
+# Assets
+
+<!-- AUTO-DESC:START -->
+
+This page summarizes the code structure for this directory and its immediate subdirectories. It focuses on the `mainapp / static / assets` area within the `mainapp` module. Use the table of contents below to navigate deeper.
+
+<!-- AUTO-DESC:END -->
+
+
+```{toctree}
+:maxdepth: 5
+:caption: Contents
+
+```
+
+<!-- AUTO-INLINE-FILES:START -->
+
+## Files in this directory
+
+- `ButtonWithConfirmation-BYObv0R3.js`
+- `ButtonWithConfirmation-BYObv0R3.js.map`
+- `CircularProgress-D64lSuov.js`
+- `CircularProgress-D64lSuov.js.map`
+- `client-CShzC-fh.js`
+- `client-CShzC-fh.js.map`
+- `Close-C5n2L6Qt.js`
+- `Close-C5n2L6Qt.js.map`
+- `createSvgIcon-BMHDtJXd.js`
+- `createSvgIcon-BMHDtJXd.js.map`
+- `DeleteDialog-CQYdpOfY.js`
+- `DeleteDialog-CQYdpOfY.js.map`
+- `DialogActions-CmVOy468.js`
+- `DialogActions-CmVOy468.js.map`
+- `Done-Bi9BuZp_.js`
+- `Done-Bi9BuZp_.js.map`
+- `download_graph_modal.js`
+- `download_graph_modal.js.map`
+- `edit_source_dialog.js`
+- `edit_source_dialog.js.map`
+- `Folder-RA7eV3tR.js`
+- `Folder-RA7eV3tR.js.map`
+- `graph_management.js`
+- `graph_management.js.map`
+- `index.js`
+- `index.js.map`
+- `InputLabel-Cs2lv41O.js`
+- `InputLabel-Cs2lv41O.js.map`
+- `kg_upload_app.js`
+- `kg_upload_app.js.map`
+- `LinearProgress-DMs9vhyO.js`
+- `LinearProgress-DMs9vhyO.js.map`
+- `mappingModeler_upload_app.js`
+- `mappingModeler_upload_app.js.map`
+- `MenuItem-DKMCgxPp.js`
+- `MenuItem-DKMCgxPp.js.map`
+- `metadata_dialog.js`
+- `metadata_dialog.js.map`
+- `Source-Cvcz-9Ji.js`
+- `Source-Cvcz-9Ji.js.map`
+- `TextField-YiayUiTt.js`
+- `TextField-YiayUiTt.js.map`
+- `Tooltip-8AQo0xVI.js`
+- `Tooltip-8AQo0xVI.js.map`
+- `upload_graph_modal.js`
+- `upload_graph_modal.js.map`
+- `user_settings.js`
+- `user_settings.js.map`
+- `Utils-sKuCG5zF.js`
+- `Utils-sKuCG5zF.js.map`
+
+<!-- AUTO-INLINE-FILES:END -->
+

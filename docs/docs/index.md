@@ -34,8 +34,9 @@ admindoc/index.md
 How to install a development instance and to contribute to the code.
 
 ```{toctree}
-:maxdepth: 2
-devdoc/index.md
+:maxdepth: 15
+
+devdoc/index
 ```
 
 # API

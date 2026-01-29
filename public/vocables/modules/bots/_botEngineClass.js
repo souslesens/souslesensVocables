@@ -1,3 +1,5 @@
+import CommonBotFunctions from "./_commonBotFunctions.js";
+
 class BotEngineClass {
     constructor() {
         this.options = {};
@@ -86,6 +88,95 @@ class BotEngineClass {
             }
         });
     }
+
+    promptTextarea(message, varToFill, defaultValue, callback) {
+        $("#" + this.divId)
+            .find("#bot_resourcesProposalSelect")
+            .hide();
+
+        // Message bot
+        this.insertBotMessage(message, { isQuestion: true });
+
+        const textareaId = "botPromptTextarea";
+        const sendBtnId = "botPromptTextareaSend";
+
+        $("#" + this.divId)
+            .find("#" + textareaId)
+            .parent()
+            .remove();
+
+        const container = $(`
+            <div style="position:relative; width:100%; margin-top:8px;">
+                <textarea
+                    id="${textareaId}"
+                    style="
+                        width:100%;
+                        min-height:120px;
+                        padding:10px 40px 10px 10px;
+                        resize:vertical;
+                    "
+                    placeholder="Enter description..."
+                ></textarea>
+
+                <button
+                    id="${sendBtnId}"
+                    style="
+                        position:absolute;
+                        bottom:10px;
+                        right:10px;
+                        border:none;
+                        background:none;
+                        cursor:pointer;
+                        font-size:18px;
+                    "
+                    title="Validate"
+                >
+                    ▶
+                </button>
+            </div>
+        `);
+
+        $("#" + this.divId)
+            .find("#bot_input")
+            .before(container);
+
+        const textarea = container.find("#" + textareaId);
+        const sendBtn = container.find("#" + sendBtnId);
+
+        textarea.val(defaultValue || "").focus();
+
+        const validate = () => {
+            var raw = textarea.val();
+            var value = String(raw || "").trim();
+            if (!value) {
+                return this.previousStep();
+            }
+
+            var valueSafe = CommonBotFunctions.toSafeTransportText(value);
+
+            this.history.VarFilling[this.history.currentIndex] = {
+                VarFilled: varToFill,
+                valueFilled: value,
+                valueFilledSafe: valueSafe,
+            };
+
+            this.currentBot.params[varToFill] = valueSafe;
+
+            this.insertBotMessage(value);
+
+            container.remove();
+
+            if (callback) {
+                var ret = callback(valueSafe, value);
+                if (ret === false) return;
+            }
+
+            this.nextStep();
+        };
+
+        sendBtn.on("click", validate);
+    }
+
     // see if is necessary when botEngine is removed and bot work with botEngineClass
     botClickGestion() {
         // find if bot is in dialog
@@ -516,7 +607,9 @@ class BotEngineClass {
         if (chat_class == "chat-left") {
             html += '<div style="display: flex; flex-direction: row;justify-content: space-between; align-items: center; ">';
         }
-        html += "<span class='" + chat_class + "' id='" + tokenId + "'>" + str + "</span>";
+        var safeDisplay = CommonBotFunctions.escapeHtml(str).replace(/\n/g, "<br>");
+        html += "<span class='" + chat_class + "' id='" + tokenId + "'>" + safeDisplay + "</span>";
+
         if (chat_class == "chat-left") {
             html += "</div>";
             this.lastTokenId = tokenId;

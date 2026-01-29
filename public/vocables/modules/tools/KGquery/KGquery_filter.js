@@ -130,26 +130,6 @@ var KGquery_filter = (function () {
 
         jstreeOptions.additionalHTMLComponent = sampleSizeHtml;
 
-        KGquery.querySets.sets.forEach(function (querySet) {
-            if (querySet.classFiltersMap) {
-                for (var key in querySet.classFiltersMap) {
-                    var filter = querySet.classFiltersMap[key].filter;
-                    var regex = /\?(\w+?)[^\w]/gm;
-                    var matches = filter.matchAll(regex);
-                    for (const match of matches) {
-                        if (match) {
-                            var property = match[1];
-                        }
-                    }
-                    for (var i = 0; i < jstreeData.length; i++) {
-                        if (jstreeData[i].id == property) {
-                            jstreeData[i].state = { disabled: true };
-                        }
-                    }
-                }
-            }
-        });
-
         JstreeWidget.loadJsTree(null, jstreeData, jstreeOptions, function () {
             JstreeWidget.openNodeDescendants(null, "root");
 

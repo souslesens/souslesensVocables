@@ -367,12 +367,23 @@ class DatabaseModel {
         let offset = startingOffset;
 
         const columns = await connection(tableName).columnInfo();
-        // ORDER BY all columns to ensure stable ordering for OFFSET/LIMIT pagination.
+        const columnsKeys = Object.keys(columns);
+
+        // ORDER BY columns to ensure stable ordering for OFFSET/LIMIT pagination.
+        // When select is specific columns, use only those for ORDER BY (required for DISTINCT, some views)
+        // When select is "*", use all table columns
         // Known limitations:
         // - Non-sortable column types (JSON, BLOB, ARRAY, geometry...) may cause query errors
         // - Perfect duplicate rows (identical on ALL columns) may be read multiple times or skipped,
         //   but unique rows are guaranteed to be read exactly once
-        const columnsKeys = Object.keys(columns);
+        let orderByColumns;
+        if (select === "*") {
+            orderByColumns = columnsKeys;
+        } else if (Array.isArray(select)) {
+            orderByColumns = select;
+        } else {
+            orderByColumns = select.split(",").map((col) => col.trim());
+        }
 
         const resSize = await connection.count("*").from(tableName);
         const size = parseInt(resSize[0].count);
@@ -387,7 +398,7 @@ class DatabaseModel {
             if (offset >= size) {
                 const result = await modelUtils.redoIfFailure(
                     async function () {
-                        return await connection.select(select).from(tableName).orderBy(columnsKeys).limit(batchSize).offset(offset);
+                        return await connection.select(select).from(tableName).orderBy(orderByColumns).limit(batchSize).offset(offset);
                     },
                     5, // maxRedo: 5 tentatives
                     5, // sleepTime: 5 secondes entre les tentatives
@@ -398,7 +409,7 @@ class DatabaseModel {
 
             const result = await modelUtils.redoIfFailure(
                 async function () {
-                    return await connection.select(select).from(tableName).orderBy(columnsKeys).limit(batchSize).offset(offset);
+                    return await connection.select(select).from(tableName).orderBy(orderByColumns).limit(batchSize).offset(offset);
                 },
                 5, // maxRedo: 5 tentatives
                 5, // sleepTime: 5 secondes entre les tentatives
@@ -437,7 +448,7 @@ class DatabaseModel {
         let res = null;
         const columns = await connection(tableName).columnInfo();
         const columnsKeys = Object.keys(columns);
-        res = await connection.select(select).from(tableName).orderBy(columnsKeys).limit(limit).offset(offset);
+        res = await connection.select(select).from(tableName).orderBy(orderByColumns).limit(limit).offset(offset);
 
         const concat = values.concat(res);
 

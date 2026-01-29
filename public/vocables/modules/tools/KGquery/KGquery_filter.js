@@ -85,6 +85,12 @@ var KGquery_filter = (function () {
 
                 // });
             });
+
+            if (querySet.classFiltersMap) {
+                for (var key in querySet.classFiltersMap) {
+                    // to be finished
+                }
+            }
         });
 
         var jstreeData = [];
@@ -231,21 +237,7 @@ var KGquery_filter = (function () {
                 return text + str;
             }
         }
-        var filterProperties = {};
-        KGquery.querySets.sets.forEach(function (querySet) {
-            if (querySet.classFiltersMap) {
-                for (var key in querySet.classFiltersMap) {
-                    var filter = querySet.classFiltersMap[key].filter;
-                    var regex = /\?(\w+?)[^\w]/gm;
-                    var matches = filter.matchAll(regex);
-                    for (const match of matches) {
-                        if (match) {
-                            filterProperties[key] = match[1];
-                        }
-                    }
-                }
-            }
-        });
+
         var optionalPredicatesSparql = "";
 
         var optionalPredicatesSubjecstMap = {};
@@ -260,12 +252,17 @@ var KGquery_filter = (function () {
             } else {
                 propertyStr = data.property.id;
             }
-            if (Object.values(filterProperties).includes(propertyNode.id)) {
-                var predicate = " ?" + data.varName + " " + propertyStr + " ?" + data.varName + "_" + data.property.label + ".\n";
-            } else {
-                var predicate = optionalStr + " {?" + data.varName + " " + propertyStr + " ?" + data.varName + "_" + data.property.label + ".}\n";
-            }
+            var filteredProperties = filteredPropertiesMap[data.varName] || [];
+            var findedFilteredProperty = filteredProperties.find(function (prop) {
+                return "<" + prop.id + ">" == propertyStr;
+            });
 
+            //var predicate = optionalStr + " {?" + data.varName + " " + propertyStr + " ?" + data.varName + "_" + data.property.label + ".}\n";
+            var predicate = "?" + data.varName + " " + propertyStr + " ?" + data.varName + "_" + data.property.label + ".";
+            if (!findedFilteredProperty) {
+                predicate = optionalStr + " {" + predicate + "}";
+            }
+            predicate += "\n";
             optionalPredicatesSparql = addToStringIfNotExists(predicate, optionalPredicatesSparql);
             if (!optionalPredicatesSubjecstMap["?" + data.varName]) {
                 optionalPredicatesSubjecstMap["?" + data.varName] = "";

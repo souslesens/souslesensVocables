@@ -7,9 +7,9 @@
  *   (e.g., Implicit Model: "Columns (color = table)").
  *
  * Standards alignment:
- * - All code/comments in English.
+ *
  * - Module pattern with self methods and dual export.
- * - HTML is built progressively with '+=' (no large template literals).
+ * - HTML is built progressively with '+=' for clarity.
  */
 var LegendOverlayWidget = (function () {
     var self = {};
@@ -148,10 +148,12 @@ var LegendOverlayWidget = (function () {
 
         var items = options.items ? options.items : self.getDefaultItems();
 
+        var showDefaultSections = options.showDefaultSections !== undefined ? options.showDefaultSections : true;
+
         var html = "";
 
         html += "<div id='" + ids.wrapperId + "'";
-        html += " style='position:absolute; z-index:10;";
+        html += " style='position:absolute; z-index:1;";
         html += self.getPositionStyle(options.position);
         html += "'>";
 
@@ -168,10 +170,11 @@ var LegendOverlayWidget = (function () {
         html += " padding:10px 12px; font-size:12px;";
         html += " box-shadow:0 2px 10px rgba(0,0,0,0.08); min-width:260px;";
         html += " display:" + (expanded ? "block" : "none") + ";'>";
-
+        
+        if (showDefaultSections) {
         html += self.buildNodesSectionHtml(items.nodes);
         html += self.buildEdgesSectionHtml(items.edges);
-
+        }
         // Variant-specific slot (initially empty; may be filled by update())
         html += "<div id='" + ids.extraSlotId + "' data-legend-slot='extra'></div>";
 
@@ -405,7 +408,7 @@ var LegendOverlayWidget = (function () {
         var html = "";
         var safeColor = color ? String(color) : "#ddd";
         if (type === "line") {
-            html += "<span style='width:14px; height:3px; background:" + self.escapeHtml(safeColor) + "; display:inline-block; border-radius:2px;'></span>";
+            html += "<span style='width:14px; height:3px; background:" + self.escapeHtml(safeColor) + "; display:inline-block; border-radius:50%;'></span>";
             return html;
         }
         if (type === "dashed") {
@@ -430,6 +433,106 @@ var LegendOverlayWidget = (function () {
         // default: box
         html += "<span style='width:12px; height:12px; background:" + self.escapeHtml(safeColor) + "; display:inline-block; border-radius:2px;'></span>";
         return html;
+    };
+
+        /**
+     * Build a larger swatch for dynamic legends.
+     * @param {string} kind - "node" or "edge"
+     * @param {Object} info - style info (color, shape, dashed)
+     * @returns {string}
+     */
+    self.getDynamicSwatchHtml = function (kind, info) {
+        var color = info && info.color ? String(info.color) : "#ddd"; //
+        var colors = info && info.colors && Array.isArray(info.colors) ? info.colors : null;
+
+        var size = 12;
+        var lineWidth = 26;
+        var lineHeight = 5;
+
+        if (kind === "edge") {
+            if (info && info.dashed) {
+            return (
+                "<span style='width:" +
+                lineWidth +
+                "px; height:0; display:inline-block; border-top:" +
+                lineHeight +
+                "px dashed " +
+                self.escapeHtml(color) +
+                ";'></span>"
+            );
+            }
+            return (
+            "<span style='width:" +
+            lineWidth +
+            "px; height:" +
+            lineHeight +
+            "px; background:" +
+            self.escapeHtml(color) +
+            "; display:inline-block; border-radius:3px;'></span>"
+            );
+        }
+
+        // Nodes
+        var shape = info && info.shape ? String(info.shape) : "dot";
+        var backgroundCss = color;
+
+        if (colors && colors.length > 1) {
+            var gradientColors  = colors.slice(0, 4);
+            var percentStep  = 100 / c.length;
+            var gradientStops  = [];
+            for (var i = 0; i < gradientColors.length; i++) {
+            var startPct  = Math.round(i * percentStep);
+            var endPct  = Math.round((i + 1) * percentStep);
+            gradientStops.push(gradientColors[i] + " " + startPct + "% " + endPct + "%");
+            }
+            backgroundCss = "linear-gradient(90deg," + gradientStops.join(",") + ")";
+            return (
+            "<span style='width:" +
+            size +
+            "px; height:" +
+            size +
+            "px; background:" +
+            backgroundCss +
+            "; display:inline-block; border-radius:50%;'></span>"
+            );
+        }
+
+        // Sans gradient
+        if (shape === "box" || shape === "square") {
+            return (
+            "<span style='width:" +
+            size +
+            "px; height:" +
+            size +
+            "px; background:" +
+            self.escapeHtml(color) +
+            "; display:inline-block; border-radius:2px;'></span>"
+            );
+        }
+        if (shape === "ellipse") {
+            return (
+            "<span style='width:16px; height:10px; background:" +
+            self.escapeHtml(color) +
+            "; display:inline-block; border-radius:50%;'></span>"
+            );
+        }
+        if (shape === "triangle") {
+            return (
+            "<span style='width:0; height:0; display:inline-block; border-left:7px solid transparent; border-right:7px solid transparent; border-bottom:14px solid " +
+            self.escapeHtml(color) +
+            ";'></span>"
+            );
+        }
+
+        return (
+            "<span style='width:" +
+            size +
+            "px; height:" +
+            size +
+            "px; background:" +
+            self.escapeHtml(color) +
+            "; display:inline-block; border-radius:50%;'></span>"
+        );
     };
 
     /**
@@ -478,10 +581,10 @@ var LegendOverlayWidget = (function () {
         // Default: clear
         slot.innerHTML = "";
 
-        // Lineage dynamic legend (generated from state)
-        if (options.variant === "lineage" && state && state.dynamicLegend === true && state.nodeTypeStyles && state.edgeCatStyles) {
-            slot.innerHTML = self.buildDynamicLegendHtmlFromState(state);
-            return;
+        // Generic "dynamic legend" mode (usable by any tool)
+        if (options.dynamicLegend === true && state && state.dynamicLegend === true && state.nodeTypeStyles && state.edgeCatStyles) {
+        slot.innerHTML = self.buildDynamicLegendHtmlFromState(state);
+        return;
         }
 
         // Implicit Model extra section: show table->color mapping
@@ -519,9 +622,9 @@ var LegendOverlayWidget = (function () {
 
         keys.forEach(function (table) {
             var color = tableColors[table];
-            var bg = typeof color === "string" ? color : "#ddd";
+            var backgroundCss = typeof color === "string" ? color : "#ddd";
             html += "<div style='display:flex; align-items:center; gap:8px; margin:4px 0;'>";
-            html += "<span style='width:12px; height:12px; background:" + self.escapeHtml(bg) + "; display:inline-block; border-radius:2px;'></span>";
+            html += "<span style='width:12px; height:12px; background:" + self.escapeHtml(backgroundCss) + "; display:inline-block; border-radius:2px;'></span>";
             html += "<span>" + self.escapeHtml(table) + "</span>";
             html += "</div>";
         });
@@ -589,56 +692,53 @@ var LegendOverlayWidget = (function () {
         });
     };
 
-    /*------------------------------------------------
-    Dynamic legend builder for Lineage (variant:"lineage")
-    Generates HTML rows from state.nodeTypeStyles
-    and state.edgeCatStyles
-    ------------------------------------------------*/
+    /**
+     * Build HTML for the dynamic legend from a state object.
+     * @param {Object} state
+     * @returns {string}
+     */
     self.buildDynamicLegendHtmlFromState = function (state) {
-        var html = "<div class='lineageLegendDyn'>";
+    if (!state) {
+        return "";
+    }
 
-        /*-------------------------
-        NODES
-        -------------------------*/
-        html += "<div class='legendSectionTitle'>Nodes</div>";
+    var html = "<div class='dynamicLegend'>";
 
-        Object.keys(state.nodeTypeStyles).forEach(function (key) {
-            var info = state.nodeTypeStyles[key];
+    html += "<div class='legendSectionTitle' style='font-weight:700; margin:8px 0 6px;'>Nodes</div>";
+    Object.keys(state.nodeTypeStyles || {}).forEach(function (key) {
+        var info = state.nodeTypeStyles[key];
+        if (!info) {
+        return;
+        }
+        var label = info.classLabel || info.type || "Node";
 
-            var symbol = "●"; // default
-            if (info.shape === "triangle") symbol = "▲";
-            else if (info.shape === "star") symbol = "★";
-            else if (info.shape === "hexagon") symbol = "⬡";
-            else if (info.shape === "text") symbol = "𝓽";
+        html +=
+        "<div class='legendRow' style='display:flex; align-items:center; gap:10px; margin:6px 0;'>" +
+        self.getDynamicSwatchHtml("node", info) +
+        "<span class='legendLabel' style='line-height:16px;'>" +
+        self.escapeHtml(label) +
+        "</span>" +
+        "</div>";
+    });
 
-            // class label (provided by Lineage)
-            var label = info.classLabel || info.type || "Class";
+    html += "<div class='legendSectionTitle' style='font-weight:700; margin:10px 0 6px;'>Edges</div>";
+    Object.keys(state.edgeCatStyles || {}).forEach(function (cat) {
+        var info = state.edgeCatStyles[cat];
+        if (!info) {
+        return;
+        }
+        var label = info.label || cat;
+        html +=
+        "<div class='legendRow' style='display:flex; align-items:center; gap:10px; margin:6px 0;'>" +
+        self.getDynamicSwatchHtml("edge", info) +
+        "<span class='legendLabel' style='line-height:16px;'>" +
+        self.escapeHtml(label) +
+        "</span>" +
+        "</div>";
+    });
 
-            html +=
-                "<div class='legendRow'>" +
-                "<span class='legendSymbol' style='color:" + info.color + "'>" + symbol + "</span>" +
-                "<span class='legendLabel'>" + label + "</span>" +
-                "</div>";
-        });
-
-        /*-------------------------
-        EDGES
-        -------------------------*/
-        html += "<div class='legendSectionTitle' style='margin-top:8px;'>Edges</div>";
-
-        Object.keys(state.edgeCatStyles).forEach(function (cat) {
-            var e = state.edgeCatStyles[cat];
-            var symbol = e.dashed ? "⋯" : "―";
-
-            html +=
-                "<div class='legendRow'>" +
-                "<span class='legendSymbol' style='color:" + e.color + "'>" + symbol + "</span>" +
-                "<span class='legendLabel'>" + cat + "</span>" +
-                "</div>";
-        });
-
-        html += "</div>";
-        return html;
+    html += "</div>";
+    return html;
     };
 
     return self;

@@ -16,21 +16,16 @@ var CommonBotFunctions = (function () {
     };
 
     function escapeHtml(str) {
-        return String(str)
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
+        return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
     }
 
     function toSafeTransportText(str) {
         var s = String(str);
-        
+
         s = s.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
-        
+
         s = s.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
-        
+
         s = s.replace(/\n/g, "\\n");
         return s;
     }

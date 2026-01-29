@@ -28,7 +28,6 @@ import Lineage_graphPaths from "./lineage_graphPaths.js";
 import LegendOverlayWidget from "../../uiWidgets/legendOverlayWidget.js";
 import Lineage_legendOverlay from "./lineage_legendOverlay.js";
 
-
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
 
@@ -132,7 +131,7 @@ var Lineage_whiteboard = (function () {
         });
         self.installLegendAutoHideOnNodeInfos();
     };
-    
+
     /**
      * Install dialog open/close listeners to auto-hide the legend overlay
      * when the "Node infos" dialog is shown.
@@ -150,26 +149,26 @@ var Lineage_whiteboard = (function () {
             return;
         }
 
-        var containerId = "graphDiv"; 
+        var containerId = "graphDiv";
 
         function isNodeInfosDialog($dlg) {
             var title = String($dlg.dialog("option", "title") || "").trim();
             title = title.replace(/\s+/g, " ");
             return title.indexOf("Node infos") > -1;
         }
-        
+
         $(document).on("dialogopen.legendAutoHide", ".ui-dialog-content", function () {
-          var $dlg = $(this);
-          if (isNodeInfosDialog($dlg) && LegendOverlayWidget && typeof LegendOverlayWidget.setVisible === "function") {
-            LegendOverlayWidget.setVisible(containerId, false);
-          }
+            var $dlg = $(this);
+            if (isNodeInfosDialog($dlg) && LegendOverlayWidget && typeof LegendOverlayWidget.setVisible === "function") {
+                LegendOverlayWidget.setVisible(containerId, false);
+            }
         });
 
         $(document).on("dialogclose.legendAutoHide", ".ui-dialog-content", function () {
-          var $dlg = $(this);
-          if (isNodeInfosDialog($dlg) && LegendOverlayWidget && typeof LegendOverlayWidget.setVisible === "function") {
-            LegendOverlayWidget.setVisible(containerId, true);
-          }
+            var $dlg = $(this);
+            if (isNodeInfosDialog($dlg) && LegendOverlayWidget && typeof LegendOverlayWidget.setVisible === "function") {
+                LegendOverlayWidget.setVisible(containerId, true);
+            }
         });
     };
 
@@ -221,7 +220,7 @@ var Lineage_whiteboard = (function () {
             });
         });
     };
-    
+
     /**
      * Handle source selection changes.
      * Resets the current whiteboard so the graph and legend always match the active source context.
@@ -996,9 +995,9 @@ var Lineage_whiteboard = (function () {
 
             // Initialize legend overlay
             Lineage_legendOverlay.init(graphDiv, self.lineageVisjsGraph, {
-            title: "📘 Legend",
-            restrictionColor: self.restrictionColor,
-            datatypeColor: self.datatypeColor,
+                title: "📘 Legend",
+                restrictionColor: self.restrictionColor,
+                datatypeColor: self.datatypeColor,
             });
 
             if (callback) {

@@ -28,6 +28,7 @@ import Lineage_graphPaths from "./lineage_graphPaths.js";
 import LegendOverlayWidget from "../../uiWidgets/legendOverlayWidget.js";
 import Lineage_legendOverlay from "./lineage_legendOverlay.js";
 
+
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
 
@@ -64,7 +65,7 @@ var Lineage_whiteboard = (function () {
     self.defaultEdgeColor = "#aaa";
     self.defaultPredicateEdgeColor = "#266264";
     self.restrictionColor = "#efbf00"; //"#fdbf01";
-    self.datatypeColor = "8F8F8F";
+    self.datatypeColor = "#8F8F8F";
     self.restrictionFontSize = 8;
     self.restrictionEdgeWidth = 1;
     self.namedIndividualShape = "triangle";
@@ -129,6 +130,47 @@ var Lineage_whiteboard = (function () {
         $("#rightControlPanelDiv").load("./modules/tools/lineage/html/whiteBoardButtons.html", function () {
             UI.resetWindowSize();
         });
+        self.installLegendAutoHideOnNodeInfos();
+    };
+    
+    /**
+     * Install dialog open/close listeners to auto-hide the legend overlay
+     * when the "Node infos" dialog is shown.
+     * Idempotent: safe to call multiple times.
+     * @returns {void}
+     */
+    self.installLegendAutoHideOnNodeInfos = function () {
+        if (self._legendAutoHideInstalled) {
+            return;
+        }
+        self._legendAutoHideInstalled = true;
+
+        // jQuery UI dialogs
+        if (!window.$ || !$.fn || !$.fn.dialog) {
+            return;
+        }
+
+        var containerId = "graphDiv"; 
+
+        function isNodeInfosDialog($dlg) {
+            var title = String($dlg.dialog("option", "title") || "").trim();
+            title = title.replace(/\s+/g, " ");
+            return title.indexOf("Node infos") > -1;
+        }
+        
+        $(document).on("dialogopen.legendAutoHide", ".ui-dialog-content", function () {
+          var $dlg = $(this);
+          if (isNodeInfosDialog($dlg) && LegendOverlayWidget && typeof LegendOverlayWidget.setVisible === "function") {
+            LegendOverlayWidget.setVisible(containerId, false);
+          }
+        });
+
+        $(document).on("dialogclose.legendAutoHide", ".ui-dialog-content", function () {
+          var $dlg = $(this);
+          if (isNodeInfosDialog($dlg) && LegendOverlayWidget && typeof LegendOverlayWidget.setVisible === "function") {
+            LegendOverlayWidget.setVisible(containerId, true);
+          }
+        });
     };
 
     /**
@@ -142,6 +184,9 @@ var Lineage_whiteboard = (function () {
         $("#graphDiv").empty();
         $("#lateralPanelDiv").resizable("destroy");
         $("#lateralPanelDiv").css("width", "435px");
+        // Remove namespaced dialog handlers (installed in installLegendAutoHideOnNodeInfos)
+        $(document).off(".legendAutoHide");
+        self._legendAutoHideInstalled = false;
     };
 
     /**
@@ -185,27 +230,28 @@ var Lineage_whiteboard = (function () {
      * @name onSourceSelect
      * @memberof module:Lineage_whiteboard
      * @param {string} sourceLabel - Selected source label.
-     * @param {Object} event - UI event.
      * @returns {void}
      */
-    self.onSourceSelect = function (sourceLabel, event) {
-    if (!sourceLabel) {
-        return;
-    }
+    self.onSourceSelect = function (sourceLabel) {
+        if (!sourceLabel) {
+            return;
+        }
+        // Keep the active source consistent for subsequent queries/actions.
+        Lineage_sources.activeSource = sourceLabel;
 
-    // Keep the active source consistent for subsequent queries/actions.
-    Lineage_sources.activeSource = sourceLabel;
+        // Destroy the overlay to prevent stale DOM and event handlers
+        Lineage_legendOverlay.destroy();
 
-    // Clear current graph + destroy overlay legend (prevents stale legend content).
-    self.initUI(true);
+        // Clear current graph + destroy overlay legend (prevents stale legend content).
+        self.initUI(true);
 
-    // Recreate an empty graph so the overlay is re-initialized in the right container.
-    self.resetVisjsGraph();
+        // Recreate an empty graph so the overlay is re-initialized in the right container.
+        self.resetVisjsGraph();
 
-    // Refresh the tree for the newly selected source (if available in your UI flow).
-    if (SearchWidget && typeof SearchWidget.showTopConcepts === "function") {
-        SearchWidget.showTopConcepts(sourceLabel);
-    }
+        // Refresh the tree for the newly selected source (if available in your UI flow).
+        if (SearchWidget && typeof SearchWidget.showTopConcepts === "function") {
+            SearchWidget.showTopConcepts(sourceLabel);
+        }
     };
 
     /**
@@ -348,7 +394,9 @@ var Lineage_whiteboard = (function () {
     self.initUI = function (clearTree) {
         UI.message("");
         self.lineageVisjsGraph.clearGraph();
-        Lineage_legendOverlay.refresh();
+        if (Lineage_legendOverlay && typeof Lineage_legendOverlay.refresh === "function") {
+            Lineage_legendOverlay.refresh();
+        }
         self.queriesStack = [];
         LegendWidget.clearLegend();
         Lineage_decoration.initLegend();
@@ -947,7 +995,11 @@ var Lineage_whiteboard = (function () {
             }
 
             // Initialize legend overlay
-            Lineage_legendOverlay.init(graphDiv);
+            Lineage_legendOverlay.init(graphDiv, self.lineageVisjsGraph, {
+            title: "📘 Legend",
+            restrictionColor: self.restrictionColor,
+            datatypeColor: self.datatypeColor,
+            });
 
             if (callback) {
                 callback();

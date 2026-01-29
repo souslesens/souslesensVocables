@@ -1,3 +1,5 @@
+import CommonBotFunctions from "./_commonBotFunctions.js"; 
+
 class BotEngineClass {
     constructor() {
         this.options = {};
@@ -15,6 +17,7 @@ class BotEngineClass {
         this.divId = null;
     }
 
+    
     init(botModule, initialWorkflow, options, callback) {
         if (!options) {
             options = {};
@@ -143,31 +146,36 @@ class BotEngineClass {
 
         textarea.val(defaultValue || "").focus();
 
-        const validate = () => {
-            const value = textarea.val().trim();
-            if (!value) {
-                return this.previousStep();
-            }
+    const validate = () => {
+        var raw = textarea.val();
+        var value = String(raw || "").trim();
+        if (!value) {
+            return this.previousStep();
+        }
 
-            this.history.VarFilling[this.history.currentIndex] = {
-                VarFilled: varToFill,
-                valueFilled: value,
-            };
+    
+        var valueSafe = CommonBotFunctions.toSafeTransportText(value);
 
-            this.currentBot.params[varToFill] = value;
-            this.insertBotMessage(value);
-
-            container.remove();
-
-            if (callback) {
-                const ret = callback(value);
-                if (ret === false) {
-                    return;
-                }
-            }
-
-            this.nextStep();
+        this.history.VarFilling[this.history.currentIndex] = {
+            VarFilled: varToFill,
+            valueFilled: value,
+            valueFilledSafe: valueSafe,
         };
+
+        this.currentBot.params[varToFill] = valueSafe;
+
+        this.insertBotMessage(value);
+
+        container.remove();
+
+        if (callback) {
+            var ret = callback(valueSafe, value);
+            if (ret === false) return;
+        }
+
+        this.nextStep();
+    };
+
 
         sendBtn.on("click", validate);
     }
@@ -602,7 +610,9 @@ class BotEngineClass {
         if (chat_class == "chat-left") {
             html += '<div style="display: flex; flex-direction: row;justify-content: space-between; align-items: center; ">';
         }
-        html += "<span class='" + chat_class + "' id='" + tokenId + "'>" + str + "</span>";
+        var safeDisplay = CommonBotFunctions.escapeHtml(str).replace(/\n/g, "<br>");
+html += "<span class='" + chat_class + "' id='" + tokenId + "'>" + safeDisplay + "</span>";
+
         if (chat_class == "chat-left") {
             html += "</div>";
             this.lastTokenId = tokenId;

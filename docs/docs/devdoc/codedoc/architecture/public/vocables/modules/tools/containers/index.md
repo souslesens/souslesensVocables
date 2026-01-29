@@ -5,7 +5,7 @@
 
 ## Overview
 
-Containers query RDF containers, visualize them, and allow user interactions. It is able to fetch container hierarchies and update memberships via SPARQL. It is then render in a Vis.js graph and display in a jstree.
+Containers holds non semantic object such as technical collection. This tool query RDF containers, visualize them, and allow user interactions. It is able to fetch container hierarchies and update memberships via SPARQL. It is then render in a Vis.js graph and display in a jstree.
 
 ## Modules
 

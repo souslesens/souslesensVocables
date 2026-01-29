@@ -107,6 +107,10 @@ var SourceSelectorWidget = (function () {
                 var othersGroup = "OTHERS";
 
                 var group = Config.sources[sourceLabel].group;
+                // jstree bug otherwise
+                if (group && group.endsWith("/")) {
+                    group = group.slice(0, -1);
+                }
                 if (group) {
                     var subGroups = group.split("/");
                     subGroups.forEach(function (subGroup, index) {

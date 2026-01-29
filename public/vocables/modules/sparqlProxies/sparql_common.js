@@ -339,7 +339,7 @@ var Sparql_common = (function () {
         if (values.value) {
             if (values.isString) {
                 var lang = values.lang ? "@" + values.lang : "";
-                str = '"' + values.value.replace(/"/g, "'") + '"';
+                var str = '"' + values.value.replace(/"/g, "'") + '"';
                 return "filter( ?" + varName + "=" + str + lang + ").";
             }
         }

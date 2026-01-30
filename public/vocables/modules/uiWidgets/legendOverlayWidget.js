@@ -462,7 +462,7 @@ var LegendOverlayWidget = (function () {
 
         if (colors && colors.length > 1) {
             var gradientColors = colors.slice(0, 4);
-            var percentStep = 100 / c.length;
+            var percentStep = 100 / gradientColors.length;
             var gradientStops = [];
             for (var i = 0; i < gradientColors.length; i++) {
                 var startPct = Math.round(i * percentStep);

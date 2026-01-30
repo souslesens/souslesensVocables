@@ -5,7 +5,7 @@
 
 ## Overview
 
-Axioms form an OWL authoring and exploration toolkit: it loads ontology classes/properties, extract and cache axioms/triples, and convert between triples and Manchester syntax for display and validation. It provides guided axiom construction with context-aware suggestions. The visualization layer renders axioms as an interactive Vis.js graph with a “live legend” to add/remove nodes, then serializes the built graph back into RDF triple.
+Axioms form an OWL authoring and exploration toolkit: it loads ontology classes/properties, extract and cache axioms/triples, convert between triples and Manchester syntax for display and validation. It provides guided axiom construction with context-aware suggestions. The visualization layer renders axioms as an interactive Vis.js graph with a “live legend” to add/remove nodes, then serializes the built graph back into RDF triple.
 
 ## Modules
 
@@ -39,15 +39,19 @@ It loads and displays all axioms for a selected ontology class then renders them
 
 ## Features
 
-- **Datasource browsing & actions**: builds the DB/CSV tree, exposes rich context menus
-- **DB/CSV ingestion + mapping load**: loads DB tables, CSV headers and the corresponding mappings JSON and populates columns
-- **Column→RDF triple mapping UI**: create/edit triple models
-
+- **Automatic extraction of OWL axioms from SPARQL endpoints**: query an ontology source and extract core OWL
+- **Intelligent suggestion engine based on ontology**: computes which classes, properties, or keywords are valid. Ensures that suggested axioms remain logically valid
+- **Graph‑based visualization and exploration of axioms**: transform RDF triples into a dynamic VisJS graph
+- **Axiom-oriented legend and guided graph interactions**:  add classes, properties, connectives, and restrictions directly from the graph interface, enforcing valid OWL construction rules
+- **Node-centric axiom inspection and editing dashboard**: provides a full panel for any ontology resource
 
 ## Usage
 
-- Load a new data source and its schema
-- Inspect
+- Load an ontology class in the interface, the system automatically extracts all its OWL axioms
+- View these axioms as an interactive graph, exploring restrictions, properties, and logical constructors
+- Inspect and navigate them through the axiom tree component
+- Refine or add new axioms
+- Build valid axioms directly on the graph, ensuring semantic correctness
 
 <!-- AUTO-DESC:END -->
 

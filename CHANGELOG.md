@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.24.0](https://github.com/souslesens/souslesensVocables/compare/2.23.1...2.24.0) (2026-02-02)
+
+
+### Bug Fixes
+
+* **databases:** treat select !='*' case for order by ([af3f43d](https://github.com/souslesens/souslesensVocables/commit/af3f43db58e90b0f1a3bec839b64a23d6ad303b6))
+* **DownloadGraphModal:**  add section on turtle and xml for ontologies where there isn't ([24c047f](https://github.com/souslesens/souslesensVocables/commit/24c047f9117722029af426e9baeb8df249d921b3))
+* **downloadgraphmodal:** lint ([aaea023](https://github.com/souslesens/souslesensVocables/commit/aaea02367638c1f5193ae5195e57fbaf5fe5302e))
+* **mappingColumnGraph:** jsdoc ([448c66e](https://github.com/souslesens/souslesensVocables/commit/448c66ed84454d6cf848d414a42b0011ea1551a9))
+* **sourceSelector:** source Selector bug when group end by '/' ([81e2fe4](https://github.com/souslesens/souslesensVocables/commit/81e2fe4c4eafeae895e17027b6817188f7c7315b))
+* **sparql_common:** missing var ([a112b51](https://github.com/souslesens/souslesensVocables/commit/a112b51ffab256a2bde0df572ee24f85d58cd19b))
+* **tripleGenerator:** orderBy for batch reading ([790e7d3](https://github.com/souslesens/souslesensVocables/commit/790e7d30671e15196a887079384956a779e6280a))
+
 ### [2.23.1](https://github.com/souslesens/souslesensVocables/compare/2.23.0...2.23.1) (2026-01-06)
 
 

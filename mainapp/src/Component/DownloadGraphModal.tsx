@@ -46,7 +46,6 @@ type ApiServerResponseError = {
 type SourceInfo = {
     graphUri: string | undefined;
     graphSize: number | undefined;
-    pageSize: number | undefined;
 };
 
 type ApiServerResponse = ApiServerResponseError | ApiServerResponseOk;
@@ -184,15 +183,15 @@ export function DownloadGraphModal({ apiUrl, onClose, open, sourceName }: Downlo
     const [currentDownloadFormat, setCurrentDownloadFormat] = useState("nt");
     const [skipNamedIndividuals, setSkipNamedIndividuals] = useState(false);
     const [includeImports, setIncludeImports] = useState(false);
-    const [sourceInfo, setSourceInfo] = useState<SourceInfo>({ graphUri: undefined, graphSize: undefined, pageSize: undefined });
+    const [sourceInfo, setSourceInfo] = useState<SourceInfo>({ graphUri: undefined, graphSize: undefined });
 
     useEffect(() => {
         const fetchAll = async () => {
             const response = await fetchMe();
             setCurrentUser(response.user);
 
-            const info = await fetchSourceInfo(sourceName);
-            setSourceInfo({ graphUri: info.graph, graphSize: info.graphSize, pageSize: info.pageSize });
+            const info = await fetchSourceInfo(sourceName, false);
+            setSourceInfo({ graphUri: info.graph, graphSize: info.graphSize });
         };
         void fetchAll();
     }, []);
@@ -205,9 +204,9 @@ export function DownloadGraphModal({ apiUrl, onClose, open, sourceName }: Downlo
         onClose();
     };
 
-    const fetchSourceInfo = async (sourceName: string) => {
-        const response = await fetch(`/api/v1/rdf/graph/info?source=${sourceName}`);
-        const json = (await response.json()) as { graph: string; graphSize: number; pageSize: number };
+    const fetchSourceInfo = async (sourceName: string, withImports: boolean) => {
+        const response = await fetch(`/api/v1/rdf/graph/info?source=${sourceName}&withImports=${String(withImports)}`);
+        const json = (await response.json()) as { graph: string; graphSize: number };
         return json;
     };
 
@@ -250,8 +249,8 @@ export function DownloadGraphModal({ apiUrl, onClose, open, sourceName }: Downlo
         return { blobParts: blobParts, message: "ok" };
     };
 
-    const fetchGraphPart = async (name: string, offset: number) => {
-        const response = await fetch(`/api/v1/rdf/graph/?source=${name}&offset=${offset}`);
+    const fetchGraphPart = async (name: string, offset: number, withImports: boolean) => {
+        const response = await fetch(`/api/v1/rdf/graph/?source=${name}&offset=${offset}&withImports=${withImports}`);
         return await response.json();
     };
 
@@ -264,7 +263,7 @@ export function DownloadGraphModal({ apiUrl, onClose, open, sourceName }: Downlo
             return [];
         }
 
-        const response = await fetchGraphPart(name, offset);
+        const response = await fetchGraphPart(name, offset, includeImports);
 
         if (response.data !== "# Empty NT\n") {
             blobParts.push(response.data);
@@ -337,6 +336,13 @@ export function DownloadGraphModal({ apiUrl, onClose, open, sourceName }: Downlo
         return { blobParts: blobParts, message: "ok" };
     };
 
+    const toggleAddImports = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const checked = event.target.checked;
+        const info = await fetchSourceInfo(sourceName, checked);
+        setSourceInfo({ graphUri: info.graph, graphSize: info.graphSize });
+        setIncludeImports(checked);
+    };
+
     return (
         <Dialog fullWidth={true} maxWidth="md" onClose={onClose} open={open} PaperProps={{ component: "form" }}>
             <DialogTitle id="contained-modal-title-vcenter">Downloading {sourceName}</DialogTitle>
@@ -387,15 +393,7 @@ export function DownloadGraphModal({ apiUrl, onClose, open, sourceName }: Downlo
                         <FormControl fullWidth>
                             <FormControlLabel
                                 id={`include-imports-switch-${sourceName}`}
-                                control={
-                                    <Checkbox
-                                        checked={includeImports}
-                                        disabled={transferPercent > 0}
-                                        onChange={(event) => {
-                                            setIncludeImports(event.currentTarget.checked);
-                                        }}
-                                    />
-                                }
+                                control={<Checkbox checked={includeImports} disabled={transferPercent > 0} onChange={toggleAddImports} />}
                                 label="Add imports in this download"
                             />
                         </FormControl>

@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.24.1](https://github.com/souslesens/souslesensVocables/compare/2.24.0...2.24.1) (2026-02-02)
+
+
+### Bug Fixes
+
+* **Databases:** upload Databases destroy actual knex connexion after update ([da852b1](https://github.com/souslesens/souslesensVocables/commit/da852b17bd3c0b623dfc506ba7a8f68a50a9d2ce))
+
 ## [2.24.0](https://github.com/souslesens/souslesensVocables/compare/2.23.1...2.24.0) (2026-02-02)
 
 

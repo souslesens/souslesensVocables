@@ -43,6 +43,12 @@ type ApiServerResponseError = {
     detail: string;
 };
 
+type SourceInfo = {
+    graphUri: string | undefined;
+    graphSize: number | undefined;
+    pageSize: number | undefined;
+};
+
 type ApiServerResponse = ApiServerResponseError | ApiServerResponseOk;
 
 const addImportsAndContributor = (blobParts: BlobPart[], sourceName: string, userLogin: string, format: string): BlobPart[] => {
@@ -178,11 +184,15 @@ export function DownloadGraphModal({ apiUrl, onClose, open, sourceName }: Downlo
     const [currentDownloadFormat, setCurrentDownloadFormat] = useState("nt");
     const [skipNamedIndividuals, setSkipNamedIndividuals] = useState(false);
     const [includeImports, setIncludeImports] = useState(false);
+    const [sourceInfo, setSourceInfo] = useState<SourceInfo>({ graphUri: undefined, graphSize: undefined, pageSize: undefined });
 
     useEffect(() => {
         const fetchAll = async () => {
             const response = await fetchMe();
             setCurrentUser(response.user);
+
+            const info = await fetchSourceInfo(sourceName);
+            setSourceInfo({ graphUri: info.graph, graphSize: info.graphSize, pageSize: info.pageSize });
         };
         void fetchAll();
     }, []);
@@ -197,7 +207,7 @@ export function DownloadGraphModal({ apiUrl, onClose, open, sourceName }: Downlo
 
     const fetchSourceInfo = async (sourceName: string) => {
         const response = await fetch(`/api/v1/rdf/graph/info?source=${sourceName}`);
-        const json = (await response.json()) as { graphSize: number; pageSize: number };
+        const json = (await response.json()) as { graph: string; graphSize: number; pageSize: number };
         return json;
     };
 
@@ -336,9 +346,8 @@ export function DownloadGraphModal({ apiUrl, onClose, open, sourceName }: Downlo
 
         for (const source of sources) {
             if (apiUrl === "/") {
-                const graphInfo = await fetchSourceInfo(source);
-                sourceSizes.push({ source, graphSize: graphInfo.graphSize, pageSize: graphInfo.pageSize });
-                totalSize += graphInfo.graphSize;
+                sourceSizes.push({ source, graphSize: sourceInfo.graphSize || 0, pageSize: sourceInfo.pageSize || 0 });
+                totalSize += sourceInfo.graphSize || 0;
             } else {
                 // For Python API, we get the filesize during download, so use equal weight as fallback
                 // We'll update progress based on actual filesize during download

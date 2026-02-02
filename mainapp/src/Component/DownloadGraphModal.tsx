@@ -313,10 +313,8 @@ export function DownloadGraphModal({ apiUrl, onClose, open, sourceName }: Downlo
                 return;
             }
 
-            const enrichedBlobParts = addImportsAndContributor(blobParts, sourceName, currentUser.login, currentDownloadFormat);
-
             // create a blob and a link to dwl data, autoclick to autodownload
-            const blob = new Blob(enrichedBlobParts, { type: "text/plain" });
+            const blob = new Blob(blobParts, { type: "text/plain" });
             const link = document.createElement("a");
             link.download = `${sourceName}.${currentDownloadFormat}`;
             link.href = URL.createObjectURL(blob);
@@ -331,10 +329,6 @@ export function DownloadGraphModal({ apiUrl, onClose, open, sourceName }: Downlo
         let blobParts: BlobPart[] | null;
         let message = "ok";
         let sources = [sourceName];
-        if (includeImports) {
-            const imports = window?.Config.sources[sourceName]?.imports || [];
-            sources = sources.concat(imports);
-        }
         blobParts = [];
         let blobPartsSource: BlobPart[] = [];
 

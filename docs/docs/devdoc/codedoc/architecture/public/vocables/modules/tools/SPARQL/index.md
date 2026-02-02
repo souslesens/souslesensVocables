@@ -1,9 +1,18 @@
 <!-- AUTO-GENERATED: do not edit by hand -->
-# SPARQL
+# SPARQL documentation tool
 
 <!-- AUTO-DESC:START -->
 
-This page summarizes the code structure for this directory and its immediate subdirectories. It focuses on the `public / vocables / modules / tools / SPARQL` area within the `public` module. Use the table of contents below to navigate deeper.
+## Overview
+
+It provides a small controller to open a dialog that hosts a SPARQL editor and wire it to your backend proxy endpoint, so users can run SPARQL queries against a configured SPARQL server.
+
+## Usage
+
+- It opens a dialog and loads an HTML interface for running SPARQL queries
+- It initializes Yasgui inside the dialog using configuration from Config.sparql_server.url
+- Queries are routed through a backend proxy to reach the SPARQL server
+- Results are displayed in a scrollable panel, while errors are sent to MainController.errorAlert
 
 <!-- AUTO-DESC:END -->
 

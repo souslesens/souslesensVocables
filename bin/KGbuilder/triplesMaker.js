@@ -221,16 +221,14 @@ var TriplesMaker = {
                             return callback(null, { sampleTriples: sampleTriples, totalTriplesCount: sampleTriples.length });
                         } else {
                             try {
-                                
-                                await modelUtils.redoIfFailure(async function () {
-                                    var batchTriplesCount = await KGbuilder_triplesWriter.writeTriplesAsync(
+                                var batchTriplesCount = 0;
+                                batchTriplesCount = await modelUtils.redoIfFailure(async function () {
+                                    return await KGbuilder_triplesWriter.writeTriplesAsync(
                                         batchTriples,
                                         tableProcessingParams.sourceInfos.graphUri,
                                         tableProcessingParams.sourceInfos.sparqlServerUrl,
                                     );
                                 });
-
-                               
 
                                 var currentTime = new Date();
                                 totalTriplesCount += batchTriplesCount;

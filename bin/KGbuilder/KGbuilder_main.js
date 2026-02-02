@@ -31,6 +31,14 @@ var KGbuilder_main = {
      * @param {Function} options - Node-style async Function called to proccess result or handle error
      */
     importTriplesFromCsvOrTable: function (user, source, datasource, tables, options, callback) {
+        console.log("[KGbuilder_main.importTriplesFromCsvOrTable] Called with:", {
+            user,
+            source,
+            datasource,
+            tables,
+            filterMappingIds: options?.filterMappingIds,
+        });
+
         //  var sparqlServerUrl;
         var output = "";
         options = options || {};
@@ -184,16 +192,18 @@ var KGbuilder_main = {
                                 }
 
                                 var sql = 'select count(*) as count from "' + table + '";';
-                                try {
-                                    databaseModel.getUserConnection(user, tableProcessingParams.tableInfos.dbID).then((connection) => {
-                                        databaseModel.query(connection, sql).then((result) => {
-                                            tableProcessingParams.tableInfos.tableTotalRecords = parseInt(result.rows[0].count);
-                                            callbackSeries();
-                                        });
+                                databaseModel
+                                    .getUserConnection(user, tableProcessingParams.tableInfos.dbID)
+                                    .then((connection) => {
+                                        return databaseModel.query(connection, sql);
+                                    })
+                                    .then((result) => {
+                                        tableProcessingParams.tableInfos.tableTotalRecords = parseInt(result.rows[0].count);
+                                        callbackSeries();
+                                    })
+                                    .catch((err) => {
+                                        callbackSeries(err);
                                     });
-                                } catch (err) {
-                                    callbackSeries(err);
-                                }
                             },
 
                             // create the tripels for this table

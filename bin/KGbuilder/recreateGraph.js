@@ -86,6 +86,58 @@ function getAllTablesFromMappings(mappingData) {
     return tables;
 }
 
+/**
+ * Get filtered mapping IDs for specific tables (includes both nodes and edges)
+ * @param {Object} mappingData - The mapping data structure
+ * @param {Array<string>} tables - Array of table names
+ * @returns {Array<string>|null} Array of mapping IDs or null
+ */
+function getFilteredMappingIds(mappingData, tables) {
+    if (!tables || tables.length === 0) return null;
+
+    var mappingIds = [];
+    var columnsMap = {};
+
+    // First pass: build columnsMap with ALL nodes of the target tables
+    // Then add to mappingIds only master nodes or nodes with otherPredicates
+    (mappingData.nodes || []).forEach(function (n) {
+        if (!n || !n.data || !n.id) return;
+
+        if (MappingParser.columnsMappingsObjects.indexOf(n.data.type) > -1) {
+            if (tables.indexOf(n.data.dataTable) > -1) {
+                // Add to columnsMap (used for edge filtering)
+                columnsMap[n.id] = n;
+
+                // Add to mappingIds only if master node or has otherPredicates
+                // Same logic as frontend showFilterMappingsDialog line 812
+                if (!n.data.definedInColumn || (n.data.otherPredicates && n.data.otherPredicates.length > 0)) {
+                    if (mappingIds.indexOf(n.id) < 0) {
+                        mappingIds.push(n.id);
+                    }
+                }
+            }
+        }
+    });
+
+    // Second pass: collect edges where BOTH endpoints are in columnsMap
+    // Same logic as frontend showFilterMappingsDialog line 824
+    (mappingData.edges || []).forEach(function (e) {
+        if (!e || !e.id) return;
+
+        // Include edge if BOTH from and to are in columnsMap
+        if (columnsMap[e.from] && columnsMap[e.to]) {
+            if (mappingIds.indexOf(e.id) < 0) {
+                mappingIds.push(e.id);
+            }
+        }
+    });
+
+    console.log("[getFilteredMappingIds] columnsMap keys:", Object.keys(columnsMap).length);
+    console.log("[getFilteredMappingIds] Total mappingIds:", mappingIds.length);
+
+    return mappingIds.length > 0 ? mappingIds : null;
+}
+
 function normalizeTablesParam(tableParam) {
     if (!tableParam) return [];
     if (Array.isArray(tableParam)) return tableParam;
@@ -125,9 +177,15 @@ async function recreateGraphTriples(params) {
 
     var requestedTables = normalizeTablesParam(body.table);
 
+    console.log("[recreateGraph] body.table:", body.table);
+    console.log("[recreateGraph] requestedTables:", requestedTables);
+
     var targetTables = requestedTables;
     if (!targetTables || targetTables.length === 0) {
         targetTables = getAllTablesFromMappings(mappingData);
+        console.log("[recreateGraph] No specific tables requested, processing ALL tables:", targetTables);
+    } else {
+        console.log("[recreateGraph] Processing specific tables:", targetTables);
     }
 
     // DELETE
@@ -137,7 +195,29 @@ async function recreateGraphTriples(params) {
         deleteResult = await deleteKGBuilderTriplesAsync(source, tablesArgForDelete, options);
     }
 
+    // Get datasource from mappings for the first table
     var datasource = null;
+    if (targetTables && targetTables.length > 0) {
+        datasource = getDatasourceFromMappings(mappingData, targetTables[0]);
+        console.log("[recreateGraph] Target tables:", targetTables);
+        console.log("[recreateGraph] Using datasource from mappings:", datasource);
+        console.log("[recreateGraph] Options passed:", JSON.stringify(options, null, 2));
+    }
+
+    // Filter mappings for target tables (server-side filtering)
+    if (targetTables && targetTables.length > 0 && !options.filterMappingIds) {
+        options.filterMappingIds = getFilteredMappingIds(mappingData, targetTables);
+        console.log("[recreateGraph] Server-side filtered mapping IDs:", options.filterMappingIds);
+        console.log("[recreateGraph] Number of filtered mappings:", options.filterMappingIds ? options.filterMappingIds.length : 0);
+    }
+
+    console.log("[recreateGraph] Calling importAsync with:", {
+        user,
+        source,
+        datasource,
+        tables: targetTables,
+        hasFilterMappingIds: !!options.filterMappingIds,
+    });
 
     const importResult = await importAsync(user, source, datasource, targetTables, options);
 
@@ -156,6 +236,7 @@ export default {
     getOptionsFromBody,
     getDatasourceFromMappings,
     getAllTablesFromMappings,
+    getFilteredMappingIds,
     importAsync,
     recreateGraphTriples,
 };

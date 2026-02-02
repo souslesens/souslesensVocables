@@ -221,7 +221,7 @@ var TriplesMaker = {
                             return callback(null, { sampleTriples: sampleTriples, totalTriplesCount: sampleTriples.length });
                         } else {
                             try {
-                                var batchTriplesCount
+                                var batchTriplesCount;
                                 await modelUtils.redoIfFailure(async function () {
                                     batchTriplesCount = await KGbuilder_triplesWriter.writeTriplesAsync(
                                         batchTriples,

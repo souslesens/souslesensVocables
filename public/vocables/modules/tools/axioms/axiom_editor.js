@@ -568,7 +568,7 @@ const Axiom_editor = (function () {
             if (err) {
                 return MainController.errorAlert(err.responseText);
             }
-            Axioms_graph.drawNodeAxioms2(self.currentSource, self.currentNode.id, triples, "axiomGraphDiv", {}, function (err) {});
+            Axioms_graph.drawNodeAxioms2(self.currentSource, self.currentNode.id, triples, "axiomGraphDiv", {}, );
         });
     };
     self.listTriples = function () {

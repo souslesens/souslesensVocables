@@ -16,8 +16,10 @@ module.exports = function () {
 
     async function GET(req, res, _next) {
         try {
+            const config = await mainConfigModel.getConfig();
+            const limit = config.sparqlDownloadLimit;
+
             const sourceName = req.query.source;
-            const limit = req.query.limit;
             const offset = req.query.offset;
             const includesImports = req.query.withImports;
 
@@ -43,9 +45,12 @@ module.exports = function () {
             }
 
             const graphUri = userSources[sourceName].graphUri;
-
             const data = await rdfDataModel.getGraphPartNt(graphUri, limit, offset, graphsImports);
-            res.status(200).send(data);
+
+            const nextOffset = Number(offset) + Number(limit);
+            const response = { next_offset: nextOffset, data: data };
+
+            res.status(200).send(response);
         } catch (error) {
             console.error(error);
             res.status(500).send({ error: error });
@@ -209,13 +214,6 @@ module.exports = function () {
             {
                 name: "source",
                 description: "Source name of the graph to retrieve",
-                in: "query",
-                type: "string",
-                required: true,
-            },
-            {
-                name: "limit",
-                description: "SPARQL LIMIT",
                 in: "query",
                 type: "string",
                 required: true,

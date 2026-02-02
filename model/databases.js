@@ -215,6 +215,10 @@ class DatabaseModel {
             await this._write(updatedDatabases);
         } finally {
             lock.release("DatabasesThread");
+            if (this.knexClients[updatedDatabase.id]) {
+                await this.knexClients[updatedDatabase.id].destroy();
+                delete this.knexClients[updatedDatabase.id];
+            }
         }
     };
 

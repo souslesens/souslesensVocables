@@ -10,6 +10,7 @@ export default function () {
     async function GET(req, res, _next) {
         try {
             const sourceName = req.query.source;
+            const includesImports = req.query.withImports;
 
             const userInfo = await userManager.getUser(req.user);
             const userSources = await sourceModel.getUserSources(userInfo.user);
@@ -19,11 +20,22 @@ export default function () {
                 return;
             }
 
-            const graphUri = userSources[sourceName].graphUri;
+            let graphsImports = [];
+            if (includesImports) {
+                graphsImports = userSources[sourceName].imports
+                    .map((src) => {
+                        if (userSources[src].graphUri) {
+                            return userSources[src].graphUri;
+                        } else {
+                            return null;
+                        }
+                    })
+                    .filter((uri) => uri !== null);
+            }
 
-            const graphSize = await rdfDataModel.getTripleCount(graphUri);
-            const pageSize = Math.min(await rdfDataModel.getPageSize(graphUri), 2000);
-            res.status(200).send({ graph: graphUri, graphSize: graphSize, pageSize: pageSize });
+            const graphUri = userSources[sourceName].graphUri;
+            const graphSize = await rdfDataModel.getTripleCount(graphUri, graphsImports);
+            res.status(200).send({ graph: graphUri, graphSize: graphSize });
         } catch (error) {
             console.error(error);
             res.status(500).send({ error: error });
@@ -41,6 +53,14 @@ export default function () {
                 in: "query",
                 type: "string",
                 required: true,
+            },
+            {
+                name: "withImports",
+                description: "",
+                in: "query",
+                type: "boolean",
+                required: false,
+                default: false,
             },
         ],
         responses: {

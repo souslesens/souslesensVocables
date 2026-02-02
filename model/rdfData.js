@@ -76,11 +76,14 @@ class RdfDataModel {
     };
     /**
      * @param {string} graphUri - the graph URI
+     * @param {string[]} withImports - array of uri to get
      * @returns {Promise<number>} - number of triples
      */
-    getTripleCount = async (graphUri) => {
+    getTripleCount = async (graphUri, withImports = []) => {
+        const fromStr = withImports.map((uri) => `FROM <${uri}>`).join("\n");
         const query = `SELECT COUNT(*) as ?total
                        FROM <${graphUri}>
+                       ${fromStr}
                        WHERE {
                            ?s ?p ?o .
                        }`;

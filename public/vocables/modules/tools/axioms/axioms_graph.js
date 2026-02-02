@@ -78,7 +78,7 @@ var Axioms_graph = (function () {
 
     self.drawNodeAxioms2 = function (sourceLabel, rootNodeId, axiomsTriples, divId, options, callback) {
         self.currentAxiomTriples=axiomsTriples;
-        Axiom_activeLegend.showTriples()
+     //   Axiom_activeLegend.showTriples()
         if (!options) {
             options = {};
         }
@@ -457,17 +457,53 @@ var Axioms_graph = (function () {
 
                     return callbackSeries();
 
-                    var edgesTodelete = {};
-                    var nodesTodelete = {};
+                    var edgesTodelete = [];
+                    var nodesTodelete = [];
                     var edgesFromMap = {};
+                    var edgesToMap = {};
                     visjsData.edges.forEach(function (edge) {
-                        edgesFromMap[edge.from] = edge;
+                        if(! edgesFromMap[edge.from] )
+                        edgesFromMap[edge.from] = [];
+                        edgesFromMap[edge.from].push(edge);
+                        if(! edgesToMap[edge.to] )
+                            edgesToMap[edge.to] = [];
+                        edgesToMap[edge.to].push(edge);
+
+
                     });
                     var nodesMap = {};
                     visjsData.nodes.forEach(function (node) {
                         nodesMap[node.id] = node;
                     });
 
+
+
+                    visjsData.nodes.forEach(function (node) {
+
+                        if ( node.color == "#70ac47") {
+                            var nextNodes=[]
+                            if(edgesFromMap[node.id])
+                          edgesFromMap[node.id].forEach(function(edge){
+                                if( nodesMap[edge.to].color == "#70ac47"){
+                                    nodesTodelete.push(edge.to)
+                                    edgesTodelete.push(edge.id)
+                                }
+                            })
+                        }
+
+
+
+                            //blanknode
+                            edgesFromMap[edge.to].from = edge.from;
+                            nodesTodelete[edge.to] = 1;
+                            edgesTodelete[edge.id] = 1;
+
+                    });
+
+
+
+
+                    return;
                     visjsData.edges.forEach(function (edge) {
                         if (nodesMap[edge.to] && nodesMap[edge.to].color == "#70ac47") {
                             //blanknode
@@ -496,6 +532,11 @@ var Axioms_graph = (function () {
                 //draw graph
 
                 function (callbackSeries) {
+
+
+                if(callback){
+                    return callback(null,visjsData);
+                }
                     if (options.addToGraph && self.axiomsVisjsGraph) {
                         if (true) {
                             self.switchToHierarchicalLayout(true);
@@ -507,8 +548,12 @@ var Axioms_graph = (function () {
                     } else {
                         options.onNodeClick=Axiom_activeLegend.onNodeGraphClick
                         self.drawGraph(visjsData, divId, options);
-                        self.currentVisjsData = visjsData;
+                        //self.currentVisjsData = visjsData;
                         self.switchToHierarchicalLayout(false);
+                    }
+                    self.currentVisjsData = {
+                        nodes: self.axiomsVisjsGraph.data.nodes.get(),
+                        edges: self.axiomsVisjsGraph.data.edges.get(),
                     }
                     return callbackSeries();
                 },
@@ -612,6 +657,7 @@ enabled:true},*/
     self.clearGraph = function () {
         $("#" + self.graphDivId).html("");
         $("#" + self.graphDivId).html("");
+        self.currentAxiomTriples=null
     };
 
     self.outlineNode = function (nodeId) {

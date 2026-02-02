@@ -221,9 +221,15 @@ var TriplesMaker = {
                             return callback(null, { sampleTriples: sampleTriples, totalTriplesCount: sampleTriples.length });
                         } else {
                             try {
+<<<<<<< HEAD
                                 var batchTriplesCount;
                                 await modelUtils.redoIfFailure(async function () {
                                     batchTriplesCount = await KGbuilder_triplesWriter.writeTriplesAsync(
+=======
+                                var batchTriplesCount = 0;
+                                batchTriplesCount = await modelUtils.redoIfFailure(async function () {
+                                    return await KGbuilder_triplesWriter.writeTriplesAsync(
+>>>>>>> 0f97855df (recreateMappingGraph)
                                         batchTriples,
                                         tableProcessingParams.sourceInfos.graphUri,
                                         tableProcessingParams.sourceInfos.sparqlServerUrl,

@@ -14,6 +14,8 @@ module.exports = function () {
             var body = req.body || {};
             var source = body.source;
 
+            console.log("[recreateTriples API] Received body:", JSON.stringify(body, null, 2));
+
             if (!source) {
                 return res.status(400).json({ error: "Parameter 'source' is required" });
             }

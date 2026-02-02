@@ -705,14 +705,24 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
     };
 
     self.validateSelfDialog = function () {
+        if (self._isValidating) {
+            return;
+        }
+        self._isValidating = true;
+
         var selected = $("#jstreeWidget_treeDiv").jstree().get_checked(true);
         if (selected.length == 0) {
             var selected = $("#jstreeWidget_treeDiv").jstree().get_selected(true);
         }
         $("#" + self.dialogDiv).dialog("close");
+
         if (self.options.validateFn) {
             self.options.validateFn(selected);
         }
+
+        setTimeout(function () {
+            self._isValidating = false;
+        }, 1000);
     };
 
     self.closeDialog = function () {

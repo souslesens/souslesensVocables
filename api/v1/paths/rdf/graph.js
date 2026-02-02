@@ -19,6 +19,7 @@ export default function () {
             const sourceName = req.query.source;
             const limit = req.query.limit;
             const offset = req.query.offset;
+            const includesImports = req.query.withImports;
 
             const userInfo = await userManager.getUser(req.user);
             const userSources = await sourceModel.getUserSources(userInfo.user);
@@ -28,10 +29,22 @@ export default function () {
                 return;
             }
 
+            let graphsImports = [];
+            if (includesImports) {
+                graphsImports = userSources[sourceName].imports
+                    .map((src) => {
+                        if (userSources[src].graphUri) {
+                            return userSources[src].graphUri;
+                        } else {
+                            return null;
+                        }
+                    })
+                    .filter((uri) => uri !== null);
+            }
+
             const graphUri = userSources[sourceName].graphUri;
 
-            const data = await rdfDataModel.getGraphPartNt(graphUri, limit, offset);
-            var length = data.length;
+            const data = await rdfDataModel.getGraphPartNt(graphUri, limit, offset, graphsImports);
             res.status(200).send(data);
         } catch (error) {
             console.error(error);
@@ -213,6 +226,14 @@ export default function () {
                 in: "query",
                 type: "string",
                 required: true,
+            },
+            {
+                name: "withImports",
+                description: "Include imports",
+                in: "query",
+                type: "boolean",
+                required: false,
+                default: false,
             },
         ],
         responses: {

@@ -200,11 +200,15 @@ class RdfDataModel {
      * @param {string} limit - SPARQL LIMIT
      * @param {string} offset - SPARQL OFFSET
      * @param {boolean} jsonOutput - JSON output format
+     * @param {string[]} withImports - array of uri to get
      * @returns {Promise<any>} - the RDF data
      */
-    getGraphPart = async (graphUri, limit, offset, jsonOutput) => {
+    getGraphPart = async (graphUri, limit, offset, jsonOutput, withImports = []) => {
+        const fromStr = withImports.map((uri) => `FROM <${uri}>`).join("\n");
+
         const query = `CONSTRUCT { ?s ?p ?o .}
                        FROM <${graphUri}>
+                       ${fromStr}
                        WHERE { ?s ?p ?o .}
                        LIMIT ${limit}
                        OFFSET ${offset}`;
@@ -216,10 +220,11 @@ class RdfDataModel {
      * @param {string} graphUri - the graph URI
      * @param {string} limit - SPARQL LIMIT
      * @param {string} offset - SPARQL OFFSET
+     * @param {string[]} withImports - array of uri to get
      * @returns {Promise<any>} - the RDF data
      */
-    getGraphPartNt = async (graphUri, limit, offset) => {
-        return await this.getGraphPart(graphUri, limit, offset, false);
+    getGraphPartNt = async (graphUri, limit, offset, withImports = []) => {
+        return await this.getGraphPart(graphUri, limit, offset, false, withImports);
     };
 
     /**

@@ -16,7 +16,7 @@ import {
     MenuItem,
     Select,
 } from "@mui/material";
-import { fetchMe } from "../Utils";
+import { fetchMe, roundMinMax } from "../Utils";
 import { MouseEvent, useEffect, useRef, useState } from "react";
 import { writeLog } from "../Log";
 import { createRoot } from "react-dom/client";
@@ -250,25 +250,25 @@ export function DownloadGraphModal({ apiUrl, onClose, open, sourceName }: Downlo
         return { blobParts: blobParts, message: "ok" };
     };
 
-    const fetchGraphPart = async (name: string, limit: number, offset: number) => {
-        const response = await fetch(`/api/v1/rdf/graph/?source=${name}&limit=${limit}&offset=${offset}`);
-        return await response.text();
+    const fetchGraphPart = async (name: string, offset: number) => {
+        const response = await fetch(`/api/v1/rdf/graph/?source=${name}&offset=${offset}`);
+        return await response.json();
     };
 
-    const recursDownloadSource = async (name: string, offset: number, graphSize: number, pageSize: number, blobParts: BlobPart[], basePercent: number, sourceWeight: number) => {
-        // percent within this source, then scaled to global progress
-        const sourcePercent = graphSize > 0 ? Math.min(Math.round((offset * 100) / graphSize), 100) : 0;
-        const globalPercent = Math.min(100, basePercent + (sourcePercent * sourceWeight) / 100);
-        setTransferPercent(Math.round(globalPercent));
+    const recursDownloadSource = async (name: string, offset: number, blobParts: BlobPart[]) => {
+        const percent = roundMinMax((offset * 100) / sourceInfo.graphSize, 1, 99);
+
+        setTransferPercent(percent);
 
         if (cancelCurrentOperation.current) {
             return [];
         }
 
-        if (offset < graphSize) {
-            const data = await fetchGraphPart(name, pageSize, offset);
-            blobParts.push(data);
-            blobParts = await recursDownloadSource(name, offset + pageSize, graphSize, pageSize, blobParts, basePercent, sourceWeight);
+        const response = await fetchGraphPart(name, offset);
+
+        if (response.data !== "# Empty NT\n") {
+            blobParts.push(response.data);
+            blobParts = await recursDownloadSource(name, response.next_offset, blobParts);
         }
         return blobParts;
     };
@@ -326,72 +326,15 @@ export function DownloadGraphModal({ apiUrl, onClose, open, sourceName }: Downlo
         }
     };
     const downloadSourceTriples = async () => {
-        let blobParts: BlobPart[] | null;
-        let message = "ok";
-        let sources = [sourceName];
-        blobParts = [];
-        let blobPartsSource: BlobPart[] = [];
-
-        // First, fetch the size of all sources to calculate proportional weights
-        const sourceSizes: { source: string; graphSize: number; pageSize: number }[] = [];
-        let totalSize = 0;
-
         setTransferState("downloading");
+        setTransferPercent(1);
 
-        for (const source of sources) {
-            if (apiUrl === "/") {
-                sourceSizes.push({ source, graphSize: sourceInfo.graphSize || 0, pageSize: sourceInfo.pageSize || 0 });
-                totalSize += sourceInfo.graphSize || 0;
-            } else {
-                // For Python API, we get the filesize during download, so use equal weight as fallback
-                // We'll update progress based on actual filesize during download
-                sourceSizes.push({ source, graphSize: 0, pageSize: 0 });
-            }
-        }
+        const blobParts: BlobPart[] = await recursDownloadSource(sourceName, 0, []);
 
-        // Calculate proportional weights based on actual sizes
-        // Use 99 as max during download to reserve 100 for completion
-        const maxPercentDuringDownload = 99;
-        let cumulativePercent = 0;
-
-        for (let i = 0; i < sources.length; i++) {
-            // Check for cancellation before each source
-            if (cancelCurrentOperation.current) {
-                return { blobParts: null, message: "cancelled" };
-            }
-
-            const sourceInfo = sourceSizes[i];
-            const source = sourceInfo.source;
-
-            // Calculate this source's weight as percentage of total (scaled to max 99%)
-            const sourceWeight = totalSize > 0 ? (sourceInfo.graphSize / totalSize) * maxPercentDuringDownload : maxPercentDuringDownload / sources.length;
-            const basePercent = cumulativePercent;
-
-            if (apiUrl === "/") {
-                blobPartsSource = await recursDownloadSource(source, 0, sourceInfo.graphSize, sourceInfo.pageSize, [], basePercent, sourceWeight);
-                // Check if cancelled (empty array returned)
-                if (cancelCurrentOperation.current) {
-                    return { blobParts: null, message: "cancelled" };
-                }
-                blobParts = blobParts.concat(blobPartsSource);
-            } else {
-                const result = await downloadSourceUsingPythonApi(source, basePercent, sourceWeight);
-                if (result.message === "cancelled" || result.blobParts === null) {
-                    return { blobParts: null, message: "cancelled" };
-                }
-                blobPartsSource = result.blobParts || [];
-                blobParts = blobParts.concat(blobPartsSource);
-
-                message = result.message;
-                if (message !== "ok") {
-                    return { blobParts: blobParts, message: message };
-                }
-            }
-            cumulativePercent += sourceWeight;
-        }
         setTransferPercent(100);
         setTransferState("done");
-        return { blobParts: blobParts, message: message };
+
+        return { blobParts: blobParts, message: "ok" };
     };
 
     return (

@@ -129,6 +129,7 @@ const MainConfigObject = z
                 maximumFileSize: z.number().positive(),
             })
             .strict(),
+        sparqlDownloadLimit: z.number().positive().max(1000000),
     })
     .strict();
 

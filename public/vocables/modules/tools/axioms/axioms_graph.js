@@ -78,7 +78,7 @@ var Axioms_graph = (function () {
 
     self.drawNodeAxioms2 = function (sourceLabel, rootNodeId, axiomsTriples, divId, options, callback) {
         self.currentAxiomTriples=axiomsTriples;
-        Axiom_activeLegend.showTriples()
+     //   Axiom_activeLegend.showTriples()
         if (!options) {
             options = {};
         }

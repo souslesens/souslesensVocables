@@ -121,4 +121,4 @@ module.exports = function () {
     };
 
     return operations;
-}
+};

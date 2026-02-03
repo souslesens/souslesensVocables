@@ -22,6 +22,7 @@ export default function () {
             tools_available: config.tools_available,
             slsPyApi: config.slsPyApi,
             theme: config.theme,
+            sparqlDownloadLimit: config.sparqlDownloadLimit,
         };
 
         res.status(200).json(result);

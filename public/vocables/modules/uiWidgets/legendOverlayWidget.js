@@ -458,7 +458,7 @@ var LegendOverlayWidget = (function () {
 
         // Nodes
         var shape = info && info.shape ? String(info.shape) : "dot";
-        var backgroundCss = color;
+        var backgroundCss = self.escapeHtml(color);
 
         if (colors && colors.length > 1) {
             var gradientColors = colors.slice(0, 4);
@@ -467,28 +467,30 @@ var LegendOverlayWidget = (function () {
             for (var i = 0; i < gradientColors.length; i++) {
                 var startPct = Math.round(i * percentStep);
                 var endPct = Math.round((i + 1) * percentStep);
-                gradientStops.push(gradientColors[i] + " " + startPct + "% " + endPct + "%");
+                gradientStops.push(self.escapeHtml(String(gradientColors[i])) + " " + startPct + "% " + endPct + "%");
             }
             backgroundCss = "linear-gradient(90deg," + gradientStops.join(",") + ")";
-            return "<span style='width:" + size + "px; height:" + size + "px; background:" + backgroundCss + "; display:inline-block; border-radius:50%;'></span>";
         }
+        // Do NOT return here: apply the computed backgroundCss to the actual shape below.
 
         // Sans gradient
         if (shape === "box" || shape === "square") {
-            return "<span style='width:" + size + "px; height:" + size + "px; background:" + self.escapeHtml(color) + "; display:inline-block; border-radius:2px;'></span>";
+            return "<span style='width:" + size + "px; height:" + size + "px; background:" + backgroundCss + "; display:inline-block; border-radius:2px;'></span>";
         }
         if (shape === "ellipse") {
-            return "<span style='width:16px; height:10px; background:" + self.escapeHtml(color) + "; display:inline-block; border-radius:50%;'></span>";
+            return "<span style='width:16px; height:10px; background:" + backgroundCss + "; display:inline-block; border-radius:50%;'></span>";
         }
         if (shape === "triangle") {
+            // Use clip-path so gradients can be applied while keeping the triangle shape.
+            // Fallback: if clip-path is not supported, it will still display a small colored block.
             return (
-                "<span style='width:0; height:0; display:inline-block; border-left:7px solid transparent; border-right:7px solid transparent; border-bottom:14px solid " +
-                self.escapeHtml(color) +
-                ";'></span>"
+                "<span style='width:14px; height:14px; background:" +
+                backgroundCss +
+                "; display:inline-block; clip-path:polygon(50% 0%, 0% 100%, 100% 100%);'></span>"
             );
         }
 
-        return "<span style='width:" + size + "px; height:" + size + "px; background:" + self.escapeHtml(color) + "; display:inline-block; border-radius:50%;'></span>";
+        return "<span style='width:" + size + "px; height:" + size + "px; background:" + backgroundCss + "; display:inline-block; border-radius:50%;'></span>";
     };
 
     /**

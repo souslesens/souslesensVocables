@@ -105,6 +105,7 @@ var GraphLegendStateBuilder = (function () {
      */
     self.buildState = function (visjsGraph, options) {
         options = options || {};
+        var splitNodeByShape = options.splitNodeByShape === true;
         var state = {
             dynamicLegend: true,
             nodeTypeStyles: {},
@@ -119,6 +120,16 @@ var GraphLegendStateBuilder = (function () {
         var edges = visjsGraph.data.edges.get();
         var visibleNodeIdsMap = {};
 
+        // Index all graph nodes by their id, so edge categorization can look up endpoints quickly.
+        // Backward compatible: edgeKeyFn(edge) still works if it expects a single argument.
+        var nodesByIdMap = {};
+        nodes.forEach(function (node) {
+        if (!node || !node.id) {
+            return;
+        }
+        nodesByIdMap[node.id] = node;
+        });
+
         nodes.forEach(function (node) {
             if (!self.isVisibleNode(node)) {
                 return;
@@ -129,30 +140,31 @@ var GraphLegendStateBuilder = (function () {
             categoryKey = String(categoryKey);
 
             var color = self.getColor(node, "#999");
-            var shape = node.shape || "dot";
+            var originalShape = node.shape || "dot";
 
-            // Force ellipse shape for Property in legend
-            if (categoryKey === "Property") {
-                shape = "ellipse";
+            // Key is based on the real graph shape (so Property|text stays Property|text)
+            var keyForLegend = splitNodeByShape ? categoryKey + "|" + originalShape : categoryKey;
+
+            // Legend icon shape: text has no glyph -> map to a safe shape for display
+            var legendShape = originalShape;
+            if (legendShape === "text") {
+            legendShape = options.legendTextShape || "dot";
             }
 
-            var label = options.nodeLabelFn ? options.nodeLabelFn(node, categoryKey) : categoryKey;
+            // Let the label function know both the logical key and the variant key
+            var label = options.nodeLabelFn ? options.nodeLabelFn(node, categoryKey, keyForLegend, originalShape) : categoryKey;
 
-            if (categoryKey === "Source") {
-                label = "DatatypeProperty";
-            }
-
-            if (!state.nodeTypeStyles[categoryKey]) {
-                state.nodeTypeStyles[categoryKey] = {
+            if (!state.nodeTypeStyles[keyForLegend]) {
+                state.nodeTypeStyles[keyForLegend] = {
                     color: color,
                     colors: [color], //  initialize colors list
-                    shape: shape,
+                    shape: legendShape,
                     classLabel: label,
                     type: categoryKey,
                 };
             } else {
                 // If we detect a new color for the same category, append it
-                var typeStyle = state.nodeTypeStyles[categoryKey];
+                var typeStyle = state.nodeTypeStyles[keyForLegend];
                 if (!typeStyle.colors) {
                     typeStyle.colors = [typeStyle.color];
                 }
@@ -167,7 +179,9 @@ var GraphLegendStateBuilder = (function () {
                 return;
             }
 
-            var edgeCategoryKey = options.edgeKeyFn ? options.edgeKeyFn(edge) : (edge.data && (edge.data.type || edge.data.propLabel)) || edge.label || "Edge";
+            var edgeCategoryKey = options.edgeKeyFn
+            ? (options.edgeKeyFn.length >= 2 ? options.edgeKeyFn(edge, nodesByIdMap) : options.edgeKeyFn(edge))
+            : (edge.data && (edge.data.type || edge.data.propLabel)) || edge.label || "Edge";
             edgeCategoryKey = String(edgeCategoryKey);
 
             if (!state.edgeCatStyles[edgeCategoryKey]) {
@@ -184,7 +198,7 @@ var GraphLegendStateBuilder = (function () {
         });
 
         var nodeOrder = options.nodeOrder || ["Source", "Class", "NamedIndividual", "Property", "bnode", "literal"];
-        var edgeOrder = options.edgeOrder || ["ObjectProperty", "Hierarchy", "Restriction", "DatatypeProperty", "SourceLink", "Other"];
+        var edgeOrder = ["ObjectProperty", "Hierarchy", "PropertyHierarchy", "Restriction", "Datatype", "DatatypeProperty", "SourceLink", "Other"];
 
         state.nodeTypeStyles = self.sortByOrder(state.nodeTypeStyles, nodeOrder);
         state.edgeCatStyles = self.sortByOrder(state.edgeCatStyles, edgeOrder);

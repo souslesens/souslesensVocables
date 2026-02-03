@@ -81,6 +81,40 @@ var Lineage_legendOverlay = (function () {
         return str;
     };
 
+        /**
+     * Ensure the legend overlay DOM exists in the container.
+     * If the graph container was emptied, the overlay DOM is lost and must be re-rendered.
+     * @returns {void}
+     */
+    self.ensureOverlayRendered = function () {
+    if (!self.containerId) {
+        return;
+    }
+    var container = document.getElementById(self.containerId);
+    if (!container) {
+        return;
+    }
+
+    // Try to detect the overlay root element (adapt selectors if your widget uses another class)
+    var hasOverlay =
+        container.querySelector(".legendOverlayWidget") ||
+        container.querySelector("[data-legend-overlay]");
+
+    if (hasOverlay) {
+        return;
+    }
+
+    // Re-render overlay with same options as init()
+    LegendOverlayWidget.render(self.containerId, {
+        title: (self.legendOptions && self.legendOptions.title) || "📘 Legend",
+        position: "top-right",
+        initiallyExpanded: true,
+        dynamicLegend: true,
+        showDefaultSections: false,
+        variant: "lineage",
+    });
+    };
+
     /**
      * Initialize the legend overlay in the graph container.
      * @param {string} containerId
@@ -121,13 +155,33 @@ var Lineage_legendOverlay = (function () {
         if (node.data && node.data.type === "container") {
             return "Container";
         }
-        // Source nodes
-        if (node.shape === "box" || node.shape === "square") {
+        // DatatypeProperty nodes (drawDataTypeProperties uses shape "box")
+        if (node.data && node.data.type === "DatatypeProperty") {
+            return "DatatypeProperty";
+        }
+        // Source nodes: in drawTopConcepts source nodes have id === data.source
+        if ((node.shape === "box" || node.shape === "square") && node.data && node.id === node.data.source) {
             return "Source";
         }
 
         // Property nodes (ellipses / predicate nodes)
         if (node.data && node.data.varName === "prop") {
+            return "Property";
+        }
+
+        // Property nodes created by Lineage_properties graphs (robust detection):
+        // - usually shape "box"
+        // - usually light grey color "#ddd"
+        // - data contains {id, label, source}
+        // We avoid relying on font/subProperties because they may be missing depending on how nodes were merged/updated.
+        if (
+            node.shape === "box" &&
+            node.data &&
+            node.data.id &&
+            node.data.label &&
+            node.data.source &&
+            self.normalizeColor(GraphLegendStateBuilder.getColor(node, "")) === self.normalizeColor("#ddd")
+            ) {
             return "Property";
         }
 
@@ -171,7 +225,7 @@ var Lineage_legendOverlay = (function () {
      * @param {Object} edge
      * @returns {string}
      */
-    self.getEdgeCategory = function (edge) {
+    self.getEdgeCategory = function (edge, nodesByIdMap) {
         if (!edge) {
             return "Other";
         }
@@ -198,7 +252,39 @@ var Lineage_legendOverlay = (function () {
                 return "ObjectProperty";
             }
         }
+        // 2) Specific datatype edges: dashed + datatypeColor + label looks like an XSD type
+        if (edge.dashes) {
+            var edgeColor = GraphLegendStateBuilder.getColor(edge, "");
+            var edgeColorNorm = self.normalizeColor(edgeColor);
+            var datatypeNorm = self.normalizeColor(self.legendOptions && self.legendOptions.datatypeColor);
 
+            var lbl = edge.label ? String(edge.label) : "";
+            // typical values: "xsd:float", "xsd:dateTime", etc.
+            var looksLikeDatatype = lbl.indexOf("xsd:") === 0 || lbl.indexOf("http://www.w3.org/2001/XMLSchema#") === 0;
+
+            if (datatypeNorm && edgeColorNorm === datatypeNorm && looksLikeDatatype) {
+                return "Datatype";
+            }
+        }
+
+        // InverseOf edges (property <-> inverse property): dashed + blue (#0067bb) + no label + endpoints are Property
+        if (nodesByIdMap && edge.dashes) {
+            var invColor = GraphLegendStateBuilder.getColor(edge, "");
+            var invColorNorm = self.normalizeColor(invColor);
+            var inverseOfNorm = self.normalizeColor((self.legendOptions && self.legendOptions.inverseOfColor) || "#0067bb");
+
+            if (invColorNorm === inverseOfNorm && !edge.label) {
+                var fromNode = nodesByIdMap[edge.from];
+                var toNode = nodesByIdMap[edge.to];
+                if (fromNode && toNode) {
+                var fromCat = self.getNodeCategory(fromNode);
+                var toCat = self.getNodeCategory(toNode);
+                if (fromCat === "Property" && toCat === "Property") {
+                    return "InverseOf";
+                }
+                }
+            }
+        }
         // 2) Visual fallback (dashes + color)
         var isDashed = edge.dashes ? true : false;
         if (isDashed) {
@@ -219,6 +305,50 @@ var Lineage_legendOverlay = (function () {
         // 3) Source/import links (UI-level)
         if (!edge.label && edge.width && edge.width >= 5) {
             return "SourceLink";
+        }
+        // rdfs:member-like container membership edges: pink, solid, no label, involving a Container node.
+        // NOTE: This is a fallback heuristic because the predicate URI is not stored on the edge (edge.data.prop is undefined).
+        if (nodesByIdMap && !edge.label && !edge.dashes) {
+        var memberColor = GraphLegendStateBuilder.getColor(edge, "");
+        var memberColorNorm = self.normalizeColor(memberColor);
+        var rdfsMemberNorm = self.normalizeColor((self.legendOptions && self.legendOptions.rdfsMemberColor) || "#e7a1be");
+
+        if (memberColorNorm === rdfsMemberNorm) {
+            var fromNode = nodesByIdMap[edge.from];
+            var toNode = nodesByIdMap[edge.to];
+            if (fromNode && toNode) {
+            var fromCat = self.getNodeCategory(fromNode);
+            var toCat = self.getNodeCategory(toNode);
+            if (fromCat === "Container" || toCat === "Container") {
+                return "RdfsMember";
+            }
+            }
+        }
+        }
+        // Property hierarchy (subPropertyOf): grey edge (#aaa), no label, arrow-from, and both endpoints are Property nodes.
+        if (
+            nodesByIdMap &&
+            !edge.label &&
+            edge.arrows &&
+            edge.arrows.from &&
+            edge.arrows.from.enabled &&
+            !edge.dashes
+            ) {
+            var edgeColor2 = GraphLegendStateBuilder.getColor(edge, "");
+            var edgeColorNorm2 = self.normalizeColor(edgeColor2);
+            var defaultEdgeNorm2 = self.normalizeColor("#aaa");
+
+            if (edgeColorNorm2 === defaultEdgeNorm2) {
+                var fromNode = nodesByIdMap[edge.from];
+                var toNode = nodesByIdMap[edge.to];
+                if (fromNode && toNode) {
+                var fromCat = self.getNodeCategory(fromNode);
+                var toCat = self.getNodeCategory(toNode);
+                if (fromCat === "Property" && toCat === "Property") {
+                    return "PropertyHierarchy";
+                }
+                }
+            }
         }
 
         // 4) Default category
@@ -247,21 +377,52 @@ var Lineage_legendOverlay = (function () {
 
         try {
             var state = GraphLegendStateBuilder.buildState(self.visjsGraph, {
+                splitNodeByShape: true,
+                legendTextShape: "dot",
                 nodeKeyFn: self.getNodeCategory,
-                nodeLabelFn: function (_node, key) {
-                    if (key && key.indexOf("Class:") === 0) {
-                        return "Class (" + key.substring("Class:".length) + ")";
-                    }
+                nodeLabelFn: function (_node, keyOrBaseKey, variantKey, shape) {
+                // Support both signatures:
+                // - old: (node, key)
+                // - new: (node, baseKey, variantKey, shape)
+
+                var baseKey = keyOrBaseKey;
+                var actualShape = shape;
+
+                // If variantKey is provided and contains "|", extract shape from it
+                if (!actualShape && typeof variantKey === "string" && variantKey.indexOf("|") > -1) {
+                    baseKey = variantKey.split("|")[0];
+                    actualShape = variantKey.split("|")[1];
+                }
+
+                // If only key is provided and contains "|", extract shape from it
+                if (!actualShape && typeof baseKey === "string" && baseKey.indexOf("|") > -1) {
+                    actualShape = baseKey.split("|")[1];
+                    baseKey = baseKey.split("|")[0];
+                }
+
+                // Human labels
+                var label;
+                if (baseKey && baseKey.indexOf("Class:") === 0) {
+                    label = "Class (" + baseKey.substring("Class:".length) + ")";
+                } else {
                     var map = {
-                        Source: "Source",
-                        Container: "Container",
-                        Class: "Class",
-                        Property: "Property (predicate)",
-                        NamedIndividual: "NamedIndividual",
-                        bnode: "Blank node",
-                        literal: "Literal",
+                    Source: "Source",
+                    Container: "Container",
+                    Class: "Class",
+                    DatatypeProperty: "DatatypeProperty",
+                    Property: "Property (predicate)",
+                    NamedIndividual: "NamedIndividual",
+                    bnode: "Blank node",
+                    literal: "Literal",
                     };
-                    return map[key] || key;
+                    label = map[baseKey] || baseKey;
+                }
+
+                // Append shape so duplicates are understandable
+                if (actualShape === "text") {
+                    label += " (text)";
+                }
+                return label;
                 },
                 edgeKeyFn: self.getEdgeCategory,
                 edgeLabelFn: function (_edge, key) {
@@ -272,13 +433,34 @@ var Lineage_legendOverlay = (function () {
                         Range: "Range (R)",
                         Restriction: "Restriction",
                         DatatypeProperty: "DatatypeProperty",
+                        Datatype: "Datatype",
                         SourceLink: "Source / import link",
+                        PropertyHierarchy: "Hierarchy (subPropertyOf)",
+                        InverseOf: "InverseOf",
+                        RdfsMember: "rdfs:member",
                         Other: "Other",
                     };
                     return map[key] || key;
                 },
             });
+            // If container nodes do not carry a color (node.color is undefined),
+            // align legend with the UI convention used in container graphs (yellow).
+            if (state.nodeTypeStyles) {
+                var containerColor = (self.legendOptions && self.legendOptions.containerColor) || "#efbf00";
 
+                // With splitNodeByShape enabled, container keys are typically "Container\n<shape>" (or "Container|<shape>")
+                Object.keys(state.nodeTypeStyles).forEach(function (key) {
+                    if (key === "Container" || key.indexOf("Container\n") === 0 || key.indexOf("Container|") === 0) {
+                    // Only override if builder fell back to default grey
+                    if (state.nodeTypeStyles[key] && state.nodeTypeStyles[key].color === "#999") {
+                        state.nodeTypeStyles[key].color = containerColor;
+                        state.nodeTypeStyles[key].colors = [containerColor];
+                    }
+                    }
+                });
+            }
+
+            self.ensureOverlayRendered();
             LegendOverlayWidget.update(self.containerId, state);
         } catch (e) {
             console.error("Legend refresh failed", e);

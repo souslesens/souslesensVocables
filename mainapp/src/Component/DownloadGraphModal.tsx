@@ -265,8 +265,8 @@ export function DownloadGraphModal({ apiUrl, onClose, open, sourceName }: Downlo
 
         const response = await fetchGraphPart(name, offset, includeImports);
 
-        if (response.data !== "# Empty NT\n") {
-            blobParts.push(response.data);
+        blobParts.push(response.data);
+        if (response.next_offset !== null) {
             blobParts = await recursDownloadSource(name, response.next_offset, blobParts);
         }
         return blobParts;

@@ -1,9 +1,17 @@
 <!-- AUTO-GENERATED: do not edit by hand -->
-# Code Architecture
+# Code Architecture (work in progress)
 
 <!-- AUTO-DESC:START -->
 
 This page presents the SousLeSens code architecture, organized into folders and subfolders. Use the navigation to browse modules, components, and implementation areas.
+
+These modules directories are documented but still in progress :  
+    - tools  
+    - shared  
+    - bots  
+
+Documentation of others modules directories is planned but pending  
+
 
 <!-- AUTO-DESC:END -->
 

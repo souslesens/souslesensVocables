@@ -244,8 +244,17 @@ self._buildExportModel = function () {
 
         var table = d.dataTable;
         if (!tableColumnIds[table]) tableColumnIds[table] = {};
+
         if (d.type === "Column" || d.type === "VirtualColumn" || d.type === "RowIndex") {
-            if (d.id) tableColumnIds[table][d.id] = 1;
+
+            // 1) le nom de colonne est souvent dans data.id (ex: "tag")
+            if (d.id) tableColumnIds[table][String(d.id)] = 1;
+
+            // 2) le nom de colonne est aussi dans label (ex: "tag")
+            if (nodes[i].label) tableColumnIds[table][String(nodes[i].label)] = 1;
+
+            // 3) parfois aussi dans data.label
+            if (d.label) tableColumnIds[table][String(d.label)] = 1;
         }
     }
 
@@ -777,7 +786,9 @@ self._escapeTurtleString = function (s) {
 };
 
 self._isHttpIri = function (v) {
-    return typeof v === "string" && (v.indexOf("http://") === 0 || v.indexOf("https://") === 0 || v.indexOf("urn:") === 0);
+    if (typeof v !== "string") return false;
+    var s = v.trim();
+    return s.indexOf("http://") === 0 || s.indexOf("https://") === 0 || s.indexOf("urn:") === 0;
 };
 
 self._isPrefixedName = function (v) {
@@ -787,8 +798,12 @@ self._isPrefixedName = function (v) {
 
 self._turtleIriOrCurie = function (v) {
     if (!v) return null;
-    if (self._isPrefixedName(v)) return String(v);
-    if (self._isHttpIri(v)) return "<" + String(v) + ">";
+
+    // IMPORTANT: nettoie espaces et retours chariot
+    var s = String(v).trim();
+
+    if (self._isPrefixedName(s)) return s;
+    if (self._isHttpIri(s)) return "<" + s + ">";
     return null;
 };
 

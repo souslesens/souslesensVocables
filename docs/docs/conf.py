@@ -30,14 +30,23 @@ isso_exclude_patterns = []
 
 html_theme = "sphinx_book_theme"
 # html_static_path = ["_static"]
+# html_theme_options = {
+#     # "home_page_in_toc": True,
+#     "show_navbar_depth": 20,
+#     "repository_url": "https://github.com/souslesens/souslesensVocables",
+#     "use_repository_button": True,
+#     "logo": {
+#         "text": "Sous Le Sens",
+#     },
+# }
+
 html_theme_options = {
-    # "home_page_in_toc": True,
-    "show_navbar_depth": 1,
+    "show_navbar_depth": 2,
+    "max_navbar_depth": 20,
+    "collapse_navbar": False,
     "repository_url": "https://github.com/souslesens/souslesensVocables",
     "use_repository_button": True,
-    "logo": {
-        "text": "Sous Le Sens",
-    },
+    "logo": {"text": "Sous Le Sens"},
 }
 html_logo = "logo.png"
 html_favicon = "logo.png"

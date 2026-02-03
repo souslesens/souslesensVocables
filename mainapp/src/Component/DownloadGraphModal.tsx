@@ -39,6 +39,12 @@ type ApiServerResponseOk = {
     identifier: string;
 };
 
+type ApiServerV2ResponseOk = {
+    data: BlobPart;
+    next_offset: number;
+    graph_size: number;
+};
+
 type ApiServerResponseError = {
     detail: string;
 };
@@ -48,7 +54,7 @@ type SourceInfo = {
     graphSize: number | undefined;
 };
 
-type ApiServerResponse = ApiServerResponseError | ApiServerResponseOk;
+type ApiServerV2Response = ApiServerResponseError | ApiServerV2ResponseOk;
 
 const addImportsAndContributor = (blobParts: BlobPart[], sourceName: string, userLogin: string, format: string): BlobPart[] => {
     const content = blobParts.map((part) => (typeof part === "string" ? part : "")).join("");
@@ -210,43 +216,15 @@ export function DownloadGraphModal({ apiUrl, onClose, open, sourceName }: Downlo
         return json;
     };
 
-    const fetchGraphPartUsingPythonApi = async (name: string, offset: number, format = "nt", identifier = "", skipNamedIndividuals = false) => {
-        const response = await fetch(`${apiUrl}api/v1/rdf/graph?source=${name}&offset=${offset}&format=${format}&identifier=${identifier}&skipNamedIndividuals=${String(skipNamedIndividuals)}`, {
+    const fetchGraphPartUsingPythonApiV2 = async (name: string, offset: number, format = "nt", skipNamedIndividuals: boolean = false, withImports: boolean = false) => {
+        const response = await fetch(`${apiUrl}api/v2/rdf/graph?source=${name}&offset=${offset}&format=${format}&skipNamedIndividuals=${String(skipNamedIndividuals)}&withImports=${withImports}`, {
             headers: { Authorization: `Bearer ${currentUser?.token ?? ""}` },
         });
-        const json = (await response.json()) as ApiServerResponse;
+        const json = (await response.json()) as ApiServerV2Response;
         if (response.status !== 200) {
             return { status: response.status, message: (json as ApiServerResponseError).detail ?? "Internal serveur error" };
         }
-        return { status: response.status, message: json as ApiServerResponseOk };
-    };
-
-    const downloadSourceUsingPythonApi = async (name: string, basePercent: number, sourceWeight: number) => {
-        let offset = 0;
-        let identifier = "";
-        const blobParts: BlobPart[] = [];
-        setTransferState("downloading");
-        while (offset !== null) {
-            if (cancelCurrentOperation.current) {
-                return { blobParts: null, message: "cancelled" };
-            }
-            const response = await fetchGraphPartUsingPythonApi(name, offset, currentDownloadFormat, identifier, skipNamedIndividuals);
-            const status = response.status;
-            if (status >= 400) {
-                const errorMessage = response.message as string;
-                return { blobParts: null, message: errorMessage };
-            }
-            const message = response.message as ApiServerResponseOk;
-            // percent within this source (0-100), then scaled to the source's weight
-            const sourcePercent = message.filesize > 0 ? Math.min(100, (offset * 100) / message.filesize) : 0;
-            const globalPercent = Math.min(100, basePercent + (sourcePercent * sourceWeight) / 100);
-            setTransferPercent(Math.round(globalPercent));
-
-            blobParts.push(message.data);
-            offset = message.next_offset;
-            identifier = message.identifier;
-        }
-        return { blobParts: blobParts, message: "ok" };
+        return { status: response.status, message: json as ApiServerV2ResponseOk };
     };
 
     const fetchGraphPart = async (name: string, offset: number, withImports: boolean) => {
@@ -254,8 +232,30 @@ export function DownloadGraphModal({ apiUrl, onClose, open, sourceName }: Downlo
         return await response.json();
     };
 
+    const recursDownloadSourceUsingPythonApi = async (name: string, offset: number, blobParts: BlobPart[], format = "nt") => {
+        const percent = roundMinMax((offset * 100) / Number(sourceInfo.graphSize), 1, 99);
+
+        setTransferPercent(percent);
+
+        if (cancelCurrentOperation.current) {
+            return [];
+        }
+
+        const response = await fetchGraphPartUsingPythonApiV2(name, offset, format, skipNamedIndividuals, includeImports);
+
+        if (response.status !== 200) {
+            return [];
+        }
+
+        blobParts.push(response.message.data);
+        if (response.message.next_offset !== null) {
+            blobParts = await recursDownloadSourceUsingPythonApi(name, response.message.next_offset, blobParts, format);
+        }
+        return blobParts;
+    };
+
     const recursDownloadSource = async (name: string, offset: number, blobParts: BlobPart[]) => {
-        const percent = roundMinMax((offset * 100) / sourceInfo.graphSize, 1, 99);
+        const percent = roundMinMax((offset * 100) / Number(sourceInfo.graphSize), 1, 99);
 
         setTransferPercent(percent);
 
@@ -328,7 +328,14 @@ export function DownloadGraphModal({ apiUrl, onClose, open, sourceName }: Downlo
         setTransferState("downloading");
         setTransferPercent(1);
 
-        const blobParts: BlobPart[] = await recursDownloadSource(sourceName, 0, []);
+        let blobParts: BlobPart[];
+        if (apiUrl === "/") {
+            // local API
+            blobParts = await recursDownloadSource(sourceName, 0, []);
+        } else {
+            // sls-py-api
+            blobParts = await recursDownloadSourceUsingPythonApi(sourceName, 0, [], currentDownloadFormat);
+        }
 
         setTransferPercent(100);
         setTransferState("done");
@@ -372,7 +379,7 @@ export function DownloadGraphModal({ apiUrl, onClose, open, sourceName }: Downlo
                                 <MenuItem disabled={transferPercent > 0 || apiUrl === "/"} value={"xml"}>
                                     RDF/XML
                                 </MenuItem>
-                                <MenuItem disabled={transferPercent > 0 || apiUrl === "/"} value={"ttl"}>
+                                <MenuItem disabled={transferPercent > 0 || apiUrl === "/"} value={"turtle"}>
                                     Turtle
                                 </MenuItem>
                             </Select>

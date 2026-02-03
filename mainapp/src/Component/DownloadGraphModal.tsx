@@ -16,7 +16,7 @@ import {
     MenuItem,
     Select,
 } from "@mui/material";
-import { fetchMe, roundMinMax } from "../Utils";
+import { fetchMe, roundMinMax, humanizeSize } from "../Utils";
 import { MouseEvent, useEffect, useRef, useState } from "react";
 import { writeLog } from "../Log";
 import { createRoot } from "react-dom/client";
@@ -345,7 +345,9 @@ export function DownloadGraphModal({ apiUrl, onClose, open, sourceName }: Downlo
 
     return (
         <Dialog fullWidth={true} maxWidth="md" onClose={onClose} open={open} PaperProps={{ component: "form" }}>
-            <DialogTitle id="contained-modal-title-vcenter">Downloading {sourceName}</DialogTitle>
+            <DialogTitle id="contained-modal-title-vcenter">
+                Downloading {sourceName} ({humanizeSize(Number(sourceInfo.graphSize))} triples)
+            </DialogTitle>
             <DialogContent sx={{ mt: 1 }}>
                 <Stack spacing={2} useFlexGap>
                     {errorMessage ? (

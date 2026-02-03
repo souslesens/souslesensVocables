@@ -193,8 +193,9 @@ var CreateSLSVsource_bot = (function () {
         uploadFromFileFn: function () {
             const apiUrl = Config.slsPyApi.enabled ? Config.slsPyApi.url.replace(/\/$/, "").concat("/") : "/";
             window.UploadGraphModal.open(apiUrl, self.params.sourceLabel, () => {
-                self.myBotEngine.currentObj = self.workflowUpload;
-                self.myBotEngine.nextStep(self.workflowUpload);
+                /*self.myBotEngine.currentObj = self.workflowUpload;
+                self.myBotEngine.nextStep(self.workflowUpload);*/
+                self.myBotEngine.nextStep();
             });
         },
 

@@ -29,13 +29,6 @@ interface DownloadGraphModalProps {
     sourceName: string;
 }
 
-type ApiServerResponseOk = {
-    filesize: number;
-    data: BlobPart;
-    next_offset: number;
-    identifier: string;
-};
-
 type ApiServerV2ResponseOk = {
     data: BlobPart;
     next_offset: number;
@@ -77,7 +70,7 @@ export function DownloadGraphModal({ apiUrl, onClose, open, sourceName }: Downlo
             setSourceInfo({ graphUri: info.graph, graphSize: info.graphSize });
         };
         void fetchAll();
-    }, []);
+    }, [sourceName]);
 
     const handleCancelOperation = () => {
         cancelCurrentOperation.current = true;
@@ -106,7 +99,7 @@ export function DownloadGraphModal({ apiUrl, onClose, open, sourceName }: Downlo
 
     const fetchGraphPart = async (name: string, offset: number, withImports: boolean) => {
         const response = await fetch(`/api/v1/rdf/graph/?source=${name}&offset=${offset}&withImports=${withImports}`);
-        return await response.json();
+        return (await response.json()) as { data: string; graph_size: number; next_offset: number | null };
     };
 
     const recursDownloadSourceUsingPythonApi = async (name: string, offset: number, blobParts: BlobPart[], format = "nt") => {
@@ -123,10 +116,11 @@ export function DownloadGraphModal({ apiUrl, onClose, open, sourceName }: Downlo
         if (response.status !== 200) {
             return [];
         }
+        const msg = response.message as ApiServerV2ResponseOk;
 
-        blobParts.push(response.message.data);
-        if (response.message.next_offset !== null) {
-            blobParts = await recursDownloadSourceUsingPythonApi(name, response.message.next_offset, blobParts, format);
+        blobParts.push(msg.data);
+        if (msg.next_offset !== null) {
+            blobParts = await recursDownloadSourceUsingPythonApi(name, msg.next_offset, blobParts, format);
         }
         return blobParts;
     };
@@ -253,10 +247,10 @@ export function DownloadGraphModal({ apiUrl, onClose, open, sourceName }: Downlo
                                 <MenuItem disabled={transferPercent > 0} value={"nt"}>
                                     N-triples
                                 </MenuItem>
-                                <MenuItem disabled={transferPercent > 0 || apiUrl === "/" || sourceInfo.graphSize > sparqlDownloadLimit} value={"xml"}>
+                                <MenuItem disabled={transferPercent > 0 || apiUrl === "/" || Number(sourceInfo.graphSize) > sparqlDownloadLimit} value={"xml"}>
                                     RDF/XML
                                 </MenuItem>
-                                <MenuItem disabled={transferPercent > 0 || apiUrl === "/" || sourceInfo.graphSize > sparqlDownloadLimit} value={"turtle"}>
+                                <MenuItem disabled={transferPercent > 0 || apiUrl === "/" || Number(sourceInfo.graphSize) > sparqlDownloadLimit} value={"turtle"}>
                                     Turtle
                                 </MenuItem>
                             </Select>

@@ -38,6 +38,7 @@ const ConfigFormSchema = z.object({
         selector: z.string().optional().transform(Boolean),
         defaultTheme: z.string(),
     }),
+    sparqlDownloadLimit: z.number().positive(),
 });
 
 type FieldChain = (index: number) => ReturnType<typeof fieldChain<z.ZodArray<z.ZodString>>>[number];

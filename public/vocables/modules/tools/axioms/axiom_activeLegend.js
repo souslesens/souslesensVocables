@@ -905,6 +905,8 @@ var Axiom_activeLegend = (function () {
             async.series([
                 //save New nodes (created on the fly)
                 function (callbackSeries) {
+if(true)
+        return callbackSeries()
                     self.saveNewNodes(triples.newNodesToStore, function (err, labelsMap) {//new nodes created on the fly
                         if (err) {
                             return callbackSeries(err)
@@ -917,8 +919,7 @@ var Axiom_activeLegend = (function () {
                 },
                 //update  basicAxiomsCache  triples stored into basicAxiomsCache
                 function (callbackSeries) {
-                if(!newNodesLabelsMap)
-                    return callbackSeries()
+
                     var basicAxiomsTriples = [] //triples stored into basicAxiomsCache
                     triples.forEach(function (triple) {
 
@@ -927,16 +928,21 @@ var Axiom_activeLegend = (function () {
                             p: triple.predicate,
                             o: triple.object
                         }
-                        if (newNodesLabelsMap[item.s]) {
-                            item.sLabel = newNodesLabelsMap[item.s];
+
+                        if(!newNodesLabelsMap) {
+
+                            if (newNodesLabelsMap[item.s]) {
+                                item.sLabel = newNodesLabelsMap[item.s];
+                            }
+                            if (newNodesLabelsMap[item.p]) {
+                                item.pLabel = newNodesLabelsMap[item.p];
+                            }
+                            if (newNodesLabelsMap[item.o]) {
+                                item.oLabel = newNodesLabelsMap[item.o];
+                            }
                         }
-                        if (newNodesLabelsMap[item.p]) {
-                            item.pLabel = newNodesLabelsMap[item.p];
-                        }
-                        if (newNodesLabelsMap[item.o]) {
-                            item.oLabel = newNodesLabelsMap[item.o];
-                        }
-                        basicAxiomsTriples.push(item)
+                            basicAxiomsTriples.push(item)
+
 
                     })
                     AxiomExtractor.addBasicAxioms(self.currentSource, basicAxiomsTriples)

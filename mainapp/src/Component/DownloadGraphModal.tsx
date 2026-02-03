@@ -1,4 +1,5 @@
 import { Done, Close, Cancel } from "@mui/icons-material";
+import { getConfig } from "../Config";
 import {
     Dialog,
     DialogTitle,
@@ -190,11 +191,15 @@ export function DownloadGraphModal({ apiUrl, onClose, open, sourceName }: Downlo
     const [skipNamedIndividuals, setSkipNamedIndividuals] = useState(false);
     const [includeImports, setIncludeImports] = useState(false);
     const [sourceInfo, setSourceInfo] = useState<SourceInfo>({ graphUri: undefined, graphSize: undefined });
+    const [sparqlDownloadLimit, setSparqlDownloadLimit] = useState<number>(0);
 
     useEffect(() => {
         const fetchAll = async () => {
             const response = await fetchMe();
             setCurrentUser(response.user);
+
+            const config = await getConfig();
+            setSparqlDownloadLimit(config.sparqlDownloadLimit);
 
             const info = await fetchSourceInfo(sourceName, false);
             setSourceInfo({ graphUri: info.graph, graphSize: info.graphSize });
@@ -376,10 +381,10 @@ export function DownloadGraphModal({ apiUrl, onClose, open, sourceName }: Downlo
                                 <MenuItem disabled={transferPercent > 0} value={"nt"}>
                                     N-triples
                                 </MenuItem>
-                                <MenuItem disabled={transferPercent > 0 || apiUrl === "/"} value={"xml"}>
+                                <MenuItem disabled={transferPercent > 0 || apiUrl === "/" || sourceInfo.graphSize > sparqlDownloadLimit} value={"xml"}>
                                     RDF/XML
                                 </MenuItem>
-                                <MenuItem disabled={transferPercent > 0 || apiUrl === "/"} value={"turtle"}>
+                                <MenuItem disabled={transferPercent > 0 || apiUrl === "/" || sourceInfo.graphSize > sparqlDownloadLimit} value={"turtle"}>
                                     Turtle
                                 </MenuItem>
                             </Select>

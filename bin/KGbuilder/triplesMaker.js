@@ -223,11 +223,7 @@ var TriplesMaker = {
                             try {
                                 var batchTriplesCount = 0;
                                 batchTriplesCount = await modelUtils.redoIfFailure(async function () {
-                                    return await KGbuilder_triplesWriter.writeTriplesAsync(
-                                        batchTriples,
-                                        tableProcessingParams.sourceInfos.graphUri,
-                                        tableProcessingParams.sourceInfos.sparqlServerUrl,
-                                    );
+                                    return await KGbuilder_triplesWriter.writeTriplesAsync(batchTriples, tableProcessingParams.sourceInfos.graphUri, tableProcessingParams.sourceInfos.sparqlServerUrl);
                                 });
 
                                 var currentTime = new Date();

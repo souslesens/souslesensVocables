@@ -309,6 +309,7 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
                 defaultTheme: "",
                 selector: false,
             },
+            sparqlDownloadLimit: 10000,
         },
         model.config,
     );

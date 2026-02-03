@@ -45,10 +45,17 @@ export default function () {
             }
 
             const graphUri = userSources[sourceName].graphUri;
+            const graphSize = await rdfDataModel.getTripleCount(graphUri, graphsImports);
             const data = await rdfDataModel.getGraphPartNt(graphUri, limit, offset, graphsImports);
 
-            const nextOffset = Number(offset) + Number(limit);
-            const response = { next_offset: nextOffset, data: data };
+            let nextOffset;
+            if (Number(offset) + Number(limit) >= graphSize) {
+                nextOffset = null;
+            } else {
+                nextOffset = Number(offset) + Number(limit);
+            }
+
+            const response = { graph_size: graphSize, next_offset: nextOffset, data: data };
 
             res.status(200).send(response);
         } catch (error) {

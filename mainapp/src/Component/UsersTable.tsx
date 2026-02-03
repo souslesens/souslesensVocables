@@ -115,6 +115,7 @@ export const UsersTable = () => {
                 defaultTheme: "",
                 selector: false,
             },
+            sparqlDownloadLimit: 10000,
         },
         identity,
         model.config,

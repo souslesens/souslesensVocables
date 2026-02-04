@@ -180,6 +180,12 @@ var Lineage_whiteboard = (function () {
      * @returns {void}
      */
     self.unload = function () {
+        
+        // Destroy legend overlay to detach Vis.js dataset handlers
+        if (Lineage_legendOverlay && typeof Lineage_legendOverlay.destroy === "function") {
+            Lineage_legendOverlay.destroy();
+        }
+
         $("#graphDiv").empty();
         $("#lateralPanelDiv").resizable("destroy");
         $("#lateralPanelDiv").css("width", "435px");
@@ -196,6 +202,12 @@ var Lineage_whiteboard = (function () {
      * @returns {void}
      */
     self.resetVisjsGraph = function () {
+        
+        // Prevent stale legend DOM and Vis.js handlers when container is cleared
+        if (Lineage_legendOverlay && typeof Lineage_legendOverlay.destroy === "function") {
+            Lineage_legendOverlay.destroy();
+        }
+
         $("#graphDiv").html("");
         Lineage_whiteboard.drawNewGraph({ nodes: [], edges: [] });
     };
@@ -475,7 +487,6 @@ var Lineage_whiteboard = (function () {
         });
 
         self.lineageVisjsGraph.data.nodes.update(nodesToHide);
-        Lineage_legendOverlay.refresh();
     };
 
     /**
@@ -902,8 +913,6 @@ var Lineage_whiteboard = (function () {
                             //  var nodes = self.lineageVisjsGraph.data.nodes.get(_properties.items);
                         }
 
-                        // Refresh legend overlay after new nodes added
-                        Lineage_legendOverlay.refresh();
                     }
                 },
             };
@@ -3326,7 +3335,6 @@ restrictionSource = Config.predicatesSource;
             newNodes.push({ id: node.id, opacity: 1 });
         });
         self.lineageVisjsGraph.data.nodes.update(newNodes);
-        Lineage_legendOverlay.refresh();
     };
 
     /**
@@ -4335,7 +4343,6 @@ self.zoomGraphOnNode(node.data[0].id, false);
                 });
             }
             self.lineageVisjsGraph.data.nodes.update(newNodes);
-            Lineage_legendOverlay.refresh();
         },
         createSubClass: function () {
             var node = self.currentGraphNode;
@@ -5078,9 +5085,6 @@ attrs.color=self.getSourceColor(superClassValue)
             });
             // self.zoomGraphOnNode(visjsData.nodes[0].id)
         }
-
-        // Refresh legend overlay
-        Lineage_legendOverlay.refresh();
     };
 
     self.drawDataTypeProperties = function (source, classIds, options, callback) {
@@ -5183,9 +5187,20 @@ attrs.color=self.getSourceColor(superClassValue)
             });
             if (existingNodes.length == 0) {
                 // if no existing nodes or edges, draw the graph
+                // NOTE: Vis.js draw() may rebuild the container DOM and remove the overlay legend,
+                // so we must re-init the legend overlay afterwards.
+                var graphDiv = Config.whiteBoardDivId || "graphDiv";
+
                 Lineage_whiteboard.lineageVisjsGraph.data = visjsData;
                 Lineage_whiteboard.lineageVisjsGraph.draw(function () {
                     Lineage_decoration.decorateByUpperOntologyByClass();
+                    
+                    // Re-init legend overlay after redraw (prevents disappearing legend)
+                    Lineage_legendOverlay.init(graphDiv, Lineage_whiteboard.lineageVisjsGraph, {
+                        title: "📘 Legend",
+                        restrictionColor: Lineage_whiteboard.restrictionColor,
+                        datatypeColor: Lineage_whiteboard.datatypeColor,
+                    });
                 });
                 if (callback) {
                     callback(null, visjsData);

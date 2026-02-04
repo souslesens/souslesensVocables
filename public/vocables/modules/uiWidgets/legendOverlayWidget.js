@@ -45,6 +45,247 @@ var LegendOverlayWidget = (function () {
     };
 
     /**
+     * -----------------------------
+     * Vis.js legend state builder
+     * -----------------------------
+     * Purpose:
+     * - Inspect a VisjsGraphClass instance and build a dynamic legend state
+     *   compatible with LegendOverlayWidget.update().
+     * - Keep this logic inside the widget so external overlays only provide
+     *   config (category/labels/order/overrides).
+     */
+
+    /**
+     * Safely pick a color from vis.js node/edge objects.
+     * vis.js sometimes stores color as a string or as an object ({background, border} or {color}).
+     * @param {Object} visItem
+     * @param {string} fallback
+     * @returns {string}
+     */
+    self.getColor = function (visItem, fallback) {
+        if (!visItem) {
+        return fallback || "#999";
+        }
+        if (typeof visItem.color === "string") {
+        return visItem.color;
+        }
+        if (visItem.color && typeof visItem.color === "object") {
+        if (visItem.color.background) {
+            return visItem.color.background;
+        }
+        if (visItem.color.color) {
+            return visItem.color.color;
+        }
+        }
+        if (visItem.color && visItem.color.color) {
+        return visItem.color.color;
+        }
+        return fallback || "#999";
+    };
+
+    /**
+     * Normalize a hex color for comparison (remove leading #, lowercase).
+     * @param {string} color
+     * @returns {string}
+     */
+    self.normalizeColor = function (color) {
+        if (!color) {
+        return "";
+        }
+        var str = String(color).trim().toLowerCase();
+        if (str.indexOf("#") === 0) {
+        str = str.substring(1);
+        }
+        return str;
+    };
+
+    /**
+     * Return true if the node is visible in the graph (not hidden).
+     * @param {Object} node
+     * @returns {boolean}
+     */
+    self.isVisibleNode = function (node) {
+        if (!node) {
+        return false;
+        }
+        return node.hidden !== true;
+    };
+
+    /**
+     * Return true if the edge is visible and both endpoints are visible.
+     * @param {Object} edge
+     * @param {Object<string, boolean>} visibleNodeIdsMap
+     * @returns {boolean}
+     */
+    self.isVisibleEdge = function (edge, visibleNodeIdsMap) {
+        if (!edge) {
+        return false;
+        }
+        if (edge.hidden === true) {
+        return false;
+        }
+        if (
+        visibleNodeIdsMap &&
+        (visibleNodeIdsMap[edge.from] !== true || visibleNodeIdsMap[edge.to] !== true)
+        ) {
+        return false;
+        }
+        return true;
+    };
+
+    /**
+     * Sort an object by a preferred key order, then append remaining keys alphabetically.
+     * @param {Object} obj
+     * @param {Array<string>} orderedKeys
+     * @returns {Object}
+     */
+    self.sortByOrder = function (obj, orderedKeys) {
+        var sorted = {};
+        (orderedKeys || []).forEach(function (key) {
+        if (Object.prototype.hasOwnProperty.call(obj, key)) {
+            sorted[key] = obj[key];
+        }
+        });
+        Object.keys(obj || {})
+        .sort()
+        .forEach(function (key) {
+            if (!Object.prototype.hasOwnProperty.call(sorted, key)) {
+            sorted[key] = obj[key];
+            }
+        });
+        return sorted;
+    };
+
+    /**
+     * Build a dynamic legend state by inspecting a VisjsGraphClass instance.
+     *
+     * @param {VisjsGraphClass} visjsGraph - VisjsGraphClass instance
+     * @param {Object} options
+     * @param {boolean} [options.splitNodeByShape] - if true, split node categories by shape (key becomes "Type\nshape")
+     * @param {string} [options.legendTextShape="dot"] - legend icon for text nodes
+     * @param {function(Object):string} [options.nodeKeyFn] - category key for nodes
+     * @param {function(Object,string,string,string):string} [options.nodeLabelFn] - display label (node, baseKey, variantKey, originalShape)
+     * @param {function(Object,Object<string,Object>):string} [options.edgeKeyFn] - category key for edges (edge, nodesByIdMap)
+     * @param {function(Object,string):string} [options.edgeLabelFn] - display label for edges
+     * @param {Array<string>} [options.nodeOrder] - preferred order for node categories
+     * @param {Array<string>} [options.edgeOrder] - preferred order for edge categories
+     * @returns {Object} state compatible with LegendOverlayWidget.update()
+     */
+    self.buildStateFromVisjsGraph = function (visjsGraph, options) {
+        options = options || {};
+        var splitNodeByShape = options.splitNodeByShape === true;
+
+        var state = {
+        dynamicLegend: true,
+        nodeTypeStyles: {},
+        edgeCatStyles: {},
+        };
+
+        if (!visjsGraph || !visjsGraph.data || !visjsGraph.data.nodes || !visjsGraph.data.edges) {
+        return state;
+        }
+
+        var nodes = visjsGraph.data.nodes.get();
+        var edges = visjsGraph.data.edges.get();
+
+        var visibleNodeIdsMap = {};
+        var nodesByIdMap = {};
+
+        nodes.forEach(function (node) {
+        if (!node || !node.id) return;
+        nodesByIdMap[node.id] = node;
+        });
+
+        nodes.forEach(function (node) {
+        if (!self.isVisibleNode(node)) return;
+
+        visibleNodeIdsMap[node.id] = true;
+
+        var categoryKey = options.nodeKeyFn
+            ? options.nodeKeyFn(node)
+            : (node.data && (node.data.rdfType || node.data.type)) || node.shape || "Node";
+
+        categoryKey = String(categoryKey);
+
+        var color = self.getColor(node, "#999");
+        var originalShape = node.shape || "dot";
+
+        var keyForLegend = splitNodeByShape ? categoryKey + "\n" + originalShape : categoryKey;
+
+        var legendShape = originalShape;
+        if (legendShape === "text") {
+            legendShape = options.legendTextShape || "dot";
+        }
+
+        var label = options.nodeLabelFn
+            ? options.nodeLabelFn(node, categoryKey, keyForLegend, originalShape)
+            : categoryKey;
+
+        if (!state.nodeTypeStyles[keyForLegend]) {
+            state.nodeTypeStyles[keyForLegend] = {
+            color: color,
+            colors: [color],
+            shape: legendShape,
+            classLabel: label,
+            type: categoryKey,
+            };
+        } else {
+            var typeStyle = state.nodeTypeStyles[keyForLegend];
+            if (!typeStyle.colors) {
+            typeStyle.colors = [typeStyle.color];
+            }
+            if (typeStyle.colors.indexOf(color) < 0) {
+            typeStyle.colors.push(color);
+            }
+        }
+        });
+
+        edges.forEach(function (edge) {
+        if (!self.isVisibleEdge(edge, visibleNodeIdsMap)) return;
+
+        var edgeCategoryKey = options.edgeKeyFn
+            ? (options.edgeKeyFn.length >= 2 ? options.edgeKeyFn(edge, nodesByIdMap) : options.edgeKeyFn(edge))
+            : (edge.data && (edge.data.type || edge.data.propLabel)) || edge.label || "Edge";
+
+        edgeCategoryKey = String(edgeCategoryKey);
+
+        if (!state.edgeCatStyles[edgeCategoryKey]) {
+            var eColor = self.getColor(edge, "#aaa");
+            var dashed = edge.dashes ? true : false;
+
+            var eLabel = options.edgeLabelFn ? options.edgeLabelFn(edge, edgeCategoryKey) : edgeCategoryKey;
+
+            state.edgeCatStyles[edgeCategoryKey] = {
+            color: eColor,
+            dashed: dashed,
+            label: eLabel,
+            };
+        }
+        });
+
+        // Default orders (can be overridden by caller)
+        var nodeOrder =
+        options.nodeOrder || ["Source", "Class", "NamedIndividual", "Property", "bnode", "literal"];
+
+        var edgeOrder =
+        options.edgeOrder || [
+            "ObjectProperty",
+            "Hierarchy",
+            "PropertyHierarchy",
+            "Restriction",
+            "Datatype",
+            "DatatypeProperty",
+            "SourceLink",
+            "Other",
+        ];
+
+        state.nodeTypeStyles = self.sortByOrder(state.nodeTypeStyles, nodeOrder);
+        state.edgeCatStyles = self.sortByOrder(state.edgeCatStyles, edgeOrder);
+
+        return state;
+    };    
+
+    /**
      * Build a safe suffix for DOM ids based on a containerId.
      * @param {string} containerId
      * @returns {string}
@@ -253,6 +494,10 @@ var LegendOverlayWidget = (function () {
         if (!instance) {
             return;
         }
+        
+        // detach graph events/timers first
+        self.detachVisjsGraph(containerId);
+
         var wrapper = document.getElementById(instance.ids.wrapperId);
         if (wrapper && wrapper.parentNode) {
             wrapper.parentNode.removeChild(wrapper);
@@ -706,6 +951,201 @@ var LegendOverlayWidget = (function () {
 
         html += "</div>";
         return html;
+    };
+
+    /**
+     * Ensure the legend overlay exists in the container.
+     * If the container was cleared, re-render the overlay.
+     *
+     * @param {string} containerId
+     * @param {Object} options - same as render() options
+     * @returns {void}
+     */
+    self.ensure = function (containerId, options) {
+        if (!containerId) return;
+
+        var instance = self.instances[containerId];
+        if (!instance) {
+        self.render(containerId, options);
+        return;
+        }
+
+        var wrapper = document.getElementById(instance.ids.wrapperId);
+        if (!wrapper) {
+        // The container was emptied -> DOM is gone, recreate safely
+        delete self.instances[containerId];
+        self.render(containerId, options);
+        }
+    };
+
+    /**
+     * Attach a VisjsGraphClass instance to a legend overlay.
+     * - Automatically ensures the overlay exists (render if needed).
+     * - Binds Vis DataSet events (add/update/remove) with debounce refresh.
+     * - Builds state from the graph and updates the widget.
+     *
+     * @param {string} containerId
+     * @param {VisjsGraphClass} visjsGraph
+     * @param {Object} cfg
+     * @param {Object} cfg.renderOptions - options passed to render()
+     * @param {Object} cfg.buildOptions - options passed to buildStateFromVisjsGraph()
+     * @param {Object} [cfg.runtimeOptions] - tool-specific runtime options (colors, etc.)
+     * @param {function(Object,Object,VisjsGraphClass):void} [cfg.applyStateOverrides] - mutate the computed state
+     * @param {number} [cfg.debounceMs=50]
+     * @returns {void}
+     */
+    self.attachVisjsGraph = function (containerId, visjsGraph, cfg) {
+        if (!containerId) return;
+        cfg = cfg || {};
+
+        // Ensure overlay exists (generic behavior)
+        self.ensure(containerId, cfg.renderOptions || {});
+
+        var instance = self.instances[containerId];
+        if (!instance) return;
+
+        // Store vis binding config in instance
+        instance._vis = instance._vis || {};
+        instance._vis.cfg = cfg;
+        instance._vis.runtimeOptions = cfg.runtimeOptions || {};
+        instance._vis.buildOptions = cfg.buildOptions || {};
+        instance._vis.applyStateOverrides = typeof cfg.applyStateOverrides === "function" ? cfg.applyStateOverrides : null;
+        instance._vis.debounceMs = cfg.debounceMs !== undefined ? cfg.debounceMs : 50;
+
+        // Rebind if graph changed
+        if (visjsGraph && visjsGraph !== instance._vis.visjsGraph) {
+        self.detachVisjsGraph(containerId); // clears old handlers/timers safely
+        instance = self.instances[containerId];
+        if (!instance) return;
+        instance._vis = instance._vis || {};
+        instance._vis.cfg = cfg;
+        instance._vis.runtimeOptions = cfg.runtimeOptions || {};
+        instance._vis.buildOptions = cfg.buildOptions || {};
+        instance._vis.applyStateOverrides = typeof cfg.applyStateOverrides === "function" ? cfg.applyStateOverrides : null;
+        instance._vis.debounceMs = cfg.debounceMs !== undefined ? cfg.debounceMs : 50;
+        instance._vis.visjsGraph = visjsGraph;
+        } else if (visjsGraph) {
+        instance._vis.visjsGraph = visjsGraph;
+        }
+
+        // Bind events
+        self._bindVisjsEvents(containerId);
+
+        // Initial refresh
+        self.refreshFromGraph(containerId);
+    };
+
+    /**
+     * Detach VisjsGraphClass instance and remove event bindings.
+     * Does not destroy the overlay DOM (caller may call destroy()).
+     *
+     * @param {string} containerId
+     * @returns {void}
+     */
+    self.detachVisjsGraph = function (containerId) {
+        var instance = self.instances[containerId];
+        if (!instance || !instance._vis) return;
+
+        // Clear debounce timer
+        if (instance._vis.refreshTimer) {
+        clearTimeout(instance._vis.refreshTimer);
+        instance._vis.refreshTimer = null;
+        }
+
+        // Unbind events
+        self._unbindVisjsEvents(containerId);
+
+        // Drop graph ref
+        instance._vis.visjsGraph = null;
+    };
+
+    /**
+     * Refresh legend content from the attached graph.
+     *
+     * @param {string} containerId
+     * @returns {void}
+     */
+    self.refreshFromGraph = function (containerId) {
+        var instance = self.instances[containerId];
+        if (!instance || !instance._vis || !instance._vis.visjsGraph) return;
+
+        try {
+        var buildOptions = instance._vis.buildOptions || {};
+        var state = self.buildStateFromVisjsGraph(instance._vis.visjsGraph, buildOptions);
+
+        if (instance._vis.applyStateOverrides) {
+            instance._vis.applyStateOverrides(state, instance._vis.runtimeOptions || {}, instance._vis.visjsGraph);
+        }
+
+        // Ensure overlay is still there (container could have been cleared)
+        self.ensure(containerId, (instance.options || {}));
+        self.update(containerId, state);
+        } catch (e) {
+        console.error("Legend refresh failed", e);
+        }
+    };
+
+    /**
+     * Internal: schedule a debounced refresh.
+     * @param {string} containerId
+     * @returns {void}
+     */
+    self._scheduleRefreshFromGraph = function (containerId) {
+        var instance = self.instances[containerId];
+        if (!instance || !instance._vis) return;
+
+        if (instance._vis.refreshTimer) {
+        clearTimeout(instance._vis.refreshTimer);
+        }
+        instance._vis.refreshTimer = setTimeout(function () {
+        instance._vis.refreshTimer = null;
+        self.refreshFromGraph(containerId);
+        }, instance._vis.debounceMs || 50);
+    };
+
+    /**
+     * Internal: bind vis DataSet events for nodes/edges.
+     * @param {string} containerId
+     * @returns {void}
+     */
+    self._bindVisjsEvents = function (containerId) {
+        var instance = self.instances[containerId];
+        if (!instance || !instance._vis || !instance._vis.visjsGraph) return;
+
+        // Avoid duplicate handlers
+        self._unbindVisjsEvents(containerId);
+
+        var visjsGraph = instance._vis.visjsGraph;
+        if (!visjsGraph.data || !visjsGraph.data.nodes || !visjsGraph.data.edges) return;
+
+        instance._vis.boundHandler = function () {
+        self._scheduleRefreshFromGraph(containerId);
+        };
+
+        ["add", "update", "remove"].forEach(function (eventName) {
+        visjsGraph.data.nodes.on(eventName, instance._vis.boundHandler);
+        visjsGraph.data.edges.on(eventName, instance._vis.boundHandler);
+        });
+    };
+
+    /**
+     * Internal: unbind vis DataSet events.
+     * @param {string} containerId
+     * @returns {void}
+     */
+    self._unbindVisjsEvents = function (containerId) {
+        var instance = self.instances[containerId];
+        if (!instance || !instance._vis || !instance._vis.visjsGraph || !instance._vis.boundHandler) return;
+
+        var visjsGraph = instance._vis.visjsGraph;
+        if (!visjsGraph.data || !visjsGraph.data.nodes || !visjsGraph.data.edges) return;
+
+        ["add", "update", "remove"].forEach(function (eventName) {
+        visjsGraph.data.nodes.off(eventName, instance._vis.boundHandler);
+        visjsGraph.data.edges.off(eventName, instance._vis.boundHandler);
+        });
+
+        instance._vis.boundHandler = null;
     };
 
     return self;

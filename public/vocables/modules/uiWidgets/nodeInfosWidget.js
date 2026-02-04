@@ -127,8 +127,10 @@ var NodeInfosWidget = (function () {
                     $("[aria-selected='true']").addClass("nodesInfos-selectedTab");
                     if (ui.newPanel.selector == "#nodeInfosWidget_AxiomsTabDiv") {
                         var source = self.currentSource;
-                        // source = Lineage_sources.mainSource;
                         UI.setDialogTitle("#smallDialogDiv", "Axioms of resource " + self.currentNode.data.label);
+                        $("#smallDialogDiv").dialog("option", "close", function () {
+                            $("#nodeInfosWidget_tabsDiv").tabs("option", "active", 0);
+                        });
                         NodeInfosAxioms.init(source, self.currentNode, "smallDialogDiv");
                     }
                     if (ui.newPanel.selector == "#nodeInfosWidget_relationsDiv") {

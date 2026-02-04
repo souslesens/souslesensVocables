@@ -108,6 +108,35 @@ class RdfDataModel {
 
     /**
      * @param {string} graphUri - the graph URI
+     * @param {string} contributor - contributor name
+     * @param {string} sep - separator, default is \t
+     * @returns {string[]} - a triple
+     */
+    genContributorTriple = (graphUri, contributor, sep = "\t") => {
+        const s = `<${graphUri}>`;
+        const p = "<http://purl.org/dc/elements/1.1/contributor>";
+        const o = `"${contributor}"^^<http://www.w3.org/2001/XMLSchema#string>`;
+        return [s, p, o];
+    };
+
+    /**
+     * @param {string} graphUri - the graph URI
+     * @param {string[]} importUris - list of import uris
+     * @param {string} sep - separator, default is \t
+     * @returns {string[][]} - a list of triples
+     */
+    genImportTriples = (graphUri, importUris, sep = "\t") => {
+        const triples = importUris.map((importUri) => {
+            const s = `<${graphUri}>`;
+            const p = "<http://www.w3.org/2002/07/owl#imports>";
+            const o = `<${importUri}>`;
+            return [s, p, o];
+        });
+        return triples;
+    };
+
+    /**
+     * @param {string} graphUri - the graph URI
      */
     _dropMetadata = async (graphUri) => {
         const query = `WITH <${graphUri}>

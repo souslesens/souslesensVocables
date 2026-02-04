@@ -135,6 +135,10 @@ class RdfDataModel {
         return triples;
     };
 
+    formatTripleToNt = (s, p, o, sep = "\t") => {
+        return `${s}${sep}${p}${sep}${o} .`;
+    };
+
     /**
      * @param {string} graphUri - the graph URI
      */

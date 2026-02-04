@@ -794,8 +794,15 @@ var LegendOverlayWidget = (function () {
         slot.innerHTML = "";
 
         // Generic "dynamic legend" mode (usable by any tool)
-        if (options.dynamicLegend === true && state && state.dynamicLegend === true && state.nodeTypeStyles && state.edgeCatStyles) {
-            slot.innerHTML = self.buildDynamicLegendHtmlFromState(state);
+        if (options.dynamicLegend === true && state && state.dynamicLegend === true && state.nodeTypeStyles && state.edgeCatStyles) {    
+        var html = self.buildDynamicLegendHtmlFromState(state);
+
+        // Allow implicit table colors section to be shown along with dynamic legend
+        if (options.variant === "implicit" && state.tableColors) {
+            html += self.buildTableColorsSectionHtml(state.tableColors);
+        }
+
+        slot.innerHTML = html;
             return;
         }
 
@@ -978,84 +985,133 @@ var LegendOverlayWidget = (function () {
         }
     };
 
+    function setupVisBinding(instance, cfg, visjsGraph) {
+        instance._vis = instance._vis || {};
+        instance._vis.cfg = cfg || {};
+        instance._vis.runtimeOptions = (cfg && cfg.runtimeOptions) || {};
+        instance._vis.buildOptions = (cfg && cfg.buildOptions) || {};
+        instance._vis.applyStateOverrides =
+            cfg && typeof cfg.applyStateOverrides === "function" ? cfg.applyStateOverrides : null;
+        instance._vis.debounceMs = cfg && cfg.debounceMs !== undefined ? cfg.debounceMs : 50;
+        instance._vis.visjsGraph = visjsGraph || null;
+    }
+
+    function scheduleRefreshFromGraph(containerId) {
+        var instance = self.instances[containerId];
+        if (!instance || !instance._vis) {
+            return;
+        }
+        if (instance._vis.refreshTimer) {
+            clearTimeout(instance._vis.refreshTimer);
+        }
+        instance._vis.refreshTimer = setTimeout(function () {
+            instance._vis.refreshTimer = null;
+            self.refreshFromGraph(containerId);
+        }, instance._vis.debounceMs || 50);
+    }
+
+    function bindVisjsEvents(containerId) {
+        var instance = self.instances[containerId];
+        if (!instance || !instance._vis || !instance._vis.visjsGraph) {
+            return;
+        }
+
+        unbindVisjsEvents(containerId);
+
+        var visjsGraph = instance._vis.visjsGraph;
+        if (!visjsGraph.data || !visjsGraph.data.nodes || !visjsGraph.data.edges) {
+            return;
+        }
+
+        instance._vis.boundHandler = function () {
+            scheduleRefreshFromGraph(containerId);
+        };
+
+        ["add", "update", "remove"].forEach(function (eventName) {
+            visjsGraph.data.nodes.on(eventName, instance._vis.boundHandler);
+            visjsGraph.data.edges.on(eventName, instance._vis.boundHandler);
+        });
+    }
+
+    function unbindVisjsEvents(containerId) {
+        var instance = self.instances[containerId];
+        if (!instance || !instance._vis || !instance._vis.visjsGraph || !instance._vis.boundHandler) {
+            return;
+        }
+
+        var visjsGraph = instance._vis.visjsGraph;
+        if (!visjsGraph.data || !visjsGraph.data.nodes || !visjsGraph.data.edges) {
+            return;
+        }
+
+        ["add", "update", "remove"].forEach(function (eventName) {
+            visjsGraph.data.nodes.off(eventName, instance._vis.boundHandler);
+            visjsGraph.data.edges.off(eventName, instance._vis.boundHandler);
+        });
+
+        instance._vis.boundHandler = null;
+    }
+
     /**
      * Attach a VisjsGraphClass instance to a legend overlay.
-     * - Automatically ensures the overlay exists (render if needed).
-     * - Binds Vis DataSet events (add/update/remove) with debounce refresh.
-     * - Builds state from the graph and updates the widget.
      *
      * @param {string} containerId
      * @param {VisjsGraphClass} visjsGraph
      * @param {Object} cfg
-     * @param {Object} cfg.renderOptions - options passed to render()
-     * @param {Object} cfg.buildOptions - options passed to buildStateFromVisjsGraph()
-     * @param {Object} [cfg.runtimeOptions] - tool-specific runtime options (colors, etc.)
-     * @param {function(Object,Object,VisjsGraphClass):void} [cfg.applyStateOverrides] - mutate the computed state
-     * @param {number} [cfg.debounceMs=50]
      * @returns {void}
      */
     self.attachVisjsGraph = function (containerId, visjsGraph, cfg) {
-        if (!containerId) return;
+        if (!containerId) {
+            return;
+        }
         cfg = cfg || {};
 
-        // Ensure overlay exists (generic behavior)
         self.ensure(containerId, cfg.renderOptions || {});
-
         var instance = self.instances[containerId];
-        if (!instance) return;
-
-        // Store vis binding config in instance
-        instance._vis = instance._vis || {};
-        instance._vis.cfg = cfg;
-        instance._vis.runtimeOptions = cfg.runtimeOptions || {};
-        instance._vis.buildOptions = cfg.buildOptions || {};
-        instance._vis.applyStateOverrides = typeof cfg.applyStateOverrides === "function" ? cfg.applyStateOverrides : null;
-        instance._vis.debounceMs = cfg.debounceMs !== undefined ? cfg.debounceMs : 50;
-
-        // Rebind if graph changed
-        if (visjsGraph && visjsGraph !== instance._vis.visjsGraph) {
-        self.detachVisjsGraph(containerId); // clears old handlers/timers safely
-        instance = self.instances[containerId];
-        if (!instance) return;
-        instance._vis = instance._vis || {};
-        instance._vis.cfg = cfg;
-        instance._vis.runtimeOptions = cfg.runtimeOptions || {};
-        instance._vis.buildOptions = cfg.buildOptions || {};
-        instance._vis.applyStateOverrides = typeof cfg.applyStateOverrides === "function" ? cfg.applyStateOverrides : null;
-        instance._vis.debounceMs = cfg.debounceMs !== undefined ? cfg.debounceMs : 50;
-        instance._vis.visjsGraph = visjsGraph;
-        } else if (visjsGraph) {
-        instance._vis.visjsGraph = visjsGraph;
+        if (!instance) {
+            return;
         }
 
-        // Bind events
-        self._bindVisjsEvents(containerId);
+        // Keep last render options for future ensure() calls
+        if (cfg.renderOptions) {
+            instance.options = cfg.renderOptions;
+        }
 
-        // Initial refresh
+        // Rebind if graph changed
+        if (instance._vis && instance._vis.visjsGraph && visjsGraph && visjsGraph !== instance._vis.visjsGraph) {
+            self.detachVisjsGraph(containerId);
+            instance = self.instances[containerId];
+            if (!instance) {
+            return;
+            }
+        }
+
+        setupVisBinding(instance, cfg, visjsGraph);
+
+        bindVisjsEvents(containerId);
         self.refreshFromGraph(containerId);
     };
 
     /**
      * Detach VisjsGraphClass instance and remove event bindings.
-     * Does not destroy the overlay DOM (caller may call destroy()).
+     * Does not destroy the overlay DOM.
      *
      * @param {string} containerId
      * @returns {void}
      */
     self.detachVisjsGraph = function (containerId) {
         var instance = self.instances[containerId];
-        if (!instance || !instance._vis) return;
-
-        // Clear debounce timer
-        if (instance._vis.refreshTimer) {
-        clearTimeout(instance._vis.refreshTimer);
-        instance._vis.refreshTimer = null;
+        if (!instance || !instance._vis) {
+            return;
         }
 
-        // Unbind events
-        self._unbindVisjsEvents(containerId);
+        if (instance._vis.refreshTimer) {
+            clearTimeout(instance._vis.refreshTimer);
+            instance._vis.refreshTimer = null;
+        }
 
-        // Drop graph ref
+        unbindVisjsEvents(containerId);
+
         instance._vis.visjsGraph = null;
     };
 
@@ -1067,87 +1123,24 @@ var LegendOverlayWidget = (function () {
      */
     self.refreshFromGraph = function (containerId) {
         var instance = self.instances[containerId];
-        if (!instance || !instance._vis || !instance._vis.visjsGraph) return;
+        if (!instance || !instance._vis || !instance._vis.visjsGraph) {
+            return;
+        }
 
         try {
-        var buildOptions = instance._vis.buildOptions || {};
-        var state = self.buildStateFromVisjsGraph(instance._vis.visjsGraph, buildOptions);
+            var buildOptions = instance._vis.buildOptions || {};
+            var state = self.buildStateFromVisjsGraph(instance._vis.visjsGraph, buildOptions);
 
-        if (instance._vis.applyStateOverrides) {
+            if (instance._vis.applyStateOverrides) {
             instance._vis.applyStateOverrides(state, instance._vis.runtimeOptions || {}, instance._vis.visjsGraph);
-        }
+            }
 
-        // Ensure overlay is still there (container could have been cleared)
-        self.ensure(containerId, (instance.options || {}));
-        self.update(containerId, state);
+            self.ensure(containerId, instance.options || {});
+            self.update(containerId, state);
         } catch (e) {
-        console.error("Legend refresh failed", e);
+            console.error("Legend refresh failed", e);
         }
     };
-
-    /**
-     * Internal: schedule a debounced refresh.
-     * @param {string} containerId
-     * @returns {void}
-     */
-    self._scheduleRefreshFromGraph = function (containerId) {
-        var instance = self.instances[containerId];
-        if (!instance || !instance._vis) return;
-
-        if (instance._vis.refreshTimer) {
-        clearTimeout(instance._vis.refreshTimer);
-        }
-        instance._vis.refreshTimer = setTimeout(function () {
-        instance._vis.refreshTimer = null;
-        self.refreshFromGraph(containerId);
-        }, instance._vis.debounceMs || 50);
-    };
-
-    /**
-     * Internal: bind vis DataSet events for nodes/edges.
-     * @param {string} containerId
-     * @returns {void}
-     */
-    self._bindVisjsEvents = function (containerId) {
-        var instance = self.instances[containerId];
-        if (!instance || !instance._vis || !instance._vis.visjsGraph) return;
-
-        // Avoid duplicate handlers
-        self._unbindVisjsEvents(containerId);
-
-        var visjsGraph = instance._vis.visjsGraph;
-        if (!visjsGraph.data || !visjsGraph.data.nodes || !visjsGraph.data.edges) return;
-
-        instance._vis.boundHandler = function () {
-        self._scheduleRefreshFromGraph(containerId);
-        };
-
-        ["add", "update", "remove"].forEach(function (eventName) {
-        visjsGraph.data.nodes.on(eventName, instance._vis.boundHandler);
-        visjsGraph.data.edges.on(eventName, instance._vis.boundHandler);
-        });
-    };
-
-    /**
-     * Internal: unbind vis DataSet events.
-     * @param {string} containerId
-     * @returns {void}
-     */
-    self._unbindVisjsEvents = function (containerId) {
-        var instance = self.instances[containerId];
-        if (!instance || !instance._vis || !instance._vis.visjsGraph || !instance._vis.boundHandler) return;
-
-        var visjsGraph = instance._vis.visjsGraph;
-        if (!visjsGraph.data || !visjsGraph.data.nodes || !visjsGraph.data.edges) return;
-
-        ["add", "update", "remove"].forEach(function (eventName) {
-        visjsGraph.data.nodes.off(eventName, instance._vis.boundHandler);
-        visjsGraph.data.edges.off(eventName, instance._vis.boundHandler);
-        });
-
-        instance._vis.boundHandler = null;
-    };
-
     return self;
 })();
 

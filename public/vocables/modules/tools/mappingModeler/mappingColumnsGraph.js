@@ -8,6 +8,9 @@ import MappingModeler from "./mappingModeler.js";
 import Lineage_graphPaths from "../lineage/lineage_graphPaths.js";
 import UIcontroller from "./uiController.js";
 import LegendOverlayWidget from "../../uiWidgets/legendOverlayWidget.js";
+import Mapping_legendOverlay from "./mapping_legendOverlay.js";
+import Implicit_legendOverlay from "./implicit_legendOverlay.js";
+
 
 /**
  * MappingColumnsGraph module.
@@ -561,39 +564,10 @@ var MappingColumnsGraph = (function () {
         if (!containerId) {
             containerId = self.graphDiv;
         }
-        var mappingLegendItems = {
-            nodes: [
-                // Rectangles (default node appearance in Mapping Modeler)
-                { type: "Class", label: "Class", color: "#00AFEF", swatch: "rect" },
-                { type: "Column", label: "Column", color: "#CB9801", swatch: "rect" },
-                { type: "Table", label: "Table", color: "#D8CACD", swatch: "rect" },
-                { type: "URI", label: "URI", color: "#BC7DEC", swatch: "rect" },
-
-                // Special shapes
-                { type: "VirtualColumn", label: "VirtualColumn", color: "#CB9801", swatch: "box" },
-                { type: "RowIndex", label: "RowIndex", color: "#CB9801", swatch: "triangle" },
-            ],
-            edges: [
-                { cat: "ObjectProperty", label: "ObjectProperty (relation)", color: "#409304", swatch: "line" },
-                { cat: "OtherRelation", label: "Other relation (e.g., rdfs:member)", color: "#333333", swatch: "line" },
-                { cat: "RdfType", label: "rdf:type / rdfs:subClassOf link", color: "#00AFEF", swatch: "line" },
-                { cat: "SystemDefault", label: "System / default edge", color: "#CCCCCC", swatch: "line" },
-                { cat: "DatasourceLink", label: "Datasource (Table → Column)", color: "#8F8A8C", swatch: "line" },
-                { cat: "TechnicalLink", label: "TechnicalLink", color: "#EF4270", swatch: "line" },
-                { cat: "DatatypeProperty", label: "DatatypeProperty (dashed)", color: "#9B59B6", swatch: "dashed" },
-            ],
-        };
-
-        LegendOverlayWidget.render(containerId, {
-            idPrefix: "mappingLegend",
-            title: "📘 Legend",
-            initiallyExpanded: true,
-            variant: "mapping",
-            position: "top-right",
-            items: mappingLegendItems,
-        });
-
-        LegendOverlayWidget.update(containerId, self.getLegendStateFromVisjsGraph(self.visjsGraph));
+        if (!self.visjsGraph) {
+            return;
+        }
+        Mapping_legendOverlay.init(containerId, self.visjsGraph, { title: "📘 Legend" });
     };
 
     /**
@@ -2441,6 +2415,7 @@ var MappingColumnsGraph = (function () {
                     $("#mainDialogDiv")
                         .off("dialogclose.mappingLegend")
                         .on("dialogclose.mappingLegend", function () {
+                            Implicit_legendOverlay.destroy();
                             LegendOverlayWidget.setVisible(self.graphDiv, true);
                         });
 
@@ -2484,18 +2459,7 @@ var MappingColumnsGraph = (function () {
 
                     self.implicitModelVisjsGraph = new VisjsGraphClass("mappingModeler_implicitModelGraph", classVisjsData, implicitOptions);
                     self.implicitModelVisjsGraph.draw(function () {
-                        LegendOverlayWidget.render("implicitModelContainer", {
-                            idPrefix: "implicitLegend",
-                            title: "📘 Legend",
-                            initiallyExpanded: true,
-                            variant: "implicit",
-                            position: "top-right",
-                        });
-
-                        var state = self.getLegendStateFromVisjsGraph(self.implicitModelVisjsGraph);
-                        state.tableColors = self.getImplicitTableColors(self.implicitModelVisjsGraph);
-
-                        LegendOverlayWidget.update("implicitModelContainer", state);
+                        Implicit_legendOverlay.init("implicitModelContainer", self.implicitModelVisjsGraph, { title: "📘 Legend" });
 
                         callbackSeries();
                     });

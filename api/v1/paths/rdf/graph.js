@@ -48,6 +48,29 @@ export default function () {
             const graphSize = await rdfDataModel.getTripleCount(graphUri, graphsImports);
             const data = await rdfDataModel.getGraphPartNt(graphUri, limit, offset, graphsImports);
 
+            let additionalTriples = "";
+            // add contributor and import triples only in offset 0
+            if (Number(offset) === 0) {
+                const contributorTriple = rdfDataModel.genContributorTriple(graphUri, userInfo.user.login);
+                const checkContributorTriple = await rdfDataModel.ask(graphUri, contributorTriple);
+                const contributorTripleStr = checkContributorTriple ? "" : rdfDataModel.formatTripleToNt(...contributorTriple);
+
+                let importTriplesStrArray = [];
+                if (graphsImports.length > 0) {
+                    importTriples = rdfDataModel.genImportTriples(graphUri, graphsImports);
+                    importTriplesStrArray = await Promise.all(
+                        importTriples
+                            .map(async (t) => {
+                                const checkImportTriple = await rdfDataModel.ask(graphUri, t);
+                                return checkImportTriple ? null : rdfDataModel.formatTripleToNt(...t);
+                            })
+                            .filter((e) => e !== null),
+                    );
+                }
+                additionalTriples = `${contributorTripleStr}\n${importTriplesStrArray.join("\n")}\n`;
+            }
+            const dataWithAdditionalTriples = additionalTriples + data;
+
             let nextOffset;
             if (Number(offset) + Number(limit) >= graphSize) {
                 nextOffset = null;
@@ -55,7 +78,7 @@ export default function () {
                 nextOffset = Number(offset) + Number(limit);
             }
 
-            const response = { graph_size: graphSize, next_offset: nextOffset, data: data };
+            const response = { graph_size: graphSize, next_offset: nextOffset, data: dataWithAdditionalTriples };
 
             res.status(200).send(response);
         } catch (error) {

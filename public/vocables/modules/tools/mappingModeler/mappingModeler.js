@@ -1717,7 +1717,7 @@ var MappingModeler = (function () {
                 var remaining = Math.max(0, estimatedTotal - elapsed);
 
                 elapsedText = " – elapsed time: " + self.formatDuration(elapsed);
-                remainingText = " – estimated remaining time: " + self.formatDuration(remaining);
+                remainingText = " – remaining time: " + self.formatDuration(remaining);
             }
 
             messageStr = "Triples created " + message.totalTriples + elapsedText + remainingText;
@@ -1740,7 +1740,7 @@ var MappingModeler = (function () {
                     var remainingDel = Math.max(0, estimatedTotalDel - elapsedDel);
 
                     elapsedTextDelete = " – elapsed time: " + self.formatDuration(elapsedDel);
-                    remainingTextDelete = " – estimated remaining time: " + self.formatDuration(remainingDel);
+                    remainingTextDelete = " – remaining time: " + self.formatDuration(remainingDel);
                 }
 
                 var deletedSoFar = message.totalSize || 0;

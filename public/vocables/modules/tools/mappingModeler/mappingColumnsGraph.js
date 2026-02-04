@@ -11,7 +11,6 @@ import LegendOverlayWidget from "../../uiWidgets/legendOverlayWidget.js";
 import Mapping_legendOverlay from "./mapping_legendOverlay.js";
 import Implicit_legendOverlay from "./implicit_legendOverlay.js";
 
-
 /**
  * MappingColumnsGraph module.
  * Handles the visualization and management of mapping columns in a graph.

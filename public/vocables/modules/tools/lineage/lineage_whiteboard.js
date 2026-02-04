@@ -180,7 +180,6 @@ var Lineage_whiteboard = (function () {
      * @returns {void}
      */
     self.unload = function () {
-        
         // Destroy legend overlay to detach Vis.js dataset handlers
         if (Lineage_legendOverlay && typeof Lineage_legendOverlay.destroy === "function") {
             Lineage_legendOverlay.destroy();
@@ -202,7 +201,6 @@ var Lineage_whiteboard = (function () {
      * @returns {void}
      */
     self.resetVisjsGraph = function () {
-        
         // Prevent stale legend DOM and Vis.js handlers when container is cleared
         if (Lineage_legendOverlay && typeof Lineage_legendOverlay.destroy === "function") {
             Lineage_legendOverlay.destroy();
@@ -912,7 +910,6 @@ var Lineage_whiteboard = (function () {
                             //!self.lineageVisjsGraph.skipColorGraphNodesByType) {
                             //  var nodes = self.lineageVisjsGraph.data.nodes.get(_properties.items);
                         }
-
                     }
                 },
             };
@@ -5194,7 +5191,7 @@ attrs.color=self.getSourceColor(superClassValue)
                 Lineage_whiteboard.lineageVisjsGraph.data = visjsData;
                 Lineage_whiteboard.lineageVisjsGraph.draw(function () {
                     Lineage_decoration.decorateByUpperOntologyByClass();
-                    
+
                     // Re-init legend overlay after redraw (prevents disappearing legend)
                     Lineage_legendOverlay.init(graphDiv, Lineage_whiteboard.lineageVisjsGraph, {
                         title: "📘 Legend",

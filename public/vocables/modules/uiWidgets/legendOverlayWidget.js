@@ -64,21 +64,21 @@ var LegendOverlayWidget = (function () {
      */
     self.getColor = function (visItem, fallback) {
         if (!visItem) {
-        return fallback || "#999";
+            return fallback || "#999";
         }
         if (typeof visItem.color === "string") {
-        return visItem.color;
+            return visItem.color;
         }
         if (visItem.color && typeof visItem.color === "object") {
-        if (visItem.color.background) {
-            return visItem.color.background;
-        }
-        if (visItem.color.color) {
-            return visItem.color.color;
-        }
+            if (visItem.color.background) {
+                return visItem.color.background;
+            }
+            if (visItem.color.color) {
+                return visItem.color.color;
+            }
         }
         if (visItem.color && visItem.color.color) {
-        return visItem.color.color;
+            return visItem.color.color;
         }
         return fallback || "#999";
     };
@@ -90,11 +90,11 @@ var LegendOverlayWidget = (function () {
      */
     self.normalizeColor = function (color) {
         if (!color) {
-        return "";
+            return "";
         }
         var str = String(color).trim().toLowerCase();
         if (str.indexOf("#") === 0) {
-        str = str.substring(1);
+            str = str.substring(1);
         }
         return str;
     };
@@ -106,7 +106,7 @@ var LegendOverlayWidget = (function () {
      */
     self.isVisibleNode = function (node) {
         if (!node) {
-        return false;
+            return false;
         }
         return node.hidden !== true;
     };
@@ -119,16 +119,13 @@ var LegendOverlayWidget = (function () {
      */
     self.isVisibleEdge = function (edge, visibleNodeIdsMap) {
         if (!edge) {
-        return false;
+            return false;
         }
         if (edge.hidden === true) {
-        return false;
+            return false;
         }
-        if (
-        visibleNodeIdsMap &&
-        (visibleNodeIdsMap[edge.from] !== true || visibleNodeIdsMap[edge.to] !== true)
-        ) {
-        return false;
+        if (visibleNodeIdsMap && (visibleNodeIdsMap[edge.from] !== true || visibleNodeIdsMap[edge.to] !== true)) {
+            return false;
         }
         return true;
     };
@@ -142,17 +139,17 @@ var LegendOverlayWidget = (function () {
     self.sortByOrder = function (obj, orderedKeys) {
         var sorted = {};
         (orderedKeys || []).forEach(function (key) {
-        if (Object.prototype.hasOwnProperty.call(obj, key)) {
-            sorted[key] = obj[key];
-        }
-        });
-        Object.keys(obj || {})
-        .sort()
-        .forEach(function (key) {
-            if (!Object.prototype.hasOwnProperty.call(sorted, key)) {
-            sorted[key] = obj[key];
+            if (Object.prototype.hasOwnProperty.call(obj, key)) {
+                sorted[key] = obj[key];
             }
         });
+        Object.keys(obj || {})
+            .sort()
+            .forEach(function (key) {
+                if (!Object.prototype.hasOwnProperty.call(sorted, key)) {
+                    sorted[key] = obj[key];
+                }
+            });
         return sorted;
     };
 
@@ -176,13 +173,13 @@ var LegendOverlayWidget = (function () {
         var splitNodeByShape = options.splitNodeByShape === true;
 
         var state = {
-        dynamicLegend: true,
-        nodeTypeStyles: {},
-        edgeCatStyles: {},
+            dynamicLegend: true,
+            nodeTypeStyles: {},
+            edgeCatStyles: {},
         };
 
         if (!visjsGraph || !visjsGraph.data || !visjsGraph.data.nodes || !visjsGraph.data.edges) {
-        return state;
+            return state;
         }
 
         var nodes = visjsGraph.data.nodes.get();
@@ -192,98 +189,85 @@ var LegendOverlayWidget = (function () {
         var nodesByIdMap = {};
 
         nodes.forEach(function (node) {
-        if (!node || !node.id) return;
-        nodesByIdMap[node.id] = node;
+            if (!node || !node.id) return;
+            nodesByIdMap[node.id] = node;
         });
 
         nodes.forEach(function (node) {
-        if (!self.isVisibleNode(node)) return;
+            if (!self.isVisibleNode(node)) return;
 
-        visibleNodeIdsMap[node.id] = true;
+            visibleNodeIdsMap[node.id] = true;
 
-        var categoryKey = options.nodeKeyFn
-            ? options.nodeKeyFn(node)
-            : (node.data && (node.data.rdfType || node.data.type)) || node.shape || "Node";
+            var categoryKey = options.nodeKeyFn ? options.nodeKeyFn(node) : (node.data && (node.data.rdfType || node.data.type)) || node.shape || "Node";
 
-        categoryKey = String(categoryKey);
+            categoryKey = String(categoryKey);
 
-        var color = self.getColor(node, "#999");
-        var originalShape = node.shape || "dot";
+            var color = self.getColor(node, "#999");
+            var originalShape = node.shape || "dot";
 
-        var keyForLegend = splitNodeByShape ? categoryKey + "\n" + originalShape : categoryKey;
+            var keyForLegend = splitNodeByShape ? categoryKey + "\n" + originalShape : categoryKey;
 
-        var legendShape = originalShape;
-        if (legendShape === "text") {
-            legendShape = options.legendTextShape || "dot";
-        }
-
-        var label = options.nodeLabelFn
-            ? options.nodeLabelFn(node, categoryKey, keyForLegend, originalShape)
-            : categoryKey;
-
-        if (!state.nodeTypeStyles[keyForLegend]) {
-            state.nodeTypeStyles[keyForLegend] = {
-            color: color,
-            colors: [color],
-            shape: legendShape,
-            classLabel: label,
-            type: categoryKey,
-            };
-        } else {
-            var typeStyle = state.nodeTypeStyles[keyForLegend];
-            if (!typeStyle.colors) {
-            typeStyle.colors = [typeStyle.color];
+            var legendShape = originalShape;
+            if (legendShape === "text") {
+                legendShape = options.legendTextShape || "dot";
             }
-            if (typeStyle.colors.indexOf(color) < 0) {
-            typeStyle.colors.push(color);
+
+            var label = options.nodeLabelFn ? options.nodeLabelFn(node, categoryKey, keyForLegend, originalShape) : categoryKey;
+
+            if (!state.nodeTypeStyles[keyForLegend]) {
+                state.nodeTypeStyles[keyForLegend] = {
+                    color: color,
+                    colors: [color],
+                    shape: legendShape,
+                    classLabel: label,
+                    type: categoryKey,
+                };
+            } else {
+                var typeStyle = state.nodeTypeStyles[keyForLegend];
+                if (!typeStyle.colors) {
+                    typeStyle.colors = [typeStyle.color];
+                }
+                if (typeStyle.colors.indexOf(color) < 0) {
+                    typeStyle.colors.push(color);
+                }
             }
-        }
         });
 
         edges.forEach(function (edge) {
-        if (!self.isVisibleEdge(edge, visibleNodeIdsMap)) return;
+            if (!self.isVisibleEdge(edge, visibleNodeIdsMap)) return;
 
-        var edgeCategoryKey = options.edgeKeyFn
-            ? (options.edgeKeyFn.length >= 2 ? options.edgeKeyFn(edge, nodesByIdMap) : options.edgeKeyFn(edge))
-            : (edge.data && (edge.data.type || edge.data.propLabel)) || edge.label || "Edge";
+            var edgeCategoryKey = options.edgeKeyFn
+                ? options.edgeKeyFn.length >= 2
+                    ? options.edgeKeyFn(edge, nodesByIdMap)
+                    : options.edgeKeyFn(edge)
+                : (edge.data && (edge.data.type || edge.data.propLabel)) || edge.label || "Edge";
 
-        edgeCategoryKey = String(edgeCategoryKey);
+            edgeCategoryKey = String(edgeCategoryKey);
 
-        if (!state.edgeCatStyles[edgeCategoryKey]) {
-            var eColor = self.getColor(edge, "#aaa");
-            var dashed = edge.dashes ? true : false;
+            if (!state.edgeCatStyles[edgeCategoryKey]) {
+                var eColor = self.getColor(edge, "#aaa");
+                var dashed = edge.dashes ? true : false;
 
-            var eLabel = options.edgeLabelFn ? options.edgeLabelFn(edge, edgeCategoryKey) : edgeCategoryKey;
+                var eLabel = options.edgeLabelFn ? options.edgeLabelFn(edge, edgeCategoryKey) : edgeCategoryKey;
 
-            state.edgeCatStyles[edgeCategoryKey] = {
-            color: eColor,
-            dashed: dashed,
-            label: eLabel,
-            };
-        }
+                state.edgeCatStyles[edgeCategoryKey] = {
+                    color: eColor,
+                    dashed: dashed,
+                    label: eLabel,
+                };
+            }
         });
 
         // Default orders (can be overridden by caller)
-        var nodeOrder =
-        options.nodeOrder || ["Source", "Class", "NamedIndividual", "Property", "bnode", "literal"];
+        var nodeOrder = options.nodeOrder || ["Source", "Class", "NamedIndividual", "Property", "bnode", "literal"];
 
-        var edgeOrder =
-        options.edgeOrder || [
-            "ObjectProperty",
-            "Hierarchy",
-            "PropertyHierarchy",
-            "Restriction",
-            "Datatype",
-            "DatatypeProperty",
-            "SourceLink",
-            "Other",
-        ];
+        var edgeOrder = options.edgeOrder || ["ObjectProperty", "Hierarchy", "PropertyHierarchy", "Restriction", "Datatype", "DatatypeProperty", "SourceLink", "Other"];
 
         state.nodeTypeStyles = self.sortByOrder(state.nodeTypeStyles, nodeOrder);
         state.edgeCatStyles = self.sortByOrder(state.edgeCatStyles, edgeOrder);
 
         return state;
-    };    
+    };
 
     /**
      * Build a safe suffix for DOM ids based on a containerId.
@@ -494,7 +478,7 @@ var LegendOverlayWidget = (function () {
         if (!instance) {
             return;
         }
-        
+
         // detach graph events/timers first
         self.detachVisjsGraph(containerId);
 
@@ -728,21 +712,13 @@ var LegendOverlayWidget = (function () {
         if (shape === "triangle") {
             // Use clip-path so gradients can be applied while keeping the triangle shape.
             // Fallback: if clip-path is not supported, it will still display a small colored block.
-            return (
-                "<span style='width:14px; height:14px; background:" +
-                backgroundCss +
-                "; display:inline-block; clip-path:polygon(50% 0%, 0% 100%, 100% 100%);'></span>"
-            );
+            return "<span style='width:14px; height:14px; background:" + backgroundCss + "; display:inline-block; clip-path:polygon(50% 0%, 0% 100%, 100% 100%);'></span>";
         }
         if (shape === "hexagon") {
             // Hexagon swatch (used for blank nodes in the graph)
             // Using clip-path allows both solid colors and gradients.
-            return (
-                "<span style='width:14px; height:14px; background:" +
-                backgroundCss +
-                "; display:inline-block; clip-path:polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);'></span>"
-            );
-            }
+            return "<span style='width:14px; height:14px; background:" + backgroundCss + "; display:inline-block; clip-path:polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);'></span>";
+        }
 
         return "<span style='width:" + size + "px; height:" + size + "px; background:" + backgroundCss + "; display:inline-block; border-radius:50%;'></span>";
     };
@@ -794,15 +770,15 @@ var LegendOverlayWidget = (function () {
         slot.innerHTML = "";
 
         // Generic "dynamic legend" mode (usable by any tool)
-        if (options.dynamicLegend === true && state && state.dynamicLegend === true && state.nodeTypeStyles && state.edgeCatStyles) {    
-        var html = self.buildDynamicLegendHtmlFromState(state);
+        if (options.dynamicLegend === true && state && state.dynamicLegend === true && state.nodeTypeStyles && state.edgeCatStyles) {
+            var html = self.buildDynamicLegendHtmlFromState(state);
 
-        // Allow implicit table colors section to be shown along with dynamic legend
-        if (options.variant === "implicit" && state.tableColors) {
-            html += self.buildTableColorsSectionHtml(state.tableColors);
-        }
+            // Allow implicit table colors section to be shown along with dynamic legend
+            if (options.variant === "implicit" && state.tableColors) {
+                html += self.buildTableColorsSectionHtml(state.tableColors);
+            }
 
-        slot.innerHTML = html;
+            slot.innerHTML = html;
             return;
         }
 
@@ -973,15 +949,15 @@ var LegendOverlayWidget = (function () {
 
         var instance = self.instances[containerId];
         if (!instance) {
-        self.render(containerId, options);
-        return;
+            self.render(containerId, options);
+            return;
         }
 
         var wrapper = document.getElementById(instance.ids.wrapperId);
         if (!wrapper) {
-        // The container was emptied -> DOM is gone, recreate safely
-        delete self.instances[containerId];
-        self.render(containerId, options);
+            // The container was emptied -> DOM is gone, recreate safely
+            delete self.instances[containerId];
+            self.render(containerId, options);
         }
     };
 
@@ -990,8 +966,7 @@ var LegendOverlayWidget = (function () {
         instance._vis.cfg = cfg || {};
         instance._vis.runtimeOptions = (cfg && cfg.runtimeOptions) || {};
         instance._vis.buildOptions = (cfg && cfg.buildOptions) || {};
-        instance._vis.applyStateOverrides =
-            cfg && typeof cfg.applyStateOverrides === "function" ? cfg.applyStateOverrides : null;
+        instance._vis.applyStateOverrides = cfg && typeof cfg.applyStateOverrides === "function" ? cfg.applyStateOverrides : null;
         instance._vis.debounceMs = cfg && cfg.debounceMs !== undefined ? cfg.debounceMs : 50;
         instance._vis.visjsGraph = visjsGraph || null;
     }
@@ -1082,7 +1057,7 @@ var LegendOverlayWidget = (function () {
             self.detachVisjsGraph(containerId);
             instance = self.instances[containerId];
             if (!instance) {
-            return;
+                return;
             }
         }
 
@@ -1132,7 +1107,7 @@ var LegendOverlayWidget = (function () {
             var state = self.buildStateFromVisjsGraph(instance._vis.visjsGraph, buildOptions);
 
             if (instance._vis.applyStateOverrides) {
-            instance._vis.applyStateOverrides(state, instance._vis.runtimeOptions || {}, instance._vis.visjsGraph);
+                instance._vis.applyStateOverrides(state, instance._vis.runtimeOptions || {}, instance._vis.visjsGraph);
             }
 
             self.ensure(containerId, instance.options || {});

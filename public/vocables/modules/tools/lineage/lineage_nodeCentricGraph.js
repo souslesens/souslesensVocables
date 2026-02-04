@@ -105,10 +105,12 @@ var Lineage_nodeCentricGraph = (function () {
      * @param {boolean} updown If true, graph flows top‑to‑bottom (UD); otherwise left‑to‑right (LR)
      */
     self.draw = function (rootNodeId, updown) {
-        self.savedVisjsData = {
-            nodes: Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(),
-            edges: Lineage_whiteboard.lineageVisjsGraph.data.edges.get(),
-        };
+        if (!self.savedVisjsData) {
+            self.savedVisjsData = {
+                nodes: Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(),
+                edges: Lineage_whiteboard.lineageVisjsGraph.data.edges.get(),
+            };
+        }
         var visjsData = self.getHierarchicalViewVisjsdata(rootNodeId);
         var directionGraph;
         var forceDirectionGraph;

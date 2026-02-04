@@ -108,6 +108,20 @@ class RdfDataModel {
 
     /**
      * @param {string} graphUri - the graph URI
+     * @param {string[]} triple - array of 3 elem
+     * @returns {Promise<boolean>} - true if the triple exists
+     */
+    ask = async (graphUri, triple) => {
+        const s = triple[0] === null ? "?s" : triple[0];
+        const p = triple[1] === null ? "?p" : triple[1];
+        const o = triple[2] === null ? "?o" : triple[2];
+        const query = `ASK FROM <${graphUri}> { ${s} ${p} ${o} . }`;
+        const result = await this.execQuery(query, "nt");
+        return result === "true";
+    };
+
+    /**
+     * @param {string} graphUri - the graph URI
      * @param {string} contributor - contributor name
      * @param {string} sep - separator, default is \t
      * @returns {string[]} - a triple

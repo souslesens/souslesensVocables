@@ -489,6 +489,15 @@ var LegendOverlayWidget = (function () {
                 "; display:inline-block; clip-path:polygon(50% 0%, 0% 100%, 100% 100%);'></span>"
             );
         }
+        if (shape === "hexagon") {
+            // Hexagon swatch (used for blank nodes in the graph)
+            // Using clip-path allows both solid colors and gradients.
+            return (
+                "<span style='width:14px; height:14px; background:" +
+                backgroundCss +
+                "; display:inline-block; clip-path:polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);'></span>"
+            );
+            }
 
         return "<span style='width:" + size + "px; height:" + size + "px; background:" + backgroundCss + "; display:inline-block; border-radius:50%;'></span>";
     };

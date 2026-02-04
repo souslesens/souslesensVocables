@@ -184,6 +184,26 @@ var Lineage_legendOverlay = (function () {
             ) {
             return "Property";
         }
+        // If an ontology term id (BFO_/RO_) is tagged as NamedIndividual, prefer Property when it matches the "property node" pattern.
+        if (node.data && node.data.rdfType === "NamedIndividual") {
+            var lbl = node.label ? String(node.label).trim() : "";
+            if (/^(BFO|RO)_\d+$/.test(lbl)) {
+                // Reuse the same robust property-node detection used elsewhere:
+                var isPropertyNode =
+                node.shape === "box" &&
+                node.data &&
+                node.data.id &&
+                node.data.label &&
+                node.data.source &&
+                self.normalizeColor(GraphLegendStateBuilder.getColor(node, "")) === self.normalizeColor("#ddd");
+
+                if (isPropertyNode) {
+                    return "Property";
+                }
+                // Otherwise fall back to Class (split by source if available)
+                return node.data.source ? "Class:" + node.data.source : "Class";
+            }
+        }
 
         // Typed nodes (when rdfType/type is provided)
         var type = node.data && (node.data.rdfType || node.data.type);

@@ -324,6 +324,13 @@ var Axioms_graph = (function () {
 
                     //  when disjointClassesAxiomRoot is not null tree starts from it
                     recurse(disjointClassesAxiomRoot || rootNodeId, level);
+                    
+                    visjsData.nodes.forEach(function(node){
+                        if(node.id==rootNodeId){
+                            node.data.rootAxiom=true;
+                            node.data.axiomId=0;
+                        }
+                    });
 
                     return callbackSeries();
                 },

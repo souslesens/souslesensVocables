@@ -15,28 +15,61 @@ The module manages and visualizes axioms in a lineage graph. It retrieves classe
 
 ### 2. lineage_combine
 
-The module combines multiple ontology sources into a single lineage graph and manages their visibility and grouping. It opens a dialog to pick OWL/SKOS sources, registers them, draws them. It provides popup menu actions to hide, show, group, and ungroup sources directly from the graph. It offers a merge dialog where users choose target source node, merge mode and depth, whether to include restrictions, and nodes to merge. The merge process gathers descendants, preserves hierarchy and OWL restrictions, builds triples, inserts them into the target SPARQL graph, and reindexes in search.
+This module combines multiple ontology sources into a single lineage graph and manages their visibility and grouping. It opens a dialog to pick OWL/SKOS sources, registers them, draws them. It provides popup menu actions to hide, show, group, and ungroup sources directly from the graph. It offers a merge dialog where users choose target source node, merge mode and depth, whether to include restrictions, and nodes to merge. The merge process gathers descendants, preserves hierarchy and OWL restrictions, builds triples, inserts them into the target SPARQL graph, and reindexes in search.
 
-### 3. lineage_combine
+### 3. lineage_common
 
-The module defines shared utility functions used across the lineage system. It lets users copy a node’s data to the clipboard in JSON format.  It allows deletion of ontology nodes while preventing deletion of nodes that have children. It supports pasting a copied node under a parent node, enforcing OWL type compatibility and generating the necessary RDF triples. It inserts these triples into the target SPARQL source and updates the jstree view accordingly and also toggles whether imported ontologies should be included in SPARQL queries.
+It defines shared utility functions used across the lineage system. It lets users copy a node’s data to the clipboard in JSON format.  It allows deletion of ontology nodes while preventing deletion of nodes that have children. It supports pasting a copied node under a parent node, enforcing OWL type compatibility and generating the necessary RDF triples. It inserts these triples into the target SPARQL source and updates the jstree view accordingly and also toggles whether imported ontologies should be included in SPARQL queries.
 
 ### 4. lineage_createRelation
 
-The module provides all mechanisms for creating relationships between ontology nodes, including predicates and OWL restrictions. It draws the new relationship in the lineage graph, applying colors, labels, arrow types and handling cardinalities when needed, and also supports advanced features such as creating sub‑properties, generating metadata triples, managing imports between ontology sources, and updating in‑memory ontology models. It allows deleting restrictions, including removing triples and updating caches and graph edges accordingly.
+This module provides all mechanisms for creating relationships between ontology nodes, including predicates and OWL restrictions. It draws the new relationship in the lineage graph, applying colors, labels, arrow types and handling cardinalities when needed, and also supports advanced features such as creating sub‑properties, generating metadata triples, managing imports between ontology sources, and updating in‑memory ontology models. It allows deleting restrictions, including removing triples and updating caches and graph edges accordingly.
 
 ### 5. lineage_createResource
 
-The module manages createation of new ontology resources such as classes or named individuals.  It generates all required RDF triples for the new resource, including label, type, hierarchy links, and metadata (creator, date, status). It generates the resource URI based on user input (specific URI, label‑based URI, or random). It writes the resource triples to the SPARQL backend, checks if the URI already exists, indexes the new node, and updates the ontology model cache. It also updates the lineage graph by drawing the new node (and parents) and supports additional features like adding predicates or creating subclasses.
+It manages creation of new ontology resources such as classes or named individuals.  It generates all required RDF triples for the new resource, including label, type, hierarchy links, and metadata (creator, date, status). It generates the resource URI based on user input (specific URI, label‑based URI, or random). It writes the resource triples to the SPARQL backend, checks if the URI already exists, indexes the new node, and updates the ontology model cache. It also updates the lineage graph by drawing the new node (and parents) and supports additional features like adding predicates or creating subclasses.
 
 ### 6. lineage_createSLSVsource
 
-The module is made to create new SLSV (Sous Le Sens Vocables) sources, it validates source name and graph URI before creating a new source configuration. It builds a complete source object containing metadata, SPARQL settings, schema type, permissions, imports, and ownership information. After that it automatically assigns a prefix and constructs a base URI for the new source. The source configuration is sent to the backend via an AJAX request, saving it on the server. 
+This module is made to create new SLSV (Sous Le Sens Vocables) sources, it validates source name and graph URI before creating a new source configuration. It builds a complete source object containing metadata, SPARQL settings, schema type, permissions, imports, and ownership information. After that it automatically assigns a prefix and constructs a base URI for the new source. The source configuration is sent to the backend via an AJAX request, saving it on the server. 
 
 ### 7. lineage_decoration
 
-The module handles visuals decorations and styles of nodes in the lineage graph (including colors, shapes, and icons).It initializes and updates the legend by resetting stored data and rendering a new legend tree. It decorates nodes based on upper‑ontology classifications by computing their ancestor classes and assigning predefined colors.
-It handles special cases such as NamedIndividuals and container nodes. The Vis.js graph is updated with new styling, including class colors, blank‑node shapes, and custom icons stored in decoration data. A merged legend is built and dsiplayed showig ontology classes groupe under the top level ontology.
+This module handles visuals decorations and styles of nodes in the lineage graph (including colors, shapes, and icons).It initializes and updates the legend by resetting stored data and rendering a new legend tree. It decorates nodes based on upper‑ontology classifications by computing their ancestor classes and assigning predefined colors.
+It handles special cases such as NamedIndividuals and container nodes. The Vis.js graph is updated with new styling, including class colors, blank‑node shapes, and custom icons stored in decoration data. A merged legend is built and displayed showing ontology classes grouped under the top level ontology.
+
+### 8. lineage_dictionary
+
+Ontology dictionaries and terms mappings are managed by this module. It handles operations and queries based on dictionary, it resolves domain/range source relationship. It supports dictionary based search, filtering and constraints. Metadata and timestamp are also managed by this module as well as dictionary visualization and navigation. It provides validation actions (promote, unPromote, trash, delete) that execute SPARQL UPDATEs on selected restriction nodes.
+
+### 9. lineage_graphPath
+
+Build a graph structure from VisJS node and edge data, optionally reversing edges. It computes all possible paths: from one node, to one node, or between two nodes, with safeguards against excessive iterations. The resulting paths is formatted in several output types (text, CSV, HTML, or list of edges) and optionally removes duplicates. Paths are highlighted on the VisJS graph by decorating edges, or displays them as text/CSV/HTML.A function allows to clear all path decorations and restore original edge colors.
+
+### 10. lineage_nodeCentricGraph
+
+Build a hierarchical subgraph starting from a chosen root node, collecting all reachable nodes and edges and assigning each node a depth level. It also Detects and stores orphan nodes that are not reachable from the chosen root. Hierarchical Vis.js graph (top‑down or left‑right) are drawn using the extracted subgraph and custom layout options. Provide a function to list all relations of a given node.
+Act as a helper module to visualize node‑centric views of the larger whiteboard graph.
+
+### 11. lineage_properties
+
+This module manage ontology properties (object and datatype), including their hierarchies, domains, ranges, restrictions, and metadata. It also builds jstree structures to browse properties, loads sub‑properties on demand, and provides context‑menu actions such as viewing info, drawing graphs, or copying/pasting nodes. Several types of property‑based graphs: restrictions graphs, range‑and‑domain graphs, predicate graphs, and property‑relation graphs, are integrated them into the whiteboard visualization. Properties and their characteristics can be retrieved via SPARQL (domain, range, inverse properties, sub‑properties), and formats them for export. It also supports search across sources, generates property matrices for OWL classes, and handles UI actions for filtering, expanding, displaying, or exporting property information.
+
+### 11. lineage_reasoner
+
+This module acts as the reasoning engine of the Lineage tool, coordinating SPARQL access, UI dialogs, remote reasoning calls, and graph rendering. It provides reasoning features for ontologies, allowing inference, consistency checking, and detection of unsatisfiable classes. It queries a backend reasoner API, retrieves and parses results in functional‑style syntax, converts them to JSON triples, and enriches them with human‑readable labels. It displays results either as tables or as Vis.js graph visualizations, with filtering and selection via jstree widgets. It also supports choosing inference predicates, listing inferred subjects, and drawing reasoning‑based node/edge structures.
+
+### 12. lineage_relationFilter
+
+It manages how users create and apply filters on relations between ontology nodes. It dynamically adjusts filter options according to domain and range information, loads allowed operators, and shows domain/range constraints when available. It also supports literal or URI‑based values, validates inputs, and finally generates SPARQL filter fragments that get appended to the relation‑query filter area.
+
+### 13. lineage_relationindividualsFilter
+
+This module manages filtering of ontology individuals when exploring relations. The user can choose a class or constraint role, search for individuals by label, and select them from a tree. It builds SPARQL filters for selected individuals or date‑based criteria, updates the query filter block, and optionally adds domain/range constraints. Finally, it applies the filter to the relations visualization and closes the dialog.
+
+### 14. lineage_relations
+
+It manages how relationships between ontology nodes are queried, filtered, and visualized. Users may choose properties, directions, and filters, then builds SPARQL‑based queries accordingly. It retrieves predicates, restrictions, inverse relations, and inferred properties, and draws them as Vis.js graphs or tables. It integrates domain/range and individual filters, merges results from multiple SPARQL calls, and handles graph updates, coloring. It also supports saving, reloading, and re‑executing user‑defined relation queries.
 
 ## Features
 

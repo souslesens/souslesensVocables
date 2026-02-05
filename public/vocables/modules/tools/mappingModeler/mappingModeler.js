@@ -1707,6 +1707,7 @@ var MappingModeler = (function () {
         } else if (message.operation == "buildTriples") {
             return;
         } else if (message.operation == "writeTriples") {
+            var elapsedText = "";
             var remainingText = "";
 
             if (self.mappingStartTime && percent > 0 && percent < 100) {
@@ -1715,10 +1716,11 @@ var MappingModeler = (function () {
                 var estimatedTotal = (elapsed * 100) / percent;
                 var remaining = Math.max(0, estimatedTotal - elapsed);
 
-                remainingText = " – estimated remaining time: " + self.formatDuration(remaining);
+                elapsedText = " – elapsed time: " + self.formatDuration(elapsed);
+                remainingText = " – remaining time: " + self.formatDuration(remaining);
             }
 
-            messageStr = "totalTriples created " + message.totalTriples + remainingText;
+            messageStr = "Triples created " + message.totalTriples + elapsedText + remainingText;
         } else if (message.operation == "deleteTriples") {
             if (!hasTotalRecords) {
                 var waitImgEl0 = document.getElementById("waitImg") || document.getElementById("KGquery_waitImg");
@@ -1728,6 +1730,7 @@ var MappingModeler = (function () {
                 messageStr = "0 triples to delete";
                 self.mappingStartTime = null;
             } else {
+                var elapsedTextDelete = "";
                 var remainingTextDelete = "";
 
                 if (self.mappingStartTime && percent > 0 && percent < 100) {
@@ -1736,12 +1739,13 @@ var MappingModeler = (function () {
                     var estimatedTotalDel = (elapsedDel * 100) / percent;
                     var remainingDel = Math.max(0, estimatedTotalDel - elapsedDel);
 
-                    remainingTextDelete = " – estimated remaining time: " + self.formatDuration(remainingDel);
+                    elapsedTextDelete = " – elapsed time: " + self.formatDuration(elapsedDel);
+                    remainingTextDelete = " – remaining time: " + self.formatDuration(remainingDel);
                 }
 
                 var deletedSoFar = message.totalSize || 0;
 
-                messageStr = "triples deleted " + deletedSoFar + " / " + (message.tableTotalRecords || 0) + remainingTextDelete;
+                messageStr = "triples deleted " + deletedSoFar + " / " + (message.tableTotalRecords || 0) + elapsedTextDelete + remainingTextDelete;
 
                 if (percent >= 100) {
                     var pb = document.getElementById("progressBar");
@@ -1768,6 +1772,9 @@ var MappingModeler = (function () {
             if (waitImgEl3) {
                 waitImgEl3.style.display = "block";
             }
+            setTimeout(function () {
+                UI.message("");
+            }, 10000);
         }
 
         if (messageStr) {

@@ -272,6 +272,7 @@ var Lineage_sources = (function () {
         self.showHideEditButtons(source);
         setTimeout(function () {
             SearchWidget.init();
+            Lineage_properties.searchTermInSources();
         }, 500);
 
         $("#LineageLinkedDataRelationsDiv").load("snippets/lineage/linkedData/lineage_linkedData_relations.html", function () {

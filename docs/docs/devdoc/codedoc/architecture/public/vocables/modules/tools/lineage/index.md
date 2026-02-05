@@ -46,30 +46,54 @@ Ontology dictionaries and terms mappings are managed by this module. It handles 
 
 Build a graph structure from VisJS node and edge data, optionally reversing edges. It computes all possible paths: from one node, to one node, or between two nodes, with safeguards against excessive iterations. The resulting paths is formatted in several output types (text, CSV, HTML, or list of edges) and optionally removes duplicates. Paths are highlighted on the VisJS graph by decorating edges, or displays them as text/CSV/HTML.A function allows to clear all path decorations and restore original edge colors.
 
-### 10. lineage_nodeCentricGraph
+### 10. lineage_graphTraversal
+
+Build a graph structure from VisJS
+
+### 11. lineage_nodeCentricGraph
 
 Build a hierarchical subgraph starting from a chosen root node, collecting all reachable nodes and edges and assigning each node a depth level. It also Detects and stores orphan nodes that are not reachable from the chosen root. Hierarchical Vis.js graph (top‑down or left‑right) are drawn using the extracted subgraph and custom layout options. Provide a function to list all relations of a given node.
 Act as a helper module to visualize node‑centric views of the larger whiteboard graph.
 
-### 11. lineage_properties
+### 12. lineage_properties
 
 This module manage ontology properties (object and datatype), including their hierarchies, domains, ranges, restrictions, and metadata. It also builds jstree structures to browse properties, loads sub‑properties on demand, and provides context‑menu actions such as viewing info, drawing graphs, or copying/pasting nodes. Several types of property‑based graphs: restrictions graphs, range‑and‑domain graphs, predicate graphs, and property‑relation graphs, are integrated them into the whiteboard visualization. Properties and their characteristics can be retrieved via SPARQL (domain, range, inverse properties, sub‑properties), and formats them for export. It also supports search across sources, generates property matrices for OWL classes, and handles UI actions for filtering, expanding, displaying, or exporting property information.
 
-### 11. lineage_reasoner
+### 13. lineage_reasoner
 
 This module acts as the reasoning engine of the Lineage tool, coordinating SPARQL access, UI dialogs, remote reasoning calls, and graph rendering. It provides reasoning features for ontologies, allowing inference, consistency checking, and detection of unsatisfiable classes. It queries a backend reasoner API, retrieves and parses results in functional‑style syntax, converts them to JSON triples, and enriches them with human‑readable labels. It displays results either as tables or as Vis.js graph visualizations, with filtering and selection via jstree widgets. It also supports choosing inference predicates, listing inferred subjects, and drawing reasoning‑based node/edge structures.
 
-### 12. lineage_relationFilter
+### 14. lineage_relationFilter
 
 It manages how users create and apply filters on relations between ontology nodes. It dynamically adjusts filter options according to domain and range information, loads allowed operators, and shows domain/range constraints when available. It also supports literal or URI‑based values, validates inputs, and finally generates SPARQL filter fragments that get appended to the relation‑query filter area.
 
-### 13. lineage_relationindividualsFilter
+### 15. lineage_relationindividualsFilter
 
 This module manages filtering of ontology individuals when exploring relations. The user can choose a class or constraint role, search for individuals by label, and select them from a tree. It builds SPARQL filters for selected individuals or date‑based criteria, updates the query filter block, and optionally adds domain/range constraints. Finally, it applies the filter to the relations visualization and closes the dialog.
 
-### 14. lineage_relations
+### 16. lineage_relations
 
 It manages how relationships between ontology nodes are queried, filtered, and visualized. Users may choose properties, directions, and filters, then builds SPARQL‑based queries accordingly. It retrieves predicates, restrictions, inverse relations, and inferred properties, and draws them as Vis.js graphs or tables. It integrates domain/range and individual filters, merges results from multiple SPARQL calls, and handles graph updates, coloring. It also supports saving, reloading, and re‑executing user‑defined relation queries.
+
+### 17. lineage_rules
+
+A rules‑editing interface is provided and allows to search ontology classes and properties, select them, and add them as premises or conclusions of a rule. It displays search results in a tree and expands nodes with allowed properties pulled from ontology constraints. It stores selected rule components, lets users remove them, and builds structured rule payloads for simple reclassification rules or multi‑premise rules involving object properties. Finally, it sends the rule definition to a backend reasoning service for execution
+
+### 18. lineage_selection
+
+It manages how nodes are selected, deselected, and manipulated inside the lineage graph. It keeps track of selected nodes, updates their visual styling, and generates a tree view of selections for inspection. It supports multi‑selection using keyboard modifiers, lets perform actions such as filtering, decorating, exporting, and modifying predicates on the chosen nodes. It also handles advanced selection utilities like selecting all graph nodes, retrieving only selected IDs, generating SPARQL filters, or identifying “top” nodes in parent‑child structures.
+
+### 19. lineage_similars
+
+Module that allows to find nodes with similar labels—either exactly or approximately—across ontology sources or within the current whiteboard. It lets users choose the starting nodes and the target sources, searches matching labels via ElasticSearch, and builds similarity groups. It then generates edges linking similar nodes, displays them as a graph or table, or saves them as similarity triples. It also provides tools to explore and export similarity taxonomies and to save it.
+
+### 20. lineage_sources
+
+Ontology sources are managed in the Lineage tool: loading them, activating one as the current source, and displaying them in the UI. It initializes sources by registering their models, imports, and ElasticSearch indexes, and sets the top‑level ontology accordingly. It updates the whiteboard to show or hide nodes by source, adjusts colors or opacity, and handles grouping, ungrouping, closing, and exporting sources. It also controls UI elements such as edit buttons, search scope settings, and source‑specific menus. Overall, it orchestrates all interactions between ontology sources, the whiteboard graph, and user permissions.
+
+### 21. lineage_whiteboard
+
+This module s the central engine orchestrating visualization, interaction, and data retrieval for the Lineage knowledge‑graph whiteboard. It controls the entire Lineage whiteboard graph: creating it, resetting it, and updating it with nodes, edges, colors, layouts, and user interactions. It loads ontology sources, draws top concepts, fetches parents, children, restrictions, object properties, linked data, similars, and inferred classes, and adds them as visual graph elements. It manages all graph events such as clicks, double‑clicks, hover selection, context menus, zooming, expanding, collapsing, removing nodes, showing info panels, and running SPARQL‑based queries. It also handles clustering, node styling, source‑based coloring, property‑based coloring, and decorations. The module provides export/import of whiteboards (JSON, SVG, GraphML, PlantUML), browsing tools, and integration with search widgets, linked data widgets, and relation‑creation dialogs.
 
 ## Features
 

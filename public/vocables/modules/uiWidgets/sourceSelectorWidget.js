@@ -298,11 +298,15 @@ var SourceSelectorWidget = (function () {
     };
 
     self.getCheckedSources = function () {
-        var vv = $("#sourceSelector_jstreeDiv").jstree();
-        var checkedNodes = $("#sourceSelector_jstreeDiv").jstree().get_checked();
+        var jstree = $("#sourceSelector_jstreeDiv").jstree();
+        var checkedNodes = jstree.get_checked();
         var sources = [];
         checkedNodes.forEach(function (item) {
-            if (Config.sources[item]) sources.push(item);
+            var node = jstree.get_node(item);
+            var sourceId = node.data && node.data.id ? node.data.id : item;
+            if (Config.sources[sourceId] && sources.indexOf(sourceId) === -1) {
+                sources.push(sourceId);
+            }
         });
         return sources;
     };

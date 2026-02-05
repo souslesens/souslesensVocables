@@ -3807,16 +3807,19 @@ self.zoomGraphOnNode(node.data[0].id, false);
          *
          */
         forceDirectedLayout: function () {
-            /*  Lineage_whiteboard.lineageVisjsGraph.network.setOptions({layout:{hierarchical:
-              {enabled:false}}})*/
-
-            var nodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
-            if (Lineage_nodeCentricGraph.orphanNodes) {
-                nodes = nodes.concat(Lineage_nodeCentricGraph.orphanNodes);
-                //  Lineage_whiteboard.lineageVisjsGraph.data.nodes.add(Lineage_nodeCentricGraph.orphanNodes)
+            var visjsData;
+            if (Lineage_nodeCentricGraph.savedVisjsData) {
+                visjsData = Lineage_nodeCentricGraph.savedVisjsData;
+                Lineage_nodeCentricGraph.savedVisjsData = null;
+            } else {
+                var nodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
+                if (Lineage_nodeCentricGraph.orphanNodes) {
+                    nodes = nodes.concat(Lineage_nodeCentricGraph.orphanNodes);
+                }
+                var edges = Lineage_whiteboard.lineageVisjsGraph.data.edges.get();
+                visjsData = { nodes: nodes, edges: edges };
             }
-            var edges = Lineage_whiteboard.lineageVisjsGraph.data.edges.get();
-            self.drawNewGraph({ nodes: nodes, edges: edges });
+            self.drawNewGraph(visjsData);
 
             return;
 

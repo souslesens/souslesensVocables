@@ -11,6 +11,7 @@ var Lineage_nodeCentricGraph = (function () {
     var self = {};
 
     self.levelsSelection = [];
+    self.savedVisjsData = null;
 
     /**
      * Builds a hierarchical sub‑graph of a Vis.js starting from a given root node
@@ -104,6 +105,12 @@ var Lineage_nodeCentricGraph = (function () {
      * @param {boolean} updown If true, graph flows top‑to‑bottom (UD); otherwise left‑to‑right (LR)
      */
     self.draw = function (rootNodeId, updown) {
+        if (!self.savedVisjsData) {
+            self.savedVisjsData = {
+                nodes: Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(),
+                edges: Lineage_whiteboard.lineageVisjsGraph.data.edges.get(),
+            };
+        }
         var visjsData = self.getHierarchicalViewVisjsdata(rootNodeId);
         var directionGraph;
         var forceDirectionGraph;

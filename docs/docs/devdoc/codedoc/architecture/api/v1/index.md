@@ -3,7 +3,11 @@
 
 <!-- AUTO-DESC:START -->
 
-This page summarizes the code structure for this directory and its immediate subdirectories. It focuses on the `api / v1` area within the `api` module. Use the table of contents below to navigate deeper.
+## Overview
+
+The api/v1 module exposes the version 1 of the application’s HTTP API. It provides a set of versioned endpoints that allow external clients to interact with the system. These endpoints cover user authentication and management, administration features, data sources and databases management, as well as operations on knowledge graphs, RDF data, and SPARQL queries.
+
+This module also includes API documentation definitions, access control rules, and structured models describing the data exchanged between clients and the server. It represents the main entry point for all external interactions with the platform.
 
 <!-- AUTO-DESC:END -->
 

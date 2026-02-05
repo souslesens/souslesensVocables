@@ -8,27 +8,33 @@ This page summarizes the code structure for this directory and its immediate sub
 <!-- AUTO-DESC:END -->
 
 
-```{toctree}
-:maxdepth: 5
-:caption: Contents
+## Overview
 
-admin/index
-annotator/index
-auth/index
-axioms/index
-data/index
-databases/index
-elasticsearch/index
-graphStore/index
-jowl/index
-kg/index
-logs/index
-pluginController/index
-rdf/index
-sources/index
-sparql/index
-users/index
-```
+This section documents all HTTP routes exposed by the API v1. Routes are organized by functional domains and follow the structure of the `paths/` directory.
+
+Each subdirectory represents a coherent set of endpoints (such as users, authentication, administration, data access, or knowledge graph operations), while files at the root level define core or cross-cutting routes. Deeper levels in the hierarchy are used to represent operations on specific resources (for example, routes scoped to a given user, data item, or identifier).
+
+
+## Contents
+
+- [Core routes](core.md)
+- [Authentication](auth/index.md)
+- [Administration](admin/index.md)
+- [Annotator](annotator/index.md)
+- [Axioms](axioms/index.md)
+- [Data access](data/index.md)
+- [Databases](databases/index.md)
+- [ElasticSearch](elasticsearch/index.md)
+- [Graph store](graphStore/index.md)
+- [JOWL](jowl/index.md)
+- [Knowledge Graph](kg/index.md)
+- [Logs](logs/index.md)
+- [Plugin controller](pluginController/index.md)
+- [RDF](rdf/index.md)
+- [Sources](sources/index.md)
+- [SPARQL](sparql/index.md)
+- [Users](users/index.md)
+
 
 <!-- AUTO-INLINE-FILES:START -->
 

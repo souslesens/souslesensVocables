@@ -134,9 +134,6 @@ function getFilteredMappingIds(mappingData, tables) {
         }
     });
 
-    console.log("[getFilteredMappingIds] columnsMap keys:", Object.keys(columnsMap).length);
-    console.log("[getFilteredMappingIds] Total mappingIds:", mappingIds.length);
-
     return mappingIds.length > 0 ? mappingIds : null;
 }
 
@@ -179,15 +176,9 @@ async function recreateGraphTriples(params) {
 
     var requestedTables = normalizeTablesParam(body.table);
 
-    console.log("[recreateGraph] body.table:", body.table);
-    console.log("[recreateGraph] requestedTables:", requestedTables);
-
     var targetTables = requestedTables;
     if (!targetTables || targetTables.length === 0) {
         targetTables = getAllTablesFromMappings(mappingData);
-        console.log("[recreateGraph] No specific tables requested, processing ALL tables:", targetTables);
-    } else {
-        console.log("[recreateGraph] Processing specific tables:", targetTables);
     }
 
     // DELETE
@@ -201,25 +192,12 @@ async function recreateGraphTriples(params) {
     var datasource = null;
     if (targetTables && targetTables.length > 0) {
         datasource = getDatasourceFromMappings(mappingData, targetTables[0]);
-        console.log("[recreateGraph] Target tables:", targetTables);
-        console.log("[recreateGraph] Using datasource from mappings:", datasource);
-        console.log("[recreateGraph] Options passed:", JSON.stringify(options, null, 2));
     }
 
     // Filter mappings for target tables (server-side filtering)
     if (targetTables && targetTables.length > 0 && !options.filterMappingIds) {
         options.filterMappingIds = getFilteredMappingIds(mappingData, targetTables);
-        console.log("[recreateGraph] Server-side filtered mapping IDs:", options.filterMappingIds);
-        console.log("[recreateGraph] Number of filtered mappings:", options.filterMappingIds ? options.filterMappingIds.length : 0);
     }
-
-    console.log("[recreateGraph] Calling importAsync with:", {
-        user,
-        source,
-        datasource,
-        tables: targetTables,
-        hasFilterMappingIds: !!options.filterMappingIds,
-    });
 
     const importResult = await importAsync(user, source, datasource, targetTables, options);
 

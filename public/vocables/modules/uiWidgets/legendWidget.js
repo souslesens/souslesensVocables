@@ -206,6 +206,28 @@ var LegendWidget = (function () {
                 }
             },
         };
+        items.HideOthers = {
+            label: "Hide others",
+            action: function (_e) {
+                var currentNode = self.currentLegendNode;
+                var allNodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
+                var newNodes = [];
+                allNodes.forEach(function (node) {
+                    if (currentNode.original.color == node.color || currentNode.id == node.id) {
+                        newNodes.push({
+                            id: node.id,
+                            hidden: false,
+                        });
+                    } else {
+                        newNodes.push({
+                            id: node.id,
+                            hidden: true,
+                        });
+                    }
+                });
+                Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(newNodes);
+            },
+        };
         items.UnGroup = {
             label: "Ungroup nodes",
             action: function (_e) {

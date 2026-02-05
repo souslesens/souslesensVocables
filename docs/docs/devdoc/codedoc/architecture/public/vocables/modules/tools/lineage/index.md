@@ -5,7 +5,8 @@
 
 ## Overview
 
-Containers 
+Lineage is designed to visualize ontologies and knowledge graph data as dynamic, interactive graphs on a whiteboard interface. It offers functionnalities to : load ontology sources, manage imports as welle as build, update, and interact with the ontology graph and provide selection, similarity detection, rule building, relation querying, filtering, SPARQL operations, and node‑centric exploration tool.
+All of these are displayed in a coherent UI dialog interface and context menus.
 
 ## Modules
 

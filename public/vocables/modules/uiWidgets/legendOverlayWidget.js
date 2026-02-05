@@ -7,9 +7,9 @@
  *   (e.g., Implicit Model: "Columns (color = table)").
  *
  * Standards alignment:
- * - All code/comments in English.
+ *
  * - Module pattern with self methods and dual export.
- * - HTML is built progressively with '+=' (no large template literals).
+ * - HTML is built progressively with '+=' for clarity.
  */
 var LegendOverlayWidget = (function () {
     var self = {};
@@ -42,6 +42,231 @@ var LegendOverlayWidget = (function () {
             DatasourceLink: "#8F8A8C",
             TechnicalLink: "#EF4270",
         },
+    };
+
+    /**
+     * -----------------------------
+     * Vis.js legend state builder
+     * -----------------------------
+     * Purpose:
+     * - Inspect a VisjsGraphClass instance and build a dynamic legend state
+     *   compatible with LegendOverlayWidget.update().
+     * - Keep this logic inside the widget so external overlays only provide
+     *   config (category/labels/order/overrides).
+     */
+
+    /**
+     * Safely pick a color from vis.js node/edge objects.
+     * vis.js sometimes stores color as a string or as an object ({background, border} or {color}).
+     * @param {Object} visItem
+     * @param {string} fallback
+     * @returns {string}
+     */
+    self.getColor = function (visItem, fallback) {
+        if (!visItem) {
+            return fallback || "#999";
+        }
+        if (typeof visItem.color === "string") {
+            return visItem.color;
+        }
+        if (visItem.color && typeof visItem.color === "object") {
+            if (visItem.color.background) {
+                return visItem.color.background;
+            }
+            if (visItem.color.color) {
+                return visItem.color.color;
+            }
+        }
+        if (visItem.color && visItem.color.color) {
+            return visItem.color.color;
+        }
+        return fallback || "#999";
+    };
+
+    /**
+     * Normalize a hex color for comparison (remove leading #, lowercase).
+     * @param {string} color
+     * @returns {string}
+     */
+    self.normalizeColor = function (color) {
+        if (!color) {
+            return "";
+        }
+        var str = String(color).trim().toLowerCase();
+        if (str.indexOf("#") === 0) {
+            str = str.substring(1);
+        }
+        return str;
+    };
+
+    /**
+     * Return true if the node is visible in the graph (not hidden).
+     * @param {Object} node
+     * @returns {boolean}
+     */
+    self.isVisibleNode = function (node) {
+        if (!node) {
+            return false;
+        }
+        return node.hidden !== true;
+    };
+
+    /**
+     * Return true if the edge is visible and both endpoints are visible.
+     * @param {Object} edge
+     * @param {Object<string, boolean>} visibleNodeIdsMap
+     * @returns {boolean}
+     */
+    self.isVisibleEdge = function (edge, visibleNodeIdsMap) {
+        if (!edge) {
+            return false;
+        }
+        if (edge.hidden === true) {
+            return false;
+        }
+        if (visibleNodeIdsMap && (visibleNodeIdsMap[edge.from] !== true || visibleNodeIdsMap[edge.to] !== true)) {
+            return false;
+        }
+        return true;
+    };
+
+    /**
+     * Sort an object by a preferred key order, then append remaining keys alphabetically.
+     * @param {Object} obj
+     * @param {Array<string>} orderedKeys
+     * @returns {Object}
+     */
+    self.sortByOrder = function (obj, orderedKeys) {
+        var sorted = {};
+        (orderedKeys || []).forEach(function (key) {
+            if (Object.prototype.hasOwnProperty.call(obj, key)) {
+                sorted[key] = obj[key];
+            }
+        });
+        Object.keys(obj || {})
+            .sort()
+            .forEach(function (key) {
+                if (!Object.prototype.hasOwnProperty.call(sorted, key)) {
+                    sorted[key] = obj[key];
+                }
+            });
+        return sorted;
+    };
+
+    /**
+     * Build a dynamic legend state by inspecting a VisjsGraphClass instance.
+     *
+     * @param {VisjsGraphClass} visjsGraph - VisjsGraphClass instance
+     * @param {Object} options
+     * @param {boolean} [options.splitNodeByShape] - if true, split node categories by shape (key becomes "Type\nshape")
+     * @param {string} [options.legendTextShape="dot"] - legend icon for text nodes
+     * @param {function(Object):string} [options.nodeKeyFn] - category key for nodes
+     * @param {function(Object,string,string,string):string} [options.nodeLabelFn] - display label (node, baseKey, variantKey, originalShape)
+     * @param {function(Object,Object<string,Object>):string} [options.edgeKeyFn] - category key for edges (edge, nodesByIdMap)
+     * @param {function(Object,string):string} [options.edgeLabelFn] - display label for edges
+     * @param {Array<string>} [options.nodeOrder] - preferred order for node categories
+     * @param {Array<string>} [options.edgeOrder] - preferred order for edge categories
+     * @returns {Object} state compatible with LegendOverlayWidget.update()
+     */
+    self.buildStateFromVisjsGraph = function (visjsGraph, options) {
+        options = options || {};
+        var splitNodeByShape = options.splitNodeByShape === true;
+
+        var state = {
+            dynamicLegend: true,
+            nodeTypeStyles: {},
+            edgeCatStyles: {},
+        };
+
+        if (!visjsGraph || !visjsGraph.data || !visjsGraph.data.nodes || !visjsGraph.data.edges) {
+            return state;
+        }
+
+        var nodes = visjsGraph.data.nodes.get();
+        var edges = visjsGraph.data.edges.get();
+
+        var visibleNodeIdsMap = {};
+        var nodesByIdMap = {};
+
+        nodes.forEach(function (node) {
+            if (!node || !node.id) return;
+            nodesByIdMap[node.id] = node;
+        });
+
+        nodes.forEach(function (node) {
+            if (!self.isVisibleNode(node)) return;
+
+            visibleNodeIdsMap[node.id] = true;
+
+            var categoryKey = options.nodeKeyFn ? options.nodeKeyFn(node) : (node.data && (node.data.rdfType || node.data.type)) || node.shape || "Node";
+
+            categoryKey = String(categoryKey);
+
+            var color = self.getColor(node, "#999");
+            var originalShape = node.shape || "dot";
+
+            var keyForLegend = splitNodeByShape ? categoryKey + "\n" + originalShape : categoryKey;
+
+            var legendShape = originalShape;
+            if (legendShape === "text") {
+                legendShape = options.legendTextShape || "dot";
+            }
+
+            var label = options.nodeLabelFn ? options.nodeLabelFn(node, categoryKey, keyForLegend, originalShape) : categoryKey;
+
+            if (!state.nodeTypeStyles[keyForLegend]) {
+                state.nodeTypeStyles[keyForLegend] = {
+                    color: color,
+                    colors: [color],
+                    shape: legendShape,
+                    classLabel: label,
+                    type: categoryKey,
+                };
+            } else {
+                var typeStyle = state.nodeTypeStyles[keyForLegend];
+                if (!typeStyle.colors) {
+                    typeStyle.colors = [typeStyle.color];
+                }
+                if (typeStyle.colors.indexOf(color) < 0) {
+                    typeStyle.colors.push(color);
+                }
+            }
+        });
+
+        edges.forEach(function (edge) {
+            if (!self.isVisibleEdge(edge, visibleNodeIdsMap)) return;
+
+            var edgeCategoryKey = options.edgeKeyFn
+                ? options.edgeKeyFn.length >= 2
+                    ? options.edgeKeyFn(edge, nodesByIdMap)
+                    : options.edgeKeyFn(edge)
+                : (edge.data && (edge.data.type || edge.data.propLabel)) || edge.label || "Edge";
+
+            edgeCategoryKey = String(edgeCategoryKey);
+
+            if (!state.edgeCatStyles[edgeCategoryKey]) {
+                var eColor = self.getColor(edge, "#aaa");
+                var dashed = edge.dashes ? true : false;
+
+                var eLabel = options.edgeLabelFn ? options.edgeLabelFn(edge, edgeCategoryKey) : edgeCategoryKey;
+
+                state.edgeCatStyles[edgeCategoryKey] = {
+                    color: eColor,
+                    dashed: dashed,
+                    label: eLabel,
+                };
+            }
+        });
+
+        // Default orders (can be overridden by caller)
+        var nodeOrder = options.nodeOrder || ["Source", "Class", "NamedIndividual", "Property", "bnode", "literal"];
+
+        var edgeOrder = options.edgeOrder || ["ObjectProperty", "Hierarchy", "PropertyHierarchy", "Restriction", "Datatype", "DatatypeProperty", "SourceLink", "Other"];
+
+        state.nodeTypeStyles = self.sortByOrder(state.nodeTypeStyles, nodeOrder);
+        state.edgeCatStyles = self.sortByOrder(state.edgeCatStyles, edgeOrder);
+
+        return state;
     };
 
     /**
@@ -148,10 +373,12 @@ var LegendOverlayWidget = (function () {
 
         var items = options.items ? options.items : self.getDefaultItems();
 
+        var showDefaultSections = options.showDefaultSections !== undefined ? options.showDefaultSections : true;
+
         var html = "";
 
         html += "<div id='" + ids.wrapperId + "'";
-        html += " style='position:absolute; z-index:10;";
+        html += " style='position:absolute; z-index:1;";
         html += self.getPositionStyle(options.position);
         html += "'>";
 
@@ -169,9 +396,10 @@ var LegendOverlayWidget = (function () {
         html += " box-shadow:0 2px 10px rgba(0,0,0,0.08); min-width:260px;";
         html += " display:" + (expanded ? "block" : "none") + ";'>";
 
-        html += self.buildNodesSectionHtml(items.nodes);
-        html += self.buildEdgesSectionHtml(items.edges);
-
+        if (showDefaultSections) {
+            html += self.buildNodesSectionHtml(items.nodes);
+            html += self.buildEdgesSectionHtml(items.edges);
+        }
         // Variant-specific slot (initially empty; may be filled by update())
         html += "<div id='" + ids.extraSlotId + "' data-legend-slot='extra'></div>";
 
@@ -250,6 +478,10 @@ var LegendOverlayWidget = (function () {
         if (!instance) {
             return;
         }
+
+        // detach graph events/timers first
+        self.detachVisjsGraph(containerId);
+
         var wrapper = document.getElementById(instance.ids.wrapperId);
         if (wrapper && wrapper.parentNode) {
             wrapper.parentNode.removeChild(wrapper);
@@ -405,7 +637,7 @@ var LegendOverlayWidget = (function () {
         var html = "";
         var safeColor = color ? String(color) : "#ddd";
         if (type === "line") {
-            html += "<span style='width:14px; height:3px; background:" + self.escapeHtml(safeColor) + "; display:inline-block; border-radius:2px;'></span>";
+            html += "<span style='width:14px; height:3px; background:" + self.escapeHtml(safeColor) + "; display:inline-block; border-radius:50%;'></span>";
             return html;
         }
         if (type === "dashed") {
@@ -430,6 +662,65 @@ var LegendOverlayWidget = (function () {
         // default: box
         html += "<span style='width:12px; height:12px; background:" + self.escapeHtml(safeColor) + "; display:inline-block; border-radius:2px;'></span>";
         return html;
+    };
+
+    /**
+     * Build a larger swatch for dynamic legends.
+     * @param {string} kind - "node" or "edge"
+     * @param {Object} info - style info (color, shape, dashed)
+     * @returns {string}
+     */
+    self.getDynamicSwatchHtml = function (kind, info) {
+        var color = info && info.color ? String(info.color) : "#ddd"; //
+        var colors = info && info.colors && Array.isArray(info.colors) ? info.colors : null;
+
+        var size = 12;
+        var lineWidth = 26;
+        var lineHeight = 5;
+
+        if (kind === "edge") {
+            if (info && info.dashed) {
+                return "<span style='width:" + lineWidth + "px; height:0; display:inline-block; border-top:" + lineHeight + "px dashed " + self.escapeHtml(color) + ";'></span>";
+            }
+            return "<span style='width:" + lineWidth + "px; height:" + lineHeight + "px; background:" + self.escapeHtml(color) + "; display:inline-block; border-radius:3px;'></span>";
+        }
+
+        // Nodes
+        var shape = info && info.shape ? String(info.shape) : "dot";
+        var backgroundCss = self.escapeHtml(color);
+
+        if (colors && colors.length > 1) {
+            var gradientColors = colors.slice(0, 4);
+            var percentStep = 100 / gradientColors.length;
+            var gradientStops = [];
+            for (var i = 0; i < gradientColors.length; i++) {
+                var startPct = Math.round(i * percentStep);
+                var endPct = Math.round((i + 1) * percentStep);
+                gradientStops.push(self.escapeHtml(String(gradientColors[i])) + " " + startPct + "% " + endPct + "%");
+            }
+            backgroundCss = "linear-gradient(90deg," + gradientStops.join(",") + ")";
+        }
+        // Do NOT return here: apply the computed backgroundCss to the actual shape below.
+
+        // Sans gradient
+        if (shape === "box" || shape === "square") {
+            return "<span style='width:" + size + "px; height:" + size + "px; background:" + backgroundCss + "; display:inline-block; border-radius:2px;'></span>";
+        }
+        if (shape === "ellipse") {
+            return "<span style='width:16px; height:10px; background:" + backgroundCss + "; display:inline-block; border-radius:50%;'></span>";
+        }
+        if (shape === "triangle") {
+            // Use clip-path so gradients can be applied while keeping the triangle shape.
+            // Fallback: if clip-path is not supported, it will still display a small colored block.
+            return "<span style='width:14px; height:14px; background:" + backgroundCss + "; display:inline-block; clip-path:polygon(50% 0%, 0% 100%, 100% 100%);'></span>";
+        }
+        if (shape === "hexagon") {
+            // Hexagon swatch (used for blank nodes in the graph)
+            // Using clip-path allows both solid colors and gradients.
+            return "<span style='width:14px; height:14px; background:" + backgroundCss + "; display:inline-block; clip-path:polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);'></span>";
+        }
+
+        return "<span style='width:" + size + "px; height:" + size + "px; background:" + backgroundCss + "; display:inline-block; border-radius:50%;'></span>";
     };
 
     /**
@@ -478,12 +769,26 @@ var LegendOverlayWidget = (function () {
         // Default: clear
         slot.innerHTML = "";
 
+        // Generic "dynamic legend" mode (usable by any tool)
+        if (options.dynamicLegend === true && state && state.dynamicLegend === true && state.nodeTypeStyles && state.edgeCatStyles) {
+            var html = self.buildDynamicLegendHtmlFromState(state);
+
+            // Allow implicit table colors section to be shown along with dynamic legend
+            if (options.variant === "implicit" && state.tableColors) {
+                html += self.buildTableColorsSectionHtml(state.tableColors);
+            }
+
+            slot.innerHTML = html;
+            return;
+        }
+
         // Implicit Model extra section: show table->color mapping
         if (options.variant === "implicit" && state.tableColors) {
             slot.innerHTML = self.buildTableColorsSectionHtml(state.tableColors);
+            return;
         }
 
-        // Optional custom extra HTML supplied by caller (must be already safe/escaped)
+        // Optional custom extra HTML supplied by caller
         if (state.extraHtml) {
             slot.innerHTML = String(state.extraHtml);
         }
@@ -512,9 +817,9 @@ var LegendOverlayWidget = (function () {
 
         keys.forEach(function (table) {
             var color = tableColors[table];
-            var bg = typeof color === "string" ? color : "#ddd";
+            var backgroundCss = typeof color === "string" ? color : "#ddd";
             html += "<div style='display:flex; align-items:center; gap:8px; margin:4px 0;'>";
-            html += "<span style='width:12px; height:12px; background:" + self.escapeHtml(bg) + "; display:inline-block; border-radius:2px;'></span>";
+            html += "<span style='width:12px; height:12px; background:" + self.escapeHtml(backgroundCss) + "; display:inline-block; border-radius:2px;'></span>";
             html += "<span>" + self.escapeHtml(table) + "</span>";
             html += "</div>";
         });
@@ -582,6 +887,235 @@ var LegendOverlayWidget = (function () {
         });
     };
 
+    /**
+     * Build HTML for the dynamic legend from a state object.
+     * @param {Object} state
+     * @returns {string}
+     */
+    self.buildDynamicLegendHtmlFromState = function (state) {
+        if (!state) {
+            return "";
+        }
+
+        var html = "<div class='dynamicLegend'>";
+
+        html += "<div class='legendSectionTitle' style='font-weight:700; margin:8px 0 6px;'>Nodes</div>";
+        Object.keys(state.nodeTypeStyles || {}).forEach(function (key) {
+            var info = state.nodeTypeStyles[key];
+            if (!info) {
+                return;
+            }
+            var label = info.classLabel || info.type || "Node";
+
+            html +=
+                "<div class='legendRow' style='display:flex; align-items:center; gap:10px; margin:6px 0;'>" +
+                self.getDynamicSwatchHtml("node", info) +
+                "<span class='legendLabel' style='line-height:16px;'>" +
+                self.escapeHtml(label) +
+                "</span>" +
+                "</div>";
+        });
+
+        html += "<div class='legendSectionTitle' style='font-weight:700; margin:10px 0 6px;'>Edges</div>";
+        Object.keys(state.edgeCatStyles || {}).forEach(function (cat) {
+            var info = state.edgeCatStyles[cat];
+            if (!info) {
+                return;
+            }
+            var label = info.label || cat;
+            html +=
+                "<div class='legendRow' style='display:flex; align-items:center; gap:10px; margin:6px 0;'>" +
+                self.getDynamicSwatchHtml("edge", info) +
+                "<span class='legendLabel' style='line-height:16px;'>" +
+                self.escapeHtml(label) +
+                "</span>" +
+                "</div>";
+        });
+
+        html += "</div>";
+        return html;
+    };
+
+    /**
+     * Ensure the legend overlay exists in the container.
+     * If the container was cleared, re-render the overlay.
+     *
+     * @param {string} containerId
+     * @param {Object} options - same as render() options
+     * @returns {void}
+     */
+    self.ensure = function (containerId, options) {
+        if (!containerId) return;
+
+        var instance = self.instances[containerId];
+        if (!instance) {
+            self.render(containerId, options);
+            return;
+        }
+
+        var wrapper = document.getElementById(instance.ids.wrapperId);
+        if (!wrapper) {
+            // The container was emptied -> DOM is gone, recreate safely
+            delete self.instances[containerId];
+            self.render(containerId, options);
+        }
+    };
+
+    function setupVisBinding(instance, cfg, visjsGraph) {
+        instance._vis = instance._vis || {};
+        instance._vis.cfg = cfg || {};
+        instance._vis.runtimeOptions = (cfg && cfg.runtimeOptions) || {};
+        instance._vis.buildOptions = (cfg && cfg.buildOptions) || {};
+        instance._vis.applyStateOverrides = cfg && typeof cfg.applyStateOverrides === "function" ? cfg.applyStateOverrides : null;
+        instance._vis.debounceMs = cfg && cfg.debounceMs !== undefined ? cfg.debounceMs : 50;
+        instance._vis.visjsGraph = visjsGraph || null;
+    }
+
+    function scheduleRefreshFromGraph(containerId) {
+        var instance = self.instances[containerId];
+        if (!instance || !instance._vis) {
+            return;
+        }
+        if (instance._vis.refreshTimer) {
+            clearTimeout(instance._vis.refreshTimer);
+        }
+        instance._vis.refreshTimer = setTimeout(function () {
+            instance._vis.refreshTimer = null;
+            self.refreshFromGraph(containerId);
+        }, instance._vis.debounceMs || 50);
+    }
+
+    function bindVisjsEvents(containerId) {
+        var instance = self.instances[containerId];
+        if (!instance || !instance._vis || !instance._vis.visjsGraph) {
+            return;
+        }
+
+        unbindVisjsEvents(containerId);
+
+        var visjsGraph = instance._vis.visjsGraph;
+        if (!visjsGraph.data || !visjsGraph.data.nodes || !visjsGraph.data.edges) {
+            return;
+        }
+
+        instance._vis.boundHandler = function () {
+            scheduleRefreshFromGraph(containerId);
+        };
+
+        ["add", "update", "remove"].forEach(function (eventName) {
+            visjsGraph.data.nodes.on(eventName, instance._vis.boundHandler);
+            visjsGraph.data.edges.on(eventName, instance._vis.boundHandler);
+        });
+    }
+
+    function unbindVisjsEvents(containerId) {
+        var instance = self.instances[containerId];
+        if (!instance || !instance._vis || !instance._vis.visjsGraph || !instance._vis.boundHandler) {
+            return;
+        }
+
+        var visjsGraph = instance._vis.visjsGraph;
+        if (!visjsGraph.data || !visjsGraph.data.nodes || !visjsGraph.data.edges) {
+            return;
+        }
+
+        ["add", "update", "remove"].forEach(function (eventName) {
+            visjsGraph.data.nodes.off(eventName, instance._vis.boundHandler);
+            visjsGraph.data.edges.off(eventName, instance._vis.boundHandler);
+        });
+
+        instance._vis.boundHandler = null;
+    }
+
+    /**
+     * Attach a VisjsGraphClass instance to a legend overlay.
+     *
+     * @param {string} containerId
+     * @param {VisjsGraphClass} visjsGraph
+     * @param {Object} cfg
+     * @returns {void}
+     */
+    self.attachVisjsGraph = function (containerId, visjsGraph, cfg) {
+        if (!containerId) {
+            return;
+        }
+        cfg = cfg || {};
+
+        self.ensure(containerId, cfg.renderOptions || {});
+        var instance = self.instances[containerId];
+        if (!instance) {
+            return;
+        }
+
+        // Keep last render options for future ensure() calls
+        if (cfg.renderOptions) {
+            instance.options = cfg.renderOptions;
+        }
+
+        // Rebind if graph changed
+        if (instance._vis && instance._vis.visjsGraph && visjsGraph && visjsGraph !== instance._vis.visjsGraph) {
+            self.detachVisjsGraph(containerId);
+            instance = self.instances[containerId];
+            if (!instance) {
+                return;
+            }
+        }
+
+        setupVisBinding(instance, cfg, visjsGraph);
+
+        bindVisjsEvents(containerId);
+        self.refreshFromGraph(containerId);
+    };
+
+    /**
+     * Detach VisjsGraphClass instance and remove event bindings.
+     * Does not destroy the overlay DOM.
+     *
+     * @param {string} containerId
+     * @returns {void}
+     */
+    self.detachVisjsGraph = function (containerId) {
+        var instance = self.instances[containerId];
+        if (!instance || !instance._vis) {
+            return;
+        }
+
+        if (instance._vis.refreshTimer) {
+            clearTimeout(instance._vis.refreshTimer);
+            instance._vis.refreshTimer = null;
+        }
+
+        unbindVisjsEvents(containerId);
+
+        instance._vis.visjsGraph = null;
+    };
+
+    /**
+     * Refresh legend content from the attached graph.
+     *
+     * @param {string} containerId
+     * @returns {void}
+     */
+    self.refreshFromGraph = function (containerId) {
+        var instance = self.instances[containerId];
+        if (!instance || !instance._vis || !instance._vis.visjsGraph) {
+            return;
+        }
+
+        try {
+            var buildOptions = instance._vis.buildOptions || {};
+            var state = self.buildStateFromVisjsGraph(instance._vis.visjsGraph, buildOptions);
+
+            if (instance._vis.applyStateOverrides) {
+                instance._vis.applyStateOverrides(state, instance._vis.runtimeOptions || {}, instance._vis.visjsGraph);
+            }
+
+            self.ensure(containerId, instance.options || {});
+            self.update(containerId, state);
+        } catch (e) {
+            console.error("Legend refresh failed", e);
+        }
+    };
     return self;
 })();
 

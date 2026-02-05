@@ -130,6 +130,7 @@ var NodeInfosWidget = (function () {
                         UI.setDialogTitle("#smallDialogDiv", "Axioms of resource " + self.currentNode.data.label);
                         $("#smallDialogDiv").dialog("option", "close", function () {
                             $("#nodeInfosWidget_tabsDiv").tabs("option", "active", 0);
+                            $("#smallDialogDiv").dialog("option", "close", null);
                         });
                         NodeInfosAxioms.init(source, self.currentNode, "smallDialogDiv");
                     }

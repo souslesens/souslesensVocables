@@ -269,8 +269,6 @@ export function DownloadGraphModal({ apiUrl, onClose, open, sourceName }: Downlo
                                 }
                                 label="Ignore the namedIndividuals in this download"
                             />
-                        </FormControl>
-                        <FormControl fullWidth>
                             <FormControlLabel
                                 id={`include-imports-switch-${sourceName}`}
                                 control={<Checkbox checked={includeImports} disabled={transferPercent > 0} onChange={toggleAddImports} />}

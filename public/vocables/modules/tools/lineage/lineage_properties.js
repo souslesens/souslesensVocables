@@ -1083,7 +1083,8 @@ var Lineage_properties = (function () {
         }
 
         if (!term || term == "") {
-            term == null;
+            term = null;
+            searchType = null;
         } else {
             if (term.indexOf("*") > -1) {
                 exactMatch = false;

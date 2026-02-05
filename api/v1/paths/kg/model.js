@@ -1,9 +1,7 @@
-const path = require("path");
+import * as dbConnector from "../../../../bin/KG/dbConnector.js";
+import { databaseModel } from "../../../../model/databases.js";
 
-const dbConnector = require(path.resolve("bin/KG/dbConnector"));
-const { databaseModel } = require(path.resolve("model/databases"));
-
-module.exports = function () {
+export default function () {
     let operations = {
         GET,
     };
@@ -75,4 +73,4 @@ module.exports = function () {
     };
 
     return operations;
-};
+}

@@ -1,4 +1,4 @@
-const knex = require("knex");
+import knex from "knex";
 
 const RDF_FORMATS_MIMETYPES = {
     json: "application/sparql-results+json",
@@ -161,4 +161,4 @@ const cleanupConnection = (connection) => {
     return connection.destroy && connection.destroy();
 };
 
-module.exports = { cleanupConnection, convertType, chunk, getKnexConnection, redoIfFailure, redoIfFailureCallback, RDF_FORMATS_MIMETYPES, sleep };
+export { cleanupConnection, convertType, chunk, getKnexConnection, redoIfFailure, redoIfFailureCallback, RDF_FORMATS_MIMETYPES, sleep };

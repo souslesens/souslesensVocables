@@ -3,7 +3,6 @@ import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 
 import common from "../../shared/common.js";
-self.lineageVisjsGraph;
 import Lineage_whiteboard from "./lineage_whiteboard.js";
 import SearchWidget from "../../uiWidgets/searchWidget.js";
 

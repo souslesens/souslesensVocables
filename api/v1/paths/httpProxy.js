@@ -1,7 +1,7 @@
-const { processResponse } = require("./utils");
-const httpProxy = require("../../../bin/httpProxy.");
+import { processResponse } from "./utils.js";
+import httpProxy from "../../../bin/httpProxy.js";
 
-module.exports = function () {
+export default function () {
     let operations = {
         POST,
         GET,
@@ -67,4 +67,4 @@ module.exports = function () {
     };
 
     return operations;
-};
+}

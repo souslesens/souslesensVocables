@@ -1,6 +1,6 @@
-const dataController = require("../../../../bin/dataController.");
+import dataController from "../../../../bin/dataController.js";
 
-module.exports = function () {
+export default function () {
     let operations = {
         GET,
     };
@@ -61,4 +61,4 @@ module.exports = function () {
     };
 
     return operations;
-};
+}

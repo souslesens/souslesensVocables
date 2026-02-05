@@ -1,12 +1,10 @@
 "use strict";
 
-const path = require("path");
+import { sourceModel } from "../../../../../model/sources.js";
+import userManager from "../../../../../bin/user.js";
+import recreateGraph from "../../../../../bin/KGbuilder/recreateGraph.js";
 
-const { sourceModel } = require(path.resolve("model/sources"));
-const userManager = require(path.resolve("bin/user."));
-const recreateGraph = require(path.resolve("bin/KGbuilder/recreateGraph.js"));
-
-module.exports = function () {
+export default function () {
     let operations = { POST: POST };
 
     async function POST(req, res, next) {

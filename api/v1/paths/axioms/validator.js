@@ -1,10 +1,11 @@
-const ManchesterSyntaxEngine = require("../../../../bin/axioms/manchesterSyntaxEngine.js");
+import ManchesterSyntaxEngine from "../../../../bin/axioms/manchesterSyntaxEngine.js";
 
 //import    ManchesterSyntaxEngine from  "../../../../bin/axioms/manchesterSyntaxEngine.js";
 
-const httpProxy = require("../../../../bin/httpProxy..js");
-const { processResponse } = require("../utils.js");
-module.exports = function () {
+import httpProxy from "../../../../bin/httpProxy.js";
+
+import { processResponse } from "../utils.js";
+export default function () {
     let operations = {
         GET,
     };
@@ -17,7 +18,7 @@ module.exports = function () {
             return res.status(200).json(result);
         };
         if (req.query.options) {
-            options = JSON.parse(req.query.options);
+            var options = JSON.parse(req.query.options);
         }
         if (true) {
             ManchesterSyntaxEngine.validateAxiom(req.query.axiom, callback);
@@ -74,4 +75,4 @@ module.exports = function () {
     };
 
     return operations;
-};
+}

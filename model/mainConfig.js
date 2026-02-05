@@ -1,9 +1,7 @@
-const { readFile, writeFile } = require("fs/promises");
-
-const { Lock } = require("async-await-mutex-lock");
-
-const { mainConfigPath } = require("./config");
-const { toolModel } = require("./tools");
+import { readFile, writeFile } from "fs/promises";
+import { Lock } from "async-await-mutex-lock";
+import { mainConfigPath } from "./config.js";
+import { toolModel } from "./tools.js";
 
 const lock = new Lock();
 
@@ -46,4 +44,4 @@ class MainConfigModel {
 
 const mainConfigModel = new MainConfigModel(mainConfigPath);
 
-module.exports = { mainConfigModel };
+export { mainConfigModel };

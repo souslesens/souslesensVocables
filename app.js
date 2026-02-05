@@ -1,26 +1,33 @@
-const createError = require("http-errors");
-const express = require("express");
-const path = require("path");
-const fs = require("fs");
-const passport = require("passport");
-const cookieParser = require("cookie-parser");
-const morganLogger = require("morgan");
-const fileUpload = require("express-fileupload");
-const openapi = require("express-openapi");
-const swaggerUi = require("swagger-ui-express");
-const httpProxy = require(path.resolve("bin/httpProxy."));
-const userManager = require(path.resolve("bin/user."));
-const querystring = require("querystring");
-require("./bin/authentication.");
-const { checkMainConfig, readMainConfig } = require("./model/config");
-const util = require("./bin/util.");
+import createError from 'http-errors';
+import express from 'express';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import fs from 'fs';
+
+// ESM equivalent of __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+import passport from 'passport';
+import cookieParser from 'cookie-parser';
+import morganLogger from 'morgan';
+import fileUpload from 'express-fileupload';
+import openapi from 'express-openapi';
+import swaggerUi from 'swagger-ui-express';
+import querystring from 'querystring';
+import httpProxy from './bin/httpProxy.js';
+import userManager from './bin/user.js';
+import './bin/authentication.js';
+import { checkMainConfig, readMainConfig } from './model/config.js';
+import util from './bin/util.js';
 
 const app = express();
-const Sentry = require("@sentry/node");
-const { userModel } = require("./model/users");
-const { profileModel } = require("./model/profiles");
-const { sourceModel } = require("./model/sources");
-const { rdfDataModel } = require("./model/rdfData");
+import * as Sentry from '@sentry/node';
+import { userModel } from './model/users.js';
+import { profileModel } from './model/profiles.js';
+import { sourceModel } from './model/sources.js';
+import { rdfDataModel } from './model/rdfData.js';
+import apiDoc from './api/v1/api-doc.js';
+import session from 'express-session';
 
 const config = readMainConfig();
 const isValid = checkMainConfig(config);
@@ -42,7 +49,8 @@ app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "20mb", parameterLimit: 10000 }));
 
 /*
-const bodyParser = require('body-parser');
+import bodyParser from "body-parser";
+import express_session_module from "express-session";
 app.use(bodyParser.json({
     limit: '20mb'
 }));
@@ -66,7 +74,7 @@ if (config.cookieSecureTrustProxy) {
     app.set("trust proxy", 1);
 }
 app.use(
-    require("express-session")({
+    session({
         secret: config.cookieSecret ? config.cookieSecret : "S3cRet!",
         resave: false,
         saveUninitialized: false,
@@ -151,7 +159,7 @@ httpProxy.app = app;
 
 // API
 openapi.initialize({
-    apiDoc: require("./api/v1/api-doc.js"),
+    apiDoc: apiDoc,
     app: app,
     paths: "./api/v1/paths",
     securityHandlers: {
@@ -312,4 +320,4 @@ async function loadDefaultGraphs() {
 
 void loadDefaultGraphs();
 
-module.exports = app;
+export default app;

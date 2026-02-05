@@ -583,65 +583,41 @@ str = str.replace(/%2F/gm, "/");*/
     };
 
     self.copyTextToClipboard = function (text, callback) {
-        async function copy() {
-            if (navigator.clipboard && window.isSecureContext) {
-                // navigator clipboard api method'
-                try {
-                    navigator.clipboard.writeText(text);
-                    if (callback) {
-                        return callback(null, "graph copied in clipboard");
-                    } else {
-                        return alert("graph copied in clipboard");
-                    }
-                } catch (err) {
-                    UI.message("graph copy failed");
-                    if (callback) {
-                        return callback(err);
-                    }
+        var fallbackCopy = function () {
+            var textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed";
+            textArea.style.left = "-999999px";
+            textArea.style.top = "-999999px";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            var ok = document.execCommand("copy");
+            textArea.remove();
+            if (ok) {
+                if (callback) {
+                    return callback(null, "copied to clipboard");
                 }
-            } else {
-                // text area method
-                let textArea = document.createElement("textarea");
-                textArea.value = text;
-                // make the textarea out of viewport
-                textArea.style.position = "fixed";
-                textArea.style.left = "-999999px";
-                textArea.style.top = "-999999px";
-                document.body.appendChild(textArea);
-                textArea.trigger("focus");
-                textArea.select();
-                return new Promise((res, rej) => {
-                    // here the magic happens
-                    var ok = document.execCommand("copy");
-                    if (ok) {
-                        if (callback) {
-                            return callback(null, "graph copied in clipboard");
-                        } else {
-                            return alert("graph copied in clipboard");
-                        }
-                    } else {
-                        UI.message("graph copy failed");
-                        if (callback) {
-                            return callback(err);
-                        }
-                    }
-                    textArea.remove();
-                });
+                return alert("copied to clipboard");
             }
+            UI.message("copy failed");
+            if (callback) {
+                return callback("copy failed");
+            }
+        };
 
-            /*  try {
-await navigator.clipboard.writeText(text);
-
-if (callback) {
-return callback(null, "graph copied in clipboard");
-} else return alert("graph copied in clipboard");
-} catch (err) {
-UI.message("graph copy failed");
-if (callback) return callback(err);
-}*/
+        if (navigator.clipboard && window.isSecureContext && document.hasFocus()) {
+            navigator.clipboard.writeText(text).then(function () {
+                if (callback) {
+                    return callback(null, "copied to clipboard");
+                }
+                return alert("copied to clipboard");
+            }).catch(function () {
+                fallbackCopy();
+            });
+        } else {
+            fallbackCopy();
         }
-
-        copy();
         return;
 
         // var textArea = document.createElement("textarea");

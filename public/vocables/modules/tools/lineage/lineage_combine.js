@@ -1,5 +1,4 @@
 import Lineage_whiteboard from "./lineage_whiteboard.js";
-self.lineageVisjsGraph;
 import common from "../../shared/common.js";
 import Lineage_selection from "./lineage_selection.js";
 import SearchUtil from "../../search/searchUtil.js";

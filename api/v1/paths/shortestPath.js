@@ -1,9 +1,9 @@
-const { processResponse } = require("./utils");
-const GraphTraversal = require("../../../bin/graphTraversal.");
-const ConfigManager = require("../../../bin/configManager.");
-const UserRequestFiltering = require("../../../bin/userRequestFiltering.");
+import { processResponse } from "./utils.js";
+import GraphTraversal from "../../../bin/graphTraversal.js";
+import ConfigManager from "../../../bin/configManager.js";
+import UserRequestFiltering from "../../../bin/userRequestFiltering.js";
 
-module.exports = function () {
+export default function () {
     let operations = {
         POST,
     };
@@ -99,4 +99,4 @@ module.exports = function () {
     };
 
     return operations;
-};
+}

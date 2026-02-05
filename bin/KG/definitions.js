@@ -1,7 +1,7 @@
-const fs = require("fs");
-const util = require("../util.");
-const async = require("async");
-const httpProxy = require("../httpProxy.");
+import fs from "fs";
+import util from "../util.js";
+import async from "async";
+import httpProxy from "../httpProxy.js";
 
 var uris = [
     "<http://data.posccaesar.org/dm/CartesianProductOfQuantityKind>",

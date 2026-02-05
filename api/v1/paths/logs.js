@@ -1,9 +1,9 @@
-const path = require("path");
-const { mainConfigModel } = require("../../../model/mainConfig");
-const logger = require(path.resolve("bin/logger..js"));
-const fs = require("fs");
+import path from "path";
+import { mainConfigModel } from "../../../model/mainConfig.js";
+import logger from "../../../bin/logger.js";
+import fs from "fs";
 
-module.exports = function () {
+export default function () {
     let operations = {
         POST,
         GET,
@@ -162,4 +162,4 @@ module.exports = function () {
     };
 
     return operations;
-};
+}

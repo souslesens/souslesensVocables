@@ -1,7 +1,7 @@
-const { profileModel } = require("../../../../model/profiles");
-const userManager = require("../../../../bin/user.");
+import { profileModel } from "../../../../model/profiles.js";
+import userManager from "../../../../bin/user.js";
 
-module.exports = function () {
+export default function () {
     let operations = { GET };
 
     async function GET(req, res, next) {
@@ -34,4 +34,4 @@ module.exports = function () {
     };
 
     return operations;
-};
+}

@@ -1,5 +1,11 @@
-const path = require("path");
-const { ToolModel } = require("../model/tools");
+import path from "path";
+import { fileURLToPath } from "url";
+import { jest } from "@jest/globals";
+
+import { ToolModel } from "../model/tools.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const TEST_PLUGINS_PATH = path.join(__dirname, "data/plugins");
 

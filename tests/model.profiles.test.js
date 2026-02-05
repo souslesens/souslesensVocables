@@ -1,10 +1,29 @@
-const fs = require("fs");
-const path = require("path");
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+import { jest } from "@jest/globals";
 
-const { profileModel, ProfileModel } = require("../model/profiles");
-const { ToolModel } = require("../model/tools");
+import { createTracker, MockClient } from "knex-mock-client";
+import knex from "knex";
 
-jest.mock("../model/utils");
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const mockKnexConnection = knex({ client: MockClient, dialect: "pg" });
+
+jest.unstable_mockModule("../model/utils.js", () => ({
+    cleanupConnection: jest.fn(),
+    getKnexConnection: jest.fn(() => mockKnexConnection),
+    convertType: jest.fn((value) => value),
+    chunk: jest.fn((list, size) => [list]),
+    redoIfFailure: jest.fn(),
+    redoIfFailureCallback: jest.fn(),
+    sleep: jest.fn(),
+    RDF_FORMATS_MIMETYPES: {},
+}));
+
+const { profileModel, ProfileModel } = await import("../model/profiles.js");
+const { ToolModel } = await import("../model/tools.js");
 
 describe("Test the Profilemodel module", () => {
     let allTools;
@@ -18,8 +37,8 @@ describe("Test the Profilemodel module", () => {
     });
 
     test("can create instance", async () => {
-        const profileModel = new ProfileModel(toolsModel);
-        expect(profileModel._toolModel).toStrictEqual(toolsModel);
+        const profileModelInstance = new ProfileModel(toolsModel);
+        expect(profileModelInstance._toolModel).toStrictEqual(toolsModel);
     });
 
     test("get all the profiles", async () => {

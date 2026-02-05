@@ -1,9 +1,9 @@
-const { processResponse } = require("../utils");
-const ConfigManager = require("../../../../bin/configManager.");
-const GraphStore = require("../../../../bin/graphStore.");
-const async2 = require("async");
+import { processResponse } from "../utils.js";
+import ConfigManager from "../../../../bin/configManager.js";
+import GraphStore from "../../../../bin/graphStore.js";
+import async2 from "async";
 
-module.exports = function () {
+export default function () {
     let operations = {
         POST,
     };
@@ -120,4 +120,4 @@ module.exports = function () {
     };
 
     return operations;
-};
+}

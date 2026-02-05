@@ -1,13 +1,34 @@
-const bcrypt = require("bcrypt");
-const fs = require("fs");
-const os = require("os");
-const path = require("path");
-const tmp = require("tmp");
+import bcrypt from "bcrypt";
+import fs from "fs";
+import os from "os";
+import path from "path";
+import tmp from "tmp";
+import { fileURLToPath } from "url";
+import { jest } from "@jest/globals";
 
-const { cleanupConnection, getKnexConnection } = require("../model/utils");
-const { UserDataModel } = require("../model/userData");
+import { createTracker, MockClient } from "knex-mock-client";
+import knex from "knex";
 
-jest.mock("../model/utils");
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const mockKnexConnection = knex({ client: MockClient, dialect: "pg" });
+
+jest.unstable_mockModule("../model/utils.js", () => ({
+    cleanupConnection: jest.fn(),
+    getKnexConnection: jest.fn(() => mockKnexConnection),
+    convertType: jest.fn((value) => value),
+    chunk: jest.fn((list, size) => [list]),
+    redoIfFailure: jest.fn(),
+    redoIfFailureCallback: jest.fn(),
+    sleep: jest.fn(),
+    RDF_FORMATS_MIMETYPES: {},
+}));
+
+const { cleanupConnection, getKnexConnection } = await import("../model/utils.js");
+const { UserDataModel } = await import("../model/userData.js");
+
+const tracker = createTracker(mockKnexConnection);
 
 describe("UserDataModel", () => {
     let temporaryDirectory;
@@ -24,6 +45,7 @@ describe("UserDataModel", () => {
     });
 
     afterEach(() => {
+        tracker.reset();
         if (fs.existsSync(temporaryDirectory)) {
             fs.rmSync(temporaryDirectory, { recursive: true, force: true });
         }
@@ -294,6 +316,8 @@ describe("UserDataModel", () => {
     });
 
     test("update userData with unknown identifier", async () => {
+        tracker.on.select("user_data").response(undefined);
+
         const updateUserData = {
             id: 10,
             data_type: "data_type",
@@ -305,6 +329,9 @@ describe("UserDataModel", () => {
     });
 
     test("update userData with unknown owner", async () => {
+        tracker.on.select("user_data").response({ id: 1, data_path: "test.json" });
+        tracker.on.select("users_list").response(undefined);
+
         const updateUserData = {
             id: 1,
             data_type: "data_type",
@@ -316,6 +343,9 @@ describe("UserDataModel", () => {
     });
 
     test("update userData with too large file (database)", async () => {
+        tracker.on.select("user_data").response({ id: 1, data_path: "test.json" });
+        tracker.on.select("users_list").response({ id: 2, login: "test" });
+
         userDataModel._mainConfig.userData = {
             location: "database",
             maximumFileSize: 4,
@@ -372,7 +402,7 @@ describe("UserDataModel", () => {
     });
 
     test("test _check", async () => {
-        data = userDataModel._check({ data_type: "text", owned_by: 1 });
+        const data = userDataModel._check({ data_type: "text", owned_by: 1 });
     });
 
     test("test _check with missing attributes", async () => {

@@ -1,23 +1,34 @@
-const fs = require("fs");
-const path = require("path");
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+import { jest } from "@jest/globals";
 
-const { createTracker, MockClient } = require("knex-mock-client");
+import { createTracker, MockClient } from "knex-mock-client";
+import knex from "knex";
 
-const { ProfileModel } = require("../model/profiles");
-const { SourceModel } = require("../model/sources");
-const { ToolModel } = require("../model/tools");
-const { cleanupConnection, getKnexConnection } = require("../model/utils");
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const mockKnexConnection = knex({ client: MockClient, dialect: "pg" });
+
+jest.unstable_mockModule("../model/utils.js", () => ({
+    cleanupConnection: jest.fn(),
+    getKnexConnection: jest.fn(() => mockKnexConnection),
+    convertType: jest.fn((value) => value),
+    chunk: jest.fn((list, size) => [list]),
+    redoIfFailure: jest.fn(),
+    redoIfFailureCallback: jest.fn(),
+    sleep: jest.fn(),
+    RDF_FORMATS_MIMETYPES: {},
+}));
+
+const { cleanupConnection, getKnexConnection } = await import("../model/utils.js");
+const { ProfileModel } = await import("../model/profiles.js");
+const { SourceModel } = await import("../model/sources.js");
+const { ToolModel } = await import("../model/tools.js");
 
 const TOOL_MODEL = new ToolModel(path.join(__dirname, "data/plugins"));
 const PROFILE_MODEL = new ProfileModel(TOOL_MODEL, path.join(__dirname, "data/config/profiles.json"));
-
-jest.mock("../model/utils", () => {
-    const knex = require("knex");
-    return {
-        cleanupConnection: jest.fn().mockReturnThis(),
-        getKnexConnection: knex({ client: MockClient, dialect: "pg" }),
-    };
-});
 
 describe("SourceModel", () => {
     let dbProfiles;
@@ -29,7 +40,7 @@ describe("SourceModel", () => {
         sourceModel = new SourceModel(PROFILE_MODEL, path.join(__dirname, "data", "config", "sources.json"));
         sourcesFromFiles = await fs.promises.readFile(path.join(__dirname, "data", "config", "sources.json")).then((data) => JSON.parse(data.toString()));
 
-        tracker = createTracker(getKnexConnection);
+        tracker = createTracker(mockKnexConnection);
 
         dbProfiles = JSON.parse(fs.readFileSync(path.join(__dirname, "data", "config", "profiles.json")));
     });

@@ -5,8 +5,12 @@
  */
 
 //global.__base = __dirname ;
-const http = require("http");
-const { readMainConfig } = require("../model/config");
+import http from "http";
+import { readMainConfig } from "../model/config.js";
+import app from "../app.js";
+import { Server } from "socket.io";
+import SocketManager from "./socketManager.js";
+
 const config = readMainConfig();
 
 /**
@@ -34,7 +38,6 @@ function normalizePort(val) {
  *
  * Listen on provided port, on all network interfaces.
  */
-const app = require("../app");
 
 const port = normalizePort(process.env.PORT || config.listenPort || "3010");
 app.set("port", port);
@@ -69,10 +72,7 @@ server.on("error", (error) => {
 /**
  * Create WebSocket server and init SocketManager for each socket
  *
-
  */
-const { Server } = require("socket.io");
-const SocketManager = require("./socketManager.");
 const io = new Server(server, {
     /* options */
 });

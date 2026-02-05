@@ -1,7 +1,7 @@
-const path = require("path");
-const dirContentAnnotator = require(path.resolve("bin/annotator/dirContentAnnotator."));
+import path from "path";
+import dirContentAnnotator from "../../../../bin/annotator/dirContentAnnotator.js";
 
-module.exports = function () {
+export default function () {
     let operations = {
         POST,
     };
@@ -61,4 +61,4 @@ module.exports = function () {
     };
 
     return operations;
-};
+}

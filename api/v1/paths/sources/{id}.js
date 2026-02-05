@@ -1,7 +1,7 @@
-const { sourceModel } = require("../../../../model/sources");
-const userManager = require("../../../../bin/user.");
+import { sourceModel } from "../../../../model/sources.js";
+import userManager from "../../../../bin/user.js";
 
-module.exports = function () {
+export default function () {
     let operations = {
         DELETE,
         PUT,
@@ -81,4 +81,4 @@ module.exports = function () {
         tags: ["Sources"],
     };
     return operations;
-};
+}

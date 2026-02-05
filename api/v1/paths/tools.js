@@ -1,8 +1,8 @@
-const { successfullyFetched } = require("./utils.js");
-const { profileModel } = require("../../../model/profiles");
-const userManager = require("../../../bin/user.");
+import { successfullyFetched } from "./utils.js";
+import { profileModel } from "../../../model/profiles.js";
+import userManager from "../../../bin/user.js";
 
-module.exports = function () {
+export default function () {
     let operations = {
         GET,
     };
@@ -37,4 +37,4 @@ module.exports = function () {
         tags: ["Tools"],
     };
     return operations;
-};
+}

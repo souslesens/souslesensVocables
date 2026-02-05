@@ -1,12 +1,12 @@
-const path = require("path");
-const elasticRestProxy = require(path.resolve("bin/elasticRestProxy..js"));
-const ConfigManager = require("../../../../bin/configManager.");
-const UserRequestFiltering = require("../../../../bin/userRequestFiltering.");
-const { processResponse } = require("../utils");
-const { sourceModel } = require("../../../../model/sources");
-const async = require("async");
+import path from "path";
+import elasticRestProxy from "../../../../bin/elasticRestProxy.js";
+import ConfigManager from "../../../../bin/configManager.js";
+import UserRequestFiltering from "../../../../bin/userRequestFiltering.js";
+import { processResponse } from "../utils.js";
+import { sourceModel } from "../../../../model/sources.js";
+import async from "async";
 
-module.exports = function () {
+export default function () {
     let operations = {
         POST,
     };
@@ -167,4 +167,4 @@ module.exports = function () {
     };
 
     return operations;
-};
+}

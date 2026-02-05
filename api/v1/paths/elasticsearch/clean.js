@@ -1,7 +1,7 @@
-const { sourceModel } = require("../../../../model/sources");
-const { indexModel } = require("../../../../model/index");
+import { sourceModel } from "../../../../model/sources.js";
+import { indexModel } from "../../../../model/index.js";
 
-module.exports = function () {
+export default function () {
     let operations = {
         GET,
         POST,
@@ -106,4 +106,4 @@ module.exports = function () {
     };
 
     return operations;
-};
+}

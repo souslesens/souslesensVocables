@@ -1,6 +1,10 @@
-const path = require("path");
-const async = require("async");
-const fs = require("fs");
+import path from "path";
+import async from "async";
+import fs from "fs";
+
+import { fileURLToPath } from "url";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 var MappingParser = {
     columnsMappingsObjects: ["Column", "RowIndex", "VirtualColumn", "URI"],
@@ -73,7 +77,7 @@ var MappingParser = {
                     var toNodeData = nodesMap[edge.to];
 
                     if (toNodeData && toNodeData.type == "Class") {
-                        mappings = MappingParser.getTypeAndLabelMappings(fromNodeData, toNodeData);
+                        var mappings = MappingParser.getTypeAndLabelMappings(fromNodeData, toNodeData);
                         mappings.forEach(function (mapping) {
                             mapping.isConstantUri = MappingParser.isConstantUri(mapping.o);
                             mapping.isConstantPrefixedUri = MappingParser.isConstantPrefixedUri(mapping.o);
@@ -89,7 +93,7 @@ var MappingParser = {
     setTableColumnsOtherPredicates: function (tablecolumnsMap) {
         for (var columnId in tablecolumnsMap) {
             var fromNodeData = tablecolumnsMap[columnId];
-            mappings = MappingParser.getOtherPredicates(fromNodeData);
+            var mappings = MappingParser.getOtherPredicates(fromNodeData);
             mappings.forEach(function (mapping) {
                 mapping.isConstantUri = MappingParser.isConstantUri(mapping.o);
                 mapping.isConstantPrefixedUri = MappingParser.isConstantPrefixedUri(mapping.o);
@@ -258,6 +262,5 @@ var MappingParser = {
     },
 };
 
-module.exports = MappingParser;
-
+export default MappingParser;
 //MappingParser.getColumnsMap("PAZFLOR_ABOX", null, function (err, result) {

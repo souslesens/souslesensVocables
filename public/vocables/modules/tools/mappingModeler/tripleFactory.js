@@ -417,9 +417,7 @@ var TripleFactory = (function () {
         var detach = attachRecreateDeleteProgressListener();
         ajaxRecreate(
             payload,
-            function (data) {
-                console.log("Recreate ALL OK", data);
-            },
+            function (data) {},
             function (xhr, msg) {
                 console.error("Recreate ALL ERROR", xhr);
                 alert(msg);
@@ -437,7 +435,6 @@ var TripleFactory = (function () {
         ajaxRecreate(
             payload,
             function (data) {
-                console.log("Recreate table OK:", table, data);
                 if (doneCb) doneCb(null, data);
             },
             function (xhr, msg) {

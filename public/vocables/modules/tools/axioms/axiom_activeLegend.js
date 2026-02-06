@@ -14,7 +14,6 @@ import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
 import NodeInfosAxioms from "./nodeInfosAxioms.js";
 import Lineage_graphPaths from "../lineage/lineage_graphPaths.js";
 
-
 var Axiom_activeLegend = (function () {
     var self = {};
     self.axiomsLegendVisjsGraph = null;
@@ -589,7 +588,6 @@ var Axiom_activeLegend = (function () {
         var visjsData = {nodes: [], edges: []};
         var visjsNode = Axioms_graph.getVisjsNode(currentNode, 0);
         visjsNode.data.predicate = selectedObject.axiomType;
-        visjsNode.data.rootAxiom = true;
 
         visjsData.nodes.push(visjsNode);
         self.hierarchicalLevel = 0;
@@ -641,7 +639,7 @@ var Axiom_activeLegend = (function () {
                 }
             }
 
-            if (node.data.axiomId > -1 || node.data.rootAxiom) {
+            if (node.data.axiomId > -1) {
                 self.selectGraphNodeJstreeTriples(node)
             }
 
@@ -688,13 +686,7 @@ var Axiom_activeLegend = (function () {
             jstreeData.push({
                 id: "triple" + index,
                 text: triple.subject + " <b>" + triple.predicate + "</b> " + triple.object,
-                parent: "#",
-                data: {
-                    subject: triple.subject,
-                    predicate: triple.predicate,
-                    object: triple.object,
-                     
-                }
+                parent: "#"
             })
 
         });
@@ -715,7 +707,7 @@ var Axiom_activeLegend = (function () {
     };
 
     self.copyTriples = function () {
-        var triples = self.getTriples();
+        var triples = self.visjsGraphToTriples();
         var str = ""
         triples.forEach(function (triple) {
             str += Sparql_generic.triplesObjectToString(triple) + ".\n";
@@ -723,49 +715,7 @@ var Axiom_activeLegend = (function () {
 
         common.copyTextToClipboard(str)
     };
-    self.getTriples = function (options) {
-        if(!options){
-            options = {};
-        }
-        var isInitializedJstree = self.isInitializedJstree();
-        if(!isInitializedJstree){
-            return alert('No triples to get, initialize the triples with "Show Triples" button');
-        }
-        var triples = []
-        var checkedNodes = $("#axiomsTriplesJstree").jstree(true).get_checked();
-        //get all nodes by default except type nodes
-        if(checkedNodes.length == 0 || options.all){
-            if(!Axioms_graph.axiomsVisjsGraph && !Axioms_graph.axiomsVisjsGraph.data.nodes){
-                return alert("No axioms graph data available");
-            }
-            var allNodes = Axioms_graph.axiomsVisjsGraph.data.nodes.get();
-            var rootNode = allNodes.find(function(node) { return node.data && node.data.rootAxiom; });
-            if(!rootNode){
-                return alert("no root node found in jstree");
-            }
 
-            self.selectGraphNodeJstreeTriples(rootNode);
-             checkedNodes = $("#axiomsTriplesJstree").jstree(true).get_checked();
-
-
-
-        }
-        checkedNodes.forEach(function (nodeId) {
-            var node = $("#axiomsTriplesJstree").jstree(true).get_node(nodeId);
-            triples.push(node.data);
-        });
-        return triples;
-        
-
-    }
-    self.isInitializedJstree = function () {
-        var jstree = $("#axiomsTriplesJstree").jstree(true);
-        var response = false;
-        if(jstree && jstree._model.data && Object.values(jstree._model.data).length > 0){
-            response = true;
-        }
-        return response;
-    }
     self.deleteTriples = function () {
 
         var checkedNodes = $("#axiomsTriplesJstree").jstree(true).get_checked()
@@ -799,7 +749,7 @@ var Axiom_activeLegend = (function () {
     self.selectGraphNodeJstreeTriples = function (visjsNode) {
 
 
-        $('#axiomsTriplesJstree').jstree('uncheck_all');
+        $('#axiomsTriplesJstree').jstree(true).deselect_all();
 
         var nodesToDelete = []
         var edgesToDelete = []
@@ -821,7 +771,7 @@ var Axiom_activeLegend = (function () {
         })
 
 
-        if (visjsNode.data.axiomId || visjsNode.data.rootAxiom ) {
+        if (visjsNode.data.axiomId) {
             var visjsData = {
                 nodes: Axioms_graph.axiomsVisjsGraph.data.nodes.get(),
                 edges: Axioms_graph.axiomsVisjsGraph.data.edges.get(),
@@ -949,14 +899,14 @@ var Axiom_activeLegend = (function () {
 
     self.saveAxiom = function (callback) {
         if (confirm("Save Axiom")) {
-            var triples = self.getTriples({all:true});
+            var triples = self.visjsGraphToTriples();
             var newNodesLabelsMap = {}
 
             async.series([
                 //save New nodes (created on the fly)
                 function (callbackSeries) {
-                    return callbackSeries();
-                    /*
+if(true)
+        return callbackSeries()
                     self.saveNewNodes(triples.newNodesToStore, function (err, labelsMap) {//new nodes created on the fly
                         if (err) {
                             return callbackSeries(err)
@@ -965,7 +915,7 @@ var Axiom_activeLegend = (function () {
                         callbackSeries()
 
 
-                    })*/
+                    })
                 },
                 //update  basicAxiomsCache  triples stored into basicAxiomsCache
                 function (callbackSeries) {
@@ -1002,6 +952,7 @@ var Axiom_activeLegend = (function () {
 
                 //write axiomtriples
                 function (callbackSeries) {
+                    var triples = self.visjsGraphToTriples();
                     Sparql_generic.insertTriples(self.currentSource, triples, {}, function (err, result) {
                         if (err) {
                             return callbackSeries(err)
@@ -1102,9 +1053,6 @@ var Axiom_activeLegend = (function () {
             }
         });
     };
-
-
-
     self.visjsGraphToTriples = function (nodes, edges) {
         if (!edges) {
             edges = Axioms_graph.axiomsVisjsGraph.data.edges.get();

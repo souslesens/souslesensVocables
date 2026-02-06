@@ -29,37 +29,14 @@ const { cleanupConnection, getKnexConnection } = await import("../model/utils.js
 const { userModel } = await import("../model/users.js");
 const { userDataModel } = await import("../model/userData.js");
 
-const tracker = createTracker(mockKnexConnection);
-
 describe("UserModelJson", () => {
     let dbUsers;
-    let dbPublicUsers;
 
     beforeAll(() => {
         dbUsers = JSON.parse(fs.readFileSync(path.join(__dirname, "data", "config", "users", "users.json")));
-        dbPublicUsers = JSON.parse(fs.readFileSync(path.join(__dirname, "data", "config", "users", "users.public.json")));
-    });
-
-    beforeEach(() => {
-        tracker.on.select("public_users_list").response(dbPublicUsers);
-        tracker.on.select("users").response((query) => {
-            const bindings = query.bindings;
-            if (bindings && bindings.length > 0) {
-                const searchValue = bindings[0];
-                const result = dbUsers.filter(
-                    (u) => u.login === searchValue || u.token === searchValue || u.id === searchValue || u.id === String(searchValue)
-                );
-                return result;
-            }
-            return dbUsers;
-        });
-        tracker.on.insert("users").response([{ id: 5 }]);
-        tracker.on.update("users").response(1);
-        tracker.on.delete("users").response(1);
-    });
-
-    afterEach(() => {
-        tracker.reset();
+        const dbPublicUsers = JSON.parse(fs.readFileSync(path.join(__dirname, "data", "config", "users", "users.public.json")));
+        const dbUserData = JSON.parse(fs.readFileSync(path.join(__dirname, "data", "config", "users", "userData.json")));
+        const dbUserDataList = JSON.parse(fs.readFileSync(path.join(__dirname, "data", "config", "users", "userData.list.json")));
     });
 
     test("retrieve the list of all the account without private information", async () => {

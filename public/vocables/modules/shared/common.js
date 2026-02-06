@@ -607,14 +607,17 @@ str = str.replace(/%2F/gm, "/");*/
         };
 
         if (navigator.clipboard && window.isSecureContext && document.hasFocus()) {
-            navigator.clipboard.writeText(text).then(function () {
-                if (callback) {
-                    return callback(null, "copied to clipboard");
-                }
-                return alert("copied to clipboard");
-            }).catch(function () {
-                fallbackCopy();
-            });
+            navigator.clipboard
+                .writeText(text)
+                .then(function () {
+                    if (callback) {
+                        return callback(null, "copied to clipboard");
+                    }
+                    return alert("copied to clipboard");
+                })
+                .catch(function () {
+                    fallbackCopy();
+                });
         } else {
             fallbackCopy();
         }

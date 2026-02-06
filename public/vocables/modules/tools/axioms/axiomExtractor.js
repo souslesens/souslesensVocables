@@ -209,15 +209,16 @@ var AxiomExtractor = (function () {
      */
     self.addBasicAxioms = function (source, triples) {
         triples.forEach(function (triple) {
-            if(!self.basicAxioms[source][triple.s]){
+            var existingTriples= self.basicAxioms[source][triple.s]
+            if(!existingTriples){
                 self.basicAxioms[source][triple.s]=[]
             }
-            var alreadyExists = self.basicAxioms[source][triple.s].some(function(existingTriple){
-                return existingTriple.p === triple.p && existingTriple.o === triple.o
+            self.basicAxioms[source][triple.s].forEach(function(existingTriple){
+                if(existingTriple.p!=triple.p && existingTriple.o!=triple.o)
+                 self.basicAxioms[source][triple.s].push(triple)
             })
-            if(!alreadyExists){
-                self.basicAxioms[source][triple.s].push(triple)
-            }
+
+
         })
     };
     self.deleteBasicAxioms = function (source, triples) {

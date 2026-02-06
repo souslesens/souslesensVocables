@@ -979,7 +979,7 @@ var Axiom_activeLegend = (function () {
                             o: triple.object
                         }
 
-                        if(newNodesLabelsMap) {
+                        if(!newNodesLabelsMap) {
 
                             if (newNodesLabelsMap[item.s]) {
                                 item.sLabel = newNodesLabelsMap[item.s];

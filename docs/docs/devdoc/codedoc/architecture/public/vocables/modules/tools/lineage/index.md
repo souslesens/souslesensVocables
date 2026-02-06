@@ -49,7 +49,7 @@ Build a graph structure from VisJS node and edge data, optionally reversing edge
 
 ### 10. lineage_graphTraversal
 
-Build a graph structure from VisJS
+This module manages shortest‑path discovery and visualization between RDF graph nodes. It queries a SPARQL backend, retrieves paths, resolves labels, and structures relation objects. It provides UI functions for searching nodes, selecting start/end points, and listing paths. It can draw shortest paths on a Vis.js whiteboard and supports multi‑path retrieval and display.
 
 ### 11. lineage_nodeCentricGraph
 
@@ -99,11 +99,34 @@ This module s the central engine orchestrating visualization, interaction, and d
 ## Features
 
 - **Query RDF containers**: fetch top containers, descendants, and ancestors using SPARQL, including depth‑controlled graph via rdfs:member paths.
-
+- **Manages and visualizes ontological axioms**
+- **Draws classes with their associated axioms** creating nodes and edges that represent axiom Relationship
+- **Manages ontology dictionaries** including term mappings, filters, metadata, and dictionary‑based navigation
+- **Finds all graph paths** configurable formats such as text, CSV, HTML, or edge lists
+- **Generates graph and support inverse navigation** bidirectional path computation
+- **Draws and clears path visualizations** on the Lineage whiteboard by highlighting edges
+- **Create Resources** add classes or individuals, generate RDF triples, manage URIs, metadata, and hierarchy links
+- **Create Relations** build relationships (predicates or restrictions), validate constraints, and update the ontology model and graph
+- **Combine Sources** load, group, and merge multiple ontology sources, managing visibility, hierarchy, and merge logic
+- **SPARQL Backend Integration** read/write triples, check constraints, update indexes, and sync ontology models
+- **Performs ontology reasoning** inference, consistency checking, and identifying unsatisfiable classes, with visual outputs and predicate selection
+- **Manages ontology properties** including object/datatype properties, their hierarchies, domains, ranges, and restrictions
+- **Generates property‑based graphs** (restrictions, predicates, range/domain networks) and supports exporting matrices or tables
+- **Defines, manages, and executes ontology rules** including premises, conclusions, reasoning payloads, and rule‑based constraints
+- **Searches classes/properties and builds rule components** supporting UI‑based rule creation and property validation
+- **Draws, filters, and analyzes relationships** graph nodes (restrictions, predicates, equivalences)
+- **Finds similar ontology nodes** comparing labels (exact or fuzzy) across whiteboard nodes or selected external sources
 
 ## Usage
 
-- Quickly find a container by name
+- Load and Prepare Ontology Sources
+- Explore Class Hierarchy and Properties
+- Find Paths Between Key Concepts
+- Detect Similar Nodes Across Sources
+- Apply Reasoning to Discover Inferred Knowledge
+- Create a Rule to Capture Business Logic
+- Analyze & Draw Relations Between Concepts
+- Visualize Axioms & Validate Semantic Coherence
 
 <!-- AUTO-DESC:END -->
 

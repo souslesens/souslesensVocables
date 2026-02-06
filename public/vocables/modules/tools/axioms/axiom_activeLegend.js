@@ -823,39 +823,40 @@ var Axiom_activeLegend = (function () {
                 },
                 //update  basicAxiomsCache  triples stored into basicAxiomsCache
                 function (callbackSeries) {
-                if(!newNodesLabelsMap)
-                    return callbackSeries()
-                    var basicAxiomsTriples = [] //triples stored into basicAxiomsCache
-                    triples.forEach(function (triple) {
+                    if(newNodesLabelsMap){
 
-                        var item = {
-                            s: triple.subject,
-                            p: triple.predicate,
-                            o: triple.object
-                        }
+                        var basicAxiomsTriples = [] //triples stored into basicAxiomsCache
+                        triples.forEach(function (triple) {
 
-                        if(newNodesLabelsMap) {
-
-                            if (newNodesLabelsMap[item.s]) {
-                                item.sLabel = newNodesLabelsMap[item.s];
+                            var item = {
+                                s: triple.subject,
+                                p: triple.predicate,
+                                o: triple.object
                             }
-                            if (newNodesLabelsMap[item.p]) {
-                                item.pLabel = newNodesLabelsMap[item.p];
-                            }
-                            if (newNodesLabelsMap[item.o]) {
-                                item.oLabel = newNodesLabelsMap[item.o];
-                            }
-                        }
-                        basicAxiomsTriples.push(item)
 
-                    })
+                            if(newNodesLabelsMap) {
+
+                                if (newNodesLabelsMap[item.s]) {
+                                    item.sLabel = newNodesLabelsMap[item.s];
+                                }
+                                if (newNodesLabelsMap[item.p]) {
+                                    item.pLabel = newNodesLabelsMap[item.p];
+                                }
+                                if (newNodesLabelsMap[item.o]) {
+                                    item.oLabel = newNodesLabelsMap[item.o];
+                                }
+                            }
+                            basicAxiomsTriples.push(item)
+
+                        })
+                    }
                     AxiomExtractor.addBasicAxioms(self.currentSource, basicAxiomsTriples)
 
                     callbackSeries()
                 },
-
-                //write axiomtriples
+                  //write axiomtriples
                 function (callbackSeries) {
+                    var triples = self.visjsGraphToTriples();
                     Sparql_generic.insertTriples(self.currentSource, triples, {}, function (err, result) {
                         if (err) {
                             return callbackSeries(err)
@@ -866,21 +867,33 @@ var Axiom_activeLegend = (function () {
                            var divId = "nodeInfosAxioms_graphDiv";
                            var options = {};
 
-                self.saveNewNodes(triples.newNodesToStore, function (err) {//new nodes created on the fly
-                    if (err) {
-                        return MainController.errorAlert(err.responseText || err);
-                    }
+
+                           AxiomExtractor.addTriplesToBasicAxioms(self.currentResource.data.source, triples, function (err, result) {
+                               if (err) {
+                                   return MainController.errorAlert(err.responseText || err);
+                               }
+
+                               Axioms_graph.drawNodeAxioms2(self.currentResource.data.source, self.currentResource.data.id, triples, divId, options, function (err, triples) {
+                               });
+                           });
+                       })
+                       callbackSeries()*/
+
+                    })
+                }
 
 
-                    AxiomExtractor.addTriplesToBasicAxioms(self.currentResource.data.source, triples, function (err, result) {
-                        if (err) {
-                            return MainController.errorAlert(err.responseText || err);
-                        }
+            ], function (err) {
+                if (callback) {
+                    return callback(err)
+                    return MainController.errorAlert(err.responseText || err);
+                }
 
-                        Axioms_graph.drawNodeAxioms2(self.currentResource.data.source, self.currentResource.data.id, triples, divId, options, function (err, triples) {
-                        });
-                    });
-                })
+
+            })
+
+
+
 
 
             //add manchester to Axioms JSTree
@@ -890,6 +903,9 @@ var Axiom_activeLegend = (function () {
             ;
             //  });
         }
+
+               
+        
     };
 
     self.addAxiomToAxomsJstree = function (manchesterStr, triples) {

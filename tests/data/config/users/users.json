@@ -24,7 +24,7 @@
         "login": "skos_user",
         "password": "",
         "profiles": ["skos_only"],
-        "auth": "database",
+        "auth": "keycloak",
         "token": "skos-token",
         "create_source": false,
         "maximum_source": 5

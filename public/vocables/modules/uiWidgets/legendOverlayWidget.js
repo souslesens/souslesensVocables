@@ -369,7 +369,7 @@ var LegendOverlayWidget = (function () {
         }
 
         var expanded = options.initiallyExpanded !== undefined ? options.initiallyExpanded : true;
-        var title = options.title ? String(options.title) : "📘 Legend";
+        var title = options.title ? String(options.title) : "🔍 Legend";
 
         var items = options.items ? options.items : self.getDefaultItems();
 
@@ -469,6 +469,131 @@ var LegendOverlayWidget = (function () {
     };
 
     /**
+     * Internal map for dialog auto-hide bindings, keyed by "containerId::namespace".
+     * Stores handler references to unbind precisely.
+     * @type {Object<string, {ns:string, onOpen:function, onClose:function}>}
+     */
+    self._autoHideBindings = self._autoHideBindings || {};
+
+    /**
+     * Install legend auto-hide when jQuery UI dialogs open/close.
+     * - If ignoreDialogIds is empty: hide when ANY dialog is visible.
+     * - If ignoreDialogIds is provided: ignore those dialog content ids (host dialogs),
+     *   and hide only when another dialog is visible.
+     *
+     * Idempotent per (containerId + namespace).
+     *
+     * @param {string} containerId
+     * @param {Object} [options]
+     * @param {Array<string>} [options.ignoreDialogIds] Dialog content ids to ignore (e.g. ["mainDialogDiv"]).
+     * @param {string} [options.namespace] jQuery event namespace suffix.
+     * @returns {void}
+     */
+    self.installAutoHideOnDialogs = function (containerId, options) {
+        if (!containerId) {
+        return;
+        }
+
+        options = options || {};
+
+        // jQuery UI dialogs required
+        if (!window.$ || !$.fn || !$.fn.dialog) {
+        return;
+        }
+
+        var ignoreDialogIds = Array.isArray(options.ignoreDialogIds) ? options.ignoreDialogIds : [];
+        // Default namespace: unique per container to avoid collisions across tools
+        var ns = options.namespace
+        ? String(options.namespace)
+        : "legendAutoHide_" + self.getSafeIdSuffix(containerId);
+
+        var key = containerId + "::" + ns;
+        if (self._autoHideBindings[key]) {
+        return;
+        }
+
+        function isIgnoredDialog($dlg) {
+        if (!ignoreDialogIds || ignoreDialogIds.length === 0) {
+            return false;
+        }
+        var id = $dlg && $dlg.attr ? $dlg.attr("id") : null;
+        if (!id) {
+            return false;
+        }
+        return ignoreDialogIds.indexOf(id) > -1;
+        }
+
+        function refreshLegendVisibility() {
+        var anyDialogOpen = false;
+
+        $(".ui-dialog-content").each(function () {
+            var $dlg = $(this);
+            if (!$dlg.is(":visible")) {
+            return;
+            }
+            if (isIgnoredDialog($dlg)) {
+            return;
+            }
+            anyDialogOpen = true;
+        });
+
+        self.setVisible(containerId, !anyDialogOpen);
+        }
+
+        // Keep handler refs for a clean uninstall
+        var onOpen = function () {
+        refreshLegendVisibility();
+        };
+        var onClose = function () {
+        refreshLegendVisibility();
+        };
+
+        $(document).on("dialogopen." + ns, ".ui-dialog-content", onOpen);
+        $(document).on("dialogclose." + ns, ".ui-dialog-content", onClose);
+
+        self._autoHideBindings[key] = { ns: ns, onOpen: onOpen, onClose: onClose };
+
+        // Initial sync
+        refreshLegendVisibility();
+    };
+
+    /**
+     * Uninstall dialog auto-hide handlers for a given containerId/namespace.
+     *
+     * @param {string} containerId
+     * @param {Object} [options]
+     * @param {string} [options.namespace] jQuery event namespace suffix.
+     * @returns {void}
+     */
+    self.uninstallAutoHideOnDialogs = function (containerId, options) {
+        if (!containerId) {
+        return;
+        }
+
+        options = options || {};
+
+        if (!window.$) {
+        return;
+        }
+
+        var ns = options.namespace
+        ? String(options.namespace)
+        : "legendAutoHide_" + self.getSafeIdSuffix(containerId);
+
+        var key = containerId + "::" + ns;
+        var binding = self._autoHideBindings[key];
+        if (!binding) {
+        // Best-effort cleanup in case handlers exist without stored refs
+        $(document).off("." + ns);
+        return;
+        }
+
+        $(document).off("dialogopen." + ns, ".ui-dialog-content", binding.onOpen);
+        $(document).off("dialogclose." + ns, ".ui-dialog-content", binding.onClose);
+
+        delete self._autoHideBindings[key];
+    };    
+    /**
      * Destroy legend instance from the container.
      * @param {string} containerId
      * @returns {void}
@@ -478,6 +603,8 @@ var LegendOverlayWidget = (function () {
         if (!instance) {
             return;
         }
+        // Remove dialog auto-hide bindings (if any)
+        self.uninstallAutoHideOnDialogs(containerId);
 
         // detach graph events/timers first
         self.detachVisjsGraph(containerId);

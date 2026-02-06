@@ -335,7 +335,9 @@ var MappingColumnsGraph = (function () {
         self.visjsGraph.draw(function () {
             // Initialize mapping legend overlay after graph draw
             self.refreshLegend(graphDiv);
-
+            LegendOverlayWidget.installAutoHideOnDialogs(graphDiv, {
+                namespace: "mappingLegendAutoHide",
+            });
             if (callback) {
                 return callback();
             }
@@ -392,36 +394,22 @@ var MappingColumnsGraph = (function () {
         if (!self.visjsGraph) {
             return;
         }
-        Mapping_legendOverlay.init(containerId, self.visjsGraph, { title: "📘 Legend" });
+        Mapping_legendOverlay.init(containerId, self.visjsGraph, { title: "🔍 Legend" });
     };
 
-    self.getColumnsClasses = function (nodes) {
-        if (!nodes) {
-            nodes = self.visjsGraph.data.nodes.get();
-        }
-        if (!Array.isArray(nodes)) {
-            nodes = [nodes];
-        }
-        var map = {};
-        nodes.forEach(function (node) {
-            map[node.id] = self.getColumnClass(node);
-        });
-        return map;
-    };
-
-    self.getColumnClass = function (node) {
-        if (!node.id) {
-            node = { id: node };
-        }
-        var connections = self.visjsGraph.getFromNodeEdgesAndToNodes(node.id);
-
-        var classId = null;
-        connections.forEach(function (connection) {
-            if (connection.edge.data && (connection.edge.data.type == "rdf:type" || connection.edge.data.type == "rdfs:subClassOf")) {
-                classId = connection.toNode.data.id;
+        self.getColumnClass = function (node) {
+            if (!node.id) {
+                node = { id: node };
             }
-        });
-        return classId;
+            var connections = self.visjsGraph.getFromNodeEdgesAndToNodes(node.id);
+
+            var classId = null;
+            connections.forEach(function (connection) {
+                if (connection.edge.data && (connection.edge.data.type == "rdf:type" || connection.edge.data.type == "rdfs:subClassOf")) {
+                    classId = connection.toNode.data.id;
+                }
+            });
+            return classId;
     };
 
     self.getClassColumns = function (node) {
@@ -2179,7 +2167,10 @@ var MappingColumnsGraph = (function () {
                     UI.openDialog("mainDialogDiv", { title: "Implicit Model" });
                     $("#mainDialogDiv")
                         .off("dialogclose.mappingLegend")
-                        .on("dialogclose.mappingLegend", function () {
+                        .on("dialogclose.mappingLegend", function () {       
+                            LegendOverlayWidget.uninstallAutoHideOnDialogs("implicitModelContainer", {
+                                namespace: "implicitLegendAutoHide",
+                            });
                             Implicit_legendOverlay.destroy();
                             LegendOverlayWidget.setVisible(self.graphDiv, true);
                         });
@@ -2224,8 +2215,11 @@ var MappingColumnsGraph = (function () {
 
                     self.implicitModelVisjsGraph = new VisjsGraphClass("mappingModeler_implicitModelGraph", classVisjsData, implicitOptions);
                     self.implicitModelVisjsGraph.draw(function () {
-                        Implicit_legendOverlay.init("implicitModelContainer", self.implicitModelVisjsGraph, { title: "📘 Legend" });
-
+                        Implicit_legendOverlay.init("implicitModelContainer", self.implicitModelVisjsGraph, { title: "🔍 Legend" });
+                        LegendOverlayWidget.installAutoHideOnDialogs("implicitModelContainer", {
+                            namespace: "implicitLegendAutoHide",
+                            ignoreDialogIds: ["mainDialogDiv"],
+                        });
                         callbackSeries();
                     });
                 },

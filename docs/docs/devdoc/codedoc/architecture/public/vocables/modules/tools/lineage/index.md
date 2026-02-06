@@ -109,7 +109,7 @@ This module s the central engine orchestrating visualization, interaction, and d
 - **Create Relations** build relationships (predicates or restrictions), validate constraints, and update the ontology model and graph
 - **Combine Sources** load, group, and merge multiple ontology sources, managing visibility, hierarchy, and merge logic
 - **SPARQL Backend Integration** read/write triples, check constraints, update indexes, and sync ontology models
-- **Performs ontology reasoning** inference, consistency checking, and identifying unsatisfiable classes, with visual outputs and predicate selection
+- **Performs ontology reasoning** inference, consistency checking, and identifying unsatisfiable classes
 - **Manages ontology properties** including object/datatype properties, their hierarchies, domains, ranges, and restrictions
 - **Generates property‑based graphs** (restrictions, predicates, range/domain networks) and supports exporting matrices or tables
 - **Defines, manages, and executes ontology rules** including premises, conclusions, reasoning payloads, and rule‑based constraints

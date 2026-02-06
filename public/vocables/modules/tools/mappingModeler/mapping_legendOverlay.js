@@ -138,7 +138,7 @@ var Mapping_legendOverlay = (function () {
                 idPrefix: "mappingLegend",
                 title: (self.legendOptions && self.legendOptions.title) || "📘 Legend",
                 position: "top-right",
-                initiallyExpanded: true,
+                initiallyExpanded: false,
                 variant: "mapping",
                 dynamicLegend: true,
                 showDefaultSections: false,

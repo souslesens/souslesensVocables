@@ -154,7 +154,7 @@ var Implicit_legendOverlay = (function () {
                 idPrefix: "implicitLegend",
                 title: (self.legendOptions && self.legendOptions.title) || "📘 Legend",
                 position: "top-right",
-                initiallyExpanded: true,
+                initiallyExpanded: false,
                 variant: "implicit",
                 dynamicLegend: true,
                 showDefaultSections: false,

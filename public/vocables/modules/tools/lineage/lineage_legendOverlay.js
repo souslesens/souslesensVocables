@@ -350,7 +350,7 @@ var Lineage_legendOverlay = (function () {
             renderOptions: {
                 title: (self.legendOptions && self.legendOptions.title) || "📘 Legend",
                 position: "top-right",
-                initiallyExpanded: true,
+                initiallyExpanded: false,
                 dynamicLegend: true,
                 showDefaultSections: false,
                 variant: "lineage",

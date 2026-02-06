@@ -6,14 +6,15 @@ import UserRequestFiltering from "../../../../../../bin/userRequestFiltering.js"
 import ConfigManager from "../../../../../../bin/configManager.js";
 import { Template } from "@huggingface/jinja";
 import { RDF_FORMATS_MIMETYPES } from "../../../../../../model/utils.js";
-//import RemoteCodeRunner from "../../../../../../bin/remoteCodeRunner.js";
+import RemoteCodeRunner from "../../../../../../bin/remoteCodeRunner.js";
+//const RemoteCodeRunner = require("../../../../../bin/remoteCodeRunner.js.js");
 
 export default () => {
     const GET = async (req, res, _next) => {
         try {
             const userInfo = await userManager.getUser(req.user);
             const userData = await userDataModel.find(req.params.id, userInfo.user);
-            /*
+
             if (userData.data_type == "jsFunction") {
                 // Get user context for SPARQL request filtering
                 const userSources = await ConfigManager.getUserSources(req, res);
@@ -30,7 +31,7 @@ export default () => {
                     user: user,
                     userSources: userSources,
                 };
-                
+
                 RemoteCodeRunner.runUserDataFunction(userData, userContext, function (err, result) {
                     if (err) {
                         var message = "Error during the execution of the js function";
@@ -46,7 +47,6 @@ export default () => {
                 });
                 return;
             }
-                */
 
             if (userData.data_type !== "sparqlQuery") {
                 res.status(400).json({ message: "This userData is not a sparqlQuery" });

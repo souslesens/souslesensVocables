@@ -30,18 +30,135 @@ const { UserDataModel } = await import("../model/userData.js");
 
 const tracker = createTracker(mockKnexConnection);
 
+const dbUsers = [
+    { id: 1, login: "admin", profiles: ["admin"], auth: "database", token: "admin-token", create_source: false, maximum_source: 5 },
+    { id: 2, login: "owl_user", profiles: ["owl_only"], auth: "database", token: "owl-token", create_source: false, maximum_source: 5 },
+    { id: 3, login: "skos_user", profiles: ["skos_only"], auth: "database", token: "skos-token", create_source: false, maximum_source: 5 },
+];
+
+const dbUserData = [
+    {
+        id: 1,
+        data_path: "1-1-xxx.json",
+        data_type: "",
+        data_label: "data1",
+        data_comment: "",
+        data_group: "",
+        data_tool: "",
+        data_source: "",
+        is_shared: false,
+        shared_profiles: "[]",
+        shared_users: "[]",
+        created_at: "2025-01-24T14:16:41.111Z",
+        modification_date: "2025-01-24T14:16:41.111Z",
+        readwrite: false,
+        owned_by: 1,
+    },
+    {
+        id: 3,
+        data_path: "3-2-xxx.json",
+        data_type: "",
+        data_label: "shared with owl_user",
+        data_comment: "",
+        data_group: "",
+        data_tool: "",
+        data_source: "",
+        is_shared: true,
+        shared_profiles: "[]",
+        shared_users: '["owl_user"]',
+        created_at: "2025-01-24T14:18:24.019Z",
+        modification_date: "2025-01-24T14:18:24.019Z",
+        readwrite: false,
+        owned_by: 2,
+    },
+    {
+        id: 4,
+        data_path: "4-3-xxx.json",
+        data_type: "",
+        data_label: "shared with skos_only profile",
+        data_comment: "",
+        data_group: "",
+        data_tool: "",
+        data_source: "",
+        is_shared: true,
+        shared_profiles: '["skos_only"]',
+        shared_users: "[]",
+        created_at: "2025-01-24T14:18:53.409Z",
+        modification_date: "2025-01-24T14:18:53.409Z",
+        readwrite: false,
+        owned_by: 3,
+    },
+    {
+        id: 5,
+        data_path: "5-1-xxx.json",
+        data_type: "string",
+        data_label: "",
+        data_comment: "",
+        data_group: "",
+        data_tool: "tool",
+        data_source: "source",
+        is_shared: false,
+        shared_profiles: "[]",
+        shared_users: '["owl_user", "skos_user"]',
+        created_at: "2025-01-27T08:05:51.750Z",
+        modification_date: "2025-01-27T08:05:51.750Z",
+        readwrite: false,
+        owned_by: 1,
+    },
+];
+
 describe("UserDataModel", () => {
     let temporaryDirectory;
     let userDataModel;
 
     beforeEach(() => {
-        // Hide the console methods from the checking function
         jest.spyOn(console, "error").mockImplementation(() => {});
 
         temporaryDirectory = fs.mkdtempSync(path.join(os.tmpdir(), "sls-"));
         fs.mkdirSync(path.join(temporaryDirectory, "user_data"));
 
         userDataModel = new UserDataModel(temporaryDirectory);
+
+        tracker.on.select("user_data").response((query) => {
+            const bindings = query.bindings;
+            if (bindings && bindings.length > 0) {
+                const searchId = bindings[0];
+                return dbUserData.filter((ud) => ud.id === searchId || ud.owned_by === searchId);
+            }
+            return dbUserData;
+        });
+
+        tracker.on.select("user_data_list").response((query) => {
+            const bindings = query.bindings;
+            if (bindings && bindings.length > 0) {
+                const searchId = bindings[0];
+                const result = dbUserData.filter((ud) => ud.id === searchId);
+                return result;
+            }
+            return dbUserData;
+        });
+
+        tracker.on.select("users").response((query) => {
+            const bindings = query.bindings;
+            if (bindings && bindings.length > 0) {
+                const searchValue = bindings[0];
+                return dbUsers.filter((u) => u.id === searchValue || u.login === searchValue);
+            }
+            return dbUsers;
+        });
+
+        tracker.on.select("users_list").response((query) => {
+            const bindings = query.bindings;
+            if (bindings && bindings.length > 0) {
+                const searchValue = bindings[0];
+                return dbUsers.filter((u) => u.id === searchValue || u.login === searchValue);
+            }
+            return dbUsers;
+        });
+
+        tracker.on.insert("user_data").response([{ id: 6 }]);
+        tracker.on.update("user_data").response(1);
+        tracker.on.delete("user_data").response(1);
     });
 
     afterEach(() => {

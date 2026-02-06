@@ -19,7 +19,7 @@
         "id": "3",
         "login": "skos_user",
         "profiles": ["skos_only"],
-        "auth": "database",
+        "auth": "keycloak",
         "create_source": false,
         "maximum_source": 5
     },

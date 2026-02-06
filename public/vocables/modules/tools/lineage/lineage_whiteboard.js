@@ -134,7 +134,7 @@ var Lineage_whiteboard = (function () {
 
     /**
      * Install dialog open/close listeners to auto-hide the legend overlay
-     * when the "Node infos" dialog is shown.
+     * when the "jQuery UI" dialogs are shown.
      * Idempotent: safe to call multiple times.
      * @returns {void}
      */
@@ -144,31 +144,9 @@ var Lineage_whiteboard = (function () {
         }
         self._legendAutoHideInstalled = true;
 
-        // jQuery UI dialogs
-        if (!window.$ || !$.fn || !$.fn.dialog) {
-            return;
-        }
-
-        var containerId = "graphDiv";
-
-        function isNodeInfosDialog($dlg) {
-            var title = String($dlg.dialog("option", "title") || "").trim();
-            title = title.replace(/\s+/g, " ");
-            return title.indexOf("Node infos") > -1;
-        }
-
-        $(document).on("dialogopen.legendAutoHide", ".ui-dialog-content", function () {
-            var $dlg = $(this);
-            if (isNodeInfosDialog($dlg) && LegendOverlayWidget && typeof LegendOverlayWidget.setVisible === "function") {
-                LegendOverlayWidget.setVisible(containerId, false);
-            }
-        });
-
-        $(document).on("dialogclose.legendAutoHide", ".ui-dialog-content", function () {
-            var $dlg = $(this);
-            if (isNodeInfosDialog($dlg) && LegendOverlayWidget && typeof LegendOverlayWidget.setVisible === "function") {
-                LegendOverlayWidget.setVisible(containerId, true);
-            }
+        // Delegate to LegendOverlayWidget
+        LegendOverlayWidget.installAutoHideOnDialogs("graphDiv", {
+            namespace: "lineageLegendAutoHide",
         });
     };
 
@@ -188,8 +166,10 @@ var Lineage_whiteboard = (function () {
         $("#graphDiv").empty();
         $("#lateralPanelDiv").resizable("destroy");
         $("#lateralPanelDiv").css("width", "435px");
-        // Remove namespaced dialog handlers (installed in installLegendAutoHideOnNodeInfos)
-        $(document).off(".legendAutoHide");
+        // Remove namespaced dialog handlers (installed in installLegendAutoHideOnNodeInfos)        
+        LegendOverlayWidget.uninstallAutoHideOnDialogs("graphDiv", {
+            namespace: "lineageLegendAutoHide",
+        });
         self._legendAutoHideInstalled = false;
     };
 
@@ -1001,7 +981,7 @@ var Lineage_whiteboard = (function () {
 
             // Initialize legend overlay
             Lineage_legendOverlay.init(graphDiv, self.lineageVisjsGraph, {
-                title: "📘 Legend",
+                title: "🔍 Legend",
                 restrictionColor: self.restrictionColor,
                 datatypeColor: self.datatypeColor,
             });
@@ -5194,7 +5174,7 @@ attrs.color=self.getSourceColor(superClassValue)
 
                     // Re-init legend overlay after redraw (prevents disappearing legend)
                     Lineage_legendOverlay.init(graphDiv, Lineage_whiteboard.lineageVisjsGraph, {
-                        title: "📘 Legend",
+                        title: "🔍 Legend",
                         restrictionColor: Lineage_whiteboard.restrictionColor,
                         datatypeColor: Lineage_whiteboard.datatypeColor,
                     });

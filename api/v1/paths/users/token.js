@@ -1,6 +1,6 @@
-const { userModel } = require("../../../../model/users");
+import { userModel } from "../../../../model/users.js";
 
-module.exports = function () {
+export default function () {
     let operations = {
         POST,
     };
@@ -32,4 +32,4 @@ module.exports = function () {
     };
 
     return operations;
-};
+}

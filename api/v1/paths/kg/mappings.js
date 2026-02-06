@@ -1,7 +1,7 @@
-const path = require("path");
-const kGcontroller = require(path.resolve("bin/KG/KGcontroller."));
+import path from "path";
+import kGcontroller from "../../../../bin/KG/KGcontroller.js";
 
-module.exports = function () {
+export default function () {
     let operations = {
         POST,
     };
@@ -51,4 +51,4 @@ module.exports = function () {
     };
 
     return operations;
-};
+}

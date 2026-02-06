@@ -1,5 +1,5 @@
-const { processResponse } = require("./utils");
-const rdf = require("../../../bin/RDF_IO..js");
+import { processResponse } from "./utils.js";
+import rdf from "../../../bin/RDF_IO.js";
 const { NamedNode, BlankNode, Literal, Graph } = rdf;
 
 var Validator = null;
@@ -7,7 +7,7 @@ import("../../../bin/shacl/validator.mjs").then((mod) => {
     Validator = mod; // true
 });
 
-module.exports = function () {
+export default function () {
     let operations = {
         GET,
         POST,
@@ -85,4 +85,4 @@ module.exports = function () {
     };
 
     return operations;
-};
+}

@@ -27,6 +27,8 @@ import GraphPaths_bot from "../../bots/graphPaths_bot.js";
 import Lineage_graphPaths from "./lineage_graphPaths.js";
 import LegendOverlayWidget from "../../uiWidgets/legendOverlayWidget.js";
 import Lineage_legendOverlay from "./lineage_legendOverlay.js";
+import Axioms_graph from "../axioms/axioms_graph.js";
+import Axioms_manager from "../axioms/axioms_manager.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com

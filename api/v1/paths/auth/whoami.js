@@ -1,7 +1,7 @@
-const path = require("path");
-const userManager = require(path.resolve("bin/user."));
+import path from "path";
+import userManager from "../../../../bin/user.js";
 
-module.exports = function () {
+export default function () {
     let operations = {
         GET,
     };
@@ -27,4 +27,4 @@ module.exports = function () {
     };
 
     return operations;
-};
+}

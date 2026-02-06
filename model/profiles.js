@@ -1,10 +1,10 @@
-const z = require("zod");
+import z from "zod";
 
-const { readMainConfig } = require("./config");
-const { toolModel } = require("./tools");
-const { cleanupConnection, getKnexConnection } = require("./utils");
-const { userDataModel } = require("./userData");
-const { userModel } = require("./users");
+import { readMainConfig } from "./config.js";
+import { toolModel } from "./tools.js";
+import { cleanupConnection, getKnexConnection } from "./utils.js";
+import { userDataModel } from "./userData.js";
+import { userModel } from "./users.js";
 
 /**
  * @typedef {import("./UserTypes").UserAccount} UserAccount
@@ -254,4 +254,4 @@ class ProfileModel {
 
 const profileModel = new ProfileModel(toolModel);
 
-module.exports = { ProfileModel, profileModel };
+export { ProfileModel, profileModel };

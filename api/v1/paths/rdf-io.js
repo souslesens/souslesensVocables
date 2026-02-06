@@ -1,13 +1,14 @@
-const { default: rdfParser } = require("rdf-parse");
-const { processResponse } = require("./utils");
-module.exports = function () {
+import { default as rdfParser } from "rdf-parse";
+import { processResponse } from "./utils.js";
+import streamify_string_module from "streamify-string";
+export default function () {
     let operations = {
         GET,
     };
 
     function GET(req, res, _next) {
         const str = req.query.turtle;
-        const textStream = require("streamify-string")(str);
+        const textStream = streamify_string_module(str);
         var triples = [];
         var prefixMap = {};
 
@@ -61,4 +62,4 @@ module.exports = function () {
     };
 
     return operations;
-};
+}

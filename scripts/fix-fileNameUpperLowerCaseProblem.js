@@ -1,5 +1,5 @@
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
 // Chemin du dossier contenant les fichiers à renommer
 const dossier = './public/vocables/icons/CFIHOS';

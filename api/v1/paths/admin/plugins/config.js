@@ -1,7 +1,7 @@
-const { toolModel } = require("../../../../../model/tools");
-const { responseSchema } = require("../../utils");
+import { toolModel } from "../../../../../model/tools.js";
+import { responseSchema } from "../../utils.js";
 
-module.exports = function () {
+export default function () {
     const operations = { GET, PUT };
 
     // GET /api/v1/admin/plugins/config
@@ -47,4 +47,4 @@ module.exports = function () {
     };
 
     return operations;
-};
+}

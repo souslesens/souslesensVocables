@@ -1,6 +1,6 @@
-const { mainConfigModel } = require("../../../model/mainConfig");
+import { mainConfigModel } from "../../../model/mainConfig.js";
 
-module.exports = function () {
+export default function () {
     let operations = {
         GET,
         PUT,
@@ -76,4 +76,4 @@ module.exports = function () {
     };
 
     return operations;
-};
+}

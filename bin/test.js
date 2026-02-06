@@ -1,4 +1,4 @@
-var fs = require("fs");
+import fs from 'fs';
 
 var str = "" + fs.readFileSync("D:\\NLP\\ontologies\\LIFEX_DALIA\\database\\ScriptFile.sql");
 str = str.replace(/\r/gm, " ");

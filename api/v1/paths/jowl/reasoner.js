@@ -1,20 +1,20 @@
-const HttpProxy = require("../../../../bin/httpProxy.");
-const ConfigManager = require("../../../../bin/configManager.");
-const { processResponse } = require("../utils");
-const request = require("request");
-const async = require("async");
-const httpProxy = require("../../../../bin/httpProxy..js");
+import HttpProxy from "../../../../bin/httpProxy.js";
+import ConfigManager from "../../../../bin/configManager.js";
+import { processResponse } from "../utils.js";
+import request from "request";
+import async from "async";
+import httpProxy from "../../../../bin/httpProxy.js";
 
 //https://jena.apache.org/documentation/inference/
 
-module.exports = function () {
+export default function () {
     let operations = {
         GET,
     };
 
     function GET(req, res, next) {
         if (req.query.options) {
-            options = JSON.parse(req.query.options);
+            var options = JSON.parse(req.query.options);
         }
 
         var payload = {
@@ -202,4 +202,4 @@ module.exports = function () {
     };
 
     return operations;
-};
+}

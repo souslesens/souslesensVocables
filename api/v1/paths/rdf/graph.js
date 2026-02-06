@@ -1,13 +1,13 @@
-const { rdfDataModel } = require("../../../../model/rdfData");
-const { mainConfigModel } = require("../../../../model/mainConfig");
-const userManager = require("../../../../bin/user.");
-const { sourceModel } = require("../../../../model/sources");
-const { ulid } = require("ulid");
-const path = require("path");
-const fs = require("fs");
-const os = require("node:os");
+import { rdfDataModel } from "../../../../model/rdfData.js";
+import { mainConfigModel } from "../../../../model/mainConfig.js";
+import userManager from "../../../../bin/user.js";
+import { sourceModel } from "../../../../model/sources.js";
+import { ulid } from "ulid";
+import path from "path";
+import fs from "fs";
+import os from "node:os";
 
-module.exports = function () {
+export default function () {
     let operations = {
         GET,
         POST,
@@ -248,4 +248,4 @@ module.exports = function () {
     };
 
     return operations;
-};
+}

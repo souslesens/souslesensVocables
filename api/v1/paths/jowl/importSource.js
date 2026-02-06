@@ -1,12 +1,12 @@
-const { processResponse } = require("../utils");
-const ConfigManager = require("../../../../bin/configManager.");
-const GraphStore = require("../../../../bin/graphStore.");
-const async2 = require("async");
-const request = require("request");
-const httpProxy = require("../../../../bin/httpProxy.");
-const Util = require("../../../../bin/util.");
+import { processResponse } from "../utils.js";
+import ConfigManager from "../../../../bin/configManager.js";
+import GraphStore from "../../../../bin/graphStore.js";
+import async2 from "async";
+import request from "request";
+import httpProxy from "../../../../bin/httpProxy.js";
+import Util from "../../../../bin/util.js";
 
-module.exports = function () {
+export default function () {
     let operations = {
         POST,
     };
@@ -65,7 +65,7 @@ module.exports = function () {
                                 return callbackSeries(err);
                             }
 
-                            graphExists = false;
+                            var graphExists = false;
                             return callbackSeries();
                         });
                     },
@@ -73,7 +73,7 @@ module.exports = function () {
                     function (callbackSeries) {
                         request(body.rdfUrl, {}, function (error, request, body) {
                             if (error) return callbackSeries();
-                            ontologyContentEncoded64 = Buffer.from(body).toString("base64");
+                            var ontologyContentEncoded64 = Buffer.from(body).toString("base64");
 
                             callbackSeries();
                         });
@@ -107,7 +107,7 @@ module.exports = function () {
                             if (!Array.isArray(body)) {
                                 return callbackSeries(body);
                             }
-                            allTriples = body;
+                            var allTriples = body;
                             if (allTriples.length == 0) {
                                 return callbackSeries("no triples generated for url " + body.rdfUrl);
                             }
@@ -122,7 +122,7 @@ module.exports = function () {
                         }
 
                         var slices = Util.sliceArray(allTriples, 200);
-                        totalImportedTriples = -1;
+                        var totalImportedTriples = -1;
                         async2.eachSeries(
                             slices,
                             function (triples, callbackEach) {
@@ -152,7 +152,7 @@ module.exports = function () {
                                     params.auth = sparqlServerConnection.auth;
                                 }
 
-                                sparqlServerUrl = sparqlServerConnection.url;
+                                var sparqlServerUrl = sparqlServerConnection.url;
 
                                 httpProxy.post(sparqlServerUrl, null, params, function (err, _result) {
                                     if (err) {
@@ -213,4 +213,4 @@ module.exports = function () {
     };
 
     return operations;
-};
+}

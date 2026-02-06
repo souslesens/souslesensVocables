@@ -1,7 +1,7 @@
-const { databaseModel } = require("../../../../model/databases");
-const { resourceFetched, responseSchema } = require("../utils");
+import { databaseModel } from "../../../../model/databases.js";
+import { resourceFetched, responseSchema } from "../utils.js";
 
-module.exports = function () {
+export default function () {
     let operations = { GET, POST };
 
     // GET /api/v1/databases
@@ -51,4 +51,4 @@ module.exports = function () {
     };
 
     return operations;
-};
+}

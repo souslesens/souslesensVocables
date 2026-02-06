@@ -1,8 +1,8 @@
-const { processResponse } = require("../utils");
-const ConfigManager = require("../../../../bin/configManager.");
-const GraphStore = require("../../../../bin/graphStore.");
+import { processResponse } from "../utils.js";
+import ConfigManager from "../../../../bin/configManager.js";
+import GraphStore from "../../../../bin/graphStore.js";
 
-module.exports = function () {
+export default function () {
     let operations = {
         GET,
         POST,
@@ -115,4 +115,4 @@ module.exports = function () {
     };
 
     return operations;
-};
+}

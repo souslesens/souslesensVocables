@@ -1,5 +1,5 @@
-var wkhtmltopdf = require("wkhtmltopdf");
-var fs = require("fs");
+import wkhtmltopdf from "wkhtmltopdf";
+import fs from "fs";
 
 var HtmlToPDF = {
     writePdf: function (html, pdfFileName) {
@@ -29,8 +29,7 @@ var HtmlToPDF = {
         }
     },
 };
-module.exports = HtmlToPDF;
-
+export default HtmlToPDF;
 var path = "C:\\Users\\claud\\Downloads\\test.html";
 var html = "<html>" + fs.readFileSync(path) + "</html>";
 

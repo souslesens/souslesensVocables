@@ -1,10 +1,10 @@
-const { processResponse } = require("../utils");
-const request = require("request");
-const ConfigManager = require("../../../../bin/configManager.");
+import { processResponse } from "../utils.js";
+import request from "request";
+import ConfigManager from "../../../../bin/configManager.js";
 
 //https://jena.apache.org/documentation/inference/
 
-module.exports = function () {
+export default function () {
     let operations = {
         GET,
     };
@@ -72,4 +72,4 @@ module.exports = function () {
     };
 
     return operations;
-};
+}

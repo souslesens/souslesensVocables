@@ -1,6 +1,6 @@
-const RDF_IO = require("../../../../../bin/RDF_IO.");
+import RDF_IO from "../../../../../bin/RDF_IO.js";
 
-module.exports = function () {
+export default function () {
     let operations = {
         GET,
     };
@@ -41,4 +41,4 @@ module.exports = function () {
         tags: ["Ontology"],
     };
     return operations;
-};
+}

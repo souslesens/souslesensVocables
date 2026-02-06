@@ -1,6 +1,6 @@
-const fs = require("fs");
-const path = require("path");
-const yargs = require("yargs");
+import fs from "fs";
+import path from "path";
+import yargs from "yargs";
 
 const migrateMainConfig = async (configDirectory, writeMode) => {
     const configPath = path.resolve(configDirectory, "mainConfig.json");

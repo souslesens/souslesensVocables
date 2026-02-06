@@ -1,10 +1,10 @@
 /* Migrate the old JSON storage to a Postgresql database */
 
-const bcrypt = require("bcrypt");
-const fs = require("fs");
-const knex = require("knex");
-const path = require("path");
-const yargs = require("yargs");
+import bcrypt from "bcrypt";
+import fs from "fs";
+import knex from "knex";
+import path from "path";
+import yargs from "yargs";
 
 const insertData = async (connection, datas, table, column) => {
     const conn = knex({ client: "pg", connection: connection });

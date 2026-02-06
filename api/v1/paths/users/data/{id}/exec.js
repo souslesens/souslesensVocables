@@ -1,34 +1,52 @@
-const fs = require("node:fs");
-const { readMainConfig } = require("../../../../../../model/config");
-const { userDataModel } = require("../../../../../../model/userData");
-const { RdfDataModel } = require("../../../../../../model/rdfData");
-const userManager = require("../../../../../../bin/user.");
-const UserRequestFiltering = require("../../../../../../bin/userRequestFiltering..js");
-const ConfigManager = require("../../../../../../bin/configManager.");
-const { Template } = require("@huggingface/jinja");
-const { RDF_FORMATS_MIMETYPES } = require("../../../../../../model/utils");
-//const RemoteCodeRunner = require("../../../../../bin/remoteCodeRunner.js.");
+import { readMainConfig } from "../../../../../../model/config.js";
+import { userDataModel } from "../../../../../../model/userData.js";
+import { RdfDataModel } from "../../../../../../model/rdfData.js";
+import userManager from "../../../../../../bin/user.js";
+import UserRequestFiltering from "../../../../../../bin/userRequestFiltering.js";
+import ConfigManager from "../../../../../../bin/configManager.js";
+import { Template } from "@huggingface/jinja";
+import { RDF_FORMATS_MIMETYPES } from "../../../../../../model/utils.js";
+//import RemoteCodeRunner from "../../../../../../bin/remoteCodeRunner.js";
 
-module.exports = () => {
-    GET = async (req, res, _next) => {
+export default () => {
+    const GET = async (req, res, _next) => {
         try {
             const userInfo = await userManager.getUser(req.user);
             const userData = await userDataModel.find(req.params.id, userInfo.user);
-
+            /*
             if (userData.data_type == "jsFunction") {
-                res.status(400).json({ message: err });
-                return;
+                // Get user context for SPARQL request filtering
+                const userSources = await ConfigManager.getUserSources(req, res);
+                const user = await ConfigManager.getUser(req, res);
 
-                //to be done
-                /*  RemoteCodeRunner.runUserDataFunction(userData,function(err, result){
-                    if( err){
-                        res.status(400).json({ message: err });
+                // Verify user context is valid - jsFunction requires authentication
+                if (!user || !userSources) {
+                    res.status(401).json({ message: "Authentication required to execute jsFunction" });
+                    return;
+                }
+
+                // Pass user context to RemoteCodeRunner for request filtering
+                const userContext = {
+                    user: user,
+                    userSources: userSources,
+                };
+                
+                RemoteCodeRunner.runUserDataFunction(userData, userContext, function (err, result) {
+                    if (err) {
+                        var message = "Error during the execution of the js function";
+                        if (err.message) {
+                            message = err.message;
+                        }
+
+                        res.status(400).json({ message: message });
                         return;
                     }
                     res.status(200).json(result);
                     return;
-                })*/
+                });
+                return;
             }
+                */
 
             if (userData.data_type !== "sparqlQuery") {
                 res.status(400).json({ message: "This userData is not a sparqlQuery" });

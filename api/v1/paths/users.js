@@ -1,9 +1,9 @@
-const { userModel } = require("../../../model/users");
-const { sortObjectByKey, responseSchema, successfullyFetched } = require("./utils");
-const { profileModel } = require("../../../model/profiles");
-const userManager = require("../../../bin/user.");
+import { userModel } from "../../../model/users.js";
+import { sortObjectByKey, responseSchema, successfullyFetched } from "./utils.js";
+import { profileModel } from "../../../model/profiles.js";
+import userManager from "../../../bin/user.js";
 
-module.exports = function () {
+export default function () {
     let operations = {
         GET,
     };
@@ -15,11 +15,11 @@ module.exports = function () {
      * @param {profiles} the group to filter
      * @returns {users} - user objects with matched profiles
      */
-    filterUserByGroup = (users, profiles) => {
+    const filterUserByGroup = (users, profiles) => {
         const userProfiles = Object.fromEntries(Object.entries(users).filter(([_key, value]) => value.groups.some((g) => profiles.includes(g))));
         return this.filterUser(userProfiles);
     };
-    filterUser = (users) => {
+    const filterUser = (users) => {
         return Object.entries(users).map(([key, value]) => ({ [key]: { login: value.login, profiles: value.groups } }));
     };
     ///// GET api/v1/users
@@ -54,4 +54,4 @@ module.exports = function () {
     };
 
     return operations;
-};
+}

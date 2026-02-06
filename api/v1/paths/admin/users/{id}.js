@@ -1,7 +1,7 @@
-const fs = require("fs");
-const { userModel } = require("../../../../../model/users");
+import fs from "fs";
+import { userModel } from "../../../../../model/users.js";
 
-module.exports = function () {
+export default function () {
     let operations = {
         GET,
         DELETE,
@@ -72,4 +72,4 @@ module.exports = function () {
     };
 
     return operations;
-};
+}

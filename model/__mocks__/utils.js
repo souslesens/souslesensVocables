@@ -1,8 +1,7 @@
-const fs = require("fs");
-const os = require("os");
-const path = require("path");
-
-const knex = require("knex");
+import fs from "fs";
+import os from "os";
+import path from "path";
+import knex from "knex";
 
 const utils = jest.createMockFromModule("./utils");
 
@@ -147,4 +146,4 @@ const cleanupConnection = (connection) => {
     connection.destroy && connection.destroy();
 };
 
-module.exports = { cleanupConnection, getKnexConnection };
+export { cleanupConnection, getKnexConnection };

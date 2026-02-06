@@ -1,8 +1,8 @@
-const { rdfDataModel } = require("../../../../../model/rdfData");
-const userManager = require("../../../../../bin/user.");
-const { sourceModel } = require("../../../../../model/sources");
+import { rdfDataModel } from "../../../../../model/rdfData.js";
+import userManager from "../../../../../bin/user.js";
+import { sourceModel } from "../../../../../model/sources.js";
 
-module.exports = function () {
+export default function () {
     let operations = {
         GET,
     };
@@ -59,4 +59,4 @@ module.exports = function () {
     };
 
     return operations;
-};
+}

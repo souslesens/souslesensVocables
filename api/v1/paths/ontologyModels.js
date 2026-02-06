@@ -1,7 +1,7 @@
-const { processResponse } = require("./utils");
+import { processResponse } from "./utils.js";
 
 var ontologyModelsCache = {};
-module.exports = function () {
+export default function () {
     let operations = {
         GET,
         POST,
@@ -229,4 +229,4 @@ module.exports = function () {
     }
 
     return operations;
-};
+}

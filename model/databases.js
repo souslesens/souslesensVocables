@@ -1,11 +1,10 @@
-const fs = require("fs");
-const knex = require("knex");
-const { Lock } = require("async-await-mutex-lock");
-
-const { configDatabasesPath } = require("./config");
-const { profileModel } = require("./profiles");
-const KGbuilder_socket = require("../bin/KGbuilder/KGbuilder_socket");
-const modelUtils = require("./utils");
+import fs from "fs";
+import knex from "knex";
+import { Lock } from "async-await-mutex-lock";
+import { configDatabasesPath } from "./config.js";
+import { profileModel } from "./profiles.js";
+import KGbuilder_socket from "../bin/KGbuilder/KGbuilder_socket.js";
+import * as modelUtils from "./utils.js";
 
 /**
  * @typedef {import("./UserTypes").UserAccount} UserAccount
@@ -371,6 +370,11 @@ class DatabaseModel {
         let offset = startingOffset;
 
         const columns = await connection(tableName).columnInfo();
+        // ORDER BY all columns to ensure stable ordering for OFFSET/LIMIT pagination.
+        // Known limitations:
+        // - Non-sortable column types (JSON, BLOB, ARRAY, geometry...) may cause query errors
+        // - Perfect duplicate rows (identical on ALL columns) may be read multiple times or skipped,
+        //   but unique rows are guaranteed to be read exactly once
         const columnsKeys = Object.keys(columns);
 
         // ORDER BY columns to ensure stable ordering for OFFSET/LIMIT pagination.
@@ -465,4 +469,4 @@ class DatabaseModel {
 }
 const databaseModel = new DatabaseModel(configDatabasesPath);
 
-module.exports = { DatabaseModel, databaseModel };
+export { DatabaseModel, databaseModel };

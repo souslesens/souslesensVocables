@@ -16,9 +16,12 @@ module.exports = function () {
 
     async function GET(req, res, _next) {
         try {
+            const config = await mainConfigModel.getConfig();
+            const limit = config.sparqlDownloadLimit;
+
             const sourceName = req.query.source;
-            const limit = req.query.limit;
             const offset = req.query.offset;
+            const includesImports = req.query.withImports;
 
             const userInfo = await userManager.getUser(req.user);
             const userSources = await sourceModel.getUserSources(userInfo.user);
@@ -28,11 +31,57 @@ module.exports = function () {
                 return;
             }
 
-            const graphUri = userSources[sourceName].graphUri;
+            let graphsImports = [];
+            if (includesImports) {
+                graphsImports = userSources[sourceName].imports
+                    .map((src) => {
+                        if (userSources[src].graphUri) {
+                            return userSources[src].graphUri;
+                        } else {
+                            return null;
+                        }
+                    })
+                    .filter((uri) => uri !== null);
+            }
 
-            const data = await rdfDataModel.getGraphPartNt(graphUri, limit, offset);
-            var length = data.length;
-            res.status(200).send(data);
+            const graphUri = userSources[sourceName].graphUri;
+            const graphSize = await rdfDataModel.getTripleCount(graphUri, graphsImports);
+            const data = await rdfDataModel.getGraphPartNt(graphUri, limit, offset, graphsImports);
+
+            let additionalTriples = "";
+            // add contributor and import triples only in offset 0
+            if (Number(offset) === 0) {
+                const owner = userSources[sourceName].owner;
+                const contributorTriple = rdfDataModel.genContributorTriple(graphUri, owner);
+                const checkContributorTriple = await rdfDataModel.ask(graphUri, contributorTriple);
+                const contributorTripleStr = checkContributorTriple ? "" : rdfDataModel.formatTripleToNt(...contributorTriple);
+
+                let importTriplesStrArray = [];
+                if (graphsImports.length > 0) {
+                    importTriples = rdfDataModel.genImportTriples(graphUri, graphsImports);
+                    importTriplesStrArray = await Promise.all(
+                        importTriples
+                            .map(async (t) => {
+                                const checkImportTriple = await rdfDataModel.ask(graphUri, t);
+                                return checkImportTriple ? null : rdfDataModel.formatTripleToNt(...t);
+                            })
+                            .filter((e) => e !== null),
+                    );
+                }
+                additionalTriples = `${contributorTripleStr}\n${importTriplesStrArray.join("\n")}\n`;
+            }
+            const dataWithAdditionalTriples = additionalTriples + data;
+
+            let nextOffset;
+            if (Number(offset) + Number(limit) >= graphSize) {
+                nextOffset = null;
+            } else {
+                nextOffset = Number(offset) + Number(limit);
+            }
+
+            const response = { graph_size: graphSize, next_offset: nextOffset, data: dataWithAdditionalTriples };
+
+            res.status(200).send(response);
         } catch (error) {
             console.error(error);
             res.status(500).send({ error: error });
@@ -201,18 +250,19 @@ module.exports = function () {
                 required: true,
             },
             {
-                name: "limit",
-                description: "SPARQL LIMIT",
-                in: "query",
-                type: "string",
-                required: true,
-            },
-            {
                 name: "offset",
                 description: "SPARQL OFFSET",
                 in: "query",
                 type: "string",
                 required: true,
+            },
+            {
+                name: "withImports",
+                description: "Include imports",
+                in: "query",
+                type: "boolean",
+                required: false,
+                default: false,
             },
         ],
         responses: {

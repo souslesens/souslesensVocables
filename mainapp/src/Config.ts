@@ -8,6 +8,7 @@ const ConfigSchema = z.object({
         defaultTheme: z.string(),
         selector: z.boolean(),
     }),
+    sparqlDownloadLimit: z.number().positive(),
 });
 
 export type ConfigType = z.infer<typeof ConfigSchema>;

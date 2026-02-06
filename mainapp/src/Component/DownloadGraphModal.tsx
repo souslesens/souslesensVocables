@@ -1,4 +1,5 @@
 import { Done, Close, Cancel } from "@mui/icons-material";
+import { getConfig } from "../Config";
 import {
     Dialog,
     DialogTitle,
@@ -16,14 +17,10 @@ import {
     MenuItem,
     Select,
 } from "@mui/material";
-import { fetchMe } from "../Utils";
+import { fetchMe, roundMinMax, humanizeSize } from "../Utils";
 import { MouseEvent, useEffect, useRef, useState } from "react";
 import { writeLog } from "../Log";
 import { createRoot } from "react-dom/client";
-
-declare const Config: {
-    sources: Record<string, { imports?: string[]; baseUri?: string }>;
-};
 
 interface DownloadGraphModalProps {
     apiUrl: string;
@@ -32,142 +29,22 @@ interface DownloadGraphModalProps {
     sourceName: string;
 }
 
-type ApiServerResponseOk = {
-    filesize: number;
+type ApiServerV2ResponseOk = {
     data: BlobPart;
     next_offset: number;
-    identifier: string;
+    graph_size: number;
 };
 
 type ApiServerResponseError = {
     detail: string;
 };
 
-type ApiServerResponse = ApiServerResponseError | ApiServerResponseOk;
-
-const addImportsAndContributor = (blobParts: BlobPart[], sourceName: string, userLogin: string, format: string): BlobPart[] => {
-    const content = blobParts.map((part) => (typeof part === "string" ? part : "")).join("");
-    const contributorUri = "http://purl.org/dc/elements/1.1/contributor";
-    const owlImportsUri = "http://www.w3.org/2002/07/owl#imports";
-    const hasContributor =
-        content.includes(contributorUri) || content.includes("http://purl.org/dc/terms/contributor") || /\bdc:contributor\b/.test(content) || /\bdcterms:contributor\b/.test(content);
-    const hasImports = content.includes(owlImportsUri) || /\bowl:imports\b/.test(content);
-
-    const sourceConfig = Config.sources[sourceName];
-    const imports = sourceConfig?.imports ?? [];
-    if (!sourceConfig || !sourceConfig.baseUri) {
-        return blobParts;
-    }
-    const baseUri = sourceConfig.baseUri;
-    const importsToAdd: string[] = [];
-    if (!hasImports) {
-        imports.forEach((importName) => {
-            const importBaseUri = Config.sources[importName]?.baseUri;
-            if (importBaseUri) {
-                importsToAdd.push(importBaseUri);
-            }
-        });
-    }
-
-    if (importsToAdd.length === 0 && hasContributor) {
-        return blobParts;
-    }
-
-    if (format === "nt") {
-        const additionalTriples: string[] = [];
-        importsToAdd.forEach((importBaseUri) => {
-            additionalTriples.push(`<${baseUri}> <${owlImportsUri}> <${importBaseUri}> .`);
-        });
-        if (!hasContributor) {
-            additionalTriples.push(`<${baseUri}> <${contributorUri}> "${userLogin}" .`);
-        }
-        if (additionalTriples.length > 0) {
-            return [...blobParts, "\n" + additionalTriples.join("\n") + "\n"];
-        }
-    } else if (format === "ttl") {
-        const escapedBaseUri = baseUri.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-        const baseUriPattern = new RegExp(`(<${escapedBaseUri}>(?:(?:"[^"]*"|<[^>]*>|[^.]))*)(\\.)`, "gm");
-
-        let insertions = "";
-        importsToAdd.forEach((importBaseUri) => {
-            insertions += ` ;\n    owl:imports <${importBaseUri}>`;
-        });
-        if (!hasContributor) {
-            insertions += ` ;\n    dc:contributor "${userLogin}"`;
-        }
-
-        if (!insertions) {
-            return blobParts;
-        }
-
-        const match = content.match(baseUriPattern);
-        if (match) {
-            for (let i = 0; i < blobParts.length; i++) {
-                const part = blobParts[i];
-                if (typeof part !== "string") continue;
-
-                if (part.match(baseUriPattern)) {
-                    const modifiedPart = part.replace(baseUriPattern, `$1${insertions}\n$2`);
-                    const result = [...blobParts];
-                    result[i] = modifiedPart;
-                    return result;
-                }
-            }
-        } else {
-            const newSection = `\n<${baseUri}> a owl:Ontology${insertions} .\n`;
-            return [...blobParts, newSection];
-        }
-    } else if (format === "xml") {
-        const escapedBaseUri = baseUri.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-        const descriptionPattern = new RegExp(`(<rdf:Description rdf:about="${escapedBaseUri}"[^>]*>[\\s\\S]*?)(<\\/rdf:Description>)`, "gm");
-
-        let insertions = "";
-        importsToAdd.forEach((importBaseUri) => {
-            insertions += `\n    <owl:imports rdf:resource="${importBaseUri}"/>`;
-        });
-        if (!hasContributor) {
-            insertions += `\n    <dc:contributor>${userLogin}</dc:contributor>`;
-        }
-
-        if (!insertions) {
-            return blobParts;
-        }
-
-        const match = content.match(descriptionPattern);
-        if (match) {
-            for (let i = 0; i < blobParts.length; i++) {
-                const part = blobParts[i];
-                if (typeof part !== "string") continue;
-
-                if (part.match(descriptionPattern)) {
-                    const modifiedPart = part.replace(descriptionPattern, `$1${insertions}\n$2`);
-                    const result = [...blobParts];
-                    result[i] = modifiedPart;
-                    return result;
-                }
-            }
-        } else {
-            const newSection = `\n<rdf:Description rdf:about="${baseUri}">${insertions}\n</rdf:Description>\n`;
-
-            // Try to insert before </rdf:RDF>
-            for (let i = blobParts.length - 1; i >= 0; i--) {
-                const part = blobParts[i];
-                if (typeof part !== "string") continue;
-
-                if (part.includes("</rdf:RDF>")) {
-                    const modifiedPart = part.replace("</rdf:RDF>", `${newSection}</rdf:RDF>`);
-                    const result = [...blobParts];
-                    result[i] = modifiedPart;
-                    return result;
-                }
-            }
-            // Fallback: append at the end
-            return [...blobParts, newSection];
-        }
-    }
-
-    return blobParts;
+type SourceInfo = {
+    graphUri: string | undefined;
+    graphSize: number | undefined;
 };
+
+type ApiServerV2Response = ApiServerResponseError | ApiServerV2ResponseOk;
 
 export function DownloadGraphModal({ apiUrl, onClose, open, sourceName }: DownloadGraphModalProps) {
     const [currentUser, setCurrentUser] = useState<{ login: string; token: string } | null>(null);
@@ -178,14 +55,22 @@ export function DownloadGraphModal({ apiUrl, onClose, open, sourceName }: Downlo
     const [currentDownloadFormat, setCurrentDownloadFormat] = useState("nt");
     const [skipNamedIndividuals, setSkipNamedIndividuals] = useState(false);
     const [includeImports, setIncludeImports] = useState(false);
+    const [sourceInfo, setSourceInfo] = useState<SourceInfo>({ graphUri: undefined, graphSize: undefined });
+    const [sparqlDownloadLimit, setSparqlDownloadLimit] = useState<number>(0);
 
     useEffect(() => {
         const fetchAll = async () => {
             const response = await fetchMe();
             setCurrentUser(response.user);
+
+            const config = await getConfig();
+            setSparqlDownloadLimit(config.sparqlDownloadLimit);
+
+            const info = await fetchSourceInfo(sourceName, false);
+            setSourceInfo({ graphUri: info.graph, graphSize: info.graphSize });
         };
         void fetchAll();
-    }, []);
+    }, [sourceName]);
 
     const handleCancelOperation = () => {
         cancelCurrentOperation.current = true;
@@ -195,70 +80,65 @@ export function DownloadGraphModal({ apiUrl, onClose, open, sourceName }: Downlo
         onClose();
     };
 
-    const fetchSourceInfo = async (sourceName: string) => {
-        const response = await fetch(`/api/v1/rdf/graph/info?source=${sourceName}`);
-        const json = (await response.json()) as { graphSize: number; pageSize: number };
+    const fetchSourceInfo = async (sourceName: string, withImports: boolean) => {
+        const response = await fetch(`/api/v1/rdf/graph/info?source=${sourceName}&withImports=${String(withImports)}`);
+        const json = (await response.json()) as { graph: string; graphSize: number };
         return json;
     };
 
-    const fetchGraphPartUsingPythonApi = async (name: string, offset: number, format = "nt", identifier = "", skipNamedIndividuals = false) => {
-        const response = await fetch(`${apiUrl}api/v1/rdf/graph?source=${name}&offset=${offset}&format=${format}&identifier=${identifier}&skipNamedIndividuals=${String(skipNamedIndividuals)}`, {
+    const fetchGraphPartUsingPythonApiV2 = async (name: string, offset: number, format = "nt", skipNamedIndividuals: boolean = false, withImports: boolean = false) => {
+        const response = await fetch(`${apiUrl}api/v2/rdf/graph?source=${name}&offset=${offset}&format=${format}&skipNamedIndividuals=${String(skipNamedIndividuals)}&withImports=${withImports}`, {
             headers: { Authorization: `Bearer ${currentUser?.token ?? ""}` },
         });
-        const json = (await response.json()) as ApiServerResponse;
+        const json = (await response.json()) as ApiServerV2Response;
         if (response.status !== 200) {
             return { status: response.status, message: (json as ApiServerResponseError).detail ?? "Internal serveur error" };
         }
-        return { status: response.status, message: json as ApiServerResponseOk };
+        return { status: response.status, message: json as ApiServerV2ResponseOk };
     };
 
-    const downloadSourceUsingPythonApi = async (name: string, basePercent: number, sourceWeight: number) => {
-        let offset = 0;
-        let identifier = "";
-        const blobParts: BlobPart[] = [];
-        setTransferState("downloading");
-        while (offset !== null) {
-            if (cancelCurrentOperation.current) {
-                return { blobParts: null, message: "cancelled" };
-            }
-            const response = await fetchGraphPartUsingPythonApi(name, offset, currentDownloadFormat, identifier, skipNamedIndividuals);
-            const status = response.status;
-            if (status >= 400) {
-                const errorMessage = response.message as string;
-                return { blobParts: null, message: errorMessage };
-            }
-            const message = response.message as ApiServerResponseOk;
-            // percent within this source (0-100), then scaled to the source's weight
-            const sourcePercent = message.filesize > 0 ? Math.min(100, (offset * 100) / message.filesize) : 0;
-            const globalPercent = Math.min(100, basePercent + (sourcePercent * sourceWeight) / 100);
-            setTransferPercent(Math.round(globalPercent));
-
-            blobParts.push(message.data);
-            offset = message.next_offset;
-            identifier = message.identifier;
-        }
-        return { blobParts: blobParts, message: "ok" };
+    const fetchGraphPart = async (name: string, offset: number, withImports: boolean) => {
+        const response = await fetch(`/api/v1/rdf/graph/?source=${name}&offset=${offset}&withImports=${withImports}`);
+        return (await response.json()) as { data: string; graph_size: number; next_offset: number | null };
     };
 
-    const fetchGraphPart = async (name: string, limit: number, offset: number) => {
-        const response = await fetch(`/api/v1/rdf/graph/?source=${name}&limit=${limit}&offset=${offset}`);
-        return await response.text();
-    };
+    const recursDownloadSourceUsingPythonApi = async (name: string, offset: number, blobParts: BlobPart[], format = "nt") => {
+        const percent = roundMinMax((offset * 100) / Number(sourceInfo.graphSize), 1, 99);
 
-    const recursDownloadSource = async (name: string, offset: number, graphSize: number, pageSize: number, blobParts: BlobPart[], basePercent: number, sourceWeight: number) => {
-        // percent within this source, then scaled to global progress
-        const sourcePercent = graphSize > 0 ? Math.min(Math.round((offset * 100) / graphSize), 100) : 0;
-        const globalPercent = Math.min(100, basePercent + (sourcePercent * sourceWeight) / 100);
-        setTransferPercent(Math.round(globalPercent));
+        setTransferPercent(percent);
 
         if (cancelCurrentOperation.current) {
             return [];
         }
 
-        if (offset < graphSize) {
-            const data = await fetchGraphPart(name, pageSize, offset);
-            blobParts.push(data);
-            blobParts = await recursDownloadSource(name, offset + pageSize, graphSize, pageSize, blobParts, basePercent, sourceWeight);
+        const response = await fetchGraphPartUsingPythonApiV2(name, offset, format, skipNamedIndividuals, includeImports);
+
+        if (response.status !== 200) {
+            return [];
+        }
+        const msg = response.message as ApiServerV2ResponseOk;
+
+        blobParts.push(msg.data);
+        if (msg.next_offset !== null) {
+            blobParts = await recursDownloadSourceUsingPythonApi(name, msg.next_offset, blobParts, format);
+        }
+        return blobParts;
+    };
+
+    const recursDownloadSource = async (name: string, offset: number, blobParts: BlobPart[]) => {
+        const percent = roundMinMax((offset * 100) / Number(sourceInfo.graphSize), 1, 99);
+
+        setTransferPercent(percent);
+
+        if (cancelCurrentOperation.current) {
+            return [];
+        }
+
+        const response = await fetchGraphPart(name, offset, includeImports);
+
+        blobParts.push(response.data);
+        if (response.next_offset !== null) {
+            blobParts = await recursDownloadSource(name, response.next_offset, blobParts);
         }
         return blobParts;
     };
@@ -303,10 +183,8 @@ export function DownloadGraphModal({ apiUrl, onClose, open, sourceName }: Downlo
                 return;
             }
 
-            const enrichedBlobParts = addImportsAndContributor(blobParts, sourceName, currentUser.login, currentDownloadFormat);
-
             // create a blob and a link to dwl data, autoclick to autodownload
-            const blob = new Blob(enrichedBlobParts, { type: "text/plain" });
+            const blob = new Blob(blobParts, { type: "text/plain" });
             const link = document.createElement("a");
             link.download = `${sourceName}.${currentDownloadFormat}`;
             link.href = URL.createObjectURL(blob);
@@ -318,82 +196,36 @@ export function DownloadGraphModal({ apiUrl, onClose, open, sourceName }: Downlo
         }
     };
     const downloadSourceTriples = async () => {
-        let blobParts: BlobPart[] | null;
-        let message = "ok";
-        let sources = [sourceName];
-        if (includeImports) {
-            const imports = window?.Config.sources[sourceName]?.imports || [];
-            sources = sources.concat(imports);
-        }
-        blobParts = [];
-        let blobPartsSource: BlobPart[] = [];
-
-        // First, fetch the size of all sources to calculate proportional weights
-        const sourceSizes: { source: string; graphSize: number; pageSize: number }[] = [];
-        let totalSize = 0;
-
         setTransferState("downloading");
+        setTransferPercent(1);
 
-        for (const source of sources) {
-            if (apiUrl === "/") {
-                const graphInfo = await fetchSourceInfo(source);
-                sourceSizes.push({ source, graphSize: graphInfo.graphSize, pageSize: graphInfo.pageSize });
-                totalSize += graphInfo.graphSize;
-            } else {
-                // For Python API, we get the filesize during download, so use equal weight as fallback
-                // We'll update progress based on actual filesize during download
-                sourceSizes.push({ source, graphSize: 0, pageSize: 0 });
-            }
+        let blobParts: BlobPart[];
+        if (apiUrl === "/") {
+            // local API
+            blobParts = await recursDownloadSource(sourceName, 0, []);
+        } else {
+            // sls-py-api
+            blobParts = await recursDownloadSourceUsingPythonApi(sourceName, 0, [], currentDownloadFormat);
         }
 
-        // Calculate proportional weights based on actual sizes
-        // Use 99 as max during download to reserve 100 for completion
-        const maxPercentDuringDownload = 99;
-        let cumulativePercent = 0;
-
-        for (let i = 0; i < sources.length; i++) {
-            // Check for cancellation before each source
-            if (cancelCurrentOperation.current) {
-                return { blobParts: null, message: "cancelled" };
-            }
-
-            const sourceInfo = sourceSizes[i];
-            const source = sourceInfo.source;
-
-            // Calculate this source's weight as percentage of total (scaled to max 99%)
-            const sourceWeight = totalSize > 0 ? (sourceInfo.graphSize / totalSize) * maxPercentDuringDownload : maxPercentDuringDownload / sources.length;
-            const basePercent = cumulativePercent;
-
-            if (apiUrl === "/") {
-                blobPartsSource = await recursDownloadSource(source, 0, sourceInfo.graphSize, sourceInfo.pageSize, [], basePercent, sourceWeight);
-                // Check if cancelled (empty array returned)
-                if (cancelCurrentOperation.current) {
-                    return { blobParts: null, message: "cancelled" };
-                }
-                blobParts = blobParts.concat(blobPartsSource);
-            } else {
-                const result = await downloadSourceUsingPythonApi(source, basePercent, sourceWeight);
-                if (result.message === "cancelled" || result.blobParts === null) {
-                    return { blobParts: null, message: "cancelled" };
-                }
-                blobPartsSource = result.blobParts || [];
-                blobParts = blobParts.concat(blobPartsSource);
-
-                message = result.message;
-                if (message !== "ok") {
-                    return { blobParts: blobParts, message: message };
-                }
-            }
-            cumulativePercent += sourceWeight;
-        }
         setTransferPercent(100);
         setTransferState("done");
-        return { blobParts: blobParts, message: message };
+
+        return { blobParts: blobParts, message: "ok" };
+    };
+
+    const toggleAddImports = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const checked = event.target.checked;
+        const info = await fetchSourceInfo(sourceName, checked);
+        setSourceInfo({ graphUri: info.graph, graphSize: info.graphSize });
+        setIncludeImports(checked);
     };
 
     return (
         <Dialog fullWidth={true} maxWidth="md" onClose={onClose} open={open} PaperProps={{ component: "form" }}>
-            <DialogTitle id="contained-modal-title-vcenter">Downloading {sourceName}</DialogTitle>
+            <DialogTitle id="contained-modal-title-vcenter">
+                Downloading {sourceName} ({humanizeSize(Number(sourceInfo.graphSize))} triples)
+            </DialogTitle>
             <DialogContent sx={{ mt: 1 }}>
                 <Stack spacing={2} useFlexGap>
                     {errorMessage ? (
@@ -415,10 +247,10 @@ export function DownloadGraphModal({ apiUrl, onClose, open, sourceName }: Downlo
                                 <MenuItem disabled={transferPercent > 0} value={"nt"}>
                                     N-triples
                                 </MenuItem>
-                                <MenuItem disabled={transferPercent > 0 || apiUrl === "/"} value={"xml"}>
+                                <MenuItem disabled={transferPercent > 0 || apiUrl === "/" || Number(sourceInfo.graphSize) > sparqlDownloadLimit} value={"xml"}>
                                     RDF/XML
                                 </MenuItem>
-                                <MenuItem disabled={transferPercent > 0 || apiUrl === "/"} value={"ttl"}>
+                                <MenuItem disabled={transferPercent > 0 || apiUrl === "/" || Number(sourceInfo.graphSize) > sparqlDownloadLimit} value={"turtle"}>
                                     Turtle
                                 </MenuItem>
                             </Select>
@@ -437,19 +269,9 @@ export function DownloadGraphModal({ apiUrl, onClose, open, sourceName }: Downlo
                                 }
                                 label="Ignore the namedIndividuals in this download"
                             />
-                        </FormControl>
-                        <FormControl fullWidth>
                             <FormControlLabel
                                 id={`include-imports-switch-${sourceName}`}
-                                control={
-                                    <Checkbox
-                                        checked={includeImports}
-                                        disabled={transferPercent > 0}
-                                        onChange={(event) => {
-                                            setIncludeImports(event.currentTarget.checked);
-                                        }}
-                                    />
-                                }
+                                control={<Checkbox checked={includeImports} disabled={transferPercent > 0} onChange={toggleAddImports} />}
                                 label="Add imports in this download"
                             />
                         </FormControl>

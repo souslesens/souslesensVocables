@@ -39,6 +39,7 @@
     "cookieSecure": false,
     "cookieSecureTrustProxy": false,
     "health_enabled_services": ["virtuoso", "elasticsearch"],
+    "sparqlDownloadLimit": 10000,
     "sparql_server": {
         "url": "http://localhost:8899/sparql",
         "user": "dba",

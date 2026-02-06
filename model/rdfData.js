@@ -76,11 +76,14 @@ class RdfDataModel {
     };
     /**
      * @param {string} graphUri - the graph URI
+     * @param {string[]} withImports - array of uri to get
      * @returns {Promise<number>} - number of triples
      */
-    getTripleCount = async (graphUri) => {
+    getTripleCount = async (graphUri, withImports = []) => {
+        const fromStr = withImports.map((uri) => `FROM <${uri}>`).join("\n");
         const query = `SELECT COUNT(*) as ?total
                        FROM <${graphUri}>
+                       ${fromStr}
                        WHERE {
                            ?s ?p ?o .
                        }`;
@@ -101,6 +104,53 @@ class RdfDataModel {
             return { metadata: entry.key.value, ...entry.value };
         });
         return result;
+    };
+
+    /**
+     * @param {string} graphUri - the graph URI
+     * @param {string[]} triple - array of 3 elem
+     * @returns {Promise<boolean>} - true if the triple exists
+     */
+    ask = async (graphUri, triple) => {
+        const s = triple[0] === null ? "?s" : triple[0];
+        const p = triple[1] === null ? "?p" : triple[1];
+        const o = triple[2] === null ? "?o" : triple[2];
+        const query = `ASK FROM <${graphUri}> { ${s} ${p} ${o} . }`;
+        const result = await this.execQuery(query, "nt");
+        return result === "true";
+    };
+
+    /**
+     * @param {string} graphUri - the graph URI
+     * @param {string} contributor - contributor name
+     * @param {string} sep - separator, default is \t
+     * @returns {string[]} - a triple
+     */
+    genContributorTriple = (graphUri, contributor, sep = "\t") => {
+        const s = `<${graphUri}>`;
+        const p = "<http://purl.org/dc/elements/1.1/contributor>";
+        const o = `"${contributor}"^^<http://www.w3.org/2001/XMLSchema#string>`;
+        return [s, p, o];
+    };
+
+    /**
+     * @param {string} graphUri - the graph URI
+     * @param {string[]} importUris - list of import uris
+     * @param {string} sep - separator, default is \t
+     * @returns {string[][]} - a list of triples
+     */
+    genImportTriples = (graphUri, importUris, sep = "\t") => {
+        const triples = importUris.map((importUri) => {
+            const s = `<${graphUri}>`;
+            const p = "<http://www.w3.org/2002/07/owl#imports>";
+            const o = `<${importUri}>`;
+            return [s, p, o];
+        });
+        return triples;
+    };
+
+    formatTripleToNt = (s, p, o, sep = "\t") => {
+        return `${s}${sep}${p}${sep}${o} .`;
     };
 
     /**
@@ -200,11 +250,15 @@ class RdfDataModel {
      * @param {string} limit - SPARQL LIMIT
      * @param {string} offset - SPARQL OFFSET
      * @param {boolean} jsonOutput - JSON output format
+     * @param {string[]} withImports - array of uri to get
      * @returns {Promise<any>} - the RDF data
      */
-    getGraphPart = async (graphUri, limit, offset, jsonOutput) => {
+    getGraphPart = async (graphUri, limit, offset, jsonOutput, withImports = []) => {
+        const fromStr = withImports.map((uri) => `FROM <${uri}>`).join("\n");
+
         const query = `CONSTRUCT { ?s ?p ?o .}
                        FROM <${graphUri}>
+                       ${fromStr}
                        WHERE { ?s ?p ?o .}
                        LIMIT ${limit}
                        OFFSET ${offset}`;
@@ -216,10 +270,11 @@ class RdfDataModel {
      * @param {string} graphUri - the graph URI
      * @param {string} limit - SPARQL LIMIT
      * @param {string} offset - SPARQL OFFSET
+     * @param {string[]} withImports - array of uri to get
      * @returns {Promise<any>} - the RDF data
      */
-    getGraphPartNt = async (graphUri, limit, offset) => {
-        return await this.getGraphPart(graphUri, limit, offset, false);
+    getGraphPartNt = async (graphUri, limit, offset, withImports = []) => {
+        return await this.getGraphPart(graphUri, limit, offset, false, withImports);
     };
 
     /**

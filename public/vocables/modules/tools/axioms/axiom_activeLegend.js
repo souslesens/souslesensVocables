@@ -833,14 +833,18 @@ var Axiom_activeLegend = (function () {
                             p: triple.predicate,
                             o: triple.object
                         }
-                        if (newNodesLabelsMap[item.s]) {
-                            item.sLabel = newNodesLabelsMap[item.s];
-                        }
-                        if (newNodesLabelsMap[item.p]) {
-                            item.pLabel = newNodesLabelsMap[item.p];
-                        }
-                        if (newNodesLabelsMap[item.o]) {
-                            item.oLabel = newNodesLabelsMap[item.o];
+
+                        if(newNodesLabelsMap) {
+
+                            if (newNodesLabelsMap[item.s]) {
+                                item.sLabel = newNodesLabelsMap[item.s];
+                            }
+                            if (newNodesLabelsMap[item.p]) {
+                                item.pLabel = newNodesLabelsMap[item.p];
+                            }
+                            if (newNodesLabelsMap[item.o]) {
+                                item.oLabel = newNodesLabelsMap[item.o];
+                            }
                         }
                         basicAxiomsTriples.push(item)
 

@@ -491,61 +491,59 @@ var LegendOverlayWidget = (function () {
      */
     self.installAutoHideOnDialogs = function (containerId, options) {
         if (!containerId) {
-        return;
+            return;
         }
 
         options = options || {};
 
         // jQuery UI dialogs required
         if (!window.$ || !$.fn || !$.fn.dialog) {
-        return;
+            return;
         }
 
         var ignoreDialogIds = Array.isArray(options.ignoreDialogIds) ? options.ignoreDialogIds : [];
         // Default namespace: unique per container to avoid collisions across tools
-        var ns = options.namespace
-        ? String(options.namespace)
-        : "legendAutoHide_" + self.getSafeIdSuffix(containerId);
+        var ns = options.namespace ? String(options.namespace) : "legendAutoHide_" + self.getSafeIdSuffix(containerId);
 
         var key = containerId + "::" + ns;
         if (self._autoHideBindings[key]) {
-        return;
+            return;
         }
 
         function isIgnoredDialog($dlg) {
-        if (!ignoreDialogIds || ignoreDialogIds.length === 0) {
-            return false;
-        }
-        var id = $dlg && $dlg.attr ? $dlg.attr("id") : null;
-        if (!id) {
-            return false;
-        }
-        return ignoreDialogIds.indexOf(id) > -1;
+            if (!ignoreDialogIds || ignoreDialogIds.length === 0) {
+                return false;
+            }
+            var id = $dlg && $dlg.attr ? $dlg.attr("id") : null;
+            if (!id) {
+                return false;
+            }
+            return ignoreDialogIds.indexOf(id) > -1;
         }
 
         function refreshLegendVisibility() {
-        var anyDialogOpen = false;
+            var anyDialogOpen = false;
 
-        $(".ui-dialog-content").each(function () {
-            var $dlg = $(this);
-            if (!$dlg.is(":visible")) {
-            return;
-            }
-            if (isIgnoredDialog($dlg)) {
-            return;
-            }
-            anyDialogOpen = true;
-        });
+            $(".ui-dialog-content").each(function () {
+                var $dlg = $(this);
+                if (!$dlg.is(":visible")) {
+                    return;
+                }
+                if (isIgnoredDialog($dlg)) {
+                    return;
+                }
+                anyDialogOpen = true;
+            });
 
-        self.setVisible(containerId, !anyDialogOpen);
+            self.setVisible(containerId, !anyDialogOpen);
         }
 
         // Keep handler refs for a clean uninstall
         var onOpen = function () {
-        refreshLegendVisibility();
+            refreshLegendVisibility();
         };
         var onClose = function () {
-        refreshLegendVisibility();
+            refreshLegendVisibility();
         };
 
         $(document).on("dialogopen." + ns, ".ui-dialog-content", onOpen);
@@ -567,32 +565,30 @@ var LegendOverlayWidget = (function () {
      */
     self.uninstallAutoHideOnDialogs = function (containerId, options) {
         if (!containerId) {
-        return;
+            return;
         }
 
         options = options || {};
 
         if (!window.$) {
-        return;
+            return;
         }
 
-        var ns = options.namespace
-        ? String(options.namespace)
-        : "legendAutoHide_" + self.getSafeIdSuffix(containerId);
+        var ns = options.namespace ? String(options.namespace) : "legendAutoHide_" + self.getSafeIdSuffix(containerId);
 
         var key = containerId + "::" + ns;
         var binding = self._autoHideBindings[key];
         if (!binding) {
-        // Best-effort cleanup in case handlers exist without stored refs
-        $(document).off("." + ns);
-        return;
+            // Best-effort cleanup in case handlers exist without stored refs
+            $(document).off("." + ns);
+            return;
         }
 
         $(document).off("dialogopen." + ns, ".ui-dialog-content", binding.onOpen);
         $(document).off("dialogclose." + ns, ".ui-dialog-content", binding.onClose);
 
         delete self._autoHideBindings[key];
-    };    
+    };
     /**
      * Destroy legend instance from the container.
      * @param {string} containerId

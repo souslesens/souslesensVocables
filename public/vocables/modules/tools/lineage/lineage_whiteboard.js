@@ -166,7 +166,7 @@ var Lineage_whiteboard = (function () {
         $("#graphDiv").empty();
         $("#lateralPanelDiv").resizable("destroy");
         $("#lateralPanelDiv").css("width", "435px");
-        // Remove namespaced dialog handlers (installed in installLegendAutoHideOnNodeInfos)        
+        // Remove namespaced dialog handlers (installed in installLegendAutoHideOnNodeInfos)
         LegendOverlayWidget.uninstallAutoHideOnDialogs("graphDiv", {
             namespace: "lineageLegendAutoHide",
         });

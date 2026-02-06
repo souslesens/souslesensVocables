@@ -397,19 +397,19 @@ var MappingColumnsGraph = (function () {
         Mapping_legendOverlay.init(containerId, self.visjsGraph, { title: "🔍 Legend" });
     };
 
-        self.getColumnClass = function (node) {
-            if (!node.id) {
-                node = { id: node };
-            }
-            var connections = self.visjsGraph.getFromNodeEdgesAndToNodes(node.id);
+    self.getColumnClass = function (node) {
+        if (!node.id) {
+            node = { id: node };
+        }
+        var connections = self.visjsGraph.getFromNodeEdgesAndToNodes(node.id);
 
-            var classId = null;
-            connections.forEach(function (connection) {
-                if (connection.edge.data && (connection.edge.data.type == "rdf:type" || connection.edge.data.type == "rdfs:subClassOf")) {
-                    classId = connection.toNode.data.id;
-                }
-            });
-            return classId;
+        var classId = null;
+        connections.forEach(function (connection) {
+            if (connection.edge.data && (connection.edge.data.type == "rdf:type" || connection.edge.data.type == "rdfs:subClassOf")) {
+                classId = connection.toNode.data.id;
+            }
+        });
+        return classId;
     };
 
     self.getClassColumns = function (node) {
@@ -2167,7 +2167,7 @@ var MappingColumnsGraph = (function () {
                     UI.openDialog("mainDialogDiv", { title: "Implicit Model" });
                     $("#mainDialogDiv")
                         .off("dialogclose.mappingLegend")
-                        .on("dialogclose.mappingLegend", function () {       
+                        .on("dialogclose.mappingLegend", function () {
                             LegendOverlayWidget.uninstallAutoHideOnDialogs("implicitModelContainer", {
                                 namespace: "implicitLegendAutoHide",
                             });

@@ -51,7 +51,8 @@ export default function () {
             let additionalTriples = "";
             // add contributor and import triples only in offset 0
             if (Number(offset) === 0) {
-                const contributorTriple = rdfDataModel.genContributorTriple(graphUri, userInfo.user.login);
+                const owner = userSources[sourceName].owner;
+                const contributorTriple = rdfDataModel.genContributorTriple(graphUri, owner);
                 const checkContributorTriple = await rdfDataModel.ask(graphUri, contributorTriple);
                 const contributorTripleStr = checkContributorTriple ? "" : rdfDataModel.formatTripleToNt(...contributorTriple);
 

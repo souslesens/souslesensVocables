@@ -21,42 +21,31 @@
                     <!--    <button class="w3-button slsv-button-3" onclick="NodeInfosAxioms.actions.toGraphMl()">toGraphML
                     </button>
                     <button class="w3-button slsv-button-3" onclick="NodeInfosAxioms.actions.toSVG()">toSVG</button>-->
-                    <button class="w3-button slsv-button-3" onclick="NodeInfosAxioms.actions.showTriples()">show
-                        triples
-                    </button>
-                    <hr/>
+                    <button class="w3-button slsv-button-3" onclick="NodeInfosAxioms.actions.showTriples()">show triples</button>
+                    <hr />
                 </div>
 
                 <div style="display: flex; flex-direction: column">
-                    <a style="color: #096eac; margin: 3px; font-weight: bold; text-decoration: underline"
-                       id="nodeInfosAxioms_newAxiomBtn" onclick="NodeInfosAxioms.newAxiom(true)">New axiom</a>
-                    <div id="nodeInfosAxioms_activeLegendDiv"
-                         style="width: 100px; height: 200px; background-color: #ddd"></div>
+                    <a style="color: #096eac; margin: 3px; font-weight: bold; text-decoration: underline" id="nodeInfosAxioms_newAxiomBtn" onclick="NodeInfosAxioms.newAxiom(true)">New axiom</a>
+                    <div id="nodeInfosAxioms_activeLegendDiv" style="width: 100px; height: 200px; background-color: #ddd"></div>
                 </div>
             </div>
             <div style="display: flex; flex-direction: row; display: none" id="nodeInfosAxioms_newAxiomPanel">
                 <!--  <button onclick="NodeInfosAxioms.actions.setLayout('randomlayout')">Random Layout</button>-->
 
                 <div>
-                    New Axiom<br/>
+                    New Axiom<br />
                     <!-- <select id="axioms_legend_suggestionsSelect" size="20" style="width: 250px; overflow: auto"></select>-->
                     <div style="width: 350px; height: 500px; overflow: auto" id="axiomSuggestionsSelectJstreeDiv"></div>
-
+                    <div>
+                        <button class="w3-button slsv-button-3" onclick="Axiom_activeLegend.clearAxiom()">clear</button>
+                        <button class="w3-button slsv-button-3" onclick="Axiom_activeLegend.showTriples()">triples</button>
+                        <button class="w3-button slsv-button-3" onclick="Axiom_activeLegend.saveAxiom()">save</button>
+                    </div>
                 </div>
             </div>
-            <div>
-                <div id="nodeInfosAxioms_graphDiv" onclick="PopupMenuWidget.hidePopup();"
-                     style="width: 70vw; height: 350px; background-color: #ddd; margin: 5px; padding: 5px; overflow: auto"></div>
-                <div>
-                    <button class="w3-button slsv-button-3" onclick="Axiom_activeLegend.clearAxiom()">clear</button>
-                    <button class="w3-button slsv-button-3" onclick="Axiom_activeLegend.saveAxiom()">save</button>
-                    <button class="w3-button slsv-button-3" onclick="Axiom_activeLegend.showTriples()">show triples</button>
-                    <button class="w3-button slsv-button-3" onclick="Axiom_activeLegend.copyTriples()">copy triples</button>
-                    <button class="w3-button slsv-button-3" onclick="Axiom_activeLegend.deleteTriples()"> delete triples</button>
-                </div>
 
-                <span id="axiomsEditor_textDiv" style="display:block;width: 60vw; height: 350px;overflow: auto; background-color: #ddd"></span>
-            </div>
+            <div id="nodeInfosAxioms_graphDiv" onclick="PopupMenuWidget.hidePopup();" style="width: 70vw; height: 450px; background-color: #ddd; margin: 5px; padding: 5px; overflow: auto"></div>
         </div>
     </div>
 
@@ -66,6 +55,6 @@
         <button class="w3-button slsv-button-3" onclick="Axioms_graph.toSVG()">SVG</button>-->
 
         <!-- <button class="w3-button slsv-button-3" onclick="Axioms_graph.visjsDataToClassDiagram()">Uml</button>-->
-
+        <span id="axiomsEditor_textDiv" style="width: 80%; height: 50px; background-color: #ddd"></span>
     </div>
 </div>

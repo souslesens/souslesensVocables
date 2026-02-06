@@ -777,7 +777,7 @@ var Lineage_createRelation = (function () {
                 object: subPropertyLabel,
             },
         ];
-
+        if (subPropId) {
             triples.push({
                 subject: subPropId,
                 predicate: "rdfs:subPropertyOf",
@@ -818,7 +818,7 @@ var Lineage_createRelation = (function () {
                     object: range,
                 });
             }
-
+        }
 
         Sparql_generic.insertTriples(source, triples, null, function (err, _result) {
             var modelData = {

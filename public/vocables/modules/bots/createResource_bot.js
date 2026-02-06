@@ -8,7 +8,6 @@ import common from "../shared/common.js";
 import Sparql_generic from "../sparqlProxies/sparql_generic.js";
 import OntologyModels from "../shared/ontologyModels.js";
 import Lineage_createResource from "../tools/lineage/lineage_createResource.js";
-import NodeInfosAxioms from "../tools/axioms/nodeInfosAxioms.js";
 
 var CreateResource_bot = (function () {
     var self = {};
@@ -40,7 +39,6 @@ var CreateResource_bot = (function () {
     (self.workflow_saveResource = {
         _OR: {
             Edit: { saveResourceFn: { editResourceFn: {} } },
-            Axioms: { saveResourceFn: { createAxiomsFn: {} } },
             Draw: { saveResourceFn: { drawResourceFn: self.workflow_end } },
         },
     }),
@@ -74,7 +72,6 @@ var CreateResource_bot = (function () {
         promptDatatypePropertyLabelFn: "enter datatypeProperty label",
         listDatatypePropertyDomainFn: "enter datatypeProperty domain",
         listDatatypePropertyRangeFn: "enter datatypeProperty domain",
-        createAxiomsFn:"createAxioms "
     };
 
     self.functions = {
@@ -260,24 +257,6 @@ var CreateResource_bot = (function () {
                 });
             }
         },
-        createAxiomsFn:function(){
-            if (self.params.resourceId) {
-                var node={
-                    id: self.params.resourceId,
-                    data: {
-                        id: self.params.resourceId,
-                        source: self.params.source,
-                        label:self.params.resourceLabel,
-                    }
-                }
-
-                Lineage_whiteboard.drawNodesAndParents(node, 1, { legendType: "individualClasses" });
-              UI.setDialogTitle("#smallDialogDiv", "Axioms of resource " + self.params.resourceLabel);
-
-                NodeInfosAxioms.init(self.params.source, node, "smallDialogDiv",{newAxiom:true});
-                self.myBotEngine.end();
-            }
-        }
     };
 
     return self;

@@ -6,6 +6,7 @@ var LegendWidget = (function () {
     var self = {};
     self.currentLegendDJstreedata = {};
     self.legendDivsStack = {};
+    self.hideOthersActive = false;
 
     self.clearLegend = function () {
         self.legendDivsStack = {};
@@ -25,7 +26,7 @@ var LegendWidget = (function () {
                 self.currentLegendNode = obj.node;
             },
             tie_selection: false,
-            contextMenu: LegendWidget.getLegendJstreeContextMenu(),
+            contextMenu: LegendWidget.getLegendJstreeContextMenu,
             notTypes: true,
         };
         $("#Lineage_classes_graphDecoration_legendDiv").jstree("destroy").empty();
@@ -207,24 +208,35 @@ var LegendWidget = (function () {
             },
         };
         items.HideOthers = {
-            label: "Hide others",
+            label: self.hideOthersActive ? "Show others" : "Hide others",
             action: function (_e) {
                 var currentNode = self.currentLegendNode;
                 var allNodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
                 var newNodes = [];
-                allNodes.forEach(function (node) {
-                    if (currentNode.original.color == node.color || currentNode.id == node.id) {
+                if (self.hideOthersActive) {
+                    allNodes.forEach(function (node) {
                         newNodes.push({
                             id: node.id,
                             hidden: false,
                         });
-                    } else {
-                        newNodes.push({
-                            id: node.id,
-                            hidden: true,
-                        });
-                    }
-                });
+                    });
+                    self.hideOthersActive = false;
+                } else {
+                    allNodes.forEach(function (node) {
+                        if (currentNode.original.color == node.color || currentNode.id == node.id) {
+                            newNodes.push({
+                                id: node.id,
+                                hidden: false,
+                            });
+                        } else {
+                            newNodes.push({
+                                id: node.id,
+                                hidden: true,
+                            });
+                        }
+                    });
+                    self.hideOthersActive = true;
+                }
                 Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(newNodes);
             },
         };

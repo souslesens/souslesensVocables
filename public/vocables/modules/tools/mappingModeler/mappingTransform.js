@@ -798,20 +798,30 @@ self._isPrefixedName = function (v) {
 
 self._turtleIriOrCurie = function (v) {
     if (!v) return null;
-
-    // IMPORTANT: nettoie espaces et retours chariot
     var s = String(v).trim();
 
-    if (self._isPrefixedName(s)) return s;
+    // 1) d'abord les URI complets
     if (self._isHttpIri(s)) return "<" + s + ">";
+
+    // 2) ensuite seulement les CURIE/prefix (ex: rdf:type, rdfs:label)
+    if (self._isPrefixedName(s)) return s;
+
     return null;
 };
 
+
 self._turtleObject = function (v) {
-    var iri = self._turtleIriOrCurie(v);
+    if (v === null || v === undefined) return '""';
+
+    // IMPORTANT : on nettoie la valeur
+    var s = String(v).trim();
+
+    var iri = self._turtleIriOrCurie(s);
     if (iri) return iri;
-    return '"' + self._escapeTurtleString(v === null || v === undefined ? "" : String(v)) + '"';
+
+    return '"' + self._escapeTurtleString(s) + '"';
 };
+
 
 self._prefixBlock = function () {
     var lines = [];

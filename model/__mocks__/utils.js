@@ -2,8 +2,7 @@ import fs from "fs";
 import os from "os";
 import path from "path";
 import knex from "knex";
-
-const utils = jest.createMockFromModule("./utils");
+import { jest } from "@jest/globals";
 
 const readSchema = (schema) => {
     const content = fs.readFileSync(path.resolve("scripts", "sql", `${schema}.sql`), "utf-8");

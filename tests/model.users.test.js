@@ -6,24 +6,12 @@ import tmp from "tmp";
 import { fileURLToPath } from "url";
 import { jest } from "@jest/globals";
 
-import { createTracker, MockClient } from "knex-mock-client";
-import knex from "knex";
+import { cleanupConnection as cleanupConnectionMock, getKnexConnection as getKnexConnectionMock } from "../model/__mocks__/utils.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const mockKnexConnection = knex({ client: MockClient, dialect: "pg" });
-
-jest.unstable_mockModule("../model/utils.js", () => ({
-    cleanupConnection: jest.fn(),
-    getKnexConnection: jest.fn(() => mockKnexConnection),
-    convertType: jest.fn((value) => value),
-    chunk: jest.fn((list, size) => [list]),
-    redoIfFailure: jest.fn(),
-    redoIfFailureCallback: jest.fn(),
-    sleep: jest.fn(),
-    RDF_FORMATS_MIMETYPES: {},
-}));
+jest.unstable_mockModule("../model/utils.js", () => ({ cleanupConnection: cleanupConnectionMock, getKnexConnection: getKnexConnectionMock }));
 
 const { cleanupConnection, getKnexConnection } = await import("../model/utils.js");
 const { userModel } = await import("../model/users.js");

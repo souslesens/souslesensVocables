@@ -1,6 +1,7 @@
 import Sparql_common from "../sparqlProxies/sparql_common.js";
 import BotEngineClass from "./_botEngineClass.js";
 import Lineage_sources from "../tools/lineage/lineage_sources.js";
+import Lineage_combine from "../tools/lineage/lineage_combine.js";
 import Lineage_whiteboard from "../tools/lineage/lineage_whiteboard.js";
 import CommonBotFunctions from "./_commonBotFunctions.js";
 import Lineage_createRelation from "../tools/lineage/lineage_createRelation.js";
@@ -95,7 +96,26 @@ var CreateResource_bot = (function () {
                 if (vocabs.length == 0) {
                     return self.myBotEngine.previousStep("no values found, try another option");
                 }
-                self.myBotEngine.showList(vocabs, "currentVocab");
+
+                var searchFn = function (term, updateCallback) {
+                    var sources;
+                    if (Lineage_combine.currentSources && Lineage_combine.currentSources.length > 0) {
+                        sources = Lineage_combine.currentSources;
+                    } else {
+                        sources = Object.keys(Lineage_sources.loadedSources);
+                    }
+                    CommonBotFunctions.searchClassesInSources(sources, term, function (_err, items) {
+                        updateCallback(items || []);
+                    });
+                };
+
+                var onSearchResultSelected = function (classId) {
+                    self.params.resourceId = classId;
+                    self.myBotEngine.currentObj = self.workflow_saveResource;
+                    self.myBotEngine.nextStep();
+                };
+
+                self.myBotEngine.showListWithSearch(vocabs, "currentVocab", searchFn, onSearchResultSelected);
             });
         },
 

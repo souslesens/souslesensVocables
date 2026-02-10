@@ -1,4 +1,5 @@
 import OntologyModels from "../shared/ontologyModels.js";
+import SearchUtil from "../search/searchUtil.js";
 
 var CommonBotFunctions = (function () {
     var self = {};
@@ -200,6 +201,52 @@ var CommonBotFunctions = (function () {
 
             function (err) {
                 return callback(err, allConstraints);
+            },
+        );
+    };
+
+    /**
+     * @function
+     * @name searchClassesInSources
+     * @memberof module:CommonBotFunctions
+     * Searches for classes matching a term across multiple sources using ElasticSearch.
+     * Delegates to SearchUtil.getSimilarLabelsInSources with fuzzyMatch mode and flattens
+     * the results into a simple array of {id, label, source} objects.
+     * @param {Array<string>} sources - The list of source names to search in.
+     * @param {string} term - The search term. A wildcard (*) is appended if not already present.
+     * @param {Function} callback - Error-first callback: callback(err, items) where items is an array of {id: string, label: string, source: string}.
+     * @returns {void}
+     */
+    self.searchClassesInSources = function (sources, term, callback) {
+        term = term.toLowerCase();
+        if (term.indexOf("*") < 0) {
+            term += "*";
+        }
+        SearchUtil.getSimilarLabelsInSources(
+            null,
+            sources,
+            [term],
+            null,
+            "fuzzyMatch",
+            { parentlabels: true, skosLabels: 1 },
+            function (err, result) {
+                if (err || !result || result.length === 0) {
+                    return callback(null, []);
+                }
+                var items = [];
+                result.forEach(function (classItem) {
+                    var matches = classItem.matches;
+                    for (var source in matches) {
+                        matches[source].forEach(function (match) {
+                            items.push({
+                                id: match.id,
+                                label: match.label + " (" + source + ")",
+                                source: source,
+                            });
+                        });
+                    }
+                });
+                callback(null, items);
             },
         );
     };

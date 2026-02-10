@@ -564,7 +564,7 @@ var Axiom_activeLegend = (function () {
         var html = "<div style='height:300px;width:100%;overflow:auto;'><div id='axiomsTriplesJstree'></div></div>";
 
         $("#axiomsEditor_textDiv").html(html);
-        JstreeWidget.loadJsTree("axiomsTriplesJstree", jstreeData, {withCheckboxes: true}, function (err, result) {
+        JstreeWidget.loadJsTree("axiomsTriplesJstree", jstreeData, {withCheckboxes: true, openAll: true}, function (err, result) {
             var divId = "nodeInfosAxioms_graphDiv";
             var options = {};
             Axioms_graph.drawNodeAxioms2(NodeInfosAxioms.currentSource,rootNodeId,triples, divId,options)

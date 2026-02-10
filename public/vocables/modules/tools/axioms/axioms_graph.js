@@ -637,24 +637,21 @@ enabled:true},*/
     };
 
     self.showGraphPopupMenu = function (node, point, event) {
-        return;
-        if (!node) {
-            return;
-        }
-        self.currentGraphNode = node;
         if (!node || !node.data) {
             return;
         }
+        self.currentGraphNode = node;
         var html = "";
-        html = '    <span class="popupMenuItem" onclick="NodeInfosAxioms.expandGraphFromNode();"> expand from Node</span>';
-        html += '    <span class="popupMenuItem" onclick="NodeInfosAxioms.collapseGraphToNode();"> collapse to Node</span>';
-        html += '    <span class="popupMenuItem" onclick="NodeInfosAxioms.startFromNode();"> start from Node</span>';
-        html += '    <span class="popupMenuItem" onclick="NodeInfosAxioms.nodeInfos();"> NodeInfos</span>';
+        // html += '    <span class="popupMenuItem" onclick="NodeInfosAxioms.expandGraphFromNode();"> expand from Node</span>';
+        // html += '    <span class="popupMenuItem" onclick="NodeInfosAxioms.collapseGraphToNode();"> collapse to Node</span>';
+        // html += '    <span class="popupMenuItem" onclick="NodeInfosAxioms.startFromNode();"> start from Node</span>';
+        html += '    <span class="popupMenuItem" onclick="NodeInfosAxioms.nodeInfos()">Node Infos</span>';
+        html += '    <span class="popupMenuItem" onclick="NodeInfosAxioms.showNodeAxioms()">Node Axioms</span>';
 
-        if (Lineage_sources.isSourceEditableForUser(NodeInfosAxioms.currentSource)) {
-            html += '    <span class="popupMenuItem" onclick="Axioms_graph.removeNodeFromGraph();"> Remove node</span>';
-            html += '    <span class="popupMenuItem" onclick="Axiom_activeLegend.createAxiomFromGraph();"> create Axiom</span>';
-        }
+        // if (Lineage_sources.isSourceEditableForUser(NodeInfosAxioms.currentSource)) {
+        //     html += '    <span class="popupMenuItem" onclick="Axioms_graph.removeNodeFromGraph();"> Remove node</span>';
+        //     html += '    <span class="popupMenuItem" onclick="Axiom_activeLegend.createAxiomFromGraph();"> create Axiom</span>';
+        // }
         $("#popupMenuWidgetDiv").html(html);
         point.x = event.x;
         point.y = event.y;

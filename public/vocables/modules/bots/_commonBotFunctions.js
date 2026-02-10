@@ -222,33 +222,25 @@ var CommonBotFunctions = (function () {
         if (term.indexOf("*") < 0) {
             term += "*";
         }
-        SearchUtil.getSimilarLabelsInSources(
-            null,
-            sources,
-            [term],
-            null,
-            "fuzzyMatch",
-            { parentlabels: true, skosLabels: 1 },
-            function (err, result) {
-                if (err || !result || result.length === 0) {
-                    return callback(null, []);
-                }
-                var items = [];
-                result.forEach(function (classItem) {
-                    var matches = classItem.matches;
-                    for (var source in matches) {
-                        matches[source].forEach(function (match) {
-                            items.push({
-                                id: match.id,
-                                label: match.label + " (" + source + ")",
-                                source: source,
-                            });
+        SearchUtil.getSimilarLabelsInSources(null, sources, [term], null, "fuzzyMatch", { parentlabels: true, skosLabels: 1 }, function (err, result) {
+            if (err || !result || result.length === 0) {
+                return callback(null, []);
+            }
+            var items = [];
+            result.forEach(function (classItem) {
+                var matches = classItem.matches;
+                for (var source in matches) {
+                    matches[source].forEach(function (match) {
+                        items.push({
+                            id: match.id,
+                            label: match.label + " (" + source + ")",
+                            source: source,
                         });
-                    }
-                });
-                callback(null, items);
-            },
-        );
+                    });
+                }
+            });
+            callback(null, items);
+        });
     };
 
     self.getSourceAndImports = function (source) {

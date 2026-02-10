@@ -256,6 +256,15 @@ var NodeInfosAxioms = (function () {
         Axioms_graph.clearGraph();
         NodeInfosAxioms.loadAxiomsJstree();
     };
+    self.showNodeAxioms = function () {
+        var node = Axioms_graph.currentGraphNode;
+        if (!node || !node.data) {
+            return;
+        }
+        var resource = { data: { id: node.data.id, source: self.currentSource, label: node.data.label } };
+        self.init(self.currentSource, resource, "mainDialogDiv");
+    };
+
     self.nodeInfos = function () {
         /* self.nodeInfosAxiomsLoaded = true;
         self.nodeBeforeNodeInfos = JSON.parse(JSON.stringify(NodeInfosWidget.currentNode));

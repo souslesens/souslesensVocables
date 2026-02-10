@@ -60,6 +60,10 @@ var Axiom_UI = (function () {
         });
 
         $("#axiomEditor_showTriplesBtn").text(config.showTriplesLabel);
+
+        if (config.visible.indexOf("nodeInfosAxioms_activeLegendDiv") > -1 && Axiom_activeLegend.axiomsLegendVisjsGraph) {
+            Axiom_activeLegend.axiomsLegendVisjsGraph.network.fit();
+        }
     };
 
     return self;

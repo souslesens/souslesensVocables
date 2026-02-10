@@ -846,7 +846,54 @@ var Axiom_activeLegend = (function () {
             var triples = self.getTriples({all:true});
 
             async.series([
+                /*function (callbackSeries) {
+                    return callbackSeries();
+                
+                    self.saveNewNodes(triples.newNodesToStore, function (err, labelsMap) {//new nodes created on the fly
+                        if (err) {
+                            return callbackSeries(err)
+                        }
+                        newNodesLabelsMap = labelsMap;
+                        callbackSeries()
+
+
+                    })
+                },
                 //update  basicAxiomsCache  triples stored into basicAxiomsCache
+                function (callbackSeries) {
+                    if(newNodesLabelsMap){
+
+                        var basicAxiomsTriples = [] //triples stored into basicAxiomsCache
+                        triples.forEach(function (triple) {
+
+                            var item = {
+                                s: triple.subject,
+                                p: triple.predicate,
+                                o: triple.object
+                            }
+
+                            if(newNodesLabelsMap) {
+
+                                if (newNodesLabelsMap[item.s]) {
+                                    item.sLabel = newNodesLabelsMap[item.s];
+                                }
+                                if (newNodesLabelsMap[item.p]) {
+                                    item.pLabel = newNodesLabelsMap[item.p];
+                                }
+                                if (newNodesLabelsMap[item.o]) {
+                                    item.oLabel = newNodesLabelsMap[item.o];
+                                }
+                            }
+                            basicAxiomsTriples.push(item)
+
+                        })
+                    }
+                    AxiomExtractor.addBasicAxioms(self.currentSource, basicAxiomsTriples)
+
+                    callbackSeries()
+                },*/
+
+
                 function (callbackSeries) {
                     var basicAxiomsTriples = self.convertTriplesToCacheFormat(triples);
                     AxiomExtractor.addBasicAxioms(self.currentSource, basicAxiomsTriples)

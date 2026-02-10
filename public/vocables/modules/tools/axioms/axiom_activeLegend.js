@@ -537,6 +537,8 @@ var Axiom_activeLegend = (function () {
 
         }
 
+        triples = self.transformBlankNodesToRandomUri(triples);
+
         var jstreeData = [];
         var rootNodeId = triples[0].subject;
 
@@ -588,7 +590,7 @@ var Axiom_activeLegend = (function () {
             options = {};
         }
         if (!self.showTriplesActivated) {
-            return self.visjsGraphToTriples();
+            return self.transformBlankNodesToRandomUri(self.visjsGraphToTriples());
         }
         var isInitializedJstree = self.isInitializedJstree();
         if(!isInitializedJstree){
@@ -638,16 +640,20 @@ var Axiom_activeLegend = (function () {
 
 
 
-        var triples = Axioms_graph.currentAxiomTriples
+        var allTriples = Axioms_graph.currentAxiomTriples
+        var selectedTriples = [];
+
+        allTriples.forEach(function (triple, index) {
+            if (checkedNodes.indexOf("triple" + index) > -1) {
+                selectedTriples.push(triple);
+            }
+        });
 
         var graphUri = Config.sources[NodeInfosAxioms.currentSource].graphUri
         var query = "with graph <" + graphUri + ">\ndelete {\n"
 
-        triples.forEach(function (triple, index) {
-            if (checkedNodes.indexOf("triple" + index) > -1) {
-                query += Sparql_generic.triplesObjectToString(triple) + "\n";
-            }
-
+        selectedTriples.forEach(function (triple) {
+            query += Sparql_generic.triplesObjectToString(triple) + "\n";
         });
         query += "}"
 
@@ -657,7 +663,7 @@ var Axiom_activeLegend = (function () {
                 return alert(err);
             }
 
-            AxiomExtractor.deleteBasicAxioms(NodeInfosAxioms.currentSource, triples)
+            AxiomExtractor.deleteBasicAxioms(NodeInfosAxioms.currentSource, selectedTriples)
             return alert("triples deleted")
         })
 
@@ -818,7 +824,6 @@ var Axiom_activeLegend = (function () {
     self.saveAxiom = function (callback) {
         if (confirm("Save Axiom")) {
             var triples = self.getTriples({all:true});
-            triples = self.transformBlankNodesToRandomUri(triples);
             var newNodesLabelsMap = {}
 
             async.series([
@@ -1227,12 +1232,27 @@ var Axiom_activeLegend = (function () {
 
         var blankNodeMapping = {};
 
+        var validBlankNodeFormat = /^_:b[0-9a-f]*[a-f][0-9a-f]*$/;
+
+        function generateHexaWithLetter(length) {
+            var result = common.getRandomHexaId(length);
+            if (!/[a-f]/.test(result)) {
+                var letters = "abcdef";
+                var pos = Math.floor(Math.random() * length);
+                result = result.substring(0, pos) + letters[Math.floor(Math.random() * 6)] + result.substring(pos + 1);
+            }
+            return result;
+        }
+
         function getOrCreateRandomBlankNode(nodeId) {
             if (!nodeId || typeof nodeId !== "string" || !nodeId.startsWith("_:b")) {
                 return nodeId;
             }
+            if (validBlankNodeFormat.test(nodeId)) {
+                return nodeId;
+            }
             if (!blankNodeMapping[nodeId]) {
-                blankNodeMapping[nodeId] = "_:b" + common.getRandomHexaId(7);
+                blankNodeMapping[nodeId] = "_:b" + generateHexaWithLetter(7);
             }
             return blankNodeMapping[nodeId];
         }

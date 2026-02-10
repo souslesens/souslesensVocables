@@ -220,15 +220,14 @@ var AxiomExtractor = (function () {
         })
     };
     self.deleteBasicAxioms = function (source, triples) {
-        triples.forEach(function (triple2) {
-            if(self.basicAxioms[source][triple2.subject])
-            self.basicAxioms[source][triple2.subject].forEach(function (triple, index) {
-                if (triple.s == triple2.subject && triple.p == triple2.predicate && triple.o == triple2.object) {
-                    self.basicAxioms[source][triple2.subject].splice(index, 1)
-                }
-
-            })
-        })
+        triples.forEach(function (tripleToDelete) {
+            if (!self.basicAxioms[source] || !self.basicAxioms[source][tripleToDelete.subject]) {
+                return;
+            }
+            self.basicAxioms[source][tripleToDelete.subject] = self.basicAxioms[source][tripleToDelete.subject].filter(function (triple) {
+                return !(triple.s == tripleToDelete.subject && triple.p == tripleToDelete.predicate && triple.o == tripleToDelete.object);
+            });
+        });
     };
 
 

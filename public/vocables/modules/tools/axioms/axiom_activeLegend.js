@@ -55,6 +55,7 @@ var Axiom_activeLegend = (function () {
         self.currentNodeType = null;
         if (node && node.data) {
             self.currentLegendNode = node;
+            Axiom_UI.showSuggestionsPanel();
 
             if (node.data.type == "Class") {
                 self.hideLegendItems();
@@ -336,6 +337,7 @@ var Axiom_activeLegend = (function () {
 
         self.hideForbiddenResources(Axioms_graph.currentGraphNode.data.type);
         $("#axioms_legend_suggestionsSelect").empty();
+        Axiom_UI.showLegendPanel();
     };
 
     self.updateCurrentGraphNode = function (newVisjsNode) {
@@ -487,9 +489,9 @@ var Axiom_activeLegend = (function () {
     self.onNodeGraphClick = function (node, point, nodeEvent) {
         if (node && node.data) {
             Axioms_graph.currentGraphNode = node;
-            Axioms_graph.currentGraphNode = node;
             Axioms_graph.outlineNode(Axioms_graph.currentGraphNode.id);
             Axiom_activeLegend.hideForbiddenResources("" + node.data.type);
+            Axiom_UI.showLegendPanel();
             if (nodeEvent.ctrlKey) {
                 if (node.data.type.indexOf("Class") > -1 || node.data.type.indexOf("ObjectProperty") > -1) {
                     NodeInfosWidget.showNodeInfos(NodeInfosAxioms.currentSource, node, "mainDialogDiv");

@@ -11,6 +11,7 @@ var Axiom_UI = (function () {
         "axiomEditor_showTriplesBtn",
         "axiomEditor_copyTriplesBtn",
         "axiomEditor_deleteTriplesBtn",
+        "axiomsEditor_textDiv",
     ];
 
     var VIEW_CONFIG = {
@@ -21,6 +22,7 @@ var Axiom_UI = (function () {
                 "axiomEditor_clearBtn",
                 "axiomEditor_saveBtn",
                 "axiomEditor_showTriplesBtn",
+                
             ],
             showTriplesLabel: "show triples",
         },
@@ -37,6 +39,7 @@ var Axiom_UI = (function () {
                 "axiomEditor_saveBtn",
                 "axiomEditor_copyTriplesBtn",
                 "axiomEditor_deleteTriplesBtn",
+                "axiomsEditor_textDiv",
             ],
             showTriplesLabel: "show triples",
         },
@@ -62,6 +65,19 @@ var Axiom_UI = (function () {
         $("#axiomEditor_showTriplesBtn").text(config.showTriplesLabel);
 
         if (config.visible.indexOf("nodeInfosAxioms_activeLegendDiv") > -1 && Axiom_activeLegend.axiomsLegendVisjsGraph) {
+            Axiom_activeLegend.axiomsLegendVisjsGraph.network.fit();
+        }
+    };
+
+    self.showSuggestionsPanel = function () {
+        $("#nodeInfosAxioms_activeLegendDiv").css("visibility", "hidden");
+        $("#nodeInfosAxioms_newAxiomPanel").css("visibility", "visible");
+    };
+
+    self.showLegendPanel = function () {
+        $("#nodeInfosAxioms_newAxiomPanel").css("visibility", "hidden");
+        $("#nodeInfosAxioms_activeLegendDiv").css("visibility", "visible");
+        if (Axiom_activeLegend.axiomsLegendVisjsGraph) {
             Axiom_activeLegend.axiomsLegendVisjsGraph.network.fit();
         }
     };

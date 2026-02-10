@@ -664,7 +664,23 @@ var Axiom_activeLegend = (function () {
             }
 
             AxiomExtractor.deleteBasicAxioms(NodeInfosAxioms.currentSource, selectedTriples)
-            return alert("triples deleted")
+
+            var remainingTriples = allTriples.filter(function (triple) {
+                return !selectedTriples.some(function (deleted) {
+                    return deleted.subject === triple.subject && deleted.predicate === triple.predicate && deleted.object === triple.object;
+                });
+            });
+
+            Axioms_graph.clearGraph();
+            if (remainingTriples.length > 0) {
+                Axioms_graph.currentAxiomTriples = remainingTriples;
+                var rootNodeId = remainingTriples[0].subject;
+                var divId = "nodeInfosAxioms_graphDiv";
+                Axioms_graph.drawNodeAxioms2(NodeInfosAxioms.currentSource, rootNodeId, remainingTriples, divId, {});
+                self.showTriples();
+            }
+
+            alert("triples deleted")
         })
 
     };
@@ -824,54 +840,12 @@ var Axiom_activeLegend = (function () {
     self.saveAxiom = function (callback) {
         if (confirm("Save Axiom")) {
             var triples = self.getTriples({all:true});
-            var newNodesLabelsMap = {}
 
             async.series([
-                //save New nodes (created on the fly)
-                function (callbackSeries) {
-                    return callbackSeries();
-                    /*
-                    self.saveNewNodes(triples.newNodesToStore, function (err, labelsMap) {//new nodes created on the fly
-                        if (err) {
-                            return callbackSeries(err)
-                        }
-                        newNodesLabelsMap = labelsMap;
-                        callbackSeries()
-
-
-                    })*/
-                },
                 //update  basicAxiomsCache  triples stored into basicAxiomsCache
                 function (callbackSeries) {
-                    if(newNodesLabelsMap){
-
-                        var basicAxiomsTriples = [] //triples stored into basicAxiomsCache
-                        triples.forEach(function (triple) {
-
-                            var item = {
-                                s: triple.subject,
-                                p: triple.predicate,
-                                o: triple.object
-                            }
-
-                            if(newNodesLabelsMap) {
-
-                                if (newNodesLabelsMap[item.s]) {
-                                    item.sLabel = newNodesLabelsMap[item.s];
-                                }
-                                if (newNodesLabelsMap[item.p]) {
-                                    item.pLabel = newNodesLabelsMap[item.p];
-                                }
-                                if (newNodesLabelsMap[item.o]) {
-                                    item.oLabel = newNodesLabelsMap[item.o];
-                                }
-                            }
-                            basicAxiomsTriples.push(item)
-
-                        })
-                    }
+                    var basicAxiomsTriples = self.convertTriplesToCacheFormat(triples);
                     AxiomExtractor.addBasicAxioms(self.currentSource, basicAxiomsTriples)
-
                     callbackSeries()
                 },
                   //write axiomtriples
@@ -1217,6 +1191,104 @@ var Axiom_activeLegend = (function () {
             self.bNodeCounter = 0;
         }
         return "_:b" + self.bNodeCounter++;
+    };
+
+    self.convertTriplesToCacheFormat = function (triples) {
+        var RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
+        var RDF_REST = "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest";
+        var RDF_NIL = "http://www.w3.org/1999/02/22-rdf-syntax-ns#nil";
+        var OWL_ON_PROPERTY = "http://www.w3.org/2002/07/owl#onProperty";
+        var OWL_RESTRICTION = "http://www.w3.org/2002/07/owl#Restriction";
+
+        var constraintTypes = [
+            "http://www.w3.org/2002/07/owl#someValuesFrom",
+            "http://www.w3.org/2002/07/owl#allValuesFrom",
+            "http://www.w3.org/2002/07/owl#hasValue",
+            "http://www.w3.org/2002/07/owl#onClass"
+        ];
+        var cardinalityTypes = [
+            "http://www.w3.org/2002/07/owl#maxCardinality",
+            "http://www.w3.org/2002/07/owl#minCardinality",
+            "http://www.w3.org/2002/07/owl#cardinality",
+            "http://www.w3.org/2002/07/owl#qualifiedCardinality",
+            "http://www.w3.org/2002/07/owl#maxQualifiedCardinality",
+            "http://www.w3.org/2002/07/owl#minQualifiedCardinality"
+        ];
+
+        var restrictionSubjects = {};
+        triples.forEach(function (triple) {
+            if (triple.predicate === RDF_TYPE && triple.object === OWL_RESTRICTION) {
+                restrictionSubjects[triple.subject] = { s: triple.subject, type: "Restriction" };
+            }
+        });
+
+        triples.forEach(function (triple) {
+            var restriction = restrictionSubjects[triple.subject];
+            if (!restriction) {
+                return;
+            }
+            if (triple.predicate === OWL_ON_PROPERTY) {
+                restriction.p = triple.object;
+            } else if (constraintTypes.indexOf(triple.predicate) > -1) {
+                restriction.o = triple.object;
+                restriction.constraintType = triple.predicate;
+            } else if (cardinalityTypes.indexOf(triple.predicate) > -1) {
+                restriction.cardinalityType = triple.predicate;
+                restriction.cardinalityValue = triple.object;
+            }
+        });
+
+        var cacheTriples = [];
+
+        triples.forEach(function (triple) {
+            if (restrictionSubjects[triple.subject]) {
+                return;
+            }
+            if (triple.predicate === RDF_TYPE && triple.subject.startsWith("_:")) {
+                return;
+            }
+            if (triple.predicate === RDF_REST && triple.object === RDF_NIL) {
+                return;
+            }
+
+            var item = {
+                s: triple.subject,
+                p: triple.predicate,
+                o: triple.object
+            };
+
+            var sResource = Axiom_manager.allResourcesMap[item.s];
+            var pResource = Axiom_manager.allResourcesMap[item.p];
+            var oResource = Axiom_manager.allResourcesMap[item.o];
+            if (sResource && sResource.label) {
+                item.sLabel = sResource.label;
+            }
+            if (pResource && pResource.label) {
+                item.pLabel = pResource.label;
+            }
+            if (oResource && oResource.label) {
+                item.oLabel = oResource.label;
+            }
+
+            cacheTriples.push(item);
+        });
+
+        Object.keys(restrictionSubjects).forEach(function (key) {
+            var restriction = restrictionSubjects[key];
+            if (restriction.p && restriction.o) {
+                var pResource = Axiom_manager.allResourcesMap[restriction.p];
+                var oResource = Axiom_manager.allResourcesMap[restriction.o];
+                if (pResource && pResource.label) {
+                    restriction.pLabel = pResource.label;
+                }
+                if (oResource && oResource.label) {
+                    restriction.oLabel = oResource.label;
+                }
+                cacheTriples.push(restriction);
+            }
+        });
+
+        return cacheTriples;
     };
 
     /**

@@ -4,6 +4,7 @@ import Axioms_graph from "./axioms_graph.js";
 import CommonBotFunctions from "../../bots/_commonBotFunctions.js";
 import axioms_graph from "./axioms_graph.js";
 import Axiom_activeLegend from "./axiom_activeLegend.js";
+import Axiom_UI from "./axiom_UI.js";
 
 var NodeInfosAxioms = (function () {
     var self = {};
@@ -20,6 +21,7 @@ var NodeInfosAxioms = (function () {
                 $("#" + divId).dialog("open");
             }
             Axiom_activeLegend.drawLegend("nodeInfosAxioms_activeLegendDiv");
+            Axiom_UI.setView("visualisation");
             if (!Lineage_sources.isSourceEditableForUser(self.currentSource)) {
                 $("#nodeInfosAxioms_newAxiomBtn").css("display", "none");
             }
@@ -177,6 +179,7 @@ var NodeInfosAxioms = (function () {
     self.onAxiomJstreeSelectNode = function (evt, obj) {
         var node = obj.node;
         self.currentJstreeNode = node;
+        Axiom_UI.setView("visualisation");
         self.switchLeftPanelDisplay("show");
         Axioms_graph.clearGraph();
         Axiom_activeLegend.isLegendActive = false;
@@ -364,6 +367,7 @@ var NodeInfosAxioms = (function () {
                 self.currentJstreeNode ? self.currentJstreeNode.data.id : null,
             );
         }
+        Axiom_UI.setView("newAxiom");
         self.switchLeftPanelDisplay("new");
 
         var options = Axiom_activeLegend.axiomtypes;

@@ -538,7 +538,9 @@ class BotEngineClass {
      */
     showListWithSearch(initialValues, varToFill, searchFn, onSearchResultSelected) {
         this.showList(initialValues, varToFill);
-        $("#" + this.divId).find("#botFilterProposalDiv").show();
+        $("#" + this.divId)
+            .find("#botFilterProposalDiv")
+            .show();
         var self = this;
         var isSearchMode = false;
         var filterInput = $("#" + this.divId).find("#botFilterProposalInput");

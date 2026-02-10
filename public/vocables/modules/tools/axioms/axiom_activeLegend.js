@@ -18,6 +18,7 @@ var Axiom_activeLegend = (function () {
     var self = {};
     self.axiomsLegendVisjsGraph = null;
     self.isLegendActive = false;
+    self.showTriplesActivated = false;
     self.axiomtypes = ["SubClassOf", "EquivalentClass", "DisjointWith", "DisjointUnionOf"];
 
     self.init = function (graphLegendDiv, axiomGraphDiv, source, resource, axiomType) {
@@ -33,6 +34,7 @@ var Axiom_activeLegend = (function () {
         self.drawNewAxiom(self.currentResource);
         self.hideForbiddenResources("Class");
         self.isLegendActive = true;
+        self.showTriplesActivated = false;
         self.bNodeCounter = 0;
         self.maxItemsInJstreePerSource = 250;
     };
@@ -523,6 +525,7 @@ var Axiom_activeLegend = (function () {
     };
 
     self.showTriples = function (callback) {
+        self.showTriplesActivated = true;
         var triples = []
 
         if (Axioms_graph.currentAxiomTriples  && ! NodeInfosAxioms.isNewAxiom ) {//saved axiom or new graph with axiomIds
@@ -583,6 +586,9 @@ var Axiom_activeLegend = (function () {
     self.getTriples = function (options) {
         if(!options){
             options = {};
+        }
+        if (!self.showTriplesActivated) {
+            return self.visjsGraphToTriples();
         }
         var isInitializedJstree = self.isInitializedJstree();
         if(!isInitializedJstree){

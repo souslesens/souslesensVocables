@@ -535,20 +535,26 @@ var Axiom_activeLegend = (function () {
         }
 
         var jstreeData = [];
+        var rootNodeId = triples[0].subject;
+
+        jstreeData.push({
+            id: "triplesRoot",
+            text: "<b>" + Sparql_common.getLabelFromURI(rootNodeId) + "</b>",
+            parent: "#",
+            data: { id: rootNodeId }
+        });
 
         triples.forEach(function (triple, index) {
             jstreeData.push({
                 id: "triple" + index,
                 text: triple.subject + " <b>" + triple.predicate + "</b> " + triple.object,
-                parent: "#",
+                parent: "triplesRoot",
                 data: {
                     subject: triple.subject,
                     predicate: triple.predicate,
                     object: triple.object,
-                     
                 }
-            })
-
+            });
         });
 
 
@@ -558,7 +564,6 @@ var Axiom_activeLegend = (function () {
         JstreeWidget.loadJsTree("axiomsTriplesJstree", jstreeData, {withCheckboxes: true}, function (err, result) {
             var divId = "nodeInfosAxioms_graphDiv";
             var options = {};
-            var rootNodeId=triples[0].subject
             Axioms_graph.drawNodeAxioms2(NodeInfosAxioms.currentSource,rootNodeId,triples, divId,options)
             if (callback) {
                 return callback(err)
@@ -604,10 +609,12 @@ var Axiom_activeLegend = (function () {
         }
         checkedNodes.forEach(function (nodeId) {
             var node = $("#axiomsTriplesJstree").jstree(true).get_node(nodeId);
-            triples.push(node.data);
+            if (node.data && node.data.subject && node.data.predicate && node.data.object) {
+                triples.push(node.data);
+            }
         });
         return triples;
-        
+
 
     }
     self.isInitializedJstree = function () {
@@ -800,10 +807,12 @@ var Axiom_activeLegend = (function () {
         Axioms_graph.axiomsVisjsGraph.clearGraph();
         NodeInfosAxioms.newAxiom(true);
     };
-
-    self.saveAxiom = function () {
+     
+    
+    self.saveAxiom = function (callback) {
         if (confirm("Save Axiom")) {
             var triples = self.getTriples({all:true});
+            triples = self.transformBlankNodesToRandomUri(triples);
             var newNodesLabelsMap = {}
 
             async.series([
@@ -856,7 +865,7 @@ var Axiom_activeLegend = (function () {
                 },
                   //write axiomtriples
                 function (callbackSeries) {
-                    var triples = self.visjsGraphToTriples();
+                   
                     Sparql_generic.insertTriples(self.currentSource, triples, {}, function (err, result) {
                         if (err) {
                             return callbackSeries(err)
@@ -904,13 +913,10 @@ var Axiom_activeLegend = (function () {
             //  });
         }
 
-               
-        
+
+
     };
 
-    self.addAxiomToAxomsJstree = function (manchesterStr, triples) {
-        var id = common.getRandomHexaId(10);
-        var jstreeData = [];
     self.addAxiomToAxomsJstree = function (manchesterStr, triples) {
         var id = common.getRandomHexaId(10);
         var jstreeData = [];
@@ -939,46 +945,7 @@ var Axiom_activeLegend = (function () {
         ];
         JstreeWidget.addNodesToJstree("nodeInfosAxioms_axiomsJstreeDiv", self.axiomType, jstreeData);
     };
-        var axiomTypeNode = $("#nodeInfosAxioms_axiomsJstreeDiv").jstree().get_node(self.axiomType);
-        if (!axiomTypeNode) {
-            jstreeData.push({
-                id: self.axiomType,
-                text: self.axiomType,
-                parent: "rootNode",
-            });
-        }
-        JstreeWidget.addNodesToJstree("nodeInfosAxioms_axiomsJstreeDiv", "rootNode", jstreeData);
-        jstreeData = [
-            {
-                id: id,
-                text: manchesterStr,
-                parent: self.axiomType,
-                data: {
-                    id: manchesterStr,
-                    label: manchesterStr,
-                    triples: triples,
-                    manchester: manchesterStr,
-                },
-            },
-        ];
-        JstreeWidget.addNodesToJstree("nodeInfosAxioms_axiomsJstreeDiv", self.axiomType, jstreeData);
-    };
 
-    self.axiomTriplesToManchester = function (triples, callback) {
-        Axiom_manager.getManchesterAxiomsFromTriples(self.currentSource, triples, function (err, result) {
-            if (err) {
-                if (callback) {
-                    return callback(err);
-                }
-                return MainController.errorAlert(err);
-            }
-            if (!result) {
-                var message = "Error : cannot generate manchester form";
-                if (callback) {
-                    return callback(message);
-                }
-                return alert(message);
-            }
     self.axiomTriplesToManchester = function (triples, callback) {
         Axiom_manager.getManchesterAxiomsFromTriples(self.currentSource, triples, function (err, result) {
             if (err) {
@@ -1030,14 +997,6 @@ var Axiom_activeLegend = (function () {
                 edgesFromMap[edge.from].push(edge);
             }
         });
-        edges.forEach(function (edge) {
-            if (nodesMap[edge.from] && nodesMap[edge.to]) {
-                if (!edgesFromMap[edge.from]) {
-                    edgesFromMap[edge.from] = [];
-                }
-                edgesFromMap[edge.from].push(edge);
-            }
-        });
 
         // check Nodes without superClass to write them in the triplestore
         var newNodesToStore = []
@@ -1051,27 +1010,10 @@ var Axiom_activeLegend = (function () {
                     newOrphanNodes.push(node)
                 } else {
                     node.data.superEntity = toNode.id
-        // check Nodes without superClass to write them in the triplestore
-        var newNodesToStore = []
-        var newOrphanNodes = []
-        nodes.forEach(function (node) {
-            var x = node
-            if (node.data.isNew) {// node created on the fly
-                var toNode = edgesFromMap[node.id]
-                if (!toNode) {//if not superClassOr property
-                    node.data.superEntity = "http://www.w3.org/2002/07/owl#Thing"
-                    newOrphanNodes.push(node)
-                } else {
-                    node.data.superEntity = toNode.id
-
-                }
-                newNodesToStore.push(node)
-            }
                 }
                 newNodesToStore.push(node)
             }
 
-        })
         })
 
         if (newOrphanNodes.length > 0) {
@@ -1082,27 +1024,11 @@ var Axiom_activeLegend = (function () {
             if (!confirm("Some nodes have no super class or property, continue aniway ?")) {
                 return;
             }
-        if (newOrphanNodes.length > 0) {
-            var str = ""
-            newOrphanNodes.forEach(function (node) {
-                str += node + ","
-            })
-            if (!confirm("Some nodes have no super class or property, continue aniway ?")) {
-                return;
-            }
 
         }
-        }
-
 
         var triples = [];
-        var triples = [];
 
-        function recurse(nodeId) {
-            var edges = edgesFromMap[nodeId];
-            if (!edges) {
-                return;
-            }
         function recurse(nodeId) {
             var edges = edgesFromMap[nodeId];
             if (!edges) {
@@ -1114,20 +1040,7 @@ var Axiom_activeLegend = (function () {
                 var fromNode = nodesMap[nodeId];
                 var toNode = nodesMap[edge.to];
                 var cardinalityStr = "";
-            edges.forEach(function (edge) {
-                var triple = {};
-                var fromNode = nodesMap[nodeId];
-                var toNode = nodesMap[edge.to];
-                var cardinalityStr = "";
 
-                var object = toNode.data.id;
-                var predicate = null;
-                if (fromNode.data.predicate) {
-                    predicate = fromNode.data.predicate;
-                }
-                if (!fromNode.data.type) {
-                    return;
-                }
                 var object = toNode.data.id;
                 var predicate = null;
                 if (fromNode.data.predicate) {
@@ -1207,12 +1120,7 @@ var Axiom_activeLegend = (function () {
                 recurse(toNode.id);
             });
         }
-                recurse(toNode.id);
-            });
-        }
 
-        var rootNode = self.newAxiomNode || nodes[0];
-        recurse(rootNode.id);
         var rootNode = self.newAxiomNode || nodes[0];
         recurse(rootNode.id);
 
@@ -1233,8 +1141,6 @@ var Axiom_activeLegend = (function () {
 
             } else {
 
-            }
-        }
             }
         }
 
@@ -1258,10 +1164,7 @@ var Axiom_activeLegend = (function () {
 
         return triples;
     };
-        return triples;
-    };
 
-    self.saveNewNodes = function (nodes, callback) {// nodes created on the fly
     self.saveNewNodes = function (nodes, callback) {// nodes created on the fly
 
         if (!nodes || nodes.length == 0) {
@@ -1304,11 +1207,40 @@ var Axiom_activeLegend = (function () {
         }
         return "_:b" + self.bNodeCounter++;
     };
-    self.getBlankNodeId = function () {
-        if (!self.bNodeCounter) {
-            self.bNodeCounter = 0;
+
+    /**
+     * Transforms sequential blank node IDs to random URI blank nodes
+     * Maps existing blank nodes (_:b0, _:b1, etc.) to new random format (_:b + 7 hex digits)
+     * @param {Array} triples - Array of triple objects with subject, predicate, object properties
+     * @returns {Array} - Triples with transformed blank node URIs
+     */
+    self.transformBlankNodesToRandomUri = function (triples) {
+        if (!triples || triples.length === 0) {
+            return triples;
         }
-        return "_:b" + self.bNodeCounter++;
+
+        var blankNodeMapping = {};
+
+        function getOrCreateRandomBlankNode(nodeId) {
+            if (!nodeId || typeof nodeId !== "string" || !nodeId.startsWith("_:b")) {
+                return nodeId;
+            }
+            if (!blankNodeMapping[nodeId]) {
+                blankNodeMapping[nodeId] = "_:b" + common.getRandomHexaId(7);
+            }
+            return blankNodeMapping[nodeId];
+        }
+
+        var transformedTriples = [];
+        triples.forEach(function (triple) {
+            transformedTriples.push({
+                subject: getOrCreateRandomBlankNode(triple.subject),
+                predicate: triple.predicate,
+                object: getOrCreateRandomBlankNode(triple.object)
+            });
+        });
+
+        return transformedTriples;
     };
 
     self.showCreateResourceBot = function (resourceType, filteredUris) {
@@ -1339,20 +1271,7 @@ var Axiom_activeLegend = (function () {
             //   self.onLegendNodeClick({data:{id:"Class"}})
         });
     };
-            $("#axioms_legend_suggestionsSelect option").eq(0).before($("<option></option>").val(CreateAxiomResource_bot.params.newObject.id).text(CreateAxiomResource_bot.params.newObject.label));
-            //   self.onLegendNodeClick({data:{id:"Class"}})
-        });
-    };
 
-    self.createAxiomFromGraph = function () {
-        self.newAxiomNode = Axioms_graph.currentGraphNode;
-        NodeInfosAxioms.newAxiom();
-        var newNodes = [];
-        Axioms_graph.axiomsVisjsGraph.data.nodes.forEach(function (node) {
-            if (node.id != self.newAxiomNode.id) {
-                var color = common.colorToRgba(node.color, 1);
-                var fontColor = common.colorToRgba(Lineage_whiteboard.defaultNodeFontColor, 1);
-                var opacity = Lineage_whiteboard.defaultLowOpacity;
     self.createAxiomFromGraph = function () {
         self.newAxiomNode = Axioms_graph.currentGraphNode;
         NodeInfosAxioms.newAxiom();
@@ -1376,9 +1295,6 @@ var Axiom_activeLegend = (function () {
         /*     var options = self.axiomTypes
         common.fillSelectOptions("axioms_legend_suggestionsSelect", options, false);*/
     };
-        /*     var options = self.axiomTypes
-        common.fillSelectOptions("axioms_legend_suggestionsSelect", options, false);*/
-    };
 
     self.loadSuggestionSelectJstree = function (objects, parentName) {
         if ($("#suggestionsSelectJstreeDiv").jstree()) {
@@ -1390,35 +1306,10 @@ var Axiom_activeLegend = (function () {
 
         self.initSourcesMap(objects);
         self.filterSuggestionList = null;
-        self.initSourcesMap(objects);
-        self.filterSuggestionList = null;
 
         var options = {
             openAll: true,
-        var options = {
-            openAll: true,
 
-            contextMenu: function (node, x) {
-                var items = {};
-                if (self.currentLegendNode.data.type == "Class" || self.currentLegendNode.data.type == "ObjectProperty") {
-                    if (node.data && node.data.resourceType != "searchClass") {
-                        items.NodeInfos = {
-                            label: "nodeInfos",
-                            action: function (_e) {
-                                NodeInfosWidget.showNodeInfos(self.currentSource, self.currentResource, "smallDialogDiv");
-                            },
-                        };
-                    }
-                }
-                return items;
-            },
-            selectTreeNodeFn: function (event, obj) {
-                self.currentSuggestedNode = obj.node;
-                var resourceUri = obj.node.data.id;
-                self.onSuggestionsSelect(resourceUri);
-            },
-        };
-        var jstreeData = [];
             contextMenu: function (node, x) {
                 var items = {};
                 if (self.currentLegendNode.data.type == "Class" || self.currentLegendNode.data.type == "ObjectProperty") {
@@ -1457,34 +1348,11 @@ var Axiom_activeLegend = (function () {
                 label: parentName,
             },
         });
-        var color = "#333";
-        if (parentName == "Class") {
-            color = "#00afef";
-        } else if (parentName == "ObjectProperty") {
-            color = "#409304";
-        } else {
-        }
-        jstreeData.push({
-            id: parentName,
-            parent: "#", // MappingModeler.currentTable,
-            text: "<span style='font-weight:bold;font-size:large;color:" + color + "'>" + parentName + "</span>",
-            data: {
-                id: parentName,
-                label: parentName,
-            },
-        });
 
         if (parentName == "Class" || parentName == "ObjectProperty") {
             var uniqueSources = {};
             var searchDone = {};
-        if (parentName == "Class" || parentName == "ObjectProperty") {
-            var uniqueSources = {};
-            var searchDone = {};
 
-            objects.forEach(function (item) {
-                if (item.source) {
-                    if (!uniqueSources[item.source]) {
-                        uniqueSources[item.source] = 1;
             objects.forEach(function (item) {
                 if (item.source) {
                     if (!uniqueSources[item.source]) {
@@ -1558,79 +1426,7 @@ var Axiom_activeLegend = (function () {
                 common.array.moveItem(jstreeData, sourceIndex, 2);
             }
         }
-                        jstreeData.push({
-                            id: item.source,
-                            parent: parentName,
-                            text: "<span style='font-size:larger;color:" + color + "'>" + item.source + "</span>",
-                            data: {
-                                id: item.source,
-                                label: item.source,
-                            },
-                        });
-                    }
-                    if (self.sourcesMap[item.source].countItems < self.maxItemsInJstreePerSource || self.sourcesMap[item.source].mappingClasses[item.id]) {
-                        jstreeData.push({
-                            id: item.id,
-                            parent: item.source,
-                            text: "<span  style='color:" + color + "'>" + item.label + "</span>",
-                            data: {
-                                id: item.id,
-                                text: item.label,
-                                resourceType: item.resourceType,
-                            },
-                        });
-                    } else if (!searchDone[item.source]) {
-                        searchDone[item.source] = 1;
-                        jstreeData.push({
-                            id: common.getRandomHexaId(5),
-                            parent: item.source,
-                            text: "<span  style='font-weight:bold;color:" + color + "'> SEARCH...</span>",
-                            data: {
-                                resourceType: "search" + item.resourceType,
-                                source: item.source,
-                            },
-                        });
-                    }
-                } else {
-                    jstreeData.push({
-                        id: item.id,
-                        parent: parentName,
-                        text: "<span  style='color:" + color + "'>" + item.label + "</span>",
-                        data: {
-                            id: item.id,
-                            text: item.label,
-                        },
-                    });
-                }
-            });
-        } else {
-            objects.forEach(function (item) {
-                if (item != "" && item != "#") {
-                    jstreeData.push({
-                        id: item.id,
-                        parent: parentName,
-                        text: "<span  style='color:" + color + "'>" + item.label + "</span>",
-                        data: {
-                            id: item.id,
-                            label: item.label,
-                        },
-                    });
-                }
-            });
-        }
-        var sourceIndex = jstreeData.findIndex((obj) => obj.id == MappingModeler.currentSLSsource);
-        if (sourceIndex > -1) {
-            if (parentName == "Properties") {
-                common.array.moveItem(jstreeData, sourceIndex, 5);
-            } else {
-                common.array.moveItem(jstreeData, sourceIndex, 2);
-            }
-        }
 
-        JstreeWidget.loadJsTree("axiomSuggestionsSelectJstreeDiv", jstreeData, options, function () {
-            //  $("#suggestionsSelectJstreeDiv").css("overflow", "unset");
-        });
-    };
         JstreeWidget.loadJsTree("axiomSuggestionsSelectJstreeDiv", jstreeData, options, function () {
             //  $("#suggestionsSelectJstreeDiv").css("overflow", "unset");
         });
@@ -1656,37 +1452,11 @@ var Axiom_activeLegend = (function () {
                     }
                 });
             }
-    self.initSourcesMap = function (resources) {
-        {
-            const sourcesMap = {};
-            resources.forEach(function (item) {
-                if (!sourcesMap[item.source]) {
-                    sourcesMap[item.source] = {
-                        countItems: 0,
-                        mappingClasses: {},
-                    };
-                }
-                sourcesMap[item.source].countItems += 1;
-            });
-            if (Axioms_graph.axiomsVisjsGraph) {
-                var graphNodes = Axioms_graph.axiomsVisjsGraph.data.nodes.get();
-                graphNodes.forEach(function (node) {
-                    if (node.data && node.data.type == "Class" && sourcesMap[node.data.source]) {
-                        sourcesMap[node.data.source].mappingClasses[node.data.id] = 1;
-                    }
-                });
-            }
 
             self.sourcesMap = sourcesMap;
         }
     };
-            self.sourcesMap = sourcesMap;
-        }
-    };
 
-    self.clearSuggestionsJstree = function () {
-        $("#axiomSuggestionsSelectJstreeDiv").jstree().empty();
-    };
     self.clearSuggestionsJstree = function () {
         $("#axiomSuggestionsSelectJstreeDiv").jstree().empty();
     };

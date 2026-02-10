@@ -12,6 +12,7 @@ import Lineage_createRelation from "../lineage/lineage_createRelation.js";
 import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
 import NodeInfosAxioms from "./nodeInfosAxioms.js";
 import Lineage_graphPaths from "../lineage/lineage_graphPaths.js";
+import Axiom_UI from "./axiom_UI.js";
 
 
 var Axiom_activeLegend = (function () {
@@ -526,6 +527,7 @@ var Axiom_activeLegend = (function () {
 
     self.showTriples = function (callback) {
         self.showTriplesActivated = true;
+        Axiom_UI.setView("showTriples");
         var triples = []
 
         if (Axioms_graph.currentAxiomTriples  && ! NodeInfosAxioms.isNewAxiom ) {//saved axiom or new graph with axiomIds

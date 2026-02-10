@@ -671,13 +671,17 @@ var Axiom_activeLegend = (function () {
                 });
             });
 
+            var jstreeInstance = $("#axiomsTriplesJstree").jstree(true);
+            checkedNodes.forEach(function (nodeId) {
+                jstreeInstance.delete_node(nodeId);
+            });
+
             Axioms_graph.clearGraph();
             if (remainingTriples.length > 0) {
                 Axioms_graph.currentAxiomTriples = remainingTriples;
                 var rootNodeId = remainingTriples[0].subject;
                 var divId = "nodeInfosAxioms_graphDiv";
                 Axioms_graph.drawNodeAxioms2(NodeInfosAxioms.currentSource, rootNodeId, remainingTriples, divId, {});
-                self.showTriples();
             }
 
             alert("triples deleted")
@@ -878,12 +882,21 @@ var Axiom_activeLegend = (function () {
 
 
             ], function (err) {
-                if (callback) {
-                    return callback(err)
+                if (err) {
                     return MainController.errorAlert(err.responseText || err);
                 }
 
+                if (!self.showTriplesActivated) {
+                    Axioms_graph.currentAxiomTriples = triples;
+                    var rootNodeId = triples[0].subject;
+                    var divId = "nodeInfosAxioms_graphDiv";
+                    Axioms_graph.drawNodeAxioms2(self.currentSource, rootNodeId, triples, divId, {});
+                    self.showTriples();
+                }
 
+                if (callback) {
+                    return callback();
+                }
             })
 
 
@@ -1244,7 +1257,7 @@ var Axiom_activeLegend = (function () {
             if (restrictionSubjects[triple.subject]) {
                 return;
             }
-            if (triple.predicate === RDF_TYPE && triple.subject.startsWith("_:")) {
+            if (triple.predicate === RDF_TYPE ) {
                 return;
             }
             if (triple.predicate === RDF_REST && triple.object === RDF_NIL) {

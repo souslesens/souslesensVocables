@@ -1,35 +1,28 @@
-const path = require("path");
-const elasticRestProxy = require(path.resolve("bin/elasticRestProxy..js"));
-const ConfigManager = require("../../../../bin/configManager.");
-const UserRequestFiltering = require("../../../../bin/userRequestFiltering.");
-const { processResponse } = require("../utils");
-const { sourceModel } = require("../../../../model/sources");
-const async = require("async");
+import elasticRestProxy from "../../../../bin/elasticRestProxy..js";
+import ConfigManager from "../../../../bin/configManager.js";
+import UserRequestFiltering from "../../../../bin/userRequestFiltering.js";
+import { processResponse } from "../utils.js";
+import { sourceModel } from "../../../../model/sources.js";
+import async from "async";
 
-module.exports = function () {
+export default function () {
     let operations = {
         POST,
     };
 
     function POST(req, res, _next) {
 
-
-       elasticRestProxy.indexDocuments( req.body.rootDir, req.body.indexName, function (err, result) {
+        elasticRestProxy.indexDocuments(req.body.rootDir, req.body.indexName, function (err, result) {
             if (err) {
                 return res.status(400).json({ error: err });
             }
             return res.status(200).json(result);
         });
-       return;
-
-
-
-
+        return;
 
         async function isIndexPrivate(userInfo, indexName, callback) {
             const sources = await sourceModel.getAllSources();
 
-            // ajout provisoire CF
             if (indexName.startsWith("whiteboard_")) {
                 return callback(null, true);
             }
@@ -50,7 +43,6 @@ module.exports = function () {
         var userInfo = null;
         async.series(
             [
-                //get UserInfo
                 function (callbackSeries) {
                     ConfigManager.getUser(req, res, function (err, _userInfo) {
                         if (err) {
@@ -60,7 +52,6 @@ module.exports = function () {
                         callbackSeries();
                     });
                 },
-                // is source private
                 function (callbackSeries) {
                     isIndexPrivate(userInfo, req.body.indexName, function (err, isPrivate) {
                         if (err) {
@@ -75,7 +66,6 @@ module.exports = function () {
                         }
                     });
                 },
-                //normal source and ConfigManager
                 function (callbackSeries) {
                     if (!ConfigManager.config) {
                         return callbackSeries();
@@ -85,7 +75,6 @@ module.exports = function () {
                                 if (_parsingError) {
                                     parsingError = _parsingError;
                                     return callbackSeries();
-                                    // return processResponse(res, parsingError, null);
                                 }
 
                                 elasticRestProxy.indexSource(req.body.indexName, req.body.data, req.body.options, function (err, _result) {
@@ -146,7 +135,7 @@ module.exports = function () {
                         },
                         rootDir: {
                             type: "string",
-                        }
+                        },
                     },
                 },
             },
@@ -164,4 +153,4 @@ module.exports = function () {
     };
 
     return operations;
-};
+}

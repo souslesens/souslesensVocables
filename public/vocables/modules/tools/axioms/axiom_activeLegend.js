@@ -353,6 +353,8 @@ var Axiom_activeLegend = (function () {
         if (!stay) {
             Axioms_graph.currentGraphNode = newVisjsNode;
             Axioms_graph.outlineNode(Axioms_graph.currentGraphNode.id);
+            var nodeLabel = newVisjsNode.data.label || Sparql_common.getLabelFromURI(newVisjsNode.data.id);
+            $("#axiom_currentNode").html("<b>Current node: </b>" + nodeLabel);
         }
     };
 
@@ -492,6 +494,8 @@ var Axiom_activeLegend = (function () {
             Axioms_graph.outlineNode(Axioms_graph.currentGraphNode.id);
             Axiom_activeLegend.hideForbiddenResources("" + node.data.type);
             Axiom_UI.showLegendPanel();
+            var nodeLabel = node.data.label || Sparql_common.getLabelFromURI(node.data.id);
+            $("#axiom_currentNode").html("<b>Current node: </b>" + nodeLabel);
             if (nodeEvent.ctrlKey) {
                 if (node.data.type.indexOf("Class") > -1 || node.data.type.indexOf("ObjectProperty") > -1) {
                     NodeInfosWidget.showNodeInfos(NodeInfosAxioms.currentSource, node, "mainDialogDiv");

@@ -1,4 +1,5 @@
 import { createInterface } from "node:readline/promises";
+import fs from "fs";
 import { readdir, readFile } from "fs/promises";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -56,39 +57,18 @@ const read = createInterface({
     output: process.stdout,
 });
 
-const defaultHost = "localhost";
-const defaultPort = 5432;
-const defaultUser = "slsv";
-const defaultName = "slsv";
-const defaultPassword = "slsv";
+// Load DB connection info from the central configuration file
+const configPath = path.resolve(__dirname, "../../config/mainConfig.json");
+const configJSON = JSON.parse(fs.readFileSync(configPath, { encoding: "utf-8" }));
+const dbConfig = configJSON.database;
 
-const databaseHost = (await read.question(`> Database host? [${defaultHost}] `)) || defaultHost;
-const databasePort = Number((await read.question(`> Database port? [${defaultPort}] `)) || defaultPort);
-const databaseUser = (await read.question(`> Database user? [${defaultUser}] `)) || defaultUser;
-const databaseName = (await read.question(`> Database name? [${defaultName}] `)) || defaultName;
-const databasePassword = (await read.question(`> Database password? [${defaultPassword}] `)) || defaultPassword;
-
-console.log(`\nUse database ${databaseName} on server ${databaseHost}:${databasePort} with password *********?`);
-
-const yes = (await read.question("Y/n ")) || "y";
-
-if (!["yes", "y", "oui", "o"].includes(yes.toLowerCase())) {
-    console.log("aborting");
-    process.exit(0);
+if (!dbConfig) {
+    console.error("❌ No database configuration found in config/mainConfig.json");
+    process.exit(1);
 }
 
-const dbConfig = {
-    client: "pg",
-    connection: {
-        host: databaseHost,
-        user: databaseUser,
-        password: databasePassword,
-        database: databaseName,
-        port: databasePort,
-    },
-};
-
-const db = knex(dbConfig);
+const knexConfig = { client: "pg", connection: dbConfig };
+const db = knex(knexConfig);
 const dbOk = await testDbConnection(db);
 console.log();
 
@@ -97,7 +77,7 @@ if (!dbOk) {
     process.exit(1);
 }
 
-const empty = await isDatabaseEmpty(dbConfig);
+const empty = await isDatabaseEmpty(knexConfig);
 if (empty) {
     await executeSqlFiles(path.resolve(__dirname, "../sql"), db);
     console.log("✅️ Database initialized!");

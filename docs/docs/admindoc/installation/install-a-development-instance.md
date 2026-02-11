@@ -71,7 +71,8 @@ npm ci
 Run the config script to create a default configuration:
 
 ```bash
-node scripts/init_configs.js
+npm run init:files
+npm run init:db
 ```
 
 ## Start docker dependencies

@@ -1,4 +1,4 @@
-import elasticRestProxy from "../../../../bin/elasticRestProxy..js";
+import elasticRestProxy from "../../../../bin/elasticRestProxy.js";
 import ConfigManager from "../../../../bin/configManager.js";
 import UserRequestFiltering from "../../../../bin/userRequestFiltering.js";
 import { processResponse } from "../utils.js";

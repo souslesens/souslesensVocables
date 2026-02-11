@@ -290,11 +290,13 @@ var Axiom_activeLegend = (function () {
             };
 
             Axioms_graph.axiomsVisjsGraph.data.nodes.add([node]);
-            self.updateCurrentGraphNode(visjsNode);
             Axioms_graph.axiomsVisjsGraph.data.edges.add([edge]);
+            Axioms_graph.currentGraphNode = visjsNode;
+            Axioms_graph.outlineNode(visjsNode.id);
+            $("#axiom_currentNode").html("<b>Current node: </b>" + label);
             self.hideForbiddenResources(Axioms_graph.currentGraphNode.data.type);
             $("#axioms_legend_suggestionsSelect").empty();
-
+            Axiom_UI.showLegendPanel();
 
             return
             var siblingObjectPropertyUri = self.getGraphSiblingUri(Axioms_graph.currentGraphNode.id, "ObjectProperty");
@@ -351,14 +353,15 @@ var Axiom_activeLegend = (function () {
             };
 
             Axioms_graph.axiomsVisjsGraph.data.nodes.add([node]);
-            self.updateCurrentGraphNode(visjsNode);
             Axioms_graph.axiomsVisjsGraph.data.edges.add([edge]);
+            Axioms_graph.currentGraphNode = visjsNode;
+            Axioms_graph.outlineNode(visjsNode.id);
+            $("#axiom_currentNode").html("<b>Current node: </b>" + label);
             self.hideForbiddenResources(Axioms_graph.currentGraphNode.data.type);
             $("#axioms_legend_suggestionsSelect").empty();
-
+            Axiom_UI.showLegendPanel();
 
             return
-
 
             var rangeClassUri = self.getGraphSiblingUri(Axioms_graph.currentGraphNode.id, "Class");
             var domainClassUri = self.getRestrictionAncestorClass(Axioms_graph.currentGraphNode.id);
@@ -552,17 +555,16 @@ var Axiom_activeLegend = (function () {
             edges.forEach(function (edge) {
                 if (edge.from == Axioms_graph.currentGraphNode.id) {
                     if (resourceType != "Class" && nodesMap[edge.to]) {
-                    if (resourceType != "Class" && nodesMap[edge.to]) {
                         var nodeToType = nodesMap[edge.to].data.type;
-
                         hiddenNodes.push(nodeToType);
                     }
                     numberOfEdgesFromCurrentGraphNode += 1;
                 }
             });
         }
-
-        hiddenNodes.push(Axioms_graph.currentGraphNode.type);
+        if(!Axioms_graph.currentGraphNode.data.isNew) {
+            hiddenNodes.push(Axioms_graph.currentGraphNode.type);
+        }
         if (numberOfEdgesFromCurrentGraphNode > 1 && resourceType != "DisjointWith") {
             //dont alllow more than two edges from a node
             hiddenNodes = null;
@@ -1370,25 +1372,6 @@ var Axiom_activeLegend = (function () {
         triples.newNodesToStore = newNodesToStore
         Axioms_graph.currentAxiomTriples = triples
 
-        //update AxiomIds with triples indexes.
-        triples.forEach(function(triple,index){
-            var node=nodesMap[triple.subject]
-            if( node && !node.data.axiomId){
-                node.data.axiomId=index
-            }
-
-             node=nodesMap[triple.object]
-            if( node && !node.data.axiomId){
-                node.data.axiomId=index
-
-            }
-        }
-
-
-        triples.newNodesToStore = newNodesToStore
-        Axioms_graph.currentAxiomTriples = triples
-
-        //update AxiomIds with triples indexes.
         triples.forEach(function(triple,index){
             var node=nodesMap[triple.subject]
             if( node && !node.data.axiomId){
@@ -1399,49 +1382,11 @@ var Axiom_activeLegend = (function () {
             if( node && !node.data.axiomId){
                 node.data.axiomId=index
             }
-        })
-        NodeInfosAxioms.isNewAxiom=false
         })
         NodeInfosAxioms.isNewAxiom=false
 
         return triples;
     };
-
-    self.saveNewNodes = function (nodes, callback) {// nodes created on the fly
-
-        if (!nodes || nodes.length == 0) {
-            return callback();
-        }
-        var labelsMap = {}
-        async.eachSeries(nodes, function (node, callbackEach) {
-            if (node.data.type == "Class") {
-                var superClass = node.data.superEntity || "http://www.w3.org/2002/07/owl#Class";
-                var triples = Lineage_createResource.getResourceTriples(self.currentSource, "owl:Class", null, node.data.label, superClass);
-                triples.forEach(function (triple) {
-                    if (triple.predicate.indexOf("label") > -1) {
-                        labelsMap[triple.subject] = triple.object
-                    }
-                })
-                Lineage_createResource.writeResource(self.currentSource, triples, function (err, resourceId) {
-                    if (err) {
-                        return callbackEach(err)
-                    }
-                    callbackEach()
-                })
-            } else if (node.data.type == "ObjectProperty") {
-                Lineage_createRelation.createSubProperty(self.currentSource, node.data.superEntity, node.data.label, true, function (err, result) {
-                    if (err) {
-                        return callbackEach(err)
-                    }
-                    labelsMap[result.uri] = node.data.label
-                    callbackEach()
-                })
-            }
-        }, function (err) {
-            return callback(err, labelsMap)
-        })
-    }
-
 
     self.saveNewNodes = function (nodes, callback) {// nodes created on the fly
 
@@ -1695,8 +1640,6 @@ var Axiom_activeLegend = (function () {
                 $("#suggestionsSelectJstreeDiv").jstree().empty();
             } catch {
             }
-            } catch {
-            }
         }
 
         self.initSourcesMap(objects);
@@ -1857,12 +1800,7 @@ var Axiom_activeLegend = (function () {
     };
 
     return self;
-})
-();
-})
-();
-
-//Axiom_activeLegend.testTriplesCreation()
+})();
 
 export default Axiom_activeLegend;
 window.Axiom_activeLegend = Axiom_activeLegend;

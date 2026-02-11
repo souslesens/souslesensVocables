@@ -1,4 +1,4 @@
-import { checkMainConfig, readMainConfig } from "../model/config.js";
+import { checkMainConfig, readMainConfig } from "../../model/config.js";
 
 const mainConfigTemplatePath = "config_templates/mainConfig.json.default";
 console.log(`Checking ${mainConfigTemplatePath}`);

@@ -261,18 +261,15 @@ var NodeInfosAxioms = (function () {
         if (!node || !node.data) {
             return;
         }
-        var resource = { data: { id: node.data.id, source: self.currentSource, label: node.data.label } };
-        self.init(self.currentSource, resource, "mainDialogDiv");
+        var label = node.data.label || Sparql_common.getLabelFromURI(node.data.id);
+        $("#smallDialogDiv").dialog("option", "title", "Axioms of " + label);
+        var resource = { data: { id: node.data.id, source: self.currentSource, label: label } };
+        self.init(self.currentSource, resource, "smallDialogDiv");
     };
 
     self.nodeInfos = function () {
-        /* self.nodeInfosAxiomsLoaded = true;
-        self.nodeBeforeNodeInfos = JSON.parse(JSON.stringify(NodeInfosWidget.currentNode));
-        $("#nodeInfosWidget_InfosTabDiv").remove();*/
-
+        $("#mainDialogDiv").parent().css("z-index", 10000);
         NodeInfosWidget.showNodeInfos(self.currentSource, Axioms_graph.currentGraphNode, "mainDialogDiv", null, function () {
-            // switch tab
-            //self.reduceNodeInfoAxioms();
         });
     };
     /*

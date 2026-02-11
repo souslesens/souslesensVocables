@@ -3,6 +3,7 @@ import Axiom_editor from "./axiom_editor.js";
 import Axioms_graph from "./axioms_graph.js";
 import Axioms_suggestions from "./axioms_suggestions.js";
 import common from "../../shared/common.js";
+import Axioms_manager from "./axioms_manager.js";
 import Lineage_whiteboard from "../lineage/lineage_whiteboard.js";
 import MainController from "../../shared/mainController.js";
 import JstreeWidget from "../../uiWidgets/jstreeWidget.js";
@@ -59,7 +60,7 @@ var Axiom_activeLegend = (function () {
 
             if (node.data.type == "Class") {
                 self.hideLegendItems();
-                var newObject = { id: "createClass", label: "_Create new Class_" };
+                var newObject = {id: "createClass", label: "_Create new Class_"};
                 var siblingObjectPropertyUri = self.getGraphSiblingUri(Axioms_graph.currentGraphNode.id, "ObjectProperty");
 
                 if (Axioms_graph.currentGraphNode.data.type == "Restriction" && siblingObjectPropertyUri) {
@@ -76,7 +77,7 @@ var Axiom_activeLegend = (function () {
                     self.setSuggestionsSelect(classes, true, newObject);
                 }
             } else if (node.data.type == "ObjectProperty") {
-                var newObject = { id: "createObjectProperty", label: "_Create new ObjectProperty_" };
+                var newObject = {id: "createObjectProperty", label: "_Create new ObjectProperty_"};
                 self.hideLegendItems();
 
                 if (Axioms_graph.currentGraphNode.data.type != "Restriction") {
@@ -90,21 +91,21 @@ var Axiom_activeLegend = (function () {
             } else if (node.data.type == "Restriction") {
                 self.hideLegendItems();
                 var suggestions = [
-                    { id: "http://www.w3.org/2002/07/owl#someValuesFrom", label: "some" },
-                    { id: "http://www.w3.org/2002/07/owl#allValuesFrom", label: "only" },
-                    { id: "http://www.w3.org/2002/07/owl#hasValue", label: "value" },
-                    { id: "http://www.w3.org/2002/07/owl#maxCardinality", label: "max" },
-                    { id: "http://www.w3.org/2002/07/owl#minCardinality", label: "min" },
-                    { id: "http://www.w3.org/2002/07/owl#cardinality", label: "cardinality" },
+                    {id: "http://www.w3.org/2002/07/owl#someValuesFrom", label: "some"},
+                    {id: "http://www.w3.org/2002/07/owl#allValuesFrom", label: "only"},
+                    {id: "http://www.w3.org/2002/07/owl#hasValue", label: "value"},
+                    {id: "http://www.w3.org/2002/07/owl#maxQualifiedCardinality", label: "max"},
+                    {id: "http://www.w3.org/2002/07/owl#minQualifiedCardinality", label: "min"},
+                    {id: "http://www.w3.org/2002/07/owl#qualifiedCardinality", label: "cardinality"},
                 ];
                 self.setSuggestionsSelect(suggestions, false);
             } else if (node.data.type == "Connective") {
                 self.hideLegendItems();
                 var suggestions = [
-                    { label: "UnionOf", id: "http://www.w3.org/2002/07/owl#unionOf" },
-                    { label: "IntersectionOf", id: "http://www.w3.org/2002/07/owl#intersectionOf" },
-                    { label: "ComplementOf", id: "http://www.w3.org/2002/07/owl#complementOf" },
-                    { label: "Enumeration", id: "http://www.w3.org/2002/07/owl#oneOf" },
+                    {label: "UnionOf", id: "http://www.w3.org/2002/07/owl#unionOf"},
+                    {label: "IntersectionOf", id: "http://www.w3.org/2002/07/owl#intersectionOf"},
+                    {label: "ComplementOf", id: "http://www.w3.org/2002/07/owl#complementOf"},
+                    {label: "Enumeration", id: "http://www.w3.org/2002/07/owl#oneOf"},
                 ];
                 self.setSuggestionsSelect(suggestions, false);
             } else {
@@ -184,6 +185,59 @@ var Axiom_activeLegend = (function () {
     };
 
     self.onSuggestionsSelect = function (resourceUri, legendNode, newResource) {
+
+
+        var node = self.currentSuggestedNode
+        if (node.data && node.data.resourceType == "searchClass") {
+            var word = prompt("class starts with... ");
+            if (!word) {
+                return;
+            }
+            word = word.toLowerCase();
+            var jstreeData = [];
+            var source = node.data.source;
+            var color = "#00afef";
+            for (var resourceUri in Axiom_manager.allResourcesMap) {
+                // var item = self.sourcesMap[resourceUri];
+                var item = Axiom_manager.allResourcesMap[resourceUri]
+                var itemLabel = item.label.toLowerCase();
+                var startWith = true;
+                if (word.startsWith("*") || word.startsWith("%")) {
+                    word = word.substring(1);
+                    startWith = false;
+                }
+                if (item.resourceType == "Class" && item.source == source) {
+                    var label = item.label;
+                    if (label.split(":").length == 2) {
+                        label = label.split(":")[1];
+                    }
+                    //  console.log(label)
+
+                    if ((startWith && label.toLowerCase().indexOf(word) == 0) || (!startWith && label.toLowerCase().indexOf(word) > -1)) {
+                        jstreeData.push({
+                            id: item.id,
+                            parent: item.source,
+                            text: "<span  style='color:" + color + "'>" + label + "</span>",
+                            data: {
+                                id: item.id,
+                                text: label,
+                                resourceType: item.resourceType,
+                            },
+                        });
+                    }
+                }
+            }
+            if (jstreeData.length == 0) {
+                return alert("no Match");
+            }
+            if (jstreeData.length > self.maxItemsInJstreePerSource) {
+                return alert("to many matches");
+            }
+
+            JstreeWidget.addNodesToJstree("axiomSuggestionsSelectJstreeDiv", source, jstreeData, {positionLast: true});
+            return;
+        }
+
         // new Axiom
         if (!Axiom_activeLegend.isLegendActive) {
             // create new Axiom
@@ -199,6 +253,50 @@ var Axiom_activeLegend = (function () {
 
         // new Class
         if (resourceUri == "createClass") {
+
+            var str = prompt("EnterClassLabel");
+            var label = Sparql_common.formatString(str);
+            var resourceUri = common.getURI(label, self.source, "fromLabel");
+            //  var triples = Lineage_createResource.getResourceTriples(self.source,resourceUri, null, label, resourceId);
+            var level = Axioms_graph.currentGraphNode ? Axioms_graph.currentGraphNode.level + 1 : 0;
+            var node = {
+                id: resourceUri,
+                label: label,
+                type: "Class",
+                shape: "box",
+                color: "#00afef",
+                level: level,
+                data: {
+                    id: resourceUri,
+                    label: label,
+                    source: self.source,
+                    resourceType: "Class",
+                    type: "Class",
+                    isNew: true
+
+
+                }
+            }
+            var visjsNode = Axioms_graph.getVisjsNode(node, level);
+            var edgeId = common.getRandomHexaId(5);
+            var edge = {
+                id: edgeId,
+                from: Axioms_graph.currentGraphNode.id,
+                to: resourceUri,
+                label: "⊑",
+                data: {
+                    type: "subClassOf"
+                }
+            };
+
+            Axioms_graph.axiomsVisjsGraph.data.nodes.add([node]);
+            self.updateCurrentGraphNode(visjsNode);
+            Axioms_graph.axiomsVisjsGraph.data.edges.add([edge]);
+            self.hideForbiddenResources(Axioms_graph.currentGraphNode.data.type);
+            $("#axioms_legend_suggestionsSelect").empty();
+
+
+            return
             var siblingObjectPropertyUri = self.getGraphSiblingUri(Axioms_graph.currentGraphNode.id, "ObjectProperty");
             if (Axioms_graph.currentGraphNode.data.type == "Restriction" && siblingObjectPropertyUri) {
                 var domainClassUri = self.getRestrictionAncestorClass(Axioms_graph.currentGraphNode.id);
@@ -216,6 +314,52 @@ var Axiom_activeLegend = (function () {
         }
         // new ObjectProperty
         if (resourceUri == "createObjectProperty") {
+
+            var str = prompt("Enter ObjectProperty Label");
+            var label = Sparql_common.formatString(str);
+            var resourceUri = common.getURI(label, self.source, "fromLabel");
+            //  var triples = Lineage_createResource.getResourceTriples(self.source,resourceUri, null, label, resourceId);
+            var level = Axioms_graph.currentGraphNode ? Axioms_graph.currentGraphNode.level + 1 : 0;
+            var node = {
+                id: resourceUri,
+                label: label,
+                type: "ObjectProperty",
+                shape: "box",
+                color: "#f5ef39",
+                level: level,
+                data: {
+                    id: resourceUri,
+                    label: label,
+                    source: self.source,
+                    resourceType: "ObjectProperty",
+                    type: "ObjectProperty",
+                    isNew: true
+
+
+                }
+            }
+            var visjsNode = Axioms_graph.getVisjsNode(node, level);
+            var edgeId = common.getRandomHexaId(5);
+            var edge = {
+                id: edgeId,
+                from: Axioms_graph.currentGraphNode.id,
+                to: resourceUri,
+                label: "⊑",
+                data: {
+                    type: "ObjectProperty"
+                }
+            };
+
+            Axioms_graph.axiomsVisjsGraph.data.nodes.add([node]);
+            self.updateCurrentGraphNode(visjsNode);
+            Axioms_graph.axiomsVisjsGraph.data.edges.add([edge]);
+            self.hideForbiddenResources(Axioms_graph.currentGraphNode.data.type);
+            $("#axioms_legend_suggestionsSelect").empty();
+
+
+            return
+
+
             var rangeClassUri = self.getGraphSiblingUri(Axioms_graph.currentGraphNode.id, "Class");
             var domainClassUri = self.getRestrictionAncestorClass(Axioms_graph.currentGraphNode.id);
 
@@ -296,7 +440,7 @@ var Axiom_activeLegend = (function () {
             return;
         }
 
-        var visjsData = { nodes: [], edges: [] };
+        var visjsData = {nodes: [], edges: []};
         var level = Axioms_graph.currentGraphNode ? Axioms_graph.currentGraphNode.level + 1 : 0;
         newResource.type = newResource.resourceType;
         newResource.level = level;
@@ -349,6 +493,8 @@ var Axiom_activeLegend = (function () {
                     stay = true;
                 }
             }
+        } else if (type == "Class" || type == "ObjectProperty") {
+            stay = false;
         }
         if (!stay) {
             Axioms_graph.currentGraphNode = newVisjsNode;
@@ -363,7 +509,7 @@ var Axiom_activeLegend = (function () {
         if (resourceType == "Class") {
             hiddenNodes.push("ObjectProperty");
         } else if (resourceType == "ObjectProperty") {
-            hiddenNodes.push("ObjectProperty");
+            //  hiddenNodes.push("ObjectProperty");
             hiddenNodes.push("Class");
             hiddenNodes.push("Restriction");
             hiddenNodes.push("Connective");
@@ -406,6 +552,7 @@ var Axiom_activeLegend = (function () {
             edges.forEach(function (edge) {
                 if (edge.from == Axioms_graph.currentGraphNode.id) {
                     if (resourceType != "Class" && nodesMap[edge.to]) {
+                    if (resourceType != "Class" && nodesMap[edge.to]) {
                         var nodeToType = nodesMap[edge.to].data.type;
 
                         hiddenNodes.push(nodeToType);
@@ -433,7 +580,7 @@ var Axiom_activeLegend = (function () {
         var newNodes = [];
         legendNodes.forEach(function (nodeId) {
             var hidden = !hiddenNodes || hiddenNodes.indexOf(nodeId) > -1;
-            newNodes.push({ id: nodeId, hidden: hidden });
+            newNodes.push({id: nodeId, hidden: hidden});
         });
         Axiom_activeLegend.axiomsLegendVisjsGraph.data.nodes.update(newNodes);
     };
@@ -447,7 +594,7 @@ var Axiom_activeLegend = (function () {
         };
         self.currentNodeType = selectedObject.resourceType;
 
-        var visjsData = { nodes: [], edges: [] };
+        var visjsData = {nodes: [], edges: []};
         var visjsNode = Axioms_graph.getVisjsNode(currentNode, 0);
         visjsNode.data.predicate = selectedObject.axiomType;
         visjsNode.data.rootAxiom = true;
@@ -775,14 +922,14 @@ var Axiom_activeLegend = (function () {
         if (!options) {
             options = {};
         }
-        var visjsData = { nodes: [], edges: [] };
+        var visjsData = {nodes: [], edges: []};
 
         if (!legendItems) {
             legendItems = [
-                { label: "Class", color: "#00afef" },
-                { label: "ObjectProperty", color: "#f5ef39" },
-                { label: "Restriction", color: "#cb9801" },
-                { label: "Connective", color: "#70ac47" },
+                {label: "Class", color: "#00afef"},
+                {label: "ObjectProperty", color: "#f5ef39"},
+                {label: "Restriction", color: "#cb9801"},
+                {label: "Connective", color: "#70ac47"},
                 /*  {label: "Union", color: "#70ac47", symbol: "⨆"},
                       {label: "Intersection", color: "#70ac47", symbol: "⊓"},
                       {label: "Complement", color: "#70ac47", symbol: "┓"},
@@ -815,7 +962,7 @@ var Axiom_activeLegend = (function () {
                 x: options.xOffset || 0,
                 y: yOffset,
 
-                fixed: { x: true, y: true },
+                fixed: {x: true, y: true},
             });
             if (options.horizontal) {
                 options.xOffset += 90;
@@ -925,6 +1072,10 @@ var Axiom_activeLegend = (function () {
                                if (err) {
                                    return MainController.errorAlert(err.responseText || err);
                                }
+                           AxiomExtractor.addTriplesToBasicAxioms(self.currentResource.data.source, triples, function (err, result) {
+                               if (err) {
+                                   return MainController.errorAlert(err.responseText || err);
+                               }
 
                                Axioms_graph.drawNodeAxioms2(self.currentResource.data.source, self.currentResource.data.id, triples, divId, options, function (err, triples) {
                                });
@@ -958,6 +1109,11 @@ var Axiom_activeLegend = (function () {
 
 
 
+            //add manchester to Axioms JSTree
+            //  self.addAxiomToAxomsJstree(manchesterStr, triples);
+
+
+            ;
             //add manchester to Axioms JSTree
             //  self.addAxiomToAxomsJstree(manchesterStr, triples);
 
@@ -1035,9 +1191,11 @@ var Axiom_activeLegend = (function () {
         var nodesMap = {};
         var edgesFromMap = {};
 
+
         nodes.forEach(function (node) {
             if (true || node.level >= self.newAxiomNode.level) {
                 nodesMap[node.id] = node;
+
 
             }
         });
@@ -1113,6 +1271,7 @@ var Axiom_activeLegend = (function () {
                     predicate = "http://www.w3.org/2000/01/rdf-schema#subClassOf";
                 } else if (fromNode.data.type.endsWith("ObjectProperty")) {
                     predicate = "http://www.w3.org/2000/01/rdf-schema#subPropertyOf";
+                    predicate = "http://www.w3.org/2000/01/rdf-schema#subPropertyOf";
                 } else if (["Connective", "IntersectionOf", "UnionOf", "ComplementOf", "Enumeration"].indexOf(fromNode.data.type) > -1) {
                     if (fromNode.data.nCount == 0) {
                         predicate = "http://www.w3.org/1999/02/22-rdf-syntax-ns#first";
@@ -1123,15 +1282,19 @@ var Axiom_activeLegend = (function () {
                             predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest",
                             object: bNode2,
 
+
                         });
 
+
                         fromNode.data.bNodeid = bNode2;
+
 
                         triples.push({
                             subject: bNode2,
                             predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest",
                             object: "http://www.w3.org/1999/02/22-rdf-syntax-ns#nil",
                         });
+
 
                         predicate = "http://www.w3.org/1999/02/22-rdf-syntax-ns#first";
                     } else {
@@ -1141,11 +1304,13 @@ var Axiom_activeLegend = (function () {
                 }
 
 
+
                 if (predicate) {
                     triple.subject = fromNode.data.bNodeid || fromNode.data.id;
                     triple.predicate = predicate;
                     triple.object = object;
                     triples.push(triple);
+
 
                 }
 
@@ -1158,6 +1323,7 @@ var Axiom_activeLegend = (function () {
                         object: toNode.data.bNodeid,
                     });
 
+
                 }
 
                 if (fromNode.data.cardinality) {
@@ -1167,7 +1333,9 @@ var Axiom_activeLegend = (function () {
                         object: '"' + fromNode.data.cardinality + '"' + "^^<http://www.w3.org/2001/XMLSchema#nonNegativeInteger>",
                     });
 
+
                 }
+
 
 
                 recurse(toNode.id);
@@ -1192,7 +1360,26 @@ var Axiom_activeLegend = (function () {
                     object: nodeTypes[node.data.type] || node.data.type,
                 });
 
+
             } else {
+
+            }
+        }
+
+
+        triples.newNodesToStore = newNodesToStore
+        Axioms_graph.currentAxiomTriples = triples
+
+        //update AxiomIds with triples indexes.
+        triples.forEach(function(triple,index){
+            var node=nodesMap[triple.subject]
+            if( node && !node.data.axiomId){
+                node.data.axiomId=index
+            }
+
+             node=nodesMap[triple.object]
+            if( node && !node.data.axiomId){
+                node.data.axiomId=index
 
             }
         }
@@ -1214,9 +1401,47 @@ var Axiom_activeLegend = (function () {
             }
         })
         NodeInfosAxioms.isNewAxiom=false
+        })
+        NodeInfosAxioms.isNewAxiom=false
 
         return triples;
     };
+
+    self.saveNewNodes = function (nodes, callback) {// nodes created on the fly
+
+        if (!nodes || nodes.length == 0) {
+            return callback();
+        }
+        var labelsMap = {}
+        async.eachSeries(nodes, function (node, callbackEach) {
+            if (node.data.type == "Class") {
+                var superClass = node.data.superEntity || "http://www.w3.org/2002/07/owl#Class";
+                var triples = Lineage_createResource.getResourceTriples(self.currentSource, "owl:Class", null, node.data.label, superClass);
+                triples.forEach(function (triple) {
+                    if (triple.predicate.indexOf("label") > -1) {
+                        labelsMap[triple.subject] = triple.object
+                    }
+                })
+                Lineage_createResource.writeResource(self.currentSource, triples, function (err, resourceId) {
+                    if (err) {
+                        return callbackEach(err)
+                    }
+                    callbackEach()
+                })
+            } else if (node.data.type == "ObjectProperty") {
+                Lineage_createRelation.createSubProperty(self.currentSource, node.data.superEntity, node.data.label, true, function (err, result) {
+                    if (err) {
+                        return callbackEach(err)
+                    }
+                    labelsMap[result.uri] = node.data.label
+                    callbackEach()
+                })
+            }
+        }, function (err) {
+            return callback(err, labelsMap)
+        })
+    }
+
 
     self.saveNewNodes = function (nodes, callback) {// nodes created on the fly
 
@@ -1421,6 +1646,7 @@ var Axiom_activeLegend = (function () {
             return alert("no valid resourceType");
         }
         var params = {source: self.currentSource, filteredUris: filteredUris};
+        var params = {source: self.currentSource, filteredUris: filteredUris};
         return CreateAxiomResource_bot.start(botWorkFlow, params, function (err, result) {
             if (err) {
                 return MainController.errorAlert(err);
@@ -1453,6 +1679,7 @@ var Axiom_activeLegend = (function () {
                     color: color,
                     opacity: opacity,
                     font: {color: fontColor, opacity: opacity},
+                    font: {color: fontColor, opacity: opacity},
                 });
             }
             Axioms_graph.axiomsVisjsGraph.data.nodes.update(newNodes);
@@ -1466,6 +1693,8 @@ var Axiom_activeLegend = (function () {
         if ($("#suggestionsSelectJstreeDiv").jstree()) {
             try {
                 $("#suggestionsSelectJstreeDiv").jstree().empty();
+            } catch {
+            }
             } catch {
             }
         }
@@ -1628,6 +1857,8 @@ var Axiom_activeLegend = (function () {
     };
 
     return self;
+})
+();
 })
 ();
 

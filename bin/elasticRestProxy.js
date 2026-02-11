@@ -416,6 +416,9 @@ var elasticRestProxy = {
                     if (elasticVersion) {
                         return callbackSeries();
                     }
+                    if (elasticVersion) {
+                        return callbackSeries();
+                    }
                     var requestOptions = {
                         method: "GET",
                         headers: {
@@ -444,7 +447,9 @@ var elasticRestProxy = {
                         var id = "R" + util.getRandomHexaId(10);
                         if (elasticVersion < 8) {
                             bulkStr += JSON.stringify({index: {_index: indexName, _type: indexName, _id: id}}) + "\r\n";
+                            bulkStr += JSON.stringify({index: {_index: indexName, _type: indexName, _id: id}}) + "\r\n";
                         } else {
+                            bulkStr += JSON.stringify({index: {_index: indexName, _id: id}}) + "\r\n";
                             bulkStr += JSON.stringify({index: {_index: indexName, _id: id}}) + "\r\n";
                         }
 

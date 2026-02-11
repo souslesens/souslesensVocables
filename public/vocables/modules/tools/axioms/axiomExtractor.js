@@ -147,6 +147,7 @@ var AxiomExtractor = (function () {
         },
     ];
 
+
     self.getBasicAxioms = function (source, callback) {
         if (self.basicAxioms[source]) {
             return callback(null, self.basicAxioms[source]);
@@ -430,44 +431,46 @@ var AxiomExtractor = (function () {
         });
     };
 
-    self.addTriplesToBasicAxioms = function (source, triples, callback) {
-        var uris = {};
-        triples.forEach(function (item) {
-            if (uris[item.subject]) {
-                uris[item.subject] = 1;
-            }
-            if (uris[item.predicate]) {
-                uris[item.predicate] = 1;
-            }
-            if (uris[item.object]) {
-                uris[item.object] = 1;
-            }
-        });
-        var options = {
-            filter: Sparql_common.setFilter("id", Object.keys(uris)),
-        };
-        if (Object.keys(uris).length == 0) {
-            options.noExecute = true;
-        }
+    /*   self.addTriplesToBasicAxioms = function (source, triples, callback) {
+           var uris = {};
+           triples.forEach(function (item) {
+               if (uris[item.subject]) {
+                   uris[item.subject] = 1;
+               }
+               if (uris[item.predicate]) {
+                   uris[item.predicate] = 1;
+               }
+               if (uris[item.object]) {
+                   uris[item.object] = 1;
+               }
+           });
+           var options = {
+               filter: Sparql_common.setFilter("id", Object.keys(uris)),
+           };
+           if (Object.keys(uris).length == 0) {
+               options.noExecute = true;
+           }
 
-        Sparql_OWL.getLabelsMap(source, options, function (err, labelsMap) {
-            if (err) return callback(err);
-            triples.forEach(function (triple) {
-                if (!self.basicAxioms[triple.subject]) {
-                    self.basicAxioms[triple.subject] = [];
-                }
-                self.basicAxioms[triple.subject].push({
-                    s: triple.subject,
-                    p: triple.predicate,
-                    o: triple.object,
-                    sLabel: labelsMap[triple.subject] || sparql_common.getLabelFromURI(triple.subject),
-                    pLabel: labelsMap[triple.predicate] || sparql_common.getLabelFromURI(triple.subject),
-                    oLabel: labelsMap[triple.object] || sparql_common.getLabelFromURI(triple.subject),
-                });
-            });
-            callback();
-        });
-    };
+           Sparql_OWL.getLabelsMap(source, options, function (err, labelsMap) {
+               if (err) {
+                   return callback(err);
+               }
+               triples.forEach(function (triple) {
+                   if (!self.basicAxioms[triple.subject]) {
+                       self.basicAxioms[triple.subject] = [];
+                   }
+                   self.basicAxioms[triple.subject].push({
+                       s: triple.subject,
+                       p: triple.predicate,
+                       o: triple.object,
+                       sLabel: labelsMap[triple.subject] || sparql_common.getLabelFromURI(triple.subject),
+                       pLabel: labelsMap[triple.predicate] || sparql_common.getLabelFromURI(triple.subject),
+                       oLabel: labelsMap[triple.object] || sparql_common.getLabelFromURI(triple.subject),
+                   });
+               });
+               callback();
+           });
+       };*/
 
     return self;
 })();

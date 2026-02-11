@@ -26,7 +26,8 @@
                 </div>
 
                 <div style="display: flex; flex-direction: column">
-                    <a style="color: #096eac; margin: 3px; font-weight: bold; text-decoration: underline" id="nodeInfosAxioms_newAxiomBtn" onclick="NodeInfosAxioms.newAxiom(true)">New axiom</a>
+                    <div id="axiom_currentNode"></div>
+                    
                     <div id="nodeInfosAxioms_activeLegendDiv" style="width: 100px; height: 200px; background-color: #ddd"></div>
                 </div>
             </div>
@@ -35,6 +36,7 @@
 
                 <div>
                     New Axiom<br />
+                    
                     <!-- <select id="axioms_legend_suggestionsSelect" size="20" style="width: 250px; overflow: auto"></select>-->
                     <div style="width: 350px; height: 500px; overflow: auto" id="axiomSuggestionsSelectJstreeDiv"></div>
 
@@ -44,6 +46,7 @@
                 <div id="nodeInfosAxioms_graphDiv" onclick="PopupMenuWidget.hidePopup();"
                      style="width: 70vw; height: 350px; background-color: #ddd; margin: 5px; padding: 5px; overflow: auto"></div>
                 <div>
+                    <button id="nodeInfosAxioms_newAxiomBtn" class="w3-button slsv-button-3" onclick="NodeInfosAxioms.newAxiom(true)">New axiom</button>
                     <button id="axiomEditor_clearBtn" class="w3-button slsv-button-3" onclick="Axiom_activeLegend.clearAxiom()">clear</button>
                     <button id="axiomEditor_saveBtn" class="w3-button slsv-button-3" onclick="Axiom_activeLegend.saveAxiom()">save</button>
                     <button id="axiomEditor_showTriplesBtn" class="w3-button slsv-button-3" onclick="Axiom_activeLegend.showTriples()">show triples</button>

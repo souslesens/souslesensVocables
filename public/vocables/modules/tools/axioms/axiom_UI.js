@@ -2,6 +2,7 @@ var Axiom_UI = (function () {
     var self = {};
 
     self.currentView = null;
+    self.previousView = null;
 
     var ALL_ELEMENTS = [
         "nodeInfosAxioms_activeLegendDiv",
@@ -12,6 +13,7 @@ var Axiom_UI = (function () {
         "axiomEditor_copyTriplesBtn",
         "axiomEditor_deleteTriplesBtn",
         "axiomsEditor_textDiv",
+        "nodeInfosAxioms_newAxiomBtn"
     ];
 
     var VIEW_CONFIG = {
@@ -29,17 +31,18 @@ var Axiom_UI = (function () {
         visualisation: {
             visible: [
                 "axiomEditor_showTriplesBtn",
+                "nodeInfosAxioms_newAxiomBtn"
             ],
-            showTriplesLabel: "Edit Axiom",
+            showTriplesLabel: "show triples",
         },
         showTriples: {
             visible: [
-                "nodeInfosAxioms_activeLegendDiv",
-                "nodeInfosAxioms_newAxiomPanel",
+               
                 "axiomEditor_saveBtn",
                 "axiomEditor_copyTriplesBtn",
                 "axiomEditor_deleteTriplesBtn",
                 "axiomsEditor_textDiv",
+                "nodeInfosAxioms_newAxiomBtn"
             ],
             showTriplesLabel: "show triples",
         },
@@ -51,6 +54,7 @@ var Axiom_UI = (function () {
             return;
         }
 
+        self.previousView = self.currentView;
         self.currentView = viewName;
 
         ALL_ELEMENTS.forEach(function (elementId) {
@@ -61,6 +65,10 @@ var Axiom_UI = (function () {
                 element.hide();
             }
         });
+
+        if (viewName === "showTriples" && self.previousView !== "newAxiom") {
+            $("#axiomEditor_saveBtn").hide();
+        }
 
         $("#axiomEditor_showTriplesBtn").text(config.showTriplesLabel);
 

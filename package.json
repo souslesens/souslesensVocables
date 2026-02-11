@@ -26,7 +26,8 @@
         "release:minor": "standard-version --skip.tag --skip.commit -t '' -r minor",
         "release:major": "standard-version --skip.tag --skip.commit -t '' -r major",
         "publish:release": "sh release-new.sh",
-        "init:db": "node scripts/init/db.js"
+        "init:db": "node scripts/init/db.js",
+        "init:files": "node scripts/init/files.js"
     },
     "devDependencies": {
         "@typescript-eslint/eslint-plugin": "^8.32.1",

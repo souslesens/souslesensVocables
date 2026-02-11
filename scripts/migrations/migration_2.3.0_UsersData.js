@@ -1,7 +1,8 @@
 import fs from "fs";
 import knex from "knex";
 import path from "path";
-import yargs from "yargs";
+import yargs from "yargs/yargs";
+import { hideBin } from "yargs/helpers";
 
 const migrateUsersData = async (configDirectory, writeMode) => {
     const configPath = path.resolve(configDirectory, "mainConfig.json");
@@ -42,7 +43,7 @@ const migrateUsersDataListView = async (configDirectory, writeMode) => {
     const usersDataListSchema = path.resolve("scripts", "sql", "030-user-data.sql");
     if (fs.existsSync(usersDataListSchema)) {
         const connection = knex({ client: "pg", connection: configJSON.database });
-        if (!await connection.schema.hasColumn("user_data_list", "data_tool")) {
+        if (!(await connection.schema.hasColumn("user_data_list", "data_tool"))) {
             if (writeMode) {
                 /* Remove the view since the library cannot do it on his own */
                 await connection.schema.dropViewIfExists("user_data_list");
@@ -62,7 +63,7 @@ const migrateUsersDataListView = async (configDirectory, writeMode) => {
 
 
 const main = async () => {
-    const argv = yargs
+    const argv = yargs(hideBin(process.argv))
         .alias("c", "config")
         .describe("c", "Path to the config directory")
         .alias("w", "write")

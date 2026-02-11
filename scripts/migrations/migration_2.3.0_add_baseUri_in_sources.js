@@ -1,8 +1,16 @@
 import fs from "fs";
 import path from "path";
-import yargs from "yargs";
+import yargs from "yargs/yargs";
+import { hideBin } from "yargs/helpers";
 
-const argv = yargs.alias("c", "config").describe("c", "Path to config directory").demandOption(["c"]).alias("w", "write").describe("w", "Write to the file").boolean("w").help().argv;
+const argv = yargs(hideBin(process.argv))
+    .alias("c", "config")
+    .describe("c", "Path to config directory")
+    .demandOption(["c"])
+    .alias("w", "write")
+    .describe("w", "Write to the file")
+    .boolean("w")
+    .help().argv;
 
 console.info("Add the baseUri attribute to each sources");
 const sourcesFilePath = path.resolve(argv.config, "sources.json");

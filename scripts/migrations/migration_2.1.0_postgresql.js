@@ -4,7 +4,8 @@ import bcrypt from "bcrypt";
 import fs from "fs";
 import knex from "knex";
 import path from "path";
-import yargs from "yargs";
+import yargs from "yargs/yargs";
+import { hideBin } from "yargs/helpers";
 
 const insertData = async (connection, datas, table, column) => {
     const conn = knex({ client: "pg", connection: connection });
@@ -130,7 +131,7 @@ const migrateUsers = async (configDirectory, writeMode) => {
 };
 
 const main = async () => {
-    const argv = yargs
+    const argv = yargs(hideBin(process.argv))
         .alias("c", "config")
         .describe("c", "Path to the config directory")
         .alias("w", "write")

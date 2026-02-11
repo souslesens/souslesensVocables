@@ -566,7 +566,7 @@ var Axiom_activeLegend = (function () {
             var divId = "nodeInfosAxioms_graphDiv";
             var options = {};
             var rootNodeId=triples[0].subject
-            Axioms_graph.drawNodeAxioms2(NodeInfosAxioms.currentSource,rootNodeId,triples, divId,options)
+          //  Axioms_graph.drawNodeAxioms2(NodeInfosAxioms.currentSource,rootNodeId,triples, divId,options)
             if (callback) {
                 return callback(err)
             }
@@ -809,7 +809,7 @@ var Axiom_activeLegend = (function () {
                         basicAxiomsTriples.push(item)
 
                     })
-                    AxiomExtractor.addBasicAxioms(self.currentSource, basicAxiomsTriples)
+                   // AxiomExtractor.addBasicAxioms(self.currentSource, basicAxiomsTriples)
 
                     callbackSeries()
                 },

@@ -1,7 +1,8 @@
 import fs from "fs";
 import knex from "knex";
 import path from "path";
-import yargs from "yargs";
+import yargs from "yargs/yargs";
+import { hideBin } from "yargs/helpers";
 
 const migrateUsersData = async (configDirectory, writeMode) => {
     const configPath = path.resolve(configDirectory, "mainConfig.json");
@@ -50,7 +51,7 @@ const migrateUsersDataListView = async (configDirectory, writeMode) => {
 
 
 const main = async () => {
-    const argv = yargs
+    const argv = yargs(hideBin(process.argv))
         .alias("c", "config")
         .describe("c", "Path to the config directory")
         .alias("w", "write")

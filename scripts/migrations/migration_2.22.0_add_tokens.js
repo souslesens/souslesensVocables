@@ -1,4 +1,5 @@
-import yargs from "yargs";
+import yargs from "yargs/yargs";
+import { hideBin } from "yargs/helpers";
 import { UserModel } from "../../model/users.js";
 
 const addMissingTokenToUsers = async (_configDirectory, writeMode) => {
@@ -21,7 +22,7 @@ const addMissingTokenToUsers = async (_configDirectory, writeMode) => {
 };
 
 const main = async () => {
-    const argv = yargs
+    const argv = yargs(hideBin(process.argv))
         .alias("c", "config")
         .describe("c", "Path to the config directory")
         .alias("w", "write")

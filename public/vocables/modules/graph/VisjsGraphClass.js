@@ -36,6 +36,18 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         self.defaultShape = options.defaultShape;
     }
 
+    /**
+     * Initializes and renders an interactive Vis.js network graph, configuring layout, events, datasets,
+     * and user interactions. It sets up node/edge behavior and calls a callback once drawing is complete.
+     * @function
+     * @name draw
+     * @memberof module:VisjsGraphClass
+     * @param {function} callback -  executed once the graph has finished drawing
+     * @param {object} self.graphDiv - internal, ID of the DOM container where the graph is drawn
+     * @param {object} self.data - internal, input nodes, edges, labels
+     * @param {object} self.options - internal, configuration options (events, layout, behaviors, styling…)
+     * @returns {void}
+     */
     self.draw = function (callback) {
         var divId = self.graphDiv;
         var visjsData = self.data;
@@ -316,7 +328,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
 
                 if (params.nodes.length == 1) {
                     /* if (true || (!params.event.srcEvent.ctrlKey && !self.currentContext.options.keepNodePositionOnDrag))
-    return;*/
+                    return;*/
 
                     var nodeId = params.nodes[0];
 
@@ -353,6 +365,19 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         }
     };
 
+    /**
+     * Configures the graph layout (vertical or horizontal hierarchical) by updating layout and edge‑smoothness
+     * settings, then triggers a full redraw of the Vis.js network. It adjusts direction, sorting, and animation
+     * timing depending on the selected layout mode. 
+     * @function
+     * @name setLayout
+     * @memberof module:VisjsGraphClass
+     * @param {string} layout desired layout mode, "hierarchical vertical" or "hierarchical horizontal"
+     * determines how nodes are arranged
+     * @param {object} self.currentContext.options - internal, stores active graph options; updated with
+     * new layout parameters
+     * @returns {void}
+     */
     self.setLayout = function (/** @type {string} */ layout) {
         if (layout == "hierarchical vertical") {
             self.currentContext.options.layoutHierarchical = {
@@ -395,6 +420,14 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         self.draw();
     };
 
+    /**
+     * Exports the current graph by enriching edges with their corresponding node objects and converting the full
+     * edge list into a JSON string. This serialized graph data is then copied directly to the clipboard
+     * @function
+     * @name exportGraph
+     * @memberof module:VisjsGraphClass
+     * @returns {void}
+     */
     self.exportGraph = function () {
         var nodes = self.data.nodes.get();
         var edges = self.data.edges.get();
@@ -410,6 +443,14 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         common.copyTextToClipboard(str);
     };
 
+    /**
+     * Rebuilds node references for each edge by linking fromNode and toNode using the existing node dataset,
+     * then serializes the enriched edge list. It finally copies this JSON graph representation to the clipboard
+     * @function
+     * @name importGraph
+     * @memberof module:VisjsGraphClass
+     * @returns {void}
+     */
     self.importGraph = function (/** @type {string} */ str) {
         var nodes = self.data.nodes.get();
         var edges = self.data.edges.get();
@@ -425,6 +466,16 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         common.copyTextToClipboard(str);
     };
 
+    /**
+     * Completely resets the current graph by clearing all nodes and edges from their Vis.js datasets. It then
+     * removes the internal self.data reference to ensure the graph state is fully emptied
+     * It operates entirely on internal state: self.data.nodes and self.data.edges
+     * Sets self.data = null, making the graph effectively empty and ready for a fresh initialization
+     * @function
+     * @name clearGraph
+     * @memberof module:VisjsGraphClass
+     * @returns {void}
+     */
     self.clearGraph = function () {
         // comment ca marche  bad doc???
 
@@ -439,6 +490,17 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         self.data = null;
     };
 
+    /**
+     * Removes all nodes whose specified property matches a given value, and optionally removes edges with the
+     * same property. It filters node and edge datasets, collects matching IDs, and deletes from the Vis.js graph
+     * @function
+     * @name removeNodes
+     * @memberof module:VisjsGraphClass
+     * @param {string|number} layout property name of nodes (and optionally edges) to check (e.g., "group", "type", "id")
+     * @param {any} value expected value of that property; matching items will be removed
+     * @param {boolean} removeEdges If true, edges with the same property/value pair are also removed
+     * @returns {void}
+     */
     self.removeNodes = function (/** @type {string | number} */ key, /** @type {any} */ value, /** @type {any} */ removeEdges) {
         /**
          * @type {any[]}
@@ -467,6 +529,15 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         }
     };
 
+    /**
+     * Removes every node from the graph except those explicitly listed in nodesToKeep, and also removes any edges
+     * connected to the deleted nodes
+     * @function
+     * @name removeOtherNodesFromGraph
+     * @memberof module:VisjsGraphClass
+     * @param {any} nodesToKeep node(s) that must remain in the graph; all others will be deleted
+     * @returns {void}
+     */
     (self.removeOtherNodesFromGraph = function (/** @type {any} */ nodesToKeep) {
         var nodes = self.data.nodes.get();
         /**
@@ -494,6 +565,14 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         });
         self.data.edges.remove(edgesIds);
     }),
+    /**
+     * Updates node sizes, labels, and font sizes dynamically based on the graph’s zoom level to maintain readability.
+     * It recalculates visual properties only when the scale changes significantly
+     * @function
+     * @name onScaleChange
+     * @memberof module:VisjsGraphClass
+     * @returns {void}
+     */
         (self.onScaleChange = function () {
             if (!self.data || !self.data.nodes) {
                 return;
@@ -552,6 +631,15 @@ const VisjsGraphClass = function (graphDiv, data, options) {
             }
             self.currentScale = scale;
         });
+    /**
+     * builds a lookup map of all existing node IDs — and optionally edge IDs — currently present in the Vis.js graph
+     * It returns an object where each ID is used as a key for fast existence checks.
+     * @function
+     * @name getExistingIdsMap
+     * @memberof module:VisjsGraphClass
+     * @param {boolean} nodesOnly truth, only node IDs are included; false, both node IDs and edge IDs are added to map
+     * @returns {object} existingVisjsIds used as a set where each existing ID maps to 1
+     */
     self.getExistingIdsMap = function (/** @type {any} */ nodesOnly) {
         var existingVisjsIds = {};
         if (!self.data || !self.data.nodes || self.data.nodes.length == 0) {
@@ -582,6 +670,16 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         });
     };
 
+    /**
+     * Converts the current graph (nodes and edges) into a CSV‑formatted string, optionally including extra node data
+     * fields. It builds CSV rows for isolated nodes and for each edge by combining the source node, edge label, and
+     * target node into a readable line
+     * @function
+     * @name toCsv
+     * @memberof module:VisjsGraphClass
+     * @param {any} dataFields optional list of node data fields to append
+     * @returns {string} csvStr, string containing the full CSV representation of the graph
+     */
     self.toCsv = function (/** @type {any[]} */ dataFields) {
         var sep = ",";
         if (dataFields && !Array.isArray(dataFields)) {
@@ -635,6 +733,17 @@ const VisjsGraphClass = function (graphDiv, data, options) {
 
         return csvStr;
     };
+
+    /**
+     * Recursively finds all descendant nodes reachable from one or several starting nodes by following outgoing
+     * edges. It returns a list of child node IDs, optionally including the original parent nodes
+     * @function
+     * @name getNodeDescendantIds
+     * @memberof module:VisjsGraphClass
+     * @param {any} nodeIds node ID or an array of node IDs from which descendant traversal begins
+     * @param {any} includeParents if truth, the starting node IDs are also included in the returned list
+     * @returns {array} nodes array of descendant IDs (and optionally parents)
+     */
     self.getNodeDescendantIds = function (/** @type {any[]} */ nodeIds, /** @type {any} */ includeParents) {
         if (!Array.isArray(nodeIds)) {
             nodeIds = [nodeIds];

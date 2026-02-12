@@ -654,11 +654,14 @@ var MappingsDetails = (function () {
                     );
                 });
         
-            if (duplicateIndex !== -1) {
-                // doublon détecté → suppression du dernier
-                data.otherPredicates.pop();
-                alert("Predicat already exist !");
+                if (duplicateIndex !== -1) {
+                    // doublon détecté → suppression du dernier
+                    data.otherPredicates.pop();
+                    alert("Predicat already exist !");
                 }
+                
+                MappingColumnsGraph.updateNode({ id: MappingColumnsGraph.currentGraphNode.id, data: data });
+                MappingColumnsGraph.saveVisjsGraph();
             }
 
             if (MappingsDetails.afterSaveColumnTechnicalMappingsDialog) {

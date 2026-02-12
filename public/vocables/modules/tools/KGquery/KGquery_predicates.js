@@ -10,6 +10,20 @@ var KGquery_predicates = (function () {
         "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
         "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>";
 
+    /**
+     * populates a map (predicatesSubjectsMap) with RDF type triples derived from a
+     * queryElement's subject (fromNode) and optional object (toNode)
+     * @function
+     * @name setRdfTypePredicates
+     * @memberof module:KGquery_predicates
+     * @param {Object} queryElement object describing a graph edge; expects:
+     *      - fromNode {Object} with .id (URI) and .toNode (optional) properties
+     *      - toNode   {Object} (optional) with .id (URI)
+     *      - isOptional {boolean} indicating OPTIONAL clause for the triple pattern
+     * @param {Object} predicatesSubjectsMap Mapping from variable name to an object:
+     *      - { predicates: Array<string>, optional: boolean }
+     * @returns {Object} predicatesSubjectsMap mapping from variable name to an object
+     */
     self.setRdfTypePredicates = function (queryElement, predicatesSubjectsMap) {
         if (!queryElement.toNode) {
             //return;
@@ -49,6 +63,20 @@ var KGquery_predicates = (function () {
         return predicatesSubjectsMap;
     };
 
+    /**
+     * populates a map (predicatesSubjectsMap) with SPARQL‑like predicate strings for each
+     * path defined in a query element. It builds subject‑wise collections of required triples,
+     * handling optional direction (inverse) and ensuring a rdf:type triple for each start
+     * variable if none exists yet
+     * @function
+     * @name setPathPredicates
+     * @memberof module:KGquery_predicates
+     * @param {Object} queryElement object containing a `paths` array
+     *   each pathItem is an array where indices encode subject, object and predicate
+     * @param {Object} predicatesSubjectsMap map (plain object) keyed by variable name.
+     *   each entry has shape: { isOptional: boolean, predicates: string[] }
+     * @returns {Object} predicatesSubjectsMap, the updated predicatesSubjectsMap
+     */
     self.setPathPredicates = function (queryElement, predicatesSubjectsMap) {
         queryElement.paths.forEach(function (pathItem, pathIndex) {
             var propertyStr = "<" + pathItem[2] + "> ";
@@ -79,6 +107,16 @@ var KGquery_predicates = (function () {
         return predicatesSubjectsMap;
     };
 
+    /**
+     * Enriches a SPARQL predicate map with rdfs:member path constraints based on a container filter
+     * It mutates the provided predicatesSubjectsMap in‑place and returns it
+     * @function
+     * @name setRdfsMemberPredicates
+     * @memberof module:KGquery_predicates
+     * @param {Object} queryElement object containing a `paths` array
+     * @param {Object} predicatesSubjectsMap map (plain object) keyed by variable name
+     * @returns {Object} predicatesSubjectsMap, the updated predicatesSubjectsMap
+     */
     self.setRdfsMemberPredicates = function (queryElement, predicatesSubjectsMap) {
         if (!queryElement.fromNode.data.containerFilter) {
             return predicatesSubjectsMap;
@@ -102,6 +140,20 @@ var KGquery_predicates = (function () {
         return predicatesSubjectsMap;
     };
 
+    /**
+     * Dynamically builds a SPARQL query based on a collection of query sets and optional configuration
+     * It handles distinct variable collection, optional UNION/JOIN composition,
+     * and supports aggregation or SHACL output.
+     * @function
+     * @name buildQuery
+     * @memberof module:KGquery_predicates
+     * @param {Object} querySets object containing an array `sets` where each set describes
+     *   elements, class filters, etc
+     * @param {Object} options optional settings:
+     *          - aggregate {select, groupBy}
+     *          - output    ("shacl" => CONSTRUCT)
+     * @returns {Object} Return the constructed query and metadata
+     */
     self.buildQuery = function (querySets, options) {
         var distinctSetTypes = [];
         var query = "";
@@ -246,6 +298,7 @@ var KGquery_predicates = (function () {
 
         return { query: query, isUnion: isUnion, isJoin: isJoin, distinctSetTypes: distinctSetTypes };
     };
+
     /**
      *  !!! if a variable is optio,nall all predicates tha contains this variable as subject have to be in nthe optional clause
      * @param predicatesSubjectsMap
@@ -282,6 +335,19 @@ var KGquery_predicates = (function () {
         return whereStr;
     };
 
+    /**
+     * Assembles a SPARQL aggregate query string from various input components
+     * @function
+     * @name buildAggregateQuery
+     * @memberof module:KGquery_predicates
+     * @param {Object} querySets containing `elements` (array of query elements) and `classFiltersMap`
+     *   (map of class filters)
+     * @param {Object} aggregateClauses object with `select`, `where`, `groupBy`, and `orderBy` string
+     *   used in the aggregate part of the query
+     * @param {Object} options optional configuration object
+     * @returns {string} string representing the assembled SPARQL query, including prefixes, SELECT
+     *   clause, FROM clause, WHERE block, GROUP BY, and ORDER BY clauses
+     */
     self.buildAggregateQuery = function (querySet, aggregateClauses, options) {
         if (!options) {
             options = {};

@@ -557,6 +557,17 @@ var Lineage_properties = (function () {
         });
     };
 
+    /**
+     * Exports a tab‑separated list of property range/domain information, optionally filtered
+     * to nodes currently displayed in a Vis.js graph. It builds the output string line‑by‑line
+     * and copies it to the clipboard
+     * @function
+     * @name exportRangeAndDomainsGraph
+     * @memberof module:lineage_properties
+     * @param {string, URI} property URI (or identifier) of the property whose range/domain data is
+     * requested
+     * @returns {void}
+     */
     self.exportRangeAndDomainsGraph = function (property) {
         var source = Lineage_sources.activeSource;
         var targetnodes = null;
@@ -609,6 +620,7 @@ var Lineage_properties = (function () {
             common.copyTextToClipboard(strAll);
         });
     };
+
     /**
      *
      * draws  graph of properties ranges and domains depending on
@@ -1060,6 +1072,16 @@ var Lineage_properties = (function () {
         }
     };
 
+    /**
+     * defines a simple object `graphActions` on `self` with two action methods for a graph UI
+     * @function
+     * @name  graphActions
+     * @memberof module:lineage_properties
+     * @param {Object} node node object that should be expanded/redrawn
+     * @param {*} _point (Unused) placeholder for potential future coordinate data
+     * @param {*} _event (Unused) placeholder for the originating event object
+     * @returns {void}
+     */
     self.graphActions = {
         expandNode: function (node, _point, _event) {
             self.drawGraph(node);
@@ -1069,6 +1091,18 @@ var Lineage_properties = (function () {
         },
     };
 
+    /**
+     * builds a jsTree of property nodes by searching one or more ontology sources based on user input
+     * @function
+     * @name searchTermInSources
+     * @memberof module:lineage_properties
+     * @param {string} term optional search string; if omitted, reads from the UI input field
+     * @param {bool} inCurrentSource if true, restricts search to the active source; otherwise
+     * may search all
+     * @param {bool} exactMatch forces exact match; overridden when a wildcard (*) is present
+     * @param {string} searchType type of search (e.g., label, uri); defaults to UI selection
+     * @returns {void} updates UI directly
+     */
     self.searchTermInSources = function (term, inCurrentSource, exactMatch, searchType) {
         if (!term) term = $("#LineageProperties_searchAllSourcesTermInput").val();
         if (!exactMatch) {

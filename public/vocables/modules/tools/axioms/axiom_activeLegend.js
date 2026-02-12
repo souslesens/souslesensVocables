@@ -563,7 +563,7 @@ var Axiom_activeLegend = (function () {
             });
         }
         if(!Axioms_graph.currentGraphNode.data.isNew) {
-            hiddenNodes.push(Axioms_graph.currentGraphNode.type);
+            hiddenNodes.push(Axioms_graph.currentGraphNode.data.type);
         }
         if (numberOfEdgesFromCurrentGraphNode > 1 && resourceType != "DisjointWith") {
             //dont alllow more than two edges from a node
@@ -682,7 +682,7 @@ var Axiom_activeLegend = (function () {
 
     self.showTriples = function (callback) {
         self.showTriplesActivated = true;
-        Axiom_UI.setView("showTriples");
+        
         var triples = []
 
         if (Axioms_graph.currentAxiomTriples  && ! NodeInfosAxioms.isNewAxiom ) {//saved axiom or new graph with axiomIds
@@ -693,7 +693,10 @@ var Axiom_activeLegend = (function () {
             triples = self.visjsGraphToTriples();
 
         }
-
+        if(!triples || triples.length == 0){
+            return;
+        }
+        Axiom_UI.setView("showTriples");
         triples = self.transformBlankNodesToRandomUri(triples);
 
         var jstreeData = [];
@@ -778,6 +781,11 @@ var Axiom_activeLegend = (function () {
                 triples.push(node.data);
             }
         });
+
+        if (Axioms_graph.currentAxiomTriples && Axioms_graph.currentAxiomTriples.newNodesToStore) {
+            triples.newNodesToStore = Axioms_graph.currentAxiomTriples.newNodesToStore;
+        }
+        
         return triples;
 
 
@@ -1003,58 +1011,21 @@ var Axiom_activeLegend = (function () {
             var triples = self.getTriples({all:true});
 
             async.series([
-                /*function (callbackSeries) {
-                    return callbackSeries();
-                
-                    self.saveNewNodes(triples.newNodesToStore, function (err, labelsMap) {//new nodes created on the fly
-                        if (err) {
-                            return callbackSeries(err)
-                        }
-                        newNodesLabelsMap = labelsMap;
-                        callbackSeries()
-
-
-                    })
-                },
-                //update  basicAxiomsCache  triples stored into basicAxiomsCache
                 function (callbackSeries) {
-                    if(newNodesLabelsMap){
-
-                        var basicAxiomsTriples = [] //triples stored into basicAxiomsCache
-                        triples.forEach(function (triple) {
-
-                            var item = {
-                                s: triple.subject,
-                                p: triple.predicate,
-                                o: triple.object
-                            }
-
-                            if(newNodesLabelsMap) {
-
-                                if (newNodesLabelsMap[item.s]) {
-                                    item.sLabel = newNodesLabelsMap[item.s];
-                                }
-                                if (newNodesLabelsMap[item.p]) {
-                                    item.pLabel = newNodesLabelsMap[item.p];
-                                }
-                                if (newNodesLabelsMap[item.o]) {
-                                    item.oLabel = newNodesLabelsMap[item.o];
-                                }
-                            }
-                            basicAxiomsTriples.push(item)
-
-                        })
+                    if (!triples.newNodesToStore || triples.newNodesToStore.length === 0) {
+                        return callbackSeries();
                     }
-                    AxiomExtractor.addBasicAxioms(self.currentSource, basicAxiomsTriples)
-
-                    callbackSeries()
-                },*/
-
-
+                    self.saveNewNodes(triples.newNodesToStore, function (err, _labelsMap) {
+                        if (err) {
+                            return callbackSeries(err);
+                        }
+                        callbackSeries();
+                    });
+                },
                 function (callbackSeries) {
                     var basicAxiomsTriples = self.convertTriplesToCacheFormat(triples);
-                    AxiomExtractor.addBasicAxioms(self.currentSource, basicAxiomsTriples)
-                    callbackSeries()
+                    AxiomExtractor.addBasicAxioms(self.currentSource, basicAxiomsTriples);
+                    callbackSeries();
                 },
                   //write axiomtriples
                 function (callbackSeries) {
@@ -1218,11 +1189,14 @@ var Axiom_activeLegend = (function () {
             var x = node
             if (node.data.isNew) {// node created on the fly
                 var toNode = edgesFromMap[node.id]
+                if(toNode && toNode.length > 0){
+                    toNode = toNode[0]
+                } 
                 if (!toNode) {//if not superClassOr property
                     node.data.superEntity = "http://www.w3.org/2002/07/owl#Thing"
                     newOrphanNodes.push(node)
                 } else {
-                    node.data.superEntity = toNode.id
+                    node.data.superEntity = toNode.to
                 }
                 newNodesToStore.push(node)
             }
@@ -1576,6 +1550,9 @@ var Axiom_activeLegend = (function () {
             });
         });
 
+        if (triples.newNodesToStore) {
+            transformedTriples.newNodesToStore = triples.newNodesToStore;
+        }
         return transformedTriples;
     };
 

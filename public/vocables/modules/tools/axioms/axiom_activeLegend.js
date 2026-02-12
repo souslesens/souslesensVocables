@@ -541,18 +541,15 @@ var Axiom_activeLegend = (function () {
         });
         var numberOfEdgesFromCurrentGraphNode = 0;
 
-        if (resourceType == "Connective") {
-        } else {
-            edges.forEach(function (edge) {
-                if (edge.from == Axioms_graph.currentGraphNode.id) {
-                    if (resourceType != "Class" && nodesMap[edge.to]) {
-                        var nodeToType = nodesMap[edge.to].data.type;
-                        hiddenNodes.push(nodeToType);
-                    }
-                    numberOfEdgesFromCurrentGraphNode += 1;
+        edges.forEach(function (edge) {
+            if (edge.from == Axioms_graph.currentGraphNode.id) {
+                if (resourceType != "Connective" && resourceType != "Class" && nodesMap[edge.to]) {
+                    var nodeToType = nodesMap[edge.to].data.type;
+                    hiddenNodes.push(nodeToType);
                 }
-            });
-        }
+                numberOfEdgesFromCurrentGraphNode += 1;
+            }
+        });
         if (!Axioms_graph.currentGraphNode.data.isNew) {
             hiddenNodes.push(Axioms_graph.currentGraphNode.data.type);
         }
@@ -1605,6 +1602,10 @@ var Axiom_activeLegend = (function () {
         if (parentName == "Class" || parentName == "ObjectProperty") {
             var uniqueSources = {};
             var searchDone = {};
+
+            objects = objects.filter(function (item) {
+                return item.id && item.id.indexOf("_:") !== 0 ;
+            });
 
             objects.forEach(function (item) {
                 if (item.source) {

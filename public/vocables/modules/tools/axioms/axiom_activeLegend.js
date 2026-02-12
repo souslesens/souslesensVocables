@@ -79,7 +79,7 @@ var Axiom_activeLegend = (function () {
                 var newObject = { id: "createObjectProperty", label: "_Create new ObjectProperty_" };
                 self.hideLegendItems();
 
-                if (Axioms_graph.currentGraphNode.data.type != "Restriction") {
+                if (Axioms_graph.currentGraphNode.data.type != "Restriction" && Axioms_graph.currentGraphNode.data.type != "ObjectProperty") {
                     return alert(" ObjectProperty can only be added to a Restriction");
                 }
                 var domainClassUri = self.getRestrictionAncestorClass(Axioms_graph.currentGraphNode.id);
@@ -313,11 +313,27 @@ var Axiom_activeLegend = (function () {
             var str = prompt("Enter ObjectProperty Label");
             var label = Sparql_common.formatString(str);
             var resourceUri = common.getURI(label, self.source, "fromLabel");
-            //  var triples = Lineage_createResource.getResourceTriples(self.source,resourceUri, null, label, resourceId);
-            var level = Axioms_graph.currentGraphNode ? Axioms_graph.currentGraphNode.level + 1 : 0;
+
+            var currentNode = Axioms_graph.currentGraphNode;
+            var restrictionNode = currentNode;
+            var existingSiblingPropertyId = null;
+            var edgeToRemove = null;
+
+            if (currentNode.data.type == "ObjectProperty") {
+                existingSiblingPropertyId = currentNode.id;
+                var allEdges = Axioms_graph.axiomsVisjsGraph.data.edges.get();
+                allEdges.forEach(function (edge) {
+                    if (edge.to == currentNode.id) {
+                        restrictionNode = Axioms_graph.axiomsVisjsGraph.data.nodes.get(edge.from);
+                        edgeToRemove = edge.id;
+                    }
+                });
+            }
+
+            var level = restrictionNode ? restrictionNode.level + 1 : 0;
             var node = {
                 id: resourceUri,
-                label: label,
+                label:  label,
                 type: "ObjectProperty",
                 shape: "box",
                 color: "#f5ef39",
@@ -332,19 +348,32 @@ var Axiom_activeLegend = (function () {
                 },
             };
             var visjsNode = Axioms_graph.getVisjsNode(node, level);
-            var edgeId = common.getRandomHexaId(5);
-            var edge = {
-                id: edgeId,
-                from: Axioms_graph.currentGraphNode.id,
+
+            if (edgeToRemove) {
+                Axioms_graph.axiomsVisjsGraph.data.edges.remove(edgeToRemove);
+            }
+
+            var edgesToAdd = [];
+            edgesToAdd.push({
+                id: common.getRandomHexaId(5),
+                from: restrictionNode.id,
                 to: resourceUri,
-                label: "⊑",
-                data: {
-                    type: "ObjectProperty",
-                },
-            };
+            });
+
+            if (existingSiblingPropertyId) {
+                edgesToAdd.push({
+                    id: common.getRandomHexaId(5),
+                    from: resourceUri,
+                    to: existingSiblingPropertyId,
+                    label: "⊑",
+                    data: {
+                        type: "subPropertyOf",
+                    },
+                });
+            }
 
             Axioms_graph.axiomsVisjsGraph.data.nodes.add([node]);
-            Axioms_graph.axiomsVisjsGraph.data.edges.add([edge]);
+            Axioms_graph.axiomsVisjsGraph.data.edges.add(edgesToAdd);
             Axioms_graph.currentGraphNode = visjsNode;
             Axioms_graph.outlineNode(visjsNode.id);
             $("#axiom_currentNode").html("<b>Current node: </b>" + label);
@@ -1198,7 +1227,6 @@ var Axiom_activeLegend = (function () {
                     predicate = "http://www.w3.org/2000/01/rdf-schema#subClassOf";
                 } else if (fromNode.data.type.endsWith("ObjectProperty")) {
                     predicate = "http://www.w3.org/2000/01/rdf-schema#subPropertyOf";
-                    predicate = "http://www.w3.org/2000/01/rdf-schema#subPropertyOf";
                 } else if (["Connective", "IntersectionOf", "UnionOf", "ComplementOf", "Enumeration"].indexOf(fromNode.data.type) > -1) {
                     if (fromNode.data.nCount == 0) {
                         predicate = "http://www.w3.org/1999/02/22-rdf-syntax-ns#first";
@@ -1250,7 +1278,10 @@ var Axiom_activeLegend = (function () {
                     });
                 }
 
-                recurse(toNode.id);
+                var isSubPropertyEdge = edge.data && edge.data.type == "subPropertyOf";
+                if (!isSubPropertyEdge) {
+                    recurse(toNode.id);
+                }
             });
         }
 

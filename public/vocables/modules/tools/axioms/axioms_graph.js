@@ -427,6 +427,14 @@ var Axioms_graph = (function () {
                                 nodesMap[edge.from]["color"] = "#eee";
                                 nodesMap[edge.from]["borderWidth"] = 0;
 
+                                var absorbedPropertyId = edge.to;
+                                var restrictionId = edge.from;
+                                visjsData.edges.forEach(function (otherEdge) {
+                                    if (otherEdge.from == absorbedPropertyId && otherEdge !== edge) {
+                                        otherEdge.from = restrictionId;
+                                    }
+                                });
+
                                 nodesToDelete.push(edge.to);
                             } else if (nodesMap[edge.to].data.type == "inverseOf") {
                                 nodesMap[edge.from].label = nodesMap[edge.to].label;

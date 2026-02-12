@@ -627,5 +627,12 @@ When Claude needs to work on this codebase:
 
 ---
 
-*Last Updated: 2025-01-12*
+
+## Auto-upgrade
+
+You should each time, I tell you something updating the .claude folder with claude.md then the prompt will be auto-improved
+
+
+
+*Last Updated: 2026-06-12*
 *Maintained by: Project Contributors*

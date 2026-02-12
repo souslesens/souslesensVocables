@@ -388,7 +388,18 @@ var AxiomExtractor = (function () {
                             object: child.o,
                         });
 
-                        if (!distinctNodes[child.p] && child.p.indexOf("http") == 0) {
+                        // Axiom properties are assumed to be owl:ObjectProperty since axioms
+                        // typically operate on object properties. Standard vocabulary properties
+                        // (rdfs, owl, rdf) are excluded as they have their own defined types.
+                        var standardNamespaces = [
+                            "http://www.w3.org/2000/01/rdf-schema#",
+                            "http://www.w3.org/2002/07/owl#",
+                            "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+                        ];
+                        var isStandardProperty = standardNamespaces.some(function (ns) {
+                            return child.p.startsWith(ns);
+                        });
+                        if (!distinctNodes[child.p] && child.p.indexOf("http") == 0 && !isStandardProperty) {
                             distinctNodes[child.p] = 1;
                             triples.push({
                                 subject: child.p,

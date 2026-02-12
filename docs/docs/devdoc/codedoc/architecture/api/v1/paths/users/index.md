@@ -32,9 +32,21 @@ Provides administrative operations on a specific user identified by an ID. Suppo
 
 <!-- AUTO-DESC:END -->
 
-
 ```{toctree}
 :maxdepth: 5
 :caption: Contents
 
 data/index
+```
+
+<!-- AUTO-INLINE-FILES:START -->
+
+## Files in this directory
+
+- `data.js`
+- `me.js`
+- `theme.js`
+- `token.js`
+- `{id}.js`
+
+<!-- AUTO-INLINE-FILES:END -->

@@ -3,10 +3,16 @@
 
 <!-- AUTO-DESC:START -->
 
-This page summarizes the code structure for this directory and its immediate subdirectories. It focuses on the `api / v1 / paths / admin / plugins / repositories / repository` area within the `api` module. Use the table of contents below to navigate deeper.
+## Overview
+
+This directory contains routes for managing the configuration of a specific plugin Git repository.
+
+## Modules
+
+### 1. Repository configuration (`{id}.js`)
+Manages a repository identified by `id`. It supports updating repository settings and deleting the repository from the platform configuration, and ensures related tool configurations are cleaned after changes.
 
 <!-- AUTO-DESC:END -->
-
 
 ```{toctree}
 :maxdepth: 5
@@ -21,4 +27,3 @@ This page summarizes the code structure for this directory and its immediate sub
 - `{id}.js`
 
 <!-- AUTO-INLINE-FILES:END -->
-

@@ -15,8 +15,16 @@ This module executes the operation associated with a user data entry. It is main
 
 <!-- AUTO-DESC:END -->
 
-
 ```{toctree}
 :maxdepth: 5
 :caption: Contents
 
+```
+
+<!-- AUTO-INLINE-FILES:START -->
+
+## Files in this directory
+
+- `exec.js`
+
+<!-- AUTO-INLINE-FILES:END -->

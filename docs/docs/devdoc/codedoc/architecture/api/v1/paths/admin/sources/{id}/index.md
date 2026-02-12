@@ -3,10 +3,16 @@
 
 <!-- AUTO-DESC:START -->
 
-This page summarizes the code structure for this directory and its immediate subdirectories. It focuses on the `api / v1 / paths / admin / sources / {id}` area within the `api` module. Use the table of contents below to navigate deeper.
+## Overview
+
+This directory contains administrative routes for managing operations related to a specific source identified by its ID. It currently focuses on managing import relationships between sources.
+
+## Modules
+
+### 1. Source imports (`imports.js`)
+Allows administrators to add an import relationship to a given source. This endpoint links another source as a dependency, enabling composition and reuse of data across multiple sources.
 
 <!-- AUTO-DESC:END -->
-
 
 ```{toctree}
 :maxdepth: 5
@@ -21,4 +27,3 @@ This page summarizes the code structure for this directory and its immediate sub
 - `imports.js`
 
 <!-- AUTO-INLINE-FILES:END -->
-

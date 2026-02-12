@@ -19,9 +19,17 @@ This module executes the action associated with a UserData entry. It currently f
 
 <!-- AUTO-DESC:END -->
 
-
 ```{toctree}
 :maxdepth: 5
 :caption: Contents
 
-{id}/exec
+{id}/index
+```
+
+<!-- AUTO-INLINE-FILES:START -->
+
+## Files in this directory
+
+- `{id}.js`
+
+<!-- AUTO-INLINE-FILES:END -->

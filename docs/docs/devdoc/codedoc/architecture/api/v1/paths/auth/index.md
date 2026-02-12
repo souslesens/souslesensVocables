@@ -19,8 +19,17 @@ This module logs out the current user when authentication is enabled. It returns
 
 <!-- AUTO-DESC:END -->
 
-
 ```{toctree}
 :maxdepth: 5
 :caption: Contents
 
+```
+
+<!-- AUTO-INLINE-FILES:START -->
+
+## Files in this directory
+
+- `logout.js`
+- `whoami.js`
+
+<!-- AUTO-INLINE-FILES:END -->

@@ -268,8 +268,12 @@ var NodeInfosAxioms = (function () {
     };
 
     self.nodeInfos = function () {
+        var node = Axioms_graph.currentGraphNode;
+        if (node && node.data && !node.data.source) {
+            node.data.source = self.currentSource;
+        }
         $("#mainDialogDiv").parent().css("z-index", 10000);
-        NodeInfosWidget.showNodeInfos(self.currentSource, Axioms_graph.currentGraphNode, "mainDialogDiv", null, function () {
+        NodeInfosWidget.showNodeInfos(self.currentSource, node, "mainDialogDiv", null, function () {
         });
     };
     /*

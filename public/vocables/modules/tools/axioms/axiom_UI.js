@@ -13,37 +13,20 @@ var Axiom_UI = (function () {
         "axiomEditor_copyTriplesBtn",
         "axiomEditor_deleteTriplesBtn",
         "axiomsEditor_textDiv",
-        "nodeInfosAxioms_newAxiomBtn"
+        "nodeInfosAxioms_newAxiomBtn",
     ];
 
     var VIEW_CONFIG = {
         newAxiom: {
-            visible: [
-                "nodeInfosAxioms_activeLegendDiv",
-                "nodeInfosAxioms_newAxiomPanel",
-                "axiomEditor_clearBtn",
-                "axiomEditor_saveBtn",
-                "axiomEditor_showTriplesBtn",
-                
-            ],
+            visible: ["nodeInfosAxioms_activeLegendDiv", "nodeInfosAxioms_newAxiomPanel", "axiomEditor_clearBtn", "axiomEditor_saveBtn", "axiomEditor_showTriplesBtn"],
             showTriplesLabel: "show triples",
         },
         visualisation: {
-            visible: [
-                "axiomEditor_showTriplesBtn",
-                "nodeInfosAxioms_newAxiomBtn"
-            ],
+            visible: ["axiomEditor_showTriplesBtn", "nodeInfosAxioms_newAxiomBtn"],
             showTriplesLabel: "show triples",
         },
         showTriples: {
-            visible: [
-               
-                "axiomEditor_saveBtn",
-                "axiomEditor_copyTriplesBtn",
-                "axiomEditor_deleteTriplesBtn",
-                "axiomsEditor_textDiv",
-                "nodeInfosAxioms_newAxiomBtn"
-            ],
+            visible: ["axiomEditor_saveBtn", "axiomEditor_copyTriplesBtn", "axiomEditor_deleteTriplesBtn", "axiomsEditor_textDiv", "nodeInfosAxioms_newAxiomBtn"],
             showTriplesLabel: "show triples",
         },
     };

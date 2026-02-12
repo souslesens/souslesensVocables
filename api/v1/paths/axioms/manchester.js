@@ -3,12 +3,10 @@ export default function () {
         GET,
     };
 
-    function GET(req, res, _next) {
-
-    }
+    function GET(req, res, _next) {}
 
     GET.apiDoc = {
-        security: [{restrictLoggedUser: []}],
+        security: [{ restrictLoggedUser: [] }],
         summary: "Return manchester syntax of triples",
         description: "Return manchester syntax of triples",
         operationId: "Return manchester syntax of triples",
@@ -20,7 +18,6 @@ export default function () {
                 type: "string",
                 required: true,
             },
-
         ],
 
         responses: {

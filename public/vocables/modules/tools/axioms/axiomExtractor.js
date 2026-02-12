@@ -208,16 +208,16 @@ var AxiomExtractor = (function () {
      */
     self.addBasicAxioms = function (source, triples) {
         triples.forEach(function (triple) {
-            if(!self.basicAxioms[source][triple.s]){
-                self.basicAxioms[source][triple.s]=[]
+            if (!self.basicAxioms[source][triple.s]) {
+                self.basicAxioms[source][triple.s] = [];
             }
-            var alreadyExists = self.basicAxioms[source][triple.s].some(function(existingTriple){
-                return existingTriple.p === triple.p && existingTriple.o === triple.o
-            })
-            if(!alreadyExists){
-                self.basicAxioms[source][triple.s].push(triple)
+            var alreadyExists = self.basicAxioms[source][triple.s].some(function (existingTriple) {
+                return existingTriple.p === triple.p && existingTriple.o === triple.o;
+            });
+            if (!alreadyExists) {
+                self.basicAxioms[source][triple.s].push(triple);
             }
-        })
+        });
     };
     self.deleteBasicAxioms = function (source, triples) {
         triples.forEach(function (tripleToDelete) {
@@ -229,10 +229,6 @@ var AxiomExtractor = (function () {
             });
         });
     };
-
-
-
-
 
     self.listClassesWithAxioms = function (sourceLabel, callback) {
         AxiomExtractor.getBasicAxioms(sourceLabel, function (err, basicAxioms) {
@@ -391,11 +387,7 @@ var AxiomExtractor = (function () {
                         // Axiom properties are assumed to be owl:ObjectProperty since axioms
                         // typically operate on object properties. Standard vocabulary properties
                         // (rdfs, owl, rdf) are excluded as they have their own defined types.
-                        var standardNamespaces = [
-                            "http://www.w3.org/2000/01/rdf-schema#",
-                            "http://www.w3.org/2002/07/owl#",
-                            "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
-                        ];
+                        var standardNamespaces = ["http://www.w3.org/2000/01/rdf-schema#", "http://www.w3.org/2002/07/owl#", "http://www.w3.org/1999/02/22-rdf-syntax-ns#"];
                         var isStandardProperty = standardNamespaces.some(function (ns) {
                             return child.p.startsWith(ns);
                         });

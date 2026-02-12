@@ -30,12 +30,11 @@ var NodeInfosAxioms = (function () {
                 AxiomExtractor.getClassAxiomsTriples(self.currentResource.data.source, self.currentResource.data.id, function (err, triples) {
                     var divId = "nodeInfosAxioms_graphDiv";
                     var options = {};
-                    Axioms_graph.drawNodeAxioms2(self.currentResource.data.source, self.currentResource.data.id, triples, divId, options, );
+                    Axioms_graph.drawNodeAxioms2(self.currentResource.data.source, self.currentResource.data.id, triples, divId, options);
                 });
             });
 
             return;
-
         });
     };
     self.initSourceClassesMap = function (source, callback) {
@@ -62,7 +61,7 @@ var NodeInfosAxioms = (function () {
         $("#nodeInfosAxioms_infosDiv").html("Loading Axioms...");
         $("#waitImg").css("display", "block");
 
-        self.getResourceAxioms(  self.currentSource,self.currentResource.data.id, {}, function (err, result) {
+        self.getResourceAxioms(self.currentSource, self.currentResource.data.id, {}, function (err, result) {
             $("#waitImg").css("display", "none");
             if (err) {
                 return MainController.errorAlert(err.responseText || err);
@@ -162,9 +161,8 @@ var NodeInfosAxioms = (function () {
         });
     };
 
-    self.getResourceAxioms = function (source,resourceId, options, callback) {
+    self.getResourceAxioms = function (source, resourceId, options, callback) {
         Axiom_manager.getClassAxioms(
-
             resourceId,
             {
                 getManchesterExpression: true,
@@ -202,18 +200,14 @@ var NodeInfosAxioms = (function () {
                 }
             });
 
-            Axioms_graph.drawNodeAxioms2(self.currentSource, self.currentResource.data.id, allTriples, "nodeInfosAxioms_graphDiv", options, );
+            Axioms_graph.drawNodeAxioms2(self.currentSource, self.currentResource.data.id, allTriples, "nodeInfosAxioms_graphDiv", options);
         } else if (node && node.data) {
             Axioms_graph.currentGraphNode = node;
 
-            Axioms_graph.drawNodeAxioms2(
-                self.currentSource,
-                self.currentResource.data.id,
-                node.data.triples,
-                "nodeInfosAxioms_graphDiv",
-                { onNodeClick: NodeInfosAxioms.onNodeGraphClick, axiomType: node.parent }
-              ,
-            );
+            Axioms_graph.drawNodeAxioms2(self.currentSource, self.currentResource.data.id, node.data.triples, "nodeInfosAxioms_graphDiv", {
+                onNodeClick: NodeInfosAxioms.onNodeGraphClick,
+                axiomType: node.parent,
+            });
 
             //  $("#nodeInfosAxioms_axiomText").html(node.data.manchester);
         }
@@ -227,7 +221,7 @@ var NodeInfosAxioms = (function () {
     self.expandGraphFromNode = function () {
         var node = Axioms_graph.currentGraphNode;
         $("#nodeInfosAxioms_infosDiv").html("Loading Axioms for " + node.data.label);
-        self.getResourceAxioms(  self.currentSource,node.data.id, {}, function (err, result) {
+        self.getResourceAxioms(self.currentSource, node.data.id, {}, function (err, result) {
             $("#waitImg").css("display", "none");
             if (err) {
                 return MainController.errorAlert(err.responseText);
@@ -238,7 +232,7 @@ var NodeInfosAxioms = (function () {
                 allTriples = allTriples.concat(item);
             });
             var options = { addToGraph: true, startLevel: node.level, axiomType: node.parent };
-            Axioms_graph.drawNodeAxioms2(self.currentSource, node.data.id, allTriples, "nodeInfosAxioms_graphDiv", options, );
+            Axioms_graph.drawNodeAxioms2(self.currentSource, node.data.id, allTriples, "nodeInfosAxioms_graphDiv", options);
         });
     };
     self.collapseGraphToNode = function () {
@@ -273,8 +267,7 @@ var NodeInfosAxioms = (function () {
             node.data.source = self.currentSource;
         }
         $("#mainDialogDiv").parent().css("z-index", 10000);
-        NodeInfosWidget.showNodeInfos(self.currentSource, node, "mainDialogDiv", null, function () {
-        });
+        NodeInfosWidget.showNodeInfos(self.currentSource, node, "mainDialogDiv", null, function () {});
     };
     /*
     self.reduceNodeInfoAxioms = function () {
@@ -300,7 +293,7 @@ var NodeInfosAxioms = (function () {
                     async.eachSeries(
                         descendants,
                         function (descendant, callbackEach) {
-                            self.getResourceAxioms(  self.currentSource,descendant.data.id, {}, function (err, result) {
+                            self.getResourceAxioms(self.currentSource, descendant.data.id, {}, function (err, result) {
                                 $("#waitImg").css("display", "none");
                                 if (err) {
                                     return callbackEach(err.responseText);
@@ -361,11 +354,10 @@ var NodeInfosAxioms = (function () {
 
     self.newAxiom = function (clearAll) {
         if (clearAll) {
-            self.isNewAxiom=true
+            self.isNewAxiom = true;
             Axiom_activeLegend.isLegendActive = false;
             Axioms_graph.clearGraph();
-            $("#axiomsEditor_textDiv").html("")
-
+            $("#axiomsEditor_textDiv").html("");
         }
 
         if (Lineage_sources.isSourceEditableForUser(self.currentSource)) {

@@ -11,7 +11,6 @@ export default function () {
     };
 
     function POST(req, res, _next) {
-
         elasticRestProxy.indexDocuments(req.body.rootDir, req.body.indexName, function (err, result) {
             if (err) {
                 return res.status(400).json({ error: err });

@@ -170,21 +170,17 @@ var Lineage_createResource = (function () {
         return triples;
     };
 
-    self.addAnnotationTriples=function(triples, callback){
-        UserDataWidget.loadUserDatabyId  (162164, function(err, result){
-            if(!err && result.length>0){
-                var subject=triples[0].subject
-                result.forEach(function(predicate){
-                    triples.push({subject: subject,
-                    predicate:predicate,
-                    object:"?"})
-                })
-
+    self.addAnnotationTriples = function (triples, callback) {
+        UserDataWidget.loadUserDatabyId(162164, function (err, result) {
+            if (!err && result.length > 0) {
+                var subject = triples[0].subject;
+                result.forEach(function (predicate) {
+                    triples.push({ subject: subject, predicate: predicate, object: "?" });
+                });
             }
-            return callback(null,triples)
-    })
-
-    }
+            return callback(null, triples);
+        });
+    };
 
     /**
      * Retrieves the URI for the resource being created.

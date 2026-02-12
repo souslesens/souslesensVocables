@@ -11,7 +11,6 @@ This module also includes API documentation definitions, access control rules, a
 
 <!-- AUTO-DESC:END -->
 
-
 ```{toctree}
 :maxdepth: 5
 :caption: Contents
@@ -26,4 +25,3 @@ paths/index
 - `api-doc.js`
 
 <!-- AUTO-INLINE-FILES:END -->
-

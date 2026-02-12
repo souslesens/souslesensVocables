@@ -3,10 +3,16 @@
 
 <!-- AUTO-DESC:START -->
 
-This page summarizes the code structure for this directory and its immediate subdirectories. It focuses on the `api / v1 / paths / admin / plugins / repositories / tags` area within the `api` module. Use the table of contents below to navigate deeper.
+## Overview
+
+This directory contains routes used to retrieve version tags from a plugin Git repository.
+
+## Modules
+
+### 1. Repository tags (`{id}.js`)
+Retrieves the available Git tags for the repository identified by `id`. This endpoint is typically used to inspect versions or releases provided by the repository.
 
 <!-- AUTO-DESC:END -->
-
 
 ```{toctree}
 :maxdepth: 5
@@ -21,4 +27,3 @@ This page summarizes the code structure for this directory and its immediate sub
 - `{id}.js`
 
 <!-- AUTO-INLINE-FILES:END -->
-

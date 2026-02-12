@@ -17,7 +17,6 @@ Each API version is self-contained and provides its own route structure and docu
 
 <!-- AUTO-DESC:END -->
 
-
 ```{toctree}
 :maxdepth: 5
 :caption: Contents
@@ -27,9 +26,8 @@ v1/index
 
 <!-- AUTO-INLINE-FILES:START -->
 
-## Files and directories in this module
+## Files in this directory
 
 - `README.md`
 
 <!-- AUTO-INLINE-FILES:END -->
-

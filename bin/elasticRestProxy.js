@@ -547,6 +547,7 @@ var elasticRestProxy = {
             // configure ingest attachement pipeline to remove binary data from index
             function (callbackSeries) {
                 return callbackSeries()
+                /*
                 var requestOptions = {
                     method: 'PUT',
                     url: config.indexation.elasticUrl + "_ingest/pipeline/attachment",
@@ -563,8 +564,8 @@ var elasticRestProxy = {
                             }
                         ],
                         auth: {
-                            user: "elastic",
-                            password: "sls#209",
+                            user: "",
+                            password: "",
                         }
                     }
                 }
@@ -582,7 +583,7 @@ var elasticRestProxy = {
                         }
                     }
                     return callbackSeries(null, body);
-                });
+                });*/
             },
 
 

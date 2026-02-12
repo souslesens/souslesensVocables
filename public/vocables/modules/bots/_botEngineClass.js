@@ -449,6 +449,9 @@ class BotEngineClass {
         $("#" + this.divId)
             .find("#bot_resourcesProposalSelect")
             .css("display", "block");
+        $("#" + this.divId)
+            .find("#botSearchScopeSelect")
+            .hide();
         this.currentList = values;
         if (values.length > 20) {
             $("#" + this.divId)
@@ -530,13 +533,18 @@ class BotEngineClass {
      * search term and press Enter or click the search button to query external sources.
      * When in local filter mode, keystrokes filter the initial list. Once a search is performed,
      * the dropdown switches to search results and the local filter is disabled.
+     * Optionally displays a scope dropdown to switch between different data sources; changing scope
+     * reloads the list and resets search mode.
      * @param {Array<Object>} initialValues - The initial list of items to display ({id, label}).
      * @param {string} varToFill - The bot parameter name to fill when an initial list item is selected.
      * @param {Function} searchFn - Search function: searchFn(term, callback) where callback receives an array of {id, label, source}.
-     * @param {Function} [onSearchResultSelected] - Callback invoked when a search result is clicked, receives the selected item id.
+     * @param {Function} [onSearchResultSelected] - Callback invoked when a search result is clicked, receives the selected item id. If null, the standard showList click handler is used.
+     * @param {Object} [scopeOptions] - Configuration for the scope dropdown.
+     * @param {Array<Object>} scopeOptions.items - Dropdown entries ({id, label}).
+     * @param {Function} scopeOptions.onScopeChange - Called on scope change: onScopeChange(scopeId, updateListFn) where updateListFn(newItems) refreshes the select.
      * @returns {void}
      */
-    showListWithSearch(initialValues, varToFill, searchFn, onSearchResultSelected) {
+    showListWithSearch(initialValues, varToFill, searchFn, onSearchResultSelected, scopeOptions) {
         this.showList(initialValues, varToFill);
         $("#" + this.divId)
             .find("#botFilterProposalDiv")
@@ -545,6 +553,30 @@ class BotEngineClass {
         var isSearchMode = false;
         var filterInput = $("#" + this.divId).find("#botFilterProposalInput");
         var searchButton = $("#" + this.divId).find(".search-icon");
+        var scopeSelect = $("#" + this.divId).find("#botSearchScopeSelect");
+
+        if (scopeOptions && scopeOptions.items) {
+            scopeSelect.empty();
+            scopeOptions.items.forEach(function (item) {
+                scopeSelect.append($("<option>").val(item.id).text(item.label));
+            });
+            scopeSelect.show();
+            scopeSelect.off("change");
+            scopeSelect.on("change", function () {
+                var selectedScope = $(this).val();
+                if (scopeOptions.onScopeChange) {
+                    scopeOptions.onScopeChange(selectedScope, function (newItems) {
+                        isSearchMode = false;
+                        self.currentList = newItems;
+                        var selectEl = $("#" + self.divId).find("#bot_resourcesProposalSelect");
+                        common.fillSelectOptions(selectEl, newItems, false, "label", "id");
+                        UI.adjustSelectListSize(selectEl, 10);
+                    });
+                }
+            });
+        } else {
+            scopeSelect.hide();
+        }
 
         var doSearch = function () {
             var term = filterInput.val();

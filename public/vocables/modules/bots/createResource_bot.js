@@ -46,10 +46,10 @@ var CreateResource_bot = (function () {
         (self.workflow = {
             listResourceTypesFn: {
                 _OR: {
-                    "owl:Class": { promptResourceLabelFn: { listVocabsFn: { listSuperClassesFn: self.workflow_saveResource } } },
+                    "owl:Class": { promptResourceLabelFn: { listSuperClassesFn: self.workflow_saveResource } },
                     // "owl:ObjectProperty": { promptResourceLabelFn: { listVocabsFn: { listObjectPropertiesfn: self.workflow_saveResource } } },
 
-                    "owl:NamedIndividual": { promptResourceLabelFn: { listVocabsFn: { listClassTypesFn: self.workflow_saveResource } } },
+                    "owl:NamedIndividual": { promptResourceLabelFn: { listClassTypesFn: self.workflow_saveResource } },
                     DatatypeProperty: { promptDatatypePropertyLabelFn: { listDatatypePropertyDomainFn: { listDatatypePropertyRangeFn: { createDataTypePropertyFn: { drawDataTypePropertFn: {} } } } } },
                     ImportClass: { listVocabsFn: { listSuperClassesFn: self.workflow_saveResource } },
                     ImportSource: { listImportsFn: { saveImportSource: self.workflow_end } },
@@ -126,12 +126,84 @@ var CreateResource_bot = (function () {
             _botEngine.nextStep();*/
         },
 
+        /**
+         * @function
+         * @name listSuperClassesFn
+         * @memberof CreateResource_bot.functions
+         * Displays a combined scope dropdown and class list. The scope dropdown contains
+         * the active source, its imports, and an "All Sources" option. Selecting a scope
+         * loads the classes from that source (or all sources with source prefix).
+         * Also supports ElasticSearch via Enter key or search button.
+         * @returns {void}
+         */
         listSuperClassesFn: function () {
-            CommonBotFunctions.listVocabClasses(self.params.currentVocab, true, null, function (err, classes) {
-                if (err) {
-                    return self.myBotEngine.abort(err);
+            var vocabs = [{ id: "allSources", label: "All Sources" }];
+            vocabs.push({ id: self.source, label: self.source });
+            var imports = Config.sources[self.source].imports;
+            if (imports) {
+                imports.forEach(function (importSource) {
+                    vocabs.push({ id: importSource, label: importSource });
+                });
+            }
+
+            var loadClassesForScope = function (scopeId, callback) {
+                if (scopeId === "allSources") {
+                    var allClasses = [];
+                    var sourceVocabs = vocabs.filter(function (v) {
+                        return v.id !== "allSources";
+                    });
+                    async.eachSeries(
+                        sourceVocabs,
+                        function (vocab, callbackEach) {
+                            CommonBotFunctions.listVocabClasses(vocab.id, false, null, function (err, classes) {
+                                if (err) return callbackEach();
+                                classes.forEach(function (cls) {
+                                    allClasses.push({
+                                        id: cls.id,
+                                        label: cls.label + " (" + vocab.id + ")",
+                                        source: vocab.id,
+                                    });
+                                });
+                                callbackEach();
+                            });
+                        },
+                        function () {
+                            CommonBotFunctions.sortList(allClasses);
+                            allClasses.splice(0, 0, { id: "owl:Thing", label: "owl:Thing" });
+                            callback(allClasses);
+                        },
+                    );
+                } else {
+                    CommonBotFunctions.listVocabClasses(scopeId, true, null, function (err, classes) {
+                        if (err) return callback([]);
+                        callback(classes);
+                    });
                 }
-                self.myBotEngine.showList(classes, "resourceId");
+            };
+
+            loadClassesForScope("allSources", function (classes) {
+                var searchFn = function (term, updateCallback) {
+                    var sources;
+                    if (Lineage_combine.currentSources && Lineage_combine.currentSources.length > 0) {
+                        sources = Lineage_combine.currentSources;
+                    } else {
+                        sources = Object.keys(Lineage_sources.loadedSources);
+                    }
+                    CommonBotFunctions.searchClassesInSources(sources, term, function (_err, items) {
+                        updateCallback(items || []);
+                    });
+                };
+
+                var scopeOptions = {
+                    items: vocabs,
+                    onScopeChange: function (scopeId, updateListFn) {
+                        loadClassesForScope(scopeId, function (newClasses) {
+                            updateListFn(newClasses);
+                        });
+                    },
+                };
+
+                self.myBotEngine.showListWithSearch(classes, "resourceId", searchFn, null, scopeOptions);
             });
         },
         listClassTypesFn: function () {

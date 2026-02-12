@@ -236,6 +236,7 @@ var CreateResource_bot = (function () {
             if (self.params.resourceType == "ImportClass") {
                 Sparql_OWL.copyUriTriplesFromSourceToSource(self.params.currentVocab, self.params.source, self.params.resourceId, function (err, result) {});
             } else {
+                self.params.superClassId = self.params.resourceId;
                 var triples = Lineage_createResource.getResourceTriples(self.params.source, self.params.resourceType, null, self.params.resourceLabel, self.params.resourceId);
                 Lineage_createResource.writeResource(self.params.source, triples, function (err, resourceId) {
                     if (err) {
@@ -253,14 +254,18 @@ var CreateResource_bot = (function () {
             //  _botEngine.nextStep();
         },
         drawResourceFn: function () {
+            var conceptType = self.params.resourceType === "owl:NamedIndividual" ? "NamedIndividual" : "Class";
             var nodeData = {
                 id: self.params.resourceId,
+                type: conceptType,
                 data: {
                     id: self.params.resourceId,
+                    label: self.params.resourceLabel,
                     source: self.params.source,
+                    type: conceptType,
                 },
             };
-            Lineage_whiteboard.drawNodesAndParents(nodeData, 1, { legendType: "individualClasses" });
+            Lineage_whiteboard.drawNodesAndParents(nodeData, 2);
             self.myBotEngine.nextStep();
         },
         newResourceFn: function () {

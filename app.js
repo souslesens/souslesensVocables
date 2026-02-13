@@ -320,15 +320,14 @@ const upperOntologies = [
 async function loadUpperOntology() {
     const existingGraphs = await rdfDataModel.getGraphs();
     try {
-        upperOntologies.forEach(async (ontology) => {
+        for (const ontology of upperOntologies) {
             const matchingGraph = existingGraphs.find((g) => g.name === ontology.graphUri);
-            const hasGraph = matchingGraph !== undefined ?? matchingGraph.count > 0;
-
+            const hasGraph = !!matchingGraph?.count;
             if (!hasGraph) {
                 console.log(`Loading ontology ${ontology.graphUri}`);
                 await rdfDataModel.loadGraph(ontology.graphUri, ontology.graphUrl);
             }
-        });
+        }
     } catch (e) {
         console.error("Could not load default ontologies: " + e);
     }
@@ -340,19 +339,18 @@ async function loadDefaultGraphs() {
     const sources = await sourceModel.getAllSources();
     try {
         const graphs = await rdfDataModel.getGraphs();
-        Object.entries(sources).forEach(async ([_, source]) => {
+        for (const [, source] of Object.entries(sources)) {
             const graphDownloadUrl = source.graphDownloadUrl;
             if (graphDownloadUrl) {
                 const graphURI = source.graphUri;
                 const matchingGraph = graphs.find((g) => g.name === graphURI);
-                const hasGraph = matchingGraph !== undefined ?? matchingGraph.count > 0;
-
+                const hasGraph = !!matchingGraph?.count;
                 if (!hasGraph) {
                     console.log(`Loading graph ${source.graphUri}`);
                     await rdfDataModel.loadGraph(source.graphUri, graphDownloadUrl);
                 }
             }
-        });
+        }
     } catch (e) {
         console.error("Could not load default graphs: " + e);
     }

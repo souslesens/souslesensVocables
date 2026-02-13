@@ -579,8 +579,9 @@ var Axiom_activeLegend = (function () {
                 numberOfEdgesFromCurrentGraphNode += 1;
             }
         });
-        if (!Axioms_graph.currentGraphNode.data.isNew) {
-            hiddenNodes.push(Axioms_graph.currentGraphNode.data.type);
+        var currentType = Axioms_graph.currentGraphNode.data.type;
+        if (!Axioms_graph.currentGraphNode.data.isNew && currentType != "Connective" && currentType != "Restriction") {
+            hiddenNodes.push(currentType);
         }
         if (numberOfEdgesFromCurrentGraphNode > 1 && resourceType != "DisjointWith") {
             //dont alllow more than two edges from a node
@@ -1534,7 +1535,6 @@ var Axiom_activeLegend = (function () {
         } else {
             return alert("no valid resourceType");
         }
-        var params = { source: self.currentSource, filteredUris: filteredUris };
         var params = { source: self.currentSource, filteredUris: filteredUris };
         return CreateAxiomResource_bot.start(botWorkFlow, params, function (err, result) {
             if (err) {

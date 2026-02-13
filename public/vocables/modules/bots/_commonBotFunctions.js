@@ -1,5 +1,8 @@
 import OntologyModels from "../shared/ontologyModels.js";
 import SearchUtil from "../search/searchUtil.js";
+import Sparql_proxy from "../sparqlProxies/sparql_proxy.js";
+import Sparql_common from "../sparqlProxies/sparql_common.js";
+import JstreeWidget from "../uiWidgets/jstreeWidget.js";
 
 var CommonBotFunctions = (function () {
     var self = {};
@@ -226,7 +229,6 @@ var CommonBotFunctions = (function () {
             if (err || !result || result.length === 0) {
                 return callback(null, []);
             }
-            var parentIdsLabelsMap = result.parentIdsLabelsMap || {};
             var items = [];
             result.forEach(function (classItem) {
                 var matches = classItem.matches;
@@ -236,13 +238,98 @@ var CommonBotFunctions = (function () {
                             id: match.id,
                             label: match.label + " (" + source + ")",
                             source: source,
-                            parents: match.parents || [],
                         });
                     });
                 }
             });
-            items.parentIdsLabelsMap = parentIdsLabelsMap;
             callback(null, items);
+        });
+    };
+
+    /**
+     * @function
+     * @name showParentsDialog
+     * @memberof module:CommonBotFunctions
+     * Fetches all ancestor classes of a given class via a SPARQL property path
+     * query (rdfs:subClassOf*) and displays them as a hierarchical JsTree in a dialog.
+     * @param {string} classId - The URI of the class to get parents for.
+     * @param {string} classLabel - The label of the class.
+     * @param {Array} currentList - The current list of classes with {id, source} to resolve the source.
+     * @param {string} defaultSource - Fallback source if classId is not found in currentList.
+     * @returns {void}
+     */
+    self.showParentsDialog = function (classId, classLabel, currentList, defaultSource) {
+        var classSource = null;
+        if (currentList) {
+            for (var i = 0; i < currentList.length; i++) {
+                if (currentList[i].id === classId) {
+                    classSource = currentList[i].source;
+                    break;
+                }
+            }
+        }
+        if (!classSource) {
+            classSource = defaultSource;
+        }
+
+        var fromStr = Sparql_common.getFromStr(classSource);
+        var query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> " +
+            "PREFIX owl: <http://www.w3.org/2002/07/owl#> " +
+            "SELECT DISTINCT ?child ?childLabel ?parent ?parentLabel " +
+            fromStr +
+            " WHERE { " +
+            "  <" + classId + "> rdfs:subClassOf* ?child . " +
+            "  ?child rdfs:subClassOf ?parent . " +
+            "  ?parent rdf:type ?type . FILTER(?type != owl:Restriction) " +
+            "  FILTER(!isBlank(?child)) " +
+            "  FILTER(!isBlank(?parent)) " +
+            "  OPTIONAL { ?child rdfs:label ?childLabel } " +
+            "  OPTIONAL { ?parent rdfs:label ?parentLabel } " +
+            "} LIMIT 500";
+
+        var url = Config.sources[classSource].sparql_server.url + "?format=json&query=";
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: classSource }, function (err, result) {
+            if (err) {
+                return alert("Error loading parents: " + err);
+            }
+            var bindings = result.results.bindings;
+            if (bindings.length === 0) {
+                return alert("No parents found for " + classLabel);
+            }
+
+            var nodesMap = {};
+            var childParentMap = {};
+            bindings.forEach(function (item) {
+                var childUri = item.child.value;
+                var parentUri = item.parent.value;
+                var childLbl = item.childLabel ? item.childLabel.value : Sparql_common.getLabelFromURI(childUri);
+                var parentLbl = item.parentLabel ? item.parentLabel.value : Sparql_common.getLabelFromURI(parentUri);
+
+                nodesMap[childUri] = childLbl;
+                nodesMap[parentUri] = parentLbl;
+
+                if (!childParentMap[childUri]) {
+                    childParentMap[childUri] = [];
+                }
+                childParentMap[childUri].push(parentUri);
+            });
+
+            var jstreeData = [];
+            for (var nodeUri in nodesMap) {
+                var parentUri = childParentMap[nodeUri] ? childParentMap[nodeUri][0] : null;
+                var isRoot = !parentUri || !nodesMap[parentUri];
+                jstreeData.push({
+                    id: nodeUri,
+                    text: nodesMap[nodeUri],
+                    parent: isRoot ? "#" : parentUri,
+                    data: { id: nodeUri, label: nodesMap[nodeUri], source: classSource },
+                });
+            }
+
+            $("#mainDialogDiv").html("<div id='showParentsJstreeDiv' style='overflow:auto; max-height:400px'></div>");
+            UI.openDialog("mainDialogDiv", { title: "Parents of " + classLabel });
+            $("#mainDialogDiv").parent().css("z-index", 10000);
+            JstreeWidget.loadJsTree("showParentsJstreeDiv", jstreeData, { openAll: true });
         });
     };
 

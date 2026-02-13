@@ -10,7 +10,6 @@ import Sparql_generic from "../sparqlProxies/sparql_generic.js";
 import OntologyModels from "../shared/ontologyModels.js";
 import Lineage_createResource from "../tools/lineage/lineage_createResource.js";
 import Sparql_OWL from "../sparqlProxies/sparql_OWL.js";
-import SimpleListSelectorWidget from "../uiWidgets/simpleListSelectorWidget.js";
 
 var CreateResource_bot = (function () {
     var self = {};
@@ -163,8 +162,6 @@ var CreateResource_bot = (function () {
                 };
 
                 loadClassesForScope("allSources", function (classes) {
-                    self.searchResultsMap = {};
-                    self.parentIdsLabelsMap = {};
                     var searchFn = function (term, updateCallback) {
                         var sources;
                         if (Lineage_combine.currentSources && Lineage_combine.currentSources.length > 0) {
@@ -176,11 +173,6 @@ var CreateResource_bot = (function () {
                             if (!items) {
                                 items = [];
                             }
-                            self.searchResultsMap = {};
-                            self.parentIdsLabelsMap = items.parentIdsLabelsMap || {};
-                            items.forEach(function (item) {
-                                self.searchResultsMap[item.id] = item;
-                            });
                             updateCallback(items);
                         });
                     };
@@ -197,22 +189,45 @@ var CreateResource_bot = (function () {
                     self.myBotEngine.showListWithSearch(classes, "resourceId", searchFn, null, scopeOptions);
 
                     var selectEl = $("#bot_resourcesProposalSelect");
-                    selectEl.off("contextmenu");
-                    selectEl.on("contextmenu", function (evt) {
+                    selectEl.off("mousedown.showParents");
+                    selectEl.on("mousedown.showParents", function (evt) {
+                        if (evt.which !== 3) {
+                            return;
+                        }
                         evt.preventDefault();
-                        var selectedOption = selectEl.find("option:selected");
-                        var classId = selectedOption.val();
+                        evt.stopPropagation();
+                        var option = $(evt.target);
+                        if (!option.is("option")) {
+                            return;
+                        }
+                        var classId = option.val();
+                        var classLabel = option.text();
                         if (!classId) {
                             return;
                         }
-                        var classLabel = selectedOption.text();
                         var popupHtml = "<div style='padding:5px'>";
                         popupHtml += "<div class='popupMenuItem' style='cursor:pointer;padding:4px 8px' ";
-                        popupHtml += "onclick='CreateResource_bot.functions.showParentsDialog(\"" + classId.replace(/'/g, "\\'") + "\",\"" + classLabel.replace(/'/g, "\\'") + "\"); PopupMenuWidget.hidePopup(\"popupMenuWidgetDiv\")'>";
+                        popupHtml += "id='showParentsPopupItem'>";
                         popupHtml += "Show Parents</div>";
                         popupHtml += "</div>";
                         $("#popupMenuWidgetDiv").html(popupHtml);
+                        $("#showParentsPopupItem").on("click", function () {
+                            var currentList = self.myBotEngine.currentList || [];
+                            CommonBotFunctions.showParentsDialog(classId, classLabel, currentList, self.source);
+                            PopupMenuWidget.hidePopup("popupMenuWidgetDiv");
+                        });
                         PopupMenuWidget.showPopup({ x: evt.pageX, y: evt.pageY }, "popupMenuWidgetDiv");
+                    });
+                    selectEl.off("contextmenu.showParents");
+                    selectEl.on("contextmenu.showParents", function (evt) {
+                        evt.preventDefault();
+                    });
+
+                    $("#botPanel").off("dialogclose.showParents");
+                    $("#botPanel").on("dialogclose.showParents", function () {
+                        selectEl.off("mousedown.showParents");
+                        selectEl.off("contextmenu.showParents");
+                        $("#botPanel").off("dialogclose.showParents");
                     });
                 });
             } else {
@@ -224,73 +239,6 @@ var CreateResource_bot = (function () {
                 });
             }
         },
-        /**
-         * @function
-         * @name showParentsDialog
-         * @memberof CreateResource_bot.functions
-         * Displays the parent classes of a given class in a SimpleListSelectorWidget.
-         * Uses ElasticSearch cached data (searchResultsMap) when available,
-         * otherwise falls back to Sparql_OWL.getNodeParents.
-         * @param {string} classId - The URI of the class to get parents for.
-         * @param {string} classLabel - The label of the class.
-         * @returns {void}
-         */
-        showParentsDialog: function (classId, classLabel) {
-            var classData = self.searchResultsMap[classId];
-            if (classData && classData.parents && classData.parents.length > 0) {
-                var parents = [];
-                classData.parents.forEach(function (parentId) {
-                    var parentLabel = self.parentIdsLabelsMap[parentId];
-                    if (!parentLabel) {
-                        parentLabel = Sparql_common.getLabelFromURI(parentId);
-                    }
-                    parents.push({ id: parentId, label: parentLabel });
-                });
-                SimpleListSelectorWidget.showDialog(
-                    { size: 10, multiple: false, title: "Parents of " + classLabel },
-                    function (loadCallback) {
-                        loadCallback(parents);
-                    },
-                    function () {}
-                );
-                return;
-            }
-
-            var classSource = null;
-            var currentList = self.myBotEngine.currentList || [];
-            for (var i = 0; i < currentList.length; i++) {
-                if (currentList[i].id === classId) {
-                    classSource = currentList[i].source;
-                    break;
-                }
-            }
-            if (!classSource) {
-                classSource = self.source;
-            }
-            SimpleListSelectorWidget.showDialog(
-                { size: 10, multiple: false, title: "Parents of " + classLabel },
-                function (loadCallback) {
-                    Sparql_OWL.getNodeParents(classSource, null, [classId], 1, {}, function (err, result) {
-                        if (err) {
-                            return loadCallback([{ id: "", label: "Error loading parents" }]);
-                        }
-                        var parents = [];
-                        result.forEach(function (item) {
-                            if (!item.broader1) {
-                                return;
-                            }
-                            parents.push({ id: item.broader1.value, label: item.broader1Label.value });
-                        });
-                        if (parents.length === 0) {
-                            parents.push({ id: "", label: "No parents found" });
-                        }
-                        loadCallback(parents);
-                    });
-                },
-                function () {}
-            );
-        },
-
         listClassTypesFn: function () {
             self.functions.listSuperClassesFn();
         },
@@ -339,7 +287,10 @@ var CreateResource_bot = (function () {
             //  _botEngine.nextStep();
         },
         drawResourceFn: function () {
-            var conceptType = self.params.resourceType === "owl:NamedIndividual" ? "NamedIndividual" : "Class";
+            var conceptType = "Class";
+            if (self.params.resourceType === "owl:NamedIndividual") {
+                conceptType = "NamedIndividual";
+            }
             var nodeData = {
                 id: self.params.resourceId,
                 type: conceptType,

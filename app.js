@@ -1,33 +1,33 @@
-import createError from 'http-errors';
-import express from 'express';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import fs from 'fs';
+import createError from "http-errors";
+import express from "express";
+import path from "path";
+import { fileURLToPath } from "url";
+import fs from "fs";
 
 // ESM equivalent of __dirname
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-import passport from 'passport';
-import cookieParser from 'cookie-parser';
-import morganLogger from 'morgan';
-import fileUpload from 'express-fileupload';
-import openapi from 'express-openapi';
-import swaggerUi from 'swagger-ui-express';
-import querystring from 'querystring';
-import httpProxy from './bin/httpProxy.js';
-import userManager from './bin/user.js';
-import './bin/authentication.js';
-import { checkMainConfig, readMainConfig } from './model/config.js';
-import util from './bin/util.js';
+import passport from "passport";
+import cookieParser from "cookie-parser";
+import morganLogger from "morgan";
+import fileUpload from "express-fileupload";
+import openapi from "express-openapi";
+import swaggerUi from "swagger-ui-express";
+import querystring from "querystring";
+import httpProxy from "./bin/httpProxy.js";
+import userManager from "./bin/user.js";
+import "./bin/authentication.js";
+import { checkMainConfig, readMainConfig } from "./model/config.js";
+import util from "./bin/util.js";
 
 const app = express();
-import * as Sentry from '@sentry/node';
-import { userModel } from './model/users.js';
-import { profileModel } from './model/profiles.js';
-import { sourceModel } from './model/sources.js';
-import { rdfDataModel } from './model/rdfData.js';
-import apiDoc from './api/v1/api-doc.js';
-import session from 'express-session';
+import * as Sentry from "@sentry/node";
+import { userModel } from "./model/users.js";
+import { profileModel } from "./model/profiles.js";
+import { sourceModel } from "./model/sources.js";
+import { rdfDataModel } from "./model/rdfData.js";
+import apiDoc from "./api/v1/api-doc.js";
+import session from "express-session";
 
 const config = readMainConfig();
 const isValid = checkMainConfig(config);

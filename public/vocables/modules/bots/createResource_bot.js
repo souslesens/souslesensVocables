@@ -162,7 +162,10 @@ var CreateResource_bot = (function () {
             //  _botEngine.nextStep();
         },
         drawResourceFn: function () {
-            var conceptType = self.params.resourceType === "owl:NamedIndividual" ? "NamedIndividual" : "Class";
+            var conceptType = "Class";
+            if (self.params.resourceType === "owl:NamedIndividual") {
+                conceptType = "NamedIndividual";
+            }
             var nodeData = {
                 id: self.params.resourceId,
                 type: conceptType,
@@ -173,7 +176,12 @@ var CreateResource_bot = (function () {
                     type: conceptType,
                 },
             };
-            Lineage_whiteboard.drawNodesAndParents(nodeData, 2);
+            var existingIds = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
+            var depth = 1;
+            if (self.params.superClassId && existingIds[self.params.superClassId]) {
+                depth = 2;
+            }
+            Lineage_whiteboard.drawNodesAndParents(nodeData, depth);
             self.myBotEngine.nextStep();
         },
         newResourceFn: function () {

@@ -3235,7 +3235,7 @@ restrictionSource = Config.predicatesSource;
                     '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.removeOthersFromGraph();">Remove others</span>' +
                     '    <span  class="popupMenuItem" onclick="NodeRelations_bot.start();">Relations...</span>';
             } else {
-                if (Lineage_sources.isSourceEditableForUser(node.data.source)) {
+                if (Lineage_sources.isSourceEditableForUser(node.data.source) || Lineage_sources.isSourceEditableForUser(Lineage_sources.activeSource)) {
                     html += '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.createSubClass();">Create SubClass</span>';
                 }
                 html +=
@@ -4335,7 +4335,8 @@ self.zoomGraphOnNode(node.data[0].id, false);
             if (!label) {
                 return;
             }
-            Lineage_createResource.createSubClass(node.data.source, label, node.data.id);
+            var targetSource = Lineage_sources.isSourceEditableForUser(node.data.source) ? node.data.source : Lineage_sources.activeSource;
+            Lineage_createResource.createSubClass(targetSource, label, node.data.id);
         },
     };
 

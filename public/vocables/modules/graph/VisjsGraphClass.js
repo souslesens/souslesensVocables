@@ -1054,16 +1054,18 @@ const VisjsGraphClass = function (graphDiv, data, options) {
     };
 
     /**
-     * Iterates over all nodes in th
+     * Scans all graph nodes and compares their data fields to given conditions and collects nodes whose
+     * properties match the specified values. Hides or shows nodes by updating their hidden property
      * @function
-     * @name setNodesProperty
+     * @name hideShowNodes
      * @memberof module:VisjsGraphClass
-     * @param {object} conditions (string | any) map of node data properties and expected values
-     * @param {any} hide bolean hidden property of matching nodes (e.g. true to hide, false to show)
+     * @param {object} conditions (string | any) Key–value pairs used to match against node.data
+     * a node is selected if node.data[key] == conditions[key] for any key
+     * @param {any} hide bolean true to hide matching nodes, false to show matching nodes
      * @returns {void}
      *  side effects :
-     *      - mutates node visibility by calling self.data.nodes.update
-     *      - only nodes matching at least one condition key are affected
+     *      - Updates visibility of matching nodes via self.data.nodes.update
+     *      - Modifies only nodes that satisfy at least one condition
      */
     self.hideShowNodes = function (/** @type {{ [x: string]: any; }} */ conditions, /** @type {any} */ hide) {
         var nodes = self.data.nodes.get();
@@ -1081,6 +1083,22 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         self.data.nodes.update(newNodes);
     };
 
+    /**
+     * Converts the current graph (nodes and edges) into a Graphviz DOT description and sends the DOT
+     * graph to a backend API to render it as SVG .It also receives the generated SVG text asynchronously
+     * via an AJAX request.
+     * @function
+     * @name toSVG_graphviz
+     * @memberof module:VisjsGraphClass
+     * @returns {void}
+     * Uses internal graph state:
+     *      - self.data.nodes — collection of nodes
+     *      - self.data.edges — collection of edges
+     *  side effects :
+     *      - builds a Graphviz DOT string representing the directed graph
+     *      - sends an HTTP GET request to a backend Graphviz service
+     *      - logs a status message ("getting Class axioms").
+     */
     self.toSVG_graphviz = function () {
         var nodes = self.data.nodes.get();
         var edges = self.data.edges.get();

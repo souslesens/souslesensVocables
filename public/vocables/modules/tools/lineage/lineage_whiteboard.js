@@ -707,6 +707,7 @@ var Lineage_whiteboard = (function () {
                     });
 
                     var shape = self.defaultShape;
+                    var nodesToUnhide = [];
                     result.forEach(function (item) {
                         var nodeSource = item.subjectGraph ? Sparql_common.getSourceFromGraphUri(item.subjectGraph.value, source) : source;
                         //  var color = self.getSourceColor(nodeSource);
@@ -743,8 +744,13 @@ var Lineage_whiteboard = (function () {
                                     visjsData.edges.push(edge);
                                 }
                             }
+                        } else {
+                            nodesToUnhide.push({ id: item.topConcept.value, hidden: false });
                         }
                     });
+                    if (nodesToUnhide.length > 0) {
+                        self.lineageVisjsGraph.data.nodes.update(nodesToUnhide);
+                    }
 
                     callbackEach();
                 });
@@ -4804,7 +4810,7 @@ attrs.color=self.getSourceColor(superClassValue)
                     $("#lineage_actionDiv_newAxiom").css("display", "none");
                 }*/
                 $("#lineageWhiteboard_modelBtn").bind("click", function (e) {
-                    // Lineage_whiteboard.drawModel(null, null, { inverse: e.ctrlKey });
+                    self.lineageVisjsGraph.clearGraph();
                     Lineage_whiteboard.drawModel(null, null, { all: true });
                 });
                 $("#lineageWhiteboard_modelBtn").bind("contextmenu", function (e) {

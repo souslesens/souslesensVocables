@@ -1034,8 +1034,8 @@ const VisjsGraphClass = function (graphDiv, data, options) {
      * @param {any} hide bolean hidden property of matching nodes (e.g. true to hide, false to show)
      * @returns {void}
      *  side effects :
-     *      - Mutates node visibility by calling self.data.nodes.update
-     *      - Only nodes matching at least one condition key are affected
+     *      - mutates node visibility by calling self.data.nodes.update
+     *      - only nodes matching at least one condition key are affected
      */
     self.setNodesProperty = function (/** @type {{ [x: string]: any; }} */ conditions, /** @type {any} */ hide) {
         var nodes = self.data.nodes.get();
@@ -1053,6 +1053,18 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         self.data.nodes.update(newNodes);
     };
 
+    /**
+     * Iterates over all nodes in th
+     * @function
+     * @name setNodesProperty
+     * @memberof module:VisjsGraphClass
+     * @param {object} conditions (string | any) map of node data properties and expected values
+     * @param {any} hide bolean hidden property of matching nodes (e.g. true to hide, false to show)
+     * @returns {void}
+     *  side effects :
+     *      - mutates node visibility by calling self.data.nodes.update
+     *      - only nodes matching at least one condition key are affected
+     */
     self.hideShowNodes = function (/** @type {{ [x: string]: any; }} */ conditions, /** @type {any} */ hide) {
         var nodes = self.data.nodes.get();
         /**

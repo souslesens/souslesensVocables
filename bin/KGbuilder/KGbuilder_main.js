@@ -31,13 +31,7 @@ var KGbuilder_main = {
      * @param {Function} options - Node-style async Function called to proccess result or handle error
      */
     importTriplesFromCsvOrTable: function (user, source, datasource, tables, options, callback) {
-        console.log("[KGbuilder_main.importTriplesFromCsvOrTable] Called with:", {
-            user,
-            source,
-            datasource,
-            tables,
-            filterMappingIds: options?.filterMappingIds,
-        });
+
 
         //  var sparqlServerUrl;
         var output = "";

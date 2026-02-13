@@ -31,8 +31,6 @@ var KGbuilder_main = {
      * @param {Function} options - Node-style async Function called to proccess result or handle error
      */
     importTriplesFromCsvOrTable: function (user, source, datasource, tables, options, callback) {
-
-
         //  var sparqlServerUrl;
         var output = "";
         options = options || {};

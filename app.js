@@ -1,33 +1,33 @@
-import createError from 'http-errors';
-import express from 'express';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import fs from 'fs';
+import createError from "http-errors";
+import express from "express";
+import path from "path";
+import { fileURLToPath } from "url";
+import fs from "fs";
 
 // ESM equivalent of __dirname
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-import passport from 'passport';
-import cookieParser from 'cookie-parser';
-import morganLogger from 'morgan';
-import fileUpload from 'express-fileupload';
-import openapi from 'express-openapi';
-import swaggerUi from 'swagger-ui-express';
-import querystring from 'querystring';
-import httpProxy from './bin/httpProxy.js';
-import userManager from './bin/user.js';
-import './bin/authentication.js';
-import { checkMainConfig, readMainConfig } from './model/config.js';
-import util from './bin/util.js';
+import passport from "passport";
+import cookieParser from "cookie-parser";
+import morganLogger from "morgan";
+import fileUpload from "express-fileupload";
+import openapi from "express-openapi";
+import swaggerUi from "swagger-ui-express";
+import querystring from "querystring";
+import httpProxy from "./bin/httpProxy.js";
+import userManager from "./bin/user.js";
+import "./bin/authentication.js";
+import { checkMainConfig, readMainConfig } from "./model/config.js";
+import util from "./bin/util.js";
 
 const app = express();
-import * as Sentry from '@sentry/node';
-import { userModel } from './model/users.js';
-import { profileModel } from './model/profiles.js';
-import { sourceModel } from './model/sources.js';
-import { rdfDataModel } from './model/rdfData.js';
-import apiDoc from './api/v1/api-doc.js';
-import session from 'express-session';
+import * as Sentry from "@sentry/node";
+import { userModel } from "./model/users.js";
+import { profileModel } from "./model/profiles.js";
+import { sourceModel } from "./model/sources.js";
+import { rdfDataModel } from "./model/rdfData.js";
+import apiDoc from "./api/v1/api-doc.js";
+import session from "express-session";
 
 const config = readMainConfig();
 const isValid = checkMainConfig(config);
@@ -298,29 +298,65 @@ function formatRedirectPath(path) {
     return path;
 }
 
-// Load default graph available in the "ttlUrl" key
+// load upper ontologies
+const upperOntologies = [
+    { prefix: "rdf", graphUri: "http://www.w3.org/1999/02/22-rdf-syntax-ns#", graphUrl: "https://www.w3.org/1999/02/22-rdf-syntax-ns" },
+    { prefix: "rdfs", graphUri: "http://www.w3.org/2000/01/rdf-schema#", graphUrl: "https://www.w3.org/2000/01/rdf-schema" },
+    { prefix: "owl", graphUri: "http://www.w3.org/2002/07/owl#", graphUrl: "https://www.w3.org/2002/07/owl" },
+    { prefix: "iof", graphUri: "https://www.industrialontologies.org/core/", graphUrl: "https://rdf.tsf.logilab.fr/iof.rdf" },
+    { prefix: "skos", graphUri: "http://www.w3.org/2004/02/skos/core#", graphUrl: "https://rdf.tsf.logilab.fr/skos.rdf" },
+    {
+        prefix: "dce",
+        graphUri: "http://purl.org/dc/elements/1.1/",
+        graphUrl: "https://www.dublincore.org/specifications/dublin-core/dcmi-terms/dublin_core_elements.nt",
+    },
+    {
+        prefix: "dcterms",
+        graphUri: "http://purl.org/dc/terms/",
+        graphUrl: "https://www.dublincore.org/specifications/dublin-core/dcmi-terms/dublin_core_terms.nt",
+    },
+];
+
+async function loadUpperOntology() {
+    const existingGraphs = await rdfDataModel.getGraphs();
+    try {
+        for (const ontology of upperOntologies) {
+            const matchingGraph = existingGraphs.find((g) => g.name === ontology.graphUri);
+            const hasGraph = !!matchingGraph?.count;
+            if (!hasGraph) {
+                console.log(`Loading ontology ${ontology.graphUri}`);
+                await rdfDataModel.loadGraph(ontology.graphUri, ontology.graphUrl);
+            }
+        }
+    } catch (e) {
+        console.error("Could not load default ontologies: " + e);
+    }
+}
+
+// Load default graph available in the "graphDownloadUrl" key
 // if no graph is already available in the Virtuoso
 async function loadDefaultGraphs() {
     const sources = await sourceModel.getAllSources();
     try {
         const graphs = await rdfDataModel.getGraphs();
-        Object.entries(sources).forEach(async ([_, source]) => {
+        for (const [, source] of Object.entries(sources)) {
             const graphDownloadUrl = source.graphDownloadUrl;
             if (graphDownloadUrl) {
                 const graphURI = source.graphUri;
                 const matchingGraph = graphs.find((g) => g.name === graphURI);
-                const hasGraph = matchingGraph !== undefined ?? matchingGraph.count > 0;
-
+                const hasGraph = !!matchingGraph?.count;
                 if (!hasGraph) {
+                    console.log(`Loading graph ${source.graphUri}`);
                     await rdfDataModel.loadGraph(source.graphUri, graphDownloadUrl);
                 }
             }
-        });
+        }
     } catch (e) {
         console.error("Could not load default graphs: " + e);
     }
 }
 
+void loadUpperOntology();
 void loadDefaultGraphs();
 
 export default app;

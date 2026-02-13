@@ -1224,8 +1224,19 @@ var Axiom_activeLegend = (function () {
                     } else {
                         predicate = fromNode.data.subType;
                     }
-                } else if (fromNode.data.type.endsWith("Class")) {
-                    predicate = "http://www.w3.org/2000/01/rdf-schema#subClassOf";
+                } else if (fromNode.data.type.endsWith("Class")) { 
+                    var isRootNode = rootNode && rootNode.id == fromNode.id;
+                    if (isRootNode) {
+                        var axiomSelectValue = $("#nodeInfosAxioms_axiomSelect").val() || "subClassOf";
+                        var axiomTypePredicateMap = {
+                            subClassOf: "http://www.w3.org/2000/01/rdf-schema#subClassOf",
+                            equivalentClass: "http://www.w3.org/2002/07/owl#equivalentClass",
+                            disjointWith: "http://www.w3.org/2002/07/owl#disjointWith",
+                        };
+                        predicate = axiomTypePredicateMap[axiomSelectValue];
+                    } else {
+                        predicate = "http://www.w3.org/2000/01/rdf-schema#subClassOf";
+                    }
                 } else if (fromNode.data.type.endsWith("ObjectProperty")) {
                     predicate = "http://www.w3.org/2000/01/rdf-schema#subPropertyOf";
                 } else if (["Connective", "IntersectionOf", "UnionOf", "ComplementOf", "Enumeration"].indexOf(fromNode.data.type) > -1) {

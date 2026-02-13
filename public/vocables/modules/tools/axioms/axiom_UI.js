@@ -14,11 +14,12 @@ var Axiom_UI = (function () {
         "axiomEditor_deleteTriplesBtn",
         "axiomsEditor_textDiv",
         "nodeInfosAxioms_newAxiomBtn",
+        "nodeInfosAxioms_axiomSelect",
     ];
 
     var VIEW_CONFIG = {
         newAxiom: {
-            visible: ["nodeInfosAxioms_activeLegendDiv", "nodeInfosAxioms_newAxiomPanel", "axiomEditor_clearBtn", "axiomEditor_saveBtn", "axiomEditor_showTriplesBtn"],
+            visible: ["nodeInfosAxioms_activeLegendDiv", "nodeInfosAxioms_newAxiomPanel", "axiomEditor_clearBtn", "axiomEditor_saveBtn", "axiomEditor_showTriplesBtn","nodeInfosAxioms_axiomSelect"],
             showTriplesLabel: "show triples",
         },
         visualisation: {

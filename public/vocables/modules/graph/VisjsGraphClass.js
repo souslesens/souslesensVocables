@@ -1024,6 +1024,19 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         }
     };
 
+    /**
+     * Iterates over all nodes in the graph and checks them against given conditions and selects nodes whose data
+     * properties match the condition values. It updates a visual property for all matching nodes
+     * @function
+     * @name setNodesProperty
+     * @memberof module:VisjsGraphClass
+     * @param {object} conditions (string | any) map of node data properties and expected values
+     * @param {any} hide bolean hidden property of matching nodes (e.g. true to hide, false to show)
+     * @returns {void}
+     *  side effects :
+     *      - Mutates node visibility by calling self.data.nodes.update
+     *      - Only nodes matching at least one condition key are affected
+     */
     self.setNodesProperty = function (/** @type {{ [x: string]: any; }} */ conditions, /** @type {any} */ hide) {
         var nodes = self.data.nodes.get();
         /**

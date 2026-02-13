@@ -298,7 +298,7 @@ function formatRedirectPath(path) {
     return path;
 }
 
-// Load default graph available in the "ttlUrl" key
+// Load default graph available in the "graphDownloadUrl" key
 // if no graph is already available in the Virtuoso
 async function loadDefaultGraphs() {
     const sources = await sourceModel.getAllSources();

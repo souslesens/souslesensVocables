@@ -146,12 +146,15 @@ var CreateResource_bot = (function () {
             } else {
                 self.params.superClassId = self.params.resourceId;
                 var triples = Lineage_createResource.getResourceTriples(self.params.source, self.params.resourceType, null, self.params.resourceLabel, self.params.resourceId);
-                Lineage_createResource.writeResource(self.params.source, triples, function (err, resourceId) {
-                    if (err) {
-                        self.myBotEngine.abort(err.responseText);
-                    }
-                    self.params.resourceId = resourceId;
-                    self.myBotEngine.nextStep();
+
+                Lineage_createResource.addAnnotationTriples(triples, function (err, result) {
+                    Lineage_createResource.writeResource(self.params.source, triples, function (err, resourceId) {
+                        if (err) {
+                            self.myBotEngine.abort(err.responseText);
+                        }
+                        self.params.resourceId = resourceId;
+                        self.myBotEngine.nextStep();
+                    });
                 });
             }
         },

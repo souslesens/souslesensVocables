@@ -327,6 +327,10 @@ var Lineage_properties = (function () {
                                 if (item.subProp) {
                                     parent = item.subProp.value;
                                 }*/
+                                if (!Config.ontologiesVocabularyModels[source]) {
+                                    return;
+                                }
+
                                 var superProp = Config.ontologiesVocabularyModels[source].properties[item.prop.value].superProp;
                                 if (superProp != null) {
                                     // for use it as parent superProp need to be on jstre
@@ -1070,7 +1074,9 @@ var Lineage_properties = (function () {
     };
 
     self.searchTermInSources = function (term, inCurrentSource, exactMatch, searchType) {
-        if (!term) term = $("#LineageProperties_searchAllSourcesTermInput").val();
+        if (!term) {
+            term = $("#LineageProperties_searchAllSourcesTermInput").val();
+        }
         if (!exactMatch) {
             exactMatch = $("#LineageProperties_allExactMatchSearchCBX").prop("checked");
         }

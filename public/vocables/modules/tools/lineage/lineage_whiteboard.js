@@ -3265,6 +3265,7 @@ restrictionSource = Config.predicatesSource;
             html += '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.showHierarchicalView();">Horizontal view </span>';
             html += '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.showVerticalView();">Vertical view </span>';
             html += '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.listAllNodeRelations();">List All relations </span>';
+            html += '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.drawAxioms();">Draw xioms</span>';
         }
 
         $("#popupMenuWidgetDiv").html(html);
@@ -4343,6 +4344,36 @@ self.zoomGraphOnNode(node.data[0].id, false);
             }
             var targetSource = Lineage_sources.isSourceEditableForUser(node.data.source) ? node.data.source : Lineage_sources.activeSource;
             Lineage_createResource.createSubClass(targetSource, label, node.data.id);
+        },
+
+        drawAxioms: function () {
+            var node = self.currentGraphNode;
+            Axioms_manager.initResourcesMap(node.data.source, function (err, result) {
+                AxiomExtractor.getClassAxiomsTriples(node.data.source, node.data.id, function (err, triples) {
+                    var divId = "graphDiv";
+                    var options = {};
+                    Axioms_graph.drawNodeAxioms2(node.data.source, node.data.id, triples, divId, options, function (err, visjsdata) {
+                        if (err) {
+                            return alert(err.responseText || err);
+                        }
+                        var existingNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
+                        var newNodes = [];
+                        var newEdges = [];
+                        visjsdata.nodes.forEach(function (node) {
+                            if (!existingNodes[node.id]) {
+                                newNodes.push(node);
+                            }
+                        });
+                        visjsdata.edges.forEach(function (edge) {
+                            if (!existingNodes[edge.id]) {
+                                newEdges.push(edge);
+                            }
+                        });
+                        Lineage_whiteboard.lineageVisjsGraph.data.nodes.add(newNodes);
+                        Lineage_whiteboard.lineageVisjsGraph.data.edges.add(newEdges);
+                    });
+                });
+            });
         },
     };
 

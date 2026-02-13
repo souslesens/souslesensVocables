@@ -436,6 +436,8 @@ var Sparql_generic = (function () {
                 return elt;
             } else if (elt.indexOf("_:b") == 0) {
                 return "<" + elt + ">";
+            } else if (elt.indexOf("nodeID:") == 0) {
+                return "<" + elt + ">";
             } else if (elt.indexOf("_:") == 0) {
                 return "<" + elt + ">";
             } else if (elt.indexOf("http") == 0 || item.valueType == "uri") {

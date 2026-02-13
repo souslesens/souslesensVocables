@@ -640,9 +640,26 @@ var MappingsDetails = (function () {
                     range: range,
                     dateFormat: params.nonObjectPropertyDateFormat || null, //if any
                 });
+                if (data.otherPredicates.length > 1) {
+                    // test to detect duplicated predicates
+                    var last = data.otherPredicates[data.otherPredicates.length - 1]; // predicat added
+                    var duplicateIndex = data.otherPredicates.findIndex(function (p, idx) {
+                        return (
+                            idx !== data.otherPredicates.length - 1 && // to not compare with itself
+                            p.property === last.property &&
+                            p.object === last.object
+                        );
+                    });
+                    if (duplicateIndex !== -1) {
+                        // duplicate detected → suppression of last one
+                        data.otherPredicates.pop();
+                        alert("Predicat already exist !");
+                    }
+                }
                 MappingColumnsGraph.updateNode({ id: MappingColumnsGraph.currentGraphNode.id, data: data });
                 MappingColumnsGraph.saveVisjsGraph();
             }
+
             if (MappingsDetails.afterSaveColumnTechnicalMappingsDialog) {
                 MappingsDetails.afterSaveColumnTechnicalMappingsDialog();
             }

@@ -184,16 +184,18 @@ var KGbuilder_main = {
                                 }
 
                                 var sql = 'select count(*) as count from "' + table + '";';
-                                try {
-                                    databaseModel.getUserConnection(user, tableProcessingParams.tableInfos.dbID).then((connection) => {
-                                        databaseModel.query(connection, sql).then((result) => {
-                                            tableProcessingParams.tableInfos.tableTotalRecords = parseInt(result.rows[0].count);
-                                            callbackSeries();
-                                        });
+                                databaseModel
+                                    .getUserConnection(user, tableProcessingParams.tableInfos.dbID)
+                                    .then((connection) => {
+                                        return databaseModel.query(connection, sql);
+                                    })
+                                    .then((result) => {
+                                        tableProcessingParams.tableInfos.tableTotalRecords = parseInt(result.rows[0].count);
+                                        callbackSeries();
+                                    })
+                                    .catch((err) => {
+                                        callbackSeries(err);
                                     });
-                                } catch (err) {
-                                    callbackSeries(err);
-                                }
                             },
 
                             // create the tripels for this table

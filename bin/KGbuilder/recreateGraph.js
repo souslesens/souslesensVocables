@@ -86,6 +86,55 @@ function getAllTablesFromMappings(mappingData) {
     return tables;
 }
 
+/**
+ * Get filtered mapping IDs for specific tables (includes both nodes and edges)
+ * @param {Object} mappingData - The mapping data structure
+ * @param {Array<string>} tables - Array of table names
+ * @returns {Array<string>|null} Array of mapping IDs or null
+ */
+function getFilteredMappingIds(mappingData, tables) {
+    if (!tables || tables.length === 0) return null;
+
+    var mappingIds = [];
+    var columnsMap = {};
+
+    // First pass: build columnsMap with ALL nodes of the target tables
+    // Then add to mappingIds only master nodes or nodes with otherPredicates
+    (mappingData.nodes || []).forEach(function (n) {
+        if (!n || !n.data || !n.id) return;
+
+        if (MappingParser.columnsMappingsObjects.indexOf(n.data.type) > -1) {
+            if (tables.indexOf(n.data.dataTable) > -1) {
+                // Add to columnsMap (used for edge filtering)
+                columnsMap[n.id] = n;
+
+                // Add to mappingIds only if master node or has otherPredicates
+                // Same logic as frontend showFilterMappingsDialog line 812
+                if (!n.data.definedInColumn || (n.data.otherPredicates && n.data.otherPredicates.length > 0)) {
+                    if (mappingIds.indexOf(n.id) < 0) {
+                        mappingIds.push(n.id);
+                    }
+                }
+            }
+        }
+    });
+
+    // Second pass: collect edges where BOTH endpoints are in columnsMap
+    // Same logic as frontend showFilterMappingsDialog line 824
+    (mappingData.edges || []).forEach(function (e) {
+        if (!e || !e.id) return;
+
+        // Include edge if BOTH from and to are in columnsMap
+        if (columnsMap[e.from] && columnsMap[e.to]) {
+            if (mappingIds.indexOf(e.id) < 0) {
+                mappingIds.push(e.id);
+            }
+        }
+    });
+
+    return mappingIds.length > 0 ? mappingIds : null;
+}
+
 function normalizeTablesParam(tableParam) {
     if (!tableParam) return [];
     if (Array.isArray(tableParam)) return tableParam;
@@ -137,7 +186,16 @@ async function recreateGraphTriples(params) {
         deleteResult = await deleteKGBuilderTriplesAsync(source, tablesArgForDelete, options);
     }
 
+    // Get datasource from mappings for the first table
     var datasource = null;
+    if (targetTables && targetTables.length > 0) {
+        datasource = getDatasourceFromMappings(mappingData, targetTables[0]);
+    }
+
+    // Filter mappings for target tables (server-side filtering)
+    if (targetTables && targetTables.length > 0 && !options.filterMappingIds) {
+        options.filterMappingIds = getFilteredMappingIds(mappingData, targetTables);
+    }
 
     const importResult = await importAsync(user, source, datasource, targetTables, options);
 

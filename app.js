@@ -298,6 +298,42 @@ function formatRedirectPath(path) {
     return path;
 }
 
+// load upper ontologies
+const upperOntologies = [
+    { prefix: "rdf", graphUri: "http://www.w3.org/1999/02/22-rdf-syntax-ns#", graphUrl: "https://www.w3.org/1999/02/22-rdf-syntax-ns" },
+    { prefix: "rdfs", graphUri: "http://www.w3.org/2000/01/rdf-schema#", graphUrl: "https://www.w3.org/2000/01/rdf-schema" },
+    { prefix: "owl", graphUri: "http://www.w3.org/2002/07/owl#", graphUrl: "https://www.w3.org/2002/07/owl" },
+    { prefix: "iof", graphUri: "https://www.industrialontologies.org/core/", graphUrl: "https://rdf.tsf.logilab.fr/iof.rdf" },
+    { prefix: "skos", graphUri: "http://www.w3.org/2004/02/skos/core#", graphUrl: "https://rdf.tsf.logilab.fr/skos.rdf" },
+    {
+        prefix: "dce",
+        graphUri: "http://purl.org/dc/elements/1.1/",
+        graphUrl: "https://www.dublincore.org/specifications/dublin-core/dcmi-terms/dublin_core_elements.nt",
+    },
+    {
+        prefix: "dcterms",
+        graphUri: "http://purl.org/dc/terms/",
+        graphUrl: "https://www.dublincore.org/specifications/dublin-core/dcmi-terms/dublin_core_terms.nt",
+    },
+];
+
+async function loadUpperOntology() {
+    const existingGraphs = await rdfDataModel.getGraphs();
+    try {
+        upperOntologies.forEach(async (ontology) => {
+            const matchingGraph = existingGraphs.find((g) => g.name === ontology.graphUri);
+            const hasGraph = matchingGraph !== undefined ?? matchingGraph.count > 0;
+
+            if (!hasGraph) {
+                console.log(`Loading ontology ${ontology.graphUri}`);
+                await rdfDataModel.loadGraph(ontology.graphUri, ontology.graphUrl);
+            }
+        });
+    } catch (e) {
+        console.error("Could not load default ontologies: " + e);
+    }
+}
+
 // Load default graph available in the "graphDownloadUrl" key
 // if no graph is already available in the Virtuoso
 async function loadDefaultGraphs() {
@@ -312,6 +348,7 @@ async function loadDefaultGraphs() {
                 const hasGraph = matchingGraph !== undefined ?? matchingGraph.count > 0;
 
                 if (!hasGraph) {
+                    console.log(`Loading graph ${source.graphUri}`);
                     await rdfDataModel.loadGraph(source.graphUri, graphDownloadUrl);
                 }
             }
@@ -321,6 +358,7 @@ async function loadDefaultGraphs() {
     }
 }
 
+void loadUpperOntology();
 void loadDefaultGraphs();
 
 export default app;

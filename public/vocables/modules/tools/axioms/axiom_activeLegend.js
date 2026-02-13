@@ -580,7 +580,8 @@ var Axiom_activeLegend = (function () {
             }
         });
         var currentType = Axioms_graph.currentGraphNode.data.type;
-        if (!Axioms_graph.currentGraphNode.data.isNew && currentType != "Connective" && currentType != "Restriction") {
+        var isRootAxiom = Axioms_graph.currentGraphNode.data.rootAxiom;
+        if (!isRootAxiom && !Axioms_graph.currentGraphNode.data.isNew && currentType != "Connective" && currentType != "Restriction") {
             hiddenNodes.push(currentType);
         }
         if (numberOfEdgesFromCurrentGraphNode > 1 && resourceType != "DisjointWith") {

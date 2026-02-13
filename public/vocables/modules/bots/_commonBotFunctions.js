@@ -273,12 +273,15 @@ var CommonBotFunctions = (function () {
         }
 
         var fromStr = Sparql_common.getFromStr(classSource);
-        var query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> " +
+        var query =
+            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> " +
             "PREFIX owl: <http://www.w3.org/2002/07/owl#> " +
             "SELECT DISTINCT ?child ?childLabel ?parent ?parentLabel " +
             fromStr +
             " WHERE { " +
-            "  <" + classId + "> rdfs:subClassOf* ?child . " +
+            "  <" +
+            classId +
+            "> rdfs:subClassOf* ?child . " +
             "  ?child rdfs:subClassOf ?parent . " +
             "  ?parent rdf:type ?type . FILTER(?type != owl:Restriction) " +
             "  FILTER(!isBlank(?child)) " +

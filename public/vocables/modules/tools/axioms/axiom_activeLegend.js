@@ -333,7 +333,7 @@ var Axiom_activeLegend = (function () {
             var level = restrictionNode ? restrictionNode.level + 1 : 0;
             var node = {
                 id: resourceUri,
-                label:  label,
+                label: label,
                 type: "ObjectProperty",
                 shape: "box",
                 color: "#f5ef39",
@@ -1635,7 +1635,7 @@ var Axiom_activeLegend = (function () {
             var searchDone = {};
 
             objects = objects.filter(function (item) {
-                return item.id && item.id.indexOf("_:") !== 0 ;
+                return item.id && item.id.indexOf("_:") !== 0;
             });
 
             objects.forEach(function (item) {

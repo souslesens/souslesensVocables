@@ -768,9 +768,10 @@ const VisjsGraphClass = function (graphDiv, data, options) {
                     }
                 }
                 /* if(includeParents && edge.to == nodeId){
-    nodes.push(edge.from)
-    recurse(edge.from)
-    }*/
+                        nodes.push(edge.from)
+                        recurse(edge.from)
+                        }
+                */
             });
         }
 
@@ -780,16 +781,43 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         return nodes;
     };
 
+    /**
+     * Returns the collection of node objects corresponding to all descendant IDs (expanded via getNodeDescendantIds)
+     * @function
+     * @name getNodeDescendant
+     * @memberof module:VisjsGraphClass
+     * @param {any} nodeIds node ID or an array of node IDs from which descendant traversal begins
+     * @param {any} includeParents if truth, the starting node IDs are also included in the returned list
+     * @returns {array} nodes objects array of descendant Ids
+     */
     self.getNodeDescendants = function (/** @type {any} */ nodeIds, /** @type {any} */ includeParents) {
         nodeIds = self.getNodeDescendantIds(nodeIds, includeParents);
         return self.data.nodes.get(nodeIds);
     };
 
+    /**
+     * Returns an object containing the current positions of all nodes in the network,
+     * obtained from self.network.getPositions()
+     * @function
+     * @name getNodesPosition
+     * @memberof module:VisjsGraphClass
+     * @returns {object} positions of all nodes in the network
+     */
     self.getNodesPosition = function () {
         var positions = self.network.getPositions();
         return positions;
     };
 
+     /**
+     * Returns an array of edge objects connected to the source node, optionally restricted to those leading
+     * to the given target node
+     * @function
+     * @name getNodeEdges
+     * @memberof module:VisjsGraphClass
+     * @param {string} sourceNodeId ID of the source node
+     * @param {string} targetNodeId optional, filters to edges whose to equals this ID
+     * @returns {object} connectedEdges array
+     */
     self.getNodeEdges = function (sourceNodeId, targetNodeId) {
         var connectedEdges = [];
         var sourceNodeEdges = self.network.getConnectedEdges(sourceNodeId);
@@ -802,6 +830,17 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         return connectedEdges;
     };
 
+     /**
+     * Finds all edges connected to sourceNodeId, and for each edge that is either outgoing from the source or
+     * (if bothDirections is true) in any direction, it returns the edge plus its from and to node objects
+     * @function
+     * @name getNodeEdgesAndToNodes
+     * @memberof module:VisjsGraphClass
+     * @param {string} sourceNodeId ID of the source node
+     * @param {boolean} bothDirections  if true, include edges in both directions; if false, include only edges
+     * @returns {object} connectedEdges array where Edge typically has id and Node is a node object (IDs usually
+     * string | number in vis-network/vis-data)
+     */
     self.getFromNodeEdgesAndToNodes = function (sourceNodeId, bothDirections) {
         var connectedEdges = [];
         var sourceNodeEdges = self.network.getConnectedEdges(sourceNodeId);
@@ -816,6 +855,22 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         return connectedEdges;
     };
 
+    /**
+     * Handles single and double click events on a graph to control simulation and select elements
+     * Toggles the physics simulation on empty clicks, and detects modifier keys (Ctrl/Alt/Shift)
+     * On node, cluster, or edge selection, it builds a context object and calls the appropriate callback
+     * @function
+     * @name processClicks
+     * @memberof module:VisjsGraphClass
+     * @param {objet} params information about what was clicked and the pointer state
+     * @param {objet} _options configuration and callback handlers
+     * @param {boolean} isDbleClick indicates whether the click should be treated as a double click
+     * @returns {void} return the result of onClusterClickFn or onclickFn when invoked
+     *  side effects:
+     *      - starting/stopping the network simulation
+     *      - updating self.context.currentNode
+     *      - calling user-provided callbacks with click context data
+     */
     self.processClicks = function (
         /** @type {{ edges: string | any[]; nodes: string | any[]; event: { srcEvent: { ctrlKey: any; altKey: any; shiftKey: any; }; }; pointer: { DOM: any; }; }} */ params,
         /** @type {{ fixedLayout: any; onclickFn: (arg0: null, arg1: any, arg2: { dbleClick?: any; ctrlKey?: number; altKey?: number; shiftKey?: number; }) => void; onClusterClickFn: (arg0: any, arg1: any, arg2: { dbleClick: any; ctrlKey: number; altKey: number; shiftKey: number; }) => any; }} */ _options,
@@ -892,6 +947,20 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         }
     };
 
+    /**
+     * Finds all outgoing edges from a given node and collects the connected target nodes and edge IDs
+     * Removes those edges and nodes from the graph, effectively collapsing the node
+     * @function
+     * @name collapseNode
+     * @memberof module:VisjsGraphClass
+     * @param {any} nodeId identifier of the node to collapse. All edges starting from this node and their
+     * destination nodes will be removed
+     * @returns {void} return the result of onClusterClickFn or onclickFn when invoked
+     *  side effects:
+     *      - Removes all edges where edge.from === nodeId
+     *      - Removes all destination nodes connected by those edges
+     *      - Mutates the graph by updating self.data.edges and self.data.node
+     */
     self.collapseNode = function (/** @type {any} */ nodeId) {
         var nodeEdges = self.data.edges.get();
         /**
@@ -914,6 +983,21 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         self.data.nodes.remove(targetNodes);
     };
 
+    /**
+     * Highlights a specific node by changing its shape and size and resets all other nodes to
+     * their default appearance. Animates the graph view to center and focus on the selected node
+     * @function
+     * @name focusOnNode
+     * @memberof module:VisjsGraphClass
+     * @param {any} id (string | number) identifier of the node to focus on
+     * @param {any} _label Unused parameter (likely kept for API compatibility or future use)
+     * @returns {void} return the result of onClusterClickFn or onclickFn when invoked
+     *  side effects :
+     *      - updates all nodes in self.data.nodes:
+     *              - Target node → shape: "star", size: 14
+     *              - Other nodes → default shape and size
+     *      - animates the network viewport to center on the target node
+     */
     self.focusOnNode = function (/** @type {any} */ id, /** @type {any} */ _label) {
         if (id) {
             /**
@@ -1331,6 +1415,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
             $("#visjsConfigureDiv").css("height", "550px !important");
         }, 2000);
     };
+
     /**
      * @function
      * @name exportGraphToDataTable

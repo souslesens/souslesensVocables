@@ -226,6 +226,7 @@ var CommonBotFunctions = (function () {
             if (err || !result || result.length === 0) {
                 return callback(null, []);
             }
+            var parentIdsLabelsMap = result.parentIdsLabelsMap || {};
             var items = [];
             result.forEach(function (classItem) {
                 var matches = classItem.matches;
@@ -235,10 +236,12 @@ var CommonBotFunctions = (function () {
                             id: match.id,
                             label: match.label + " (" + source + ")",
                             source: source,
+                            parents: match.parents || [],
                         });
                     });
                 }
             });
+            items.parentIdsLabelsMap = parentIdsLabelsMap;
             callback(null, items);
         });
     };

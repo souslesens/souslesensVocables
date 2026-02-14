@@ -38,6 +38,10 @@ var Axiom_activeLegend = (function () {
         self.showTriplesActivated = false;
         self.bNodeCounter = 0;
         self.maxItemsInJstreePerSource = 250;
+
+
+
+
     };
     self.filterSuggestion = function (suggestions, resourceType) {
         var selection = [];
@@ -63,7 +67,8 @@ var Axiom_activeLegend = (function () {
                 var siblingObjectPropertyUri = self.getGraphSiblingUri(Axioms_graph.currentGraphNode.id, "ObjectProperty");
 
                 if (Axioms_graph.currentGraphNode.data.type == "Restriction" && siblingObjectPropertyUri) {
-                    var domainClassUri = self.getRestrictionAncestorClass(Axioms_graph.currentGraphNode.id);
+                    /** lors d'une restriction sule le range compte, pas le domaine ???**/
+                    var domainClassUri = null;//self.getRestrictionAncestorClass(Axioms_graph.currentGraphNode.id);
                     Axioms_suggestions.getClassMatchingPropertiesRangeAndDomain(self.currentSource, siblingObjectPropertyUri, domainClassUri, null, function (err, classes) {
                         if (err) {
                             return MainController.errorAlert(err);
@@ -910,18 +915,16 @@ var Axiom_activeLegend = (function () {
                 });
             });
 
-            //  Axioms_graph.axiomsVisjsGraph.data.nodes.remove(nodesToDelete)
-            //  Axioms_graph.axiomsVisjsGraph.data.edges.remove(edgesToDelete)
+            if (Axioms_graph.currentAxiomTriples) {
+                Axioms_graph.currentAxiomTriples.forEach(function (triple, index) {
+                    if (nodesToDelete.indexOf(triple.subject) > -1 || nodesToDelete.indexOf(triple.object) > -1) {
 
-            Axioms_graph.currentAxiomTriples.forEach(function (triple, index) {
-                if (nodesToDelete.indexOf(triple.subject) > -1 || nodesToDelete.indexOf(triple.object) > -1) {
-                    //} && (triple2.predicate.indexOf("owl")>-1 )) {
-                    //   $("#axiomsTriplesJstree").jstree(true).select_node("triple" + index);
-                    $("#axiomsTriplesJstree")
-                        .jstree(true)
-                        .check_node("triple" + index);
-                }
-            });
+                        $("#axiomsTriplesJstree")
+                            .jstree(true)
+                            .check_node("triple" + index);
+                    }
+                });
+            }
         }
     };
 
@@ -1589,6 +1592,7 @@ var Axiom_activeLegend = (function () {
             }
         }
 
+
         self.initSourcesMap(objects);
         self.filterSuggestionList = null;
 
@@ -1602,18 +1606,66 @@ var Axiom_activeLegend = (function () {
                         items.NodeInfos = {
                             label: "nodeInfos",
                             action: function (_e) {
-                                NodeInfosWidget.showNodeInfos(self.currentSource, self.currentResource, "smallDialogDiv");
+                                $("#mainDialogDiv").css("z-index",999)
+                                $("#axiomsEditor_nodeInfosDiv").dialog({
+                                    autoOpen: false,
+                                    height: "auto",
+                                    width: "auto",
+                                    modal: false,
+                                    position: {my: "center", at: "center", of: window}
+                                })
+                                NodeInfosWidget.showNodeInfos(node.parent, node, "axiomsEditor_nodeInfosDiv");
                             },
                         };
+                    }
+                   /* if(self.currentLegendNode.data.type == "ObjectProperty"){
+                        items.DomainAndRange = {
+                            label: "DomainAndRange",
+                            action: function (_e) {
+
+                             var obj= Config.ontologiesVocabularyModels[node.parent].constraints[node.id];
+                                if(obj){
+                                    var str="domain : "+obj.domainLabel || "any"+"\n"
+                                    str+="range : "+obj.rangeLabel || "any"
+
+                                  alert(str)
+
+
+                                }
+                            },
+                        };
+                    }*/
+                }else{
+                    items.owlDefinition={
+                            label: "OWL reference document",
+                            action: function (_e) {
+                               window.open(" https://www.w3.org/TR/owl-ref/")
+                            },
+
+
                     }
                 }
                 return items;
             },
             selectTreeNodeFn: function (event, obj) {
+                if(obj.event.button==2)
+                    return;
                 self.currentSuggestedNode = obj.node;
                 var resourceUri = obj.node.data.id;
                 self.onSuggestionsSelect(resourceUri);
             },
+            onHoverNode:function(event, node){
+                return;
+                var obj= Config.ontologiesVocabularyModels[node.parent].constraints[node.id];
+                if(obj){
+                    var str="domain : "+obj.domainLabel || "any"+"\n"
+                    str+="range : "+obj.rangeLabel || "any"
+
+                    alert(str)
+
+
+                }
+            }
         };
         var jstreeData = [];
 
@@ -1717,6 +1769,10 @@ var Axiom_activeLegend = (function () {
         }
 
         JstreeWidget.loadJsTree("axiomSuggestionsSelectJstreeDiv", jstreeData, options, function () {
+            const element = document.getElementById("axiomSuggestionsSelectJstreeDiv");
+            element.addEventListener("contextmenu", function (e) {
+                e.preventDefault();
+            });
             //  $("#suggestionsSelectJstreeDiv").css("overflow", "unset");
         });
     };

@@ -374,6 +374,7 @@ var NodeInfosAxioms = (function () {
 
         var options = Axiom_activeLegend.axiomtypes;
         common.fillSelectOptions("axioms_legend_suggestionsSelect", options, false);
+
     };
 
     self.switchLeftPanelDisplay = function (role) {

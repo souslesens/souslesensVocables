@@ -1,9 +1,19 @@
+import TriplesToManchester from "../../../../bin/axioms/triplesToManchester.js";
+
 export default function () {
     let operations = {
         GET,
     };
 
-    function GET(req, res, _next) {}
+    function GET(req, res, _next) {
+        try {
+            var triples = JSON.parse(req.query.triples);
+            var result = TriplesToManchester.convert(triples);
+            return res.status(200).json({ result: result });
+        } catch (err) {
+            return res.status(400).json({ error: err.message || err });
+        }
+    }
 
     GET.apiDoc = {
         security: [{ restrictLoggedUser: [] }],

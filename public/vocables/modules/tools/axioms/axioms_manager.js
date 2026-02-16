@@ -100,13 +100,12 @@ var Axioms_manager = (function () {
         var rawManchesterStr = "";
 
         const params = new URLSearchParams({
-            ontologyGraphUri: Config.sources[source].graphUri,
-            axiomTriples: JSON.stringify(triples),
+            triples: JSON.stringify(triples),
         });
         UI.message("generating manchester syntax ");
         $.ajax({
             type: "GET",
-            url: Config.apiUrl + "/jowl/axiomTriples2manchester?" + params.toString(),
+            url: Config.apiUrl + "/axioms/manchester?" + params.toString(),
             dataType: "json",
 
             success: function (data, _textStatus, _jqXHR) {
@@ -194,37 +193,15 @@ var Axioms_manager = (function () {
             },
         });
     };
-    self.parseManchesterClassAxioms = function (classUri, manchesterRawStr) {
-        var axiomsArray = [];
-        var lines = manchesterRawStr.split("\n");
-        var recording = false;
-        var currentAxiom = "<" + classUri + ">";
-        var start = true;
-        lines.forEach(function (line, index) {
-            if (line.trim() == "") {
-                return;
-            }
-            if (line.indexOf("Prefix") > -1) {
-                return;
-            }
-            if (line.indexOf(classUri) > -1) start = 1;
-
-            if (start && line.match(/^(\s*)/)[1].length > 0) {
-                currentAxiom += " " + line;
-            } else {
-                // currentAxiom = line
-            }
-        });
-        currentAxiom = currentAxiom.replace(/\s\s/gm, " ");
-
-        currentAxiom = currentAxiom.replace(/<([^>]+)>/gm, function (expr, value) {
+    self.parseManchesterClassAxioms = function (manchesterRawStr) {
+        var result = manchesterRawStr.replace(/<([^>]+)>/gm, function (expr, value) {
             if (Axioms_manager.allResourcesMap[value]) return Axioms_manager.allResourcesMap[value].label;
-            return value;
+            return Sparql_common.getLabelFromURI(value);
         });
-
-        //   currentAxiom = currentAxiom.replace(/[<>]/gm, " ");
-
-        return currentAxiom;
+        result = result.replace(/\n( *)/g, function (match, spaces) {
+            return "<br>" + spaces.replace(/ /g, "&nbsp;");
+        });
+        return result;
     };
 
     return self;

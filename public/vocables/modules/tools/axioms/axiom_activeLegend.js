@@ -1116,7 +1116,31 @@ var Axiom_activeLegend = (function () {
     };
 
     self.axiomTriplesToManchester = function (triples, callback) {
-        Axiom_manager.getManchesterAxiomsFromTriples(self.currentSource, triples, function (err, result) {
+        if(!triples || triples.length == 0){
+            triples = self.getTriples({ all: true });
+        }
+        if(!triples || triples.length == 0){
+            var message = "No triples to convert to manchester form";
+            if (callback) {
+                return callback(message);
+            }
+            return MainController.errorAlert(message);
+        }
+        var enrichedTriples = triples.map(function (triple) {
+            var sEntry = Axioms_manager.allResourcesMap[triple.subject];
+            var pEntry = Axioms_manager.allResourcesMap[triple.predicate];
+            var oEntry = Axioms_manager.allResourcesMap[triple.object];
+            return {
+                subject: triple.subject,
+                predicate: triple.predicate,
+                object: triple.object,
+                sLabel: sEntry ? sEntry.label : null,
+                pLabel: pEntry ? pEntry.label : null,
+                oLabel: oEntry ? oEntry.label : null,
+            };
+        });
+
+        Axioms_manager.getManchesterAxiomsFromTriples(Lineage_sources.activeSource, enrichedTriples, function (err, result) {
             if (err) {
                 if (callback) {
                     return callback(err);
@@ -1128,11 +1152,11 @@ var Axiom_activeLegend = (function () {
                 if (callback) {
                     return callback(message);
                 }
-                return alert(message);
+                return MainController.errorAlert(message);
             }
 
-            var manchesterStr = Axiom_manager.parseManchesterClassAxioms(self.newAxiomNode.id, result);
-            $("#axiomsEditor_textDiv").html(manchesterStr);
+            var manchesterStr = Axioms_manager.parseManchesterClassAxioms(result);
+            $("#axiomsEditor_textManchesterDiv").html(manchesterStr);
             if (callback) {
                 return callback(null, manchesterStr);
             }

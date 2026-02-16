@@ -16,6 +16,7 @@ import NodeInfosAxioms from "../tools/axioms/nodeInfosAxioms.js";
 import Axioms_manager from "../tools/axioms/axioms_manager.js";
 import CreateRestriction_bot from "../bots/createRestriction_bot.js";
 import OntologyModels from "../shared/ontologyModels.js";
+import AnnotationTemplateNodeInfoDecorator from "../shared/annotationTemplateNodeInfoDecorator.js";
 
 var NodeInfosWidget = (function () {
     var self = {};
@@ -469,6 +470,10 @@ value = item.valueLabel.value;*/
                         self.propertiesMap.properties[propName].value.push({ value: value, predicateId: predicateId });
                     }
                 });
+                
+            AnnotationTemplateNodeInfoDecorator.decorate(sourceLabel, nodeId, types, self.propertiesMap, function () {
+                    // continue processing after decoration
+           
 
                 var defaultProps = [
                     "UUID",
@@ -577,22 +582,37 @@ defaultLang = 'en';*/
 
                             values.forEach(function (valueObj, index) {
                                 var value = valueObj.value;
-
                                 var predicateId = valueObj.predicateId;
                                 var optionalStr = getOptionalStr(key, predicateId);
 
-                                if (value.indexOf("http") == 0 && value.indexOf(" ") == -1 && value.indexOf(",") == -1) {
+                                // --- PLACEHOLDER HANDLING (template missing value) ---
+                                if (valueObj && valueObj.isPlaceholder) {
+                                    var propUri = valueObj.propUri || (self.propertiesMap.properties[key] && self.propertiesMap.properties[key].propUri);
+                                    value = "?";
+                                    // replace optionalStr by pencil only
+                                    optionalStr =
+                                    " <button class='w3-button nodesInfos-iconsButtons' style='font-size: 10px;margin-left:7px;' " +
+                                    "onclick='NodeInfosWidget.addTemplatePlaceholderPredicate(\"" +
+                                    propUri +
+                                    "\")'>" +
+                                    "<input type='image' src='./icons/CommonIcons/EditIcon.png' />" +
+                                    "</button>";
+                                } else {
+                                    // existing behavior for normal values
+                                    if (value.indexOf("http") == 0 && value.indexOf(" ") == -1 && value.indexOf(",") == -1) {
                                     if (valueLabelsMap[value]) {
                                         value = "<a target='" + self.getUriTarget(nodeId) + "' href='" + value + "'>" + valueLabelsMap[value] + "</a>";
                                     } else {
                                         value = "<a target='" + self.getUriTarget(value) + "' href='" + value + "'>" + value + "</a>";
                                     }
+                                    }
                                 }
+
                                 if (index > 0) {
                                     valuesStr += "<br>";
                                 }
                                 valuesStr += value + optionalStr;
-                            });
+                                });
                             strGeneratedByProp += "<td class='detailsCellValue'><div class='detailsCellValueContent'>" + valuesStr + "</div></td>";
                             strGeneratedByProp += "</tr>";
                         } else {
@@ -672,9 +692,46 @@ defaultLang = 'en';*/
                     if (callback) {
                         return callback(null, { types: types, blankNodes: blankNodes });
                     }
-                });
+                });            
+            });
             },
         );
+    };
+    /**
+     * Add a literal value for a missing template property (placeholder "?").
+     * Opens the existing predicate editor and saves a literal value.
+     * @param {string} propUri
+     */
+    self.addTemplatePlaceholderPredicate = function (propUri) {
+        if (!propUri) {
+            return;
+        }
+
+        PredicatesSelectorWidget.init(Lineage_sources.activeSource, function () {
+            self.showHidePropertiesDiv("show");
+
+            // pre-fill property
+            $("#editPredicate_propertyValue").val(propUri);
+
+            // clear value and focus
+            $("#editPredicate_objectValue").val("");
+            $("#editPredicate_objectValue").trigger("focus");
+
+            // override save handler
+            $("#editPredicate_savePredicateButton").off("click");
+            $("#editPredicate_savePredicateButton").click(function () {
+            PredicatesSelectorWidget.storeRecentPredicates();
+
+            // property is forced to propUri; value is taken from widget input
+            self.addPredicate(propUri, null, null, false, function () {
+                $("#editPredicate_objectValue").val("");
+                $("#editPredicate_propertyValue").val("");
+
+                // refresh node infos
+                self.drawAllInfos(self.currentSource, self.currentNode.data.id, {}, function () {});
+            });
+            });
+        });
     };
 
     self.showClassRestrictions = function (sourceLabel, nodeId, _options, callback) {

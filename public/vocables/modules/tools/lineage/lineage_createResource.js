@@ -6,6 +6,8 @@ import OntologyModels from "../../shared/ontologyModels.js";
 import Lineage_createRelation from "./lineage_createRelation.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import UserDataWidget from "../../uiWidgets/userDataWidget.js";
+import AnnotationTemplateAppliedService from "../../shared/annotationTemplateAppliedService.js";
+import AnnotationTemplateAssignmentService from "../../shared/annotationTemplateAssignmentService.js";
 
 /**
  * @module Lineage_createResource
@@ -170,21 +172,21 @@ var Lineage_createResource = (function () {
         return triples;
     };
 
-    self.addAnnotationTriples=function(triples, callback){
-        UserDataWidget.loadUserDatabyId  (162164, function(err, result){
-            if(!err && result.length>0){
-                var subject=triples[0].subject
-                result.forEach(function(predicate){
-                    triples.push({subject: subject,
-                    predicate:predicate,
-                    object:"?"})
-                })
+    // self.addAnnotationTriples=function(triples, callback){
+    //     UserDataWidget.loadUserDatabyId  (162164, function(err, result){
+    //         if(!err && result.length>0){
+    //             var subject=triples[0].subject
+    //             result.forEach(function(predicate){
+    //                 triples.push({subject: subject,
+    //                 predicate:predicate,
+    //                 object:"?"})
+    //             })
 
-            }
-            return callback(null,triples)
-    })
+    //         }
+    //         return callback(null,triples)
+    // })
 
-    }
+    // }
 
     /**
      * Retrieves the URI for the resource being created.
@@ -329,62 +331,89 @@ var Lineage_createResource = (function () {
      * Writes the resource (defined by its triples) to the backend and indexes it.
      * If the URI already exists, the user is notified to choose a new one.
      *
-     * @function
-     * @name writeResource
-     * @memberof Lineage_createResource
-     * @param {string} source - The source to which the resource will be written.
-     * @param {Array<Object>} triples - The RDF triples defining the resource.
-     * @param {Function} callback - The callback function to handle the result, with signature (error, resourceUri).
+     * @param {string} source
+     * @param {Array<Object>} triples
+     * @param {Function} callback
      */
     self.writeResource = function (source, triples, callback) {
-        if (!triples || triples.length == 0) {
+        if (!triples || triples.length === 0) {
             return callback({ responseText: "no predicates for node" });
         }
 
-        var resourceUri = triples[0].subject;
+        var createdResourceUri = triples[0].subject;
 
-        Sparql_OWL.getNodeInfos(source, resourceUri, {}, function (err, result) {
+        Sparql_OWL.getNodeInfos(source, createdResourceUri, {}, function (err, existing) {
             if (err) {
-                return callback(err);
+            return callback(err);
             }
-            if (result.length > 0) {
-                resourceUri = null;
-                $("#lineageCreateResource_creatingNodeUriType").val();
-                return callback({ responseText: "this uri already exists, choose a new one" });
+            if (existing && existing.length > 0) {
+            $("#lineageCreateResource_creatingNodeUriType").val();
+            return callback({ responseText: "this uri already exists, choose a new one" });
             }
 
-            Sparql_generic.insertTriples(source, triples, {}, function (err, _result) {
-                if (err) {
-                    return callback(err.responseText);
+            // Determine created resourceType from triples
+            var createdResourceType = null;
+            (triples || []).forEach(function (t) {
+            if (
+                t.predicate === "rdf:type" &&
+                (t.object === "owl:Class" || t.object === "owl:NamedIndividual")
+            ) {
+                createdResourceType = t.object;
+            }
+            });
+
+            // Add annotation template triples BEFORE inserting (single insert)
+            self.addAnnotationTemplateTriplesOnCreation(
+            source,
+            createdResourceUri,
+            createdResourceType,
+            triples,
+            function (_errTpl, tplResult) {
+                // do not block on template errors
+                var templateIds = (tplResult && tplResult.templateIds) ? tplResult.templateIds : [];
+                var finalTriples = (tplResult && tplResult.triples) ? tplResult.triples : triples;
+
+                Sparql_generic.insertTriples(source, finalTriples, {}, function (errInsert, _result) {
+                if (errInsert) {
+                    return callback(errInsert.responseText || errInsert);
                 }
 
-                SearchUtil.generateElasticIndex(source, { ids: [resourceUri] }, function (err, result) {
-                    if (err) {
-                        return callback(err);
+                // Optional "Applied marker"
+                if (AnnotationTemplateAppliedService.isConcernedResourceType(finalTriples)) {
+                    AnnotationTemplateAppliedService.createApplied(source, createdResourceUri, templateIds, function () {});
+                }
+
+                SearchUtil.generateElasticIndex(source, { ids: [createdResourceUri] }, function (errIndex) {
+                    if (errIndex) {
+                    return callback(errIndex);
                     }
                     UI.message("node Created and Indexed");
                 });
 
-                var modelData = {};
-                triples.forEach(function (item) {
-                    if (item.predicate == "rdfs:label") {
-                        modelData.label = item.object;
-                        modelData.id = item.subject;
+                // Update ontology model cache
+                var createdModelData = {};
+                finalTriples.forEach(function (item) {
+                    if (item.predicate === "rdfs:label") {
+                    createdModelData.label = item.object;
+                    createdModelData.id = item.subject;
                     }
-                    if (item.predicate == "rdfs:subClassOf") {
-                        modelData.superClass = item.object;
-                        modelData.superClassLabel = Sparql_common.getLabelFromURI(item.object);
+                    if (item.predicate === "rdfs:subClassOf") {
+                    createdModelData.superClass = item.object;
+                    createdModelData.superClassLabel = Sparql_common.getLabelFromURI(item.object);
                     }
                 });
 
-                var modelData = {
-                    classes: { [modelData.id]: modelData },
+                var modelPayload = {
+                    classes: { [createdModelData.id]: createdModelData },
                 };
-                OntologyModels.updateModel(source, modelData, {}, function (err, result) {
-                    if (callback) return callback(err, resourceUri);
-                    return console.log(err || "ontologyModelCache updated");
+
+                OntologyModels.updateModel(source, modelPayload, {}, function (errModel) {
+                    if (callback) return callback(errModel, createdResourceUri);
+                    return console.log(errModel || "ontologyModelCache updated");
                 });
-            });
+                });
+            }
+            );
         });
     };
 
@@ -422,7 +451,7 @@ var Lineage_createResource = (function () {
      * @memberof Lineage_createResource
      * @param {string} uriType - The selected URI type ("specific" or other).
      */
-    self.onselectNodeUriType = function (uryType) {
+    self.onselectNodeUriType = function (uriType) {
         var display = uriType == "specific" ? "block" : "none";
         $("#lineageCreateResource_specificUri").css("display", display);
     };
@@ -516,6 +545,118 @@ var Lineage_createResource = (function () {
                 Lineage_whiteboard.drawNodesAndParents(nodeData, 2, { legendType: "individualClasses" });
             });
         });
+    };
+
+        /**
+     * Load template userData records and extract annotation property URIs.
+     * Expected template content structure (data_content):
+     * {
+     *   properties: [ "http://...", ... ],
+     *   selections: [ { propertyUri: "...", ... }, ... ]
+     * }
+     *
+     * @param {Array<number>} templateIds
+     * @param {function(Error|null, Array<string>)} callback
+     */
+    self.getAnnotationPredicatesFromTemplateIds = function (templateIds, callback) {
+        if (!templateIds || templateIds.length === 0) {
+            return callback(null, []);
+        }
+
+        var propertyUriSet = {};
+
+        async.eachSeries(
+            templateIds,
+            function (templateId, eachCb) {
+            UserDataWidget.loadUserDatabyId(templateId, function (err, userDataItems) {
+                if (err || !userDataItems || userDataItems.length === 0) {
+                return eachCb(); // ignore template load errors (do not block creation)
+                }
+
+                var templateRecord = userDataItems[0];
+                var templateContent = templateRecord.data_content;
+
+                if (typeof templateContent === "string") {
+                try {
+                    templateContent = JSON.parse(templateContent);
+                } catch (e) {}
+                }
+
+                var propertyUris = [];
+                if (templateContent) {
+                if (Array.isArray(templateContent.properties)) {
+                    propertyUris = templateContent.properties;
+                } else if (Array.isArray(templateContent.selections)) {
+                    propertyUris = templateContent.selections
+                    .map(function (s) { return s.propertyUri; })
+                    .filter(Boolean);
+                }
+                }
+
+                propertyUris.forEach(function (uri) {
+                if (uri) propertyUriSet[uri] = 1;
+                });
+
+                return eachCb();
+            });
+            },
+            function () {
+            return callback(null, Object.keys(propertyUriSet));
+            }
+        );
+    };
+
+    /**
+     * Add annotation template triples to the resource creation triples.
+     * Note: RDF cannot store "empty" values; a placeholder literal is inserted.
+     *
+     * @param {string} source
+     * @param {string} resourceUri
+     * @param {string} resourceType - "owl:Class" or "owl:NamedIndividual"
+     * @param {Array<Object>} triples
+     * @param {function(Error|null, {triples:Array<Object>, templateIds:Array<number>})} callback
+     */
+    self.addAnnotationTemplateTriplesOnCreation = function (source, resourceUri, resourceType, triples, callback) {
+        AnnotationTemplateAssignmentService.getAssignedTemplateIdsForCreation(
+            { source: source, resourceType: resourceType },
+            function (errAssign, templateIds) {
+            // do not block creation flow
+            templateIds = templateIds || [];
+
+            if (templateIds.length === 0) {
+                return callback(null, { triples: triples, templateIds: [] });
+            }
+
+            self.getAnnotationPredicatesFromTemplateIds(templateIds, function (err, predicates) {
+                // ignore errors (do not block)
+                predicates = predicates || [];
+
+                // Avoid duplicates: if predicate already present in triples, skip it
+                var existing = {};
+                (triples || []).forEach(function (t) {
+                existing[t.predicate] = 1;
+                });
+
+                predicates.forEach(function (p) {
+                if (!p || existing[p]) {
+                    return;
+                }
+                existing[p] = 1;
+
+                // Placeholder choice:
+                // - "?" to make it visible in NodeInfos
+                // - or empty string: Sparql_common.formatStringForTriple("")
+                triples.push({
+                    subject: resourceUri,
+                    predicate: p,
+                    object: Sparql_common.formatStringForTriple("__TO_FILL__"),
+                });
+                });
+
+                return callback(null, { triples: triples, templateIds: templateIds });
+            });
+            }
+        );
     };
 
     return self;

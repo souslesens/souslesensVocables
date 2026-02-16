@@ -3,6 +3,8 @@ import SearchUtil from "../search/searchUtil.js";
 import Sparql_proxy from "../sparqlProxies/sparql_proxy.js";
 import Sparql_common from "../sparqlProxies/sparql_common.js";
 import JstreeWidget from "../uiWidgets/jstreeWidget.js";
+import NodeInfosWidget from "../uiWidgets/nodeInfosWidget.js";
+import PopupMenuWidget from "../uiWidgets/popupMenuWidget.js";
 
 var CommonBotFunctions = (function () {
     var self = {};
@@ -333,6 +335,43 @@ var CommonBotFunctions = (function () {
             UI.openDialog("mainDialogDiv", { title: "Parents of " + classLabel });
             $("#mainDialogDiv").parent().css("z-index", 10000);
             JstreeWidget.loadJsTree("showParentsJstreeDiv", jstreeData, { openAll: true });
+
+            $("#mainDialogDiv").on("dialogclose.showParents", function () {
+                $(document).off("contextmenu.nodeInfos");
+                $("#mainDialogDiv").off("dialogclose.showParents");
+            });
+
+            $(document).off("contextmenu.nodeInfos");
+            $(document).on("contextmenu.nodeInfos", "#showParentsJstreeDiv .jstree-anchor", function (evt) {
+                evt.preventDefault();
+                evt.stopPropagation();
+                var nodeId = $(this).closest("li").attr("id");
+                var jstreeInstance = $("#showParentsJstreeDiv").jstree(true);
+                if (!jstreeInstance) {
+                    return;
+                }
+                var nodeData = jstreeInstance.get_node(nodeId);
+                if (!nodeData || !nodeData.data) {
+                    return;
+                }
+                var popupHtml = "<div style='padding:5px'>";
+                popupHtml += "<div class='popupMenuItem' style='cursor:pointer;padding:4px 8px' ";
+                popupHtml += "id='nodeInfosPopupItem'>";
+                popupHtml += "Node Infos</div>";
+                popupHtml += "</div>";
+                $("#popupMenuWidgetDiv").html(popupHtml);
+                $("#nodeInfosPopupItem").on("click", function () {
+                    NodeInfosWidget.showNodeInfos(nodeData.data.source, nodeData.data.id, "smallDialogDiv", null, function () {
+                        var savedWidth = $("#smallDialogDiv").dialog("option", "width");
+                        var savedHeight = $("#smallDialogDiv").dialog("option", "height");
+                        UI.sideBySideTwoWindows("#mainDialogDiv", "#smallDialogDiv");
+                        $("#smallDialogDiv").dialog("option", { width: savedWidth, height: savedHeight, resizable: false });
+                    });
+                    PopupMenuWidget.hidePopup("popupMenuWidgetDiv");
+                });
+                PopupMenuWidget.showPopup({ x: evt.pageX, y: evt.pageY }, "popupMenuWidgetDiv");
+                $("#popupMenuWidgetDiv").css("z-index", 10002);
+            });
         });
     };
 

@@ -331,14 +331,14 @@ var CommonBotFunctions = (function () {
                 });
             }
 
-            $("#mainDialogDiv").html("<div id='showParentsJstreeDiv' style='overflow:auto; max-height:400px'></div>");
-            UI.openDialog("mainDialogDiv", { title: "Parents of " + classLabel });
-            $("#mainDialogDiv").parent().css("z-index", 10000);
+            $("#smallDialogDiv").html("<div id='showParentsJstreeDiv' style='overflow:auto; max-height:400px'></div>");
+            UI.openDialog("smallDialogDiv", { title: "Parents of " + classLabel });
+            $("#smallDialogDiv").parent().css("z-index", 10000);
             JstreeWidget.loadJsTree("showParentsJstreeDiv", jstreeData, { openAll: true });
 
-            $("#mainDialogDiv").on("dialogclose.showParents", function () {
+            $("#smallDialogDiv").on("dialogclose.showParents", function () {
                 $(document).off("contextmenu.nodeInfos");
-                $("#mainDialogDiv").off("dialogclose.showParents");
+                $("#smallDialogDiv").off("dialogclose.showParents");
             });
 
             $(document).off("contextmenu.nodeInfos");
@@ -361,11 +361,11 @@ var CommonBotFunctions = (function () {
                 popupHtml += "</div>";
                 $("#popupMenuWidgetDiv").html(popupHtml);
                 $("#nodeInfosPopupItem").on("click", function () {
-                    NodeInfosWidget.showNodeInfos(nodeData.data.source, nodeData.data.id, "smallDialogDiv", null, function () {
-                        var savedWidth = $("#smallDialogDiv").dialog("option", "width");
-                        var savedHeight = $("#smallDialogDiv").dialog("option", "height");
-                        UI.sideBySideTwoWindows("#mainDialogDiv", "#smallDialogDiv");
-                        $("#smallDialogDiv").dialog("option", { width: savedWidth, height: savedHeight, resizable: false });
+                    NodeInfosWidget.showNodeInfos(nodeData.data.source, nodeData.data.id, "mainDialogDiv", null, function () {
+                        var savedWidth = $("#mainDialogDiv").dialog("option", "width");
+                        var savedHeight = $("#mainDialogDiv").dialog("option", "height");
+                        UI.sideBySideTwoWindows("#smallDialogDiv", "#mainDialogDiv");
+                        $("#mainDialogDiv").dialog("option", { width: savedWidth, height: savedHeight, resizable: false });
                     });
                     PopupMenuWidget.hidePopup("popupMenuWidgetDiv");
                 });

@@ -135,7 +135,7 @@ var AnnotationPropertiesTemplate_bot = (function () {
 
   self.workflow_afterSave = {
     _OR: {
-        "Create another template": { resetTemplateFn: self.workflow_entry },
+        "Create another template": { resetTemplateFn: {} },
         End: { endBotFn: {} },
     },
   };
@@ -289,15 +289,24 @@ var AnnotationPropertiesTemplate_bot = (function () {
           if (err) {
             return self.myBotEngine.abort(err.responseText || err);
           }
+          
+          // Keep saved template id
+          self.params.savedTemplateId = saved.id;
 
-          UI.message("Template saved (id=" + saved.id + ")", true);
-
+          // Auto-apply to selected sources (the ones chosen in Admin)
+          self.functions.createAssignmentsForSelectedSourcesFn(saved.id, function (err2) {
+            if (err2) {
+             UI.message("Template saved but apply failed: " + (err2.responseText || err2.message || err2), true);
+            } else {
+                UI.message("Template saved and applied to selected sources", true);
+            }
 
           // Show post-save menu: create another or finish
           self.myBotEngine.currentObj = self.workflow_afterSave;
           return self.myBotEngine.nextStep(self.workflow_afterSave);
 
-        },
+          });
+        }
       );
       
     // After opening the save dialog, move it to the right of the bot dialog
@@ -354,6 +363,66 @@ var AnnotationPropertiesTemplate_bot = (function () {
             self.callback(null);
         }
         return self.myBotEngine.end();
+    },
+
+    /**
+     * Creates one assignment record per selected source.
+     * Assignment = (templateId -> sourceLabel).
+     * @param {number|string} templateId
+     * @param {function} callback error-first callback
+     */
+    createAssignmentsForSelectedSourcesFn: function (templateId, callback) {
+        var selectedSources = self.params.selectedSources || [];
+
+        if (!templateId) {
+            return callback(new Error("Missing templateId"));
+        }
+        if (!selectedSources || selectedSources.length === 0) {
+            return callback(new Error("No selected sources"));
+        }
+
+        async.eachSeries(
+            selectedSources,
+            function (sourceLabel, callbackEach) {
+            var assignmentContent = {
+                templateId: templateId,
+                source: sourceLabel,
+                placeholderValue: "__TO__FILL__",
+                appliedAt: new Date().toISOString(),
+            };
+
+            var payload = {
+                data_path: "",
+                data_type: "annotationPropertiesTemplateAssignment",
+                data_label: "Template " + templateId + " for " + sourceLabel,
+                data_comment: "Auto-apply from AnnotationPropertiesTemplate_bot",
+                data_group: sourceLabel,
+                data_tool: "admin",
+                data_source: sourceLabel,
+                data_content: assignmentContent,
+                is_shared: false,
+                shared_profiles: [],
+                shared_users: [],
+            };
+
+            $.ajax({
+                url: Config.apiUrl + "/users/data",
+                type: "POST",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify(payload),
+                success: function () {
+                return callbackEach();
+                },
+                error: function (err) {
+                return callbackEach(err);
+                },
+            });
+            },
+            function (err) {
+            return callback(err || null);
+            },
+        );
     },
   };
 

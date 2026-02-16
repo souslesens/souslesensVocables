@@ -189,8 +189,8 @@ var CreateResource_bot = (function () {
                     self.myBotEngine.showListWithSearch(classes, "resourceId", searchFn, null, scopeOptions);
 
                     var selectEl = $("#bot_resourcesProposalSelect");
-                    selectEl.off("mousedown.showParents");
-                    selectEl.on("mousedown.showParents", function (evt) {
+                    selectEl.off("mousedown.nodeInfos");
+                    selectEl.on("mousedown.nodeInfos", function (evt) {
                         if (evt.which !== 3) {
                             return;
                         }
@@ -201,33 +201,50 @@ var CreateResource_bot = (function () {
                             return;
                         }
                         var classId = option.val();
-                        var classLabel = option.text();
                         if (!classId) {
                             return;
                         }
+                        var currentList = self.myBotEngine.currentList || [];
+                        var classSource = self.source;
+                        for (var i = 0; i < currentList.length; i++) {
+                            if (currentList[i].id === classId) {
+                                classSource = currentList[i].source;
+                                break;
+                            }
+                        }
                         var popupHtml = "<div style='padding:5px'>";
                         popupHtml += "<div class='popupMenuItem' style='cursor:pointer;padding:4px 8px' ";
-                        popupHtml += "id='showParentsPopupItem'>";
-                        popupHtml += "Show Parents</div>";
+                        popupHtml += "id='nodeInfosPopupItem'>";
+                        popupHtml += "Node Infos</div>";
                         popupHtml += "</div>";
                         $("#popupMenuWidgetDiv").html(popupHtml);
-                        $("#showParentsPopupItem").on("click", function () {
-                            var currentList = self.myBotEngine.currentList || [];
-                            CommonBotFunctions.showParentsDialog(classId, classLabel, currentList, self.source);
+                        $("#nodeInfosPopupItem").on("click", function () {
+                            NodeInfosWidget.showNodeInfos(classSource, classId, "smallDialogDiv", null, function () {
+                                var halfWidth = Math.floor($(window).width() / 2);
+                                $("#smallDialogDiv").dialog("option", {
+                                    width: halfWidth,
+                                    position: { my: "right top", at: "right-12 top+50", of: window },
+                                });
+                                $("#smallDialogDiv").parent().css("z-index", 10000);
+                            });
                             PopupMenuWidget.hidePopup("popupMenuWidgetDiv");
                         });
                         PopupMenuWidget.showPopup({ x: evt.pageX, y: evt.pageY }, "popupMenuWidgetDiv");
                     });
-                    selectEl.off("contextmenu.showParents");
-                    selectEl.on("contextmenu.showParents", function (evt) {
+                    selectEl.off("contextmenu.nodeInfos");
+                    selectEl.on("contextmenu.nodeInfos", function (evt) {
                         evt.preventDefault();
                     });
 
-                    $("#botPanel").off("dialogclose.showParents");
-                    $("#botPanel").on("dialogclose.showParents", function () {
-                        selectEl.off("mousedown.showParents");
-                        selectEl.off("contextmenu.showParents");
-                        $("#botPanel").off("dialogclose.showParents");
+                    $("#botPanel").off("dialogclose.nodeInfos");
+                    $("#botPanel").on("dialogclose.nodeInfos", function () {
+                        selectEl.off("mousedown.nodeInfos");
+                        selectEl.off("contextmenu.nodeInfos");
+                        $("#botPanel").off("dialogclose.nodeInfos");
+                    });
+                    $("#smallDialogDiv").off("dialogclose.nodeInfosBotCleanup");
+                    $("#smallDialogDiv").on("dialogclose.nodeInfosBotCleanup", function () {
+                        $("#smallDialogDiv").off("dialogclose.nodeInfosBotCleanup");
                     });
                 });
             } else {

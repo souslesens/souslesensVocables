@@ -40,8 +40,6 @@ var Axiom_activeLegend = (function () {
         self.maxItemsInJstreePerSource = 250;
 
 
-
-
     };
     self.filterSuggestion = function (suggestions, resourceType) {
         var selection = [];
@@ -753,7 +751,7 @@ var Axiom_activeLegend = (function () {
         }, function (err, result) {
             var divId = "nodeInfosAxioms_graphDiv";
             var options = {};
-            Axioms_graph.drawNodeAxioms2(NodeInfosAxioms.currentSource, rootNodeId, triples, divId, options);
+            // Axioms_graph.drawNodeAxioms2(NodeInfosAxioms.currentSource, rootNodeId, triples, divId, options);
             if (callback) {
                 return callback(err);
             }
@@ -764,7 +762,7 @@ var Axiom_activeLegend = (function () {
         var triples = self.getTriples();
         var str = "";
         triples.forEach(function (triple) {
-            str += Sparql_generic.triplesObjectToString(triple)+"\n";
+            str += Sparql_generic.triplesObjectToString(triple) + "\n";
         });
 
         common.copyTextToClipboard(str);
@@ -1234,7 +1232,10 @@ var Axiom_activeLegend = (function () {
                     predicate = "http://www.w3.org/2000/01/rdf-schema#subClassOf";
                 } else if (fromNode.data.type.endsWith("ObjectProperty")) {
                     predicate = "http://www.w3.org/2000/01/rdf-schema#subPropertyOf";
-                } else if (["Connective", "IntersectionOf", "UnionOf", "ComplementOf", "Enumeration"].indexOf(fromNode.data.type) > -1) {
+                } else if ( fromNode.data.label == "ComplementOf") {
+                    predicate = "http://www.w3.org/2002/07/owl#complementOf";
+                    //;complement is not a disjunction
+                } else if ([ "IntersectionOf", "UnionOf", "Enumeration"].indexOf(fromNode.data.type) > -1) {
                     if (fromNode.data.nCount == 0) {
                         predicate = "http://www.w3.org/1999/02/22-rdf-syntax-ns#first";
                     } else if (fromNode.data.nCount == 1) {
@@ -1510,8 +1511,8 @@ var Axiom_activeLegend = (function () {
                 return nodeId;
             }
             if (!blankNodeMapping[nodeId]) {
-              //  blankNodeMapping[nodeId] = "_:b" + generateHexaWithLetter(7);
-                blankNodeMapping[nodeId] = "<" + generateHexaWithLetter(10)+">"
+                //  blankNodeMapping[nodeId] = "_:b" + generateHexaWithLetter(7);
+                blankNodeMapping[nodeId] = "<" + generateHexaWithLetter(10) + ">"
             }
             return blankNodeMapping[nodeId];
         }
@@ -1606,7 +1607,7 @@ var Axiom_activeLegend = (function () {
                         items.NodeInfos = {
                             label: "nodeInfos",
                             action: function (_e) {
-                                $("#mainDialogDiv").css("z-index",999)
+                                $("#mainDialogDiv").css("z-index", 999)
                                 $("#axiomsEditor_nodeInfosDiv").dialog({
                                     autoOpen: false,
                                     height: "auto",
@@ -1618,29 +1619,29 @@ var Axiom_activeLegend = (function () {
                             },
                         };
                     }
-                   /* if(self.currentLegendNode.data.type == "ObjectProperty"){
-                        items.DomainAndRange = {
-                            label: "DomainAndRange",
-                            action: function (_e) {
+                    /* if(self.currentLegendNode.data.type == "ObjectProperty"){
+                         items.DomainAndRange = {
+                             label: "DomainAndRange",
+                             action: function (_e) {
 
-                             var obj= Config.ontologiesVocabularyModels[node.parent].constraints[node.id];
-                                if(obj){
-                                    var str="domain : "+obj.domainLabel || "any"+"\n"
-                                    str+="range : "+obj.rangeLabel || "any"
+                              var obj= Config.ontologiesVocabularyModels[node.parent].constraints[node.id];
+                                 if(obj){
+                                     var str="domain : "+obj.domainLabel || "any"+"\n"
+                                     str+="range : "+obj.rangeLabel || "any"
 
-                                  alert(str)
+                                   alert(str)
 
 
-                                }
-                            },
-                        };
-                    }*/
-                }else{
-                    items.owlDefinition={
-                            label: "OWL reference document",
-                            action: function (_e) {
-                               window.open(" https://www.w3.org/TR/owl-ref/")
-                            },
+                                 }
+                             },
+                         };
+                     }*/
+                } else {
+                    items.owlDefinition = {
+                        label: "OWL reference document",
+                        action: function (_e) {
+                            window.open(" https://www.w3.org/TR/owl-ref/")
+                        },
 
 
                     }
@@ -1648,18 +1649,19 @@ var Axiom_activeLegend = (function () {
                 return items;
             },
             selectTreeNodeFn: function (event, obj) {
-                if(obj.event.button==2)
+                if (obj.event.button == 2) {
                     return;
+                }
                 self.currentSuggestedNode = obj.node;
                 var resourceUri = obj.node.data.id;
                 self.onSuggestionsSelect(resourceUri);
             },
-            onHoverNode:function(event, node){
+            onHoverNode: function (event, node) {
                 return;
-                var obj= Config.ontologiesVocabularyModels[node.parent].constraints[node.id];
-                if(obj){
-                    var str="domain : "+obj.domainLabel || "any"+"\n"
-                    str+="range : "+obj.rangeLabel || "any"
+                var obj = Config.ontologiesVocabularyModels[node.parent].constraints[node.id];
+                if (obj) {
+                    var str = "domain : " + obj.domainLabel || "any" + "\n"
+                    str += "range : " + obj.rangeLabel || "any"
 
                     alert(str)
 
@@ -1691,7 +1693,8 @@ var Axiom_activeLegend = (function () {
             var searchDone = {};
 
             objects = objects.filter(function (item) {
-                return item.id && item.id.indexOf("_:") !== 0;
+                return item.id && item.id.startsWith("http") || item.id && item.id.startsWith("create")
+                // return item.id && item.id.indexOf("_:") !== 0;
             });
 
             objects.forEach(function (item) {
@@ -1759,10 +1762,10 @@ var Axiom_activeLegend = (function () {
                 }
             });
         }
-        var sourceIndex = jstreeData.findIndex((obj) => obj.id == MappingModeler.currentSLSsource);
+        var sourceIndex = jstreeData.findIndex((obj) => obj.id == self.currentSource);
         if (sourceIndex > -1) {
             if (parentName == "Properties") {
-                common.array.moveItem(jstreeData, sourceIndex, 5);
+                common.array.moveItem(jstreeData, sourceIndex, 2);
             } else {
                 common.array.moveItem(jstreeData, sourceIndex, 2);
             }

@@ -752,7 +752,7 @@ var Axiom_activeLegend = (function () {
         }, function (err, result) {
             var divId = "nodeInfosAxioms_graphDiv";
             var options = {};
-            // Axioms_graph.drawNodeAxioms2(NodeInfosAxioms.currentSource, rootNodeId, triples, divId, options);
+            Axioms_graph.drawNodeAxioms2(NodeInfosAxioms.currentSource, rootNodeId, triples, divId, options);
             if (callback) {
                 return callback(err);
             }
@@ -1068,12 +1068,18 @@ var Axiom_activeLegend = (function () {
                         return MainController.errorAlert(err.responseText || err);
                     }
 
+                    Axiom_UI.axiomSaved = true;
+
                     if (!self.showTriplesActivated) {
                         Axioms_graph.currentAxiomTriples = triples;
                         var rootNodeId = triples[0].subject;
                         var divId = "nodeInfosAxioms_graphDiv";
                         Axioms_graph.drawNodeAxioms2(self.currentSource, rootNodeId, triples, divId, {});
                         self.showTriples();
+                    }
+
+                    if (self.showTriplesActivated) {
+                        $("#axiomEditor_deleteTriplesBtn").show();
                     }
 
                     if (callback) {

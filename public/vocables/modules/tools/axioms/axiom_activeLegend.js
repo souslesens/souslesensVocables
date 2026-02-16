@@ -1232,10 +1232,11 @@ var Axiom_activeLegend = (function () {
                     predicate = "http://www.w3.org/2000/01/rdf-schema#subClassOf";
                 } else if (fromNode.data.type.endsWith("ObjectProperty")) {
                     predicate = "http://www.w3.org/2000/01/rdf-schema#subPropertyOf";
-                } else if ( fromNode.data.label == "ComplementOf") {
-                    predicate = "http://www.w3.org/2002/07/owl#complementOf";
-                    //;complement is not a disjunction
-                } else if ([ "IntersectionOf", "UnionOf", "Enumeration"].indexOf(fromNode.data.type) > -1) {
+                } else if (fromNode.data.label == "ComplementOf") {
+                    //  predicate = "http://www.w3.org/2002/07/owl#complementOf";
+                    /*  toNode.data.bNodeid=toNode.data.id
+                      toNode.data.type="complementOf"*/
+                } else if (["IntersectionOf", "UnionOf", "Enumeration"].indexOf(fromNode.data.type) > -1) {
                     if (fromNode.data.nCount == 0) {
                         predicate = "http://www.w3.org/1999/02/22-rdf-syntax-ns#first";
                     } else if (fromNode.data.nCount == 1) {
@@ -1260,22 +1261,33 @@ var Axiom_activeLegend = (function () {
                     fromNode.data.nCount += 1;
                 } else {
                 }
+                if (fromNode.data.label == "ComplementOf") {
+                    //  predicate = "http://www.w3.org/2002/07/owl#complementOf";
+                    triples.push({
+                        subject: fromNode.data.id,
+                        predicate: fromNode.data.subType,
+                        object: toNode.data.id,
+                    });
 
-                if (predicate) {
+                    return recurse(toNode.data.id)
+                } else if (predicate) {
                     triple.subject = fromNode.data.bNodeid || fromNode.data.id;
                     triple.predicate = predicate;
                     triple.object = object;
                     triples.push(triple);
                 }
-
                 if (toNode.data.type == "Connective") {
-                    toNode.data.nCount = 0;
-                    toNode.data.bNodeid = self.getBlankNodeId();
-                    triples.push({
-                        subject: toNode.data.id,
-                        predicate: toNode.data.subType,
-                        object: toNode.data.bNodeid,
-                    });
+                    //  predicate = "http://www.w3.org/2002/07/owl#complementOf";
+                    if (toNode.data.label == "ComplementOf") {
+                        toNode.data.nCount = 0;
+                        toNode.data.bNodeid = self.getBlankNodeId();
+                        triples.push({
+                            subject: toNode.data.id,
+                            predicate: toNode.data.subType,
+                            object: toNode.data.bNodeid,
+                        });
+                    }
+
                 }
 
                 if (fromNode.data.cardinality) {
@@ -1285,6 +1297,7 @@ var Axiom_activeLegend = (function () {
                         object: '"' + fromNode.data.cardinality + '"' + "^^<http://www.w3.org/2001/XMLSchema#nonNegativeInteger>",
                     });
                 }
+
 
                 var isSubPropertyEdge = edge.data && edge.data.type == "subPropertyOf";
                 if (!isSubPropertyEdge) {

@@ -38,7 +38,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
 
     /**
      * Initializes and renders an interactive Vis.js network graph, configuring layout, events, datasets,
-     * and user interactions. It sets up node/edge behavior and calls a callback once drawing is complete.
+     * and user interactions. It sets up node/edge behavior and calls a callback once drawing is complete
      * @function
      * @name draw
      * @memberof module:VisjsGraphClass
@@ -368,7 +368,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
     /**
      * Configures the graph layout (vertical or horizontal hierarchical) by updating layout and edge‑smoothness
      * settings, then triggers a full redraw of the Vis.js network. It adjusts direction, sorting, and animation
-     * timing depending on the selected layout mode.
+     * timing depending on the selected layout mode
      * @function
      * @name setLayout
      * @memberof module:VisjsGraphClass
@@ -415,7 +415,11 @@ const VisjsGraphClass = function (graphDiv, data, options) {
             self.redraw();
         }
     };
-
+    /** call draw function
+     * @function
+     * @name redraw
+     * @memberof module:VisjsGraphClass
+     */
     self.redraw = function () {
         self.draw();
     };
@@ -530,8 +534,8 @@ const VisjsGraphClass = function (graphDiv, data, options) {
     };
 
     /**
-     * Removes every node from the graph except those explicitly listed in nodesToKeep, and also removes any edges
-     * connected to the deleted nodes
+     * Removes every node from the graph except those explicitly listed in nodesToKeep, and also
+     * removes any edges connected to the deleted nodes
      * @function
      * @name removeOtherNodesFromGraph
      * @memberof module:VisjsGraphClass
@@ -631,9 +635,10 @@ const VisjsGraphClass = function (graphDiv, data, options) {
             }
             self.currentScale = scale;
         });
+
     /**
      * builds a lookup map of all existing node IDs — and optionally edge IDs — currently present in the Vis.js graph
-     * It returns an object where each ID is used as a key for fast existence checks.
+     * It returns an object where each ID is used as a key for fast existence checks
      * @function
      * @name getExistingIdsMap
      * @memberof module:VisjsGraphClass
@@ -655,11 +660,21 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         return existingVisjsIds;
     };
 
+    /** check if the graph contains any nodes
+     * @function
+     * @name isGraphNotEmpty
+     * @memberof module:VisjsGraphClass
+     */
     self.isGraphNotEmpty = function () {
         // if(self.isGraphNotEmpty()){
         return Object.keys(self.getExistingIdsMap()).length > 0;
     };
 
+    /** convert the current graph data to CSV format and copies it to the system clipboard
+     * @function
+     * @name graphCsvToClipBoard
+     * @memberof module:VisjsGraphClass
+     */
     self.graphCsvToClipBoard = function () {
         var csv = self.toCsv();
         common.copyTextToClipboard(csv, function (/** @type {any} */ err, /** @type {any} */ _result) {
@@ -1140,6 +1155,12 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         return;
     };
 
+    /**
+     * Export the current graph as an SVG file
+     * @function
+     * @name toSVG
+     * @memberof module:VisjsGraphClass
+     */
     self.toSVG = function () {
         SVGexport2.toSVG(self);
         //self.redraw();
@@ -1147,6 +1168,9 @@ const VisjsGraphClass = function (graphDiv, data, options) {
 
     /**
      * Convert the current Vis.js nodes and edges into a GraphML string
+     * @function
+     * @name toGraphMl
+     * @memberof module:VisjsGraphClass
      */
     self.toGraphMl = function () {
         var visjsData = {
@@ -1302,6 +1326,12 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         });
     };
 
+    /**
+     * Export the current graph as an SVG file
+     * @function
+     * @name toSVG
+     * @memberof module:VisjsGraphClass
+     */
     self.message = function (/** @type {string | JQuery.Node | ((this: HTMLElement, index: number, oldhtml: string) => string | JQuery.Node)} */ message) {
         $("#VisJsGraph_message").html(message);
     };

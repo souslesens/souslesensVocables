@@ -986,11 +986,19 @@ var MappingModeler = (function () {
                 var uniqueIds = {};
                 result.forEach(function (item) {
                     if (!uniqueIds[item.id]) {
-                        uniqueIds[item.id] = 1;
+                        uniqueIds[item.id] = item.label;
 
                         item.label = item.label; //,.replace(/ /g, "_");
                         item.resourceType = "ObjectProperty";
                         self.allProperties.push(item);
+                    }else{
+                        // in case there label is different from label calculated from uri, we keep the true label get from rdfs:label
+                        var labelFromUri = Sparql_common.getLabelFromURI(item.id);
+                        if(labelFromUri != item.label && labelFromUri == uniqueIds[item.id]){ 
+                            self.allProperties.find(function(prop){
+                                return prop.id == item.id;
+                            }).label = item.label;
+                        }
                     }
                 });
                 common.array.sort(self.allProperties, "label");

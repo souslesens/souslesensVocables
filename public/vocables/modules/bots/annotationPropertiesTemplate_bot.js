@@ -300,6 +300,7 @@ var AnnotationPropertiesTemplate_bot = (function () {
             } else {
                 UI.message("Template saved and applied to selected sources", true);
             }
+            self.functions.showTemplateSummaryFn();
 
           // Show post-save menu: create another or finish
           self.myBotEngine.currentObj = self.workflow_afterSave;
@@ -423,6 +424,38 @@ var AnnotationPropertiesTemplate_bot = (function () {
             return callback(err || null);
             },
         );
+    },
+    /**
+     * Shows a summary of the created template: sources + properties.
+     */
+    showTemplateSummaryFn: function () {
+        var sources = self.params.selectedSources || [];
+        var selections = self.params.templateSelections || [];
+        var properties = self.params.templatePropertyUris || [];
+
+        var html = "<div style='font-size:12px;'>";
+        html += "<div><b>Selected sources:</b> " + sources.join(", ") + "</div>";
+        html += "<div style='margin-top:6px;'><b>Template properties:</b></div>";
+
+        if (selections.length > 0) {
+            html += "<ul>";
+            selections.forEach(function (s) {
+            html += "<li>" + (s.propertyLabel || s.propertyUri || "") + "</li>";
+            });
+            html += "</ul>";
+        } else {
+            html += "<ul>";
+            properties.forEach(function (p) {
+            html += "<li>" + p + "</li>";
+            });
+            html += "</ul>";
+        }
+
+        html += "</div>";
+
+        $("#smallDialogDiv").html(html);
+        $("#smallDialogDiv").dialog("open");
+        UI.setDialogTitle("#smallDialogDiv", "Template summary");
     },
   };
 

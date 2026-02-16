@@ -10,6 +10,7 @@ import SparqlQueryUI from "../sparqlQueryUI.js";
 import SourceSelectorWidget from "../../uiWidgets/sourceSelectorWidget.js";
 import OntologyModels from "../../shared/ontologyModels.js";
 import UIcontroller from "../mappingModeler/uiController.js";
+import AnnotationPropertiesTemplate_bot from "../../bots/annotationPropertiesTemplate_bot.js";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 var Admin = (function () {
@@ -446,6 +447,31 @@ $("#sourceDivControlPanelDiv").html(html);*/
         Sparql_OWL.createSkgFromOntology(source, skgGraphUri, function (err, result) {
             MainController.errorAlert(err ? err : result);
         });
+    };
+
+    /**
+     * Starts the annotation template workflow from Admin.
+     * Forces the user to select one or more sources via checkboxes.
+     */
+    self.createAnnotationPropertiesTemplate = function () {
+        var selectedSources = SourceSelectorWidget.getCheckedSources();
+
+        if (!selectedSources || selectedSources.length === 0) {
+            return alert("Please select at least ONE source (checkbox in the sources tree).");
+        }
+
+        // Start the dedicated bot with selected sources
+        AnnotationPropertiesTemplate_bot.start(
+            null,
+            { sources: selectedSources },
+            function (err) {
+            if (err) {
+                console.error(err);
+                return MainController.errorAlert(err.responseText || err.message || err);
+            }
+            UI.message("Annotation template workflow finished", true);
+            },
+        );
     };
     return self;
 })();

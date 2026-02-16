@@ -1145,6 +1145,9 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         //self.redraw();
     };
 
+    /**
+     * Convert the current Vis.js nodes and edges into a GraphML string
+     */
     self.toGraphMl = function () {
         var visjsData = {
             nodes: self.data.nodes.get(),
@@ -1156,6 +1159,19 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         // common.copyTextToClipboard(xmlStr);
     };
 
+    /**
+     * Searches graph nodes by label text or node id. Matching nodes are visually highlighted
+     * (star shape, bigger size). First match is automatically focused/zoomed in the network view
+     * @function
+     * @name searchNode
+     * @memberof module:VisjsGraphClass
+     * @param {any} id optional, exact node ID to search for
+     * @param {string} id optional, text to match against node labels (case-insensitive)
+     *                    if not provided, it reads from #visjsGraph_searchInput
+     * @returns {void}
+     *  side effects :
+     *      - updates node styles in the graph and focuses the first matching node
+     */
     self.searchNode = function (id, word) {
         if (!word || word == "") {
             word = $("#visjsGraph_searchInput").val();
@@ -1188,7 +1204,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
             if (id) {
                 ok = node.id == id;
             }
-            if (ok) {
+            if (k) {
                 shape = "star";
                 size = 14;
                 matches.push(node.id);
@@ -1208,6 +1224,20 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         });
     };
 
+    /**
+     * Serialize the current graph (nodes, edges, layout, and context). It converts functions
+     * to strings (unless raw is true) and builds a JSON file
+     * @function
+     * @name saveGraph
+     * @memberof module:VisjsGraphClass
+     * @param {string} fileName optional, Name of the graph file to save
+     * @param {boolean} raw optional, if true, skips converting functions to string
+     * @param {object} options optional, extra save options
+     * @returns {void}
+     *  side effects :
+     *      - sends a POST request to save the graph JSON, updates the UI
+     *      - optionally triggers a callback
+     */
     self.saveGraph = function (fileName, raw, options) {
         if (!self.currentContext) {
             return;
@@ -1276,6 +1306,22 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         $("#VisJsGraph_message").html(message);
     };
 
+    /**
+     * Serialize the current graph (nodes, edges, layout, and context). It converts functions
+     * to strings (unless raw is true) and builds a JSON file
+     * @function
+     * @name loadGraph
+     * @memberof module:VisjsGraphClass
+     * @param {string} fileName optional, Name of the graph file to load
+     * @param {boolean} add optional, if true, forces adding the graph to the existing one
+     * @param {function} callback optional, Called after load (or on error) with (err, visjsData)
+     * @param {boolean} dontDraw optional, if true, returns processed data without drawing the graph
+     * @param {function} dataProcessorFn optional, transform the loaded data before use
+     * @returns {void}
+     *  side effects :
+     *      - performs an AJAX GET, updates graph data/visuals, fits the network
+     *      - triggers callbacks or error handling
+     */
     self.loadGraph = function (fileName, add, callback, dontDraw, dataProcessorFn) {
         if (!fileName) {
             fileName = $("#visjsGraph_savedGraphsSelect").val();
@@ -1374,6 +1420,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
             },
         });
     };
+
     /**
      * Load graphs from the "/data/graphs" directory
      *
@@ -1406,6 +1453,17 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         });
     };
 
+    /**
+     * Updates visual or data attributes of selected graph nodes
+     * @function
+     * @name decorateNodes
+     * @memberof module:VisjsGraphClass
+     * @param {any} nodeIds single nodeID array of node IDs or null to target all nodes
+     * @param {object} attrsMap key–value map of attributes to apply
+     * @returns {void}
+     *  side effects :
+     *      - updates node properties in the graph’s data store and refreshes their appearance
+     */
     self.decorateNodes = function (nodeIds, attrsMap) {
         if (nodeIds && !Array.isArray(nodeIds)) {
             nodeIds = [nodeIds];
@@ -1423,6 +1481,17 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         self.data.nodes.update(newIds);
     };
 
+    /**
+     * Open and configures a UI panel to edit graph display and physics settings
+     * It injects a theme selector (white/dark) and enables vis.js config controls
+     * @function
+     * @name showGraphConfig
+     * @memberof module:VisjsGraphClass
+     * @returns {void}
+     *  side effects :
+     *      - modifies DOM elements, updates network configuration options
+     *      - opens a dialog for graph parameter editing
+     */
     self.showGraphConfig = function () {
         $("#graphDisplay_theme").remove();
         $("#visjsConfigureDiv").parent().css("left", "20%");
@@ -1472,7 +1541,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
     };
 
     /**
-     * Converts the current graph to PlantUML format.
+     * Converts the current graph to PlantUML format
      *
      * @function
      * @name toPlantUML
@@ -1496,6 +1565,18 @@ const VisjsGraphClass = function (graphDiv, data, options) {
             Export.exportPlantUML(plantUMLString, fileName);
         }
     };
+
+    /**
+     * Open and configures a UI panel to edit graph display and physics settings
+     * It injects a theme selector (white/dark) and enables vis.js config controls
+     * @function
+     * @name addSelectNode
+     * @memberof module:VisjsGraphClass
+     * @param {any} newNodeId ID of the node to add to the current selection
+     * @returns {void}
+     *  side effects :
+     *      - updates the network’s selected nodes visually in the graph
+     */
     self.addSelectNode = function (newNodeId) {
         var selectedNodes = self.network.getSelectedNodes();
 
@@ -1504,6 +1585,19 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         }
         self.network.selectNodes(selectedNodes);
     };
+
+    /**
+     * Set a specific set of nodes as selected in the graph. It handles both single node IDs,
+     * node objects or arrays, ensuring uniqueness. The selection is updated visually and stored
+     * in a global selection tracker
+     * @function
+     * @name setSelectedNodes
+     * @memberof module:VisjsGraphClass
+     * @param {any|object} nodes node ID(s) or node object(s) to select
+     * @returns {void}
+     *  side effects :
+     *      - updates the network’s selected nodes visually and updates Lineage_selection.selectedNodes
+     */
     self.setSelectedNodes = function (nodes) {
         if (!nodes) {
             return;

@@ -302,6 +302,18 @@ var TriplesToManchester = {
         return "<" + uri + ">";
     },
 
+    _isComplex: function (expr) {
+        return expr.type !== "namedClass" && expr.type !== "inverseOf";
+    },
+
+    _wrapIfComplex: function (expr) {
+        var rendered = TriplesToManchester._renderExpression(expr);
+        if (TriplesToManchester._isComplex(expr)) {
+            return "(" + rendered + ")";
+        }
+        return rendered;
+    },
+
     _renderExpression: function (expr) {
         if (!expr) {
             return "Thing";
@@ -316,30 +328,31 @@ var TriplesToManchester = {
 
             case "restriction": {
                 var propStr = typeof expr.property === "string" ? TriplesToManchester._formatUri(expr.property) : TriplesToManchester._renderExpression(expr.property);
+                var fillerStr = TriplesToManchester._wrapIfComplex(expr.filler);
 
                 if (expr.cardinality !== undefined) {
                     var result = propStr + " " + expr.restrictionType + " " + expr.cardinality;
                     if (expr.filler) {
-                        result += " " + TriplesToManchester._renderExpression(expr.filler);
+                        result += " " + fillerStr;
                     }
                     return result;
                 }
 
-                return propStr + " " + expr.restrictionType + " " + TriplesToManchester._renderExpression(expr.filler);
+                return propStr + " " + expr.restrictionType + " " + fillerStr;
             }
 
             case "intersection": {
                 var parts = expr.operands.map(function (op) {
-                    return TriplesToManchester._renderExpression(op);
+                    return TriplesToManchester._wrapIfComplex(op);
                 });
-                return "(" + parts.join(" and ") + ")";
+                return parts.join(" and ");
             }
 
             case "union": {
                 var parts = expr.operands.map(function (op) {
-                    return TriplesToManchester._renderExpression(op);
+                    return TriplesToManchester._wrapIfComplex(op);
                 });
-                return "(" + parts.join(" or ") + ")";
+                return parts.join(" or ");
             }
 
             case "complement":

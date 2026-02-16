@@ -368,7 +368,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
     /**
      * Configures the graph layout (vertical or horizontal hierarchical) by updating layout and edge‑smoothness
      * settings, then triggers a full redraw of the Vis.js network. It adjusts direction, sorting, and animation
-     * timing depending on the selected layout mode. 
+     * timing depending on the selected layout mode.
      * @function
      * @name setLayout
      * @memberof module:VisjsGraphClass
@@ -565,14 +565,14 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         });
         self.data.edges.remove(edgesIds);
     }),
-    /**
-     * Updates node sizes, labels, and font sizes dynamically based on the graph’s zoom level to maintain readability.
-     * It recalculates visual properties only when the scale changes significantly
-     * @function
-     * @name onScaleChange
-     * @memberof module:VisjsGraphClass
-     * @returns {void}
-     */
+        /**
+         * Updates node sizes, labels, and font sizes dynamically based on the graph’s zoom level to maintain readability.
+         * It recalculates visual properties only when the scale changes significantly
+         * @function
+         * @name onScaleChange
+         * @memberof module:VisjsGraphClass
+         * @returns {void}
+         */
         (self.onScaleChange = function () {
             if (!self.data || !self.data.nodes) {
                 return;
@@ -808,7 +808,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         return positions;
     };
 
-     /**
+    /**
      * Returns an array of edge objects connected to the source node, optionally restricted to those leading
      * to the given target node
      * @function
@@ -830,7 +830,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         return connectedEdges;
     };
 
-     /**
+    /**
      * Finds all edges connected to sourceNodeId, and for each edge that is either outgoing from the source or
      * (if bothDirections is true) in any direction, it returns the edge plus its from and to node objects
      * @function

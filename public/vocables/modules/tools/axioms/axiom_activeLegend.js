@@ -583,7 +583,8 @@ var Axiom_activeLegend = (function () {
             }
         });
         var currentType = Axioms_graph.currentGraphNode.data.type;
-        if (!Axioms_graph.currentGraphNode.data.isNew && currentType != "Connective" && currentType != "Restriction") {
+        var isRootAxiom = Axioms_graph.currentGraphNode.data.rootAxiom;
+        if (!isRootAxiom && !Axioms_graph.currentGraphNode.data.isNew && currentType != "Connective" && currentType != "Restriction") {
             hiddenNodes.push(currentType);
         }
         if (numberOfEdgesFromCurrentGraphNode > 1 && resourceType != "DisjointWith") {
@@ -1119,7 +1120,31 @@ var Axiom_activeLegend = (function () {
     };
 
     self.axiomTriplesToManchester = function (triples, callback) {
-        Axiom_manager.getManchesterAxiomsFromTriples(self.currentSource, triples, function (err, result) {
+        if(!triples || triples.length == 0){
+            triples = self.getTriples({ all: true });
+        }
+        if(!triples || triples.length == 0){
+            var message = "No triples to convert to manchester form";
+            if (callback) {
+                return callback(message);
+            }
+            return MainController.errorAlert(message);
+        }
+        var enrichedTriples = triples.map(function (triple) {
+            var sEntry = Axioms_manager.allResourcesMap[triple.subject];
+            var pEntry = Axioms_manager.allResourcesMap[triple.predicate];
+            var oEntry = Axioms_manager.allResourcesMap[triple.object];
+            return {
+                subject: triple.subject,
+                predicate: triple.predicate,
+                object: triple.object,
+                sLabel: sEntry ? sEntry.label : null,
+                pLabel: pEntry ? pEntry.label : null,
+                oLabel: oEntry ? oEntry.label : null,
+            };
+        });
+
+        Axioms_manager.getManchesterAxiomsFromTriples(Lineage_sources.activeSource, enrichedTriples, function (err, result) {
             if (err) {
                 if (callback) {
                     return callback(err);
@@ -1131,11 +1156,11 @@ var Axiom_activeLegend = (function () {
                 if (callback) {
                     return callback(message);
                 }
-                return alert(message);
+                return MainController.errorAlert(message);
             }
 
-            var manchesterStr = Axiom_manager.parseManchesterClassAxioms(self.newAxiomNode.id, result);
-            $("#axiomsEditor_textDiv").html(manchesterStr);
+            var manchesterStr = Axioms_manager.parseManchesterClassAxioms(result);
+            $("#axiomsEditor_textManchesterDiv").html(manchesterStr);
             if (callback) {
                 return callback(null, manchesterStr);
             }
@@ -1228,8 +1253,19 @@ var Axiom_activeLegend = (function () {
                     } else {
                         predicate = fromNode.data.subType;
                     }
-                } else if (fromNode.data.type.endsWith("Class")) {
-                    predicate = "http://www.w3.org/2000/01/rdf-schema#subClassOf";
+                } else if (fromNode.data.type.endsWith("Class")) { 
+                    var isRootNode = rootNode && rootNode.id == fromNode.id;
+                    if (isRootNode) {
+                        var axiomSelectValue = $("#nodeInfosAxioms_axiomSelect").val() || "subClassOf";
+                        var axiomTypePredicateMap = {
+                            subClassOf: "http://www.w3.org/2000/01/rdf-schema#subClassOf",
+                            equivalentClass: "http://www.w3.org/2002/07/owl#equivalentClass",
+                            disjointWith: "http://www.w3.org/2002/07/owl#disjointWith",
+                        };
+                        predicate = axiomTypePredicateMap[axiomSelectValue];
+                    } else {
+                        predicate = "http://www.w3.org/2000/01/rdf-schema#subClassOf";
+                    }
                 } else if (fromNode.data.type.endsWith("ObjectProperty")) {
                     predicate = "http://www.w3.org/2000/01/rdf-schema#subPropertyOf";
                 } else if (fromNode.data.label == "ComplementOf") {

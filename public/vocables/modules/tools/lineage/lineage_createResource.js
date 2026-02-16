@@ -346,7 +346,7 @@ var Lineage_createResource = (function () {
             if (result.length > 0) {
                 resourceUri = null;
                 $("#lineageCreateResource_creatingNodeUriType").val();
-                return callback({ responseText: "this uri already exists, choose a new one" });
+                return callback({ responseText: "URI " + resourceUri + " already exists, choose a new one" });
             }
 
             Sparql_generic.insertTriples(source, triples, {}, function (err, _result) {

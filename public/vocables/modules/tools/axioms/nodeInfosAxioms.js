@@ -383,7 +383,7 @@ var NodeInfosAxioms = (function () {
     self.switchLeftPanelDisplay = function (role) {
         if (role == "new") {
             $("#nodeInfosAxioms_newAxiomPanel").css("display", "flex");
-            $("#nodeInfosAxioms_manchesterDiv").css("display", "flex");
+            //$("#nodeInfosAxioms_manchesterDiv").css("display", "flex");
             $("#nodeInfosAxioms_graphPanelDiv").css("display", "none");
             $("#nodeInfosAxioms_graphDiv").width("50vw");
         } else if (role == "show") {

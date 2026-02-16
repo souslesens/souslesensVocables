@@ -15,6 +15,9 @@ var NodeInfosAxioms = (function () {
         self.currentResource.level = 0;
         self.allClassesMap = {};
         Axioms_manager.allResourcesMap = {};
+        Axioms_manager.initResourcesMap(self.currentResource.data.source, function (err, result) {
+            AxiomExtractor.getClassAxiomsTriples(self.currentResource.data.source, self.currentResource.data.id, function (err, triples) {
+
 
         $("#" + divId).load("modules/tools/axioms/html/nodeInfosAxioms.html", function () {
             if (divId && divId.indexOf("Dialog") > -1) {
@@ -26,15 +29,15 @@ var NodeInfosAxioms = (function () {
                 $("#nodeInfosAxioms_newAxiomBtn").css("display", "none");
             }
 
-            Axioms_manager.initResourcesMap(self.currentResource.data.source, function (err, result) {
-                AxiomExtractor.getClassAxiomsTriples(self.currentResource.data.source, self.currentResource.data.id, function (err, triples) {
-                    var divId = "nodeInfosAxioms_graphDiv";
+
+
+            var graphDivId = "nodeInfosAxioms_graphDiv";
                     var options = {};
-                    Axioms_graph.drawNodeAxioms2(self.currentResource.data.source, self.currentResource.data.id, triples, divId, options);
+                    Axioms_graph.drawNodeAxioms2(self.currentResource.data.source, self.currentResource.data.id, triples, graphDivId, options);
                 });
             });
 
-            return;
+
         });
     };
     self.initSourceClassesMap = function (source, callback) {
@@ -374,6 +377,7 @@ var NodeInfosAxioms = (function () {
 
         var options = Axiom_activeLegend.axiomtypes;
         common.fillSelectOptions("axioms_legend_suggestionsSelect", options, false);
+
     };
 
     self.switchLeftPanelDisplay = function (role) {

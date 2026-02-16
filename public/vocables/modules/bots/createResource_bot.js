@@ -155,6 +155,12 @@ var CreateResource_bot = (function () {
                         }
                         self.params.resourceId = resourceId;
                         
+                        var isClassOrIndividual =
+                            self.params.resourceType === "owl:Class" || self.params.resourceType === "owl:NamedIndividual";
+
+                        if (!isClassOrIndividual) {
+                            return self.myBotEngine.nextStep();
+                        }
                         // Insert template placeholders if a template is applied to this source
                         insertTemplatePlaceholders(self.params.source, resourceId, function (err2) {
                             if (err2) {

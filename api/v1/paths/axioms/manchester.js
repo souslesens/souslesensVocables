@@ -1,4 +1,4 @@
-import TriplesToManchester from "../../../../bin/axioms/triplesToManchester.js";
+
 
 export default function () {
     let operations = {

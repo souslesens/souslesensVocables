@@ -1,5 +1,6 @@
 import CommonBotFunctions from "../../bots/_commonBotFunctions.js";
 import NodeInfosAxioms from "./nodeInfosAxioms.js";
+import TriplesToManchester from "./triplesToManchester.js";
 
 var Axioms_manager = (function () {
     var self = {};
@@ -105,30 +106,15 @@ var Axioms_manager = (function () {
         if (!source) {
             source = NodeInfosAxioms.currentSource;
         }
-        var rawManchesterStr = "";
-
-        const params = new URLSearchParams({
-            triples: JSON.stringify(triples),
-        });
-        UI.message("generating manchester syntax ");
-        $.ajax({
-            type: "GET",
-            url: Config.apiUrl + "/axioms/manchester?" + params.toString(),
-            dataType: "json",
-
-            success: function (data, _textStatus, _jqXHR) {
-                if (data.result && data.result.indexOf("Error") > -1) {
-                    return callback(data.result);
-                }
-                rawManchesterStr = data.result;
-                UI.message("", true);
-                callback(null, data.result);
-            },
-            error(err) {
-                UI.message("", true);
-                callback(err.responseText);
-            },
-        });
+        try {
+            var result = TriplesToManchester.convert(triples);
+            if (result && result.indexOf("Error") > -1) {
+                return callback(result);
+            }
+            callback(null, result);
+        } catch (err) {
+            callback(err.message || err);
+        }
     };
 
     self.getClassAxioms = function (sourceLabel, classUri, options, callback) {

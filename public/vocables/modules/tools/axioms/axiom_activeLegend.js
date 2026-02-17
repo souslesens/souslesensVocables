@@ -1275,10 +1275,7 @@ var Axiom_activeLegend = (function () {
                     }
                 } else if (fromNode.data.type.endsWith("ObjectProperty")) {
                     predicate = "http://www.w3.org/2000/01/rdf-schema#subPropertyOf";
-                } else if ( fromNode.data.label == "ComplementOf") {
-                    predicate = "http://www.w3.org/2002/07/owl#complementOf";
-                    //;complement is not a disjunction
-                } else if ([ "IntersectionOf", "UnionOf", "Enumeration"].indexOf(fromNode.data.type) > -1) {
+                }  else if (fromNode.data.type=="Connective") {
                     if (fromNode.data.nCount == 0) {
                         predicate = "http://www.w3.org/1999/02/22-rdf-syntax-ns#first";
                     } else if (fromNode.data.nCount == 1) {

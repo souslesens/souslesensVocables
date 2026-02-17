@@ -752,7 +752,7 @@ var Axiom_activeLegend = (function () {
         }, function (err, result) {
             var divId = "nodeInfosAxioms_graphDiv";
             var options = {};
-            // Axioms_graph.drawNodeAxioms2(NodeInfosAxioms.currentSource, rootNodeId, triples, divId, options);
+          Axioms_graph.drawNodeAxioms2(NodeInfosAxioms.currentSource, rootNodeId, triples, divId, options);
             if (callback) {
                 return callback(err);
             }
@@ -1299,7 +1299,7 @@ var Axiom_activeLegend = (function () {
                 }
                 if (fromNode.data.label == "ComplementOf") {
                     //  predicate = "http://www.w3.org/2002/07/owl#complementOf";
-                    triples.push({
+                  triples.push({
                         subject: fromNode.data.id,
                         predicate: fromNode.data.subType,
                         object: toNode.data.id,
@@ -1314,7 +1314,7 @@ var Axiom_activeLegend = (function () {
                 }
                 if (toNode.data.type == "Connective") {
                     //  predicate = "http://www.w3.org/2002/07/owl#complementOf";
-                    if (toNode.data.label == "ComplementOf") {
+                    if (toNode.data.label != "ComplementOf") {
                         toNode.data.nCount = 0;
                         toNode.data.bNodeid = self.getBlankNodeId();
                         triples.push({

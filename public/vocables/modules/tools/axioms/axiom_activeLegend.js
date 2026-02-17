@@ -651,7 +651,9 @@ var Axiom_activeLegend = (function () {
         var html = "";
         html = '    <span class="popupMenuItem" onclick="Axiom_activeLegend.removeNodeFromGraph();"> Remove Node</span>';
         html += '    <span class="popupMenuItem" onclick="NodeInfosAxioms.nodeInfos()">Node Infos</span>';
-        html += '    <span class="popupMenuItem" onclick="Axiom_activeLegend.createAxiomFromGraph();"> create Axiom</span>';
+        if (Axiom_UI.currentView === "visualisation") {
+            html += '    <span class="popupMenuItem" onclick="Axiom_activeLegend.createAxiomFromGraph();"> create Axiom</span>';
+        }
 
         $("#popupMenuWidgetDiv").html(html);
         point.x = event.x;

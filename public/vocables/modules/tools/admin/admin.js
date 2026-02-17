@@ -11,6 +11,8 @@ import SourceSelectorWidget from "../../uiWidgets/sourceSelectorWidget.js";
 import OntologyModels from "../../shared/ontologyModels.js";
 import UIcontroller from "../mappingModeler/uiController.js";
 import AnnotationPropertiesTemplate_bot from "../../bots/annotationPropertiesTemplate_bot.js";
+import AdminAnnotationTemplates from "./admin_annotationTemplates.js";
+
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 var Admin = (function () {
@@ -472,6 +474,12 @@ $("#sourceDivControlPanelDiv").html(html);*/
             UI.message("Annotation template workflow finished", true);
             },
         );
+    };
+    /**
+     * Opens the Admin UI to manage template assignments.
+     */
+    self.manageAnnotationTemplateAssignments = function () {
+        return AdminAnnotationTemplates.openAssignmentsManager();
     };
     return self;
 })();

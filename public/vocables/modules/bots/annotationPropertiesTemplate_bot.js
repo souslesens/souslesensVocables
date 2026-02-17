@@ -178,7 +178,25 @@ var AnnotationPropertiesTemplate_bot = (function () {
         if (!vocabs || vocabs.length === 0) {
           return self.myBotEngine.previousStep("No vocabularies found. Try another source.");
         }
-        self.myBotEngine.showList(vocabs, "selectedVocabulary");
+        // Add readable categories in labels to reduce confusion
+        var referenceSource = self.params.referenceSource;
+
+        var categorizedVocabs = vocabs.map(function (vocabItem ) {
+            // v can be string or object depending on listVocabsFn implementation
+            var id = typeof vocabItem === "string" ? vocabItem : vocabItem.id;
+            var label = typeof vocabItem === "string" ? vocabItem : (vocabItem.label || vocabItem.id);
+
+            var category = "[Import]";
+            if (id === referenceSource) {
+                category = "[Source]";
+            } else if (id === "rdf" || id === "rdfs" || id === "owl" || id === "skos") {
+                category = "[Standard]";
+            }
+
+            return { id: id, label: category + " " + label };
+        });
+
+        self.myBotEngine.showList(categorizedVocabs, "selectedVocabulary");
       });
     },
 
@@ -199,19 +217,33 @@ var AnnotationPropertiesTemplate_bot = (function () {
           return self.myBotEngine.previousStep("No annotation properties found for this vocabulary.");
         }
 
-        // Build list choices: id = URI
-        var choices = nonObjectProperties.map(function (p) {
-          return {
-            id: p.id,
-            label: normalizePropertyLabel(vocab, p.label),
-          };
+        // Build list choices safely (skip invalid items)
+        var choices = [];
+        self.params.propertyUriToLabelMap = {};
+
+        nonObjectProperties.forEach(function (propertyItem) {
+            if (!propertyItem || !propertyItem.id) {
+                return; // skip invalid properties
+            }
+
+            // Normalize label to string
+            var rawLabel = propertyItem.label;
+            if (!rawLabel) {
+                rawLabel = propertyItem.id; // fallback to URI
+            }
+            var normalizedLabel = normalizePropertyLabel(vocab, rawLabel);
+
+            choices.push({
+                id: propertyItem.id,
+                label: normalizedLabel,
+            });
+
+            self.params.propertyUriToLabelMap[propertyItem.id] = normalizedLabel;
         });
 
-        // Keep label map for later
-        self.params.propertyUriToLabelMap = {};
-        choices.forEach(function (c) {
-          self.params.propertyUriToLabelMap[c.id] = c.label;
-        });
+        if (choices.length === 0) {
+            return self.myBotEngine.previousStep("No usable annotation properties found for this vocabulary.");
+        }
 
         // Sort for better UX
         choices.sort(function (a, b) {
@@ -228,6 +260,11 @@ var AnnotationPropertiesTemplate_bot = (function () {
     afterChoosePropertyFn: function () {
       var vocab = self.params.selectedVocabulary;
       var propertyUri = self.params.selectedPropertyUri;
+      // Prevent double execution (can happen on some vocabularies / large lists)
+      if (self.params.isProcessingPropertySelection) {
+        return;
+      }
+      self.params.isProcessingPropertySelection = true;  
 
       if (!propertyUri) {
         return self.myBotEngine.previousStep("No property selected. Try again.");
@@ -261,6 +298,10 @@ var AnnotationPropertiesTemplate_bot = (function () {
 
       // IMPORTANT: explicitly set the next workflow object to avoid BotEngine parsing "undefined"
       self.myBotEngine.currentObj = self.workflow_loop;
+      // Release lock after transition is started
+      setTimeout(function () {
+        self.params.isProcessingPropertySelection = false;
+      }, 300);
       return self.myBotEngine.nextStep(self.workflow_loop);
     },
 
@@ -292,6 +333,13 @@ var AnnotationPropertiesTemplate_bot = (function () {
           
           // Keep saved template id
           self.params.savedTemplateId = saved.id;
+
+          self.params.savedTemplateMeta = {
+            id: saved.id,
+            label: saved.data_label || ("Template " + saved.id),
+            group: saved.data_group || "",
+            comment: saved.data_comment || "",
+          };
 
           // Auto-apply to selected sources (the ones chosen in Admin)
           self.functions.createAssignmentsForSelectedSourcesFn(saved.id, function (err2) {
@@ -426,31 +474,43 @@ var AnnotationPropertiesTemplate_bot = (function () {
         );
     },
     /**
-     * Shows a summary of the created template: sources + properties.
+     * Shows a summary of the created template: meta + sources + properties.
      */
     showTemplateSummaryFn: function () {
+        var meta = self.params.savedTemplateMeta || {};
         var sources = self.params.selectedSources || [];
         var selections = self.params.templateSelections || [];
         var properties = self.params.templatePropertyUris || [];
 
         var html = "<div style='font-size:12px;'>";
-        html += "<div><b>Selected sources:</b> " + sources.join(", ") + "</div>";
-        html += "<div style='margin-top:6px;'><b>Template properties:</b></div>";
+
+        // Template meta
+        html += "<div><b>Template:</b> " + (meta.label || "") + "</div>";
+        html += "<div><b>Template ID:</b> " + (meta.id || "") + "</div>";
+        html += "<div><b>Group:</b> " + (meta.group || "") + "</div>";
+        html += "<div><b>Description:</b> " + (meta.comment || "") + "</div>";
+
+        // Sources
+        html += "<div style='margin-top:8px;'><b>Selected sources:</b> " + sources.join(", ") + "</div>";
+
+        // Properties
+        html += "<div style='margin-top:8px;'><b>Template properties:</b></div>";
+        html += "<ul>";
 
         if (selections.length > 0) {
-            html += "<ul>";
             selections.forEach(function (s) {
-            html += "<li>" + (s.propertyLabel || s.propertyUri || "") + "</li>";
+                var vocab = s.vocab || "?";
+                var label = s.propertyLabel || s.propertyUri || "";
+                html += "<li>" + vocab + ": " + label + "</li>";
             });
-            html += "</ul>";
         } else {
-            html += "<ul>";
+            // Fallback: show URIs if selections are missing
             properties.forEach(function (p) {
-            html += "<li>" + p + "</li>";
+                html += "<li>" + p + "</li>";
             });
-            html += "</ul>";
         }
 
+        html += "</ul>";
         html += "</div>";
 
         $("#smallDialogDiv").html(html);

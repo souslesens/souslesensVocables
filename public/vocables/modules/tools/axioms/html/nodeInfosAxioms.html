@@ -40,9 +40,21 @@
             <div style="display: flex; flex-direction: row; display: none" id="nodeInfosAxioms_newAxiomPanel">
                 <!--  <button onclick="NodeInfosAxioms.actions.setLayout('randomlayout')">Random Layout</button>-->
 
-                <div>
+                <div id="axiomSuggestionsSelectDiv" >
                     <!-- <select id="axioms_legend_suggestionsSelect" size="20" style="width: 250px; overflow: auto"></select>-->
-                    <div style="width: 350px; height: 500px; overflow: auto" id="axiomSuggestionsSelectJstreeDiv"></div>
+                    <div id="axiomSuggestionsSearchBar" class="input-group mb-3" style="display: none;margin-left: 10px;">
+                        <div class="input-group-prepend">
+                            <input
+                                id="axiomSuggestionsSearchInput"
+                                onkeyup="JstreeWidget.filterTree($(this), 'axiomSuggestionsSelectJstreeDiv')"
+                                style="width: 280px; height: 33.5px; border-bottom-left-radius: 14px; border-top-left-radius: 14px"
+                            />
+                        </div>
+                        <div class="SearchButtonIconRight border-without-raduis-theme1" style="height: 33.5px; padding-left: 7px; padding-right: 5px">
+                            <button class="search-icon slsv-invisible-button" onclick="JstreeWidget.filterTree($('#axiomSuggestionsSearchInput'), 'axiomSuggestionsSelectJstreeDiv')" style="margin-top: 4px; height: 20px; width: 20px"></button>
+                        </div>
+                    </div>
+                    <div style="width: 350px; height: 470px; overflow: auto;margin-top: 10px;" id="axiomSuggestionsSelectJstreeDiv"></div>
                 </div>
             </div>
             <div>

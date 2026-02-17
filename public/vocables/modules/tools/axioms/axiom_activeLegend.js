@@ -292,7 +292,7 @@ var Axiom_activeLegend = (function () {
             Axioms_graph.outlineNode(visjsNode.id);
             $("#axiom_currentNode").html("<b>Current node: </b>" + label);
             self.hideForbiddenResources(Axioms_graph.currentGraphNode.data.type);
-            $("#axioms_legend_suggestionsSelect").empty();
+            self.clearSuggestionsJstree();
             Axiom_UI.showLegendPanel();
 
             return;
@@ -381,7 +381,7 @@ var Axiom_activeLegend = (function () {
             Axioms_graph.outlineNode(visjsNode.id);
             $("#axiom_currentNode").html("<b>Current node: </b>" + label);
             self.hideForbiddenResources(Axioms_graph.currentGraphNode.data.type);
-            $("#axioms_legend_suggestionsSelect").empty();
+            self.clearSuggestionsJstree();
             Axiom_UI.showLegendPanel();
 
             return;
@@ -506,7 +506,7 @@ var Axiom_activeLegend = (function () {
         }
 
         self.hideForbiddenResources(Axioms_graph.currentGraphNode.data.type);
-        $("#axioms_legend_suggestionsSelect").empty();
+        self.clearSuggestionsJstree();
         Axiom_UI.showLegendPanel();
     };
 
@@ -994,7 +994,6 @@ var Axiom_activeLegend = (function () {
 
             visjsOptions: {},
             onclickFn: options.onLegendNodeClick || Axiom_activeLegend.onLegendNodeClick,
-            onRightClickFn: options.showLegendGraphPopupMenu || Axiom_activeLegend.showGraphPopupMenu,
         };
 
         self.axiomsLegendVisjsGraph = new VisjsGraphClass(graphLegendDiv || self.graphLegendDiv, visjsData, options);
@@ -1641,6 +1640,7 @@ var Axiom_activeLegend = (function () {
 
         var options = {
             openAll: true,
+            searchPlugin: {show_only_matches: true},
 
             contextMenu: function (node, x) {
                 var items = {};
@@ -1814,11 +1814,14 @@ var Axiom_activeLegend = (function () {
         }
 
         JstreeWidget.loadJsTree("axiomSuggestionsSelectJstreeDiv", jstreeData, options, function () {
-            const element = document.getElementById("axiomSuggestionsSelectJstreeDiv");
+            var element = document.getElementById("axiomSuggestionsSelectJstreeDiv");
             element.addEventListener("contextmenu", function (e) {
                 e.preventDefault();
             });
-            //  $("#suggestionsSelectJstreeDiv").css("overflow", "unset");
+            
+            $("#axiomSuggestionsSearchBar").show();
+            $("#axiomSuggestionsSearchInput").val("");
+            $('#axiomSuggestionsSelectDiv').css('overflow','unset');
         });
     };
 
@@ -1849,6 +1852,8 @@ var Axiom_activeLegend = (function () {
 
     self.clearSuggestionsJstree = function () {
         $("#axiomSuggestionsSelectJstreeDiv").jstree().empty();
+        $("#axiomSuggestionsSearchBar").hide();
+        $("#axiomSuggestionsSearchInput").val("");
     };
 
     return self;

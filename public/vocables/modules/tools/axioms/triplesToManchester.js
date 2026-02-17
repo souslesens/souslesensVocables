@@ -1,35 +1,37 @@
-var OWL = "http://www.w3.org/2002/07/owl#";
-var RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
-var RDFS = "http://www.w3.org/2000/01/rdf-schema#";
+var TriplesToManchester = (function () {
+    var self = {};
 
-var AXIOM_KEYWORDS = {};
-AXIOM_KEYWORDS[RDFS + "subClassOf"] = "SubClassOf:";
-AXIOM_KEYWORDS[OWL + "equivalentClass"] = "EquivalentTo:";
-AXIOM_KEYWORDS[OWL + "disjointWith"] = "DisjointWith:";
-AXIOM_KEYWORDS[OWL + "disjointUnionOf"] = "DisjointUnionOf:";
+    var OWL = "http://www.w3.org/2002/07/owl#";
+    var RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
+    var RDFS = "http://www.w3.org/2000/01/rdf-schema#";
 
-var RESTRICTION_KEYWORDS = {};
-RESTRICTION_KEYWORDS[OWL + "someValuesFrom"] = "some";
-RESTRICTION_KEYWORDS[OWL + "allValuesFrom"] = "only";
-RESTRICTION_KEYWORDS[OWL + "hasValue"] = "value";
+    var AXIOM_KEYWORDS = {};
+    AXIOM_KEYWORDS[RDFS + "subClassOf"] = "SubClassOf:";
+    AXIOM_KEYWORDS[OWL + "equivalentClass"] = "EquivalentTo:";
+    AXIOM_KEYWORDS[OWL + "disjointWith"] = "DisjointWith:";
+    AXIOM_KEYWORDS[OWL + "disjointUnionOf"] = "DisjointUnionOf:";
 
-var CARDINALITY_KEYWORDS = {};
-CARDINALITY_KEYWORDS[OWL + "minCardinality"] = "min";
-CARDINALITY_KEYWORDS[OWL + "maxCardinality"] = "max";
-CARDINALITY_KEYWORDS[OWL + "cardinality"] = "exactly";
-CARDINALITY_KEYWORDS[OWL + "minQualifiedCardinality"] = "min";
-CARDINALITY_KEYWORDS[OWL + "maxQualifiedCardinality"] = "max";
-CARDINALITY_KEYWORDS[OWL + "qualifiedCardinality"] = "exactly";
+    var RESTRICTION_KEYWORDS = {};
+    RESTRICTION_KEYWORDS[OWL + "someValuesFrom"] = "some";
+    RESTRICTION_KEYWORDS[OWL + "allValuesFrom"] = "only";
+    RESTRICTION_KEYWORDS[OWL + "hasValue"] = "value";
 
-var TriplesToManchester = {
-    convert: function (triples) {
+    var CARDINALITY_KEYWORDS = {};
+    CARDINALITY_KEYWORDS[OWL + "minCardinality"] = "min";
+    CARDINALITY_KEYWORDS[OWL + "maxCardinality"] = "max";
+    CARDINALITY_KEYWORDS[OWL + "cardinality"] = "exactly";
+    CARDINALITY_KEYWORDS[OWL + "minQualifiedCardinality"] = "min";
+    CARDINALITY_KEYWORDS[OWL + "maxQualifiedCardinality"] = "max";
+    CARDINALITY_KEYWORDS[OWL + "qualifiedCardinality"] = "exactly";
+
+    self.convert = function (triples) {
         if (!triples || triples.length === 0) {
             return "";
         }
 
-        var subjectIndex = TriplesToManchester._buildSubjectIndex(triples);
-        TriplesToManchester._labelsMap = subjectIndex.labelsMap || {};
-        var rootAxioms = TriplesToManchester._findAllRootAxioms(subjectIndex);
+        var subjectIndex = self._buildSubjectIndex(triples);
+        self._labelsMap = subjectIndex.labelsMap || {};
+        var rootAxioms = self._findAllRootAxioms(subjectIndex);
 
         if (!rootAxioms || rootAxioms.length === 0) {
             throw new Error("No root axiom subject found in triples");
@@ -44,11 +46,11 @@ var TriplesToManchester = {
             if (!bySubject[axiom.uri][keyword]) {
                 bySubject[axiom.uri][keyword] = [];
             }
-            var expression = TriplesToManchester._resolveNode(axiom.targetNode, subjectIndex, new Set());
-            bySubject[axiom.uri][keyword].push(TriplesToManchester._renderExpression(expression));
+            var expression = self._resolveNode(axiom.targetNode, subjectIndex, new Set());
+            bySubject[axiom.uri][keyword].push(self._renderExpression(expression));
         });
 
-        var labelsMap = TriplesToManchester._labelsMap;
+        var labelsMap = self._labelsMap;
         var lines = [];
         for (var uri in bySubject) {
             var classLabel = labelsMap[uri] || "<" + uri + ">";
@@ -63,11 +65,10 @@ var TriplesToManchester = {
                 }
             }
         }
-        var manchesterStr = lines.join("\n");
-        return manchesterStr;
-    },
+        return lines.join("\n");
+    };
 
-    _buildSubjectIndex: function (triples) {
+    self._buildSubjectIndex = function (triples) {
         var index = new Map();
         var labelsMap = {};
         triples.forEach(function (triple) {
@@ -93,9 +94,9 @@ var TriplesToManchester = {
         });
         index.labelsMap = labelsMap;
         return index;
-    },
+    };
 
-    _findAllRootAxioms: function (subjectIndex) {
+    self._findAllRootAxioms = function (subjectIndex) {
         var axiomPredicates = Object.keys(AXIOM_KEYWORDS);
         var results = [];
 
@@ -114,9 +115,9 @@ var TriplesToManchester = {
             }
         }
         return results;
-    },
+    };
 
-    _resolveNode: function (nodeId, subjectIndex, visited) {
+    self._resolveNode = function (nodeId, subjectIndex, visited) {
         if (!nodeId || nodeId === RDF + "nil") {
             return null;
         }
@@ -142,14 +143,14 @@ var TriplesToManchester = {
         var nodeType = typeTriple ? typeTriple.object : null;
 
         if (nodeType === OWL + "Restriction") {
-            return TriplesToManchester._resolveRestriction(predicates, subjectIndex, visited);
+            return self._resolveRestriction(predicates, subjectIndex, visited);
         }
 
         var intersectionOf = predicates.find(function (p) {
             return p.predicate === OWL + "intersectionOf";
         });
         if (intersectionOf) {
-            var operands = TriplesToManchester._resolveList(intersectionOf.object, subjectIndex, visited);
+            var operands = self._resolveList(intersectionOf.object, subjectIndex, visited);
             return { type: "intersection", operands: operands };
         }
 
@@ -157,7 +158,7 @@ var TriplesToManchester = {
             return p.predicate === OWL + "unionOf";
         });
         if (unionOf) {
-            var operands = TriplesToManchester._resolveList(unionOf.object, subjectIndex, visited);
+            var operands = self._resolveList(unionOf.object, subjectIndex, visited);
             return { type: "union", operands: operands };
         }
 
@@ -165,7 +166,7 @@ var TriplesToManchester = {
             return p.predicate === OWL + "complementOf";
         });
         if (complementOf) {
-            var operand = TriplesToManchester._resolveNode(complementOf.object, subjectIndex, visited);
+            var operand = self._resolveNode(complementOf.object, subjectIndex, visited);
             return { type: "complement", operand: operand };
         }
 
@@ -180,7 +181,7 @@ var TriplesToManchester = {
             return p.predicate === OWL + "members";
         });
         if (members) {
-            var memberList = TriplesToManchester._resolveList(members.object, subjectIndex, visited);
+            var memberList = self._resolveList(members.object, subjectIndex, visited);
             return { type: "disjointClasses", operands: memberList };
         }
 
@@ -189,7 +190,7 @@ var TriplesToManchester = {
                 return p.predicate === RDF + "first";
             });
             if (firstTriple) {
-                var items = TriplesToManchester._resolveList(nodeId, subjectIndex, visited);
+                var items = self._resolveList(nodeId, subjectIndex, visited);
                 if (items.length > 0) {
                     return { type: "intersection", operands: items };
                 }
@@ -197,9 +198,9 @@ var TriplesToManchester = {
         }
 
         return { type: "namedClass", uri: nodeId };
-    },
+    };
 
-    _resolveRestriction: function (predicates, subjectIndex, visited) {
+    self._resolveRestriction = function (predicates, subjectIndex, visited) {
         var onPropertyTriple = predicates.find(function (p) {
             return p.predicate === OWL + "onProperty";
         });
@@ -221,7 +222,7 @@ var TriplesToManchester = {
                 return p.predicate === predUri;
             });
             if (match) {
-                var filler = TriplesToManchester._resolveNode(match.object, subjectIndex, visited);
+                var filler = self._resolveNode(match.object, subjectIndex, visited);
                 return {
                     type: "restriction",
                     property: resolvedProperty,
@@ -236,11 +237,11 @@ var TriplesToManchester = {
                 return p.predicate === cardUri;
             });
             if (match) {
-                var cardValue = TriplesToManchester._parseLiteral(match.object);
+                var cardValue = self._parseLiteral(match.object);
                 var onClassTriple = predicates.find(function (p) {
                     return p.predicate === OWL + "onClass";
                 });
-                var onClass = onClassTriple ? TriplesToManchester._resolveNode(onClassTriple.object, subjectIndex, visited) : null;
+                var onClass = onClassTriple ? self._resolveNode(onClassTriple.object, subjectIndex, visited) : null;
                 return {
                     type: "restriction",
                     property: resolvedProperty,
@@ -257,9 +258,9 @@ var TriplesToManchester = {
             restrictionType: "some",
             filler: { type: "namedClass", uri: OWL + "Thing" },
         };
-    },
+    };
 
-    _resolveList: function (listNodeId, subjectIndex, visited) {
+    self._resolveList = function (listNodeId, subjectIndex, visited) {
         var items = [];
         var current = listNodeId;
         var listVisited = new Set();
@@ -279,7 +280,7 @@ var TriplesToManchester = {
                 return p.predicate === RDF + "first";
             });
             if (firstTriple) {
-                var resolved = TriplesToManchester._resolveNode(firstTriple.object, subjectIndex, new Set(visited));
+                var resolved = self._resolveNode(firstTriple.object, subjectIndex, new Set(visited));
                 if (resolved) {
                     items.push(resolved);
                 }
@@ -292,43 +293,43 @@ var TriplesToManchester = {
         }
 
         return items;
-    },
+    };
 
-    _formatUri: function (uri) {
-        var labelsMap = TriplesToManchester._labelsMap;
+    self._formatUri = function (uri) {
+        var labelsMap = self._labelsMap;
         if (labelsMap && labelsMap[uri]) {
             return labelsMap[uri];
         }
         return "<" + uri + ">";
-    },
+    };
 
-    _isComplex: function (expr) {
+    self._isComplex = function (expr) {
         return expr.type !== "namedClass" && expr.type !== "inverseOf";
-    },
+    };
 
-    _wrapIfComplex: function (expr) {
-        var rendered = TriplesToManchester._renderExpression(expr);
-        if (TriplesToManchester._isComplex(expr)) {
+    self._wrapIfComplex = function (expr) {
+        var rendered = self._renderExpression(expr);
+        if (self._isComplex(expr)) {
             return "(" + rendered + ")";
         }
         return rendered;
-    },
+    };
 
-    _renderExpression: function (expr) {
+    self._renderExpression = function (expr) {
         if (!expr) {
             return "Thing";
         }
 
         switch (expr.type) {
             case "namedClass":
-                return TriplesToManchester._formatUri(expr.uri);
+                return self._formatUri(expr.uri);
 
             case "inverseOf":
-                return "inverse(" + TriplesToManchester._renderExpression(expr.operand) + ")";
+                return "inverse(" + self._renderExpression(expr.operand) + ")";
 
             case "restriction": {
-                var propStr = typeof expr.property === "string" ? TriplesToManchester._formatUri(expr.property) : TriplesToManchester._renderExpression(expr.property);
-                var fillerStr = TriplesToManchester._wrapIfComplex(expr.filler);
+                var propStr = typeof expr.property === "string" ? self._formatUri(expr.property) : self._renderExpression(expr.property);
+                var fillerStr = self._wrapIfComplex(expr.filler);
 
                 if (expr.cardinality !== undefined) {
                     var result = propStr + " " + expr.restrictionType + " " + expr.cardinality;
@@ -343,34 +344,34 @@ var TriplesToManchester = {
 
             case "intersection": {
                 var parts = expr.operands.map(function (op) {
-                    return TriplesToManchester._wrapIfComplex(op);
+                    return self._wrapIfComplex(op);
                 });
                 return parts.join(" and ");
             }
 
             case "union": {
                 var parts = expr.operands.map(function (op) {
-                    return TriplesToManchester._wrapIfComplex(op);
+                    return self._wrapIfComplex(op);
                 });
                 return parts.join(" or ");
             }
 
             case "complement":
-                return "not " + TriplesToManchester._renderExpression(expr.operand);
+                return "not " + self._renderExpression(expr.operand);
 
             case "disjointClasses": {
                 var parts = expr.operands.map(function (op) {
-                    return TriplesToManchester._renderExpression(op);
+                    return self._renderExpression(op);
                 });
                 return "DisjointClasses: " + parts.join(", ");
             }
 
             default:
-                return expr.uri ? TriplesToManchester._formatUri(expr.uri) : "unknown";
+                return expr.uri ? self._formatUri(expr.uri) : "unknown";
         }
-    },
+    };
 
-    _parseLiteral: function (str) {
+    self._parseLiteral = function (str) {
         if (!str) {
             return "0";
         }
@@ -380,7 +381,11 @@ var TriplesToManchester = {
             return val;
         }
         return str.replace(/"/g, "");
-    },
-};
+    };
+
+    return self;
+})();
 
 export default TriplesToManchester;
+
+window.TriplesToManchester = TriplesToManchester;

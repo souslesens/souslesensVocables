@@ -292,7 +292,7 @@ var Axiom_activeLegend = (function () {
             Axioms_graph.outlineNode(visjsNode.id);
             $("#axiom_currentNode").html("<b>Current node: </b>" + label);
             self.hideForbiddenResources(Axioms_graph.currentGraphNode.data.type);
-            $("#axioms_legend_suggestionsSelect").empty();
+            self.clearSuggestionsJstree();
             Axiom_UI.showLegendPanel();
 
             return;
@@ -381,7 +381,7 @@ var Axiom_activeLegend = (function () {
             Axioms_graph.outlineNode(visjsNode.id);
             $("#axiom_currentNode").html("<b>Current node: </b>" + label);
             self.hideForbiddenResources(Axioms_graph.currentGraphNode.data.type);
-            $("#axioms_legend_suggestionsSelect").empty();
+            self.clearSuggestionsJstree();
             Axiom_UI.showLegendPanel();
 
             return;
@@ -506,7 +506,7 @@ var Axiom_activeLegend = (function () {
         }
 
         self.hideForbiddenResources(Axioms_graph.currentGraphNode.data.type);
-        $("#axioms_legend_suggestionsSelect").empty();
+        self.clearSuggestionsJstree();
         Axiom_UI.showLegendPanel();
     };
 
@@ -651,7 +651,9 @@ var Axiom_activeLegend = (function () {
         var html = "";
         html = '    <span class="popupMenuItem" onclick="Axiom_activeLegend.removeNodeFromGraph();"> Remove Node</span>';
         html += '    <span class="popupMenuItem" onclick="NodeInfosAxioms.nodeInfos()">Node Infos</span>';
-        html += '    <span class="popupMenuItem" onclick="Axiom_activeLegend.createAxiomFromGraph();"> create Axiom</span>';
+        if (Axiom_UI.currentView === "visualisation") {
+            html += '    <span class="popupMenuItem" onclick="Axiom_activeLegend.createAxiomFromGraph();"> create Axiom</span>';
+        }
 
         $("#popupMenuWidgetDiv").html(html);
         point.x = event.x;
@@ -752,7 +754,7 @@ var Axiom_activeLegend = (function () {
         }, function (err, result) {
             var divId = "nodeInfosAxioms_graphDiv";
             var options = {};
-          Axioms_graph.drawNodeAxioms2(NodeInfosAxioms.currentSource, rootNodeId, triples, divId, options);
+            Axioms_graph.drawNodeAxioms2(NodeInfosAxioms.currentSource, rootNodeId, triples, divId, options);
             if (callback) {
                 return callback(err);
             }
@@ -994,7 +996,6 @@ var Axiom_activeLegend = (function () {
 
             visjsOptions: {},
             onclickFn: options.onLegendNodeClick || Axiom_activeLegend.onLegendNodeClick,
-            onRightClickFn: options.showLegendGraphPopupMenu || Axiom_activeLegend.showGraphPopupMenu,
         };
 
         self.axiomsLegendVisjsGraph = new VisjsGraphClass(graphLegendDiv || self.graphLegendDiv, visjsData, options);
@@ -1068,12 +1069,18 @@ var Axiom_activeLegend = (function () {
                         return MainController.errorAlert(err.responseText || err);
                     }
 
+                    Axiom_UI.axiomSaved = true;
+
                     if (!self.showTriplesActivated) {
                         Axioms_graph.currentAxiomTriples = triples;
                         var rootNodeId = triples[0].subject;
                         var divId = "nodeInfosAxioms_graphDiv";
                         Axioms_graph.drawNodeAxioms2(self.currentSource, rootNodeId, triples, divId, {});
                         self.showTriples();
+                    }
+
+                    if (self.showTriplesActivated) {
+                        $("#axiomEditor_deleteTriplesBtn").show();
                     }
 
                     if (callback) {
@@ -1268,11 +1275,7 @@ var Axiom_activeLegend = (function () {
                     }
                 } else if (fromNode.data.type.endsWith("ObjectProperty")) {
                     predicate = "http://www.w3.org/2000/01/rdf-schema#subPropertyOf";
-                } else if (fromNode.data.label == "ComplementOf") {
-                    //  predicate = "http://www.w3.org/2002/07/owl#complementOf";
-                    /*  toNode.data.bNodeid=toNode.data.id
-                      toNode.data.type="complementOf"*/
-                } else if (["IntersectionOf", "UnionOf", "Enumeration"].indexOf(fromNode.data.type) > -1) {
+                }  else if (fromNode.data.type=="Connective") {
                     if (fromNode.data.nCount == 0) {
                         predicate = "http://www.w3.org/1999/02/22-rdf-syntax-ns#first";
                     } else if (fromNode.data.nCount == 1) {
@@ -1297,33 +1300,22 @@ var Axiom_activeLegend = (function () {
                     fromNode.data.nCount += 1;
                 } else {
                 }
-                if (fromNode.data.label == "ComplementOf") {
-                    //  predicate = "http://www.w3.org/2002/07/owl#complementOf";
-                  triples.push({
-                        subject: fromNode.data.id,
-                        predicate: fromNode.data.subType,
-                        object: toNode.data.id,
-                    });
 
-                    return recurse(toNode.data.id)
-                } else if (predicate) {
+                if (predicate) {
                     triple.subject = fromNode.data.bNodeid || fromNode.data.id;
                     triple.predicate = predicate;
                     triple.object = object;
                     triples.push(triple);
                 }
-                if (toNode.data.type == "Connective") {
-                    //  predicate = "http://www.w3.org/2002/07/owl#complementOf";
-                    if (toNode.data.label != "ComplementOf") {
-                        toNode.data.nCount = 0;
-                        toNode.data.bNodeid = self.getBlankNodeId();
-                        triples.push({
-                            subject: toNode.data.id,
-                            predicate: toNode.data.subType,
-                            object: toNode.data.bNodeid,
-                        });
-                    }
 
+                if (toNode.data.type == "Connective") {
+                    toNode.data.nCount = 0;
+                    toNode.data.bNodeid = self.getBlankNodeId();
+                    triples.push({
+                        subject: toNode.data.id,
+                        predicate: toNode.data.subType,
+                        object: toNode.data.bNodeid,
+                    });
                 }
 
                 if (fromNode.data.cardinality) {
@@ -1333,7 +1325,6 @@ var Axiom_activeLegend = (function () {
                         object: '"' + fromNode.data.cardinality + '"' + "^^<http://www.w3.org/2001/XMLSchema#nonNegativeInteger>",
                     });
                 }
-
 
                 var isSubPropertyEdge = edge.data && edge.data.type == "subPropertyOf";
                 if (!isSubPropertyEdge) {
@@ -1648,6 +1639,7 @@ var Axiom_activeLegend = (function () {
 
         var options = {
             openAll: true,
+            searchPlugin: {show_only_matches: true},
 
             contextMenu: function (node, x) {
                 var items = {};
@@ -1821,11 +1813,14 @@ var Axiom_activeLegend = (function () {
         }
 
         JstreeWidget.loadJsTree("axiomSuggestionsSelectJstreeDiv", jstreeData, options, function () {
-            const element = document.getElementById("axiomSuggestionsSelectJstreeDiv");
+            var element = document.getElementById("axiomSuggestionsSelectJstreeDiv");
             element.addEventListener("contextmenu", function (e) {
                 e.preventDefault();
             });
-            //  $("#suggestionsSelectJstreeDiv").css("overflow", "unset");
+            
+            $("#axiomSuggestionsSearchBar").show();
+            $("#axiomSuggestionsSearchInput").val("");
+            $('#axiomSuggestionsSelectDiv').css('overflow','unset');
         });
     };
 
@@ -1855,7 +1850,11 @@ var Axiom_activeLegend = (function () {
     };
 
     self.clearSuggestionsJstree = function () {
-        $("#axiomSuggestionsSelectJstreeDiv").jstree().empty();
+        try {
+            $("#axiomSuggestionsSelectJstreeDiv").jstree().empty();
+        }catch(e){}
+        $("#axiomSuggestionsSearchBar").hide();
+        $("#axiomSuggestionsSearchInput").val("");
     };
 
     return self;

@@ -3,6 +3,7 @@ var Axiom_UI = (function () {
 
     self.currentView = null;
     self.previousView = null;
+    self.axiomSaved = false;
 
     var ALL_ELEMENTS = [
         "nodeInfosAxioms_activeLegendDiv",
@@ -52,8 +53,21 @@ var Axiom_UI = (function () {
             }
         });
 
-        if (viewName === "showTriples" && self.previousView !== "newAxiom") {
-            $("#axiomEditor_saveBtn").hide();
+        if (viewName === "newAxiom") {
+            self.axiomSaved = false;
+        }
+
+        if (viewName === "visualisation") {
+            self.axiomSaved = true;
+        }
+
+        if (viewName === "showTriples") {
+            if (self.previousView !== "newAxiom") {
+                $("#axiomEditor_saveBtn").hide();
+            }
+            if (!self.axiomSaved) {
+                $("#axiomEditor_deleteTriplesBtn").hide();
+            }
         }
 
         $("#axiomEditor_showTriplesBtn").text(config.showTriplesLabel);

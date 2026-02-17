@@ -1851,7 +1851,9 @@ var Axiom_activeLegend = (function () {
     };
 
     self.clearSuggestionsJstree = function () {
-        $("#axiomSuggestionsSelectJstreeDiv").jstree().empty();
+        try {
+            $("#axiomSuggestionsSelectJstreeDiv").jstree().empty();
+        }catch(e){}
         $("#axiomSuggestionsSearchBar").hide();
         $("#axiomSuggestionsSearchInput").val("");
     };

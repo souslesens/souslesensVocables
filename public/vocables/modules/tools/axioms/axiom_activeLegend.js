@@ -1276,30 +1276,34 @@ var Axiom_activeLegend = (function () {
                 } else if (fromNode.data.type.endsWith("ObjectProperty")) {
                     predicate = "http://www.w3.org/2000/01/rdf-schema#subPropertyOf";
                 }  else if (fromNode.data.type=="Connective") {
-                    if (fromNode.data.nCount == 0) {
-                        predicate = "http://www.w3.org/1999/02/22-rdf-syntax-ns#first";
-                    } else if (fromNode.data.nCount == 1) {
-                        var bNode2 = self.getBlankNodeId();
-                        triples.push({
-                            subject: fromNode.data.bNodeid,
-                            predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest",
-                            object: bNode2,
-                        });
+                    if(fromNode.data && fromNode.data.label && fromNode.data.label=="ComplementOf"){
+                        predicate = "http://www.w3.org/2002/07/owl#complementOf";
+                    }else{
+                         if (fromNode.data.nCount == 0) {
+                            predicate = "http://www.w3.org/1999/02/22-rdf-syntax-ns#first";
+                        } else if (fromNode.data.nCount == 1) {
+                            var bNode2 = self.getBlankNodeId();
+                            triples.push({
+                                subject: fromNode.data.bNodeid,
+                                predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest",
+                                object: bNode2,
+                            });
 
-                        fromNode.data.bNodeid = bNode2;
+                            fromNode.data.bNodeid = bNode2;
 
-                        triples.push({
-                            subject: bNode2,
-                            predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest",
-                            object: "http://www.w3.org/1999/02/22-rdf-syntax-ns#nil",
-                        });
+                            triples.push({
+                                subject: bNode2,
+                                predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest",
+                                object: "http://www.w3.org/1999/02/22-rdf-syntax-ns#nil",
+                            });
 
-                        predicate = "http://www.w3.org/1999/02/22-rdf-syntax-ns#first";
-                    } else {
+                            predicate = "http://www.w3.org/1999/02/22-rdf-syntax-ns#first";
+                        } 
+                        
                     }
+                   
                     fromNode.data.nCount += 1;
-                } else {
-                }
+                } 
 
                 if (predicate) {
                     triple.subject = fromNode.data.bNodeid || fromNode.data.id;
@@ -1308,14 +1312,18 @@ var Axiom_activeLegend = (function () {
                     triples.push(triple);
                 }
 
-                if (toNode.data.type == "Connective") {
-                    toNode.data.nCount = 0;
-                    toNode.data.bNodeid = self.getBlankNodeId();
-                    triples.push({
-                        subject: toNode.data.id,
-                        predicate: toNode.data.subType,
-                        object: toNode.data.bNodeid,
-                    });
+                if (toNode.data.type == "Connective" ) {
+                    if(toNode.data && toNode.data.label && toNode.data.label=="ComplementOf"){}
+                    else{
+                        toNode.data.nCount = 0;
+                        toNode.data.bNodeid = self.getBlankNodeId();
+                        triples.push({
+                            subject: toNode.data.id,
+                            predicate: toNode.data.subType,
+                            object: toNode.data.bNodeid,
+                        });
+                    }
+                    
                 }
 
                 if (fromNode.data.cardinality) {

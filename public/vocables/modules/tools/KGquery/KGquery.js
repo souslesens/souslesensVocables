@@ -33,6 +33,7 @@ import KGquery_filter from "./KGquery_filter.js";
 import Containers_widget from "../containers/containers_widget.js";
 import UserDataWidget from "../../uiWidgets/userDataWidget.js";
 import KGquery_predicates from "./KGquery_predicates.js";
+import KGquery_NodeInfos from "./KGquery_NodeInfos.js";
 
 var KGquery = (function () {
     var self = {};
@@ -942,10 +943,23 @@ var KGquery = (function () {
                     //varName = varName.split("_")[0];
                 }
                 var uri = dataItem[varName].value;
-                var node = { data: { id: uri } };
-                NodeInfosWidget.showNodeInfos(self.currentSource, node, "smallDialogDiv", null, function (err) {
-                    $("#smallDialogDiv").parent().css("z-index", 1);
-                });
+                var targetClassId = null;
+                for (var classId in KGquery.classToVarNameMap) {
+                    if (KGquery.classToVarNameMap[classId] === "?" + varName) {
+                        targetClassId = classId;
+                        break;
+                    }
+                }
+                if (targetClassId) {
+                    KGquery_NodeInfos.showNodeInfos(self.currentSource, uri, targetClassId, "smallDialogDiv", function (err) {
+                        $("#smallDialogDiv").parent().css("z-index", 1);
+                    });
+                } else {
+                    var node = { data: { id: uri } };
+                    NodeInfosWidget.showNodeInfos(self.currentSource, node, "smallDialogDiv", null, function (err) {
+                        $("#smallDialogDiv").parent().css("z-index", 1);
+                    });
+                }
             });
         });
     };

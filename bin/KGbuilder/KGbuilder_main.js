@@ -71,9 +71,10 @@ var KGbuilder_main = {
             sourceInfos: {},
             uniqueTriplesMap: {},
         };
+        var options2={forceClassesToIndividuals:true}
 
         // load visj mapping file
-        MappingsParser.getMappingsData(source, function (err, _mappingData) {
+        MappingsParser.getMappingsData(source,options2, function (err, _mappingData) {
             if (err) {
                 return callback(err);
             }
@@ -96,6 +97,11 @@ var KGbuilder_main = {
 
                     async.series(
                         [
+
+                            function (callbackSeries) {
+
+                                callbackSeries(err);
+                            },
                             //getColumnsMap
                             function (callbackSeries) {
                                 MappingsParser.getColumnsMap(mappingData, table, function (err, allColumnsMappings) {

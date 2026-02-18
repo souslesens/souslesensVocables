@@ -1,5 +1,5 @@
 import KGbuilder_socket from "./KGbuilder_socket.js";
-import {databaseModel} from "../../model/databases.js";
+import { databaseModel } from "../../model/databases.js";
 import csvCrawler from "../_csvCrawler.js";
 import async from "async";
 import sqlServerProxy from "../KG/SQLserverConnector.js";
@@ -29,7 +29,7 @@ var TriplesMaker = {
         var processedRecords = 0;
         var tableInfos = tableProcessingParams.tableInfos;
         TriplesMaker.uniqueSubjects = {};
-        TriplesMaker.existingRestrictions={}
+        TriplesMaker.existingRestrictions = {};
         tableProcessingParams.randomIdentiersMap = {}; // identifiers with scope the whole table
         tableProcessingParams.blankNodesMap = {}; // identifiers with scope the whole table
         tableProcessingParams.isSampleData = options.sampleSize;
@@ -130,7 +130,7 @@ var TriplesMaker = {
                         KGbuilder_socket.message(options.clientSocketId, message);
                         // KGbuilder_socket.message(options.clientSocketId, " DONE " + processedRecords + "records  from " + tableInfos.table + " : " + (totalTriplesCount) + " triples", false);
 
-                        return callback(err, {sampleTriples: sampleTriples, totalTriplesCount: totalTriplesCount});
+                        return callback(err, { sampleTriples: sampleTriples, totalTriplesCount: totalTriplesCount });
                     },
                 );
             });
@@ -171,11 +171,11 @@ var TriplesMaker = {
                 totalDuration: 0,
             };
             const conn = await databaseModel.getUserConnection(user, tableInfos.dbID);
-            var connectionObject = {connection: conn, user: user, dbId: tableInfos.dbID};
+            var connectionObject = { connection: conn, user: user, dbId: tableInfos.dbID };
             let generator = databaseModel.batchSelectGenerator(connectionObject, tableInfos.table, {
                 select: select,
                 batchSize: limitSize,
-                startingOffset: offset
+                startingOffset: offset,
             });
 
             KGbuilder_socket.message(options.clientSocketId, "loading data from database table " + tableInfos.table, false);
@@ -224,7 +224,7 @@ var TriplesMaker = {
 
                             return callback(null, {
                                 sampleTriples: sampleTriples,
-                                totalTriplesCount: sampleTriples.length
+                                totalTriplesCount: sampleTriples.length,
                             });
                         } else {
                             try {
@@ -275,7 +275,7 @@ var TriplesMaker = {
             message.operation = "finished";
             message.totalTriples = totalTriplesCount;
             KGbuilder_socket.message(options.clientSocketId, message);
-            return callback(null, {sampleTriples: sampleTriples, totalTriplesCount: totalTriplesCount});
+            return callback(null, { sampleTriples: sampleTriples, totalTriplesCount: totalTriplesCount });
         }
     },
 
@@ -287,7 +287,6 @@ var TriplesMaker = {
         function addTriple(subjectUri, predicateUri, objectUri) {
             if (subjectUri && predicateUri && objectUri) {
                 var triple = subjectUri + " " + predicateUri + " " + objectUri;
-
 
                 var triplelHashCode = triple;
 
@@ -416,7 +415,7 @@ var TriplesMaker = {
                             object = TriplesMaker.getFormatedLiteral(line, {
                                 dataType: item.range,
                                 o: item.object,
-                                dateFormat: item.dateFormat
+                                dateFormat: item.dateFormat,
                             });
 
                             var property = TriplesMaker.getPropertyUri(item.property);
@@ -741,7 +740,7 @@ var TriplesMaker = {
             restrictionType = "http://www.w3.org/2002/07/owl#someValuesFrom";
         }
         if (TriplesMaker.existingRestrictions[subjectUri + predicateUri + objectUri]) {
-            return []
+            return [];
         }
 
         var blankNode = "<_:b" + util.getRandomHexaId(10) + ">";
@@ -769,9 +768,7 @@ var TriplesMaker = {
             o: blankNode,
         });
 
-        TriplesMaker.existingRestrictions[subjectUri+ predicateUri+ objectUri]=1
-
-
+        TriplesMaker.existingRestrictions[subjectUri + predicateUri + objectUri] = 1;
 
         return triples;
     },
@@ -796,14 +793,14 @@ var TriplesMaker = {
     },
 
     readCsv: function (filePath, maxLines, callback) {
-        csvCrawler.readCsv({filePath: filePath}, maxLines, function (err, result) {
+        csvCrawler.readCsv({ filePath: filePath }, maxLines, function (err, result) {
             if (err) {
                 return callback(err);
             }
             var data = result.data;
             var headers = result.headers;
 
-            return callback(null, {headers: headers, data: data});
+            return callback(null, { headers: headers, data: data });
         });
     },
 };

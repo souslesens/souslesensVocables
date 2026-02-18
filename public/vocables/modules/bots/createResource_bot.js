@@ -76,9 +76,7 @@ var CreateResource_bot = (function () {
 
     self.functions = {
         listResourceTypesFn: function (queryParams, varName) {
-            var choices = [
-                { id: "owl:Class", label: "Class" },
-            ];
+            var choices = [{ id: "owl:Class", label: "Class" }];
             if (Config.sources[self.source] && Config.sources[self.source].allowIndividuals) {
                 choices.push({ id: "owl:NamedIndividual", label: "Individual" });
             }

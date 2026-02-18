@@ -78,12 +78,14 @@ var CreateResource_bot = (function () {
         listResourceTypesFn: function (queryParams, varName) {
             var choices = [
                 { id: "owl:Class", label: "Class" },
-                { id: "owl:NamedIndividual", label: "Individual" },
-                // { id: "owl:ObjectProperty", label: "ObjectProperty" },
-                { id: "DatatypeProperty", label: "DatatypeProperty" },
-                //   { id: "ImportClass", label: "Import Class" },
-                //  { id: "ImportSource", label: "Add import source " },
             ];
+            if (Config.sources[self.source] && Config.sources[self.source].allowIndividuals) {
+                choices.push({ id: "owl:NamedIndividual", label: "Individual" });
+            }
+            // { id: "owl:ObjectProperty", label: "ObjectProperty" },
+            choices.push({ id: "DatatypeProperty", label: "DatatypeProperty" });
+            //   { id: "ImportClass", label: "Import Class" },
+            //  { id: "ImportSource", label: "Add import source " },
             self.myBotEngine.showList(choices, "resourceType");
         },
 

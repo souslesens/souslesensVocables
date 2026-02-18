@@ -1,5 +1,6 @@
 import CommonBotFunctions from "../../bots/_commonBotFunctions.js";
 import NodeInfosAxioms from "./nodeInfosAxioms.js";
+import TriplesToManchester from "./triplesToManchester.js";
 
 var Axioms_manager = (function () {
     var self = {};
@@ -72,11 +73,19 @@ var Axioms_manager = (function () {
                 var uniqueIds = {};
                 result.forEach(function (item) {
                     if (!uniqueIds[item.id]) {
-                        uniqueIds[item.id] = 1;
+                        uniqueIds[item.id] = item.label;
 
                         item.label = item.label; //,.replace(/ /g, "_");
                         item.resourceType = "ObjectProperty";
                         self.allProperties.push(item);
+                    } else {
+                        // in case there label is different from label calculated from uri, we keep the true label get from rdfs:label
+                        var labelFromUri = Sparql_common.getLabelFromURI(item.id);
+                        if (labelFromUri != item.label && labelFromUri == uniqueIds[item.id]) {
+                            self.allProperties.find(function (prop) {
+                                return prop.id == item.id;
+                            }).label = item.label;
+                        }
                     }
                 });
                 common.array.sort(self.allProperties, "label");
@@ -97,31 +106,15 @@ var Axioms_manager = (function () {
         if (!source) {
             source = NodeInfosAxioms.currentSource;
         }
-        var rawManchesterStr = "";
-
-        const params = new URLSearchParams({
-            ontologyGraphUri: Config.sources[source].graphUri,
-            axiomTriples: JSON.stringify(triples),
-        });
-        UI.message("generating manchester syntax ");
-        $.ajax({
-            type: "GET",
-            url: Config.apiUrl + "/jowl/axiomTriples2manchester?" + params.toString(),
-            dataType: "json",
-
-            success: function (data, _textStatus, _jqXHR) {
-                if (data.result && data.result.indexOf("Error") > -1) {
-                    return callback(data.result);
-                }
-                rawManchesterStr = data.result;
-                UI.message("", true);
-                callback(null, data.result);
-            },
-            error(err) {
-                UI.message("", true);
-                callback(err.responseText);
-            },
-        });
+        try {
+            var result = TriplesToManchester.convert(triples);
+            if (result && result.indexOf("Error") > -1) {
+                return callback(result);
+            }
+            callback(null, result);
+        } catch (err) {
+            callback(err.message || err);
+        }
     };
 
     self.getClassAxioms = function (sourceLabel, classUri, options, callback) {
@@ -194,37 +187,15 @@ var Axioms_manager = (function () {
             },
         });
     };
-    self.parseManchesterClassAxioms = function (classUri, manchesterRawStr) {
-        var axiomsArray = [];
-        var lines = manchesterRawStr.split("\n");
-        var recording = false;
-        var currentAxiom = "<" + classUri + ">";
-        var start = true;
-        lines.forEach(function (line, index) {
-            if (line.trim() == "") {
-                return;
-            }
-            if (line.indexOf("Prefix") > -1) {
-                return;
-            }
-            if (line.indexOf(classUri) > -1) start = 1;
-
-            if (start && line.match(/^(\s*)/)[1].length > 0) {
-                currentAxiom += " " + line;
-            } else {
-                // currentAxiom = line
-            }
-        });
-        currentAxiom = currentAxiom.replace(/\s\s/gm, " ");
-
-        currentAxiom = currentAxiom.replace(/<([^>]+)>/gm, function (expr, value) {
+    self.parseManchesterClassAxioms = function (manchesterRawStr) {
+        var result = manchesterRawStr.replace(/<([^>]+)>/gm, function (expr, value) {
             if (Axioms_manager.allResourcesMap[value]) return Axioms_manager.allResourcesMap[value].label;
-            return value;
+            return Sparql_common.getLabelFromURI(value);
         });
-
-        //   currentAxiom = currentAxiom.replace(/[<>]/gm, " ");
-
-        return currentAxiom;
+        result = result.replace(/\n( *)/g, function (match, spaces) {
+            return "<br>" + spaces.replace(/ /g, "&nbsp;");
+        });
+        return result;
     };
 
     return self;

@@ -3,6 +3,7 @@ var Axiom_UI = (function () {
 
     self.currentView = null;
     self.previousView = null;
+    self.axiomSaved = false;
 
     var ALL_ELEMENTS = [
         "nodeInfosAxioms_activeLegendDiv",
@@ -13,20 +14,30 @@ var Axiom_UI = (function () {
         "axiomEditor_copyTriplesBtn",
         "axiomEditor_deleteTriplesBtn",
         "axiomsEditor_textDiv",
+        "axiomsEditor_textManchesterDiv",
         "nodeInfosAxioms_newAxiomBtn",
+        "nodeInfosAxioms_axiomSelect",
     ];
 
     var VIEW_CONFIG = {
         newAxiom: {
-            visible: ["nodeInfosAxioms_activeLegendDiv", "nodeInfosAxioms_newAxiomPanel", "axiomEditor_clearBtn", "axiomEditor_saveBtn", "axiomEditor_showTriplesBtn"],
+            visible: [
+                "nodeInfosAxioms_activeLegendDiv",
+                "nodeInfosAxioms_newAxiomPanel",
+                "axiomEditor_clearBtn",
+                "axiomEditor_saveBtn",
+                "axiomEditor_showTriplesBtn",
+                "axiomsEditor_textManchesterDiv",
+                "nodeInfosAxioms_axiomSelect",
+            ],
             showTriplesLabel: "show triples",
         },
         visualisation: {
-            visible: ["axiomEditor_showTriplesBtn", "nodeInfosAxioms_newAxiomBtn"],
+            visible: ["axiomEditor_showTriplesBtn", "axiomsEditor_textManchesterDiv", "nodeInfosAxioms_newAxiomBtn"],
             showTriplesLabel: "show triples",
         },
         showTriples: {
-            visible: ["axiomEditor_saveBtn", "axiomEditor_copyTriplesBtn", "axiomEditor_deleteTriplesBtn", "axiomsEditor_textDiv", "nodeInfosAxioms_newAxiomBtn"],
+            visible: ["axiomEditor_saveBtn", "axiomEditor_copyTriplesBtn", "axiomEditor_deleteTriplesBtn", "axiomsEditor_textDiv", "axiomsEditor_textManchesterDiv", "nodeInfosAxioms_newAxiomBtn"],
             showTriplesLabel: "show triples",
         },
     };
@@ -49,8 +60,27 @@ var Axiom_UI = (function () {
             }
         });
 
-        if (viewName === "showTriples" && self.previousView !== "newAxiom") {
-            $("#axiomEditor_saveBtn").hide();
+        if (viewName === "newAxiom") {
+            self.axiomSaved = false;
+            Axiom_activeLegend.showTriplesActivated = false;
+            NodeInfosAxioms.isNewAxiom = true;
+        }
+
+        if (viewName === "visualisation") {
+            self.axiomSaved = true;
+            Axiom_activeLegend.showTriplesActivated = false;
+            Axiom_activeLegend.isLegendActive = false;
+            NodeInfosAxioms.isNewAxiom = false;
+        }
+
+        if (viewName === "showTriples") {
+            NodeInfosAxioms.isNewAxiom = false;
+            if (self.previousView !== "newAxiom") {
+                $("#axiomEditor_saveBtn").hide();
+            }
+            if (!self.axiomSaved) {
+                $("#axiomEditor_deleteTriplesBtn").hide();
+            }
         }
 
         $("#axiomEditor_showTriplesBtn").text(config.showTriplesLabel);

@@ -282,7 +282,7 @@ var JstreeWidget = (function () {
         }
 
         if (options.onHoverNode) {
-            $("#" + (jstreeDiv || self.jstreeDiv)).on("hover_node.jstree", function (node) {
+            $("#" + (jstreeDiv || self.jstreeDiv)).on("hover_node.jstree", function (event, node) {
                 options.onHoverNode(node);
             });
         }

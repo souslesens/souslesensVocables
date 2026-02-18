@@ -561,6 +561,7 @@ var Axioms_graph = (function () {
 
             function (err) {
                 self.rootNode = self.axiomsVisjsGraph.data.nodes.get(rootNodeId);
+                Axiom_activeLegend.axiomTriplesToManchester();
                 if (callback) {
                     return callback(err);
                 }

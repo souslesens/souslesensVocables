@@ -13,7 +13,6 @@ var Axiom_UI = (function () {
         "axiomEditor_showTriplesBtn",
         "axiomEditor_copyTriplesBtn",
         "axiomEditor_deleteTriplesBtn",
-        "axiomEditor_toManchesterBtn",
         "axiomsEditor_textDiv",
         "axiomsEditor_textManchesterDiv",
         "nodeInfosAxioms_newAxiomBtn",
@@ -22,15 +21,15 @@ var Axiom_UI = (function () {
 
     var VIEW_CONFIG = {
         newAxiom: {
-            visible: ["nodeInfosAxioms_activeLegendDiv", "nodeInfosAxioms_newAxiomPanel", "axiomEditor_clearBtn", "axiomEditor_saveBtn", "axiomEditor_showTriplesBtn", "axiomEditor_toManchesterBtn", "axiomsEditor_textManchesterDiv", "nodeInfosAxioms_axiomSelect"],
+            visible: ["nodeInfosAxioms_activeLegendDiv", "nodeInfosAxioms_newAxiomPanel", "axiomEditor_clearBtn", "axiomEditor_saveBtn", "axiomEditor_showTriplesBtn", "axiomsEditor_textManchesterDiv", "nodeInfosAxioms_axiomSelect"],
             showTriplesLabel: "show triples",
         },
         visualisation: {
-            visible: ["axiomEditor_showTriplesBtn", "axiomEditor_toManchesterBtn", "axiomsEditor_textManchesterDiv", "nodeInfosAxioms_newAxiomBtn"],
+            visible: ["axiomEditor_showTriplesBtn", "axiomsEditor_textManchesterDiv", "nodeInfosAxioms_newAxiomBtn"],
             showTriplesLabel: "show triples",
         },
         showTriples: {
-            visible: ["axiomEditor_saveBtn", "axiomEditor_copyTriplesBtn", "axiomEditor_deleteTriplesBtn", "axiomEditor_toManchesterBtn", "axiomsEditor_textDiv", "axiomsEditor_textManchesterDiv", "nodeInfosAxioms_newAxiomBtn"],
+            visible: ["axiomEditor_saveBtn", "axiomEditor_copyTriplesBtn", "axiomEditor_deleteTriplesBtn", "axiomsEditor_textDiv", "axiomsEditor_textManchesterDiv", "nodeInfosAxioms_newAxiomBtn"],
             showTriplesLabel: "show triples",
         },
     };

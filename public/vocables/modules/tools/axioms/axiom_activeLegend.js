@@ -293,6 +293,7 @@ var Axiom_activeLegend = (function () {
             self.hideForbiddenResources(Axioms_graph.currentGraphNode.data.type);
             self.clearSuggestionsJstree();
             Axiom_UI.showLegendPanel();
+            self.axiomTriplesToManchester();
 
             return;
             var siblingObjectPropertyUri = self.getGraphSiblingUri(Axioms_graph.currentGraphNode.id, "ObjectProperty");
@@ -382,6 +383,7 @@ var Axiom_activeLegend = (function () {
             self.hideForbiddenResources(Axioms_graph.currentGraphNode.data.type);
             self.clearSuggestionsJstree();
             Axiom_UI.showLegendPanel();
+            self.axiomTriplesToManchester();
 
             return;
 
@@ -492,8 +494,7 @@ var Axiom_activeLegend = (function () {
                 self.updateCurrentGraphNode(visjsNode);
                 Axioms_graph.axiomsVisjsGraph.data.edges.add(visjsData.edges);
             }
-
-            //
+            self.axiomTriplesToManchester();
         } else {
             self.hierarchicalLevel = 0;
             var options = {
@@ -697,6 +698,7 @@ var Axiom_activeLegend = (function () {
             var fromNode = Axioms_graph.axiomsVisjsGraph.data.nodes.get(fromNodeId);
             Axioms_graph.currentGraphNode = fromNode;
             Axioms_graph.outlineNode(fromNode.id);
+            self.axiomTriplesToManchester();
         }
 
         return;

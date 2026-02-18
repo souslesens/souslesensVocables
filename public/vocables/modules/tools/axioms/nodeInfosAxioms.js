@@ -183,7 +183,6 @@ var NodeInfosAxioms = (function () {
         Axiom_UI.setView("visualisation");
         self.switchLeftPanelDisplay("show");
         Axioms_graph.clearGraph();
-        Axiom_activeLegend.isLegendActive = false;
         if (Lineage_sources.isSourceEditableForUser(self.currentSource)) {
             Axiom_activeLegend.init("nodeInfosAxioms_activeLegendDiv", "nodeInfosAxioms_graphDiv", NodeInfosAxioms.currentSource, NodeInfosAxioms.currentResource, self.currentJstreeNode.data.id);
         }
@@ -358,7 +357,6 @@ var NodeInfosAxioms = (function () {
     self.newAxiom = function (clearAll) {
         if (clearAll) {
             self.isNewAxiom = true;
-            Axiom_activeLegend.isLegendActive = false;
             Axioms_graph.clearGraph();
             $("#axiomsEditor_textDiv").html("");
         }

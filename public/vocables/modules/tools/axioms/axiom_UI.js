@@ -55,10 +55,13 @@ var Axiom_UI = (function () {
 
         if (viewName === "newAxiom") {
             self.axiomSaved = false;
+            Axiom_activeLegend.showTriplesActivated = false;
         }
 
         if (viewName === "visualisation") {
             self.axiomSaved = true;
+            Axiom_activeLegend.showTriplesActivated = false;
+            Axiom_activeLegend.isLegendActive = false;
         }
 
         if (viewName === "showTriples") {

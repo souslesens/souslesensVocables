@@ -241,7 +241,6 @@ var Axiom_activeLegend = (function () {
         // new Axiom
         if (!Axiom_activeLegend.isLegendActive) {
             // create new Axiom
-            self.newAxiomNode = NodeInfosAxioms.currentResource;
             Axiom_activeLegend.init("nodeInfosAxioms_activeLegendDiv", "nodeInfosAxioms_graphDiv", NodeInfosAxioms.currentSource, NodeInfosAxioms.currentResource, resourceUri);
             return $("#axioms_legend_suggestionsSelect").children().remove().end();
         }
@@ -1185,7 +1184,7 @@ var Axiom_activeLegend = (function () {
         var edgesFromMap = {};
 
         nodes.forEach(function (node) {
-            if (true || node.level >= self.newAxiomNode.level) {
+            if (true || node.level >= Axioms_graph.rootNode.level) {
                 nodesMap[node.id] = node;
             }
         });
@@ -1341,7 +1340,7 @@ var Axiom_activeLegend = (function () {
             });
         }
 
-        var rootNode = self.newAxiomNode || nodes[0];
+        var rootNode = Axioms_graph.rootNode || nodes[0];
         recurse(rootNode.id);
 
         var nodeTypes = {
@@ -1610,11 +1609,11 @@ var Axiom_activeLegend = (function () {
     };
 
     self.createAxiomFromGraph = function () {
-        self.newAxiomNode = Axioms_graph.currentGraphNode;
+        Axioms_graph.rootNode = Axioms_graph.currentGraphNode;
         NodeInfosAxioms.newAxiom();
         var newNodes = [];
         Axioms_graph.axiomsVisjsGraph.data.nodes.forEach(function (node) {
-            if (node.id != self.newAxiomNode.id) {
+            if (node.id != Axioms_graph.rootNode.id) {
                 var color = common.colorToRgba(node.color, 1);
                 var fontColor = common.colorToRgba(Lineage_whiteboard.defaultNodeFontColor, 1);
                 var opacity = Lineage_whiteboard.defaultLowOpacity;

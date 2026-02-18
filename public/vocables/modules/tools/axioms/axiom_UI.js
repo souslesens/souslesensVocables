@@ -26,7 +26,7 @@ var Axiom_UI = (function () {
             showTriplesLabel: "show triples",
         },
         visualisation: {
-            visible: ["axiomEditor_showTriplesBtn", "nodeInfosAxioms_newAxiomBtn"],
+            visible: ["axiomEditor_showTriplesBtn", "axiomEditor_toManchesterBtn", "axiomsEditor_textManchesterDiv", "nodeInfosAxioms_newAxiomBtn"],
             showTriplesLabel: "show triples",
         },
         showTriples: {

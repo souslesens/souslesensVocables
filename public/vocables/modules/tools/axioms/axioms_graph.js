@@ -619,6 +619,7 @@ enabled:true},*/
                 self.switchToHierarchicalLayout(false);
             }
         });
+        self.rootNode = self.axiomsVisjsGraph.data.nodes.get(rootNodeId);
     };
 
     self.switchToHierarchicalLayout = function (booleanValue) {

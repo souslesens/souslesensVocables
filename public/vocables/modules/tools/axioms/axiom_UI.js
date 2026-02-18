@@ -22,7 +22,7 @@ var Axiom_UI = (function () {
 
     var VIEW_CONFIG = {
         newAxiom: {
-            visible: ["nodeInfosAxioms_activeLegendDiv", "nodeInfosAxioms_newAxiomPanel", "axiomEditor_clearBtn", "axiomEditor_saveBtn", "axiomEditor_showTriplesBtn", "nodeInfosAxioms_axiomSelect"],
+            visible: ["nodeInfosAxioms_activeLegendDiv", "nodeInfosAxioms_newAxiomPanel", "axiomEditor_clearBtn", "axiomEditor_saveBtn", "axiomEditor_showTriplesBtn", "axiomEditor_toManchesterBtn", "axiomsEditor_textManchesterDiv", "nodeInfosAxioms_axiomSelect"],
             showTriplesLabel: "show triples",
         },
         visualisation: {
@@ -56,15 +56,18 @@ var Axiom_UI = (function () {
         if (viewName === "newAxiom") {
             self.axiomSaved = false;
             Axiom_activeLegend.showTriplesActivated = false;
+            NodeInfosAxioms.isNewAxiom = true;
         }
 
         if (viewName === "visualisation") {
             self.axiomSaved = true;
             Axiom_activeLegend.showTriplesActivated = false;
             Axiom_activeLegend.isLegendActive = false;
+            NodeInfosAxioms.isNewAxiom = false;
         }
 
         if (viewName === "showTriples") {
+            NodeInfosAxioms.isNewAxiom = false;
             if (self.previousView !== "newAxiom") {
                 $("#axiomEditor_saveBtn").hide();
             }

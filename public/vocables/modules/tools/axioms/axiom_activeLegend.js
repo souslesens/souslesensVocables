@@ -773,12 +773,20 @@ var Axiom_activeLegend = (function () {
         if (!options) {
             options = {};
         }
+        
         if (!self.showTriplesActivated) {
-            return self.transformBlankNodesToRandomUri(self.visjsGraphToTriples());
+            if (Axioms_graph.currentAxiomTriples && !NodeInfosAxioms.isNewAxiom) {
+                //saved axiom or new graph with axiomIds
+
+                triples = Axioms_graph.currentAxiomTriples;
+                return self.transformBlankNodesToRandomUri(triples);
+            } else {
+                return self.transformBlankNodesToRandomUri(self.visjsGraphToTriples());
+            }
         }
         var isInitializedJstree = self.isInitializedJstree();
         if (!isInitializedJstree) {
-            return alert('No triples to get, initialize the triples with "Show Triples" button');
+            return alert('No triples');
         }
         var triples = [];
         var checkedNodes = $("#axiomsTriplesJstree").jstree(true).get_checked();
@@ -824,17 +832,26 @@ var Axiom_activeLegend = (function () {
 
         var allTriples = Axioms_graph.currentAxiomTriples;
         var selectedTriples = [];
-
+        var selectedTriplesFormated = [];
         allTriples.forEach(function (triple, index) {
             if (checkedNodes.indexOf("triple" + index) > -1) {
+                var copy = Object.assign({}, triple);
+                if (/^[0-9a-f]+$/i.test(copy.subject) && /[a-f]/i.test(copy.subject)) {
+                    copy.subject = "<" + copy.subject + ">";
+                }
+                if (/^[0-9a-f]+$/i.test(copy.object) && /[a-f]/i.test(copy.object)) {
+                    copy.object = "<" + copy.object + ">";
+                }
                 selectedTriples.push(triple);
+                selectedTriplesFormated.push(copy);
+
             }
         });
 
         var graphUri = Config.sources[NodeInfosAxioms.currentSource].graphUri;
         var query = "with graph <" + graphUri + ">\ndelete {\n";
 
-        selectedTriples.forEach(function (triple) {
+        selectedTriplesFormated.forEach(function (triple) {
             query += Sparql_generic.triplesObjectToString(triple) + "\n";
         });
         query += "}";
@@ -1375,7 +1392,7 @@ var Axiom_activeLegend = (function () {
                 node.data.axiomId = index;
             }
         });
-        NodeInfosAxioms.isNewAxiom = false;
+        
 
         return triples;
     };

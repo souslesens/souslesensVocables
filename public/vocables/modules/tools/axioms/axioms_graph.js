@@ -547,6 +547,7 @@ var Axioms_graph = (function () {
                     } else {
                         options.onNodeClick = Axiom_activeLegend.onNodeGraphClick;
                         self.drawGraph(visjsData, divId, options);
+                        
                         //self.currentVisjsData = visjsData;
                         self.switchToHierarchicalLayout(false);
                     }
@@ -559,6 +560,7 @@ var Axioms_graph = (function () {
             ],
 
             function (err) {
+                self.rootNode = self.axiomsVisjsGraph.data.nodes.get(rootNodeId);
                 if (callback) {
                     return callback(err);
                 }
@@ -619,7 +621,6 @@ enabled:true},*/
                 self.switchToHierarchicalLayout(false);
             }
         });
-        self.rootNode = self.axiomsVisjsGraph.data.nodes.get(rootNodeId);
     };
 
     self.switchToHierarchicalLayout = function (booleanValue) {

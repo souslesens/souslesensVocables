@@ -1,4 +1,5 @@
 import KGcreator_run from "../KGcreator/KGcreator_run.js";
+import KGcreator from "../KGcreator/KGcreator.js";
 import MappingsDetails from "./mappingsDetails.js";
 
 import MappingTransform from "./mappingTransform.js";
@@ -25,6 +26,7 @@ var TripleFactory = (function () {
      * @memberof module:TripleFactory
      */
     self.indexGraph = function () {
+        KGcreator.currentSlsvSource = MappingModeler.currentSLSsource;
         KGcreator_run.indexGraph();
     };
 

@@ -9,6 +9,7 @@ import Sparql_generic from "../sparqlProxies/sparql_generic.js";
 import OntologyModels from "../shared/ontologyModels.js";
 import Lineage_createResource from "../tools/lineage/lineage_createResource.js";
 import NodeInfosAxioms from "../tools/axioms/nodeInfosAxioms.js";
+import AxiomExtractor from "../tools/axioms/axiomExtractor.js";
 
 var CreateResource_bot = (function () {
     var self = {};
@@ -197,8 +198,19 @@ var CreateResource_bot = (function () {
                     source: self.params.source,
                 },
             };
-            NodeInfosAxioms.init(self.params.source, resource, "mainDialogDiv");
-            self.myBotEngine.end();
+            var subclassTriple = {
+                subject: self.params.resourceId,
+                predicate: "http://www.w3.org/2000/01/rdf-schema#subClassOf",
+                object: self.params.superClassId,
+            }
+            AxiomExtractor.addTriplesToBasicAxioms(self.params.source, [subclassTriple], function (err, result) {
+                if (err) {
+                    return self.myBotEngine.abort(err);
+                }
+            
+                NodeInfosAxioms.init(self.params.source, resource, "mainDialogDiv");
+                self.myBotEngine.end();
+            });
         },
         newResourceFn: function () {
             self.start();

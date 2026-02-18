@@ -20,8 +20,8 @@ var KGquery_NodeInfos = (function () {
 
     self.generateRawInfosStr = function (prop, value, notTr) {
         var str = "<tr class='infos_table'>";
-        str += "<td class='KGquery_NodeInfos_detailsCellName'>" + prop + "</td>";
-        str += "<td class='KGquery_NodeInfos_detailsCellValue'><div class='KGquery_NodeInfos_content'>" + value + "</div></td>";
+        str += "<td class='detailsCellName'>" + prop + "</td>";
+        str += "<td class='detailsCellValue'><div class='KGquery_NodeInfos_content'>" + value + "</div></td>";
         if (!notTr) {
             str += "</tr>";
         }
@@ -29,9 +29,9 @@ var KGquery_NodeInfos = (function () {
     };
 
     self.generatePropertiesBloc = function (title, properties) {
-        var str = "<div class='KGquery_NodeInfos_tableDiv'>";
-        str += "<table class='KGquery_NodeInfos_infosTable'><tbody>";
-        str += "<tr><td class='KGquery_NodeInfos_CardId' colspan='2'>" + title + "</td></tr>";
+        var str = "<div class='NodesInfos_tableDiv'>";
+        str += "<table class='infosTable'><tbody>";
+        str += "<tr><td class='NodesInfos_CardId' colspan='2'>" + title + "</td></tr>";
 
         properties.forEach(function (prop) {
             var columnName = prop.column_name || "";
@@ -45,21 +45,21 @@ var KGquery_NodeInfos = (function () {
     };
 
     self.generatePropertiesPave = function (title, properties) {
-        var str = "<div class='KGquery_NodeInfos_tableDiv'>";
-        str += "<table class='KGquery_NodeInfos_infosTable'><tbody>";
-        str += "<tr><td class='KGquery_NodeInfos_CardId' colspan='" + properties.length + "'>" + title + "</td></tr>";
+        var str = "<div class='NodesInfos_tableDiv'>";
+        str += "<table class='infosTable'><tbody>";
+        str += "<tr><td class='NodesInfos_CardId' colspan='" + properties.length + "'>" + title + "</td></tr>";
 
         str += "<tr>";
         properties.forEach(function (prop) {
             var columnName = prop.column_name || "";
-            str += "<td class='KGquery_NodeInfos_detailsCellName' style='text-align:center;'>" + columnName + "</td>";
+            str += "<td class='detailsCellName' style='text-align:center;'>" + columnName + "</td>";
         });
         str += "</tr>";
 
         str += "<tr>";
         properties.forEach(function (prop) {
             var value = prop.value || "";
-            str += "<td class='KGquery_NodeInfos_detailsCellValue' style='text-align:center;'>" + value + "</td>";
+            str += "<td class='detailsCellValue' style='text-align:center;'>" + value + "</td>";
         });
         str += "</tr>";
 
@@ -70,7 +70,7 @@ var KGquery_NodeInfos = (function () {
 
     self.generateSparqlResultsPave = function (title, sparqlResult, columnsToDisplay) {
         if (!sparqlResult || !sparqlResult.results || !sparqlResult.results.bindings || sparqlResult.results.bindings.length === 0) {
-            return "<div class='KGquery_NodeInfos_tableDiv'><p>No data available</p></div>";
+            return "<div class='NodesInfos_tableDiv'><p>No data available</p></div>";
         }
 
         var bindings = sparqlResult.results.bindings;
@@ -94,15 +94,15 @@ var KGquery_NodeInfos = (function () {
             return true;
         });
 
-        var str = "<div class='KGquery_NodeInfos_tableDiv'>";
-        str += "<table class='KGquery_NodeInfos_infosTable'><tbody>";
-        str += "<tr><td class='KGquery_NodeInfos_CardId' colspan='" + filteredColumns.length + "'>" + title + "</td></tr>";
+        var str = "<div class='NodesInfos_tableDiv'>";
+        str += "<table class='infosTable'><tbody>";
+        str += "<tr><td class='NodesInfos_CardId' colspan='" + filteredColumns.length + "'>" + title + "</td></tr>";
 
         str += "<tr>";
         filteredColumns.forEach(function (columnName) {
             var displayName = columnName.replace(/_/g, " ");
             displayName = displayName.charAt(0).toUpperCase() + displayName.slice(1);
-            str += "<td class='KGquery_NodeInfos_detailsCellName' style='text-align:center;'>" + displayName + "</td>";
+            str += "<td class='detailsCellName' style='text-align:center;'>" + displayName + "</td>";
         });
         str += "</tr>";
 
@@ -138,7 +138,7 @@ var KGquery_NodeInfos = (function () {
                     }
                 }
 
-                str += "<td class='KGquery_NodeInfos_detailsCellValue' style='text-align:center;'>" + value + "</td>";
+                str += "<td class='detailsCellValue' style='text-align:center;'>" + value + "</td>";
             });
             str += "</tr>";
         });

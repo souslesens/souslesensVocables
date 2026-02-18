@@ -21,7 +21,15 @@ var Axiom_UI = (function () {
 
     var VIEW_CONFIG = {
         newAxiom: {
-            visible: ["nodeInfosAxioms_activeLegendDiv", "nodeInfosAxioms_newAxiomPanel", "axiomEditor_clearBtn", "axiomEditor_saveBtn", "axiomEditor_showTriplesBtn", "axiomsEditor_textManchesterDiv", "nodeInfosAxioms_axiomSelect"],
+            visible: [
+                "nodeInfosAxioms_activeLegendDiv",
+                "nodeInfosAxioms_newAxiomPanel",
+                "axiomEditor_clearBtn",
+                "axiomEditor_saveBtn",
+                "axiomEditor_showTriplesBtn",
+                "axiomsEditor_textManchesterDiv",
+                "nodeInfosAxioms_axiomSelect",
+            ],
             showTriplesLabel: "show triples",
         },
         visualisation: {

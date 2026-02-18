@@ -42,7 +42,7 @@ var CreateResource_bot = (function () {
         _OR: {
             Edit: { saveResourceFn: { editResourceFn: {} } },
             Draw: { saveResourceFn: { drawResourceFn: self.workflow_end } },
-            Axiom: { saveResourceFn: { drawAxiomFn: {} }},
+            Axiom: { saveResourceFn: { drawAxiomFn: {} } },
         },
     }),
         (self.workflow = {
@@ -202,12 +202,12 @@ var CreateResource_bot = (function () {
                 subject: self.params.resourceId,
                 predicate: "http://www.w3.org/2000/01/rdf-schema#subClassOf",
                 object: self.params.superClassId,
-            }
+            };
             AxiomExtractor.addTriplesToBasicAxioms(self.params.source, [subclassTriple], function (err, result) {
                 if (err) {
                     return self.myBotEngine.abort(err);
                 }
-            
+
                 NodeInfosAxioms.init(self.params.source, resource, "mainDialogDiv");
                 self.myBotEngine.end();
             });

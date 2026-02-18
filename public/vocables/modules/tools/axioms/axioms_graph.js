@@ -547,7 +547,7 @@ var Axioms_graph = (function () {
                     } else {
                         options.onNodeClick = Axiom_activeLegend.onNodeGraphClick;
                         self.drawGraph(visjsData, divId, options);
-                        
+
                         //self.currentVisjsData = visjsData;
                         self.switchToHierarchicalLayout(false);
                     }

@@ -17,27 +17,21 @@ var NodeInfosAxioms = (function () {
         Axioms_manager.allResourcesMap = {};
         Axioms_manager.initResourcesMap(self.currentResource.data.source, function (err, result) {
             AxiomExtractor.getClassAxiomsTriples(self.currentResource.data.source, self.currentResource.data.id, function (err, triples) {
+                $("#" + divId).load("modules/tools/axioms/html/nodeInfosAxioms.html", function () {
+                    if (divId && divId.indexOf("Dialog") > -1) {
+                        $("#" + divId).dialog("open");
+                    }
+                    Axiom_activeLegend.drawLegend("nodeInfosAxioms_activeLegendDiv");
+                    Axiom_UI.setView("visualisation");
+                    if (!Lineage_sources.isSourceEditableForUser(self.currentSource)) {
+                        $("#nodeInfosAxioms_newAxiomBtn").css("display", "none");
+                    }
 
-
-        $("#" + divId).load("modules/tools/axioms/html/nodeInfosAxioms.html", function () {
-            if (divId && divId.indexOf("Dialog") > -1) {
-                $("#" + divId).dialog("open");
-            }
-            Axiom_activeLegend.drawLegend("nodeInfosAxioms_activeLegendDiv");
-            Axiom_UI.setView("visualisation");
-            if (!Lineage_sources.isSourceEditableForUser(self.currentSource)) {
-                $("#nodeInfosAxioms_newAxiomBtn").css("display", "none");
-            }
-
-
-
-            var graphDivId = "nodeInfosAxioms_graphDiv";
+                    var graphDivId = "nodeInfosAxioms_graphDiv";
                     var options = {};
                     Axioms_graph.drawNodeAxioms2(self.currentResource.data.source, self.currentResource.data.id, triples, graphDivId, options);
                 });
             });
-
-
         });
     };
     self.initSourceClassesMap = function (source, callback) {
@@ -375,7 +369,6 @@ var NodeInfosAxioms = (function () {
 
         var options = Axiom_activeLegend.axiomtypes;
         common.fillSelectOptions("axioms_legend_suggestionsSelect", options, false);
-
     };
 
     self.switchLeftPanelDisplay = function (role) {

@@ -991,11 +991,11 @@ var MappingModeler = (function () {
                         item.label = item.label; //,.replace(/ /g, "_");
                         item.resourceType = "ObjectProperty";
                         self.allProperties.push(item);
-                    }else{
+                    } else {
                         // in case there label is different from label calculated from uri, we keep the true label get from rdfs:label
                         var labelFromUri = Sparql_common.getLabelFromURI(item.id);
-                        if(labelFromUri != item.label && labelFromUri == uniqueIds[item.id]){ 
-                            self.allProperties.find(function(prop){
+                        if (labelFromUri != item.label && labelFromUri == uniqueIds[item.id]) {
+                            self.allProperties.find(function (prop) {
                                 return prop.id == item.id;
                             }).label = item.label;
                         }

@@ -30,7 +30,6 @@
                         <option value="subClassOf">subClassOf</option>
                         <option value="equivalentClass">equivalentClass</option>
                         <option value="disjointWith">disjointWith</option>
-                        
                     </select>
                     <div id="axiom_currentNode"></div>
 
@@ -40,9 +39,9 @@
             <div style="display: flex; flex-direction: row; display: none" id="nodeInfosAxioms_newAxiomPanel">
                 <!--  <button onclick="NodeInfosAxioms.actions.setLayout('randomlayout')">Random Layout</button>-->
 
-                <div id="axiomSuggestionsSelectDiv" >
+                <div id="axiomSuggestionsSelectDiv">
                     <!-- <select id="axioms_legend_suggestionsSelect" size="20" style="width: 250px; overflow: auto"></select>-->
-                    <div id="axiomSuggestionsSearchBar" class="input-group mb-3" style="display: none;margin-left: 10px;">
+                    <div id="axiomSuggestionsSearchBar" class="input-group mb-3" style="display: none; margin-left: 10px">
                         <div class="input-group-prepend">
                             <input
                                 id="axiomSuggestionsSearchInput"
@@ -51,10 +50,14 @@
                             />
                         </div>
                         <div class="SearchButtonIconRight border-without-raduis-theme1" style="height: 33.5px; padding-left: 7px; padding-right: 5px">
-                            <button class="search-icon slsv-invisible-button" onclick="JstreeWidget.filterTree($('#axiomSuggestionsSearchInput'), 'axiomSuggestionsSelectJstreeDiv')" style="margin-top: 4px; height: 20px; width: 20px"></button>
+                            <button
+                                class="search-icon slsv-invisible-button"
+                                onclick="JstreeWidget.filterTree($('#axiomSuggestionsSearchInput'), 'axiomSuggestionsSelectJstreeDiv')"
+                                style="margin-top: 4px; height: 20px; width: 20px"
+                            ></button>
                         </div>
                     </div>
-                    <div style="width: 350px; height: 470px; overflow: auto;margin-top: 10px;" id="axiomSuggestionsSelectJstreeDiv"></div>
+                    <div style="width: 350px; height: 470px; overflow: auto; margin-top: 10px" id="axiomSuggestionsSelectJstreeDiv"></div>
                 </div>
             </div>
             <div>
@@ -68,7 +71,7 @@
                     <button id="axiomEditor_deleteTriplesBtn" class="w3-button slsv-button-3" onclick="Axiom_activeLegend.deleteTriples()">delete triples</button>
                 </div>
 
-                <span id="axiomsEditor_textManchesterDiv" style="display: block; width: 60vw; min-height: 30px; overflow: auto; background-color: #f5f5f5; padding: 5px; margin: 5px 0;"></span>
+                <span id="axiomsEditor_textManchesterDiv" style="display: block; width: 60vw; min-height: 30px; overflow: auto; background-color: #f5f5f5; padding: 5px; margin: 5px 0"></span>
                 <span id="axiomsEditor_textDiv" style="display: block; width: 60vw; height: 350px; overflow: auto; background-color: #ddd"></span>
             </div>
         </div>

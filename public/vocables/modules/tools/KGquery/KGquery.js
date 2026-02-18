@@ -925,6 +925,9 @@ var KGquery = (function () {
             return Export.exportDataToCSV(tableData);
         }
         console.trace();
+        var savedSelectedPredicates = JSON.parse(JSON.stringify(KGquery.currentSelectedPredicates));
+        var savedClassToVarNameMap = Object.assign({}, KGquery.classToVarNameMap);
+
         Export.showDataTable("KGquery_dataTableDialogDiv", tableCols, tableData, null, { paging: true }, function (err, datatable) {
             $("#dataTableDivExport").on("click", "td", function () {
                 var table = $("#dataTableDivExport").DataTable();
@@ -936,16 +939,15 @@ var KGquery = (function () {
 
                 var varName = self.tableCols[index.column].title;
                 if (true || !dataItem[varName]) {
-                    var varNameNode = KGquery.currentSelectedPredicates.filter((key) => key.id == varName);
+                    var varNameNode = savedSelectedPredicates.filter((key) => key.id == varName);
                     if (varNameNode && varNameNode.length > 0 && varNameNode[0]?.data?.varName) {
                         varName = varNameNode[0].data.varName;
                     }
-                    //varName = varName.split("_")[0];
                 }
                 var uri = dataItem[varName].value;
                 var targetClassId = null;
-                for (var classId in KGquery.classToVarNameMap) {
-                    if (KGquery.classToVarNameMap[classId] === "?" + varName) {
+                for (var classId in savedClassToVarNameMap) {
+                    if (savedClassToVarNameMap[classId] === "?" + varName) {
                         targetClassId = classId;
                         break;
                     }

@@ -1,7 +1,6 @@
 import KGquery from "./KGquery.js";
 import KGquery_graph from "./KGquery_graph.js";
 import KGquery_proxy from "./KGquery_proxy.js";
-import KGquery_filter from "./KGquery_filter.js";
 import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import UI from "../../shared/UI.js";
@@ -17,46 +16,6 @@ var KGquery_NodeInfos = (function () {
     self.uri = null;
     self.currentNodesByWindowType = null;
     self.currentDatatypesResult = null;
-    self.savedKGqueryState = null;
-
-    self.saveKGqueryState = function () {
-        self.savedKGqueryState = {
-            querySets: JSON.parse(JSON.stringify(KGquery.querySets)),
-            divsMap: Object.assign({}, KGquery.divsMap),
-            currentQuerySet: KGquery.currentQuerySet,
-            allPathEdges: KGquery.allPathEdges ? Object.assign({}, KGquery.allPathEdges) : {},
-            classToVarNameMap: Object.assign({}, KGquery.classToVarNameMap),
-            varNameToClassMap: Object.assign({}, KGquery.varNameToClassMap),
-            selectClauseSparql: KGquery.selectClauseSparql,
-            currentOptionalPredicatesSparql: KGquery.currentOptionalPredicatesSparql,
-            optionalPredicatesSubjecstMap: KGquery.optionalPredicatesSubjecstMap ? Object.assign({}, KGquery.optionalPredicatesSubjecstMap) : {},
-            labelFromURIToDisplay: KGquery.labelFromURIToDisplay ? KGquery.labelFromURIToDisplay.slice() : [],
-            currentSelectedPredicates: KGquery.currentSelectedPredicates ? KGquery.currentSelectedPredicates.slice() : [],
-            currentSource: KGquery.currentSource,
-            containersFilterMap: KGquery_filter.containersFilterMap ? Object.assign({}, KGquery_filter.containersFilterMap) : {},
-        };
-    };
-
-    self.restoreKGqueryState = function () {
-        if (!self.savedKGqueryState) {
-            return;
-        }
-        KGquery.querySets = self.savedKGqueryState.querySets;
-        KGquery.divsMap = self.savedKGqueryState.divsMap;
-        KGquery.currentQuerySet = self.savedKGqueryState.currentQuerySet;
-        KGquery.allPathEdges = self.savedKGqueryState.allPathEdges;
-        KGquery.classToVarNameMap = self.savedKGqueryState.classToVarNameMap;
-        KGquery.varNameToClassMap = self.savedKGqueryState.varNameToClassMap;
-        KGquery.selectClauseSparql = self.savedKGqueryState.selectClauseSparql;
-        KGquery.currentOptionalPredicatesSparql = self.savedKGqueryState.currentOptionalPredicatesSparql;
-        KGquery.optionalPredicatesSubjecstMap = self.savedKGqueryState.optionalPredicatesSubjecstMap;
-        KGquery.labelFromURIToDisplay = self.savedKGqueryState.labelFromURIToDisplay;
-        KGquery.currentSelectedPredicates = self.savedKGqueryState.currentSelectedPredicates;
-        KGquery.currentSource = self.savedKGqueryState.currentSource;
-        KGquery_filter.containersFilterMap = self.savedKGqueryState.containersFilterMap;
-        self.savedKGqueryState = null;
-    };
-
     self.generateRawInfosStr = function (prop, value, notTr) {
         var str = "<tr class='infos_table'>";
         str += "<td class='detailsCellName'>" + prop + "</td>";
@@ -527,6 +486,14 @@ var KGquery_NodeInfos = (function () {
                         }
                     }
                 });
+
+            var firstTabId = tabPrefix + "_0";
+            var firstTabPanel = $("#" + firstTabId);
+            if (filteredNodes.length > 0 && !firstTabPanel.data("loaded")) {
+                var firstNode = filteredNodes[0];
+                var fakeUi = { newPanel: firstTabPanel };
+                self.loadTabContent(firstNode, firstTabId, tabPrefix, filteredNodes, fakeUi);
+            }
         }
 
         callback();
@@ -620,14 +587,12 @@ var KGquery_NodeInfos = (function () {
     self.loadTabContent = function (node, tabId, tabPrefix, filteredNodes, ui) {
         ui.newPanel.data("loaded", true);
 
-        self.saveKGqueryState();
         KGquery.clearAll(true);
         KGquery_proxy.init(self.currentSource, function () {
             var targetClassId = self.currentTargetClassId;
             var nodeIds = [targetClassId, node.id];
 
             self.executeNodeQuery(node, nodeIds, targetClassId, self.currentTargetClassName, self.uri, function (err, queryResult) {
-                self.restoreKGqueryState();
 
                 if (err) {
                     console.log(err);
@@ -667,7 +632,6 @@ var KGquery_NodeInfos = (function () {
             intermediateClassId = null;
         }
 
-        self.saveKGqueryState();
         KGquery.clearAll(true);
         KGquery_proxy.init(self.currentSource, function () {
             var targetClassId = self.currentTargetClassId;
@@ -680,7 +644,6 @@ var KGquery_NodeInfos = (function () {
             nodeIds.push(node.id);
 
             self.executeNodeQuery(node, nodeIds, targetClassId, targetClassName, uri, function (err, queryResult) {
-                self.restoreKGqueryState();
 
                 if (err) {
                     console.log(err);

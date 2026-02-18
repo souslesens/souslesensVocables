@@ -12,6 +12,8 @@ import OntologyModels from "../../shared/ontologyModels.js";
 import UIcontroller from "../mappingModeler/uiController.js";
 import AnnotationPropertiesTemplate_bot from "../../bots/annotationPropertiesTemplate_bot.js";
 import AdminAnnotationTemplates from "./admin_annotationTemplates.js";
+import AssignTemplate_bot from "../../bots/assignTemplate_bot.js";
+
 
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars

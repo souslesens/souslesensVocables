@@ -84,7 +84,9 @@ var AdminAnnotationTemplates = (function () {
     var html = "";
     html += "<div style='margin-bottom:8px;'>";
     html +=
-      "<button class='btn btn-sm btn-outline-primary' onclick='AdminAnnotationTemplates.openAssignmentsManager()'>Refresh</button>";
+      "<button class='btn btn-sm btn-outline-primary' onclick='AdminAnnotationTemplates.openAssignmentsManager()'>Refresh</button>";    
+    html +=
+        "<button class='btn btn-sm btn-outline-success' onclick='AssignTemplate_bot.start()'>Assign template...</button>";
     html += "</div>";
 
     html += "<table class='table table-bordered table-sm' style='font-size:12px;'>";

@@ -200,9 +200,9 @@ var AssignTemplate_bot = (function () {
 
         userIds.sort();
 
-        var choices = userIds.map(function (userId) {
-          var u = usersMap[userId];
-          return { id: userId, label: (u && u.login ? u.login : userId) };
+        var choices = userIds.map(function (userLogin) {
+          var user = usersMap[userLogin];
+          return { id: userLogin, label: (user && user.login ? user.login : userLogin) };
         });
 
         return self.myBotEngine.showList(choices, "selectedUserId");
@@ -424,15 +424,36 @@ var AssignTemplate_bot = (function () {
       dataType: "json",
       success: function (data) {
         var resources = data && data.resources ? data.resources : {};
-        // Swagger model suggests resources is an object; we normalize into {id: user}
         var usersMap = {};
-        Object.keys(resources).forEach(function (key) {
-          var userObj = resources[key];
-          // Some APIs use key=id, some wrap differently
-          if (userObj && userObj.id) {
-            usersMap[userObj.id] = userObj;
-          } else {
-            usersMap[key] = userObj;
+
+        // The ShareUserData_bot expects resources values to be wrapper objects
+        // like: { "admin": { id:"1", login:"admin", groups:[...] } }
+        // It extracts login with Object.keys(wrapper)[0].
+        var wrappersArray = Object.values(resources);
+
+        wrappersArray.forEach(function (wrapper) {
+          if (!wrapper || typeof wrapper !== "object") {
+            return;
+          }
+
+          // Case A: wrapper has exactly one key = login
+          var wrapperKeys = Object.keys(wrapper);
+          if (wrapperKeys.length === 1) {
+            var loginKey = wrapperKeys[0];
+            var userObj = wrapper[loginKey];
+
+            if (userObj && typeof userObj === "object") {
+              if (!userObj.login) {
+                userObj.login = loginKey;
+              }
+              usersMap[userObj.login] = userObj;
+            }
+            return;
+          }
+
+          // Case B: direct user object (fallback)
+          if (wrapper.login) {
+            usersMap[wrapper.login] = wrapper;
           }
         });
 

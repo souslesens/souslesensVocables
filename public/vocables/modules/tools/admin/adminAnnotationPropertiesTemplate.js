@@ -1,15 +1,18 @@
 import MainController from "../../shared/mainController.js";
 import SourceSelectorWidget from "../../uiWidgets/sourceSelectorWidget.js";
+import AssignAnnotationPropertiesTemplate_bot
+from "../../bots/assignAnnotationPropertiesTemplate_bot.js";
+
 
 /**
- * @module AdminAnnotationTemplates
+ * @module adminAnnotationPropertiesTemplate
  * Admin UI for managing annotation templates assignments.
  *
  * Key rules:
  * - GET /users/data (list) does NOT include data_content => always use GET /users/data/{id} for details.
  * - Active assignment for a source is the newest one (highest assignmentId).
  */
-var AdminAnnotationTemplates = (function () {
+var AdminAnnotationPropertiesTemplate = (function () {
   var self = {};
 
   var ASSIGNMENT_TYPE = "annotationPropertiesTemplateAssignment";
@@ -76,7 +79,7 @@ var AdminAnnotationTemplates = (function () {
    * @param {object} options
    */
   self.renderAssignmentsTable = function (rows, options) {
-    var title = "Annotation template assignments";
+    var title = "Annotation properties template assignments";
     if (options && options.selectedSources && options.selectedSources.length > 0) {
       title += " (filtered)";
     }
@@ -84,9 +87,9 @@ var AdminAnnotationTemplates = (function () {
     var html = "";
     html += "<div style='margin-bottom:8px;'>";
     html +=
-      "<button class='btn btn-sm btn-outline-primary' onclick='AdminAnnotationTemplates.openAssignmentsManager()'>Refresh</button>";    
+      "<button class='btn btn-sm btn-outline-primary' onclick='AdminAnnotationPropertiesTemplate.openAssignmentsManager()'>Refresh</button>";    
     html +=
-        "<button class='btn btn-sm btn-outline-success' onclick='AssignTemplate_bot.start()'>Assign template...</button>";
+        "<button class='btn btn-sm btn-outline-success' onclick='AssignAnnotationPropertiesTemplate_bot.start()'>Assign template...</button>";
     html += "</div>";
 
     html += "<table class='table table-bordered table-sm' style='font-size:12px;'>";
@@ -112,17 +115,17 @@ var AdminAnnotationTemplates = (function () {
       html += "<td>";
 
       html +=
-        "<button class='btn btn-sm btn-outline-secondary' onclick='AdminAnnotationTemplates.viewTemplateDetails(" +
+        "<button class='btn btn-sm btn-outline-secondary' onclick='AdminAnnotationPropertiesTemplate.viewTemplateDetails(" +
         JSON.stringify(row.templateId) +
         ")'>View</button> ";
 
       html +=
-        "<button class='btn btn-sm btn-outline-primary' onclick='AdminAnnotationTemplates.promptChangeTemplate(" +
+        "<button class='btn btn-sm btn-outline-primary' onclick='AdminAnnotationPropertiesTemplate.promptChangeTemplate(" +
         JSON.stringify(row.source) +
         ")'>Change</button> ";
 
       html +=
-        "<button class='btn btn-sm btn-outline-danger' onclick='AdminAnnotationTemplates.deleteAssignment(" +
+        "<button class='btn btn-sm btn-outline-danger' onclick='AdminAnnotationPropertiesTemplate.deleteAssignment(" +
         JSON.stringify(row.assignmentId) +
         ")'>Delete</button>";
 
@@ -425,5 +428,5 @@ var AdminAnnotationTemplates = (function () {
   return self;
 })();
 
-export default AdminAnnotationTemplates;
-window.AdminAnnotationTemplates = AdminAnnotationTemplates;
+export default AdminAnnotationPropertiesTemplate;
+window.AdminAnnotationPropertiesTemplate = AdminAnnotationPropertiesTemplate;

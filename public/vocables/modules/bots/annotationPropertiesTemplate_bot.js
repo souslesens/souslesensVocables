@@ -21,48 +21,35 @@ var AnnotationPropertiesTemplate_bot = (function () {
    * @param {function} callback Standard callback(err)
    */
   self.start = function (workflow, _params, callback) {
-    var startParams = self.myBotEngine.fillStartParams(arguments);
-    self.callback = callback;
+      var startParams = self.myBotEngine.fillStartParams(arguments);
+      self.callback = callback;
 
-    if (!workflow) {
-      workflow = self.workflow;
-    }
-
-    self.myBotEngine.init(AnnotationPropertiesTemplate_bot, workflow, null, function () {
-      self.myBotEngine.startParams = startParams;
-
-      self.params = {
-        // Admin passes selected sources here
-        selectedSources: [],
-        // We use the first selected source as the "reference" source for listing vocabs
-        referenceSource: Lineage_sources.activeSource,
-
-        selectedVocabulary: "",
-        selectedPropertyUri: "",
-        propertyUriToLabelMap: {},
-
-        // Stored template content
-        templateSelections: [], // [{vocab, propertyUri, propertyLabel}]
-        templatePropertyUris: [], // [uri1, uri2, ...]
-      };
-
-      if (_params) {
-        for (var key in _params) {
-          self.params[key] = _params[key];
-        }
+      if (!workflow) {
+          workflow = self.workflow;
       }
 
-      // Normalize selected sources
-      if (Array.isArray(self.params.sources)) {
-        self.params.selectedSources = self.params.sources;
-      }
+      self.myBotEngine.init(AnnotationPropertiesTemplate_bot, workflow, null, function () {
+          self.myBotEngine.startParams = startParams;
 
-      if (self.params.selectedSources.length > 0) {
-        self.params.referenceSource = self.params.selectedSources[0];
-      }
+          self.params = {
+              referenceSource: null,
+              selectedVocabulary: "",
+              selectedPropertyUri: "",
+              propertyUriToLabelMap: {},
+              templateSelections: [],
+              templatePropertyUris: []
+          };
 
-      self.myBotEngine.nextStep();
-    });
+          // Optional reference source (context only)
+          if (_params && _params.referenceSource) {
+              self.params.referenceSource = _params.referenceSource;
+          } else {
+              self.params.referenceSource = Lineage_sources.activeSource || null;
+          }
+
+          // ✅ NOTHING ELSE HERE
+          self.myBotEngine.nextStep();
+      });
   };
 
   // ---------------------------
@@ -123,11 +110,13 @@ var AnnotationPropertiesTemplate_bot = (function () {
   self.workflow_loop = {
     _OR: {
       "Add another property": {
-        listTemplateVocabsFn: {
-          choosePropertyFn: {
-            afterChoosePropertyFn: self.workflow_loop,
-          },
-        },
+          listTemplateVocabsFn: {
+              // selectedVocabulary: {
+                  choosePropertyFn: {
+                      afterChoosePropertyFn: self.workflow_loop
+                  }
+              // }
+          }
       },
       "Save template": { saveTemplateFn: self.workflow_end },
     },
@@ -139,19 +128,19 @@ var AnnotationPropertiesTemplate_bot = (function () {
         End: { endBotFn: {} },
     },
   };
-  // Entry menu 
-    self.workflow_entry = {
-        _OR: {
-            "Choose property": {
-            listTemplateVocabsFn: {
-                choosePropertyFn: {
-                afterChoosePropertyFn: self.workflow_loop,
-                },
-            },
-            },
-            End: { endBotFn: {} },
-        },
-    };
+  // Entry point: directly start with vocabulary selection
+  self.workflow_entry = {
+      _OR: {
+          "Choose property": {
+              listTemplateVocabsFn: {
+                      choosePropertyFn: {
+                          afterChoosePropertyFn: self.workflow_loop
+                    }
+              }
+          },
+          End: { endBotFn: {} }
+      }
+  };
 
   self.workflow = self.workflow_entry;
 
@@ -169,8 +158,24 @@ var AnnotationPropertiesTemplate_bot = (function () {
      */
     listTemplateVocabsFn: function () {
       var sourceForVocabs = self.params.referenceSource;
+      
+      // Fallback for GLOBAL templates (no source selected)
+      // We list only standard vocabularies
+      if (!sourceForVocabs) {
+          var standardVocabs = [
+              { id: "rdf", label: "[Standard] rdf" },
+              { id: "rdfs", label: "[Standard] rdfs" },
+              { id: "owl", label: "[Standard] owl" },
+              { id: "skos", label: "[Standard] skos" }
+          ];
 
-      // Same behavior as other tools: source + imports + base vocabs
+          return self.myBotEngine.showList(
+              standardVocabs,
+              "selectedVocabulary"
+          );
+      }
+
+      // Normal behavior: source-based vocab listing
       CommonBotFunctions.listVocabsFn(sourceForVocabs, true, function (err, vocabs) {
         if (err) {
           return self.myBotEngine.abort(err.responseText || err);
@@ -178,25 +183,98 @@ var AnnotationPropertiesTemplate_bot = (function () {
         if (!vocabs || vocabs.length === 0) {
           return self.myBotEngine.previousStep("No vocabularies found. Try another source.");
         }
-        // Add readable categories in labels to reduce confusion
-        var referenceSource = self.params.referenceSource;
+        // -------------------------------------------------------------------------
+        // Vocabulary categorization and sorting (Admin / Bot UI)
+        // -------------------------------------------------------------------------
 
-        var categorizedVocabs = vocabs.map(function (vocabItem ) {
-            // v can be string or object depending on listVocabsFn implementation
-            var id = typeof vocabItem === "string" ? vocabItem : vocabItem.id;
-            var label = typeof vocabItem === "string" ? vocabItem : (vocabItem.label || vocabItem.id);
+        // RDF core vocabularies always available in SousLesens
+        var RDF_STANDARD_VOCABS = {
+            rdf: true,
+            rdfs: true,
+            owl: true,
+            skos: true,
+        };
 
-            var category = "[Import]";
-            if (id === referenceSource) {
-                category = "[Source]";
-            } else if (id === "rdf" || id === "rdfs" || id === "owl" || id === "skos") {
-                category = "[Standard]";
+        // Display order for categories (UX-oriented)
+        var VOCAB_CATEGORY_ORDER = {
+            Source: 1,
+            Import: 2,
+            Standard: 3,
+        };
+
+        /**
+         * Returns the functional category of a vocabulary.
+         * @param {string} vocabId
+         * @param {string} referenceSource
+         * @returns {"Source"|"Import"|"Standard"}
+         */
+        function getVocabularyCategory(vocabId, referenceSource) {
+            if (vocabId === referenceSource) {
+                return "Source";
+            }
+            if (RDF_STANDARD_VOCABS[vocabId]) {
+                return "Standard";
+            }
+            return "Import";
+        }
+
+        /**
+         * Normalizes raw vocabulary item coming from listVocabsFn.
+         * Handles both string and object formats.
+         */
+        function normalizeVocabularyItem(vocabItem) {
+            if (!vocabItem) return null;
+
+            if (typeof vocabItem === "string") {
+                return {
+                    id: vocabItem,
+                    label: vocabItem,
+                };
             }
 
-            return { id: id, label: category + " " + label };
+            if (typeof vocabItem === "object" && vocabItem.id) {
+                return {
+                    id: vocabItem.id,
+                    label: vocabItem.label || vocabItem.id,
+                };
+            }
+
+            return null;
+        }
+
+        // Reference source used to identify [Source]
+        var referenceSource = self.params.referenceSource;
+
+        // Build categorized vocabularies
+        var categorizedVocabularies = vocabs
+            .map(normalizeVocabularyItem)
+            .filter(Boolean)
+            .map(function (vocab) {
+                var category = getVocabularyCategory(vocab.id, referenceSource);
+
+                return {
+                    id: vocab.id,
+                    label: "[" + category + "] " + vocab.label,
+                    category: category,
+                };
+            });
+
+        // Sort vocabularies for better UX
+        categorizedVocabularies.sort(function (a, b) {
+            var categoryDiff =
+                VOCAB_CATEGORY_ORDER[a.category] -
+                VOCAB_CATEGORY_ORDER[b.category];
+
+            if (categoryDiff !== 0) {
+                return categoryDiff;
+            }
+
+            // Same category → alphabetical order
+            return a.label.localeCompare(b.label);
         });
 
-        self.myBotEngine.showList(categorizedVocabs, "selectedVocabulary");
+        // Feed BotEngine list
+        self.myBotEngine.showList(categorizedVocabularies, "selectedVocabulary");
       });
     },
 
@@ -315,11 +393,14 @@ var AnnotationPropertiesTemplate_bot = (function () {
       }
 
       var dataContent = {
-        referenceSource: self.params.referenceSource,
-        selectedSources: self.params.selectedSources,
-        properties: self.params.templatePropertyUris,
-        selections: self.params.templateSelections,
+          properties: self.params.templatePropertyUris,
+          selections: self.params.templateSelections
       };
+
+      // Keep referenceSource only as information (optional)
+      if (self.params.referenceSource) {
+          dataContent.referenceSource = self.params.referenceSource;
+      }
 
       UserDataWidget.showSaveDialog(
         "annotationPropertiesTemplate",
@@ -342,19 +423,19 @@ var AnnotationPropertiesTemplate_bot = (function () {
           };
 
           // Auto-apply to selected sources (the ones chosen in Admin)
-          self.functions.createAssignmentsForSelectedSourcesFn(saved.id, function (err2) {
-            if (err2) {
-             UI.message("Template saved but apply failed: " + (err2.responseText || err2.message || err2), true);
-            } else {
-                UI.message("Template saved and applied to selected sources", true);
-            }
-            self.functions.showTemplateSummaryFn();
+          // self.functions.createAssignmentsForSelectedSourcesFn(saved.id, function (err2) {
+          //   if (err2) {
+          //    UI.message("Template saved but apply failed: " + (err2.responseText || err2.message || err2), true);
+          //   } else {
+          //       UI.message("Template saved and applied to selected sources", true);
+          //   }
+          self.functions.showTemplateSummaryFn();
 
           // Show post-save menu: create another or finish
           self.myBotEngine.currentObj = self.workflow_afterSave;
           return self.myBotEngine.nextStep(self.workflow_afterSave);
 
-          });
+          // });
         }
       );
       
@@ -414,65 +495,65 @@ var AnnotationPropertiesTemplate_bot = (function () {
         return self.myBotEngine.end();
     },
 
-    /**
-     * Creates one assignment record per selected source.
-     * Assignment = (templateId -> sourceLabel).
-     * @param {number|string} templateId
-     * @param {function} callback error-first callback
-     */
-    createAssignmentsForSelectedSourcesFn: function (templateId, callback) {
-        var selectedSources = self.params.selectedSources || [];
+    // /**
+    //  * Creates one assignment record per selected source.
+    //  * Assignment = (templateId -> sourceLabel).
+    //  * @param {number|string} templateId
+    //  * @param {function} callback error-first callback
+    //  */
+    // createAssignmentsForSelectedSourcesFn: function (templateId, callback) {
+    //     var selectedSources = self.params.selectedSources || [];
 
-        if (!templateId) {
-            return callback(new Error("Missing templateId"));
-        }
-        if (!selectedSources || selectedSources.length === 0) {
-            return callback(new Error("No selected sources"));
-        }
+    //     if (!templateId) {
+    //         return callback(new Error("Missing templateId"));
+    //     }
+    //     if (!selectedSources || selectedSources.length === 0) {
+    //         return callback(new Error("No selected sources"));
+    //     }
 
-        async.eachSeries(
-            selectedSources,
-            function (sourceLabel, callbackEach) {
-            var assignmentContent = {
-                templateId: templateId,
-                source: sourceLabel,
-                placeholderValue: "__TO__FILL__",
-                appliedAt: new Date().toISOString(),
-            };
+    //     async.eachSeries(
+    //         selectedSources,
+    //         function (sourceLabel, callbackEach) {
+    //         var assignmentContent = {
+    //             templateId: templateId,
+    //             source: sourceLabel,
+    //             placeholderValue: "__TO__FILL__",
+    //             appliedAt: new Date().toISOString(),
+    //         };
 
-            var payload = {
-                data_path: "",
-                data_type: "annotationPropertiesTemplateAssignment",
-                data_label: "Template " + templateId + " for " + sourceLabel,
-                data_comment: "Auto-apply from AnnotationPropertiesTemplate_bot",
-                data_group: sourceLabel,
-                data_tool: "admin",
-                data_source: sourceLabel,
-                data_content: assignmentContent,
-                is_shared: false,
-                shared_profiles: [],
-                shared_users: [],
-            };
+    //         var payload = {
+    //             data_path: "",
+    //             data_type: "annotationPropertiesTemplateAssignment",
+    //             data_label: "Template " + templateId + " for " + sourceLabel,
+    //             data_comment: "Auto-apply from AnnotationPropertiesTemplate_bot",
+    //             data_group: sourceLabel,
+    //             data_tool: "admin",
+    //             data_source: sourceLabel,
+    //             data_content: assignmentContent,
+    //             is_shared: false,
+    //             shared_profiles: [],
+    //             shared_users: [],
+    //         };
 
-            $.ajax({
-                url: Config.apiUrl + "/users/data",
-                type: "POST",
-                dataType: "json",
-                contentType: "application/json; charset=utf-8",
-                data: JSON.stringify(payload),
-                success: function () {
-                return callbackEach();
-                },
-                error: function (err) {
-                return callbackEach(err);
-                },
-            });
-            },
-            function (err) {
-            return callback(err || null);
-            },
-        );
-    },
+    //         $.ajax({
+    //             url: Config.apiUrl + "/users/data",
+    //             type: "POST",
+    //             dataType: "json",
+    //             contentType: "application/json; charset=utf-8",
+    //             data: JSON.stringify(payload),
+    //             success: function () {
+    //             return callbackEach();
+    //             },
+    //             error: function (err) {
+    //             return callbackEach(err);
+    //             },
+    //         });
+    //         },
+    //         function (err) {
+    //         return callback(err || null);
+    //         },
+    //     );
+    // },
     /**
      * Shows a summary of the created template: meta + sources + properties.
      */

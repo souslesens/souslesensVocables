@@ -831,6 +831,19 @@ var MappingColumnsGraph = (function () {
         dataTables = dataTables.filter(function (item) {
             return item != undefined;
         });
+
+        if (dataTables.length == 0) {
+            MappingColumnsGraph.visjsGraph.data.nodes = nodes;
+            MappingColumnsGraph.visjsGraph.draw(function () {
+                MappingColumnsGraph.visjsGraph.network.fit();
+                MappingColumnsGraph.refreshLegend(MappingColumnsGraph.graphDiv);
+                if (callback) {
+                    callback();
+                }
+            });
+            return;
+        }
+
         var index = 0;
         async.eachSeries(
             dataTables,

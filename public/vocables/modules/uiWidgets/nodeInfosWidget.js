@@ -496,6 +496,34 @@ defaultLang = 'en';*/
                     }
                 }
 
+                // ----------------------------------------------------
+                // Move EMPTY annotation properties (template placeholders)
+                // to the very end of the display order
+                // ----------------------------------------------------
+                var emptyAnnotationProps = [];
+
+                defaultProps = defaultProps.filter(function (key) {
+                    var prop = self.propertiesMap.properties[key];
+                    if (!prop || !prop.value) {
+                        return true;
+                    }
+
+                    // Check if ALL values are empty placeholders ("?")
+                    var isEmpty = prop.value.every(function (v) {
+                        return v.value === "?";
+                    });
+
+                    if (isEmpty) {
+                        emptyAnnotationProps.push(key);
+                        return false; // remove for now
+                    }
+
+                    return true;
+                });
+
+                // Append empty annotation properties at the end
+                defaultProps = defaultProps.concat(emptyAnnotationProps);
+
                 var str = "<div class='NodesInfos_tableDiv'>" + "<table class='infosTable'>";
                 str +=
                     "<tr><td class='NodesInfos_CardId'>UUID</td><td><a target='" +

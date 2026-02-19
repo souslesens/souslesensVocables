@@ -10,9 +10,9 @@ import SparqlQueryUI from "../sparqlQueryUI.js";
 import SourceSelectorWidget from "../../uiWidgets/sourceSelectorWidget.js";
 import OntologyModels from "../../shared/ontologyModels.js";
 import UIcontroller from "../mappingModeler/uiController.js";
-import AnnotationPropertiesTemplate_bot from "../../bots/annotationPropertiesTemplate_bot.js";
-import AdminAnnotationTemplates from "./admin_annotationTemplates.js";
-import AssignTemplate_bot from "../../bots/assignTemplate_bot.js";
+import CreateAnnotationPropertiesTemplate_bot from "../../bots/createAnnotationPropertiesTemplate_bot.js";
+import AdminAnnotationPropertiesTemplate from "./adminAnnotationPropertiesTemplate.js";
+import AssignAnnotationPropertiesTemplate_bot from "../../bots/assignAnnotationPropertiesTemplate_bot.js";
 
 
 
@@ -472,7 +472,7 @@ $("#sourceDivControlPanelDiv").html(html);*/
 
         // Start the template creation bot
         // It must work even with NO selected source (global template)
-        AnnotationPropertiesTemplate_bot.start(
+        CreateAnnotationPropertiesTemplate_bot.start(
             null,
             botParams,
             function (err) {
@@ -492,7 +492,7 @@ $("#sourceDivControlPanelDiv").html(html);*/
      * Opens the Admin UI to manage template assignments.
      */
     self.manageAnnotationTemplateAssignments = function () {
-        return AdminAnnotationTemplates.openAssignmentsManager();
+        return AdminAnnotationPropertiesTemplate.openAssignmentsManager();
     };
     return self;
 })();

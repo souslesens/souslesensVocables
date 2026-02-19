@@ -3,10 +3,16 @@
 
 <!-- AUTO-DESC:START -->
 
-This page summarizes the code structure for this directory and its immediate subdirectories. It focuses on the `api / v1 / paths / admin / plugins / repositories / fetch` area within the `api` module. Use the table of contents below to navigate deeper.
+## Overview
+
+This directory contains routes used to update a plugin Git repository by fetching its latest changes.
+
+## Modules
+
+### 1. Repository fetch (`{id}.js`)
+Updates a configured plugin repository identified by `id`. It triggers a fetch operation on the remote Git repository and returns a success or error status depending on the result.
 
 <!-- AUTO-DESC:END -->
-
 
 ```{toctree}
 :maxdepth: 5
@@ -21,4 +27,3 @@ This page summarizes the code structure for this directory and its immediate sub
 - `{id}.js`
 
 <!-- AUTO-INLINE-FILES:END -->
-

@@ -4,6 +4,7 @@ export default function () {
     let operations = {
         GET,
         POST,
+        DELETE,
     };
 
     function GET(req, res, next) {
@@ -93,6 +94,48 @@ export default function () {
         responses: {
             200: {
                 description: "Results",
+                schema: {
+                    type: "object",
+                },
+            },
+        },
+        tags: ["Data"],
+    };
+
+    function DELETE(req, res, next) {
+        dataController.deleteFile(req.query.dir, req.query.fileName, function (err, result) {
+            if (err) {
+                res.status(err === "file does not exist" ? 404 : 500).json({ error: err });
+                return next(err);
+            }
+            return res.status(200).json({ done: true, message: result });
+        });
+    }
+
+    DELETE.apiDoc = {
+        security: [{ restrictLoggedUser: [] }],
+        summary: "Delete a file",
+        description: "Delete a file from a sub-directory of data",
+        operationId: "Delete a file",
+        parameters: [
+            {
+                name: "dir",
+                description: "subDirectory in /dataDir",
+                type: "string",
+                in: "query",
+                required: true,
+            },
+            {
+                name: "fileName",
+                description: "fileName",
+                in: "query",
+                type: "string",
+                required: true,
+            },
+        ],
+        responses: {
+            200: {
+                description: "File deleted",
                 schema: {
                     type: "object",
                 },

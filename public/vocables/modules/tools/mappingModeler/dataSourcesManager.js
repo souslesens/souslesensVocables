@@ -682,13 +682,14 @@ var DataSourceManager = (function () {
      */
     self.deleteDataSource = function (jstreeNode) {
         var datasourceName = jstreeNode.id;
-        // Delete from config
+        var isCsv = jstreeNode.data.type == "csvSource";
+
         if (jstreeNode.data.type == "databaseSource") {
             if (DataSourceManager.rawConfig.databaseSources[datasourceName]) {
                 delete DataSourceManager.rawConfig.databaseSources[datasourceName];
                 JstreeWidget.deleteNode("mappingModeler_dataSourcesJstreeDiv", jstreeNode.id);
             }
-        } else if (jstreeNode.data.type == "csvSource") {
+        } else if (isCsv) {
             if (DataSourceManager.rawConfig.csvSources[datasourceName]) {
                 delete DataSourceManager.rawConfig.csvSources[datasourceName];
                 JstreeWidget.deleteNode("mappingModeler_dataSourcesJstreeDiv", jstreeNode.id);
@@ -701,14 +702,12 @@ var DataSourceManager = (function () {
             if (err) {
                 return MainController.errorAlert(err);
             }
-            // Delete all nodes/edges from this DataSource
 
             var newNodes = [];
             MappingColumnsGraph.visjsGraph.data.nodes.get().forEach(function (node) {
                 if (node.data.datasource != datasourceName) {
                     newNodes.push(node);
                 } else {
-                    // to not save n times
                     MappingColumnsGraph.visjsGraph.data.nodes.remove(node);
                 }
             });
@@ -723,10 +722,23 @@ var DataSourceManager = (function () {
                 }
             });
             MappingColumnsGraph.saveVisjsGraphWithConfig(function () {
-                MappingModeler.onLoaded();
+                if (isCsv) {
+                    var csvDir = "CSV/" + MappingModeler.currentSLSsource;
+                    $.ajax({
+                        type: "DELETE",
+                        url: Config.apiUrl + "/data/file?dir=" + encodeURIComponent(csvDir) + "&fileName=" + encodeURIComponent(datasourceName),
+                        dataType: "json",
+                        success: function (_result) {
+                            MappingModeler.onLoaded();
+                        },
+                        error: function (_err) {
+                            MappingModeler.onLoaded();
+                        },
+                    });
+                } else {
+                    MappingModeler.onLoaded();
+                }
             });
-            // Delete File from CSV if it's a CSV
-            // Not done because road don't exist
         });
     };
 

@@ -455,26 +455,37 @@ $("#sourceDivControlPanelDiv").html(html);*/
 
     /**
      * Starts the annotation template workflow from Admin.
-     * Forces the user to select one or more sources via checkboxes.
+     * The workflow will create an annotation template based on the vocabularies of a selected source (if any) or globally (if no source is selected).
      */
     self.createAnnotationPropertiesTemplate = function () {
-        var selectedSources = SourceSelectorWidget.getCheckedSources();
+        // Get selected sources (can be empty)
+        var selectedSources = SourceSelectorWidget.getCheckedSources() || [];
 
-        if (!selectedSources || selectedSources.length === 0) {
-            return alert("Please select at least ONE source (checkbox in the sources tree).");
+        // Bot parameters
+        var botParams = {};
+
+        // If at least one source is selected, use the first one
+        // ONLY as a reference to list vocabularies
+        if (selectedSources.length > 0) {
+            botParams.referenceSource = selectedSources[0];
         }
 
-        // Start the dedicated bot with selected sources
+        // Start the template creation bot
+        // It must work even with NO selected source (global template)
         AnnotationPropertiesTemplate_bot.start(
             null,
-            { sources: selectedSources },
+            botParams,
             function (err) {
-            if (err) {
-                console.error(err);
-                return MainController.errorAlert(err.responseText || err.message || err);
+                if (err) {
+                    console.error(err);
+                    return MainController.errorAlert(
+                        err.responseText ||
+                        err.message ||
+                        err
+                    );
+                }
+                UI.message("Annotation template workflow finished", true);
             }
-            UI.message("Annotation template workflow finished", true);
-            },
         );
     };
     /**

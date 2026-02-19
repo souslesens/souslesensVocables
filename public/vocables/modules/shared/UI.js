@@ -98,7 +98,14 @@ var UI = (function () {
     };
 
     self.copyCurrentQuery = function () {
-        common.copyTextToClipboard(Sparql_proxy.currentQuery);
+        var query = Sparql_proxy.currentQuery;
+        if (query) {
+            var offsetIndex = query.lastIndexOf(" offset ");
+            if (offsetIndex > -1) {
+                query = query.substring(0, offsetIndex);
+            }
+        }
+        common.copyTextToClipboard(query);
     };
 
     //Etablish the resizing, load select bar tools --> Keep here

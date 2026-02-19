@@ -1,22 +1,21 @@
 import BotEngineClass from "./_botEngineClass.js";
 
 /**
- * @module AssignTemplate_bot
- * Assigns an annotationPropertiesTemplate to:
- * - a profile (applies to profile accessible sources)
- * - a user (applies to union of profile sources from user.groups)
+ * @module assignAnnotationPropertiesTemplate_bot
+ * Assigns an annotation properties template to:
+ * - a profile (applies to its accessible sources)
+ * - a user (union of profile sources)
  *
- * This bot creates one assignment per source:
- * data_type = annotationPropertiesTemplateAssignment
+ * One assignment record is created per source.
  */
-var AssignTemplate_bot = (function () {
+var AssignAnnotationPropertiesTemplate_bot = (function () {
   var self = {};
   self.myBotEngine = new BotEngineClass();
-  self.title = "Assign template";
+  self.title = "Assign annotation properties template";
 
   var TEMPLATE_TYPE = "annotationPropertiesTemplate";
   var ASSIGNMENT_TYPE = "annotationPropertiesTemplateAssignment";
-  var PLACEHOLDER_VALUE = "__TO__FILL__";
+
 
   self.start = function (workflow, _params, callback) {
     var startParams = self.myBotEngine.fillStartParams(arguments);
@@ -26,7 +25,7 @@ var AssignTemplate_bot = (function () {
       workflow = self.workflow;
     }
 
-    self.myBotEngine.init(AssignTemplate_bot, workflow, null, function () {
+    self.myBotEngine.init(AssignAnnotationPropertiesTemplate_bot, workflow, null, function () {
       self.myBotEngine.startParams = startParams;
 
       self.params = {
@@ -318,7 +317,7 @@ var AssignTemplate_bot = (function () {
             data_path: "",
             data_type: ASSIGNMENT_TYPE,
             data_label: "Template " + templateId + " for " + sourceLabel,
-            data_comment: "Assigned from AssignTemplate_bot",
+            data_comment: "Assigned from assignAnnotationPropertiesTemplate_bot",
             data_group: sourceLabel,
             data_tool: "admin",
             data_source: sourceLabel,
@@ -535,82 +534,6 @@ var AssignTemplate_bot = (function () {
     UI.setDialogTitle("#smallDialogDiv", "Preview sources");
   }
 
-  // -------------------------
-  // Internal helpers (logic)
-  // -------------------------
-
-  /**
-   * Computes accessible sources for a profile using:
-   * - allowedSourceSchemas (required)
-   * - sourcesAccessControl (optional; when provided, missing keys are treated as forbidden)
-   *
-   * This follows the same spirit as Admin.getUserAllowedSources (schemaType + draft filtering). [1](https://jemsprod-my.sharepoint.com/personal/cbekhouche_jems-group_com/Documents/Fichiers%20Microsoft%20Copilot%20Chat/shareUserData_bot.js)
-   */
-  function computeAccessibleSourcesForProfile(profile) {
-    if (!profile) return [];
-
-    var allowedSchemas = profile.allowedSourceSchemas || [];
-    var sourcesAccessControl = profile.sourcesAccessControl || null;
-    var hasAccessControlRules = sourcesAccessControl && Object.keys(sourcesAccessControl).length > 0;
-
-    var out = [];
-
-    Object.keys(Config.sources)
-      .sort()
-      .forEach(function (sourceLabel) {
-        var src = Config.sources[sourceLabel];
-        if (!src) return;
-
-        // Ignore drafts
-        if (src.isDraft) return;
-
-        // Must match schema type
-        var schemaType = src.schemaType;
-        if (allowedSchemas.length > 0 && allowedSchemas.indexOf(schemaType) < 0) {
-          return;
-        }
-
-        // Access control by schemaType/group path (optional)
-        if (hasAccessControlRules) {
-          var groupPath = src.group || "";
-          var accessKeyCandidates = buildAccessKeyCandidates(schemaType, groupPath);
-
-          var decision = null;
-          accessKeyCandidates.forEach(function (k) {
-            if (decision) return;
-            if (sourcesAccessControl[k]) decision = sourcesAccessControl[k];
-          });
-
-          // If rules exist and no match -> forbidden by default
-          if (!decision) {
-            return;
-          }
-          if (decision === "forbidden") {
-            return;
-          }
-          // decision "read" or "readwrite" => allowed
-        }
-
-        out.push(sourceLabel);
-      });
-
-    return out;
-  }
-
-  function buildAccessKeyCandidates(schemaType, groupPath) {
-    // Try most specific first: schemaType/groupPath, then progressively shorten, then schemaType
-    var candidates = [];
-    if (groupPath) {
-      var parts = groupPath.split("/");
-      while (parts.length > 0) {
-        candidates.push(schemaType + "/" + parts.join("/"));
-        parts.pop();
-      }
-    }
-    candidates.push(schemaType);
-    return candidates;
-  }
-
   /**
    * Returns sources where this template is ACTIVE (active-only per source).
    * We do:
@@ -688,5 +611,5 @@ var AssignTemplate_bot = (function () {
   return self;
 })();
 
-export default AssignTemplate_bot;
-window.AssignTemplate_bot = AssignTemplate_bot;
+export default AssignAnnotationPropertiesTemplate_bot;
+window.AssignAnnotationPropertiesTemplate_bot = AssignAnnotationPropertiesTemplate_bot;

@@ -544,8 +544,8 @@ var CreateResource_bot = (function () {
                     return callback(null);
                     }
 
-                    // 4) Insert triples with "__TO__FILL__"
-                    var placeholder = "__TO__FILL__";
+                    // 4) Insert triples with "?" as object value
+                    var placeholder = "?";
                     var triplesToInsert = properties.map(function (predicateUri) {
                     return {
                         subject: resourceUri,

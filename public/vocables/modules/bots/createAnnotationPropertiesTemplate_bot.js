@@ -4,16 +4,16 @@ import Lineage_sources from "../tools/lineage/lineage_sources.js";
 import UserDataWidget from "../uiWidgets/userDataWidget.js";
 
 /**
- * @module AnnotationPropertiesTemplate_bot
+ * @module createAnnotationPropertiesTemplate_bot
  * A dedicated workflow to create "annotation properties templates".
- * This bot is started from the Admin menu and requires at least one selected source.
+ * This bot is started from the Admin menu. 
+ * A reference source may be provided for vocabulary listing, but is optional.
  */
-var AnnotationPropertiesTemplate_bot = (function () {
+var CreateAnnotationPropertiesTemplate_bot = (function () {
   var self = {};
 
   self.myBotEngine = new BotEngineClass();
-  self.title = "Annotation properties template";
-
+  self.title = "Create annotation properties template";
   /**
    * Starts the bot.
    * @param {object} workflow Optional workflow override
@@ -28,7 +28,7 @@ var AnnotationPropertiesTemplate_bot = (function () {
           workflow = self.workflow;
       }
 
-      self.myBotEngine.init(AnnotationPropertiesTemplate_bot, workflow, null, function () {
+      self.myBotEngine.init(CreateAnnotationPropertiesTemplate_bot, workflow, null, function () {
           self.myBotEngine.startParams = startParams;
 
           self.params = {
@@ -40,62 +40,17 @@ var AnnotationPropertiesTemplate_bot = (function () {
               templatePropertyUris: []
           };
 
-          // Optional reference source (context only)
+          // Optional reference source (context only) (à revoir si utile)
           if (_params && _params.referenceSource) {
               self.params.referenceSource = _params.referenceSource;
           } else {
               self.params.referenceSource = Lineage_sources.activeSource || null;
           }
 
-          // ✅ NOTHING ELSE HERE
+          
           self.myBotEngine.nextStep();
       });
   };
-
-  // ---------------------------
-  // Helpers 
-  // ---------------------------
-
-  /**
-   * Deduplicates selections by (vocab + uri).
-   * @param {Array<{vocab:string, propertyUri:string, propertyLabel:string}>} selections
-   * @returns {Array}
-   */
-  function dedupeSelections(selections) {
-    var seen = {};
-    var out = [];
-
-    selections.forEach(function (item) {
-      if (!item || !item.vocab || !item.propertyUri) {
-        return;
-      }
-      var key = item.vocab + "||" + item.propertyUri;
-      if (!seen[key]) {
-        seen[key] = 1;
-        out.push(item);
-      }
-    });
-
-    return out;
-  }
-
-  /**
-   * Extracts a shorter display label (removes "vocab:" prefix when present).
-   * @param {string} vocab
-   * @param {string} label
-   * @returns {string}
-   */
-  function normalizePropertyLabel(vocab, label) {
-    if (!label) return "";
-    if (typeof label !== "string") {
-    label = String(label);
-    }
-    var prefix = vocab + ":";
-    if (label.indexOf(prefix) === 0) {
-    return label.substring(prefix.length);
-    }
-    return label;
-  }
 
   // ---------------------------
   // Workflows
@@ -111,11 +66,9 @@ var AnnotationPropertiesTemplate_bot = (function () {
     _OR: {
       "Add another property": {
           listTemplateVocabsFn: {
-              // selectedVocabulary: {
                   choosePropertyFn: {
                       afterChoosePropertyFn: self.workflow_loop
                   }
-              // }
           }
       },
       "Save template": { saveTemplateFn: self.workflow_end },
@@ -183,9 +136,9 @@ var AnnotationPropertiesTemplate_bot = (function () {
         if (!vocabs || vocabs.length === 0) {
           return self.myBotEngine.previousStep("No vocabularies found. Try another source.");
         }
-        // -------------------------------------------------------------------------
+        // --------------------------------------------------------------
         // Vocabulary categorization and sorting (Admin / Bot UI)
-        // -------------------------------------------------------------------------
+        // -------------------------------------------------------------
 
         // RDF core vocabularies always available in SousLesens
         var RDF_STANDARD_VOCABS = {
@@ -274,7 +227,7 @@ var AnnotationPropertiesTemplate_bot = (function () {
         });
 
         // Feed BotEngine list
-        self.myBotEngine.showList(categorizedVocabularies, "selectedVocabulary");
+        return self.myBotEngine.showList(categorizedVocabularies, "selectedVocabulary");
       });
     },
 
@@ -422,13 +375,6 @@ var AnnotationPropertiesTemplate_bot = (function () {
             comment: saved.data_comment || "",
           };
 
-          // Auto-apply to selected sources (the ones chosen in Admin)
-          // self.functions.createAssignmentsForSelectedSourcesFn(saved.id, function (err2) {
-          //   if (err2) {
-          //    UI.message("Template saved but apply failed: " + (err2.responseText || err2.message || err2), true);
-          //   } else {
-          //       UI.message("Template saved and applied to selected sources", true);
-          //   }
           self.functions.showTemplateSummaryFn();
 
           // Show post-save menu: create another or finish
@@ -469,7 +415,7 @@ var AnnotationPropertiesTemplate_bot = (function () {
       }, 200);
     },
 
-          /**
+    /**
      * Resets current template selections (keeps selected sources).
      */
     resetTemplateFn: function () {
@@ -495,68 +441,6 @@ var AnnotationPropertiesTemplate_bot = (function () {
         return self.myBotEngine.end();
     },
 
-    // /**
-    //  * Creates one assignment record per selected source.
-    //  * Assignment = (templateId -> sourceLabel).
-    //  * @param {number|string} templateId
-    //  * @param {function} callback error-first callback
-    //  */
-    // createAssignmentsForSelectedSourcesFn: function (templateId, callback) {
-    //     var selectedSources = self.params.selectedSources || [];
-
-    //     if (!templateId) {
-    //         return callback(new Error("Missing templateId"));
-    //     }
-    //     if (!selectedSources || selectedSources.length === 0) {
-    //         return callback(new Error("No selected sources"));
-    //     }
-
-    //     async.eachSeries(
-    //         selectedSources,
-    //         function (sourceLabel, callbackEach) {
-    //         var assignmentContent = {
-    //             templateId: templateId,
-    //             source: sourceLabel,
-    //             placeholderValue: "__TO__FILL__",
-    //             appliedAt: new Date().toISOString(),
-    //         };
-
-    //         var payload = {
-    //             data_path: "",
-    //             data_type: "annotationPropertiesTemplateAssignment",
-    //             data_label: "Template " + templateId + " for " + sourceLabel,
-    //             data_comment: "Auto-apply from AnnotationPropertiesTemplate_bot",
-    //             data_group: sourceLabel,
-    //             data_tool: "admin",
-    //             data_source: sourceLabel,
-    //             data_content: assignmentContent,
-    //             is_shared: false,
-    //             shared_profiles: [],
-    //             shared_users: [],
-    //         };
-
-    //         $.ajax({
-    //             url: Config.apiUrl + "/users/data",
-    //             type: "POST",
-    //             dataType: "json",
-    //             contentType: "application/json; charset=utf-8",
-    //             data: JSON.stringify(payload),
-    //             success: function () {
-    //             return callbackEach();
-    //             },
-    //             error: function (err) {
-    //             return callbackEach(err);
-    //             },
-    //         });
-    //         },
-    //         function (err) {
-    //         return callback(err || null);
-    //         },
-    //     );
-    // },
-    /**
-     * Shows a summary of the created template: meta + sources + properties.
-     */
     showTemplateSummaryFn: function () {
         var meta = self.params.savedTemplateMeta || {};
         var sources = self.params.selectedSources || [];
@@ -571,8 +455,7 @@ var AnnotationPropertiesTemplate_bot = (function () {
         html += "<div><b>Group:</b> " + (meta.group || "") + "</div>";
         html += "<div><b>Description:</b> " + (meta.comment || "") + "</div>";
 
-        // Sources
-        html += "<div style='margin-top:8px;'><b>Selected sources:</b> " + sources.join(", ") + "</div>";
+        html += "<div><b>Template scope:</b> Global</div>";
 
         // Properties
         html += "<div style='margin-top:8px;'><b>Template properties:</b></div>";
@@ -600,8 +483,52 @@ var AnnotationPropertiesTemplate_bot = (function () {
     },
   };
 
+  // ---------------------------
+  // Helpers 
+  // ---------------------------
+
+  /**
+   * Deduplicates selections by (vocab + uri).
+   * @param {Array<{vocab:string, propertyUri:string, propertyLabel:string}>} selections
+   * @returns {Array}
+   */
+  function dedupeSelections(selections) {
+    var seen = {};
+    var out = [];
+
+    selections.forEach(function (item) {
+      if (!item || !item.vocab || !item.propertyUri) {
+        return;
+      }
+      var key = item.vocab + "||" + item.propertyUri;
+      if (!seen[key]) {
+        seen[key] = 1;
+        out.push(item);
+      }
+    });
+
+    return out;
+  }
+
+  /**
+   * Extracts a shorter display label (removes "vocab:" prefix when present).
+   * @param {string} vocab
+   * @param {string} label
+   * @returns {string}
+   */
+  function normalizePropertyLabel(vocab, label) {
+    if (!label) return "";
+    if (typeof label !== "string") {
+    label = String(label);
+    }
+    var prefix = vocab + ":";
+    if (label.indexOf(prefix) === 0) {
+    return label.substring(prefix.length);
+    }
+    return label;
+  }
   return self;
 })();
 
-export default AnnotationPropertiesTemplate_bot;
-window.AnnotationPropertiesTemplate_bot = AnnotationPropertiesTemplate_bot;
+export default CreateAnnotationPropertiesTemplate_bot;
+window.CreateAnnotationPropertiesTemplate_bot = CreateAnnotationPropertiesTemplate_bot;

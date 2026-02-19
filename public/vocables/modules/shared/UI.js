@@ -104,6 +104,7 @@ var UI = (function () {
             if (offsetIndex > -1) {
                 query = query.substring(0, offsetIndex);
             }
+            query = query.replace(/\n{2,}/g, "\n");
         }
         common.copyTextToClipboard(query);
     };

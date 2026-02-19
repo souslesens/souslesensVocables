@@ -1,9 +1,9 @@
-import KGcreator_run from "../KGcreator/KGcreator_run.js";
-import KGcreator from "../KGcreator/KGcreator.js";
 import MappingsDetails from "./mappingsDetails.js";
 
 import MappingTransform from "./mappingTransform.js";
 import MappingModeler from "./mappingModeler.js";
+import SearchUtil from "../../search/searchUtil.js";
+import MainController from "../../shared/mainController.js";
 import Export from "../../shared/export.js";
 import UIcontroller from "./uiController.js";
 import DataSourceManager from "./dataSourcesManager.js";
@@ -20,14 +20,38 @@ var TripleFactory = (function () {
     var self = {};
 
     /**
-     * Indexes the RDF graph using the KGcreator_run module.
+     * Indexes the RDF graph in ElasticSearch for the current MappingModeler source.
      * @function
      * @name indexGraph
      * @memberof module:TripleFactory
      */
-    self.indexGraph = function () {
-        KGcreator.currentSlsvSource = MappingModeler.currentSLSsource;
-        KGcreator_run.indexGraph();
+    self.indexGraph = function (callback) {
+        var graphSource = MappingModeler.currentSLSsource;
+        if (!graphSource) {
+            return alert("no source selected");
+        }
+        if (!Config.sources[graphSource].graphUri) {
+            return alert("no graphUri for source " + graphSource);
+        }
+
+        if (callback || confirm("index source " + graphSource)) {
+            UI.message("indexing graph...", false, true);
+            SearchUtil.generateElasticIndex(graphSource, null, function (err, _result) {
+                if (err) {
+                    if (callback) {
+                        return callback(err.responseText);
+                    }
+                    return MainController.errorAlert(err.responseText);
+                }
+                UI.message("indexed graph " + Config.sources[graphSource].graphUri + " in index " + graphSource.toLowerCase(), true);
+                setTimeout(function () {
+                    UI.message("", false, true);
+                }, 5000);
+                if (callback) {
+                    return callback();
+                }
+            });
+        }
     };
 
     /**

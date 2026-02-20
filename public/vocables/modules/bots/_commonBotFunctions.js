@@ -4,8 +4,6 @@ import Sparql_proxy from "../sparqlProxies/sparql_proxy.js";
 import Sparql_common from "../sparqlProxies/sparql_common.js";
 import JstreeWidget from "../uiWidgets/jstreeWidget.js";
 
-
-
 var CommonBotFunctions = (function () {
     var self = {};
 

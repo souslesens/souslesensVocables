@@ -34,7 +34,7 @@ var AssignAnnotationPropertiesTemplate_bot = (function () {
         selectedTemplateId: null,
         selectedProfileId: "",
         selectedUserId: "",
-
+        selectedSource: "",
         // loaded caches
         templatesList: [],
         profilesMap: null, // { profileId: profileObject }
@@ -67,10 +67,27 @@ var AssignAnnotationPropertiesTemplate_bot = (function () {
 
   self.workflow_chooseTarget = {
     _OR: {
-      Profile: { chooseProfileFn: { afterChooseProfileFn: { previewSourcesFn: self.workflow_confirmApply } } },
-      User: { chooseUserFn: { afterChooseUserFn: { previewSourcesFn: self.workflow_confirmApply } } },
-      Cancel: { endFn: self.workflow_end },
-    },
+      Profile: {
+        chooseProfileFn: {
+          afterChooseProfileFn: {
+            previewSourcesFn: self.workflow_confirmApply
+          }
+        }
+      },
+      User: {
+        chooseUserFn: {
+          afterChooseUserFn: {
+            previewSourcesFn: self.workflow_confirmApply
+          }
+        }
+      },
+      Source: {
+        chooseSourceFn: {
+          afterChooseSourceFn: self.workflow_confirmApply
+        }
+      },
+      Cancel: { endFn: self.workflow_end }
+    }
   };
 
   self.workflow = {
@@ -291,63 +308,47 @@ var AssignAnnotationPropertiesTemplate_bot = (function () {
      */
     applyAssignmentsFn: function () {
       var templateId = self.params.selectedTemplateId;
-      var sources = self.params.previewSources || [];
-
       if (!templateId) {
         return self.myBotEngine.abort("Missing templateId");
       }
-      if (!sources || sources.length === 0) {
-        UI.message("No sources to apply", true);
-        return self.myBotEngine.end();
+
+      var scope = null;
+      var targetId = null;
+
+      if (self.params.selectedSource) {
+        scope = "source";
+        targetId = self.params.selectedSource;
+      } else if (self.params.selectedProfileId) {
+        scope = "profile";
+        targetId = self.params.selectedProfileId;
+      } else if (self.params.selectedUserId) {
+        scope = "user";
+        targetId = self.params.selectedUserId;
+      } else {
+        return self.myBotEngine.abort("No target selected");
       }
 
-      UI.message("Applying template " + templateId + " to " + sources.length + " sources...", true);
+      UI.message(
+        "Assigning template " + templateId + " to " + scope + " " + targetId,
+        true
+      );
 
-      async.eachSeries(
-        sources,
-        function (sourceLabel, cbEach) {
-          var assignmentContent = {
-            templateId: templateId,
-            source: sourceLabel,
-            placeholderValue: PLACEHOLDER_VALUE,
-            appliedAt: new Date().toISOString(),
-          };
-
-          var payload = {
-            data_path: "",
-            data_type: ASSIGNMENT_TYPE,
-            data_label: "Template " + templateId + " for " + sourceLabel,
-            data_comment: "Assigned from assignAnnotationPropertiesTemplate_bot",
-            data_group: sourceLabel,
-            data_tool: "admin",
-            data_source: sourceLabel,
-            data_content: assignmentContent,
-            is_shared: false,
-            shared_profiles: [],
-            shared_users: [],
-          };
-
-          $.ajax({
-            url: Config.apiUrl + "/users/data",
-            type: "POST",
-            dataType: "json",
-            contentType: "application/json; charset=utf-8",
-            data: JSON.stringify(payload),
-            success: function () {
-              return cbEach();
-            },
-            error: function (err) {
-              return cbEach(err);
-            },
-          });
+      createAnnotationTemplateAssignment(
+        {
+          scope: scope,
+          targetId: targetId,
+          templateId: templateId
         },
         function (err) {
           if (err) {
-            return self.myBotEngine.abort(err.responseText || err.message || err);
+            return self.myBotEngine.abort(
+              err.responseText || err.message || err
+            );
           }
-          UI.message("Done: template applied to all sources", true);
+
+          UI.message("Template assigned successfully", true);
           return self.myBotEngine.end();
-        },
+        }
       );
     },
 
@@ -357,6 +358,38 @@ var AssignAnnotationPropertiesTemplate_bot = (function () {
     endFn: function () {
       if (self.callback) self.callback(null);
       return self.myBotEngine.end();
+    },
+
+    /**
+     * Lets the user choose a source.
+     */
+    chooseSourceFn: function () {
+
+      var sources = Object.keys(Config.sources || {});
+      if (!sources || sources.length === 0) {
+        UI.message("No sources found", true);
+        return self.myBotEngine.previousStep();
+      }
+
+      sources.sort();
+
+      var choices = sources.map(function (sourceLabel) {
+        return {
+          id: sourceLabel,
+          label: sourceLabel
+        };
+      });
+
+      self.myBotEngine.showList(choices, "selectedSource");
+    },
+    /**
+     * Called after a source has been selected.
+     */
+    afterChooseSourceFn: function () {
+      if (!self.params.selectedSource) {
+        return self.myBotEngine.previousStep("No source selected");
+      }
+      return self.myBotEngine.nextStep();
     },
   };
 
@@ -606,6 +639,53 @@ var AssignAnnotationPropertiesTemplate_bot = (function () {
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;");
+  }
+
+  /**
+   * Creates a declarative annotation template assignment.
+   * No RDF triples are written here.
+   *
+   * @param {Object} params
+   * @param {string} params.scope - "user" | "profile" | "source"
+   * @param {string} params.targetId - userLogin | profileId | sourceLabel
+   * @param {number} params.templateId
+   * @param {Function} callback
+   */
+  function createAnnotationTemplateAssignment(params, callback) {
+
+    var payload = {
+      data_type: "annotationPropertiesTemplateAssignment",
+      data_label: "Annotation template assignment",
+      data_comment: "Declarative assignment",
+      data_tool: "admin",
+
+      // Visibility
+      shared_users: params.scope === "user" ? [params.targetId] : [],
+      shared_profiles: params.scope === "profile" ? [params.targetId] : [],
+      data_source: params.scope === "source" ? params.targetId : "",
+
+      // Business logic
+      data_content: {
+        scope: params.scope,
+        targetId: params.targetId,
+        templateId: params.templateId,
+        strategy: "single",
+        createdAt: new Date().toISOString()
+      }
+    };
+
+    $.ajax({
+      url: Config.apiUrl + "/users/data",
+      type: "POST",
+      contentType: "application/json",
+      data: JSON.stringify(payload),
+      success: function () {
+        callback();
+      },
+      error: function (err) {
+        callback(err);
+      }
+    });
   }
 
   return self;

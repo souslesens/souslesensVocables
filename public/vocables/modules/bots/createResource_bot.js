@@ -10,6 +10,7 @@ import Sparql_generic from "../sparqlProxies/sparql_generic.js";
 import OntologyModels from "../shared/ontologyModels.js";
 import Lineage_createResource from "../tools/lineage/lineage_createResource.js";
 import Sparql_OWL from "../sparqlProxies/sparql_OWL.js";
+import NodeInfosWidget from "../uiWidgets/nodeInfosWidget.js";
 
 var CreateResource_bot = (function () {
     var self = {};
@@ -209,11 +210,20 @@ var CreateResource_bot = (function () {
                         popupHtml += "<div class='popupMenuItem' style='cursor:pointer;padding:4px 8px' ";
                         popupHtml += "id='showParentsPopupItem'>";
                         popupHtml += "Show Parents</div>";
+                        popupHtml += "<div class='popupMenuItem' style='cursor:pointer;padding:4px 8px' ";
+                        popupHtml += "id='nodeInfosPopupItem'>";
+                        popupHtml += "Node Infos</div>";
                         popupHtml += "</div>";
                         $("#popupMenuWidgetDiv").html(popupHtml);
                         $("#showParentsPopupItem").on("click", function () {
                             var currentList = self.myBotEngine.currentList || [];
                             CommonBotFunctions.showParentsDialog(classId, classLabel, currentList, self.source);
+                            PopupMenuWidget.hidePopup("popupMenuWidgetDiv");
+                        });
+                        $("#nodeInfosPopupItem").on("click", function () {
+                            NodeInfosWidget.showNodeInfos(self.source, classId, "mainDialogDiv", null, function () {
+                                $("#mainDialogDiv").parent().css("z-index", 10001);
+                            });
                             PopupMenuWidget.hidePopup("popupMenuWidgetDiv");
                         });
                         PopupMenuWidget.showPopup({ x: evt.pageX, y: evt.pageY }, "popupMenuWidgetDiv");

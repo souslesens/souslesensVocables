@@ -258,7 +258,7 @@ var CommonBotFunctions = (function () {
      * @param {string} defaultSource - Fallback source if classId is not found in currentList.
      * @returns {void}
      */
-    self.showParentsDialog = function (classId, classLabel, currentList, defaultSource) {
+    self.showParentsDialog = function (classId, classLabel, currentList, defaultSource, callback) {
         var classSource = null;
         if (currentList) {
             for (var i = 0; i < currentList.length; i++) {
@@ -338,6 +338,10 @@ var CommonBotFunctions = (function () {
             $("#smallDialogDiv").on("dialogclose.showParents", function () {
                 $("#smallDialogDiv").off("dialogclose.showParents");
             });
+
+            if (callback) {
+                callback();
+            }
         });
     };
 

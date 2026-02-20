@@ -217,14 +217,35 @@ var CreateResource_bot = (function () {
                         $("#popupMenuWidgetDiv").html(popupHtml);
                         $("#showParentsPopupItem").on("click", function () {
                             var currentList = self.myBotEngine.currentList || [];
-                            CommonBotFunctions.showParentsDialog(classId, classLabel, currentList, self.source);
                             PopupMenuWidget.hidePopup("popupMenuWidgetDiv");
+                            CommonBotFunctions.showParentsDialog(classId, classLabel, currentList, self.source, function () {
+                                try {
+                                    if ($("#mainDialogDiv").dialog("isOpen")) {
+                                        UI.sideBySideTwoWindows("#mainDialogDiv", "#smallDialogDiv");
+                                        $("#mainDialogDiv").parent().css("z-index", 10001);
+                                        $("#smallDialogDiv").parent().css("z-index", 10001);
+                                    }
+                                } catch (e) {}
+                            });
                         });
                         $("#nodeInfosPopupItem").on("click", function () {
-                            NodeInfosWidget.showNodeInfos(self.source, classId, "mainDialogDiv", null, function () {
-                                $("#mainDialogDiv").parent().css("z-index", 10001);
-                            });
                             PopupMenuWidget.hidePopup("popupMenuWidgetDiv");
+                            $("#mainDialogDiv").on("dialogopen.botNodeInfos", function () {
+                                $("#mainDialogDiv").off("dialogopen.botNodeInfos");
+                                $("#botPanel").closest(".ui-dialog").css("z-index", 1);
+                                $("#mainDialogDiv").closest(".ui-dialog").css("z-index", 10000);
+                            });
+                            NodeInfosWidget.showNodeInfos(self.source, classId, "mainDialogDiv", null, function () {
+                                $("#botPanel").closest(".ui-dialog").css("z-index", 1);
+                                $("#mainDialogDiv").closest(".ui-dialog").css("z-index", 10000);
+                                try {
+                                    if ($("#smallDialogDiv").dialog("isOpen")) {
+                                        UI.sideBySideTwoWindows("#mainDialogDiv", "#smallDialogDiv");
+                                        $("#mainDialogDiv").closest(".ui-dialog").css("z-index", 10000);
+                                        $("#smallDialogDiv").closest(".ui-dialog").css("z-index", 10000);
+                                    }
+                                } catch (e) {}
+                            });
                         });
                         PopupMenuWidget.showPopup({ x: evt.pageX, y: evt.pageY }, "popupMenuWidgetDiv");
                     });

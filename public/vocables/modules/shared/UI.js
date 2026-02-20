@@ -472,6 +472,16 @@ var UI = (function () {
         if (!divId.startsWith("#")) {
             divId = "#" + divId;
         }
+        try {
+            if ($(divId).dialog("isOpen")) {
+                $(divId).dialog("close");
+            }
+        } catch (e) {}
+        $(divId).dialog("option", {
+            width: "auto",
+            height: "auto",
+            position: { my: "center", at: "center", of: window },
+        });
         $(divId).dialog("open");
         var title = "";
         if (options.title) {

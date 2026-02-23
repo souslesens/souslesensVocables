@@ -514,39 +514,77 @@ var CreateResource_bot = (function () {
                 dataType: "json",
                 success: function (assignmentFull) {
                 var assignmentContent = assignmentFull ? assignmentFull.data_content : null;
-
-                if (!assignmentContent || !assignmentContent.templateId) {
+                if (!assignmentContent) {
                     return callback(null);
                 }
 
-                // 3) Load template by id
-                UserDataWidget.loadUserDatabyId(assignmentContent.templateId, function (err, tplResult) {
-                    if (err) {
-                    return callback(err);
+                // Parse if string
+                if (typeof assignmentContent === "string") {
+                    try {
+                        assignmentContent = JSON.parse(assignmentContent);
+                    } catch (e) {
+                        return callback(e);
                     }
+                }
+
+                // Accept both models:
+                // - templateIds: [1,2,3]  (new)
+                // - templateId: 1         (old)
+                var templateIds = [];
+                if (Array.isArray(assignmentContent.templateIds) && assignmentContent.templateIds.length > 0) {
+                templateIds = assignmentContent.templateIds;
+                } else if (assignmentContent.templateId) {
+                templateIds = [assignmentContent.templateId];
+                } else {
+                return callback(null);
+                }
+                
+                var allPropertiesMap = {};
+                var allProperties = [];
+
+                // Load each template sequentially (project style: callbacks + async.js)
+                async.eachSeries(
+                templateIds,
+                function (tplId, cbEach) {
+                    UserDataWidget.loadUserDatabyId(tplId, function (err, tplResult) {
+                    if (err) return cbEach(err);
 
                     var templateItem = Array.isArray(tplResult) ? tplResult[0] : tplResult;
                     if (!templateItem || !templateItem.data_content) {
-                    return callback(null);
+                        return cbEach(); // ignore empty
                     }
 
                     var templateContent = templateItem.data_content;
                     if (typeof templateContent === "string") {
-                    try {
+                        try {
                         templateContent = JSON.parse(templateContent);
-                    } catch (e) {
-                        return callback(e);
-                    }
+                        } catch (e) {
+                        return cbEach(e);
+                        }
                     }
 
                     var properties = templateContent.properties || [];
-                    if (!properties || properties.length === 0) {
+                    properties.forEach(function (predicateUri) {
+                        if (!predicateUri) return;
+                        if (!allPropertiesMap[predicateUri]) {
+                        allPropertiesMap[predicateUri] = 1;
+                        allProperties.push(predicateUri);
+                        }
+                    });
+
+                    return cbEach();
+                    });
+                },
+                function (errLoad) {
+                    if (errLoad) return callback(errLoad);
+
+                    if (allProperties.length === 0) {
                     return callback(null);
                     }
 
-                    // 4) Insert triples with "?" as object value
+                    // Insert triples with placeholder
                     var placeholder = "?";
-                    var triplesToInsert = properties.map(function (predicateUri) {
+                    var triplesToInsert = allProperties.map(function (predicateUri) {
                     return {
                         subject: resourceUri,
                         predicate: predicateUri,
@@ -557,7 +595,48 @@ var CreateResource_bot = (function () {
                     Sparql_generic.insertTriples(sourceLabel, triplesToInsert, null, function (err2) {
                     return callback(err2 || null);
                     });
-                });
+                }
+                );
+
+                // // 3) Load template by id
+                // UserDataWidget.loadUserDatabyId(assignmentContent.templateId, function (err, tplResult) {
+                //     if (err) {
+                //     return callback(err);
+                //     }
+
+                //     var templateItem = Array.isArray(tplResult) ? tplResult[0] : tplResult;
+                //     if (!templateItem || !templateItem.data_content) {
+                //     return callback(null);
+                //     }
+
+                //     var templateContent = templateItem.data_content;
+                //     if (typeof templateContent === "string") {
+                //     try {
+                //         templateContent = JSON.parse(templateContent);
+                //     } catch (e) {
+                //         return callback(e);
+                //     }
+                //     }
+
+                //     var properties = templateContent.properties || [];
+                //     if (!properties || properties.length === 0) {
+                //     return callback(null);
+                //     }
+
+                //     // 4) Insert triples with "?" as object value
+                //     var placeholder = "?";
+                //     var triplesToInsert = properties.map(function (predicateUri) {
+                //     return {
+                //         subject: resourceUri,
+                //         predicate: predicateUri,
+                //         object: placeholder,
+                //     };
+                //     });
+
+                //     Sparql_generic.insertTriples(sourceLabel, triplesToInsert, null, function (err2) {
+                //     return callback(err2 || null);
+                //     });
+                // });
                 },
                 error: function (err) {
                 return callback(err);

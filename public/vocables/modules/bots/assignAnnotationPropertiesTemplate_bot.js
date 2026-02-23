@@ -42,6 +42,13 @@ var AssignAnnotationPropertiesTemplate_bot = (function () {
 
         // computed
         previewSources: [],
+        // existing source assignment resolution
+        existingAssignmentId: null,
+        existingTemplateId: null,
+        existingTemplateLabel: "",
+        pendingSourceLabel: "",
+        pendingNewTemplateId: null,
+        existingTemplateAction: "",
       };
 
       if (_params) {
@@ -60,7 +67,7 @@ var AssignAnnotationPropertiesTemplate_bot = (function () {
 
   self.workflow_confirmApply = {
     _OR: {
-      Apply: { applyAssignmentsFn: self.workflow_end },
+      Apply: { applyAssignmentsFn: { handleExistingSourceActionFn: self.workflow_end } },
       Cancel: { endFn: self.workflow_end },
     },
   };
@@ -103,6 +110,7 @@ var AssignAnnotationPropertiesTemplate_bot = (function () {
     chooseUserFn: "Choose user",
     previewSourcesFn: "Preview sources",
     applyAssignmentsFn: "Apply template",
+    handleExistingSourceActionFn: "Existing template found - choose an action",
   };
 
   // -------------------------
@@ -328,6 +336,11 @@ var AssignAnnotationPropertiesTemplate_bot = (function () {
         return self.myBotEngine.abort("No target selected");
       }
 
+      if (scope === "source") {
+        // defer to source-specific logic (may show a choice list)
+        return checkExistingTemplateForSource(targetId, templateId);
+      }
+
       UI.message(
         "Assigning template " + templateId + " to " + scope + " " + targetId,
         true
@@ -350,6 +363,72 @@ var AssignAnnotationPropertiesTemplate_bot = (function () {
           return self.myBotEngine.end();
         }
       );
+    },
+
+    /**
+     * Applies the user decision when an existing template was found on a source.
+     */
+    handleExistingSourceActionFn: function () {
+      var action = self.params.existingTemplateAction;
+      var sourceLabel = self.params.pendingSourceLabel;
+      var newTemplateId = self.params.pendingNewTemplateId;
+
+      if (!action || action === "cancel") {
+        UI.message("Template assignment cancelled", true);
+        return self.myBotEngine.end();
+      }
+
+      if (action === "keep") {
+        UI.message("Keeping existing template on source " + sourceLabel, true);
+        return self.myBotEngine.end();
+      }
+
+      if (action === "replace") {
+        return createAnnotationTemplateAssignment(
+          { scope: "source", targetId: sourceLabel, templateId: newTemplateId },
+          endApply
+        );
+      }
+
+      if (action === "add") {
+        // 1) Read existing template(s)
+        var existingTemplateIds = [];
+        if (self.params.existingTemplateIds && Array.isArray(self.params.existingTemplateIds)) {
+          existingTemplateIds = self.params.existingTemplateIds;
+        } else if (self.params.existingTemplateId) {
+          existingTemplateIds = [self.params.existingTemplateId];
+        }
+
+        // 2) Union with newTemplateId
+        var map = {};
+        existingTemplateIds.forEach(function (id) {
+          if (id) map[String(id)] = 1;
+        });
+        if (newTemplateId) map[String(newTemplateId)] = 1;
+
+        var unionIds = Object.keys(map).map(function (x) {
+          return parseInt(x, 10);
+        });
+
+        // 3) Create a new assignment containing templateIds[]
+        return createAnnotationTemplateAssignment(
+          { scope: "source", targetId: sourceLabel, templateIds: unionIds },
+          endApply
+        );
+      }
+
+      if (action === "remove") {
+        // Recommended "clean" approach in your current architecture:
+        // create a neutralizing assignment (latest wins) so createResource_bot sees no templateId.
+        return createAnnotationTemplateAssignment(
+          { scope: "source", targetId: sourceLabel, templateId: null },
+          endApply
+        );
+      }
+
+      // Fallback
+      UI.message("Unknown action: " + action, true);
+      return self.myBotEngine.end();
     },
 
     /**
@@ -547,7 +626,15 @@ var AssignAnnotationPropertiesTemplate_bot = (function () {
       html += "</ul></div>";
 
       $("#smallDialogDiv").html(html);
-      $("#smallDialogDiv").dialog("open");
+      $("#smallDialogDiv").dialog({
+        modal: false,
+        width: 420,
+        position: {
+          my: "left top",
+          at: "right top",
+          of: "#mainDialogDiv" // dialog du bot
+        }
+      }).dialog("open");
       UI.setDialogTitle("#smallDialogDiv", "Template details");
 
       return callback(null);
@@ -648,10 +735,23 @@ var AssignAnnotationPropertiesTemplate_bot = (function () {
    * @param {Object} params
    * @param {string} params.scope - "user" | "profile" | "source"
    * @param {string} params.targetId - userLogin | profileId | sourceLabel
-   * @param {number} params.templateId
-   * @param {Function} callback
+   * @param {number|null} params.templateId
+   * @param {Array<number>} [params.templateIds]
+   * @param {Function} callback error-first callback
    */
   function createAnnotationTemplateAssignment(params, callback) {
+    // Decide what we store (compute OUTSIDE the payload object)
+    var tplIds = Array.isArray(params.templateIds) ? params.templateIds : null;
+
+    // Backward compatible main templateId:
+    // - if templateIds[] exists -> take the last one
+    // - else fallback to params.templateId
+    var mainTemplateId = null;
+    if (tplIds && tplIds.length > 0) {
+      mainTemplateId = tplIds[tplIds.length - 1];
+    } else if (typeof params.templateId !== "undefined") {
+      mainTemplateId = params.templateId;
+    }
 
     var payload = {
       data_type: "annotationPropertiesTemplateAssignment",
@@ -668,10 +768,16 @@ var AssignAnnotationPropertiesTemplate_bot = (function () {
       data_content: {
         scope: params.scope,
         targetId: params.targetId,
-        templateId: params.templateId,
-        strategy: "single",
-        createdAt: new Date().toISOString()
-      }
+
+        // Always keep templateId for backward compatibility
+        templateId: mainTemplateId,
+
+        // Multi mode (can be null)
+        templateIds: tplIds,
+
+        strategy: tplIds ? "multi" : "single",
+        createdAt: new Date().toISOString(),
+      },
     };
 
     $.ajax({
@@ -680,12 +786,138 @@ var AssignAnnotationPropertiesTemplate_bot = (function () {
       contentType: "application/json",
       data: JSON.stringify(payload),
       success: function () {
-        callback();
+        return callback(null);
       },
       error: function (err) {
-        callback(err);
-      }
+        return callback(err);
+      },
     });
+  }
+
+  /**
+   * Returns the ACTIVE assignment record (FULL) for a source.
+   * Active = latest assignment (highest id) for this source.
+   * We MUST reload by id to get data_content (list endpoint may not include it).
+   *
+   * @param {string} sourceLabel
+   * @param {Function} callback (err, fullAssignment|null)
+   */
+  function getActiveAssignmentForSourceFull(sourceLabel, callback) {
+    $.ajax({
+      url:
+        Config.apiUrl +
+        "/users/data?data_type=" +
+        encodeURIComponent(ASSIGNMENT_TYPE) +
+        "&data_source=" +
+        encodeURIComponent(sourceLabel),
+      type: "GET",
+      dataType: "json",
+      success: function (assignments) {
+        assignments = assignments || [];
+        if (assignments.length === 0) {
+          return callback(null, null);
+        }
+        var latest = assignments.reduce(function (acc, item) {
+          if (!acc) return item;
+          return item.id > acc.id ? item : acc;
+        }, null);
+
+        if (!latest || !latest.id) {
+          return callback(null, null);
+        }
+
+        // IMPORTANT: reload full record by id to get data_content
+        loadUserDataById(latest.id, function (err, full) {
+          if (err) return callback(err);
+          return callback(null, full);
+        });
+      },
+      error: function (err) {
+        return callback(err);
+      },
+    });
+  }
+
+  /**
+   * Checks if a source already has an active template and asks what to do.
+   * Options: keep / replace / remove / cancel.
+   *
+   * @param {string} sourceLabel
+   * @param {number} newTemplateId
+   */
+  function checkExistingTemplateForSource(sourceLabel, newTemplateId) {
+    getActiveAssignmentForSourceFull(sourceLabel, function (err, existingFull) {
+      if (err) {
+        // safer to stop than to overwrite blindly
+        return self.myBotEngine.abort(err.responseText || err.message || err);
+      }
+
+      // No existing assignment -> assign directly
+      if (!existingFull) {
+        return createAnnotationTemplateAssignment(
+          { scope: "source", targetId: sourceLabel, templateId: newTemplateId },
+          endApply
+        );
+      }
+
+      var existingContent = normalizeDataContent(existingFull.data_content);
+      var existingTemplateId = existingContent ? existingContent.templateId : null;
+      
+      self.params.existingTemplateIds = null;
+
+      if (existingContent && Array.isArray(existingContent.templateIds)) {
+        self.params.existingTemplateIds = existingContent.templateIds;
+      } else if (existingContent && existingContent.templateId) {
+        self.params.existingTemplateIds = [existingContent.templateId];
+      }
+
+      // If existing record has no templateId -> treat as "no active template"
+      if (!existingTemplateId) {
+        return createAnnotationTemplateAssignment(
+          { scope: "source", targetId: sourceLabel, templateId: newTemplateId },
+          endApply
+        );
+      }
+
+      // Store context for next step
+      self.params.existingAssignmentId = existingFull.id;
+      self.params.existingTemplateId = existingTemplateId;
+      self.params.pendingSourceLabel = sourceLabel;
+      self.params.pendingNewTemplateId = newTemplateId;
+
+      // Load existing template label for display
+      loadUserDataById(existingTemplateId, function (_err2, tpl) {
+        var label = "";
+        if (tpl && tpl.data_label) label = tpl.data_label;
+        self.params.existingTemplateLabel = label || ("Template " + existingTemplateId);
+
+        // Show action list in the bot (project-friendly pattern)
+        var choices = [
+          { id: "keep", label: "Keep current template (" + self.params.existingTemplateLabel + ")" },
+          { id: "replace", label: "Replace with new template (id=" + newTemplateId + ")" },
+          { id: "add", label: "Add another template (keep existing + add new)" },
+          { id: "remove", label: "Remove template from this source" },
+          { id: "cancel", label: "Cancel" },
+        ];
+
+        // This will set self.params.existingTemplateAction
+        self.myBotEngine.showList(choices, "existingTemplateAction");
+
+        // Then the workflow goes to handleExistingSourceActionFn (next step)
+        return;
+      });
+    });
+  }
+
+  /**
+   * Ends the apply workflow cleanly.
+   */
+  function endApply(err) {
+    if (err) {
+      return self.myBotEngine.abort(err.responseText || err.message || err);
+    }
+    UI.message("Template assigned to source successfully", true);
+    self.myBotEngine.end();
   }
 
   return self;

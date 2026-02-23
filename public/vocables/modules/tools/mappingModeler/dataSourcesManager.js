@@ -681,36 +681,6 @@ var DataSourceManager = (function () {
      * @returns {void}
      */
     self.deleteDataSource = function (jstreeNode) {
-        var currentSource = MappingModeler.currentSLSsource;
-        var groups = authentication.currentUser.groupes;
-        var hasWriteAccess = false;
-        if (groups.indexOf("admin") > -1) {
-            hasWriteAccess = true;
-        } else {
-            var allProfiles = Object.values(Config.profiles);
-            for (var i = 0; i < groups.length; i++) {
-                var profile = allProfiles.find(function (p) {
-                    return p.name === groups[i];
-                });
-                if (!profile) {
-                    continue;
-                }
-                var accessControl = profile.sourcesAccessControl || {};
-                if (accessControl[currentSource] === "readwrite") {
-                    hasWriteAccess = true;
-                    break;
-                }
-                if (!accessControl.hasOwnProperty(currentSource) && profile.defaultSourceAccessControl === "readwrite") {
-                    hasWriteAccess = true;
-                    break;
-                }
-            }
-        }
-        if (!hasWriteAccess) {
-            alert("You don't have right to delete");
-            return;
-        }
-
         var datasourceName = jstreeNode.id;
         var isCsv = jstreeNode.data.type == "csvSource";
 
@@ -756,12 +726,15 @@ var DataSourceManager = (function () {
                     var csvDir = "CSV/" + MappingModeler.currentSLSsource;
                     $.ajax({
                         type: "DELETE",
-                        url: Config.apiUrl + "/data/file?dir=" + encodeURIComponent(csvDir) + "&fileName=" + encodeURIComponent(datasourceName),
+                        url: Config.apiUrl + "/data/file?dir=" + encodeURIComponent(csvDir) + "&fileName=" + encodeURIComponent(datasourceName) + "&source=" + encodeURIComponent(MappingModeler.currentSLSsource),
                         dataType: "json",
                         success: function (_result) {
                             MappingModeler.onLoaded();
                         },
-                        error: function (_err) {
+                        error: function (jqXHR) {
+                            if (jqXHR.status === 403) {
+                                alert("You don't have right to delete");
+                            }
                             MappingModeler.onLoaded();
                         },
                     });

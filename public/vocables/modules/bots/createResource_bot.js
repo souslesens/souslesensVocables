@@ -1,6 +1,7 @@
 import Sparql_common from "../sparqlProxies/sparql_common.js";
 import BotEngineClass from "./_botEngineClass.js";
 import Lineage_sources from "../tools/lineage/lineage_sources.js";
+import Lineage_combine from "../tools/lineage/lineage_combine.js";
 import Lineage_whiteboard from "../tools/lineage/lineage_whiteboard.js";
 import CommonBotFunctions from "./_commonBotFunctions.js";
 import Lineage_createRelation from "../tools/lineage/lineage_createRelation.js";
@@ -10,6 +11,8 @@ import OntologyModels from "../shared/ontologyModels.js";
 import Lineage_createResource from "../tools/lineage/lineage_createResource.js";
 import NodeInfosAxioms from "../tools/axioms/nodeInfosAxioms.js";
 import AxiomExtractor from "../tools/axioms/axiomExtractor.js";
+import Sparql_OWL from "../sparqlProxies/sparql_OWL.js";
+import NodeInfosWidget from "../uiWidgets/nodeInfosWidget.js";
 
 var CreateResource_bot = (function () {
     var self = {};
@@ -95,9 +98,7 @@ var CreateResource_bot = (function () {
                 if (err) {
                     return self.myBotEngine.abort(err);
                 }
-                if (vocabs.length == 0) {
-                    return self.myBotEngine.previousStep("no values found, try another option");
-                }
+                vocabs.splice(0, 0, { id: "searchClass", label: "Search Class" });
                 self.myBotEngine.showList(vocabs, "currentVocab");
             });
         },
@@ -109,13 +110,168 @@ var CreateResource_bot = (function () {
             _botEngine.nextStep();*/
         },
 
+        /**
+         * @function
+         * @name listSuperClassesFn
+         * @memberof CreateResource_bot.functions
+         * Displays class selection. When currentVocab is "searchClass", shows a scope dropdown
+         * (All Sources + active source + imports) with all classes suffixed by source name, plus
+         * an ElasticSearch search bar. Otherwise shows classes from the selected vocab.
+         * @returns {void}
+         */
         listSuperClassesFn: function () {
-            CommonBotFunctions.listVocabClasses(self.params.currentVocab, true, null, function (err, classes) {
-                if (err) {
-                    return self.myBotEngine.abort(err);
+            if (self.params.currentVocab === "searchClass") {
+                var vocabs = [{ id: "allSources", label: "All Sources" }];
+                vocabs.push({ id: self.source, label: self.source });
+                var imports = Config.sources[self.source].imports;
+                if (imports) {
+                    imports.forEach(function (importSource) {
+                        vocabs.push({ id: importSource, label: importSource });
+                    });
                 }
-                self.myBotEngine.showList(classes, "resourceId");
-            });
+
+                var loadClassesForScope = function (scopeId, callback) {
+                    if (scopeId === "allSources") {
+                        var allClasses = [];
+                        var sourceVocabs = vocabs.filter(function (v) {
+                            return v.id !== "allSources";
+                        });
+                        async.eachSeries(
+                            sourceVocabs,
+                            function (vocab, callbackEach) {
+                                CommonBotFunctions.listVocabClasses(vocab.id, false, null, function (err, classes) {
+                                    if (err) return callbackEach();
+                                    classes.forEach(function (cls) {
+                                        allClasses.push({
+                                            id: cls.id,
+                                            label: cls.label + " (" + vocab.id + ")",
+                                            source: vocab.id,
+                                        });
+                                    });
+                                    callbackEach();
+                                });
+                            },
+                            function () {
+                                CommonBotFunctions.sortList(allClasses);
+                                allClasses.splice(0, 0, { id: "owl:Thing", label: "owl:Thing" });
+                                callback(allClasses);
+                            },
+                        );
+                    } else {
+                        CommonBotFunctions.listVocabClasses(scopeId, true, null, function (err, classes) {
+                            if (err) return callback([]);
+                            callback(classes);
+                        });
+                    }
+                };
+
+                loadClassesForScope("allSources", function (classes) {
+                    var searchFn = function (term, updateCallback) {
+                        var sources;
+                        if (Lineage_combine.currentSources && Lineage_combine.currentSources.length > 0) {
+                            sources = Lineage_combine.currentSources;
+                        } else {
+                            sources = Object.keys(Lineage_sources.loadedSources);
+                        }
+                        CommonBotFunctions.searchClassesInSources(sources, term, function (_err, items) {
+                            if (!items) {
+                                items = [];
+                            }
+                            updateCallback(items);
+                        });
+                    };
+
+                    var scopeOptions = {
+                        items: vocabs,
+                        onScopeChange: function (scopeId, updateListFn) {
+                            loadClassesForScope(scopeId, function (newClasses) {
+                                updateListFn(newClasses);
+                            });
+                        },
+                    };
+
+                    self.myBotEngine.showListWithSearch(classes, "resourceId", searchFn, null, scopeOptions);
+
+                    var selectEl = $("#bot_resourcesProposalSelect");
+                    selectEl.off("mousedown.showParents");
+                    selectEl.on("mousedown.showParents", function (evt) {
+                        if (evt.which !== 3) {
+                            return;
+                        }
+                        evt.preventDefault();
+                        evt.stopPropagation();
+                        var option = $(evt.target);
+                        if (!option.is("option")) {
+                            return;
+                        }
+                        var classId = option.val();
+                        var classLabel = option.text();
+                        if (!classId) {
+                            return;
+                        }
+                        var popupHtml = "<div style='padding:5px'>";
+                        popupHtml += "<div class='popupMenuItem' style='cursor:pointer;padding:4px 8px' ";
+                        popupHtml += "id='showParentsPopupItem'>";
+                        popupHtml += "Show Parents</div>";
+                        popupHtml += "<div class='popupMenuItem' style='cursor:pointer;padding:4px 8px' ";
+                        popupHtml += "id='nodeInfosPopupItem'>";
+                        popupHtml += "Node Infos</div>";
+                        popupHtml += "</div>";
+                        $("#popupMenuWidgetDiv").html(popupHtml);
+                        $("#showParentsPopupItem").on("click", function () {
+                            var currentList = self.myBotEngine.currentList || [];
+                            PopupMenuWidget.hidePopup("popupMenuWidgetDiv");
+                            CommonBotFunctions.showParentsDialog(classId, classLabel, currentList, self.source, function () {
+                                try {
+                                    if ($("#mainDialogDiv").dialog("isOpen")) {
+                                        UI.sideBySideTwoWindows("#mainDialogDiv", "#smallDialogDiv");
+                                        $("#mainDialogDiv").parent().css("z-index", 10001);
+                                        $("#smallDialogDiv").parent().css("z-index", 10001);
+                                    }
+                                } catch (e) {}
+                            });
+                        });
+                        $("#nodeInfosPopupItem").on("click", function () {
+                            PopupMenuWidget.hidePopup("popupMenuWidgetDiv");
+                            $("#mainDialogDiv").on("dialogopen.botNodeInfos", function () {
+                                $("#mainDialogDiv").off("dialogopen.botNodeInfos");
+                                $("#botPanel").closest(".ui-dialog").css("z-index", 1);
+                                $("#mainDialogDiv").closest(".ui-dialog").css("z-index", 10000);
+                            });
+                            NodeInfosWidget.showNodeInfos(self.source, classId, "mainDialogDiv", null, function () {
+                                $("#botPanel").closest(".ui-dialog").css("z-index", 1);
+                                $("#mainDialogDiv").closest(".ui-dialog").css("z-index", 10000);
+                                try {
+                                    if ($("#smallDialogDiv").dialog("isOpen")) {
+                                        UI.sideBySideTwoWindows("#mainDialogDiv", "#smallDialogDiv");
+                                        $("#mainDialogDiv").closest(".ui-dialog").css("z-index", 10000);
+                                        $("#smallDialogDiv").closest(".ui-dialog").css("z-index", 10000);
+                                    }
+                                } catch (e) {}
+                            });
+                        });
+                        PopupMenuWidget.showPopup({ x: evt.pageX, y: evt.pageY }, "popupMenuWidgetDiv");
+                    });
+                    selectEl.off("contextmenu.showParents");
+                    selectEl.on("contextmenu.showParents", function (evt) {
+                        evt.preventDefault();
+                    });
+
+                    $("#botPanel").off("dialogclose.showParents");
+                    $("#botPanel").on("dialogclose.showParents", function () {
+                        selectEl.off("mousedown.showParents");
+                        selectEl.off("contextmenu.showParents");
+                        $("#botPanel").off("dialogclose.showParents");
+                    });
+                });
+            } else {
+                CommonBotFunctions.listVocabClasses(self.params.currentVocab, true, null, function (err, classes) {
+                    if (err) {
+                        return self.myBotEngine.abort(err);
+                    }
+                    self.myBotEngine.showList(classes, "resourceId");
+                });
+            }
         },
         listClassTypesFn: function () {
             self.functions.listSuperClassesFn();
@@ -196,6 +352,7 @@ var CreateResource_bot = (function () {
                     id: self.params.resourceId,
                     label: self.params.resourceLabel,
                     source: self.params.source,
+                    type: conceptType,
                 },
             };
             var subclassTriple = {

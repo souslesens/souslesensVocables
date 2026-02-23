@@ -7,6 +7,22 @@ This page summarizes the code structure for this directory and its immediate sub
 
 <!-- AUTO-DESC:END -->
 
+## Overview
+
+The **tools** subdirectory contains specialized utilities for the KG construction pipeline, focused on process industry asset hierarchy extraction.
+
+---
+
+## Modules
+
+1. **PIbuilder..js** — Builds CSV exports of process industry asset hierarchies by querying SPARQL endpoints for relationships between functional objects, equipment classes, and tags. Generates structured reports of equipment taxonomy data.
+
+---
+
+## Usage
+
+- `PIbuilder..js` is invoked to extract asset hierarchy data from SPARQL-stored knowledge graphs and export it as CSV for downstream analysis.
+
 
 ```{toctree}
 :maxdepth: 5
@@ -21,4 +37,3 @@ This page summarizes the code structure for this directory and its immediate sub
 - `PIbuilder..js`
 
 <!-- AUTO-INLINE-FILES:END -->
-

@@ -3,10 +3,16 @@
 
 <!-- AUTO-DESC:START -->
 
-This page summarizes the code structure for this directory and its immediate subdirectories. It focuses on the `api / v1 / paths / admin / plugins / repositories / plugins` area within the `api` module. Use the table of contents below to navigate deeper.
+## Overview
+
+This directory contains routes used to inspect plugins available in a specific Git repository.
+
+## Modules
+
+### 1. Repository plugins listing (`{id}.js`)
+Retrieves the list of plugin directories available in the repository identified by `id`. This endpoint is used to discover plugins present in single-plugin or multi-plugin repositories.
 
 <!-- AUTO-DESC:END -->
-
 
 ```{toctree}
 :maxdepth: 5
@@ -21,4 +27,3 @@ This page summarizes the code structure for this directory and its immediate sub
 - `{id}.js`
 
 <!-- AUTO-INLINE-FILES:END -->
-

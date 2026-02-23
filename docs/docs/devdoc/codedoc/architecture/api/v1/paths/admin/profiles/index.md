@@ -3,10 +3,16 @@
 
 <!-- AUTO-DESC:START -->
 
-This page summarizes the code structure for this directory and its immediate subdirectories. It focuses on the `api / v1 / paths / admin / profiles` area within the `api` module. Use the table of contents below to navigate deeper.
+## Overview
+
+This directory contains administrative routes for managing individual profiles. Profiles define configuration settings applied to users or groups, such as interface themes or permissions.
+
+## Modules
+
+### 1. Profile management (`{id}.js`)
+Provides operations on a specific profile identified by its ID. It supports retrieving a profile visible to the current user, and allows administrators to update or delete profiles. Successful updates or deletions return a confirmation message along with the refreshed list of profiles.
 
 <!-- AUTO-DESC:END -->
-
 
 ```{toctree}
 :maxdepth: 5
@@ -21,4 +27,3 @@ This page summarizes the code structure for this directory and its immediate sub
 - `{id}.js`
 
 <!-- AUTO-INLINE-FILES:END -->
-

@@ -7,6 +7,31 @@ This page summarizes the code structure for this directory and its immediate sub
 
 <!-- AUTO-DESC:END -->
 
+## Overview
+
+The **shacl** directory contains the **SHACL (Shapes Constraint Language) validation** module. It validates RDF data against SHACL shape definitions to ensure data quality and conformance to defined schemas.
+
+---
+
+## Modules
+
+1. **validator.mjs** — ES6 module that validates RDF triples against SHACL shape definitions using the `rdf-validate-shacl` library, generating conformance reports with violation details.
+
+---
+
+## Features
+
+- **SHACL validation** of RDF graphs against shape definitions.
+- **Conformance reporting** with detailed violation information (focus node, path, severity, message).
+- **ES6 module** format (`.mjs`) for modern Node.js import support.
+
+---
+
+## Usage
+
+- The validator is called from Express route handlers when the user triggers SHACL validation from the frontend.
+- It receives RDF data and SHACL shapes, runs validation, and returns a conformance report.
+
 
 ```{toctree}
 :maxdepth: 5
@@ -21,4 +46,3 @@ This page summarizes the code structure for this directory and its immediate sub
 - `validator.mjs`
 
 <!-- AUTO-INLINE-FILES:END -->
-

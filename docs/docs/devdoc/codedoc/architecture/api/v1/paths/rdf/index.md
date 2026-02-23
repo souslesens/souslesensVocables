@@ -7,7 +7,6 @@ This page summarizes the code structure for this directory and its immediate sub
 
 <!-- AUTO-DESC:END -->
 
-
 ```{toctree}
 :maxdepth: 5
 :caption: Contents
@@ -23,4 +22,3 @@ graph/index
 - `graphUrl.js`
 
 <!-- AUTO-INLINE-FILES:END -->
-

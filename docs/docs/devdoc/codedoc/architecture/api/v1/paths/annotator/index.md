@@ -7,7 +7,6 @@ This page summarizes the code structure for this directory and its immediate sub
 
 <!-- AUTO-DESC:END -->
 
-
 ```{toctree}
 :maxdepth: 5
 :caption: Contents
@@ -24,4 +23,3 @@ tree/index
 - `uploadZipFile.js`
 
 <!-- AUTO-INLINE-FILES:END -->
-

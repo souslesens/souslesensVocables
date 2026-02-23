@@ -36,6 +36,18 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         self.defaultShape = options.defaultShape;
     }
 
+    /**
+     * Initializes and renders an interactive Vis.js network graph, configuring layout, events, datasets,
+     * and user interactions. It sets up node/edge behavior and calls a callback once drawing is complete
+     * @function
+     * @name draw
+     * @memberof module:VisjsGraphClass
+     * @param {function} callback -  executed once the graph has finished drawing
+     * @param {object} self.graphDiv - internal, ID of the DOM container where the graph is drawn
+     * @param {object} self.data - internal, input nodes, edges, labels
+     * @param {object} self.options - internal, configuration options (events, layout, behaviors, styling…)
+     * @returns {void}
+     */
     self.draw = function (callback) {
         var divId = self.graphDiv;
         var visjsData = self.data;
@@ -316,7 +328,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
 
                 if (params.nodes.length == 1) {
                     /* if (true || (!params.event.srcEvent.ctrlKey && !self.currentContext.options.keepNodePositionOnDrag))
-    return;*/
+                    return;*/
 
                     var nodeId = params.nodes[0];
 
@@ -353,6 +365,19 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         }
     };
 
+    /**
+     * Configures the graph layout (vertical or horizontal hierarchical) by updating layout and edge‑smoothness
+     * settings, then triggers a full redraw of the Vis.js network. It adjusts direction, sorting, and animation
+     * timing depending on the selected layout mode
+     * @function
+     * @name setLayout
+     * @memberof module:VisjsGraphClass
+     * @param {string} layout desired layout mode, "hierarchical vertical" or "hierarchical horizontal"
+     * determines how nodes are arranged
+     * @param {object} self.currentContext.options - internal, stores active graph options; updated with
+     * new layout parameters
+     * @returns {void}
+     */
     self.setLayout = function (/** @type {string} */ layout) {
         if (layout == "hierarchical vertical") {
             self.currentContext.options.layoutHierarchical = {
@@ -390,11 +415,23 @@ const VisjsGraphClass = function (graphDiv, data, options) {
             self.redraw();
         }
     };
-
+    /** call draw function
+     * @function
+     * @name redraw
+     * @memberof module:VisjsGraphClass
+     */
     self.redraw = function () {
         self.draw();
     };
 
+    /**
+     * Exports the current graph by enriching edges with their corresponding node objects and converting the full
+     * edge list into a JSON string. This serialized graph data is then copied directly to the clipboard
+     * @function
+     * @name exportGraph
+     * @memberof module:VisjsGraphClass
+     * @returns {void}
+     */
     self.exportGraph = function () {
         var nodes = self.data.nodes.get();
         var edges = self.data.edges.get();
@@ -410,6 +447,14 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         common.copyTextToClipboard(str);
     };
 
+    /**
+     * Rebuilds node references for each edge by linking fromNode and toNode using the existing node dataset,
+     * then serializes the enriched edge list. It finally copies this JSON graph representation to the clipboard
+     * @function
+     * @name importGraph
+     * @memberof module:VisjsGraphClass
+     * @returns {void}
+     */
     self.importGraph = function (/** @type {string} */ str) {
         var nodes = self.data.nodes.get();
         var edges = self.data.edges.get();
@@ -425,6 +470,16 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         common.copyTextToClipboard(str);
     };
 
+    /**
+     * Completely resets the current graph by clearing all nodes and edges from their Vis.js datasets. It then
+     * removes the internal self.data reference to ensure the graph state is fully emptied
+     * It operates entirely on internal state: self.data.nodes and self.data.edges
+     * Sets self.data = null, making the graph effectively empty and ready for a fresh initialization
+     * @function
+     * @name clearGraph
+     * @memberof module:VisjsGraphClass
+     * @returns {void}
+     */
     self.clearGraph = function () {
         // comment ca marche  bad doc???
 
@@ -439,6 +494,17 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         self.data = null;
     };
 
+    /**
+     * Removes all nodes whose specified property matches a given value, and optionally removes edges with the
+     * same property. It filters node and edge datasets, collects matching IDs, and deletes from the Vis.js graph
+     * @function
+     * @name removeNodes
+     * @memberof module:VisjsGraphClass
+     * @param {string|number} layout property name of nodes (and optionally edges) to check (e.g., "group", "type", "id")
+     * @param {any} value expected value of that property; matching items will be removed
+     * @param {boolean} removeEdges If true, edges with the same property/value pair are also removed
+     * @returns {void}
+     */
     self.removeNodes = function (/** @type {string | number} */ key, /** @type {any} */ value, /** @type {any} */ removeEdges) {
         /**
          * @type {any[]}
@@ -467,6 +533,15 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         }
     };
 
+    /**
+     * Removes every node from the graph except those explicitly listed in nodesToKeep, and also
+     * removes any edges connected to the deleted nodes
+     * @function
+     * @name removeOtherNodesFromGraph
+     * @memberof module:VisjsGraphClass
+     * @param {any} nodesToKeep node(s) that must remain in the graph; all others will be deleted
+     * @returns {void}
+     */
     (self.removeOtherNodesFromGraph = function (/** @type {any} */ nodesToKeep) {
         var nodes = self.data.nodes.get();
         /**
@@ -494,6 +569,14 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         });
         self.data.edges.remove(edgesIds);
     }),
+        /**
+         * Updates node sizes, labels, and font sizes dynamically based on the graph’s zoom level to maintain readability.
+         * It recalculates visual properties only when the scale changes significantly
+         * @function
+         * @name onScaleChange
+         * @memberof module:VisjsGraphClass
+         * @returns {void}
+         */
         (self.onScaleChange = function () {
             if (!self.data || !self.data.nodes) {
                 return;
@@ -552,6 +635,16 @@ const VisjsGraphClass = function (graphDiv, data, options) {
             }
             self.currentScale = scale;
         });
+
+    /**
+     * builds a lookup map of all existing node IDs — and optionally edge IDs — currently present in the Vis.js graph
+     * It returns an object where each ID is used as a key for fast existence checks
+     * @function
+     * @name getExistingIdsMap
+     * @memberof module:VisjsGraphClass
+     * @param {boolean} nodesOnly truth, only node IDs are included; false, both node IDs and edge IDs are added to map
+     * @returns {object} existingVisjsIds used as a set where each existing ID maps to 1
+     */
     self.getExistingIdsMap = function (/** @type {any} */ nodesOnly) {
         var existingVisjsIds = {};
         if (!self.data || !self.data.nodes || self.data.nodes.length == 0) {
@@ -567,11 +660,21 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         return existingVisjsIds;
     };
 
+    /** check if the graph contains any nodes
+     * @function
+     * @name isGraphNotEmpty
+     * @memberof module:VisjsGraphClass
+     */
     self.isGraphNotEmpty = function () {
         // if(self.isGraphNotEmpty()){
         return Object.keys(self.getExistingIdsMap()).length > 0;
     };
 
+    /** convert the current graph data to CSV format and copies it to the system clipboard
+     * @function
+     * @name graphCsvToClipBoard
+     * @memberof module:VisjsGraphClass
+     */
     self.graphCsvToClipBoard = function () {
         var csv = self.toCsv();
         common.copyTextToClipboard(csv, function (/** @type {any} */ err, /** @type {any} */ _result) {
@@ -582,6 +685,16 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         });
     };
 
+    /**
+     * Converts the current graph (nodes and edges) into a CSV‑formatted string, optionally including extra node data
+     * fields. It builds CSV rows for isolated nodes and for each edge by combining the source node, edge label, and
+     * target node into a readable line
+     * @function
+     * @name toCsv
+     * @memberof module:VisjsGraphClass
+     * @param {any} dataFields optional list of node data fields to append
+     * @returns {string} csvStr, string containing the full CSV representation of the graph
+     */
     self.toCsv = function (/** @type {any[]} */ dataFields) {
         var sep = ",";
         if (dataFields && !Array.isArray(dataFields)) {
@@ -635,6 +748,17 @@ const VisjsGraphClass = function (graphDiv, data, options) {
 
         return csvStr;
     };
+
+    /**
+     * Recursively finds all descendant nodes reachable from one or several starting nodes by following outgoing
+     * edges. It returns a list of child node IDs, optionally including the original parent nodes
+     * @function
+     * @name getNodeDescendantIds
+     * @memberof module:VisjsGraphClass
+     * @param {any} nodeIds node ID or an array of node IDs from which descendant traversal begins
+     * @param {any} includeParents if truth, the starting node IDs are also included in the returned list
+     * @returns {array} nodes array of descendant IDs (and optionally parents)
+     */
     self.getNodeDescendantIds = function (/** @type {any[]} */ nodeIds, /** @type {any} */ includeParents) {
         if (!Array.isArray(nodeIds)) {
             nodeIds = [nodeIds];
@@ -659,9 +783,10 @@ const VisjsGraphClass = function (graphDiv, data, options) {
                     }
                 }
                 /* if(includeParents && edge.to == nodeId){
-    nodes.push(edge.from)
-    recurse(edge.from)
-    }*/
+                        nodes.push(edge.from)
+                        recurse(edge.from)
+                        }
+                */
             });
         }
 
@@ -671,16 +796,43 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         return nodes;
     };
 
+    /**
+     * Returns the collection of node objects corresponding to all descendant IDs (expanded via getNodeDescendantIds)
+     * @function
+     * @name getNodeDescendant
+     * @memberof module:VisjsGraphClass
+     * @param {any} nodeIds node ID or an array of node IDs from which descendant traversal begins
+     * @param {any} includeParents if truth, the starting node IDs are also included in the returned list
+     * @returns {array} nodes objects array of descendant Ids
+     */
     self.getNodeDescendants = function (/** @type {any} */ nodeIds, /** @type {any} */ includeParents) {
         nodeIds = self.getNodeDescendantIds(nodeIds, includeParents);
         return self.data.nodes.get(nodeIds);
     };
 
+    /**
+     * Returns an object containing the current positions of all nodes in the network,
+     * obtained from self.network.getPositions()
+     * @function
+     * @name getNodesPosition
+     * @memberof module:VisjsGraphClass
+     * @returns {object} positions of all nodes in the network
+     */
     self.getNodesPosition = function () {
         var positions = self.network.getPositions();
         return positions;
     };
 
+    /**
+     * Returns an array of edge objects connected to the source node, optionally restricted to those leading
+     * to the given target node
+     * @function
+     * @name getNodeEdges
+     * @memberof module:VisjsGraphClass
+     * @param {string} sourceNodeId ID of the source node
+     * @param {string} targetNodeId optional, filters to edges whose to equals this ID
+     * @returns {object} connectedEdges array
+     */
     self.getNodeEdges = function (sourceNodeId, targetNodeId) {
         var connectedEdges = [];
         var sourceNodeEdges = self.network.getConnectedEdges(sourceNodeId);
@@ -693,6 +845,17 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         return connectedEdges;
     };
 
+    /**
+     * Finds all edges connected to sourceNodeId, and for each edge that is either outgoing from the source or
+     * (if bothDirections is true) in any direction, it returns the edge plus its from and to node objects
+     * @function
+     * @name getNodeEdgesAndToNodes
+     * @memberof module:VisjsGraphClass
+     * @param {string} sourceNodeId ID of the source node
+     * @param {boolean} bothDirections  if true, include edges in both directions; if false, include only edges
+     * @returns {object} connectedEdges array where Edge typically has id and Node is a node object (IDs usually
+     * string | number in vis-network/vis-data)
+     */
     self.getFromNodeEdgesAndToNodes = function (sourceNodeId, bothDirections) {
         var connectedEdges = [];
         var sourceNodeEdges = self.network.getConnectedEdges(sourceNodeId);
@@ -707,6 +870,22 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         return connectedEdges;
     };
 
+    /**
+     * Handles single and double click events on a graph to control simulation and select elements
+     * Toggles the physics simulation on empty clicks, and detects modifier keys (Ctrl/Alt/Shift)
+     * On node, cluster, or edge selection, it builds a context object and calls the appropriate callback
+     * @function
+     * @name processClicks
+     * @memberof module:VisjsGraphClass
+     * @param {objet} params information about what was clicked and the pointer state
+     * @param {objet} _options configuration and callback handlers
+     * @param {boolean} isDbleClick indicates whether the click should be treated as a double click
+     * @returns {void} return the result of onClusterClickFn or onclickFn when invoked
+     *  side effects:
+     *      - starting/stopping the network simulation
+     *      - updating self.context.currentNode
+     *      - calling user-provided callbacks with click context data
+     */
     self.processClicks = function (
         /** @type {{ edges: string | any[]; nodes: string | any[]; event: { srcEvent: { ctrlKey: any; altKey: any; shiftKey: any; }; }; pointer: { DOM: any; }; }} */ params,
         /** @type {{ fixedLayout: any; onclickFn: (arg0: null, arg1: any, arg2: { dbleClick?: any; ctrlKey?: number; altKey?: number; shiftKey?: number; }) => void; onClusterClickFn: (arg0: any, arg1: any, arg2: { dbleClick: any; ctrlKey: number; altKey: number; shiftKey: number; }) => any; }} */ _options,
@@ -783,6 +962,20 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         }
     };
 
+    /**
+     * Finds all outgoing edges from a given node and collects the connected target nodes and edge IDs
+     * Removes those edges and nodes from the graph, effectively collapsing the node
+     * @function
+     * @name collapseNode
+     * @memberof module:VisjsGraphClass
+     * @param {any} nodeId identifier of the node to collapse. All edges starting from this node and their
+     * destination nodes will be removed
+     * @returns {void} return the result of onClusterClickFn or onclickFn when invoked
+     *  side effects:
+     *      - Removes all edges where edge.from === nodeId
+     *      - Removes all destination nodes connected by those edges
+     *      - Mutates the graph by updating self.data.edges and self.data.node
+     */
     self.collapseNode = function (/** @type {any} */ nodeId) {
         var nodeEdges = self.data.edges.get();
         /**
@@ -805,6 +998,21 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         self.data.nodes.remove(targetNodes);
     };
 
+    /**
+     * Highlights a specific node by changing its shape and size and resets all other nodes to
+     * their default appearance. Animates the graph view to center and focus on the selected node
+     * @function
+     * @name focusOnNode
+     * @memberof module:VisjsGraphClass
+     * @param {any} id (string | number) identifier of the node to focus on
+     * @param {any} _label Unused parameter (likely kept for API compatibility or future use)
+     * @returns {void} return the result of onClusterClickFn or onclickFn when invoked
+     *  side effects :
+     *      - updates all nodes in self.data.nodes:
+     *              - Target node → shape: "star", size: 14
+     *              - Other nodes → default shape and size
+     *      - animates the network viewport to center on the target node
+     */
     self.focusOnNode = function (/** @type {any} */ id, /** @type {any} */ _label) {
         if (id) {
             /**
@@ -831,6 +1039,19 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         }
     };
 
+    /**
+     * Iterates over all nodes in the graph and checks them against given conditions and selects nodes whose data
+     * properties match the condition values. It updates a visual property for all matching nodes
+     * @function
+     * @name setNodesProperty
+     * @memberof module:VisjsGraphClass
+     * @param {object} conditions (string | any) map of node data properties and expected values
+     * @param {any} hide bolean hidden property of matching nodes (e.g. true to hide, false to show)
+     * @returns {void}
+     *  side effects :
+     *      - mutates node visibility by calling self.data.nodes.update
+     *      - only nodes matching at least one condition key are affected
+     */
     self.setNodesProperty = function (/** @type {{ [x: string]: any; }} */ conditions, /** @type {any} */ hide) {
         var nodes = self.data.nodes.get();
         /**
@@ -847,6 +1068,20 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         self.data.nodes.update(newNodes);
     };
 
+    /**
+     * Scans all graph nodes and compares their data fields to given conditions and collects nodes whose
+     * properties match the specified values. Hides or shows nodes by updating their hidden property
+     * @function
+     * @name hideShowNodes
+     * @memberof module:VisjsGraphClass
+     * @param {object} conditions (string | any) Key–value pairs used to match against node.data
+     * a node is selected if node.data[key] == conditions[key] for any key
+     * @param {any} hide bolean true to hide matching nodes, false to show matching nodes
+     * @returns {void}
+     *  side effects :
+     *      - Updates visibility of matching nodes via self.data.nodes.update
+     *      - Modifies only nodes that satisfy at least one condition
+     */
     self.hideShowNodes = function (/** @type {{ [x: string]: any; }} */ conditions, /** @type {any} */ hide) {
         var nodes = self.data.nodes.get();
         /**
@@ -863,6 +1098,22 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         self.data.nodes.update(newNodes);
     };
 
+    /**
+     * Converts the current graph (nodes and edges) into a Graphviz DOT description and sends the DOT
+     * graph to a backend API to render it as SVG .It also receives the generated SVG text asynchronously
+     * via an AJAX request.
+     * @function
+     * @name toSVG_graphviz
+     * @memberof module:VisjsGraphClass
+     * @returns {void}
+     * Uses internal graph state:
+     *      - self.data.nodes — collection of nodes
+     *      - self.data.edges — collection of edges
+     *  side effects :
+     *      - builds a Graphviz DOT string representing the directed graph
+     *      - sends an HTTP GET request to a backend Graphviz service
+     *      - logs a status message ("getting Class axioms").
+     */
     self.toSVG_graphviz = function () {
         var nodes = self.data.nodes.get();
         var edges = self.data.edges.get();
@@ -904,11 +1155,23 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         return;
     };
 
+    /**
+     * Export the current graph as an SVG file
+     * @function
+     * @name toSVG
+     * @memberof module:VisjsGraphClass
+     */
     self.toSVG = function () {
         SVGexport2.toSVG(self);
         //self.redraw();
     };
 
+    /**
+     * Convert the current Vis.js nodes and edges into a GraphML string
+     * @function
+     * @name toGraphMl
+     * @memberof module:VisjsGraphClass
+     */
     self.toGraphMl = function () {
         var visjsData = {
             nodes: self.data.nodes.get(),
@@ -920,6 +1183,19 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         // common.copyTextToClipboard(xmlStr);
     };
 
+    /**
+     * Searches graph nodes by label text or node id. Matching nodes are visually highlighted
+     * (star shape, bigger size). First match is automatically focused/zoomed in the network view
+     * @function
+     * @name searchNode
+     * @memberof module:VisjsGraphClass
+     * @param {any} id optional, exact node ID to search for
+     * @param {string} id optional, text to match against node labels (case-insensitive)
+     *                    if not provided, it reads from #visjsGraph_searchInput
+     * @returns {void}
+     *  side effects :
+     *      - updates node styles in the graph and focuses the first matching node
+     */
     self.searchNode = function (id, word) {
         if (!word || word == "") {
             word = $("#visjsGraph_searchInput").val();
@@ -952,7 +1228,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
             if (id) {
                 ok = node.id == id;
             }
-            if (ok) {
+            if (k) {
                 shape = "star";
                 size = 14;
                 matches.push(node.id);
@@ -972,6 +1248,20 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         });
     };
 
+    /**
+     * Serialize the current graph (nodes, edges, layout, and context). It converts functions
+     * to strings (unless raw is true) and builds a JSON file
+     * @function
+     * @name saveGraph
+     * @memberof module:VisjsGraphClass
+     * @param {string} fileName optional, Name of the graph file to save
+     * @param {boolean} raw optional, if true, skips converting functions to string
+     * @param {object} options optional, extra save options
+     * @returns {void}
+     *  side effects :
+     *      - sends a POST request to save the graph JSON, updates the UI
+     *      - optionally triggers a callback
+     */
     self.saveGraph = function (fileName, raw, options) {
         if (!self.currentContext) {
             return;
@@ -1036,10 +1326,32 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         });
     };
 
+    /**
+     * Export the current graph as an SVG file
+     * @function
+     * @name toSVG
+     * @memberof module:VisjsGraphClass
+     */
     self.message = function (/** @type {string | JQuery.Node | ((this: HTMLElement, index: number, oldhtml: string) => string | JQuery.Node)} */ message) {
         $("#VisJsGraph_message").html(message);
     };
 
+    /**
+     * Serialize the current graph (nodes, edges, layout, and context). It converts functions
+     * to strings (unless raw is true) and builds a JSON file
+     * @function
+     * @name loadGraph
+     * @memberof module:VisjsGraphClass
+     * @param {string} fileName optional, Name of the graph file to load
+     * @param {boolean} add optional, if true, forces adding the graph to the existing one
+     * @param {function} callback optional, Called after load (or on error) with (err, visjsData)
+     * @param {boolean} dontDraw optional, if true, returns processed data without drawing the graph
+     * @param {function} dataProcessorFn optional, transform the loaded data before use
+     * @returns {void}
+     *  side effects :
+     *      - performs an AJAX GET, updates graph data/visuals, fits the network
+     *      - triggers callbacks or error handling
+     */
     self.loadGraph = function (fileName, add, callback, dontDraw, dataProcessorFn) {
         if (!fileName) {
             fileName = $("#visjsGraph_savedGraphsSelect").val();
@@ -1138,6 +1450,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
             },
         });
     };
+
     /**
      * Load graphs from the "/data/graphs" directory
      *
@@ -1170,6 +1483,17 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         });
     };
 
+    /**
+     * Updates visual or data attributes of selected graph nodes
+     * @function
+     * @name decorateNodes
+     * @memberof module:VisjsGraphClass
+     * @param {any} nodeIds single nodeID array of node IDs or null to target all nodes
+     * @param {object} attrsMap key–value map of attributes to apply
+     * @returns {void}
+     *  side effects :
+     *      - updates node properties in the graph’s data store and refreshes their appearance
+     */
     self.decorateNodes = function (nodeIds, attrsMap) {
         if (nodeIds && !Array.isArray(nodeIds)) {
             nodeIds = [nodeIds];
@@ -1187,6 +1511,17 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         self.data.nodes.update(newIds);
     };
 
+    /**
+     * Open and configures a UI panel to edit graph display and physics settings
+     * It injects a theme selector (white/dark) and enables vis.js config controls
+     * @function
+     * @name showGraphConfig
+     * @memberof module:VisjsGraphClass
+     * @returns {void}
+     *  side effects :
+     *      - modifies DOM elements, updates network configuration options
+     *      - opens a dialog for graph parameter editing
+     */
     self.showGraphConfig = function () {
         $("#graphDisplay_theme").remove();
         $("#visjsConfigureDiv").parent().css("left", "20%");
@@ -1222,6 +1557,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
             $("#visjsConfigureDiv").css("height", "550px !important");
         }, 2000);
     };
+
     /**
      * @function
      * @name exportGraphToDataTable
@@ -1235,7 +1571,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
     };
 
     /**
-     * Converts the current graph to PlantUML format.
+     * Converts the current graph to PlantUML format
      *
      * @function
      * @name toPlantUML
@@ -1259,6 +1595,18 @@ const VisjsGraphClass = function (graphDiv, data, options) {
             Export.exportPlantUML(plantUMLString, fileName);
         }
     };
+
+    /**
+     * Open and configures a UI panel to edit graph display and physics settings
+     * It injects a theme selector (white/dark) and enables vis.js config controls
+     * @function
+     * @name addSelectNode
+     * @memberof module:VisjsGraphClass
+     * @param {any} newNodeId ID of the node to add to the current selection
+     * @returns {void}
+     *  side effects :
+     *      - updates the network’s selected nodes visually in the graph
+     */
     self.addSelectNode = function (newNodeId) {
         var selectedNodes = self.network.getSelectedNodes();
 
@@ -1267,6 +1615,19 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         }
         self.network.selectNodes(selectedNodes);
     };
+
+    /**
+     * Set a specific set of nodes as selected in the graph. It handles both single node IDs,
+     * node objects or arrays, ensuring uniqueness. The selection is updated visually and stored
+     * in a global selection tracker
+     * @function
+     * @name setSelectedNodes
+     * @memberof module:VisjsGraphClass
+     * @param {any|object} nodes node ID(s) or node object(s) to select
+     * @returns {void}
+     *  side effects :
+     *      - updates the network’s selected nodes visually and updates Lineage_selection.selectedNodes
+     */
     self.setSelectedNodes = function (nodes) {
         if (!nodes) {
             return;

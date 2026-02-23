@@ -938,21 +938,21 @@ var Sparql_generic = (function () {
                             "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>" +
                             "SELECT distinct *  " +
                             fromStr +
-                            "  WHERE {{  ?subject   rdfs:subClassOf+   ?ancestor. ?subject rdfs:subClassOf ?firstParent.?firstParent rdf:type owl:Class.  ?subject rdfs:label ?subjectLabel. " +
+                            "  WHERE {{  ?subject   rdfs:subClassOf+   ?firstParent.?subject rdfs:label ?subjectLabel.  ?firstParent rdf:type owl:Class. " +
                             filter +
                             // "filter( lang(?subjectLabel)= 'en' || !lang(?subjectLabel))" +
                             "OPTIONAL{?subject skos:altLabel \n" +
                             "          ?skosAltLabel. } }" +
                             " UNION " +
-                            "{  ?subject   rdfs:subClassOf  ?firstParent.?firstParent rdf:type owl:Class.  ?subject <http://www.w3.org/2004/02/skos/core#prefLabel> ?subjectLabel. filter( lang(?subjectLabel)= 'en' || !lang(?subjectLabel))OPTIONAL{?subject skos:altLabel ?skosAltLabel }  " +
+                            "{  ?subject   rdfs:subClassOf  ?firstParent.    ?firstParent rdf:type owl:Class. ?subject <http://www.w3.org/2004/02/skos/core#prefLabel> ?subjectLabel. filter( lang(?subjectLabel)= 'en' || !lang(?subjectLabel))OPTIONAL{?subject skos:altLabel ?skosAltLabel }  " +
                             filter +
                             "}" +
                             "UNION  {" +
-                            "    ?subject rdfs:label ?subjectLabel." +
+                            "    ?subject rdf:type owl:Class.?subject rdfs:label ?subjectLabel." +
                             filter +
                             //  "   filter( lang(?subjectLabel)= 'en' || !lang(?subjectLabel))" +
                             "  OPTIONAL{?subject skos:altLabel  ?skosAltLabel}" +
-                            "  filter( not exists{  ?subject   rdfs:subClassOf   ?aParent.  })}" +
+                            "  filter( not exists{  ?subject   rdfs:subClassOf   ?aParent.  ?aParent rdf:type owl:Class.  })}" +
                             "}";
                     } else {
                         var query =

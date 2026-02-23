@@ -634,27 +634,19 @@ var MappingsDetails = (function () {
                 MappingColumnsGraph.saveVisjsGraph();
             } else if (params.nonObjectPropertyId) {
                 var range = params.datatypePropertyRange || Config.ontologiesVocabularyModels[params.nonObjectPropertyVocab].nonObjectProperties[params.nonObjectPropertyId].range;
-                data.otherPredicates.push({
-                    property: params.nonObjectPropertyId,
-                    object: params.predicateObjectColumn,
-                    range: range,
-                    dateFormat: params.nonObjectPropertyDateFormat || null, //if any
+                var isDuplicate = data.otherPredicates.some(function (p) {
+                    return p.property === params.nonObjectPropertyId && p.object === params.predicateObjectColumn;
                 });
-                if (data.otherPredicates.length > 1) {
-                    // test to detect duplicated predicates
-                    var last = data.otherPredicates[data.otherPredicates.length - 1]; // predicat added
-                    var duplicateIndex = data.otherPredicates.findIndex(function (p, idx) {
-                        return (
-                            idx !== data.otherPredicates.length - 1 && // to not compare with itself
-                            p.property === last.property &&
-                            p.object === last.object
-                        );
+                if (isDuplicate) {
+                    alert("Predicat already exist !");
+                    return;
+                } else {
+                    data.otherPredicates.push({
+                        property: params.nonObjectPropertyId,
+                        object: params.predicateObjectColumn,
+                        range: range,
+                        dateFormat: params.nonObjectPropertyDateFormat || null,
                     });
-                    if (duplicateIndex !== -1) {
-                        // duplicate detected → suppression of last one
-                        data.otherPredicates.pop();
-                        alert("Predicat already exist !");
-                    }
                 }
                 MappingColumnsGraph.updateNode({ id: MappingColumnsGraph.currentGraphNode.id, data: data });
                 MappingColumnsGraph.saveVisjsGraph();

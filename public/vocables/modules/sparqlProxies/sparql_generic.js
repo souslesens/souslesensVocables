@@ -939,18 +939,18 @@ var Sparql_generic = (function () {
                             "SELECT distinct *  " +
                             fromStr +
                             "  WHERE {{  ?subject   rdfs:subClassOf+   ?firstParent.?subject rdfs:label ?subjectLabel.  ?firstParent rdf:type owl:Class. " +
+                            "filter(isIRI(?subject) && isIRI(?firstParent))" +
                             filter +
-                            // "filter( lang(?subjectLabel)= 'en' || !lang(?subjectLabel))" +
                             "OPTIONAL{?subject skos:altLabel \n" +
                             "          ?skosAltLabel. } }" +
                             " UNION " +
-                            "{  ?subject   rdfs:subClassOf  ?firstParent.    ?firstParent rdf:type owl:Class. ?subject <http://www.w3.org/2004/02/skos/core#prefLabel> ?subjectLabel. filter( lang(?subjectLabel)= 'en' || !lang(?subjectLabel))OPTIONAL{?subject skos:altLabel ?skosAltLabel }  " +
+                            "{  ?subject   rdfs:subClassOf  ?firstParent.    ?firstParent rdf:type owl:Class. ?subject <http://www.w3.org/2004/02/skos/core#prefLabel> ?subjectLabel. filter(isIRI(?subject) && isIRI(?firstParent)) filter( lang(?subjectLabel)= 'en' || !lang(?subjectLabel))OPTIONAL{?subject skos:altLabel ?skosAltLabel }  " +
                             filter +
                             "}" +
                             "UNION  {" +
                             "    ?subject rdf:type owl:Class.?subject rdfs:label ?subjectLabel." +
+                            "filter(isIRI(?subject))" +
                             filter +
-                            //  "   filter( lang(?subjectLabel)= 'en' || !lang(?subjectLabel))" +
                             "  OPTIONAL{?subject skos:altLabel  ?skosAltLabel}" +
                             "  filter( not exists{  ?subject   rdfs:subClassOf   ?aParent.  ?aParent rdf:type owl:Class.  })}" +
                             "}";
@@ -1095,10 +1095,14 @@ var Sparql_generic = (function () {
                                 id: item.subject.value,
                                 label: conceptLabel,
                                 skoslabels: skosLabelsMap[item.subject.value],
-                                parent: item.firstParent ? item.firstParent.value : null,
-                                parents: [],
+                                parents: item.firstParent ? [item.firstParent.value] : [],
                                 type: conceptType,
                             };
+                        } else if (item.firstParent) {
+                            var parentVal = item.firstParent.value;
+                            if (allClassesMap[item.subject.value].parents.indexOf(parentVal) < 0) {
+                                allClassesMap[item.subject.value].parents.push(parentVal);
+                            }
                         }
                     });
                     callbackSeries();
@@ -1106,54 +1110,80 @@ var Sparql_generic = (function () {
 
                 // set ancestors
                 function (callbackSeries) {
-                    function recurse(nodeId, parents) {
-                        var obj = allClassesMap[nodeId];
-                        if (!obj) {
-                            return;
-                        }
-                        if (obj.parent && parents.indexOf(obj.parent) < 0) {
-                            parents.push(obj.parent);
-                            recurse(obj.parent, parents);
-                        }
+                    for (var key in allClassesMap) {
+                        allClassesMap[key]._directParents = allClassesMap[key].parents.slice();
+                        allClassesMap[key].parents = [];
                     }
 
-                    // chain parents
+                    function recurse(nodeId, ancestors) {
+                        var obj = allClassesMap[nodeId];
+                        if (!obj) return;
+                        obj._directParents.forEach(function (parentId) {
+                            if (ancestors.indexOf(parentId) < 0) {
+                                ancestors.push(parentId);
+                                recurse(parentId, ancestors);
+                            }
+                        });
+                    }
+
                     for (var key in allClassesMap) {
                         recurse(key, allClassesMap[key].parents);
                     }
-                    //format parents
-                    for (var key in allClassesMap) {
-                        var obj = allClassesMap[key];
-                        var parentArray = obj.parents;
-                        if (options.parentsTopDown) {
-                            parentArray.push(sourceLabel);
-                            parentArray = parentArray.reverse();
-                        }
 
-                        //   delete allClassesMap[key].parent;
-                        allClassesMap[key].parents = parentArray;
+                    // pick single most-specific parent (deepest = most ancestors)
+                    // read all depths before modifying any parents array
+                    var chosenParents = {};
+                    for (var key in allClassesMap) {
+                        chosenParents[key] = allClassesMap[key]._directParents.reduce(function (best, candidateId) {
+                            if (!best) return candidateId;
+                            var bestDepth = allClassesMap[best] ? allClassesMap[best].parents.length : 0;
+                            var candidateDepth = allClassesMap[candidateId] ? allClassesMap[candidateId].parents.length : 0;
+                            return candidateDepth > bestDepth ? candidateId : best;
+                        }, null);
                     }
+
+                    // build full ancestor chain following chosen parents only (memoized)
+                    function buildParentChain(nodeId) {
+                        var obj = allClassesMap[nodeId];
+                        if (!obj || obj._chainBuilt) return obj ? obj.parents : [];
+                        var chosenParent = chosenParents[nodeId];
+                        obj.parents = chosenParent
+                            ? [chosenParent].concat(buildParentChain(chosenParent))
+                            : [];
+                        obj._chainBuilt = true;
+                        return obj.parents;
+                    }
+
+                    for (var key in allClassesMap) {
+                        buildParentChain(key);
+                        delete allClassesMap[key]._directParents;
+                        delete allClassesMap[key]._chainBuilt;
+                    }
+
+                    // format parents: add source and sort top-down [source, ..., parent_direct]
+                    for (var key in allClassesMap) {
+                        var parentArray = allClassesMap[key].parents.slice();
+                        parentArray.push(sourceLabel);
+                        allClassesMap[key].parents = parentArray.reverse();
+                    }
+
                     callbackSeries();
                 },
 
                 // add orphan parents to all data
                 function (callbackSeries) {
-                    //  return   callbackSeries()
-                    var topNodesToAdd = [];
                     for (var key in allClassesMap) {
-                        var parent = allClassesMap[key].parent;
-                        if (parent && parent != sourceLabel) {
-                            if (!allClassesMap[parent]) {
-                                allClassesMap[parent] = {
-                                    id: parent,
-                                    label: Sparql_common.getLabelFromURI(parent),
+                        allClassesMap[key].parents.forEach(function (parentId) {
+                            if (parentId && parentId != sourceLabel && !allClassesMap[parentId]) {
+                                allClassesMap[parentId] = {
+                                    id: parentId,
+                                    label: Sparql_common.getLabelFromURI(parentId),
                                     skoslabels: [],
-                                    parent: sourceLabel,
                                     parents: [sourceLabel],
                                     type: "owl:class",
                                 };
                             }
-                        }
+                        });
                     }
                     callbackSeries();
                 },

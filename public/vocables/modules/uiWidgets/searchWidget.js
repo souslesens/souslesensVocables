@@ -571,6 +571,19 @@ var SearchWidget = (function () {
             if (result[0] && result[0].matches && result[0].matches[sourceLabel]) {
                 es_results = result[0].matches[sourceLabel];
             }
+            es_results.sort(function (a, b) {
+                var aIsIndividual = a.type.indexOf("Class") === -1;
+                var bIsIndividual = b.type.indexOf("Class") === -1;
+                if (aIsIndividual !== bIsIndividual) {
+                    return aIsIndividual ? 1 : -1;
+                }
+                if (a.label > b.label) return 1;
+                if (b.label > a.label) return -1;
+                return 0;
+            });
+            if (es_results.length > 500) {
+                es_results = es_results.slice(0, 500);
+            }
             if (es_results.length > 0) {
                 treated_results = [];
                 var item;

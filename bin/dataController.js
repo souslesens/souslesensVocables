@@ -66,6 +66,23 @@ var DataController = {
     },
 
     /**
+     * Deletes a file in a sub-directory of `data`
+     * @param {string} dir - directory path under data
+     * @param {string} fileName - name of the file to delete
+     * @param {(err: NodeJS.ErrnoException | null, data: string | null) => void} callback -
+     *   function to be called once the file has been deleted
+     */
+    deleteFile: function (dir, fileName, callback) {
+        var filePath = path.join(__dirname, "../data/" + dir + "/" + fileName);
+        if (!fs.existsSync(filePath)) {
+            return callback("file does not exist");
+        }
+        fs.unlink(filePath, function (err) {
+            return callback(err, "file deleted");
+        });
+    },
+
+    /**
      * Create a directory in a sub-directory of `data`
      * @param {string} dir - directory path under data
      * @param {string} newDirName - name of the directory to create

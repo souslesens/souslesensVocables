@@ -726,7 +726,14 @@ var DataSourceManager = (function () {
                     var csvDir = "CSV/" + MappingModeler.currentSLSsource;
                     $.ajax({
                         type: "DELETE",
-                        url: Config.apiUrl + "/data/file?dir=" + encodeURIComponent(csvDir) + "&fileName=" + encodeURIComponent(datasourceName) + "&source=" + encodeURIComponent(MappingModeler.currentSLSsource),
+                        url:
+                            Config.apiUrl +
+                            "/data/file?dir=" +
+                            encodeURIComponent(csvDir) +
+                            "&fileName=" +
+                            encodeURIComponent(datasourceName) +
+                            "&source=" +
+                            encodeURIComponent(MappingModeler.currentSLSsource),
                         dataType: "json",
                         success: function (_result) {
                             MappingModeler.onLoaded();

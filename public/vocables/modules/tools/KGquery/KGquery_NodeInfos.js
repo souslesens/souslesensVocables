@@ -113,7 +113,7 @@ var KGquery_NodeInfos = (function () {
                     if (binding[columnName].type === "uri") {
                         var uriParts = value.split("/");
                         var shortValue = uriParts[uriParts.length - 1];
-                        value = "<span title=\"" + value + "\">" + shortValue + "</span>";
+                        value = '<span title="' + value + '">' + shortValue + "</span>";
                     }
                 }
 
@@ -205,19 +205,27 @@ var KGquery_NodeInfos = (function () {
                     if (!uri) {
                         return callbackSeries();
                     }
-                    self.displayNodeDatatypeProperties(uri, self.datatypeProperties, "Bloc", self.currentTargetClassName + " Attributes", "KGquery_NodeInfos_targetInfosDiv", source, function (err, datatypeResult) {
-                        if (err) {
-                            return callbackSeries(err);
-                        }
+                    self.displayNodeDatatypeProperties(
+                        uri,
+                        self.datatypeProperties,
+                        "Bloc",
+                        self.currentTargetClassName + " Attributes",
+                        "KGquery_NodeInfos_targetInfosDiv",
+                        source,
+                        function (err, datatypeResult) {
+                            if (err) {
+                                return callbackSeries(err);
+                            }
 
-                        if (datatypeResult && datatypeResult.label && datatypeResult.label.value) {
-                            UI.openDialog(divId, { title: "Infos : " + datatypeResult.label.value });
-                        }
+                            if (datatypeResult && datatypeResult.label && datatypeResult.label.value) {
+                                UI.openDialog(divId, { title: "Infos : " + datatypeResult.label.value });
+                            }
 
-                        $("#" + divId).dialog("option", "position", { my: "center", at: "center", of: window });
-                        self.currentDatatypesResult = datatypeResult;
-                        callbackSeries();
-                    });
+                            $("#" + divId).dialog("option", "position", { my: "center", at: "center", of: window });
+                            self.currentDatatypesResult = datatypeResult;
+                            callbackSeries();
+                        },
+                    );
                 },
 
                 // Compute nodesByWindowType (with cache)
@@ -259,7 +267,7 @@ var KGquery_NodeInfos = (function () {
                 if (callback) {
                     callback(err);
                 }
-            }
+            },
         );
     };
 
@@ -580,7 +588,7 @@ var KGquery_NodeInfos = (function () {
                     return callback(err);
                 }
                 callback(null, queryResult);
-            }
+            },
         );
     };
 
@@ -593,7 +601,6 @@ var KGquery_NodeInfos = (function () {
             var nodeIds = [targetClassId, node.id];
 
             self.executeNodeQuery(node, nodeIds, targetClassId, self.currentTargetClassName, self.uri, function (err, queryResult) {
-
                 if (err) {
                     console.log(err);
                     MainController.errorAlert(err);
@@ -644,7 +651,6 @@ var KGquery_NodeInfos = (function () {
             nodeIds.push(node.id);
 
             self.executeNodeQuery(node, nodeIds, targetClassId, targetClassName, uri, function (err, queryResult) {
-
                 if (err) {
                     console.log(err);
                     return callback(err);
@@ -712,7 +718,7 @@ var KGquery_NodeInfos = (function () {
                 if (callback) {
                     callback(err);
                 }
-            }
+            },
         );
     };
 

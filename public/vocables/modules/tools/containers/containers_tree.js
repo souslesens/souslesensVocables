@@ -376,6 +376,12 @@ var Containers_tree = (function () {
             },
         };
 
+        items["GraphDirectDescendants"] = {
+            label: "Graph direct descendants",
+            action: function (_e) {
+                Containers_graph.graphResources(self.currentSource, self.currentContainer.data, { depth: 1 });
+            },
+        };
         items["GraphParentContainers"] = {
             label: "Graph  parent container",
             action: function (_e) {

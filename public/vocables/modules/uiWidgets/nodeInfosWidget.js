@@ -594,6 +594,9 @@ defaultLang = 'en';*/
 
                         if (self.propertiesMap.properties[key].value) {
                             var values = self.propertiesMap.properties[key].value;
+                            var hasPlaceholderValue = values.some(function (v) {
+                                return v && v.value === "?";
+                            });
                             strGeneratedByProp +=
                                 "<td class='detailsCellName'>" +
                                 "<a target='" +
@@ -601,13 +604,15 @@ defaultLang = 'en';*/
                                 "' href='" +
                                 self.propertiesMap.properties[key].propUri +
                                 "'>" +
-                                self.propertiesMap.properties[key].name +
+                                (hasPlaceholderValue ? "<b>" + self.propertiesMap.properties[key].name + "</b>" : self.propertiesMap.properties[key].name) +
                                 "</a>" +
                                 "</td>";
+                                
                             var valuesStr = "";
 
                             values.forEach(function (valueObj, index) {
                                 var value = valueObj.value;
+                                var isPlaceholder = value === "?";
 
                                 var predicateId = valueObj.predicateId;
                                 var optionalStr = getOptionalStr(key, predicateId);
@@ -621,6 +626,9 @@ defaultLang = 'en';*/
                                 }
                                 if (index > 0) {
                                     valuesStr += "<br>";
+                                }
+                                if (isPlaceholder) {
+                                    value = "<b>?</b>";
                                 }
                                 valuesStr += value + optionalStr;
                             });

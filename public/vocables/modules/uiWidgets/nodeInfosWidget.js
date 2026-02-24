@@ -102,11 +102,13 @@ var NodeInfosWidget = (function () {
                         UI.message(err, true);
                     }
                     self.showNodeInfosToolbar(options);
+                    if (self.divId.endsWith("DialogDiv")) {
 
                     $("#deleteButton").insertAfter($("#mainDialogDiv").parent().find(".ui-dialog-title"));
                     //  $("#addRestrictionButton").insertAfter($("#mainDialogDiv").parent().find(".ui-dialog-title"));
                     $("#addPredicateButton").insertAfter($("#mainDialogDiv").parent().find(".ui-dialog-title"));
                     $("#addPredicateButton").css("margin-left", "25px !important");
+                }
                     //  $("#addRestrictionButton").css("margin-left", "25px !important");
                 });
             }

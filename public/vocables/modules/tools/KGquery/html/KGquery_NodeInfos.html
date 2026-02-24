@@ -1,0 +1,76 @@
+<style>
+    #KGquery_NodeInfos_mainDiv {
+        display: flex !important;
+        gap: 15px;
+        padding: 10px;
+        flex-wrap: nowrap;
+        align-items: flex-start;
+    }
+
+    #KGquery_NodeInfos_targetInfosDiv {
+        flex: 0 0 auto;
+        width: auto;
+        max-width: 600px;
+    }
+
+    #KGquery_NodeInfos_tabsDiv {
+        flex: 1 1 auto;
+        min-width: 400px;
+        max-width: calc(100% - 650px);
+    }
+
+    #KGquery_NodeInfos_tabsDiv .ui-tabs-nav {
+        display: flex !important;
+        align-items: flex-end !important;
+        flex-wrap: wrap !important;
+    }
+
+    #KGquery_NodeInfos_tabsDiv .ui-tabs-nav li {
+        margin-bottom: 0 !important;
+        margin-top: 0 !important;
+        vertical-align: bottom !important;
+        flex-shrink: 0 !important;
+    }
+
+    #KGquery_NodeInfos_tabsDiv .ui-tabs-nav li.ui-state-active,
+    #KGquery_NodeInfos_tabsDiv .ui-tabs-nav li.ui-tabs-active {
+        margin-bottom: 0 !important;
+        margin-top: 0 !important;
+    }
+
+    #KGquery_NodeInfos_tabsDiv .ui-tabs-panel {
+        padding: 15px !important;
+        min-height: 300px;
+    }
+
+    .KGquery_NodeInfos_content {
+        max-height: 100px;
+        overflow-y: auto;
+    }
+
+    @media (max-width: 1400px) {
+        #KGquery_NodeInfos_mainDiv {
+            flex-direction: column;
+            flex-wrap: wrap;
+        }
+
+        #KGquery_NodeInfos_targetInfosDiv {
+            max-width: 100%;
+            width: 100%;
+        }
+
+        #KGquery_NodeInfos_tabsDiv {
+            width: 100%;
+            max-width: 100%;
+        }
+    }
+</style>
+
+<div>
+    <div id="KGquery_NodeInfos_mainDiv">
+        <div id="KGquery_NodeInfos_targetInfosDiv"></div>
+        <div id="KGquery_NodeInfos_tabsDiv" class="nodesInfosAdditionalInfos">
+            <ul></ul>
+        </div>
+    </div>
+</div>

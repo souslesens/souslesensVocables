@@ -33,6 +33,7 @@ import KGquery_filter from "./KGquery_filter.js";
 import Containers_widget from "../containers/containers_widget.js";
 import UserDataWidget from "../../uiWidgets/userDataWidget.js";
 import KGquery_predicates from "./KGquery_predicates.js";
+import KGquery_NodeInfos from "./KGquery_NodeInfos.js";
 
 var KGquery = (function () {
     var self = {};
@@ -924,6 +925,9 @@ var KGquery = (function () {
             return Export.exportDataToCSV(tableData);
         }
         console.trace();
+        var savedSelectedPredicates = JSON.parse(JSON.stringify(KGquery.currentSelectedPredicates));
+        var savedClassToVarNameMap = Object.assign({}, KGquery.classToVarNameMap);
+
         Export.showDataTable("KGquery_dataTableDialogDiv", tableCols, tableData, null, { paging: true }, function (err, datatable) {
             $("#dataTableDivExport").on("click", "td", function () {
                 var table = $("#dataTableDivExport").DataTable();
@@ -935,17 +939,29 @@ var KGquery = (function () {
 
                 var varName = self.tableCols[index.column].title;
                 if (true || !dataItem[varName]) {
-                    var varNameNode = KGquery.currentSelectedPredicates.filter((key) => key.id == varName);
+                    var varNameNode = savedSelectedPredicates.filter((key) => key.id == varName);
                     if (varNameNode && varNameNode.length > 0 && varNameNode[0]?.data?.varName) {
                         varName = varNameNode[0].data.varName;
                     }
-                    //varName = varName.split("_")[0];
                 }
                 var uri = dataItem[varName].value;
-                var node = { data: { id: uri } };
-                NodeInfosWidget.showNodeInfos(self.currentSource, node, "smallDialogDiv", null, function (err) {
-                    $("#smallDialogDiv").parent().css("z-index", 1);
-                });
+                var targetClassId = null;
+                for (var classId in savedClassToVarNameMap) {
+                    if (savedClassToVarNameMap[classId] === "?" + varName) {
+                        targetClassId = classId;
+                        break;
+                    }
+                }
+                if (targetClassId) {
+                    KGquery_NodeInfos.showNodeInfos(self.currentSource, uri, targetClassId, "smallDialogDiv", function (err) {
+                        $("#smallDialogDiv").parent().css("z-index", 1);
+                    });
+                } else {
+                    var node = { data: { id: uri } };
+                    NodeInfosWidget.showNodeInfos(self.currentSource, node, "smallDialogDiv", null, function (err) {
+                        $("#smallDialogDiv").parent().css("z-index", 1);
+                    });
+                }
             });
         });
     };

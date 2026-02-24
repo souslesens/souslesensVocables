@@ -1147,9 +1147,7 @@ var Sparql_generic = (function () {
                         var obj = allClassesMap[nodeId];
                         if (!obj || obj._chainBuilt) return obj ? obj.parents : [];
                         var chosenParent = chosenParents[nodeId];
-                        obj.parents = chosenParent
-                            ? [chosenParent].concat(buildParentChain(chosenParent))
-                            : [];
+                        obj.parents = chosenParent ? [chosenParent].concat(buildParentChain(chosenParent)) : [];
                         obj._chainBuilt = true;
                         return obj.parents;
                     }

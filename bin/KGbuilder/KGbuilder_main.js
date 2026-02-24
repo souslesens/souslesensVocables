@@ -71,7 +71,7 @@ var KGbuilder_main = {
             sourceInfos: {},
             uniqueTriplesMap: {},
         };
-        var options2={forceClassesToIndividuals:true}
+        var options2={forceClassesToIndividuals:false}
 
         // load visj mapping file
         MappingsParser.getMappingsData(source,options2, function (err, _mappingData) {

@@ -29,7 +29,7 @@ var TriplesMaker = {
         var processedRecords = 0;
         var tableInfos = tableProcessingParams.tableInfos;
         TriplesMaker.uniqueSubjects = {};
-        TriplesMaker.existingRestrictions={}
+        TriplesMaker.existingBnodeTriples={}
         tableProcessingParams.randomIdentiersMap = {}; // identifiers with scope the whole table
         tableProcessingParams.blankNodesMap = {}; // identifiers with scope the whole table
         tableProcessingParams.isSampleData = options.sampleSize;
@@ -385,18 +385,29 @@ var TriplesMaker = {
             }
             // process columnToColumnMappings
             for (var edgeId in tableProcessingParams.columnToColumnEdgesMap) {
-                var edge = tableProcessingParams.columnToColumnEdgesMap[edgeId];
-                var subjectUri = TriplesMaker.getColumnUri(line, edge.from, columnMappings, rowIndex, tableProcessingParams);
-                var objectUri = TriplesMaker.getColumnUri(line, edge.to, columnMappings, rowIndex, tableProcessingParams);
-                var property = TriplesMaker.getPropertyUri(edge.data.id);
 
-                if (edge.isRestriction) {
-                    var triples = TriplesMaker.getRestrictionTriples(subjectUri, property, objectUri, edge.retrictionType, null);
-                    triples.forEach(function (triple) {
-                        addTriple(triple.s, triple.p, triple.o);
-                    });
-                } else {
-                    addTriple(subjectUri, property, objectUri);
+
+
+                    var edge = tableProcessingParams.columnToColumnEdgesMap[edgeId];
+                    var subjectUri = TriplesMaker.getColumnUri(line, edge.from, columnMappings, rowIndex, tableProcessingParams);
+                    var objectUri = TriplesMaker.getColumnUri(line, edge.to, columnMappings, rowIndex, tableProcessingParams);
+                    var property = TriplesMaker.getPropertyUri(edge.data.id);
+
+
+                    if (edge.isRestriction) {
+                        var triples = TriplesMaker.getRestrictionTriples(subjectUri, property, objectUri, edge.retrictionType, null);
+                        triples.forEach(function (triple) {
+                            addTriple(triple.s, triple.p, triple.o);
+                        });
+                    } else {
+
+                        var atriple = line[ columnMappings[edge.from].id]+ edge.data.id + line[columnMappings[edge.to].id]
+                        //avid duplicate blanknodes triples (see restrictions also)
+                        if (!TriplesMaker.existingBnodeTriples[atriple]) {
+                            TriplesMaker.existingBnodeTriples[atriple] = 1
+                            addTriple(subjectUri, property, objectUri);
+                        }
+
                 }
             }
 
@@ -736,7 +747,7 @@ var TriplesMaker = {
         if (!restrictionType) {
             restrictionType = "http://www.w3.org/2002/07/owl#someValuesFrom";
         }
-        if (TriplesMaker.existingRestrictions[subjectUri + predicateUri + objectUri]) {
+        if (TriplesMaker.existingBnodeTriples[subjectUri + predicateUri + objectUri]) {
             return []
         }
 
@@ -765,7 +776,7 @@ var TriplesMaker = {
             o: blankNode,
         });
 
-        TriplesMaker.existingRestrictions[subjectUri+ predicateUri+ objectUri]=1
+        TriplesMaker.existingBnodeTriples[subjectUri+ predicateUri+ objectUri]=1
 
 
 

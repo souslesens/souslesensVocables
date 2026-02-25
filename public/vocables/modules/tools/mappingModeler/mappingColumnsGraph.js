@@ -345,6 +345,68 @@ var MappingColumnsGraph = (function () {
     };
 
     /**
+     * Adjusts edge curvatures so that multiple edges between the same node pair
+     * do not overlap. Edges are spread using alternating curvedCW / curvedCCW
+     * directions with increasing roundness.
+     * @function
+     * @name adjustEdgeCurvatures
+     * @memberof module:MappingColumnsGraph
+     * @returns {void}
+     */
+    self.adjustEdgeCurvatures = function () {
+        if (!self.visjsGraph || !self.visjsGraph.data || !self.visjsGraph.data.edges) {
+            return;
+        }
+        var edges = self.visjsGraph.data.edges.get();
+
+        var pairMap = {};
+        edges.forEach(function (edge) {
+            var key;
+            if (edge.from < edge.to) {
+                key = edge.from + "|||" + edge.to;
+            } else {
+                key = edge.to + "|||" + edge.from;
+            }
+            if (!pairMap[key]) {
+                pairMap[key] = [];
+            }
+            pairMap[key].push(edge);
+        });
+
+        var updates = [];
+        Object.keys(pairMap).forEach(function (key) {
+            var group = pairMap[key];
+            if (group.length <= 1) {
+                return;
+            }
+            group.forEach(function (edge, index) {
+                var direction;
+                if (index % 2 === 0) {
+                    direction = "curvedCW";
+                } else {
+                    direction = "curvedCCW";
+                }
+                var roundness = 0.2 + Math.floor(index / 2) * 0.2;
+                if (roundness > 0.8) {
+                    roundness = 0.8;
+                }
+                updates.push({
+                    id: edge.id,
+                    smooth: {
+                        type: direction,
+                        forceDirection: "vertical",
+                        roundness: roundness,
+                    },
+                });
+            });
+        });
+
+        if (updates.length > 0) {
+            self.visjsGraph.data.edges.update(updates);
+        }
+    };
+
+    /**
      * Normalize rdf:type / rdfs:subClassOf edge color to blue for consistency.
      * It updates the edges store in place.
      * @param {Object} visjsGraph
@@ -939,6 +1001,7 @@ var MappingColumnsGraph = (function () {
                         }
 
                         MappingColumnsGraph.visjsGraph.network.setOptions({ physics: self.physicsHierarchical });
+                        self.adjustEdgeCurvatures();
                         UI.resetWindowSize();
 
                         if (callback) {
@@ -1297,6 +1360,7 @@ var MappingColumnsGraph = (function () {
         } catch (e) {
             // Ignore duplicate/invalid edge addition
         }
+        self.adjustEdgeCurvatures();
         self.saveVisjsGraph();
     };
 

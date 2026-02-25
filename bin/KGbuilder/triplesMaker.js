@@ -411,8 +411,7 @@ var TriplesMaker = {
                     otherPredicates.forEach(function (item) {
                         if (options.filterMappingIds && options.filterMappingIds.indexOf(item.property) > -1) {
                             var subjectUri = TriplesMaker.getColumnUri(line, columnId, columnMappings, rowIndex, tableProcessingParams);
-                            //item.dateFormat
-                            object = TriplesMaker.getFormatedLiteral(line, {
+                            var object = TriplesMaker.getFormatedLiteral(line, {
                                 dataType: item.range,
                                 o: item.object,
                                 dateFormat: item.dateFormat,
@@ -443,7 +442,7 @@ var TriplesMaker = {
                     });
                     filteredMappings.forEach(function (mapping) {
                         var subjectUri = TriplesMaker.getColumnUri(line, columnId, columnMappings, rowIndex, tableProcessingParams);
-
+                        var object = null;
                         var property = TriplesMaker.getPropertyUri(mapping.p);
                         if (!line[mapping.o]) {
                             if (mapping.isConstantUri) {

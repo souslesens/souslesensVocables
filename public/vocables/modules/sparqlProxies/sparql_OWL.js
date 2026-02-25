@@ -469,7 +469,7 @@ var Sparql_OWL = (function () {
 
         var selectStr = " * ";
         if (true || options.excludeType) {
-            selectStr = ' ?subject ?subjectLabel (GROUP_CONCAT(?subjectType;SEPARATOR=",") AS ?subjectTypes)';
+            selectStr = ' ?subject ?subjectLabel (GROUP_CONCAT(?subjectType;SEPARATOR=",") AS ?subjectTypes) (GROUP_CONCAT(?subjectSuperClass;SEPARATOR=",") AS ?subjectSuperClasses)';
             for (var i = 1; i <= ancestorsDepth; i++) {
                 selectStr += '(GROUP_CONCAT(?broaderGraph1;SEPARATOR=",") AS ?broaderGraphs' + i + " ) ?broader" + i + " ?broader" + i + "Label";
             }
@@ -493,6 +493,7 @@ var Sparql_OWL = (function () {
         }
         query += " }}\n";
         query += " filter( ?subjectGraph" + i + " in " + fromList + " ).\n";
+        query += " OPTIONAL {?subject rdfs:subClassOf ?subjectSuperClass.}\n";
         //query += " }\n";
         ancestorsDepth = Math.min(ancestorsDepth, self.ancestorsDepth);
 

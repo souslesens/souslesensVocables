@@ -3475,8 +3475,12 @@ restrictionSource = Config.predicatesSource;
             }
 
             result.forEach(function (item) {
-                //if (item.subjectType && item.subjectType.value.indexOf("NamedIndividual") > -1) {
-                if (item.subjectTypes && item.subjectTypes.value.indexOf("NamedIndividual") > -1) {
+                if (!item.subjectTypes) return;
+                var types = item.subjectTypes.value;
+                var superClasses = item.subjectSuperClasses ? item.subjectSuperClasses.value : "";
+                if (types.indexOf("NamedIndividual") > -1) {
+                    conceptType = "NamedIndividual";
+                } else if (!superClasses && types.indexOf("/owl#") < 0 && types.indexOf("/rdf-schema#") < 0) {
                     conceptType = "NamedIndividual";
                 }
             });

@@ -16,8 +16,6 @@ export default () => {
             const userInfo = await userManager.getUser(req.user);
             const userData = await userDataModel.find(req.params.id, userInfo.user);
             const userTools = await profileModel.getUserTools(userInfo.user);
-            
-            
 
             if (userData.data_type == "jsFunction") {
                 // Get user context for SPARQL request filtering

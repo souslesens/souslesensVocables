@@ -5,7 +5,6 @@ import async from "async";
 import httpProxy from "./httpProxy.js";
 import UserRequestFiltering from "./userRequestFiltering.js";
 
-
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
 // Register custom loader to remap vocables paths
@@ -248,10 +247,7 @@ const RemoteCodeRunner = {
         const resolvedPath = path.resolve(projectRoot, modulePath).replace(/\\/g, "/");
 
         const projectRootFwd = projectRoot.replace(/\\/g, "/");
-        const trustedPluginsDirs = [
-            projectRootFwd + "/plugins",
-            path.dirname(projectRoot).replace(/\\/g, "/") + "/plugins",
-        ];
+        const trustedPluginsDirs = [projectRootFwd + "/plugins", path.dirname(projectRoot).replace(/\\/g, "/") + "/plugins"];
 
         const pathParts = resolvedPath.split("/");
         const pluginsIdx = pathParts.lastIndexOf("plugins");
@@ -265,9 +261,7 @@ const RemoteCodeRunner = {
 
         const userGroups = (userContext && userContext.user && userContext.user.user && userContext.user.user.groups) || [];
         const userTools = (userContext && userContext.tools) || [];
-        const hasAccess =
-            userGroups.includes("admin") ||
-            userTools.some((t) => t.type === "plugin" && t.name.toLowerCase() === pluginName.toLowerCase());
+        const hasAccess = userGroups.includes("admin") || userTools.some((t) => t.type === "plugin" && t.name.toLowerCase() === pluginName.toLowerCase());
 
         if (!hasAccess) {
             return callback(new Error(`Access denied: user does not have rights on plugin '${pluginName}'`));

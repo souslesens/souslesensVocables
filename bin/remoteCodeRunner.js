@@ -1,7 +1,12 @@
 import { register } from "node:module";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import async from "async";
 import httpProxy from "./httpProxy.js";
 import UserRequestFiltering from "./userRequestFiltering.js";
+
+
+const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
 // Register custom loader to remap vocables paths
 register("./remoteCodeRunnerLoader.js", import.meta.url);
@@ -237,6 +242,35 @@ const RemoteCodeRunner = {
         if (typeof userContext === "function") {
             callback = userContext;
             userContext = null;
+        }
+
+        const modulePath = userData.data_content.modulePath;
+        const resolvedPath = path.resolve(projectRoot, modulePath).replace(/\\/g, "/");
+
+        const projectRootFwd = projectRoot.replace(/\\/g, "/");
+        const trustedPluginsDirs = [
+            projectRootFwd + "/plugins",
+            path.dirname(projectRoot).replace(/\\/g, "/") + "/plugins",
+        ];
+
+        const pathParts = resolvedPath.split("/");
+        const pluginsIdx = pathParts.lastIndexOf("plugins");
+        const actualPluginsDir = pluginsIdx !== -1 ? pathParts.slice(0, pluginsIdx + 1).join("/") : null;
+
+        if (!actualPluginsDir || !trustedPluginsDirs.includes(actualPluginsDir) || pluginsIdx >= pathParts.length - 2) {
+            return callback(new Error("Access denied: module path must be within the project's plugins/<PluginName>/ directory"));
+        }
+
+        const pluginName = pathParts[pluginsIdx + 1];
+
+        const userGroups = (userContext && userContext.user && userContext.user.user && userContext.user.user.groups) || [];
+        const userTools = (userContext && userContext.tools) || [];
+        const hasAccess =
+            userGroups.includes("admin") ||
+            userTools.some((t) => t.type === "plugin" && t.name.toLowerCase() === pluginName.toLowerCase());
+
+        if (!hasAccess) {
+            return callback(new Error(`Access denied: user does not have rights on plugin '${pluginName}'`));
         }
 
         // Store user context for $.ajax filtering

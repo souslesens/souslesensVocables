@@ -7,6 +7,7 @@ import ConfigManager from "../../../../../../bin/configManager.js";
 import { Template } from "@huggingface/jinja";
 import { RDF_FORMATS_MIMETYPES } from "../../../../../../model/utils.js";
 import RemoteCodeRunner from "../../../../../../bin/remoteCodeRunner.js";
+import { profileModel } from "../../../../../../model/profiles.js";
 //const RemoteCodeRunner = require("../../../../../bin/remoteCodeRunner.js.js");
 
 export default () => {
@@ -14,6 +15,9 @@ export default () => {
         try {
             const userInfo = await userManager.getUser(req.user);
             const userData = await userDataModel.find(req.params.id, userInfo.user);
+            const userTools = await profileModel.getUserTools(userInfo.user);
+            
+            
 
             if (userData.data_type == "jsFunction") {
                 // Get user context for SPARQL request filtering
@@ -30,6 +34,7 @@ export default () => {
                 const userContext = {
                     user: user,
                     userSources: userSources,
+                    tools: userTools,
                 };
 
                 RemoteCodeRunner.runUserDataFunction(userData, userContext, function (err, result) {

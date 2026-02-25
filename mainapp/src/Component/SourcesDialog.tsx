@@ -100,6 +100,13 @@ export const SourcesDialog = ({ edit, me, onClose, onSubmit, open, selectedSourc
 
     const handleValidation = (data: ServerSource) => {
         const schema = ServerSourceSchema.superRefine((value: ServerSource, context) => {
+            if (value.name.includes(" ")) {
+                context.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    message: "Name cannot contain spaces",
+                    path: ["name"],
+                });
+            }
             if (!edit && sourcesNames.includes(value.name)) {
                 context.addIssue({
                     code: z.ZodIssueCode.custom,

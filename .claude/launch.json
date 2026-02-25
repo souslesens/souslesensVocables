@@ -1,0 +1,20 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "start",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": ["/c", "npm run start"],
+      "port": 3010
+    },
+   
+    {
+      "name": "mainapp-watch",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": ["/c", "npm run mainapp:watch"],
+      "port": 9000,
+      "autoPort": true
+    }
+   
+  ]
+}

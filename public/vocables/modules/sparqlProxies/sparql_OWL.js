@@ -229,7 +229,8 @@ var Sparql_OWL = (function () {
             "OPTIONAL {?child1 rdfs:label ?child1Label." +
             Sparql_common.getLangFilter(sourceLabel, "child1Label") +
             "}" +
-            "OPTIONAL {?child1 rdf:type ?child1Type.}";
+            "OPTIONAL {?child1 rdf:type ?child1Type.}" +
+            "OPTIONAL {?child1 rdfs:subClassOf ?child1SuperClass.}";
 
         for (let i = 1; i < descendantsDepth; i++) {
             query +=
@@ -468,7 +469,7 @@ var Sparql_OWL = (function () {
 
         var selectStr = " * ";
         if (true || options.excludeType) {
-            selectStr = ' ?subject ?subjectLabel (GROUP_CONCAT(?subjectType;SEPARATOR=",") AS ?subjectTypes)';
+            selectStr = ' ?subject ?subjectLabel (GROUP_CONCAT(?subjectType;SEPARATOR=",") AS ?subjectTypes) (GROUP_CONCAT(?subjectSuperClass;SEPARATOR=",") AS ?subjectSuperClasses)';
             for (var i = 1; i <= ancestorsDepth; i++) {
                 selectStr += '(GROUP_CONCAT(?broaderGraph1;SEPARATOR=",") AS ?broaderGraphs' + i + " ) ?broader" + i + " ?broader" + i + "Label";
             }
@@ -492,6 +493,7 @@ var Sparql_OWL = (function () {
         }
         query += " }}\n";
         query += " filter( ?subjectGraph" + i + " in " + fromList + " ).\n";
+        query += " OPTIONAL {?subject rdfs:subClassOf ?subjectSuperClass.}\n";
         //query += " }\n";
         ancestorsDepth = Math.min(ancestorsDepth, self.ancestorsDepth);
 

@@ -2,33 +2,12 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "backend",
-      "runtimeExecutable": "cmd",
-      "runtimeArgs": ["/c", "npm run dev:server"],
-      "port": 3010,
-      "autoPort": false
-    },
-    {
-      "name": "mainapp-dev",
-      "runtimeExecutable": "cmd",
-      "runtimeArgs": ["/c", "npm run mainapp:dev"],
-      "port": 5173,
-      "autoPort": false
-    },
-    {
-      "name": "fullstack",
-      "runtimeExecutable": "cmd",
-      "runtimeArgs": ["/c", "npm run dev:fullstack"],
-      "port": 3010,
-      "autoPort": false
-    },
-    {
       "name": "start",
       "runtimeExecutable": "cmd",
       "runtimeArgs": ["/c", "npm run start"],
-      "port": 3010,
-      "autoPort": false
+      "port": 3010
     },
+   
     {
       "name": "mainapp-watch",
       "runtimeExecutable": "cmd",
@@ -36,5 +15,6 @@
       "port": 9000,
       "autoPort": true
     }
+   
   ]
 }

@@ -319,7 +319,11 @@ var TripleFactory = (function () {
                 if (sampleData) {
                     UIcontroller.activateRightPanel("generic");
                     self.showTriplesInDataTable(result, "mappingModeler_genericPanel");
-                    //   UI.message("", true);
+                    UI.message("", true);
+                    var progressBar = document.getElementById("progressBar");
+                    if (progressBar) {
+                        progressBar.style.display = "none";
+                    }
                 } else {
                     if (options.deleteTriples) {
                         $("#KGcreator_infosDiv").val(result.result);

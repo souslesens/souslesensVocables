@@ -561,13 +561,13 @@ var SearchWidget = (function () {
         var es_options = {};
 
         es_options.skosLabels = 1;
+        es_options.parentlabels = true;
         es_options.classFilter = node.data.id;
         SearchUtil.getSimilarLabelsInSources(null, [sourceLabel], ["*"], null, "fuzzyMatch", es_options, function (_err, result) {
             if (_err) {
-                return UI.message(err);
+                return UI.message(_err);
             }
             var es_results = [];
-            var treated_results = [];
             if (result[0] && result[0].matches && result[0].matches[sourceLabel]) {
                 es_results = result[0].matches[sourceLabel];
             }
@@ -581,43 +581,27 @@ var SearchWidget = (function () {
                 if (b.label > a.label) return -1;
                 return 0;
             });
-            if (es_results.length > 500) {
-                es_results = es_results.slice(0, 500);
+            if (es_results.length > 1000) {
+                es_results = es_results.slice(0, 1000);
             }
-            if (es_results.length > 0) {
-                treated_results = [];
-                var item;
-                es_results.forEach(function (result) {
-                    item = {};
-                    if (result.id == node.data.id) {
-                        return;
+            if (es_results.length === 0) {
+                return UI.message("No results found");
+            }
+            if (result[0] && result[0].matches) {
+                result[0].matches[sourceLabel] = es_results;
+            }
+            SearchWidget.searchResultToJstree(null, result, { source: sourceLabel }, function (err, jstreeData) {
+                if (err) return UI.message(err);
+                jstreeData.forEach(function (treeNode) {
+                    if (treeNode.parent === "#") {
+                        treeNode.parent = node.id;
                     }
-                    item.subject = { type: "uri", value: node.data.id };
-                    item.subjectLabel = { type: "uri", value: node.data.label };
-                    item.subjectType = { value: "http://www.w3.org/2004/02/skos/core#Concept" };
-                    var type = result.type == "Class" ? "http://www.w3.org/2002/07/owl#Class" : "http://www.w3.org/2002/07/owl#NamedIndividual";
-                    item.child1Type = { type: "uri", value: type };
-                    item.child1 = { type: "uri", value: result.id };
-                    item.child1Label = { type: "uri", value: result.label };
-                    treated_results.push(item);
                 });
-                if (treated_results.length == 0) {
-                    return UI.message("No results found");
-                }
-            }
-            if (options.beforeDrawingFn) {
-                options.beforeDrawingFn(treated_results);
-            }
-            var jsTreeOptions = {
-                source: sourceLabel,
-                type: node.data.type,
-            };
-            if (options.optionalData) {
-                jsTreeOptions.optionalData = options.optionalData;
-            }
-            TreeController.drawOrUpdateTree(divId, treated_results, node.id, "child1", jsTreeOptions);
-
-            $("#waitImg").css("display", "none");
+                JstreeWidget.addNodesToJstree(divId, null, jstreeData, { positionLast: true }, function () {
+                    JstreeWidget.openNodeDescendants(divId, node.id);
+                    $("#waitImg").css("display", "none");
+                });
+            });
         });
         return;
         // options.filterCollections = Collection.currentCollectionFilter;

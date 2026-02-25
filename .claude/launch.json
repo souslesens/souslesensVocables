@@ -1,0 +1,23 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "backend",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev:server"],
+      "port": 3010
+    },
+    {
+      "name": "mainapp-dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "mainapp:dev"],
+      "port": 5173
+    },
+    {
+      "name": "fullstack",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev:fullstack"],
+      "port": 3010
+    }
+  ]
+}

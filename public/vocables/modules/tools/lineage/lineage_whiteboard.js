@@ -1935,14 +1935,34 @@ var Lineage_whiteboard = (function () {
                     var shapeSize = Lineage_whiteboard.defaultShapeSize;
 
                     // identify namedLinkedData when several rdf:type
-                    var namedLinkedDataMap = {};
+                    var childEvidence = {};
                     parentsMap[parentConcept].forEach(function (item) {
                         for (var i = 1; i < depth + 1; i++) {
-                            if (item["child" + i + "Type"] && item["child" + i + "Type"].indexOf("NamedIndividual") > -1) {
-                                namedLinkedDataMap[item["child" + i]] = 1;
+                            var childId = item["child" + i];
+                            var childType = item["child" + i + "Type"];
+                            if (!childId) continue;
+                            if (!childEvidence[childId]) childEvidence[childId] = {};
+                            if (childType) {
+                                if (childType.indexOf("NamedIndividual") > -1) {
+                                    childEvidence[childId].hasNamedIndividualType = true;
+                                } else if (childType.indexOf("/owl#") > -1 || childType.indexOf("/rdf-schema#") > -1) {
+                                    childEvidence[childId].hasOwlMetaType = true;
+                                } else {
+                                    childEvidence[childId].hasUserDefinedType = true;
+                                }
+                            }
+                            if (i === 1 && item.child1SuperClass) {
+                                childEvidence[childId].hasSubClassOf = true;
                             }
                         }
                     });
+                    var namedLinkedDataMap = {};
+                    for (var childId in childEvidence) {
+                        var ev = childEvidence[childId];
+                        if (ev.hasNamedIndividualType || (ev.hasUserDefinedType && !ev.hasOwlMetaType && !ev.hasSubClassOf)) {
+                            namedLinkedDataMap[childId] = 1;
+                        }
+                    }
 
                     parentsMap[parentConcept].forEach(function (item) {
                         expandedLevel.push(item.id);

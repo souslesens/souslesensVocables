@@ -229,7 +229,8 @@ var Sparql_OWL = (function () {
             "OPTIONAL {?child1 rdfs:label ?child1Label." +
             Sparql_common.getLangFilter(sourceLabel, "child1Label") +
             "}" +
-            "OPTIONAL {?child1 rdf:type ?child1Type.}";
+            "OPTIONAL {?child1 rdf:type ?child1Type.}" +
+            "OPTIONAL {?child1 rdfs:subClassOf ?child1SuperClass.}";
 
         for (let i = 1; i < descendantsDepth; i++) {
             query +=

@@ -38,23 +38,21 @@ This module is a console‑based test suite that thoroughly checks getUriFilter(
 - **Visual Query Construction**: Click nodes and edges directly in the graph.
 - **Boolean Query Logic**: Support for AND, OR, UNION combinations.
 1. SPARQL Query Construction Utilities
-All modules rely on sparql_common to dynamically build SPARQL filters, prefixes, graph clauses, date filters, string sanitization, and URI handling. [jemsprod-m...epoint.com]
+All modules rely on sparql_common to dynamically build SPARQL filters, prefixes, graph clauses, date filters, string sanitization, and URI handling.
 2. Source‑Aware Graph Management
-The system detects graph URIs, manages imports, and builds FROM/GRAPH clauses depending on the source definition, enabling cross‑source querying. [jemsprod-m...epoint.com]
+The system detects graph URIs, manages imports, and builds FROM/GRAPH clauses depending on the source definition, enabling cross‑source querying.
 3. Hierarchical Navigation (SKOS & OWL)
-Sparql_OWL and Sparql_SKOS implement parent/child lookup, ancestors, descendants, taxonomy traversal, and genealogy extraction for both OWL and SKOS vocabularies. [jemsprod-m...epoint.com], [jemsprod-m...epoint.com]
+Sparql_OWL and Sparql_SKOS implement parent/child lookup, ancestors, descendants, taxonomy traversal, and genealogy extraction for both OWL and SKOS vocabularies. 
 4. Node‑Level Data Retrieval
 Modules provide functions to fetch labels, types, triples, restrictions, item definitions, and domain/range metadata for any resource.
- [jemsprod-m...epoint.com], [jemsprod-m...epoint.com]
 5. Triple Manipulation API
-Insert, update, delete, copy, export, and reconstruct triples (NT/Turtle) across graphs with safe handling of blank nodes and URIs. [jemsprod-m...epoint.com], [jemsprod-m...epoint.com]
+Insert, update, delete, copy, export, and reconstruct triples (NT/Turtle) across graphs with safe handling of blank nodes and URIs. 
 6. Proxy‑Based SPARQL Execution Layer
-sparql_proxy.js unifies GET/POST execution, authentication, headers, error handling, async querying, and fallback logic across sparql servers. [jemsprod-m...epoint.com]
+sparql_proxy.js unifies GET/POST execution, authentication, headers, error handling, async querying, and fallback logic across sparql servers.
 7. Bulk & Slice Processing
-Sparql_generic automatically slices large sets of IDs or labels to avoid endpoint overload and then recombines the results. [jemsprod-m...epoint.com]
+Sparql_generic automatically slices large sets of IDs or labels to avoid endpoint overload and then recombines the results.
 8. Multi‑Schema Support (SKOS / OWL / KG)
 The utilities adapt queries to different schema types with configurable predicates (prefLabel, broader, subclassOf, type).
- [jemsprod-m...epoint.com], [jemsprod-m...epoint.com]
 9. Result Enrichment Helpers
 Automatic enrichment of bindings with missing labels, types, sorting, optional properties, and consistent labeling for UI use
 
@@ -63,7 +61,7 @@ Automatic enrichment of bindings with missing labels, types, sorting, optional p
 - retrieves and links concepts, hierarchies, and metadata from OWL and SKOS vocabularies to build a unified knowledge graph
 - query the graph through a UI powered by sparql_proxy, which handles secure, optimized requests
 - detect missing labels, taxonomy issues, and inconsistent properties across sources
-- The result is a consolidated semantic backbone enabling faster decision‑making, asset classification, and cross‑department knowledge reuse.
+- the result is a consolidated semantic backbone enabling faster decision‑making, asset classification, and cross‑department knowledge reuse
 
 <!-- AUTO-DESC:END -->
 

@@ -427,6 +427,13 @@ var SearchWidget = (function () {
             },
         };
 
+        items.exportSearchResults = {
+            label: "Export search results",
+            action: function (_e) {
+                Export.exportTreeToDataTable(null, null);
+            },
+        };
+
         if (MainController.currentTool == "lineage" || MainController.currentTool == "KGmappings") {
             items.graphNode = {
                 label: "graph Node",

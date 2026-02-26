@@ -13,7 +13,7 @@
                     <input id="searchWidget_searchTermInput" class="border-without-raduis-theme1" autocomplete="off" style="width: 35%; height: 33.5px; border-left: 0px" value="" />
 
                     <div class="SearchButtonIconRight border-without-raduis-theme1" style="height: 33.5px; padding-left: 7px; padding-right: 6px">
-                        <button class="search-icon slsv-invisible-button" onclick="SearchWidget.searchTermInSources()" style="margin-top: 4px; height: 20px; width: 20px"></button>
+                        <button class="search-icon slsv-invisible-button" onclick="SearchWidget.searchOrShowTopConcepts()" style="margin-top: 4px; height: 20px; width: 20px"></button>
                     </div>
                     <div>
                         <button class="w3-button classesPanelButton size-of-button-small" style="margin-left: 10px" onclick="SearchWidget.showTopConcepts();">Reset</button>
@@ -65,7 +65,7 @@
 <script>
     $("#searchWidget_searchTermInput").keypress(function (e) {
         if (e.which == 13) {
-            SearchWidget.searchTermInSources();
+            SearchWidget.searchOrShowTopConcepts();
         }
     });
     $("#searchWidget_searchTermInput").trigger("focus");

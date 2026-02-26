@@ -112,20 +112,28 @@ var CreateAnnotationPropertiesTemplate_bot = (function () {
     listTemplateVocabsFn: function () {
       var sourceForVocabs = self.params.referenceSource;
       
-      // Fallback for GLOBAL templates (no source selected)
-      // We list only standard vocabularies
+      // GLOBAL templates (no reference source): show standard + common import vocabularies
       if (!sourceForVocabs) {
-          var standardVocabs = [
-              { id: "rdf", label: "[Standard] rdf" },
-              { id: "rdfs", label: "[Standard] rdfs" },
-              { id: "owl", label: "[Standard] owl" },
-              { id: "skos", label: "[Standard] skos" }
-          ];
+        var vocabs = [
+          // Imports (common)
+          { id: "BFO", label: "[Import] BFO" },
+          { id: "dc", label: "[Import] dc" },
+          { id: "dcterms", label: "[Import] dcterms" },
+          { id: "iof-av", label: "[Import] iof-av" },
 
-          return self.myBotEngine.showList(
-              standardVocabs,
-              "selectedVocabulary"
-          );
+          // Standards
+          { id: "rdf", label: "[Standard] rdf" },
+          { id: "rdfs", label: "[Standard] rdfs" },
+          { id: "owl", label: "[Standard] owl" },
+          { id: "skos", label: "[Standard] skos" },
+        ];
+
+        // Sort for UX (optional)
+        vocabs.sort(function (a, b) {
+          return a.label.localeCompare(b.label);
+        });
+
+        return self.myBotEngine.showList(vocabs, "selectedVocabulary");
       }
 
       // Normal behavior: source-based vocab listing

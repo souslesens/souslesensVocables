@@ -120,66 +120,108 @@ export function UploadGraphModal({ apiUrl, onClose, open, sourceName, indexAfter
             // get file
             const file = uploadfile[0];
 
-            // get file size and chunk size
-            const chunkSize = 10_000_000; // 10Mb
-            const fileSize = file.size;
-
-            // init values
+            // Streaming implementation: read the file line‑by‑line and
+            // send a chunk every 10,000 lines
+            const LINES_PER_CHUNK = 10_000;
+            const decoder = new TextDecoder();
+            let linesBuffer: string[] = [];
+            let leftover = "";
+            let bytesRead = 0;
             let chunkId = "";
 
-            // iterate over file and send chunks to server
-            for (let start = 0; start < fileSize; start += chunkSize) {
-                // set percent for progress bar
-                const percent = (start * 100) / fileSize;
-                setTransferPercent(Math.round(percent));
+            async function sendChunk(lines: string[], isLast: boolean) {
+                // Ensure each chunk ends with a newline character.
+                const chunkContent = lines.length ? lines.join("\n") + "\n" : "";
+                const chunkFile = new File([chunkContent], file.name, { type: file.type });
 
-                // slice file
-                const end = start + chunkSize;
-                const chunk = new File([file.slice(start, end)], file.name, { type: file.type });
+                if (isLast) setTransferState("processing");
 
-                // last ?
-                const lastChunk = start + chunkSize >= fileSize ? true : false;
-                if (lastChunk) {
-                    setTransferState("processing");
-                }
-
-                // build formData
                 const formData = new FormData();
                 Object.entries({
                     source: sourceName,
-                    last: lastChunk,
+                    last: isLast,
                     identifier: chunkId,
                     clean: false,
                     replace: replaceGraph,
-                    data: chunk,
-                }).forEach(([key, value]) => {
-                    formData.append(key, typeof value === "boolean" ? String(value) : value);
+                    data: chunkFile,
+                }).forEach(([k, v]) => {
+                    formData.append(k, typeof v === "boolean" ? String(v) : v);
                 });
-                // if cancel button is pressed, remove uploaded file and return
+
+                // Handle cancellation before sending the chunk
                 if (cancelCurrentOperation.current) {
-                    formData.set("clean", String(true));
-                    await fetch(`${apiUrl}api/v1/rdf/graph`, { method: "post", headers: { Authorization: `Bearer ${userToken}` }, body: formData });
+                    formData.set("clean", "true");
+                    await fetch(`${apiUrl}api/v1/rdf/graph`, {
+                        method: "post",
+                        headers: { Authorization: `Bearer ${userToken}` },
+                        body: formData,
+                    });
                     setTransferState("init");
-                    return;
+                    return false;
                 }
 
-                // POST data
-                const res = await fetch(`${apiUrl}api/v1/rdf/graph`, { method: "post", headers: { Authorization: `Bearer ${userToken}` }, body: formData });
-                if (res.status != 200) {
-                    const message = (await res.json()) as { error?: string; detail?: string };
-                    console.error(message);
-                    setErrorMessage(message.error ?? message.detail ?? "Internal server error");
-                    setTransferState("init");
-                    return;
-                } else {
-                    const json = (await res.json()) as { identifier: string };
+                const res = await fetch(`${apiUrl}api/v1/rdf/graph`, {
+                    method: "post",
+                    headers: { Authorization: `Bearer ${userToken}` },
+                    body: formData,
+                });
 
-                    // Set values for next iteration
-                    chunkId = json.identifier;
+                if (res.status !== 200) {
+                    const msg = (await res.json()) as { error?: string; detail?: string };
+                    console.error(msg);
+                    setErrorMessage(msg.error ?? msg.detail ?? "Internal server error");
+                    setTransferState("init");
+                    throw new Error("Upload failed");
+                }
+
+                const json = (await res.json()) as { identifier: string };
+                chunkId = json.identifier; // store identifier for the next chunk
+                return true;
+            }
+
+            // Stream the file – supported in modern browsers
+            const reader = file.stream().getReader();
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                const uint8 = value; // Uint8Array
+                const text = decoder.decode(uint8, { stream: true });
+                bytesRead += uint8.byteLength;
+
+                const combined = leftover + text;
+                const parts = combined.split("\n");
+                leftover = parts.pop() as string;
+
+                linesBuffer.push(...parts);
+
+                // While we have enough lines for a full chunk, send it
+                while (linesBuffer.length >= LINES_PER_CHUNK) {
+                    const chunkLines = linesBuffer.splice(0, LINES_PER_CHUNK);
+                    const continueUpload = await sendChunk(chunkLines, false);
+                    if (!continueUpload) {
+                        reader.releaseLock();
+                        return;
+                    }
+                }
+
+                const percent = Math.round((bytesRead * 100) / file.size);
+                setTransferPercent(percent);
+
+                if (cancelCurrentOperation.current) {
+                    break;
                 }
             }
-            setTransferPercent(100);
-            setTransferState("done");
+
+            if (!cancelCurrentOperation.current) {
+                if (leftover) linesBuffer.push(leftover);
+                if (linesBuffer.length > 0) {
+                    await sendChunk(linesBuffer, true);
+                } else {
+                    await sendChunk([], true);
+                }
+                setTransferPercent(100);
+                setTransferState("done");
+            }
         } catch (error) {
             console.error(error);
             setErrorMessage((error as Error).message);

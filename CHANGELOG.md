@@ -2,6 +2,94 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.0.0](https://github.com/souslesens/souslesensVocables/compare/2.24.1...3.0.0) (2026-02-26)
+
+> [!IMPORTANT]
+> Updating to 3.0.0 require a data migration. Execute the following script after upgrade.
+
+```bash
+npm run migrate
+```
+
+
+### Features
+
+* **api/config:** return sparqlDownloadLimit ([3dcec4b](https://github.com/souslesens/souslesensVocables/commit/3dcec4b9d4e901da670de52c5fb694adfc1bce12))
+* **api:** /v1/rdf/graph: add withImports option to include imports ([cd281bd](https://github.com/souslesens/souslesensVocables/commit/cd281bd8eb7c07aba6750bac2b73a488a61dec9c))
+* **api:** add withImports to get graph info with imports ([f6c4892](https://github.com/souslesens/souslesensVocables/commit/f6c48928197c0c8d9a746bafd42d194fd2637463))
+* **api:** GET /api/v1/rdf/graph take only offset, and return the next offset ([d86f64b](https://github.com/souslesens/souslesensVocables/commit/d86f64b7500f0733640462d6aff5a87158678e6d))
+* **api:** GET rdf/graph includes contributor and import triples ([19d347b](https://github.com/souslesens/souslesensVocables/commit/19d347b4d08d411a61012c98dfb52a49937ce935))
+* **api:** GET rdf/graph: contributor is owner, not logged user ([e7d74d4](https://github.com/souslesens/souslesensVocables/commit/e7d74d44ab190894e5188744ecf0bbe7b2729870))
+* **app.js:** load upper ontology at start ([da40ae5](https://github.com/souslesens/souslesensVocables/commit/da40ae59310ccb4f7593212a3257e94d5e0e8530))
+* **config:** add graphDownloadUrl + reformat file ([62dddcc](https://github.com/souslesens/souslesensVocables/commit/62dddcc53f7529c43418f31b7e4e2dcf57fbfc85))
+* **config:** add sparqlDownloadLimit option ([2a849f6](https://github.com/souslesens/souslesensVocables/commit/2a849f6e9eed43faac39f8be0c6b524c2dff95ef))
+* **DownloadGraphModal:** display triple number on modal ([8c84db3](https://github.com/souslesens/souslesensVocables/commit/8c84db35992e0c36b82227d5f1f0e08db6078399))
+* **DownloadGraphModal:** don't allow xml and ttl download if graph is bigger than limit ([09bae45](https://github.com/souslesens/souslesensVocables/commit/09bae4524c933e2ae79a6571f0b90cc4d14f5b21))
+* **DownloadGraphModal:** fetch graphInfo (graph size) at modal open ([c79b5c7](https://github.com/souslesens/souslesensVocables/commit/c79b5c76fbd122ec0903c89fb463dbabbc80cf16))
+* **DownloadGraphModal:** remove a formControl to reduce margin ([7fc22a0](https://github.com/souslesens/souslesensVocables/commit/7fc22a0d6fa65bd93ade8b066d34b333821db52c))
+* **DownloadGraphModal:** remove unsued method ([0e9fa43](https://github.com/souslesens/souslesensVocables/commit/0e9fa43ee0b08942c3918285075a138eb23b4550))
+* **DownloadGraphModal:** uniformize api with sls-py-api ([821eefb](https://github.com/souslesens/souslesensVocables/commit/821eefbba02e36e363dd0d33d5127766edca2ce9))
+* **DownloadGraphModal:** use sls-py-api v2 route to download graph ([d48804b](https://github.com/souslesens/souslesensVocables/commit/d48804b6c608164791f7e6222462f0e78101088a))
+* **downloadModal:** add import download graph with imports ([3ddbc4b](https://github.com/souslesens/souslesensVocables/commit/3ddbc4bc00cbd81be1850749acafe3a8caae853d))
+* **mainapp:** add roundMinMax function ([20eacbc](https://github.com/souslesens/souslesensVocables/commit/20eacbc57a347b8261304ce0af2dfaf93209b451))
+* **migartion:** migrate mainConfig.json file to add sparqlDownloadLimit ([8bfeeed](https://github.com/souslesens/souslesensVocables/commit/8bfeeed7da6e2d78a9269af1a85e92e9fec2bbf8))
+* **model/rdfData:** add ask method ([fd15dc1](https://github.com/souslesens/souslesensVocables/commit/fd15dc1074fcaf8f0700d4af919d74b90d35ac95))
+* **model/rdfData:** add formatTripleToNt method ([4ddd48a](https://github.com/souslesens/souslesensVocables/commit/4ddd48a3eb87ef4e7d1c366a92c4ba242dcc4265))
+* **model/rdfData:** add genContributorTriple and genImportTriples method ([283f923](https://github.com/souslesens/souslesensVocables/commit/283f923312f2b0421e028f578a3ae233c467465f))
+* remove imports things ([2856883](https://github.com/souslesens/souslesensVocables/commit/28568834182bd19d727f3ea232e3683db811ecc5))
+
+
+### Bug Fixes
+
+* auth with token ([b296c04](https://github.com/souslesens/souslesensVocables/commit/b296c04ccdae17e0343ded4cc08dc083b2ba3245))
+* **axiom:** open by default ([b2ac635](https://github.com/souslesens/souslesensVocables/commit/b2ac635d398efc25c46e73c921d52b7dfce3709a))
+* **axioms:** add axiom cache update ([8e81975](https://github.com/souslesens/souslesensVocables/commit/8e819752a8b8c5d78023440136f700646d939fda))
+* **axioms:** bug of empty tree ([26774ff](https://github.com/souslesens/souslesensVocables/commit/26774ffa5f1367a4e95910e8a8d6027b00e9d06c))
+* **axioms:** cache convertor for addAxioms ([73aa96b](https://github.com/souslesens/souslesensVocables/commit/73aa96bffc49f5765679669b01bf49c469b86a97))
+* **axioms:** can choose a class for rootAxiom ([7da1518](https://github.com/souslesens/souslesensVocables/commit/7da1518cdd6e2d95c199f03d1a116d94081684a1))
+* **axioms:** connective fixing ([2cfe142](https://github.com/souslesens/souslesensVocables/commit/2cfe142e778a137985d2db7ab84dcf09ad480064))
+* **axioms:** contextual get triples ([62017d9](https://github.com/souslesens/souslesensVocables/commit/62017d96ff27f8c951b1e2ed0be3388b71157a35))
+* **axioms:** delete triples cache and gestion of blanks nodes fixing ([f51d50e](https://github.com/souslesens/souslesensVocables/commit/f51d50e7e21fd3a77712dce6d30992f671943c0d))
+* **axioms:** legend zoom fixing ([6c70eeb](https://github.com/souslesens/souslesensVocables/commit/6c70eeb76b165343576884e3175fbf075ff316b8))
+* **axioms:** max 2 nodes per connective + no blank nodes on suggestions ([a7ba3c5](https://github.com/souslesens/souslesensVocables/commit/a7ba3c59ebce156ed79511c0976f4e4aee1fdca2))
+* **axioms:** rdf and owl properties inferred type object property correction ([ebb357c](https://github.com/souslesens/souslesensVocables/commit/ebb357c2980f4894979599a61bd1a0b695971e7a))
+* **axioms:** repair elastic + repair createClass ([6056b4b](https://github.com/souslesens/souslesensVocables/commit/6056b4b3d4ba7b32167f4df9c8cc28a459d97d0d))
+* **axioms:** z-index node infos ([cfb0f0c](https://github.com/souslesens/souslesensVocables/commit/cfb0f0cf3448d8d91c821e5d2223deab938cb87b))
+* **axiom:** update add Cache ([1006b66](https://github.com/souslesens/souslesensVocables/commit/1006b66ea62bca4dbbc2d9655e2c86b69d2c665a))
+* **common:** copyToClipboard error gestion ([0a0f1dc](https://github.com/souslesens/souslesensVocables/commit/0a0f1dc14a2e4b9d46af3a5beac9e2a0532f876f))
+* **ConfigEditor:** sno space in source name can introduce problems ([d43ad7f](https://github.com/souslesens/souslesensVocables/commit/d43ad7f4d70af672654649baf0ace88d8a044afd))
+* **Databases:** upload Databases destroy actual knex connexion after update ([f5e57c3](https://github.com/souslesens/souslesensVocables/commit/f5e57c39e1d07b144c92ae81cdff58f4e72cf654))
+* **ECMA script:** jest continue ([2a3aa6f](https://github.com/souslesens/souslesensVocables/commit/2a3aa6fc561a1e50f9293d8c228b39c9b8dbee10))
+* **ECMA script:** jest continue ([fe6bbea](https://github.com/souslesens/souslesensVocables/commit/fe6bbea0bda0e46e45350109e8ea86050566a3e0))
+* **ECMAscript:** cpntinue ([5fb623c](https://github.com/souslesens/souslesensVocables/commit/5fb623ce249c4c012770775c1f356d678443d13d))
+* **ECMAScript:** find and replace sloppy defined vars ([dde8e21](https://github.com/souslesens/souslesensVocables/commit/dde8e210775e033ca70c32717d32c6216350db53))
+* **ECMAScript:** find and replace sloppy defined vars ([fa49688](https://github.com/souslesens/souslesensVocables/commit/fa49688273504f12c41926ac64f30aff1663a456))
+* **ECMAScript:** find and replace sloppy defined vars ([a6f5d0e](https://github.com/souslesens/souslesensVocables/commit/a6f5d0e4ed7aade30099db27c8f9620de3f51df9))
+* **ECMAScript:** find and replace sloppy defined vars ([f630683](https://github.com/souslesens/souslesensVocables/commit/f63068381ca91c38d0b3fda2d9c2eaa7eb3a5abf))
+* **ECMAScript:** jest continue ([99f00d1](https://github.com/souslesens/souslesensVocables/commit/99f00d10121582a78aeef626e0d4b57a619f5aaf))
+* **ECMAScript:** jest continue ([fd36ce5](https://github.com/souslesens/souslesensVocables/commit/fd36ce5f7853053304e144b029803d1f57eb4491))
+* **ECMAScript:** jest continue ([5967e8a](https://github.com/souslesens/souslesensVocables/commit/5967e8a0cb040a3a476744be9c78e03db27bdf5c))
+* **ECMAScript:** jest continue ([0a3cbc6](https://github.com/souslesens/souslesensVocables/commit/0a3cbc69f2db3daf169034c47ebb275ccecdd3bb))
+* **ECMAscript:** manage packages files ([8440006](https://github.com/souslesens/souslesensVocables/commit/8440006a08fbe869ffdb8f289f9b790fea74b741))
+* **ecmascript:** remigrate new files ([90b1d16](https://github.com/souslesens/souslesensVocables/commit/90b1d16a64b9d8cdb2034f8181ef3d87ec6e8264))
+* **elasticRestProxy:** mdp fixing!! ([fbadca4](https://github.com/souslesens/souslesensVocables/commit/fbadca4aad619f82011c72f3d48b788b3ca45ce2))
+* **getTaxonomy:** affinate algorithm and filter blanks nodes from taxonomy ([77f75ec](https://github.com/souslesens/souslesensVocables/commit/77f75ec181ffe4b43b690a70ea46c4f71305eba7))
+* **jest:** try fix jest ([11e9cec](https://github.com/souslesens/souslesensVocables/commit/11e9cec8e2294d68f3b3a1707a12a25dad900419))
+* **KGqueryNodeInfos:** use it multiple time ([af25da8](https://github.com/souslesens/souslesensVocables/commit/af25da8aeb3533a5db9994256db34285147ca71c))
+* **launch.json claude:** supress all useless configs ([afd565a](https://github.com/souslesens/souslesensVocables/commit/afd565af2d190f18f69f332c5f55f51d21529ff2))
+* **migrations:** use yargs from yargs/yargs ([d28efc8](https://github.com/souslesens/souslesensVocables/commit/d28efc8d6fd6d17b2e783f4b8b37792ba43653d5))
+* **NamedIndividual:** fix shape of namedIndividual more precisely namedIndividual = owl:NamedIndividual explicit or type smthng + no subclassOf ([4491737](https://github.com/souslesens/souslesensVocables/commit/4491737055b13fc8d2dec3a5452a53b204707118))
+* **Ontocreator:** UploadFromFileFn was overriding worklflows ([4654805](https://github.com/souslesens/souslesensVocables/commit/465480536d8ed87eb69c2770a04e930f2cc49a72))
+* **ontologyModels:** true label for object defined in others ontologies ([10e55e4](https://github.com/souslesens/souslesensVocables/commit/10e55e4d233c0e87d24e6317535868509f0e9eda))
+* **remoteCodeRunner:** clean remoteCodeRunner ([48eed0a](https://github.com/souslesens/souslesensVocables/commit/48eed0a20a1b377b622272e74e9652aa334e6042))
+* **remoteCodeRunner:** refacto ([471dbc4](https://github.com/souslesens/souslesensVocables/commit/471dbc49ae2681aa3841fb083fc0b66d24c618cb))
+* **RemoteCodeRunner:** Security ([97141d7](https://github.com/souslesens/souslesensVocables/commit/97141d7243f200492f4a52c8c8677554375a18d3))
+* **searchutil:** ELK queries for exact match without case and for multiple words with and operator ([a8f637c](https://github.com/souslesens/souslesensVocables/commit/a8f637c867b39df01d7fe4c2dc5dae798e164e53))
+* **searchUtil:** mulitple space cleaning before search ([8b80cc6](https://github.com/souslesens/souslesensVocables/commit/8b80cc64bc3d86d2234a1aa5599b682ba86f6671))
+* **searchWidget:** homogeneize showtopConcepts ([bd69271](https://github.com/souslesens/souslesensVocables/commit/bd692718e7aa7d89e75ac5a6e906791137180f4c))
+* **searchwidget:** open tree node fixes ([f4b8921](https://github.com/souslesens/souslesensVocables/commit/f4b8921e64db646196b42c4f746562f4d19baf2c))
+* **tripleGenerator:** orderBy for batch reading ([6d5648b](https://github.com/souslesens/souslesensVocables/commit/6d5648bb923deb90b7b44ebd14cbb9d99d61aa03))
+
 ### [2.24.1](https://github.com/souslesens/souslesensVocables/compare/2.24.0...2.24.1) (2026-02-02)
 
 

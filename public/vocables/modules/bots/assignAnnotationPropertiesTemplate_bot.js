@@ -60,6 +60,17 @@ var AssignAnnotationPropertiesTemplate_bot = (function () {
     });
   };
 
+  /**
+   * Ends the bot and triggers the optional callback (used by Admin UI for auto-refresh).
+   * @param {Object|null} err
+   */
+  function endBot(err) {
+    if (self.callback) {
+      self.callback(err || null);
+    }
+    return self.myBotEngine.end();
+  }
+
   // -------------------------
   // Workflows
   // -------------------------
@@ -130,7 +141,7 @@ var AssignAnnotationPropertiesTemplate_bot = (function () {
         }
         if (!list || list.length === 0) {
           UI.message("No templates found", true);
-          return self.myBotEngine.end();
+          return endBot(null);
         }
 
         // Defensive filtering: keep only templates (API may return mixed records)
@@ -358,12 +369,12 @@ var AssignAnnotationPropertiesTemplate_bot = (function () {
 
       if (!action || action === "cancel") {
         UI.message("Template assignment cancelled", true);
-        return self.myBotEngine.end();
+        return endBot(null);
       }
 
       if (action === "keep") {
         UI.message("Keeping existing template on " + scope + " " + targetId, true);
-        return self.myBotEngine.end();
+        return endBot(null);
       }
 
       if (action === "replace") {
@@ -410,7 +421,7 @@ var AssignAnnotationPropertiesTemplate_bot = (function () {
 
       // Fallback
       UI.message("Unknown action: " + action, true);
-      return self.myBotEngine.end();
+      return endBot(null);
     },
 
     /**
@@ -1125,7 +1136,7 @@ var AssignAnnotationPropertiesTemplate_bot = (function () {
   function finalizeNoHistoryAssignment(scope, targetId, newAssignmentId, successMessage) {
     deletePreviousAssignmentsForTarget(scope, targetId, newAssignmentId, function () {
       UI.message(successMessage, true);
-      self.myBotEngine.end();
+      endBot(null);
     });
   }
 

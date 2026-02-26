@@ -14,10 +14,11 @@ from "../../bots/assignAnnotationPropertiesTemplate_bot.js";
  */
 var AdminAnnotationPropertiesTemplate = (function () {
   var self = {};
+  // In-memory caches (per dialog session)
+  self.userDataCacheById = {}; // cache for /users/data/{id} (assignments + templates)
 
   var ASSIGNMENT_TYPE = "annotationPropertiesTemplateAssignment";
   var TEMPLATE_TYPE = "annotationPropertiesTemplate";
-  // var PLACEHOLDER_VALUE = "__TO__FILL__";
 
   /**
    * Opens the assignments manager dialog.
@@ -88,13 +89,12 @@ var AdminAnnotationPropertiesTemplate = (function () {
     html +=
       "<button class='btn btn-sm btn-outline-primary' onclick='AdminAnnotationPropertiesTemplate.openAssignmentsManager()'>Refresh</button>";    
     html +=
-        "<button class='btn btn-sm btn-outline-success' onclick='AssignAnnotationPropertiesTemplate_bot.start()'>Assign template...</button>";
+        "<button class='btn btn-sm btn-outline-success' onclick='AssignAnnotationPropertiesTemplate_bot.start(null, null, function(){ AdminAnnotationPropertiesTemplate.openAssignmentsManager(); })'>Assign template...</button>";
     html += "</div>";
 
     html += "<table class='table table-bordered table-sm' style='font-size:12px;'>";
     html += "<thead><tr>";
     html += "<th>Target</th>";
-    html += "<th>Assignment ID</th>";
     html += "<th>Templates</th>";
     html += "<th>Properties</th>";
     html += "<th>Actions</th>";
@@ -110,7 +110,6 @@ var AdminAnnotationPropertiesTemplate = (function () {
 
       html += "<tr>";
       html += "<td>" + safeText(row.scope) + " : " + safeText(row.targetId) + "</td>";
-      html += "<td>" + safeText(row.assignmentId) + "</td>";
       var templatesText = "";
       if (row.templateIds && row.templateIds.length > 0) {
         templatesText = row.templateIds
@@ -256,7 +255,7 @@ var AdminAnnotationPropertiesTemplate = (function () {
   // ---------------------------------------------------------------------------
   // Internal helpers
   // ---------------------------------------------------------------------------
-
+  
   function fetchUserDataList(queryParams, callback) {
     var url = Config.apiUrl + "/users/data";
     if (queryParams && queryParams.data_type) {
@@ -290,18 +289,43 @@ var AdminAnnotationPropertiesTemplate = (function () {
     });
   }
 
+  /**
+   * Cached wrapper for GET /users/data/{id}.
+   * Reduces repeated network calls when multiple rows use the same template id.
+   *
+   * @param {number|string} id
+   * @param {function} callback error-first callback(err, data)
+   */
+  function fetchUserDataByIdCached(id, callback) {
+    var idNumber = parseInt(id, 10);
+    if (!idNumber) {
+      return callback({ message: "Invalid id " + id });
+    }
+
+    var key = String(idNumber);
+    if (self.userDataCacheById && self.userDataCacheById[key]) {
+      return callback(null, self.userDataCacheById[key]);
+    }
+
+    fetchUserDataById(idNumber, function (err, data) {
+      if (!err && data && self.userDataCacheById) {
+        self.userDataCacheById[key] = data;
+      }
+      return callback(err, data);
+    });
+  }
+
   function enrichAssignments(assignmentsList, callback) {
     var rows = [];
 
-    async.eachSeries(
-      assignmentsList,
-      function (assignmentListItem, cbEach) {
+    
+    async.eachLimit(assignmentsList, 6, function (assignmentListItem, cbEach) {
         if (!assignmentListItem || !assignmentListItem.id) {
           return cbEach();
         }
 
         // 1) GET assignment by id to access data_content
-        fetchUserDataById(assignmentListItem.id, function (err, assignmentFull) {
+        fetchUserDataByIdCached(assignmentListItem.id, function (err, assignmentFull) {
           if (err) {
             return cbEach(err);
           }
@@ -326,10 +350,8 @@ var AdminAnnotationPropertiesTemplate = (function () {
           }
 
           var templatesInfoArray = [];
-          async.eachSeries(
-            templateIdsArray,
-            function (templateId, cbTemplate) {
-              fetchUserDataById(templateId, function (errTpl, templateFull) {
+          async.eachLimit(templateIdsArray, 6, function (templateId, cbTemplate) {
+              fetchUserDataByIdCached(templateId, function (errTpl, templateFull) {
                 if (errTpl || !templateFull) {
                   // Keep row usable even if one template cannot be loaded
                   templatesInfoArray.push({

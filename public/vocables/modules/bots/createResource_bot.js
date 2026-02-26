@@ -308,27 +308,26 @@ var CreateResource_bot = (function () {
                 self.params.superClassId = self.params.resourceId;
                 var triples = Lineage_createResource.getResourceTriples(self.params.source, self.params.resourceType, null, self.params.resourceLabel, self.params.resourceId);
 
-                    Lineage_createResource.writeResource(self.params.source, triples, function (err, resourceId) {
-                        if (err) {
-                            self.myBotEngine.abort(err.responseText);
-                        }
-                        self.params.resourceId = resourceId;
-                        
-                        var isClassOrIndividual =
-                            self.params.resourceType === "owl:Class" || self.params.resourceType === "owl:NamedIndividual";
+                Lineage_createResource.writeResource(self.params.source, triples, function (err, resourceId) {
+                    if (err) {
+                        self.myBotEngine.abort(err.responseText);
+                    }
+                    self.params.resourceId = resourceId;
 
-                        if (!isClassOrIndividual) {
-                            return self.myBotEngine.nextStep();
+                    var isClassOrIndividual = self.params.resourceType === "owl:Class" || self.params.resourceType === "owl:NamedIndividual";
+
+                    if (!isClassOrIndividual) {
+                        return self.myBotEngine.nextStep();
+                    }
+                    // Insert template placeholders if a template is applied to this source
+                    AnnotationPropertiesTemplateAssignmentsResolver.applyTemplatePlaceholdersToResource(self.params.source, resourceId, function (err2) {
+                        if (err2) {
+                            // Do not block the creation: resource is created anyway
+                            UI.message("Resource created, but template placeholders failed: " + (err2.responseText || err2.message || err2), true);
                         }
-                        // Insert template placeholders if a template is applied to this source
-                        AnnotationPropertiesTemplateAssignmentsResolver.applyTemplatePlaceholdersToResource(self.params.source, resourceId, function (err2) {
-                            if (err2) {
-                                // Do not block the creation: resource is created anyway
-                                UI.message("Resource created, but template placeholders failed: " + (err2.responseText || err2.message || err2), true);
-                            }
-                                self.myBotEngine.nextStep();
-                        });
+                        self.myBotEngine.nextStep();
                     });
+                });
             }
         },
 

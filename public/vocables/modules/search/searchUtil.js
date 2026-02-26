@@ -403,13 +403,13 @@ indexes.push(source.toLowerCase());
         //  word=word.toLowerCase()
         var queryObj;
         if (!mode || mode == "exactMatch") {
+            var normalizedWord = word.trim().replace(/\s+/g, " ");
             queryObj = {
                 bool: {
                     must: [
                         {
-                            //  match: {
                             term: {
-                                [field]: word,
+                                [field]: { value: normalizedWord, case_insensitive: true },
                             },
                         },
                     ],
@@ -431,6 +431,7 @@ indexes.push(source.toLowerCase());
                         query_string: {
                             query: word,
                             fields: fields,
+                            default_operator: "AND",
                         },
                     },
                 },

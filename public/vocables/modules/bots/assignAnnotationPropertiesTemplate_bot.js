@@ -133,6 +133,11 @@ var AssignAnnotationPropertiesTemplate_bot = (function () {
           return self.myBotEngine.end();
         }
 
+        // Defensive filtering: keep only templates (API may return mixed records)
+        list = (list || []).filter(function (item) {
+          return item && item.data_type === TEMPLATE_TYPE;
+        });
+
         self.params.templatesList = list;
 
         var choices = list.map(function (tpl) {
@@ -455,9 +460,10 @@ var AssignAnnotationPropertiesTemplate_bot = (function () {
 
   function loadUserDataList(dataType, callback) {
     $.ajax({
-      url: Config.apiUrl + "/users/data?data_type=" + encodeURIComponent(dataType),
+      url: Config.apiUrl + "/users/data",
       type: "GET",
       dataType: "json",
+      data: { data_type: dataType },
       success: function (data) {
         return callback(null, data || []);
       },

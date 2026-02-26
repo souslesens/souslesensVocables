@@ -6,7 +6,6 @@ import OntologyModels from "../../shared/ontologyModels.js";
 import Lineage_createRelation from "./lineage_createRelation.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
 
-
 /**
  * @module Lineage_createResource
  * @description Module for creating new resources (classes, named individuals) in the ontology.

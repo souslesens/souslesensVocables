@@ -14,8 +14,6 @@ import CreateAnnotationPropertiesTemplate_bot from "../../bots/createAnnotationP
 import AdminAnnotationPropertiesTemplate from "./adminAnnotationPropertiesTemplate.js";
 import AssignAnnotationPropertiesTemplate_bot from "../../bots/assignAnnotationPropertiesTemplate_bot.js";
 
-
-
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 var Admin = (function () {
     var self = {};
@@ -472,21 +470,13 @@ $("#sourceDivControlPanelDiv").html(html);*/
 
         // Start the template creation bot
         // It must work even with NO selected source (global template)
-        CreateAnnotationPropertiesTemplate_bot.start(
-            null,
-            botParams,
-            function (err) {
-                if (err) {
-                    console.error(err);
-                    return MainController.errorAlert(
-                        err.responseText ||
-                        err.message ||
-                        err
-                    );
-                }
-                UI.message("Annotation template workflow finished", true);
+        CreateAnnotationPropertiesTemplate_bot.start(null, botParams, function (err) {
+            if (err) {
+                console.error(err);
+                return MainController.errorAlert(err.responseText || err.message || err);
             }
-        );
+            UI.message("Annotation template workflow finished", true);
+        });
     };
     /**
      * Opens the Admin UI to manage template assignments.

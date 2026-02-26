@@ -607,7 +607,7 @@ defaultLang = 'en';*/
                                 (hasPlaceholderValue ? "<b>" + self.propertiesMap.properties[key].name + "</b>" : self.propertiesMap.properties[key].name) +
                                 "</a>" +
                                 "</td>";
-                                
+
                             var valuesStr = "";
 
                             values.forEach(function (valueObj, index) {

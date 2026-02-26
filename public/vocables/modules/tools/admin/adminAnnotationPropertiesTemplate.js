@@ -17,7 +17,7 @@ var AdminAnnotationPropertiesTemplate = (function () {
 
   var ASSIGNMENT_TYPE = "annotationPropertiesTemplateAssignment";
   var TEMPLATE_TYPE = "annotationPropertiesTemplate";
-  var PLACEHOLDER_VALUE = "__TO__FILL__";
+  // var PLACEHOLDER_VALUE = "__TO__FILL__";
 
   /**
    * Opens the assignments manager dialog.
@@ -55,7 +55,6 @@ var AdminAnnotationPropertiesTemplate = (function () {
         return callback(err);
       }
 
-      // Optional client-side filtering by source
       if (selectedSources && selectedSources.length > 0) {
         assignmentsList = assignmentsList.filter(function (item) {
           return item && item.data_source && selectedSources.indexOf(item.data_source) >= 0;
@@ -67,7 +66,7 @@ var AdminAnnotationPropertiesTemplate = (function () {
           return callback(err2);
         }
 
-        markActiveAssignmentPerSource(enrichedRows);
+        markActiveAssignmentPerTarget(enrichedRows);
         return callback(null, enrichedRows);
       });
     });
@@ -94,35 +93,39 @@ var AdminAnnotationPropertiesTemplate = (function () {
 
     html += "<table class='table table-bordered table-sm' style='font-size:12px;'>";
     html += "<thead><tr>";
-    html += "<th>Source</th>";
+    html += "<th>Target</th>";
     html += "<th>Assignment ID</th>";
-    html += "<th>Active</th>";
-    html += "<th>Template</th>";
+    html += "<th>Templates</th>";
     html += "<th>Properties</th>";
     html += "<th>Actions</th>";
     html += "</tr></thead><tbody>";
 
+    self.rowsIndexByAssignmentId = {};
+    rows.forEach(function (r) {
+      if (r && r.assignmentId) self.rowsIndexByAssignmentId[String(r.assignmentId)] = r;
+    });
+
     rows.forEach(function (row) {
-      var propertiesCount = getPropertiesCount(row);
-      var activeLabel = row.isActive ? "YES" : "";
+      var propertiesCount = row.propertiesCount || 0;
 
       html += "<tr>";
-      html += "<td>" + safeText(row.source) + "</td>";
+      html += "<td>" + safeText(row.scope) + " : " + safeText(row.targetId) + "</td>";
       html += "<td>" + safeText(row.assignmentId) + "</td>";
-      html += "<td style='font-weight:bold;'>" + activeLabel + "</td>";
-      html += "<td>" + safeText(row.templateLabel) + " (id=" + safeText(row.templateId) + ")</td>";
+      var templatesText = "";
+      if (row.templateIds && row.templateIds.length > 0) {
+        templatesText = row.templateIds
+          .map(function (tplId, idx) {
+            var lbl = row.templateLabels && row.templateLabels[idx] ? row.templateLabels[idx] : ("Template " + tplId);
+            return lbl + " (id=" + tplId + ")";
+          })
+          .join(", ");
+      }
+      html += "<td>" + safeText(templatesText) + "</td>";
       html += "<td>" + propertiesCount + "</td>";
       html += "<td>";
 
       html +=
-        "<button class='btn btn-sm btn-outline-secondary' onclick='AdminAnnotationPropertiesTemplate.viewTemplateDetails(" +
-        JSON.stringify(row.templateId) +
-        ")'>View</button> ";
-
-      html +=
-        "<button class='btn btn-sm btn-outline-primary' onclick='AdminAnnotationPropertiesTemplate.promptChangeTemplate(" +
-        JSON.stringify(row.source) +
-        ")'>Change</button> ";
+        "<button ... onclick='AdminAnnotationPropertiesTemplate.viewRowTemplates(" + JSON.stringify(row.assignmentId) + ")'>View</button>";
 
       html +=
         "<button class='btn btn-sm btn-outline-danger' onclick='AdminAnnotationPropertiesTemplate.deleteAssignment(" +
@@ -145,11 +148,12 @@ var AdminAnnotationPropertiesTemplate = (function () {
    * @param {number|string} templateId
    */
   self.viewTemplateDetails = function (templateId) {
-    if (!templateId) {
-      return openSmallDialog("Template properties", "<div>No template selected.</div>");
+    var templateIdNumber = parseInt(templateId, 10);
+    if (!templateIdNumber) {
+      return openSmallDialog("Template properties", "<div>Invalid template id.</div>");
     }
 
-    fetchUserDataById(templateId, function (err, templateItem) {
+    fetchUserDataById(templateIdNumber, function (err, templateItem) {
       if (err) {
         console.error(err);
         return MainController.errorAlert(err.responseText || err.message || err);
@@ -183,29 +187,42 @@ var AdminAnnotationPropertiesTemplate = (function () {
   };
 
   /**
-   * Prompts user for a templateId and creates a new assignment for the given source.
-   * Newest assignment becomes active automatically.
-   * @param {string} sourceLabel
+   * View templates linked to a row.
+   * - If one template: open details directly
+   * - If multiple: show a small list to pick which template to open
    */
-  self.promptChangeTemplate = function (sourceLabel) {
-    var templateIdStr = prompt("Enter templateId to assign to source: " + sourceLabel, "");
-    if (!templateIdStr) {
-      return;
+  self.viewRowTemplates = function (assignmentId) {
+    var row = self.rowsIndexByAssignmentId ? self.rowsIndexByAssignmentId[String(assignmentId)] : null;
+    if (!row) {
+      return openSmallDialog("Templates", "<div>No row found.</div>");
     }
 
-    var templateId = parseInt(templateIdStr, 10);
-    if (!templateId) {
-      return alert("Invalid templateId");
+    if (!row.templateIds || row.templateIds.length === 0) {
+      return openSmallDialog("Templates", "<div>No template on this assignment.</div>");
     }
 
-    createAssignment(sourceLabel, templateId, function (err) {
-      if (err) {
-        console.error(err);
-        return MainController.errorAlert(err.responseText || err.message || err);
+    if (row.templateIds.length === 1) {
+      var singleId = parseInt(row.templateIds[0], 10);
+      if (!singleId) {
+        return openSmallDialog("Templates", "<div>Invalid template id in row.</div>");
       }
-      UI.message("Template changed for source " + sourceLabel, true);
-      self.openAssignmentsManager();
+      return self.viewTemplateDetails(singleId);
+    }
+
+    var html = "<div style='font-size:12px;'><div><b>Templates (" + row.templateIds.length + ")</b></div><ul>";
+    row.templateIds.forEach(function (tplId, idx) {
+      var tplIdNumber = parseInt(tplId, 10);
+      if (!tplIdNumber) return;
+
+      var label = (row.templateLabels && row.templateLabels[idx]) ? row.templateLabels[idx] : ("Template " + tplIdNumber);
+      html += "<li>" + safeText(label) +
+        " (id=" + safeText(tplIdNumber) + ") " +
+        "<button class='btn btn-sm btn-outline-secondary' onclick='AdminAnnotationPropertiesTemplate.viewTemplateDetails(" + JSON.stringify(tplIdNumber) + ")'>View</button>" +
+        "</li>";
     });
+    html += "</ul></div>";
+
+    return openSmallDialog("Templates", html);
   };
 
   /**
@@ -290,28 +307,55 @@ var AdminAnnotationPropertiesTemplate = (function () {
           }
 
           var assignmentContent = normalizeDataContent(assignmentFull.data_content);
-          var templateId = assignmentContent && assignmentContent.templateId ? assignmentContent.templateId : null;
+          // Support both single-template and multi-template assignments
+          var templateIdsArray = [];
+          if (assignmentContent && Array.isArray(assignmentContent.templateIds) && assignmentContent.templateIds.length > 0) {
+            templateIdsArray = assignmentContent.templateIds;
+          } else if (assignmentContent && assignmentContent.templateId) {
+            templateIdsArray = [assignmentContent.templateId];
+          }
+          // Normalize template ids to integers to avoid invalid /users/data/{id} calls
+          templateIdsArray = (templateIdsArray || [])
+            .map(function (x) { return parseInt(x, 10); })
+            .filter(function (x) { return !!x; });
 
-          // 2) GET template by id to show label + properties
-          if (!templateId) {
-            rows.push(buildRow(assignmentListItem, null, null, [], []));
+
+          if (!templateIdsArray || templateIdsArray.length === 0) {
+            rows.push(buildRowFromAssignment(assignmentListItem, assignmentContent, []));
             return cbEach();
           }
 
-          fetchUserDataById(templateId, function (err2, templateFull) {
-            if (err2) {
-              // Still keep the row without template details
-              rows.push(buildRow(assignmentListItem, templateId, "Template " + templateId, [], []));
+          var templatesInfoArray = [];
+          async.eachSeries(
+            templateIdsArray,
+            function (templateId, cbTemplate) {
+              fetchUserDataById(templateId, function (errTpl, templateFull) {
+                if (errTpl || !templateFull) {
+                  // Keep row usable even if one template cannot be loaded
+                  templatesInfoArray.push({
+                    id: templateId,
+                    label: "Template " + templateId,
+                    properties: [],
+                    selections: [],
+                  });
+                  return cbTemplate();
+                }
+
+                var templateContent = normalizeDataContent(templateFull.data_content);
+                templatesInfoArray.push({
+                  id: templateId,
+                  label: templateFull.data_label || ("Template " + templateId),
+                  properties: (templateContent && templateContent.properties) || [],
+                  selections: (templateContent && templateContent.selections) || [],
+                });
+                return cbTemplate();
+              });
+            },
+            function () {
+              rows.push(buildRowFromAssignment(assignmentListItem, assignmentContent, templatesInfoArray));
               return cbEach();
             }
-
-            var templateContent = normalizeDataContent(templateFull.data_content);
-            var selections = (templateContent && templateContent.selections) || [];
-            var properties = (templateContent && templateContent.properties) || [];
-
-            rows.push(buildRow(assignmentListItem, templateId, templateFull.data_label || ("Template " + templateId), properties, selections));
-            return cbEach();
-          });
+          );
         });
       },
       function (err) {
@@ -320,30 +364,69 @@ var AdminAnnotationPropertiesTemplate = (function () {
     );
   }
 
-  function buildRow(assignmentListItem, templateId, templateLabel, properties, selections) {
+  /**
+   * Builds a UI row from an assignment item + its parsed content + loaded templates.
+   * This supports:
+   * - scope: source / user / profile
+   * - targetId: source label / user login / profile id
+   * - one or multiple templates
+   */
+  function buildRowFromAssignment(assignmentListItem, assignmentContent, templatesInfoArray) {
+    var scope = "source";
+    if (assignmentContent && typeof assignmentContent.scope === "string") {
+      scope = assignmentContent.scope;
+    }
+
+    // Prefer explicit targetId from data_content (produced by the assign bot)
+    var targetId = (assignmentContent && assignmentContent.targetId)
+      ? assignmentContent.targetId
+      : (assignmentListItem.data_source || "");
+
+    // Aggregate templates
+    var templateIds = (templatesInfoArray || []).map(function (t) { return t.id; });
+    var templateLabels = (templatesInfoArray || []).map(function (t) { return t.label; });
+
+    // Count unique properties across templates (simple union)
+    var uniquePropertiesMap = {};
+    (templatesInfoArray || []).forEach(function (t) {
+      (t.properties || []).forEach(function (p) {
+        if (p) uniquePropertiesMap[p] = 1;
+      });
+    });
+
     return {
       assignmentId: assignmentListItem.id,
-      source: assignmentListItem.data_source,
-      templateId: templateId,
-      templateLabel: templateLabel || "",
-      properties: properties || [],
-      selections: selections || [],
+      scope: scope,
+      targetId: targetId,
       isActive: false,
+
+      templateIds: templateIds,
+      templateLabels: templateLabels,
+      propertiesCount: Object.keys(uniquePropertiesMap).length,
+
+      // Keep full template info for "View" actions
+      templatesInfoArray: templatesInfoArray || [],
     };
   }
 
-  function markActiveAssignmentPerSource(rows) {
-    var maxIdBySource = {};
+  /**
+   * Marks active assignments using the "latest wins" rule.
+   * Active = highest assignmentId per (scope + targetId).
+   */
+  function markActiveAssignmentPerTarget(rows) {
+    var maxAssignmentIdByTargetKey = {}; // key = "<scope>|<targetId>"
 
-    rows.forEach(function (r) {
-      if (!r || !r.source) return;
-      if (!maxIdBySource[r.source] || r.assignmentId > maxIdBySource[r.source]) {
-        maxIdBySource[r.source] = r.assignmentId;
+    (rows || []).forEach(function (row) {
+      if (!row || !row.scope || !row.targetId) return;
+      var targetKey = row.scope + "|" + row.targetId;
+      if (!maxAssignmentIdByTargetKey[targetKey] || row.assignmentId > maxAssignmentIdByTargetKey[targetKey]) {
+        maxAssignmentIdByTargetKey[targetKey] = row.assignmentId;
       }
     });
 
-    rows.forEach(function (r2) {
-      r2.isActive = maxIdBySource[r2.source] === r2.assignmentId;
+    (rows || []).forEach(function (row) {
+      var targetKey = row.scope + "|" + row.targetId;
+      row.isActive = maxAssignmentIdByTargetKey[targetKey] === row.assignmentId;
     });
   }
 
@@ -387,44 +470,6 @@ var AdminAnnotationPropertiesTemplate = (function () {
     if (value === null || value === undefined) return "";
     return String(value);
   }
-
-  function createAssignment(sourceLabel, templateId, callback) {
-    var assignmentContent = {
-      templateId: templateId,
-      source: sourceLabel,
-      placeholderValue: PLACEHOLDER_VALUE,
-      appliedAt: new Date().toISOString(),
-    };
-
-    var payload = {
-      data_path: "",
-      data_type: ASSIGNMENT_TYPE,
-      data_label: "Template " + templateId + " for " + sourceLabel,
-      data_comment: "Manual change from Admin UI",
-      data_group: sourceLabel,
-      data_tool: "admin",
-      data_source: sourceLabel,
-      data_content: assignmentContent,
-      is_shared: false,
-      shared_profiles: [],
-      shared_users: [],
-    };
-
-    $.ajax({
-      url: Config.apiUrl + "/users/data",
-      type: "POST",
-      dataType: "json",
-      contentType: "application/json; charset=utf-8",
-      data: JSON.stringify(payload),
-      success: function () {
-        return callback(null);
-      },
-      error: function (err) {
-        return callback(err);
-      },
-    });
-  }
-
   return self;
 })();
 

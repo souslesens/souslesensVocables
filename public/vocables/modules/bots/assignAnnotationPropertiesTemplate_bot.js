@@ -1,4 +1,5 @@
 import BotEngineClass from "./_botEngineClass.js";
+import AnnotationPropertiesTemplateAssignmentsResolver from "../shared/annotationPropertiesTemplateAssignmentsResolver.js";
 
 /**
  * @module assignAnnotationPropertiesTemplate_bot
@@ -6,7 +7,7 @@ import BotEngineClass from "./_botEngineClass.js";
  * - a profile (applies to its accessible sources)
  * - a user (union of profile sources)
  *
- * One assignment record is created per source.
+ * One active assignment is maintained per target (source/user/profile). History is automatically cleaned (no-history policy).
  */
 var AssignAnnotationPropertiesTemplate_bot = (function () {
   var self = {};
@@ -336,33 +337,9 @@ var AssignAnnotationPropertiesTemplate_bot = (function () {
         return self.myBotEngine.abort("No target selected");
       }
 
-      if (scope === "source") {
-        // defer to source-specific logic (may show a choice list)
-        return checkExistingTemplateForSource(targetId, templateId);
-      }
+      // Use the same logic for all scopes (source/user/profile)
+      return checkExistingTemplateForTarget(scope, targetId, templateId);
 
-      UI.message(
-        "Assigning template " + templateId + " to " + scope + " " + targetId,
-        true
-      );
-
-      createAnnotationTemplateAssignment(
-        {
-          scope: scope,
-          targetId: targetId,
-          templateId: templateId
-        },
-        function (err) {
-          if (err) {
-            return self.myBotEngine.abort(
-              err.responseText || err.message || err
-            );
-          }
-
-          UI.message("Template assigned successfully", true);
-          return self.myBotEngine.end();
-        }
-      );
     },
 
     /**
@@ -370,7 +347,8 @@ var AssignAnnotationPropertiesTemplate_bot = (function () {
      */
     handleExistingSourceActionFn: function () {
       var action = self.params.existingTemplateAction;
-      var sourceLabel = self.params.pendingSourceLabel;
+      var scope = self.params.pendingTargetScope;
+      var targetId = self.params.pendingTargetId;
       var newTemplateId = self.params.pendingNewTemplateId;
 
       if (!action || action === "cancel") {
@@ -379,40 +357,39 @@ var AssignAnnotationPropertiesTemplate_bot = (function () {
       }
 
       if (action === "keep") {
-        UI.message("Keeping existing template on source " + sourceLabel, true);
+        UI.message("Keeping existing template on " + scope + " " + targetId, true);
         return self.myBotEngine.end();
       }
 
       if (action === "replace") {
         return createAnnotationTemplateAssignment(
-          { scope: "source", targetId: sourceLabel, templateId: newTemplateId },
+          { scope: scope, targetId: targetId, templateId: newTemplateId },
           endApply
         );
       }
 
       if (action === "add") {
-        // 1) Read existing template(s)
+        // Read existing template ids (already computed in checkExistingTemplateForTarget/checkExistingTemplateForSource)
         var existingTemplateIds = [];
-        if (self.params.existingTemplateIds && Array.isArray(self.params.existingTemplateIds)) {
+        if (Array.isArray(self.params.existingTemplateIds)) {
           existingTemplateIds = self.params.existingTemplateIds;
-        } else if (self.params.existingTemplateId) {
-          existingTemplateIds = [self.params.existingTemplateId];
         }
 
-        // 2) Union with newTemplateId
-        var map = {};
+        // Union existing + new
+        var idsMap = {};
         existingTemplateIds.forEach(function (id) {
-          if (id) map[String(id)] = 1;
+          var n = parseInt(id, 10);
+          if (n) idsMap[String(n)] = 1;
         });
-        if (newTemplateId) map[String(newTemplateId)] = 1;
+        if (newTemplateId) idsMap[String(parseInt(newTemplateId, 10))] = 1;
 
-        var unionIds = Object.keys(map).map(function (x) {
+        var unionIds = Object.keys(idsMap).map(function (x) {
           return parseInt(x, 10);
         });
 
-        // 3) Create a new assignment containing templateIds[]
+        // Create a new assignment with templateIds[]
         return createAnnotationTemplateAssignment(
-          { scope: "source", targetId: sourceLabel, templateIds: unionIds },
+          { scope: scope, targetId: targetId, templateIds: unionIds },
           endApply
         );
       }
@@ -421,7 +398,7 @@ var AssignAnnotationPropertiesTemplate_bot = (function () {
         // Recommended "clean" approach in your current architecture:
         // create a neutralizing assignment (latest wins) so createResource_bot sees no templateId.
         return createAnnotationTemplateAssignment(
-          { scope: "source", targetId: sourceLabel, templateId: null },
+          { scope: scope, targetId: targetId, templateId: null },
           endApply
         );
       }
@@ -785,11 +762,110 @@ var AssignAnnotationPropertiesTemplate_bot = (function () {
       type: "POST",
       contentType: "application/json",
       data: JSON.stringify(payload),
-      success: function () {
-        return callback(null);
+      success: function (data, _textStatus, jqXHR) {
+        // Try to read created id from response body or headers
+        var newAssignmentId = getCreatedUserDataId(data, jqXHR);
+
+        // Fallback: if API does not return the id, compute it from the latest matching assignment
+        if (!newAssignmentId) {
+          return getLatestAssignmentIdForTarget(params.scope, params.targetId, function (_err2, latestId) {
+            newAssignmentId = latestId || null;
+
+            try {
+              AnnotationPropertiesTemplateAssignmentsResolver.clearCache();
+            } catch (e) {}
+
+            return callback(null, newAssignmentId);
+          });
+        }
+
+        try {
+          AnnotationPropertiesTemplateAssignmentsResolver.clearCache();
+        } catch (e) {}
+
+        return callback(null, newAssignmentId);
       },
       error: function (err) {
         return callback(err);
+      },
+    });
+  }
+
+  /**
+   * Extracts created user-data id from ajax response (body or headers).
+   * @param {Object} data Ajax success data
+   * @param {Object} jqXHR Ajax jqXHR
+   * @returns {number|null}
+   */
+  function getCreatedUserDataId(data, jqXHR) {
+    // Case A: server returns {id: 123}
+    if (data && data.id) {
+      var id1 = parseInt(data.id, 10);
+      if (id1) return id1;
+    }
+
+    // Case B: some servers put id in responseJSON
+    if (jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.id) {
+      var id2 = parseInt(jqXHR.responseJSON.id, 10);
+      if (id2) return id2;
+    }
+
+    // Case C: Location header ends with /users/data/{id}
+    if (jqXHR && jqXHR.getResponseHeader) {
+      var location = jqXHR.getResponseHeader("Location");
+      if (location) {
+        var match = location.match(/\/(\d+)\s*$/);
+        if (match && match[1]) {
+          var id3 = parseInt(match[1], 10);
+          if (id3) return id3;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Fallback: finds the latest assignment id for a given target (scope + targetId).
+   * This is used only if the POST response does not return an id.
+   *
+   * @param {string} scope "source" | "user" | "profile"
+   * @param {string} targetId
+   * @param {function} callback (err, latestId)
+   */
+  function getLatestAssignmentIdForTarget(scope, targetId, callback) {
+    $.ajax({
+      url: Config.apiUrl + "/users/data?data_type=" + encodeURIComponent(ASSIGNMENT_TYPE),
+      type: "GET",
+      dataType: "json",
+      success: function (list) {
+        list = list || [];
+
+        var matching = list.filter(function (item) {
+          if (!item || !item.id) return false;
+
+          if (scope === "source") {
+            return item.data_source && item.data_source === targetId;
+          }
+          if (scope === "user") {
+            return Array.isArray(item.shared_users) && item.shared_users.indexOf(targetId) > -1;
+          }
+          if (scope === "profile") {
+            return Array.isArray(item.shared_profiles) && item.shared_profiles.indexOf(targetId) > -1;
+          }
+          return false;
+        });
+
+        var latestId = null;
+        matching.forEach(function (item) {
+          if (!latestId || item.id > latestId) latestId = item.id;
+        });
+
+        return callback(null, latestId);
+      },
+      error: function (_err) {
+        // Do not block: just return null if we cannot compute it
+        return callback(null, null);
       },
     });
   }
@@ -839,6 +915,60 @@ var AssignAnnotationPropertiesTemplate_bot = (function () {
   }
 
   /**
+   * Returns the ACTIVE assignment record (FULL) for a generic target (user/profile/source).
+   * Active = latest assignment (highest id) for this target.
+   *
+   * @param {string} scope "source" | "user" | "profile"
+   * @param {string} targetId
+   * @param {function} callback (err, fullAssignment|null)
+   */
+  function getActiveAssignmentForTargetFull(scope, targetId, callback) {
+    // Source can reuse the existing source-specific endpoint
+    if (scope === "source") {
+      return getActiveAssignmentForSourceFull(targetId, callback);
+    }
+
+    // For user/profile: load list, filter by shared_users/shared_profiles, then reload full by id
+    $.ajax({
+      url: Config.apiUrl + "/users/data?data_type=" + encodeURIComponent(ASSIGNMENT_TYPE),
+      type: "GET",
+      dataType: "json",
+      success: function (assignments) {
+        assignments = assignments || [];
+
+        var matching = assignments.filter(function (item) {
+          if (!item || !item.id) return false;
+
+          if (scope === "user") {
+            return Array.isArray(item.shared_users) && item.shared_users.indexOf(targetId) > -1;
+          }
+          if (scope === "profile") {
+            return Array.isArray(item.shared_profiles) && item.shared_profiles.indexOf(targetId) > -1;
+          }
+          return false;
+        });
+
+        if (matching.length === 0) {
+          return callback(null, null);
+        }
+
+        var latest = matching.reduce(function (acc, item) {
+          if (!acc) return item;
+          return item.id > acc.id ? item : acc;
+        }, null);
+
+        return loadUserDataById(latest.id, function (err, full) {
+          if (err) return callback(err);
+          return callback(null, full);
+        });
+      },
+      error: function (err) {
+        return callback(err);
+      },
+    });
+  }
+
+  /**
    * Checks if a source already has an active template and asks what to do.
    * Options: keep / replace / remove / cancel.
    *
@@ -851,9 +981,11 @@ var AssignAnnotationPropertiesTemplate_bot = (function () {
         // safer to stop than to overwrite blindly
         return self.myBotEngine.abort(err.responseText || err.message || err);
       }
-
+      self.params.pendingSourceLabel = sourceLabel;
       // No existing assignment -> assign directly
       if (!existingFull) {
+        self.params.pendingTargetScope = "source";
+        self.params.pendingTargetId = sourceLabel;
         return createAnnotationTemplateAssignment(
           { scope: "source", targetId: sourceLabel, templateId: newTemplateId },
           endApply
@@ -884,7 +1016,8 @@ var AssignAnnotationPropertiesTemplate_bot = (function () {
       self.params.existingTemplateId = existingTemplateId;
       self.params.pendingSourceLabel = sourceLabel;
       self.params.pendingNewTemplateId = newTemplateId;
-
+      self.params.pendingTargetScope = "source";
+      self.params.pendingTargetId = sourceLabel;
       // Load existing template label for display
       loadUserDataById(existingTemplateId, function (_err2, tpl) {
         var label = "";
@@ -910,14 +1043,167 @@ var AssignAnnotationPropertiesTemplate_bot = (function () {
   }
 
   /**
+   * Same behavior as source assignment, but for any scope (source/user/profile).
+   * Shows keep/replace/add/remove/cancel when an existing assignment is found.
+   *
+   * @param {string} scope "source" | "user" | "profile"
+   * @param {string} targetId
+   * @param {number} newTemplateId
+   */
+  function checkExistingTemplateForTarget(scope, targetId, newTemplateId) {
+    getActiveAssignmentForTargetFull(scope, targetId, function (err, existingFull) {
+      if (err) {
+        return self.myBotEngine.abort(err.responseText || err.message || err);
+      }
+
+      // Store generic pending target (used by endApply)
+      self.params.pendingTargetScope = scope;
+      self.params.pendingTargetId = targetId;
+      self.params.pendingNewTemplateId = newTemplateId;
+
+      // No existing assignment => assign directly (no-history will cleanup anyway)
+      if (!existingFull) {
+        return createAnnotationTemplateAssignment(
+          { scope: scope, targetId: targetId, templateId: newTemplateId },
+          endApply
+        );
+      }
+
+      var existingContent = normalizeDataContent(existingFull.data_content);
+      self.params.existingTemplateIds = null;
+
+      if (existingContent && Array.isArray(existingContent.templateIds)) {
+        self.params.existingTemplateIds = existingContent.templateIds;
+      } else if (existingContent && existingContent.templateId) {
+        self.params.existingTemplateIds = [existingContent.templateId];
+      }
+
+      var existingTemplateId = existingContent ? existingContent.templateId : null;
+
+      // If existing record has no templateId => treat as no active template
+      if (!existingTemplateId) {
+        return createAnnotationTemplateAssignment(
+          { scope: scope, targetId: targetId, templateId: newTemplateId },
+          endApply
+        );
+      }
+
+      // Load existing template label for display
+      loadUserDataById(existingTemplateId, function (_err2, tpl) {
+        var label = "";
+        if (tpl && tpl.data_label) label = tpl.data_label;
+        self.params.existingTemplateLabel = label || ("Template " + existingTemplateId);
+
+        var choices = [
+          { id: "keep", label: "Keep current template (" + self.params.existingTemplateLabel + ")" },
+          { id: "replace", label: "Replace with new template" },
+          { id: "add", label: "Add another template (keep existing + add new)" },
+          { id: "remove", label: "Remove template from this target" },
+          { id: "cancel", label: "Cancel" },
+        ];
+
+        // This sets self.params.existingTemplateAction
+        self.myBotEngine.showList(choices, "existingTemplateAction");
+        return;
+      });
+    });
+  }
+
+  /**
+   * Finalizes an assignment by deleting previous ones for the same target (no-history policy).
+   * @param {string} scope "source" | "user" | "profile"
+   * @param {string} targetId
+   * @param {number} newAssignmentId
+   * @param {string} successMessage
+   */
+  function finalizeNoHistoryAssignment(scope, targetId, newAssignmentId, successMessage) {
+    deletePreviousAssignmentsForTarget(scope, targetId, newAssignmentId, function () {
+      UI.message(successMessage, true);
+      self.myBotEngine.end();
+    });
+  }
+
+  /**
    * Ends the apply workflow cleanly.
    */
-  function endApply(err) {
+  function endApply(err, newAssignmentId) {
     if (err) {
       return self.myBotEngine.abort(err.responseText || err.message || err);
     }
-    UI.message("Template assigned to source successfully", true);
-    self.myBotEngine.end();
+    // For source actions, we stored the pending target in params
+    finalizeNoHistoryAssignment(
+      self.params.pendingTargetScope,
+      self.params.pendingTargetId,
+      newAssignmentId,
+      "Template assigned successfully"
+    );
+  }
+
+  /**
+   * Deletes previous assignments for the same target (no history policy).
+   * Keeps only the newly created assignment (by id).
+   *
+   * Safety: deletes only assignments with id < newAssignmentId.
+   *
+   * @param {string} scope "source" | "user" | "profile"
+   * @param {string} targetId sourceLabel | userLogin | profileId
+   * @param {number} newAssignmentId
+   * @param {function} callback error-first callback
+   */
+  function deletePreviousAssignmentsForTarget(scope, targetId, newAssignmentId, callback) {
+    if (!scope || !targetId || !newAssignmentId) {
+      return callback(null);
+    }
+
+    // 1) Load list of assignments (list endpoint is enough: id + data_source + shared_users + shared_profiles)
+    $.ajax({
+      url: Config.apiUrl + "/users/data?data_type=" + encodeURIComponent(ASSIGNMENT_TYPE),
+      type: "GET",
+      dataType: "json",
+      success: function (list) {
+        list = list || [];
+
+        // 2) Keep only assignments matching this target
+        var matching = list.filter(function (item) {
+          if (!item || !item.id) return false;
+
+          if (scope === "source") {
+            return item.data_source && item.data_source === targetId;
+          }
+          if (scope === "user") {
+            return Array.isArray(item.shared_users) && item.shared_users.indexOf(targetId) > -1;
+          }
+          if (scope === "profile") {
+            return Array.isArray(item.shared_profiles) && item.shared_profiles.indexOf(targetId) > -1;
+          }
+          return false;
+        });
+
+        // 3) Delete only older ones (id < newAssignmentId) and not the new one
+        var idsToDelete = matching
+          .map(function (x) { return x.id; })
+          .filter(function (id) { return id && id !== newAssignmentId && id < newAssignmentId; });
+
+        async.eachSeries(
+          idsToDelete,
+          function (id, cbEach) {
+            $.ajax({
+              url: Config.apiUrl + "/users/data/" + id,
+              type: "DELETE",
+              success: function () { return cbEach(); },
+              error: function () { return cbEach(); }, // non-blocking cleanup
+            });
+          },
+          function () {
+            return callback(null);
+          }
+        );
+      },
+      error: function (err) {
+        // Do not block the main flow if cleanup fails
+        return callback(null);
+      },
+    });
   }
 
   return self;

@@ -9,6 +9,8 @@ import common from "../shared/common.js";
 import Sparql_generic from "../sparqlProxies/sparql_generic.js";
 import OntologyModels from "../shared/ontologyModels.js";
 import Lineage_createResource from "../tools/lineage/lineage_createResource.js";
+import AnnotationPropertiesTemplateAssignmentsResolver from "../shared/annotationPropertiesTemplateAssignmentsResolver.js";
+
 import NodeInfosAxioms from "../tools/axioms/nodeInfosAxioms.js";
 import AxiomExtractor from "../tools/axioms/axiomExtractor.js";
 import Sparql_OWL from "../sparqlProxies/sparql_OWL.js";
@@ -306,7 +308,6 @@ var CreateResource_bot = (function () {
                 self.params.superClassId = self.params.resourceId;
                 var triples = Lineage_createResource.getResourceTriples(self.params.source, self.params.resourceType, null, self.params.resourceLabel, self.params.resourceId);
 
-                // Lineage_createResource.addAnnotationTriples(triples, function (err, result) {
                     Lineage_createResource.writeResource(self.params.source, triples, function (err, resourceId) {
                         if (err) {
                             self.myBotEngine.abort(err.responseText);
@@ -320,15 +321,14 @@ var CreateResource_bot = (function () {
                             return self.myBotEngine.nextStep();
                         }
                         // Insert template placeholders if a template is applied to this source
-                        insertTemplatePlaceholders(self.params.source, resourceId, function (err2) {
+                        AnnotationPropertiesTemplateAssignmentsResolver.applyTemplatePlaceholdersToResource(self.params.source, resourceId, function (err2) {
                             if (err2) {
-                            // Do not block the creation: resource is created anyway
-                            UI.message("Resource created, but template placeholders failed: " + (err2.responseText || err2.message || err2), true);
+                                // Do not block the creation: resource is created anyway
+                                UI.message("Resource created, but template placeholders failed: " + (err2.responseText || err2.message || err2), true);
                             }
-                            self.myBotEngine.nextStep();
+                                self.myBotEngine.nextStep();
                         });
                     });
-                // });
             }
         },
 
@@ -471,183 +471,6 @@ var CreateResource_bot = (function () {
         },
     };
     return self;
-
-    /**
-     * Inserts annotation triples with a placeholder object value ("__TO__FILL__")
-     * for the template assigned to the given source (if any).
-     * @param {string} sourceLabel
-     * @param {string} resourceUri
-     * @param {function} callback error-first callback
-     */
-    function insertTemplatePlaceholders(sourceLabel, resourceUri, callback) {
-        // 1) Load assignments list for this source (list does NOT include data_content)
-        var listUrl =
-            Config.apiUrl +
-            "/users/data?data_type=annotationPropertiesTemplateAssignment&data_source=" +
-            encodeURIComponent(sourceLabel);
-
-        $.ajax({
-            url: listUrl,
-            type: "GET",
-            dataType: "json",
-            success: function (assignments) {
-            if (!assignments || assignments.length === 0) {
-                return callback(null); // no template applied
-            }
-
-            // Choose latest assignment (highest id)
-            var latestAssignment = assignments.reduce(function (acc, item) {
-                if (!acc) return item;
-                return item.id > acc.id ? item : acc;
-            }, null);
-
-            if (!latestAssignment || !latestAssignment.id) {
-                return callback(null);
-            }
-
-            // 2) Load full assignment by id to get data_content
-            var byIdUrl = Config.apiUrl + "/users/data/" + latestAssignment.id;
-
-            $.ajax({
-                url: byIdUrl,
-                type: "GET",
-                dataType: "json",
-                success: function (assignmentFull) {
-                var assignmentContent = assignmentFull ? assignmentFull.data_content : null;
-                if (!assignmentContent) {
-                    return callback(null);
-                }
-
-                // Parse if string
-                if (typeof assignmentContent === "string") {
-                    try {
-                        assignmentContent = JSON.parse(assignmentContent);
-                    } catch (e) {
-                        return callback(e);
-                    }
-                }
-
-                // Accept both models:
-                // - templateIds: [1,2,3]  (new)
-                // - templateId: 1         (old)
-                var templateIds = [];
-                if (Array.isArray(assignmentContent.templateIds) && assignmentContent.templateIds.length > 0) {
-                templateIds = assignmentContent.templateIds;
-                } else if (assignmentContent.templateId) {
-                templateIds = [assignmentContent.templateId];
-                } else {
-                return callback(null);
-                }
-                
-                var allPropertiesMap = {};
-                var allProperties = [];
-
-                // Load each template sequentially (project style: callbacks + async.js)
-                async.eachSeries(
-                templateIds,
-                function (tplId, cbEach) {
-                    UserDataWidget.loadUserDatabyId(tplId, function (err, tplResult) {
-                    if (err) return cbEach(err);
-
-                    var templateItem = Array.isArray(tplResult) ? tplResult[0] : tplResult;
-                    if (!templateItem || !templateItem.data_content) {
-                        return cbEach(); // ignore empty
-                    }
-
-                    var templateContent = templateItem.data_content;
-                    if (typeof templateContent === "string") {
-                        try {
-                        templateContent = JSON.parse(templateContent);
-                        } catch (e) {
-                        return cbEach(e);
-                        }
-                    }
-
-                    var properties = templateContent.properties || [];
-                    properties.forEach(function (predicateUri) {
-                        if (!predicateUri) return;
-                        if (!allPropertiesMap[predicateUri]) {
-                        allPropertiesMap[predicateUri] = 1;
-                        allProperties.push(predicateUri);
-                        }
-                    });
-
-                    return cbEach();
-                    });
-                },
-                function (errLoad) {
-                    if (errLoad) return callback(errLoad);
-
-                    if (allProperties.length === 0) {
-                    return callback(null);
-                    }
-
-                    // Insert triples with placeholder
-                    var placeholder = "?";
-                    var triplesToInsert = allProperties.map(function (predicateUri) {
-                    return {
-                        subject: resourceUri,
-                        predicate: predicateUri,
-                        object: placeholder,
-                    };
-                    });
-
-                    Sparql_generic.insertTriples(sourceLabel, triplesToInsert, null, function (err2) {
-                    return callback(err2 || null);
-                    });
-                }
-                );
-
-                // // 3) Load template by id
-                // UserDataWidget.loadUserDatabyId(assignmentContent.templateId, function (err, tplResult) {
-                //     if (err) {
-                //     return callback(err);
-                //     }
-
-                //     var templateItem = Array.isArray(tplResult) ? tplResult[0] : tplResult;
-                //     if (!templateItem || !templateItem.data_content) {
-                //     return callback(null);
-                //     }
-
-                //     var templateContent = templateItem.data_content;
-                //     if (typeof templateContent === "string") {
-                //     try {
-                //         templateContent = JSON.parse(templateContent);
-                //     } catch (e) {
-                //         return callback(e);
-                //     }
-                //     }
-
-                //     var properties = templateContent.properties || [];
-                //     if (!properties || properties.length === 0) {
-                //     return callback(null);
-                //     }
-
-                //     // 4) Insert triples with "?" as object value
-                //     var placeholder = "?";
-                //     var triplesToInsert = properties.map(function (predicateUri) {
-                //     return {
-                //         subject: resourceUri,
-                //         predicate: predicateUri,
-                //         object: placeholder,
-                //     };
-                //     });
-
-                //     Sparql_generic.insertTriples(sourceLabel, triplesToInsert, null, function (err2) {
-                //     return callback(err2 || null);
-                //     });
-                // });
-                },
-                error: function (err) {
-                return callback(err);
-                },
-            });
-            },
-            error: function (err) {
-            return callback(err);
-            },
-        });
-    }
 })();
 
 export default CreateResource_bot;

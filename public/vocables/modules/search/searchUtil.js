@@ -407,9 +407,8 @@ indexes.push(source.toLowerCase());
                 bool: {
                     must: [
                         {
-                            //  match: {
                             term: {
-                                [field]: word,
+                                [field]: { value: word, case_insensitive: true },
                             },
                         },
                     ],
@@ -431,6 +430,7 @@ indexes.push(source.toLowerCase());
                         query_string: {
                             query: word,
                             fields: fields,
+                            default_operator: "AND",
                         },
                     },
                 },

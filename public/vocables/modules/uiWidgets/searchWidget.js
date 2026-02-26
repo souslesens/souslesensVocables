@@ -629,6 +629,15 @@ var SearchWidget = (function () {
         NodeInfosWidget.showNodeInfos(sourceLabel, node, "graphDiv");
     };
 
+    self.searchOrShowTopConcepts = function (options, callback) {
+        var term = (options && options.term) || $("#searchWidget_searchTermInput").val();
+        if (term && term.trim()) {
+            self.searchTermInSources(options, callback);
+        } else {
+            self.showTopConcepts(options && options.sourceLabel, options);
+        }
+    };
+
     self.onSearchClass = function () {
         PromptedSelectWidget.prompt("owl:Class", "GenericTools_searchAllClassSelect", self.activeSource);
     };

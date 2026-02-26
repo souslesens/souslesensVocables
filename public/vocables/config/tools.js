@@ -63,9 +63,18 @@ async function loadToolsAndPlugins(callback) {
 function mergeToolsAndPlugins(tools, plugins) {
     let pluginsToMerge = {};
     plugins.forEach((element) => {
-        // We first check that the plugin is already registered in the window
         if (window[element.name]) {
-            pluginsToMerge[element.name] = { label: element.name, noSource: 1, controller: window[element.name], toolDescriptionImg: null };
+            const config = element.config ?? {};
+            pluginsToMerge[element.name] = {
+                label: config.label ?? element.name,
+                noSource: !config.useSource,
+                multiSources: +!!config.multiSources,
+                controller: window[element.name],
+                toolDescriptionImg: null,
+                toTools: {},
+                resetURLParamsDiv: config.resetURLParamsDiv || false,
+                displayImports: config.displayImports || false,
+            };
         } else {
             console.error(`Window object ${element.name} not found`);
         }

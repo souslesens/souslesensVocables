@@ -6,6 +6,7 @@ import { ulid } from "ulid";
 import path from "path";
 import fs from "fs";
 import os from "node:os";
+import { getUploadedMime } from "../utils.js";
 
 export default function () {
     let operations = {
@@ -94,6 +95,7 @@ export default function () {
         const id = req.body.identifier || ulid();
         const clean = req.body.clean;
         const file = req.files.data;
+        const uploadedMime = getUploadedMime(file);
 
         const tmpPath = path.resolve(os.tmpdir(), `${id}.nt`);
         const uploadedPath = path.resolve("data", "uploaded_rdf_data");

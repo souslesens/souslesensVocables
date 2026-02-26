@@ -3,9 +3,9 @@ import fs from "fs";
 const release = process.argv[2];
 const line = parseInt(process.argv[3]);
 
-if (release === undefined || line === undefined || line === NaN) {
+if (release === undefined || line === undefined || isNaN(line)) {
     console.error("Usage: changelog.js <release> <lineNumber>");
-    return;
+    process.exit(1);
 }
 
 const message = `

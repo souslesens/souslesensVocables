@@ -1,4 +1,5 @@
 import BotEngineClass from "./_botEngineClass.js";
+import CommonBotFunctions from "./_commonBotFunctions.js";
 import Sparql_proxy from "../sparqlProxies/sparql_proxy.js";
 
 var CreateSLSVsource_bot = (function () {
@@ -160,9 +161,7 @@ var CreateSLSVsource_bot = (function () {
         },
 
         listImportsFn: function () {
-            var sources = Object.keys(Config.sources);
-            sources.sort();
-            self.myBotEngine.showList(sources, "imports");
+            self.myBotEngine.showTree(CommonBotFunctions.getSourcesJstreeData(), "imports", { withCheckboxes: true });
         },
 
         afterImportFn: function () {

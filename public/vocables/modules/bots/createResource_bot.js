@@ -9,7 +9,7 @@ import common from "../shared/common.js";
 import Sparql_generic from "../sparqlProxies/sparql_generic.js";
 import OntologyModels from "../shared/ontologyModels.js";
 import Lineage_createResource from "../tools/lineage/lineage_createResource.js";
-import AnnotationPropertiesTemplateAssignmentsResolver from "../shared/annotationPropertiesTemplateAssignmentsResolver.js";
+import AnnotationPropertiesTemplateAssignmentsResolver from "../tools/annotationPropertiesTemplate/annotationPropertiesTemplateAssignmentsResolver.js";
 
 import NodeInfosAxioms from "../tools/axioms/nodeInfosAxioms.js";
 import AxiomExtractor from "../tools/axioms/axiomExtractor.js";

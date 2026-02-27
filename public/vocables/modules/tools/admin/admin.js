@@ -10,9 +10,9 @@ import SparqlQueryUI from "../sparqlQueryUI.js";
 import SourceSelectorWidget from "../../uiWidgets/sourceSelectorWidget.js";
 import OntologyModels from "../../shared/ontologyModels.js";
 import UIcontroller from "../mappingModeler/uiController.js";
-import CreateAnnotationPropertiesTemplate_bot from "../../bots/createAnnotationPropertiesTemplate_bot.js";
-import AdminAnnotationPropertiesTemplate from "./adminAnnotationPropertiesTemplate.js";
-import AssignAnnotationPropertiesTemplate_bot from "../../bots/assignAnnotationPropertiesTemplate_bot.js";
+import CreateAnnotationPropertiesTemplate_bot from "../annotationPropertiesTemplate/createAnnotationPropertiesTemplate_bot.js";
+import AdminAnnotationPropertiesTemplate from "../annotationPropertiesTemplate/adminAnnotationPropertiesTemplate.js";
+import AssignAnnotationPropertiesTemplate_bot from "../annotationPropertiesTemplate/assignAnnotationPropertiesTemplate_bot.js";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 var Admin = (function () {

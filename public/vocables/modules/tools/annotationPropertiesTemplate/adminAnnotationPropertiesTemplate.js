@@ -1,6 +1,6 @@
 import MainController from "../../shared/mainController.js";
 import SourceSelectorWidget from "../../uiWidgets/sourceSelectorWidget.js";
-import AssignAnnotationPropertiesTemplate_bot from "../../bots/assignAnnotationPropertiesTemplate_bot.js";
+import AssignAnnotationPropertiesTemplate_bot from "./assignAnnotationPropertiesTemplate_bot.js";
 
 /**
  * @module adminAnnotationPropertiesTemplate

@@ -107,39 +107,39 @@ var AssignAnnotationPropertiesTemplate_bot = (function () {
             Cancel: { endFn: self.workflow_end },
         },
     };
-    
+
     self.workflow_confirmDeleteTemplate = {
-      _OR: {
-        "Yes, delete": { deleteTemplateFn: self.workflow_end },
-        Cancel: { endFn: self.workflow_end },
-      },
+        _OR: {
+            "Yes, delete": { deleteTemplateFn: self.workflow_end },
+            Cancel: { endFn: self.workflow_end },
+        },
     };
 
     // Confirm: unassign from all active targets, then delete the template
     self.workflow_confirmUnassignDeleteTemplate = {
-      _OR: {
-        "Unassign & delete (recommended)": {
-          unassignTemplateFromAllTargetsFn: {
-            deleteTemplateFn: self.workflow_end,
-          },
+        _OR: {
+            "Unassign & delete (recommended)": {
+                unassignTemplateFromAllTargetsFn: {
+                    deleteTemplateFn: self.workflow_end,
+                },
+            },
+            Cancel: { endFn: self.workflow_end },
         },
-        Cancel: { endFn: self.workflow_end },
-      },
     };
 
     self.workflow_chooseTemplate = {};
 
     self.workflow_templateActions = {
-      _OR: {
-        Apply: self.workflow_chooseTarget,
-        "Delete template": { showDeleteTemplateWarningFn: {} },
-        Back: { backToChooseTemplateFn: {} },
-        Cancel: { endFn: self.workflow_end },
-      },
+        _OR: {
+            Apply: self.workflow_chooseTarget,
+            "Delete template": { showDeleteTemplateWarningFn: {} },
+            Back: { backToChooseTemplateFn: {} },
+            Cancel: { endFn: self.workflow_end },
+        },
     };
 
     self.workflow_chooseTemplate.chooseTemplateFn = {
-      afterChooseTemplateFn: self.workflow_templateActions,
+        afterChooseTemplateFn: self.workflow_templateActions,
     };
 
     self.workflow = self.workflow_chooseTemplate;
@@ -228,25 +228,25 @@ var AssignAnnotationPropertiesTemplate_bot = (function () {
          * Avoids direct workflow circular references.
          */
         backToChooseTemplateFn: function () {
-          // Close the right-side summary panel (best-effort)
-          try {
-            $("#smallDialogDiv").dialog("close");
-          } catch (e) {}
+            // Close the right-side summary panel (best-effort)
+            try {
+                $("#smallDialogDiv").dialog("close");
+            } catch (e) {}
 
-          // Reset template selection
-          self.params.selectedTemplateId = null;
+            // Reset template selection
+            self.params.selectedTemplateId = null;
 
-          // Reset target selection (clean state)
-          self.params.selectedProfileId = "";
-          self.params.selectedUserId = "";
-          self.params.selectedSource = "";
+            // Reset target selection (clean state)
+            self.params.selectedProfileId = "";
+            self.params.selectedUserId = "";
+            self.params.selectedSource = "";
 
-          // Reset computed preview
-          self.params.previewSources = [];
+            // Reset computed preview
+            self.params.previewSources = [];
 
-          // Force BotEngine to restart at the chooseTemplate workflow
-          self.myBotEngine.currentObj = self.workflow_chooseTemplate;
-          return self.myBotEngine.nextStep(self.workflow_chooseTemplate);
+            // Force BotEngine to restart at the chooseTemplate workflow
+            self.myBotEngine.currentObj = self.workflow_chooseTemplate;
+            return self.myBotEngine.nextStep(self.workflow_chooseTemplate);
         },
 
         /**
@@ -517,70 +517,70 @@ var AssignAnnotationPropertiesTemplate_bot = (function () {
          * If the template is still applied on targets, propose "Unassign & delete" first.
          */
         showDeleteTemplateWarningFn: function () {
-          var templateId = parseInt(self.params.selectedTemplateId, 10);
-          if (!templateId) {
-            return self.myBotEngine.previousStep("No template selected");
-          }
-
-          getActiveTargetsForTemplate(templateId, function (err, targets) {
-            if (err) {
-              return self.myBotEngine.abort(err.responseText || err.message || err);
-            }
-            targets = targets || { sources: [], profiles: [], users: [] };
-
-            var sources = targets.sources || [];
-            var profiles = targets.profiles || [];
-            var users = targets.users || [];
-
-            var hasAny = sources.length > 0 || profiles.length > 0 || users.length > 0;
-
-            // Store for the unassign step
-            self.params.pendingDeleteTemplateId = templateId;
-            self.params.pendingDeleteTargets = targets;
-
-            // Build info panel (right dialog)
-            var html = "<div style='font-size:12px;'>";
-            html += "<div><b>Delete template</b></div>";
-            html += "<div style='margin-top:6px;'>Template id=<b>" + templateId + "</b></div>";
-
-            if (hasAny) {
-              html += "<div style='margin-top:6px; color:#b00;'><b>This template is still applied.</b></div>";
-              html += "<div style='margin-top:6px;'>Recommended: unassign from all targets, then delete.</div>";
-
-              html += "<div style='margin-top:10px;'><b>Applied on:</b></div>";
-
-              html += "<div style='margin-top:4px;'><b>Sources (" + sources.length + "):</b></div>";
-              html += "<div style='max-height:70px; overflow:auto; border:1px solid #ddd; padding:6px;'>" + escapeHtml(sources.join(", ")) + "</div>";
-
-              html += "<div style='margin-top:6px;'><b>Profiles (" + profiles.length + "):</b></div>";
-              html += "<div style='max-height:70px; overflow:auto; border:1px solid #ddd; padding:6px;'>" + escapeHtml(profiles.join(", ")) + "</div>";
-
-              html += "<div style='margin-top:6px;'><b>Users (" + users.length + "):</b></div>";
-              html += "<div style='max-height:70px; overflow:auto; border:1px solid #ddd; padding:6px;'>" + escapeHtml(users.join(", ")) + "</div>";
-
-              html += "<div style='margin-top:10px; color:#555;'><i>Use the bot menu to choose an action.</i></div>";
-            } else {
-              html += "<div style='margin-top:6px;'>This template is not applied anywhere.</div>";
-              html += "<div style='margin-top:6px;'>Do you want to delete it?</div>";
-              html += "<div style='margin-top:10px; color:#555;'><i>Use the bot menu to confirm (Yes, delete / Cancel).</i></div>";
+            var templateId = parseInt(self.params.selectedTemplateId, 10);
+            if (!templateId) {
+                return self.myBotEngine.previousStep("No template selected");
             }
 
-            html += "</div>";
+            getActiveTargetsForTemplate(templateId, function (err, targets) {
+                if (err) {
+                    return self.myBotEngine.abort(err.responseText || err.message || err);
+                }
+                targets = targets || { sources: [], profiles: [], users: [] };
 
-            $("#smallDialogDiv").html(html);
-            $("#smallDialogDiv").dialog("open");
-            UI.setDialogTitle("#smallDialogDiv", "Delete template");
+                var sources = targets.sources || [];
+                var profiles = targets.profiles || [];
+                var users = targets.users || [];
 
-            if (hasAny) {
-              // Go to unassign+delete confirmation menu
-              self.myBotEngine.currentObj = self.workflow_confirmUnassignDeleteTemplate;
-              return self.myBotEngine.nextStep(self.workflow_confirmUnassignDeleteTemplate);
-            }
+                var hasAny = sources.length > 0 || profiles.length > 0 || users.length > 0;
 
-            // No targets -> keep current delete confirmation
-            self.myBotEngine.currentObj = self.workflow_confirmDeleteTemplate;
-            return self.myBotEngine.nextStep(self.workflow_confirmDeleteTemplate);
-          });
+                // Store for the unassign step
+                self.params.pendingDeleteTemplateId = templateId;
+                self.params.pendingDeleteTargets = targets;
+
+                // Build info panel (right dialog)
+                var html = "<div style='font-size:12px;'>";
+                html += "<div><b>Delete template</b></div>";
+                html += "<div style='margin-top:6px;'>Template id=<b>" + templateId + "</b></div>";
+
+                if (hasAny) {
+                    html += "<div style='margin-top:6px; color:#b00;'><b>This template is still applied.</b></div>";
+                    html += "<div style='margin-top:6px;'>Recommended: unassign from all targets, then delete.</div>";
+
+                    html += "<div style='margin-top:10px;'><b>Applied on:</b></div>";
+
+                    html += "<div style='margin-top:4px;'><b>Sources (" + sources.length + "):</b></div>";
+                    html += "<div style='max-height:70px; overflow:auto; border:1px solid #ddd; padding:6px;'>" + escapeHtml(sources.join(", ")) + "</div>";
+
+                    html += "<div style='margin-top:6px;'><b>Profiles (" + profiles.length + "):</b></div>";
+                    html += "<div style='max-height:70px; overflow:auto; border:1px solid #ddd; padding:6px;'>" + escapeHtml(profiles.join(", ")) + "</div>";
+
+                    html += "<div style='margin-top:6px;'><b>Users (" + users.length + "):</b></div>";
+                    html += "<div style='max-height:70px; overflow:auto; border:1px solid #ddd; padding:6px;'>" + escapeHtml(users.join(", ")) + "</div>";
+
+                    html += "<div style='margin-top:10px; color:#555;'><i>Use the bot menu to choose an action.</i></div>";
+                } else {
+                    html += "<div style='margin-top:6px;'>This template is not applied anywhere.</div>";
+                    html += "<div style='margin-top:6px;'>Do you want to delete it?</div>";
+                    html += "<div style='margin-top:10px; color:#555;'><i>Use the bot menu to confirm (Yes, delete / Cancel).</i></div>";
+                }
+
+                html += "</div>";
+
+                $("#smallDialogDiv").html(html);
+                $("#smallDialogDiv").dialog("open");
+                UI.setDialogTitle("#smallDialogDiv", "Delete template");
+
+                if (hasAny) {
+                    // Go to unassign+delete confirmation menu
+                    self.myBotEngine.currentObj = self.workflow_confirmUnassignDeleteTemplate;
+                    return self.myBotEngine.nextStep(self.workflow_confirmUnassignDeleteTemplate);
+                }
+
+                // No targets -> keep current delete confirmation
+                self.myBotEngine.currentObj = self.workflow_confirmDeleteTemplate;
+                return self.myBotEngine.nextStep(self.workflow_confirmDeleteTemplate);
+            });
         },
 
         /**
@@ -588,31 +588,31 @@ var AssignAnnotationPropertiesTemplate_bot = (function () {
          * Uses DELETE /users/data/{id}.
          */
         deleteTemplateFn: function () {
-          var templateId = parseInt(self.params.selectedTemplateId, 10);
-          if (!templateId) {
-            return self.myBotEngine.abort("Missing templateId");
-          }
+            var templateId = parseInt(self.params.selectedTemplateId, 10);
+            if (!templateId) {
+                return self.myBotEngine.abort("Missing templateId");
+            }
 
-          $.ajax({
-            url: Config.apiUrl + "/users/data/" + templateId,
-            type: "DELETE",
-            success: function () {
-              UI.message("Template deleted (id=" + templateId + ")", true);
+            $.ajax({
+                url: Config.apiUrl + "/users/data/" + templateId,
+                type: "DELETE",
+                success: function () {
+                    UI.message("Template deleted (id=" + templateId + ")", true);
 
-              // Cleanup local state to avoid using deleted template after Back
-              self.params.selectedTemplateId = null;
+                    // Cleanup local state to avoid using deleted template after Back
+                    self.params.selectedTemplateId = null;
 
-              // Best-effort: close the side dialog
-              try {
-                $("#smallDialogDiv").dialog("close");
-              } catch (e) {}
+                    // Best-effort: close the side dialog
+                    try {
+                        $("#smallDialogDiv").dialog("close");
+                    } catch (e) {}
 
-              return endBot(null);
-            },
-            error: function (err) {
-              return self.myBotEngine.abort(err.responseText || err.message || err);
-            },
-          });
+                    return endBot(null);
+                },
+                error: function (err) {
+                    return self.myBotEngine.abort(err.responseText || err.message || err);
+                },
+            });
         },
 
         /**
@@ -620,105 +620,104 @@ var AssignAnnotationPropertiesTemplate_bot = (function () {
          * @returns {void}
          */
         unassignTemplateFromAllTargetsFn: function () {
-          var templateId = parseInt(self.params.pendingDeleteTemplateId, 10);
-          var targets = self.params.pendingDeleteTargets || { sources: [], profiles: [], users: [] };
+            var templateId = parseInt(self.params.pendingDeleteTemplateId, 10);
+            var targets = self.params.pendingDeleteTargets || { sources: [], profiles: [], users: [] };
 
-          if (!templateId) {
-            return self.myBotEngine.abort("Missing pendingDeleteTemplateId");
-          }
+            if (!templateId) {
+                return self.myBotEngine.abort("Missing pendingDeleteTemplateId");
+            }
 
-          var targetJobs = [];
-          (targets.sources || []).forEach(function (sourceLabel) {
-            targetJobs.push({ scope: "source", targetId: sourceLabel });
-          });
-          (targets.profiles || []).forEach(function (profileId) {
-            targetJobs.push({ scope: "profile", targetId: profileId });
-          });
-          (targets.users || []).forEach(function (userLogin) {
-            targetJobs.push({ scope: "user", targetId: userLogin });
-          });
+            var targetJobs = [];
+            (targets.sources || []).forEach(function (sourceLabel) {
+                targetJobs.push({ scope: "source", targetId: sourceLabel });
+            });
+            (targets.profiles || []).forEach(function (profileId) {
+                targetJobs.push({ scope: "profile", targetId: profileId });
+            });
+            (targets.users || []).forEach(function (userLogin) {
+                targetJobs.push({ scope: "user", targetId: userLogin });
+            });
 
-          if (targetJobs.length === 0) {
-            return self.myBotEngine.nextStep();
-          }
+            if (targetJobs.length === 0) {
+                return self.myBotEngine.nextStep();
+            }
 
-          async.eachSeries(
-            targetJobs,
-            function (job, callbackEach) {
-              getActiveAssignmentForTargetFull(job.scope, job.targetId, function (err, activeAssignment) {
-                if (err) {
-                  return callbackEach(err);
-                }
-                if (!activeAssignment) {
-                  return callbackEach();
-                }
+            async.eachSeries(
+                targetJobs,
+                function (job, callbackEach) {
+                    getActiveAssignmentForTargetFull(job.scope, job.targetId, function (err, activeAssignment) {
+                        if (err) {
+                            return callbackEach(err);
+                        }
+                        if (!activeAssignment) {
+                            return callbackEach();
+                        }
 
-                var content = normalizeDataContent(activeAssignment.data_content);
-                var existingTemplateIds = [];
+                        var content = normalizeDataContent(activeAssignment.data_content);
+                        var existingTemplateIds = [];
 
-                if (content && Array.isArray(content.templateIds) && content.templateIds.length > 0) {
-                  existingTemplateIds = content.templateIds.slice();
-                } else if (content && content.templateId !== undefined && content.templateId !== null) {
-                  existingTemplateIds = [content.templateId];
-                }
+                        if (content && Array.isArray(content.templateIds) && content.templateIds.length > 0) {
+                            existingTemplateIds = content.templateIds.slice();
+                        } else if (content && content.templateId !== undefined && content.templateId !== null) {
+                            existingTemplateIds = [content.templateId];
+                        }
 
-                var remainingTemplateIds = [];
-                var wasTemplatePresent = false;
+                        var remainingTemplateIds = [];
+                        var wasTemplatePresent = false;
 
-                existingTemplateIds.forEach(function (id) {
-                  var numericId = parseInt(id, 10);
-                  if (!numericId) {
-                    return;
-                  }
-                  if (numericId === templateId) {
-                    wasTemplatePresent = true;
-                    return;
-                  }
-                  if (remainingTemplateIds.indexOf(numericId) < 0) {
-                    remainingTemplateIds.push(numericId);
-                  }
-                });
+                        existingTemplateIds.forEach(function (id) {
+                            var numericId = parseInt(id, 10);
+                            if (!numericId) {
+                                return;
+                            }
+                            if (numericId === templateId) {
+                                wasTemplatePresent = true;
+                                return;
+                            }
+                            if (remainingTemplateIds.indexOf(numericId) < 0) {
+                                remainingTemplateIds.push(numericId);
+                            }
+                        });
 
-                if (!wasTemplatePresent) {
-                  return callbackEach();
-                }
+                        if (!wasTemplatePresent) {
+                            return callbackEach();
+                        }
 
-                var assignmentParams = {
-                  scope: job.scope,
-                  targetId: job.targetId,
-                };
-                if (remainingTemplateIds.length === 0) {
-                  return deleteAssignmentsForTarget(job.scope, job.targetId, callbackEach);
-                }
+                        var assignmentParams = {
+                            scope: job.scope,
+                            targetId: job.targetId,
+                        };
+                        if (remainingTemplateIds.length === 0) {
+                            return deleteAssignmentsForTarget(job.scope, job.targetId, callbackEach);
+                        }
 
-                if (remainingTemplateIds.length === 1) {
-                  assignmentParams.templateId = remainingTemplateIds[0];
-                } else {
-                  assignmentParams.templateIds = remainingTemplateIds;
-                }
+                        if (remainingTemplateIds.length === 1) {
+                            assignmentParams.templateId = remainingTemplateIds[0];
+                        } else {
+                            assignmentParams.templateIds = remainingTemplateIds;
+                        }
 
-                createAnnotationTemplateAssignment(assignmentParams, function (err2, newAssignmentId) {
-                  if (err2) {
-                    return callbackEach(err2);
-                  }
-                  deletePreviousAssignmentsForTarget(job.scope, job.targetId, newAssignmentId, function () {
-                    return callbackEach();
-                  });
-                });
-              });
-            },
-            function (err) {
-              if (err) {
-                return self.myBotEngine.abort(err.responseText || err.message || err);
-              }
+                        createAnnotationTemplateAssignment(assignmentParams, function (err2, newAssignmentId) {
+                            if (err2) {
+                                return callbackEach(err2);
+                            }
+                            deletePreviousAssignmentsForTarget(job.scope, job.targetId, newAssignmentId, function () {
+                                return callbackEach();
+                            });
+                        });
+                    });
+                },
+                function (err) {
+                    if (err) {
+                        return self.myBotEngine.abort(err.responseText || err.message || err);
+                    }
 
-              self.params.pendingDeleteTemplateId = null;
-              self.params.pendingDeleteTargets = null;
-              return self.myBotEngine.nextStep();
-            },
-          );
+                    self.params.pendingDeleteTemplateId = null;
+                    self.params.pendingDeleteTargets = null;
+                    return self.myBotEngine.nextStep();
+                },
+            );
         },
-
     };
 
     // -------------------------
@@ -843,74 +842,60 @@ var AssignAnnotationPropertiesTemplate_bot = (function () {
 
         // Load active assignments for this template (active-only per target: source/profile/user)
         getActiveTargetsForTemplate(templateId, function (err, activeTargets) {
-          if (err) {
-            activeTargets = { sources: [], profiles: [], users: [] };
-          }
+            if (err) {
+                activeTargets = { sources: [], profiles: [], users: [] };
+            }
 
-          // Defensive defaults
-          var activeSources = (activeTargets && activeTargets.sources) ? activeTargets.sources : [];
-          var activeProfiles = (activeTargets && activeTargets.profiles) ? activeTargets.profiles : [];
-          var activeUsers = (activeTargets && activeTargets.users) ? activeTargets.users : [];
+            // Defensive defaults
+            var activeSources = activeTargets && activeTargets.sources ? activeTargets.sources : [];
+            var activeProfiles = activeTargets && activeTargets.profiles ? activeTargets.profiles : [];
+            var activeUsers = activeTargets && activeTargets.users ? activeTargets.users : [];
 
-          var html = "<div style='font-size:12px;'>";
-          html += "<div><b>Template:</b> " + escapeHtml(label) + "</div>";
-          html += "<div><b>ID:</b> " + templateId + "</div>";
-          html += "<div><b>Group:</b> " + escapeHtml(group) + "</div>";
-          html += "<div><b>Description:</b> " + escapeHtml(comment) + "</div>";
+            var html = "<div style='font-size:12px;'>";
+            html += "<div><b>Template:</b> " + escapeHtml(label) + "</div>";
+            html += "<div><b>ID:</b> " + templateId + "</div>";
+            html += "<div><b>Group:</b> " + escapeHtml(group) + "</div>";
+            html += "<div><b>Description:</b> " + escapeHtml(comment) + "</div>";
 
-          html += "<div style='margin-top:8px;'><b>Applied on:</b></div>";
+            html += "<div style='margin-top:8px;'><b>Applied on:</b></div>";
 
-          html += "<div style='margin-top:4px;'><b>Sources (" + activeSources.length + "):</b></div>";
-          html +=
-            "<div style='max-height:80px; overflow:auto; border:1px solid #ddd; padding:6px;'>" +
-            escapeHtml(activeSources.join(", ")) +
-            "</div>";
+            html += "<div style='margin-top:4px;'><b>Sources (" + activeSources.length + "):</b></div>";
+            html += "<div style='max-height:80px; overflow:auto; border:1px solid #ddd; padding:6px;'>" + escapeHtml(activeSources.join(", ")) + "</div>";
 
-          html += "<div style='margin-top:6px;'><b>Profiles (" + activeProfiles.length + "):</b></div>";
-          html +=
-            "<div style='max-height:80px; overflow:auto; border:1px solid #ddd; padding:6px;'>" +
-            escapeHtml(activeProfiles.join(", ")) +
-            "</div>";
+            html += "<div style='margin-top:6px;'><b>Profiles (" + activeProfiles.length + "):</b></div>";
+            html += "<div style='max-height:80px; overflow:auto; border:1px solid #ddd; padding:6px;'>" + escapeHtml(activeProfiles.join(", ")) + "</div>";
 
-          html += "<div style='margin-top:6px;'><b>Users (" + activeUsers.length + "):</b></div>";
-          html +=
-            "<div style='max-height:80px; overflow:auto; border:1px solid #ddd; padding:6px;'>" +
-            escapeHtml(activeUsers.join(", ")) +
-            "</div>";
+            html += "<div style='margin-top:6px;'><b>Users (" + activeUsers.length + "):</b></div>";
+            html += "<div style='max-height:80px; overflow:auto; border:1px solid #ddd; padding:6px;'>" + escapeHtml(activeUsers.join(", ")) + "</div>";
 
-          // Properties (unchanged)
-          html += "<div style='margin-top:8px;'><b>Properties:</b></div><ul>";
-          if (selections.length > 0) {
-            selections.forEach(function (s) {
-              html +=
-                "<li>" +
-                escapeHtml(s.vocab || "?") +
-                ": " +
-                escapeHtml(s.propertyLabel || s.propertyUri || "") +
-                "</li>";
-            });
-          } else {
-            properties.forEach(function (p) {
-              html += "<li>" + escapeHtml(p) + "</li>";
-            });
-          }
-          html += "</ul></div>";
+            // Properties (unchanged)
+            html += "<div style='margin-top:8px;'><b>Properties:</b></div><ul>";
+            if (selections.length > 0) {
+                selections.forEach(function (s) {
+                    html += "<li>" + escapeHtml(s.vocab || "?") + ": " + escapeHtml(s.propertyLabel || s.propertyUri || "") + "</li>";
+                });
+            } else {
+                properties.forEach(function (p) {
+                    html += "<li>" + escapeHtml(p) + "</li>";
+                });
+            }
+            html += "</ul></div>";
 
-          $("#smallDialogDiv").html(html);
-          $("#smallDialogDiv")
-            .dialog({
-              modal: false,
-              width: 420,
-              position: {
-                my: "left top",
-                at: "right top",
-                of: "#mainDialogDiv",
-              },
-            })
-            .dialog("open");
+            $("#smallDialogDiv").html(html);
+            $("#smallDialogDiv")
+                .dialog({
+                    modal: false,
+                    width: 420,
+                    position: {
+                        my: "left top",
+                        at: "right top",
+                        of: "#mainDialogDiv",
+                    },
+                })
+                .dialog("open");
 
-          UI.setDialogTitle("#smallDialogDiv", "Template details");
-          return callback(null);
+            UI.setDialogTitle("#smallDialogDiv", "Template details");
+            return callback(null);
         });
     }
 
@@ -1001,113 +986,113 @@ var AssignAnnotationPropertiesTemplate_bot = (function () {
      * @param {function} callback (err, result) with result={sources:[], profiles:[], users:[]}
      */
     function getActiveTargetsForTemplate(templateId, callback) {
-      $.ajax({
-        url: Config.apiUrl + "/users/data?data_type=" + encodeURIComponent(ASSIGNMENT_TYPE),
-        type: "GET",
-        dataType: "json",
-        success: function (list) {
-          list = list || [];
+        $.ajax({
+            url: Config.apiUrl + "/users/data?data_type=" + encodeURIComponent(ASSIGNMENT_TYPE),
+            type: "GET",
+            dataType: "json",
+            success: function (list) {
+                list = list || [];
 
-          // 1) Compute latest assignment id per target key
-          var latestIdByTarget = {};
+                // 1) Compute latest assignment id per target key
+                var latestIdByTarget = {};
 
-          list.forEach(function (a) {
-            if (!a || !a.id) return;
+                list.forEach(function (a) {
+                    if (!a || !a.id) return;
 
-            // Source target (data_source is set)
-            if (a.data_source) {
-              var keyS = "source:" + a.data_source;
-              if (!latestIdByTarget[keyS] || a.id > latestIdByTarget[keyS]) {
-                latestIdByTarget[keyS] = a.id;
-              }
-              return;
-            }
-
-            // User target (shared_users contains user login)
-            if (Array.isArray(a.shared_users) && a.shared_users.length > 0) {
-              // In this bot, assignments are typically 1 user; still handle arrays defensively
-              a.shared_users.forEach(function (u) {
-                if (!u) return;
-                var keyU = "user:" + u;
-                if (!latestIdByTarget[keyU] || a.id > latestIdByTarget[keyU]) {
-                  latestIdByTarget[keyU] = a.id;
-                }
-              });
-              return;
-            }
-
-            // Profile target (shared_profiles contains profile ids)
-            if (Array.isArray(a.shared_profiles) && a.shared_profiles.length > 0) {
-              a.shared_profiles.forEach(function (p) {
-                if (!p) return;
-                var keyP = "profile:" + p;
-                if (!latestIdByTarget[keyP] || a.id > latestIdByTarget[keyP]) {
-                  latestIdByTarget[keyP] = a.id;
-                }
-              });
-            }
-          });
-
-          var latestIds = Object.keys(latestIdByTarget).map(function (k) {
-            return latestIdByTarget[k];
-          });
-
-          var out = { sources: [], profiles: [], users: [] };
-          var seen = { source: {}, profile: {}, user: {} };
-
-          // 2) Reload each latest assignment by id to read data_content
-          async.eachSeries(
-            latestIds,
-            function (assignmentId, cbEach) {
-              loadUserDataById(assignmentId, function (err, full) {
-                if (err || !full) return cbEach(); // ignore one failure
-
-                var c = normalizeDataContent(full.data_content);
-                if (!c) return cbEach();
-
-                // Support both single and multi modes
-                var match = false;
-                if (c.templateId === templateId) match = true;
-                if (!match && Array.isArray(c.templateIds) && c.templateIds.indexOf(templateId) > -1) match = true;
-                if (!match) return cbEach();
-
-                // Identify the target from the full record
-                if (full.data_source) {
-                  if (!seen.source[full.data_source]) {
-                    seen.source[full.data_source] = 1;
-                    out.sources.push(full.data_source);
-                  }
-                } else if (Array.isArray(full.shared_users) && full.shared_users.length > 0) {
-                  full.shared_users.forEach(function (u) {
-                    if (u && !seen.user[u]) {
-                      seen.user[u] = 1;
-                      out.users.push(u);
+                    // Source target (data_source is set)
+                    if (a.data_source) {
+                        var keyS = "source:" + a.data_source;
+                        if (!latestIdByTarget[keyS] || a.id > latestIdByTarget[keyS]) {
+                            latestIdByTarget[keyS] = a.id;
+                        }
+                        return;
                     }
-                  });
-                } else if (Array.isArray(full.shared_profiles) && full.shared_profiles.length > 0) {
-                  full.shared_profiles.forEach(function (p) {
-                    if (p && !seen.profile[p]) {
-                      seen.profile[p] = 1;
-                      out.profiles.push(p);
-                    }
-                  });
-                }
 
-                return cbEach();
-              });
+                    // User target (shared_users contains user login)
+                    if (Array.isArray(a.shared_users) && a.shared_users.length > 0) {
+                        // In this bot, assignments are typically 1 user; still handle arrays defensively
+                        a.shared_users.forEach(function (u) {
+                            if (!u) return;
+                            var keyU = "user:" + u;
+                            if (!latestIdByTarget[keyU] || a.id > latestIdByTarget[keyU]) {
+                                latestIdByTarget[keyU] = a.id;
+                            }
+                        });
+                        return;
+                    }
+
+                    // Profile target (shared_profiles contains profile ids)
+                    if (Array.isArray(a.shared_profiles) && a.shared_profiles.length > 0) {
+                        a.shared_profiles.forEach(function (p) {
+                            if (!p) return;
+                            var keyP = "profile:" + p;
+                            if (!latestIdByTarget[keyP] || a.id > latestIdByTarget[keyP]) {
+                                latestIdByTarget[keyP] = a.id;
+                            }
+                        });
+                    }
+                });
+
+                var latestIds = Object.keys(latestIdByTarget).map(function (k) {
+                    return latestIdByTarget[k];
+                });
+
+                var out = { sources: [], profiles: [], users: [] };
+                var seen = { source: {}, profile: {}, user: {} };
+
+                // 2) Reload each latest assignment by id to read data_content
+                async.eachSeries(
+                    latestIds,
+                    function (assignmentId, cbEach) {
+                        loadUserDataById(assignmentId, function (err, full) {
+                            if (err || !full) return cbEach(); // ignore one failure
+
+                            var c = normalizeDataContent(full.data_content);
+                            if (!c) return cbEach();
+
+                            // Support both single and multi modes
+                            var match = false;
+                            if (c.templateId === templateId) match = true;
+                            if (!match && Array.isArray(c.templateIds) && c.templateIds.indexOf(templateId) > -1) match = true;
+                            if (!match) return cbEach();
+
+                            // Identify the target from the full record
+                            if (full.data_source) {
+                                if (!seen.source[full.data_source]) {
+                                    seen.source[full.data_source] = 1;
+                                    out.sources.push(full.data_source);
+                                }
+                            } else if (Array.isArray(full.shared_users) && full.shared_users.length > 0) {
+                                full.shared_users.forEach(function (u) {
+                                    if (u && !seen.user[u]) {
+                                        seen.user[u] = 1;
+                                        out.users.push(u);
+                                    }
+                                });
+                            } else if (Array.isArray(full.shared_profiles) && full.shared_profiles.length > 0) {
+                                full.shared_profiles.forEach(function (p) {
+                                    if (p && !seen.profile[p]) {
+                                        seen.profile[p] = 1;
+                                        out.profiles.push(p);
+                                    }
+                                });
+                            }
+
+                            return cbEach();
+                        });
+                    },
+                    function () {
+                        out.sources.sort();
+                        out.profiles.sort();
+                        out.users.sort();
+                        return callback(null, out);
+                    },
+                );
             },
-            function () {
-              out.sources.sort();
-              out.profiles.sort();
-              out.users.sort();
-              return callback(null, out);
+            error: function (err) {
+                return callback(err);
             },
-          );
-        },
-        error: function (err) {
-          return callback(err);
-        },
-      });
+        });
     }
 
     function escapeHtml(str) {
@@ -1610,69 +1595,69 @@ var AssignAnnotationPropertiesTemplate_bot = (function () {
      * @returns {void}
      */
     function deleteAssignmentsForTarget(scope, targetId, callback) {
-      if (!scope || !targetId) {
-        return callback(null);
-      }
-
-      $.ajax({
-        url: Config.apiUrl + "/users/data?data_type=" + encodeURIComponent(ASSIGNMENT_TYPE),
-        type: "GET",
-        dataType: "json",
-        success: function (list) {
-          list = list || [];
-
-          var matchingIds = list
-            .filter(function (item) {
-              if (!item || !item.id) return false;
-
-              if (scope === "source") {
-                return item.data_source && item.data_source === targetId;
-              }
-              if (scope === "user") {
-                return Array.isArray(item.shared_users) && item.shared_users.indexOf(targetId) > -1;
-              }
-              if (scope === "profile") {
-                return Array.isArray(item.shared_profiles) && item.shared_profiles.indexOf(targetId) > -1;
-              }
-              return false;
-            })
-            .map(function (item) {
-              return item.id;
-            });
-
-          if (matchingIds.length === 0) {
-            try {
-              AnnotationPropertiesTemplateAssignmentsResolver.clearCache();
-            } catch (e) {}
+        if (!scope || !targetId) {
             return callback(null);
-          }
+        }
 
-          async.eachSeries(
-            matchingIds,
-            function (id, callbackEach) {
-              $.ajax({
-                url: Config.apiUrl + "/users/data/" + id,
-                type: "DELETE",
-                success: function () {
-                  return callbackEach();
-                },
-                error: function (err) {
-                  return callbackEach(err);
-                },
-              });
+        $.ajax({
+            url: Config.apiUrl + "/users/data?data_type=" + encodeURIComponent(ASSIGNMENT_TYPE),
+            type: "GET",
+            dataType: "json",
+            success: function (list) {
+                list = list || [];
+
+                var matchingIds = list
+                    .filter(function (item) {
+                        if (!item || !item.id) return false;
+
+                        if (scope === "source") {
+                            return item.data_source && item.data_source === targetId;
+                        }
+                        if (scope === "user") {
+                            return Array.isArray(item.shared_users) && item.shared_users.indexOf(targetId) > -1;
+                        }
+                        if (scope === "profile") {
+                            return Array.isArray(item.shared_profiles) && item.shared_profiles.indexOf(targetId) > -1;
+                        }
+                        return false;
+                    })
+                    .map(function (item) {
+                        return item.id;
+                    });
+
+                if (matchingIds.length === 0) {
+                    try {
+                        AnnotationPropertiesTemplateAssignmentsResolver.clearCache();
+                    } catch (e) {}
+                    return callback(null);
+                }
+
+                async.eachSeries(
+                    matchingIds,
+                    function (id, callbackEach) {
+                        $.ajax({
+                            url: Config.apiUrl + "/users/data/" + id,
+                            type: "DELETE",
+                            success: function () {
+                                return callbackEach();
+                            },
+                            error: function (err) {
+                                return callbackEach(err);
+                            },
+                        });
+                    },
+                    function (err) {
+                        try {
+                            AnnotationPropertiesTemplateAssignmentsResolver.clearCache();
+                        } catch (e) {}
+                        return callback(err || null);
+                    },
+                );
             },
-            function (err) {
-              try {
-                AnnotationPropertiesTemplateAssignmentsResolver.clearCache();
-              } catch (e) {}
-              return callback(err || null);
+            error: function (err) {
+                return callback(err);
             },
-          );
-        },
-        error: function (err) {
-          return callback(err);
-        },
-      });
+        });
     }
 
     return self;

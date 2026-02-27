@@ -389,6 +389,9 @@ var elasticRestProxy = {
                                     owlType: {
                                         type: "keyword",
                                     },
+                                    lang: {
+                                        type: "keyword",
+                                    },
                                 },
                             },
                         },

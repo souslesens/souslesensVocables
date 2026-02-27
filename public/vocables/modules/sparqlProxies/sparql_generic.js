@@ -1094,14 +1094,22 @@ var Sparql_generic = (function () {
                             allClassesMap[item.subject.value] = {
                                 id: item.subject.value,
                                 label: conceptLabel,
+                                lang: item.subjectLabel ? item.subjectLabel["xml:lang"] : null,
                                 skoslabels: skosLabelsMap[item.subject.value],
                                 parents: item.firstParent ? [item.firstParent.value] : [],
                                 type: conceptType,
                             };
-                        } else if (item.firstParent) {
-                            var parentVal = item.firstParent.value;
-                            if (allClassesMap[item.subject.value].parents.indexOf(parentVal) < 0) {
-                                allClassesMap[item.subject.value].parents.push(parentVal);
+                        } else {
+                            var newLang = item.subjectLabel ? item.subjectLabel["xml:lang"] : null;
+                            if (newLang === "en" && allClassesMap[item.subject.value].lang !== "en") {
+                                allClassesMap[item.subject.value].label = conceptLabel;
+                                allClassesMap[item.subject.value].lang = "en";
+                            }
+                            if (item.firstParent) {
+                                var parentVal = item.firstParent.value;
+                                if (allClassesMap[item.subject.value].parents.indexOf(parentVal) < 0) {
+                                    allClassesMap[item.subject.value].parents.push(parentVal);
+                                }
                             }
                         }
                     });

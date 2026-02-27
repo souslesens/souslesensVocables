@@ -187,10 +187,24 @@ var SearchWidget = (function () {
         });
     };
 
+    self.sortMatchesLangFirst = function (preferredLang, a, b) {
+        var aIsPreferred = a.lang === preferredLang;
+        var bIsPreferred = b.lang === preferredLang;
+        if (aIsPreferred !== bIsPreferred) {
+            return aIsPreferred ? -1 : 1;
+        }
+        if (a.label > b.label) return 1;
+        if (b.label > a.label) return -1;
+        return 0;
+    };
+
     self.searchResultToJstree = function (targetDiv, result, _options, _callback) {
         var existingNodes = {};
         var jstreeData = [];
         var parentIdsLabelsMap = result.parentIdsLabelsMap;
+        var preferredLang = (Config && Config.default_lang) ? Config.default_lang : "en";
+        var maxDisplayedLeaves = 1000;
+        var leafCount = 0;
 
         result.forEach(function (item) {
             var matches = item.matches;
@@ -198,16 +212,13 @@ var SearchWidget = (function () {
                 var items = matches[source];
 
                 items.sort(function (a, b) {
-                    if (a.label > b.label) {
-                        return 1;
-                    }
-                    if (b.label > a.label) {
-                        return -1;
-                    }
-                    return 0;
+                    return self.sortMatchesLangFirst(preferredLang, a, b);
                 });
 
                 items.forEach(function (match) {
+                    if (leafCount >= maxDisplayedLeaves) {
+                        return;
+                    }
                     if (match.parents) {
                         var parentId = "";
                         var parents = match.parents; //.split("|")
@@ -261,6 +272,7 @@ var SearchWidget = (function () {
                     }
                     if (!existingNodes[leafId]) {
                         existingNodes[leafId] = 1;
+                        leafCount++;
                         jstreeData.push({
                             id: leafId,
                             text: "<span class='searched_concept'>" + match.label + "</span>",
@@ -578,15 +590,14 @@ var SearchWidget = (function () {
             if (result[0] && result[0].matches && result[0].matches[sourceLabel]) {
                 es_results = result[0].matches[sourceLabel];
             }
+            var preferredLang = (Config && Config.default_lang) ? Config.default_lang : "en";
             es_results.sort(function (a, b) {
                 var aIsIndividual = a.type.indexOf("Class") === -1;
                 var bIsIndividual = b.type.indexOf("Class") === -1;
                 if (aIsIndividual !== bIsIndividual) {
                     return aIsIndividual ? 1 : -1;
                 }
-                if (a.label > b.label) return 1;
-                if (b.label > a.label) return -1;
-                return 0;
+                return self.sortMatchesLangFirst(preferredLang, a, b);
             });
             if (es_results.length > 1000) {
                 es_results = es_results.slice(0, 1000);

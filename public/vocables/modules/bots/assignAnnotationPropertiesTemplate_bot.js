@@ -115,6 +115,18 @@ var AssignAnnotationPropertiesTemplate_bot = (function () {
       },
     };
 
+    // Confirm: unassign from all active targets, then delete the template
+    self.workflow_confirmUnassignDeleteTemplate = {
+      _OR: {
+        "Unassign & delete (recommended)": {
+          unassignTemplateFromAllTargetsFn: {
+            deleteTemplateFn: self.workflow_end,
+          },
+        },
+        Cancel: { endFn: self.workflow_end },
+      },
+    };
+
     self.workflow_chooseTemplate = {};
 
     self.workflow_templateActions = {
@@ -143,6 +155,7 @@ var AssignAnnotationPropertiesTemplate_bot = (function () {
         showDeleteTemplateWarningFn: "Delete template - warning",
         deleteTemplateFn: "Delete template",
         backToChooseTemplateFn: "Back to templates",
+        unassignTemplateFromAllTargetsFn: "Unassign template from all targets",
     };
 
     // -------------------------
@@ -500,30 +513,74 @@ var AssignAnnotationPropertiesTemplate_bot = (function () {
         },
 
         /**
-         * Shows a warning before deleting a template.
-         * The template may still be referenced by existing assignments.
+         * Shows a delete warning.
+         * If the template is still applied on targets, propose "Unassign & delete" first.
          */
         showDeleteTemplateWarningFn: function () {
-          var templateId = self.params.selectedTemplateId;
+          var templateId = parseInt(self.params.selectedTemplateId, 10);
           if (!templateId) {
             return self.myBotEngine.previousStep("No template selected");
           }
 
-          var html = "<div style='font-size:12px;'>";
-          html += "<div><b>Warning</b></div>";
-          html += "<div style='margin-top:6px;'>You are about to delete template <b>id=" + templateId + "</b>.</div>";
-          html += "<div style='margin-top:6px; color:#b00;'><b>Note:</b> existing assignments may still reference this template id.</div>";
-          html += "<div style='margin-top:6px;'>Do you want to continue?</div>";
-          html += "<div style='margin-top:10px; color:#555;'><i>Use the bot menu to confirm (Yes, delete / Cancel).</i></div>";
-          html += "</div>";
+          getActiveTargetsForTemplate(templateId, function (err, targets) {
+            if (err) {
+              return self.myBotEngine.abort(err.responseText || err.message || err);
+            }
+            targets = targets || { sources: [], profiles: [], users: [] };
 
-          $("#smallDialogDiv").html(html);
-          $("#smallDialogDiv").dialog("open");
-          UI.setDialogTitle("#smallDialogDiv", "Delete template");
+            var sources = targets.sources || [];
+            var profiles = targets.profiles || [];
+            var users = targets.users || [];
 
-          // Force next step to be the confirm workflow (this is the important part)
-          self.myBotEngine.currentObj = self.workflow_confirmDeleteTemplate;
-          return self.myBotEngine.nextStep(self.workflow_confirmDeleteTemplate);
+            var hasAny = sources.length > 0 || profiles.length > 0 || users.length > 0;
+
+            // Store for the unassign step
+            self.params.pendingDeleteTemplateId = templateId;
+            self.params.pendingDeleteTargets = targets;
+
+            // Build info panel (right dialog)
+            var html = "<div style='font-size:12px;'>";
+            html += "<div><b>Delete template</b></div>";
+            html += "<div style='margin-top:6px;'>Template id=<b>" + templateId + "</b></div>";
+
+            if (hasAny) {
+              html += "<div style='margin-top:6px; color:#b00;'><b>This template is still applied.</b></div>";
+              html += "<div style='margin-top:6px;'>Recommended: unassign from all targets, then delete.</div>";
+
+              html += "<div style='margin-top:10px;'><b>Applied on:</b></div>";
+
+              html += "<div style='margin-top:4px;'><b>Sources (" + sources.length + "):</b></div>";
+              html += "<div style='max-height:70px; overflow:auto; border:1px solid #ddd; padding:6px;'>" + escapeHtml(sources.join(", ")) + "</div>";
+
+              html += "<div style='margin-top:6px;'><b>Profiles (" + profiles.length + "):</b></div>";
+              html += "<div style='max-height:70px; overflow:auto; border:1px solid #ddd; padding:6px;'>" + escapeHtml(profiles.join(", ")) + "</div>";
+
+              html += "<div style='margin-top:6px;'><b>Users (" + users.length + "):</b></div>";
+              html += "<div style='max-height:70px; overflow:auto; border:1px solid #ddd; padding:6px;'>" + escapeHtml(users.join(", ")) + "</div>";
+
+              html += "<div style='margin-top:10px; color:#555;'><i>Use the bot menu to choose an action.</i></div>";
+            } else {
+              html += "<div style='margin-top:6px;'>This template is not applied anywhere.</div>";
+              html += "<div style='margin-top:6px;'>Do you want to delete it?</div>";
+              html += "<div style='margin-top:10px; color:#555;'><i>Use the bot menu to confirm (Yes, delete / Cancel).</i></div>";
+            }
+
+            html += "</div>";
+
+            $("#smallDialogDiv").html(html);
+            $("#smallDialogDiv").dialog("open");
+            UI.setDialogTitle("#smallDialogDiv", "Delete template");
+
+            if (hasAny) {
+              // Go to unassign+delete confirmation menu
+              self.myBotEngine.currentObj = self.workflow_confirmUnassignDeleteTemplate;
+              return self.myBotEngine.nextStep(self.workflow_confirmUnassignDeleteTemplate);
+            }
+
+            // No targets -> keep current delete confirmation
+            self.myBotEngine.currentObj = self.workflow_confirmDeleteTemplate;
+            return self.myBotEngine.nextStep(self.workflow_confirmDeleteTemplate);
+          });
         },
 
         /**
@@ -556,6 +613,110 @@ var AssignAnnotationPropertiesTemplate_bot = (function () {
               return self.myBotEngine.abort(err.responseText || err.message || err);
             },
           });
+        },
+
+        /**
+         * Unassigns the pending delete template from all active targets.
+         * @returns {void}
+         */
+        unassignTemplateFromAllTargetsFn: function () {
+          var templateId = parseInt(self.params.pendingDeleteTemplateId, 10);
+          var targets = self.params.pendingDeleteTargets || { sources: [], profiles: [], users: [] };
+
+          if (!templateId) {
+            return self.myBotEngine.abort("Missing pendingDeleteTemplateId");
+          }
+
+          var targetJobs = [];
+          (targets.sources || []).forEach(function (sourceLabel) {
+            targetJobs.push({ scope: "source", targetId: sourceLabel });
+          });
+          (targets.profiles || []).forEach(function (profileId) {
+            targetJobs.push({ scope: "profile", targetId: profileId });
+          });
+          (targets.users || []).forEach(function (userLogin) {
+            targetJobs.push({ scope: "user", targetId: userLogin });
+          });
+
+          if (targetJobs.length === 0) {
+            return self.myBotEngine.nextStep();
+          }
+
+          async.eachSeries(
+            targetJobs,
+            function (job, callbackEach) {
+              getActiveAssignmentForTargetFull(job.scope, job.targetId, function (err, activeAssignment) {
+                if (err) {
+                  return callbackEach(err);
+                }
+                if (!activeAssignment) {
+                  return callbackEach();
+                }
+
+                var content = normalizeDataContent(activeAssignment.data_content);
+                var existingTemplateIds = [];
+
+                if (content && Array.isArray(content.templateIds) && content.templateIds.length > 0) {
+                  existingTemplateIds = content.templateIds.slice();
+                } else if (content && content.templateId !== undefined && content.templateId !== null) {
+                  existingTemplateIds = [content.templateId];
+                }
+
+                var remainingTemplateIds = [];
+                var wasTemplatePresent = false;
+
+                existingTemplateIds.forEach(function (id) {
+                  var numericId = parseInt(id, 10);
+                  if (!numericId) {
+                    return;
+                  }
+                  if (numericId === templateId) {
+                    wasTemplatePresent = true;
+                    return;
+                  }
+                  if (remainingTemplateIds.indexOf(numericId) < 0) {
+                    remainingTemplateIds.push(numericId);
+                  }
+                });
+
+                if (!wasTemplatePresent) {
+                  return callbackEach();
+                }
+
+                var assignmentParams = {
+                  scope: job.scope,
+                  targetId: job.targetId,
+                };
+                if (remainingTemplateIds.length === 0) {
+                  return deleteAssignmentsForTarget(job.scope, job.targetId, callbackEach);
+                }
+
+                if (remainingTemplateIds.length === 1) {
+                  assignmentParams.templateId = remainingTemplateIds[0];
+                } else {
+                  assignmentParams.templateIds = remainingTemplateIds;
+                }
+
+                createAnnotationTemplateAssignment(assignmentParams, function (err2, newAssignmentId) {
+                  if (err2) {
+                    return callbackEach(err2);
+                  }
+                  deletePreviousAssignmentsForTarget(job.scope, job.targetId, newAssignmentId, function () {
+                    return callbackEach();
+                  });
+                });
+              });
+            },
+            function (err) {
+              if (err) {
+                return self.myBotEngine.abort(err.responseText || err.message || err);
+              }
+
+              self.params.pendingDeleteTemplateId = null;
+              self.params.pendingDeleteTargets = null;
+              return self.myBotEngine.nextStep();
+            },
+          );
         },
 
     };
@@ -1439,6 +1600,79 @@ var AssignAnnotationPropertiesTemplate_bot = (function () {
                 return callback(null);
             },
         });
+    }
+
+    /**
+     * Deletes all template assignment records for a given target.
+     * @param {string} scope "source" | "user" | "profile"
+     * @param {string} targetId
+     * @param {function} callback callback(err)
+     * @returns {void}
+     */
+    function deleteAssignmentsForTarget(scope, targetId, callback) {
+      if (!scope || !targetId) {
+        return callback(null);
+      }
+
+      $.ajax({
+        url: Config.apiUrl + "/users/data?data_type=" + encodeURIComponent(ASSIGNMENT_TYPE),
+        type: "GET",
+        dataType: "json",
+        success: function (list) {
+          list = list || [];
+
+          var matchingIds = list
+            .filter(function (item) {
+              if (!item || !item.id) return false;
+
+              if (scope === "source") {
+                return item.data_source && item.data_source === targetId;
+              }
+              if (scope === "user") {
+                return Array.isArray(item.shared_users) && item.shared_users.indexOf(targetId) > -1;
+              }
+              if (scope === "profile") {
+                return Array.isArray(item.shared_profiles) && item.shared_profiles.indexOf(targetId) > -1;
+              }
+              return false;
+            })
+            .map(function (item) {
+              return item.id;
+            });
+
+          if (matchingIds.length === 0) {
+            try {
+              AnnotationPropertiesTemplateAssignmentsResolver.clearCache();
+            } catch (e) {}
+            return callback(null);
+          }
+
+          async.eachSeries(
+            matchingIds,
+            function (id, callbackEach) {
+              $.ajax({
+                url: Config.apiUrl + "/users/data/" + id,
+                type: "DELETE",
+                success: function () {
+                  return callbackEach();
+                },
+                error: function (err) {
+                  return callbackEach(err);
+                },
+              });
+            },
+            function (err) {
+              try {
+                AnnotationPropertiesTemplateAssignmentsResolver.clearCache();
+              } catch (e) {}
+              return callback(err || null);
+            },
+          );
+        },
+        error: function (err) {
+          return callback(err);
+        },
+      });
     }
 
     return self;

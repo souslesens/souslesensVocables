@@ -107,12 +107,30 @@ var AssignAnnotationPropertiesTemplate_bot = (function () {
             Cancel: { endFn: self.workflow_end },
         },
     };
-
-    self.workflow = {
-        chooseTemplateFn: {
-            afterChooseTemplateFn: self.workflow_chooseTarget,
-        },
+    
+    self.workflow_confirmDeleteTemplate = {
+      _OR: {
+        "Yes, delete": { deleteTemplateFn: self.workflow_end },
+        Cancel: { endFn: self.workflow_end },
+      },
     };
+
+    self.workflow_chooseTemplate = {};
+
+    self.workflow_templateActions = {
+      _OR: {
+        Apply: self.workflow_chooseTarget,
+        "Delete template": { showDeleteTemplateWarningFn: {} },
+        Back: { backToChooseTemplateFn: {} },
+        Cancel: { endFn: self.workflow_end },
+      },
+    };
+
+    self.workflow_chooseTemplate.chooseTemplateFn = {
+      afterChooseTemplateFn: self.workflow_templateActions,
+    };
+
+    self.workflow = self.workflow_chooseTemplate;
 
     self.functionTitles = {
         chooseTemplateFn: "Choose template",
@@ -122,6 +140,9 @@ var AssignAnnotationPropertiesTemplate_bot = (function () {
         previewSourcesFn: "Preview sources",
         applyAssignmentsFn: "Apply template",
         handleExistingSourceActionFn: "Existing template found - choose an action",
+        showDeleteTemplateWarningFn: "Delete template - warning",
+        deleteTemplateFn: "Delete template",
+        backToChooseTemplateFn: "Back to templates",
     };
 
     // -------------------------
@@ -184,9 +205,35 @@ var AssignAnnotationPropertiesTemplate_bot = (function () {
                         // Non-blocking: still allow to continue
                         console.error(err2);
                     }
-                    return self.myBotEngine.nextStep();
+                    return self.myBotEngine.nextStep(self.workflow_templateActions);
                 });
             });
+        },
+
+        /**
+         * Goes back to the template list (chooseTemplateFn).
+         * Avoids direct workflow circular references.
+         */
+        backToChooseTemplateFn: function () {
+          // Close the right-side summary panel (best-effort)
+          try {
+            $("#smallDialogDiv").dialog("close");
+          } catch (e) {}
+
+          // Reset template selection
+          self.params.selectedTemplateId = null;
+
+          // Reset target selection (clean state)
+          self.params.selectedProfileId = "";
+          self.params.selectedUserId = "";
+          self.params.selectedSource = "";
+
+          // Reset computed preview
+          self.params.previewSources = [];
+
+          // Force BotEngine to restart at the chooseTemplate workflow
+          self.myBotEngine.currentObj = self.workflow_chooseTemplate;
+          return self.myBotEngine.nextStep(self.workflow_chooseTemplate);
         },
 
         /**
@@ -451,6 +498,66 @@ var AssignAnnotationPropertiesTemplate_bot = (function () {
             }
             return self.myBotEngine.nextStep();
         },
+
+        /**
+         * Shows a warning before deleting a template.
+         * The template may still be referenced by existing assignments.
+         */
+        showDeleteTemplateWarningFn: function () {
+          var templateId = self.params.selectedTemplateId;
+          if (!templateId) {
+            return self.myBotEngine.previousStep("No template selected");
+          }
+
+          var html = "<div style='font-size:12px;'>";
+          html += "<div><b>Warning</b></div>";
+          html += "<div style='margin-top:6px;'>You are about to delete template <b>id=" + templateId + "</b>.</div>";
+          html += "<div style='margin-top:6px; color:#b00;'><b>Note:</b> existing assignments may still reference this template id.</div>";
+          html += "<div style='margin-top:6px;'>Do you want to continue?</div>";
+          html += "<div style='margin-top:10px; color:#555;'><i>Use the bot menu to confirm (Yes, delete / Cancel).</i></div>";
+          html += "</div>";
+
+          $("#smallDialogDiv").html(html);
+          $("#smallDialogDiv").dialog("open");
+          UI.setDialogTitle("#smallDialogDiv", "Delete template");
+
+          // Force next step to be the confirm workflow (this is the important part)
+          self.myBotEngine.currentObj = self.workflow_confirmDeleteTemplate;
+          return self.myBotEngine.nextStep(self.workflow_confirmDeleteTemplate);
+        },
+
+        /**
+         * Deletes the selected template (user data record).
+         * Uses DELETE /users/data/{id}.
+         */
+        deleteTemplateFn: function () {
+          var templateId = parseInt(self.params.selectedTemplateId, 10);
+          if (!templateId) {
+            return self.myBotEngine.abort("Missing templateId");
+          }
+
+          $.ajax({
+            url: Config.apiUrl + "/users/data/" + templateId,
+            type: "DELETE",
+            success: function () {
+              UI.message("Template deleted (id=" + templateId + ")", true);
+
+              // Cleanup local state to avoid using deleted template after Back
+              self.params.selectedTemplateId = null;
+
+              // Best-effort: close the side dialog
+              try {
+                $("#smallDialogDiv").dialog("close");
+              } catch (e) {}
+
+              return endBot(null);
+            },
+            error: function (err) {
+              return self.myBotEngine.abort(err.responseText || err.message || err);
+            },
+          });
+        },
+
     };
 
     // -------------------------
@@ -573,55 +680,76 @@ var AssignAnnotationPropertiesTemplate_bot = (function () {
         var selections = (content && content.selections) || [];
         var properties = (content && content.properties) || [];
 
-        // Load active assignments for this template (active-only per source)
-        getActiveSourcesForTemplate(templateId, function (err, activeSources) {
-            if (err) {
-                activeSources = [];
-            }
+        // Load active assignments for this template (active-only per target: source/profile/user)
+        getActiveTargetsForTemplate(templateId, function (err, activeTargets) {
+          if (err) {
+            activeTargets = { sources: [], profiles: [], users: [] };
+          }
 
-            var html = "<div style='font-size:12px;'>";
-            html += "<div><b>Template:</b> " + escapeHtml(label) + "</div>";
-            html += "<div><b>ID:</b> " + templateId + "</div>";
-            html += "<div><b>Group:</b> " + escapeHtml(group) + "</div>";
-            html += "<div><b>Description:</b> " + escapeHtml(comment) + "</div>";
+          // Defensive defaults
+          var activeSources = (activeTargets && activeTargets.sources) ? activeTargets.sources : [];
+          var activeProfiles = (activeTargets && activeTargets.profiles) ? activeTargets.profiles : [];
+          var activeUsers = (activeTargets && activeTargets.users) ? activeTargets.users : [];
 
-            // sharing info (if present)
-            var sp = templateFull.shared_profiles || [];
-            var su = templateFull.shared_users || [];
-            html += "<div style='margin-top:8px;'><b>Shared profiles:</b> " + escapeHtml(sp.join(", ")) + "</div>";
-            html += "<div><b>Shared users:</b> " + escapeHtml(su.join(", ")) + "</div>";
+          var html = "<div style='font-size:12px;'>";
+          html += "<div><b>Template:</b> " + escapeHtml(label) + "</div>";
+          html += "<div><b>ID:</b> " + templateId + "</div>";
+          html += "<div><b>Group:</b> " + escapeHtml(group) + "</div>";
+          html += "<div><b>Description:</b> " + escapeHtml(comment) + "</div>";
 
-            // active assignments
-            html += "<div style='margin-top:8px;'><b>Active on sources:</b> " + escapeHtml(activeSources.join(", ")) + "</div>";
+          html += "<div style='margin-top:8px;'><b>Applied on:</b></div>";
 
-            // properties
-            html += "<div style='margin-top:8px;'><b>Properties:</b></div><ul>";
-            if (selections.length > 0) {
-                selections.forEach(function (s) {
-                    html += "<li>" + escapeHtml(s.vocab || "?") + ": " + escapeHtml(s.propertyLabel || s.propertyUri || "") + "</li>";
-                });
-            } else {
-                properties.forEach(function (p) {
-                    html += "<li>" + escapeHtml(p) + "</li>";
-                });
-            }
-            html += "</ul></div>";
+          html += "<div style='margin-top:4px;'><b>Sources (" + activeSources.length + "):</b></div>";
+          html +=
+            "<div style='max-height:80px; overflow:auto; border:1px solid #ddd; padding:6px;'>" +
+            escapeHtml(activeSources.join(", ")) +
+            "</div>";
 
-            $("#smallDialogDiv").html(html);
-            $("#smallDialogDiv")
-                .dialog({
-                    modal: false,
-                    width: 420,
-                    position: {
-                        my: "left top",
-                        at: "right top",
-                        of: "#mainDialogDiv", // dialog du bot
-                    },
-                })
-                .dialog("open");
-            UI.setDialogTitle("#smallDialogDiv", "Template details");
+          html += "<div style='margin-top:6px;'><b>Profiles (" + activeProfiles.length + "):</b></div>";
+          html +=
+            "<div style='max-height:80px; overflow:auto; border:1px solid #ddd; padding:6px;'>" +
+            escapeHtml(activeProfiles.join(", ")) +
+            "</div>";
 
-            return callback(null);
+          html += "<div style='margin-top:6px;'><b>Users (" + activeUsers.length + "):</b></div>";
+          html +=
+            "<div style='max-height:80px; overflow:auto; border:1px solid #ddd; padding:6px;'>" +
+            escapeHtml(activeUsers.join(", ")) +
+            "</div>";
+
+          // Properties (unchanged)
+          html += "<div style='margin-top:8px;'><b>Properties:</b></div><ul>";
+          if (selections.length > 0) {
+            selections.forEach(function (s) {
+              html +=
+                "<li>" +
+                escapeHtml(s.vocab || "?") +
+                ": " +
+                escapeHtml(s.propertyLabel || s.propertyUri || "") +
+                "</li>";
+            });
+          } else {
+            properties.forEach(function (p) {
+              html += "<li>" + escapeHtml(p) + "</li>";
+            });
+          }
+          html += "</ul></div>";
+
+          $("#smallDialogDiv").html(html);
+          $("#smallDialogDiv")
+            .dialog({
+              modal: false,
+              width: 420,
+              position: {
+                my: "left top",
+                at: "right top",
+                of: "#mainDialogDiv",
+              },
+            })
+            .dialog("open");
+
+          UI.setDialogTitle("#smallDialogDiv", "Template details");
+          return callback(null);
         });
     }
 
@@ -702,6 +830,123 @@ var AssignAnnotationPropertiesTemplate_bot = (function () {
             }
         }
         return dataContent;
+    }
+
+    /**
+     * Returns targets where this template is ACTIVE (active-only per target).
+     * Active = latest assignment (highest id) for each target (source/user/profile).
+     *
+     * @param {number} templateId
+     * @param {function} callback (err, result) with result={sources:[], profiles:[], users:[]}
+     */
+    function getActiveTargetsForTemplate(templateId, callback) {
+      $.ajax({
+        url: Config.apiUrl + "/users/data?data_type=" + encodeURIComponent(ASSIGNMENT_TYPE),
+        type: "GET",
+        dataType: "json",
+        success: function (list) {
+          list = list || [];
+
+          // 1) Compute latest assignment id per target key
+          var latestIdByTarget = {};
+
+          list.forEach(function (a) {
+            if (!a || !a.id) return;
+
+            // Source target (data_source is set)
+            if (a.data_source) {
+              var keyS = "source:" + a.data_source;
+              if (!latestIdByTarget[keyS] || a.id > latestIdByTarget[keyS]) {
+                latestIdByTarget[keyS] = a.id;
+              }
+              return;
+            }
+
+            // User target (shared_users contains user login)
+            if (Array.isArray(a.shared_users) && a.shared_users.length > 0) {
+              // In this bot, assignments are typically 1 user; still handle arrays defensively
+              a.shared_users.forEach(function (u) {
+                if (!u) return;
+                var keyU = "user:" + u;
+                if (!latestIdByTarget[keyU] || a.id > latestIdByTarget[keyU]) {
+                  latestIdByTarget[keyU] = a.id;
+                }
+              });
+              return;
+            }
+
+            // Profile target (shared_profiles contains profile ids)
+            if (Array.isArray(a.shared_profiles) && a.shared_profiles.length > 0) {
+              a.shared_profiles.forEach(function (p) {
+                if (!p) return;
+                var keyP = "profile:" + p;
+                if (!latestIdByTarget[keyP] || a.id > latestIdByTarget[keyP]) {
+                  latestIdByTarget[keyP] = a.id;
+                }
+              });
+            }
+          });
+
+          var latestIds = Object.keys(latestIdByTarget).map(function (k) {
+            return latestIdByTarget[k];
+          });
+
+          var out = { sources: [], profiles: [], users: [] };
+          var seen = { source: {}, profile: {}, user: {} };
+
+          // 2) Reload each latest assignment by id to read data_content
+          async.eachSeries(
+            latestIds,
+            function (assignmentId, cbEach) {
+              loadUserDataById(assignmentId, function (err, full) {
+                if (err || !full) return cbEach(); // ignore one failure
+
+                var c = normalizeDataContent(full.data_content);
+                if (!c) return cbEach();
+
+                // Support both single and multi modes
+                var match = false;
+                if (c.templateId === templateId) match = true;
+                if (!match && Array.isArray(c.templateIds) && c.templateIds.indexOf(templateId) > -1) match = true;
+                if (!match) return cbEach();
+
+                // Identify the target from the full record
+                if (full.data_source) {
+                  if (!seen.source[full.data_source]) {
+                    seen.source[full.data_source] = 1;
+                    out.sources.push(full.data_source);
+                  }
+                } else if (Array.isArray(full.shared_users) && full.shared_users.length > 0) {
+                  full.shared_users.forEach(function (u) {
+                    if (u && !seen.user[u]) {
+                      seen.user[u] = 1;
+                      out.users.push(u);
+                    }
+                  });
+                } else if (Array.isArray(full.shared_profiles) && full.shared_profiles.length > 0) {
+                  full.shared_profiles.forEach(function (p) {
+                    if (p && !seen.profile[p]) {
+                      seen.profile[p] = 1;
+                      out.profiles.push(p);
+                    }
+                  });
+                }
+
+                return cbEach();
+              });
+            },
+            function () {
+              out.sources.sort();
+              out.profiles.sort();
+              out.users.sort();
+              return callback(null, out);
+            },
+          );
+        },
+        error: function (err) {
+          return callback(err);
+        },
+      });
     }
 
     function escapeHtml(str) {

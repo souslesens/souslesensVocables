@@ -496,6 +496,34 @@ defaultLang = 'en';*/
                     }
                 }
 
+                // ----------------------------------------------------
+                // Move EMPTY annotation properties (template placeholders)
+                // to the very end of the display order
+                // ----------------------------------------------------
+                var emptyAnnotationProps = [];
+
+                defaultProps = defaultProps.filter(function (key) {
+                    var prop = self.propertiesMap.properties[key];
+                    if (!prop || !prop.value) {
+                        return true;
+                    }
+
+                    // Check if ALL values are empty placeholders ("?")
+                    var isEmpty = prop.value.every(function (v) {
+                        return v.value === "?";
+                    });
+
+                    if (isEmpty) {
+                        emptyAnnotationProps.push(key);
+                        return false; // remove for now
+                    }
+
+                    return true;
+                });
+
+                // Append empty annotation properties at the end
+                defaultProps = defaultProps.concat(emptyAnnotationProps);
+
                 var str = "<div class='NodesInfos_tableDiv'>" + "<table class='infosTable'>";
                 str +=
                     "<tr><td class='NodesInfos_CardId'>UUID</td><td><a target='" +
@@ -566,6 +594,9 @@ defaultLang = 'en';*/
 
                         if (self.propertiesMap.properties[key].value) {
                             var values = self.propertiesMap.properties[key].value;
+                            var hasPlaceholderValue = values.some(function (v) {
+                                return v && v.value === "?";
+                            });
                             strGeneratedByProp +=
                                 "<td class='detailsCellName'>" +
                                 "<a target='" +
@@ -573,13 +604,15 @@ defaultLang = 'en';*/
                                 "' href='" +
                                 self.propertiesMap.properties[key].propUri +
                                 "'>" +
-                                self.propertiesMap.properties[key].name +
+                                (hasPlaceholderValue ? "<b>" + self.propertiesMap.properties[key].name + "</b>" : self.propertiesMap.properties[key].name) +
                                 "</a>" +
                                 "</td>";
+
                             var valuesStr = "";
 
                             values.forEach(function (valueObj, index) {
                                 var value = valueObj.value;
+                                var isPlaceholder = value === "?";
 
                                 var predicateId = valueObj.predicateId;
                                 var optionalStr = getOptionalStr(key, predicateId);
@@ -593,6 +626,9 @@ defaultLang = 'en';*/
                                 }
                                 if (index > 0) {
                                     valuesStr += "<br>";
+                                }
+                                if (isPlaceholder) {
+                                    value = "<b>?</b>";
                                 }
                                 valuesStr += value + optionalStr;
                             });

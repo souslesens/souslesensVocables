@@ -1,0 +1,3 @@
+import CreateAnnotationPropertiesTemplate_bot from "../tools/annotationPropertiesTemplate/createAnnotationPropertiesTemplate_bot.js";
+export default CreateAnnotationPropertiesTemplate_bot;
+window.CreateAnnotationPropertiesTemplate_bot = CreateAnnotationPropertiesTemplate_bot;

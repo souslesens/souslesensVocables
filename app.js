@@ -298,8 +298,8 @@ function formatRedirectPath(path) {
     return path;
 }
 
-// load upper ontologies
-const upperOntologies = [
+// load basic vocabularies
+const basicVocabularies = [
     { prefix: "rdf", graphUri: "http://www.w3.org/1999/02/22-rdf-syntax-ns#", graphUrl: "https://www.w3.org/1999/02/22-rdf-syntax-ns" },
     { prefix: "rdfs", graphUri: "http://www.w3.org/2000/01/rdf-schema#", graphUrl: "https://www.w3.org/2000/01/rdf-schema" },
     { prefix: "owl", graphUri: "http://www.w3.org/2002/07/owl#", graphUrl: "https://www.w3.org/2002/07/owl" },
@@ -317,10 +317,10 @@ const upperOntologies = [
     },
 ];
 
-async function loadUpperOntology() {
+async function loadBasicVocabularies() {
     const existingGraphs = await rdfDataModel.getGraphs();
     try {
-        for (const ontology of upperOntologies) {
+        for (const ontology of basicVocabularies) {
             const matchingGraph = existingGraphs.find((g) => g.name === ontology.graphUri);
             const hasGraph = !!matchingGraph?.count;
             if (!hasGraph) {
@@ -356,7 +356,7 @@ async function loadDefaultGraphs() {
     }
 }
 
-void loadUpperOntology();
+void loadBasicVocabularies();
 void loadDefaultGraphs();
 
 export default app;

@@ -44,7 +44,7 @@ import { SRD } from "srd";
 import { defaultProfile, saveProfile, Profile, deleteProfile, SourceAccessControl, ProfileSchema, ProfileSchemaCreate, useDatabases } from "../Profile";
 import { ServerSource } from "../Source";
 import { writeLog } from "../Log";
-import { identity, style, joinWhenArray, cleanUpText } from "../Utils";
+import { identity, style, joinWhenArray, cleanUpText, jsonToDownloadUrl } from "../Utils";
 import { ulid } from "ulid";
 import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
 import { errorMessage } from "./errorMessage";
@@ -206,6 +206,9 @@ const ProfilesTable = () => {
                             <CsvDownloader separator="&#9;" filename="profiles" extension=".tsv" datas={datas as Datas}>
                                 <Button variant="outlined">Download CSV</Button>
                             </CsvDownloader>
+                            <Button variant="outlined" href={jsonToDownloadUrl(gotProfiles)} download="profiles.json">
+                                Download JSON
+                            </Button>
                             <ProfileForm create={true} me={me} />
                         </Stack>
                     </Stack>

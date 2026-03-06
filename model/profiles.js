@@ -183,7 +183,7 @@ class ProfileModel {
             return false;
         }
         // delete profile in shared_profiles
-        const allUserData = await conn.select("*").from("user_data_list");
+        const allUserData = await conn.select("*").from("user_data");
         Object.values(allUserData).map((userData) => {
             if (userData.shared_profiles.includes(profileNameId)) {
                 userData.shared_profiles = userData.shared_profiles.filter((p) => p !== profileNameId);

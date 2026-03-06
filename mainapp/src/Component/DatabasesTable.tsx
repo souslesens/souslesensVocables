@@ -276,13 +276,13 @@ const DatabasesTable = () => {
         fileInputRef.current?.click();
     };
 
-    const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (!file) return;
         const reader = new FileReader();
         reader.onload = async (e) => {
             try {
-                const parsed = JSON.parse(e.target?.result as string);
+                const parsed = JSON.parse(e.target?.result as string) as unknown;
                 // Accept either an array of databases or a single database object
                 const entries: unknown[] = Array.isArray(parsed)
                     ? parsed
@@ -294,7 +294,7 @@ const DatabasesTable = () => {
                 let successCount = 0;
                 for (const entry of entries) {
                     // Generate a fresh ULID and replace any existing id
-                    const entryWithNewId = { ...(entry as Record<string, any>), id: ulid() };
+                    const entryWithNewId = { ...(entry as Record<string, unknown>), id: ulid() };
                     const validation = DatabaseSchema.safeParse(entryWithNewId);
                     if (!validation.success) {
                         console.warn("Invalid database entry skipped:", validation.error);
@@ -305,8 +305,8 @@ const DatabasesTable = () => {
                 }
                 setSnackMessage(`${successCount} database(s) uploaded successfully`);
                 setSnackOpen(true);
-            } catch (err: any) {
-                setSnackMessage(`Upload failed: ${err.message}`);
+            } catch (err: unknown) {
+                setSnackMessage(`Upload failed: ${err instanceof Error ? err.message : String(err)}`);
                 setSnackOpen(true);
             }
             // reset input

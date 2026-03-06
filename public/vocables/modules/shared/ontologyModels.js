@@ -1564,10 +1564,14 @@ var OntologyModels = (function () {
                 return;
             }
             for (var key in Config.ontologiesVocabularyModels[source].properties) {
-                var item = Config.ontologiesVocabularyModels[source].properties[key];
+                var item = JSON.parse(JSON.stringify(Config.ontologiesVocabularyModels[source].properties[key]));
                 if (props[key]) {
-                    props[key].superClass = item.superProp;
+                    if (item.superProp) {
+                        props[key].superProp = item.superProp;
+                        props[key].source = source;
+                    }
                 } else {
+                    item.source = source;
                     props[key] = item;
                 }
             }

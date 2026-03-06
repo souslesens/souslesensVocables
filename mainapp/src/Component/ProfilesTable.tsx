@@ -93,13 +93,13 @@ const ProfilesTable = () => {
     };
 
     // Process selected file, validate each profile, generate fresh ULID, POST to backend
-    const handleProfileFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const handleProfileFileChange = (event: ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (!file) return;
         const reader = new FileReader();
         reader.onload = async (e) => {
             try {
-                const raw = JSON.parse(e.target?.result as string);
+                const raw = JSON.parse(e.target?.result as string) as unknown;
                 const entries: unknown[] = Array.isArray(raw)
                     ? raw
                     : typeof raw === "object" && raw !== null
@@ -109,7 +109,7 @@ const ProfilesTable = () => {
                         })();
                 let successCount = 0;
                 for (const entry of entries) {
-                    const entryWithId = { ...(entry as Record<string, any>), id: ulid() };
+                    const entryWithId = { ...(entry as Record<string, unknown>), id: ulid() };
                     const validation = ProfileSchema.safeParse(entryWithId);
                     if (!validation.success) {
                         console.warn("Invalid profile entry skipped:", validation.error);
@@ -127,8 +127,8 @@ const ProfilesTable = () => {
                             throw new Error(`Server responded ${response.status}: ${errText}`);
                         }
                         successCount++;
-                    } catch (fetchErr: any) {
-                        setSnackMessage(`Upload failed: ${fetchErr.message}`);
+                    } catch (fetchErr: unknown) {
+                        setSnackMessage(`Upload failed: ${fetchErr instanceof Error ? fetchErr.message : String(fetchErr)}`);
                         setSnackError(true);
                         setSnackOpen(true);
                         // Stop processing further entries
@@ -140,8 +140,8 @@ const ProfilesTable = () => {
                 setSnackMessage(`${successCount} profile(s) uploaded successfully`);
                 setSnackError(false);
                 setSnackOpen(true);
-            } catch (err: any) {
-                setSnackMessage(`Upload failed: ${err.message}`);
+            } catch (err: unknown) {
+                setSnackMessage(`Upload failed: ${err instanceof Error ? err.message : String(err)}`);
                 setSnackError(true);
                 setSnackOpen(true);
             }

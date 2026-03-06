@@ -1,4 +1,4 @@
-import { useReducer, useState, ChangeEvent, SyntheticEvent, MouseEventHandler, Dispatch } from "react";
+import { useReducer, useState, useRef, ChangeEvent, SyntheticEvent, MouseEventHandler, Dispatch } from "react";
 import {
     Button,
     Dialog,
@@ -241,6 +241,7 @@ const DatabasesTable = () => {
 
     const [snackOpen, setSnackOpen] = useState(false);
     const [snackMessage, setSnackMessage] = useState("");
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const me = SRD.withDefault("", model.me);
 
@@ -269,6 +270,49 @@ const DatabasesTable = () => {
     const handleDeleteDatabase = (database: Database, updateModel: Dispatch<Msg>) => {
         void deleteDatabase(database, updateModel);
         void writeLog(me, "ConfigEditor", "delete", database.name ?? "");
+    };
+
+    const handleUploadClick = () => {
+        fileInputRef.current?.click();
+    };
+
+    const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            try {
+                const parsed = JSON.parse(e.target?.result as string) as unknown;
+                // Accept either an array of databases or a single database object
+                const entries: unknown[] = Array.isArray(parsed)
+                    ? parsed
+                    : typeof parsed === "object" && parsed !== null
+                      ? [parsed]
+                      : (() => {
+                            throw new Error("Uploaded file must contain a JSON object or an array of objects");
+                        })();
+                let successCount = 0;
+                for (const entry of entries) {
+                    // Generate a fresh ULID and replace any existing id
+                    const entryWithNewId = { ...(entry as Record<string, unknown>), id: ulid() };
+                    const validation = DatabaseSchema.safeParse(entryWithNewId);
+                    if (!validation.success) {
+                        console.warn("Invalid database entry skipped:", validation.error);
+                        continue;
+                    }
+                    await addDatabase(validation.data, updateModel);
+                    successCount++;
+                }
+                setSnackMessage(`${successCount} database(s) uploaded successfully`);
+                setSnackOpen(true);
+            } catch (err: unknown) {
+                setSnackMessage(`Upload failed: ${err instanceof Error ? err.message : String(err)}`);
+                setSnackOpen(true);
+            }
+            // reset input
+            event.target.value = "";
+        };
+        reader.readAsText(file);
     };
 
     const renderDatabases = SRD.match(
@@ -376,6 +420,7 @@ const DatabasesTable = () => {
                                         })}
                                 </TableBody>
                             </Table>
+                            <input type="file" accept=".json,application/json" ref={fileInputRef} style={{ display: "none" }} onChange={handleFileChange} />
                         </TableContainer>
                         <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
                             <Button
@@ -391,6 +436,9 @@ const DatabasesTable = () => {
                                 download={"databases.json"}
                             >
                                 Download JSON
+                            </Button>
+                            <Button variant="contained" color="primary" onClick={handleUploadClick} sx={{ marginLeft: "8px" }}>
+                                Upload JSON
                             </Button>
                             <DatabaseFormDialog create={true} me={me} />
                         </Stack>

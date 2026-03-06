@@ -1,6 +1,7 @@
-import { useState, useMemo, useReducer, ChangeEvent, forwardRef, Ref, Dispatch, MouseEventHandler } from "react";
+import { useState, useMemo, useReducer, ChangeEvent, SyntheticEvent, forwardRef, Ref, Dispatch, MouseEventHandler, useRef } from "react";
 import {
     Alert,
+    Snackbar,
     Box,
     Button,
     Checkbox,
@@ -40,11 +41,11 @@ import { useZorm, createCustomIssues } from "react-zorm";
 import { ZodIssue } from "zod";
 
 import { Msg, useModel } from "../Admin";
-import { SRD } from "srd";
-import { defaultProfile, saveProfile, Profile, deleteProfile, SourceAccessControl, ProfileSchema, ProfileSchemaCreate, useDatabases } from "../Profile";
+import { SRD, success } from "srd";
+import { defaultProfile, saveProfile, Profile, deleteProfile, SourceAccessControl, ProfileSchema, ProfileSchemaCreate, useDatabases, getProfiles } from "../Profile";
 import { ServerSource } from "../Source";
 import { writeLog } from "../Log";
-import { identity, style, joinWhenArray, cleanUpText } from "../Utils";
+import { identity, style, joinWhenArray, cleanUpText, jsonToDownloadUrl } from "../Utils";
 import { ulid } from "ulid";
 import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
 import { errorMessage } from "./errorMessage";
@@ -55,6 +56,9 @@ const ProfilesTable = () => {
     const [filteringChars, setFilteringChars] = useState(model.profilesInitialFilter);
     const [orderBy, setOrderBy] = useState<keyof Profile>("name");
     const [order, setOrder] = useState<Order>("asc");
+    const [snackOpen, setSnackOpen] = useState(false);
+    const [snackMessage, setSnackMessage] = useState("");
+    const [snackError, setSnackError] = useState(false);
 
     const me = SRD.withDefault("", model.me);
 
@@ -69,6 +73,82 @@ const ProfilesTable = () => {
     const handleDeleteProfile = (profile: Profile, updateModel: Dispatch<Msg>) => {
         void deleteProfile(profile, updateModel);
         void writeLog(me, "ConfigEditor", "delete", profile.name);
+    };
+
+    // Ref for hidden file input
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    // Open file selector
+    const handleUploadClick = () => {
+        fileInputRef.current?.click();
+    };
+
+    // Close snackbar (reset error flag)
+    const handleSnackbarClose = (_event: SyntheticEvent | Event, reason?: string) => {
+        if (reason === "clickaway") {
+            return;
+        }
+        setSnackOpen(false);
+        setSnackError(false);
+    };
+
+    // Process selected file, validate each profile, generate fresh ULID, POST to backend
+    const handleProfileFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            try {
+                const raw = JSON.parse(e.target?.result as string) as unknown;
+                const entries: unknown[] = Array.isArray(raw)
+                    ? raw
+                    : typeof raw === "object" && raw !== null
+                      ? [raw]
+                      : (() => {
+                            throw new Error("Uploaded file must contain a JSON object or an array of objects");
+                        })();
+                let successCount = 0;
+                for (const entry of entries) {
+                    const entryWithId = { ...(entry as Record<string, unknown>), id: ulid() };
+                    const validation = ProfileSchema.safeParse(entryWithId);
+                    if (!validation.success) {
+                        console.warn("Invalid profile entry skipped:", validation.error);
+                        continue;
+                    }
+                    // POST each valid profile; backend expects an object with the profile name as key
+                    try {
+                        const response = await fetch("/api/v1/admin/profiles", {
+                            method: "post",
+                            body: JSON.stringify({ [validation.data.name]: validation.data }, null, "\t"),
+                            headers: { "Content-Type": "application/json" },
+                        });
+                        if (!response.ok) {
+                            const errText = await response.text();
+                            throw new Error(`Server responded ${response.status}: ${errText}`);
+                        }
+                        successCount++;
+                    } catch (fetchErr: unknown) {
+                        setSnackMessage(`Upload failed: ${fetchErr instanceof Error ? fetchErr.message : String(fetchErr)}`);
+                        setSnackError(true);
+                        setSnackOpen(true);
+                        // Stop processing further entries
+                        return;
+                    }
+                }
+                const refreshedProfiles = await getProfiles();
+                updateModel({ type: "profiles", payload: success(refreshedProfiles) });
+                setSnackMessage(`${successCount} profile(s) uploaded successfully`);
+                setSnackError(false);
+                setSnackOpen(true);
+            } catch (err: unknown) {
+                setSnackMessage(`Upload failed: ${err instanceof Error ? err.message : String(err)}`);
+                setSnackError(true);
+                setSnackOpen(true);
+            }
+            // reset input value to allow re‑upload same file later
+            event.target.value = "";
+        };
+        reader.readAsText(file);
     };
 
     const renderProfiles = SRD.match(
@@ -121,6 +201,11 @@ const ProfilesTable = () => {
                 });
                 return (
                     <Stack direction="column" spacing={{ xs: 2 }} sx={{ m: 4 }} useFlexGap>
+                        <Snackbar autoHideDuration={2000} open={snackOpen} onClose={handleSnackbarClose}>
+                            <Alert onClose={handleSnackbarClose} severity={snackError ? "error" : "success"} sx={{ width: "100%" }}>
+                                {snackMessage}
+                            </Alert>
+                        </Snackbar>
                         <TextField
                             inputProps={{ autoComplete: "off" }}
                             label="Search Profiles by name"
@@ -206,8 +291,15 @@ const ProfilesTable = () => {
                             <CsvDownloader separator="&#9;" filename="profiles" extension=".tsv" datas={datas as Datas}>
                                 <Button variant="outlined">Download CSV</Button>
                             </CsvDownloader>
+                            <Button variant="outlined" href={jsonToDownloadUrl(gotProfiles)} download="profiles.json">
+                                Download JSON
+                            </Button>
+                            <Button variant="outlined" color="primary" onClick={handleUploadClick}>
+                                Upload JSON
+                            </Button>
                             <ProfileForm create={true} me={me} />
                         </Stack>
+                        <input type="file" accept=".json,application/json" ref={fileInputRef} style={{ display: "none" }} onChange={handleProfileFileChange} />
                     </Stack>
                 );
             },

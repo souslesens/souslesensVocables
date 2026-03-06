@@ -8,12 +8,18 @@ const __dirname = path.dirname(__filename);
 
 var MappingParser = {
     columnsMappingsObjects: ["Column", "RowIndex", "VirtualColumn", "URI"],
-    getMappingsData: function (source, callback) {
+    getMappingsData: function (source,options, callback) {
+        if(!options)
+            options={}
         var mappingGraphDir = path.join(__dirname, "../../data/graphs/");
         var file = mappingGraphDir + "mappings_" + source + "_ALL.json";
         var visjsData;
         try {
-            visjsData = JSON.parse("" + fs.readFileSync(file));
+
+            var mappingsStr="" + fs.readFileSync(file)
+            if( options.forceClassesToIndividuals)//allows to generate individuals instead of classes , usefull for representing and manipulating  RDL ontologies in KGquery
+                mappingsStr=mappingsStr.replace(/owl:Class/g,"owl:NamedIndividual")
+            visjsData = JSON.parse(mappingsStr);
         } catch (e) {
             return callback(e);
         }

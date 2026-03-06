@@ -18,7 +18,7 @@ function deleteKGBuilderTriplesAsync(source, tables, options) {
 
 function getMappingsDataAsync(source) {
     return new Promise(function (resolve, reject) {
-        MappingParser.getMappingsData(source, function (err, data) {
+        MappingParser.getMappingsData(source, {},function (err, data) {
             if (err) return reject(err);
             return resolve(data);
         });

@@ -1,5 +1,5 @@
 import KGbuilder_socket from "./KGbuilder_socket.js";
-import { databaseModel } from "../../model/databases.js";
+import {databaseModel} from "../../model/databases.js";
 import csvCrawler from "../_csvCrawler.js";
 import async from "async";
 import sqlServerProxy from "../KG/SQLserverConnector.js";
@@ -29,7 +29,7 @@ var TriplesMaker = {
         var processedRecords = 0;
         var tableInfos = tableProcessingParams.tableInfos;
         TriplesMaker.uniqueSubjects = {};
-        TriplesMaker.existingRestrictions = {};
+        TriplesMaker.existingBnodeTriples={}
         tableProcessingParams.randomIdentiersMap = {}; // identifiers with scope the whole table
         tableProcessingParams.blankNodesMap = {}; // identifiers with scope the whole table
         tableProcessingParams.isSampleData = options.sampleSize;
@@ -130,7 +130,7 @@ var TriplesMaker = {
                         KGbuilder_socket.message(options.clientSocketId, message);
                         // KGbuilder_socket.message(options.clientSocketId, " DONE " + processedRecords + "records  from " + tableInfos.table + " : " + (totalTriplesCount) + " triples", false);
 
-                        return callback(err, { sampleTriples: sampleTriples, totalTriplesCount: totalTriplesCount });
+                        return callback(err, {sampleTriples: sampleTriples, totalTriplesCount: totalTriplesCount});
                     },
                 );
             });
@@ -275,7 +275,7 @@ var TriplesMaker = {
             message.operation = "finished";
             message.totalTriples = totalTriplesCount;
             KGbuilder_socket.message(options.clientSocketId, message);
-            return callback(null, { sampleTriples: sampleTriples, totalTriplesCount: totalTriplesCount });
+            return callback(null, {sampleTriples: sampleTriples, totalTriplesCount: totalTriplesCount});
         }
     },
 
@@ -290,6 +290,7 @@ var TriplesMaker = {
 
                 var triplelHashCode = triple;
 
+
                 if (!tableProcessingParams.uniqueTriplesMap[triplelHashCode]) {
                     tableProcessingParams.uniqueTriplesMap[triplelHashCode] = 1;
                     batchTriples.push(triple);
@@ -298,11 +299,7 @@ var TriplesMaker = {
         }
 
         data.forEach(function (line, index) {
-            if (line.funct_loc == "GIR/FPSOA/CRS/SESD /43-NSD922080") {
-                var x = 3;
-            } else {
-                // return
-            }
+
 
             var lineColumnUrisMap = {};
             var rowIndex = index + options.currentBatchRowIndex;
@@ -388,18 +385,29 @@ var TriplesMaker = {
             }
             // process columnToColumnMappings
             for (var edgeId in tableProcessingParams.columnToColumnEdgesMap) {
-                var edge = tableProcessingParams.columnToColumnEdgesMap[edgeId];
-                var subjectUri = TriplesMaker.getColumnUri(line, edge.from, columnMappings, rowIndex, tableProcessingParams);
-                var objectUri = TriplesMaker.getColumnUri(line, edge.to, columnMappings, rowIndex, tableProcessingParams);
-                var property = TriplesMaker.getPropertyUri(edge.data.id);
 
-                if (edge.isRestriction) {
-                    var triples = TriplesMaker.getRestrictionTriples(subjectUri, property, objectUri, edge.retrictionType, null);
-                    triples.forEach(function (triple) {
-                        addTriple(triple.s, triple.p, triple.o);
-                    });
-                } else {
-                    addTriple(subjectUri, property, objectUri);
+
+
+                    var edge = tableProcessingParams.columnToColumnEdgesMap[edgeId];
+                    var subjectUri = TriplesMaker.getColumnUri(line, edge.from, columnMappings, rowIndex, tableProcessingParams);
+                    var objectUri = TriplesMaker.getColumnUri(line, edge.to, columnMappings, rowIndex, tableProcessingParams);
+                    var property = TriplesMaker.getPropertyUri(edge.data.id);
+
+
+                    if (edge.isRestriction) {
+                        var triples = TriplesMaker.getRestrictionTriples(subjectUri, property, objectUri, edge.retrictionType, null);
+                        triples.forEach(function (triple) {
+                            addTriple(triple.s, triple.p, triple.o);
+                        });
+                    } else {
+
+                        var atriple = line[ columnMappings[edge.from].id]+ edge.data.id + line[columnMappings[edge.to].id]
+                        //avid duplicate blanknodes triples (see restrictions also)
+                        if (!TriplesMaker.existingBnodeTriples[atriple]) {
+                            TriplesMaker.existingBnodeTriples[atriple] = 1
+                            addTriple(subjectUri, property, objectUri);
+                        }
+
                 }
             }
 
@@ -738,8 +746,8 @@ var TriplesMaker = {
         if (!restrictionType) {
             restrictionType = "http://www.w3.org/2002/07/owl#someValuesFrom";
         }
-        if (TriplesMaker.existingRestrictions[subjectUri + predicateUri + objectUri]) {
-            return [];
+        if (TriplesMaker.existingBnodeTriples[subjectUri + predicateUri + objectUri]) {
+            return []
         }
 
         var blankNode = "<_:b" + util.getRandomHexaId(10) + ">";
@@ -767,7 +775,9 @@ var TriplesMaker = {
             o: blankNode,
         });
 
-        TriplesMaker.existingRestrictions[subjectUri + predicateUri + objectUri] = 1;
+        TriplesMaker.existingBnodeTriples[subjectUri+ predicateUri+ objectUri]=1
+
+
 
         return triples;
     },
@@ -792,14 +802,14 @@ var TriplesMaker = {
     },
 
     readCsv: function (filePath, maxLines, callback) {
-        csvCrawler.readCsv({ filePath: filePath }, maxLines, function (err, result) {
+        csvCrawler.readCsv({filePath: filePath}, maxLines, function (err, result) {
             if (err) {
                 return callback(err);
             }
             var data = result.data;
             var headers = result.headers;
 
-            return callback(null, { headers: headers, data: data });
+            return callback(null, {headers: headers, data: data});
         });
     },
 };

@@ -744,14 +744,12 @@ var Lineage_whiteboard = (function () {
                                     visjsData.edges.push(edge);
                                 }
                             }
-                        }else {
-                            if(existingNodes[item.topConcept.hidden])
-                                nodesToUnhide.push({id: item.topConcept.value, hidden: false});
+                        } else {
+                            if (existingNodes[item.topConcept.hidden]) nodesToUnhide.push({ id: item.topConcept.value, hidden: false });
                         }
                     });
                     if (nodesToUnhide.length > 0) {
-                        if(  self.lineageVisjsGraph.data &&   self.lineageVisjsGraph.data.nodes)
-                            self.lineageVisjsGraph.data.nodes.update(nodesToUnhide);
+                        if (self.lineageVisjsGraph.data && self.lineageVisjsGraph.data.nodes) self.lineageVisjsGraph.data.nodes.update(nodesToUnhide);
                     }
 
                     callbackEach();

@@ -159,6 +159,7 @@ indexes.push(source.toLowerCase());
                             callbackSeries();
                         },
                         function (callbackSeries) {
+                            if (options.indexes) indexes = options.indexes;
                             self.getElasticSearchMatches(words, indexes, mode, 0, 1000, options, function (err, result) {
                                 if (err) {
                                     return callbackSeries(err);

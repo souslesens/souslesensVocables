@@ -745,11 +745,11 @@ var Lineage_whiteboard = (function () {
                                 }
                             }
                         } else {
-                            nodesToUnhide.push({ id: item.topConcept.value, hidden: false });
+                            if (existingNodes[item.topConcept.hidden]) nodesToUnhide.push({ id: item.topConcept.value, hidden: false });
                         }
                     });
                     if (nodesToUnhide.length > 0) {
-                        self.lineageVisjsGraph.data.nodes.update(nodesToUnhide);
+                        if (self.lineageVisjsGraph.data && self.lineageVisjsGraph.data.nodes) self.lineageVisjsGraph.data.nodes.update(nodesToUnhide);
                     }
 
                     callbackEach();

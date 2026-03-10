@@ -746,10 +746,12 @@ var Lineage_whiteboard = (function () {
                                 }
                             }
                         } else {
+                            if(existingNodes[item.topConcept.hidden])
                             nodesToUnhide.push({id: item.topConcept.value, hidden: false});
                         }
                     });
                     if (nodesToUnhide.length > 0) {
+                        if(  self.lineageVisjsGraph.data &&   self.lineageVisjsGraph.data.nodes)
                         self.lineageVisjsGraph.data.nodes.update(nodesToUnhide);
                     }
 
@@ -3267,7 +3269,7 @@ restrictionSource = Config.predicatesSource;
             html += '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.showHierarchicalView();">Horizontal view </span>';
             html += '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.showVerticalView();">Vertical view </span>';
             html += '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.listAllNodeRelations();">List All relations </span>';
-            html += '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.drawAxioms();">Draw xioms</span>';
+            html += '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.drawAxioms();">Draw Axiom</span>';
         }
 
         $("#popupMenuWidgetDiv").html(html);

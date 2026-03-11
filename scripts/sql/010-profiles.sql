@@ -8,5 +8,6 @@ create table if not exists profiles(
        allowed_databases text[],
        is_shared         boolean default true,
        access_control    json default '{}'::json,
-       schema_types      schema_type[]
+       schema_types      schema_type[],
+       quota             json default '{}'::json
 );

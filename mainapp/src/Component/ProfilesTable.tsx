@@ -32,7 +32,7 @@ import {
     styled,
 } from "@mui/material";
 
-import { ChevronRight, Close, Done, Edit, ExpandMore } from "@mui/icons-material";
+import { ChevronRight, Close, Done, Edit, ExpandMore, Delete as DeleteIcon } from "@mui/icons-material";
 import { TreeView, TreeItem, TreeItemProps, TreeItemContentProps, useTreeItem } from "@mui/x-tree-view";
 
 import clsx from "clsx";
@@ -415,6 +415,15 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
         model.config,
     );
     const [profileModel, update] = useReducer(updateProfile, { modal: false, profileForm: profile });
+    const [quota, setQuota] = useState<Array<{ route: string; limit: string }>>(
+        // `profile` may not have a `quota` field in its TypeScript definition, so we cast to any.
+        (profile as any).quota
+            ? Object.entries((profile as any).quota).map(([r, l]) => ({
+                  route: r,
+                  limit: String(l),
+              }))
+            : [{ route: "", limit: "" }],
+    );
 
     const handleOpen = () => update({ type: Type.UserClickedModal, payload: { modal: true, profileForm: profile } });
     const handleClose = () => {
@@ -504,6 +513,19 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
         };
     }
     const saveProfiles = () => {
+        // Convert quota array (route/limit) into the object format expected by the backend
+        const quotaObj = quota.reduce(
+            (acc, cur) => {
+                if (cur.route.trim()) {
+                    acc[cur.route] = Number(cur.limit) || 0;
+                }
+                return acc;
+            },
+            {} as Record<string, number>,
+        );
+        // Attach quota to the profile being saved
+        (profileModel.profileForm as any).quota = quotaObj;
+
         void saveProfile(profileModel.profileForm, create ? Mode.Creation : Mode.Edition, updateModel, update);
         const mode = create ? "create" : "edit";
         void writeLog(me, "ConfigEditor", mode, profileModel.profileForm.name);
@@ -794,6 +816,58 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
                                 </MenuItem>
                             ))}
                         </TextField>
+                        {/* Quota editor */}
+                        <FormControl sx={{ mt: 2 }}>
+                            <Box>
+                                <Typography variant="subtitle1" gutterBottom>
+                                    Quota (API route limits)
+                                </Typography>
+                                {quota.map((q, idx) => (
+                                    <Grid container spacing={1} alignItems="center" key={idx} sx={{ mb: 1 }}>
+                                        <Grid item xs={5}>
+                                            <TextField
+                                                fullWidth
+                                                label="Route"
+                                                value={q.route}
+                                                onChange={(e) => {
+                                                    const newQuota = [...quota];
+                                                    newQuota[idx].route = e.target.value;
+                                                    setQuota(newQuota);
+                                                }}
+                                            />
+                                        </Grid>
+                                        <Grid item xs={5}>
+                                            <TextField
+                                                fullWidth
+                                                type="number"
+                                                label="Limit"
+                                                value={q.limit}
+                                                onChange={(e) => {
+                                                    const newQuota = [...quota];
+                                                    newQuota[idx].limit = e.target.value;
+                                                    setQuota(newQuota);
+                                                }}
+                                                InputProps={{ inputProps: { min: 0 } }}
+                                            />
+                                        </Grid>
+                                        <Grid item xs={2}>
+                                            <IconButton
+                                                aria-label="delete quota entry"
+                                                onClick={() => {
+                                                    const newQuota = quota.filter((_v, i) => i !== idx);
+                                                    setQuota(newQuota.length ? newQuota : [{ route: "", limit: "" }]);
+                                                }}
+                                            >
+                                                <DeleteIcon />
+                                            </IconButton>
+                                        </Grid>
+                                    </Grid>
+                                ))}
+                                <Button variant="outlined" onClick={() => setQuota([...quota, { route: "", limit: "" }])}>
+                                    Add quota
+                                </Button>
+                            </Box>
+                        </FormControl>
                         <Button disabled={zo.validation?.success === false || zo.customIssues.length > 0} type="submit" variant="contained" color="primary">
                             Save Profile
                         </Button>

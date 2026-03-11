@@ -13,6 +13,9 @@ const apiDoc = {
         restrictAdmin: {
             type: "basic",
         },
+        restrictQuota: {
+            type: "basic",
+        },
     },
     definitions: {
         AuthCheck: {

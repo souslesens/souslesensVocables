@@ -254,6 +254,26 @@ class ProfileModel {
 
         return results.theme;
     };
+
+    /**
+     * Return the highest quota for a given route among all profiles of a user.
+     * @param {string} route - API route (e.g., "/api/v1/une/route")
+     * @param {UserAccount} user - the user whose profiles are inspected
+     * @returns {Promise<number|undefined>} - maximum quota value or undefined if none
+     */
+    getMaxQuotaForRoute = async (route, user) => {
+        const userProfiles = await this.getUserProfiles(user);
+        let maxQuota;
+        Object.values(userProfiles).forEach((profile) => {
+            const profileQuota = profile.quota; // `quota` may be undefined
+            if (profileQuota && typeof profileQuota[route] === "number") {
+                if (maxQuota === undefined || profileQuota[route] > maxQuota) {
+                    maxQuota = profileQuota[route];
+                }
+            }
+        });
+        return maxQuota;
+    };
 }
 
 const profileModel = new ProfileModel(toolModel);

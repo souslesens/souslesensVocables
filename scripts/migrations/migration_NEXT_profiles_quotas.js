@@ -47,6 +47,24 @@ const migrateProfilesList = async (configDirectory, writeMode) => {
     connection.destroy();
 };
 
+const createQuotaTable = async (configDirectory, writeMode) => {
+    const configPath = path.resolve(configDirectory, "mainConfig.json");
+    const configJSON = JSON.parse(fs.readFileSync(configPath, { encoding: "utf-8" }));
+    const connection = await knex({ client: "pg", connection: configJSON.database });
+    if (!(await connection.schema.hasTable("quota"))) {
+        if (writeMode) {
+            const quotaSchema = path.resolve("scripts", "sql", "040-quota.sql");
+            await connection.raw(fs.readFileSync(quotaSchema, "utf-8"));
+            connection.destroy();
+            console.info(`The script ${quotaSchema} have beed executed`);
+        } else {
+            console.info(`Will create quota table`);
+        }
+    } else {
+        console.info("Table quota already exists");
+    }
+};
+
 const main = async () => {
     const argv = yargs(hideBin(process.argv))
         .alias("c", "config")
@@ -60,6 +78,7 @@ const main = async () => {
     console.info(argv.write ? "🚧 Prepare the migration…" : "🔧 Dry run mode…");
     await migrateProfiles(argv.config, argv.write);
     await migrateProfilesList(argv.config, argv.write);
+    await createQuotaTable(argv.config, argv.write);
 };
 
 main()

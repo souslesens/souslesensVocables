@@ -26,6 +26,7 @@ import { userModel } from "./model/users.js";
 import { profileModel } from "./model/profiles.js";
 import { sourceModel } from "./model/sources.js";
 import { rdfDataModel } from "./model/rdfData.js";
+import { quotaModel } from "./model/quota.js";
 import apiDoc from "./api/v1/api-doc.js";
 import session from "express-session";
 
@@ -163,6 +164,42 @@ openapi.initialize({
     app: app,
     paths: "./api/v1/paths",
     securityHandlers: {
+        restrictQuota: async function (req, scope, definition) {
+            if (config.auth != "disabled") {
+                const token = req.headers.authorization;
+                if (token !== undefined) {
+                    const output = util.parseAuthorizationFromHeader(token);
+
+                    // Only accept the Bearer scheme from the Authorization header
+                    if (output !== null && output[0] === "Bearer") {
+                        const user = await userModel.findUserAccountFromToken(output[1]);
+                        if (user) {
+                            req.user = user[1];
+                        }
+                    }
+                }
+
+                const user = await userManager.getUser(req.user);
+                const route = req.url;
+
+                // store quota in db
+                const quotaId = await quotaModel.add(route, user.user);
+
+                // get quota
+                const routeQuota = await profileModel.getMaxQuotaForRoute(route, user.user);
+
+                // compare
+                const usage = await quotaModel.getRouteUsage(route, user.user);
+
+                if (usage > routeQuota) {
+                    throw {
+                        status: 429,
+                        message: `Too many requests, you exceeded your current quota of requests per minute (${routeQuota} for route ${route})`,
+                    };
+                }
+            }
+            return Promise.resolve(true);
+        },
         restrictLoggedUser: async function (req, _scopes, _definition) {
             if (config.auth != "disabled") {
                 const token = req.headers.authorization;

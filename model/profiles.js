@@ -21,6 +21,7 @@ const ProfileObject = z
         allowedTools: z.string().array().optional(),
         allowedDatabases: z.string().array().optional(),
         isShared: z.boolean().default(true),
+        quota: z.record(z.string(), z.number()).optional(),
         _type: z.string().default("profile"),
     })
     .strict();
@@ -62,6 +63,7 @@ class ProfileModel {
         allowed_databases: profile.allowedDatabases || [],
         is_shared: profile.isShared !== undefined ? profile.isShared : true,
         access_control: JSON.stringify(profile.sourcesAccessControl || {}),
+        quota: profile.quota ? JSON.stringify(profile.quota) : null,
         schema_types: profile.allowedSourceSchemas || [],
     });
 
@@ -85,6 +87,7 @@ class ProfileModel {
             allowedDatabases: typeof profile.allowed_databases === "string" ? JSON.parse(profile.allowed_databases) : profile.allowed_databases === null ? [] : profile.allowed_databases,
             isShared: typeof profile.is_shared === "number" ? profile.is_shared === 1 : profile.is_shared,
             sourcesAccessControl: typeof profile.access_control === "string" ? JSON.parse(profile.access_control) : profile.access_control,
+            quota: typeof profile.quota === "string" ? JSON.parse(profile.quota) : profile.quota,
         },
     ];
 
@@ -108,6 +111,7 @@ class ProfileModel {
                 allowedDatabases: [],
                 isShared: true,
                 sourcesAccessControl: {},
+                quota: {},
                 defaultSourceAccessControl: "readwrite",
             };
         }
@@ -249,6 +253,26 @@ class ProfileModel {
         }
 
         return results.theme;
+    };
+
+    /**
+     * Return the highest quota for a given route among all profiles of a user.
+     * @param {string} route - API route (e.g., "/api/v1/une/route")
+     * @param {UserAccount} user - the user whose profiles are inspected
+     * @returns {Promise<number|undefined>} - maximum quota value or undefined if none
+     */
+    getMaxQuotaForRoute = async (route, user) => {
+        const userProfiles = await this.getUserProfiles(user);
+        let maxQuota;
+        Object.values(userProfiles).forEach((profile) => {
+            const profileQuota = profile.quota; // `quota` may be undefined
+            if (profileQuota && typeof profileQuota[route] === "number") {
+                if (maxQuota === undefined || profileQuota[route] > maxQuota) {
+                    maxQuota = profileQuota[route];
+                }
+            }
+        });
+        return maxQuota;
     };
 }
 

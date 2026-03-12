@@ -31,7 +31,7 @@ export default function () {
     }
     GET.apiDoc = {
         summary: "Returns current logged user",
-        security: [{ restrictLoggedUser: [] }],
+        security: [{ restrictLoggedUser: [], restrictQuota: [] }],
         operationId: "getMe",
         parameters: [],
         responses: {

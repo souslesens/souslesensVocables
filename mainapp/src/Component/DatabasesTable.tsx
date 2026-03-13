@@ -400,6 +400,7 @@ const DatabasesTable = () => {
                                                                 sx={{
                                                                     // FIXME Need to override the jquery css
                                                                     color: "rgb(25, 118, 210) !important",
+                                                                    fontSize: "1em",
                                                                 }}
                                                                 title={"Download JSON"}
                                                                 href={createSingleDatabaseDownloadUrl(

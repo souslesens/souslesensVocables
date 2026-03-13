@@ -27,6 +27,7 @@ export default function () {
                 });
             }
         } catch (error) {
+            console.error(error);
             res.status(500).json({ message: error.message, status: error.cause });
         }
     }

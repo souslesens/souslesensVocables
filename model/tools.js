@@ -123,8 +123,17 @@ class ToolModel {
     deleteRepository = async (repositoryId) => {
         const repositories = await this.readRepositories();
 
-        // Remove linked plugins related to the deleted repository
-        repositories[repositoryId]["plugins"].forEach((pluginName) => {
+        const repo = repositories[repositoryId];
+        if (!repo) {
+            // Nothing to delete – the identifier is unknown.
+            return;
+        }
+
+        // Get plugins if repo is multiplugin
+        const plugins = Array.isArray(repo.plugins) ? repo.plugins : [];
+
+        // Remove symbolic links that point to plugins belonging to this repo.
+        plugins.forEach((pluginName) => {
             const pluginPath = path.join(directoryPlugins, pluginName);
 
             if (fs.existsSync(pluginPath) && fs.lstatSync(pluginPath).isSymbolicLink()) {

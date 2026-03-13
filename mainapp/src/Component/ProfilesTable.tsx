@@ -291,7 +291,16 @@ const ProfilesTable = () => {
                             <CsvDownloader separator="&#9;" filename="profiles" extension=".tsv" datas={datas as Datas}>
                                 <Button variant="outlined">Download CSV</Button>
                             </CsvDownloader>
-                            <Button variant="outlined" href={jsonToDownloadUrl(gotProfiles)} download="profiles.json">
+                            <Button
+                                sx={{
+                                    // FIXME Need to override the jquery css
+                                    color: "rgb(25, 118, 210) !important",
+                                    fontSize: "1em",
+                                }}
+                                variant="outlined"
+                                href={jsonToDownloadUrl(gotProfiles)}
+                                download="profiles.json"
+                            >
                                 Download JSON
                             </Button>
                             <Button variant="outlined" color="primary" onClick={handleUploadClick}>

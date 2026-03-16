@@ -1,0 +1,4 @@
+book_id,title,isbn,author_id,publisher_id,pub_year
+B100,Voyage au Nord,978-1-23456-789-7,A001,P01,2021
+B101,Les Machines Silencieuses,978-1-11111-222-3,A002,P02,2019
+B102,Cartes et Tempêtes,978-1-99999-000-1,A001,P02,2023

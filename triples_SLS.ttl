@@ -1,0 +1,13 @@
+<http://testClasses_Shirelle/A001> <http://www.w3.org/2000/01/rdf-schema#label> "Leïla Martin".
+<http://testClasses_Shirelle/A001> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://testClasses_Shirelle/Author>.
+<http://testClasses_Shirelle/A002> <http://www.w3.org/2000/01/rdf-schema#label> "Nicolas Durand".
+<http://testClasses_Shirelle/A002> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://testClasses_Shirelle/Author>.
+<http://testClasses_Shirelle/B100> <http://www.w3.org/2000/01/rdf-schema#label> "Voyage au Nord".
+<http://testClasses_Shirelle/B100> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://testClasses_Shirelle/Book>.
+<http://testClasses_Shirelle/B100> <https://spec.industrialontologies.org/ontology/construct/prescribes> <http://testClasses_Shirelle/A001>.
+<http://testClasses_Shirelle/B101> <http://www.w3.org/2000/01/rdf-schema#label> "Les Machines Silencieuses".
+<http://testClasses_Shirelle/B101> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://testClasses_Shirelle/Book>.
+<http://testClasses_Shirelle/B101> <https://spec.industrialontologies.org/ontology/construct/prescribes> <http://testClasses_Shirelle/A002>.
+<http://testClasses_Shirelle/B102> <http://www.w3.org/2000/01/rdf-schema#label> "Cartes et Tempêtes".
+<http://testClasses_Shirelle/B102> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://testClasses_Shirelle/Book>.
+<http://testClasses_Shirelle/B102> <https://spec.industrialontologies.org/ontology/construct/prescribes> <http://testClasses_Shirelle/A001>.

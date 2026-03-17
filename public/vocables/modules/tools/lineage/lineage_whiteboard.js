@@ -926,7 +926,6 @@ var Lineage_whiteboard = (function () {
                 initiallyActive: true,
                 deleteNode: false,
                 deleteEdge: false,
-                editNode: false,
                 editEdge: false,
 
                 addEdge: function (edgeData, callback) {

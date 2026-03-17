@@ -1019,26 +1019,26 @@ var Lineage_properties = (function () {
                         }
                     }
 
-                allProps.forEach(function (item) {
-                    item.property = { value: item.prop };
-                    item.propertyLabel = { value: item.propLabel };
-                    item.domain = { value: item.domain };
-                    item.domainLabel = { value: item.domainLabel };
-                    item.range = { value: item.range };
-                    item.rangeLabel = { value: item.rangeLabel };
-                    item.subProperty = { value: item.subProp };
-                    item.subPropertyLabel = { value: item.subPropLabel };
-                    item.inverseProperty = { value: item.inverseProp };
-                    item.subProperties = [];
-                    item.subProps.forEach(function (subPropId) {
-                        if (result[subPropId]) {
-                            item.subProperties.push({ id: subPropId, label: result[subPropId].propLabel });
-                        }
+                    allProps.forEach(function (item) {
+                        item.property = { value: item.prop };
+                        item.propertyLabel = { value: item.propLabel };
+                        item.domain = { value: item.domain };
+                        item.domainLabel = { value: item.domainLabel };
+                        item.range = { value: item.range };
+                        item.rangeLabel = { value: item.rangeLabel };
+                        item.subProperty = { value: item.subProp };
+                        item.subPropertyLabel = { value: item.subPropLabel };
+                        item.inverseProperty = { value: item.inverseProp };
+                        item.subProperties = [];
+                        item.subProps.forEach(function (subPropId) {
+                            if (result[subPropId]) {
+                                item.subProperties.push({ id: subPropId, label: result[subPropId].propLabel });
+                            }
+                        });
+                        item.inversePropertyLabel = { value: item.inversePropLabel };
                     });
-                    item.inversePropertyLabel = { value: item.inversePropLabel };
-                });
 
-                return callback(null, allProps);
+                    return callback(null, allProps);
                 });
             };
 

@@ -12,16 +12,23 @@ export default function () {
             const driver = await databaseModel.getClientDriver(database.driver);
 
             const connection = dbConnector.getConnection(database, driver);
-            dbConnector.getData(
-                connection,
-                req.query.sqlQuery,
-                function (result) {
-                    res.status(200).json(result);
-                },
-                function (error) {
-                    res.status(500).json({ error });
-                },
-            );
+
+            if (req.query.tableName) {
+                const limit = parseInt(req.query.limit) || 200;
+                const rows = await dbConnector.getSampleData(connection, req.query.tableName, limit, driver);
+                res.status(200).json({ rows });
+            } else {
+                dbConnector.getData(
+                    connection,
+                    req.query.sqlQuery,
+                    function (result) {
+                        res.status(200).json(result);
+                    },
+                    function (error) {
+                        res.status(500).json({ error });
+                    },
+                );
+            }
         } catch (error) {
             res.status(error.status || 500).json({ error: error });
         }
@@ -40,9 +47,21 @@ export default function () {
             },
             {
                 in: "query",
+                name: "tableName",
+                type: "string",
+                required: false,
+            },
+            {
+                in: "query",
+                name: "limit",
+                type: "integer",
+                required: false,
+            },
+            {
+                in: "query",
                 name: "sqlQuery",
                 type: "string",
-                required: true,
+                required: false,
             },
         ],
         responses: {

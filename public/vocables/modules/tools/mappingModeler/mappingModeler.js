@@ -1561,15 +1561,9 @@ var MappingModeler = (function () {
                     return alert("no Table  selected");
                 }
             }
-            var size = 200;
-            var sqlQuery = "select top  " + size + "* from " + node.data.id;
-            if (DataSourceManager.currentConfig.currentDataSource.sqlType == "postgres") {
-                sqlQuery = "select   " + "* from public." + node.data.id + " LIMIT " + size;
-            }
             const params = new URLSearchParams({
-                type: DataSourceManager.currentConfig.currentDataSource.sqlType,
                 dbName: DataSourceManager.currentConfig.currentDataSource.id,
-                sqlQuery: sqlQuery,
+                tableName: node.data.id,
             });
 
             $.ajax({

@@ -1311,11 +1311,8 @@ var Lineage_properties = (function () {
                 return node.data ? node.data.id : node;
             });
         }
-        if (!nodeIds) {
-            var nodesSelection = $("#lineageProperties_nodesSelectionSelect").val();
-            if (Lineage_whiteboard.lineageVisjsGraph.data && Lineage_whiteboard.lineageVisjsGraph.data.nodes && nodesSelection == "currentGraphNodes") {
-                nodeIds = Lineage_whiteboard.lineageVisjsGraph.data.nodes.getIds();
-            }
+        if (!nodeIds && Lineage_whiteboard.lineageVisjsGraph.data && Lineage_whiteboard.lineageVisjsGraph.data.nodes) {
+            nodeIds = Lineage_whiteboard.lineageVisjsGraph.data.nodes.getIds();
         }
 
         var source = Lineage_sources.activeSource;

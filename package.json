@@ -30,6 +30,7 @@
         "init:files": "node scripts/init/files.js"
     },
     "devDependencies": {
+        "@playwright/test": "^1.58.2",
         "@typescript-eslint/eslint-plugin": "^8.32.1",
         "@typescript-eslint/parser": "^8.32.1",
         "@vitejs/plugin-react": "4.5.0",

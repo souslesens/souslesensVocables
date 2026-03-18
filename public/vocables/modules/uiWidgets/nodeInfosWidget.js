@@ -452,9 +452,7 @@ value = item.valueLabel.value;*/
                     var predicateId = common.getRandomHexaId(5);
                     PredicatesSelectorWidget.predicatesIdsMap[predicateId] = { item: item };
 
-                    // dont manage lang clustering when source is editable
-
-                    if (!Lineage_sources.isSourceEditableForUser(sourceLabel) && item.value && item.value["xml:lang"]) {
+                    if (item.value && item.value["xml:lang"]) {
                         if (!self.propertiesMap.properties[propName].langValues[item.value["xml:lang"]]) {
                             self.propertiesMap.properties[propName].langValues[item.value["xml:lang"]] = [];
                         }
@@ -465,9 +463,6 @@ value = item.valueLabel.value;*/
                     } else {
                         if (!self.propertiesMap.properties[propName].value) {
                             self.propertiesMap.properties[propName].value = [];
-                        }
-                        if (Lineage_sources.isSourceEditableForUser(sourceLabel) && item.value && item.value["xml:lang"]) {
-                            value += "@" + item.value["xml:lang"];
                         }
                         self.propertiesMap.properties[propName].value.push({ value: value, predicateId: predicateId });
                     }
@@ -623,8 +618,7 @@ defaultLang = 'en';*/
                                             value += "<a target='" + NodeInfosWidget.getUriTarget(value) + "' href='" + value + "'>" + value + "</a>";
                                         }
                                     }
-                                    var optionalStr = ""; //  complcated to manage lang together with edit and delete
-                                    // var optionalStr = getOptionalStr(key,valueObject.predicateId);
+                                    var optionalStr = Lineage_sources.isSourceEditableForUser(sourceLabel) ? getOptionalStr(key, valueObject.predicateId) : "";
                                     if (index > 0) {
                                         valuesStr += "<br>";
                                     }
@@ -1116,6 +1110,10 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
         if (!value) {
             // value = $("#editPredicate_objectValue").val().trim();
             value = PredicatesSelectorWidget.getSelectedObjectValue();
+            var lang = PredicatesSelectorWidget.getSelectedLang();
+            if (lang) {
+                value = value + "@" + lang;
+            }
         }
 
         if (!property || !value) {
@@ -1537,6 +1535,14 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
 
             $("#editPredicate_objectValue").val(PredicatesSelectorWidget.currentEditingItem.item.value.value);
             $("#editPredicate_propertyValue").val(PredicatesSelectorWidget.currentEditingItem.item.prop.value);
+            var itemLang = PredicatesSelectorWidget.currentEditingItem.item.value["xml:lang"];
+            if (itemLang) {
+                $("#editPredicate_langDiv").show();
+                $("#editPredicate_langValue").val(itemLang);
+            } else {
+                $("#editPredicate_langDiv").hide();
+                $("#editPredicate_langValue").val("");
+            }
             $("#editPredicate_objectValue").trigger("focus");
             $("#editPredicate_savePredicateButton").click(function () {
                 PredicatesSelectorWidget.storeRecentPredicates();
@@ -1663,6 +1669,7 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
         //  $("#editPredicate_objectValue").hide();
         $("#editPredicate_objectValue").css("width", "700px");
         $("#editPredicate_objectValue").css("height", "130px");
+        $("#editPredicate_langDiv").show();
     };
 
     self.showRestrictionInfos = function (node, targetDiv, filterProp, callback) {

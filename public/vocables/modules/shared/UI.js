@@ -154,6 +154,10 @@ var UI = (function () {
             true,
         );
 
+        $(document).on("dialogopen", function (event) {
+            self.clampAndCenterDialog(event.target);
+        });
+
         self.themeList();
 
         UI.resetWindowSize();
@@ -212,20 +216,27 @@ var UI = (function () {
         //Lineage_whiteboard.lineageVisjsGraph.network.startSimulation();
     };
 
+    self.clampAndCenterDialog = function (dialogTarget) {
+        try {
+            var $contentDiv = $(dialogTarget);
+            var maxDialogWidth = Math.floor(window.innerWidth * 0.95);
+            var maxDialogHeight = Math.floor(window.innerHeight * 0.92);
+            var $dialogElement = $contentDiv.closest(".ui-dialog");
+            if ($dialogElement.outerWidth() > maxDialogWidth) {
+                $contentDiv.dialog("option", "width", maxDialogWidth);
+            }
+            if ($dialogElement.outerHeight() > maxDialogHeight) {
+                $contentDiv.dialog("option", "height", maxDialogHeight);
+            }
+            $contentDiv.dialog("option", "position", { my: "center", at: "center", of: window });
+        } catch (e) {}
+    };
+
     self.repositionOpenDialogs = function () {
-        var maxDialogWidth = Math.floor(window.innerWidth * 0.95);
-        var maxDialogHeight = Math.floor(window.innerHeight * 0.92);
         ["#mainDialogDiv", "#smallDialogDiv", "#botPanel", "#widgetGenericDialogDiv"].forEach(function (dialogId) {
             try {
                 if ($(dialogId).dialog("isOpen")) {
-                    var $dialogElement = $(dialogId).closest(".ui-dialog");
-                    if ($dialogElement.outerWidth() > maxDialogWidth) {
-                        $(dialogId).dialog("option", "width", maxDialogWidth);
-                    }
-                    if ($dialogElement.outerHeight() > maxDialogHeight) {
-                        $(dialogId).dialog("option", "height", maxDialogHeight);
-                    }
-                    $(dialogId).dialog("option", "position", { my: "center", at: "center", of: window });
+                    self.clampAndCenterDialog(dialogId);
                 }
             } catch (e) {}
         });

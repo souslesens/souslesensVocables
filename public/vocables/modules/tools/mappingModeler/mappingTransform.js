@@ -266,7 +266,8 @@ self._buildExportModel = function () {
 
     var isEntitySubjectNode = function (nodeData) {
         if (!nodeData) return false;
-        if (nodeData.type === "URI") return true;
+        // URI constant nodes are handled exclusively by _writeUriConstantTriplesMaps
+        if (nodeData.type === "URI") return false;
         if (nodeData.isMainColumn === true) return true;
         if (nodeData.uriType === "blankNode" || nodeData.uriType === "randomIdentifier") return true;
         return false;
@@ -353,39 +354,43 @@ self._writeTriplesMapProper = function (format, tmInfo, model) {
     // build predicate-object maps from:
     // 1) node properties: rdfsLabel, otherPredicates, transform (optional)
     // 2) outgoing edges from any node whose canonical(from) == subjectCanonicalId
-    var po = "";
+    // poSeen deduplicates identical chunks (avoids duplicate rdf:type etc.)
+    var poChunks = [];
+    var poSeen = {};
 
-    // (A) rdfs:label patch
+    var addPo = function (chunk) {
+        if (!chunk) return;
+        if (poSeen[chunk]) return;
+        poSeen[chunk] = true;
+        poChunks.push(chunk);
+    };
+
+    // (A) rdfs:label — rdfsLabel is always a column name in SousLeSens
     if (sData.rdfsLabel) {
-        // if rdfsLabel equals a column name => column mapping
-        var colIds = model.tableColumnIds[table] ? model.tableColumnIds[table] : {};
-        if (colIds[sData.rdfsLabel]) {
-            po += self._writePredicateObjectMapProper(format, "rdfs:label", {
-                kind: "literalColumn",
-                value: sData.rdfsLabel,
-                datatype: "xsd:string",
-            });
-        } else {
-            po += self._writePredicateObjectMapProper(format, "rdfs:label", {
-                kind: "literalConstant",
-                value: sData.rdfsLabel,
-                datatype: "xsd:string",
-            });
-        }
+        var labelLang = sData.rdfsLabelLang ? String(sData.rdfsLabelLang).trim() : null;
+        addPo(self._writePredicateObjectMapProper(format, "rdfs:label", {
+            kind: "literalColumn",
+            value: sData.rdfsLabel,
+            language: labelLang,
+            datatype: labelLang ? null : "xsd:string",
+        }));
     }
 
-    // (B) transform (si tu veux garder une trace)
-    if (sData.transform) {
-        po += self._writePredicateObjectMapProper(format, ":sls_transform", {
-            kind: "literalConstant",
-            value: sData.transform,
-            datatype: "xsd:string",
-        });
+    // (B) transform: emit FnO if a known GREL function exists, else comment + raw reference
+    if (sData.transform && sData.rdfsLabel) {
+        // rdfsLabel is used as the source column to transform
+        var colIdsForTransform = model.tableColumnIds[table] ? model.tableColumnIds[table] : {};
+        if (colIdsForTransform[sData.rdfsLabel]) {
+            addPo(self._writeFnoTransformObjectMap(format, ":sls_transformedValue", sData.rdfsLabel, sData.transform, null));
+        } else {
+            addPo("  # NOTE: transform '" + sData.transform + "' — source column '" + sData.rdfsLabel + "' not found in table columns\n");
+        }
+    } else if (sData.transform) {
+        addPo("  # NOTE: transform '" + sData.transform + "' defined on subject node but no rdfsLabel column to apply it to\n");
     }
 
     // (C) otherPredicates (IMPORTANT: object can be a column!)
     if (sData.otherPredicates && Array.isArray(sData.otherPredicates)) {
-        var tableCols = model.tableColumnIds[table] ? model.tableColumnIds[table] : {};
         for (var opi = 0; opi < sData.otherPredicates.length; opi++) {
             var op = sData.otherPredicates[opi];
             if (!op || !op.property) continue;
@@ -395,22 +400,26 @@ self._writeTriplesMapProper = function (format, tmInfo, model) {
             var dt = null;
 
             if (op.range) {
-                // si range contient "Resource" on le traite comme string (ton code historique)
-                if (String(op.range).indexOf("Resource") > -1) dt = "xsd:string";
-                else dt = op.range;
+                if (self._isIriRange(op.range)) {
+                    dt = null; // object property => IRI, no datatype
+                } else {
+                    dt = self._mapXsdType(op.range);
+                }
             }
 
-            // column ?
-            if (obj && tableCols[obj]) {
-                po += self._writePredicateObjectMapProper(format, pred, { kind: "literalColumn", value: obj, datatype: dt });
-            } else {
-                // iri ?
-                var iri = self._turtleIriOrCurie(obj);
-                if (iri) {
-                    po += self._writePredicateObjectMapProper(format, pred, { kind: "iriConstant", value: obj });
+            // IRI constant (http://, urn:, or prefixed name like rdf:type) ?
+            var iri = self._turtleIriOrCurie(obj);
+            if (iri || (op.range && self._isIriRange(op.range))) {
+                addPo(self._writePredicateObjectMapProper(format, pred, { kind: "iriConstant", value: obj }));
+            } else if (obj && self._isColumnName(obj)) {
+                // simple identifier => column reference
+                if (op.range && self._isIriRange(op.range)) {
+                    addPo(self._writePredicateObjectMapProper(format, pred, { kind: "iriTemplate", value: "{" + obj + "}" }));
                 } else {
-                    po += self._writePredicateObjectMapProper(format, pred, { kind: "literalConstant", value: obj, datatype: dt });
+                    addPo(self._writePredicateObjectMapProper(format, pred, { kind: "literalColumn", value: obj, datatype: dt }));
                 }
+            } else {
+                addPo(self._writePredicateObjectMapProper(format, pred, { kind: "literalConstant", value: obj, datatype: dt }));
             }
         }
     }
@@ -447,13 +456,11 @@ self._writeTriplesMapProper = function (format, tmInfo, model) {
                 // ok: join still possible
             }
 
-            po += self._edgeToObjectMap(format, table, toNode, pred2, model);
+            addPo(self._edgeToObjectMap(format, table, toNode, pred2, model));
         }
     }
 
-    if (!po) {
-        // still output TM with subject, useful for ontology alignment
-    }
+    var po = poChunks.join("");
 
     // Write TM
     var ttl = "";
@@ -492,10 +499,15 @@ self._edgeToObjectMap = function (format, currentTable, toNode, predicate, model
     var canonData = canonToNode.data;
 
     // detect if target is entity-like (so we can join)
+    // RowIndex and VirtualColumn are handled separately below (blank node semantics)
     var isEntity =
-        (canonData.type === "URI") ||
-        (canonData.isMainColumn === true) ||
-        (canonData.uriType === "blankNode" || canonData.uriType === "randomIdentifier");
+        canonData.type !== "RowIndex" &&
+        canonData.type !== "VirtualColumn" &&
+        (
+            (canonData.type === "URI") ||
+            (canonData.isMainColumn === true) ||
+            (canonData.uriType === "blankNode" || canonData.uriType === "randomIdentifier")
+        );
 
     // If target is an entity and there is a TriplesMap for it, do parentTriplesMap+joinCondition
     // child = column holding FK (toData.id)
@@ -525,8 +537,44 @@ self._edgeToObjectMap = function (format, currentTable, toNode, predicate, model
         return self._writePredicateObjectMapProper(format, predicate, { kind: "iriTemplate", value: tmpl });
     }
 
+    // RowIndex: SousLeSens creates a blank node per row using the row position as cache key.
+    // In RML, replicate this with rr:parentTriplesMap + joinCondition on the primary key column.
+    if (canonData.type === "RowIndex") {
+        var rowIndexParentTm = model.tmByCanonicalNodeId[canonToId];
+        if (rowIndexParentTm) {
+            var rowIndexPkCol = self._findPrimaryKeyColumn(canonData.dataTable, nodesById);
+            if (rowIndexPkCol) {
+                return self._writePredicateObjectMapProper(format, predicate, {
+                    kind: "parentTriplesMap",
+                    parentTriplesMap: rowIndexParentTm,
+                    child: rowIndexPkCol,
+                    parent: rowIndexPkCol,
+                });
+            }
+        }
+        return "  # NOTE: predicate <" + predicate + "> → RowIndex blank node — no primary key column found in table '" + (canonData.dataTable || "?") + "', skipped\n";
+    }
+
+    // VirtualColumn: SousLeSens creates a blank node per (columnId, rowIndex).
+    // In RML, replicate with rr:parentTriplesMap + joinCondition on the primary key column.
+    if (canonData.type === "VirtualColumn") {
+        var vcParentTm = model.tmByCanonicalNodeId[canonToId];
+        if (vcParentTm) {
+            var vcPkCol = self._findPrimaryKeyColumn(canonData.dataTable, nodesById);
+            if (vcPkCol) {
+                return self._writePredicateObjectMapProper(format, predicate, {
+                    kind: "parentTriplesMap",
+                    parentTriplesMap: vcParentTm,
+                    child: vcPkCol,
+                    parent: vcPkCol,
+                });
+            }
+        }
+        return "  # NOTE: predicate <" + predicate + "> → VirtualColumn '" + canonData.id + "' blank node — no primary key column found in table '" + (canonData.dataTable || "?") + "', skipped\n";
+    }
+
     // literal columns
-    if (toData.type === "Column" || toData.type === "VirtualColumn" || toData.type === "RowIndex") {
+    if (toData.type === "Column") {
         return self._writePredicateObjectMapProper(format, predicate, { kind: "literalColumn", value: toData.id, datatype: null });
     }
 
@@ -629,18 +677,39 @@ self._writeSubjectMapProper = function (_format, subjectData, businessClass, _no
     if (subjectData && subjectData.type === "URI") {
         ttl += "    rr:constant <" + self._escapeTurtleString(subjectData.id) + "> ;\n";
         ttl += "    rr:termType rr:IRI";
+    } else if (subjectData && (subjectData.type === "RowIndex" || subjectData.type === "VirtualColumn")) {
+        // SousLeSens creates a blank node per row for RowIndex/VirtualColumn.
+        // To make the blank node stable and joinable from other TriplesMaps, use a template
+        // built from the primary key column of the same table (if available).
+        var pkForBNode = self._findPrimaryKeyColumn(subjectData.dataTable, _nodesById);
+        if (pkForBNode) {
+            var safeId = self._escapeTurtleString(String(subjectData.id)).replace(/[^a-zA-Z0-9_]/g, "_");
+            ttl += '    rr:template "http://souslesens.org/bnode/' + safeId + '/{' + pkForBNode + '}" ;\n';
+            // rr:template requires rr:IRI — BlankNode is incompatible with templates
+            ttl += "    rr:termType rr:IRI";
+        } else {
+            // no primary key available: true blank node per row (no template)
+            ttl += "    rr:termType rr:BlankNode";
+        }
     } else {
         var template = self._subjectTemplateForColumn(subjectData);
         ttl += '    rr:template "' + self._escapeTurtleString(template) + '" ;\n';
-        if (subjectData && subjectData.uriType === "blankNode") {
-            ttl += "    rr:termType rr:BlankNode";
-        } else {
-            ttl += "    rr:termType rr:IRI";
-        }
+        // rr:template requires rr:IRI — BlankNode is incompatible with templates
+        ttl += "    rr:termType rr:IRI";
     }
 
     if (businessClass) {
-        ttl += " ;\n    rr:class " + self._turtleObject(businessClass);
+        // businessClass may be a comma-separated string or an array of class IRIs
+        var classes = [];
+        if (Array.isArray(businessClass)) {
+            classes = businessClass;
+        } else {
+            // split on comma and clean whitespace
+            classes = String(businessClass).split(",").map(function (c) { return c.trim(); }).filter(function (c) { return c.length > 0; });
+        }
+        for (var ci = 0; ci < classes.length; ci++) {
+            ttl += " ;\n    rr:class " + self._turtleObject(classes[ci]);
+        }
     }
 
     ttl += "\n  ] ;\n";
@@ -666,7 +735,10 @@ self._writePredicateObjectMapProper = function (format, predicate, spec) {
         } else {
             ttl += '      rr:column "' + self._escapeTurtleString(spec.value) + '"';
         }
-        if (spec.datatype) {
+        if (spec.language) {
+            // language tag takes precedence over datatype (they are mutually exclusive in RML)
+            ttl += " ;\n      rml:language \"" + self._escapeTurtleString(spec.language) + "\"";
+        } else if (spec.datatype) {
             ttl += " ;\n      rr:datatype " + self._turtleObject(spec.datatype);
         }
         ttl += "\n";
@@ -707,17 +779,23 @@ self._logicalBlockRML = function (table, dsId) {
         var csvPath = "CSV/" + (MappingModeler && MappingModeler.currentSLSsource ? MappingModeler.currentSLSsource : "") + "/" + table;
         var s = "";
         s += '    rml:source "' + self._escapeTurtleString(csvPath) + '" ;\n';
-        s += "    rml:referenceFormulation ql:CSV ;\n";
-        s += '    rml:iterator "$"';
+        s += "    rml:referenceFormulation ql:CSV";
         return s;
     }
 
-    // SQL
+    // SQL - generate a standard d2rq:Database block with JDBC placeholders
+    var sqlInfo = self._getSqlDatasourceInfo(dsId);
+    var q = String.fromCharCode(34);
     var s2 = "";
-    // rml:source = id datasource (opaque) : c’est OK pour l’export (tu adapteras côté moteur si besoin)
-    s2 += '    rml:source "' + self._escapeTurtleString(dsId || "") + '" ;\n';
+    s2 += "    rml:source [\n";
+    s2 += "      a d2rq:Database ;\n";
+    s2 += "      d2rq:jdbcDSN " + q + sqlInfo.jdbcDSN + q + " ;\n";
+    s2 += "      d2rq:jdbcDriver " + q + sqlInfo.jdbcDriver + q + " ;\n";
+    s2 += "      d2rq:username " + q + "YOUR_USERNAME" + q + " ;\n";
+    s2 += "      d2rq:password " + q + "YOUR_PASSWORD" + q + "\n";
+    s2 += "    ] ;\n";
     s2 += "    rml:referenceFormulation ql:SQL2008 ;\n";
-    s2 += '    rr:tableName "' + self._escapeTurtleString(table) + '"';
+    s2 += "    rr:tableName " + q + self._escapeTurtleString(table) + q;
     return s2;
 };
 
@@ -749,6 +827,55 @@ self._getTableDatasourceId = function (table) {
         if (cd.name) return cd.name;
     }
     return null;
+};
+
+/**
+ * Returns JDBC connection info (DSN template and driver class) for a SQL datasource.
+ * Uses the sqlType stored in DataSourceManager to pick the correct driver.
+ * @function
+ * @name _getSqlDatasourceInfo
+ * @memberof module:MappingTransform
+ * @param {string} dsId - The datasource identifier.
+ * @returns {{jdbcDSN: string, jdbcDriver: string}} JDBC DSN template and driver class name.
+ */
+self._getSqlDatasourceInfo = function (dsId) {
+    var sqlType = null;
+    if (DataSourceManager && DataSourceManager.currentConfig && DataSourceManager.currentConfig.currentDataSource) {
+        var ds = DataSourceManager.currentConfig.currentDataSource;
+        if (!dsId || String(ds.id) === String(dsId) || String(ds.name) === String(dsId)) {
+            sqlType = ds.sqlType ? String(ds.sqlType).toLowerCase() : null;
+        }
+    }
+
+    if (sqlType === "postgres" || sqlType === "postgresql") {
+        return {
+            jdbcDSN: "jdbc:postgresql://YOUR_HOST:5432/YOUR_DATABASE",
+            jdbcDriver: "org.postgresql.Driver",
+        };
+    }
+    if (sqlType === "sqlserver" || sqlType === "mssql") {
+        return {
+            jdbcDSN: "jdbc:sqlserver://YOUR_HOST:1433;databaseName=YOUR_DATABASE",
+            jdbcDriver: "com.microsoft.sqlserver.jdbc.SQLServerDriver",
+        };
+    }
+    if (sqlType === "oracle") {
+        return {
+            jdbcDSN: "jdbc:oracle:thin:@YOUR_HOST:1521:YOUR_DATABASE",
+            jdbcDriver: "oracle.jdbc.OracleDriver",
+        };
+    }
+    if (sqlType === "sqlite") {
+        return {
+            jdbcDSN: "jdbc:sqlite:YOUR_DATABASE_FILE.db",
+            jdbcDriver: "org.sqlite.JDBC",
+        };
+    }
+    // default: MySQL
+    return {
+        jdbcDSN: "jdbc:mysql://YOUR_HOST:3306/YOUR_DATABASE",
+        jdbcDriver: "com.mysql.cj.jdbc.Driver",
+    };
 };
 
 self._isCsvDatasource = function (dsId) {
@@ -832,6 +959,11 @@ self._prefixBlock = function () {
     lines.push("@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .");
     lines.push("@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .");
     lines.push("@prefix owl: <http://www.w3.org/2002/07/owl#> .");
+    lines.push("@prefix fnml: <http://semweb.mmlab.be/ns/fnml#> .");
+    lines.push("@prefix fno: <https://w3id.org/function/ontology#> .");
+    lines.push("@prefix grel: <http://users.ugent.be/~bjdmeest/function/grel.ttl#> .");
+    lines.push("@prefix idlab-fn: <https://namespaces.ilabt.imec.be/idlab/function#> .");
+    lines.push("@prefix d2rq: <http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#> .");
     lines.push("@prefix : <urn:souslesens:mapping:> .");
     lines.push("");
     return lines.join("\n") + "\n";
@@ -858,23 +990,84 @@ self._subjectTemplateForColumn = function (data) {
     // URI constant should not use template (handled elsewhere)
     if (data.type === "URI") return String(data.id);
 
+    // baseURI: node-level > graphUri config > fallback urn:souslesens
     var base = data.baseURI ? String(data.baseURI) : null;
     if (!base) {
-        // default base
+        base = self._getGraphUri();
+    }
+    if (!base) {
         var src = (MappingModeler && MappingModeler.currentSLSsource) ? String(MappingModeler.currentSLSsource) : "source";
         var table = data.dataTable ? String(data.dataTable) : "table";
-        base = "urn:souslesens:" + src + ":" + table + ":" + (data.id ? String(data.id) : "id");
+        base = "urn:souslesens:" + src + ":" + table + ":";
     }
 
-    // normalize base
+    // normalize base: ensure trailing / or #
     if (base.lastIndexOf("/") !== base.length - 1 && base.lastIndexOf("#") !== base.length - 1) {
         base += "/";
     }
 
+    // prefixURI: SousLeSens adds separator if none present
+    var prefix = data.prefixURI ? String(data.prefixURI) : "";
+    if (prefix && prefix.slice(-1) !== "/" && prefix.slice(-1) !== "#" && prefix.slice(-1) !== "-" && prefix.slice(-1) !== "_" && prefix.slice(-1) !== ".") {
+        prefix += "-";
+    }
+
+    // suffixURI
+    var suffix = data.suffixURI ? String(data.suffixURI) : "";
+
     var col = data.id ? String(data.id) : "id";
 
-    // template pattern
-    return base + "{" + col + "}";
+    return base + prefix + "{" + col + "}" + suffix;
+};
+
+/**
+ * Finds the primary key column name for a given table by looking for a node
+ * with isMainColumn===true and type==="Column" in the same table.
+ * Used to create join conditions for RowIndex and VirtualColumn blank nodes.
+ * @function
+ * @name _findPrimaryKeyColumn
+ * @memberof module:MappingTransform
+ * @param {string} table - The table name to search in.
+ * @param {Object} nodesById - Map of all graph nodes keyed by ID.
+ * @returns {string|null} The column name (node data id) or null if not found.
+ */
+/**
+ * Returns true if the value looks like a plain column name (simple identifier,
+ * no spaces, no http://, no colon-separated prefix).
+ * Used to distinguish column references from literal constants in otherPredicates.
+ * @function
+ * @name _isColumnName
+ * @memberof module:MappingTransform
+ * @param {string} v - The value to test.
+ * @returns {boolean} True if the value is a plain column identifier.
+ */
+self._isColumnName = function (v) {
+    if (!v) return false;
+    var s = String(v).trim();
+    if (s.length === 0) return false;
+    // IRIs and prefixed names are not column names
+    if (s.indexOf("http") === 0 || s.indexOf("urn:") === 0) return false;
+    if (s.indexOf("://") > -1) return false;
+    // prefixed names (rdf:type, xsd:string, etc.) are not column names
+    if (/^[a-zA-Z_][a-zA-Z0-9_-]*:[^\s]+$/.test(s)) return false;
+    // spaces = likely a literal string, not a column name
+    if (s.indexOf(" ") > -1) return false;
+    // plain identifier: letters, digits, underscores, hyphens, dots
+    return /^[a-zA-Z0-9_\-\.]+$/.test(s);
+};
+
+self._findPrimaryKeyColumn = function (table, nodesById) {
+    if (!table || !nodesById) return null;
+    var nodeIds = Object.keys(nodesById);
+    for (var i = 0; i < nodeIds.length; i++) {
+        var node = nodesById[nodeIds[i]];
+        if (!node || !node.data) continue;
+        var d = node.data;
+        if (d.dataTable === table && d.isMainColumn === true && d.type === "Column") {
+            return String(d.id);
+        }
+    }
+    return null;
 };
 
 self._makeTriplesMapId = function (prefix, table, nodeId) {
@@ -883,6 +1076,159 @@ self._makeTriplesMapId = function (prefix, table, nodeId) {
     var safeT = self._escapeTurtleString(t).replace(/[^a-zA-Z0-9_]/g, "_");
     var safeN = self._escapeTurtleString(n).replace(/[^a-zA-Z0-9_]/g, "_");
     return ":" + prefix + "_" + safeT + "_" + safeN;
+};
+
+/**
+ * Maps a SousLeSens range/type string to an XSD datatype CURIE.
+ * Returns null if the range represents an IRI/object property (not a literal).
+ * @function
+ * @name _mapXsdType
+ * @memberof module:MappingTransform
+ * @param {string|null} range - The range string from the mapping model (e.g. "xsd:string", "http://...#integer", "Resource").
+ * @returns {string|null} XSD datatype CURIE (e.g. "xsd:string") or null if the range is an IRI class.
+ */
+self._mapXsdType = function (range) {
+    if (!range) return null;
+    var r = String(range).trim();
+
+    // Already a proper XSD CURIE
+    if (r.indexOf("xsd:") === 0) return r;
+
+    // Full XSD URI
+    if (r.indexOf("http://www.w3.org/2001/XMLSchema#") === 0) {
+        return "xsd:" + r.split("#")[1];
+    }
+
+    // "Resource" or anything containing "Resource" => IRI, not a literal datatype
+    if (r.indexOf("Resource") > -1) return null;
+
+    // Named types mapping
+    var typeMap = {
+        "string": "xsd:string",
+        "integer": "xsd:integer",
+        "int": "xsd:integer",
+        "float": "xsd:float",
+        "double": "xsd:double",
+        "decimal": "xsd:decimal",
+        "boolean": "xsd:boolean",
+        "date": "xsd:date",
+        "dateTime": "xsd:dateTime",
+        "datetime": "xsd:dateTime",
+        "time": "xsd:time",
+        "long": "xsd:long",
+        "short": "xsd:short",
+        "byte": "xsd:byte",
+        "anyURI": "xsd:anyURI",
+        "anyuri": "xsd:anyURI",
+        "gYear": "xsd:gYear",
+        "gyear": "xsd:gYear",
+    };
+
+    var lower = r.toLowerCase();
+    if (typeMap[r]) return typeMap[r];
+    if (typeMap[lower]) return typeMap[lower];
+
+    // If it looks like a full IRI (http:// or starts with known prefixes) => it's a class, not a datatype
+    if (r.indexOf("http") === 0 || r.indexOf("owl:") === 0 || r.indexOf("rdf:") === 0 || r.indexOf("rdfs:") === 0) {
+        return null;
+    }
+
+    // Otherwise treat as xsd:string
+    return "xsd:string";
+};
+
+/**
+ * Returns true if the range string represents an IRI/class (object property),
+ * as opposed to a literal datatype.
+ * @function
+ * @name _isIriRange
+ * @memberof module:MappingTransform
+ * @param {string|null} range - The range string to check.
+ * @returns {boolean} True if the range is an IRI class reference.
+ */
+self._isIriRange = function (range) {
+    if (!range) return false;
+    var r = String(range).trim();
+    if (r.indexOf("Resource") > -1) return true;
+    if (r.indexOf("http") === 0) return true;
+    if (r.indexOf("owl:") === 0 || r.indexOf("rdf:") === 0 || r.indexOf("rdfs:") === 0) return true;
+    // xsd types are literal datatypes => not IRI
+    if (r.indexOf("xsd:") === 0) return false;
+    if (r.indexOf("http://www.w3.org/2001/XMLSchema#") === 0) return false;
+    return false;
+};
+
+/**
+ * Returns the GREL/idlab-fn function IRI for a known SousLeSens transform string.
+ * Returns null for unknown transforms.
+ * @function
+ * @name _getGrelFunctionForTransform
+ * @memberof module:MappingTransform
+ * @param {string} transform - The transform identifier (e.g. "toLowerCase", "toUpperCase", "trim").
+ * @returns {string|null} A GREL/idlab-fn function CURIE, or null if not mapped.
+ */
+self._getGrelFunctionForTransform = function (transform) {
+    if (!transform) return null;
+    var t = String(transform).trim().toLowerCase();
+    if (t === "tolowercase" || t === "lowercase") return "grel:toLowerCase";
+    if (t === "touppercase" || t === "uppercase") return "grel:toUpperCase";
+    if (t === "trim") return "grel:trim";
+    if (t === "urlencode" || t === "encodeuri") return "grel:encodeForUri";
+    if (t === "strip_html" || t === "striphtml") return "grel:htmlUnescape";
+    if (t === "replace_spaces" || t === "replacespaces") return "idlab-fn:normalizeString";
+    return null;
+};
+
+/**
+ * Writes a full FnO-based predicateObjectMap that applies a GREL transformation to a column.
+ * Falls back to a plain rml:reference with a comment if the transform is unknown.
+ * @function
+ * @name _writeFnoTransformObjectMap
+ * @memberof module:MappingTransform
+ * @param {string} format - "rml" or "r2rml".
+ * @param {string} predicate - The predicate CURIE or IRI.
+ * @param {string} columnRef - The source column name.
+ * @param {string} transform - The transform identifier.
+ * @param {string|null} datatype - Optional XSD datatype CURIE.
+ * @returns {string} Turtle snippet for the predicateObjectMap.
+ */
+self._writeFnoTransformObjectMap = function (format, predicate, columnRef, transform, datatype) {
+    var grelFn = self._getGrelFunctionForTransform(transform);
+    if (!grelFn) {
+        // Unknown transform: output column reference with a comment
+        var ttl = "  # NOTE: transform '" + transform + "' not mapped to FnO — using raw column reference\n";
+        ttl += self._writePredicateObjectMapProper(format, predicate, {
+            kind: "literalColumn",
+            value: columnRef,
+            datatype: datatype,
+        });
+        return ttl;
+    }
+
+    // Build FnO execution map inline
+    var refKeyword = (format === "rml") ? "rml:reference" : "rr:column";
+
+    var ttl = "";
+    ttl += "  rr:predicateObjectMap [\n";
+    ttl += "    rr:predicate " + self._turtleObject(predicate) + " ;\n";
+    ttl += "    rr:objectMap [\n";
+    ttl += "      fnml:functionValue [\n";
+    ttl += "        rr:predicateObjectMap [\n";
+    ttl += "          rr:predicate fno:executes ;\n";
+    ttl += "          rr:objectMap [ rr:constant " + grelFn + " ; rr:termType rr:IRI ]\n";
+    ttl += "        ] ;\n";
+    ttl += "        rr:predicateObjectMap [\n";
+    ttl += "          rr:predicate grel:valueParameter ;\n";
+    ttl += "          rr:objectMap [ " + refKeyword + ' "' + self._escapeTurtleString(columnRef) + '"';
+    if (datatype) {
+        ttl += " ; rr:datatype " + self._turtleObject(datatype);
+    }
+    ttl += " ]\n";
+    ttl += "        ]\n";
+    ttl += "      ]\n";
+    ttl += "    ]\n";
+    ttl += "  ] ;\n";
+    return ttl;
 };
 
 

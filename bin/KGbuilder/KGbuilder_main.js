@@ -84,6 +84,7 @@ var KGbuilder_main = {
             tableProcessingParams.uniqueTriplesMap = {};
             var sampleTriples = [];
             var totalTriplesCount = {};
+            var totalReport = {};
 
             /**
              * for each table get columnsMappingMap and create tripels
@@ -210,6 +211,9 @@ var KGbuilder_main = {
                                     } else {
                                         if (!totalTriplesCount[table]) totalTriplesCount[table] = 0;
                                         totalTriplesCount[table] += result.totalTriplesCount;
+                                        if (result.report) {
+                                            totalReport[table] = result.report;
+                                        }
                                     }
                                     callbackSeries();
                                 });
@@ -223,7 +227,7 @@ var KGbuilder_main = {
                 },
 
                 function (err) {
-                    return callback(err, { sampleTriples: sampleTriples, totalTriplesCount: totalTriplesCount });
+                    return callback(err, { sampleTriples: sampleTriples, totalTriplesCount: totalTriplesCount, report: options.sampleSize ? undefined : totalReport });
                 },
             );
 

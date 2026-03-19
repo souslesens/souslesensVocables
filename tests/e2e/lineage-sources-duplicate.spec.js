@@ -4,7 +4,7 @@
 
 import { test, expect } from "@playwright/test";
 
-const BASE_URL = "http://localhost:3011";
+const BASE_URL = "http://localhost:3010";
 
 // Sources that exist in the test environment:
 // plant_ontology imports BFO

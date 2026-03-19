@@ -236,7 +236,12 @@ var UserRequestFiltering = {
         var schemaError = "";
         tables.forEach(function (tableRef) {
             var schema = tableRef.split("::")[1];
-            if (schema && forbiddenSchemas.some(function (fs) { return schema.toLowerCase() === fs; })) {
+            if (
+                schema &&
+                forbiddenSchemas.some(function (fs) {
+                    return schema.toLowerCase() === fs;
+                })
+            ) {
                 schemaError += "DATA PROTECTION: access to schema " + schema + " is not allowed; ";
             }
         });

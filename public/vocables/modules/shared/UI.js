@@ -146,6 +146,7 @@ var UI = (function () {
             "resize",
             function (event) {
                 self.resetWindowSize();
+                self.repositionOpenDialogs();
                 if (MainController.currentTool == "KGcreator") {
                     KGcreator.ResetRunMappingTabWidth();
                 }
@@ -210,6 +211,23 @@ var UI = (function () {
         //$("#graphDiv").css("height", $(window).height() - MenuBarHeight - 1);
         //Lineage_whiteboard.lineageVisjsGraph.network.startSimulation();
     };
+
+    self.repositionOpenDialogs = function () {
+        var maxW = Math.floor(window.innerWidth * 0.95);
+        var maxH = Math.floor(window.innerHeight * 0.92);
+        ["#mainDialogDiv", "#smallDialogDiv", "#botPanel", "#widgetGenericDialogDiv"].forEach(function (id) {
+            try {
+                if ($(id).dialog("isOpen")) {
+                    $(id).dialog("option", {
+                        maxWidth: maxW,
+                        maxHeight: maxH,
+                        position: { my: "center", at: "center", of: window },
+                    });
+                }
+            } catch (e) {}
+        });
+    };
+
     //Keep
     self.ApplySelectedTabCSS = function (buttonClicked, tabGroup) {
         var x = $("#" + tabGroup + "-buttons").children();
@@ -484,7 +502,11 @@ var UI = (function () {
                 $(divId).dialog("close");
             }
         } catch (e) {}
+        var maxW = Math.floor(window.innerWidth * 0.95);
+        var maxH = Math.floor(window.innerHeight * 0.92);
         var dialogOptions = {
+            maxWidth: maxW,
+            maxHeight: maxH,
             position: { my: "center", at: "center", of: window },
         };
         if (options.width) {
@@ -502,6 +524,7 @@ var UI = (function () {
         if (options.zIndex) {
             $(divId).closest(".ui-dialog").css("z-index", options.zIndex);
         }
+        $(divId).dialog("option", "position", { my: "center", at: "center", of: window });
         var title = "";
         if (options.title) {
             title = options.title;

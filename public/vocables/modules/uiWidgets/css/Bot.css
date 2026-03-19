@@ -2,8 +2,8 @@
     background-color: @background-color;
     margin: 5px;
     padding: 3px;
-    height: 500px;
-    width: 500px;
+    height: min(500px, 80vh);
+    width: min(500px, 90vw);
     border-radius: 14px;
 }
 #bot_resourcesProposalSelect {

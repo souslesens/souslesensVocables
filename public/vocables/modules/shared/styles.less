@@ -250,17 +250,23 @@ html {
     margin-bottom: 0px !important;
 }
 
-#mainDialogDiv {
-    max-width: 100vw;
-    max-height: 85vh !important;
+.ui-dialog {
+    max-width: 95vw !important;
+    max-height: 92vh !important;
+    box-sizing: border-box !important;
 }
-#smallDialogDiv {
-    max-width: 100vw;
-    max-height: 85vh !important;
+
+.ui-dialog .ui-dialog-content {
+    overflow: auto !important;
+    max-height: calc(92vh - 60px) !important;
+    box-sizing: border-box;
 }
+
+#mainDialogDiv,
+#smallDialogDiv,
+#widgetGenericDialogDiv,
 #botPanel {
-    max-width: 100vw;
-    max-height: 85vh !important;
+    overflow: auto;
 }
 
 #toolsSelect > div {

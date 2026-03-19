@@ -202,7 +202,7 @@ var SearchWidget = (function () {
         var existingNodes = {};
         var jstreeData = [];
         var parentIdsLabelsMap = result.parentIdsLabelsMap;
-        var preferredLang = (Config && Config.default_lang) ? Config.default_lang : "en";
+        var preferredLang = Config && Config.default_lang ? Config.default_lang : "en";
         var maxDisplayedLeaves = 1000;
         var leafCount = 0;
 
@@ -590,7 +590,7 @@ var SearchWidget = (function () {
             if (result[0] && result[0].matches && result[0].matches[sourceLabel]) {
                 es_results = result[0].matches[sourceLabel];
             }
-            var preferredLang = (Config && Config.default_lang) ? Config.default_lang : "en";
+            var preferredLang = Config && Config.default_lang ? Config.default_lang : "en";
             es_results.sort(function (a, b) {
                 var aIsIndividual = a.type.indexOf("Class") === -1;
                 var bIsIndividual = b.type.indexOf("Class") === -1;

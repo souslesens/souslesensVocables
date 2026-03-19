@@ -507,16 +507,20 @@ class BotEngineClass {
             this.history.step.push(this.history.currentIndex);
         }
 
-        $("#" + this.divId).find("#bot_resourcesProposalSelect").hide();
-        $("#" + this.divId).find("#botFilterProposalDiv").hide();
-        $("#" + this.divId).find("#botTreeContainer").remove();
+        $("#" + this.divId)
+            .find("#bot_resourcesProposalSelect")
+            .hide();
+        $("#" + this.divId)
+            .find("#botFilterProposalDiv")
+            .hide();
+        $("#" + this.divId)
+            .find("#botTreeContainer")
+            .remove();
 
         const treeDivId = "botJstreeDiv_" + common.getRandomHexaId(5);
         const searchInputId = "botTreeSearch_" + common.getRandomHexaId(5);
         const withCheckboxes = treeOptions.withCheckboxes === true;
-        const validateBtnHtml = withCheckboxes
-            ? `<button id="botTreeValidateBtn" class="w3-button classesPanelButton size-of-button-small" style="margin-top:6px;width:100%">Validate</button>`
-            : "";
+        const validateBtnHtml = withCheckboxes ? `<button id="botTreeValidateBtn" class="w3-button classesPanelButton size-of-button-small" style="margin-top:6px;width:100%">Validate</button>` : "";
 
         $("#" + this.divId)
             .find("#botTA")
@@ -537,8 +541,12 @@ class BotEngineClass {
             }
 
             this.insertBotMessage(selectedLabel);
-            $("#" + this.divId).find("#botTreeContainer").remove();
-            $("#" + this.divId).find("#bot_resourcesProposalSelect").show();
+            $("#" + this.divId)
+                .find("#botTreeContainer")
+                .remove();
+            $("#" + this.divId)
+                .find("#bot_resourcesProposalSelect")
+                .show();
 
             if (callback) {
                 return callback(selectedValue, nodeOrNodes);
@@ -554,9 +562,7 @@ class BotEngineClass {
             },
             treeOptions,
             {
-                selectTreeNodeFn: withCheckboxes
-                    ? null
-                    : (_evt, obj) => resolveSelection(obj.node.id, obj.node.text, obj.node),
+                selectTreeNodeFn: withCheckboxes ? null : (_evt, obj) => resolveSelection(obj.node.id, obj.node.text, obj.node),
             },
         );
 
@@ -576,7 +582,7 @@ class BotEngineClass {
                     if (checkedNodes.length === 0) return;
 
                     const leafNodes = checkedNodes.filter((n) => n.type !== "Folder");
-                    const rawIds = leafNodes.map((n) => (n.data && n.data.id) ? n.data.id : n.id);
+                    const rawIds = leafNodes.map((n) => (n.data && n.data.id ? n.data.id : n.id));
                     const ids = rawIds.filter((id, index) => rawIds.indexOf(id) === index);
                     const label = ids.join(", ");
                     resolveSelection(ids, label, checkedNodes);

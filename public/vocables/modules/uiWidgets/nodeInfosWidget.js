@@ -454,7 +454,7 @@ value = item.valueLabel.value;*/
 
                     // dont manage lang clustering when source is editable --> why?? I remove it for now
 
-                    if ( item.value && item.value["xml:lang"]) {
+                    if (item.value && item.value["xml:lang"]) {
                         if (!self.propertiesMap.properties[propName].langValues[item.value["xml:lang"]]) {
                             self.propertiesMap.properties[propName].langValues[item.value["xml:lang"]] = [];
                         }
@@ -564,7 +564,10 @@ defaultLang = 'en';*/
 
                         strGeneratedByProp += "<tr class='infos_table'>";
 
-                        if (self.propertiesMap.properties[key].value && (!Object.keys(self.propertiesMap.properties[key].langValues).length || Object.keys(self.propertiesMap.properties[key].langValues).length == 0)) {
+                        if (
+                            self.propertiesMap.properties[key].value &&
+                            (!Object.keys(self.propertiesMap.properties[key].langValues).length || Object.keys(self.propertiesMap.properties[key].langValues).length == 0)
+                        ) {
                             var values = self.propertiesMap.properties[key].value;
                             strGeneratedByProp +=
                                 "<td class='detailsCellName'>" +

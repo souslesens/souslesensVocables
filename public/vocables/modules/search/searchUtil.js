@@ -475,7 +475,7 @@ indexes.push(source.toLowerCase());
             };
         }
 
-        var preferredLang = (Config && Config.default_lang) ? Config.default_lang : "en";
+        var preferredLang = Config && Config.default_lang ? Config.default_lang : "en";
         if (!queryObj.bool.should) {
             queryObj.bool.should = [];
         }

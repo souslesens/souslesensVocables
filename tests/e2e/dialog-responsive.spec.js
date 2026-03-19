@@ -2,10 +2,7 @@ import { test, expect, chromium } from "playwright/test";
 import * as fs from "fs";
 import * as path from "path";
 
-const PROJECT_ROOT = path.resolve(
-    path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Z]:)/, "$1")),
-    "../..",
-);
+const PROJECT_ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Z]:)/, "$1")), "../..");
 
 const STYLES_LESS = path.join(PROJECT_ROOT, "public/vocables/modules/shared/styles.less");
 const UI_JS = path.join(PROJECT_ROOT, "public/vocables/modules/shared/UI.js");

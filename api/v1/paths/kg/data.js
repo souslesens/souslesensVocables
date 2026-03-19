@@ -1,5 +1,7 @@
 import * as dbConnector from "../../../../bin/KG/dbConnector.js";
 import { databaseModel } from "../../../../model/databases.js";
+import userManager from "../../../../bin/user.js";
+import UserRequestFiltering from "../../../../bin/userRequestFiltering.js";
 
 export default function () {
     let operations = {
@@ -8,19 +10,40 @@ export default function () {
 
     async function GET(req, res, _next) {
         try {
-            const database = await databaseModel.getDatabase(req.query.dbName);
-            const driver = await databaseModel.getClientDriver(database.driver);
+            const userInfo = await userManager.getUser(req.user);
+            const connection = await databaseModel.getUserConnection(userInfo.user, req.query.dbName);
 
-            const connection = dbConnector.getConnection(database, driver);
+            if (!connection) {
+                return res.status(403).json({ error: "Access to this database is not allowed" });
+            }
 
             if (req.query.tableName) {
+                const database = await databaseModel.getDatabase(req.query.dbName);
+                const driver = databaseModel.getClientDriver(database.driver);
                 const limit = parseInt(req.query.limit) || 200;
                 const rows = await dbConnector.getSampleData(connection, req.query.tableName, limit, driver);
                 res.status(200).json({ rows });
             } else {
+                const sqlQuery = req.query.sqlQuery;
+                if (!sqlQuery) {
+                    return res.status(400).json({ error: "Missing tableName or sqlQuery parameter" });
+                }
+                const { user } = userInfo;
+                //const isAdmin = user.login === "admin" || (user.groups && user.groups.includes("admin"));
+                const isAdmin = false; // Disable admin bypass for SQL filtering to enhance security. Admin users should still have their queries filtered to prevent potential misuse.
+                if (!isAdmin) {
+                    const database = await databaseModel.getDatabase(req.query.dbName);
+                    const driver = databaseModel.getClientDriver(database.driver);
+                    const filterError = await new Promise((resolve) => {
+                        UserRequestFiltering.checkSqlSelectQuery(sqlQuery, driver, (err) => resolve(err));
+                    });
+                    if (filterError) {
+                        return res.status(403).json({ error: filterError });
+                    }
+                }
                 dbConnector.getData(
                     connection,
-                    req.query.sqlQuery,
+                    sqlQuery,
                     function (result) {
                         res.status(200).json(result);
                     },

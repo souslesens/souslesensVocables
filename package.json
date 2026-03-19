@@ -90,6 +90,7 @@
         "mysql": "^2.18.1",
         "n3": "^1.25.2",
         "ndjson": "^2.0.0",
+        "node-sql-parser": "^5.4.0",
         "nodemon": "^3.1.10",
         "passport": "^0.7.0",
         "passport-auth0": "^1.4.4",

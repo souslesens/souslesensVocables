@@ -213,16 +213,19 @@ var UI = (function () {
     };
 
     self.repositionOpenDialogs = function () {
-        var maxW = Math.floor(window.innerWidth * 0.95);
-        var maxH = Math.floor(window.innerHeight * 0.92);
-        ["#mainDialogDiv", "#smallDialogDiv", "#botPanel", "#widgetGenericDialogDiv"].forEach(function (id) {
+        var maxDialogWidth = Math.floor(window.innerWidth * 0.95);
+        var maxDialogHeight = Math.floor(window.innerHeight * 0.92);
+        ["#mainDialogDiv", "#smallDialogDiv", "#botPanel", "#widgetGenericDialogDiv"].forEach(function (dialogId) {
             try {
-                if ($(id).dialog("isOpen")) {
-                    $(id).dialog("option", {
-                        maxWidth: maxW,
-                        maxHeight: maxH,
-                        position: { my: "center", at: "center", of: window },
-                    });
+                if ($(dialogId).dialog("isOpen")) {
+                    var $dialogElement = $(dialogId).closest(".ui-dialog");
+                    if ($dialogElement.outerWidth() > maxDialogWidth) {
+                        $(dialogId).dialog("option", "width", maxDialogWidth);
+                    }
+                    if ($dialogElement.outerHeight() > maxDialogHeight) {
+                        $(dialogId).dialog("option", "height", maxDialogHeight);
+                    }
+                    $(dialogId).dialog("option", "position", { my: "center", at: "center", of: window });
                 }
             } catch (e) {}
         });
@@ -502,11 +505,11 @@ var UI = (function () {
                 $(divId).dialog("close");
             }
         } catch (e) {}
-        var maxW = Math.floor(window.innerWidth * 0.95);
-        var maxH = Math.floor(window.innerHeight * 0.92);
-        var dialogOptions = {
-            maxWidth: maxW,
-            maxHeight: maxH,
+        var maxDialogWidth = Math.floor(window.innerWidth * 0.95);
+        var maxDialogHeight = Math.floor(window.innerHeight * 0.92);
+        $(divId).dialog("option", {
+            width: "auto",
+            height: "auto",
             position: { my: "center", at: "center", of: window },
         };
         if (options.width) {
@@ -523,6 +526,15 @@ var UI = (function () {
         $(divId).dialog("open");
         if (options.zIndex) {
             $(divId).closest(".ui-dialog").css("z-index", options.zIndex);
+        }
+        var $dialogElement = $(divId).closest(".ui-dialog");
+        var renderedWidth = $dialogElement.outerWidth();
+        var renderedHeight = $dialogElement.outerHeight();
+        if (renderedWidth > maxDialogWidth) {
+            $(divId).dialog("option", "width", maxDialogWidth);
+        }
+        if (renderedHeight > maxDialogHeight) {
+            $(divId).dialog("option", "height", maxDialogHeight);
         }
         $(divId).dialog("option", "position", { my: "center", at: "center", of: window });
         var title = "";

@@ -5,15 +5,15 @@ import path from "path";
 import tmp from "tmp";
 import { fileURLToPath } from "url";
 import { jest } from "@jest/globals";
-import { cleanupConnection as cleanupConnectionMock, getKnexConnection as getKnexConnectionMock } from "../model/__mocks__/utils.js";
+import { cleanupConnection as cleanupConnectionMock, getKnexConnection as getKnexConnectionMock } from "../../model/__mocks__/utils.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-jest.unstable_mockModule("../model/utils.js", () => ({ cleanupConnection: cleanupConnectionMock, getKnexConnection: getKnexConnectionMock }));
+jest.unstable_mockModule("../../model/utils.js", () => ({ cleanupConnection: cleanupConnectionMock, getKnexConnection: getKnexConnectionMock }));
 
-const { cleanupConnection, getKnexConnection } = await import("../model/utils.js");
-const { UserDataModel } = await import("../model/userData.js");
+const { cleanupConnection, getKnexConnection } = await import("../../model/utils.js");
+const { UserDataModel } = await import("../../model/userData.js");
 
 describe("UserDataModel", () => {
     let temporaryDirectory;

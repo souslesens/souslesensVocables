@@ -415,8 +415,10 @@ var Export = (function () {
 
         var width = "97%";
         if (options.width) width = options.width;
+        var height = "75vh";
+        if (options.height) height = options.height;
 
-        $("#" + div).html("<div style='width: " + width + "'> <table class='cell-border' id='" + dataTableDivId + "Export" + "'></table></div>");
+        $("#" + div).html("<div style='width: " + width + ";height:" + height + "'> <table class='cell-border' id='" + dataTableDivId + "Export" + "'></table></div>");
         //  $("#" + div).html("<div style='width: 97%;height:75vh'> <table class='cell-border' id='dataTableDivExport'></table></div>");
 
         if (!buttons) {
@@ -429,6 +431,7 @@ var Export = (function () {
         var params = {
             data: dataSet,
             columns: cols,
+            fixedColumns: true,
             pageLength: 200,
             dom: buttons,
             buttons: [
@@ -442,9 +445,6 @@ var Export = (function () {
             ],
 
             paging: false,
-            scrollX: true,
-            scrollY: "65vh",
-            scrollCollapse: true,
             /*  columnDefs: [
     { width: 400, targets: 0 }
 ],
@@ -468,9 +468,8 @@ fixedColumns: true*/
             $("#" + options.dataTableDivId + "Export_wrapper").css({ width: "100%", height: "100%" });
         }
         if (div.indexOf("DialogDiv") > -1) {
+            //open the dialog after the datatable is loaded to be on center
             UI.openDialog(div, { title: "DataTable" });
-            self.dataTable.columns.adjust().draw();
-            $("#" + dataTableDivId + "Export_wrapper").css("overflow-x", "hidden");
         }
         if (callback) {
             return callback(null, self.dataTable);

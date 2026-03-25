@@ -32,24 +32,18 @@ var UI = (function () {
     };
 
     self.setCredits = function () {
-        var LateralPanelWidth = $("#lateralPanelDiv").width();
-        var gifStart = $(window).width() / 2 - LateralPanelWidth + 100;
-        // Load image only when it is ready to has useful resetWindowSize
-        /*"<img>", {
-            src: "images/souslesensVocables.gif",
-            css: {
-                
-                display: "block"
-            }
-        }*/
-
-        var gif = $(`<img  src=\"images/souslesensVocables.gif\" >`).on("load", function () {
-            $("#graphDiv").html("<div style='position:absolute;left:" + gifStart + "px'>" + $(this).prop("outerHTML") + "</div>");
+        var gif = $(`<img src="images/souslesensVocables.gif">`).on("load", function () {
+            $("#graphAndCommandScreen").append(
+                "<div id='slsv-credits-logo' style='position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;z-index:0;'>" +
+                    $(this).prop("outerHTML") +
+                    "</div>"
+            );
             UI.resetWindowSize();
         });
     };
     self.cleanPage = function () {
         $("#graphDiv").empty();
+        $("#slsv-credits-logo").remove();
         $("#Lineage_graphEditionButtons").hide();
         $("#lateralPanelDiv").empty();
         $("#index_topContolPanel").hide();
@@ -158,6 +152,13 @@ var UI = (function () {
             self.clampAndCenterDialog(event.target);
         });
 
+        var lateralPanelEl = document.getElementById("lateralPanelDiv");
+        if (lateralPanelEl && typeof ResizeObserver !== "undefined") {
+            new ResizeObserver(function () {
+                self.resetWindowSize();
+            }).observe(lateralPanelEl);
+        }
+
         self.themeList();
 
         UI.resetWindowSize();
@@ -201,7 +202,11 @@ var UI = (function () {
             $("#lateralPanelDiv").css("width", LateralPanelWidth);
         }
 
-        $("#graphAndCommandScreen").css("height", $(window).height() - MenuBarHeight - 7);
+        var baseHeight = $(window).height() - MenuBarHeight - 7;
+        var lateralContentHeight = $("#lateralPanelDiv")[0] ? $("#lateralPanelDiv")[0].scrollHeight : 0;
+        var graphAndCommandScreenHeight = Math.max(baseHeight, lateralContentHeight);
+        $("#graphAndCommandScreen").css("height", graphAndCommandScreenHeight);
+        $("#lateralPanelDiv").css("height", "");
         if ($("#lateralPanelDiv").data("ui-resizable") != undefined) {
             $("#lateralPanelDiv").resizable("destroy");
             $("#lateralPanelDiv").resizable({

@@ -236,7 +236,6 @@ var UI = (function () {
             }
             if ($dialogElement.outerHeight() > maxDialogHeight) {
                 $contentDiv.dialog("option", "height", maxDialogHeight);
-                $contentDiv.css("overflow", "hidden");
             }
             $contentDiv.dialog("option", "position", { my: "center", at: "center", of: window });
         } catch (e) {}

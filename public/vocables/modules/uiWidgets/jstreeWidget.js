@@ -81,7 +81,6 @@ var JstreeWidget = (function () {
             self.dialogDiv = "smallDialogDiv";
 
             $("#smallDialogDiv").load("modules/uiWidgets/html/jsTreeWidget.html", function () {
-                UI.openDialog("smallDialogDiv", { title: "Select items" });
                 if (options && options.additionalHTMLComponent) {
                     try {
                         $(options.additionalHTMLComponent).insertBefore("#jstreeWidget_okButton");
@@ -94,6 +93,9 @@ var JstreeWidget = (function () {
             return;
         } else {
             self.jstreeDiv = jstreeDiv;
+            if (jstreeDiv !== "jstreeWidget_treeDiv") {
+                self.dialogDiv = null;
+            }
         }
 
         var jstreeData2 = [];
@@ -182,6 +184,11 @@ var JstreeWidget = (function () {
                 self.setTreeAppearance();
                 if (!options.doNotAdjustDimensions) {
                     JstreeWidget.setTreeParentDivDimensions(jstreeDiv);
+                }
+                if (self.dialogDiv) {
+                    var dialogDiv = self.dialogDiv;
+                    self.dialogDiv = null;
+                    UI.openDialog(dialogDiv, { title: "Select items" });
                 }
                 if (options.check_all) {
                     self.checkAll();

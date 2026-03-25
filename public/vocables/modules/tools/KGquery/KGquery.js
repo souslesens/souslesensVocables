@@ -277,6 +277,20 @@ var KGquery = (function () {
             return;
         }
 
+        if (KGquery_graph.KGqueryGraph && KGquery_graph.KGqueryGraph.network) {
+            var savedViewport = {
+                scale: KGquery_graph.KGqueryGraph.network.getScale(),
+                position: KGquery_graph.KGqueryGraph.network.getViewPosition(),
+            };
+            setTimeout(function () {
+                KGquery_graph.KGqueryGraph.network.moveTo({
+                    position: savedViewport.position,
+                    scale: savedViewport.scale,
+                    animation: false,
+                });
+            }, 200);
+        }
+
         var node = JSON.parse(JSON.stringify(selectedNode));
 
         /* if existing path in queryFlement a new one is created

@@ -562,7 +562,7 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
             parentDiv.height(h);
         }
 
-        //parentDiv.css("overflow", "auto");
+        parentDiv.css("overflow", "auto");
         parentDiv.css("margin-top", "5px");
     };
 

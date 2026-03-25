@@ -153,10 +153,14 @@ var UI = (function () {
         });
 
         var lateralPanelEl = document.getElementById("lateralPanelDiv");
-        if (lateralPanelEl && typeof ResizeObserver !== "undefined") {
-            new ResizeObserver(function () {
-                self.resetWindowSize();
-            }).observe(lateralPanelEl);
+        if (lateralPanelEl) {
+            var lateralPanelResizeTimer = null;
+            new MutationObserver(function () {
+                clearTimeout(lateralPanelResizeTimer);
+                lateralPanelResizeTimer = setTimeout(function () {
+                    self.resetWindowSize();
+                }, 100);
+            }).observe(lateralPanelEl, { childList: true, subtree: true });
         }
 
         self.themeList();
@@ -203,10 +207,10 @@ var UI = (function () {
         }
 
         var baseHeight = $(window).height() - MenuBarHeight - 7;
-        var lateralContentHeight = $("#lateralPanelDiv")[0] ? $("#lateralPanelDiv")[0].scrollHeight : 0;
+        var lateralPanelEl = $("#lateralPanelDiv")[0];
+        var lateralContentHeight = lateralPanelEl ? lateralPanelEl.offsetHeight : 0;
         var graphAndCommandScreenHeight = Math.max(baseHeight, lateralContentHeight);
         $("#graphAndCommandScreen").css("height", graphAndCommandScreenHeight);
-        $("#lateralPanelDiv").css("height", "");
         if ($("#lateralPanelDiv").data("ui-resizable") != undefined) {
             $("#lateralPanelDiv").resizable("destroy");
             $("#lateralPanelDiv").resizable({

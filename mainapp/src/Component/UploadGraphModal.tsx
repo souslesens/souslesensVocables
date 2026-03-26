@@ -70,6 +70,16 @@ export function UploadGraphModal({ apiUrl, onClose, open, sourceName, indexAfter
 
         await writeLog(currentUser.login, "GraphManagement", "upload", sourceName);
 
+        if (replaceGraph) {
+            try {
+                await deleteGraph(currentUser.token);
+            } catch (error) {
+                console.error(error);
+                setErrorMessage((error as Error).message);
+                return;
+            }
+        }
+
         if (graphUrl !== "") {
             await uploadGraphByUrl(currentUser.token);
         } else {
@@ -92,6 +102,24 @@ export function UploadGraphModal({ apiUrl, onClose, open, sourceName, indexAfter
                 console.error(error);
                 window.UI.message(`An error occurs during ${sourceName} update`, true);
             }
+        }
+    };
+
+    const deleteGraph = async (userToken: string) => {
+        const response = await fetch(`${apiUrl}api/v1/rdf/graph?source=${sourceName}`, {
+            method: "DELETE",
+            headers: { Authorization: `Bearer ${userToken}` },
+        });
+        if (!response.ok) {
+            let errorMessage: string | undefined;
+            try {
+                const json = (await response.json()) as { error?: string; detail?: string };
+                errorMessage = json.error ?? json.detail;
+            } catch {
+                // ignore JSON parse errors
+            }
+            const message = errorMessage ?? response.statusText ?? "Failed to delete graph";
+            throw new Error(message);
         }
     };
 
@@ -142,7 +170,6 @@ export function UploadGraphModal({ apiUrl, onClose, open, sourceName, indexAfter
                     last: isLast,
                     identifier: chunkId,
                     clean: false,
-                    replace: replaceGraph,
                     data: chunkFile,
                 }).forEach(([k, v]) => {
                     formData.append(k, typeof v === "boolean" ? String(v) : v);

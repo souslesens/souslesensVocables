@@ -27,7 +27,7 @@ interface UploadGraphModalProps {
 export function UploadGraphModal({ apiUrl, onClose, open, sourceName, indexAfterSuccess = false }: UploadGraphModalProps) {
     const [currentUser, setCurrentUser] = useState<{ login: string; token: string } | null>(null);
     const [transferPercent, setTransferPercent] = useState(0);
-    const [transferState, setTransferState] = useState<"init" | "uploading" | "processing" | "done">("init");
+    const [transferState, setTransferState] = useState<"init" | "deleting" | "uploading" | "processing" | "done">("init");
     const [uploadfile, setUploadFile] = useState<File[]>([]);
     const [replaceGraph, setReplaceGraph] = useState<boolean>(true);
     const [errorMessage, setErrorMessage] = useState("");
@@ -72,10 +72,12 @@ export function UploadGraphModal({ apiUrl, onClose, open, sourceName, indexAfter
 
         if (replaceGraph) {
             try {
+                setTransferState("deleting");
                 await deleteGraph(currentUser.token);
             } catch (error) {
                 console.error(error);
                 setErrorMessage((error as Error).message);
+                setTransferState("init");
                 return;
             }
         }
@@ -301,16 +303,24 @@ export function UploadGraphModal({ apiUrl, onClose, open, sourceName, indexAfter
                             />
                         </FormControl>
                     </Stack>
-                    {transferPercent > 0 && !errorMessage ? (
+                    {transferState !== "init" && !errorMessage ? (
                         <Stack alignItems="center" direction="row" spacing={2} useFlexGap>
                             <LinearProgress
                                 id={`progress-${sourceName}`}
                                 sx={{ flex: 1 }}
-                                value={transferState === "processing" ? undefined : transferPercent}
-                                variant={transferState === "processing" ? "indeterminate" : "determinate"}
+                                value={transferState === "deleting" || transferState === "processing" ? undefined : transferPercent}
+                                variant={transferState === "deleting" || transferState === "processing" ? "indeterminate" : "determinate"}
                             />
                             <Typography variant="body2">
-                                {transferState === "processing" ? "Processing" : transferPercent === 100 ? (!errorMessage ? "Completed" : "") : `${transferPercent}%`}
+                                {transferState === "deleting"
+                                    ? "Deleting"
+                                    : transferState === "processing"
+                                      ? "Processing"
+                                      : transferPercent === 100
+                                        ? !errorMessage
+                                            ? "Completed"
+                                            : ""
+                                        : `${transferPercent}%`}
                             </Typography>
                         </Stack>
                     ) : null}

@@ -1,20 +1,54 @@
 /* Specific interactions of lineage */
 
 /* Source title interactions */
-.Lineage_sourceLabelDiv {
-    background-color: inherit;
-    color: @source-color !important;
+.lineage-action-group {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
 }
+
+.lineage-sources-separator {
+    width: 1px;
+    height: 28px;
+    background-color: @button1-color;
+    opacity: 0.25;
+    margin: 0 2px;
+    flex-shrink: 0;
+    border-radius: 1px;
+}
+
 .Lineage_sourceLabelDiv {
-    margin: @margin-small;
-    background-color: @background-color;
+    .slsv-button-source;
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: opacity 0.15s ease;
+    background: unset !important;
+}
+
+.Lineage_sourceLabelDiv:hover {
+    opacity: 0.7;
+}
+
+.Lineage_sourceLabelDiv .arrow-icon {
+    width: 20px !important;
+    height: 20px !important;
+    background-color: unset !important;
 }
 
 .Lineage_selectedSourceDiv {
-    .source-border;
+    border: 2px solid @source-color !important;
+    font-weight: bold;
 }
+
 .Lineage_allSelectedSourceDiv {
-    .source-border;
+    border: 2px dashed @source-color !important;
+    font-weight: bold;
 }
 
 #Lineage_graphEditionButtons {
@@ -336,4 +370,18 @@
     bottom: 10px;
     right: 10px;
     padding: 5px;
+}
+
+#lineage_drawnSources {
+    scrollbar-color: @button1-color @background-color;
+}
+#lineage_drawnSources::-webkit-scrollbar {
+    height: 4px;
+}
+#lineage_drawnSources::-webkit-scrollbar-thumb {
+    background-color: @button1-color;
+    border-radius: 2px;
+}
+#lineage_drawnSources::-webkit-scrollbar-track {
+    background-color: @background-color;
 }

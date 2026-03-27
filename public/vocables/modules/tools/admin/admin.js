@@ -10,6 +10,9 @@ import SparqlQueryUI from "../sparqlQueryUI.js";
 import SourceSelectorWidget from "../../uiWidgets/sourceSelectorWidget.js";
 import OntologyModels from "../../shared/ontologyModels.js";
 import UIcontroller from "../mappingModeler/uiController.js";
+import CreateAnnotationPropertiesTemplate_bot from "../annotationPropertiesTemplate/createAnnotationPropertiesTemplate_bot.js";
+import AdminAnnotationPropertiesTemplate from "../annotationPropertiesTemplate/adminAnnotationPropertiesTemplate.js";
+import AssignAnnotationPropertiesTemplate_bot from "../annotationPropertiesTemplate/assignAnnotationPropertiesTemplate_bot.js";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 var Admin = (function () {
@@ -446,6 +449,40 @@ $("#sourceDivControlPanelDiv").html(html);*/
         Sparql_OWL.createSkgFromOntology(source, skgGraphUri, function (err, result) {
             MainController.errorAlert(err ? err : result);
         });
+    };
+
+    /**
+     * Starts the annotation template workflow from Admin.
+     * The workflow will create an annotation template based on the vocabularies of a selected source (if any) or globally (if no source is selected).
+     */
+    self.createAnnotationPropertiesTemplate = function () {
+        // Get selected sources (can be empty)
+        var selectedSources = SourceSelectorWidget.getCheckedSources() || [];
+
+        // Bot parameters
+        var botParams = {};
+
+        // If at least one source is selected, use the first one
+        // ONLY as a reference to list vocabularies
+        if (selectedSources.length > 0) {
+            botParams.referenceSource = selectedSources[0];
+        }
+
+        // Start the template creation bot
+        // It must work even with NO selected source (global template)
+        CreateAnnotationPropertiesTemplate_bot.start(null, botParams, function (err) {
+            if (err) {
+                console.error(err);
+                return MainController.errorAlert(err.responseText || err.message || err);
+            }
+            UI.message("Annotation template workflow finished", true);
+        });
+    };
+    /**
+     * Opens the Admin UI to manage template assignments.
+     */
+    self.manageAnnotationTemplateAssignments = function () {
+        return AdminAnnotationPropertiesTemplate.openAssignmentsManager();
     };
     return self;
 })();

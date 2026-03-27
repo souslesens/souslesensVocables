@@ -23,7 +23,7 @@ import CsvDownloader from "react-csv-downloader";
 import { SRD } from "srd";
 
 import { useModel } from "../Admin";
-import { Log, LogFiles, getLogs } from "../Log";
+import { Log, LogFiles, getLogsByDateRange } from "../Log";
 import { cleanUpText } from "../Utils";
 
 type Order = "asc" | "desc";
@@ -57,7 +57,8 @@ function LogsTableComponent({ logFiles }: { logFiles: LogFiles }) {
     const [orderBy, setOrderBy] = useState<keyof Log>("timestamp");
     const [order, setOrder] = useState<Order>("desc");
 
-    const [selectedPeriod, setSelectedPeriod] = useState<string | undefined>(undefined);
+    const [startPeriod, setStartPeriod] = useState<string | undefined>(undefined);
+    const [endPeriod, setEndPeriod] = useState<string | undefined>(undefined);
     const [selectedLogs, setSelectedLogs] = useState<Log[]>([]);
 
     const handleRequestSort = (property: keyof Log) => {
@@ -66,24 +67,36 @@ function LogsTableComponent({ logFiles }: { logFiles: LogFiles }) {
         setOrderBy(property);
     };
 
-    const handleLogSelection = (event: ChangeEvent<HTMLInputElement>) => {
-        setSelectedPeriod(event.target.value);
+    const handleStartPeriodChange = (event: ChangeEvent<HTMLInputElement>) => {
+        setStartPeriod(event.target.value);
+    };
+
+    const handleEndPeriodChange = (event: ChangeEvent<HTMLInputElement>) => {
+        setEndPeriod(event.target.value);
     };
 
     useEffect(() => {
-        if (selectedPeriod !== undefined) {
-            getLogs(selectedPeriod)
+        if (startPeriod !== undefined && endPeriod !== undefined) {
+            const startDate = startPeriod + "-01";
+            const [year, month] = endPeriod.split("-");
+            const lastDay = new Date(parseInt(year), parseInt(month), 0).getDate();
+            const endDate = `${endPeriod}-${lastDay}`;
+
+            getLogsByDateRange(startDate, endDate)
                 .then((data) => setSelectedLogs(data))
                 .catch(() => {
                     console.error("Error getting logs");
                     setSelectedLogs([]);
                 });
         }
-    }, [selectedPeriod]);
+    }, [startPeriod, endPeriod]);
 
     const logFilesData = logFiles.message;
-    if (selectedPeriod === undefined) {
-        setSelectedPeriod(logFilesData.find((log) => log.current)?.date);
+    if (startPeriod === undefined) {
+        setStartPeriod(logFilesData.find((log) => log.current)?.date);
+    }
+    if (endPeriod === undefined) {
+        setEndPeriod(logFilesData.find((log) => log.current)?.date);
     }
 
     const memoizedLogs = useMemo(() => {
@@ -116,7 +129,7 @@ function LogsTableComponent({ logFiles }: { logFiles: LogFiles }) {
             <Stack direction="row" spacing={{ xs: 2 }} useFlexGap>
                 <TextField
                     select
-                    id="select-period"
+                    id="select-start-period"
                     InputProps={{
                         startAdornment: (
                             <InputAdornment position="start">
@@ -124,10 +137,31 @@ function LogsTableComponent({ logFiles }: { logFiles: LogFiles }) {
                             </InputAdornment>
                         ),
                     }}
-                    label="Select Period"
-                    onChange={handleLogSelection}
+                    label="Start Period"
+                    onChange={handleStartPeriodChange}
                     size="medium"
-                    value={selectedPeriod}
+                    value={startPeriod ?? ""}
+                >
+                    {logFilesData.map((file, i) => (
+                        <MenuItem key={i} value={file.date}>
+                            {file.date}
+                        </MenuItem>
+                    ))}
+                </TextField>
+                <TextField
+                    select
+                    id="select-end-period"
+                    InputProps={{
+                        startAdornment: (
+                            <InputAdornment position="start">
+                                <CalendarMonth />
+                            </InputAdornment>
+                        ),
+                    }}
+                    label="End Period"
+                    onChange={handleEndPeriodChange}
+                    size="medium"
+                    value={endPeriod ?? ""}
                 >
                     {logFilesData.map((file, i) => (
                         <MenuItem key={i} value={file.date}>

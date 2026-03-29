@@ -2,6 +2,7 @@ import common from "../../shared/common.js";
 import DataSourceManager from "./dataSourcesManager.js";
 import MappingModeler from "./mappingModeler.js";
 import UIcontroller from "./uiController.js";
+import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 
 /**
  * Module responsible for generating and managing mappings for the MappingTransform process.
@@ -54,63 +55,235 @@ var MappingTransform = (function () {
             return alert("JstreeWidget not loaded");
         }
 
-        var baseName = "mapping_" + (MappingModeler && MappingModeler.currentSLSsource ? MappingModeler.currentSLSsource : "export");
+        var source = MappingModeler && MappingModeler.currentSLSsource ? MappingModeler.currentSLSsource : null;
+        var baseName = "mapping_" + (source || "export");
 
-        var jstreeData = [
-            { id: "export_root", parent: "#", text: "Export mappings", type: "Folder", data: { kind: "root" } },
-            { id: "export_r2rml", parent: "export_root", text: "R2RML (SQL only - Ontop)", type: "Property", data: { format: "r2rml" } },
-            { id: "export_rml", parent: "export_root", text: "RML (SQL + CSV)", type: "Property", data: { format: "rml" } },
-        ];
-
-        var options = {
-            openAll: true,
-
-            // validateSelfDialog du widget fait get_checked(true) -> donc checkbox plugin obligatoire
-            withCheckboxes: true,
-            tie_selection: false,
-            cascade: "xxx",
-
-            // Un seul choix (RML XOR R2RML)
-            onCheckNodeFn: function (_evt, obj) {
-                try {
-                    var tree = $("#jstreeWidget_treeDiv").jstree(true);
-                    if (!tree || !obj || !obj.node) return;
-                    var id = obj.node.id;
-                    if (id !== "export_rml" && id !== "export_r2rml") return;
-                    var other = id === "export_rml" ? "export_r2rml" : "export_rml";
-                    tree.uncheck_node(other);
-                } catch (e) {}
-            },
-
-            validateFn: function (selectedNodes) {
-                if (!selectedNodes || selectedNodes.length === 0) {
-                    return alert("Check one option (RML or R2RML), then click OK");
-                }
-
-                var fmt = null;
-                for (var i = 0; i < selectedNodes.length; i++) {
-                    var n = selectedNodes[i];
-                    if (n && n.data && n.data.format) {
-                        fmt = n.data.format;
-                        break;
+        // Pre-fetch rdfs:subClassOf links to parent ontology classes (BFO, IOF-CORE, etc.)
+        // so that TBox TriplesMaps include class hierarchy, enabling SousLeSens to display
+        // the hierarchy panel after import.
+        // Build a preview model to know which tables/datasources are involved,
+        // then fetch non-nullable columns from the actual CSV files so that
+        // blankNode and VirtualColumn templates can use per-row unique IDs
+        // (e.g. RowId, DataActorGainOfRole) instead of nullable composite keys.
+        var previewModel = self.buildExportModel();
+        console.log("[MappingTransform v2] getNonNullableColsMap start, triplesMaps=", previewModel.triplesMaps ? previewModel.triplesMaps.length : 0);
+        self.getNonNullableColsMap(previewModel, function (_err, nonNullableColsMap) {
+            console.log("[MappingTransform v2] nonNullableColsMap=", JSON.stringify(nonNullableColsMap));
+            self.fetchDirectSuperClasses(source, function (subClassOfMap) {
+                // Detect whether all datasources in the model are CSV.
+                // R2RML does not support CSV sources, so the R2RML option is hidden
+                // when every TriplesMap in the model comes from a CSV datasource.
+                var allCsv = previewModel.triplesMaps && previewModel.triplesMaps.length > 0;
+                if (allCsv) {
+                    for (var tmIndex = 0; tmIndex < previewModel.triplesMaps.length; tmIndex++) {
+                        if (!self.isCsvDatasource(previewModel.triplesMaps[tmIndex].dsId)) {
+                            allCsv = false;
+                            break;
+                        }
                     }
                 }
-                if (!fmt) {
-                    return alert("Check RML or R2RML, then click OK");
+
+                var jstreeData = [
+                    { id: "export_root", parent: "#", text: "Export mappings", type: "Folder", data: { kind: "root" } },
+                    { id: "export_rml", parent: "export_root", text: "RML (SQL + CSV)", type: "Property", data: { format: "rml" } },
+                ];
+                if (!allCsv) {
+                    jstreeData.splice(1, 0, { id: "export_r2rml", parent: "export_root", text: "R2RML (SQL only - Ontop)", type: "Property", data: { format: "r2rml" } });
                 }
 
-                var ttl = "";
-                if (fmt === "r2rml") {
-                    ttl = self.generateR2RMLTurtle();
-                    self.downloadTextFile(baseName + ".r2rml.ttl", ttl, "text/turtle;charset=utf-8");
-                } else if (fmt === "rml") {
-                    ttl = self.generateRMLTurtle();
-                    self.downloadTextFile(baseName + ".rml.ttl", ttl, "text/turtle;charset=utf-8");
+                var options = {
+                    openAll: true,
+                    withCheckboxes: true,
+                    tie_selection: false,
+                    cascade: "xxx",
+
+                    onCheckNodeFn: function (_evt, obj) {
+                        try {
+                            var tree = $("#jstreeWidget_treeDiv").jstree(true);
+                            if (!tree || !obj || !obj.node) return;
+                            var id = obj.node.id;
+                            if (id !== "export_rml" && id !== "export_r2rml") return;
+                            var other = id === "export_rml" ? "export_r2rml" : "export_rml";
+                            tree.uncheck_node(other);
+                        } catch (e) {}
+                    },
+
+                    validateFn: function (selectedNodes) {
+                        if (!selectedNodes || selectedNodes.length === 0) {
+                            var alertMessage;
+                            if (allCsv) {
+                                alertMessage = "Check RML, then click OK";
+                            } else {
+                                alertMessage = "Check one option (RML or R2RML), then click OK";
+                            }
+                            return alert(alertMessage);
+                        }
+
+                        var fmt = null;
+                        for (var i = 0; i < selectedNodes.length; i++) {
+                            var n = selectedNodes[i];
+                            if (n && n.data && n.data.format) {
+                                fmt = n.data.format;
+                                break;
+                            }
+                        }
+                        if (!fmt) {
+                            var noSelectionMessage;
+                            if (allCsv) {
+                                noSelectionMessage = "Check RML, then click OK";
+                            } else {
+                                noSelectionMessage = "Check RML or R2RML, then click OK";
+                            }
+                            return alert(noSelectionMessage);
+                        }
+
+                        var ttl = self.generateRmlOrR2rmlTurtle(fmt, subClassOfMap, nonNullableColsMap || {});
+                        var ext = fmt === "r2rml" ? ".r2rml.ttl" : ".rml.ttl";
+                        self.downloadTextFile(baseName + ext, ttl, "text/turtle;charset=utf-8");
+                    },
+                };
+
+                JstreeWidget.loadJsTree(null, jstreeData, options, function () {});
+            });
+        });
+    };
+
+    /**
+     * Queries the triplestore for direct rdfs:subClassOf links to non-restriction parent classes
+     * for all class nodes present in the current Vis.js graph.
+     * Used to enrich TBox TriplesMaps with class hierarchy (BFO, IOF-CORE, etc.).
+     *
+     * @function
+     * @name fetchDirectSuperClasses
+     * @memberof module:MappingTransform
+     * @param {string|null} source - SousLeSens source label
+     * @param {function} callback - function(subClassOfMap) where subClassOfMap is { classUri: [parentUri, ...] }
+     * @returns {void}
+     */
+    self.fetchDirectSuperClasses = function (source, callback) {
+        if (!source) {
+            return callback({});
+        }
+
+        var nodes = self.getAllVisNodes();
+        var classIris = [];
+        for (var i = 0; i < nodes.length; i++) {
+            var n = nodes[i];
+            if (!n || !n.id) continue;
+            var nid = String(n.id);
+            if (nid.startsWith("http")) {
+                classIris.push(nid);
+            }
+        }
+
+        if (classIris.length === 0) {
+            return callback({});
+        }
+
+        Sparql_OWL.getFilteredTriples(
+            source,
+            classIris,
+            ["http://www.w3.org/2000/01/rdf-schema#subClassOf"],
+            null,
+            { withoutImports: true },
+            function (err, results) {
+                var map = {};
+                if (!err && results) {
+                    for (var ri = 0; ri < results.length; ri++) {
+                        var row = results[ri];
+                        var cls = row.subject && row.subject.value ? row.subject.value : null;
+                        var parent = row.object && row.object.value ? row.object.value : null;
+                        if (!cls || !parent) continue;
+                        // Skip blank nodes and urn:souslesens: restriction IRIs
+                        if (parent.indexOf("urn:souslesens:") === 0) continue;
+                        if (parent.startsWith("_:")) continue;
+                        if (!map[cls]) {
+                            map[cls] = [];
+                        }
+                        map[cls].push(parent);
+                    }
                 }
+                callback(map);
             },
-        };
+        );
+    };
 
-        JstreeWidget.loadJsTree(null, jstreeData, options, function () {});
+    /**
+     * Reads CSV files for all CSV datasources in the model and returns a map of
+     * non-nullable columns (columns that have a non-empty value in every row).
+     * Used to build composite IRI templates that won't cause RMLMapper to skip rows
+     * where optional columns (e.g. dates) are empty.
+     *
+     * @function
+     * @name getNonNullableColsMap
+     * @memberof module:MappingTransform
+     * @param {object} model - The export model from buildExportModel()
+     * @param {Function} callback - Called with (err, map) where map is { [table]: string[] }
+     * @returns {void}
+     */
+    self.getNonNullableColsMap = function (model, callback) {
+        var result = {};
+        var tasks = [];
+        var seen = {};
+        for (var i = 0; i < model.triplesMaps.length; i++) {
+            var tm = model.triplesMaps[i];
+            if (!self.isCsvDatasource(tm.dsId)) continue;
+            var key = tm.table + "|" + tm.dsId;
+            if (seen[key]) continue;
+            seen[key] = true;
+            tasks.push({ dsId: tm.dsId, table: tm.table });
+        }
+        if (tasks.length === 0) {
+            return callback(null, result);
+        }
+        var pending = tasks.length;
+        var done = false;
+        tasks.forEach(function (task) {
+            $.ajax({
+                type: "GET",
+                url: Config.apiUrl + "/data/csv",
+                data: { dir: "CSV/" + (MappingModeler && MappingModeler.currentSLSsource ? MappingModeler.currentSLSsource : task.dsId), fileName: task.table },
+                dataType: "json",
+                success: function (csvResult) {
+                    if (!done) {
+                        if (csvResult && csvResult.headers && csvResult.data) {
+                            var headers = csvResult.headers;
+                            // csvResult.data is an array of batches ([[row1,row2,...],[...]])
+                            // flatten to a single array of row objects before processing
+                            var rows = [];
+                            for (var bi = 0; bi < csvResult.data.length; bi++) {
+                                rows = rows.concat(csvResult.data[bi]);
+                            }
+                            var colHasNull = {};
+                            for (var r = 0; r < rows.length; r++) {
+                                var row = rows[r];
+                                for (var c = 0; c < headers.length; c++) {
+                                    var col = headers[c];
+                                    if (!row[col] || String(row[col]).trim() === "") {
+                                        colHasNull[col] = true;
+                                    }
+                                }
+                            }
+                            result[task.table] = headers.filter(function (col) {
+                                return !colHasNull[col];
+                            }).sort();
+                        } else {
+                            result[task.table] = [];
+                        }
+                        pending--;
+                        if (pending === 0) {
+                            callback(null, result);
+                        }
+                    }
+                },
+                error: function () {
+                    if (!done) {
+                        done = true;
+                        callback(null, result);
+                    }
+                },
+            });
+        });
     };
 
     self.downloadTextFile = function (fileName, content, mimeType) {
@@ -140,8 +313,10 @@ var MappingTransform = (function () {
         return self.generateRmlOrR2rmlTurtle("rml");
     };
 
-    self.generateRmlOrR2rmlTurtle = function (format) {
+    self.generateRmlOrR2rmlTurtle = function (format, subClassOfMap, nonNullableColsMap) {
         // format: "rml" | "r2rml"
+        // subClassOfMap: optional { classUri: [parentUri, ...] } from fetchDirectSuperClasses
+        // nonNullableColsMap: optional { tableName: [colName, ...] } — columns guaranteed non-null in every CSV row
         var model = self.buildExportModel(); // canonical ids + TriplesMaps index
 
         var out = "";
@@ -149,14 +324,12 @@ var MappingTransform = (function () {
         out += "# Generated by SousLeSens (" + (format === "rml" ? "RML" : "R2RML") + " export)\n";
         out += "# Source: " + self.escapeTurtleString(MappingModeler && MappingModeler.currentSLSsource ? MappingModeler.currentSLSsource : "") + "\n\n";
 
-        // TBox declarations (owl:Class) --- RML only, so the output is directly importable in SousLeSens
-        if (format === "rml") {
-            out += self.writeTBoxDeclarations(format, model);
-        }
+        // TBox declarations (owl:Class, restrictions, and parent class hierarchy)
+        out += self.writeTBoxDeclarations(format, model, subClassOfMap || {});
 
         // TriplesMaps "entites"
         for (var i = 0; i < model.triplesMaps.length; i++) {
-            out += self.writeTriplesMapProper(format, model.triplesMaps[i], model);
+            out += self.writeTriplesMapProper(format, model.triplesMaps[i], model, nonNullableColsMap || {});
             out += "\n";
         }
 
@@ -176,21 +349,47 @@ var MappingTransform = (function () {
      * @param {object} model - The export model built by buildExportModel()
      * @returns {string} Turtle snippet with owl:Class declarations
      */
-    self.writeTBoxDeclarations = function (format, model) {
+    self.writeTBoxDeclarations = function (format, model, subClassOfMap) {
         var ttl = "# TBox declarations (TriplesMaps)\n";
         var seenClasses = {};
         var gUri = self.getGraphUri();
         var nodesById = model.nodesById;
+        var parentMap = subClassOfMap || {};
 
-        // Find reference tmInfo for logical source (use first entity TriplesMap)
-        var refTmInfo = model.triplesMaps.length > 0 ? model.triplesMaps[0] : null;
+        // Find reference tmInfo: for R2RML skip CSV-only datasources
+        var refTmInfo = null;
+        for (var ri = 0; ri < model.triplesMaps.length; ri++) {
+            var candidate = model.triplesMaps[ri];
+            if (format === "r2rml" && self.isCsvDatasource(candidate.dsId)) continue;
+            refTmInfo = candidate;
+            break;
+        }
         if (!refTmInfo) {
             return ttl + "\n";
         }
 
+        /**
+         * Returns the format-specific logical source tag and block string for TBox TriplesMaps.
+         * For R2RML: uses rr:logicalTable with rr:tableName.
+         * For RML: uses rml:logicalSource with source path and reference formulation.
+         * @param {string} table - Table name
+         * @param {string} dsId - Datasource ID
+         * @returns {{ tag: string, block: string }} tag and block content
+         */
+        var getTboxLogical = function (table, dsId) {
+            if (format === "r2rml") {
+                return { tag: "rr:logicalTable", block: self.logicalBlockR2RML(table) };
+            }
+            return { tag: "rml:logicalSource", block: self.logicalBlockRML(table, dsId) };
+        };
+
+        var refLogicalInfo = getTboxLogical(refTmInfo.table, refTmInfo.dsId);
+
         // Case 1: rdfType on entity node is a business class (not owl:NamedIndividual, not owl:Class)
         for (var i = 0; i < model.triplesMaps.length; i++) {
             var tmInfo = model.triplesMaps[i];
+            // R2RML: skip CSV datasources
+            if (format === "r2rml" && self.isCsvDatasource(tmInfo.dsId)) continue;
             var subjNode = tmInfo.subjNode;
             if (!subjNode || !subjNode.data) continue;
             var rdfType = subjNode.data.rdfType;
@@ -198,11 +397,11 @@ var MappingTransform = (function () {
             if (seenClasses[rdfType]) continue;
             seenClasses[rdfType] = true;
             var classIri = self.resolveIri(rdfType);
-            var classLabel1 = self.iriLocalName(rdfType);
+            var classLabel1 = self.iriLocalName(rdfType).replace(/_/g, " ");
             var tboxTmId = self.makeTriplesMapId("TM_TBOX", tmInfo.table, rdfType.replace(/[^a-zA-Z0-9_]/g, "_"));
-            var logical = self.logicalBlockRML(tmInfo.table, tmInfo.dsId);
+            var logicalInfo1 = getTboxLogical(tmInfo.table, tmInfo.dsId);
             ttl += tboxTmId + " a rr:TriplesMap ;\n";
-            ttl += "  rml:logicalSource [\n" + logical + "\n  ] ;\n";
+            ttl += "  " + logicalInfo1.tag + " [\n" + logicalInfo1.block + "\n  ] ;\n";
             ttl += "  rr:subjectMap [\n";
             if (gUri) {
                 ttl += "    rr:graph <" + self.escapeTurtleString(gUri) + "> ;\n";
@@ -218,7 +417,6 @@ var MappingTransform = (function () {
         }
 
         // Case 2: Class nodes (rdfType comes from rdf:type edges to Class nodes in the graph)
-        var refLogical = self.logicalBlockRML(refTmInfo.table, refTmInfo.dsId);
         for (var nodeId in nodesById) {
             var node = nodesById[nodeId];
             if (!node || !node.data) continue;
@@ -226,10 +424,10 @@ var MappingTransform = (function () {
             var classUri = nodeId;
             if (!classUri || seenClasses[classUri]) continue;
             seenClasses[classUri] = true;
-            var classLabel2 = self.iriLocalName(classUri);
+            var classLabel2 = self.iriLocalName(classUri).replace(/_/g, " ");
             var tboxTmId2 = self.makeTriplesMapId("TM_TBOX_URI", refTmInfo.table, classUri.replace(/[^a-zA-Z0-9_]/g, "_"));
             ttl += tboxTmId2 + " a rr:TriplesMap ;\n";
-            ttl += "  rml:logicalSource [\n" + refLogical + "\n  ] ;\n";
+            ttl += "  " + refLogicalInfo.tag + " [\n" + refLogicalInfo.block + "\n  ] ;\n";
             ttl += "  rr:subjectMap [\n";
             if (gUri) {
                 ttl += "    rr:graph <" + self.escapeTurtleString(gUri) + "> ;\n";
@@ -274,12 +472,15 @@ var MappingTransform = (function () {
 
             var propSafeId = predUri.replace(/[^a-zA-Z0-9_]/g, "_");
             var fromClassSafe = fromClass.replace(/[^a-zA-Z0-9_]/g, "_");
-            var restrictionIri = "urn:souslesens:restriction:" + fromClassSafe + "_" + propSafeId;
+            var toClassSafe = toClass.replace(/[^a-zA-Z0-9_]/g, "_");
+            // Include toClassSafe in restrictionIri so each (fromClass, prop, toClass) combo is unique
+            var restrictionIri = "urn:souslesens:restriction:" + fromClassSafe + "_" + propSafeId + "_" + toClassSafe;
 
             // TriplesMap A: owl:ObjectProperty with rdfs:domain / rdfs:range
-            var propTmId = self.makeTriplesMapId("TM_TBOX_PROP", refTmInfo.table, propSafeId);
+            // Include fromClassSafe + toClassSafe to avoid ID collision when same prop has multiple domain/range pairs
+            var propTmId = self.makeTriplesMapId("TM_TBOX_PROP", refTmInfo.table, fromClassSafe + "_" + propSafeId + "_" + toClassSafe);
             ttl += propTmId + " a rr:TriplesMap ;\n";
-            ttl += "  rml:logicalSource [\n" + refLogical + "\n  ] ;\n";
+            ttl += "  " + refLogicalInfo.tag + " [\n" + refLogicalInfo.block + "\n  ] ;\n";
             ttl += "  rr:subjectMap [\n";
             if (gUri) {
                 ttl += "    rr:graph <" + self.escapeTurtleString(gUri) + "> ;\n";
@@ -298,9 +499,9 @@ var MappingTransform = (function () {
             ttl += "  ] .\n\n";
 
             // TriplesMap B: OWL restriction node (owl:Restriction + owl:onProperty + owl:someValuesFrom)
-            var restrTmId = self.makeTriplesMapId("TM_TBOX_RESTR", refTmInfo.table, fromClassSafe + "_" + propSafeId);
+            var restrTmId = self.makeTriplesMapId("TM_TBOX_RESTR", refTmInfo.table, fromClassSafe + "_" + propSafeId + "_" + toClassSafe);
             ttl += restrTmId + " a rr:TriplesMap ;\n";
-            ttl += "  rml:logicalSource [\n" + refLogical + "\n  ] ;\n";
+            ttl += "  " + refLogicalInfo.tag + " [\n" + refLogicalInfo.block + "\n  ] ;\n";
             ttl += "  rr:subjectMap [\n";
             if (gUri) {
                 ttl += "    rr:graph <" + self.escapeTurtleString(gUri) + "> ;\n";
@@ -319,9 +520,9 @@ var MappingTransform = (function () {
             ttl += "  ] .\n\n";
 
             // TriplesMap C: fromClass rdfs:subClassOf restrictionNode
-            var subclsTmId = self.makeTriplesMapId("TM_TBOX_SUBCLS", refTmInfo.table, fromClassSafe + "_" + propSafeId);
+            var subclsTmId = self.makeTriplesMapId("TM_TBOX_SUBCLS", refTmInfo.table, fromClassSafe + "_" + propSafeId + "_" + toClassSafe);
             ttl += subclsTmId + " a rr:TriplesMap ;\n";
-            ttl += "  rml:logicalSource [\n" + refLogical + "\n  ] ;\n";
+            ttl += "  " + refLogicalInfo.tag + " [\n" + refLogicalInfo.block + "\n  ] ;\n";
             ttl += "  rr:subjectMap [\n";
             if (gUri) {
                 ttl += "    rr:graph <" + self.escapeTurtleString(gUri) + "> ;\n";
@@ -333,6 +534,32 @@ var MappingTransform = (function () {
             ttl += "    rr:predicate rdfs:subClassOf ;\n";
             ttl += "    rr:objectMap [ rr:constant <" + self.escapeTurtleString(restrictionIri) + "> ; rr:termType rr:IRI ]\n";
             ttl += "  ] .\n\n";
+        }
+
+        // Case 4: rdfs:subClassOf to external parent classes (BFO, IOF-CORE, etc.)
+        // These links give SousLeSens the class hierarchy in "node infos" after import.
+        for (var classUri4 in parentMap) {
+            var parents4 = parentMap[classUri4];
+            if (!parents4 || parents4.length === 0) continue;
+            for (var pi = 0; pi < parents4.length; pi++) {
+                var parentUri4 = parents4[pi];
+                var classSafe4 = classUri4.replace(/[^a-zA-Z0-9_]/g, "_");
+                var parentSafe4 = parentUri4.replace(/[^a-zA-Z0-9_]/g, "_");
+                var parentTmId = self.makeTriplesMapId("TM_TBOX_PARENT", refTmInfo.table, classSafe4 + "_" + parentSafe4);
+                ttl += parentTmId + " a rr:TriplesMap ;\n";
+                ttl += "  " + refLogicalInfo.tag + " [\n" + refLogicalInfo.block + "\n  ] ;\n";
+                ttl += "  rr:subjectMap [\n";
+                if (gUri) {
+                    ttl += "    rr:graph <" + self.escapeTurtleString(gUri) + "> ;\n";
+                }
+                ttl += "    rr:constant <" + self.escapeTurtleString(classUri4) + "> ;\n";
+                ttl += "    rr:termType rr:IRI\n";
+                ttl += "  ] ;\n";
+                ttl += "  rr:predicateObjectMap [\n";
+                ttl += "    rr:predicate rdfs:subClassOf ;\n";
+                ttl += "    rr:objectMap [ rr:constant <" + self.escapeTurtleString(parentUri4) + "> ; rr:termType rr:IRI ]\n";
+                ttl += "  ] .\n\n";
+            }
         }
 
         ttl += "\n";
@@ -499,13 +726,41 @@ var MappingTransform = (function () {
     // ---------------------------------------------------------------------------
     // TriplesMap writer (proper)
     // ---------------------------------------------------------------------------
-    self.writeTriplesMapProper = function (format, tmInfo, model) {
+    self.writeTriplesMapProper = function (format, tmInfo, model, nonNullableColsMap) {
         var nodesById = model.nodesById;
         var nodes = model.nodes;
         var outgoing = model.outgoing;
 
         var table = tmInfo.table;
         var dsId = tmInfo.dsId;
+
+        // Compute deduplicated list of real CSV Column node IDs for this table.
+        // Used by writeSubjectMapProper for blankNode composite URI templates.
+        // We compute it here because tmInfo.table is always set, while
+        // subjectData.dataTable may be null for some blankNode subject nodes.
+        var tmRealCols = [];
+        var tmColSeen = {};
+        if (table && nodesById) {
+            var tmAllNodeIds = Object.keys(nodesById);
+            for (var tmci = 0; tmci < tmAllNodeIds.length; tmci++) {
+                var tmcNode = nodesById[tmAllNodeIds[tmci]];
+                if (!tmcNode || !tmcNode.data) continue;
+                var tmcd = tmcNode.data;
+                if (tmcd.type === "Column" && tmcd.dataTable === table && tmcd.id && !tmColSeen[String(tmcd.id)]) {
+                    tmColSeen[String(tmcd.id)] = true;
+                    tmRealCols.push(String(tmcd.id));
+                }
+            }
+            tmRealCols.sort();
+        }
+
+        // Compute the list of non-nullable CSV columns for this table.
+        // This list is passed separately to writeSubjectMapProper so that blankNode
+        // and VirtualColumn templates can use per-row unique ID columns
+        // (e.g. RowId, DataActorGainOfRole) even when they are not MappingModeler nodes.
+        // Keeping tmRealCols unchanged avoids polluting the mapped-column list with
+        // CSV-only columns that would break other template logic.
+        var tmNonNullCols = (nonNullableColsMap && table && nonNullableColsMap[table]) ? nonNullableColsMap[table] : null;
 
         // R2RML = SQL only
         if (format === "r2rml" && self.isCsvDatasource(dsId)) {
@@ -550,6 +805,17 @@ var MappingTransform = (function () {
                     value: sData.rdfsLabel,
                     language: labelLang,
                     datatype: labelLang ? null : "xsd:string",
+                }),
+            );
+        }
+
+        // (A1) KGcreator#mappingFile — required by MappingModeler getTriplesStats query to display triple count
+        if (table) {
+            addPo(
+                self.writePredicateObjectMapProper(format, "http://souslesens.org/KGcreator#mappingFile", {
+                    kind: "literalConstant",
+                    value: table,
+                    datatype: null,
                 }),
             );
         }
@@ -635,7 +901,7 @@ var MappingTransform = (function () {
                 }
 
                 // pass n as fromNode so edgeToObjectMap can use its column as child FK
-                addPo(self.edgeToObjectMap(format, table, n, toNode, pred2, model));
+                addPo(self.edgeToObjectMap(format, table, n, toNode, pred2, model, tmNonNullCols));
             }
         }
 
@@ -655,7 +921,7 @@ var MappingTransform = (function () {
             ttl += "  ] ;\n";
         }
 
-        ttl += self.writeSubjectMapProper(format, sData, businessClass, model.nodesById);
+        ttl += self.writeSubjectMapProper(format, sData, businessClass, model.nodesById, tmInfo.tmId, tmRealCols, tmNonNullCols);
 
         if (po) ttl += po;
 
@@ -664,7 +930,7 @@ var MappingTransform = (function () {
     };
 
     // Convert an edge target into objectMap (proper join if possible)
-    self.edgeToObjectMap = function (format, currentTable, fromNode, toNode, predicate, model) {
+    self.edgeToObjectMap = function (format, currentTable, fromNode, toNode, predicate, model, tmNonNullCols) {
         var nodesById = model.nodesById;
 
         var toData = toNode && toNode.data ? toNode.data : null;
@@ -716,8 +982,46 @@ var MappingTransform = (function () {
                     childCol = null;
                 }
             } else {
-                // Same-table join: both child and parent reference toData.id
-                if (toData.id) {
+                // Same-table join.
+                // The join key depends on the nature of the source and target nodes:
+                //
+                // Case A — source is VirtualColumn (e.g. Data_actor_gain_of_role):
+                //   Use the VirtualColumn's own key column (DataActorGainOfRole / RowId).
+                //   Using toData.id (e.g. "ActorRoleStartDate") would create a cross-join
+                //   on the date value, linking one event to all rows with the same date.
+                //
+                // Case B — target is blankNode Column (e.g. RoleAsDefinedInDataGovernanceModel,
+                //   ActorRoleStartDate): its subject template uses RowId, not its own column
+                //   value. Joining on the target column value (e.g. "RoleAsDefinedInDataGovernanceModel")
+                //   would link the source to ALL rows that share the same role string instead
+                //   of only the rows belonging to the same entity.
+                //   Fix: join on the canonical source entity's column (fromNode.data.id),
+                //   e.g. "DataActor = DataActor" links each actor to only its own rows' roles.
+                //
+                // Case C — normal fromLabel-to-fromLabel join (e.g. MainEntity → DataActor):
+                //   Use toData.id as before.
+                var fromNodeData = fromNode && fromNode.data ? fromNode.data : null;
+                if (fromNodeData && fromNodeData.type === "VirtualColumn") {
+                    // Case A
+                    var vcJoinKey = self.findVirtualColumnKey(fromNodeData, nodesById, tmNonNullCols);
+                    childCol = vcJoinKey;
+                    parentCol = vcJoinKey;
+                } else if (canonData.uriType === "blankNode") {
+                    // Case B: target blankNode — join on the source entity's own column
+                    var canonFromNodeId = model.getCanonicalNodeId(fromNode ? fromNode.id : "");
+                    var canonFromNodeData = nodesById[canonFromNodeId] ? nodesById[canonFromNodeId].data : null;
+                    if (canonFromNodeData && canonFromNodeData.id) {
+                        childCol = String(canonFromNodeData.id);
+                        parentCol = String(canonFromNodeData.id);
+                    } else if (fromNodeData && fromNodeData.id) {
+                        childCol = String(fromNodeData.id);
+                        parentCol = String(fromNodeData.id);
+                    } else {
+                        childCol = null;
+                        parentCol = null;
+                    }
+                } else if (toData.id) {
+                    // Case C: normal join on the target column value
                     parentCol = String(toData.id);
                     childCol = String(toData.id);
                 } else if (canonData.id) {
@@ -768,11 +1072,15 @@ var MappingTransform = (function () {
         }
 
         // VirtualColumn: SousLeSens creates a blank node per (columnId, rowIndex).
-        // In RML, replicate with rr:parentTriplesMap + joinCondition on the primary key column.
+        // In RML, replicate with rr:parentTriplesMap + joinCondition on the VirtualColumn's
+        // own key column (e.g. DataActorGainOfRole or RowId).
+        // Using findPrimaryKeyColumn here was wrong: it returned the first isMainColumn node
+        // in graph order (e.g. "MainEntity"), causing all actors in the same entity to be
+        // linked to every gain_of_role of that entity instead of only their own.
         if (canonData.type === "VirtualColumn") {
             var vcParentTm = model.tmByCanonicalNodeId[canonToId];
             if (vcParentTm) {
-                var vcPkCol = self.findPrimaryKeyColumn(canonData.dataTable, nodesById);
+                var vcPkCol = self.findVirtualColumnKey(canonData, nodesById, tmNonNullCols);
                 if (vcPkCol) {
                     return self.writePredicateObjectMapProper(format, predicate, {
                         kind: "parentTriplesMap",
@@ -782,7 +1090,7 @@ var MappingTransform = (function () {
                     });
                 }
             }
-            return "  # NOTE: predicate <" + predicate + "> → VirtualColumn '" + canonData.id + "' blank node — no primary key column found in table '" + (canonData.dataTable || "?") + "', skipped\n";
+            return "  # NOTE: predicate <" + predicate + "> → VirtualColumn '" + canonData.id + "' blank node — no key column found in table '" + (canonData.dataTable || "?") + "', skipped\n";
         }
 
         // literal columns
@@ -896,7 +1204,7 @@ var MappingTransform = (function () {
     // ---------------------------------------------------------------------------
     // Writers: subjectMap + predicateObjectMap (proper)
     // ---------------------------------------------------------------------------
-    self.writeSubjectMapProper = function (_format, subjectData, businessClass, _nodesById) {
+    self.writeSubjectMapProper = function (_format, subjectData, businessClass, _nodesById, _tmId, _tmRealCols, _tmNonNullCols) {
         var gUri = self.getGraphUri();
         var ttl = "";
         ttl += "  rr:subjectMap [\n";
@@ -911,11 +1219,41 @@ var MappingTransform = (function () {
             ttl += "    rr:termType rr:IRI";
         } else if (subjectData && (subjectData.type === "RowIndex" || subjectData.type === "VirtualColumn")) {
             // SousLeSens creates a blank node per row for RowIndex/VirtualColumn.
-            // To make the blank node stable and joinable from other TriplesMaps, use a template
-            // built from the primary key column of the same table (if available).
-            var pkForBNode = self.findPrimaryKeyColumn(subjectData.dataTable, _nodesById);
+            // To make the blank node joinable from other TriplesMaps (parentTriplesMap),
+            // use an IRI template scoped by node id + a per-row unique column.
+            // Preference order:
+            //   1. Column whose normalized name matches the VirtualColumn node's safeId
+            //      (e.g. node "Data_actor_gain_of_role" → column "DataActorGainOfRole")
+            //      This allows users to add a dedicated per-row column for each VirtualColumn.
+            //   2. "RowId" column — generic synthetic row identifier
+            //   3. Primary key column — fallback
+            var safeId = self.escapeTurtleString(String(subjectData.id)).replace(/[^a-zA-Z0-9_]/g, "_");
+            var safeIdNorm = safeId.replace(/_/g, "").toLowerCase();
+            var matchedCol = null;
+            // Search order: non-nullable CSV columns first (may contain synthetic ID columns
+            // like DataActorGainOfRole/RowId not present as MappingModeler nodes),
+            // then fall back to mapped real columns.
+            var colListsToSearch = [];
+            if (_tmNonNullCols && _tmNonNullCols.length > 0) {
+                colListsToSearch.push(_tmNonNullCols);
+            }
+            if (_tmRealCols && _tmRealCols.length > 0) {
+                colListsToSearch.push(_tmRealCols);
+            }
+            for (var cli = 0; cli < colListsToSearch.length && !matchedCol; cli++) {
+                var colList = colListsToSearch[cli];
+                for (var rvi = 0; rvi < colList.length; rvi++) {
+                    if (colList[rvi].toLowerCase() === safeIdNorm) {
+                        matchedCol = colList[rvi];
+                        break;
+                    }
+                }
+                if (!matchedCol && colList.indexOf("RowId") !== -1) {
+                    matchedCol = "RowId";
+                }
+            }
+            var pkForBNode = matchedCol || self.findPrimaryKeyColumn(subjectData.dataTable, _nodesById);
             if (pkForBNode) {
-                var safeId = self.escapeTurtleString(String(subjectData.id)).replace(/[^a-zA-Z0-9_]/g, "_");
                 ttl += '    rr:template "http://souslesens.org/bnode/' + safeId + "/{" + pkForBNode + '}" ;\n';
                 // rr:template requires rr:IRI — BlankNode is incompatible with templates
                 ttl += "    rr:termType rr:IRI";
@@ -923,8 +1261,87 @@ var MappingTransform = (function () {
                 // no primary key available: true blank node per row (no template)
                 ttl += "    rr:termType rr:BlankNode";
             }
+        } else if (subjectData && subjectData.uriType === "blankNode") {
+            // Blank node semantics: rr:termType rr:BlankNode does NOT work with
+            // parentTriplesMap+joinCondition in RMLMapper (blank nodes cannot be resolved
+            // across TriplesMaps). Instead we use a composite IRI template that is:
+            //   - namespaced by the TriplesMap ID (unique per TriplesMap) to prevent URI
+            //     collisions between TriplesMaps with different rdf:type on the same row
+            //   - built from all real CSV Column nodes of the table to ensure per-row
+            //     uniqueness within each TriplesMap
+            // Joins (parentTriplesMap+joinCondition) still work because they match on column
+            // VALUES, not on the generated IRI.
+            var bnNs = _tmId ? String(_tmId).replace(/[^a-zA-Z0-9_]/g, "_").replace(/^_+/, "") : "bnode";
+            // Strategy for choosing template columns (in order):
+            //   1. _tmNonNullCols from CSV: all columns are guaranteed non-null, so RMLMapper
+            //      will never skip a row. If RowId exists → use it alone. Otherwise use all
+            //      non-nullable columns (unique combination per row in practice).
+            //   2. _tmRealCols fallback: mapped node columns. May include nullable columns
+            //      (e.g. ActorRoleEndDate) which cause RMLMapper to skip rows.
+            //      Apply RowId / VirtualColumn-pattern reduction to minimise skipped rows.
+            var bnRealCols = [];
+            if (_tmNonNullCols && _tmNonNullCols.length > 0) {
+                // Use the non-nullable CSV columns directly.
+                if (_tmNonNullCols.indexOf("RowId") !== -1) {
+                    bnRealCols = ["RowId"];
+                } else {
+                    bnRealCols = _tmNonNullCols.slice();
+                }
+            } else {
+                bnRealCols = _tmRealCols && _tmRealCols.length > 0 ? _tmRealCols : [];
+                // Prefer per-row synthetic ID columns over the full composite template.
+                if (bnRealCols.indexOf("RowId") !== -1) {
+                    bnRealCols = ["RowId"];
+                } else {
+                    var bnVcCols = bnRealCols.filter(function (c) {
+                        var cn = c.toLowerCase();
+                        return cn.indexOf("gainofrole") !== -1 || cn.indexOf("lossofrole") !== -1 || cn.indexOf("rowid") !== -1;
+                    });
+                    if (bnVcCols.length > 0) {
+                        bnRealCols = bnVcCols;
+                    }
+                }
+            }
+            if (bnRealCols.length === 0 && subjectData.dataTable && _nodesById) {
+                // Fallback: compute from nodesById using subjectData.dataTable
+                var bnTable = String(subjectData.dataTable);
+                var bnColSeen = {};
+                var bnNodeIds = Object.keys(_nodesById);
+                for (var bni = 0; bni < bnNodeIds.length; bni++) {
+                    var bnNode = _nodesById[bnNodeIds[bni]];
+                    if (!bnNode || !bnNode.data) continue;
+                    var bnd = bnNode.data;
+                    if (bnd.type === "Column" && bnd.dataTable === bnTable && bnd.id && !bnColSeen[String(bnd.id)]) {
+                        bnColSeen[String(bnd.id)] = true;
+                        bnRealCols.push(String(bnd.id));
+                    }
+                }
+                bnRealCols.sort();
+            }
+            if (bnRealCols.length > 0) {
+                var bnTemplate = bnRealCols.map(function (c) { return "{" + c + "}"; }).join("_");
+                ttl += '    rr:template "http://souslesens.org/bnode/' + bnNs + "/" + bnTemplate + '" ;\n';
+            } else {
+                var bnCol = subjectData.id ? String(subjectData.id) : "id";
+                ttl += '    rr:template "http://souslesens.org/bnode/' + bnNs + "/{" + bnCol + '}" ;\n';
+            }
+            ttl += "    rr:termType rr:IRI";
         } else {
             var template = self.subjectTemplateForColumn(subjectData);
+            // Namespace the URI by column name to prevent inter-TriplesMap URI collisions.
+            // Two TMs sharing the same graphUri prefix (e.g. DataDomain and ActorRoleEndDate)
+            // can produce the same IRI when column values happen to match — for example when
+            // the ActorRoleEndDate column contains a value identical to a DataDomain value.
+            // Using the column name (subjectData.id) as a path segment guarantees uniqueness
+            // because column names are distinct across TMs: DataDomain/{DataDomain} can never
+            // collide with ActorRoleEndDate/{ActorRoleEndDate}.
+            var colNameNs = subjectData && subjectData.id ? String(subjectData.id) : null;
+            if (colNameNs) {
+                var nsSep = Math.max(template.lastIndexOf("/"), template.lastIndexOf("#"));
+                if (nsSep !== -1) {
+                    template = template.slice(0, nsSep + 1) + colNameNs + "/" + template.slice(nsSep + 1);
+                }
+            }
             ttl += '    rr:template "' + self.escapeTurtleString(template) + '" ;\n';
             // rr:template requires rr:IRI — BlankNode is incompatible with templates
             ttl += "    rr:termType rr:IRI";
@@ -1086,27 +1503,34 @@ var MappingTransform = (function () {
             }
         }
 
+        var host = (ds && ds.host) ? ds.host : "YOUR_HOST";
+        var database = (ds && ds.database) ? ds.database : "YOUR_DATABASE";
+        var port;
+
         if (sqlType === "postgres" || sqlType === "postgresql") {
+            port = (ds && ds.port) ? ds.port : 5432;
             return {
-                jdbcDSN: "jdbc:postgresql://YOUR_HOST:5432/YOUR_DATABASE",
+                jdbcDSN: "jdbc:postgresql://" + host + ":" + port + "/" + database,
                 jdbcDriver: "org.postgresql.Driver",
             };
         }
         if (sqlType === "sqlserver" || sqlType === "mssql") {
+            port = (ds && ds.port) ? ds.port : 1433;
             return {
-                jdbcDSN: "jdbc:sqlserver://YOUR_HOST:1433;databaseName=YOUR_DATABASE",
+                jdbcDSN: "jdbc:sqlserver://" + host + ":" + port + ";databaseName=" + database,
                 jdbcDriver: "com.microsoft.sqlserver.jdbc.SQLServerDriver",
             };
         }
         if (sqlType === "oracle") {
+            port = (ds && ds.port) ? ds.port : 1521;
             return {
-                jdbcDSN: "jdbc:oracle:thin:@YOUR_HOST:1521:YOUR_DATABASE",
+                jdbcDSN: "jdbc:oracle:thin:@" + host + ":" + port + ":" + database,
                 jdbcDriver: "oracle.jdbc.OracleDriver",
             };
         }
         if (sqlType === "sqlite") {
             return {
-                jdbcDSN: "jdbc:sqlite:YOUR_DATABASE_FILE.db",
+                jdbcDSN: "jdbc:sqlite:" + database,
                 jdbcDriver: "org.sqlite.JDBC",
             };
         }
@@ -1309,6 +1733,62 @@ var MappingTransform = (function () {
         if (s.indexOf(" ") > -1) return false;
         // plain identifier: letters, digits, underscores, hyphens, dots
         return /^[a-zA-Z0-9_\-\.]+$/.test(s);
+    };
+
+    /**
+     * Returns the join key column for a VirtualColumn node.
+     * Uses the same resolution order as writeSubjectMapProper for VirtualColumn subjects:
+     *   1. Column in nonNullCols whose normalized name matches the VirtualColumn's safeId
+     *      (e.g. "Data actor gain of role" → "dataactorgainofrole" → matches "DataActorGainOfRole")
+     *   2. "RowId" if present in nonNullCols or graph nodes
+     *   3. findPrimaryKeyColumn fallback
+     * @function
+     * @name findVirtualColumnKey
+     * @memberof module:MappingTransform
+     * @param {Object} vcData - The VirtualColumn node's data object.
+     * @param {Object} nodesById - Map of all graph nodes keyed by ID.
+     * @param {string[]|null} nonNullCols - Non-nullable CSV column names for the table.
+     * @returns {string|null} The column name to use as join key, or null.
+     */
+    self.findVirtualColumnKey = function (vcData, nodesById, nonNullCols) {
+        var safeId = String(vcData.id || "").replace(/[^a-zA-Z0-9_]/g, "_");
+        var safeIdNorm = safeId.replace(/_/g, "").toLowerCase();
+        var table = vcData.dataTable;
+
+        // Build the list of candidate columns: nonNullCols first, then graph nodes.
+        var colsToSearch = [];
+        if (nonNullCols && nonNullCols.length > 0) {
+            colsToSearch = nonNullCols.slice();
+        }
+        if (nodesById) {
+            var nodeIds = Object.keys(nodesById);
+            for (var i = 0; i < nodeIds.length; i++) {
+                var n = nodesById[nodeIds[i]];
+                if (!n || !n.data) continue;
+                var d = n.data;
+                if (d.type === "Column" && d.dataTable === table && d.id) {
+                    var cid = String(d.id);
+                    if (colsToSearch.indexOf(cid) === -1) {
+                        colsToSearch.push(cid);
+                    }
+                }
+            }
+        }
+
+        // 1. Exact normalized-name match (e.g. "DataActorGainOfRole" → "dataactorgainofrole")
+        for (var j = 0; j < colsToSearch.length; j++) {
+            if (colsToSearch[j].replace(/_/g, "").toLowerCase() === safeIdNorm) {
+                return colsToSearch[j];
+            }
+        }
+
+        // 2. RowId
+        if (colsToSearch.indexOf("RowId") !== -1) {
+            return "RowId";
+        }
+
+        // 3. Fallback: standard primary-key column
+        return self.findPrimaryKeyColumn(table, nodesById);
     };
 
     self.findPrimaryKeyColumn = function (table, nodesById) {

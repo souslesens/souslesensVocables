@@ -180,32 +180,25 @@ var MappingTransform = (function () {
             return callback({});
         }
 
-        Sparql_OWL.getFilteredTriples(
-            source,
-            classIris,
-            ["http://www.w3.org/2000/01/rdf-schema#subClassOf"],
-            null,
-            { withoutImports: true },
-            function (err, results) {
-                var map = {};
-                if (!err && results) {
-                    for (var ri = 0; ri < results.length; ri++) {
-                        var row = results[ri];
-                        var cls = row.subject && row.subject.value ? row.subject.value : null;
-                        var parent = row.object && row.object.value ? row.object.value : null;
-                        if (!cls || !parent) continue;
-                        // Skip blank nodes and urn:souslesens: restriction IRIs
-                        if (parent.indexOf("urn:souslesens:") === 0) continue;
-                        if (parent.startsWith("_:")) continue;
-                        if (!map[cls]) {
-                            map[cls] = [];
-                        }
-                        map[cls].push(parent);
+        Sparql_OWL.getFilteredTriples(source, classIris, ["http://www.w3.org/2000/01/rdf-schema#subClassOf"], null, { withoutImports: true }, function (err, results) {
+            var map = {};
+            if (!err && results) {
+                for (var ri = 0; ri < results.length; ri++) {
+                    var row = results[ri];
+                    var cls = row.subject && row.subject.value ? row.subject.value : null;
+                    var parent = row.object && row.object.value ? row.object.value : null;
+                    if (!cls || !parent) continue;
+                    // Skip blank nodes and urn:souslesens: restriction IRIs
+                    if (parent.indexOf("urn:souslesens:") === 0) continue;
+                    if (parent.startsWith("_:")) continue;
+                    if (!map[cls]) {
+                        map[cls] = [];
                     }
+                    map[cls].push(parent);
                 }
-                callback(map);
-            },
-        );
+            }
+            callback(map);
+        });
     };
 
     /**
@@ -264,9 +257,11 @@ var MappingTransform = (function () {
                                     }
                                 }
                             }
-                            result[task.table] = headers.filter(function (col) {
-                                return !colHasNull[col];
-                            }).sort();
+                            result[task.table] = headers
+                                .filter(function (col) {
+                                    return !colHasNull[col];
+                                })
+                                .sort();
                         } else {
                             result[task.table] = [];
                         }
@@ -412,7 +407,7 @@ var MappingTransform = (function () {
             ttl += "  ] ;\n";
             ttl += "  rr:predicateObjectMap [\n";
             ttl += "    rr:predicate rdfs:label ;\n";
-            ttl += "    rr:objectMap [ rr:constant \"" + self.escapeTurtleString(classLabel1) + "\" ]\n";
+            ttl += '    rr:objectMap [ rr:constant "' + self.escapeTurtleString(classLabel1) + '" ]\n';
             ttl += "  ] .\n\n";
         }
 
@@ -438,7 +433,7 @@ var MappingTransform = (function () {
             ttl += "  ] ;\n";
             ttl += "  rr:predicateObjectMap [\n";
             ttl += "    rr:predicate rdfs:label ;\n";
-            ttl += "    rr:objectMap [ rr:constant \"" + self.escapeTurtleString(classLabel2) + "\" ]\n";
+            ttl += '    rr:objectMap [ rr:constant "' + self.escapeTurtleString(classLabel2) + '" ]\n';
             ttl += "  ] .\n\n";
         }
 
@@ -760,7 +755,7 @@ var MappingTransform = (function () {
         // (e.g. RowId, DataActorGainOfRole) even when they are not MappingModeler nodes.
         // Keeping tmRealCols unchanged avoids polluting the mapped-column list with
         // CSV-only columns that would break other template logic.
-        var tmNonNullCols = (nonNullableColsMap && table && nonNullableColsMap[table]) ? nonNullableColsMap[table] : null;
+        var tmNonNullCols = nonNullableColsMap && table && nonNullableColsMap[table] ? nonNullableColsMap[table] : null;
 
         // R2RML = SQL only
         if (format === "r2rml" && self.isCsvDatasource(dsId)) {
@@ -1271,7 +1266,11 @@ var MappingTransform = (function () {
             //     uniqueness within each TriplesMap
             // Joins (parentTriplesMap+joinCondition) still work because they match on column
             // VALUES, not on the generated IRI.
-            var bnNs = _tmId ? String(_tmId).replace(/[^a-zA-Z0-9_]/g, "_").replace(/^_+/, "") : "bnode";
+            var bnNs = _tmId
+                ? String(_tmId)
+                      .replace(/[^a-zA-Z0-9_]/g, "_")
+                      .replace(/^_+/, "")
+                : "bnode";
             // Strategy for choosing template columns (in order):
             //   1. _tmNonNullCols from CSV: all columns are guaranteed non-null, so RMLMapper
             //      will never skip a row. If RowId exists → use it alone. Otherwise use all
@@ -1319,7 +1318,11 @@ var MappingTransform = (function () {
                 bnRealCols.sort();
             }
             if (bnRealCols.length > 0) {
-                var bnTemplate = bnRealCols.map(function (c) { return "{" + c + "}"; }).join("_");
+                var bnTemplate = bnRealCols
+                    .map(function (c) {
+                        return "{" + c + "}";
+                    })
+                    .join("_");
                 ttl += '    rr:template "http://souslesens.org/bnode/' + bnNs + "/" + bnTemplate + '" ;\n';
             } else {
                 var bnCol = subjectData.id ? String(subjectData.id) : "id";
@@ -1503,26 +1506,26 @@ var MappingTransform = (function () {
             }
         }
 
-        var host = (ds && ds.host) ? ds.host : "YOUR_HOST";
-        var database = (ds && ds.database) ? ds.database : "YOUR_DATABASE";
+        var host = ds && ds.host ? ds.host : "YOUR_HOST";
+        var database = ds && ds.database ? ds.database : "YOUR_DATABASE";
         var port;
 
         if (sqlType === "postgres" || sqlType === "postgresql") {
-            port = (ds && ds.port) ? ds.port : 5432;
+            port = ds && ds.port ? ds.port : 5432;
             return {
                 jdbcDSN: "jdbc:postgresql://" + host + ":" + port + "/" + database,
                 jdbcDriver: "org.postgresql.Driver",
             };
         }
         if (sqlType === "sqlserver" || sqlType === "mssql") {
-            port = (ds && ds.port) ? ds.port : 1433;
+            port = ds && ds.port ? ds.port : 1433;
             return {
                 jdbcDSN: "jdbc:sqlserver://" + host + ":" + port + ";databaseName=" + database,
                 jdbcDriver: "com.microsoft.sqlserver.jdbc.SQLServerDriver",
             };
         }
         if (sqlType === "oracle") {
-            port = (ds && ds.port) ? ds.port : 1521;
+            port = ds && ds.port ? ds.port : 1521;
             return {
                 jdbcDSN: "jdbc:oracle:thin:@" + host + ":" + port + ":" + database,
                 jdbcDriver: "oracle.jdbc.OracleDriver",

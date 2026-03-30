@@ -1633,6 +1633,11 @@ var MappingModeler = (function () {
     //     }
     // };
 
+    self.recreateSource = null;
+    self.recreateTotalTables = 0;
+    self.recreateProcessedTables = 0;
+    self.recreateTotalTriples = 0;
+
     self.formatDuration = function (ms) {
         var totalSeconds = Math.round(ms / 1000);
         var minutes = Math.floor(totalSeconds / 60);
@@ -1728,7 +1733,9 @@ var MappingModeler = (function () {
                 remainingText = " – remaining time: " + self.formatDuration(remaining);
             }
 
-            messageStr = "Triples created " + message.totalTriples + elapsedText + remainingText;
+            var writeLabel = message.table || self.recreateSource || null;
+            var writeTriplesPrefix = writeLabel ? "[" + writeLabel + "] " : "";
+            messageStr = writeTriplesPrefix + "Triples created " + message.totalTriples + elapsedText + remainingText;
         } else if (message.operation == "deleteTriples") {
             if (!hasTotalRecords) {
                 var waitImgEl0 = document.getElementById("waitImg") || document.getElementById("KGquery_waitImg");
@@ -1753,7 +1760,9 @@ var MappingModeler = (function () {
 
                 var deletedSoFar = message.totalSize || 0;
 
-                messageStr = "triples deleted " + deletedSoFar + " / " + (message.tableTotalRecords || 0) + elapsedTextDelete + remainingTextDelete;
+                var deleteLabel = message.table || self.recreateSource || null;
+                var sourcePrefix = deleteLabel ? "[" + deleteLabel + "] " : "";
+                messageStr = sourcePrefix + "triples deleted " + deletedSoFar + " / " + (message.tableTotalRecords || 0) + elapsedTextDelete + remainingTextDelete;
 
                 if (percent >= 100) {
                     var pb = document.getElementById("progressBar");
@@ -1769,7 +1778,26 @@ var MappingModeler = (function () {
                 }
             }
         } else if (message.operation == "finished") {
-            messageStr = "totalTriples created " + message.totalTriples + " – total duration: " + self.formatDuration(message.totalDuration);
+            var finishedLabel = message.table || self.recreateSource || null;
+            var finishedPrefix = finishedLabel ? "[" + finishedLabel + "] " : "";
+            messageStr = finishedPrefix + "totalTriples created " + message.totalTriples + " – total duration: " + self.formatDuration(message.totalDuration);
+
+            if (self.recreateSource) {
+                self.recreateProcessedTables++;
+                self.recreateTotalTriples += message.totalTriples || 0;
+
+                if (self.recreateProcessedTables >= self.recreateTotalTables) {
+                    if (self.recreateTotalTables === 1) {
+                        alert("created triples :" + self.recreateTotalTriples + " in datasource :" + finishedLabel);
+                    } else {
+                        alert("created triples :" + self.recreateTotalTriples + " in source :" + self.recreateSource);
+                    }
+                    self.recreateSource = null;
+                    self.recreateTotalTables = 0;
+                    self.recreateProcessedTables = 0;
+                    self.recreateTotalTriples = 0;
+                }
+            }
 
             var progressBar2 = document.getElementById("progressBar");
             if (progressBar2) {

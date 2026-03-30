@@ -439,11 +439,15 @@ var TripleFactory = (function () {
         };
     }
 
-    self.recreateAllTablesTriples = function (source, optionsObj) {
+    self.recreateAllTablesTriples = function (source, optionsObj, tableCount) {
         var payload = {
             source: source,
             options: JSON.stringify(optionsObj || {}),
         };
+        MappingModeler.recreateSource = source;
+        MappingModeler.recreateTotalTables = tableCount || 1;
+        MappingModeler.recreateProcessedTables = 0;
+        MappingModeler.recreateTotalTriples = 0;
         var detach = attachRecreateDeleteProgressListener();
         ajaxRecreate(
             payload,
@@ -479,6 +483,11 @@ var TripleFactory = (function () {
         if (!Array.isArray(tables) || tables.length === 0) {
             return alert("No table selected");
         }
+
+        MappingModeler.recreateSource = source;
+        MappingModeler.recreateTotalTables = tables.length;
+        MappingModeler.recreateProcessedTables = 0;
+        MappingModeler.recreateTotalTriples = 0;
 
         var i = 0;
 
@@ -687,7 +696,7 @@ var TripleFactory = (function () {
                         var allSelected = selectedIds.length === tablesDisplayed.length;
 
                         if (allSelected) {
-                            return self.recreateAllTablesTriples(source, optionsObj);
+                            return self.recreateAllTablesTriples(source, optionsObj, tablesDisplayed.length);
                         } else {
                             return self.recreateSelectedTablesTriples(source, selectedIds, optionsObj);
                         }

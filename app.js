@@ -180,21 +180,22 @@ openapi.initialize({
                 }
 
                 const user = await userManager.getUser(req.user);
-                const route = req.url;
+                const route = req.baseUrl + req.path;
+                const method = req.method;
 
                 // store quota in db
-                const quotaId = await quotaModel.add(route, user.user);
+                const quotaId = await quotaModel.add(route, method, user.user);
 
                 // get quota
-                const routeQuota = await profileModel.getMaxQuotaForRoute(route, user.user);
+                const routeQuota = await profileModel.getMaxQuotaForRoute(route, method, user.user);
 
                 // compare
-                const usage = await quotaModel.getRouteUsage(route, user.user);
+                const usage = await quotaModel.getRouteUsage(route, method, user.user);
 
                 if (usage > routeQuota) {
                     throw {
                         status: 429,
-                        message: `Too many requests, you exceeded your current quota of requests per minute (${routeQuota} for route ${route})`,
+                        message: `Too many requests, you exceeded your current quota of requests per minute (${routeQuota} for route ${route} ${method})`,
                     };
                 }
             }

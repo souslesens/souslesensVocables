@@ -114,7 +114,7 @@ type ProfileJson = {
     allowedDatabases: string[];
     isShared: boolean;
     theme?: string;
-    quota?: Record<string, number>;
+    quota?: Record<string, Record<string, number>>;
 };
 
 const decodeProfile = (key: string, profile: ProfileJson): Profile => {
@@ -149,7 +149,7 @@ const ProfileSchema = z.object({
     allowedDatabases: z.array(z.string()).default([]),
     isShared: z.boolean().default(true),
     id: z.string().default(ulid()),
-    quota: z.record(z.string(), z.number()).optional().default({}),
+    quota: z.record(z.string(), z.record(z.string(), z.number())).optional().default({}),
 });
 
 export const ProfileSchemaCreate = ProfileSchema.merge(

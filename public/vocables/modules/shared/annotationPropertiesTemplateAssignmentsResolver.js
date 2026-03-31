@@ -1,3 +1,0 @@
-import AnnotationPropertiesTemplateAssignmentsResolver from "../tools/annotationPropertiesTemplate/annotationPropertiesTemplateAssignmentsResolver.js";
-export default AnnotationPropertiesTemplateAssignmentsResolver;
-window.AnnotationPropertiesTemplateAssignmentsResolver = AnnotationPropertiesTemplateAssignmentsResolver;

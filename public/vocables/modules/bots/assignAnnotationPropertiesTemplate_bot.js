@@ -1,3 +1,0 @@
-import AssignAnnotationPropertiesTemplate_bot from "../tools/annotationPropertiesTemplate/assignAnnotationPropertiesTemplate_bot.js";
-export default AssignAnnotationPropertiesTemplate_bot;
-window.AssignAnnotationPropertiesTemplate_bot = AssignAnnotationPropertiesTemplate_bot;

@@ -211,6 +211,11 @@ class UserDataModel {
         const connection = getKnexConnection(this._mainConfig.database);
         const results = await connection.select("*").from("user_data").where("id", identifier).first();
 
+        if (results === undefined) {
+            cleanupConnection(connection);
+            throw Error("The specified identifier do not exists", { cause: 404 });
+        }
+
         // don't return if unauthorized
         const isOwner = results.owned_by === parseInt(currentUser.id);
         const isSharedWithUser = results.is_shared && results.shared_users.includes(currentUser.login);
@@ -223,11 +228,6 @@ class UserDataModel {
             const fileContent = JSON.parse(fs.readFileSync(this._getStorage(results.data_path)));
             results.data_content = fileContent;
             delete results.data_path;
-        }
-
-        if (results === undefined) {
-            cleanupConnection(connection);
-            throw Error("The specified identifier do not exists", { cause: 404 });
         }
 
         cleanupConnection(connection);

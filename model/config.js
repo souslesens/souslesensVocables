@@ -130,6 +130,7 @@ const MainConfigObject = z
             })
             .strict(),
         sparqlDownloadLimit: z.number().positive().max(1000000),
+        generalQuota: z.record(z.record(z.number().positive())),
     })
     .strict();
 

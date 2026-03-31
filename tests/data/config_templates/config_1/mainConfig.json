@@ -39,5 +39,6 @@
         "location": "database",
         "maximumFileSize": 1000000
     },
-    "sparqlDownloadLimit": 10000
+    "sparqlDownloadLimit": 10000,
+    "generalQuota": {}
 }

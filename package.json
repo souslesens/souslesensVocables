@@ -57,6 +57,7 @@
     },
     "dependencies": {
         "@anthropic-ai/sdk": "^0.80.0",
+        "@babel/parser": "^7.26.0",
         "@elastic/elasticsearch": "^8.18.2",
         "@huggingface/jinja": "^0.5.1",
         "@sentry/node": "^9.22.0",

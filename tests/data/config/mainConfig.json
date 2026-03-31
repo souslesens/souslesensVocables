@@ -89,5 +89,6 @@
     "userData": {
         "location": "database",
         "maximumFileSize": 1000000
-    }
+    },
+    "generalQuota": {}
 }

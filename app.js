@@ -186,13 +186,18 @@ openapi.initialize({
                 // store quota in db
                 const quotaId = await quotaModel.add(route, method, user.user);
 
-                // get quota
-                const routeQuota = await profileModel.getMaxQuotaForRoute(route, method, user.user);
+                // get quota from profile
+                let routeQuota = await profileModel.getMaxQuotaForRoute(route, method, user.user);
+
+                // if no profile quota, check generalQuota
+                if (routeQuota === undefined && config.generalQuota?.[route]?.[method]) {
+                    routeQuota = config.generalQuota[route][method];
+                }
 
                 // compare
                 const usage = await quotaModel.getRouteUsage(route, method, user.user);
 
-                if (usage > routeQuota) {
+                if (routeQuota !== undefined && usage > routeQuota) {
                     throw {
                         status: 429,
                         message: `Too many requests, you exceeded your current quota of requests per minute (${routeQuota} for route ${route} ${method})`,

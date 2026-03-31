@@ -87,7 +87,7 @@ class ProfileModel {
             allowedDatabases: typeof profile.allowed_databases === "string" ? JSON.parse(profile.allowed_databases) : profile.allowed_databases === null ? [] : profile.allowed_databases,
             isShared: typeof profile.is_shared === "number" ? profile.is_shared === 1 : profile.is_shared,
             sourcesAccessControl: typeof profile.access_control === "string" ? JSON.parse(profile.access_control) : profile.access_control,
-            quota: typeof profile.quota === "string" ? JSON.parse(profile.quota) : profile.quota,
+            quota: typeof profile.quota === "string" ? JSON.parse(profile.quota) : profile.quota || {},
         },
     ];
 

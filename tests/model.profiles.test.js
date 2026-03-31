@@ -64,6 +64,7 @@ describe("Test the Profilemodel module", () => {
             name: "read_folder_1",
             sourcesAccessControl: { "OWL/FOLDER_1": "read" },
             theme: "",
+            quota: {},
         });
     });
 
@@ -108,6 +109,7 @@ describe("Test the Profilemodel module", () => {
             name: "all",
             sourcesAccessControl: {},
             theme: "",
+            quota: {},
         });
     });
 
@@ -122,6 +124,7 @@ describe("Test the Profilemodel module", () => {
             name: "all_forbidden",
             sourcesAccessControl: {},
             theme: "default",
+            quota: {},
         });
     });
 
@@ -198,6 +201,7 @@ describe("Test the Profilemodel module", () => {
             allowed_databases: [],
             is_shared: true,
             access_control: "{}",
+            quota: null,
             schema_types: [],
         });
     });
@@ -225,7 +229,99 @@ describe("Test the Profilemodel module", () => {
                 allowedDatabases: [],
                 isShared: true,
                 sourcesAccessControl: {},
+                quota: {},
             },
         ]);
+    });
+
+    test("test _convertToLegacy with quota values", async () => {
+        const profile = {
+            id: 1,
+            label: "test",
+            theme: "SLS",
+            allowed_tools: [],
+            allowed_databases: [],
+            is_shared: true,
+            access_control: {},
+            schema_types: [],
+            quota: JSON.stringify({
+                "/api/v1/test": {
+                    GET: 100,
+                    POST: 50,
+                },
+            }),
+        };
+
+        expect(profileModel._convertToLegacy(profile)).toStrictEqual([
+            "test",
+            {
+                id: "test",
+                name: "test",
+                theme: "SLS",
+                allowedSourceSchemas: [],
+                allowedTools: [],
+                allowedDatabases: [],
+                isShared: true,
+                sourcesAccessControl: {},
+                quota: {
+                    "/api/v1/test": {
+                        GET: 100,
+                        POST: 50,
+                    },
+                },
+            },
+        ]);
+    });
+
+    test("test _checkProfile with invalid quota values", async () => {
+        const invalidProfile = {
+            id: "test",
+            name: "test",
+            theme: "SLS",
+            allowed_tools: [],
+            allowed_databases: [],
+            is_shared: true,
+            access_control: {},
+            schema_types: [],
+            quota: "invalid",
+        };
+
+        expect(() => profileModel._checkProfile(invalidProfile)).toThrow();
+    });
+
+    test("test _checkProfile with quota containing non-number values", async () => {
+        const invalidProfile = {
+            id: "test",
+            name: "test",
+            theme: "SLS",
+            allowed_tools: [],
+            allowed_databases: [],
+            is_shared: true,
+            access_control: {},
+            schema_types: [],
+            quota: {
+                "/api/v1/test": {
+                    GET: "not-a-number",
+                },
+            },
+        };
+
+        expect(() => profileModel._checkProfile(invalidProfile)).toThrow();
+    });
+
+    test("test _checkProfile with null quota", async () => {
+        const invalidProfile = {
+            id: "test",
+            name: "test",
+            theme: "SLS",
+            allowed_tools: [],
+            allowed_databases: [],
+            is_shared: true,
+            access_control: {},
+            schema_types: [],
+            quota: null,
+        };
+
+        expect(() => profileModel._checkProfile(invalidProfile)).toThrow();
     });
 });

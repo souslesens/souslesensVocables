@@ -285,7 +285,9 @@ var CreateSLSVsource_bot = (function () {
                 }
             }
 
-            sourceConfig.graphUri = self.params.graphUri;
+            var graphUri = self.params.graphUri.endsWith("/") ? self.params.graphUri : self.params.graphUri + "/";
+            sourceConfig.graphUri = graphUri;
+            sourceConfig.baseUri = graphUri;
             sourceConfig.imports = self.params.imports;
             $.ajax({
                 type: "PUT",

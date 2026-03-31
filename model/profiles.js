@@ -21,7 +21,7 @@ const ProfileObject = z
         allowedTools: z.string().array().optional(),
         allowedDatabases: z.string().array().optional(),
         isShared: z.boolean().default(true),
-        quota: z.record(z.string(), z.number()).optional(),
+        quota: z.record(z.string(), z.record(z.string(), z.number())).optional(),
         _type: z.string().default("profile"),
     })
     .strict();
@@ -261,18 +261,28 @@ class ProfileModel {
      * @param {UserAccount} user - the user whose profiles are inspected
      * @returns {Promise<number|undefined>} - maximum quota value or undefined if none
      */
-    getMaxQuotaForRoute = async (route, user) => {
+    /**
+     * Return the highest quota for a given route and method among all profiles of a user.
+     * @param {string} route - API route (e.g., "/api/v1/une/route")
+     * @param {string} method - HTTP method (e.g., "GET", "POST")
+     * @param {UserAccount} user - the user whose profiles are inspected
+     * @returns {Promise<number|undefined>} - maximum quota value or undefined if none (no limit)
+     */
+    getMaxQuotaForRoute = async (route, method, user) => {
         const userProfiles = await this.getUserProfiles(user);
         let maxQuota;
         Object.values(userProfiles).forEach((profile) => {
-            const profileQuota = profile.quota; // `quota` may be undefined
-            if (profileQuota && typeof profileQuota[route] === "number") {
-                if (maxQuota === undefined || profileQuota[route] > maxQuota) {
-                    maxQuota = profileQuota[route];
+            const profileQuota = profile.quota;
+            if (profileQuota && profileQuota[route] && profileQuota[route][method]) {
+                const limit = profileQuota[route][method];
+                if (typeof limit === "number") {
+                    if (maxQuota === undefined || limit > maxQuota) {
+                        maxQuota = limit;
+                    }
                 }
             }
         });
-        return maxQuota;
+        return maxQuota; // undefined if no quota found (no limit)
     };
 }
 

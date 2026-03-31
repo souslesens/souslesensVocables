@@ -1,4 +1,4 @@
-import { useState, useMemo, useReducer, ChangeEvent, SyntheticEvent, forwardRef, Ref, Dispatch, MouseEventHandler, useRef } from "react";
+import { useState, useMemo, useReducer, ChangeEvent, SyntheticEvent, forwardRef, Ref, Dispatch, MouseEventHandler, useRef, useEffect } from "react";
 import {
     Alert,
     Snackbar,
@@ -50,6 +50,12 @@ import { ulid } from "ulid";
 import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
 import { errorMessage } from "./errorMessage";
 import { Datas } from "react-csv-downloader/dist/esm/lib/csv";
+
+type RouteInfo = {
+    route: string;
+    methods: string[];
+    quotas: string[];
+};
 
 const ProfilesTable = () => {
     const { model, updateModel } = useModel();
@@ -395,6 +401,7 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
     const [issues, setIssues] = useState<ZodIssue[]>([]);
     const [filter, setFilter] = useState<string>("");
     const allDatabases = useDatabases();
+    const [routesInfo, setRoutesInfo] = useState<RouteInfo[]>([]);
     const sources = useMemo(() => {
         return unwrappedSources;
     }, [unwrappedSources]);
@@ -415,14 +422,17 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
         model.config,
     );
     const [profileModel, update] = useReducer(updateProfile, { modal: false, profileForm: profile });
-    const [quota, setQuota] = useState<Array<{ route: string; limit: string }>>(
+    const [quota, setQuota] = useState<Array<{ route: string; method: string; limit: string }>>(
         // `profile` may not have a `quota` field in its TypeScript definition, so we cast to any.
         (profile as any).quota
-            ? Object.entries((profile as any).quota).map(([r, l]) => ({
-                  route: r,
-                  limit: String(l),
-              }))
-            : [{ route: "", limit: "" }],
+            ? Object.entries((profile as any).quota).flatMap(([route, methods]) =>
+                  Object.entries(methods as Record<string, number>).map(([method, limit]) => ({
+                      route,
+                      method,
+                      limit: String(limit),
+                  }))
+              )
+            : [{ route: "", method: "", limit: "" }],
     );
 
     const handleOpen = () => update({ type: Type.UserClickedModal, payload: { modal: true, profileForm: profile } });
@@ -446,6 +456,28 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
         setNodeToExpand(nodeIds);
         setManualExpand(true);
     };
+
+    useEffect(() => {
+        fetch("/api/v1/routesinfo")
+            .then((res) => res.json())
+            .then((data: RouteInfo[]) => setRoutesInfo(data))
+            .catch((err) => console.error(err));
+    }, []);
+
+    useEffect(() => {
+        const newIssues: ZodIssue[] = [];
+        quota.forEach((q, idx) => {
+            if (q.route && !q.method) {
+                newIssues.push({
+                    code: z.ZodIssueCode.custom,
+                    message: "Method is required when route is selected",
+                    path: ["quota", idx, "method"],
+                });
+            }
+        });
+        setIssues(newIssues);
+    }, [quota]);
+
     const profilesSchema = create ? ProfileSchemaCreate : ProfileSchema;
     const zo = useZorm("form", profilesSchema, { setupListeners: false, customIssues: issues });
     const handleSourceAccessControlUpdate = (src: SourceTreeNode) => (event: SelectChangeEvent) => {
@@ -516,12 +548,15 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
         // Convert quota array (route/limit) into the object format expected by the backend
         const quotaObj = quota.reduce(
             (acc, cur) => {
-                if (cur.route.trim()) {
-                    acc[cur.route] = Number(cur.limit) || 0;
+                if (cur.route.trim() && cur.method && cur.limit) {
+                    if (!acc[cur.route]) {
+                        acc[cur.route] = {};
+                    }
+                    acc[cur.route][cur.method] = Number(cur.limit) || 0;
                 }
                 return acc;
             },
-            {} as Record<string, number>,
+            {} as Record<string, Record<string, number>>,
         );
         // Attach quota to the profile being saved
         (profileModel.profileForm as any).quota = quotaObj;
@@ -822,48 +857,78 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
                                 <Typography variant="subtitle1" gutterBottom>
                                     Quota (API route limits)
                                 </Typography>
-                                {quota.map((q, idx) => (
-                                    <Grid container spacing={1} alignItems="center" key={idx} sx={{ mb: 1 }}>
-                                        <Grid item xs={5}>
-                                            <TextField
-                                                fullWidth
-                                                label="Route"
-                                                value={q.route}
-                                                onChange={(e) => {
-                                                    const newQuota = [...quota];
-                                                    newQuota[idx].route = e.target.value;
-                                                    setQuota(newQuota);
-                                                }}
-                                            />
+                                {quota.map((q, idx) => {
+                                    const selectedRouteInfo = routesInfo.find((r) => r.route === q.route);
+                                    const methodsAvailable = selectedRouteInfo?.methods || [];
+
+                                    return (
+                                        <Grid container spacing={1} alignItems="center" key={idx} sx={{ mb: 1 }}>
+                                            <Grid item xs={4}>
+                                                <Select
+                                                    fullWidth
+                                                    value={q.route}
+                                                    onChange={(e) => {
+                                                        const newQuota = [...quota];
+                                                        newQuota[idx].route = e.target.value;
+                                                        const newRouteInfo = routesInfo.find((r) => r.route === e.target.value);
+                                                        newQuota[idx].method = newRouteInfo?.methods[0] || "";
+                                                        setQuota(newQuota);
+                                                    }}
+                                                >
+                                                    {routesInfo.filter((routeInfo) => routeInfo.quotas.length > 0).map((routeInfo) => (
+                                                        <MenuItem key={routeInfo.route} value={routeInfo.route}>
+                                                            {routeInfo.route}
+                                                        </MenuItem>
+                                                    ))}
+                                                </Select>
+                                            </Grid>
+                                            <Grid item xs={3}>
+                                                <Select
+                                                    fullWidth
+                                                    value={q.method || ""}
+                                                    disabled={!q.route}
+                                                    onChange={(e) => {
+                                                        const newQuota = [...quota];
+                                                        newQuota[idx].method = e.target.value;
+                                                        setQuota(newQuota);
+                                                    }}
+                                                >
+                                                    {methodsAvailable.map((method) => (
+                                                        <MenuItem key={method} value={method}>
+                                                            {method}
+                                                        </MenuItem>
+                                                    ))}
+                                                </Select>
+                                            </Grid>
+                                            <Grid item xs={3}>
+                                                <TextField
+                                                    fullWidth
+                                                    type="number"
+                                                    label="Limit"
+                                                    value={q.limit}
+                                                    onChange={(e) => {
+                                                        const newQuota = [...quota];
+                                                        newQuota[idx].limit = e.target.value;
+                                                        setQuota(newQuota);
+                                                    }}
+                                                    InputProps={{ inputProps: { min: 0 } }}
+                                                />
+                                            </Grid>
+                                            <Grid item xs={2}>
+                                                <IconButton
+                                                    aria-label="delete quota entry"
+                                                    onClick={() => {
+                                                        const newQuota = quota.filter((_v, i) => i !== idx);
+                                                        setQuota(newQuota.length ? newQuota : [{ route: "", method: "", limit: "" }]);
+                                                    }}
+                                                >
+                                                    <DeleteIcon />
+                                                </IconButton>
+                                            </Grid>
                                         </Grid>
-                                        <Grid item xs={5}>
-                                            <TextField
-                                                fullWidth
-                                                type="number"
-                                                label="Limit"
-                                                value={q.limit}
-                                                onChange={(e) => {
-                                                    const newQuota = [...quota];
-                                                    newQuota[idx].limit = e.target.value;
-                                                    setQuota(newQuota);
-                                                }}
-                                                InputProps={{ inputProps: { min: 0 } }}
-                                            />
-                                        </Grid>
-                                        <Grid item xs={2}>
-                                            <IconButton
-                                                aria-label="delete quota entry"
-                                                onClick={() => {
-                                                    const newQuota = quota.filter((_v, i) => i !== idx);
-                                                    setQuota(newQuota.length ? newQuota : [{ route: "", limit: "" }]);
-                                                }}
-                                            >
-                                                <DeleteIcon />
-                                            </IconButton>
-                                        </Grid>
-                                    </Grid>
-                                ))}
-                                <Button variant="outlined" onClick={() => setQuota([...quota, { route: "", limit: "" }])}>
+                                    );
+                                })}
+                                <Button variant="outlined" onClick={() => setQuota([...quota, { route: "", method: "", limit: "" }])}>
                                     Add quota
                                 </Button>
                             </Box>

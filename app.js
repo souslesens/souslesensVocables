@@ -31,11 +31,11 @@ import apiDoc from "./api/v1/api-doc.js";
 import session from "express-session";
 
 const config = readMainConfig();
-const isValid = checkMainConfig(config);
-
-if (!isValid) {
-    process.exit(1);
-}
+checkMainConfig(config).then((isValid) => {
+    if (!isValid) {
+        process.exit(1);
+    }
+});
 
 // sentry/glitchtip
 if (config.sentryDsnNode) {

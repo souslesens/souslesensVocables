@@ -360,6 +360,10 @@ var CreateResource_bot = (function () {
             self.myBotEngine.nextStep();
         },
         drawAxiomFn: function () {
+            var conceptType = "Class";
+            if (self.params.resourceType === "owl:NamedIndividual") {
+                conceptType = "NamedIndividual";
+            }
             var resource = {
                 data: {
                     id: self.params.resourceId,

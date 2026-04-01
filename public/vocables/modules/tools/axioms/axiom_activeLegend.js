@@ -1034,6 +1034,17 @@ var Axiom_activeLegend = (function () {
     self.saveAxiom = function (callback) {
         if (confirm("Save Axiom")) {
             var triples = self.getTriples({ all: true });
+            if (triples.newNodesToStore && triples.newNodesToStore.length > 0) {
+                var orphans = triples.newNodesToStore.filter(function (node) {
+                    return node.data.superEntity === "http://www.w3.org/2002/07/owl#Thing";
+                });
+                if (orphans.length > 0) {
+                    var names = orphans.map(function (n) { return n.data.label || n.data.id; }).join(", ");
+                    if (!confirm("Some nodes have no super class or property (" + names + ") and will be saved as owl:Class under owl:Thing, continue ?")) {
+                        return;
+                    }
+                }
+            }
 
             async.series(
                 [
@@ -1150,11 +1161,10 @@ var Axiom_activeLegend = (function () {
             triples = self.getTriples({ all: true });
         }
         if (!triples || triples.length == 0) {
-            var message = "No triples to convert to manchester form";
             if (callback) {
-                return callback(message);
+                return callback(null, "");
             }
-            return MainController.errorAlert(message);
+            return;
         }
         var enrichedTriples = triples.map(function (triple) {
             var sEntry = Axioms_manager.allResourcesMap[triple.subject];
@@ -1240,15 +1250,6 @@ var Axiom_activeLegend = (function () {
             }
         });
 
-        if (newOrphanNodes.length > 0) {
-            var str = "";
-            newOrphanNodes.forEach(function (node) {
-                str += node + ",";
-            });
-            if (!confirm("Some nodes have no super class or property, continue aniway ?")) {
-                return;
-            }
-        }
 
         var triples = [];
 

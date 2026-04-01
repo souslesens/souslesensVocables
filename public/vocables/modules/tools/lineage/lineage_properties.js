@@ -1356,10 +1356,16 @@ var Lineage_properties = (function () {
                 Lineage_properties.drawObjectPropertiesRestrictions(source, nodeIds, properties, { withoutImports: true });
             }
         } else if (action == "rangesAndDomains") {
+            var rangeAndDomainTargetNodes = null;
+            if (!properties || properties.length === 0) {
+                if (Lineage_whiteboard.lineageVisjsGraph.data && Lineage_whiteboard.lineageVisjsGraph.data.nodes) {
+                    rangeAndDomainTargetNodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.getIds();
+                }
+            }
             if (target == "visj") {
-                self.drawRangeAndDomainsGraph(source, nodeIds, { withoutImports: true }, properties);
+                self.drawRangeAndDomainsGraph(source, rangeAndDomainTargetNodes, { withoutImports: true }, properties);
             } else if (target == "table") {
-                self.exportRangeAndDomainsGraph(source, nodeIds, properties);
+                self.exportRangeAndDomainsGraph(source, rangeAndDomainTargetNodes, properties);
             }
         }
     };

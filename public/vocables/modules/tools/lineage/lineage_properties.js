@@ -34,6 +34,7 @@ import JstreeWidget from "../../uiWidgets/jstreeWidget.js";
 var Lineage_properties = (function () {
     var self = {};
     var sourceColors = {};
+    var rangeAndDomainTrackedIds = { nodes: {}, edges: {} };
     self.defaultShape = "triangle";
     self.defaultEdgeArrowType = "triangle";
     self.defaultShape = "dot";
@@ -631,24 +632,71 @@ var Lineage_properties = (function () {
                 return MainController.errorAlert(err);
             }
 
-            //set invers properties
             var inversePropsItems = [];
             result.forEach(function (item) {
                 if (item.inverseProperty && item.inverseProperty.value) {
-                    var prop = {
+                    inversePropsItems.push({
                         property: item.inverseProperty,
                         propertyLabel: item.inversePropertyLabel,
                         domain: item.range,
                         domainLabel: item.rangeLabel,
                         range: item.domain,
                         rangeLabel: item.domainLabel,
-                    };
-
-                    inversePropsItems.push(prop);
+                    });
                 }
             });
 
             result = result.concat(inversePropsItems);
+
+            var desiredNodeIds = {};
+            var desiredEdgeIds = {};
+            result.forEach(function (item) {
+                if (!item.property || !item.property.value) {
+                    return;
+                }
+                desiredNodeIds[item.property.value] = 1;
+                if (item.subProperty && item.subProperty.value) {
+                    desiredNodeIds[item.subProperty.value] = 1;
+                    desiredEdgeIds[item.property.value + "_" + item.subProperty.value] = 1;
+                }
+                if (item.subProperties) {
+                    item.subProperties.forEach(function (sub) {
+                        desiredNodeIds[sub.id] = 1;
+                        desiredEdgeIds[item.property.value + "_" + sub.id] = 1;
+                    });
+                }
+                if (item.range && item.range.value) {
+                    desiredNodeIds[item.range.value] = 1;
+                    desiredEdgeIds[item.property.value + "_range_" + item.range.value] = 1;
+                }
+                if (item.domain && item.domain.value) {
+                    desiredNodeIds[item.domain.value] = 1;
+                    desiredEdgeIds[item.property.value + "_domain_" + item.domain.value] = 1;
+                }
+                if (item.inverseProperty && item.inverseProperty.value) {
+                    desiredNodeIds[item.inverseProperty.value] = 1;
+                    desiredEdgeIds[item.inverseProperty.value + "_" + item.property.value] = 1;
+                }
+            });
+
+            if (Lineage_whiteboard.lineageVisjsGraph.data) {
+                var edgesToRemove = Object.keys(rangeAndDomainTrackedIds.edges).filter(function (id) {
+                    return !desiredEdgeIds[id];
+                });
+                Lineage_whiteboard.lineageVisjsGraph.data.edges.remove(edgesToRemove);
+
+                var nodesToRemove = Object.keys(rangeAndDomainTrackedIds.nodes).filter(function (id) {
+                    return !desiredNodeIds[id];
+                });
+                nodesToRemove.forEach(function (nodeId) {
+                    var connectedEdges = Lineage_whiteboard.lineageVisjsGraph.network.getConnectedEdges(nodeId);
+                    if (connectedEdges.length === 0) {
+                        Lineage_whiteboard.lineageVisjsGraph.data.nodes.remove(nodeId);
+                    }
+                });
+            }
+
+            rangeAndDomainTrackedIds = { nodes: desiredNodeIds, edges: desiredEdgeIds };
 
             var visjsData = { nodes: [], edges: [] };
             var existingNodes = {};

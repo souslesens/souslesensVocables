@@ -1,5 +1,6 @@
 import fs from "fs";
 import z from "zod";
+import { getApiRoutesWithQuotas } from "./apiRoutes.js";
 
 const configPath = process.env.CONFIG_PATH || "config";
 const mainConfigPath = `${configPath}/mainConfig.json`;
@@ -130,7 +131,30 @@ const MainConfigObject = z
             })
             .strict(),
         sparqlDownloadLimit: z.number().positive().max(1000000),
-        generalQuota: z.record(z.record(z.number().positive())),
+        generalQuota: z.record(z.record(z.number().positive())).superRefine(async (generalQuota, ctx) => {
+            const apiRoutes = await getApiRoutesWithQuotas();
+
+            for (const [route, methods] of Object.entries(generalQuota)) {
+                if (!apiRoutes[route]) {
+                    ctx.addIssue({
+                        code: z.ZodIssueCode.custom,
+                        message: `Route "${route}" does not exist or does not have restrictQuota enabled`,
+                        path: [route],
+                    });
+                    continue;
+                }
+
+                for (const method of Object.keys(methods)) {
+                    if (!apiRoutes[route].includes(method)) {
+                        ctx.addIssue({
+                            code: z.ZodIssueCode.custom,
+                            message: `Method "${method}" does not have restrictQuota enabled on route "${route}"`,
+                            path: [route, method],
+                        });
+                    }
+                }
+            }
+        }),
     })
     .strict();
 
@@ -177,10 +201,10 @@ const printErrorReport = (errors, section, logs = []) => {
     return logs;
 };
 
-const checkMainConfig = (config) => {
+const checkMainConfig = async (config) => {
     console.debug("Check the mainConfig.json file…");
 
-    const results = MainConfigObject.safeParse(config);
+    const results = await MainConfigObject.safeParseAsync(config);
     if (!results.success) {
         const errors = checkMainConfigSection(results.error.format(), {});
         console.error("The configuration file is invalid:");

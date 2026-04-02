@@ -21,7 +21,7 @@ const ProfileObject = z
         allowedTools: z.string().array().optional(),
         allowedDatabases: z.string().array().optional(),
         isShared: z.boolean().default(true),
-        quota: z.record(z.string(), z.record(z.string(), z.number())).optional(),
+        quota: z.record(z.string(), z.record(z.string(), z.union([z.number(), z.object({ quota: z.number(), wholeProfileQuota: z.boolean() })]))).optional(),
         _type: z.string().default("profile"),
     })
     .strict();
@@ -279,10 +279,15 @@ class ProfileModel {
                     if (maxQuota === undefined || limit > maxQuota) {
                         maxQuota = limit;
                     }
+                } else if (typeof limit === "object" && limit !== null && "quota" in limit) {
+                    const quotaValue = limit.quota;
+                    if (maxQuota === undefined || quotaValue > maxQuota) {
+                        maxQuota = quotaValue;
+                    }
                 }
             }
         });
-        return maxQuota; // undefined if no quota found (no limit)
+        return maxQuota;
     };
 }
 

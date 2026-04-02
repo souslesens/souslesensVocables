@@ -187,7 +187,7 @@ openapi.initialize({
                 const quotaId = await quotaModel.add(route, method, user.user);
 
                 // get quota from profile
-                let routeQuota = await profileModel.getMaxQuotaForRoute(route, method, user.user);
+                const { maxQuota: routeQuota, profile: profileName, wholeProfile } = await profileModel.getMaxQuotaForRoute(route, method, user.user);
 
                 // if no profile quota, check generalQuota
                 if (routeQuota === undefined && config.generalQuota?.[route]?.[method]) {
@@ -195,7 +195,7 @@ openapi.initialize({
                 }
 
                 // compare
-                const usage = await quotaModel.getRouteUsage(route, method, user.user);
+                const usage = await quotaModel.getRouteUsage(route, method, user.user, 1, wholeProfile, profileName);
 
                 if (routeQuota !== undefined && usage > routeQuota) {
                     throw {

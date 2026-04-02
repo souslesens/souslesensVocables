@@ -19,6 +19,7 @@ import userManager from "./bin/user.js";
 import "./bin/authentication.js";
 import { checkMainConfig, readMainConfig } from "./model/config.js";
 import util from "./bin/util.js";
+import { register, httpRequestDuration, httpRequestsTotal } from "./bin/metrics.js";
 
 const app = express();
 import * as Sentry from "@sentry/node";
@@ -163,12 +164,36 @@ app.use("/api/v1", (req, res, next) => {
     const startTime = Date.now();
 
     res.on("finish", () => {
-        const duration = Date.now() - startTime;
-        const username = req.user?.login || null;
-        console.log(`[API] ${req.method} ${req.path} - Status: ${res.statusCode} - User: ${username} - ${duration}ms`);
+        // Normalize the route: remove the trailing / (except for /)
+        const rawRoute = req.baseUrl + req.path;
+        const route = util.normalizeRoute(rawRoute);
+
+        // Filter out irrelevant routes (static assets, documentation, etc.)
+        if (!util.shouldTrackRoute(route)) {
+            return;
+        }
+
+        const duration = (Date.now() - startTime) / 1000;
+        const authenticated = req.user?.login ? "true" : "false";
+
+        const labels = {
+            method: req.method,
+            route: route,
+            status: res.statusCode,
+            authenticated,
+        };
+
+        httpRequestDuration.observe(labels, duration);
+        httpRequestsTotal.inc(labels);
     });
 
     next();
+});
+
+// Endpoint Prometheus
+app.get("/metrics", async (req, res) => {
+    res.set("Content-Type", register.contentType);
+    res.end(await register.metrics());
 });
 
 openapi.initialize({

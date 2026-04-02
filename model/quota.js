@@ -47,10 +47,12 @@ class QuotaModel {
      * @param {string} method - HTTP method (e.g., "GET", "POST").
      * @param {UserAccount} user - User object (must contain `id`).
      * @param {number} [lastMinutes=1] - Time window in minutes (default 1).
+     * @param {boolean} [wholeProfile=false] - If true, count usage for all users sharing the same profile.
+     * @param {string|null} [profileName=null] - The profile name to use when wholeProfile is true.
      * @returns {Promise<number>} Count of matching quota entries; returns 0 if none.
      * @throws {Error} If parameters are invalid or the DB query fails.
      */
-    async getRouteUsage(route, method, user, lastMinutes = 1) {
+    async getRouteUsage(route, method, user, lastMinutes = 1, wholeProfile = false, profileName = null) {
         if (!route || typeof route !== "string") {
             throw new Error("Invalid route supplied to QuotaModel.getRouteUsage");
         }
@@ -66,11 +68,26 @@ class QuotaModel {
 
         const conn = getKnexConnection(this._mainConfig.database);
         try {
-            const rows = await conn
+            let query = conn
                 .count("* as cnt")
                 .from("quota")
-                .where({ route, method, user_id: user.id })
+                .where({ route, method })
                 .andWhere("timestamp", ">=", conn.raw(`now() - interval '${lastMinutes} minute'`));
+
+            if (wholeProfile && profileName) {
+                query = query.andWhere(
+                    "user_id",
+                    "in",
+                    conn
+                        .select("id")
+                        .from("users")
+                        .andWhere("profiles", "@>", conn.raw(`ARRAY['${profileName}']`)),
+                );
+            } else {
+                query = query.andWhere({ user_id: user.id });
+            }
+
+            const rows = await query;
 
             const count = parseInt(rows[0].cnt, 10);
             return Number.isNaN(count) ? 0 : count;

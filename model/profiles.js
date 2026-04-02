@@ -266,28 +266,35 @@ class ProfileModel {
      * @param {string} route - API route (e.g., "/api/v1/une/route")
      * @param {string} method - HTTP method (e.g., "GET", "POST")
      * @param {UserAccount} user - the user whose profiles are inspected
-     * @returns {Promise<number|undefined>} - maximum quota value or undefined if none (no limit)
+     * @returns {Promise<{ maxQuota: number|undefined, profile: string|null, wholeProfile: boolean }>} - maximum quota value, profile name and wholeProfile flag
      */
     getMaxQuotaForRoute = async (route, method, user) => {
         const userProfiles = await this.getUserProfiles(user);
         let maxQuota;
+        let profileWithMaxQuota = null;
+        let wholeProfileQuota = false;
         Object.values(userProfiles).forEach((profile) => {
             const profileQuota = profile.quota;
             if (profileQuota && profileQuota[route] && profileQuota[route][method]) {
                 const limit = profileQuota[route][method];
+                let quotaValue;
+                let wholeProfile = false;
                 if (typeof limit === "number") {
-                    if (maxQuota === undefined || limit > maxQuota) {
-                        maxQuota = limit;
-                    }
+                    quotaValue = limit;
                 } else if (typeof limit === "object" && limit !== null && "quota" in limit) {
-                    const quotaValue = limit.quota;
-                    if (maxQuota === undefined || quotaValue > maxQuota) {
-                        maxQuota = quotaValue;
-                    }
+                    quotaValue = limit.quota;
+                    wholeProfile = limit.wholeProfileQuota || false;
+                } else {
+                    return;
+                }
+                if (maxQuota === undefined || quotaValue > maxQuota) {
+                    maxQuota = quotaValue;
+                    profileWithMaxQuota = profile.name;
+                    wholeProfileQuota = wholeProfile;
                 }
             }
         });
-        return maxQuota;
+        return { maxQuota, profile: profileWithMaxQuota, wholeProfile: wholeProfileQuota };
     };
 }
 

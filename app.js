@@ -159,6 +159,18 @@ app.set("view engine", "pug");
 httpProxy.app = app;
 
 // API
+app.use("/api/v1", (req, res, next) => {
+    const startTime = Date.now();
+
+    res.on("finish", () => {
+        const duration = Date.now() - startTime;
+        const username = req.user?.login || null;
+        console.log(`[API] ${req.method} ${req.path} - Status: ${res.statusCode} - User: ${username} - ${duration}ms`);
+    });
+
+    next();
+});
+
 openapi.initialize({
     apiDoc: apiDoc,
     app: app,

@@ -1039,7 +1039,11 @@ var Axiom_activeLegend = (function () {
                     return node.data.superEntity === "http://www.w3.org/2002/07/owl#Thing";
                 });
                 if (orphans.length > 0) {
-                    var names = orphans.map(function (n) { return n.data.label || n.data.id; }).join(", ");
+                    var names = orphans
+                        .map(function (n) {
+                            return n.data.label || n.data.id;
+                        })
+                        .join(", ");
                     if (!confirm("Some nodes have no super class or property (" + names + ") and will be saved as owl:Class under owl:Thing, continue ?")) {
                         return;
                     }
@@ -1249,7 +1253,6 @@ var Axiom_activeLegend = (function () {
                 newNodesToStore.push(node);
             }
         });
-
 
         var triples = [];
 

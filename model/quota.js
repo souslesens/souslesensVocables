@@ -95,6 +95,42 @@ class QuotaModel {
             cleanupConnection(conn);
         }
     }
+
+    /**
+     * Get the total number of times a given route and method has been used by ALL users
+     * within the last *N* minutes (global quota, no user filter).
+     *
+     * @param {string} route - API route (e.g., "/api/data").
+     * @param {string} method - HTTP method (e.g., "GET", "POST").
+     * @param {number} [lastMinutes=1] - Time window in minutes (default 1).
+     * @returns {Promise<number>} Count of matching quota entries; returns 0 if none.
+     * @throws {Error} If parameters are invalid or the DB query fails.
+     */
+    async getGlobalRouteUsage(route, method, lastMinutes = 1) {
+        if (!route || typeof route !== "string") {
+            throw new Error("Invalid route supplied to QuotaModel.getGlobalRouteUsage");
+        }
+        if (!method || typeof method !== "string") {
+            throw new Error("Invalid method supplied to QuotaModel.getGlobalRouteUsage");
+        }
+        if (typeof lastMinutes !== "number" || lastMinutes <= 0) {
+            throw new Error("lastMinutes must be a positive number");
+        }
+
+        const conn = getKnexConnection(this._mainConfig.database);
+        try {
+            const rows = await conn
+                .count("* as cnt")
+                .from("quota")
+                .where({ route, method })
+                .andWhere("timestamp", ">=", conn.raw(`now() - interval '${lastMinutes} minute'`));
+
+            const count = parseInt(rows[0].cnt, 10);
+            return Number.isNaN(count) ? 0 : count;
+        } finally {
+            cleanupConnection(conn);
+        }
+    }
 }
 
 const quotaModel = new QuotaModel();

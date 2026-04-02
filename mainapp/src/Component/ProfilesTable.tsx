@@ -38,7 +38,7 @@ import { TreeView, TreeItem, TreeItemProps, TreeItemContentProps, useTreeItem } 
 import clsx from "clsx";
 import CsvDownloader from "react-csv-downloader";
 import { useZorm, createCustomIssues } from "react-zorm";
-import { ZodIssue } from "zod";
+import { ZodIssue, z } from "zod";
 
 import { Msg, useModel } from "../Admin";
 import { SRD, success } from "srd";
@@ -422,17 +422,22 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
         model.config,
     );
     const [profileModel, update] = useReducer(updateProfile, { modal: false, profileForm: profile });
-    const [quota, setQuota] = useState<Array<{ route: string; method: string; limit: string }>>(
+    const [quota, setQuota] = useState<Array<{ route: string; method: string; limit: string; wholeProfileQuota: boolean }>>(
         // `profile` may not have a `quota` field in its TypeScript definition, so we cast to any.
         (profile as any).quota
             ? Object.entries((profile as any).quota).flatMap(([route, methods]) =>
-                  Object.entries(methods as Record<string, number>).map(([method, limit]) => ({
-                      route,
-                      method,
-                      limit: String(limit),
-                  }))
+                  Object.entries(methods as Record<string, { quota?: number; wholeProfileQuota?: boolean } | number>).map(([method, value]) => {
+                      const limit = typeof value === "number" ? value : value.quota || 0;
+                      const wholeProfileQuota = typeof value === "object" && value !== null ? value.wholeProfileQuota || false : false;
+                      return {
+                          route,
+                          method,
+                          limit: String(limit),
+                          wholeProfileQuota,
+                      };
+                  }),
               )
-            : [{ route: "", method: "", limit: "" }],
+            : [{ route: "", method: "", limit: "", wholeProfileQuota: false }],
     );
 
     const handleOpen = () => update({ type: Type.UserClickedModal, payload: { modal: true, profileForm: profile } });
@@ -552,11 +557,14 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
                     if (!acc[cur.route]) {
                         acc[cur.route] = {};
                     }
-                    acc[cur.route][cur.method] = Number(cur.limit) || 0;
+                    acc[cur.route][cur.method] = {
+                        quota: Number(cur.limit) || 0,
+                        wholeProfileQuota: cur.wholeProfileQuota,
+                    };
                 }
                 return acc;
             },
-            {} as Record<string, Record<string, number>>,
+            {} as Record<string, Record<string, { quota: number; wholeProfileQuota: boolean }>>,
         );
         // Attach quota to the profile being saved
         (profileModel.profileForm as any).quota = quotaObj;
@@ -875,11 +883,13 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
                                                         setQuota(newQuota);
                                                     }}
                                                 >
-                                                    {routesInfo.filter((routeInfo) => routeInfo.quotas.length > 0).map((routeInfo) => (
-                                                        <MenuItem key={routeInfo.route} value={routeInfo.route}>
-                                                            {routeInfo.route}
-                                                        </MenuItem>
-                                                    ))}
+                                                    {routesInfo
+                                                        .filter((routeInfo) => routeInfo.quotas.length > 0)
+                                                        .map((routeInfo) => (
+                                                            <MenuItem key={routeInfo.route} value={routeInfo.route}>
+                                                                {routeInfo.route}
+                                                            </MenuItem>
+                                                        ))}
                                                 </Select>
                                             </Grid>
                                             <Grid item xs={3}>
@@ -915,11 +925,26 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
                                                 />
                                             </Grid>
                                             <Grid item xs={2}>
+                                                <FormControlLabel
+                                                    control={
+                                                        <Checkbox
+                                                            checked={q.wholeProfileQuota}
+                                                            onChange={(e) => {
+                                                                const newQuota = [...quota];
+                                                                newQuota[idx].wholeProfileQuota = e.target.checked;
+                                                                setQuota(newQuota);
+                                                            }}
+                                                        />
+                                                    }
+                                                    label="Whole Profile"
+                                                />
+                                            </Grid>
+                                            <Grid item xs={1}>
                                                 <IconButton
                                                     aria-label="delete quota entry"
                                                     onClick={() => {
                                                         const newQuota = quota.filter((_v, i) => i !== idx);
-                                                        setQuota(newQuota.length ? newQuota : [{ route: "", method: "", limit: "" }]);
+                                                        setQuota(newQuota.length ? newQuota : [{ route: "", method: "", limit: "", wholeProfileQuota: false }]);
                                                     }}
                                                 >
                                                     <DeleteIcon />
@@ -928,7 +953,7 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
                                         </Grid>
                                     );
                                 })}
-                                <Button variant="outlined" onClick={() => setQuota([...quota, { route: "", method: "", limit: "" }])}>
+                                <Button variant="outlined" onClick={() => setQuota([...quota, { route: "", method: "", limit: "", wholeProfileQuota: false }])}>
                                     Add quota
                                 </Button>
                             </Box>

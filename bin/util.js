@@ -723,6 +723,26 @@ var util = {
         }
         return false;
     },
+
+    normalizeRoute: function (route) {
+        // Supprimer le / trailing, sauf si c'est la route racine
+        return route.length > 1 && route.endsWith("/") ? route.slice(0, -1) : route;
+    },
+
+    shouldTrackRoute: function (route) {
+        // Routes statiques à ignorer (Swagger UI assets et documentation)
+        const ignoredPatterns = [
+            /^\/api\/v1\/favicon/, // Favicon Swagger
+            /^\/api\/v1\/.*\.png$/, // Images PNG
+            /^\/api\/v1\/.*\.svg$/, // Images SVG
+            /^\/api\/v1\/.*\.css$/, // Stylesheets
+            /^\/api\/v1\/.*\.js$/, // JavaScript
+            /^\/api\/v1\/api-docs$/, // Documentation OpenAPI
+            /^\/api\/v1\/?$/, // Swagger UI root
+        ];
+
+        return !ignoredPatterns.some((pattern) => pattern.test(route));
+    },
 };
 
 export default util;

@@ -315,7 +315,8 @@ var AxiomExtractor = (function () {
             }
             var rootNode = sourceBasicAxioms[classUri];
             if (!rootNode) {
-                return callback(null, []);
+                alert("classUri not found in axioms " + classUri);
+                //return callback(null, []);
             }
 
             var triples = [];

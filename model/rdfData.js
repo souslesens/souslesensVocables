@@ -282,6 +282,11 @@ class RdfDataModel {
      * @param {string} graphPath - URL of data
      * @returns {Promise<any>} - response
      */
+    moveGraph = async (sourceGraphUri, targetGraphUri) => {
+        await this.execQuery(`ADD <${sourceGraphUri}> TO <${targetGraphUri}>`);
+        await this.execQuery(`CLEAR GRAPH <${sourceGraphUri}>`);
+    };
+
     loadGraph = async (graphUri, graphPath) => {
         const query = `LOAD <${graphPath}> INTO GRAPH <${graphUri}>`;
         const json = await this.execQuery(query);

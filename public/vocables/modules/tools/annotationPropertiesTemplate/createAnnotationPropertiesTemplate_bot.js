@@ -235,7 +235,6 @@ var CreateAnnotationPropertiesTemplate_bot = (function () {
             });
         },
 
-
         /**
          * Shows annotation properties for the selected vocabulary.
          * In "searchProperty" mode, loads and merges ALL properties from every available vocab
@@ -337,7 +336,8 @@ var CreateAnnotationPropertiesTemplate_bot = (function () {
                     function (vocabId, callbackEach) {
                         CommonBotFunctions.listNonObjectPropertiesFn([vocabId], null, function (err, props) {
                             if (err || !props || props.length === 0) {
-                                    var vocabGraphUri = (Config.basicVocabularies && Config.basicVocabularies[vocabId] && Config.basicVocabularies[vocabId].graphUri) ||
+                                var vocabGraphUri =
+                                    (Config.basicVocabularies && Config.basicVocabularies[vocabId] && Config.basicVocabularies[vocabId].graphUri) ||
                                     (Config.sources && Config.sources[vocabId] && Config.sources[vocabId].graphUri);
                                 if (vocabGraphUri && source && source !== vocabId) {
                                     CommonBotFunctions.listNonObjectPropertiesFn([source], null, function (err2, sourceProps) {
@@ -371,7 +371,7 @@ var CreateAnnotationPropertiesTemplate_bot = (function () {
                             return (a.label || "").localeCompare(b.label || "");
                         });
                         self.myBotEngine.showList(allProps, "selectedPropertyUri");
-                    }
+                    },
                 );
                 return;
             }

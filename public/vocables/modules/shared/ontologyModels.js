@@ -846,43 +846,38 @@ var OntologyModels = (function () {
                             sourceConstraintsAndRestrictions[property].forEach(function (constraint) {
                                 constraint.source = _source;
                                 var domainOK = false;
-                                if (true || !allConstraints[property]) {
-                                    allConstraints[property] = constraint;
 
-                                    if (constraint.domain && constraint.domain.startsWith("http")) {
-                                        if (
-                                            startNodeAncestorIds.length == 0 ||
-                                            startNodeAncestorIds.indexOf(constraint.domain) > -1 ||
-                                            startNodeAncestorIds[0] == "http://www.w3.org/2002/07/owl#Class"
-                                        ) {
-                                            if (!constraint.range || constraint.range.indexOf("http") < 0 || endNodeIds.length == 0) {
-                                                if (propertiesMatchingStartNode.indexOf(property) < 0) {
-                                                    propertiesMatchingStartNode.push(property);
+                                allConstraints[property] = constraint;
+
+                                if (constraint.domain && constraint.domain.startsWith("http")) {
+                                    if (startNodeAncestorIds.length == 0 || startNodeAncestorIds.indexOf(constraint.domain) > -1 || startNodeAncestorIds[0] == "http://www.w3.org/2002/07/owl#Class") {
+                                        if (!constraint.range || constraint.range.indexOf("http") < 0 || endNodeIds.length == 0) {
+                                            if (propertiesMatchingStartNode.indexOf(property) < 0) {
+                                                propertiesMatchingStartNode.push(property);
+                                            }
+                                        } else {
+                                            domainOK = true;
+                                        }
+                                    }
+                                }
+                                if (constraint.range && constraint.range.startsWith("http")) {
+                                    if (endNodeAncestorIds.length == 0 || endNodeAncestorIds.indexOf(constraint.range) > -1 || endNodeAncestorIds[0] == "http://www.w3.org/2002/07/owl#Class") {
+                                        if (domainOK) {
+                                            if (propertiesMatchingBoth.indexOf(property) < 0) {
+                                                propertiesMatchingBoth.push(property);
+                                            }
+                                        } else {
+                                            if (!constraint.domain || constraint.domain.indexOf("http") < 0) {
+                                                if (propertiesMatchingEndNode.indexOf(property) < 0) {
+                                                    propertiesMatchingEndNode.push(property);
                                                 }
-                                            } else {
-                                                domainOK = true;
                                             }
                                         }
                                     }
-                                    if (constraint.range && constraint.range.startsWith("http")) {
-                                        if (endNodeAncestorIds.length == 0 || endNodeAncestorIds.indexOf(constraint.range) > -1 || endNodeAncestorIds[0] == "http://www.w3.org/2002/07/owl#Class") {
-                                            if (domainOK) {
-                                                if (propertiesMatchingBoth.indexOf(property) < 0) {
-                                                    propertiesMatchingBoth.push(property);
-                                                }
-                                            } else {
-                                                if (!constraint.domain || constraint.domain.indexOf("http") < 0) {
-                                                    if (propertiesMatchingEndNode.indexOf(property) < 0) {
-                                                        propertiesMatchingEndNode.push(property);
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                    if (!constraint.domain && !constraint.range) {
-                                        if (noConstaintsArray.indexOf(property) < 0) {
-                                            noConstaintsArray.push(property);
-                                        }
+                                }
+                                if (!constraint.domain && !constraint.range) {
+                                    if (noConstaintsArray.indexOf(property) < 0) {
+                                        noConstaintsArray.push(property);
                                     }
                                 }
                             });

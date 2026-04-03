@@ -64,7 +64,7 @@ var Axiom_activeLegend = (function () {
 
                 if (Axioms_graph.currentGraphNode.data.type == "Restriction" && siblingObjectPropertyUri) {
                     /** lors d'une restriction sule le range compte, pas le domaine ???**/
-                    var domainClassUri = null; //self.getRestrictionAncestorClass(Axioms_graph.currentGraphNode.id);
+                    var domainClassUri = null; //self.getRestrictionSourceClass(Axioms_graph.currentGraphNode.id);
                     Axioms_suggestions.getClassMatchingPropertiesRangeAndDomain(self.currentSource, siblingObjectPropertyUri, domainClassUri, null, function (err, classes) {
                         if (err) {
                             return MainController.errorAlert(err);
@@ -83,7 +83,8 @@ var Axiom_activeLegend = (function () {
                 if (Axioms_graph.currentGraphNode.data.type != "Restriction" && Axioms_graph.currentGraphNode.data.type != "ObjectProperty") {
                     // return alert(" ObjectProperty can only be added to a Restriction");
                 }
-                var domainClassUri = self.getRestrictionAncestorClass(Axioms_graph.currentGraphNode.id);
+
+                var domainClassUri = self.getRestrictionSourceClass(Axioms_graph.currentGraphNode.id);
                 var rangeClassUri = self.getGraphSiblingUri(Axioms_graph.currentGraphNode.id, "Class");
                 Axioms_suggestions.getValidPropertiesForClasses(self.currentSource, domainClassUri, rangeClassUri, {}, function (err, properties) {
                     self.setSuggestionsSelect(properties, true, newObject);
@@ -116,11 +117,11 @@ var Axiom_activeLegend = (function () {
 
     /**
      *
-     * get the first ancestor that is a Class
+     * get the first ancestor that is a Class or when restriction parent is a connective return the sibling class if it exists)
      * @param restrictionUri
      * @returns classUri
      */
-    self.getRestrictionAncestorClass = function (restrictionUri) {
+    self.getRestrictionSourceClass = function (restrictionUri) {
         var edges = Axioms_graph.axiomsVisjsGraph.data.edges.get();
         var edgesToMap = {};
         edges.forEach(function (edge) {
@@ -132,6 +133,16 @@ var Axiom_activeLegend = (function () {
             nodesMap[node.id] = node;
         });
         var firstClassNodeUri = null;
+
+        var restrictioParent = nodesMap[edgesToMap[restrictionUri].from];
+        if (restrictioParent && restrictioParent.data.type == "Connective") {
+            var siblingClass = self.getGraphSiblingUri(restrictioParent.id, "Class");
+            if (siblingClass) {
+                return siblingClass;
+            } else {
+                return null;
+            }
+        }
 
         function recurse(nodeId) {
             var node = nodesMap[nodeId];
@@ -296,7 +307,7 @@ var Axiom_activeLegend = (function () {
             return;
             var siblingObjectPropertyUri = self.getGraphSiblingUri(Axioms_graph.currentGraphNode.id, "ObjectProperty");
             if (Axioms_graph.currentGraphNode.data.type == "Restriction" && siblingObjectPropertyUri) {
-                var domainClassUri = self.getRestrictionAncestorClass(Axioms_graph.currentGraphNode.id);
+                var domainClassUri = self.getRestrictionSourceClass(Axioms_graph.currentGraphNode.id);
                 Axioms_suggestions.getClassMatchingPropertiesRangeAndDomain(self.currentSource, siblingObjectPropertyUri, domainClassUri, null, function (err, classes) {
                     if (err) {
                         return MainController.errorAlert(err);
@@ -386,7 +397,7 @@ var Axiom_activeLegend = (function () {
             return;
 
             var rangeClassUri = self.getGraphSiblingUri(Axioms_graph.currentGraphNode.id, "Class");
-            var domainClassUri = self.getRestrictionAncestorClass(Axioms_graph.currentGraphNode.id);
+            var domainClassUri = self.getRestrictionSourceClass(Axioms_graph.currentGraphNode.id);
 
             if (Axioms_graph.currentGraphNode.data.type == "Restriction" && domainClassUri) {
                 Axioms_suggestions.getValidPropertiesForClasses(self.currentSource, domainClassUri, rangeClassUri, {}, function (err, properties) {
@@ -939,9 +950,11 @@ var Axiom_activeLegend = (function () {
             if (Axioms_graph.currentAxiomTriples) {
                 Axioms_graph.currentAxiomTriples.forEach(function (triple, index) {
                     if (nodesToDelete.indexOf(triple.subject) > -1 || nodesToDelete.indexOf(triple.object) > -1) {
-                        $("#axiomsTriplesJstree")
-                            .jstree(true)
-                            .check_node("triple" + index);
+                        try {
+                            $("#axiomsTriplesJstree")
+                                .jstree(true)
+                                .check_node("triple" + index);
+                        } catch (e) {}
                     }
                 });
             }

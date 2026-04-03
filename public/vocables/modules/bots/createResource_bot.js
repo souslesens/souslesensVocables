@@ -360,6 +360,7 @@ var CreateResource_bot = (function () {
             self.myBotEngine.nextStep();
         },
         drawAxiomFn: function () {
+            var conceptType = "Class";
             var resource = {
                 data: {
                     id: self.params.resourceId,

@@ -155,6 +155,18 @@ const MainConfigObject = z
                 }
             }
         }),
+        metrics: z
+            .object({
+                enabled: z.boolean(),
+                auth: z
+                    .object({
+                        enabled: z.boolean(),
+                        username: z.string().min(1),
+                        password: z.string().min(1),
+                    })
+                    .strict(),
+            })
+            .strict(),
     })
     .strict();
 

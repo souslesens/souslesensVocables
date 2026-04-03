@@ -88,5 +88,13 @@
         "maximumFileSize": 1000000
     },
     "sparqlDownloadLimit": 10000,
-    "generalQuota": {}
+    "generalQuota": {},
+    "metrics": {
+        "enabled": false,
+        "auth": {
+            "enabled": true,
+            "username": "prometheus",
+            "password": "changeme"
+        }
+    }
 }

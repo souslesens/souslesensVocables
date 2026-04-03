@@ -190,8 +190,24 @@ app.use("/api/v1", (req, res, next) => {
     next();
 });
 
-// Endpoint Prometheus
+// Prometheus endpoint (controlled by metrics.enabled)
 app.get("/metrics", async (req, res) => {
+    // If metrics.enabled is false, disable the route
+    if (!config.metrics?.enabled) {
+        return res.status(404).send("Metrics endpoint disabled");
+    }
+
+    // Check if authentication is enabled
+    if (config.metrics.auth?.enabled) {
+        const auth = req.headers.authorization;
+        const expectedAuth = Buffer.from(`${config.metrics.auth.username}:${config.metrics.auth.password}`).toString("base64");
+
+        if (!auth || auth !== `Basic ${expectedAuth}`) {
+            res.set("WWW-Authenticate", "Basic realm='Prometheus Metrics'");
+            return res.status(401).send("Unauthorized");
+        }
+    }
+
     res.set("Content-Type", register.contentType);
     res.end(await register.metrics());
 });

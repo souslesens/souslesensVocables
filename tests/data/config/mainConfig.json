@@ -90,5 +90,13 @@
         "location": "database",
         "maximumFileSize": 1000000
     },
-    "generalQuota": {}
+    "generalQuota": {},
+    "metrics": {
+        "enabled": false,
+        "auth": {
+            "enabled": true,
+            "username": "prometheus",
+            "password": "changeme"
+        }
+    }
 }

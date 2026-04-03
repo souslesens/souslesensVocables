@@ -457,7 +457,10 @@ class BotEngineClass {
             $("#" + this.divId)
                 .find("#botFilterProposalDiv")
                 .show();
-            $("#botFilterProposalInput").trigger("focus");
+            $("#" + this.divId)
+                .find("#botFilterProposalInput")
+                .val("")
+                .trigger("focus");
         }
         common.fillSelectOptions($("#" + this.divId).find("#bot_resourcesProposalSelect"), values, false, "label", "id");
         $("#" + this.divId)

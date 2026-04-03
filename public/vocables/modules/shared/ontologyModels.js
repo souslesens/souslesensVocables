@@ -846,7 +846,7 @@ var OntologyModels = (function () {
                             sourceConstraintsAndRestrictions[property].forEach(function (constraint) {
                                 constraint.source = _source;
                                 var domainOK = false;
-                                if (true || !allConstraints[property]) {
+
                                     allConstraints[property] = constraint;
 
                                     if (constraint.domain && constraint.domain.startsWith("http")) {
@@ -884,7 +884,7 @@ var OntologyModels = (function () {
                                             noConstaintsArray.push(property);
                                         }
                                     }
-                                }
+
                             });
                         }
                     });

@@ -7,7 +7,6 @@
       "Grep",
       "Glob",
       "LS",
-      "echo",
       "Bash(git status:*)",
       "Bash(git diff:*)",
       "Bash(git add:*)",
@@ -22,7 +21,8 @@
       "Bash(git show-ref:*)",
       "Bash(test:*)",
       "Bash(npm run build:*)",
-      "Bash(node --check:*)"
+      "Bash(node --check:*)",
+      "Bash(node -e \":*)"
     ],
     "deny": [
       "Bash(git push:*)",

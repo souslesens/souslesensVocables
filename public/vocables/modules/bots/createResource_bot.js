@@ -9,6 +9,8 @@ import common from "../shared/common.js";
 import Sparql_generic from "../sparqlProxies/sparql_generic.js";
 import OntologyModels from "../shared/ontologyModels.js";
 import Lineage_createResource from "../tools/lineage/lineage_createResource.js";
+import AnnotationPropertiesTemplateAssignmentsResolver from "../tools/annotationPropertiesTemplate/annotationPropertiesTemplateAssignmentsResolver.js";
+
 import NodeInfosAxioms from "../tools/axioms/nodeInfosAxioms.js";
 import AxiomExtractor from "../tools/axioms/axiomExtractor.js";
 import Sparql_OWL from "../sparqlProxies/sparql_OWL.js";
@@ -306,12 +308,23 @@ var CreateResource_bot = (function () {
                 self.params.superClassId = self.params.resourceId;
                 var triples = Lineage_createResource.getResourceTriples(self.params.source, self.params.resourceType, null, self.params.resourceLabel, self.params.resourceId);
 
-                Lineage_createResource.addAnnotationTriples(triples, function (err, result) {
-                    Lineage_createResource.writeResource(self.params.source, triples, function (err, resourceId) {
-                        if (err) {
-                            self.myBotEngine.abort(err.responseText);
+                Lineage_createResource.writeResource(self.params.source, triples, function (err, resourceId) {
+                    if (err) {
+                        self.myBotEngine.abort(err.responseText);
+                    }
+                    self.params.resourceId = resourceId;
+
+                    var isClassOrIndividual = self.params.resourceType === "owl:Class" || self.params.resourceType === "owl:NamedIndividual";
+
+                    if (!isClassOrIndividual) {
+                        return self.myBotEngine.nextStep();
+                    }
+                    // Insert template placeholders if a template is applied to this source
+                    AnnotationPropertiesTemplateAssignmentsResolver.applyTemplatePlaceholdersToResource(self.params.source, resourceId, function (err2) {
+                        if (err2) {
+                            // Do not block the creation: resource is created anyway
+                            UI.message("Resource created, but template placeholders failed: " + (err2.responseText || err2.message || err2), true);
                         }
-                        self.params.resourceId = resourceId;
                         self.myBotEngine.nextStep();
                     });
                 });
@@ -348,6 +361,9 @@ var CreateResource_bot = (function () {
         },
         drawAxiomFn: function () {
             var conceptType = "Class";
+            if (self.params.resourceType === "owl:NamedIndividual") {
+                conceptType = "NamedIndividual";
+            }
             var resource = {
                 data: {
                     id: self.params.resourceId,
@@ -457,7 +473,6 @@ var CreateResource_bot = (function () {
             }
         },
     };
-
     return self;
 })();
 

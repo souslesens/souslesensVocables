@@ -22,6 +22,29 @@ export async function getLogs(file: string): Promise<Log[]> {
     return json;
 }
 
+export async function getLogsByDateRange(startDate: string, endDate: string): Promise<Log[]> {
+    const logFilesResponse = await getLogFiles();
+    const logFiles = logFilesResponse.message;
+
+    const startMonth = startDate.substring(0, 7);
+    const endMonth = endDate.substring(0, 7);
+
+    const relevantFiles = logFiles.filter((file) => {
+        return file.date >= startMonth && file.date <= endMonth;
+    });
+
+    const logsPromises = relevantFiles.map((file) => getLogs(file.date));
+    const logsArrays = await Promise.all(logsPromises);
+
+    const allLogs = logsArrays.flat();
+    const filteredLogs = allLogs.filter((log) => {
+        const logDate = log.timestamp.substring(0, 10);
+        return logDate >= startDate && logDate <= endDate;
+    });
+
+    return filteredLogs;
+}
+
 export async function writeLog(user: string, tool: string, action: string, source: string): Promise<number> {
     const body = { infos: `${user},${tool},${source},${action}` };
 

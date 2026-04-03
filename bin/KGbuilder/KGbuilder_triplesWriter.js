@@ -255,6 +255,7 @@ const KGbuilder_triplesWriter = {
 
             message.tableTotalRecords = totalRecords;
             message.operation = "deleteTriples";
+            message.table = table || null;
 
             var limit = 10000;
             var resultSize = 1;

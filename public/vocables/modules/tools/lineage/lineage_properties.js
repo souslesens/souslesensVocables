@@ -622,6 +622,10 @@ var Lineage_properties = (function () {
      * @param property : a specific property uri or null (all)
      */
     self.drawRangeAndDomainsGraph = function (source, targetnodes, options, property) {
+        if (targetnodes && targetnodes.length > 0) {
+            options = options || {};
+            options.filterNodes = targetnodes;
+        }
         self.getPropertiesRangeAndDomain(source, property, options, function (err, result) {
             if (err) {
                 return MainController.errorAlert(err);
@@ -659,20 +663,8 @@ var Lineage_properties = (function () {
             var allNodeIds = [];
 
             result.forEach(function (item) {
-                var ok = 0;
                 if (!item.property || !item.property.value) {
                     return;
-                }
-                if (targetnodes && targetnodes.length > 0) {
-                    if (item.range && targetnodes.indexOf(item.range.value) > -1) {
-                        ok = 1;
-                    } else if (item.domain && targetnodes.indexOf(item.domain.value) > -1) {
-                        ok = 1;
-                    }
-
-                    if (!ok) {
-                        return;
-                    }
                 }
 
                 if (item.property.value.indexOf("#type") > -1 && item.property.value.indexOf("#label") > -1) {
@@ -990,62 +982,67 @@ var Lineage_properties = (function () {
             if (!options) {
                 options = {};
             }
-            var mode = $("#LineagePropertie_nodesSelectionSelect").val();
             var filterNodes = null;
-            if (mode == "currentGraphNodes") {
-                if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty) {
-                    filterNodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.getIds();
+            if (options.filterNodes && options.filterNodes.length > 0) {
+                filterNodes = options.filterNodes.slice();
+            } else {
+                var mode = $("#LineagePropertie_nodesSelectionSelect").val();
+                if (mode == "currentGraphNodes") {
+                    if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty) {
+                        filterNodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.getIds();
+                    }
                 }
             }
             if (properties && properties.length > 0) {
                 options.filter = Sparql_common.setFilter("prop", properties);
             }
+
             UI.message("searching...");
-            Sparql_OWL.getInferredPropertiesDomainsAndRanges(source, options, function (err, result) {
-                if (err) {
-                    return callback(err);
-                }
-                var allProps = [];
-                if (Object.keys(allProps).length == 0) {
-                }
-                //  UI.message("No data found",true)
 
-                UI.message("drawing...");
-                for (var propId in result) {
-                    var item = result[propId];
-
-                    if (filterNodes) {
-                        if (filterNodes.indexOf(item.domain) > -1 || filterNodes.indexOf(item.range) > -1) {
-                            if (!properties || properties.indexOf(item.prop) > -1) {
-                                allProps.push(item);
-                            }
-                        }
-                    } else {
-                        allProps.push(item);
+            var runQuery = function (effectiveFilterNodes) {
+                Sparql_OWL.getInferredPropertiesDomainsAndRanges(source, options, function (err, result) {
+                    if (err) {
+                        return callback(err);
                     }
-                }
-
-                allProps.forEach(function (item) {
-                    item.property = { value: item.prop };
-                    item.propertyLabel = { value: item.propLabel };
-                    item.domain = { value: item.domain };
-                    item.domainLabel = { value: item.domainLabel };
-                    item.range = { value: item.range };
-                    item.rangeLabel = { value: item.rangeLabel };
-                    item.subProperty = { value: item.subProp };
-                    item.subPropertyLabel = { value: item.subPropLabel };
-                    item.inverseProperty = { value: item.inverseProp };
-                    item.subProperties = [];
-                    item.subProps.forEach(function (subPropId) {
-                        if (result[subPropId]) {
-                            item.subProperties.push({ id: subPropId, label: result[subPropId].propLabel });
+                    var allProps = [];
+                    UI.message("drawing...");
+                    for (var propId in result) {
+                        var item = result[propId];
+                        if (effectiveFilterNodes) {
+                            if (effectiveFilterNodes.indexOf(item.domain) > -1 || effectiveFilterNodes.indexOf(item.range) > -1) {
+                                if (!properties || properties.indexOf(item.prop) > -1) {
+                                    allProps.push(item);
+                                }
+                            }
+                        } else {
+                            allProps.push(item);
                         }
-                    });
-                    item.inversePropertyLabel = { value: item.inversePropLabel };
-                });
+                    }
 
-                return callback(null, allProps);
-            });
+                    allProps.forEach(function (item) {
+                        item.property = { value: item.prop };
+                        item.propertyLabel = { value: item.propLabel };
+                        item.domain = { value: item.domain };
+                        item.domainLabel = { value: item.domainLabel };
+                        item.range = { value: item.range };
+                        item.rangeLabel = { value: item.rangeLabel };
+                        item.subProperty = { value: item.subProp };
+                        item.subPropertyLabel = { value: item.subPropLabel };
+                        item.inverseProperty = { value: item.inverseProp };
+                        item.subProperties = [];
+                        item.subProps.forEach(function (subPropId) {
+                            if (result[subPropId]) {
+                                item.subProperties.push({ id: subPropId, label: result[subPropId].propLabel });
+                            }
+                        });
+                        item.inversePropertyLabel = { value: item.inversePropLabel };
+                    });
+
+                    return callback(null, allProps);
+                });
+            };
+
+            runQuery(filterNodes);
         } else if (Config.sources[source].schemaType == "KNOWLEDGE_GRAPH") {
             let options = {};
             Sparql_OWL.getFilteredTriples(source, targetnodes, null, null, options, function (err, result) {
@@ -1305,8 +1302,16 @@ var Lineage_properties = (function () {
             }
         }
         var nodeIds = null;
-        var nodesSelection = $("#lineageProperties_nodesSelectionSelect").val();
-        if (Lineage_whiteboard.lineageVisjsGraph.data && Lineage_whiteboard.lineageVisjsGraph.data.nodes && nodesSelection == "currentGraphNodes") {
+        var network = Lineage_whiteboard.lineageVisjsGraph.network;
+        var visSelected = network ? network.getSelectedNodes() : [];
+        if (visSelected.length > 0) {
+            nodeIds = visSelected;
+        } else if (Lineage_selection.selectedNodes && Lineage_selection.selectedNodes.length > 0) {
+            nodeIds = Lineage_selection.selectedNodes.map(function (node) {
+                return node.data ? node.data.id : node;
+            });
+        }
+        if (!nodeIds && Lineage_whiteboard.lineageVisjsGraph.data && Lineage_whiteboard.lineageVisjsGraph.data.nodes) {
             nodeIds = Lineage_whiteboard.lineageVisjsGraph.data.nodes.getIds();
         }
 

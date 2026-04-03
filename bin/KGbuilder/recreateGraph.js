@@ -182,8 +182,7 @@ async function recreateGraphTriples(params) {
     // DELETE
     var deleteResult = null;
     if (!skipDelete) {
-        var tablesArgForDelete = requestedTables && requestedTables.length > 0 ? targetTables : [];
-        deleteResult = await deleteKGBuilderTriplesAsync(source, tablesArgForDelete, options);
+        deleteResult = await deleteKGBuilderTriplesAsync(source, targetTables, options);
     }
 
     // Get datasource from mappings for the first table

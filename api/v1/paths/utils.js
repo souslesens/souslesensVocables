@@ -248,6 +248,15 @@ function fixBooleanInObject(obj, depth) {
     return obj;
 }
 
+/**
+ * Returns the MIME type of the uploaded file.
+ * @param {Object} file - The file object from req.files.
+ * @returns {string} Normalized MIME type or an empty string.
+ */
+function getUploadedMime(file) {
+    return file && typeof file.mimetype === "string" ? file.mimetype.toLowerCase() : "";
+}
+
 export {
     writeResource,
     failure,
@@ -267,4 +276,5 @@ export {
     filterSources,
     sortObjectByKey,
     fixBooleanInObject,
+    getUploadedMime,
 };

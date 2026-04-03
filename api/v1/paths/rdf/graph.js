@@ -6,6 +6,7 @@ import { ulid } from "ulid";
 import path from "path";
 import fs from "fs";
 import os from "node:os";
+import { getUploadedMime } from "../utils.js";
 
 export default function () {
     let operations = {
@@ -89,11 +90,31 @@ export default function () {
     }
 
     async function POST(req, res, _next) {
+        // Helper function to upload a chunk and clean temporary files
+        async function uploadChunkAndClean(tmpPath, uploadedPath, filePathToUpload, graphUri, config) {
+            // Ensure the directory for exposed uploads exists
+            if (!fs.existsSync(uploadedPath)) {
+                fs.mkdirSync(uploadedPath);
+            }
+            // Move the temporary file to the exposed directory
+            const blob = fs.readFileSync(tmpPath);
+            fs.writeFileSync(filePathToUpload, blob);
+
+            // Load file into triplestore
+            const slsUrl = config.souslesensUrlForVirtuoso ? config.souslesensUrlForVirtuoso : config.souslesensUrl;
+            const fileToUploadUrl = `${slsUrl}/upload/rdf/${path.basename(filePathToUpload)}`;
+            await rdfDataModel.loadGraph(graphUri, fileToUploadUrl);
+
+            // Clean up
+            if (fs.existsSync(filePathToUpload)) fs.rmSync(filePathToUpload);
+        }
+
         const config = await mainConfigModel.getConfig();
         const last = req.body.last;
         const id = req.body.identifier || ulid();
         const clean = req.body.clean;
         const file = req.files.data;
+        const uploadedMime = getUploadedMime(file);
 
         const tmpPath = path.resolve(os.tmpdir(), `${id}.nt`);
         const uploadedPath = path.resolve("data", "uploaded_rdf_data");
@@ -119,36 +140,26 @@ export default function () {
                 return;
             }
 
-            // append data to file (create it first time)
             try {
                 fs.appendFileSync(tmpPath, file.data);
-            } catch (error2) {
-                console.log(error2);
+            } catch (error) {
+                console.error(error);
             }
 
-            // last chunk, upload file to endpoint
-            if (last) {
-                // create exposed directory if not exists
-                if (!fs.existsSync(uploadedPath)) {
-                    fs.mkdirSync(uploadedPath);
-                }
-
-                // move file to this dir
-                const blob = fs.readFileSync(tmpPath);
-                fs.writeFileSync(filePathToUpload, blob);
-
-                // Load file into triplestore
-                const slsUrlForTriplestore = config.souslesensUrlForVirtuoso ? config.souslesensUrlForVirtuoso : config.souslesensUrl;
-                const fileToUploadUrl = `${slsUrlForTriplestore}/upload/rdf/${id}.nt`;
-                await rdfDataModel.loadGraph(graphUri, fileToUploadUrl);
+            // N‑Triples can be uploaded directly.
+            // upload it immediately and clean temporary files.
+            if (uploadedMime === "application/n-triples" || last) {
+                await uploadChunkAndClean(tmpPath, uploadedPath, filePathToUpload, graphUri, config);
                 // clean
-                fs.rmSync(filePathToUpload);
+                if (fs.existsSync(tmpPath)) fs.rmSync(tmpPath);
             }
+
             res.status(200).send({ identifier: id });
         } catch (error) {
             // clean
             if (fs.existsSync(filePathToUpload)) {
-                fs.rmSync(filePathToUpload);
+                if (fs.existsSync(filePathToUpload)) fs.rmSync(filePathToUpload);
+                if (fs.existsSync(tmpPath)) fs.rmSync(tmpPath);
             }
             console.error(error);
             return res.status(500).json({ error: error.message });

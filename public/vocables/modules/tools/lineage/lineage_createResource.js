@@ -5,7 +5,6 @@ import Sparql_generic from "../../sparqlProxies/sparql_generic.js";
 import OntologyModels from "../../shared/ontologyModels.js";
 import Lineage_createRelation from "./lineage_createRelation.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
-import UserDataWidget from "../../uiWidgets/userDataWidget.js";
 
 /**
  * @module Lineage_createResource
@@ -168,18 +167,6 @@ var Lineage_createResource = (function () {
         self.basicDone = true;
 
         return triples;
-    };
-
-    self.addAnnotationTriples = function (triples, callback) {
-        UserDataWidget.loadUserDatabyId(162164, function (err, result) {
-            if (!err && result.length > 0) {
-                var subject = triples[0].subject;
-                result.forEach(function (predicate) {
-                    triples.push({ subject: subject, predicate: predicate, object: "?" });
-                });
-            }
-            return callback(null, triples);
-        });
     };
 
     /**
@@ -419,7 +406,7 @@ var Lineage_createResource = (function () {
      * @memberof Lineage_createResource
      * @param {string} uriType - The selected URI type ("specific" or other).
      */
-    self.onselectNodeUriType = function (uryType) {
+    self.onselectNodeUriType = function (uriType) {
         var display = uriType == "specific" ? "block" : "none";
         $("#lineageCreateResource_specificUri").css("display", display);
     };

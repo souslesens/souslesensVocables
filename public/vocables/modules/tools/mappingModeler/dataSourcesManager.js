@@ -386,6 +386,12 @@ var DataSourceManager = (function () {
     self.loadDataBaseSource = function (slsvSource, dataSource, sqlType, callback) {
         fetch(`${Config.apiUrl}/databases/${dataSource}`).then((response) => {
             response.json().then((data) => {
+                // Store connection info so RML export can build the JDBC DSN automatically
+                if (data && self.currentConfig.currentDataSource) {
+                    self.currentConfig.currentDataSource.host = data.host || null;
+                    self.currentConfig.currentDataSource.port = data.port || null;
+                    self.currentConfig.currentDataSource.database = data.database || null;
+                }
                 async.series(
                     [
                         function (callbackSeries) {

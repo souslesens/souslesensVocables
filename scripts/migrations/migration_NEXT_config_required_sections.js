@@ -17,9 +17,30 @@ const main = async () => {
     const configPath = path.resolve(argv.config, "mainConfig.json");
     const configJSON = JSON.parse(fs.readFileSync(configPath, { encoding: "utf-8" }));
 
+    let changesMade = false;
+
+    // Migration 1: generalQuota
     if (configJSON.generalQuota === undefined) {
         configJSON.generalQuota = {};
+        console.info(" ➕ Added 'generalQuota' section");
+        changesMade = true;
+    }
 
+    // Migration 2: metrics
+    if (configJSON.metrics === undefined) {
+        configJSON.metrics = {
+            enabled: false,
+            auth: {
+                enabled: true,
+                username: "prometheus",
+                password: "changeme",
+            },
+        };
+        console.info(" ➕ Added 'metrics' section");
+        changesMade = true;
+    }
+
+    if (changesMade) {
         if (argv.write) {
             console.info(" ✅ The mainConfig.json was updated");
             fs.writeFileSync(configPath, JSON.stringify(configJSON, null, 2));

@@ -116,9 +116,18 @@ export default function () {
         const file = req.files.data;
         const uploadedMime = getUploadedMime(file);
 
-        const tmpPath = path.resolve(os.tmpdir(), `${id}.nt`);
+        const mimeToExtension = {
+            "application/n-triples": ".nt",
+            "text/turtle": ".ttl",
+            "application/rdf+xml": ".rdf",
+            "application/owl+xml": ".owl",
+            "text/n3": ".n3",
+            "application/trig": ".trig",
+        };
+        const fileExtension = mimeToExtension[uploadedMime] || ".nt";
+        const tmpPath = path.resolve(os.tmpdir(), `${id}${fileExtension}`);
         const uploadedPath = path.resolve("data", "uploaded_rdf_data");
-        const filePathToUpload = path.resolve(uploadedPath, `${id}.nt`);
+        const filePathToUpload = path.resolve(uploadedPath, `${id}${fileExtension}`);
 
         try {
             const sourceName = req.body.source;

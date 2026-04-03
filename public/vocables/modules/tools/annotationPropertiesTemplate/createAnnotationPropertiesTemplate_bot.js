@@ -114,6 +114,8 @@ var CreateAnnotationPropertiesTemplate_bot = (function () {
             // GLOBAL templates (no reference source): show standard + common import vocabularies
             if (!sourceForVocabs) {
                 var vocabs = [
+                    { id: "searchProperty", label: "Search Property" },
+
                     // Imports (common)
                     { id: "BFO", label: "[Import] BFO" },
                     { id: "dc", label: "[Import] dc" },
@@ -126,11 +128,6 @@ var CreateAnnotationPropertiesTemplate_bot = (function () {
                     { id: "owl", label: "[Standard] owl" },
                     { id: "skos", label: "[Standard] skos" },
                 ];
-
-                // Sort for UX (optional)
-                vocabs.sort(function (a, b) {
-                    return a.label.localeCompare(b.label);
-                });
 
                 return self.myBotEngine.showList(vocabs, "selectedVocabulary");
             }
@@ -231,13 +228,21 @@ var CreateAnnotationPropertiesTemplate_bot = (function () {
                     return a.label.localeCompare(b.label);
                 });
 
-                // Feed BotEngine list
+                // "Search Class" always available as first option
+                categorizedVocabularies.splice(0, 0, { id: "searchProperty", label: "Search Property" });
+
                 return self.myBotEngine.showList(categorizedVocabularies, "selectedVocabulary");
             });
         },
 
+
         /**
-         * Shows annotation properties (non-object properties) for the selected vocabulary.
+         * Shows annotation properties for the selected vocabulary.
+         * In "searchProperty" mode, loads and merges ALL properties from every available vocab
+         * (referenceSource + imports + basicVocabularies) and shows them as a single list.
+         * For basicVocabularies whose graph is absent from the triplestore, falls back to
+         * filtering the referenceSource graph by URI namespace.
+         * In normal mode, loads properties for the single selected vocab only.
          */
         choosePropertyFn: function () {
             var vocab = self.params.selectedVocabulary;
@@ -245,48 +250,171 @@ var CreateAnnotationPropertiesTemplate_bot = (function () {
                 return self.myBotEngine.previousStep("No vocabulary selected.");
             }
 
-            CommonBotFunctions.listNonObjectPropertiesFn([vocab], null, function (err, nonObjectProperties) {
-                if (err) {
-                    return self.myBotEngine.abort(err.responseText || err);
-                }
-                if (!nonObjectProperties || nonObjectProperties.length === 0) {
-                    return self.myBotEngine.previousStep("No annotation properties found for this vocabulary.");
-                }
+            self.params.propertyUriToLabelMap = {};
 
-                // Build list choices safely (skip invalid items)
+            var showPropertyChoices = function (properties, vocabId) {
                 var choices = [];
-                self.params.propertyUriToLabelMap = {};
 
-                nonObjectProperties.forEach(function (propertyItem) {
+                properties.forEach(function (propertyItem) {
                     if (!propertyItem || !propertyItem.id) {
-                        return; // skip invalid properties
+                        return;
                     }
+                    var rawLabel = propertyItem.label || propertyItem.id;
+                    var normalizedLabel = normalizePropertyLabel(vocabId || vocab, rawLabel);
 
-                    // Normalize label to string
-                    var rawLabel = propertyItem.label;
-                    if (!rawLabel) {
-                        rawLabel = propertyItem.id; // fallback to URI
-                    }
-                    var normalizedLabel = normalizePropertyLabel(vocab, rawLabel);
-
-                    choices.push({
-                        id: propertyItem.id,
-                        label: normalizedLabel,
-                    });
-
+                    choices.push({ id: propertyItem.id, label: normalizedLabel });
                     self.params.propertyUriToLabelMap[propertyItem.id] = normalizedLabel;
                 });
 
                 if (choices.length === 0) {
-                    return self.myBotEngine.previousStep("No usable annotation properties found for this vocabulary.");
+                    return self.myBotEngine.previousStep("No usable annotation properties found for " + vocab + ".");
                 }
 
-                // Sort for better UX
                 choices.sort(function (a, b) {
                     return (a.label || "").localeCompare(b.label || "");
                 });
 
                 self.myBotEngine.showList(choices, "selectedPropertyUri");
+            };
+
+            if (vocab === "searchProperty") {
+                var source = self.params.referenceSource;
+                var vocabsToLoad = [];
+
+                // Load in priority order: specific vocabs first, general source last.
+                // This ensures deduplication keeps the most precise vocab name (e.g. "skos"
+                // over "IOF-CORE-202401" for skos:prefLabel).
+
+                // 1. basicVocabularies first (rdf, rdfs, owl, skos, dc, dcterms, iof-av)
+                for (var bvKey in Config.basicVocabularies) {
+                    vocabsToLoad.push(bvKey);
+                }
+
+                if (source && Config.sources[source]) {
+                    // 2. imports of referenceSource (e.g. BFO)
+                    var imports = Config.sources[source].imports || [];
+                    imports.forEach(function (imp) {
+                        if (vocabsToLoad.indexOf(imp) < 0) {
+                            vocabsToLoad.push(imp);
+                        }
+                    });
+
+                    // 3. referenceSource last (may contain everything but less specific)
+                    if (vocabsToLoad.indexOf(source) < 0) {
+                        vocabsToLoad.push(source);
+                    }
+                } else {
+                    // No referenceSource: use sources currently loaded on the whiteboard
+                    var loadedSrcIds = Object.keys(Lineage_sources.loadedSources || {});
+                    loadedSrcIds.forEach(function (srcId) {
+                        if (vocabsToLoad.indexOf(srcId) < 0) {
+                            vocabsToLoad.push(srcId);
+                        }
+                    });
+                }
+
+                var allProps = [];
+                var propVocabSeen = {};
+
+                var addProps = function (props, vocabId) {
+                    props.forEach(function (p) {
+                        if (!p || !p.id) {
+                            return;
+                        }
+                        var key = p.id + "|" + vocabId;
+                        if (propVocabSeen[key]) {
+                            return;
+                        }
+                        propVocabSeen[key] = true;
+                        var shortLabel = normalizePropertyLabel(vocabId, p.label || p.id);
+                        allProps.push({ id: p.id, label: shortLabel + " (" + vocabId + ")" });
+                        self.params.propertyUriToLabelMap[p.id] = shortLabel;
+                    });
+                };
+
+                async.eachSeries(
+                    vocabsToLoad,
+                    function (vocabId, callbackEach) {
+                        CommonBotFunctions.listNonObjectPropertiesFn([vocabId], null, function (err, props) {
+                            if (err || !props || props.length === 0) {
+                                    var vocabGraphUri = (Config.basicVocabularies && Config.basicVocabularies[vocabId] && Config.basicVocabularies[vocabId].graphUri) ||
+                                    (Config.sources && Config.sources[vocabId] && Config.sources[vocabId].graphUri);
+                                if (vocabGraphUri && source && source !== vocabId) {
+                                    CommonBotFunctions.listNonObjectPropertiesFn([source], null, function (err2, sourceProps) {
+                                        if (!err2 && sourceProps) {
+                                            var nsFiltered = sourceProps
+                                                .filter(function (p) {
+                                                    return p.id && p.id.startsWith(vocabGraphUri);
+                                                })
+                                                .map(function (p) {
+                                                    var shortLabel = p.id.split("/").pop().split("#").pop();
+                                                    return { id: p.id, label: shortLabel };
+                                                });
+                                            addProps(nsFiltered, vocabId);
+                                        }
+                                        callbackEach();
+                                    });
+                                } else {
+                                    callbackEach();
+                                }
+                                return;
+                            }
+                            addProps(props, vocabId);
+                            callbackEach();
+                        });
+                    },
+                    function () {
+                        if (allProps.length === 0) {
+                            return self.myBotEngine.previousStep("No annotation properties found.");
+                        }
+                        allProps.sort(function (a, b) {
+                            return (a.label || "").localeCompare(b.label || "");
+                        });
+                        self.myBotEngine.showList(allProps, "selectedPropertyUri");
+                    }
+                );
+                return;
+            }
+
+            var loadFromReferenceSourceByNamespace = function (vocabNamespaceUri) {
+                var fallbackSource = self.params.referenceSource;
+                if (!fallbackSource) {
+                    return self.myBotEngine.previousStep("No annotation properties found for " + vocab + ".");
+                }
+                CommonBotFunctions.listNonObjectPropertiesFn([fallbackSource], null, function (err2, sourceProps) {
+                    if (err2 || !sourceProps) {
+                        return self.myBotEngine.previousStep("No annotation properties found for " + vocab + ".");
+                    }
+                    var filtered = sourceProps
+                        .filter(function (p) {
+                            return p.id && p.id.startsWith(vocabNamespaceUri);
+                        })
+                        .map(function (p) {
+                            var shortLabel = p.id.split("/").pop().split("#").pop();
+                            return { id: p.id, label: vocab + ":" + shortLabel };
+                        });
+
+                    if (filtered.length === 0) {
+                        return self.myBotEngine.previousStep("No annotation properties found for " + vocab + ".");
+                    }
+                    showPropertyChoices(filtered, vocab);
+                });
+            };
+
+            CommonBotFunctions.listNonObjectPropertiesFn([vocab], null, function (err, nonObjectProperties) {
+                if (err) {
+                    return self.myBotEngine.abort(err.responseText || err);
+                }
+
+                if (!nonObjectProperties || nonObjectProperties.length === 0) {
+                    var basicVocab = Config.basicVocabularies && Config.basicVocabularies[vocab];
+                    if (basicVocab && basicVocab.graphUri) {
+                        return loadFromReferenceSourceByNamespace(basicVocab.graphUri);
+                    }
+                    return self.myBotEngine.previousStep("No annotation properties found for " + vocab + ".");
+                }
+
+                showPropertyChoices(nonObjectProperties, vocab);
             });
         },
 
@@ -295,6 +423,10 @@ var CreateAnnotationPropertiesTemplate_bot = (function () {
          */
         afterChoosePropertyFn: function () {
             var vocab = self.params.selectedVocabulary;
+            if (vocab === "searchProperty") {
+                vocab = resolveVocabFromPropertyUri(self.params.selectedPropertyUri) || "searchProperty";
+                self.params.selectedVocabulary = vocab;
+            }
             var propertyUri = self.params.selectedPropertyUri;
             // Prevent double execution (can happen on some vocabularies / large lists)
             if (self.params.isProcessingPropertySelection) {
@@ -485,6 +617,31 @@ var CreateAnnotationPropertiesTemplate_bot = (function () {
     // ---------------------------
     // Helpers
     // ---------------------------
+
+    /**
+     * Resolves the vocabulary ID from a property URI by matching against basicVocabularies
+     * and Config.sources graphUris.
+     * @param {string} uri - Property URI
+     * @returns {string|null}
+     */
+    function resolveVocabFromPropertyUri(uri) {
+        if (!uri) {
+            return null;
+        }
+        for (var bvKey in Config.basicVocabularies) {
+            var bv = Config.basicVocabularies[bvKey];
+            if (bv.graphUri && uri.startsWith(bv.graphUri)) {
+                return bvKey;
+            }
+        }
+        for (var srcKey in Config.sources) {
+            var src = Config.sources[srcKey];
+            if (src.graphUri && uri.startsWith(src.graphUri)) {
+                return srcKey;
+            }
+        }
+        return null;
+    }
 
     /**
      * Deduplicates selections by (vocab + uri).

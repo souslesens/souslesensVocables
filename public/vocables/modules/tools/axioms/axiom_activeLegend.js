@@ -1026,9 +1026,9 @@ var Axiom_activeLegend = (function () {
     };
 
     self.clearAxiom = function () {
-        // self.axiomsLegendVisjsGraph.clearGraph();
         Axioms_graph.axiomsVisjsGraph.clearGraph();
         NodeInfosAxioms.newAxiom(true);
+        Axiom_UI.showLegendPanel();
     };
 
     self.saveAxiom = function (callback) {
@@ -1838,7 +1838,7 @@ var Axiom_activeLegend = (function () {
             });
 
             $("#axiomSuggestionsSearchBar").show();
-            $("#axiomSuggestionsSearchInput").val("");
+            $("#axiomSuggestionsSearchInput").val("").trigger("focus");
             $("#axiomSuggestionsSelectDiv").css("overflow", "unset");
         });
     };

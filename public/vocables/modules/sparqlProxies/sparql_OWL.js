@@ -1521,8 +1521,9 @@ var Sparql_OWL = (function () {
         if (options.selectGraph) {
             query += " GRAPH ?g ";
         }
+        var subClassOfPath = options.includeInherited ? "rdfs:subClassOf+" : "rdfs:subClassOf";
         query +=
-            "{ ?subject rdfs:subClassOf ?node.  ?node rdf:type owl:Restriction." +
+            "{ ?subject " + subClassOfPath + " ?node.  ?node rdf:type owl:Restriction." +
             filterStr +
             " ?node owl:onProperty ?prop ." +
             Sparql_common.getVariableLangLabel("prop", true, null, filterStr) +

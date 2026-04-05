@@ -286,6 +286,7 @@ var CreateSLSVsource_bot = (function () {
             }
 
             var graphUri = self.params.graphUri.endsWith("/") ? self.params.graphUri : self.params.graphUri + "/";
+            var temporaryGraphUri = sourceConfig.graphUri;
             sourceConfig.graphUri = graphUri;
             sourceConfig.baseUri = graphUri;
             sourceConfig.imports = self.params.imports;
@@ -295,8 +296,20 @@ var CreateSLSVsource_bot = (function () {
                 data: JSON.stringify(sourceConfig),
                 contentType: "application/json",
                 dataType: "json",
-                success: function (data, _textStatus, _jqXHR) {
-                    return self.myBotEngine.nextStep();
+                success: function (_data, _textStatus, _jqXHR) {
+                    $.ajax({
+                        type: "POST",
+                        url: `${Config.apiUrl}/rdf/graphMove`,
+                        data: JSON.stringify({ sourceGraphUri: temporaryGraphUri, targetGraphUri: graphUri }),
+                        contentType: "application/json",
+                        dataType: "json",
+                        success: function () {
+                            return self.myBotEngine.nextStep();
+                        },
+                        error: function (err) {
+                            return MainController.errorAlert(err);
+                        },
+                    });
                 },
                 error: function (err) {
                     return MainController.errorAlert(err);

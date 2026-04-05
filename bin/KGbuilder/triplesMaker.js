@@ -173,7 +173,7 @@ var TriplesMaker = {
             const conn = await databaseModel.getUserConnection(user, tableInfos.dbID);
             var connectionObject = { connection: conn, user: user, dbId: tableInfos.dbID };
             let generator = databaseModel.batchSelectGenerator(connectionObject, tableInfos.table, {
-                select: select,
+                select: "*",//select,
                 batchSize: limitSize,
                 startingOffset: offset,
             });
@@ -319,7 +319,8 @@ var TriplesMaker = {
 
             for (var columnId in columnMappings) {
                 // filter columns
-                if (options.filterMappingIds && options.filterMappingIds.indexOf(columnId) < 0) {
+
+                if (options.filterMappingIds && options.filterMappingIds.toString().indexOf(columnId) < 0) {
                     continue;
                 }
 
@@ -341,6 +342,16 @@ var TriplesMaker = {
                     }
                     if (!columnId) {
                         return;
+                    }
+                    if(options.filterMappingIds) {
+
+                        var str = options.filterMappingIds.toString();
+                        if(str.indexOf(">")>-1 && str.indexOf(mapping.p) < 0){
+                            return
+                        }
+
+
+
                     }
 
                     var object = null;
@@ -407,15 +418,22 @@ var TriplesMaker = {
             for (var columnId in columnMappings) {
                 // filter columns
                 var otherPredicates = columnMappings[columnId].otherPredicates;
-                if (otherPredicates) {
+                if (otherPredicates ) {
                     otherPredicates.forEach(function (item) {
+
                         if (options.filterMappingIds && options.filterMappingIds.indexOf(item.property) > -1) {
                             var subjectUri = TriplesMaker.getColumnUri(line, columnId, columnMappings, rowIndex, tableProcessingParams);
-                            var object = TriplesMaker.getFormatedLiteral(line, {
-                                dataType: item.range,
-                                o: item.object,
-                                dateFormat: item.dateFormat,
-                            });
+                           var value=line[item.object]
+                            var object=null
+                            if(value && value.startsWith("http:")){
+                                object="<"+value +">"
+                            }else {
+                                object = TriplesMaker.getFormatedLiteral(line, {
+                                    dataType: item.range,
+                                    o: item.object,
+                                    dateFormat: item.dateFormat,
+                                });
+                            }
 
                             var property = TriplesMaker.getPropertyUri(item.property);
                             addTriple(subjectUri, property, object);
@@ -601,6 +619,11 @@ var TriplesMaker = {
             // cross lines value for the column
 
             if (dataItem[columnParams.id]) {
+               var value=dataItem[columnParams.id];
+               if(value.startsWith("http")){
+                  return "<"+value+">"
+               }
+
                 id = util.formatStringForTriple(dataItem[columnParams.id], true);
             }
         } else if (columnParams.uriType == "randomIdentifier") {

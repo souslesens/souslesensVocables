@@ -108,20 +108,33 @@ const ConfigForm = () => {
         loadConfig();
     }, [loadConfig]);
 
-    const zo = useZorm("general-config", ConfigFormSchema, {
-        onValidSubmit(event) {
-            event.preventDefault();
-            void updateConfig(event.data)
-                .then(() => notifier.notify({ message: "Settings correctly saved", severity: "success" }))
-                .catch(() => setConfigRD(failure("Couldn't save configuration")))
-                .then(loadConfig);
-        },
-    });
+    const zo = useZorm("general-config", ConfigFormSchema, { setupListeners: false });
+
+    const handleSubmit = (event: React.FormEvent) => {
+        event.preventDefault();
+        const formData = new FormData(event.target as HTMLFormElement);
+        const themeSelectorCheckbox = (event.target as HTMLFormElement).querySelector(`input[name="${zo.fields.theme.selector()}"]`) as HTMLInputElement;
+
+        const configData = {
+            defaultGroups,
+            tools_available: availableTools,
+            theme: {
+                defaultTheme: formData.get(zo.fields.theme.defaultTheme()) as string,
+                selector: themeSelectorCheckbox?.checked ?? false,
+            },
+            sparqlDownloadLimit: 10000,
+        };
+
+        void updateConfig(configData)
+            .then(() => notifier.notify({ message: "Settings correctly saved", severity: "success" }))
+            .catch(() => setConfigRD(failure("Couldn't save configuration")))
+            .then(loadConfig);
+    };
 
     const renderRD = SRD.map3(
         (config, allProfiles, allTools) => {
             return (
-                <form ref={zo.ref}>
+                <form ref={zo.ref} onSubmit={handleSubmit}>
                     {notifier.element}
                     <Stack direction="column" spacing={{ xs: 2 }} sx={{ m: 4 }} useFlexGap>
                         <Stack direction="column" spacing={{ xs: 2 }} useFlexGap>
@@ -207,7 +220,7 @@ const ConfigForm = () => {
     return SRD.match(
         {
             success: (content) => content,
-            notAsked: () => <p>Let’s fetch some data!</p>,
+            notAsked: () => <p>Let's fetch some data!</p>,
             loading: () => (
                 <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
                     <CircularProgress />

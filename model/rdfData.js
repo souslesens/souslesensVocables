@@ -299,9 +299,9 @@ class RdfDataModel {
      */
     deleteGraph = async (graphUri) => {
         if (this.endpointUser && this.endpointPassword) {
-            this._deleteGraphWithApi(graphUri);
+            await this._deleteGraphWithApi(graphUri);
         } else {
-            this._clearGraph(graphUri);
+            await this._clearGraph(graphUri);
         }
     };
     /**

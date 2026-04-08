@@ -99,7 +99,34 @@ var MappingParser = {
                 mapping.isConstantPrefixedUri = MappingParser.isConstantPrefixedUri(mapping.o);
             });
 
-            tablecolumnsMap[columnId].mappings = tablecolumnsMap[columnId].mappings.concat(mappings);
+            var existingMappings = tablecolumnsMap[columnId].mappings.concat(mappings);
+
+            var hasRdfsLabel = existingMappings.some(function (m) {
+                return m.p === "rdfs:label";
+            });
+            if (fromNodeData.rdfsLabel && !hasRdfsLabel) {
+                existingMappings.push({
+                    s: fromNodeData.id,
+                    p: "rdfs:label",
+                    o: fromNodeData.rdfsLabel,
+                    isString: true,
+                });
+            }
+
+            var hasRdfType = existingMappings.some(function (m) {
+                return m.p === "rdf:type";
+            });
+            if (fromNodeData.rdfType && !hasRdfType) {
+                existingMappings.push({
+                    s: fromNodeData.id,
+                    p: "rdf:type",
+                    o: fromNodeData.rdfType,
+                    isConstantUri: MappingParser.isConstantUri(fromNodeData.rdfType),
+                    isConstantPrefixedUri: MappingParser.isConstantPrefixedUri(fromNodeData.rdfType),
+                });
+            }
+
+            tablecolumnsMap[columnId].mappings = existingMappings;
         }
     },
     isConstantUri: function (str) {

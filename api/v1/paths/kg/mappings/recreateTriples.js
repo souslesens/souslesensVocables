@@ -36,6 +36,7 @@ export default function () {
                 tables: out.table,
                 deleteResult: out.deleteResult,
                 result: out.result,
+                report: out.result && out.result.report,
                 mode: out.mode,
                 tablesProcessed: out.tablesProcessed,
             });

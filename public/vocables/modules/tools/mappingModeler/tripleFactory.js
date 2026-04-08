@@ -325,6 +325,7 @@ var TripleFactory = (function () {
                         progressBar.style.display = "none";
                     }
                 } else {
+                    downloadReport(result && result.report, DataSourceManager.currentSlsvSource, table);
                     if (options.deleteTriples) {
                         $("#KGcreator_infosDiv").val(result.result);
                         UI.message(result.result, true);
@@ -396,6 +397,8 @@ var TripleFactory = (function () {
             contentType: "application/json; charset=utf-8",
             dataType: "json",
             success: function (data) {
+                var report = (data && data.report) || (data && data.result && data.result.report);
+                downloadReport(report, data && data.source, data && data.tablesProcessed);
                 if (onSuccess) onSuccess(data);
             },
             error: function (xhr) {
@@ -1010,6 +1013,88 @@ var TripleFactory = (function () {
     /* self.showFilterMappingsDialog=function(){
         TripleFactory.initFilterMappingDialog()
     }*/
+
+    function downloadReport(report, source, tables) {
+        if (!report) return;
+        var hasErrors = report.errors && report.errors.length > 0;
+        var hasSkipped = report.skippedMappings && report.skippedMappings.length > 0;
+
+        if (!hasErrors) {
+            var tableKeys = Object.keys(report);
+            tableKeys.forEach(function (t) {
+                var tableReport = report[t];
+                if (tableReport && tableReport.errors && tableReport.errors.length > 0) hasErrors = true;
+                if (tableReport && tableReport.skippedMappings && tableReport.skippedMappings.length > 0) hasSkipped = true;
+            });
+        }
+
+        if (!hasErrors && !hasSkipped) return;
+
+        var lines = [];
+        lines.push("=== Triple Generation Report ===");
+        lines.push("Date: " + new Date().toISOString());
+        lines.push("Source: " + (source || "unknown"));
+        if (tables) {
+            lines.push("Tables: " + (Array.isArray(tables) ? tables.join(", ") : String(tables)));
+        }
+        lines.push("");
+
+        function formatTableReport(tableReport) {
+            var tableLines = [];
+            if (tableReport.errors && tableReport.errors.length > 0) {
+                tableLines.push("--- Errors (" + tableReport.errors.length + (tableReport.errorsTruncated ? "+" : "") + ") ---");
+                tableReport.errors.forEach(function (e) {
+                    var parts = ["Row " + e.rowIndex];
+                    if (e.columnId) parts.push("Column: " + e.columnId);
+                    if (e.predicate) parts.push("Predicate: " + e.predicate);
+                    parts.push("Error: " + e.error);
+                    if (e.rawValue !== null && e.rawValue !== undefined) parts.push("Value: " + e.rawValue);
+                    tableLines.push("  " + parts.join(", "));
+                });
+                tableLines.push("");
+            }
+            if (tableReport.skippedMappings && tableReport.skippedMappings.length > 0) {
+                tableLines.push("--- Skipped Mappings (" + tableReport.skippedMappings.length + (tableReport.skippedMappingsTruncated ? "+" : "") + ") ---");
+                tableReport.skippedMappings.forEach(function (s) {
+                    var parts = ["Row " + s.rowIndex];
+                    if (s.columnId) parts.push("Column: " + s.columnId);
+                    if (s.predicate) parts.push("Predicate: " + s.predicate);
+                    parts.push("Reason: " + s.reason);
+                    if (s.rawValue !== null && s.rawValue !== undefined) parts.push("Value: " + s.rawValue);
+                    tableLines.push("  " + parts.join(", "));
+                });
+                tableLines.push("");
+            }
+            return tableLines;
+        }
+
+        if (report.errors || report.skippedMappings) {
+            var tl = formatTableReport(report);
+            tl.forEach(function (l) { lines.push(l); });
+        } else {
+            Object.keys(report).forEach(function (tableName) {
+                var tableReport = report[tableName];
+                if (!tableReport) return;
+                var hasTableContent = (tableReport.errors && tableReport.errors.length > 0) || (tableReport.skippedMappings && tableReport.skippedMappings.length > 0);
+                if (!hasTableContent) return;
+                lines.push("=== Table: " + tableName + " ===");
+                var tl = formatTableReport(tableReport);
+                tl.forEach(function (l) { lines.push(l); });
+            });
+        }
+
+        var content = lines.join("\n");
+        var blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement("a");
+        a.href = url;
+        var dateStr = new Date().toISOString().slice(0, 10);
+        a.download = "triple_report_" + (source || "unknown") + "_" + dateStr + ".txt";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
 
     return self;
 })();

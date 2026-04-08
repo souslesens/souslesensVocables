@@ -33,6 +33,9 @@ var TriplesMaker = {
         tableProcessingParams.randomIdentiersMap = {}; // identifiers with scope the whole table
         tableProcessingParams.blankNodesMap = {}; // identifiers with scope the whole table
         tableProcessingParams.isSampleData = options.sampleSize;
+        tableProcessingParams.report = options.sampleSize
+            ? null
+            : { table: tableInfos.table, skippedMappings: [], errors: [], skippedMappingsTruncated: false, errorsTruncated: false };
 
         var message = {
             table: tableInfos.table,
@@ -130,7 +133,7 @@ var TriplesMaker = {
                         KGbuilder_socket.message(options.clientSocketId, message);
                         // KGbuilder_socket.message(options.clientSocketId, " DONE " + processedRecords + "records  from " + tableInfos.table + " : " + (totalTriplesCount) + " triples", false);
 
-                        return callback(err, { sampleTriples: sampleTriples, totalTriplesCount: totalTriplesCount });
+                        return callback(err, { sampleTriples: sampleTriples, totalTriplesCount: totalTriplesCount, report: tableProcessingParams.report });
                     },
                 );
             });
@@ -275,14 +278,51 @@ var TriplesMaker = {
             message.operation = "finished";
             message.totalTriples = totalTriplesCount;
             KGbuilder_socket.message(options.clientSocketId, message);
-            return callback(null, { sampleTriples: sampleTriples, totalTriplesCount: totalTriplesCount });
+            return callback(null, { sampleTriples: sampleTriples, totalTriplesCount: totalTriplesCount, report: tableProcessingParams.report });
         }
     },
 
     buildTriples: function (data, tableProcessingParams, options, callback) {
         var columnMappings = tableProcessingParams.tableColumnsMappings;
+        var report = tableProcessingParams.report || null;
+        var tableName = tableProcessingParams.tableInfos && tableProcessingParams.tableInfos.table;
+        var MAX_REPORT = 500;
 
         var batchTriples = [];
+
+        var reportRowIndex = 0;
+        var reportColumnId = null;
+        var reportPredicate = null;
+
+        function addReportSkip(reason, rawValue) {
+            if (!report || report.skippedMappings.length >= MAX_REPORT) {
+                if (report && !report.skippedMappingsTruncated) report.skippedMappingsTruncated = true;
+                return;
+            }
+            report.skippedMappings.push({
+                table: tableName,
+                rowIndex: reportRowIndex,
+                columnId: reportColumnId,
+                predicate: reportPredicate,
+                reason: reason,
+                rawValue: rawValue !== undefined ? rawValue : null,
+            });
+        }
+
+        function addReportError(error, rawValue) {
+            if (!report || report.errors.length >= MAX_REPORT) {
+                if (report && !report.errorsTruncated) report.errorsTruncated = true;
+                return;
+            }
+            report.errors.push({
+                table: tableName,
+                rowIndex: reportRowIndex,
+                columnId: reportColumnId,
+                predicate: reportPredicate,
+                error: error && error.message ? error.message : String(error),
+                rawValue: rawValue !== undefined ? rawValue : null,
+            });
+        }
 
         function addTriple(subjectUri, predicateUri, objectUri) {
             if (subjectUri && predicateUri && objectUri) {
@@ -294,6 +334,9 @@ var TriplesMaker = {
                     tableProcessingParams.uniqueTriplesMap[triplelHashCode] = 1;
                     batchTriples.push(triple);
                 }
+            } else if (subjectUri || predicateUri || objectUri) {
+                var reason = !objectUri ? "null_object" : !subjectUri ? "null_subject" : "null_predicate";
+                addReportSkip(reason, null);
             }
         }
 
@@ -306,6 +349,7 @@ var TriplesMaker = {
 
             var lineColumnUrisMap = {};
             var rowIndex = index + options.currentBatchRowIndex;
+            reportRowIndex = rowIndex;
             var blankNodesMap = {};
             for (var key in line) {
                 if (line[key]) {
@@ -318,6 +362,8 @@ var TriplesMaker = {
             }
 
             for (var columnId in columnMappings) {
+                reportColumnId = columnId;
+                reportPredicate = null;
                 // filter columns
                 if (options.filterMappingIds && options.filterMappingIds.indexOf(columnId) < 0) {
                     continue;
@@ -331,6 +377,7 @@ var TriplesMaker = {
                     }
                 }
                 if (!columnUri) {
+                    addReportSkip("null_column_uri", line[columnMappings[columnId] && columnMappings[columnId].id] || null);
                     continue;
                 }
 
@@ -342,6 +389,7 @@ var TriplesMaker = {
                     if (!columnId) {
                         return;
                     }
+                    reportPredicate = mapping.p;
 
                     var object = null;
                     // if no matching item for mapping.o  and no fixed uri return
@@ -359,6 +407,7 @@ var TriplesMaker = {
                         } else {
                             object = TriplesMaker.getColumnUri(line, mapping.objColId, columnMappings, rowIndex, tableProcessingParams);
                             if (!object) {
+                                addReportSkip("null_object_column_uri", line[mapping.o] || null);
                                 return;
                             }
                         }
@@ -367,7 +416,12 @@ var TriplesMaker = {
                         object = TriplesMaker.getColumnUri(line, mapping.objColId, columnMappings, rowIndex, tableProcessingParams);
                     } else if (mapping.transform) {
                         var objStr = line[mapping.o];
-                        object = tableProcessingParams.jsFunctionsMap[mapping.s](objStr, "o", mapping.p, line, mapping);
+                        try {
+                            object = tableProcessingParams.jsFunctionsMap[mapping.s](objStr, "o", mapping.p, line, mapping);
+                        } catch (transformErr) {
+                            addReportError(transformErr, objStr);
+                            return;
+                        }
                     } else if (mapping.isString) {
                         var objStr = line[mapping.o];
                         object = '"' + util.formatStringForTriple(objStr) + '"';
@@ -388,7 +442,9 @@ var TriplesMaker = {
             }
             // process columnToColumnMappings
             for (var edgeId in tableProcessingParams.columnToColumnEdgesMap) {
+                reportColumnId = edgeId;
                 var edge = tableProcessingParams.columnToColumnEdgesMap[edgeId];
+                reportPredicate = edge.data && edge.data.id;
                 var subjectUri = TriplesMaker.getColumnUri(line, edge.from, columnMappings, rowIndex, tableProcessingParams);
                 var objectUri = TriplesMaker.getColumnUri(line, edge.to, columnMappings, rowIndex, tableProcessingParams);
                 var property = TriplesMaker.getPropertyUri(edge.data.id);
@@ -405,11 +461,13 @@ var TriplesMaker = {
 
             // isolated predicates (dont want to duplicate label, type...
             for (var columnId in columnMappings) {
+                reportColumnId = columnId;
                 // filter columns
                 var otherPredicates = columnMappings[columnId].otherPredicates;
                 if (otherPredicates) {
                     otherPredicates.forEach(function (item) {
                         if (options.filterMappingIds && options.filterMappingIds.indexOf(item.property) > -1) {
+                            reportPredicate = item.property;
                             var subjectUri = TriplesMaker.getColumnUri(line, columnId, columnMappings, rowIndex, tableProcessingParams);
                             var object = TriplesMaker.getFormatedLiteral(line, {
                                 dataType: item.range,
@@ -441,6 +499,7 @@ var TriplesMaker = {
                         return filteredBasicProperties.indexOf(mapping.p) > -1;
                     });
                     filteredMappings.forEach(function (mapping) {
+                        reportPredicate = mapping.p;
                         var subjectUri = TriplesMaker.getColumnUri(line, columnId, columnMappings, rowIndex, tableProcessingParams);
                         var object = null;
                         var property = TriplesMaker.getPropertyUri(mapping.p);
@@ -454,6 +513,7 @@ var TriplesMaker = {
                             } else {
                                 object = TriplesMaker.getColumnUri(line, mapping.objColId, columnMappings, rowIndex, tableProcessingParams);
                                 if (!object) {
+                                    addReportSkip("null_object_column_uri", null);
                                     return;
                                 }
                             }
@@ -465,6 +525,7 @@ var TriplesMaker = {
                             object = TriplesMaker.getColumnUri(line, mapping.objColId, columnMappings, rowIndex, tableProcessingParams);
                         }
                         if (!object || !property || !subjectUri) {
+                            addReportSkip("null_triple_component", null);
                             return;
                         }
                         addTriple(subjectUri, property, object);

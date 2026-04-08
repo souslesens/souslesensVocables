@@ -452,9 +452,9 @@ value = item.valueLabel.value;*/
                     var predicateId = common.getRandomHexaId(5);
                     PredicatesSelectorWidget.predicatesIdsMap[predicateId] = { item: item };
 
-                    // dont manage lang clustering when source is editable
+                    // dont manage lang clustering when source is editable --> why?? I remove it for now
 
-                    if (!Lineage_sources.isSourceEditableForUser(sourceLabel) && item.value && item.value["xml:lang"]) {
+                    if (item.value && item.value["xml:lang"]) {
                         if (!self.propertiesMap.properties[propName].langValues[item.value["xml:lang"]]) {
                             self.propertiesMap.properties[propName].langValues[item.value["xml:lang"]] = [];
                         }
@@ -592,7 +592,10 @@ defaultLang = 'en';*/
 
                         strGeneratedByProp += "<tr class='infos_table'>";
 
-                        if (self.propertiesMap.properties[key].value) {
+                        if (
+                            self.propertiesMap.properties[key].value &&
+                            (!Object.keys(self.propertiesMap.properties[key].langValues).length || Object.keys(self.propertiesMap.properties[key].langValues).length == 0)
+                        ) {
                             var values = self.propertiesMap.properties[key].value;
                             var hasPlaceholderValue = values.some(function (v) {
                                 return v && v.value === "?";

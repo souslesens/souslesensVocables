@@ -420,10 +420,10 @@ var Containers_tree = (function () {
             label: "Add selected node to container",
             action: function (_e) {
                 var graphNodeData = Lineage_whiteboard.currentGraphNode.data;
-                Containers_tree.menuActions.addResourcesToContainer(self.currentSource, self.currentContainer, graphNodeData, false, function (err, result) {
-                    if (err) {
+                Containers_tree.menuActions.addResourcesToContainer(self.currentSource, self.currentContainer, graphNodeData, false, function (result) {
+                 /*   if (err) {
                         return MainController.errorAlert(err.responseText || err);
-                    }
+                    }*/
                     Containers_graph.graphResources(self.currentSource, self.currentContainer.data, { leaves: true });
                 });
             },

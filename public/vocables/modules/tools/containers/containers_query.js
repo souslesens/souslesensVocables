@@ -44,7 +44,7 @@ var Containers_query = (function () {
         var filter = options.filter || "";
         if (containerId) {
             // needs options.useFilterKeyWord because VALUES dont work
-            filter = Sparql_common.setFilter("root", containerId, null, { useFilterKeyWord: 1 });
+            filter = Sparql_common.setFilter("root", containerId, null, { useFilterKeyWord: 1 }) || "";
         }
 
         if (!options.leaves) {

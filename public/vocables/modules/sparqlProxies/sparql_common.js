@@ -164,6 +164,8 @@ var Sparql_common = (function () {
                         uriIds.push(id);
                     } else {
                         console.log(id);
+
+                        uriIds.push(id);
                     }
                 });
 

@@ -442,9 +442,7 @@ var TriplesMaker = {
                     otherPredicates.forEach(function (item) {
                         var shouldProcess = !options.filterMappingIds;
                         if (!shouldProcess) {
-                            shouldProcess =
-                                options.filterMappingIds.indexOf(item.property) > -1 ||
-                                options.filterMappingIds.indexOf(columnId + ">" + item.property) > -1;
+                            shouldProcess = options.filterMappingIds.indexOf(item.property) > -1 || options.filterMappingIds.indexOf(columnId + ">" + item.property) > -1;
                         }
                         if (!shouldProcess) {
                             return;

@@ -153,13 +153,19 @@ var TriplesMaker = {
                     select.push(column.id);
                 }
                 if (MappingParser.columnsMappingsObjects.includes(column.type)) {
+                    if (column.rdfsLabel) {
+                        select.push(column.rdfsLabel);
+                    }
                     if (column.otherPredicates) {
                         column.otherPredicates.forEach(function (predicate) {
-                            select.push(predicate.object);
+                            if (!MappingParser.isConstantUri(predicate.object) && !MappingParser.isConstantPrefixedUri(predicate.object)) {
+                                select.push(predicate.object);
+                            }
                         });
                     }
                 }
             }
+            select = [...new Set(select)];
             var message = {
                 table: tableInfos.table,
                 tableTotalRecords: tableProcessingParams.tableInfos.tableTotalRecords,
@@ -319,8 +325,17 @@ var TriplesMaker = {
 
             for (var columnId in columnMappings) {
                 // filter columns
-                if (options.filterMappingIds && options.filterMappingIds.indexOf(columnId) < 0) {
-                    continue;
+                if (options.filterMappingIds) {
+                    var columnIsDirectlySelected = options.filterMappingIds.indexOf(columnId) > -1;
+                    var columnHasCompositeFilter = options.filterMappingIds.some(function (filterId) {
+                        return filterId.split(">")[0] === columnId && filterId.split(">")[1];
+                    });
+                    var filterHasOnlyPredicates = options.filterMappingIds.every(function (filterId) {
+                        return filterId.indexOf(">") < 0 && (MappingParser.isConstantUri(filterId) || MappingParser.isConstantPrefixedUri(filterId));
+                    });
+                    if (!columnIsDirectlySelected && !columnHasCompositeFilter && !filterHasOnlyPredicates) {
+                        continue;
+                    }
                 }
 
                 var columnUri = lineColumnUrisMap[columnId];
@@ -334,12 +349,29 @@ var TriplesMaker = {
                     continue;
                 }
 
+                var allowedPredicates = null;
+                if (options.filterMappingIds) {
+                    var compositePredicates = options.filterMappingIds
+                        .filter(function (filterId) {
+                            return filterId.split(">")[0] === columnId && filterId.split(">")[1];
+                        })
+                        .map(function (filterId) {
+                            return filterId.split(">")[1];
+                        });
+                    if (compositePredicates.length > 0) {
+                        allowedPredicates = compositePredicates;
+                    }
+                }
+
                 var mappings = columnMappings[columnId].mappings;
                 mappings.forEach(function (mapping) {
                     if (!mapping) {
                         return;
                     }
                     if (!columnId) {
+                        return;
+                    }
+                    if (allowedPredicates && allowedPredicates.indexOf(mapping.p) < 0) {
                         return;
                     }
 
@@ -405,68 +437,29 @@ var TriplesMaker = {
 
             // isolated predicates (dont want to duplicate label, type...
             for (var columnId in columnMappings) {
-                // filter columns
                 var otherPredicates = columnMappings[columnId].otherPredicates;
                 if (otherPredicates) {
                     otherPredicates.forEach(function (item) {
-                        if (options.filterMappingIds && options.filterMappingIds.indexOf(item.property) > -1) {
-                            var subjectUri = TriplesMaker.getColumnUri(line, columnId, columnMappings, rowIndex, tableProcessingParams);
-                            var object = TriplesMaker.getFormatedLiteral(line, {
+                        var shouldProcess = !options.filterMappingIds;
+                        if (!shouldProcess) {
+                            shouldProcess = options.filterMappingIds.indexOf(item.property) > -1 || options.filterMappingIds.indexOf(columnId + ">" + item.property) > -1;
+                        }
+                        if (!shouldProcess) {
+                            return;
+                        }
+                        var subjectUri = TriplesMaker.getColumnUri(line, columnId, columnMappings, rowIndex, tableProcessingParams);
+                        var value = line[item.object];
+                        var object = null;
+                        if (value && value.startsWith("http:")) {
+                            object = "<" + value + ">";
+                        } else {
+                            object = TriplesMaker.getFormatedLiteral(line, {
                                 dataType: item.range,
                                 o: item.object,
                                 dateFormat: item.dateFormat,
                             });
-
-                            var property = TriplesMaker.getPropertyUri(item.property);
-                            addTriple(subjectUri, property, object);
                         }
-                    });
-                }
-
-                var filteredBasicProperties = null;
-                if (options.filterMappingIds) {
-                    filteredBasicProperties = options.filterMappingIds.filter(function (mapping) {
-                        return mapping.split(">")[0] == columnId && mapping.split(">")[1];
-                    });
-                    filteredBasicProperties = filteredBasicProperties.map(function (mapping) {
-                        return mapping.split(">")[1];
-                    });
-                    if (filteredBasicProperties.length == 0) {
-                        filteredBasicProperties = null;
-                    }
-                }
-                if (filteredBasicProperties) {
-                    var mappings = columnMappings[columnId].mappings;
-                    var filteredMappings = mappings.filter(function (mapping) {
-                        return filteredBasicProperties.indexOf(mapping.p) > -1;
-                    });
-                    filteredMappings.forEach(function (mapping) {
-                        var subjectUri = TriplesMaker.getColumnUri(line, columnId, columnMappings, rowIndex, tableProcessingParams);
-                        var object = null;
-                        var property = TriplesMaker.getPropertyUri(mapping.p);
-                        if (!line[mapping.o]) {
-                            if (mapping.isConstantUri) {
-                                // uri
-                                object = "<" + mapping.o + ">";
-                            } else if (mapping.isConstantPrefixedUri) {
-                                //prefix
-                                object = mapping.o;
-                            } else {
-                                object = TriplesMaker.getColumnUri(line, mapping.objColId, columnMappings, rowIndex, tableProcessingParams);
-                                if (!object) {
-                                    return;
-                                }
-                            }
-                        } else if (mapping.isString) {
-                            var objStr = line[mapping.o];
-                            object = '"' + util.formatStringForTriple(objStr) + '"';
-                        } else if (columnMappings[mapping.objColId]) {
-                            // if object is a column
-                            object = TriplesMaker.getColumnUri(line, mapping.objColId, columnMappings, rowIndex, tableProcessingParams);
-                        }
-                        if (!object || !property || !subjectUri) {
-                            return;
-                        }
+                        var property = TriplesMaker.getPropertyUri(item.property);
                         addTriple(subjectUri, property, object);
                     });
                 }

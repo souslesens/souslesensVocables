@@ -8,6 +8,7 @@ import ElasticSearchProxy from "../../modules/search/elasticSearchProxy.js";
 import SearchUtil from "../../modules/search/searchUtil.js";
 import MainController from "../../modules/shared/mainController.js";
 import PredicatesSelectorWidget from "../../modules/uiWidgets/predicatesSelectorWidget.js";
+import Predicates_bot from "../../modules/bots/predicates_bot.js";
 
 import Lineage_sources from "../../modules/tools/lineage/lineage_sources.js";
 import authentication from "../../modules/shared/authentification.js";
@@ -300,10 +301,7 @@ var NodeInfosWidget = (function () {
         if (Lineage_sources.isSourceEditableForUser(self.currentSource) && !options.hideModifyButtons) {
             str +=
                 "<button id='addPredicateButton' class='w3-button slsv-right-top-bar-button nodeInfos-button' " +
-                "onclick='PredicatesSelectorWidget.init(Lineage_sources.activeSource, NodeInfosWidget.configureEditPredicateWidget)'>  Add Predicate </button>";
-            /* str +=
-                 "<button id='addRestriction' class='w3-button slsv-right-top-bar-button nodeInfos-button' " +
-                 "onclick='NodeInfosWidget.showAddRestrictionWidget()'>  Add restriction </button>";*/
+                "onclick='Predicates_bot.start(Lineage_sources.activeSource)'>  Add Predicate </button>";
 
             str += "<button id='deleteButton' class='w3-button slsv-right-top-bar-button nodeInfos-button' onclick='NodeInfosWidget.deleteNode()'> Delete </button>";
             str += "<div id='sourceBrowser_addPropertyDiv' style=''>";
@@ -312,20 +310,13 @@ var NodeInfosWidget = (function () {
         if (authentication.currentUser.groupes.indexOf("Annotator") > -1) {
             str +=
                 "<button id='addPredicateButton' class='w3-button slsv-right-top-bar-button nodeInfos-button' " +
-                "onclick='PredicatesSelectorWidget.init(Lineage_sources.activeSource, NodeInfosWidget.configureEditPredicateWidget)'>  Add Predicate </button>";
+                "onclick='Predicates_bot.start(Lineage_sources.activeSource)'>  Add Predicate </button>";
             str += "<div id='sourceBrowser_addPropertyDiv' style=''>";
         }
 
         str += "</div>";
 
         $("#" + self.currentNodeIdInfosDivId).prepend(str);
-
-        if (Lineage_sources.isSourceEditableForUser(self.currentSource) && !options.hideModifyButtons) {
-            PredicatesSelectorWidget.load("sourceBrowser_addPropertyDiv", self.currentSource, {}, function () {
-                //$("#editPredicate_controlsDiv").css("display", "block");
-                $("#sourceBrowser_addPropertyDiv").css("display", "none");
-            });
-        }
     };
 
     self.configureEditPredicateWidget = function () {

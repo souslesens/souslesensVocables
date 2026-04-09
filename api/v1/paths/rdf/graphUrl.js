@@ -57,7 +57,7 @@ export default function () {
     }
 
     POST.apiDoc = {
-        security: [{ restrictLoggedUser: [] }],
+        security: [{ restrictLoggedUser: [], restrictQuota: [] }],
         summary: "Post a RDF graph by url",
         description: "Post a RDF graph by url",
         parameters: [

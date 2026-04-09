@@ -80,7 +80,7 @@ export default function () {
 
     POST.apiDoc = {
         summary: "Send a request to a different domain",
-        security: [{ restrictLoggedUser: [] }],
+        security: [{ restrictLoggedUser: [], restrictQuota: [] }],
         operationId: "httpProxy",
         parameters: [],
         responses: {
@@ -129,7 +129,7 @@ export default function () {
 
     GET.apiDoc = {
         summary: "Retrieve a request from a different domain",
-        security: [{ restrictLoggedUser: [] }],
+        security: [{ restrictLoggedUser: [], restrictQuota: [] }],
         operationId: "httpProxy",
         parameters: [],
         responses: {

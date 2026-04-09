@@ -17,7 +17,7 @@ export default function () {
     }
 
     GET.apiDoc = {
-        security: [{ restrictLoggedUser: [] }],
+        security: [{ restrictLoggedUser: [], restrictQuota: [] }],
         summary: "Get ElasticSearch indices",
         description: "Get ElasticSearch indices",
         operationId: "Get ElasticSearch indices",

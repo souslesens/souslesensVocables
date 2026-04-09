@@ -117,7 +117,7 @@ export default function () {
     }
 
     POST.apiDoc = {
-        security: [{ restrictLoggedUser: [] }],
+        security: [{ restrictLoggedUser: [], restrictQuota: [] }],
         summary: "Elasticsearch index documents in dir",
         description: "Elasticsearch index documents in dir",
         operationId: "Elasticsearch index documents in dir",

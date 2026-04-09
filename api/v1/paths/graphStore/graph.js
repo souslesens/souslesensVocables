@@ -31,7 +31,7 @@ export default function () {
     }
 
     GET.apiDoc = {
-        security: [{ restrictLoggedUser: [] }],
+        security: [{ restrictLoggedUser: [], restrictQuota: [] }],
         summary: "get turtle  from triples",
         description: "get turtle  from triples",
         operationId: "get turtle  from triples",
@@ -80,7 +80,7 @@ export default function () {
     }
 
     POST.apiDoc = {
-        security: [{ restrictLoggedUser: [] }],
+        security: [{ restrictLoggedUser: [], restrictQuota: [] }],
         summary: "Save rdf url to SLSV graph store",
         description: "Save rdf file or url to SLSV graph store",
         operationId: "Save rdf file or url to SLSV graph store",

@@ -27,7 +27,7 @@ export default function () {
     }
 
     GET.apiDoc = {
-        security: [{ restrictLoggedUser: [] }],
+        security: [{ restrictLoggedUser: [], restrictQuota: [] }],
         summary: "Get all RDF graphs present in the triplestore",
         description: "Get all RDF graphs present in the triplestore",
         operationId: "Sparql get graphs",

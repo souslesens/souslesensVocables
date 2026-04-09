@@ -204,7 +204,7 @@ export default function () {
     }
 
     POST.apiDoc = {
-        security: [{ restrictLoggedUser: [] }],
+        security: [{ restrictLoggedUser: [], restrictQuota: [] }],
         summary: "Post a RDF graph",
         description: "Post a RDF graph",
         parameters: [
@@ -257,7 +257,7 @@ export default function () {
     };
 
     GET.apiDoc = {
-        security: [{ restrictLoggedUser: [] }],
+        security: [{ restrictLoggedUser: [], restrictQuota: [] }],
         summary: "Get a RDF graph",
         description: "Get a RDF graph in several serialization format",
         operationId: "RDF get graph",
@@ -297,7 +297,7 @@ export default function () {
     };
 
     DELETE.apiDoc = {
-        security: [{ restrictLoggedUser: [] }],
+        security: [{ restrictLoggedUser: [], restrictQuota: [] }],
         summary: "DELETE a RDF graph",
         parameters: [
             {

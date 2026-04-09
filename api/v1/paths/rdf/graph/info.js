@@ -43,7 +43,7 @@ export default function () {
     }
 
     GET.apiDoc = {
-        security: [{ restrictLoggedUser: [] }],
+        security: [{ restrictLoggedUser: [], restrictQuota: [] }],
         summary: "Get a RDF graph info (size and pageSize)",
         operationId: "RDF get graph info",
         parameters: [

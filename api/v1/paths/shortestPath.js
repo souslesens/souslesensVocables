@@ -53,7 +53,7 @@ export default function () {
 
     POST.apiDoc = {
         summary: "Get the shortest path between two node",
-        security: [{ restrictLoggedUser: [] }],
+        security: [{ restrictLoggedUser: [], restrictQuota: [] }],
         operationId: "getShortestPath",
         parameters: [
             {

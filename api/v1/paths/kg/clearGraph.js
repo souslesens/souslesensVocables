@@ -18,7 +18,7 @@ export default function () {
     }
 
     POST.apiDoc = {
-        security: [{ restrictLoggedUser: [] }],
+        security: [{ restrictLoggedUser: [], restrictQuota: [] }],
         summary: "Creates triples from csv file",
         description: "Takes a csv filename and directory and returns triples",
         operationId: "createTriplesFromCsvOrTable",

@@ -40,7 +40,7 @@ export default function () {
     }
 
     POST.apiDoc = {
-        security: [{ restrictLoggedUser: [] }],
+        security: [{ restrictLoggedUser: [], restrictQuota: [] }],
         summary: "Elasticsearch query",
         description: "Elasticsearch query",
         operationId: "Elasticsearch query",

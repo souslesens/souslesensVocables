@@ -305,7 +305,7 @@ export default function () {
 
     POST.apiDoc = {
         summary: "Upload files",
-        security: [{ restrictLoggedUser: [] }],
+        security: [{ restrictLoggedUser: [], restrictQuota: [] }],
         operationId: "upload",
         parameters: [],
         responses: {

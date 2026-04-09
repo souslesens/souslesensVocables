@@ -154,20 +154,23 @@ var Sparql_common = (function () {
 
                 var conceptIdsStr = "";
 
+                var seenIds = {};
                 var uriIds = [];
                 ids.forEach(function (id, _index) {
-                    /* if (true || ("" + id).indexOf(":") > -1) {
-                        // literal
-                        uriIds.push(id);
-                    }*/
                     if (("" + id).startsWith("http") || ("" + id).indexOf(":") > -1) {
-                        uriIds.push(id);
+                        if (!seenIds[id]) {
+                            seenIds[id] = true;
+                            uriIds.push(id);
+                        }
                     } else {
                         console.log(id);
                     }
                 });
 
-                uriIds.forEach(function (id, _index) {
+                var maxInClauseSize = 100;
+                var chunkedUriIds = uriIds.slice(0, maxInClauseSize);
+
+                chunkedUriIds.forEach(function (id, _index) {
                     if (!id) {
                         return;
                     }
@@ -199,7 +202,7 @@ var Sparql_common = (function () {
                 }
 
                 if (options.useFilterKeyWord) {
-                    if (ids.length == 1) {
+                    if (chunkedUriIds.length == 1) {
                         filters.push(" FILTER( ?" + varName + " =" + conceptIdsStr + ")");
                     } else {
                         filters.push(" FILTER( ?" + varName + " in (" + conceptIdsStr + "))");

@@ -126,18 +126,20 @@ export function UploadGraphModal({ apiUrl, onClose, open, sourceName, indexAfter
     };
 
     const uploadGraphByUrl = async (userToken: string) => {
+        setTransferState("uploading");
         const formData = new FormData();
         formData.append("url", graphUrl);
         formData.append("source", sourceName);
-        // POST data
         const res = await fetch("/api/v1/rdf/graphUrl", { method: "post", headers: { Authorization: `Bearer ${userToken}` }, body: formData });
         if (res.status != 200) {
             const message = (await res.json()) as { error?: string; detail?: string };
             console.error(message);
             setErrorMessage(message.error ?? message.detail ?? "Internal server error");
+            setTransferState("init");
             return;
         }
         setTransferPercent(100);
+        setTransferState("done");
     };
 
     const uploadGraphByFile = async (userToken: string) => {

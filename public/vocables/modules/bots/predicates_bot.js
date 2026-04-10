@@ -11,28 +11,16 @@ var Predicates_bot = (function () {
     self.title = "Add Predicate";
 
     self.workflow = {
-        propertyStepFn: {
-            propertyVocabFn: {
-                choosePropertyFn: {
-                    objectStepFn: {
-                        objectVocabFn: {
-                            chooseObjectFn: {
-                                saveStepFn: {},
-                            },
-                        },
-                    },
-                },
+        choosePropertyFn: {
+            chooseObjectFn: {
+                saveStepFn: {},
             },
         },
     };
 
     self.functionTitles = {
-        propertyStepFn: "Add Predicate",
-        propertyVocabFn: "vocabulary",
-        choosePropertyFn: "choose",
-        objectStepFn: "Add Predicate",
-        objectVocabFn: "vocabulary",
-        chooseObjectFn: "choose",
+        choosePropertyFn: "choose property",
+        chooseObjectFn: "choose Object",
         saveStepFn: "Add Predicate",
     };
 
@@ -47,9 +35,7 @@ var Predicates_bot = (function () {
         self.myBotEngine.init(Predicates_bot, self.workflow, null, function () {
             self.params = {
                 source: source,
-                propertyVocab: null,
                 selectedProperty: null,
-                objectVocab: null,
                 selectedObject: null,
             };
             self.myBotEngine.nextStep();
@@ -60,22 +46,182 @@ var Predicates_bot = (function () {
         $("#botPanel").dialog("option", "title", title);
     }
 
-    function buildVocabJstree() {
-        var vocabs = [{ id: "usual", label: "usual" }];
-        Object.keys(Config.ontologiesVocabularyModels).forEach(function (key) {
-            vocabs.push({ id: key, label: key });
+    /**
+     * Builds a jstree array with a "search" node at the top followed by
+     * "usual" and all ontologyVocabularyModel sources.
+     * @param {string} searchLabel - Label for the special search node.
+     * @returns {Array} jstree-compatible node array.
+     */
+    function buildSourcesJstreeWithSearch(searchLabel) {
+        var nodes = [
+            {
+                id: "__search__",
+                text: searchLabel,
+                parent: "#",
+                data: { id: "__search__" },
+                icon: "jstree-icon jstree-themeicon fa fa-search",
+            },
+            { id: "usual", text: "usual", parent: "#", data: { id: "usual" } },
+        ];
+        Object.keys(Config.ontologiesVocabularyModels).forEach(function (vocab) {
+            nodes.push({ id: vocab, text: vocab, parent: "#", data: { id: vocab } });
         });
-        return vocabs.map(function (v) {
-            return { id: v.id, text: v.label, parent: "#", data: v };
+        return nodes;
+    }
+
+    /**
+     * Returns properties (object + non-object) for a single vocab source.
+     * @param {string} vocab - Vocab name or "usual".
+     * @param {Function} callback - callback(err, [{id, label}])
+     */
+    function getSourceProperties(vocab, callback) {
+        if (vocab === "usual") {
+            var usualProps = PredicatesSelectorWidget.usualProperties
+                .filter(function (p) { return p !== ""; })
+                .map(function (p) { return { id: p, label: p }; });
+            return callback(null, usualProps);
+        }
+        OntologyModels.registerSourcesModel([vocab], null, function (err) {
+            if (err) {
+                return callback(err);
+            }
+            var model = Config.ontologiesVocabularyModels[vocab];
+            var props = [];
+            if (model) {
+                for (var key in model.properties) {
+                    var p = model.properties[key];
+                    props.push({ id: p.id, label: p.label || p.id });
+                }
+                for (var key2 in model.nonObjectProperties) {
+                    var p2 = model.nonObjectProperties[key2];
+                    props.push({ id: p2.id, label: p2.label || p2.id });
+                }
+            }
+            props.sort(function (a, b) { return a.label.localeCompare(b.label); });
+            return callback(null, props);
         });
     }
 
-    function buildItemJstree(items) {
-        return items
-            .filter(function (item) { return item && item.id; })
-            .map(function (item) {
-                return { id: item.id, text: item.label || item.id, parent: "#", data: item };
+    /**
+     * Returns all properties from all vocabs, each labeled with "(vocabName)" suffix.
+     * Deduplicates by property id.
+     * @param {Function} callback - callback(err, [{id, label}])
+     */
+    function getAllProperties(callback) {
+        var props = [];
+        var seen = {};
+
+        PredicatesSelectorWidget.usualProperties
+            .filter(function (p) { return p !== ""; })
+            .forEach(function (p) {
+                if (!seen[p]) {
+                    seen[p] = true;
+                    props.push({ id: p, label: p + " (usual)" });
+                }
             });
+
+        var vocabs = Object.keys(Config.ontologiesVocabularyModels);
+        async.eachSeries(vocabs, function (vocab, callbackEach) {
+            OntologyModels.registerSourcesModel([vocab], null, function (err) {
+                if (err) {
+                    return callbackEach();
+                }
+                var model = Config.ontologiesVocabularyModels[vocab];
+                if (model) {
+                    for (var key in model.properties) {
+                        var p = model.properties[key];
+                        if (!seen[p.id]) {
+                            seen[p.id] = true;
+                            props.push({ id: p.id, label: (p.label || p.id) + " (" + vocab + ")" });
+                        }
+                    }
+                    for (var key2 in model.nonObjectProperties) {
+                        var p2 = model.nonObjectProperties[key2];
+                        if (!seen[p2.id]) {
+                            seen[p2.id] = true;
+                            props.push({ id: p2.id, label: (p2.label || p2.id) + " (" + vocab + ")" });
+                        }
+                    }
+                }
+                callbackEach();
+            });
+        }, function () {
+            props.sort(function (a, b) { return a.label.localeCompare(b.label); });
+            return callback(null, props);
+        });
+    }
+
+    /**
+     * Returns objects (classes) for a single vocab source.
+     * @param {string} vocab - Vocab name or "usual".
+     * @param {Function} callback - callback(err, [{id, label}])
+     */
+    function getSourceObjects(vocab, callback) {
+        if (vocab === "usual") {
+            var usualObjects = PredicatesSelectorWidget.usualObjectClasses
+                .filter(function (o) { return o !== ""; })
+                .map(function (o) { return { id: o, label: o }; });
+            return callback(null, usualObjects);
+        }
+        OntologyModels.registerSourcesModel([vocab], null, function (err) {
+            if (err) {
+                return callback(err);
+            }
+            var model = Config.ontologiesVocabularyModels[vocab];
+            var items = [];
+            if (model) {
+                for (var classId in model.classes) {
+                    var c = model.classes[classId];
+                    if (c && c.id && c.id.indexOf("http") === 0) {
+                        items.push({ id: c.id, label: c.label || c.id });
+                    }
+                }
+                items.sort(function (a, b) { return a.label.localeCompare(b.label); });
+            }
+            return callback(null, items);
+        });
+    }
+
+    /**
+     * Returns all objects from all vocabs, each labeled with "(vocabName)" suffix.
+     * Deduplicates by class id.
+     * @param {Function} callback - callback(err, [{id, label}])
+     */
+    function getAllObjects(callback) {
+        var items = [];
+        var seen = {};
+
+        PredicatesSelectorWidget.usualObjectClasses
+            .filter(function (o) { return o !== ""; })
+            .forEach(function (o) {
+                if (!seen[o]) {
+                    seen[o] = true;
+                    items.push({ id: o, label: o + " (usual)" });
+                }
+            });
+
+        var vocabs = Object.keys(Config.ontologiesVocabularyModels);
+        async.eachSeries(vocabs, function (vocab, callbackEach) {
+            OntologyModels.registerSourcesModel([vocab], null, function (err) {
+                if (err) {
+                    return callbackEach();
+                }
+                var model = Config.ontologiesVocabularyModels[vocab];
+                if (model) {
+                    for (var classId in model.classes) {
+                        var c = model.classes[classId];
+                        if (c && c.id && c.id.indexOf("http") === 0 && !seen[c.id]) {
+                            seen[c.id] = true;
+                            items.push({ id: c.id, label: (c.label || c.id) + " (" + vocab + ")" });
+                        }
+                    }
+                }
+                callbackEach();
+            });
+        }, function () {
+            items.sort(function (a, b) { return a.label.localeCompare(b.label); });
+            return callback(null, items);
+        });
     }
 
     function isLiteralProperty(property) {
@@ -117,87 +263,40 @@ var Predicates_bot = (function () {
         return value;
     }
 
-    function getPropertiesForVocab(vocab, callback) {
-        if (vocab === "usual") {
-            var props = PredicatesSelectorWidget.usualProperties
-                .filter(function (p) { return p !== ""; })
-                .map(function (p) { return { id: p, label: p }; });
-            return callback(null, props);
-        }
-        OntologyModels.registerSourcesModel([vocab], null, function (err) {
-            if (err) {
-                return callback(err);
-            }
-            var model = Config.ontologiesVocabularyModels[vocab];
-            var props = [];
-            if (model) {
-                for (var key in model.properties) {
-                    var p = model.properties[key];
-                    props.push({ id: p.id, label: p.label || p.id });
-                }
-                for (var key2 in model.nonObjectProperties) {
-                    var p2 = model.nonObjectProperties[key2];
-                    props.push({ id: p2.id, label: p2.label || p2.id });
-                }
-                props.sort(function (a, b) { return a.label.localeCompare(b.label); });
-            }
-            return callback(null, props);
-        });
-    }
-
-    function getObjectsForVocab(vocab, callback) {
-        if (vocab === "usual") {
-            var items = PredicatesSelectorWidget.usualObjectClasses
-                .filter(function (o) { return o !== ""; })
-                .map(function (o) { return { id: o, label: o }; });
-            return callback(null, items);
-        }
-        OntologyModels.registerSourcesModel([vocab], null, function (err) {
-            if (err) {
-                return callback(err);
-            }
-            var model = Config.ontologiesVocabularyModels[vocab];
-            var items = [];
-            if (model) {
-                for (var classId in model.classes) {
-                    var c = model.classes[classId];
-                    if (c && c.id && c.id.indexOf("http") === 0) {
-                        items.push({ id: c.id, label: c.label || c.id });
-                    }
-                }
-                items.sort(function (a, b) { return a.label.localeCompare(b.label); });
-            }
-            return callback(null, items);
+    /**
+     * Shows a list of items in the bot and then an editable promptValue.
+     * On confirmation calls onConfirmed(value).
+     * @param {Array} items - [{id, label}]
+     * @param {string} varName - param name for the promptValue
+     * @param {Function} onConfirmed - callback(confirmedValue)
+     */
+    function showItemsAndConfirm(items, varName, onConfirmed) {
+        self.myBotEngine.showList(items, null, null, false, function (selectedId) {
+            $("#" + self.myBotEngine.divId).find("#botFilterProposalDiv").hide();
+            self.myBotEngine.promptValue("choose", varName, selectedId, null, function (value) {
+                onConfirmed(value);
+            });
         });
     }
 
     self.functions = {
-        propertyStepFn: function () {
-            setDialogTitle("Add Predicate");
-            self.myBotEngine.showList([{ id: "property", label: "Property" }], null, null, false, function () {
-                self.myBotEngine.nextStep();
-            });
-        },
-
-        propertyVocabFn: function () {
-            setDialogTitle("vocabulary");
-            self.myBotEngine.showTree(buildVocabJstree(), "propertyVocab", { withCheckboxes: false }, null, function (selectedId) {
-                self.params.propertyVocab = selectedId;
-                self.myBotEngine.nextStep();
-            });
-        },
-
+        /**
+         * Displays a jstree of vocab sources (+ "search property" node).
+         * - Clicking a source shows that source's properties → editable confirm → choose Object step.
+         * - Clicking "search property" shows all properties from all sources (with vocab suffix) → editable confirm → choose Object step.
+         */
         choosePropertyFn: function () {
-            setDialogTitle("choose");
-            getPropertiesForVocab(self.params.propertyVocab, function (err, props) {
-                if (err) {
-                    return MainController.errorAlert(err);
-                }
-                self.myBotEngine.showTree(buildItemJstree(props), null, { withCheckboxes: false }, null, function (selectedId) {
-                    self.myBotEngine.promptValue("choose", "selectedProperty", selectedId, null, function (value) {
-                        if (!value) {
-                            return self.myBotEngine.previousStep();
-                        }
+            setDialogTitle("choose property");
+            var sourceTree = buildSourcesJstreeWithSearch("search property");
+
+            self.myBotEngine.showTree(sourceTree, null, { withCheckboxes: false }, null, function (selectedId) {
+                var loadItems = selectedId === "__search__" ? getAllProperties : function (cb) { return getSourceProperties(selectedId, cb); };
+
+                loadItems(function (err, items) {
+                    if (err) {
+                        return MainController.errorAlert(err);
+                    }
+                    showItemsAndConfirm(items, "selectedProperty", function (value) {
                         self.params.selectedProperty = value;
                         self.myBotEngine.nextStep();
                     });
@@ -205,32 +304,23 @@ var Predicates_bot = (function () {
             });
         },
 
-        objectStepFn: function () {
-            setDialogTitle("Add Predicate");
-            self.myBotEngine.showList([{ id: "object", label: "Object" }], null, null, false, function () {
-                self.myBotEngine.nextStep();
-            });
-        },
-
-        objectVocabFn: function () {
-            setDialogTitle("vocabulary");
-            self.myBotEngine.showTree(buildVocabJstree(), "objectVocab", { withCheckboxes: false }, null, function (selectedId) {
-                self.params.objectVocab = selectedId;
-                self.myBotEngine.nextStep();
-            });
-        },
-
+        /**
+         * Displays a jstree of vocab sources (+ "search object" node).
+         * - Clicking a source shows that source's classes → editable confirm → save step.
+         * - Clicking "search object" shows all objects from all sources (with vocab suffix) → editable confirm → save step.
+         */
         chooseObjectFn: function () {
-            setDialogTitle("choose");
-            getObjectsForVocab(self.params.objectVocab, function (err, items) {
-                if (err) {
-                    return MainController.errorAlert(err);
-                }
-                self.myBotEngine.showTree(buildItemJstree(items), null, { withCheckboxes: false }, null, function (selectedId) {
-                    self.myBotEngine.promptValue("choose", "selectedObject", selectedId, null, function (value) {
-                        if (!value) {
-                            return self.myBotEngine.previousStep();
-                        }
+            setDialogTitle("choose Object");
+            var sourceTree = buildSourcesJstreeWithSearch("search object");
+
+            self.myBotEngine.showTree(sourceTree, null, { withCheckboxes: false }, null, function (selectedId) {
+                var loadItems = selectedId === "__search__" ? getAllObjects : function (cb) { return getSourceObjects(selectedId, cb); };
+
+                loadItems(function (err, items) {
+                    if (err) {
+                        return MainController.errorAlert(err);
+                    }
+                    showItemsAndConfirm(items, "selectedObject", function (value) {
                         self.params.selectedObject = value;
                         self.myBotEngine.nextStep();
                     });

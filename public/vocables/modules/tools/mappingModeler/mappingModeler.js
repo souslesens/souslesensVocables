@@ -417,9 +417,15 @@ var MappingModeler = (function () {
             }
             var index = 0;
             sourceOrderArray.forEach(function (source) {
-                if (uniqueSources[source]) {
-                    var jstreeIndex = uniqueSources[source];
-                    common.array.moveItem(jstreeData, jstreeIndex + index, startIndex + index);
+                var currentIndex = -1;
+                for (var k = 0; k < jstreeData.length; k++) {
+                    if (jstreeData[k] && jstreeData[k].id === source) {
+                        currentIndex = k;
+                        break;
+                    }
+                }
+                if (currentIndex > -1) {
+                    common.array.moveItem(jstreeData, currentIndex, startIndex + index);
                     index++;
                 }
             });

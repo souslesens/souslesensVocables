@@ -77,8 +77,12 @@ var Predicates_bot = (function () {
     function getSourceProperties(vocab, callback) {
         if (vocab === "usual") {
             var usualProps = PredicatesSelectorWidget.usualProperties
-                .filter(function (p) { return p !== ""; })
-                .map(function (p) { return { id: p, label: p }; });
+                .filter(function (p) {
+                    return p !== "";
+                })
+                .map(function (p) {
+                    return { id: p, label: p };
+                });
             return callback(null, usualProps);
         }
         OntologyModels.registerSourcesModel([vocab], null, function (err) {
@@ -97,7 +101,9 @@ var Predicates_bot = (function () {
                     props.push({ id: p2.id, label: p2.label || p2.id });
                 }
             }
-            props.sort(function (a, b) { return a.label.localeCompare(b.label); });
+            props.sort(function (a, b) {
+                return a.label.localeCompare(b.label);
+            });
             return callback(null, props);
         });
     }
@@ -112,7 +118,9 @@ var Predicates_bot = (function () {
         var seen = {};
 
         PredicatesSelectorWidget.usualProperties
-            .filter(function (p) { return p !== ""; })
+            .filter(function (p) {
+                return p !== "";
+            })
             .forEach(function (p) {
                 if (!seen[p]) {
                     seen[p] = true;
@@ -121,34 +129,40 @@ var Predicates_bot = (function () {
             });
 
         var vocabs = Object.keys(Config.ontologiesVocabularyModels);
-        async.eachSeries(vocabs, function (vocab, callbackEach) {
-            OntologyModels.registerSourcesModel([vocab], null, function (err) {
-                if (err) {
-                    return callbackEach();
-                }
-                var model = Config.ontologiesVocabularyModels[vocab];
-                if (model) {
-                    for (var key in model.properties) {
-                        var p = model.properties[key];
-                        if (!seen[p.id]) {
-                            seen[p.id] = true;
-                            props.push({ id: p.id, label: (p.label || p.id) + " (" + vocab + ")" });
+        async.eachSeries(
+            vocabs,
+            function (vocab, callbackEach) {
+                OntologyModels.registerSourcesModel([vocab], null, function (err) {
+                    if (err) {
+                        return callbackEach();
+                    }
+                    var model = Config.ontologiesVocabularyModels[vocab];
+                    if (model) {
+                        for (var key in model.properties) {
+                            var p = model.properties[key];
+                            if (!seen[p.id]) {
+                                seen[p.id] = true;
+                                props.push({ id: p.id, label: (p.label || p.id) + " (" + vocab + ")" });
+                            }
+                        }
+                        for (var key2 in model.nonObjectProperties) {
+                            var p2 = model.nonObjectProperties[key2];
+                            if (!seen[p2.id]) {
+                                seen[p2.id] = true;
+                                props.push({ id: p2.id, label: (p2.label || p2.id) + " (" + vocab + ")" });
+                            }
                         }
                     }
-                    for (var key2 in model.nonObjectProperties) {
-                        var p2 = model.nonObjectProperties[key2];
-                        if (!seen[p2.id]) {
-                            seen[p2.id] = true;
-                            props.push({ id: p2.id, label: (p2.label || p2.id) + " (" + vocab + ")" });
-                        }
-                    }
-                }
-                callbackEach();
-            });
-        }, function () {
-            props.sort(function (a, b) { return a.label.localeCompare(b.label); });
-            return callback(null, props);
-        });
+                    callbackEach();
+                });
+            },
+            function () {
+                props.sort(function (a, b) {
+                    return a.label.localeCompare(b.label);
+                });
+                return callback(null, props);
+            },
+        );
     }
 
     /**
@@ -159,8 +173,12 @@ var Predicates_bot = (function () {
     function getSourceObjects(vocab, callback) {
         if (vocab === "usual") {
             var usualObjects = PredicatesSelectorWidget.usualObjectClasses
-                .filter(function (o) { return o !== ""; })
-                .map(function (o) { return { id: o, label: o }; });
+                .filter(function (o) {
+                    return o !== "";
+                })
+                .map(function (o) {
+                    return { id: o, label: o };
+                });
             return callback(null, usualObjects);
         }
         OntologyModels.registerSourcesModel([vocab], null, function (err) {
@@ -176,7 +194,9 @@ var Predicates_bot = (function () {
                         items.push({ id: c.id, label: c.label || c.id });
                     }
                 }
-                items.sort(function (a, b) { return a.label.localeCompare(b.label); });
+                items.sort(function (a, b) {
+                    return a.label.localeCompare(b.label);
+                });
             }
             return callback(null, items);
         });
@@ -192,7 +212,9 @@ var Predicates_bot = (function () {
         var seen = {};
 
         PredicatesSelectorWidget.usualObjectClasses
-            .filter(function (o) { return o !== ""; })
+            .filter(function (o) {
+                return o !== "";
+            })
             .forEach(function (o) {
                 if (!seen[o]) {
                     seen[o] = true;
@@ -201,27 +223,33 @@ var Predicates_bot = (function () {
             });
 
         var vocabs = Object.keys(Config.ontologiesVocabularyModels);
-        async.eachSeries(vocabs, function (vocab, callbackEach) {
-            OntologyModels.registerSourcesModel([vocab], null, function (err) {
-                if (err) {
-                    return callbackEach();
-                }
-                var model = Config.ontologiesVocabularyModels[vocab];
-                if (model) {
-                    for (var classId in model.classes) {
-                        var c = model.classes[classId];
-                        if (c && c.id && c.id.indexOf("http") === 0 && !seen[c.id]) {
-                            seen[c.id] = true;
-                            items.push({ id: c.id, label: (c.label || c.id) + " (" + vocab + ")" });
+        async.eachSeries(
+            vocabs,
+            function (vocab, callbackEach) {
+                OntologyModels.registerSourcesModel([vocab], null, function (err) {
+                    if (err) {
+                        return callbackEach();
+                    }
+                    var model = Config.ontologiesVocabularyModels[vocab];
+                    if (model) {
+                        for (var classId in model.classes) {
+                            var c = model.classes[classId];
+                            if (c && c.id && c.id.indexOf("http") === 0 && !seen[c.id]) {
+                                seen[c.id] = true;
+                                items.push({ id: c.id, label: (c.label || c.id) + " (" + vocab + ")" });
+                            }
                         }
                     }
-                }
-                callbackEach();
-            });
-        }, function () {
-            items.sort(function (a, b) { return a.label.localeCompare(b.label); });
-            return callback(null, items);
-        });
+                    callbackEach();
+                });
+            },
+            function () {
+                items.sort(function (a, b) {
+                    return a.label.localeCompare(b.label);
+                });
+                return callback(null, items);
+            },
+        );
     }
 
     function isLiteralProperty(property) {
@@ -272,7 +300,9 @@ var Predicates_bot = (function () {
      */
     function showItemsAndConfirm(items, varName, onConfirmed) {
         self.myBotEngine.showList(items, null, null, false, function (selectedId) {
-            $("#" + self.myBotEngine.divId).find("#botFilterProposalDiv").hide();
+            $("#" + self.myBotEngine.divId)
+                .find("#botFilterProposalDiv")
+                .hide();
             self.myBotEngine.promptValue("choose", varName, selectedId, null, function (value) {
                 onConfirmed(value);
             });
@@ -290,7 +320,12 @@ var Predicates_bot = (function () {
             var sourceTree = buildSourcesJstreeWithSearch("search property");
 
             self.myBotEngine.showTree(sourceTree, null, { withCheckboxes: false }, null, function (selectedId) {
-                var loadItems = selectedId === "__search__" ? getAllProperties : function (cb) { return getSourceProperties(selectedId, cb); };
+                var loadItems =
+                    selectedId === "__search__"
+                        ? getAllProperties
+                        : function (cb) {
+                              return getSourceProperties(selectedId, cb);
+                          };
 
                 loadItems(function (err, items) {
                     if (err) {
@@ -314,7 +349,12 @@ var Predicates_bot = (function () {
             var sourceTree = buildSourcesJstreeWithSearch("search object");
 
             self.myBotEngine.showTree(sourceTree, null, { withCheckboxes: false }, null, function (selectedId) {
-                var loadItems = selectedId === "__search__" ? getAllObjects : function (cb) { return getSourceObjects(selectedId, cb); };
+                var loadItems =
+                    selectedId === "__search__"
+                        ? getAllObjects
+                        : function (cb) {
+                              return getSourceObjects(selectedId, cb);
+                          };
 
                 loadItems(function (err, items) {
                     if (err) {

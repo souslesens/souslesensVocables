@@ -28,6 +28,7 @@ import { RD, SRD, failure, loading, success } from "srd";
 import { ConfigType, getConfig, updateConfig } from "../Config";
 import { useZorm, fieldChain } from "react-zorm";
 import { errorMessage } from "./errorMessage";
+import { HelpTooltip } from "./HelpModal";
 import { Profile, getProfiles } from "../Profile";
 import { Tool, getAllTools } from "../Tool";
 
@@ -248,9 +249,12 @@ const ConfigForm = () => {
                         <Stack direction="column" spacing={{ xs: 2 }} useFlexGap>
                             <FormControl sx={{ mt: 2 }}>
                                 <Box>
-                                    <Typography variant="subtitle1" gutterBottom>
-                                        General Quota (API route limits)
-                                    </Typography>
+                                    <Box display="flex" alignItems="center" gap={1}>
+                                        <Typography variant="subtitle1" gutterBottom>
+                                            API Rate Limits
+                                        </Typography>
+                                        <HelpTooltip title="Set the maximum number of requests allowed per minute for each API route. This applies globally to all users." />
+                                    </Box>
                                     {routesInfo.length === 0 ? (
                                         <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
                                             Loading available routes...

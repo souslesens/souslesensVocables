@@ -2,6 +2,7 @@ import { readFile, writeFile } from "fs/promises";
 import { Lock } from "async-await-mutex-lock";
 import { mainConfigPath } from "./config.js";
 import { toolModel } from "./tools.js";
+import { quotaModel } from "./quota.js";
 
 const lock = new Lock();
 
@@ -26,6 +27,10 @@ class MainConfigModel {
         await lock.acquire("MainConfigLock");
         try {
             await writeFile(this.path, JSON.stringify(config, null, 4));
+
+            if (config.generalQuota !== undefined) {
+                quotaModel.clearConfigCache();
+            }
         } finally {
             lock.release("MainConfigLock");
         }

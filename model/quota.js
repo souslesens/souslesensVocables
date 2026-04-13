@@ -91,11 +91,6 @@ class QuotaStore {
         };
     }
 
-    getCount(type, id, route, method, capacity = 100) {
-        const result = this.getTokenCount(type, id, route, method, capacity);
-        return result.capacity - result.remaining;
-    }
-
     async getProfileConfig(profileName, fetchCallback) {
         const key = `profile:${profileName}`;
         const cached = this._configCache.get(key);
@@ -235,41 +230,6 @@ class QuotaModel {
         return userResult;
     }
 
-    async getRouteUsage(route, method, user, lastMinutes = 1, wholeProfile = false, profileName = null) {
-        if (!route || typeof route !== "string") {
-            throw new Error("Invalid route supplied to QuotaModel.getRouteUsage");
-        }
-        if (!method || typeof method !== "string") {
-            throw new Error("Invalid method supplied to QuotaModel.getRouteUsage");
-        }
-        if (!user || user.id === undefined || user.id === null) {
-            throw new Error("User object with a valid id must be provided to QuotaModel.getRouteUsage");
-        }
-        if (typeof lastMinutes !== "number" || lastMinutes <= 0) {
-            throw new Error("lastMinutes must be a positive number");
-        }
-
-        const quota = await this._getQuotaForRoute(route, method, user, profileName, wholeProfile);
-        const result = this._store.getTokenCount(wholeProfile && profileName ? "profile" : "user", wholeProfile && profileName ? profileName : user.id, route, method, quota);
-
-        return result.capacity - result.remaining;
-    }
-
-    async getGlobalRouteUsage(route, method, lastMinutes = 1) {
-        if (!route || typeof route !== "string") {
-            throw new Error("Invalid route supplied to QuotaModel.getGlobalRouteUsage");
-        }
-        if (!method || typeof method !== "string") {
-            throw new Error("Invalid method supplied to QuotaModel.getGlobalRouteUsage");
-        }
-        if (typeof lastMinutes !== "number" || lastMinutes <= 0) {
-            throw new Error("lastMinutes must be a positive number");
-        }
-
-        const quota = this._mainConfig.generalQuota?.[route]?.[method] || Infinity;
-        return this._store.getCount("global", null, route, method, quota);
-    }
-
     async getProfileConfig(profileName, fetchCallback) {
         return await this._store.getProfileConfig(profileName, fetchCallback);
     }
@@ -282,7 +242,7 @@ class QuotaModel {
         this._store.clearConfigCache();
     }
 
-    async     async getRateLimitHeaders(route, method, user, wholeProfile = false, profileName = null) {
+    async getRateLimitHeaders(route, method, user, wholeProfile = false, profileName = null) {
         const quota = await this._getQuotaForRoute(route, method, user, profileName, wholeProfile);
         const result = this._store.getTokenCount(wholeProfile && profileName ? "profile" : "user", wholeProfile && profileName ? profileName : user.id, route, method, quota);
 

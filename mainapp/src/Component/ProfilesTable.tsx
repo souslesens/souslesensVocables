@@ -49,6 +49,7 @@ import { identity, style, joinWhenArray, cleanUpText, jsonToDownloadUrl } from "
 import { ulid } from "ulid";
 import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
 import { errorMessage } from "./errorMessage";
+import { HelpTooltip } from "./HelpModal";
 import { Datas } from "react-csv-downloader/dist/esm/lib/csv";
 
 type RouteInfo = {
@@ -862,9 +863,12 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
                         {/* Quota editor */}
                         <FormControl sx={{ mt: 2 }}>
                             <Box>
-                                <Typography variant="subtitle1" gutterBottom>
-                                    Quota (API route limits)
-                                </Typography>
+                                <Box display="flex" alignItems="center" gap={1}>
+                                    <Typography variant="subtitle1" gutterBottom>
+                                        API Rate Limits
+                                    </Typography>
+                                    <HelpTooltip title="Set the maximum number of requests allowed per minute for each API route. Whole Profile applies the limit to the total of all routes combined. Otherwise, each route has its own separate limit." />
+                                </Box>
                                 {quota.map((q, idx) => {
                                     const selectedRouteInfo = routesInfo.find((r) => r.route === q.route);
                                     const methodsAvailable = selectedRouteInfo?.methods || [];

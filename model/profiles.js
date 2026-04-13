@@ -133,7 +133,7 @@ class ProfileModel {
         const results = await conn.select("label", "quota").from("profiles");
         cleanupConnection(conn);
 
-        const quotas = Object.fromEntries(results.map((r) => [r.label, r.quota ? JSON.parse(r.quota) : {}]));
+        const quotas = Object.fromEntries(results.map((r) => [r.label, r.quota && typeof r.quota === "string" ? JSON.parse(r.quota) : r.quota || {}]));
 
         this._quotaCache = { data: quotas, expiresAt: Date.now() + this._quotaCacheTTL };
         return quotas;

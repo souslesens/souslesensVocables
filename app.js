@@ -250,6 +250,7 @@ openapi.initialize({
                 if (config.generalQuota?.[route]?.[method]) {
                     const generalQuota = config.generalQuota[route][method];
                     const generalResult = await quotaModel.tryConsume(route, method, user.user, false, null, generalQuota);
+                    await quotaModel._store.increment("global", null, route, method, generalQuota);
 
                     if (!generalResult.consumed) {
                         throw {

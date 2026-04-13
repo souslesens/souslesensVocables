@@ -1384,15 +1384,21 @@ var Axiom_activeLegend = (function () {
             Connective: "http://www.w3.org/2002/07/owl#Class",
             Restriction: "http://www.w3.org/2002/07/owl#Restriction",
         };
+        var sourceBaseUri = Config.sources[self.currentSource] ? Config.sources[self.currentSource].baseUri : null;
         for (var nodeId in nodesMap) {
             var node = nodesMap[nodeId];
             if (node.data.type) {
+                var subjectId = node.data.id;
+                var isBlankNode = subjectId && subjectId.indexOf("_:") === 0;
+                var belongsToSource = sourceBaseUri && subjectId && subjectId.indexOf(sourceBaseUri) === 0;
+                if (!isBlankNode && !belongsToSource) {
+                    continue;
+                }
                 triples.push({
-                    subject: node.data.id,
+                    subject: subjectId,
                     predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
                     object: nodeTypes[node.data.type] || node.data.type,
                 });
-            } else {
             }
         }
 

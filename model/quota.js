@@ -49,6 +49,9 @@ class QuotaStore {
                     capacity: capacity,
                     refillRate: refillRate,
                 };
+            } else if (entry.capacity !== capacity) {
+                entry.capacity = capacity;
+                entry.refillRate = capacity / (this._windowMs / 1000);
             }
 
             const elapsed = (now - entry.lastRefill) / 1000;

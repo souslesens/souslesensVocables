@@ -34,6 +34,8 @@ class ProfileModel {
     constructor(toolModel) {
         this._toolModel = toolModel;
         this._mainConfig = readMainConfig();
+        this._quotaCache = { data: null, expiresAt: 0 };
+        this._quotaCacheTTL = 65000;
     }
 
     /**
@@ -120,6 +122,28 @@ class ProfileModel {
     };
 
     /**
+     * @returns {Promise<Record<string, object>>} a collection of quotas for each profile
+     */
+    _getAllQuotas = async () => {
+        if (Date.now() < this._quotaCache.expiresAt) {
+            return this._quotaCache.data;
+        }
+
+        const conn = getKnexConnection(this._mainConfig.database);
+        const results = await conn.select("label", "quota").from("profiles");
+        cleanupConnection(conn);
+
+        const quotas = Object.fromEntries(results.map((r) => [r.label, r.quota ? JSON.parse(r.quota) : {}]));
+
+        this._quotaCache = { data: quotas, expiresAt: Date.now() + this._quotaCacheTTL };
+        return quotas;
+    };
+
+    _clearQuotaCache = () => {
+        this._quotaCache = { data: null, expiresAt: 0 };
+    };
+
+    /**
      * @param {UserAccount} user -  a user account
      * @returns {Promise<Record<string, Profile>>} a collection of profiles
      */
@@ -199,6 +223,10 @@ class ProfileModel {
         // using select here allows mocking in tests
         await conn.select("*").from("profiles").where("label", profileNameId).del();
         cleanupConnection(conn);
+
+        quotaModel.clearConfigCache();
+        this._clearQuotaCache();
+
         return true;
     };
 
@@ -218,6 +246,10 @@ class ProfileModel {
 
         await conn.update(this._convertToDatabase(data)).into("profiles").where("label", data.name);
         cleanupConnection(conn);
+
+        quotaModel.clearConfigCache();
+        this._clearQuotaCache();
+
         return true;
     };
 
@@ -236,6 +268,8 @@ class ProfileModel {
 
         const idx = await conn.insert(this._convertToDatabase(data)).into("profiles");
         cleanupConnection(conn);
+
+        this._clearQuotaCache();
 
         return idx[0];
     };
@@ -270,11 +304,14 @@ class ProfileModel {
      */
     getMaxQuotaForRoute = async (route, method, user) => {
         const userProfiles = await this.getUserProfiles(user);
+        const allQuotas = await this._getAllQuotas();
         let maxQuota;
         let profileWithMaxQuota = null;
         let wholeProfileQuota = false;
-        Object.values(userProfiles).forEach((profile) => {
-            const profileQuota = profile.quota;
+
+        for (const [profileName, _profile] of Object.entries(userProfiles)) {
+            const profileQuota = allQuotas[profileName] || {};
+
             if (profileQuota && profileQuota[route] && profileQuota[route][method]) {
                 const limit = profileQuota[route][method];
                 let quotaValue;
@@ -285,15 +322,15 @@ class ProfileModel {
                     quotaValue = limit.quota;
                     wholeProfile = limit.wholeProfileQuota || false;
                 } else {
-                    return;
+                    continue;
                 }
                 if (maxQuota === undefined || quotaValue > maxQuota) {
                     maxQuota = quotaValue;
-                    profileWithMaxQuota = profile.name;
+                    profileWithMaxQuota = profileName;
                     wholeProfileQuota = wholeProfile;
                 }
             }
-        });
+        }
         return { maxQuota, profile: profileWithMaxQuota, wholeProfile: wholeProfileQuota };
     };
 }

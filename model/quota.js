@@ -1,25 +1,189 @@
 import { readMainConfig } from "./config.js";
-import { getKnexConnection, cleanupConnection } from "./utils.js";
+import { Lock } from "async-await-mutex-lock";
 
 /**
  * @typedef {import("./UserTypes").UserAccount} UserAccount
  */
 
-class QuotaModel {
-    constructor() {
-        this._mainConfig = readMainConfig();
+class QuotaStore {
+    constructor(windowMs = 60000) {
+        this._store = new Map();
+        this._configCache = new Map();
+        this._windowMs = windowMs;
+        this._cleanupInterval = 10000;
+        this._locks = new Map();
+
+        this._cleanupTimer = setInterval(() => this._cleanup(), this._cleanupInterval);
+
+        if (this._cleanupTimer.unref) {
+            this._cleanupTimer.unref();
+        }
     }
 
-    /**
-     * Add a quota entry for a given user, route and method.
-     *
-     * @param {string} route - The API route that was called (e.g., "/api/data").
-     * @param {string} method - The HTTP method (e.g., "GET", "POST").
-     * @param {UserAccount} user - A user account
-     * @returns {Promise<number>} The generated identifier of the inserted quota row.
-     * @throws {Error} If the parameters are invalid or the database operation fails.
-     */
-    async add(route, method, user) {
+    _getKey(type, id, route, method) {
+        return `${type}:${id || "all"}:${route}:${method}`;
+    }
+
+    _getLock(key) {
+        if (!this._locks.has(key)) {
+            this._locks.set(key, new Lock());
+        }
+        return this._locks.get(key);
+    }
+
+    async increment(type, id, route, method, capacity = 100) {
+        const key = this._getKey(type, id, route, method);
+        const lock = this._getLock(key);
+
+        await lock.acquire();
+        try {
+            const now = Date.now();
+            const refillRate = capacity / (this._windowMs / 1000);
+
+            let entry = this._store.get(key);
+
+            if (!entry) {
+                entry = {
+                    tokens: capacity,
+                    lastRefill: now,
+                    capacity: capacity,
+                    refillRate: refillRate,
+                };
+            }
+
+            const elapsed = (now - entry.lastRefill) / 1000;
+            entry.tokens = Math.min(entry.tokens + elapsed * entry.refillRate, entry.capacity);
+            entry.lastRefill = now;
+
+            let consumed = false;
+            if (entry.tokens >= 1) {
+                entry.tokens -= 1;
+                consumed = true;
+            }
+
+            this._store.set(key, entry);
+
+            return {
+                consumed,
+                remaining: entry.tokens,
+                capacity: entry.capacity,
+            };
+        } finally {
+            lock.release();
+        }
+    }
+
+    getTokenCount(type, id, route, method, capacity) {
+        const key = this._getKey(type, id, route, method);
+        const entry = this._store.get(key);
+
+        if (!entry) {
+            return { remaining: capacity, capacity: capacity };
+        }
+
+        const now = Date.now();
+        const elapsed = (now - entry.lastRefill) / 1000;
+        const tokens = Math.min(entry.tokens + elapsed * entry.refillRate, entry.capacity);
+
+        return {
+            remaining: tokens,
+            capacity: entry.capacity,
+        };
+    }
+
+    getCount(type, id, route, method, capacity = 100) {
+        const result = this.getTokenCount(type, id, route, method, capacity);
+        return result.capacity - result.remaining;
+    }
+
+    async getProfileConfig(profileName, fetchCallback) {
+        const key = `profile:${profileName}`;
+        const cached = this._configCache.get(key);
+
+        if (cached && Date.now() < cached.expiresAt) {
+            return cached.data;
+        }
+
+        const data = await fetchCallback();
+        this._configCache.set(key, {
+            data,
+            expiresAt: Date.now() + this._windowMs,
+        });
+        return data;
+    }
+
+    async getGeneralConfig(fetchCallback) {
+        const key = "general";
+        const cached = this._configCache.get(key);
+
+        if (cached && Date.now() < cached.expiresAt) {
+            return cached.data;
+        }
+
+        const data = await fetchCallback();
+        this._configCache.set(key, {
+            data,
+            expiresAt: Date.now() + this._windowMs,
+        });
+        return data;
+    }
+
+    clearConfigCache() {
+        this._configCache.clear();
+    }
+
+    _cleanup() {
+        const now = Date.now();
+        const maxIdle = this._windowMs * 2;
+
+        for (const [key, entry] of this._store.entries()) {
+            if (now - entry.lastRefill > maxIdle && entry.tokens >= entry.capacity) {
+                this._store.delete(key);
+                this._locks.delete(key);
+            }
+        }
+
+        const configNow = Date.now();
+        for (const [key, entry] of this._configCache.entries()) {
+            if (configNow > entry.expiresAt) {
+                this._configCache.delete(key);
+            }
+        }
+    }
+}
+
+class QuotaModel {
+    constructor(quotaStore = null) {
+        this._mainConfig = readMainConfig();
+        this._store = quotaStore || new QuotaStore(60000);
+    }
+
+    async _getQuotaForRoute(route, method, user, profileName, wholeProfile) {
+        if (wholeProfile && profileName) {
+            const profileQuota = await this.getProfileConfig(profileName, async () => {
+                const profileModel = (await import("./profiles.js")).profileModel;
+                const profiles = await profileModel.getAllProfiles();
+                return profiles[profileName]?.quota || {};
+            });
+
+            if (profileQuota && profileQuota[route] && profileQuota[route][method]) {
+                const limit = profileQuota[route][method];
+                if (typeof limit === "number") {
+                    return limit;
+                } else if (typeof limit === "object" && limit !== null && "quota" in limit) {
+                    return limit.quota;
+                }
+            }
+        }
+
+        if (this._mainConfig.generalQuota?.[route]?.[method]) {
+            return this._mainConfig.generalQuota[route][method];
+        }
+
+        return Infinity;
+    }
+
+    async add(route, method, user, wholeProfile = false, profileName = null) {
         if (!route || typeof route !== "string") {
             throw new Error("Invalid route supplied to QuotaModel.add");
         }
@@ -30,28 +194,47 @@ class QuotaModel {
             throw new Error("User object with a valid id must be provided to QuotaModel.add");
         }
 
-        const conn = getKnexConnection(this._mainConfig.database);
-        try {
-            const result = await conn.insert({ route, method, user_id: user.id, timestamp: new Date() }).into("quota");
-            return Array.isArray(result) ? result[0] : result;
-        } finally {
-            cleanupConnection(conn);
+        const quota = await this._getQuotaForRoute(route, method, user, profileName, wholeProfile);
+
+        const userResult = await this._store.increment("user", user.id, route, method, quota);
+
+        if (wholeProfile && profileName) {
+            await this._store.increment("profile", profileName, route, method, quota);
         }
+
+        await this._store.increment("global", null, route, method, quota);
+
+        return userResult;
     }
 
-    /**
-     * Get the number of times a given route and method has been used by a user
-     * within the last *N* minutes.
-     *
-     * @param {string} route - API route (e.g., "/api/data").
-     * @param {string} method - HTTP method (e.g., "GET", "POST").
-     * @param {UserAccount} user - User object (must contain `id`).
-     * @param {number} [lastMinutes=1] - Time window in minutes (default 1).
-     * @param {boolean} [wholeProfile=false] - If true, count usage for all users sharing the same profile.
-     * @param {string|null} [profileName=null] - The profile name to use when wholeProfile is true.
-     * @returns {Promise<number>} Count of matching quota entries; returns 0 if none.
-     * @throws {Error} If parameters are invalid or the DB query fails.
-     */
+    async tryConsume(route, method, user, wholeProfile = false, profileName = null, quotaOverride = null) {
+        if (!route || typeof route !== "string") {
+            throw new Error("Invalid route supplied to QuotaModel.tryConsume");
+        }
+        if (!method || typeof method !== "string") {
+            throw new Error("Invalid method supplied to QuotaModel.tryConsume");
+        }
+        if (!user || user.id === undefined || user.id === null) {
+            throw new Error("User object with a valid id must be provided to QuotaModel.tryConsume");
+        }
+
+        const quota = quotaOverride !== null ? quotaOverride : await this._getQuotaForRoute(route, method, user, profileName, wholeProfile);
+
+        if (quota === Infinity) {
+            return { consumed: true, remaining: Infinity, capacity: Infinity };
+        }
+
+        const userResult = await this._store.increment("user", user.id, route, method, quota);
+
+        if (wholeProfile && profileName) {
+            await this._store.increment("profile", profileName, route, method, quota);
+        }
+
+        await this._store.increment("global", null, route, method, quota);
+
+        return userResult;
+    }
+
     async getRouteUsage(route, method, user, lastMinutes = 1, wholeProfile = false, profileName = null) {
         if (!route || typeof route !== "string") {
             throw new Error("Invalid route supplied to QuotaModel.getRouteUsage");
@@ -66,46 +249,12 @@ class QuotaModel {
             throw new Error("lastMinutes must be a positive number");
         }
 
-        const conn = getKnexConnection(this._mainConfig.database);
-        try {
-            let query = conn
-                .count("* as cnt")
-                .from("quota")
-                .where({ route, method })
-                .andWhere("timestamp", ">=", conn.raw(`now() - interval '${lastMinutes} minute'`));
+        const quota = await this._getQuotaForRoute(route, method, user, profileName, wholeProfile);
+        const result = this._store.getTokenCount(wholeProfile && profileName ? "profile" : "user", wholeProfile && profileName ? profileName : user.id, route, method, quota);
 
-            if (wholeProfile && profileName) {
-                query = query.andWhere(
-                    "user_id",
-                    "in",
-                    conn
-                        .select("id")
-                        .from("users")
-                        .andWhere("profiles", "@>", conn.raw(`ARRAY['${profileName}']`)),
-                );
-            } else {
-                query = query.andWhere({ user_id: user.id });
-            }
-
-            const rows = await query;
-
-            const count = parseInt(rows[0].cnt, 10);
-            return Number.isNaN(count) ? 0 : count;
-        } finally {
-            cleanupConnection(conn);
-        }
+        return result.capacity - result.remaining;
     }
 
-    /**
-     * Get the total number of times a given route and method has been used by ALL users
-     * within the last *N* minutes (global quota, no user filter).
-     *
-     * @param {string} route - API route (e.g., "/api/data").
-     * @param {string} method - HTTP method (e.g., "GET", "POST").
-     * @param {number} [lastMinutes=1] - Time window in minutes (default 1).
-     * @returns {Promise<number>} Count of matching quota entries; returns 0 if none.
-     * @throws {Error} If parameters are invalid or the DB query fails.
-     */
     async getGlobalRouteUsage(route, method, lastMinutes = 1) {
         if (!route || typeof route !== "string") {
             throw new Error("Invalid route supplied to QuotaModel.getGlobalRouteUsage");
@@ -117,21 +266,38 @@ class QuotaModel {
             throw new Error("lastMinutes must be a positive number");
         }
 
-        const conn = getKnexConnection(this._mainConfig.database);
-        try {
-            const rows = await conn
-                .count("* as cnt")
-                .from("quota")
-                .where({ route, method })
-                .andWhere("timestamp", ">=", conn.raw(`now() - interval '${lastMinutes} minute'`));
+        const quota = this._mainConfig.generalQuota?.[route]?.[method] || Infinity;
+        return this._store.getCount("global", null, route, method, quota);
+    }
 
-            const count = parseInt(rows[0].cnt, 10);
-            return Number.isNaN(count) ? 0 : count;
-        } finally {
-            cleanupConnection(conn);
-        }
+    async getProfileConfig(profileName, fetchCallback) {
+        return await this._store.getProfileConfig(profileName, fetchCallback);
+    }
+
+    async getGeneralConfig(fetchCallback) {
+        return await this._store.getGeneralConfig(fetchCallback);
+    }
+
+    clearConfigCache() {
+        this._store.clearConfigCache();
+    }
+
+    async     async getRateLimitHeaders(route, method, user, wholeProfile = false, profileName = null) {
+        const quota = await this._getQuotaForRoute(route, method, user, profileName, wholeProfile);
+        const result = this._store.getTokenCount(wholeProfile && profileName ? "profile" : "user", wholeProfile && profileName ? profileName : user.id, route, method, quota);
+
+        const retryAfter = result.remaining < 1 ? Math.ceil((1 - result.remaining) / (result.capacity / (this._store._windowMs / 1000))) : 0;
+
+        return {
+            "X-RateLimit-Limit": result.capacity === Infinity ? "unlimited" : Math.floor(result.capacity),
+            "X-RateLimit-Remaining": result.remaining === Infinity ? "unlimited" : Math.floor(result.remaining),
+            "X-RateLimit-Reset": Math.ceil((Date.now() + this._store._windowMs) / 1000),
+            "Retry-After": retryAfter > 0 ? Math.floor(retryAfter) : undefined,
+        };
     }
 }
 
-const quotaModel = new QuotaModel();
-export { QuotaModel, quotaModel };
+const quotaStore = new QuotaStore(60000);
+const quotaModel = new QuotaModel(quotaStore);
+
+export { QuotaModel, quotaModel, quotaStore, QuotaStore };

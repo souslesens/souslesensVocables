@@ -236,28 +236,40 @@ openapi.initialize({
                 const route = req.baseUrl + req.path;
                 const method = req.method;
 
-                // store quota in db
-                const quotaId = await quotaModel.add(route, method, user.user);
-
-                // get quota from profile
                 const { maxQuota: profileQuota, profile: profileName, wholeProfile } = await profileModel.getMaxQuotaForRoute(route, method, user.user);
 
-                // check profile quota (with wholeProfile logic)
-                if (profileQuota !== undefined) {
-                    const usage = await quotaModel.getRouteUsage(route, method, user.user, 1, wholeProfile, profileName);
-                    if (usage > profileQuota) {
-                        throw {
-                            status: 429,
-                            message: `Too many requests, you exceeded your profile quota (${profileQuota} for route ${route} ${method})`,
-                        };
+                const consumeResult = await quotaModel.tryConsume(route, method, user.user, wholeProfile, profileName, profileQuota);
+
+                if (!consumeResult.consumed) {
+                    res.set("X-RateLimit-Limit", consumeResult.capacity === Infinity ? "unlimited" : Math.floor(consumeResult.capacity));
+                    res.set("X-RateLimit-Remaining", 0);
+                    res.set("X-RateLimit-Reset", Math.ceil((Date.now() + 60000) / 1000));
+                    const retryAfter = Math.ceil((1 - consumeResult.remaining) / (consumeResult.capacity / 60));
+                    if (retryAfter > 0) {
+                        res.set("Retry-After", Math.floor(retryAfter));
                     }
+                    throw {
+                        status: 429,
+                        message: `Too many requests, you exceeded your profile quota (${profileQuota} for route ${route} ${method})`,
+                    };
                 }
 
-                // check generalQuota (applies to ALL users globally, always checked)
+                res.set("X-RateLimit-Limit", consumeResult.capacity === Infinity ? "unlimited" : Math.floor(consumeResult.capacity));
+                res.set("X-RateLimit-Remaining", Math.floor(consumeResult.remaining));
+                res.set("X-RateLimit-Reset", Math.ceil((Date.now() + 60000) / 1000));
+
                 if (config.generalQuota?.[route]?.[method]) {
                     const generalQuota = config.generalQuota[route][method];
-                    const generalUsage = await quotaModel.getGlobalRouteUsage(route, method, 1);
-                    if (generalUsage > generalQuota) {
+                    const generalResult = await quotaModel.tryConsume(route, method, user.user, false, null, generalQuota);
+
+                    if (!generalResult.consumed) {
+                        res.set("X-RateLimit-Limit", generalResult.capacity === Infinity ? "unlimited" : Math.floor(generalResult.capacity));
+                        res.set("X-RateLimit-Remaining", 0);
+                        res.set("X-RateLimit-Reset", Math.ceil((Date.now() + 60000) / 1000));
+                        const retryAfter = Math.ceil((1 - generalResult.remaining) / (generalResult.capacity / 60));
+                        if (retryAfter > 0) {
+                            res.set("Retry-After", Math.floor(retryAfter));
+                        }
                         throw {
                             status: 429,
                             message: `Too many requests, the general quota has been exceeded (${generalQuota} for route ${route} ${method})`,

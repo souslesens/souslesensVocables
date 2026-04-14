@@ -367,42 +367,6 @@
 #index_topContolPanel {
     font-size: 13px;
 }
-
-#topControlPanelSection {
-    position: relative;
-    flex-shrink: 0;
-}
-
-.topControlPanelDropdown {
-    background-color: @background-color;
-    border: 2px solid @button1-color;
-    border-radius: 14px;
-    padding: 4px;
-    min-width: 260px;
-}
-
-@media (min-width: 1400px) {
-    #topControlPanelSection {
-        flex: 1 1 auto;
-        min-width: 0;
-    }
-
-    #sourcesCompactTrigger {
-        display: none !important;
-    }
-
-    #topControlPanelSection > .topControlPanelDropdown {
-        display: block !important;
-        position: static !important;
-        background: none !important;
-        border: none !important;
-        border-radius: 0 !important;
-        min-width: 0 !important;
-        padding: 0 !important;
-        max-width: 100%;
-        overflow: hidden;
-    }
-}
 #LineageVisjsLegendCanvas {
     display: none;
     z-index: 100;

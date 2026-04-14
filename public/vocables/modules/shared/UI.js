@@ -170,14 +170,84 @@ var UI = (function () {
                 $("#AddSourceButton").remove();
                 $("#AllSourceButton").remove();
             }
+            self.updateSourcesPanelMode();
+            self.initSourcesPanelHover();
             if (callback) {
                 callback();
             }
         });
     };
 
+    self.updateSourcesPanelMode = function () {
+        var toolSelectionSection = document.getElementById("toolSelectionSection");
+        var dropdownMenuLink = document.getElementById("dropdownMenuLink");
+        var panel = document.getElementById("index_topContolPanel");
+        var section = document.getElementById("topControlPanelSection");
+        if (!toolSelectionSection || !dropdownMenuLink || !panel || !section) {
+            return;
+        }
+        var availableWidth = dropdownMenuLink.getBoundingClientRect().left - toolSelectionSection.getBoundingClientRect().right;
+        var isCompact = panel.scrollWidth > availableWidth;
+        var wasCompact = section.classList.contains("sources-compact-mode");
+        if (isCompact === wasCompact) {
+            return;
+        }
+        if (isCompact) {
+            section.classList.add("sources-compact-mode");
+            $("#index_topContolPanel").hide();
+        } else {
+            section.classList.remove("sources-compact-mode");
+            $("#index_topContolPanel").show();
+        }
+    };
+
+    self.initSourcesPanelHover = function () {
+        var $trigger = $("#sourcesCompactTrigger");
+        var $panel = $("#index_topContolPanel");
+        var hideTimeout = null;
+
+        function reposition() {
+            var rect = $trigger[0].getBoundingClientRect();
+            $panel.css({ top: rect.bottom + "px", left: rect.left + "px" });
+        }
+
+        function showPopup() {
+            clearTimeout(hideTimeout);
+            hideTimeout = null;
+            reposition();
+            $panel.show();
+        }
+
+        function scheduleHide() {
+            hideTimeout = setTimeout(function () {
+                $panel.hide();
+                hideTimeout = null;
+            }, 150);
+        }
+
+        $trigger.off("mouseenter.sourcesPanel mouseleave.sourcesPanel");
+        $panel.off("mouseenter.sourcesPanel mouseleave.sourcesPanel");
+
+        $trigger.on("mouseenter.sourcesPanel", showPopup);
+        $trigger.on("mouseleave.sourcesPanel", scheduleHide);
+        $panel.on("mouseenter.sourcesPanel", function () {
+            clearTimeout(hideTimeout);
+            hideTimeout = null;
+        });
+        $panel.on("mouseleave.sourcesPanel", scheduleHide);
+
+        var sourcesContainer = document.getElementById("lineage_r_addPanel");
+        if (sourcesContainer && !sourcesContainer._sourcesPanelObserver) {
+            sourcesContainer._sourcesPanelObserver = new ResizeObserver(function () {
+                self.updateSourcesPanelMode();
+            });
+            sourcesContainer._sourcesPanelObserver.observe(sourcesContainer);
+        }
+    };
+
     // Keep Here
     self.resetWindowSize = function () {
+        self.updateSourcesPanelMode();
         var MenuBarHeight = $("#MenuBar").height();
         var LateralPanelWidth = $("#lateralPanelDiv").width();
         var rightControlPanelWidth = $("#rightControlPanelDiv").width();

@@ -21,6 +21,13 @@ var KGqueryAggregateWidget = (function () {
                 self.groupByVarsMap = {};
                 self.numericVarsMap = {};
                 self.allProperties = {};
+                var jstreeCallback = function () {
+                    UI.repositionOpenDialogs();
+                    $("#smallDialogDiv").css("overflow","hidden");
+                    $("#smallDialogDiv").css("height","unset");
+                    
+
+                };
                 for (var key in data) {
                     var item = data[key];
 
@@ -57,7 +64,7 @@ var KGqueryAggregateWidget = (function () {
                     }
                 }
 
-                self.loadJstree(self.allProperties, "KGqueryAggregate_groupBySelect", { withCheckboxes: true, tie_selection: true,noScroll: true });
+                self.loadJstree(self.allProperties, "KGqueryAggregate_groupBySelect", { withCheckboxes: true, tie_selection: true,noScroll: true },jstreeCallback);
 
                 var options = {
                     noScroll: true,
@@ -68,10 +75,11 @@ var KGqueryAggregateWidget = (function () {
                         } else {
                             groupFnsMap = { COUNT: 1, concat: 1 };
                         }
-                        self.loadJstree(groupFnsMap, "KGqueryAggregate_groupFunctionSelect", { withCheckboxes: true, tie_selection: true,noScroll: true });
+                        self.loadJstree(groupFnsMap, "KGqueryAggregate_groupFunctionSelect", { withCheckboxes: true, tie_selection: true,noScroll: true },jstreeCallback);
                     },
+                    
                 };
-                self.loadJstree(self.allProperties, "KGqueryAggregate_functionVariableSelect", options);
+                self.loadJstree(self.allProperties, "KGqueryAggregate_functionVariableSelect", options,jstreeCallback);
 
                 /*   var options = {
                     selectTreeNodeFn: function (event, obj) {
@@ -213,7 +221,7 @@ var KGqueryAggregateWidget = (function () {
         return aggregateClauses;
     };
 
-    self.loadJstree = function (dataMap, divId, options) {
+    self.loadJstree = function (dataMap, divId, options,callback) {
         var jstreeData = [];
         for (var key in dataMap) {
             jstreeData.push({
@@ -226,7 +234,7 @@ var KGqueryAggregateWidget = (function () {
             options = {};
         }
         options.openAll = true;
-        JstreeWidget.loadJsTree(divId, jstreeData, options);
+        JstreeWidget.loadJsTree(divId, jstreeData, options, callback);
     };
 
     return self;

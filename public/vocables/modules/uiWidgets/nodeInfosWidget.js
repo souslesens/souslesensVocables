@@ -304,14 +304,14 @@ var NodeInfosWidget = (function () {
                 "onclick='Predicates_bot.start(Lineage_sources.activeSource)'>  Add Predicate </button>";
 
             str += "<button id='deleteButton' class='w3-button slsv-right-top-bar-button nodeInfos-button' onclick='NodeInfosWidget.deleteNode()'> Delete </button>";
-            str += "<div id='sourceBrowser_addPropertyDiv' style=''>";
+            str += "<div id='sourceBrowser_addPropertyDiv' style='display:none'>";
         }
 
         if (authentication.currentUser.groupes.indexOf("Annotator") > -1) {
             str +=
                 "<button id='addPredicateButton' class='w3-button slsv-right-top-bar-button nodeInfos-button' " +
                 "onclick='Predicates_bot.start(Lineage_sources.activeSource)'>  Add Predicate </button>";
-            str += "<div id='sourceBrowser_addPropertyDiv' style=''>";
+            str += "<div id='sourceBrowser_addPropertyDiv' style='display:none'>";
         }
 
         str += "</div>";
@@ -1531,55 +1531,17 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
         }
     };
     self.showModifyPredicateDialog = function (predicateId) {
-        PredicatesSelectorWidget.currentEditingItem = PredicatesSelectorWidget.predicatesIdsMap[predicateId];
-        if (!PredicatesSelectorWidget.currentEditingItem) {
+        var item = PredicatesSelectorWidget.predicatesIdsMap[predicateId];
+        if (!item) {
             return alert("error");
         }
-
-        PredicatesSelectorWidget.init(Lineage_sources.activeSource, function () {
-            self.showHidePropertiesDiv("hide");
-
-            if (PredicatesSelectorWidget.currentEditingItem.item.value.type != "uri") {
-                //hide both
-                self.setLargerObjectTextArea();
-                $("#editPredicate_objectSelectDiv").hide();
-                $("#editPredicate_largerTextButton").hide();
-            } else {
-                $("#editPredicate_objectSelectDiv").show();
-                $("#editPredicate_largerTextButton").show();
-                $("#editPredicate_objectValue").hide();
-                var vocab = common.getVocabularyFromURI(PredicatesSelectorWidget.currentEditingItem.item.value.value);
-                if (vocab) {
-                    $("#editPredicate_vocabularySelect").val(vocab[0]);
-                    PredicatesSelectorWidget.setCurrentVocabPropertiesSelect(vocab[0], "editPredicate_currentVocabPredicateSelect", function () {
-                        $("#editPredicate_currentVocabPredicateSelect").val(PredicatesSelectorWidget.currentEditingItem.item.prop.value);
-                        $("#editPredicate_propertyValue").val(PredicatesSelectorWidget.currentEditingItem.item.prop.value);
-                        //PredicatesSelectorWidget.onSelectPredicateProperty($('#editPredicate_currentVocabPredicateSelect').val());
-                    });
-
-                    $("#editPredicate_vocabularySelect2").val(vocab[0]);
-                    PredicatesSelectorWidget.setCurrentVocabClassesSelect(vocab[0], "editPredicate_objectSelect", function () {
-                        $("#editPredicate_objectSelect").val(PredicatesSelectorWidget.currentEditingItem.item.value.value);
-                        PredicatesSelectorWidget.onSelectCurrentVocabObject(PredicatesSelectorWidget.currentEditingItem.item.value.value);
-                    });
-                }
-            }
-
-            $("#editPredicate_objectValue").val(PredicatesSelectorWidget.currentEditingItem.item.value.value);
-            $("#editPredicate_propertyValue").val(PredicatesSelectorWidget.currentEditingItem.item.prop.value);
-            $("#editPredicate_objectValue").trigger("focus");
-            $("#editPredicate_savePredicateButton").click(function () {
-                PredicatesSelectorWidget.storeRecentPredicates();
-
-                self.deletePredicate(predicateId, false, function () {
-                    self.addPredicate(null, null, null, null, function () {
-                        self.showNodeInfos(MainController.currentSource, self.currentNode, "mainDialogDiv", { resetVisited: 1 });
-                        $("#editPredicate_objectValue").val("");
-                        $("#editPredicate_propertyValue").val("");
-                    });
-                });
-            });
-        });
+        var editItem = {
+            predicateId: predicateId,
+            property: item.item.prop.value,
+            object: item.item.value.value,
+            objectType: item.item.value.type,
+        };
+        Predicates_bot.start(Lineage_sources.activeSource, editItem);
     };
 
     self.hideAddPredicateDiv = function () {

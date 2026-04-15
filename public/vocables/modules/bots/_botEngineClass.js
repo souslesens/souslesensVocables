@@ -91,6 +91,9 @@ class BotEngineClass {
     }
 
     promptTextarea(message, varToFill, defaultValue, callback) {
+        if (!this.history.step.includes(this.history.currentIndex)) {
+            this.history.step.push(this.history.currentIndex);
+        }
         $("#" + this.divId)
             .find("#bot_resourcesProposalSelect")
             .hide();
@@ -320,7 +323,7 @@ class BotEngineClass {
                 .css("display", "none");
 
             var lastStepIndex = this.history.step[this.history.step.length - 2];
-            if (lastStepIndex == 0) {
+            if (lastStepIndex === undefined) {
                 return this.reset();
             }
             this.currentObj = this.history.workflowObjects[lastStepIndex];
@@ -519,6 +522,13 @@ class BotEngineClass {
         $("#" + this.divId)
             .find("#botTreeContainer")
             .remove();
+        $("#" + this.divId)
+            .find("#botPromptInput")
+            .css("display", "none");
+        $("#" + this.divId)
+            .find("#botPromptTextarea")
+            .parent()
+            .remove();
 
         const treeDivId = "botJstreeDiv_" + common.getRandomHexaId(5);
         const searchInputId = "botTreeSearch_" + common.getRandomHexaId(5);
@@ -565,11 +575,18 @@ class BotEngineClass {
             },
             treeOptions,
             {
-                selectTreeNodeFn: withCheckboxes ? null : (_evt, obj) => resolveSelection(obj.node.id, obj.node.text, obj.node),
+                selectTreeNodeFn: withCheckboxes ? null : (_evt, obj) => {
+                    if (treeOptions.parentNodeIds && treeOptions.parentNodeIds.indexOf(obj.node.id) >= 0) {
+                        return;
+                    }
+                    resolveSelection(obj.node.id, obj.node.text, obj.node);
+                },
             },
         );
 
         JstreeWidget.loadJsTree(treeDivId, jstreeData, jstreeOpts, null);
+
+        $("#" + searchInputId).trigger("focus");
 
         $("#" + searchInputId).on("keyup", function () {
             $("#" + treeDivId)
@@ -716,6 +733,9 @@ class BotEngineClass {
     }
 
     promptValue(message, varToFill, defaultValue, options, callback) {
+        if (!this.history.step.includes(this.history.currentIndex)) {
+            this.history.step.push(this.history.currentIndex);
+        }
         $("#" + this.divId)
             .find("#bot_resourcesProposalSelect")
             .hide();

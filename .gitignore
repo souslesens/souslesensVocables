@@ -165,4 +165,10 @@ mainapp/static/assets
 /plugins/Lifex_cost/
 /plugins/
 /public/tutorials/
-
+# worktree isolation (github-issue-claude-code)
+vite.config.worktree.js
+start-worktree.sh
+start-worktree.cmd
+*/vite.config.worktree.js
+WORKTREE.md
+.env.local

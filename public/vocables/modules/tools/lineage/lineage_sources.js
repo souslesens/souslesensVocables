@@ -356,6 +356,7 @@ var Lineage_sources = (function () {
             $("#lineage_createResourceBtn").hide();
         }
         $("#Title1").text($(".Lineage_selectedSourceDiv").text());
+        setTimeout(function () { UI.checkSourcesPanelOverflow(); }, 0);
         //Lineage_whiteboard.resetCurrentTab();
     };
 
@@ -552,7 +553,8 @@ var Lineage_sources = (function () {
                     "<button class='arrow-icon slsv-invisible-button'  style=' width: 20px;height:20px;}' onclick='Lineage_sources.showSourceDivPopupMenu(\"" +
                     sourceDivId +
                     "\")'/> </button></div>";
-                $("#lineage_drawnSources").append(html);
+                $("#lineage_r_addPanel").append(html);
+                setTimeout(function () { UI.checkSourcesPanelOverflow(); }, 0);
 
                 $("#" + sourceDivId).bind("click", function (e) {
                     var sourceDivId = $(this).attr("id");
@@ -609,8 +611,9 @@ var Lineage_sources = (function () {
                         "<button class='arrow-icon slsv-invisible-button'  style=' width: 20px;height:20px;}' onclick='Lineage_sources.showSourceDivPopupMenu(\"" +
                         sourceDivId +
                         "\")'/> </button></div>";
-                    $("#lineage_drawnSources").append(html);
-                    $("#lineage_drawnSources").find(".arrow-icon").hide();
+                    $("#lineage_r_addPanel").append(html);
+                    $("#lineage_r_addPanel").find(".arrow-icon").hide();
+                    setTimeout(function () { UI.checkSourcesPanelOverflow(); }, 0);
                 }
                 /*
                 $("#" + sourceDivId).bind("click", function (e) {
@@ -883,6 +886,7 @@ var Lineage_sources = (function () {
             var sourceDivId = self.loadedSources[self.activeSource].sourceDivId;
             self.loadedSources[self.activeSource] = null;
             $("#" + sourceDivId).remove();
+            setTimeout(function () { UI.checkSourcesPanelOverflow(); }, 0);
         },
         /**
          * Hides all nodes belonging to a source.

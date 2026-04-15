@@ -170,84 +170,77 @@ var UI = (function () {
                 $("#AddSourceButton").remove();
                 $("#AllSourceButton").remove();
             }
-            self.updateSourcesPanelMode();
-            self.initSourcesPanelHover();
             if (callback) {
                 callback();
             }
         });
     };
 
-    self.updateSourcesPanelMode = function () {
-        var toolSelectionSection = document.getElementById("toolSelectionSection");
-        var dropdownMenuLink = document.getElementById("dropdownMenuLink");
-        var panel = document.getElementById("index_topContolPanel");
-        var section = document.getElementById("topControlPanelSection");
-        if (!toolSelectionSection || !dropdownMenuLink || !panel || !section) {
-            return;
-        }
-        var availableWidth = dropdownMenuLink.getBoundingClientRect().left - toolSelectionSection.getBoundingClientRect().right;
-        var isCompact = panel.scrollWidth > availableWidth;
-        var wasCompact = section.classList.contains("sources-compact-mode");
-        if (isCompact === wasCompact) {
-            return;
-        }
-        if (isCompact) {
-            section.classList.add("sources-compact-mode");
-            $("#index_topContolPanel").hide();
-        } else {
-            section.classList.remove("sources-compact-mode");
-            $("#index_topContolPanel").show();
-        }
-    };
+    var _sourcesPanelCompact = false;
+    var _sourcesHideTimeout = null;
 
-    self.initSourcesPanelHover = function () {
-        var $trigger = $("#sourcesCompactTrigger");
+    self.checkSourcesPanelOverflow = function () {
+        var sourcesBar = document.getElementById("lineage_drawnSources");
+        if (!sourcesBar) {
+            return;
+        }
+
         var $panel = $("#index_topContolPanel");
-        var hideTimeout = null;
+        var $popup = $("#lineage_sourcesPopup");
 
-        function reposition() {
-            var rect = $trigger[0].getBoundingClientRect();
-            $panel.css({ top: rect.bottom + "px", left: rect.left + "px" });
-        }
+        if (!_sourcesPanelCompact) {
+            if (sourcesBar.scrollWidth <= sourcesBar.clientWidth) {
+                return;
+            }
+            _sourcesPanelCompact = true;
+            $popup.hide();
 
-        function showPopup() {
-            clearTimeout(hideTimeout);
-            hideTimeout = null;
-            reposition();
-            $panel.show();
-        }
+            $panel.off("mouseenter.sourcesPanel mouseleave.sourcesPanel");
+            $popup.off("mouseenter.sourcesPanel mouseleave.sourcesPanel");
 
-        function scheduleHide() {
-            hideTimeout = setTimeout(function () {
-                $panel.hide();
-                hideTimeout = null;
-            }, 150);
-        }
-
-        $trigger.off("mouseenter.sourcesPanel mouseleave.sourcesPanel");
-        $panel.off("mouseenter.sourcesPanel mouseleave.sourcesPanel");
-
-        $trigger.on("mouseenter.sourcesPanel", showPopup);
-        $trigger.on("mouseleave.sourcesPanel", scheduleHide);
-        $panel.on("mouseenter.sourcesPanel", function () {
-            clearTimeout(hideTimeout);
-            hideTimeout = null;
-        });
-        $panel.on("mouseleave.sourcesPanel", scheduleHide);
-
-        var sourcesContainer = document.getElementById("lineage_r_addPanel");
-        if (sourcesContainer && !sourcesContainer._sourcesPanelObserver) {
-            sourcesContainer._sourcesPanelObserver = new ResizeObserver(function () {
-                self.updateSourcesPanelMode();
+            $panel.on("mouseenter.sourcesPanel", function () {
+                clearTimeout(_sourcesHideTimeout);
+                _sourcesHideTimeout = null;
+                var rect = $panel[0].getBoundingClientRect();
+                $popup.css({ position: "fixed", top: rect.bottom + "px", left: rect.left + "px", zIndex: 200, flexWrap: "wrap", padding: "6px" });
+                $popup.addClass("sources-popup-panel").show();
             });
-            sourcesContainer._sourcesPanelObserver.observe(sourcesContainer);
+            $panel.on("mouseleave.sourcesPanel", function () {
+                _sourcesHideTimeout = setTimeout(function () {
+                    $popup.hide();
+                    _sourcesHideTimeout = null;
+                }, 150);
+            });
+            $popup.on("mouseenter.sourcesPanel", function () {
+                clearTimeout(_sourcesHideTimeout);
+                _sourcesHideTimeout = null;
+            });
+            $popup.on("mouseleave.sourcesPanel", function () {
+                _sourcesHideTimeout = setTimeout(function () {
+                    $popup.hide();
+                    _sourcesHideTimeout = null;
+                }, 150);
+            });
+        } else {
+            // Measure with popup restored inline but invisible to avoid flicker
+            $popup.css({ position: "static", visibility: "hidden", display: "flex", flexWrap: "nowrap", padding: "" }).removeClass("sources-popup-panel");
+            var wouldOverflow = sourcesBar.scrollWidth > sourcesBar.clientWidth;
+            if (wouldOverflow) {
+                $popup.css({ position: "", visibility: "" }).hide();
+            } else {
+                _sourcesPanelCompact = false;
+                clearTimeout(_sourcesHideTimeout);
+                _sourcesHideTimeout = null;
+                $panel.off("mouseenter.sourcesPanel mouseleave.sourcesPanel");
+                $popup.off("mouseenter.sourcesPanel mouseleave.sourcesPanel");
+                $popup.css({ position: "", visibility: "", flexWrap: "", padding: "" });
+            }
         }
     };
 
     // Keep Here
     self.resetWindowSize = function () {
-        self.updateSourcesPanelMode();
+        self.checkSourcesPanelOverflow();
         var MenuBarHeight = $("#MenuBar").height();
         var LateralPanelWidth = $("#lateralPanelDiv").width();
         var rightControlPanelWidth = $("#rightControlPanelDiv").width();

@@ -4873,12 +4873,33 @@ attrs.color=self.getSourceColor(superClassValue)
                 }*/
                 $("#lineageWhiteboard_modelBtn").bind("click", function (e) {
                     var activeSource = Lineage_sources.activeSource;
-                    var shouldPreserveGraph =
-                        self.lineageVisjsGraph.data &&
-                        self.lineageVisjsGraph.data.nodes.get().some(function (node) {
-                            return node.data && (node.data.source !== activeSource || node.data.type === "Container");
+                    if (self.lineageVisjsGraph.data) {
+                        var allNodes = self.lineageVisjsGraph.data.nodes.get();
+                        var hasOtherSourceNodes = allNodes.some(function (node) {
+                            return node.data && node.data.source !== activeSource;
                         });
-                    if (!shouldPreserveGraph) {
+                        if (hasOtherSourceNodes) {
+                            var activeSourceNodeIds = allNodes
+                                .filter(function (node) {
+                                    return node.data && node.data.source === activeSource;
+                                })
+                                .map(function (node) {
+                                    return node.id;
+                                });
+                            var activeSourceEdgeIds = self.lineageVisjsGraph.data.edges
+                                .get()
+                                .filter(function (edge) {
+                                    return edge.data && edge.data.source === activeSource;
+                                })
+                                .map(function (edge) {
+                                    return edge.id;
+                                });
+                            self.lineageVisjsGraph.data.edges.remove(activeSourceEdgeIds);
+                            self.lineageVisjsGraph.data.nodes.remove(activeSourceNodeIds);
+                        } else {
+                            self.lineageVisjsGraph.clearGraph();
+                        }
+                    } else {
                         self.lineageVisjsGraph.clearGraph();
                     }
                     Lineage_whiteboard.drawModel(null, null, { all: true });

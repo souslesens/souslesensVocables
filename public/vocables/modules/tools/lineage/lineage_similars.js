@@ -468,8 +468,8 @@ var Lineage_similars = (function () {
     self.drawWhiteBoardSimilars = function (selectedMode, mode, output) {
         var commonNodes = [];
         var existingNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
-        
-    var existingEdgesIds = Lineage_whiteboard.  lineageVisjsGraph.data.edges.getIds();
+
+        var existingEdgesIds = Lineage_whiteboard.lineageVisjsGraph.data.edges.getIds();
 
         if (!mode) {
             mode = "exactMatch";
@@ -504,7 +504,7 @@ var Lineage_similars = (function () {
                 if (!node2.data.label) {
                     return;
                 }
-                    if (!node1.data.label) {
+                if (!node1.data.label) {
                     return;
                 }
                 var cleaned_label1 = node1.data.label.toLowerCase().replace(/ /g, "");

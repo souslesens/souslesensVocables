@@ -538,7 +538,14 @@ var Lineage_whiteboard = (function () {
                     options.source = source;
                     Lineage_relations.currentQueryInfos = null;
                     if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
-                        options.data = Lineage_whiteboard.lineageVisjsGraph.data.nodes.getIds();
+                        options.data = Lineage_whiteboard.lineageVisjsGraph.data.nodes
+                            .get()
+                            .filter(function (node) {
+                                return !node.data || node.data.type !== "Container";
+                            })
+                            .map(function (node) {
+                                return node.id;
+                            });
                     }
                     var direction = options.inverse ? "inverse" : "direct";
                     if (options.all) {
@@ -4865,7 +4872,15 @@ attrs.color=self.getSourceColor(superClassValue)
                     $("#lineage_actionDiv_newAxiom").css("display", "none");
                 }*/
                 $("#lineageWhiteboard_modelBtn").bind("click", function (e) {
-                    self.lineageVisjsGraph.clearGraph();
+                    var activeSource = Lineage_sources.activeSource;
+                    var hasContainersFromActiveSource =
+                        self.lineageVisjsGraph.isGraphNotEmpty() &&
+                        self.lineageVisjsGraph.data.nodes.get().some(function (node) {
+                            return node.data && node.data.type === "Container" && node.data.source === activeSource;
+                        });
+                    if (!hasContainersFromActiveSource) {
+                        self.lineageVisjsGraph.clearGraph();
+                    }
                     Lineage_whiteboard.drawModel(null, null, { all: true });
                 });
                 $("#lineageWhiteboard_modelBtn").bind("contextmenu", function (e) {

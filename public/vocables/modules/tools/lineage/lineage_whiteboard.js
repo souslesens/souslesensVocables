@@ -4873,10 +4873,11 @@ attrs.color=self.getSourceColor(superClassValue)
                 }*/
                 $("#lineageWhiteboard_modelBtn").bind("click", function (e) {
                     var activeSource = Lineage_sources.activeSource;
-                    var graphNodes = self.lineageVisjsGraph.data.nodes.get();
-                    var hasContainersFromActiveSource = graphNodes.some(function (node) {
-                        return node.data && node.data.type === "Container" && node.data.source === activeSource;
-                    });
+                    var hasContainersFromActiveSource =
+                        self.lineageVisjsGraph.data &&
+                        self.lineageVisjsGraph.data.nodes.get().some(function (node) {
+                            return node.data && node.data.type === "Container" && node.data.source === activeSource;
+                        });
                     if (!hasContainersFromActiveSource) {
                         self.lineageVisjsGraph.clearGraph();
                     }

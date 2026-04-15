@@ -538,7 +538,14 @@ var Lineage_whiteboard = (function () {
                     options.source = source;
                     Lineage_relations.currentQueryInfos = null;
                     if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
-                        options.data = Lineage_whiteboard.lineageVisjsGraph.data.nodes.getIds();
+                        options.data = Lineage_whiteboard.lineageVisjsGraph.data.nodes
+                            .get()
+                            .filter(function (node) {
+                                return node.data && node.data.source === source && node.data.type !== "Container";
+                            })
+                            .map(function (node) {
+                                return node.id;
+                            });
                     }
                     var direction = options.inverse ? "inverse" : "direct";
                     if (options.all) {
@@ -4865,7 +4872,36 @@ attrs.color=self.getSourceColor(superClassValue)
                     $("#lineage_actionDiv_newAxiom").css("display", "none");
                 }*/
                 $("#lineageWhiteboard_modelBtn").bind("click", function (e) {
-                    self.lineageVisjsGraph.clearGraph();
+                    var activeSource = Lineage_sources.activeSource;
+                    if (self.lineageVisjsGraph.data) {
+                        var allNodes = self.lineageVisjsGraph.data.nodes.get();
+                        var hasOtherSourceNodes = allNodes.some(function (node) {
+                            return node.data && node.data.source !== activeSource;
+                        });
+                        if (hasOtherSourceNodes) {
+                            var activeSourceNodeIds = allNodes
+                                .filter(function (node) {
+                                    return node.data && node.data.source === activeSource;
+                                })
+                                .map(function (node) {
+                                    return node.id;
+                                });
+                            var activeSourceEdgeIds = self.lineageVisjsGraph.data.edges
+                                .get()
+                                .filter(function (edge) {
+                                    return edge.data && edge.data.source === activeSource;
+                                })
+                                .map(function (edge) {
+                                    return edge.id;
+                                });
+                            self.lineageVisjsGraph.data.edges.remove(activeSourceEdgeIds);
+                            self.lineageVisjsGraph.data.nodes.remove(activeSourceNodeIds);
+                        } else {
+                            self.lineageVisjsGraph.clearGraph();
+                        }
+                    } else {
+                        self.lineageVisjsGraph.clearGraph();
+                    }
                     Lineage_whiteboard.drawModel(null, null, { all: true });
                 });
                 $("#lineageWhiteboard_modelBtn").bind("contextmenu", function (e) {

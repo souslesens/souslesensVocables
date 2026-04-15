@@ -468,6 +468,9 @@ var Lineage_similars = (function () {
     self.drawWhiteBoardSimilars = function (selectedMode, mode, output) {
         var commonNodes = [];
         var existingNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
+
+        var existingEdgesIds = Lineage_whiteboard.lineageVisjsGraph.data.edges.getIds();
+
         if (!mode) {
             mode = "exactMatch";
         }
@@ -485,6 +488,9 @@ var Lineage_similars = (function () {
             if (!node1.data && !node1.data.label) {
                 return;
             }
+            if (!node1.data.label) {
+                node1.data.label = Sparql_common.getLabelFromURI(node1.data.id);
+            }
             nodes.forEach(function (node2) {
                 if (!node2.data && !node2.data.label) {
                     return;
@@ -494,6 +500,12 @@ var Lineage_similars = (function () {
                 }
                 if (!node2.data.label) {
                     node2.data.label = Sparql_common.getLabelFromURI(node2.data.id);
+                }
+                if (!node2.data.label) {
+                    return;
+                }
+                if (!node1.data.label) {
+                    return;
                 }
                 var cleaned_label1 = node1.data.label.toLowerCase().replace(/ /g, "");
                 var cleaned_label2 = node2.data.label.toLowerCase().replace(/ /g, "");

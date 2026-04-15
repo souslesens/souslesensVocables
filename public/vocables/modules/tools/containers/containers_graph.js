@@ -5,7 +5,6 @@ import Lineage_decoration from "../lineage/lineage_decoration.js";
 
 var Containers_graph = (function () {
     var self = {};
-    self.containerNodeType = "Container";
     self.parentContainersColors = [];
     self.containerStyle = {
         shape: "square",
@@ -92,7 +91,7 @@ var Containers_graph = (function () {
                             // font: { color: self.containerStyle.color },
                             color: color,
                             data: {
-                                type: self.containerNodeType,
+                                type: "Container",
                                 source: Lineage_sources.activeSource,
                                 id: item.childParent.value,
                                 label: label,

@@ -541,7 +541,7 @@ var Lineage_whiteboard = (function () {
                         options.data = Lineage_whiteboard.lineageVisjsGraph.data.nodes
                             .get()
                             .filter(function (node) {
-                                return !node.data || node.data.type !== "Container";
+                                return node.data && node.data.source === source && node.data.type !== "Container";
                             })
                             .map(function (node) {
                                 return node.id;
@@ -4873,12 +4873,12 @@ attrs.color=self.getSourceColor(superClassValue)
                 }*/
                 $("#lineageWhiteboard_modelBtn").bind("click", function (e) {
                     var activeSource = Lineage_sources.activeSource;
-                    var hasContainersFromActiveSource =
+                    var shouldPreserveGraph =
                         self.lineageVisjsGraph.data &&
                         self.lineageVisjsGraph.data.nodes.get().some(function (node) {
-                            return node.data && node.data.type === "Container" && node.data.source === activeSource;
+                            return node.data && (node.data.source !== activeSource || node.data.type === "Container");
                         });
-                    if (!hasContainersFromActiveSource) {
+                    if (!shouldPreserveGraph) {
                         self.lineageVisjsGraph.clearGraph();
                     }
                     Lineage_whiteboard.drawModel(null, null, { all: true });

@@ -185,7 +185,7 @@ var Similars_bot = (function () {
                 });
             } else {
                 Lineage_similars.drawWhiteBoardSimilars(self.params.nodeSelection, self.params.mode, "no draw");
-                if (Lineage_similars.visjsData.nodes.length > 0) {
+                if (Lineage_similars.visjsData.edges.length > 0) {
                     self.myBotEngine.nextStep();
                 } else {
                     UI.message("No similars found");

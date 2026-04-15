@@ -203,6 +203,7 @@ var UI = (function () {
                 _sourcesHideTimeout = null;
                 var rect = $panel[0].getBoundingClientRect();
                 $popup.css({ position: "fixed", top: rect.bottom + "px", left: rect.left + "px", zIndex: 200, flexWrap: "wrap", padding: "6px" });
+                $("#lineage_r_addPanel").css("flexDirection", "column");
                 $popup.addClass("sources-popup-panel").show();
             });
             $panel.on("mouseleave.sourcesPanel", function () {
@@ -234,6 +235,7 @@ var UI = (function () {
                 $panel.off("mouseenter.sourcesPanel mouseleave.sourcesPanel");
                 $popup.off("mouseenter.sourcesPanel mouseleave.sourcesPanel");
                 $popup.css({ position: "", visibility: "", flexWrap: "", padding: "" });
+                $("#lineage_r_addPanel").css("flexDirection", "row");
             }
         }
     };

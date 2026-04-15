@@ -465,7 +465,7 @@ fixedColumns: true*/
         self.dataTable = $("#" + dataTableDivId + "Export").DataTable(params);
         //if(options.dataTabe$('')
         if (options.dataTableDivId) {
-            $("#" + options.dataTableDivId + "Export_wrapper").css({ width: "100%", height: "100%", overflow: "auto" });
+            $("#" + options.dataTableDivId + "Export_wrapper").css({ width: "100%", height: "100%" });
         }
         if (div.indexOf("DialogDiv") > -1) {
             //open the dialog after the datatable is loaded to be on center

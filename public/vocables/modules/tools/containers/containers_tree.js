@@ -128,6 +128,7 @@ var Containers_tree = (function () {
                     var canMove = $("#Lineage_unlockMoveContainer_cbx").prop("checked");
                     return canMove;
                 },
+                noScroll: true,
             };
         }
         JstreeWidget.loadJsTree(jstreeDiv, jstreeData, jstreeOptions, function () {
@@ -321,6 +322,7 @@ var Containers_tree = (function () {
                             self.currenDraggingNodeSourceParent = $("#lineage_containers_containersJstree").jstree().get_node(sourceNodeId).parent;
                         },
                     },
+                    noScroll: true,
                 };
             }
             JstreeWidget.loadJsTree(self.jstreeDivId, jstreeData, jstreeOptions, function () {

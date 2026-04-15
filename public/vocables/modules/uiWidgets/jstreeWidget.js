@@ -182,7 +182,7 @@ var JstreeWidget = (function () {
                 }
 
                 self.setTreeAppearance();
-                if (!options.doNotAdjustDimensions) {
+                if (!options.noScroll) {
                     JstreeWidget.setTreeParentDivDimensions(jstreeDiv);
                 }
                 if (self.dialogDiv) {

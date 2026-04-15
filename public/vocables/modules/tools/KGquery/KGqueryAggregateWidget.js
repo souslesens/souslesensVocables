@@ -57,10 +57,10 @@ var KGqueryAggregateWidget = (function () {
                     }
                 }
 
-                self.loadJstree(self.allProperties, "KGqueryAggregate_groupBySelect", { withCheckboxes: true, tie_selection: true,doNotAdjustDimensions: true });
+                self.loadJstree(self.allProperties, "KGqueryAggregate_groupBySelect", { withCheckboxes: true, tie_selection: true,noScroll: true });
 
                 var options = {
-                    doNotAdjustDimensions: true,
+                    noScroll: true,
                     selectTreeNodeFn: function (event, obj) {
                         var groupFnsMap = {};
                         if (self.numericVarsMap[obj.node.text]) {
@@ -68,7 +68,7 @@ var KGqueryAggregateWidget = (function () {
                         } else {
                             groupFnsMap = { COUNT: 1, concat: 1 };
                         }
-                        self.loadJstree(groupFnsMap, "KGqueryAggregate_groupFunctionSelect", { withCheckboxes: true, tie_selection: true,doNotAdjustDimensions: true });
+                        self.loadJstree(groupFnsMap, "KGqueryAggregate_groupFunctionSelect", { withCheckboxes: true, tie_selection: true,noScroll: true });
                     },
                 };
                 self.loadJstree(self.allProperties, "KGqueryAggregate_functionVariableSelect", options);

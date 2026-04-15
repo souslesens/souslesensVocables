@@ -152,16 +152,6 @@ var UI = (function () {
             self.clampAndCenterDialog(event.target);
         });
 
-        var lateralPanelEl = document.getElementById("lateralPanelDiv");
-        if (lateralPanelEl) {
-            var lateralPanelResizeTimer = null;
-            new MutationObserver(function () {
-                clearTimeout(lateralPanelResizeTimer);
-                lateralPanelResizeTimer = setTimeout(function () {
-                    self.resetWindowSize();
-                }, 100);
-            }).observe(lateralPanelEl, { childList: true, subtree: true });
-        }
 
         self.themeList();
 
@@ -207,10 +197,7 @@ var UI = (function () {
         }
 
         var baseHeight = $(window).height() - MenuBarHeight - 7;
-        var lateralPanelEl = $("#lateralPanelDiv")[0];
-        var lateralContentHeight = lateralPanelEl ? lateralPanelEl.offsetHeight : 0;
-        var graphAndCommandScreenHeight = Math.max(baseHeight, lateralContentHeight);
-        $("#graphAndCommandScreen").css("height", graphAndCommandScreenHeight);
+        $("#graphAndCommandScreen").css("height", baseHeight);
         if ($("#lateralPanelDiv").data("ui-resizable") != undefined) {
             $("#lateralPanelDiv").resizable("destroy");
             $("#lateralPanelDiv").resizable({

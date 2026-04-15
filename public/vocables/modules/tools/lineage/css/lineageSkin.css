@@ -234,11 +234,16 @@
 
     height: 10%;
 }
+#lineage-tab-buttons {
+    flex-shrink: 0;
+}
 .lineage-tabDiv {
     .slsv-tabDiv;
+    height: auto;
     width: 20% !important;
     display: flex !important;
     justify-content: center;
+    align-items: center;
     margin-bottom: 5px;
 }
 .mappingModeler-tabDiv {
@@ -258,9 +263,11 @@
 
 .KGquery-tabDiv {
     .slsv-tabDiv;
+    height: auto;
     width: 50% !important;
     display: flex !important;
     justify-content: center;
+    align-items: center;
 }
 .KGcreator-tabDiv {
     .slsv-tabDiv;

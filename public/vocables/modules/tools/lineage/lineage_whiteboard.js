@@ -540,12 +540,12 @@ var Lineage_whiteboard = (function () {
                     if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
                         options.data = Lineage_whiteboard.lineageVisjsGraph.data.nodes
                             .get()
-                            .filter(function (node) {
-                                return !node.data || node.data.type !== "Container";
-                            })
-                            .map(function (node) {
-                                return node.id;
-                            });
+                            .reduce(function (acc, node) {
+                                if (!node.data || node.data.type !== Containers_graph.containerNodeType) {
+                                    acc.push(node.id);
+                                }
+                                return acc;
+                            }, []);
                     }
                     var direction = options.inverse ? "inverse" : "direct";
                     if (options.all) {
@@ -4873,11 +4873,10 @@ attrs.color=self.getSourceColor(superClassValue)
                 }*/
                 $("#lineageWhiteboard_modelBtn").bind("click", function (e) {
                     var activeSource = Lineage_sources.activeSource;
-                    var hasContainersFromActiveSource =
-                        self.lineageVisjsGraph.isGraphNotEmpty() &&
-                        self.lineageVisjsGraph.data.nodes.get().some(function (node) {
-                            return node.data && node.data.type === "Container" && node.data.source === activeSource;
-                        });
+                    var graphNodes = self.lineageVisjsGraph.data.nodes.get();
+                    var hasContainersFromActiveSource = graphNodes.some(function (node) {
+                        return node.data && node.data.type === Containers_graph.containerNodeType && node.data.source === activeSource;
+                    });
                     if (!hasContainersFromActiveSource) {
                         self.lineageVisjsGraph.clearGraph();
                     }

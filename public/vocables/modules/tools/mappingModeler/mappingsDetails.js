@@ -329,6 +329,7 @@ var MappingsDetails = (function () {
 
                 return items;
             },
+            noScroll: true,
         };
 
         for (var key in _options) {

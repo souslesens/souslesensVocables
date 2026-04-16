@@ -178,7 +178,7 @@ export default function () {
 
     POST.apiDoc = {
         summary: "Access to Graph Store",
-        security: [{ restrictLoggedUser: [] }],
+        security: [{ restrictLoggedUser: [], restrictQuota: [] }],
         operationId: "GraphStore",
         parameters: [
             {

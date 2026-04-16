@@ -147,7 +147,7 @@ export default function () {
     }
 
     GET.apiDoc = {
-        security: [{ restrictLoggedUser: [] }],
+        security: [{ restrictLoggedUser: [], restrictQuota: [] }],
         summary: "Query Jowl server",
         description: "Query Jowl server",
         operationId: "Query Jowl server",

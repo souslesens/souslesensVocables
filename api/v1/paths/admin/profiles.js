@@ -1,4 +1,5 @@
 import { profileModel } from "../../../../model/profiles.js";
+import { quotaModel } from "../../../../model/quota.js";
 import { resourceFetched, responseSchema, resourceCreated } from "../utils.js";
 import userManager from "../../../../bin/user.js";
 
@@ -34,6 +35,7 @@ export default function () {
                     await profileModel.addProfile(profile);
                 }),
             );
+            quotaModel.clearConfigCache();
             const profiles = await profileModel.getAllProfiles();
             resourceCreated(res, profiles);
         } catch (error) {

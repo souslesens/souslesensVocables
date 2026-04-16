@@ -1,4 +1,5 @@
 import { profileModel } from "../../../../../model/profiles.js";
+import { quotaModel } from "../../../../../model/quota.js";
 import userManager from "../../../../../bin/user.js";
 
 export default function () {
@@ -30,6 +31,7 @@ export default function () {
                 res.status(500).json({ message: `I couldn't delete resource ${profileIdToDelete}. Maybe it has been deleted already?` });
                 return;
             }
+            quotaModel.clearConfigCache();
             const profiles = await profileModel.getAllProfiles();
             res.status(200).json({ message: `${profileIdToDelete} successfully deleted`, resources: profiles });
         } catch (err) {
@@ -50,6 +52,7 @@ export default function () {
                 res.status(400).json({ message: "Resource does not exist. If you want to create another reprofile, use POST instead." });
                 return;
             }
+            quotaModel.clearConfigCache();
             const profiles = await profileModel.getAllProfiles();
             res.status(200).json({ message: `${profileIdToUpdate} successfully updated`, reprofiles: profiles });
         } catch (err) {

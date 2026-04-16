@@ -19,6 +19,7 @@ import userManager from "./bin/user.js";
 import "./bin/authentication.js";
 import { checkMainConfig, readMainConfig } from "./model/config.js";
 import util from "./bin/util.js";
+import { register, httpRequestDuration, httpRequestsTotal } from "./bin/metrics.js";
 
 const app = express();
 import * as Sentry from "@sentry/node";
@@ -26,15 +27,16 @@ import { userModel } from "./model/users.js";
 import { profileModel } from "./model/profiles.js";
 import { sourceModel } from "./model/sources.js";
 import { rdfDataModel } from "./model/rdfData.js";
+import { quotaModel } from "./model/quota.js";
 import apiDoc from "./api/v1/api-doc.js";
 import session from "express-session";
 
 const config = readMainConfig();
-const isValid = checkMainConfig(config);
-
-if (!isValid) {
-    process.exit(1);
-}
+checkMainConfig(config).then((isValid) => {
+    if (!isValid) {
+        process.exit(1);
+    }
+});
 
 // sentry/glitchtip
 if (config.sentryDsnNode) {
@@ -158,11 +160,114 @@ app.set("view engine", "pug");
 httpProxy.app = app;
 
 // API
+app.use("/api/v1", (req, res, next) => {
+    const startTime = Date.now();
+
+    res.on("finish", () => {
+        // Normalize the route: remove the trailing / (except for /)
+        const rawRoute = req.baseUrl + req.path;
+        const route = util.normalizeRoute(rawRoute);
+
+        // Filter out irrelevant routes (static assets, documentation, etc.)
+        if (!util.shouldTrackRoute(route)) {
+            return;
+        }
+
+        const duration = (Date.now() - startTime) / 1000;
+        const authenticated = req.user?.login ? "true" : "false";
+
+        const labels = {
+            method: req.method,
+            route: route,
+            status: res.statusCode,
+            authenticated,
+        };
+
+        httpRequestDuration.observe(labels, duration);
+        httpRequestsTotal.inc(labels);
+    });
+
+    next();
+});
+
+// Prometheus endpoint (controlled by metrics.enabled)
+app.get("/metrics", async (req, res) => {
+    // If metrics.enabled is false, disable the route
+    if (!config.metrics?.enabled) {
+        return res.status(404).send("Metrics endpoint disabled");
+    }
+
+    // Check if authentication is enabled
+    if (config.metrics.auth?.enabled) {
+        const auth = req.headers.authorization;
+        const expectedAuth = Buffer.from(`${config.metrics.auth.username}:${config.metrics.auth.password}`).toString("base64");
+
+        if (!auth || auth !== `Basic ${expectedAuth}`) {
+            res.set("WWW-Authenticate", "Basic realm='Prometheus Metrics'");
+            return res.status(401).send("Unauthorized");
+        }
+    }
+
+    res.set("Content-Type", register.contentType);
+    res.end(await register.metrics());
+});
+
 openapi.initialize({
     apiDoc: apiDoc,
     app: app,
     paths: "./api/v1/paths",
     securityHandlers: {
+        restrictQuota: async function (req, scope, definition) {
+            if (config.auth != "disabled") {
+                const token = req.headers.authorization;
+                if (token !== undefined) {
+                    const output = util.parseAuthorizationFromHeader(token);
+
+                    // Only accept the Bearer scheme from the Authorization header
+                    if (output !== null && output[0] === "Bearer") {
+                        const user = await userModel.findUserAccountFromToken(output[1]);
+                        if (user) {
+                            req.user = user[1];
+                        }
+                    }
+                }
+
+                const user = await userManager.getUser(req.user);
+                const route = req.baseUrl + req.path;
+                const method = req.method;
+
+                try {
+                    const { maxQuota: profileQuota, profile: profileName, wholeProfile } = await profileModel.getMaxQuotaForRoute(route, method, user.user);
+
+                    const consumeResult = await quotaModel.tryConsume(route, method, user.user, wholeProfile, profileName, profileQuota);
+
+                    if (!consumeResult.consumed) {
+                        throw {
+                            status: 429,
+                            message: `Too many requests, you exceeded your profile quota (${profileQuota} for route ${route} ${method})`,
+                        };
+                    }
+
+                    if (config.generalQuota?.[route]?.[method]) {
+                        const generalQuota = config.generalQuota[route][method];
+                        const generalResult = await quotaModel.tryConsume(route, method, user.user, false, null, generalQuota);
+
+                        if (!generalResult.consumed) {
+                            throw {
+                                status: 429,
+                                message: `Too many requests, the general quota has been exceeded (${generalQuota} for route ${route} ${method})`,
+                            };
+                        }
+                    }
+                } catch (error) {
+                    if (error.status === 429) {
+                        throw error;
+                    }
+                    console.error(`Quota error for ${route} ${method}:`, error);
+                }
+            }
+            return Promise.resolve(true);
+        },
         restrictLoggedUser: async function (req, _scopes, _definition) {
             if (config.auth != "disabled") {
                 const token = req.headers.authorization;

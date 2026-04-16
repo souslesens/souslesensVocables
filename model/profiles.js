@@ -5,6 +5,7 @@ import { toolModel } from "./tools.js";
 import { cleanupConnection, getKnexConnection } from "./utils.js";
 import { userDataModel } from "./userData.js";
 import { userModel } from "./users.js";
+import { quotaModel } from "./quota.js";
 
 /**
  * @typedef {import("./UserTypes").UserAccount} UserAccount
@@ -21,6 +22,7 @@ const ProfileObject = z
         allowedTools: z.string().array().optional(),
         allowedDatabases: z.string().array().optional(),
         isShared: z.boolean().default(true),
+        quota: z.record(z.string(), z.record(z.string(), z.union([z.number(), z.object({ quota: z.number(), wholeProfileQuota: z.boolean() })]))).optional(),
         _type: z.string().default("profile"),
     })
     .strict();
@@ -33,6 +35,8 @@ class ProfileModel {
     constructor(toolModel) {
         this._toolModel = toolModel;
         this._mainConfig = readMainConfig();
+        this._quotaCache = { data: null, expiresAt: 0 };
+        this._quotaCacheTTL = 65000;
     }
 
     /**
@@ -62,6 +66,7 @@ class ProfileModel {
         allowed_databases: profile.allowedDatabases || [],
         is_shared: profile.isShared !== undefined ? profile.isShared : true,
         access_control: JSON.stringify(profile.sourcesAccessControl || {}),
+        quota: profile.quota ? JSON.stringify(profile.quota) : null,
         schema_types: profile.allowedSourceSchemas || [],
     });
 
@@ -85,6 +90,7 @@ class ProfileModel {
             allowedDatabases: typeof profile.allowed_databases === "string" ? JSON.parse(profile.allowed_databases) : profile.allowed_databases === null ? [] : profile.allowed_databases,
             isShared: typeof profile.is_shared === "number" ? profile.is_shared === 1 : profile.is_shared,
             sourcesAccessControl: typeof profile.access_control === "string" ? JSON.parse(profile.access_control) : profile.access_control,
+            quota: typeof profile.quota === "string" ? JSON.parse(profile.quota) : profile.quota || {},
         },
     ];
 
@@ -108,11 +114,34 @@ class ProfileModel {
                 allowedDatabases: [],
                 isShared: true,
                 sourcesAccessControl: {},
+                quota: {},
                 defaultSourceAccessControl: "readwrite",
             };
         }
 
         return profiles;
+    };
+
+    /**
+     * @returns {Promise<Record<string, object>>} a collection of quotas for each profile
+     */
+    _getAllQuotas = async () => {
+        if (Date.now() < this._quotaCache.expiresAt) {
+            return this._quotaCache.data;
+        }
+
+        const conn = getKnexConnection(this._mainConfig.database);
+        const results = await conn.select("label", "quota").from("profiles");
+        cleanupConnection(conn);
+
+        const quotas = Object.fromEntries(results.map((r) => [r.label, r.quota && typeof r.quota === "string" ? JSON.parse(r.quota) : r.quota || {}]));
+
+        this._quotaCache = { data: quotas, expiresAt: Date.now() + this._quotaCacheTTL };
+        return quotas;
+    };
+
+    _clearQuotaCache = () => {
+        this._quotaCache = { data: null, expiresAt: 0 };
     };
 
     /**
@@ -195,6 +224,10 @@ class ProfileModel {
         // using select here allows mocking in tests
         await conn.select("*").from("profiles").where("label", profileNameId).del();
         cleanupConnection(conn);
+
+        quotaModel.clearConfigCache();
+        this._clearQuotaCache();
+
         return true;
     };
 
@@ -214,6 +247,10 @@ class ProfileModel {
 
         await conn.update(this._convertToDatabase(data)).into("profiles").where("label", data.name);
         cleanupConnection(conn);
+
+        quotaModel.clearConfigCache();
+        this._clearQuotaCache();
+
         return true;
     };
 
@@ -233,6 +270,8 @@ class ProfileModel {
         const idx = await conn.insert(this._convertToDatabase(data)).into("profiles");
         cleanupConnection(conn);
 
+        this._clearQuotaCache();
+
         return idx[0];
     };
 
@@ -249,6 +288,51 @@ class ProfileModel {
         }
 
         return results.theme;
+    };
+
+    /**
+     * Return the highest quota for a given route among all profiles of a user.
+     * @param {string} route - API route (e.g., "/api/v1/une/route")
+     * @param {UserAccount} user - the user whose profiles are inspected
+     * @returns {Promise<number|undefined>} - maximum quota value or undefined if none
+     */
+    /**
+     * Return the highest quota for a given route and method among all profiles of a user.
+     * @param {string} route - API route (e.g., "/api/v1/une/route")
+     * @param {string} method - HTTP method (e.g., "GET", "POST")
+     * @param {UserAccount} user - the user whose profiles are inspected
+     * @returns {Promise<{ maxQuota: number|undefined, profile: string|null, wholeProfile: boolean }>} - maximum quota value, profile name and wholeProfile flag
+     */
+    getMaxQuotaForRoute = async (route, method, user) => {
+        const userProfiles = await this.getUserProfiles(user);
+        const allQuotas = await this._getAllQuotas();
+        let maxQuota;
+        let profileWithMaxQuota = null;
+        let wholeProfileQuota = false;
+
+        for (const [profileName, _profile] of Object.entries(userProfiles)) {
+            const profileQuota = allQuotas[profileName] || {};
+
+            if (profileQuota && profileQuota[route] && profileQuota[route][method]) {
+                const limit = profileQuota[route][method];
+                let quotaValue;
+                let wholeProfile = false;
+                if (typeof limit === "number") {
+                    quotaValue = limit;
+                } else if (typeof limit === "object" && limit !== null && "quota" in limit) {
+                    quotaValue = limit.quota;
+                    wholeProfile = limit.wholeProfileQuota || false;
+                } else {
+                    continue;
+                }
+                if (maxQuota === undefined || quotaValue > maxQuota) {
+                    maxQuota = quotaValue;
+                    profileWithMaxQuota = profileName;
+                    wholeProfileQuota = wholeProfile;
+                }
+            }
+        }
+        return { maxQuota, profile: profileWithMaxQuota, wholeProfile: wholeProfileQuota };
     };
 }
 

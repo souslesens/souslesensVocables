@@ -9,6 +9,7 @@ const ConfigSchema = z.object({
         selector: z.boolean(),
     }),
     sparqlDownloadLimit: z.number().positive(),
+    generalQuota: z.record(z.record(z.number().positive())).optional().default({}),
 });
 
 export type ConfigType = z.infer<typeof ConfigSchema>;

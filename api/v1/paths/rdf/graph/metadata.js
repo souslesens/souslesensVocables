@@ -49,7 +49,7 @@ export default function () {
     }
 
     POST.apiDoc = {
-        security: [{ restrictLoggedUser: [] }],
+        security: [{ restrictLoggedUser: [], restrictQuota: [] }],
         summary: "POST RDF graph metadata",
         operationId: "post-rdf-graph-metadata",
         parameters: [
@@ -94,7 +94,7 @@ export default function () {
         tags: ["RDF"],
     };
     GET.apiDoc = {
-        security: [{ restrictLoggedUser: [] }],
+        security: [{ restrictLoggedUser: [], restrictQuota: [] }],
         summary: "Get a RDF graph metadata",
         operationId: "RDF get graph metadata",
         parameters: [

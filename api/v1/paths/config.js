@@ -23,6 +23,7 @@ export default function () {
             slsPyApi: config.slsPyApi,
             theme: config.theme,
             sparqlDownloadLimit: config.sparqlDownloadLimit,
+            generalQuota: config.generalQuota || {},
         };
 
         res.status(200).json(result);
@@ -48,10 +49,10 @@ export default function () {
 
     async function PUT(req, res, next) {
         try {
-            const { defaultGroups, tools_available, theme } = req.body;
+            const { defaultGroups, tools_available, theme, generalQuota } = req.body;
             const initialConfig = await mainConfigModel.getConfig();
-            await mainConfigModel.writeConfig({ ...initialConfig, defaultGroups, tools_available, theme });
-            const newConfig = await mainConfigModel.getConfig({ ...initialConfig, defaultGroups, tools_available, theme });
+            await mainConfigModel.writeConfig({ ...initialConfig, defaultGroups, tools_available, theme, generalQuota: generalQuota || {} });
+            const newConfig = await mainConfigModel.getConfig({ ...initialConfig, defaultGroups, tools_available, theme, generalQuota: generalQuota || {} });
             res.status(200).json(newConfig);
         } catch (error) {
             res.status(error.status || 500).json(error);

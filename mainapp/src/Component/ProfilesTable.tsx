@@ -1,4 +1,4 @@
-import { useState, useMemo, useReducer, ChangeEvent, SyntheticEvent, forwardRef, Ref, Dispatch, MouseEventHandler, useRef } from "react";
+import { useState, useMemo, useReducer, ChangeEvent, SyntheticEvent, forwardRef, Ref, Dispatch, MouseEventHandler, useRef, useEffect } from "react";
 import {
     Alert,
     Snackbar,
@@ -32,13 +32,13 @@ import {
     styled,
 } from "@mui/material";
 
-import { ChevronRight, Close, Done, Edit, ExpandMore } from "@mui/icons-material";
+import { ChevronRight, Close, Done, Edit, ExpandMore, Delete as DeleteIcon } from "@mui/icons-material";
 import { TreeView, TreeItem, TreeItemProps, TreeItemContentProps, useTreeItem } from "@mui/x-tree-view";
 
 import clsx from "clsx";
 import CsvDownloader from "react-csv-downloader";
 import { useZorm, createCustomIssues } from "react-zorm";
-import { ZodIssue } from "zod";
+import { ZodIssue, z } from "zod";
 
 import { Msg, useModel } from "../Admin";
 import { SRD, success } from "srd";
@@ -49,7 +49,13 @@ import { identity, style, joinWhenArray, cleanUpText, jsonToDownloadUrl } from "
 import { ulid } from "ulid";
 import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
 import { errorMessage } from "./errorMessage";
-import { Datas } from "react-csv-downloader/dist/esm/lib/csv";
+import { HelpTooltip } from "./HelpModal";
+
+type RouteInfo = {
+    route: string;
+    methods: string[];
+    quotas: string[];
+};
 
 const ProfilesTable = () => {
     const { model, updateModel } = useModel();
@@ -182,8 +188,8 @@ const ProfilesTable = () => {
                             }
                             return [key, value];
                         }),
-                    );
-                    return { ...dataWithoutCarriageReturns };
+                    ) as Record<string, string>;
+                    return dataWithoutCarriageReturns;
                 });
                 const sortedProfiles: Profile[] = gotProfiles.slice().sort((a: Profile, b: Profile) => {
                     let left = "";
@@ -288,7 +294,7 @@ const ProfilesTable = () => {
                             </Table>
                         </TableContainer>
                         <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
-                            <CsvDownloader separator="&#9;" filename="profiles" extension=".tsv" datas={datas as Datas}>
+                            <CsvDownloader separator="&#9;" filename="profiles" extension=".tsv" datas={datas}>
                                 <Button variant="outlined">Download CSV</Button>
                             </CsvDownloader>
                             <Button
@@ -395,6 +401,7 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
     const [issues, setIssues] = useState<ZodIssue[]>([]);
     const [filter, setFilter] = useState<string>("");
     const allDatabases = useDatabases();
+    const [routesInfo, setRoutesInfo] = useState<RouteInfo[]>([]);
     const sources = useMemo(() => {
         return unwrappedSources;
     }, [unwrappedSources]);
@@ -411,10 +418,27 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
                 selector: false,
             },
             sparqlDownloadLimit: 10000,
+            generalQuota: {},
         },
         model.config,
     );
     const [profileModel, update] = useReducer(updateProfile, { modal: false, profileForm: profile });
+    const [quota, setQuota] = useState<Array<{ route: string; method: string; limit: string; wholeProfileQuota: boolean }>>(
+        profile.quota
+            ? Object.entries(profile.quota).flatMap(([route, methods]) =>
+                  Object.entries(methods as Record<string, { quota?: number; wholeProfileQuota?: boolean } | number>).map(([method, value]) => {
+                      const limit = typeof value === "number" ? value : value.quota || 0;
+                      const wholeProfileQuota = typeof value === "object" && value !== null ? value.wholeProfileQuota || false : false;
+                      return {
+                          route,
+                          method,
+                          limit: String(limit),
+                          wholeProfileQuota,
+                      };
+                  }),
+              )
+            : [{ route: "", method: "", limit: "", wholeProfileQuota: false }],
+    );
 
     const handleOpen = () => update({ type: Type.UserClickedModal, payload: { modal: true, profileForm: profile } });
     const handleClose = () => {
@@ -437,6 +461,28 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
         setNodeToExpand(nodeIds);
         setManualExpand(true);
     };
+
+    useEffect(() => {
+        fetch("/api/v1/routesinfo")
+            .then((res) => res.json())
+            .then((data: RouteInfo[]) => setRoutesInfo(data))
+            .catch((err) => console.error(err));
+    }, []);
+
+    useEffect(() => {
+        const newIssues: ZodIssue[] = [];
+        quota.forEach((q, idx) => {
+            if (q.route && !q.method) {
+                newIssues.push({
+                    code: z.ZodIssueCode.custom,
+                    message: "Method is required when route is selected",
+                    path: ["quota", idx, "method"],
+                });
+            }
+        });
+        setIssues(newIssues);
+    }, [quota]);
+
     const profilesSchema = create ? ProfileSchemaCreate : ProfileSchema;
     const zo = useZorm("form", profilesSchema, { setupListeners: false, customIssues: issues });
     const handleSourceAccessControlUpdate = (src: SourceTreeNode) => (event: SelectChangeEvent) => {
@@ -504,6 +550,28 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
         };
     }
     const saveProfiles = () => {
+        // Convert quota array (route/limit) into the object format expected by the backend
+        const quotaObj = quota.reduce(
+            (acc, cur) => {
+                if (cur.route.trim() && cur.method && cur.limit) {
+                    if (!acc[cur.route]) {
+                        acc[cur.route] = {};
+                    }
+                    acc[cur.route][cur.method] = {
+                        quota: Number(cur.limit) || 0,
+                        wholeProfileQuota: cur.wholeProfileQuota,
+                    };
+                }
+                return acc;
+            },
+            {} as Record<string, Record<string, { quota: number; wholeProfileQuota: boolean }>>,
+        );
+        // Attach quota to the profile being saved
+        const simplifiedQuotaObj = Object.fromEntries(
+            Object.entries(quotaObj).map(([route, methods]) => [route, Object.fromEntries(Object.entries(methods).map(([method, { quota }]) => [method, quota]))]),
+        );
+        profileModel.profileForm.quota = simplifiedQuotaObj;
+
         void saveProfile(profileModel.profileForm, create ? Mode.Creation : Mode.Edition, updateModel, update);
         const mode = create ? "create" : "edit";
         void writeLog(me, "ConfigEditor", mode, profileModel.profileForm.name);
@@ -794,6 +862,108 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
                                 </MenuItem>
                             ))}
                         </TextField>
+                        {/* Quota editor */}
+                        <FormControl sx={{ mt: 2 }}>
+                            <Box>
+                                <Box display="flex" alignItems="center" gap={1}>
+                                    <Typography variant="subtitle1" gutterBottom>
+                                        API Rate Limits
+                                    </Typography>
+                                    <HelpTooltip title="Set the maximum number of requests allowed per minute for each API route. Whole Profile applies the limit to the total of all routes combined. Otherwise, each route has its own separate limit." />
+                                </Box>
+                                {quota.map((q, idx) => {
+                                    const selectedRouteInfo = routesInfo.find((r) => r.route === q.route);
+                                    const methodsAvailable = selectedRouteInfo?.methods || [];
+
+                                    return (
+                                        <Grid container spacing={1} alignItems="center" key={idx} sx={{ mb: 1 }}>
+                                            <Grid item xs={4}>
+                                                <Select
+                                                    fullWidth
+                                                    value={q.route}
+                                                    onChange={(e) => {
+                                                        const newQuota = [...quota];
+                                                        newQuota[idx].route = e.target.value;
+                                                        const newRouteInfo = routesInfo.find((r) => r.route === e.target.value);
+                                                        newQuota[idx].method = newRouteInfo?.methods[0] || "";
+                                                        setQuota(newQuota);
+                                                    }}
+                                                >
+                                                    {routesInfo
+                                                        .filter((routeInfo) => routeInfo.quotas.length > 0)
+                                                        .map((routeInfo) => (
+                                                            <MenuItem key={routeInfo.route} value={routeInfo.route}>
+                                                                {routeInfo.route}
+                                                            </MenuItem>
+                                                        ))}
+                                                </Select>
+                                            </Grid>
+                                            <Grid item xs={3}>
+                                                <Select
+                                                    fullWidth
+                                                    value={q.method || ""}
+                                                    disabled={!q.route}
+                                                    onChange={(e) => {
+                                                        const newQuota = [...quota];
+                                                        newQuota[idx].method = e.target.value;
+                                                        setQuota(newQuota);
+                                                    }}
+                                                >
+                                                    {methodsAvailable.map((method) => (
+                                                        <MenuItem key={method} value={method}>
+                                                            {method}
+                                                        </MenuItem>
+                                                    ))}
+                                                </Select>
+                                            </Grid>
+                                            <Grid item xs={3}>
+                                                <TextField
+                                                    fullWidth
+                                                    type="number"
+                                                    label="Limit"
+                                                    value={q.limit}
+                                                    onChange={(e) => {
+                                                        const newQuota = [...quota];
+                                                        newQuota[idx].limit = e.target.value;
+                                                        setQuota(newQuota);
+                                                    }}
+                                                    InputProps={{ inputProps: { min: 0 } }}
+                                                />
+                                            </Grid>
+                                            <Grid item xs={2}>
+                                                <FormControlLabel
+                                                    control={
+                                                        <Checkbox
+                                                            checked={q.wholeProfileQuota}
+                                                            onChange={(e) => {
+                                                                const newQuota = [...quota];
+                                                                newQuota[idx].wholeProfileQuota = e.target.checked;
+                                                                setQuota(newQuota);
+                                                            }}
+                                                        />
+                                                    }
+                                                    label="Whole Profile"
+                                                />
+                                            </Grid>
+                                            <Grid item xs={1}>
+                                                <IconButton
+                                                    aria-label="delete quota entry"
+                                                    onClick={() => {
+                                                        const newQuota = quota.filter((_v, i) => i !== idx);
+                                                        setQuota(newQuota.length ? newQuota : [{ route: "", method: "", limit: "", wholeProfileQuota: false }]);
+                                                    }}
+                                                >
+                                                    <DeleteIcon />
+                                                </IconButton>
+                                            </Grid>
+                                        </Grid>
+                                    );
+                                })}
+                                <Button variant="outlined" onClick={() => setQuota([...quota, { route: "", method: "", limit: "", wholeProfileQuota: false }])}>
+                                    Add quota
+                                </Button>
+                            </Box>
+                        </FormControl>
                         <Button disabled={zo.validation?.success === false || zo.customIssues.length > 0} type="submit" variant="contained" color="primary">
                             Save Profile
                         </Button>

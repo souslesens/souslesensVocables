@@ -184,6 +184,15 @@ var UI = (function () {
 
         var $panel = $("#index_topContolPanel");
         var $popup = $("#lineage_sourcesPopup");
+        var ctxMenuDiv = document.getElementById("popupMenuWidgetDiv");
+
+        var disconnectCtxObserver = function () {
+            var obs = $popup.data("ctxObserver");
+            if (obs) {
+                obs.disconnect();
+                $popup.removeData("ctxObserver");
+            }
+        };
 
         if (!_sourcesPanelCompact) {
             if (sourcesBar.scrollWidth <= sourcesBar.clientWidth) {
@@ -198,14 +207,6 @@ var UI = (function () {
             var cancelHide = function () {
                 clearTimeout(_sourcesHideTimeout);
                 _sourcesHideTimeout = null;
-            };
-            var ctxMenuDiv = document.getElementById("popupMenuWidgetDiv");
-            var disconnectCtxObserver = function () {
-                var obs = $popup.data("ctxObserver");
-                if (obs) {
-                    obs.disconnect();
-                    $popup.removeData("ctxObserver");
-                }
             };
 
             var scheduleHide = function () {

@@ -5,6 +5,7 @@ import { toolModel } from "./tools.js";
 import { cleanupConnection, getKnexConnection } from "./utils.js";
 import { userDataModel } from "./userData.js";
 import { userModel } from "./users.js";
+import { quotaModel } from "./quota.js";
 
 /**
  * @typedef {import("./UserTypes").UserAccount} UserAccount

@@ -160,9 +160,7 @@ var Predicates_bot = (function () {
      * @param {Function} callback - callback(err, jstreeNodes, parentNodeIds)
      */
     function buildPropertyJstreeData(callback) {
-        var nodes = [
-            { id: "__src__usual", text: "usual", parent: "#", data: { id: "__src__usual" } },
-        ];
+        var nodes = [{ id: "__src__usual", text: "usual", parent: "#", data: { id: "__src__usual" } }];
         var parentNodeIds = ["__src__usual"];
         var recents = loadRecents();
         if (recents.length > 0) {
@@ -176,7 +174,9 @@ var Predicates_bot = (function () {
         var seen = {};
 
         PredicatesSelectorWidget.usualProperties
-            .filter(function (p) { return p !== ""; })
+            .filter(function (p) {
+                return p !== "";
+            })
             .forEach(function (p) {
                 if (!seen[p]) {
                     seen[p] = true;
@@ -190,33 +190,37 @@ var Predicates_bot = (function () {
             parentNodeIds.push("__src__" + vocab);
         });
 
-        async.eachSeries(vocabs, function (vocab, callbackEach) {
-            OntologyModels.registerSourcesModel([vocab], null, function (err) {
-                if (err) {
-                    return callbackEach();
-                }
-                var model = Config.ontologiesVocabularyModels[vocab];
-                if (model) {
-                    for (var key in model.properties) {
-                        var p = model.properties[key];
-                        if (!seen[p.id]) {
-                            seen[p.id] = true;
-                            nodes.push({ id: p.id, text: p.label || p.id, parent: "__src__" + vocab, data: { id: p.id, isObjectProperty: true } });
+        async.eachSeries(
+            vocabs,
+            function (vocab, callbackEach) {
+                OntologyModels.registerSourcesModel([vocab], null, function (err) {
+                    if (err) {
+                        return callbackEach();
+                    }
+                    var model = Config.ontologiesVocabularyModels[vocab];
+                    if (model) {
+                        for (var key in model.properties) {
+                            var p = model.properties[key];
+                            if (!seen[p.id]) {
+                                seen[p.id] = true;
+                                nodes.push({ id: p.id, text: p.label || p.id, parent: "__src__" + vocab, data: { id: p.id, isObjectProperty: true } });
+                            }
+                        }
+                        for (var key2 in model.nonObjectProperties) {
+                            var p2 = model.nonObjectProperties[key2];
+                            if (!seen[p2.id]) {
+                                seen[p2.id] = true;
+                                nodes.push({ id: p2.id, text: p2.label || p2.id, parent: "__src__" + vocab, data: { id: p2.id, isObjectProperty: false } });
+                            }
                         }
                     }
-                    for (var key2 in model.nonObjectProperties) {
-                        var p2 = model.nonObjectProperties[key2];
-                        if (!seen[p2.id]) {
-                            seen[p2.id] = true;
-                            nodes.push({ id: p2.id, text: p2.label || p2.id, parent: "__src__" + vocab, data: { id: p2.id, isObjectProperty: false } });
-                        }
-                    }
-                }
-                callbackEach();
-            });
-        }, function () {
-            callback(null, nodes, parentNodeIds);
-        });
+                    callbackEach();
+                });
+            },
+            function () {
+                callback(null, nodes, parentNodeIds);
+            },
+        );
     }
 
     /**
@@ -234,7 +238,9 @@ var Predicates_bot = (function () {
         var seen = {};
 
         PredicatesSelectorWidget.usualObjectClasses
-            .filter(function (o) { return o !== ""; })
+            .filter(function (o) {
+                return o !== "";
+            })
             .forEach(function (o) {
                 if (!seen[o]) {
                     seen[o] = true;
@@ -248,26 +254,30 @@ var Predicates_bot = (function () {
             parentNodeIds.push("__src__" + vocab);
         });
 
-        async.eachSeries(vocabs, function (vocab, callbackEach) {
-            OntologyModels.registerSourcesModel([vocab], null, function (err) {
-                if (err) {
-                    return callbackEach();
-                }
-                var model = Config.ontologiesVocabularyModels[vocab];
-                if (model) {
-                    for (var classId in model.classes) {
-                        var c = model.classes[classId];
-                        if (c && c.id && c.id.indexOf("http") === 0 && !seen[c.id]) {
-                            seen[c.id] = true;
-                            nodes.push({ id: c.id, text: c.label || c.id, parent: "__src__" + vocab, data: { id: c.id } });
+        async.eachSeries(
+            vocabs,
+            function (vocab, callbackEach) {
+                OntologyModels.registerSourcesModel([vocab], null, function (err) {
+                    if (err) {
+                        return callbackEach();
+                    }
+                    var model = Config.ontologiesVocabularyModels[vocab];
+                    if (model) {
+                        for (var classId in model.classes) {
+                            var c = model.classes[classId];
+                            if (c && c.id && c.id.indexOf("http") === 0 && !seen[c.id]) {
+                                seen[c.id] = true;
+                                nodes.push({ id: c.id, text: c.label || c.id, parent: "__src__" + vocab, data: { id: c.id } });
+                            }
                         }
                     }
-                }
-                callbackEach();
-            });
-        }, function () {
-            callback(null, nodes, parentNodeIds);
-        });
+                    callbackEach();
+                });
+            },
+            function () {
+                callback(null, nodes, parentNodeIds);
+            },
+        );
     }
 
     self.functions = {
@@ -282,27 +292,19 @@ var Predicates_bot = (function () {
                 if (err) {
                     return MainController.errorAlert(err);
                 }
-                self.myBotEngine.showTree(
-                    jstreeData,
-                    null,
-                    { withCheckboxes: false, openAll: false, parentNodeIds: parentNodeIds },
-                    null,
-                    function (selectedId, node) {
-                        if (node && node.data && node.data.recentProperty) {
-                            self.params.selectedProperty = node.data.recentProperty;
-                            self.params.selectedObject = node.data.recentObject;
-                            self.params.isObjectProperty = null;
-                            self.params.skipObject = true;
-                        } else {
-                            self.params.selectedProperty = selectedId;
-                            self.params.isObjectProperty = (node && node.data && node.data.isObjectProperty !== undefined)
-                                ? node.data.isObjectProperty
-                                : null;
-                            self.params.skipObject = false;
-                        }
-                        self.myBotEngine.nextStep();
+                self.myBotEngine.showTree(jstreeData, null, { withCheckboxes: false, openAll: false, parentNodeIds: parentNodeIds }, null, function (selectedId, node) {
+                    if (node && node.data && node.data.recentProperty) {
+                        self.params.selectedProperty = node.data.recentProperty;
+                        self.params.selectedObject = node.data.recentObject;
+                        self.params.isObjectProperty = null;
+                        self.params.skipObject = true;
+                    } else {
+                        self.params.selectedProperty = selectedId;
+                        self.params.isObjectProperty = node && node.data && node.data.isObjectProperty !== undefined ? node.data.isObjectProperty : null;
+                        self.params.skipObject = false;
                     }
-                );
+                    self.myBotEngine.nextStep();
+                });
             });
         },
 
@@ -346,28 +348,22 @@ var Predicates_bot = (function () {
                 if (err) {
                     return MainController.errorAlert(err);
                 }
-                self.myBotEngine.showTree(
-                    jstreeData,
-                    null,
-                    { withCheckboxes: false, openAll: false, parentNodeIds: parentNodeIds },
-                    null,
-                    function (selectedId) {
-                        if (selectedId === "__enter_uri__") {
-                            self.myBotEngine.promptValue("enter URI", "selectedObject", "", null, function (value) {
-                                if (!value) {
-                                    return self.myBotEngine.previousStep();
-                                }
-                                self.params.selectedObject = sanitizeUri(value);
-                                self.params.enteredUri = true;
-                                self.myBotEngine.nextStep();
-                            });
-                            return;
-                        }
-                        self.params.enteredUri = false;
-                        self.params.selectedObject = selectedId;
-                        self.myBotEngine.nextStep();
+                self.myBotEngine.showTree(jstreeData, null, { withCheckboxes: false, openAll: false, parentNodeIds: parentNodeIds }, null, function (selectedId) {
+                    if (selectedId === "__enter_uri__") {
+                        self.myBotEngine.promptValue("enter URI", "selectedObject", "", null, function (value) {
+                            if (!value) {
+                                return self.myBotEngine.previousStep();
+                            }
+                            self.params.selectedObject = sanitizeUri(value);
+                            self.params.enteredUri = true;
+                            self.myBotEngine.nextStep();
+                        });
+                        return;
                     }
-                );
+                    self.params.enteredUri = false;
+                    self.params.selectedObject = selectedId;
+                    self.myBotEngine.nextStep();
+                });
             });
         },
 
@@ -402,21 +398,13 @@ var Predicates_bot = (function () {
 
                 if (self.params.editItem) {
                     var oldObject = self.params.editItem.object;
-                    var oldObjectArg = self.params.editItem.objectType === "literal"
-                        ? { isString: true, value: oldObject }
-                        : oldObject;
-                    Sparql_generic.deleteTriples(
-                        self.params.source,
-                        NodeInfosWidget.currentNodeId,
-                        self.params.editItem.property,
-                        oldObjectArg,
-                        function (err) {
-                            if (err) {
-                                return MainController.errorAlert(err);
-                            }
-                            doSave();
+                    var oldObjectArg = self.params.editItem.objectType === "literal" ? { isString: true, value: oldObject } : oldObject;
+                    Sparql_generic.deleteTriples(self.params.source, NodeInfosWidget.currentNodeId, self.params.editItem.property, oldObjectArg, function (err) {
+                        if (err) {
+                            return MainController.errorAlert(err);
                         }
-                    );
+                        doSave();
+                    });
                 } else {
                     doSave();
                 }

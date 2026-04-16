@@ -575,12 +575,14 @@ class BotEngineClass {
             },
             treeOptions,
             {
-                selectTreeNodeFn: withCheckboxes ? null : (_evt, obj) => {
-                    if (treeOptions.parentNodeIds && treeOptions.parentNodeIds.indexOf(obj.node.id) >= 0) {
-                        return;
-                    }
-                    resolveSelection(obj.node.id, obj.node.text, obj.node);
-                },
+                selectTreeNodeFn: withCheckboxes
+                    ? null
+                    : (_evt, obj) => {
+                          if (treeOptions.parentNodeIds && treeOptions.parentNodeIds.indexOf(obj.node.id) >= 0) {
+                              return;
+                          }
+                          resolveSelection(obj.node.id, obj.node.text, obj.node);
+                      },
             },
         );
 

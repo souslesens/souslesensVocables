@@ -336,12 +336,7 @@ var Sparql_common = (function () {
     };*/
     // new version that handles blank nodes (nodeID://)
     function escapeSparqlStringLiteral(str) {
-        return str
-            .replace(/\\/g, "\\\\")
-            .replace(/"/g, "'")
-            .replace(/\n/g, "\\n")
-            .replace(/\r/g, "\\r")
-            .replace(/\t/g, "\\t");
+        return str.replace(/\\/g, "\\\\").replace(/"/g, "'").replace(/\n/g, "\\n").replace(/\r/g, "\\r").replace(/\t/g, "\\t");
     }
 
     self.getUriFilter = function (varName, values) {

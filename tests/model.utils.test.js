@@ -5,14 +5,15 @@ import { convertType, chunk, cleanupConnection, getKnexConnection, redoIfFailure
 describe("redoIfFailure", () => {
     test("redo", async () => {
         let ntry = 0;
-        const noThrowAtThirdCall = () => {
+        const noThrowAtThirdCall = async () => {
             ntry += 1;
             if (ntry <= 3) {
                 throw `Throw error at call ${ntry}`;
             }
         };
 
-        redoIfFailure(noThrowAtThirdCall, 4, 0.1);
+        await redoIfFailure(noThrowAtThirdCall, 4, 0.001);
+        expect(ntry).toBe(4);
     });
 });
 

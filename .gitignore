@@ -174,4 +174,4 @@ WORKTREE.md
 .env.local
 
 .serena/
-.claude/settings.local.json
+.claude/settings.local.jsonclaude-code-lsp-enforcement-kit

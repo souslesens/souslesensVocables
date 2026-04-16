@@ -198,31 +198,48 @@ var UI = (function () {
             $panel.off("mouseenter.sourcesPanel mouseleave.sourcesPanel");
             $popup.off("mouseenter.sourcesPanel mouseleave.sourcesPanel");
 
-            $panel.on("mouseenter.sourcesPanel", function () {
+            var cancelHide = function () {
                 clearTimeout(_sourcesHideTimeout);
                 _sourcesHideTimeout = null;
+            };
+            var ctxMenuDiv = document.getElementById("popupMenuWidgetDiv");
+            var disconnectCtxObserver = function () {
+                var obs = $popup.data("ctxObserver");
+                if (obs) { obs.disconnect(); $popup.removeData("ctxObserver"); }
+            };
+
+            var scheduleHide = function () {
+                clearTimeout(_sourcesHideTimeout);
+                _sourcesHideTimeout = setTimeout(function () {
+                    _sourcesHideTimeout = null;
+                    if ($("#popupMenuWidgetDiv").is(":visible")) { return; }
+                    disconnectCtxObserver();
+                    $popup.hide();
+                }, 150);
+            };
+
+            $panel.on("mouseenter.sourcesPanel", function () {
+                cancelHide();
                 var rect = $panel[0].getBoundingClientRect();
                 $popup.css({ position: "fixed", top: rect.bottom + "px", left: rect.left + "px", zIndex: 200, flexWrap: "wrap", padding: "6px" });
                 $("#lineage_r_addPanel").css("flexDirection", "column");
                 $popup.addClass("sources-popup-panel").show();
+
+                disconnectCtxObserver();
+                var ctxObserver = new MutationObserver(function () {
+                    if (!$(ctxMenuDiv).is(":visible")) {
+                        disconnectCtxObserver();
+                        $popup.hide();
+                    }
+                });
+                ctxObserver.observe(ctxMenuDiv, { attributes: true, attributeFilter: ["style"] });
+                $popup.data("ctxObserver", ctxObserver);
             });
-            $panel.on("mouseleave.sourcesPanel", function () {
-                _sourcesHideTimeout = setTimeout(function () {
-                    $popup.hide();
-                    _sourcesHideTimeout = null;
-                }, 150);
-            });
-            $popup.on("mouseenter.sourcesPanel", function () {
-                clearTimeout(_sourcesHideTimeout);
-                _sourcesHideTimeout = null;
-            });
-            $popup.on("mouseleave.sourcesPanel", function () {
-                _sourcesHideTimeout = setTimeout(function () {
-                    $popup.hide();
-                    _sourcesHideTimeout = null;
-                }, 150);
-            });
+            $panel.on("mouseleave.sourcesPanel", scheduleHide);
+            $popup.on("mouseenter.sourcesPanel", cancelHide);
+            $popup.on("mouseleave.sourcesPanel", scheduleHide);
         } else {
+            if ($popup.is(":visible")) { return; }
             // Measure with popup restored inline but invisible to avoid flicker
             $popup.css({ position: "static", visibility: "hidden", display: "flex", flexWrap: "nowrap", padding: "" }).removeClass("sources-popup-panel");
             var wouldOverflow = sourcesBar.scrollWidth > sourcesBar.clientWidth;
@@ -230,6 +247,7 @@ var UI = (function () {
                 $popup.css({ position: "", visibility: "" }).hide();
             } else {
                 _sourcesPanelCompact = false;
+                disconnectCtxObserver();
                 clearTimeout(_sourcesHideTimeout);
                 _sourcesHideTimeout = null;
                 $panel.off("mouseenter.sourcesPanel mouseleave.sourcesPanel");

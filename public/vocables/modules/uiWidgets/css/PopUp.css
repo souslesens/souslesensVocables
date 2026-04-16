@@ -1,6 +1,6 @@
 .popupMenuWidgetDiv {
-    z-index: 20;
-    position: absolute;
+    z-index: 300;
+    position: fixed;
     flex-direction: column;
     padding: 5px;
     text-align: center;

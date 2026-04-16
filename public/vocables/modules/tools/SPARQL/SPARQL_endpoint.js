@@ -24,10 +24,19 @@ var SPARQL_endpoint = (function () {
         //localStorage.clear();
 
         //$("#mainDialogDiv").parent().css("left", "100px");
-        $("#mainDialogDiv").css("width", "1000px");
+        function vhToPx(v) {
+            return Math.round(window.innerHeight * (v / 100));
+        }
+        function vwToPx(v) {
+            return Math.round(window.innerWidth * (v / 100));
+        }
         $("#graphDiv").html("");
         $("#mainDialogDiv").load("modules/tools/SPARQL/SPARQLendpoint.html", function () {
-            UI.openDialog("mainDialogDiv", { title: "SPARQL endpoint" });
+            UI.openDialog("mainDialogDiv", {
+                title: "SPARQL endpoint",
+                width: vwToPx(90),
+                height: vhToPx(80),
+            });
             self.initYasGui();
         });
     };

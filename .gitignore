@@ -172,3 +172,6 @@ start-worktree.cmd
 */vite.config.worktree.js
 WORKTREE.md
 .env.local
+
+.serena/
+.claude/settings.local.json

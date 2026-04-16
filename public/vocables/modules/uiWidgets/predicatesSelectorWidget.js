@@ -308,6 +308,10 @@ var PredicatesSelectorWidget = (function () {
         }
     };
 
+    self.getSelectedLang = function () {
+        return $("#editPredicate_langValue").val().trim() || null;
+    };
+
     self.getSelectedProperty = function () {
         var property = $("#editPredicate_propertyValue").val();
 

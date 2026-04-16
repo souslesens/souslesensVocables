@@ -484,11 +484,20 @@ var UI = (function () {
                 $(divId).dialog("close");
             }
         } catch (e) {}
-        $(divId).dialog("option", {
-            width: "auto",
-            height: "auto",
+        var dialogOptions = {
             position: { my: "center", at: "center", of: window },
-        });
+        };
+        if (options.width) {
+            dialogOptions.width = options.width;
+        } else {
+            dialogOptions.width = "auto";
+        }
+        if (options.height) {
+            dialogOptions.height = options.height;
+        } else {
+            dialogOptions.height = "auto";
+        }
+        $(divId).dialog("option", dialogOptions);
         $(divId).dialog("open");
         var title = "";
         if (options.title) {

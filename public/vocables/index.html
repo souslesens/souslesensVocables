@@ -345,12 +345,10 @@
 
                         $("#mainDialogDiv").dialog({
                             autoOpen: false,
-                            height: "auto",
-                            width: "auto",
                             modal: false,
                             position: { my: "center", at: "center", of: window },
                             open: function (event, ui) {
-                                //  $("#mainDialogDiv").css("width","80%")
+                                // Preserve dimensions set by individual tools
                             },
                         });
 
@@ -449,7 +447,7 @@
                                         style="min-width: 150px; display: flex; flex-direction: column; overflow: auto; max-height: 300px"
                                         class="Lineage_PopUpStyle"
                                         size="8"
-                                        onclick="MainController.onToolSelect(null,event)"
+                                        onclick="MainController.onToolSelect(null, event)"
                                     ></div>
                                 </div>
                             </div>
@@ -517,7 +515,7 @@
         <div id="widgetGenericDialogDiv"></div>
 
         <div id="LineagePopup"></div>
-        <div id="popupMenuWidgetDiv" onclick="PopupMenuWidget.hidePopup('popupMenuWidgetDiv');"></div>
+        <div id="popupMenuWidgetDiv" onclick="PopupMenuWidget.hidePopup('popupMenuWidgetDiv')"></div>
         <div id="botPanel" style="overflow-x: hidden">
             <div id="botDiv"></div>
         </div>

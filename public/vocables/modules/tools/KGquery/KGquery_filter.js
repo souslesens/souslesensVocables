@@ -138,14 +138,11 @@ var KGquery_filter = (function () {
         jstreeOptions.additionalHTMLComponent = sampleSizeHtml;
         jstreeOptions.onAfterOpenNodeFn = function () {
             UI.repositionOpenDialogs();
-            $("#smallDialogDiv").css("overflow","hidden");
-            $("#smallDialogDiv").css("height","unset");
-            
-
+            $("#smallDialogDiv").css("overflow", "hidden");
+            $("#smallDialogDiv").css("height", "unset");
         };
         JstreeWidget.loadJsTree(null, jstreeData, jstreeOptions, function () {
             JstreeWidget.openNodeDescendants(null, "root");
-            
 
             if (queryNonObjectProperties.length < KGquery.maxOptionalPredicatesInQuery) {
                 JstreeWidget.checkAll();

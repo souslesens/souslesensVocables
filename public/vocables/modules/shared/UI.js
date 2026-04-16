@@ -34,9 +34,7 @@ var UI = (function () {
     self.setCredits = function () {
         var gif = $(`<img src="images/souslesensVocables.gif">`).on("load", function () {
             $("#graphAndCommandScreen").append(
-                "<div id='slsv-credits-logo' style='position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;z-index:0;'>" +
-                    $(this).prop("outerHTML") +
-                    "</div>"
+                "<div id='slsv-credits-logo' style='position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;z-index:0;'>" + $(this).prop("outerHTML") + "</div>",
             );
             UI.resetWindowSize();
         });
@@ -152,7 +150,6 @@ var UI = (function () {
             self.clampAndCenterDialog(event.target);
         });
 
-
         self.themeList();
 
         UI.resetWindowSize();
@@ -205,14 +202,19 @@ var UI = (function () {
             var ctxMenuDiv = document.getElementById("popupMenuWidgetDiv");
             var disconnectCtxObserver = function () {
                 var obs = $popup.data("ctxObserver");
-                if (obs) { obs.disconnect(); $popup.removeData("ctxObserver"); }
+                if (obs) {
+                    obs.disconnect();
+                    $popup.removeData("ctxObserver");
+                }
             };
 
             var scheduleHide = function () {
                 clearTimeout(_sourcesHideTimeout);
                 _sourcesHideTimeout = setTimeout(function () {
                     _sourcesHideTimeout = null;
-                    if ($("#popupMenuWidgetDiv").is(":visible")) { return; }
+                    if ($("#popupMenuWidgetDiv").is(":visible")) {
+                        return;
+                    }
                     disconnectCtxObserver();
                     $popup.hide();
                 }, 150);
@@ -239,7 +241,9 @@ var UI = (function () {
             $popup.on("mouseenter.sourcesPanel", cancelHide);
             $popup.on("mouseleave.sourcesPanel", scheduleHide);
         } else {
-            if ($popup.is(":visible")) { return; }
+            if ($popup.is(":visible")) {
+                return;
+            }
             // Measure with popup restored inline but invisible to avoid flicker
             $popup.css({ position: "static", visibility: "hidden", display: "flex", flexWrap: "nowrap", padding: "" }).removeClass("sources-popup-panel");
             var wouldOverflow = sourcesBar.scrollWidth > sourcesBar.clientWidth;

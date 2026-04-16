@@ -23,20 +23,26 @@ var PopupMenuWidget = (function () {
             PopupMenuWidget.showPopup(point, popupDivId);
             var clickedButton = $(e.currentTarget);
 
-            $("#" + popupDivId).off("mouseleave.popupMenu").on("mouseleave.popupMenu", function (event) {
-                var toEl = event.toElement || event.relatedTarget;
-                if (toEl && ($(toEl).is(clickedButton) || $(toEl).closest(clickedButton).length)) { return; }
-                PopupMenuWidget.hidePopup(popupDivId);
-                $("#" + popupDivId).off("mouseleave.popupMenu");
-            });
+            $("#" + popupDivId)
+                .off("mouseleave.popupMenu")
+                .on("mouseleave.popupMenu", function (event) {
+                    var toEl = event.toElement || event.relatedTarget;
+                    if (toEl && ($(toEl).is(clickedButton) || $(toEl).closest(clickedButton).length)) {
+                        return;
+                    }
+                    PopupMenuWidget.hidePopup(popupDivId);
+                    $("#" + popupDivId).off("mouseleave.popupMenu");
+                });
 
             setTimeout(function () {
-                $(document).off("mousedown.popupMenuDismiss").on("mousedown.popupMenuDismiss", function (evt) {
-                    if (!$(evt.target).closest("#" + popupDivId).length) {
-                        PopupMenuWidget.hidePopup(popupDivId);
-                        $(document).off("mousedown.popupMenuDismiss");
-                    }
-                });
+                $(document)
+                    .off("mousedown.popupMenuDismiss")
+                    .on("mousedown.popupMenuDismiss", function (evt) {
+                        if (!$(evt.target).closest("#" + popupDivId).length) {
+                            PopupMenuWidget.hidePopup(popupDivId);
+                            $(document).off("mousedown.popupMenuDismiss");
+                        }
+                    });
             }, 0);
         }
     };

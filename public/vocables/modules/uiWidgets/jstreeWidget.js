@@ -525,8 +525,6 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
         $("#" + (jstreeDiv || self.jstreeDiv))
             .jstree()
             .open_node(descendants);
-        
-
     };
 
     self.setTreeParentDivDimensions = function (jstreeDiv) {

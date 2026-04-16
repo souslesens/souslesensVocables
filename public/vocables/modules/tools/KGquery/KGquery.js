@@ -277,7 +277,6 @@ var KGquery = (function () {
             return;
         }
 
-
         var node = JSON.parse(JSON.stringify(selectedNode));
 
         /* if existing path in queryFlement a new one is created
@@ -930,8 +929,7 @@ var KGquery = (function () {
         var savedClassToVarNameMap = Object.assign({}, KGquery.classToVarNameMap);
 
         Export.showDataTable("KGquery_dataTableDialogDiv", tableCols, tableData, null, { paging: true }, function (err, datatable) {
-
-            $("#KGquery_dataTableDialogDiv").find(".dataTables_scrollBody").css("overflow-y","hidden");
+            $("#KGquery_dataTableDialogDiv").find(".dataTables_scrollBody").css("overflow-y", "hidden");
             $("#dataTableDivExport").on("click", "td", function () {
                 var table = $("#dataTableDivExport").DataTable();
                 var index = table.cell(this).index();

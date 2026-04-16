@@ -50,7 +50,6 @@ import { ulid } from "ulid";
 import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
 import { errorMessage } from "./errorMessage";
 import { HelpTooltip } from "./HelpModal";
-import { Datas } from "react-csv-downloader/dist/esm/lib/csv";
 
 type RouteInfo = {
     route: string;
@@ -189,8 +188,8 @@ const ProfilesTable = () => {
                             }
                             return [key, value];
                         }),
-                    );
-                    return { ...dataWithoutCarriageReturns };
+                    ) as Record<string, string>;
+                    return dataWithoutCarriageReturns;
                 });
                 const sortedProfiles: Profile[] = gotProfiles.slice().sort((a: Profile, b: Profile) => {
                     let left = "";
@@ -295,7 +294,7 @@ const ProfilesTable = () => {
                             </Table>
                         </TableContainer>
                         <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
-                            <CsvDownloader separator="&#9;" filename="profiles" extension=".tsv" datas={datas as Datas}>
+                            <CsvDownloader separator="&#9;" filename="profiles" extension=".tsv" datas={datas}>
                                 <Button variant="outlined">Download CSV</Button>
                             </CsvDownloader>
                             <Button
@@ -419,14 +418,14 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
                 selector: false,
             },
             sparqlDownloadLimit: 10000,
+            generalQuota: {},
         },
         model.config,
     );
     const [profileModel, update] = useReducer(updateProfile, { modal: false, profileForm: profile });
     const [quota, setQuota] = useState<Array<{ route: string; method: string; limit: string; wholeProfileQuota: boolean }>>(
-        // `profile` may not have a `quota` field in its TypeScript definition, so we cast to any.
-        (profile as any).quota
-            ? Object.entries((profile as any).quota).flatMap(([route, methods]) =>
+        profile.quota
+            ? Object.entries(profile.quota).flatMap(([route, methods]) =>
                   Object.entries(methods as Record<string, { quota?: number; wholeProfileQuota?: boolean } | number>).map(([method, value]) => {
                       const limit = typeof value === "number" ? value : value.quota || 0;
                       const wholeProfileQuota = typeof value === "object" && value !== null ? value.wholeProfileQuota || false : false;
@@ -568,7 +567,10 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
             {} as Record<string, Record<string, { quota: number; wholeProfileQuota: boolean }>>,
         );
         // Attach quota to the profile being saved
-        (profileModel.profileForm as any).quota = quotaObj;
+        const simplifiedQuotaObj = Object.fromEntries(
+            Object.entries(quotaObj).map(([route, methods]) => [route, Object.fromEntries(Object.entries(methods).map(([method, { quota }]) => [method, quota]))]),
+        );
+        profileModel.profileForm.quota = simplifiedQuotaObj;
 
         void saveProfile(profileModel.profileForm, create ? Mode.Creation : Mode.Edition, updateModel, update);
         const mode = create ? "create" : "edit";

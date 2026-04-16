@@ -335,7 +335,8 @@ var Predicates_bot = (function () {
                     DateWidget.setDatePickerOnInput("botPromptInput", null, null);
                 } else {
                     self.myBotEngine.promptTextarea("enter value", "selectedObject", self.params.selectedObject || "", function (valueSafe, rawValue) {
-                        self.params.selectedObject = rawValue !== undefined ? rawValue : valueSafe;
+                        var raw = rawValue !== undefined ? rawValue : valueSafe;
+                        self.params.selectedObject = raw.replace(/[\r\n]+/g, " ");
                     });
                 }
                 return;

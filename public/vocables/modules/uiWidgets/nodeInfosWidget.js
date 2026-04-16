@@ -375,7 +375,7 @@ var NodeInfosWidget = (function () {
                         item.value = { value: "" };
                     }
                     if (item.prop.value.indexOf("label") > -1) {
-                        $("#ui-id-1").append(" " + item.value.value);
+                        $("#ui-id-1").text("Node infos : " + item.value.value);
                     }
                     var key;
                     if (item.objectValue) {

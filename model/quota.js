@@ -181,30 +181,6 @@ class QuotaModel {
         return Infinity;
     }
 
-    async add(route, method, user, wholeProfile = false, profileName = null) {
-        if (!route || typeof route !== "string") {
-            throw new Error("Invalid route supplied to QuotaModel.add");
-        }
-        if (!method || typeof method !== "string") {
-            throw new Error("Invalid method supplied to QuotaModel.add");
-        }
-        if (!user || user.id === undefined || user.id === null) {
-            throw new Error("User object with a valid id must be provided to QuotaModel.add");
-        }
-
-        const quota = await this._getQuotaForRoute(route, method, user, profileName, wholeProfile);
-
-        const userResult = await this._store.increment("user", user.id, route, method, quota);
-
-        if (wholeProfile && profileName) {
-            await this._store.increment("profile", profileName, route, method, quota);
-        }
-
-        await this._store.increment("global", null, route, method, quota);
-
-        return userResult;
-    }
-
     async tryConsume(route, method, user, wholeProfile = false, profileName = null, quotaOverride = null) {
         if (!route || typeof route !== "string") {
             throw new Error("Invalid route supplied to QuotaModel.tryConsume");

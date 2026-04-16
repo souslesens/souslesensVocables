@@ -322,6 +322,29 @@ var PredicatesSelectorWidget = (function () {
             }
         }
     };
+    self.xsdValidators = {
+        "xsd:integer": { regex: /^-?\d+$/, label: "integer (ex: 42)" },
+        "xsd:float": { regex: /^-?\d*\.?\d+([eE][+-]?\d+)?$/, label: "float (ex: 3.14)" },
+        "xsd:double": { regex: /^-?\d*\.?\d+([eE][+-]?\d+)?$/, label: "double (ex: 3.14)" },
+        "xsd:decimal": { regex: /^-?\d*\.?\d+$/, label: "decimal (ex: 3.14)" },
+        "xsd:boolean": { regex: /^(true|false|1|0)$/, label: "boolean (true/false/1/0)" },
+    };
+
+    self.validateLiteralValue = function (property, value) {
+        var validator = self.xsdValidators[property];
+        if (validator && !validator.regex.test(value)) {
+            alert("Invalid value for " + property + ". Expected: " + validator.label);
+            return false;
+        }
+        return true;
+    };
+
+    self.validateObjectValue = function () {
+        var property = $("#editPredicate_propertyValue").val();
+        var value = $("#editPredicate_objectValue").val().trim();
+        return self.validateLiteralValue(property, value);
+    };
+
     self.getSelectedObjectValue = function () {
         var property = $("#editPredicate_propertyValue").val();
         var value = $("#editPredicate_objectValue").val().trim();

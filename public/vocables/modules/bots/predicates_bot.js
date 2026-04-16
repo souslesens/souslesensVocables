@@ -40,6 +40,7 @@ var Predicates_bot = (function () {
                 selectedProperty: editItem ? editItem.property : null,
                 selectedObject: editItem ? editItem.object : null,
                 editItem: editItem || null,
+                enteredUri: false,
             };
             self.myBotEngine.nextStep();
         });
@@ -74,6 +75,33 @@ var Predicates_bot = (function () {
         $("#botPanel").dialog("option", "title", title);
     }
 
+    function sanitizeUri(uri) {
+        if (!uri) {
+            return uri;
+        }
+        return uri
+            .trim()
+            .replace(/\\/g, "")
+            .replace(/\r/g, "")
+            .replace(/\n/g, "")
+            .replace(/\t/g, "")
+            .replace(/\\xa0/g, "_")
+            .replace(/\xa0/g, "_")
+            .replace(/@/g, "_")
+            .replace(/\$/g, "")
+            .replace(/"/g, "")
+            .replace(/'/g, "")
+            .replace(/[<>{}|^`]/g, "")
+            .replace(/\s+/g, "_");
+    }
+
+    function isMatchProperty(property) {
+        if (!property) {
+            return false;
+        }
+        return property.toLowerCase().indexOf("match") > -1;
+    }
+
     function isLiteralProperty(property) {
         if (!property) {
             return false;
@@ -97,8 +125,17 @@ var Predicates_bot = (function () {
         return value;
     }
 
-    function escapeLiteralForSparql(value) {
-        return value.replace(/'/g, "\\'");
+    function isValidObjectUri(value) {
+        if (!value) {
+            return false;
+        }
+        if (value.indexOf("http://") === 0 || value.indexOf("https://") === 0) {
+            return true;
+        }
+        if (/^[a-zA-Z][a-zA-Z0-9_]*:[^\s]+$/.test(value)) {
+            return true;
+        }
+        return false;
     }
 
     function formatObject(property, value) {
@@ -106,13 +143,13 @@ var Predicates_bot = (function () {
             return value;
         }
         if (property && property.indexOf("xsd:") === 0) {
-            return "'" + escapeLiteralForSparql(value) + "'^^" + property;
-        }
-        if (Sparql_common.isTripleObjectString(property)) {
-            return "'" + escapeLiteralForSparql(value) + "'";
+            return "'" + Sparql_common.formatStringForTriple(value) + "'^^" + property;
         }
         if (value.indexOf("http") === 0) {
             return "<" + value + ">";
+        }
+        if (Sparql_common.isTripleObjectString(property)) {
+            return Sparql_common.formatStringForTriple(value);
         }
         return value;
     }
@@ -164,14 +201,14 @@ var Predicates_bot = (function () {
                         var p = model.properties[key];
                         if (!seen[p.id]) {
                             seen[p.id] = true;
-                            nodes.push({ id: p.id, text: p.label || p.id, parent: "__src__" + vocab, data: { id: p.id } });
+                            nodes.push({ id: p.id, text: p.label || p.id, parent: "__src__" + vocab, data: { id: p.id, isObjectProperty: true } });
                         }
                     }
                     for (var key2 in model.nonObjectProperties) {
                         var p2 = model.nonObjectProperties[key2];
                         if (!seen[p2.id]) {
                             seen[p2.id] = true;
-                            nodes.push({ id: p2.id, text: p2.label || p2.id, parent: "__src__" + vocab, data: { id: p2.id } });
+                            nodes.push({ id: p2.id, text: p2.label || p2.id, parent: "__src__" + vocab, data: { id: p2.id, isObjectProperty: false } });
                         }
                     }
                 }
@@ -187,10 +224,12 @@ var Predicates_bot = (function () {
      * Classes are leaf children under their source group.
      * @param {Function} callback - callback(err, jstreeNodes, parentNodeIds)
      */
-    function buildObjectJstreeData(callback) {
-        var nodes = [
-            { id: "__src__usual", text: "usual", parent: "#", data: { id: "__src__usual" } },
-        ];
+    function buildObjectJstreeData(showEnterUri, callback) {
+        var nodes = [];
+        if (showEnterUri) {
+            nodes.push({ id: "__enter_uri__", text: "enter URI", parent: "#", data: { id: "__enter_uri__" } });
+        }
+        nodes.push({ id: "__src__usual", text: "usual", parent: "#", data: { id: "__src__usual" } });
         var parentNodeIds = ["__src__usual"];
         var seen = {};
 
@@ -252,9 +291,13 @@ var Predicates_bot = (function () {
                         if (node && node.data && node.data.recentProperty) {
                             self.params.selectedProperty = node.data.recentProperty;
                             self.params.selectedObject = node.data.recentObject;
+                            self.params.isObjectProperty = null;
                             self.params.skipObject = true;
                         } else {
                             self.params.selectedProperty = selectedId;
+                            self.params.isObjectProperty = (node && node.data && node.data.isObjectProperty !== undefined)
+                                ? node.data.isObjectProperty
+                                : null;
                             self.params.skipObject = false;
                         }
                         self.myBotEngine.nextStep();
@@ -273,7 +316,14 @@ var Predicates_bot = (function () {
                 return;
             }
 
-            if (isLiteralProperty(self.params.selectedProperty)) {
+            var literalProp;
+            if (self.params.isObjectProperty !== null && self.params.isObjectProperty !== undefined) {
+                literalProp = !self.params.isObjectProperty;
+            } else {
+                literalProp = isLiteralProperty(self.params.selectedProperty);
+            }
+
+            if (literalProp) {
                 if (self.params.selectedProperty === "xsd:dateTime") {
                     self.myBotEngine.promptValue("select date", "selectedObject", self.params.selectedObject || "", null, function (value) {
                         if (!value) {
@@ -284,14 +334,14 @@ var Predicates_bot = (function () {
                     });
                     DateWidget.setDatePickerOnInput("botPromptInput", null, null);
                 } else {
-                    self.myBotEngine.promptTextarea("enter value", "selectedObject", self.params.selectedObject || "", function (valueSafe) {
-                        self.params.selectedObject = valueSafe;
+                    self.myBotEngine.promptTextarea("enter value", "selectedObject", self.params.selectedObject || "", function (valueSafe, rawValue) {
+                        self.params.selectedObject = rawValue !== undefined ? rawValue : valueSafe;
                     });
                 }
                 return;
             }
 
-            buildObjectJstreeData(function (err, jstreeData, parentNodeIds) {
+            buildObjectJstreeData(isMatchProperty(self.params.selectedProperty), function (err, jstreeData, parentNodeIds) {
                 if (err) {
                     return MainController.errorAlert(err);
                 }
@@ -301,6 +351,18 @@ var Predicates_bot = (function () {
                     { withCheckboxes: false, openAll: false, parentNodeIds: parentNodeIds },
                     null,
                     function (selectedId) {
+                        if (selectedId === "__enter_uri__") {
+                            self.myBotEngine.promptValue("enter URI", "selectedObject", "", null, function (value) {
+                                if (!value) {
+                                    return self.myBotEngine.previousStep();
+                                }
+                                self.params.selectedObject = sanitizeUri(value);
+                                self.params.enteredUri = true;
+                                self.myBotEngine.nextStep();
+                            });
+                            return;
+                        }
+                        self.params.enteredUri = false;
                         self.params.selectedObject = selectedId;
                         self.myBotEngine.nextStep();
                     }
@@ -317,6 +379,14 @@ var Predicates_bot = (function () {
 
                 if (!property || !objectValue) {
                     return MainController.errorAlert("Missing property or object value");
+                }
+
+                if (!PredicatesSelectorWidget.validateLiteralValue(self.params.selectedProperty, self.params.selectedObject)) {
+                    return;
+                }
+
+                if ((self.params.isObjectProperty === true || self.params.enteredUri) && !isValidObjectUri(self.params.selectedObject)) {
+                    return MainController.errorAlert("Invalid URI: '" + self.params.selectedObject + "'. Expected http://... or prefix:localName");
                 }
 
                 function doSave() {

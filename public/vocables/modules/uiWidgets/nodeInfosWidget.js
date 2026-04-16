@@ -567,8 +567,7 @@ defaultLang = 'en';*/
                 }
                 Sparql_OWL.getLabelsMap(sourceLabel, options, function (err, result) {
                     if (err) {
-                        UI.message(err.responseText);
-                        return;
+                        result = {};
                     }
                     if (result) {
                         Object.keys(result).forEach(function (item) {
@@ -612,11 +611,9 @@ defaultLang = 'en';*/
                                 var optionalStr = getOptionalStr(key, predicateId);
 
                                 if (value.indexOf("http") == 0 && value.indexOf(" ") == -1 && value.indexOf(",") == -1) {
-                                    if (valueLabelsMap[value]) {
-                                        value = "<a target='" + self.getUriTarget(nodeId) + "' href='" + value + "'>" + valueLabelsMap[value] + "</a>";
-                                    } else {
-                                        value = "<a target='" + self.getUriTarget(value) + "' href='" + value + "'>" + value + "</a>";
-                                    }
+                                    var uriLabel = valueLabelsMap[value];
+                                    var titleAttr = uriLabel ? " title='" + uriLabel.replace(/'/g, "&#39;") + "'" : "";
+                                    value = "<a target='" + self.getUriTarget(value) + "' href='" + value + "'" + titleAttr + ">" + value + "</a>";
                                 }
                                 if (index > 0) {
                                     valuesStr += "<br>";
@@ -647,11 +644,9 @@ defaultLang = 'en';*/
                                     var optionalStr = getOptionalStr(key, valueObject.predicateId);
                                     var value = valueObject.value;
                                     if (value.indexOf("http") == 0 && value.indexOf(" ") == -1 && value.indexOf(",") == -1) {
-                                        if (valueLabelsMap[value]) {
-                                            value = "<a target='" + NodeInfosWidget.getUriTarget(nodeId) + "' href='" + value + "'>" + valueLabelsMap[value] + "</a>";
-                                        } else {
-                                            value += "<a target='" + NodeInfosWidget.getUriTarget(value) + "' href='" + value + "'>" + value + "</a>";
-                                        }
+                                        var uriLabel = valueLabelsMap[value];
+                                        var titleAttr = uriLabel ? " title='" + uriLabel.replace(/'/g, "&#39;") + "'" : "";
+                                        value = "<a target='" + NodeInfosWidget.getUriTarget(value) + "' href='" + value + "'" + titleAttr + ">" + value + "</a>";
                                     }
                                     var optionalStr = ""; //  complcated to manage lang together with edit and delete
                                     // var optionalStr = getOptionalStr(key,valueObject.predicateId);
@@ -1266,15 +1261,15 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
             async.series(
                 [
                     function (callbackSeries) {
-                        var object = currentEditingItem.item.value.value;
-                        if (currentEditingItem.item.value.type == "literal") {
+                        var itemValue = currentEditingItem.item.value;
+                        var object = itemValue.value;
+                        if (itemValue.type == "literal" || itemValue.type == "typed-literal") {
                             object = {
                                 isString: true,
-                                value: currentEditingItem.item.value.value,
-                                lang: currentEditingItem.item.value["xml:lang"],
+                                value: itemValue.value,
+                                lang: itemValue["xml:lang"],
+                                datatype: itemValue.datatype,
                             };
-                            /*   if(currentEditingItem.item.value["xml:lang"])
-object+="@"+currentEditingItem.item.value["xml:lang"]*/
                         }
                         Sparql_generic.deleteTriples(self.currentSource, self.currentNodeId, currentEditingItem.item.prop.value, object, function (err, _result) {
                             if (err) {

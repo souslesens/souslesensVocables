@@ -347,8 +347,11 @@ var Sparql_common = (function () {
     self.getUriFilter = function (varName, values) {
         if (values.value) {
             if (values.isString) {
-                var lang = values.lang ? "@" + values.lang : "";
                 var str = '"' + escapeSparqlStringLiteral(values.value) + '"';
+                if (values.datatype) {
+                    return "filter( ?" + varName + "=" + str + "^^<" + values.datatype + ">).";
+                }
+                var lang = values.lang ? "@" + values.lang : "";
                 return "filter( ?" + varName + "=" + str + lang + ").";
             }
         }
@@ -790,10 +793,13 @@ var Sparql_common = (function () {
         if (property.toLowerCase().indexOf("label") > -1) {
             return true;
         }
-        if (property.toLowerCase().indexOf("definedby") > -1) {
+        if (property.toLowerCase().indexOf("comment") > -1) {
             return true;
         }
-        if (property.toLowerCase().indexOf("comment") > -1) {
+        if (property.toLowerCase().indexOf("definition") > -1) {
+            return true;
+        }
+        if (property.toLowerCase().indexOf("description") > -1) {
             return true;
         }
         if (property.toLowerCase().indexOf("example") > -1) {

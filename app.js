@@ -236,28 +236,34 @@ openapi.initialize({
                 const route = req.baseUrl + req.path;
                 const method = req.method;
 
-                const { maxQuota: profileQuota, profile: profileName, wholeProfile } = await profileModel.getMaxQuotaForRoute(route, method, user.user);
+                try {
+                    const { maxQuota: profileQuota, profile: profileName, wholeProfile } = await profileModel.getMaxQuotaForRoute(route, method, user.user);
 
-                const consumeResult = await quotaModel.tryConsume(route, method, user.user, wholeProfile, profileName, profileQuota);
+                    const consumeResult = await quotaModel.tryConsume(route, method, user.user, wholeProfile, profileName, profileQuota);
 
-                if (!consumeResult.consumed) {
-                    throw {
-                        status: 429,
-                        message: `Too many requests, you exceeded your profile quota (${profileQuota} for route ${route} ${method})`,
-                    };
-                }
-
-                if (config.generalQuota?.[route]?.[method]) {
-                    const generalQuota = config.generalQuota[route][method];
-                    const generalResult = await quotaModel.tryConsume(route, method, user.user, false, null, generalQuota);
-                    await quotaModel._store.increment("global", null, route, method, generalQuota);
-
-                    if (!generalResult.consumed) {
+                    if (!consumeResult.consumed) {
                         throw {
                             status: 429,
-                            message: `Too many requests, the general quota has been exceeded (${generalQuota} for route ${route} ${method})`,
+                            message: `Too many requests, you exceeded your profile quota (${profileQuota} for route ${route} ${method})`,
                         };
                     }
+
+                    if (config.generalQuota?.[route]?.[method]) {
+                        const generalQuota = config.generalQuota[route][method];
+                        const generalResult = await quotaModel.tryConsume(route, method, user.user, false, null, generalQuota);
+
+                        if (!generalResult.consumed) {
+                            throw {
+                                status: 429,
+                                message: `Too many requests, the general quota has been exceeded (${generalQuota} for route ${route} ${method})`,
+                            };
+                        }
+                    }
+                } catch (error) {
+                    if (error.status === 429) {
+                        throw error;
+                    }
+                    console.error(`Quota error for ${route} ${method}:`, error);
                 }
             }
             return Promise.resolve(true);

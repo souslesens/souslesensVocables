@@ -13,16 +13,13 @@ var Predicates_bot = (function () {
 
     self.workflow = {
         choosePropertyFn: {
-            chooseObjectFn: {
-                saveStepFn: {},
-            },
+            chooseObjectFn: {},
         },
     };
 
     self.functionTitles = {
         choosePropertyFn: "choose property",
         chooseObjectFn: "choose Object",
-        saveStepFn: "Add Predicate",
     };
 
     /**
@@ -280,6 +277,46 @@ var Predicates_bot = (function () {
         );
     }
 
+    function executeSave() {
+        var property = formatProperty(self.params.selectedProperty);
+        var objectValue = formatObject(self.params.selectedProperty, self.params.selectedObject);
+
+        if (!property || !objectValue) {
+            return MainController.errorAlert("Missing property or object value");
+        }
+
+        if (!PredicatesSelectorWidget.validateLiteralValue(self.params.selectedProperty, self.params.selectedObject)) {
+            return;
+        }
+
+        if ((self.params.isObjectProperty === true || self.params.enteredUri) && !isValidObjectUri(self.params.selectedObject)) {
+            return MainController.errorAlert("Invalid URI: '" + self.params.selectedObject + "'. Expected http://... or prefix:localName");
+        }
+
+        function doSave() {
+            NodeInfosWidget.addPredicate(property, objectValue, null, null, function (err) {
+                if (err) {
+                    return MainController.errorAlert(err);
+                }
+                storeRecent(self.params.selectedProperty, self.params.selectedObject);
+                self.myBotEngine.nextStep();
+            });
+        }
+
+        if (self.params.editItem) {
+            var oldObject = self.params.editItem.object;
+            var oldObjectArg = self.params.editItem.objectType === "literal" ? { isString: true, value: oldObject } : oldObject;
+            Sparql_generic.deleteTriples(self.params.source, NodeInfosWidget.currentNodeId, self.params.editItem.property, oldObjectArg, function (err) {
+                if (err) {
+                    return MainController.errorAlert(err);
+                }
+                doSave();
+            });
+        } else {
+            doSave();
+        }
+    }
+
     self.functions = {
         choosePropertyFn: function () {
             if (self.params.editItem) {
@@ -314,7 +351,7 @@ var Predicates_bot = (function () {
 
             if (self.params.skipObject) {
                 self.params.skipObject = false;
-                self.myBotEngine.nextStep();
+                executeSave();
                 return;
             }
 
@@ -328,17 +365,15 @@ var Predicates_bot = (function () {
             if (literalProp) {
                 if (self.params.selectedProperty === "xsd:dateTime") {
                     self.myBotEngine.promptValue("select date", "selectedObject", self.params.selectedObject || "", null, function (value) {
-                        if (!value) {
-                            return self.myBotEngine.previousStep();
-                        }
                         self.params.selectedObject = value;
-                        self.myBotEngine.nextStep();
+                        executeSave();
                     });
                     DateWidget.setDatePickerOnInput("botPromptInput", null, null);
                 } else {
                     self.myBotEngine.promptTextarea("enter value", "selectedObject", self.params.selectedObject || "", function (valueSafe, rawValue) {
                         var raw = rawValue !== undefined ? rawValue : valueSafe;
                         self.params.selectedObject = raw.replace(/[\r\n]+/g, " ");
+                        executeSave();
                     });
                 }
                 return;
@@ -351,63 +386,16 @@ var Predicates_bot = (function () {
                 self.myBotEngine.showTree(jstreeData, null, { withCheckboxes: false, openAll: false, parentNodeIds: parentNodeIds }, null, function (selectedId) {
                     if (selectedId === "__enter_uri__") {
                         self.myBotEngine.promptValue("enter URI", "selectedObject", "", null, function (value) {
-                            if (!value) {
-                                return self.myBotEngine.previousStep();
-                            }
                             self.params.selectedObject = sanitizeUri(value);
                             self.params.enteredUri = true;
-                            self.myBotEngine.nextStep();
+                            executeSave();
                         });
                         return;
                     }
                     self.params.enteredUri = false;
                     self.params.selectedObject = selectedId;
-                    self.myBotEngine.nextStep();
+                    executeSave();
                 });
-            });
-        },
-
-        saveStepFn: function () {
-            setDialogTitle("Add Predicate");
-            $("#botPanel").parent().find("#previousButtonBot").show();
-            self.myBotEngine.showList([{ id: "save", label: "Save" }], null, null, false, function () {
-                var property = formatProperty(self.params.selectedProperty);
-                var objectValue = formatObject(self.params.selectedProperty, self.params.selectedObject);
-
-                if (!property || !objectValue) {
-                    return MainController.errorAlert("Missing property or object value");
-                }
-
-                if (!PredicatesSelectorWidget.validateLiteralValue(self.params.selectedProperty, self.params.selectedObject)) {
-                    return;
-                }
-
-                if ((self.params.isObjectProperty === true || self.params.enteredUri) && !isValidObjectUri(self.params.selectedObject)) {
-                    return MainController.errorAlert("Invalid URI: '" + self.params.selectedObject + "'. Expected http://... or prefix:localName");
-                }
-
-                function doSave() {
-                    NodeInfosWidget.addPredicate(property, objectValue, null, null, function (err) {
-                        if (err) {
-                            return MainController.errorAlert(err);
-                        }
-                        storeRecent(self.params.selectedProperty, self.params.selectedObject);
-                        self.myBotEngine.nextStep();
-                    });
-                }
-
-                if (self.params.editItem) {
-                    var oldObject = self.params.editItem.object;
-                    var oldObjectArg = self.params.editItem.objectType === "literal" ? { isString: true, value: oldObject } : oldObject;
-                    Sparql_generic.deleteTriples(self.params.source, NodeInfosWidget.currentNodeId, self.params.editItem.property, oldObjectArg, function (err) {
-                        if (err) {
-                            return MainController.errorAlert(err);
-                        }
-                        doSave();
-                    });
-                } else {
-                    doSave();
-                }
             });
         },
     };

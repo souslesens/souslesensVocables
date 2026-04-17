@@ -153,7 +153,9 @@ class BotEngineClass {
             var raw = textarea.val();
             var value = String(raw || "").trim();
             if (!value) {
-                return this.previousStep();
+                this.insertBotMessage("Please enter a value.", { isError: true });
+                textarea.focus();
+                return;
             }
 
             var valueSafe = CommonBotFunctions.toSafeTransportText(value);
@@ -766,6 +768,11 @@ class BotEngineClass {
                         .find("#botPromptInput")
                         .css("display", "none");
                     var value = $(evt.currentTarget).val();
+                    if (!value || !value.trim()) {
+                        this.insertBotMessage("Please enter a value.", { isError: true });
+                        $(evt.currentTarget).css("display", "").focus();
+                        return;
+                    }
                     var varToFill = $("#" + this.divId)
                         .find("#botVarToFill")
                         .val();

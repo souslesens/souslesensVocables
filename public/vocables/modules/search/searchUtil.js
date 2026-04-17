@@ -183,6 +183,7 @@ indexes.push(source.toLowerCase());
                                                 source: source,
                                                 id: toHit._source.id,
                                                 label: toHit._source.label,
+                                                lang: toHit._source.lang,
                                                 parents: toHit._source.parents,
                                                 type: toHit._source.type,
                                             });
@@ -474,6 +475,12 @@ indexes.push(source.toLowerCase());
             };
         }
 
+        var preferredLang = Config && Config.default_lang ? Config.default_lang : "en";
+        if (!queryObj.bool.should) {
+            queryObj.bool.should = [];
+        }
+        queryObj.bool.should.push({ term: { lang: { value: preferredLang, boost: 3 } } });
+
         return queryObj;
     };
 
@@ -656,6 +663,7 @@ indexes.push(source.toLowerCase());
                                     individualsToIndex.push({
                                         id: item.id.value,
                                         label: item.label ? item.label.value : Sparql_common.getLabelFromURI(item.id.value),
+                                        lang: item.label ? item.label["xml:lang"] : null,
                                         skoslabels: [skosLabel],
                                         parent: parent,
                                         parents: parents,

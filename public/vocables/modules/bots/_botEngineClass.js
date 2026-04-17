@@ -1,4 +1,5 @@
 import CommonBotFunctions from "./_commonBotFunctions.js";
+import JstreeWidget from "../uiWidgets/jstreeWidget.js";
 
 class BotEngineClass {
     constructor() {
@@ -90,6 +91,9 @@ class BotEngineClass {
     }
 
     promptTextarea(message, varToFill, defaultValue, callback) {
+        if (!this.history.step.includes(this.history.currentIndex)) {
+            this.history.step.push(this.history.currentIndex);
+        }
         $("#" + this.divId)
             .find("#bot_resourcesProposalSelect")
             .hide();
@@ -149,7 +153,9 @@ class BotEngineClass {
             var raw = textarea.val();
             var value = String(raw || "").trim();
             if (!value) {
-                return this.previousStep();
+                this.insertBotMessage("Please enter a value.", { isError: true });
+                textarea.focus();
+                return;
             }
 
             var valueSafe = CommonBotFunctions.toSafeTransportText(value);
@@ -319,7 +325,7 @@ class BotEngineClass {
                 .css("display", "none");
 
             var lastStepIndex = this.history.step[this.history.step.length - 2];
-            if (lastStepIndex == 0) {
+            if (lastStepIndex === undefined) {
                 return this.reset();
             }
             this.currentObj = this.history.workflowObjects[lastStepIndex];
@@ -500,6 +506,114 @@ class BotEngineClass {
                 this.nextStep(returnValue || selectedValue);
             });
     }
+    showTree(jstreeData, varToFill, treeOptions, returnValue, callback) {
+        if (!treeOptions) {
+            treeOptions = {};
+        }
+
+        if (!this.history.step.includes(this.history.currentIndex)) {
+            this.history.step.push(this.history.currentIndex);
+        }
+
+        $("#" + this.divId)
+            .find("#bot_resourcesProposalSelect")
+            .hide();
+        $("#" + this.divId)
+            .find("#botFilterProposalDiv")
+            .hide();
+        $("#" + this.divId)
+            .find("#botTreeContainer")
+            .remove();
+        $("#" + this.divId)
+            .find("#botPromptInput")
+            .css("display", "none");
+        $("#" + this.divId)
+            .find("#botPromptTextarea")
+            .parent()
+            .remove();
+
+        const treeDivId = "botJstreeDiv_" + common.getRandomHexaId(5);
+        const searchInputId = "botTreeSearch_" + common.getRandomHexaId(5);
+        const withCheckboxes = treeOptions.withCheckboxes === true;
+        const validateBtnHtml = withCheckboxes ? `<button id="botTreeValidateBtn" class="w3-button classesPanelButton size-of-button-small" style="margin-top:6px;width:100%">Validate</button>` : "";
+
+        $("#" + this.divId)
+            .find("#botTA")
+            .before(
+                `<div id="botTreeContainer" style="margin-top:8px;width:100%;">` +
+                    `<div style="margin-bottom:4px;"><span>Search </span>` +
+                    `<input id="${searchInputId}" class="w3-input w3-border" type="text" autocomplete="off" style="width:180px;font-size:12px;padding:3px;display:inline-block;" /></div>` +
+                    `<div style="max-height:250px;overflow:auto;"><div id="${treeDivId}"></div></div>` +
+                    validateBtnHtml +
+                    `</div>`,
+            );
+
+        const resolveSelection = (selectedValue, selectedLabel, nodeOrNodes) => {
+            this.history.VarFilling[this.history.currentIndex] = { VarFilled: varToFill, valueFilled: selectedValue };
+
+            if (varToFill) {
+                this.currentBot.params[varToFill] = selectedValue;
+            }
+
+            this.insertBotMessage(selectedLabel);
+            $("#" + this.divId)
+                .find("#botTreeContainer")
+                .remove();
+            $("#" + this.divId)
+                .find("#bot_resourcesProposalSelect")
+                .show();
+
+            if (callback) {
+                return callback(selectedValue, nodeOrNodes);
+            }
+            this.nextStep(returnValue || selectedValue);
+        };
+
+        const jstreeOpts = Object.assign(
+            {
+                doNotAdjustDimensions: true,
+                openAll: true,
+                searchPlugin: { case_insensitive: true, fuzzy: false, show_only_matches: true },
+            },
+            treeOptions,
+            {
+                selectTreeNodeFn: withCheckboxes
+                    ? null
+                    : (_evt, obj) => {
+                          if (treeOptions.parentNodeIds && treeOptions.parentNodeIds.indexOf(obj.node.id) >= 0) {
+                              return;
+                          }
+                          resolveSelection(obj.node.id, obj.node.text, obj.node);
+                      },
+            },
+        );
+
+        JstreeWidget.loadJsTree(treeDivId, jstreeData, jstreeOpts, null);
+
+        $("#" + searchInputId).trigger("focus");
+
+        $("#" + searchInputId).on("keyup", function () {
+            $("#" + treeDivId)
+                .jstree(true)
+                .search($(this).val());
+        });
+
+        if (withCheckboxes) {
+            $("#" + this.divId)
+                .find("#botTreeValidateBtn")
+                .on("click", () => {
+                    const checkedNodes = JstreeWidget.getjsTreeCheckedNodes(treeDivId);
+                    if (checkedNodes.length === 0) return;
+
+                    const leafNodes = checkedNodes.filter((n) => n.type !== "Folder");
+                    const rawIds = leafNodes.map((n) => (n.data && n.data.id ? n.data.id : n.id));
+                    const ids = rawIds.filter((id, index) => rawIds.indexOf(id) === index);
+                    const label = ids.join(", ");
+                    resolveSelection(ids, label, checkedNodes);
+                });
+        }
+    }
+
     filterList(evt) {
         if (!this.lastFilterListStr) this.lastFilterListStr = "";
         //var str = $(this).val();
@@ -623,6 +737,9 @@ class BotEngineClass {
     }
 
     promptValue(message, varToFill, defaultValue, options, callback) {
+        if (!this.history.step.includes(this.history.currentIndex)) {
+            this.history.step.push(this.history.currentIndex);
+        }
         $("#" + this.divId)
             .find("#bot_resourcesProposalSelect")
             .hide();
@@ -651,6 +768,11 @@ class BotEngineClass {
                         .find("#botPromptInput")
                         .css("display", "none");
                     var value = $(evt.currentTarget).val();
+                    if (!value || !value.trim()) {
+                        this.insertBotMessage("Please enter a value.", { isError: true });
+                        $(evt.currentTarget).css("display", "").focus();
+                        return;
+                    }
                     var varToFill = $("#" + this.divId)
                         .find("#botVarToFill")
                         .val();

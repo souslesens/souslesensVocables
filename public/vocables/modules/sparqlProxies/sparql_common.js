@@ -338,11 +338,18 @@ var Sparql_common = (function () {
         return filterStr;
     };*/
     // new version that handles blank nodes (nodeID://)
+    function escapeSparqlStringLiteral(str) {
+        return str.replace(/\\/g, "\\\\").replace(/"/g, "'").replace(/\n/g, "\\n").replace(/\r/g, "\\r").replace(/\t/g, "\\t");
+    }
+
     self.getUriFilter = function (varName, values) {
         if (values.value) {
             if (values.isString) {
+                var str = '"' + escapeSparqlStringLiteral(values.value) + '"';
+                if (values.datatype) {
+                    return "filter( ?" + varName + "=" + str + "^^<" + values.datatype + ">).";
+                }
                 var lang = values.lang ? "@" + values.lang : "";
-                var str = '"' + values.value.replace(/"/g, "'") + '"';
                 return "filter( ?" + varName + "=" + str + lang + ").";
             }
         }
@@ -377,7 +384,7 @@ var Sparql_common = (function () {
                     isLiteral = false;
                 }
                 if (isLiteral) {
-                    standardValuesStr += '"' + item.replace(/"/g, "'") + '"';
+                    standardValuesStr += '"' + escapeSparqlStringLiteral(item) + '"';
                 } else {
                     standardValuesStr += "<" + item + ">";
                 }
@@ -784,15 +791,19 @@ var Sparql_common = (function () {
         if (property.toLowerCase().indexOf("label") > -1) {
             return true;
         }
-        if (property.toLowerCase().indexOf("definedby") > -1) {
+        if (property.toLowerCase().indexOf("comment") > -1) {
             return true;
         }
-        if (property.toLowerCase().indexOf("comment") > -1) {
+        if (property.toLowerCase().indexOf("definition") > -1) {
+            return true;
+        }
+        if (property.toLowerCase().indexOf("description") > -1) {
             return true;
         }
         if (property.toLowerCase().indexOf("example") > -1) {
             return true;
         }
+
         if (object && object.indexOf("http://") == 0) {
             return false;
         }

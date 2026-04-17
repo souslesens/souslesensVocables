@@ -616,7 +616,14 @@ var MappingsDetails = (function () {
                 data.otherPredicates = [];
             }
 
-            if (params.addingTransform) {
+            if (params.predicate == "owl:equivalentClass") {
+                data.otherPredicates.push({
+                    property: "owl:equivalentClass",
+                    object: params.predicateObjectColumn,
+                });
+                MappingColumnsGraph.updateNode({ id: MappingColumnsGraph.currentGraphNode.id, data: data });
+                MappingColumnsGraph.saveVisjsGraph();
+            } else if (params.addingTransform) {
                 return; // function processing made in save transform
             } else if (params.addingType) {
                 data.otherPredicates.push({

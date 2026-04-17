@@ -1726,6 +1726,7 @@ var Lineage_whiteboard = (function () {
                                     var edge = {
                                         id: edgeId,
                                         from: item.subject.value,
+                                        label: "a",
                                         to: item.broader1.value,
                                         color: self.defaultEdgeColor,
                                         arrows: {
@@ -2025,6 +2026,7 @@ var Lineage_whiteboard = (function () {
                                     visjsData2.edges.push({
                                         id: edgeId,
                                         to: parent,
+                                        label: "a",
                                         from: item["child" + i],
                                         color: Lineage_whiteboard.defaultEdgeColor,
                                         arrows: {

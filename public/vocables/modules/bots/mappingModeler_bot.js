@@ -49,6 +49,9 @@ var MappingModeler_bot = (function () {
                         },
                     },
                 },
+                "add owl:EquivalentClassColumn": {
+                    listTableColumnsFn: { setEquivalentClassFn: {} },
+                },
                 "add transform": {
                     addTransformFn: {},
                 },
@@ -182,31 +185,6 @@ var MappingModeler_bot = (function () {
                     self.myBotEngine.nextStep();
                 });
             }
-            /*
-            var range = Config.ontologiesVocabularyModels[self.params.nonObjectPropertyVocab].nonObjectProperties[self.params.nonObjectPropertyId].range;
-            if (!range) {
-                return self.myBotEngine.nextStep();
-            }
-            if (range != "xsd:dateTime") {
-                return _botEngine.nextStep();
-            } else {
-                var choices = [
-                    { id: "FR", label: "FR : DD/MM/YYYY" },
-                    { id: "ISO", label: "ISO : YYYY-MM-DD" },
-                    { id: "USA", label: "USA : MM/DD/YYYY" },
-                    { id: "EUR", label: "EUR : DD. MM. YYYY" },
-                    { id: "JIS", label: "JIS : YYYY-MM-DD" },
-                    { id: "ISO-time", label: "ISO-time : 2022-09-27 18:00:00.000" },
-                    { id: "other", label: "other" },
-                ];
-                _botEngine.showList(choices, "nonObjectPropertyDateFormat", null, false, function (result) {
-                    if (result == "other") {
-                        return _botEngine.nextStep();
-                    }
-                    self.params.nonObjectPropertyDateFormat = result;
-                    _botEngine.nextStep();
-                });
-            }*/
         },
 
         listTableColumnsFn: function () {
@@ -277,6 +255,9 @@ var MappingModeler_bot = (function () {
                 }
                 self.myBotEngine.showList(vocabs, "datatypePropertySource");
             });
+        },
+        setEquivalentClassFn: function () {
+            self.params.predicate = "owl:equivalentClass";
         },
     };
 

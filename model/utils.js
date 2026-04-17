@@ -111,7 +111,15 @@ const addFromsToSparqlQuery = (sparqlQuery, graphUris, replaceFrom = false) => {
     const from = replaceFrom ? emptyFrom : parsedQuery.from || emptyFrom;
 
     graphUris
-        .filter((graphUri) => graphUri && graphUri.trim().length > 0)
+        .filter((graphUri) => {
+            if (!graphUri || !graphUri.length) return false;
+            try {
+                new URL(graphUri);
+                return true;
+            } catch {
+                return false;
+            }
+        })
         .forEach((graphUri) => {
             from.default.push({ termType: "NamedNode", value: graphUri });
         });

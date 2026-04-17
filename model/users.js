@@ -229,6 +229,28 @@ class UserModel {
     };
 
     /**
+     * Ensure admin user exists in database when auth is disabled
+     * Creates the user if it doesn't exist, does nothing otherwise
+     * @returns {Promise<void>}
+     */
+    ensureAdminUserExists = async () => {
+        const adminUser = await this.findUserAccount("admin");
+        if (!adminUser) {
+            await this.addUserAccount({
+                _type: "database",
+                login: "admin",
+                groups: ["admin"],
+                source: "database",
+                token: "admin",
+                password: "",
+                allowSourceCreation: true,
+                maxNumberCreatedSource: 999,
+            });
+            console.log("✅ Auto-created admin user for auth:disabled mode");
+        }
+    };
+
+    /**
      * @param {UserAccount} modifiedUserAccount
      */
     updateUserAccount = async (user) => {

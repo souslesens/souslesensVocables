@@ -233,6 +233,9 @@ var UI = (function () {
                 }
                 _sourcesHideTimeout = setTimeout(function () {
                     _sourcesHideTimeout = null;
+                    if ($("#popupMenuWidgetDiv").is(":visible")) {
+                        return;
+                    }
                     hidePopupNow();
                 }, 150);
             };

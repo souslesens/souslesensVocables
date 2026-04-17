@@ -95,7 +95,7 @@ class UserDataModel {
      * @returns {User} – the user from the request, an admin account otherwise
      */
     _getUser = (user) => {
-        if ((user === undefined) & (this._mainConfig.auth === "disabled")) {
+        if (user === undefined && this._mainConfig.auth === "disabled") {
             return { id: "1", login: "admin", groups: ["admin"] };
         }
         return user;

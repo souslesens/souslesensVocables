@@ -1,0 +1,9 @@
+PREFIX bsbm: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+SELECT * FROM <http://toto.com/example>
+WHERE {
+  ?product rdfs:label ?label;
+    bsbm:price ?price.
+  FILTER(?price < 50 )
+  OPTIONAL { ?product bsbm:feature ?feature. }
+}

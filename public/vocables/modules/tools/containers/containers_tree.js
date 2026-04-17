@@ -421,7 +421,7 @@ var Containers_tree = (function () {
             action: function (_e) {
                 var graphNodeData = Lineage_whiteboard.currentGraphNode.data;
                 Containers_tree.menuActions.addResourcesToContainer(self.currentSource, self.currentContainer, graphNodeData, false, function (result) {
-                 /*   if (err) {
+                    /*   if (err) {
                         return MainController.errorAlert(err.responseText || err);
                     }*/
                     Containers_graph.graphResources(self.currentSource, self.currentContainer.data, { leaves: true });

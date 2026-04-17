@@ -50,7 +50,7 @@ var MappingModeler_bot = (function () {
                     },
                 },
                 "add owl:EquivalentClassColumn": {
-                    listTableColumnsFn: {setEquivalentClassFn:{}}
+                    listTableColumnsFn: { setEquivalentClassFn: {} },
                 },
                 "add transform": {
                     addTransformFn: {},
@@ -185,12 +185,11 @@ var MappingModeler_bot = (function () {
                     self.myBotEngine.nextStep();
                 });
             }
-
         },
 
         listTableColumnsFn: function () {
             var choices = self.params.columns;
-            self.myBotEngine.showList(choices, "predicateObjectColumn",);
+            self.myBotEngine.showList(choices, "predicateObjectColumn");
         },
         createDatatypePropertyFn: function () {
             var classId = self.params.columnClass;
@@ -257,10 +256,9 @@ var MappingModeler_bot = (function () {
                 self.myBotEngine.showList(vocabs, "datatypePropertySource");
             });
         },
-        setEquivalentClassFn:function(){
-            self.params.predicate="owl:equivalentClass"
-        }
-
+        setEquivalentClassFn: function () {
+            self.params.predicate = "owl:equivalentClass";
+        },
     };
 
     return self;

@@ -18,6 +18,7 @@ export const UserDataSchema = z.object({
     data_source: z.string(),
     modification_date: z.string(),
     readwrite: z.boolean().default(false),
+    data_content: z.any().optional(),
 });
 
 export type UserData = z.infer<typeof UserDataSchema>;

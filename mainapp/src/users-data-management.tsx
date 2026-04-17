@@ -11,13 +11,18 @@ import Paper from "@mui/material/Paper";
 import { ButtonWithConfirmation } from "./Component/ButtonWithConfirmation";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
+import { IconButton } from "@mui/material";
+import { Edit } from "@mui/icons-material";
 
 import { UserData, UserDataDialog } from "./Component/UserDataDialog";
+import { EditUserDataDialog } from "./Component/EditUserDataDialog";
 
 export default function UsersDataManagement() {
     const [usersData, setUsersData] = useState<UserData[]>([]);
     const [displayModal, setDisplayModal] = useState<boolean>(false);
     const [editingUser, setEditingUser] = useState<UserData | null>(null);
+    const [displayEditDialog, setDisplayEditDialog] = useState<boolean>(false);
+    const [selectedUserDataId, setSelectedUserDataId] = useState<number | null>(null);
 
     const fetchUsersData = async () => {
         const response = await fetch("/api/v1/users/data");
@@ -36,6 +41,20 @@ export default function UsersDataManagement() {
     };
 
     const handleCloseDialog = () => setDisplayModal(false);
+
+    const handleOpenEditDialog = (userDataId: number) => {
+        setSelectedUserDataId(userDataId);
+        setDisplayEditDialog(true);
+    };
+
+    const handleCloseEditDialog = () => {
+        setDisplayEditDialog(false);
+        setSelectedUserDataId(null);
+    };
+
+    const handleEditSave = () => {
+        void fetchUsersData();
+    };
 
     const handleSave = async (newData: UserData) => {
         if (editingUser) {
@@ -99,7 +118,12 @@ export default function UsersDataManagement() {
                                     <TableCell align="right">{row.data_tool}</TableCell>
                                     <TableCell align="right">{row.data_source}</TableCell>
                                     <TableCell align="right">
-                                        <ButtonWithConfirmation func={deleteUserData} label="Delete" args={[row.id]} />
+                                        <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
+                                            <IconButton aria-label="edit" color="primary" onClick={() => handleOpenEditDialog(row.id)} size="small" title="Edit">
+                                                <Edit />
+                                            </IconButton>
+                                            <ButtonWithConfirmation func={deleteUserData} label="Delete" args={[row.id]} />
+                                        </Stack>
                                     </TableCell>
                                 </TableRow>
                             ))}
@@ -114,6 +138,7 @@ export default function UsersDataManagement() {
             </Stack>
 
             <UserDataDialog open={displayModal} onClose={handleCloseDialog} onSave={handleSave} defaultValue={defaultUserValue} />
+            <EditUserDataDialog open={displayEditDialog} onClose={handleCloseEditDialog} onSave={handleEditSave} userDataId={selectedUserDataId || 0} />
         </>
     );
 }

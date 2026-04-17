@@ -14,14 +14,6 @@ import Stack from "@mui/material/Stack";
 
 import { UserData, UserDataDialog } from "./Component/UserDataDialog";
 
-declare global {
-    interface Window {
-        UsersDataManagement: {
-            createApp: () => void;
-        };
-    }
-}
-
 export default function UsersDataManagement() {
     const [usersData, setUsersData] = useState<UserData[]>([]);
     const [displayModal, setDisplayModal] = useState<boolean>(false);
@@ -125,11 +117,3 @@ export default function UsersDataManagement() {
         </>
     );
 }
-
-window.UsersDataManagement.createApp = function createApp() {
-    const container = document.getElementById("mount-users-data-management-here");
-
-    const root = createRoot(container!);
-    root.render(<UsersDataManagement />);
-    return root.unmount.bind(root);
-};

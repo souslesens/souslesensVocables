@@ -1,7 +1,7 @@
-<<<<<<< HEAD
 import { jest } from "@jest/globals";
+import fs from "node:fs";
 
-import { convertType, chunk, cleanupConnection, getKnexConnection, redoIfFailure } from "../model/utils.js";
+import { convertType, chunk, cleanupConnection, getKnexConnection, addFromsToSparqlQuery, redoIfFailure } from "../model/utils.js";
 
 describe("redoIfFailure", () => {
     test("redo", async () => {
@@ -17,10 +17,6 @@ describe("redoIfFailure", () => {
         expect(ntry).toBe(4);
     });
 });
-=======
-const { convertType, chunk, cleanupConnection, getKnexConnection, addFromsToSparqlQuery } = require("../model/utils");
-const fs = require("node:fs");
->>>>>>> f07e45c87 (feat(utils): add a addFromsToSparqlQuery function)
 
 describe("convertTypeUtils", () => {
     test("Convert string to boolean", async () => {
@@ -92,7 +88,7 @@ describe("addFromToSparqlQuery", () => {
     });
     test("add FROM to a complexe SPARQL query", async () => {
         const sparql = fs.readFileSync("./tests/data/sparql/bsbm4.sparql", "utf8");
-        const expected = fs.readFileSync("./tests/data/sparql/bsbm4_FROM.sparql", "utf8").slice(0, -1); // slice to remove last \n
+        const expected = fs.readFileSync("./tests/data/sparql/bsbm4_FROM.sparql", "utf8").slice(0, -1);
         expect(addFromsToSparqlQuery(sparql, ["http://toto.com/example"])).toStrictEqual(expected);
     });
     test("replace FROM", async () => {

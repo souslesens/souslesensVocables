@@ -202,23 +202,43 @@ var UI = (function () {
             $popup.hide();
 
             $panel.off("mouseenter.sourcesPanel mouseleave.sourcesPanel");
-            $popup.off("mouseenter.sourcesPanel mouseleave.sourcesPanel");
+            $(document).off("mousemove.sourcesPanel mousedown.sourcesPanel");
+
+            var $indicator = $("#lineage_compactSourceIndicator");
+
+            var refreshActiveSourceIndicator = function () {
+                var $active = $(".Lineage_selectedSourceDiv").first();
+                if ($active.length) {
+                    $indicator.html($active.prop("outerHTML")).show();
+                } else {
+                    $indicator.hide().empty();
+                }
+            };
 
             var cancelHide = function () {
                 clearTimeout(_sourcesHideTimeout);
                 _sourcesHideTimeout = null;
             };
 
+            var hidePopupNow = function () {
+                cancelHide();
+                disconnectCtxObserver();
+                $popup.hide();
+                refreshActiveSourceIndicator();
+            };
+
             var scheduleHide = function () {
-                clearTimeout(_sourcesHideTimeout);
+                if (_sourcesHideTimeout) {
+                    return;
+                }
                 _sourcesHideTimeout = setTimeout(function () {
                     _sourcesHideTimeout = null;
-                    if ($("#popupMenuWidgetDiv").is(":visible")) {
-                        return;
-                    }
-                    disconnectCtxObserver();
-                    $popup.hide();
+                    hidePopupNow();
                 }, 150);
+            };
+
+            var isInsidePanelOrPopup = function (target) {
+                return target === $panel[0] || $.contains($panel[0], target);
             };
 
             $panel.on("mouseenter.sourcesPanel", function () {
@@ -226,21 +246,53 @@ var UI = (function () {
                 var rect = $panel[0].getBoundingClientRect();
                 $popup.css({ position: "fixed", top: rect.bottom + "px", left: rect.left + "px", zIndex: 200, flexWrap: "wrap", padding: "6px" });
                 $("#lineage_r_addPanel").css("flexDirection", "column");
+                $("#lineage_sourceButtons").css("flexDirection", "column");
                 $popup.addClass("sources-popup-panel").show();
 
                 disconnectCtxObserver();
                 var ctxObserver = new MutationObserver(function () {
                     if (!$(ctxMenuDiv).is(":visible")) {
-                        disconnectCtxObserver();
-                        $popup.hide();
+                        hidePopupNow();
                     }
                 });
                 ctxObserver.observe(ctxMenuDiv, { attributes: true, attributeFilter: ["style"] });
                 $popup.data("ctxObserver", ctxObserver);
             });
+
             $panel.on("mouseleave.sourcesPanel", scheduleHide);
-            $popup.on("mouseenter.sourcesPanel", cancelHide);
-            $popup.on("mouseleave.sourcesPanel", scheduleHide);
+
+            $(document).on("mousemove.sourcesPanel", function (e) {
+                if (!$popup.is(":visible")) {
+                    return;
+                }
+                if (isInsidePanelOrPopup(e.target)) {
+                    cancelHide();
+                } else {
+                    scheduleHide();
+                }
+            });
+
+            $(document).on("mousedown.sourcesPanel", function (e) {
+                if (!$popup.is(":visible")) {
+                    return;
+                }
+                if (!$.contains($panel[0], e.target) && e.target !== $panel[0]) {
+                    hidePopupNow();
+                }
+            });
+
+            var lineageAddPanel = document.getElementById("lineage_r_addPanel");
+            if (lineageAddPanel) {
+                var sourcesListObserver = new MutationObserver(function () {
+                    if (!$popup.is(":visible")) {
+                        refreshActiveSourceIndicator();
+                    }
+                });
+                sourcesListObserver.observe(lineageAddPanel, { childList: true, subtree: true, attributes: true, attributeFilter: ["class"] });
+                $popup.data("sourcesListObserver", sourcesListObserver);
+            }
+
+            refreshActiveSourceIndicator();
         } else {
             if ($popup.is(":visible")) {
                 return;
@@ -253,12 +305,19 @@ var UI = (function () {
             } else {
                 _sourcesPanelCompact = false;
                 disconnectCtxObserver();
+                var sourcesObs = $popup.data("sourcesListObserver");
+                if (sourcesObs) {
+                    sourcesObs.disconnect();
+                    $popup.removeData("sourcesListObserver");
+                }
                 clearTimeout(_sourcesHideTimeout);
                 _sourcesHideTimeout = null;
                 $panel.off("mouseenter.sourcesPanel mouseleave.sourcesPanel");
-                $popup.off("mouseenter.sourcesPanel mouseleave.sourcesPanel");
+                $(document).off("mousemove.sourcesPanel mousedown.sourcesPanel");
+                $("#lineage_compactSourceIndicator").hide().empty();
                 $popup.css({ position: "", visibility: "", flexWrap: "", padding: "" });
                 $("#lineage_r_addPanel").css("flexDirection", "row");
+                $("#lineage_sourceButtons").css("flexDirection", "row");
             }
         }
     };

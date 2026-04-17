@@ -5,6 +5,7 @@ import { Alert, Snackbar, Stack, Tab, Tabs } from "@mui/material";
 
 import { UserInfo } from "./Component/UserInfo";
 import { UserSources } from "./Component/UserSources";
+import UsersDataManagement from "./users-data-management";
 
 declare global {
     interface Window {
@@ -17,6 +18,7 @@ declare global {
 enum Sections {
     Settings = "settings",
     Sources = "sources",
+    UsersData = "usersData",
 }
 
 export type Severity = "error" | "info" | "success" | "warning";
@@ -29,7 +31,7 @@ export type SnackInfo = {
 
 interface DispatcherProps {
     handleSnackbar: (msg: string, severity?: Severity) => void;
-    selectedTab: Sections.Settings | Sections.Sources;
+    selectedTab: Sections.Settings | Sections.Sources | Sections.UsersData;
 }
 
 const Dispatcher = ({ handleSnackbar, selectedTab }: DispatcherProps) => {
@@ -38,6 +40,8 @@ const Dispatcher = ({ handleSnackbar, selectedTab }: DispatcherProps) => {
             return <UserInfo handleSnackbar={handleSnackbar} />;
         case Sections.Sources:
             return <UserSources handleSnackbar={handleSnackbar} />;
+        case Sections.UsersData:
+            return <UsersDataManagement />;
     }
 };
 
@@ -85,6 +89,7 @@ export default function UserSettings() {
             >
                 <Tab label="API token" value={Sections.Settings} />
                 <Tab label="Sources" value={Sections.Sources} />
+                <Tab label="Users Data" value={Sections.UsersData} />
             </Tabs>
             <Dispatcher handleSnackbar={handleSnackbar} selectedTab={selectedTab} />
         </Stack>

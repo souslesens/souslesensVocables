@@ -370,12 +370,12 @@ var NodeInfosWidget = (function () {
                 var types = [];
                 var graphUri = "";
                 var uniqueTriples = {};
+                if (self.currentNode && self.currentNode.data && self.currentNode.data.label) {
+                    $("#ui-id-1").text("Node infos : " + self.currentNode.data.label);
+                }
                 data.forEach(function (item) {
                     if (!item.value) {
                         item.value = { value: "" };
-                    }
-                    if (item.prop.value.indexOf("label") > -1) {
-                        $("#ui-id-1").text("Node infos : " + item.value.value);
                     }
                     var key;
                     if (item.objectValue) {

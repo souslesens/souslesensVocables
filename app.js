@@ -339,6 +339,17 @@ app.get("/", function (req, res, next) {
     res.redirect(redirect);
 });
 
+// Ensure admin user exists when auth is disabled
+if (config.auth === "disabled") {
+    (async () => {
+        try {
+            await userModel.ensureAdminUserExists();
+        } catch (error) {
+            console.error("⚠️ Failed to auto-create admin user:", error.message);
+        }
+    })();
+}
+
 // Login routes
 if (config.auth == "disabled") {
     app.get("/login", function (req, res, _next) {

@@ -15,10 +15,21 @@ const user = {
                 : {};
 
         if (config.auth === "disabled") {
+            const [_name, adminUser] = await userModel.findUserAccount("admin");
+            if (adminUser === undefined) {
+                throw Error("Admin user not found in database. Ensure ensureAdminUserExists() was called at startup.");
+            }
             result = {
                 logged: true,
-                user: { login: "admin", id: 1, source: "disabled", name: "admin", groups: ["admin"], token: "admin", allowSourceCreation: true, maxNumberCreatedSource: 999 },
-                authSource: "json",
+                user: {
+                    id: adminUser.id,
+                    login: adminUser.login,
+                    groups: adminUser.groups,
+                    token: adminUser.token,
+                },
+                authSource: "disabled",
+                allowSourceCreation: adminUser.allowSourceCreation,
+                maxNumberCreatedSource: adminUser.maxNumberCreatedSource,
                 auth: {},
             };
         } else if (logged) {

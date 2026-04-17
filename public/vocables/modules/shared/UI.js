@@ -194,8 +194,14 @@ var UI = (function () {
             }
         };
 
+        var isOverflowing = function () {
+            var popupRect = $popup[0].getBoundingClientRect();
+            var barRect = sourcesBar.getBoundingClientRect();
+            return popupRect.right > barRect.right + 1;
+        };
+
         if (!_sourcesPanelCompact) {
-            if (sourcesBar.scrollWidth <= sourcesBar.clientWidth) {
+            if (!isOverflowing()) {
                 return;
             }
             _sourcesPanelCompact = true;
@@ -207,7 +213,7 @@ var UI = (function () {
             var $indicator = $("#lineage_compactSourceIndicator");
 
             var refreshActiveSourceIndicator = function () {
-                var $active = $(".Lineage_selectedSourceDiv").first();
+                var $active = $("#lineage_r_addPanel .Lineage_selectedSourceDiv").first();
                 if ($active.length) {
                     $indicator.html($active.prop("outerHTML")).show();
                 } else {
@@ -287,9 +293,7 @@ var UI = (function () {
             var lineageAddPanel = document.getElementById("lineage_r_addPanel");
             if (lineageAddPanel) {
                 var sourcesListObserver = new MutationObserver(function () {
-                    if (!$popup.is(":visible")) {
-                        refreshActiveSourceIndicator();
-                    }
+                    refreshActiveSourceIndicator();
                 });
                 sourcesListObserver.observe(lineageAddPanel, { childList: true, subtree: true, attributes: true, attributeFilter: ["class"] });
                 $popup.data("sourcesListObserver", sourcesListObserver);
@@ -301,8 +305,11 @@ var UI = (function () {
                 return;
             }
             // Measure with popup restored inline but invisible to avoid flicker
+            // Reset flexDirection to row so the measurement reflects actual inline layout
+            $("#lineage_r_addPanel").css("flexDirection", "row");
+            $("#lineage_sourceButtons").css("flexDirection", "row");
             $popup.css({ position: "static", visibility: "hidden", display: "flex", flexWrap: "nowrap", padding: "" }).removeClass("sources-popup-panel");
-            var wouldOverflow = sourcesBar.scrollWidth > sourcesBar.clientWidth;
+            var wouldOverflow = isOverflowing();
             if (wouldOverflow) {
                 $popup.css({ position: "", visibility: "" }).hide();
             } else {

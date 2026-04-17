@@ -8,6 +8,7 @@ import ElasticSearchProxy from "../../modules/search/elasticSearchProxy.js";
 import SearchUtil from "../../modules/search/searchUtil.js";
 import MainController from "../../modules/shared/mainController.js";
 import PredicatesSelectorWidget from "../../modules/uiWidgets/predicatesSelectorWidget.js";
+import Predicates_bot from "../../modules/bots/predicates_bot.js";
 
 import Lineage_sources from "../../modules/tools/lineage/lineage_sources.js";
 import authentication from "../../modules/shared/authentification.js";
@@ -300,32 +301,22 @@ var NodeInfosWidget = (function () {
         if (Lineage_sources.isSourceEditableForUser(self.currentSource) && !options.hideModifyButtons) {
             str +=
                 "<button id='addPredicateButton' class='w3-button slsv-right-top-bar-button nodeInfos-button' " +
-                "onclick='PredicatesSelectorWidget.init(Lineage_sources.activeSource, NodeInfosWidget.configureEditPredicateWidget)'>  Add Predicate </button>";
-            /* str +=
-                 "<button id='addRestriction' class='w3-button slsv-right-top-bar-button nodeInfos-button' " +
-                 "onclick='NodeInfosWidget.showAddRestrictionWidget()'>  Add restriction </button>";*/
+                "onclick='Predicates_bot.start(Lineage_sources.activeSource)'>  Add Predicate </button>";
 
             str += "<button id='deleteButton' class='w3-button slsv-right-top-bar-button nodeInfos-button' onclick='NodeInfosWidget.deleteNode()'> Delete </button>";
-            str += "<div id='sourceBrowser_addPropertyDiv' style=''>";
+            str += "<div id='sourceBrowser_addPropertyDiv' style='display:none'>";
         }
 
         if (authentication.currentUser.groupes.indexOf("Annotator") > -1) {
             str +=
                 "<button id='addPredicateButton' class='w3-button slsv-right-top-bar-button nodeInfos-button' " +
-                "onclick='PredicatesSelectorWidget.init(Lineage_sources.activeSource, NodeInfosWidget.configureEditPredicateWidget)'>  Add Predicate </button>";
-            str += "<div id='sourceBrowser_addPropertyDiv' style=''>";
+                "onclick='Predicates_bot.start(Lineage_sources.activeSource)'>  Add Predicate </button>";
+            str += "<div id='sourceBrowser_addPropertyDiv' style='display:none'>";
         }
 
         str += "</div>";
 
         $("#" + self.currentNodeIdInfosDivId).prepend(str);
-
-        if (Lineage_sources.isSourceEditableForUser(self.currentSource) && !options.hideModifyButtons) {
-            PredicatesSelectorWidget.load("sourceBrowser_addPropertyDiv", self.currentSource, {}, function () {
-                //$("#editPredicate_controlsDiv").css("display", "block");
-                $("#sourceBrowser_addPropertyDiv").css("display", "none");
-            });
-        }
     };
 
     self.configureEditPredicateWidget = function () {
@@ -379,12 +370,12 @@ var NodeInfosWidget = (function () {
                 var types = [];
                 var graphUri = "";
                 var uniqueTriples = {};
+                if (self.currentNode && self.currentNode.data && self.currentNode.data.label) {
+                    $("#ui-id-1").text("Node infos : " + self.currentNode.data.label);
+                }
                 data.forEach(function (item) {
                     if (!item.value) {
                         item.value = { value: "" };
-                    }
-                    if (item.prop.value.indexOf("label") > -1) {
-                        $("#ui-id-1").append(" " + item.value.value);
                     }
                     var key;
                     if (item.objectValue) {
@@ -452,9 +443,9 @@ value = item.valueLabel.value;*/
                     var predicateId = common.getRandomHexaId(5);
                     PredicatesSelectorWidget.predicatesIdsMap[predicateId] = { item: item };
 
-                    // dont manage lang clustering when source is editable
+                    // dont manage lang clustering when source is editable --> why?? I remove it for now
 
-                    if (!Lineage_sources.isSourceEditableForUser(sourceLabel) && item.value && item.value["xml:lang"]) {
+                    if (item.value && item.value["xml:lang"]) {
                         if (!self.propertiesMap.properties[propName].langValues[item.value["xml:lang"]]) {
                             self.propertiesMap.properties[propName].langValues[item.value["xml:lang"]] = [];
                         }
@@ -576,8 +567,7 @@ defaultLang = 'en';*/
                 }
                 Sparql_OWL.getLabelsMap(sourceLabel, options, function (err, result) {
                     if (err) {
-                        UI.message(err.responseText);
-                        return;
+                        result = {};
                     }
                     if (result) {
                         Object.keys(result).forEach(function (item) {
@@ -592,7 +582,10 @@ defaultLang = 'en';*/
 
                         strGeneratedByProp += "<tr class='infos_table'>";
 
-                        if (self.propertiesMap.properties[key].value) {
+                        if (
+                            self.propertiesMap.properties[key].value &&
+                            (!Object.keys(self.propertiesMap.properties[key].langValues).length || Object.keys(self.propertiesMap.properties[key].langValues).length == 0)
+                        ) {
                             var values = self.propertiesMap.properties[key].value;
                             var hasPlaceholderValue = values.some(function (v) {
                                 return v && v.value === "?";
@@ -618,11 +611,9 @@ defaultLang = 'en';*/
                                 var optionalStr = getOptionalStr(key, predicateId);
 
                                 if (value.indexOf("http") == 0 && value.indexOf(" ") == -1 && value.indexOf(",") == -1) {
-                                    if (valueLabelsMap[value]) {
-                                        value = "<a target='" + self.getUriTarget(nodeId) + "' href='" + value + "'>" + valueLabelsMap[value] + "</a>";
-                                    } else {
-                                        value = "<a target='" + self.getUriTarget(value) + "' href='" + value + "'>" + value + "</a>";
-                                    }
+                                    var uriLabel = valueLabelsMap[value];
+                                    var titleAttr = uriLabel ? " title='" + uriLabel.replace(/'/g, "&#39;") + "'" : "";
+                                    value = "<a target='" + self.getUriTarget(value) + "' href='" + value + "'" + titleAttr + ">" + value + "</a>";
                                 }
                                 if (index > 0) {
                                     valuesStr += "<br>";
@@ -653,11 +644,9 @@ defaultLang = 'en';*/
                                     var optionalStr = getOptionalStr(key, valueObject.predicateId);
                                     var value = valueObject.value;
                                     if (value.indexOf("http") == 0 && value.indexOf(" ") == -1 && value.indexOf(",") == -1) {
-                                        if (valueLabelsMap[value]) {
-                                            value = "<a target='" + NodeInfosWidget.getUriTarget(nodeId) + "' href='" + value + "'>" + valueLabelsMap[value] + "</a>";
-                                        } else {
-                                            value += "<a target='" + NodeInfosWidget.getUriTarget(value) + "' href='" + value + "'>" + value + "</a>";
-                                        }
+                                        var uriLabel = valueLabelsMap[value];
+                                        var titleAttr = uriLabel ? " title='" + uriLabel.replace(/'/g, "&#39;") + "'" : "";
+                                        value = "<a target='" + NodeInfosWidget.getUriTarget(value) + "' href='" + value + "'" + titleAttr + ">" + value + "</a>";
                                     }
                                     var optionalStr = ""; //  complcated to manage lang together with edit and delete
                                     // var optionalStr = getOptionalStr(key,valueObject.predicateId);
@@ -1272,15 +1261,15 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
             async.series(
                 [
                     function (callbackSeries) {
-                        var object = currentEditingItem.item.value.value;
-                        if (currentEditingItem.item.value.type == "literal") {
+                        var itemValue = currentEditingItem.item.value;
+                        var object = itemValue.value;
+                        if (itemValue.type == "literal" || itemValue.type == "typed-literal") {
                             object = {
                                 isString: true,
-                                value: currentEditingItem.item.value.value,
-                                lang: currentEditingItem.item.value["xml:lang"],
+                                value: itemValue.value,
+                                lang: itemValue["xml:lang"],
+                                datatype: itemValue.datatype,
                             };
-                            /*   if(currentEditingItem.item.value["xml:lang"])
-object+="@"+currentEditingItem.item.value["xml:lang"]*/
                         }
                         Sparql_generic.deleteTriples(self.currentSource, self.currentNodeId, currentEditingItem.item.prop.value, object, function (err, _result) {
                             if (err) {
@@ -1537,55 +1526,17 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
         }
     };
     self.showModifyPredicateDialog = function (predicateId) {
-        PredicatesSelectorWidget.currentEditingItem = PredicatesSelectorWidget.predicatesIdsMap[predicateId];
-        if (!PredicatesSelectorWidget.currentEditingItem) {
+        var item = PredicatesSelectorWidget.predicatesIdsMap[predicateId];
+        if (!item) {
             return alert("error");
         }
-
-        PredicatesSelectorWidget.init(Lineage_sources.activeSource, function () {
-            self.showHidePropertiesDiv("hide");
-
-            if (PredicatesSelectorWidget.currentEditingItem.item.value.type != "uri") {
-                //hide both
-                self.setLargerObjectTextArea();
-                $("#editPredicate_objectSelectDiv").hide();
-                $("#editPredicate_largerTextButton").hide();
-            } else {
-                $("#editPredicate_objectSelectDiv").show();
-                $("#editPredicate_largerTextButton").show();
-                $("#editPredicate_objectValue").hide();
-                var vocab = common.getVocabularyFromURI(PredicatesSelectorWidget.currentEditingItem.item.value.value);
-                if (vocab) {
-                    $("#editPredicate_vocabularySelect").val(vocab[0]);
-                    PredicatesSelectorWidget.setCurrentVocabPropertiesSelect(vocab[0], "editPredicate_currentVocabPredicateSelect", function () {
-                        $("#editPredicate_currentVocabPredicateSelect").val(PredicatesSelectorWidget.currentEditingItem.item.prop.value);
-                        $("#editPredicate_propertyValue").val(PredicatesSelectorWidget.currentEditingItem.item.prop.value);
-                        //PredicatesSelectorWidget.onSelectPredicateProperty($('#editPredicate_currentVocabPredicateSelect').val());
-                    });
-
-                    $("#editPredicate_vocabularySelect2").val(vocab[0]);
-                    PredicatesSelectorWidget.setCurrentVocabClassesSelect(vocab[0], "editPredicate_objectSelect", function () {
-                        $("#editPredicate_objectSelect").val(PredicatesSelectorWidget.currentEditingItem.item.value.value);
-                        PredicatesSelectorWidget.onSelectCurrentVocabObject(PredicatesSelectorWidget.currentEditingItem.item.value.value);
-                    });
-                }
-            }
-
-            $("#editPredicate_objectValue").val(PredicatesSelectorWidget.currentEditingItem.item.value.value);
-            $("#editPredicate_propertyValue").val(PredicatesSelectorWidget.currentEditingItem.item.prop.value);
-            $("#editPredicate_objectValue").trigger("focus");
-            $("#editPredicate_savePredicateButton").click(function () {
-                PredicatesSelectorWidget.storeRecentPredicates();
-
-                self.deletePredicate(predicateId, false, function () {
-                    self.addPredicate(null, null, null, null, function () {
-                        self.showNodeInfos(MainController.currentSource, self.currentNode, "mainDialogDiv", { resetVisited: 1 });
-                        $("#editPredicate_objectValue").val("");
-                        $("#editPredicate_propertyValue").val("");
-                    });
-                });
-            });
-        });
+        var editItem = {
+            predicateId: predicateId,
+            property: item.item.prop.value,
+            object: item.item.value.value,
+            objectType: item.item.value.type,
+        };
+        Predicates_bot.start(Lineage_sources.activeSource, editItem);
     };
 
     self.hideAddPredicateDiv = function () {

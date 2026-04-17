@@ -3,6 +3,7 @@ import SearchUtil from "../search/searchUtil.js";
 import Sparql_proxy from "../sparqlProxies/sparql_proxy.js";
 import Sparql_common from "../sparqlProxies/sparql_common.js";
 import JstreeWidget from "../uiWidgets/jstreeWidget.js";
+import SourceSelectorWidget from "../uiWidgets/sourceSelectorWidget.js";
 
 var CommonBotFunctions = (function () {
     var self = {};
@@ -343,6 +344,11 @@ var CommonBotFunctions = (function () {
                 callback();
             }
         });
+    };
+
+    self.getSourcesJstreeData = function (types) {
+        var treeData = SourceSelectorWidget.getSourcesJstreeData(types);
+        return SourceSelectorWidget.addRecentSources(treeData);
     };
 
     self.getSourceAndImports = function (source) {

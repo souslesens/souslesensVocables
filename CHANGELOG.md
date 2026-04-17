@@ -2,6 +2,79 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.2.0](https://github.com/souslesens/souslesensVocables/compare/3.1.0...3.2.0) (2026-04-17)
+
+> [!IMPORTANT]
+> Updating to 3.2.0 require a data migration. Execute the following script after upgrade.
+
+```bash
+npm run migrate
+```
+
+
+### Features
+
+* **/metrics:** enable/disable metrics + manage basic auth ([93e56fd](https://github.com/souslesens/souslesensVocables/commit/93e56fdb168936c529ca4dd10c900163b63b7d89))
+* add method to the quota system ([c044d36](https://github.com/souslesens/souslesensVocables/commit/c044d369d864cce669f32031cfbb0f6f7df6919d))
+* **api:** add /api/v1/routesinfo ([373da66](https://github.com/souslesens/souslesensVocables/commit/373da661fce6738d39a1217017fa900d5a229dab))
+* **api:** add restrictQuota middleware on routes that uses Virtuoso or Elasticsearch ([7add995](https://github.com/souslesens/souslesensVocables/commit/7add995063cf9f01fac30134387f02f2b6a6adce))
+* **api:** detect mimetype at upload ([5f68367](https://github.com/souslesens/souslesensVocables/commit/5f68367e29bc0308f8592edc39779ad87d3a08ad))
+* **api:** POST rdf/graph: if mimetype is nt, upload chunk directly ([8f4edae](https://github.com/souslesens/souslesensVocables/commit/8f4edaef40f01820d740e68c5aad866d07c4c6ce))
+* **api:** use addFromsToSparqlQuery with yasguiQuery ([8c946e5](https://github.com/souslesens/souslesensVocables/commit/8c946e5b5cea19c9498acdce74879388b5339045))
+* **api:** users/data/exec: use addFromsToSparqlQuery to restrict results from user sources ([5dcc530](https://github.com/souslesens/souslesensVocables/commit/5dcc530171925624273adf273cfd13ee0011b68c))
+* **app:** use wholeQuota option ([fd66215](https://github.com/souslesens/souslesensVocables/commit/fd66215aac6c89f01f103cdcdcbbf2a3c8e4f037))
+* delete graph with DELETE route ([969737c](https://github.com/souslesens/souslesensVocables/commit/969737ceadd6e21bb35348fcb70d7b000951e5aa))
+* expose api usage metrics on /metrics ([cc54cb4](https://github.com/souslesens/souslesensVocables/commit/cc54cb45ddbcc283c5fd4654cd4ec99d5dbbe5fd))
+* **mainapp:** add range to fetch logs ([4dca72b](https://github.com/souslesens/souslesensVocables/commit/4dca72beb75c7e3e71900ef1286a0fbec1a8fa4c))
+* **mainapp:** ConfigEditor/Settings: configure generalQuota" ([43dd43b](https://github.com/souslesens/souslesensVocables/commit/43dd43b1a47c39dcba45b93c724acdebb9b45b1d))
+* **mainapp:** crud quota in configEditor ([1fa2698](https://github.com/souslesens/souslesensVocables/commit/1fa269886a839655c078db5ab1481e2f97e048e2))
+* **mainapp:** download json profiles ([cf16e37](https://github.com/souslesens/souslesensVocables/commit/cf16e3754afaf6f676b542a820e08d0f2d3c57f2))
+* **mainapp:** upload JSON button on profile page ([98ad522](https://github.com/souslesens/souslesensVocables/commit/98ad522e80ffff80543665143d3b0cb906c4c63f))
+* **mainapp:** upload json on database table ([14ae84e](https://github.com/souslesens/souslesensVocables/commit/14ae84e41ebfb5d8a95fed8d655b8dd3897c5118))
+* **mainapp:** UploadGraphModal: send chunk of 10000 lines ([5a85e1c](https://github.com/souslesens/souslesensVocables/commit/5a85e1ca96575a729031d32819b5dc8d96cf0d51))
+* **migrations:** add quota table ([afc678c](https://github.com/souslesens/souslesensVocables/commit/afc678c539d8feb7ab3337c25c5e2a44db6942f5))
+* **migrations:** add quota table to profiles ([4fa0a86](https://github.com/souslesens/souslesensVocables/commit/4fa0a8664fca6a15bf5f22c86397d6b679a1e766))
+* **migrations:** migrate mainConfig.json to add generalQuota ([2fa1ebf](https://github.com/souslesens/souslesensVocables/commit/2fa1ebf6fc20f5f2e39ddade73383be6e7a57598))
+* **migrations:** migrate metrics config ([96c1e27](https://github.com/souslesens/souslesensVocables/commit/96c1e27615d7921c24bbca690557edebfca11c41))
+* **model/config:** add generalQuota ([273c141](https://github.com/souslesens/souslesensVocables/commit/273c1418582d731eab45210481bf3561f8297211))
+* **model/profile:** add getMaxQuotaForRoute function ([fd3585d](https://github.com/souslesens/souslesensVocables/commit/fd3585d8244f719ffac975948e364869450d15de))
+* **model/profiles:** return quota ([ec114b7](https://github.com/souslesens/souslesensVocables/commit/ec114b70cc38e8d031f9b727a25867c7063de52e))
+* **model/quota:** add getRouteUsage function ([649447e](https://github.com/souslesens/souslesensVocables/commit/649447ec00964862718128bc4d60079f14715cba))
+* **model:** add quota model ([eca79a8](https://github.com/souslesens/souslesensVocables/commit/eca79a8e7e18b6f670ef853bc34479c8535098d6))
+* **profiles:** add quota caching to avoid repeated config lookups ([1fea830](https://github.com/souslesens/souslesensVocables/commit/1fea83013a46c33c5ebfd4c1159fdb5747591168))
+* **quota:** add tryConsume method with rate limit headers support ([e5b18cf](https://github.com/souslesens/souslesensVocables/commit/e5b18cf53d4ec4cb1d78c1e7ea10d35e353086a8))
+* **quota:** add wholeProfile option ([14adb07](https://github.com/souslesens/souslesensVocables/commit/14adb07d8c74fde937132fa0cdf0db97d3817356))
+* **quota:** general quota applies for whole users ([1c17762](https://github.com/souslesens/souslesensVocables/commit/1c17762091f922125d95fbb2e13cc18c1b5a4090))
+* restrictQuota middleware ([bd4df6e](https://github.com/souslesens/souslesensVocables/commit/bd4df6e58725e15f40ecad6b710f31e00b22395f))
+* **searchWidget:** language treatment ([a747f9b](https://github.com/souslesens/souslesensVocables/commit/a747f9b8b4b0b210a20c103bc4eb3b1d4b3fd016))
+* **SPARQL:** update modal to save the query to users data ([401fc79](https://github.com/souslesens/souslesensVocables/commit/401fc791c008965fbc584a1f4d475b4bcc72d4a2))
+* **ui:** add help tooltips to API rate limits sections ([57be5d3](https://github.com/souslesens/souslesensVocables/commit/57be5d3d651e569eb4056e24f2bfb2e662b4ea57))
+* **UploadGraphModal:** add deleting state to the progress bar ([1c9b076](https://github.com/souslesens/souslesensVocables/commit/1c9b07607d5d93dd4de4b1f8ba3d132cf9bcac3d))
+* use generalQuota if no profile quota ([87a5292](https://github.com/souslesens/souslesensVocables/commit/87a52922f2e549adb799977fd092fce2c3ee4dca))
+* **utils:** add a addFromsToSparqlQuery function ([91bc530](https://github.com/souslesens/souslesensVocables/commit/91bc53085d2ced4b85d92bf91b45d089432fe6fa))
+
+
+### Bug Fixes
+
+* **api:** delete profile ([d0340ed](https://github.com/souslesens/souslesensVocables/commit/d0340edb4bce5120ead58510019364765cefd02b))
+* **auth:** resolve disabled authentication mode to properly create admin user in database ([0ec498b](https://github.com/souslesens/souslesensVocables/commit/0ec498b05bc39e5b9eb029ace819393db303034f))
+* **config:** clear quota cache when generalQuota config changes ([bde1992](https://github.com/souslesens/souslesensVocables/commit/bde1992ccf523e67cb81fe47ce4c200432051cee))
+* conflit on tests/model.utils.test.js ([81efada](https://github.com/souslesens/souslesensVocables/commit/81efada687b01039561487d9229b3f5433cd73b7))
+* **mainapp:** display quotas in profile editor ([a255b36](https://github.com/souslesens/souslesensVocables/commit/a255b3635231b6c2cb130ea3341144a2273d3300))
+* **mainapp:** fix ConfigEditor/Settings form ([7f91804](https://github.com/souslesens/souslesensVocables/commit/7f91804f378166247b0f1439fe40dddee3603e6b))
+* **model/tools:** remove plugins only if repo is multiplugin ([6bfe33a](https://github.com/souslesens/souslesensVocables/commit/6bfe33a5de7500a71e872279e27b31b240cf8ea8))
+* **nodeInfos:** Lang gestion in nodeInfos ([bb11c7b](https://github.com/souslesens/souslesensVocables/commit/bb11c7b7b021b9a51af73e66ceb8ad8e5378ab92))
+* null guard on lineageVisjsGraph.data before accessing nodes ([aa5b8e7](https://github.com/souslesens/souslesensVocables/commit/aa5b8e75eea5188ad6f6398bdfdb5e8aff3208d1))
+* preserve container nodes when clicking relation button ([0d9116a](https://github.com/souslesens/souslesensVocables/commit/0d9116a123ecb556dbde2a9b6ee98d6c179fc892))
+* preserve container nodes when clicking relation button ([94d1b2d](https://github.com/souslesens/souslesensVocables/commit/94d1b2dbd83d28f4776df57c568e6b010d02c7ab))
+* preserve other-source nodes when clicking relation with multiple sources ([1455b06](https://github.com/souslesens/souslesensVocables/commit/1455b06235f0d119feeeb53f63de152803d45af2))
+* **profiles:** add missing quotaModel import ([668994a](https://github.com/souslesens/souslesensVocables/commit/668994a1b9cc78b61956755c336d3ef66e97a125))
+* **quota:** update bucket capacity when config changes ([1133840](https://github.com/souslesens/souslesensVocables/commit/1133840444b30204a087e96e5a45d56ea622add5))
+* remove only active source nodes when other sources present on whiteboard ([f019185](https://github.com/souslesens/souslesensVocables/commit/f019185bd19eb88b422bb7a8c69a096bed7b7b97))
+* replace & with && ([b4e9b57](https://github.com/souslesens/souslesensVocables/commit/b4e9b5755d51a1228d994e74e39f739ebf22f7b6))
+* **SPARQL:** fix with and height ([874e4a9](https://github.com/souslesens/souslesensVocables/commit/874e4a98c94d6d119e7f4ad52326103a35f3c350))
+* **utils:** correct sleep function and redoIfFailure test ([d87f13e](https://github.com/souslesens/souslesensVocables/commit/d87f13e1e7b1383f956dc6c0c6616ece571118c1))
+
 ## [3.1.0](https://github.com/souslesens/souslesensVocables/compare/3.0.0...3.1.0) (2026-03-11)
 
 ## [3.0.0](https://github.com/souslesens/souslesensVocables/compare/2.24.1...3.0.0) (2026-02-26)

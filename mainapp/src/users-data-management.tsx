@@ -8,14 +8,16 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
-import { ButtonWithConfirmation } from "./Component/ButtonWithConfirmation";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import { IconButton } from "@mui/material";
-import { Edit } from "@mui/icons-material";
+import TextField from "@mui/material/TextField";
+import { Edit, Delete } from "@mui/icons-material";
 
 import { UserData, UserDataDialog } from "./Component/UserDataDialog";
 import { EditUserDataDialog } from "./Component/EditUserDataDialog";
+import { DeleteDialog } from "./Component/DeleteDialog";
+import { cleanUpText } from "./Utils";
 
 export default function UsersDataManagement() {
     const [usersData, setUsersData] = useState<UserData[]>([]);
@@ -23,6 +25,8 @@ export default function UsersDataManagement() {
     const [editingUser, setEditingUser] = useState<UserData | null>(null);
     const [displayEditDialog, setDisplayEditDialog] = useState<boolean>(false);
     const [selectedUserDataId, setSelectedUserDataId] = useState<number | null>(null);
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+    const [filtering, setFiltering] = useState("");
 
     const fetchUsersData = async () => {
         const response = await fetch("/api/v1/users/data");
@@ -56,6 +60,35 @@ export default function UsersDataManagement() {
         void fetchUsersData();
     };
 
+    const handleOpenDeleteDialog = (userDataId: number, userDataLabel: string) => {
+        setSelectedUserDataId(userDataId);
+        setIsDeleteDialogOpen(true);
+    };
+
+    const handleCloseDeleteDialog = () => {
+        setIsDeleteDialogOpen(false);
+        setSelectedUserDataId(null);
+    };
+
+    const handleDeleteUserData = async () => {
+        if (!selectedUserDataId) return;
+        
+        try {
+            const response = await fetch(`/api/v1/users/data/${selectedUserDataId}`, { method: "DELETE" });
+            
+            if (response.status === 200) {
+                await fetchUsersData();
+            } else {
+                const errorData = await response.json();
+                console.error(errorData.message);
+            }
+        } catch (error) {
+            console.error(error);
+        }
+        
+        handleCloseDeleteDialog();
+    };
+
     const handleSave = async (newData: UserData) => {
         if (editingUser) {
             // update
@@ -84,6 +117,12 @@ export default function UsersDataManagement() {
     return (
         <>
             <Stack direction="column" spacing={{ xs: 2 }} sx={{ m: 4 }} useFlexGap>
+                <TextField 
+                    label="Search..." 
+                    id="filter-user-data" 
+                    onChange={(event) => setFiltering(event.target.value)} 
+                    fullWidth
+                />
                 <TableContainer sx={{ height: "400px" }} component={Paper}>
                     <Table sx={{ minWidth: 650 }} aria-label="simple table">
                         <TableHead>
@@ -108,25 +147,35 @@ export default function UsersDataManagement() {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {usersData.map((row) => (
-                                <TableRow key={row.id} sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
-                                    <TableCell align="left" component="th" scope="row">
-                                        {row.id}
-                                    </TableCell>
-                                    <TableCell align="right">{row.data_label}</TableCell>
-                                    <TableCell align="right">{row.data_type}</TableCell>
-                                    <TableCell align="right">{row.data_tool}</TableCell>
-                                    <TableCell align="right">{row.data_source}</TableCell>
-                                    <TableCell align="right">
-                                        <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
-                                            <IconButton aria-label="edit" color="primary" onClick={() => handleOpenEditDialog(row.id)} size="small" title="Edit">
-                                                <Edit />
-                                            </IconButton>
-                                            <ButtonWithConfirmation func={deleteUserData} label="Delete" args={[row.id]} />
-                                        </Stack>
-                                    </TableCell>
-                                </TableRow>
-                            ))}
+                            {usersData
+                                .filter((row) => {
+                                    const filterText = cleanUpText(filtering);
+                                    return (
+                                        cleanUpText(row.data_label).includes(filterText) ||
+                                        cleanUpText(row.data_comment).includes(filterText)
+                                    );
+                                })
+                                .map((row) => (
+                                    <TableRow key={row.id} sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
+                                        <TableCell align="left" component="th" scope="row">
+                                            {row.id}
+                                        </TableCell>
+                                        <TableCell align="right">{row.data_label}</TableCell>
+                                        <TableCell align="right">{row.data_type}</TableCell>
+                                        <TableCell align="right">{row.data_tool}</TableCell>
+                                        <TableCell align="right">{row.data_source}</TableCell>
+                                        <TableCell align="right">
+                                            <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
+                                                <IconButton aria-label="edit" color="primary" onClick={() => handleOpenEditDialog(row.id)} size="small" title="Edit">
+                                                    <Edit />
+                                                </IconButton>
+                                                <IconButton aria-label="delete" color="error" onClick={() => handleOpenDeleteDialog(row.id, row.data_label)} size="small" title="Delete">
+                                                    <Delete />
+                                                </IconButton>
+                                            </Stack>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
                         </TableBody>
                     </Table>
                 </TableContainer>
@@ -139,6 +188,13 @@ export default function UsersDataManagement() {
 
             <UserDataDialog open={displayModal} onClose={handleCloseDialog} onSave={handleSave} defaultValue={defaultUserValue} />
             <EditUserDataDialog open={displayEditDialog} onClose={handleCloseEditDialog} onSave={handleEditSave} userDataId={selectedUserDataId || 0} />
+            <DeleteDialog
+                description={`The user data '${selectedUserDataId ? usersData.find(u => u.id === selectedUserDataId)?.data_label : ''}' will be deleted. Are you sure?`}
+                onClose={handleCloseDeleteDialog}
+                onDelete={handleDeleteUserData}
+                isOpen={isDeleteDialogOpen}
+                title="Delete User Data"
+            />
         </>
     );
 }

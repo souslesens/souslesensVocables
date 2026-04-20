@@ -18,12 +18,20 @@ export const EditUserDataDialog = ({ onClose, onSave, open, userDataId }: EditUs
 
     const [availableSources, setAvailableSources] = useState<string[]>([]);
     const [availableTools, setAvailableTools] = useState<string[]>([]);
+    const [availableProfiles, setAvailableProfiles] = useState<string[]>([]);
+    const [availableUsers, setAvailableUsers] = useState<string[]>([]);
     const [sourcesLoading, setSourcesLoading] = useState(false);
     const [toolsLoading, setToolsLoading] = useState(false);
+    const [profilesLoading, setProfilesLoading] = useState(false);
+    const [usersLoading, setUsersLoading] = useState(false);
     const [sourcesError, setSourcesError] = useState<string | null>(null);
     const [toolsError, setToolsError] = useState<string | null>(null);
+    const [profilesError, setProfilesError] = useState<string | null>(null);
+    const [usersError, setUsersError] = useState<string | null>(null);
     const [sourcesFetched, setSourcesFetched] = useState(false);
     const [toolsFetched, setToolsFetched] = useState(false);
+    const [profilesFetched, setProfilesFetched] = useState(false);
+    const [usersFetched, setUsersFetched] = useState(false);
 
     const dataTypes = ["SparqlQuery", "Template", "Other"];
 
@@ -89,6 +97,48 @@ export const EditUserDataDialog = ({ onClose, onSave, open, userDataId }: EditUs
             console.error("Failed to fetch tools:", err);
         }
         setToolsLoading(false);
+    };
+
+    const fetchProfiles = async () => {
+        if (profilesFetched) return;
+        setProfilesLoading(true);
+        try {
+            const response = await fetch("/api/v1/profiles");
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            const profilesList = Object.keys(data.resources || {}).sort();
+            setAvailableProfiles(profilesList);
+            setProfilesFetched(true);
+            setProfilesError(null);
+        } catch (err) {
+            setProfilesError("Failed to load profiles");
+            console.error("Failed to fetch profiles:", err);
+        }
+        setProfilesLoading(false);
+    };
+
+    const fetchUsers = async () => {
+        if (usersFetched) return;
+        setUsersLoading(true);
+        try {
+            const response = await fetch("/api/v1/users");
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            const usersList = (data.resources || [])
+                .flatMap((item: any) => Object.keys(item))
+                .sort();
+            setAvailableUsers(usersList);
+            setUsersFetched(true);
+            setUsersError(null);
+        } catch (err) {
+            setUsersError("Failed to load users");
+            console.error("Failed to fetch users:", err);
+        }
+        setUsersLoading(false);
     };
 
     const handleFieldChange = (fieldName: keyof UserData, value: UserData[keyof UserData]) => {
@@ -246,24 +296,62 @@ export const EditUserDataDialog = ({ onClose, onSave, open, userDataId }: EditUs
                         {userData?.is_shared && (
                             <>
                                 <Autocomplete
-                                    disabled={loading}
-                                    freeSolo
+                                    disabled={loading || !!profilesError}
+                                    loading={profilesLoading}
+                                    openOnFocus
+                                    onOpen={fetchProfiles}
                                     id="shared_profiles"
                                     multiple
                                     onChange={(_e, value) => handleFieldChange("shared_profiles", value)}
-                                    options={[]}
-                                    renderInput={(params) => <TextField {...params} label="Shared Profiles" />}
+                                    options={availableProfiles}
+                                    getOptionLabel={(option) => option}
+                                    renderInput={(params) => (
+                                        <TextField
+                                            {...params}
+                                            error={!!profilesError}
+                                            helperText={profilesError}
+                                            label="Shared Profiles"
+                                            InputProps={{
+                                                ...params.InputProps,
+                                                endAdornment: (
+                                                    <>
+                                                        {profilesLoading ? <CircularProgress color="inherit" size={16} /> : null}
+                                                        {params.InputProps?.endAdornment}
+                                                    </>
+                                                ),
+                                            }}
+                                        />
+                                    )}
                                     value={userData?.shared_profiles || []}
                                 />
 
                                 <Autocomplete
-                                    disabled={loading}
-                                    freeSolo
+                                    disabled={loading || !!usersError}
+                                    loading={usersLoading}
+                                    openOnFocus
+                                    onOpen={fetchUsers}
                                     id="shared_users"
                                     multiple
                                     onChange={(_e, value) => handleFieldChange("shared_users", value)}
-                                    options={[]}
-                                    renderInput={(params) => <TextField {...params} label="Shared Users" />}
+                                    options={availableUsers}
+                                    getOptionLabel={(option) => option}
+                                    renderInput={(params) => (
+                                        <TextField
+                                            {...params}
+                                            error={!!usersError}
+                                            helperText={usersError}
+                                            label="Shared Users"
+                                            InputProps={{
+                                                ...params.InputProps,
+                                                endAdornment: (
+                                                    <>
+                                                        {usersLoading ? <CircularProgress color="inherit" size={16} /> : null}
+                                                        {params.InputProps?.endAdornment}
+                                                    </>
+                                                ),
+                                            }}
+                                        />
+                                    )}
                                     value={userData?.shared_users || []}
                                 />
                             </>

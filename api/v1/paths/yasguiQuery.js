@@ -4,7 +4,7 @@ import ConfigManager from "../../../bin/configManager.js";
 import UserRequestFiltering from "../../../bin/userRequestFiltering.js";
 import userManager from "../../../bin/user.js";
 import { sourceModel } from "../../../model/sources.js";
-import { addFromsToSparqlQuery } from "../../../model/utils.js";
+import { addFromsToSparqlQuery, hasFromClause, validateFromClause } from "../../../model/utils.js";
 
 export default function () {
     let operations = {
@@ -20,7 +20,13 @@ export default function () {
             let query = req.body.query || req.body.update;
             const headers = {};
 
-            if (req.query.graphUri && graphs.includes(req.query.graphUri)) {
+            if (hasFromClause(query)) {
+                if (!validateFromClause(query, graphs)) {
+                    const error = new Error("DATA PROTECTION: FROM clause contains unauthorized graph URIs");
+                    error.status = 403;
+                    throw error;
+                }
+            } else if (req.query.graphUri && graphs.includes(req.query.graphUri)) {
                 query = addFromsToSparqlQuery(query, [req.query.graphUri], true);
             } else {
                 query = addFromsToSparqlQuery(query, graphs, true);

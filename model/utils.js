@@ -95,6 +95,64 @@ const sleep = (sec) => {
 };
 
 /**
+ * Check if a SPARQL query contains a FROM clause
+ *
+ * @param {string} sparqlQuery - a SPARQL query
+ * @returns {boolean} - true if the query contains a FROM clause, false otherwise
+ */
+const hasFromClause = (sparqlQuery) => {
+    const parser = new sparqljs.Parser();
+    const parsedQuery = parser.parse(sparqlQuery);
+
+    if (!parsedQuery.from) {
+        return false;
+    }
+
+    const hasDefaultFrom = parsedQuery.from.default && parsedQuery.from.default.length > 0;
+    const hasNamedFrom = parsedQuery.from.named && parsedQuery.from.named.length > 0;
+
+    return hasDefaultFrom || hasNamedFrom;
+};
+
+/**
+ * Validate that FROM clauses in a SPARQL query are in an allowed list
+ *
+ * @param {string} sparqlQuery - a SPARQL query
+ * @param {string[]} allowedGraphUris - list of allowed graph URIs
+ * @returns {boolean} - true if all FROM graph URIs are in the allowed list, false otherwise
+ */
+const validateFromClause = (sparqlQuery, allowedGraphUris) => {
+    const parser = new sparqljs.Parser();
+    const parsedQuery = parser.parse(sparqlQuery);
+
+    if (!parsedQuery.from) {
+        return false;
+    }
+
+    const fromGraphUris = [];
+
+    if (parsedQuery.from.default && parsedQuery.from.default.length > 0) {
+        parsedQuery.from.default.forEach((from) => {
+            fromGraphUris.push(from.value);
+        });
+    }
+
+    if (parsedQuery.from.named && parsedQuery.from.named.length > 0) {
+        parsedQuery.from.named.forEach((from) => {
+            fromGraphUris.push(from.value);
+        });
+    }
+
+    if (fromGraphUris.length === 0) {
+        return false;
+    }
+
+    const allValid = fromGraphUris.every((graphUri) => allowedGraphUris.includes(graphUri));
+
+    return allValid;
+};
+
+/**
  * Add a FROM clause to a SPARQL query
  *
  * @param {string} sparqlQuery - a SPARQL query
@@ -196,4 +254,4 @@ const cleanupConnection = (connection) => {
     return connection.destroy && connection.destroy();
 };
 
-export { cleanupConnection, convertType, chunk, getKnexConnection, redoIfFailure, redoIfFailureCallback, RDF_FORMATS_MIMETYPES, sleep, addFromsToSparqlQuery };
+export { cleanupConnection, convertType, chunk, getKnexConnection, redoIfFailure, redoIfFailureCallback, RDF_FORMATS_MIMETYPES, sleep, addFromsToSparqlQuery, hasFromClause, validateFromClause };

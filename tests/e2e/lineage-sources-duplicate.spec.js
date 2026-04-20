@@ -41,10 +41,7 @@ async function selectSourceInDialog(page, sourceName) {
         await searchInput.press("Enter");
         await page.waitForTimeout(500);
     }
-    const sourceNode = page
-        .locator(`#sourceSelector_jstreeDiv`)
-        .getByText(sourceName, { exact: true })
-        .first();
+    const sourceNode = page.locator(`#sourceSelector_jstreeDiv`).getByText(sourceName, { exact: true }).first();
     if (await sourceNode.isVisible({ timeout: 5000 })) {
         await sourceNode.click();
         await page.waitForTimeout(2000);
@@ -110,10 +107,7 @@ test.describe("Lineage sources deduplication (issue #1348)", () => {
 
     test("Lineage_sources.clearRegistrations method exists", async ({ page }) => {
         const hasClearRegistrations = await page.evaluate(() => {
-            return (
-                typeof window.Lineage_sources !== "undefined" &&
-                typeof window.Lineage_sources.clearRegistrations === "function"
-            );
+            return typeof window.Lineage_sources !== "undefined" && typeof window.Lineage_sources.clearRegistrations === "function";
         });
         expect(hasClearRegistrations, "Lineage_sources.clearRegistrations should be a function").toBe(true);
     });

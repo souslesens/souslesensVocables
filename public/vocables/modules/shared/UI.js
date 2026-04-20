@@ -180,7 +180,7 @@ var UI = (function () {
 
     self.sourcePopupHideDelay = 150;
     self.sourcePopupEventsNamespace = ".sourcesPanel";
-    self.sourcePopupFirstLoad = true;
+    //self.sourcePopupFirstLoad = true;
     self.sourcePopupSelectors = {
         panel: "#index_topContolPanel",
         bar: "#lineage_drawnSources",
@@ -193,11 +193,11 @@ var UI = (function () {
     };
 
     self.isSourceContextMenuOpen = function () {
-        if (self.sourcePopupFirstLoad) {
+        /*if (self.sourcePopupFirstLoad) {
             // Avoid treating the context menu as part of the panel on first load when the popup is shown programmatically before any user interaction.
             self.sourcePopupFirstLoad = false;
             return false;
-        }
+        }*/
         return $(self.sourcePopupSelectors.contextMenu).is(":visible");
     };
 

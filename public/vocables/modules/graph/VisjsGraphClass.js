@@ -1577,7 +1577,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
             .on("dialogclose.visjsConfigWrapper", function () {
                 $(window).off("resize.visjsConfigWrapper");
             });
-        $(".vis-configuration-wrapper").css({ "width":"530px" });
+        $(".vis-configuration-wrapper").css({ width: "530px" });
     };
 
     /**

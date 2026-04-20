@@ -173,8 +173,6 @@ var UI = (function () {
         });
     };
 
-    
-
     self.compact = false;
     self.hideTimeout = null;
     self.ctxMenuObserver = null;
@@ -195,12 +193,12 @@ var UI = (function () {
     };
 
     self.isCtxMenuOpen = function () {
-        if(self.sourcePanelFistLoad) {
+        if (self.sourcePanelFistLoad) {
             // Avoid treating the context menu as part of the panel on first load when the popup is shown programmatically before any user interaction.
             self.sourcePanelFistLoad = false;
             return false;
         }
-        return $(self.selectors.ctxMenu).is(":visible") ;
+        return $(self.selectors.ctxMenu).is(":visible");
     };
 
     self.overflows = function () {
@@ -260,7 +258,7 @@ var UI = (function () {
             if (self.isCtxMenuOpen()) {
                 return;
             }
-            
+
             self.hidePopup();
         }, self.HIDE_DELAY_MS);
     };
@@ -408,8 +406,6 @@ var UI = (function () {
             self.exitCompact();
         }
     };
-
-       
 
     self.checkSourcesPanelOverflow = function () {
         self.check();

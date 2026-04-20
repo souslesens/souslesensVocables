@@ -319,7 +319,11 @@ class UserDataModel {
         if (Object.hasOwn(userData, "modification_date")) {
             delete userData.modification_date;
         }
+        if (Object.hasOwn(userData, "data_path")) {
+            delete userData.data_path;
+        }
         const data = this._check(userData);
+
         if (this._mainConfig.userData.location === "database" && !this._allowedStringLength(data.data_content)) {
             throw Error(`The specified content is too large for the database`, { cause: 413 });
         }
@@ -345,7 +349,7 @@ class UserDataModel {
             // Only update the data content when the attribute is in the request
             if (data.data_content !== undefined) {
                 const filePath = this._getStorage(dataPath);
-                fs.writeFileSync(filePath, JSON.stringify(userData.data_content, null, 2));
+                fs.writeFileSync(filePath, JSON.stringify(data.data_content, null, 2));
             }
 
             delete data.data_content;

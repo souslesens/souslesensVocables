@@ -35,6 +35,8 @@ var Lineage_sources = (function () {
     self.loadedSources = {};
     self.sourceDivsMap = {};
 
+    var _registrationGeneration = 0;
+
     /**
      * Initializes the lineage sources module, resetting the active source and UI elements.
      * Optionally displays the source selection dialog.
@@ -53,7 +55,9 @@ var Lineage_sources = (function () {
 
         if (self.loadedSources) {
             for (var source in self.loadedSources) {
-                self.menuActions.closeSource(source);
+                if (self.loadedSources[source]) {
+                    self.menuActions.closeSource(source);
+                }
             }
         }
         /*  $("#LineagePopup").dialog({
@@ -64,6 +68,7 @@ var Lineage_sources = (function () {
 
         });*/
 
+        _registrationGeneration++;
         self.activeSource = null;
         self.loadedSources = {};
         self.sourceDivsMap = {};
@@ -89,6 +94,12 @@ var Lineage_sources = (function () {
     self.resetAll = function (showDialog) {
         OntologyModels.unRegisterSourceModel();
         self.init(showDialog);
+    };
+
+    self.clearRegistrations = function () {
+        _registrationGeneration++;
+        self.loadedSources = {};
+        self.sourceDivsMap = {};
     };
 
     /**
@@ -536,9 +547,13 @@ var Lineage_sources = (function () {
         if (!Lineage_whiteboard.decorationData[sourceLabel]) {
             Lineage_whiteboard.loadDecorationData(sourceLabel);
         }
+        var _capturedGeneration = _registrationGeneration;
         OntologyModels.registerSourcesModel(sourceLabel, null, function (err, result) {
             if (err) {
                 return callback(err);
+            }
+            if (_capturedGeneration !== _registrationGeneration) {
+                return callback();
             }
             var sourceDivId = "source_" + common.getRandomHexaId(5);
             if (!self.loadedSources[sourceLabel]) {

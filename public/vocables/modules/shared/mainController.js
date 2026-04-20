@@ -229,7 +229,7 @@ var MainController = (function () {
         var toolObj = Config.userTools[toolId];
         self.initControllers();
         Clipboard.clear();
-        Lineage_sources.loadedSources = {};
+        Lineage_sources.clearRegistrations();
         /*  if(!Config.userTools[toolId].controller)
                 Config.userTools[toolId].controller= window[toolId]*/
         if (Config.userTools[toolId].controller.onLoaded) {

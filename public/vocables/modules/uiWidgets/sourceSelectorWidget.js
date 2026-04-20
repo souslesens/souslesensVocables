@@ -11,7 +11,7 @@ var SourceSelectorWidget = (function () {
         $("#sourceSelector_searchInput").trigger("focus");
         var onSourceSelect;
         if (resetAll) {
-            Lineage_sources.loadedSources = {};
+            Lineage_sources.clearRegistrations();
             onSourceSelect = SourceSelectorWidget.onSourceSelect;
         } else {
             onSourceSelect = SourceSelectorWidget.onSourceSelect_AddSource;

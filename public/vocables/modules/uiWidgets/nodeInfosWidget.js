@@ -961,10 +961,13 @@ defaultLang = 'en';*/
                 if (!uniqueIds[item.id]) {
                     var parent = item.superClass || "#";
                     uniqueIds[item.id] = 1;
+                    var sourceSuffix = "";
+                    if (item.source) {
+                        sourceSuffix = " <i style='color:#888;font-size:11px'>(" + item.source + ")</i>";
+                    }
                     jstreeData.push({
                         id: item.id,
-                        text: "<span  style='background-color:" + color + ";border: solid 0px ; border-radius: 3px; padding: 1px; '>" + item.label + "</span>",
-                        //  text: "<span  style='border: solid 3px "+color+"; border-radius: 3px; padding: 1px; '>"+item.label+"</span>",
+                        text: "<span  style='background-color:" + color + ";border: solid 0px ; border-radius: 3px; padding: 1px; '>" + item.label + sourceSuffix + "</span>",
                         parent: parent,
                         type: "Class",
                         data: {
@@ -996,14 +999,18 @@ defaultLang = 'en';*/
                         descendants.forEach(function (item) {
                             if (!uniqueIds[item.id]) {
                                 uniqueIds[item.id] = 1;
+                                var descSourceSuffix = "";
+                                if (item.source) {
+                                    descSourceSuffix = " <i style='color:#888;font-size:11px'>(" + item.source + ")</i>";
+                                }
                                 jstreeData.push({
                                     id: item.id,
-                                    text: item.label,
+                                    text: item.label + descSourceSuffix,
                                     parent: item.superClass,
                                     type: "Class",
                                     data: {
                                         id: item.id,
-                                        source: sourceLabel,
+                                        source: item.source || sourceLabel,
                                     },
                                 });
                             }
@@ -1040,14 +1047,18 @@ defaultLang = 'en';*/
                 if (!uniqueIds[item.id]) {
                     var parent = item.superProp || "#";
                     uniqueIds[item.id] = 1;
+                    var sourceSuffix = "";
+                    if (item.source) {
+                        sourceSuffix = " <i style='color:#888;font-size:11px'>(" + item.source + ")</i>";
+                    }
                     jstreeData.push({
                         id: item.id,
-                        text: item.label,
+                        text: item.label + sourceSuffix,
                         parent: parent,
                         type: "Property",
                         data: {
                             id: item.id,
-                            source: sourceLabel,
+                            source: item.source || sourceLabel,
                         },
                     });
                 }
@@ -1073,14 +1084,18 @@ defaultLang = 'en';*/
                         descendants.forEach(function (item) {
                             if (!uniqueIds[item.id]) {
                                 uniqueIds[item.id] = 1;
+                                var descSourceSuffix = "";
+                                if (item.source) {
+                                    descSourceSuffix = " <i style='color:#888;font-size:11px'>(" + item.source + ")</i>";
+                                }
                                 jstreeData.push({
                                     id: item.id,
-                                    text: item.label,
+                                    text: item.label + descSourceSuffix,
                                     parent: item.superProp,
                                     type: "Property",
                                     data: {
                                         id: item.id,
-                                        source: sourceLabel,
+                                        source: item.source || sourceLabel,
                                     },
                                 });
                             }
@@ -1707,11 +1722,23 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
                     },
                 };
 
+                var propSourceName = Sparql_common.getSourceFromUri(fieldsMap.prop, node.data.source);
+                var propSourceSuffix = "";
+                if (propSourceName) {
+                    propSourceSuffix = " <i style='color:#888;font-size:11px'>(" + propSourceName + ")</i>";
+                }
+
+                var valueSourceName = Sparql_common.getSourceFromUri(fieldsMap.value, node.data.source);
+                var valueSourceSuffix = "";
+                if (valueSourceName) {
+                    valueSourceSuffix = " <i style='color:#888;font-size:11px'>(" + valueSourceName + ")</i>";
+                }
+
                 html += "<tr>";
                 if (filterProp) {
                     html += "<td class='detailsCellValue'><a target='_slsvCallback' href='" + fieldsMap.subject + "'>" + fieldsMap.subjectLabel + "</a></td>";
                 }
-                html += "<td class='detailsCellValue'><a target='_slsvCallback' href='" + fieldsMap.prop + "'>" + fieldsMap.propLabel + "</a></td>";
+                html += "<td class='detailsCellValue'><a target='_slsvCallback' href='" + fieldsMap.prop + "'>" + fieldsMap.propLabel + propSourceSuffix + "</a></td>";
 
                 if (fieldsMap.cardinalityType) {
                     var str = common.getRestrictionCardinalityLabel(fieldsMap.cardinalityType, fieldsMap.cardinalityValue);
@@ -1720,7 +1747,7 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
                     html += "<td class='detailsCellValue'><a target='_slsvCallback' href='" + fieldsMap.constraintType + "'>" + Sparql_common.getLabelFromURI(fieldsMap.constraintType) + "</a></td>";
                 }
 
-                html += "<td class='detailsCellValue'><a target='_slsvCallback' href='" + fieldsMap.value + "'>" + fieldsMap.valueLabel + "</a></td>";
+                html += "<td class='detailsCellValue'><a target='_slsvCallback' href='" + fieldsMap.value + "'>" + fieldsMap.valueLabel + valueSourceSuffix + "</a></td>";
 
                 var modifyButton = "";
                 if (Lineage_sources.isSourceEditableForUser(self.currentSource)) {

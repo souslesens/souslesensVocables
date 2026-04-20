@@ -214,7 +214,8 @@ var UI = (function () {
         var $indicator = $(self.sourcePopupSelectors.compactIndicator);
         var $active = $(self.sourcePopupSelectors.activeSource).first();
         if ($active.length) {
-            $indicator.html($active.prop("outerHTML")).show();
+            var arrowIcon = '<div class="arrow-icon slsv-invisible-button" style="height: 20px; width: 20px;"></div>';
+            $indicator.html($active.prop("outerHTML") + arrowIcon).css("display", "inline-flex").css("align-items", "center");
         } else {
             $indicator.hide().empty();
         }
@@ -379,10 +380,14 @@ var UI = (function () {
         $(self.sourcePopupSelectors.addPanel).css("flexDirection", "row");
         $(self.sourcePopupSelectors.sourceButtons).css("flexDirection", "row");
         var $popup = $(self.sourcePopupSelectors.popup);
+        var $indicator = $(self.sourcePopupSelectors.compactIndicator);
+        var prevIndicatorDisplay = $indicator.length ? $indicator[0].style.display : "";
+        $indicator.hide();
         $popup.css({ position: "static", visibility: "hidden", display: "flex", flexWrap: "nowrap", padding: "" }).removeClass("sources-popup-panel");
         var overflows = self.sourcePopupOverflows();
         if (overflows) {
             $popup.css({ position: "", visibility: "" }).hide();
+            $indicator.css("display", prevIndicatorDisplay);
         }
         return overflows;
     };

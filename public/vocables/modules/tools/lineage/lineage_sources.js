@@ -221,6 +221,12 @@ var Lineage_sources = (function () {
          * @private
          */
         function highlightSourceDiv(source) {
+
+            var id = $(".Lineage_sourceLabelDiv.Lineage_selectedSourceDiv").attr("id");
+            if(id == self.loadedSources[source].sourceDivId){
+                return;
+            }
+
             $(".Lineage_sourceLabelDiv").removeClass("Lineage_selectedSourceDiv");
             $("#" + self.loadedSources[source].sourceDivId).addClass("Lineage_selectedSourceDiv");
         }

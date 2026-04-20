@@ -1524,9 +1524,6 @@ const VisjsGraphClass = function (graphDiv, data, options) {
      */
     self.showGraphConfig = function () {
         $("#graphDisplay_theme").remove();
-        $("#visjsConfigureDiv").parent().css("left", "20%");
-        $("#visjsConfigureDiv").parent().css("overflow-y", "auto !important");
-        $("#visjsConfigureDiv").parent().css("height", "550px !important");
         $("#visjsConfigureDiv").prepend(
             "<div id='graphDisplay_theme' class='div.vis-configuration.vis-config-item '>theme" +
                 "<select onchange='Lineage_sources.setTheme($(this).val())' >" +
@@ -1534,28 +1531,53 @@ const VisjsGraphClass = function (graphDiv, data, options) {
                 "<option>dark</option>" +
                 "</select></div>",
         );
-        // these are all options in full.
         var options = {
             configure: {
                 enabled: true,
                 filter: "physics,layout,manipulation,renderer",
-
                 container: document.getElementById("visjsConfigureDiv"),
                 showButton: true,
             },
         };
         self.network.setOptions(options);
-        $("#visjsConfigureDiv").dialog({
-            //   autoOpen: false,
-            height: 700,
-            width: 550,
-            modal: false,
-            title: "Graph parameters",
-        });
-        setTimeout(function () {
-            $("#visjsConfigureDiv").css("overflow-y", "auto !important");
-            $("#visjsConfigureDiv").css("height", "550px !important");
-        }, 2000);
+        $("#visjsConfigureDiv").css({ width: "550px", overflow: "hidden" });
+        if ($("#visjsConfigureDiv").hasClass("ui-dialog-content")) {
+            $("#visjsConfigureDiv").dialog("option", { title: "Graph parameters", width: 550, height: "auto" });
+            $("#visjsConfigureDiv").dialog("open");
+        } else {
+            $("#visjsConfigureDiv").dialog({
+                autoOpen: true,
+                width: 550,
+                height: "auto",
+                modal: false,
+                title: "Graph parameters",
+            });
+        }
+        UI.clampAndCenterDialog("visjsConfigureDiv");
+
+        var sizeConfigWrapper = function () {
+            var $dialog = $("#visjsConfigureDiv").closest(".ui-dialog");
+            var $titlebar = $dialog.find(".ui-dialog-titlebar");
+            var $content = $("#visjsConfigureDiv");
+            var $wrapper = $content.find(".vis-configuration-wrapper");
+            if (!$wrapper.length) {
+                return;
+            }
+            var contentInnerHeight = $dialog.innerHeight() - $titlebar.outerHeight(true);
+            var contentPadding = $content.outerHeight(true) - $content.height();
+            var themeHeight = $("#graphDisplay_theme").outerHeight(true) || 0;
+            var available = contentInnerHeight - contentPadding - themeHeight - 30;
+            $wrapper.css({ "max-height": available + "px", "overflow-y": "auto", "overflow-x": "hidden" });
+        };
+        setTimeout(sizeConfigWrapper, 0);
+        $(window).off("resize.visjsConfigWrapper").on("resize.visjsConfigWrapper", sizeConfigWrapper);
+        $("#visjsConfigureDiv")
+            .off("dialogresize.visjsConfigWrapper dialogclose.visjsConfigWrapper")
+            .on("dialogresize.visjsConfigWrapper", sizeConfigWrapper)
+            .on("dialogclose.visjsConfigWrapper", function () {
+                $(window).off("resize.visjsConfigWrapper");
+            });
+        $(".vis-configuration-wrapper").css({ "width":"530px" });
     };
 
     /**

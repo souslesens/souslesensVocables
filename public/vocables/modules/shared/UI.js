@@ -173,163 +173,246 @@ var UI = (function () {
         });
     };
 
-    var _sourcesPanelCompact = false;
-    var _sourcesHideTimeout = null;
+    
 
-    self.checkSourcesPanelOverflow = function () {
-        var sourcesBar = document.getElementById("lineage_drawnSources");
-        if (!sourcesBar) {
+    self.compact = false;
+    self.hideTimeout = null;
+    self.ctxMenuObserver = null;
+    self.listObserver = null;
+
+    self.HIDE_DELAY_MS = 150;
+    self.EVENTS_NS = ".sourcesPanel";
+    self.sourcePanelFistLoad = true;
+    self.selectors = {
+        panel: "#index_topContolPanel",
+        bar: "#lineage_drawnSources",
+        popup: "#lineage_sourcesPopup",
+        addPanel: "#lineage_r_addPanel",
+        sourceButtons: "#lineage_sourceButtons",
+        compactIndicator: "#lineage_compactSourceIndicator",
+        activeSource: "#lineage_r_addPanel .Lineage_selectedSourceDiv",
+        ctxMenu: "#popupMenuWidgetDiv",
+    };
+
+    self.isCtxMenuOpen = function () {
+        if(self.sourcePanelFistLoad) {
+            // Avoid treating the context menu as part of the panel on first load when the popup is shown programmatically before any user interaction.
+            self.sourcePanelFistLoad = false;
+            return false;
+        }
+        return $(self.selectors.ctxMenu).is(":visible") ;
+    };
+
+    self.overflows = function () {
+        var $popup = $(self.selectors.popup);
+        var $bar = $(self.selectors.bar);
+        if (!$popup.length || !$bar.length) {
+            return false;
+        }
+        return $popup[0].getBoundingClientRect().right > $bar[0].getBoundingClientRect().right + 1;
+    };
+
+    self.refreshIndicator = function () {
+        var $indicator = $(self.selectors.compactIndicator);
+        var $active = $(self.selectors.activeSource).first();
+        if ($active.length) {
+            $indicator.html($active.prop("outerHTML")).show();
+        } else {
+            $indicator.hide().empty();
+        }
+    };
+
+    self.cancelHide = function () {
+        if (self.hideTimeout) {
+            clearTimeout(self.hideTimeout);
+            self.hideTimeout = null;
+        }
+    };
+
+    self.disconnectCtxObserver = function () {
+        if (self.ctxMenuObserver) {
+            self.ctxMenuObserver.disconnect();
+            self.ctxMenuObserver = null;
+        }
+    };
+
+    self.disconnectListObserver = function () {
+        if (self.listObserver) {
+            self.listObserver.disconnect();
+            self.listObserver = null;
+        }
+    };
+
+    self.hidePopup = function () {
+        self.cancelHide();
+        self.disconnectCtxObserver();
+        $(self.selectors.popup).hide();
+        self.refreshIndicator();
+    };
+
+    self.scheduleHide = function () {
+        if (self.hideTimeout) {
             return;
         }
-
-        var $panel = $("#index_topContolPanel");
-        var $popup = $("#lineage_sourcesPopup");
-        var ctxMenuDiv = document.getElementById("popupMenuWidgetDiv");
-
-        var disconnectCtxObserver = function () {
-            var obs = $popup.data("ctxObserver");
-            if (obs) {
-                obs.disconnect();
-                $popup.removeData("ctxObserver");
-            }
-        };
-
-        var isOverflowing = function () {
-            var popupRect = $popup[0].getBoundingClientRect();
-            var barRect = sourcesBar.getBoundingClientRect();
-            return popupRect.right > barRect.right + 1;
-        };
-
-        if (!_sourcesPanelCompact) {
-            if (!isOverflowing()) {
+        self.hideTimeout = setTimeout(function () {
+            self.hideTimeout = null;
+            // Keep popup open while the source context menu is visible so the user can interact with it
+            if (self.isCtxMenuOpen()) {
                 return;
             }
-            _sourcesPanelCompact = true;
-            $popup.hide();
+            
+            self.hidePopup();
+        }, self.HIDE_DELAY_MS);
+    };
 
-            $panel.off("mouseenter.sourcesPanel mouseleave.sourcesPanel");
-            $(document).off("mousemove.sourcesPanel mousedown.sourcesPanel");
-
-            var $indicator = $("#lineage_compactSourceIndicator");
-
-            var refreshActiveSourceIndicator = function () {
-                var $active = $("#lineage_r_addPanel .Lineage_selectedSourceDiv").first();
-                if ($active.length) {
-                    $indicator.html($active.prop("outerHTML")).show();
-                } else {
-                    $indicator.hide().empty();
-                }
-            };
-
-            var cancelHide = function () {
-                clearTimeout(_sourcesHideTimeout);
-                _sourcesHideTimeout = null;
-            };
-
-            var hidePopupNow = function () {
-                cancelHide();
-                disconnectCtxObserver();
-                $popup.hide();
-                refreshActiveSourceIndicator();
-            };
-
-            var scheduleHide = function () {
-                if (_sourcesHideTimeout) {
-                    return;
-                }
-                _sourcesHideTimeout = setTimeout(function () {
-                    _sourcesHideTimeout = null;
-                    if ($("#popupMenuWidgetDiv").is(":visible")) {
-                        return;
-                    }
-                    hidePopupNow();
-                }, 150);
-            };
-
-            var isInsidePanelOrPopup = function (target) {
-                return target === $panel[0] || $.contains($panel[0], target);
-            };
-
-            $panel.on("mouseenter.sourcesPanel", function () {
-                cancelHide();
-                var rect = $panel[0].getBoundingClientRect();
-                $popup.css({ position: "fixed", top: rect.bottom + "px", left: rect.left + "px", zIndex: 200, flexWrap: "wrap", padding: "6px" });
-                $("#lineage_r_addPanel").css("flexDirection", "column");
-                $("#lineage_sourceButtons").css("flexDirection", "column");
-                $popup.addClass("sources-popup-panel").show();
-
-                disconnectCtxObserver();
-                var ctxObserver = new MutationObserver(function () {
-                    if (!$(ctxMenuDiv).is(":visible")) {
-                        hidePopupNow();
-                    }
-                });
-                ctxObserver.observe(ctxMenuDiv, { attributes: true, attributeFilter: ["style"] });
-                $popup.data("ctxObserver", ctxObserver);
-            });
-
-            $panel.on("mouseleave.sourcesPanel", scheduleHide);
-
-            $(document).on("mousemove.sourcesPanel", function (e) {
-                if (!$popup.is(":visible")) {
-                    return;
-                }
-                if (isInsidePanelOrPopup(e.target)) {
-                    cancelHide();
-                } else {
-                    scheduleHide();
-                }
-            });
-
-            $(document).on("mousedown.sourcesPanel", function (e) {
-                if (!$popup.is(":visible")) {
-                    return;
-                }
-                if (!$.contains($panel[0], e.target) && e.target !== $panel[0]) {
-                    hidePopupNow();
-                }
-            });
-
-            var lineageAddPanel = document.getElementById("lineage_r_addPanel");
-            if (lineageAddPanel) {
-                var sourcesListObserver = new MutationObserver(function () {
-                    refreshActiveSourceIndicator();
-                });
-                sourcesListObserver.observe(lineageAddPanel, { childList: true, subtree: true, attributes: true, attributeFilter: ["class"] });
-                $popup.data("sourcesListObserver", sourcesListObserver);
-            }
-
-            refreshActiveSourceIndicator();
-        } else {
-            if ($popup.is(":visible")) {
-                return;
-            }
-            // Measure with popup restored inline but invisible to avoid flicker
-            // Reset flexDirection to row so the measurement reflects actual inline layout
-            $("#lineage_r_addPanel").css("flexDirection", "row");
-            $("#lineage_sourceButtons").css("flexDirection", "row");
-            $popup.css({ position: "static", visibility: "hidden", display: "flex", flexWrap: "nowrap", padding: "" }).removeClass("sources-popup-panel");
-            var wouldOverflow = isOverflowing();
-            if (wouldOverflow) {
-                $popup.css({ position: "", visibility: "" }).hide();
-            } else {
-                _sourcesPanelCompact = false;
-                disconnectCtxObserver();
-                var sourcesObs = $popup.data("sourcesListObserver");
-                if (sourcesObs) {
-                    sourcesObs.disconnect();
-                    $popup.removeData("sourcesListObserver");
-                }
-                clearTimeout(_sourcesHideTimeout);
-                _sourcesHideTimeout = null;
-                $panel.off("mouseenter.sourcesPanel mouseleave.sourcesPanel");
-                $(document).off("mousemove.sourcesPanel mousedown.sourcesPanel");
-                $("#lineage_compactSourceIndicator").hide().empty();
-                $popup.css({ position: "", visibility: "", flexWrap: "", padding: "" });
-                $("#lineage_r_addPanel").css("flexDirection", "row");
-                $("#lineage_sourceButtons").css("flexDirection", "row");
-            }
+    // Treat the visible per-source context menu as part of the panel so
+    // hovering/clicking into it does not dismiss the popup.
+    self.isTargetInside = function (target) {
+        var $panel = $(self.selectors.panel);
+        if ($panel.length && (target === $panel[0] || $.contains($panel[0], target))) {
+            return true;
         }
+        var $ctx = $(self.selectors.ctxMenu);
+        if ($ctx.length && $ctx.is(":visible") && (target === $ctx[0] || $.contains($ctx[0], target))) {
+            return true;
+        }
+        return false;
+    };
+
+    self.showPopup = function () {
+        self.cancelHide();
+        var $panel = $(self.selectors.panel);
+        var $popup = $(self.selectors.popup);
+        var rect = $panel[0].getBoundingClientRect();
+        $popup.css({
+            position: "fixed",
+            top: rect.bottom + "px",
+            left: rect.left + "px",
+            zIndex: 200,
+            flexWrap: "wrap",
+            padding: "6px",
+        });
+        $(self.selectors.addPanel).css("flexDirection", "column");
+        $(self.selectors.sourceButtons).css("flexDirection", "column");
+        $popup.addClass("sources-popup-panel").show();
+
+        self.disconnectCtxObserver();
+        var ctxEl = $(self.selectors.ctxMenu)[0];
+        if (ctxEl) {
+            // When the source context menu closes, schedule (not force) a hide:
+            // mousemove will cancel it if the pointer is still inside the panel.
+            self.ctxMenuObserver = new MutationObserver(function () {
+                if (!self.isCtxMenuOpen()) {
+                    self.scheduleHide();
+                }
+            });
+            self.ctxMenuObserver.observe(ctxEl, { attributes: true, attributeFilter: ["style"] });
+        }
+    };
+
+    self.onMouseMove = function (event) {
+        if (!$(self.selectors.popup).is(":visible")) {
+            return;
+        }
+        if (self.isTargetInside(event.target)) {
+            self.cancelHide();
+        } else {
+            self.scheduleHide();
+        }
+    };
+
+    self.onMouseDown = function (event) {
+        if (!$(self.selectors.popup).is(":visible")) {
+            return;
+        }
+        if (self.isTargetInside(event.target)) {
+            return;
+        }
+        self.hidePopup();
+    };
+
+    self.bindHandlers = function () {
+        var $panel = $(self.selectors.panel);
+        $panel.on("mouseenter" + self.EVENTS_NS, self.showPopup);
+        $panel.on("mouseleave" + self.EVENTS_NS, self.scheduleHide);
+        $(document).on("mousemove" + self.EVENTS_NS, self.onMouseMove);
+        $(document).on("mousedown" + self.EVENTS_NS, self.onMouseDown);
+    };
+
+    self.unbindHandlers = function () {
+        $(self.selectors.panel).off(self.EVENTS_NS);
+        $(document).off(self.EVENTS_NS);
+    };
+
+    self.observeSources = function () {
+        self.disconnectListObserver();
+        var addPanelEl = $(self.selectors.addPanel)[0];
+        if (!addPanelEl) {
+            return;
+        }
+        self.listObserver = new MutationObserver(self.refreshIndicator);
+        self.listObserver.observe(addPanelEl, { childList: true, subtree: true, attributes: true, attributeFilter: ["class"] });
+    };
+
+    self.enterCompact = function () {
+        self.compact = true;
+        $(self.selectors.popup).hide();
+        self.unbindHandlers();
+        self.bindHandlers();
+        self.observeSources();
+        self.refreshIndicator();
+    };
+
+    self.exitCompact = function () {
+        self.compact = false;
+        self.cancelHide();
+        self.disconnectCtxObserver();
+        self.disconnectListObserver();
+        self.unbindHandlers();
+        $(self.selectors.compactIndicator).hide().empty();
+        $(self.selectors.popup).css({ position: "", visibility: "", flexWrap: "", padding: "" }).removeClass("sources-popup-panel");
+        $(self.selectors.addPanel).css("flexDirection", "row");
+        $(self.selectors.sourceButtons).css("flexDirection", "row");
+    };
+
+    // Restore popup inline but invisible to measure whether it would still overflow;
+    // leaves it hidden if overflow persists so the caller can keep compact mode.
+    self.inlineWouldOverflow = function () {
+        $(self.selectors.addPanel).css("flexDirection", "row");
+        $(self.selectors.sourceButtons).css("flexDirection", "row");
+        var $popup = $(self.selectors.popup);
+        $popup.css({ position: "static", visibility: "hidden", display: "flex", flexWrap: "nowrap", padding: "" }).removeClass("sources-popup-panel");
+        var over = self.overflows();
+        if (over) {
+            $popup.css({ position: "", visibility: "" }).hide();
+        }
+        return over;
+    };
+
+    self.check = function () {
+        if (!$(self.selectors.bar).length) {
+            return;
+        }
+        if (!self.compact) {
+            // Inline mode: switch to compact only when the popup overflows its container.
+            if (self.overflows()) {
+                self.enterCompact();
+            }
+            return;
+        }
+        // Compact mode: do not re-measure while the popup is open (it's positioned fixed).
+        if ($(self.selectors.popup).is(":visible")) {
+            return;
+        }
+        if (!self.inlineWouldOverflow()) {
+            self.exitCompact();
+        }
+    };
+
+       
+
+    self.checkSourcesPanelOverflow = function () {
+        self.check();
     };
 
     // Keep Here

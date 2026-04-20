@@ -371,7 +371,7 @@ var Lineage_sources = (function () {
             $("#Lineage_graphEditionButtons").css("display", "none");
             $("#lineage_createResourceBtn").hide();
         }
-        $("#Title1").text($(".Lineage_selectedSourceDiv").text());
+        $("#Title1").text(Lineage_sources.activeSource);
         setTimeout(function () {
             UI.checkSourcesPanelOverflow();
         }, 0);

@@ -1,7 +1,7 @@
 import { jest } from "@jest/globals";
 import fs from "node:fs";
 
-import { convertType, chunk, cleanupConnection, getKnexConnection, addFromsToSparqlQuery, redoIfFailure } from "../model/utils.js";
+import { convertType, chunk, cleanupConnection, getKnexConnection, addFromsToSparqlQuery, redoIfFailure, hasFromClause, validateFromClause } from "../model/utils.js";
 
 describe("redoIfFailure", () => {
     test("redo", async () => {
@@ -110,5 +110,74 @@ describe("addFromToSparqlQuery", () => {
         const sparql = "SELECT * FROM <urn:a:b:c> FROM <urn:d:e:f> WHERE { ?s ?p ?o .}";
         const expected = "SELECT * FROM <urn:a:b:c>\nFROM <urn:d:e:f>\nFROM <http://toto.com/example>\nFROM <http://titi.com/toto>\nWHERE { ?s ?p ?o. }";
         expect(addFromsToSparqlQuery(sparql, ["http://toto.com/example", "http://titi.com/toto"], false)).toStrictEqual(expected);
+    });
+});
+
+describe("hasFromClause", () => {
+    test("query without FROM clause", async () => {
+        const sparql = "SELECT * WHERE { ?s ?p ?o .}";
+        expect(hasFromClause(sparql)).toBe(false);
+    });
+
+    test("query with simple FROM clause", async () => {
+        const sparql = "SELECT * FROM <http://example.org/graph> WHERE { ?s ?p ?o .}";
+        expect(hasFromClause(sparql)).toBe(true);
+    });
+
+    test("query with multiple FROM clauses", async () => {
+        const sparql = "SELECT * FROM <http://example.org/graph1> FROM <http://example.org/graph2> WHERE { ?s ?p ?o .}";
+        expect(hasFromClause(sparql)).toBe(true);
+    });
+
+    test("query with FROM NAMED clause", async () => {
+        const sparql = "SELECT * FROM NAMED <http://example.org/graph> WHERE { GRAPH ?g { ?s ?p ?o . }}";
+        expect(hasFromClause(sparql)).toBe(true);
+    });
+
+    test("empty query", async () => {
+        const sparql = "";
+        expect(hasFromClause(sparql)).toBe(false);
+    });
+
+    test("invalid SPARQL query", async () => {
+        const sparql = "INVALID SPARQL QUERY";
+        expect(() => hasFromClause(sparql)).toThrow();
+    });
+});
+
+describe("validateFromClause", () => {
+    test("query without FROM clause returns false", async () => {
+        const sparql = "SELECT * WHERE { ?s ?p ?o .}";
+        expect(validateFromClause(sparql, ["http://example.org/graph"])).toBe(false);
+    });
+
+    test("query with authorized FROM clause", async () => {
+        const sparql = "SELECT * FROM <http://example.org/graph> WHERE { ?s ?p ?o .}";
+        expect(validateFromClause(sparql, ["http://example.org/graph"])).toBe(true);
+    });
+
+    test("query with unauthorized FROM clause", async () => {
+        const sparql = "SELECT * FROM <http://example.org/graph> WHERE { ?s ?p ?o .}";
+        expect(validateFromClause(sparql, ["http://example.org/other"])).toBe(false);
+    });
+
+    test("query with multiple authorized FROM clauses", async () => {
+        const sparql = "SELECT * FROM <http://example.org/graph1> FROM <http://example.org/graph2> WHERE { ?s ?p ?o .}";
+        expect(validateFromClause(sparql, ["http://example.org/graph1", "http://example.org/graph2"])).toBe(true);
+    });
+
+    test("query with multiple FROM clauses where one is unauthorized", async () => {
+        const sparql = "SELECT * FROM <http://example.org/graph1> FROM <http://example.org/graph2> WHERE { ?s ?p ?o .}";
+        expect(validateFromClause(sparql, ["http://example.org/graph1"])).toBe(false);
+    });
+
+    test("query with FROM clause and empty allowed list", async () => {
+        const sparql = "SELECT * FROM <http://example.org/graph> WHERE { ?s ?p ?o .}";
+        expect(validateFromClause(sparql, [])).toBe(false);
+    });
+
+    test("invalid SPARQL query throws error", async () => {
+        const sparql = "INVALID SPARQL QUERY";
+        expect(() => validateFromClause(sparql, ["http://example.org/graph"])).toThrow();
     });
 });

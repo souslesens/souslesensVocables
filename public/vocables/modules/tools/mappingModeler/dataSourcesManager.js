@@ -612,6 +612,7 @@ var DataSourceManager = (function () {
         });
 
         UI.openDialog("smallDialogDiv", { title: "Add DataBase" });
+        UI.clampAndCenterDialog("smallDialogDiv");
     };
 
     /**

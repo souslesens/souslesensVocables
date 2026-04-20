@@ -40,6 +40,7 @@ var Lineage_createRelation = (function () {
         var allLabelsMap = {};
         $("#smallDialogDiv").load("modules/tools/lineage/html/lineageAddEdgeDialog.html", function () {
             UI.openDialog("smallDialogDiv", { title: "Create relation in source " + Lineage_sources.activeSource });
+            UI.clampAndCenterDialog("smallDialogDiv");
             self.sourceNode = edgeData.from; // Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(edgeData.from).data;
             self.targetNode = edgeData.to; //Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(edgeData.to).data;
 

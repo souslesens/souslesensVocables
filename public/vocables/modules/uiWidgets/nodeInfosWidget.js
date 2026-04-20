@@ -117,6 +117,7 @@ var NodeInfosWidget = (function () {
                     $("#addPredicateButton").insertAfter($("#mainDialogDiv").parent().find(".ui-dialog-title"));
                     $("#addPredicateButton").css("margin-left", "25px !important");
                     //  $("#addRestrictionButton").css("margin-left", "25px !important");
+                    UI.repositionOpenDialogs();
                 });
             }
         });
@@ -1755,14 +1756,17 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
 
             html += "</table></div>";
 
-            if (!targetDiv) {
+            var isNewDialog = !targetDiv;
+            if (isNewDialog) {
                 targetDiv = "smallDialogDiv";
                 UI.openDialog(targetDiv, { title: " Node Restrictions" });
                 $("#addPredicateButton").remove();
-
                 $("#deleteButton").remove();
             }
             $("#" + targetDiv).html(html);
+            if (isNewDialog) {
+                UI.repositionOpenDialogs();
+            }
 
             if (callback) {
                 callback();

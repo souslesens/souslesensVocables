@@ -470,6 +470,7 @@ fixedColumns: true*/
         if (div.indexOf("DialogDiv") > -1) {
             //open the dialog after the datatable is loaded to be on center
             UI.openDialog(div, { title: "DataTable" });
+            UI.clampAndCenterDialog(div);
             $("#" + div).css("overflow", "hidden");
             var height = $("#" + div).height();
             $("#" + div).height(height + 30);

@@ -11,6 +11,7 @@ var Containers_widget = (function () {
 
         $("#mainDialogDiv").load("modules/tools/containers/containers_widget.html", function () {
             UI.openDialog("mainDialogDiv", { title: "Containers widget" });
+            UI.clampAndCenterDialog("mainDialogDiv");
 
             //   $("#mainDialogDiv").addClass("zIndexTop-10");
             Containers_tree.search(self.jstreeDivId, options);
@@ -47,6 +48,7 @@ var Containers_widget = (function () {
 
         $("#smallDialogDiv").load("./modules/tools/lineage/html/parentContainers.html", function () {
             UI.openDialog("smallDialogDiv", { title: "Parent Containers Type" });
+            UI.clampAndCenterDialog("smallDialogDiv");
             var types = [];
             types.splice(0, 0, { id: "all", label: "all" });
 

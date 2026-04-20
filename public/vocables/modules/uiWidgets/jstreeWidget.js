@@ -189,6 +189,7 @@ var JstreeWidget = (function () {
                     var dialogDiv = self.dialogDiv;
                     self.dialogDiv = null;
                     UI.openDialog(dialogDiv, { title: "Select items" });
+                    UI.clampAndCenterDialog(dialogDiv);
                 }
                 if (options.check_all) {
                     self.checkAll();

@@ -60,6 +60,7 @@ var Browse = (function () {
             }*/
         $("#mainDialogDiv").load("modules/tools/browse/html/browseDialog.html", function () {
             UI.openDialog("mainDialogDiv", { title: "Browse" });
+            UI.clampAndCenterDialog("mainDialogDiv");
             self.init(mainSource);
         });
         //   })

@@ -12,6 +12,7 @@ var GraphDecorationWidget = (function () {
         //$("#smallDialogDiv").parent().css("left", "30%");
         $("#smallDialogDiv").load("modules/tools/lineage/html/lineage_decorateDialog.html", function () {
             UI.openDialog("smallDialogDiv", { title: "Decorate Graph Nodes" });
+            UI.clampAndCenterDialog("smallDialogDiv");
             self.currentNodeSelectorFn = null;
             if (nodeSelectorFn) {
                 self.currentNodeSelectorFn = nodeSelectorFn;

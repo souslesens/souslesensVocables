@@ -43,6 +43,7 @@ var Lineage_relations = (function () {
 
         $("#mainDialogDiv").load("modules/tools/lineage/html/relationsDialog.html", function () {
             UI.openDialog("mainDialogDiv", { title: "Query" });
+            UI.clampAndCenterDialog("mainDialogDiv");
 
             $("#LineageRelations_searchJsTreeInput").keypress(function (e) {
                 if (e.which == 13 || e.which == 9) {

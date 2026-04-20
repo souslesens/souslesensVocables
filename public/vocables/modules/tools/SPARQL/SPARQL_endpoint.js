@@ -28,6 +28,7 @@ var SPARQL_endpoint = (function () {
         $("#graphDiv").html("");
         $("#mainDialogDiv").load("modules/tools/SPARQL/SPARQLendpoint.html", function () {
             UI.openDialog("mainDialogDiv", { title: "SPARQL endpoint" });
+            UI.clampAndCenterDialog("mainDialogDiv");
             self.initYasGui();
         });
     };

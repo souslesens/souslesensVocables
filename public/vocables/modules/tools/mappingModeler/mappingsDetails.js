@@ -968,6 +968,7 @@ var MappingsDetails = (function () {
             }
             $("#smallDialogDiv").load("./modules/tools/mappingModeler/html/transformColumnDialog.html", function (err) {
                 UI.openDialog("smallDialogDiv", { title: "Transform for " + column });
+                UI.clampAndCenterDialog("smallDialogDiv");
                 self.transformColumn = column;
                 if (callback) {
                     callback();

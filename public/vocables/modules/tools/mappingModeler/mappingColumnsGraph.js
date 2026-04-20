@@ -866,6 +866,7 @@ var MappingColumnsGraph = (function () {
             $("#smallDialogDiv").html("<div id='" + divId + "'></div>");
 
             UI.openDialog("smallDialogDiv", { title: "Column Technical Mappings" });
+            UI.clampAndCenterDialog("smallDialogDiv");
             MappingsDetails.showColumnTechnicalMappingsDialog(divId, node || self.currentGraphNode, function () {
                 $("#smallDialogDiv").dialog("close");
             });
@@ -1630,6 +1631,7 @@ var MappingColumnsGraph = (function () {
         var html = "<div style='font-size:13px;line-height:1.45'>" + htmlBody + "</div>";
         $("#mainDialogDiv").html(html);
         UI.openDialog("mainDialogDiv", { title: title });
+        UI.clampAndCenterDialog("mainDialogDiv");
     }
 
     /** Posts the imported mapping graph JSON to the backend. @returns {void} */
@@ -2242,6 +2244,7 @@ var MappingColumnsGraph = (function () {
 
                     $("#mainDialogDiv").html(html);
                     UI.openDialog("mainDialogDiv", { title: "Implicit Model" });
+                    UI.clampAndCenterDialog("mainDialogDiv");
                     $("#mainDialogDiv")
                         .off("dialogclose.mappingLegend")
                         .on("dialogclose.mappingLegend", function () {

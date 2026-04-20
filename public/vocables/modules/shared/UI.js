@@ -173,15 +173,15 @@ var UI = (function () {
         });
     };
 
-    self.compact = false;
-    self.hideTimeout = null;
-    self.ctxMenuObserver = null;
-    self.listObserver = null;
+    self.sourcePopupIsCompact = false;
+    self.sourcePopupHideTimer = null;
+    self.sourceContextMenuObserver = null;
+    self.sourceListObserver = null;
 
-    self.HIDE_DELAY_MS = 150;
-    self.EVENTS_NS = ".sourcesPanel";
-    self.sourcePanelFistLoad = true;
-    self.selectors = {
+    self.sourcePopupHideDelay = 150;
+    self.sourcePopupEventsNamespace = ".sourcesPanel";
+    self.sourcePopupFirstLoad = true;
+    self.sourcePopupSelectors = {
         panel: "#index_topContolPanel",
         bar: "#lineage_drawnSources",
         popup: "#lineage_sourcesPopup",
@@ -189,30 +189,30 @@ var UI = (function () {
         sourceButtons: "#lineage_sourceButtons",
         compactIndicator: "#lineage_compactSourceIndicator",
         activeSource: "#lineage_r_addPanel .Lineage_selectedSourceDiv",
-        ctxMenu: "#popupMenuWidgetDiv",
+        contextMenu: "#popupMenuWidgetDiv",
     };
 
-    self.isCtxMenuOpen = function () {
-        if (self.sourcePanelFistLoad) {
+    self.isSourceContextMenuOpen = function () {
+        if (self.sourcePopupFirstLoad) {
             // Avoid treating the context menu as part of the panel on first load when the popup is shown programmatically before any user interaction.
-            self.sourcePanelFistLoad = false;
+            self.sourcePopupFirstLoad = false;
             return false;
         }
-        return $(self.selectors.ctxMenu).is(":visible");
+        return $(self.sourcePopupSelectors.contextMenu).is(":visible");
     };
 
-    self.overflows = function () {
-        var $popup = $(self.selectors.popup);
-        var $bar = $(self.selectors.bar);
+    self.sourcePopupOverflows = function () {
+        var $popup = $(self.sourcePopupSelectors.popup);
+        var $bar = $(self.sourcePopupSelectors.bar);
         if (!$popup.length || !$bar.length) {
             return false;
         }
         return $popup[0].getBoundingClientRect().right > $bar[0].getBoundingClientRect().right + 1;
     };
 
-    self.refreshIndicator = function () {
-        var $indicator = $(self.selectors.compactIndicator);
-        var $active = $(self.selectors.activeSource).first();
+    self.refreshSourcePopupIndicator = function () {
+        var $indicator = $(self.sourcePopupSelectors.compactIndicator);
+        var $active = $(self.sourcePopupSelectors.activeSource).first();
         if ($active.length) {
             $indicator.html($active.prop("outerHTML")).show();
         } else {
@@ -220,67 +220,67 @@ var UI = (function () {
         }
     };
 
-    self.cancelHide = function () {
-        if (self.hideTimeout) {
-            clearTimeout(self.hideTimeout);
-            self.hideTimeout = null;
+    self.cancelSourcePopupHide = function () {
+        if (self.sourcePopupHideTimer) {
+            clearTimeout(self.sourcePopupHideTimer);
+            self.sourcePopupHideTimer = null;
         }
     };
 
-    self.disconnectCtxObserver = function () {
-        if (self.ctxMenuObserver) {
-            self.ctxMenuObserver.disconnect();
-            self.ctxMenuObserver = null;
+    self.disconnectSourceContextMenuObserver = function () {
+        if (self.sourceContextMenuObserver) {
+            self.sourceContextMenuObserver.disconnect();
+            self.sourceContextMenuObserver = null;
         }
     };
 
-    self.disconnectListObserver = function () {
-        if (self.listObserver) {
-            self.listObserver.disconnect();
-            self.listObserver = null;
+    self.disconnectSourceListObserver = function () {
+        if (self.sourceListObserver) {
+            self.sourceListObserver.disconnect();
+            self.sourceListObserver = null;
         }
     };
 
-    self.hidePopup = function () {
-        self.cancelHide();
-        self.disconnectCtxObserver();
-        $(self.selectors.popup).hide();
-        self.refreshIndicator();
+    self.hideSourcePopup = function () {
+        self.cancelSourcePopupHide();
+        self.disconnectSourceContextMenuObserver();
+        $(self.sourcePopupSelectors.popup).hide();
+        self.refreshSourcePopupIndicator();
     };
 
-    self.scheduleHide = function () {
-        if (self.hideTimeout) {
+    self.scheduleSourcePopupHide = function () {
+        if (self.sourcePopupHideTimer) {
             return;
         }
-        self.hideTimeout = setTimeout(function () {
-            self.hideTimeout = null;
+        self.sourcePopupHideTimer = setTimeout(function () {
+            self.sourcePopupHideTimer = null;
             // Keep popup open while the source context menu is visible so the user can interact with it
-            if (self.isCtxMenuOpen()) {
+            if (self.isSourceContextMenuOpen()) {
                 return;
             }
 
-            self.hidePopup();
-        }, self.HIDE_DELAY_MS);
+            self.hideSourcePopup();
+        }, self.sourcePopupHideDelay);
     };
 
     // Treat the visible per-source context menu as part of the panel so
     // hovering/clicking into it does not dismiss the popup.
-    self.isTargetInside = function (target) {
-        var $panel = $(self.selectors.panel);
+    self.isTargetInsideSourcePanel = function (target) {
+        var $panel = $(self.sourcePopupSelectors.panel);
         if ($panel.length && (target === $panel[0] || $.contains($panel[0], target))) {
             return true;
         }
-        var $ctx = $(self.selectors.ctxMenu);
-        if ($ctx.length && $ctx.is(":visible") && (target === $ctx[0] || $.contains($ctx[0], target))) {
+        var $contextMenu = $(self.sourcePopupSelectors.contextMenu);
+        if ($contextMenu.length && $contextMenu.is(":visible") && (target === $contextMenu[0] || $.contains($contextMenu[0], target))) {
             return true;
         }
         return false;
     };
 
-    self.showPopup = function () {
-        self.cancelHide();
-        var $panel = $(self.selectors.panel);
-        var $popup = $(self.selectors.popup);
+    self.showSourcePopup = function () {
+        self.cancelSourcePopupHide();
+        var $panel = $(self.sourcePopupSelectors.panel);
+        var $popup = $(self.sourcePopupSelectors.popup);
         var rect = $panel[0].getBoundingClientRect();
         $popup.css({
             position: "fixed",
@@ -290,125 +290,125 @@ var UI = (function () {
             flexWrap: "wrap",
             padding: "6px",
         });
-        $(self.selectors.addPanel).css("flexDirection", "column");
-        $(self.selectors.sourceButtons).css("flexDirection", "column");
+        $(self.sourcePopupSelectors.addPanel).css("flexDirection", "column");
+        $(self.sourcePopupSelectors.sourceButtons).css("flexDirection", "column");
         $popup.addClass("sources-popup-panel").show();
 
-        self.disconnectCtxObserver();
-        var ctxEl = $(self.selectors.ctxMenu)[0];
-        if (ctxEl) {
+        self.disconnectSourceContextMenuObserver();
+        var contextMenuElement = $(self.sourcePopupSelectors.contextMenu)[0];
+        if (contextMenuElement) {
             // When the source context menu closes, schedule (not force) a hide:
             // mousemove will cancel it if the pointer is still inside the panel.
-            self.ctxMenuObserver = new MutationObserver(function () {
-                if (!self.isCtxMenuOpen()) {
-                    self.scheduleHide();
+            self.sourceContextMenuObserver = new MutationObserver(function () {
+                if (!self.isSourceContextMenuOpen()) {
+                    self.scheduleSourcePopupHide();
                 }
             });
-            self.ctxMenuObserver.observe(ctxEl, { attributes: true, attributeFilter: ["style"] });
+            self.sourceContextMenuObserver.observe(contextMenuElement, { attributes: true, attributeFilter: ["style"] });
         }
     };
 
-    self.onMouseMove = function (event) {
-        if (!$(self.selectors.popup).is(":visible")) {
+    self.onSourcePanelMouseMove = function (event) {
+        if (!$(self.sourcePopupSelectors.popup).is(":visible")) {
             return;
         }
-        if (self.isTargetInside(event.target)) {
-            self.cancelHide();
+        if (self.isTargetInsideSourcePanel(event.target)) {
+            self.cancelSourcePopupHide();
         } else {
-            self.scheduleHide();
+            self.scheduleSourcePopupHide();
         }
     };
 
-    self.onMouseDown = function (event) {
-        if (!$(self.selectors.popup).is(":visible")) {
+    self.onSourcePanelMouseDown = function (event) {
+        if (!$(self.sourcePopupSelectors.popup).is(":visible")) {
             return;
         }
-        if (self.isTargetInside(event.target)) {
+        if (self.isTargetInsideSourcePanel(event.target)) {
             return;
         }
-        self.hidePopup();
+        self.hideSourcePopup();
     };
 
-    self.bindHandlers = function () {
-        var $panel = $(self.selectors.panel);
-        $panel.on("mouseenter" + self.EVENTS_NS, self.showPopup);
-        $panel.on("mouseleave" + self.EVENTS_NS, self.scheduleHide);
-        $(document).on("mousemove" + self.EVENTS_NS, self.onMouseMove);
-        $(document).on("mousedown" + self.EVENTS_NS, self.onMouseDown);
+    self.bindSourcePanelHandlers = function () {
+        var $panel = $(self.sourcePopupSelectors.panel);
+        $panel.on("mouseenter" + self.sourcePopupEventsNamespace, self.showSourcePopup);
+        $panel.on("mouseleave" + self.sourcePopupEventsNamespace, self.scheduleSourcePopupHide);
+        $(document).on("mousemove" + self.sourcePopupEventsNamespace, self.onSourcePanelMouseMove);
+        $(document).on("mousedown" + self.sourcePopupEventsNamespace, self.onSourcePanelMouseDown);
     };
 
-    self.unbindHandlers = function () {
-        $(self.selectors.panel).off(self.EVENTS_NS);
-        $(document).off(self.EVENTS_NS);
+    self.unbindSourcePanelHandlers = function () {
+        $(self.sourcePopupSelectors.panel).off(self.sourcePopupEventsNamespace);
+        $(document).off(self.sourcePopupEventsNamespace);
     };
 
-    self.observeSources = function () {
-        self.disconnectListObserver();
-        var addPanelEl = $(self.selectors.addPanel)[0];
-        if (!addPanelEl) {
+    self.observeSourceList = function () {
+        self.disconnectSourceListObserver();
+        var addPanelElement = $(self.sourcePopupSelectors.addPanel)[0];
+        if (!addPanelElement) {
             return;
         }
-        self.listObserver = new MutationObserver(self.refreshIndicator);
-        self.listObserver.observe(addPanelEl, { childList: true, subtree: true, attributes: true, attributeFilter: ["class"] });
+        self.sourceListObserver = new MutationObserver(self.refreshSourcePopupIndicator);
+        self.sourceListObserver.observe(addPanelElement, { childList: true, subtree: true, attributes: true, attributeFilter: ["class"] });
     };
 
-    self.enterCompact = function () {
-        self.compact = true;
-        $(self.selectors.popup).hide();
-        self.unbindHandlers();
-        self.bindHandlers();
-        self.observeSources();
-        self.refreshIndicator();
+    self.enterSourcePopupCompactMode = function () {
+        self.sourcePopupIsCompact = true;
+        $(self.sourcePopupSelectors.popup).hide();
+        self.unbindSourcePanelHandlers();
+        self.bindSourcePanelHandlers();
+        self.observeSourceList();
+        self.refreshSourcePopupIndicator();
     };
 
-    self.exitCompact = function () {
-        self.compact = false;
-        self.cancelHide();
-        self.disconnectCtxObserver();
-        self.disconnectListObserver();
-        self.unbindHandlers();
-        $(self.selectors.compactIndicator).hide().empty();
-        $(self.selectors.popup).css({ position: "", visibility: "", flexWrap: "", padding: "" }).removeClass("sources-popup-panel");
-        $(self.selectors.addPanel).css("flexDirection", "row");
-        $(self.selectors.sourceButtons).css("flexDirection", "row");
+    self.exitSourcePopupCompactMode = function () {
+        self.sourcePopupIsCompact = false;
+        self.cancelSourcePopupHide();
+        self.disconnectSourceContextMenuObserver();
+        self.disconnectSourceListObserver();
+        self.unbindSourcePanelHandlers();
+        $(self.sourcePopupSelectors.compactIndicator).hide().empty();
+        $(self.sourcePopupSelectors.popup).css({ position: "", visibility: "", flexWrap: "", padding: "" }).removeClass("sources-popup-panel");
+        $(self.sourcePopupSelectors.addPanel).css("flexDirection", "row");
+        $(self.sourcePopupSelectors.sourceButtons).css("flexDirection", "row");
     };
 
     // Restore popup inline but invisible to measure whether it would still overflow;
     // leaves it hidden if overflow persists so the caller can keep compact mode.
-    self.inlineWouldOverflow = function () {
-        $(self.selectors.addPanel).css("flexDirection", "row");
-        $(self.selectors.sourceButtons).css("flexDirection", "row");
-        var $popup = $(self.selectors.popup);
+    self.sourcePopupInlineWouldOverflow = function () {
+        $(self.sourcePopupSelectors.addPanel).css("flexDirection", "row");
+        $(self.sourcePopupSelectors.sourceButtons).css("flexDirection", "row");
+        var $popup = $(self.sourcePopupSelectors.popup);
         $popup.css({ position: "static", visibility: "hidden", display: "flex", flexWrap: "nowrap", padding: "" }).removeClass("sources-popup-panel");
-        var over = self.overflows();
-        if (over) {
+        var overflows = self.sourcePopupOverflows();
+        if (overflows) {
             $popup.css({ position: "", visibility: "" }).hide();
         }
-        return over;
+        return overflows;
     };
 
-    self.check = function () {
-        if (!$(self.selectors.bar).length) {
+    self.checkSourcePopupLayout = function () {
+        if (!$(self.sourcePopupSelectors.bar).length) {
             return;
         }
-        if (!self.compact) {
+        if (!self.sourcePopupIsCompact) {
             // Inline mode: switch to compact only when the popup overflows its container.
-            if (self.overflows()) {
-                self.enterCompact();
+            if (self.sourcePopupOverflows()) {
+                self.enterSourcePopupCompactMode();
             }
             return;
         }
         // Compact mode: do not re-measure while the popup is open (it's positioned fixed).
-        if ($(self.selectors.popup).is(":visible")) {
+        if ($(self.sourcePopupSelectors.popup).is(":visible")) {
             return;
         }
-        if (!self.inlineWouldOverflow()) {
-            self.exitCompact();
+        if (!self.sourcePopupInlineWouldOverflow()) {
+            self.exitSourcePopupCompactMode();
         }
     };
 
     self.checkSourcesPanelOverflow = function () {
-        self.check();
+        self.checkSourcePopupLayout();
     };
 
     // Keep Here

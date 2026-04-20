@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Stack, TextField, Autocomplete, Checkbox, FormGroup, FormControlLabel, Alert } from "@mui/material";
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Stack, TextField, Autocomplete, Checkbox, FormGroup, FormControlLabel, Alert, CircularProgress } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import { UserData, UserDataSchema } from "./UserDataDialog";
 
@@ -16,8 +16,16 @@ export const EditUserDataDialog = ({ onClose, onSave, open, userDataId }: EditUs
     const [error, setError] = useState<string | undefined>();
     const [saving, setSaving] = useState(false);
 
+    const [availableSources, setAvailableSources] = useState<string[]>([]);
+    const [availableTools, setAvailableTools] = useState<string[]>([]);
+    const [sourcesLoading, setSourcesLoading] = useState(false);
+    const [toolsLoading, setToolsLoading] = useState(false);
+    const [sourcesError, setSourcesError] = useState<string | null>(null);
+    const [toolsError, setToolsError] = useState<string | null>(null);
+    const [sourcesFetched, setSourcesFetched] = useState(false);
+    const [toolsFetched, setToolsFetched] = useState(false);
+
     const dataTypes = ["SparqlQuery", "Template", "Other"];
-    const dataTools = ["Lineage", "KGquery", "SPARQL", "MappingModeler", "UserSettings", "Browse", "Weaver"];
 
     useEffect(() => {
         if (open && userDataId) {
@@ -41,6 +49,46 @@ export const EditUserDataDialog = ({ onClose, onSave, open, userDataId }: EditUs
             setError("An error occurred while loading user data");
         }
         setLoading(false);
+    };
+
+    const fetchSources = async () => {
+        if (sourcesFetched) return;
+        setSourcesLoading(true);
+        try {
+            const response = await fetch("/api/v1/sources");
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            const sourcesList = Object.keys(data.resources || {}).sort();
+            setAvailableSources(sourcesList);
+            setSourcesFetched(true);
+            setSourcesError(null);
+        } catch (err) {
+            setSourcesError("Failed to load sources");
+            console.error("Failed to fetch sources:", err);
+        }
+        setSourcesLoading(false);
+    };
+
+    const fetchTools = async () => {
+        if (toolsFetched) return;
+        setToolsLoading(true);
+        try {
+            const response = await fetch("/api/v1/tools");
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            const toolsList = (data.resources || []).map((tool: any) => tool.name).sort();
+            setAvailableTools(toolsList);
+            setToolsFetched(true);
+            setToolsError(null);
+        } catch (err) {
+            setToolsError("Failed to load tools");
+            console.error("Failed to fetch tools:", err);
+        }
+        setToolsLoading(false);
     };
 
     const handleFieldChange = (fieldName: keyof UserData, value: UserData[keyof UserData]) => {
@@ -107,23 +155,60 @@ export const EditUserDataDialog = ({ onClose, onSave, open, userDataId }: EditUs
                         />
 
                         <Autocomplete
-                            disabled={loading}
-                            freeSolo
+                            disabled={loading || !!toolsError}
+                            loading={toolsLoading}
+                            openOnFocus
+                            onOpen={fetchTools}
                             id="data_tool"
                             onChange={(_e, value) => handleFieldChange("data_tool", value)}
-                            options={dataTools}
-                            renderInput={(params) => <TextField {...params} error={!!validationErrors?.data_tool} helperText={validationErrors?.data_tool?._errors.join(", ")} label="Tool" required />}
+                            options={availableTools}
+                            renderInput={(params) => (
+                                <TextField
+                                    {...params}
+                                    error={!!validationErrors?.data_tool || !!toolsError}
+                                    helperText={toolsError || validationErrors?.data_tool?._errors.join(", ")}
+                                    label="Tool"
+                                    required
+                                    InputProps={{
+                                        ...params.InputProps,
+                                        endAdornment: (
+                                            <>
+                                                {toolsLoading ? <CircularProgress color="inherit" size={16} /> : null}
+                                                {params.InputProps?.endAdornment}
+                                            </>
+                                        ),
+                                    }}
+                                />
+                            )}
                             value={userData?.data_tool || ""}
                         />
 
-                        <TextField
-                            disabled={loading}
-                            error={!!validationErrors?.data_source}
-                            helperText={validationErrors?.data_source?._errors.join(", ")}
-                            fullWidth
-                            label="Source"
-                            onChange={(e) => handleFieldChange("data_source", e.target.value)}
-                            required
+                        <Autocomplete
+                            disabled={loading || !!sourcesError}
+                            loading={sourcesLoading}
+                            openOnFocus
+                            onOpen={fetchSources}
+                            id="data_source"
+                            onChange={(_e, value) => handleFieldChange("data_source", value)}
+                            options={availableSources}
+                            renderInput={(params) => (
+                                <TextField
+                                    {...params}
+                                    error={!!validationErrors?.data_source || !!sourcesError}
+                                    helperText={sourcesError || validationErrors?.data_source?._errors.join(", ")}
+                                    label="Source"
+                                    required
+                                    InputProps={{
+                                        ...params.InputProps,
+                                        endAdornment: (
+                                            <>
+                                                {sourcesLoading ? <CircularProgress color="inherit" size={16} /> : null}
+                                                {params.InputProps?.endAdornment}
+                                            </>
+                                        ),
+                                    }}
+                                />
+                            )}
                             value={userData?.data_source || ""}
                         />
 

@@ -158,13 +158,13 @@ export default () => {
         try {
             // users can only update their own data
             const userInfo = await userManager.getUser(req.user);
-            const existingData = await userDataModel.find(req.body.id, userInfo.user);
+            const existingData = await userDataModel.find(req.params.id, userInfo.user);
             if (!existingData.readwrite && existingData.owned_by !== parseInt(userInfo.user.id)) {
                 throw Error(`The resources is readonly and not owned by ${userInfo.user.login}`, { cause: 403 });
             }
             const userData = await cleanUserData.clean(req.body);
             //never change owned_by
-            await userDataModel.update({ ...userData, owned_by: parseInt(existingData.owned_by) });
+            await userDataModel.update({ ...userData, id: parseInt(req.params.id), owned_by: parseInt(existingData.owned_by) });
             res.status(200).json({ message: "The resource has been updated successfully" });
         } catch (error) {
             if (error.cause !== undefined) {

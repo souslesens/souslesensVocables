@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.2.1](https://github.com/souslesens/souslesensVocables/compare/3.2.0...3.2.1) (2026-04-20)
+
+
+### Bug Fixes
+
+* **migrations:** fix undefined variable in token migration script ([b6b686b](https://github.com/souslesens/souslesensVocables/commit/b6b686bd5e2b4b5416d1672341e381b27c812188))
+* **utils:** ignore empty graphUri in addFromsToSparqlQuery ([a11acea](https://github.com/souslesens/souslesensVocables/commit/a11acea239e52038d0595ef15961edaa62878690))
+* **utils:** validate graphUri using URL constructor ([802fd32](https://github.com/souslesens/souslesensVocables/commit/802fd3238448e2a1fd6a14609a18ba4551f4f593))
+
 ## [3.2.0](https://github.com/souslesens/souslesensVocables/compare/3.1.0...3.2.0) (2026-04-17)
 
 > [!IMPORTANT]

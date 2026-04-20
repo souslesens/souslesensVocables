@@ -9,8 +9,7 @@ const addMissingTokenToUsers = async (_configDirectory, writeMode) => {
         .filter(([_id, user]) => !user.token)
         .map(([_id, user]) => user.login);
     if (writeMode) {
-        for (i in toUpdate) {
-            const user = toUpdate[i];
+        for (const user of toUpdate) {
             await userModel.generateUserToken(user);
         }
         if (toUpdate.length > 0) {

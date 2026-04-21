@@ -252,7 +252,7 @@
     "IOF_core": {
         "editable": false,
         "graphUri": "https://www.industrialontologies.org/core/",
-        "graphDownloadUrl": "https://raw.githubusercontent.com/iofoundry/ontology/Release_202502/core/meta/AnnotationVocabulary.rdf",
+        "graphDownloadUrl": "https://raw.githubusercontent.com/iofoundry/ontology/refs/heads/master/core/Core.rdf",
         "sparql_server": {
             "url": "_default"
         },
@@ -262,14 +262,19 @@
         "schema": null,
         "color": "#bcbd22",
         "group": "STANDARDS/ABSTRACT ONTOLOGIES",
-        "imports": [],
+        "imports": [
+            "BFO",
+            "iof-av"
+        ],
         "name": "IOF_core",
         "baseUri": "https://www.industrialontologies.org/core/"
     },
     "IOF_maintenance": {
         "editable": false,
-        "graphUri": "https://www.industrialontologies.org/maintenance/",
+        "graphUri": "https://spec.industrialontologies.org/ontology/maintenance/Maintenance/",
+        "graphDownloadUrl": "https://raw.githubusercontent.com/iofoundry/ontology/refs/heads/master/maintenance/Maintenance.rdf",
         "imports": [
+            "BFO",
             "IOF_core"
         ],
         "sparql_server": {
@@ -301,32 +306,271 @@
         "name": "ROMAIN",
         "baseUri": "http://www.semanticweb.org/hedi/ontologies/2018/11/ROMAIN/"
     },
-    "QUDT": {
-        "name": "QUDT",
+    "QUDT_OWL_Schema": {
+        "name": "QUDT_OWL_Schema",
         "_type": "source",
-        "id": "01GNYJ6AM3W62H2DY48SSBZNSR",
-        "graphUri": "",
+        "graphUri": "http://qudt.org/3.2.1/schema/qudt",
+        "graphDownloadUrl": "https://qudt.org/schema/qudt.ttl",
         "sparql_server": {
-            "url": "http://www.qudt.org/fuseki/qudt/sparql",
-            "method": "GET"
+            "url": "_default"
         },
         "controller": "Sparql_OWL",
-        "topClassFilter": "?topConcept <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://qudt.org/schema/qudt/Datatype>",
+        "topClassFilter": "?topConcept rdf:type owl:Class .",
         "schemaType": "OWL",
-        "dataSource": null,
         "schema": null,
-        "isDraft": false,
         "editable": false,
-        "allowIndividuals": false,
         "color": "#bcbd22",
-        "predicates": {
-            "broaderPredicate": "",
-            "lang": ""
+        "group": "STANDARDS/QUDT",
+        "imports": [
+            "QUDT_OWL_Datatypes",
+            "skos"
+        ],
+        "taxonomyPredicates": [
+            "rdfs:subClassOf",
+            "rdf:type"
+        ],
+        "baseUri": "http://qudt.org/3.2.1/schema/qudt"
+    },
+    "QUDT_OWL_Datatypes": {
+        "name": "QUDT_OWL_Datatypes",
+        "_type": "source",
+        "graphUri": "http://qudt.org/3.2.1/schema/datatype",
+        "graphDownloadUrl": "https://qudt.org/schema/datatype.ttl",
+        "sparql_server": {
+            "url": "_default"
         },
-        "group": "TSF/DRAFTS/OTHERS_OWL",
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .",
+        "schemaType": "OWL",
+        "schema": null,
+        "editable": false,
+        "color": "#bcbd22",
+        "group": "STANDARDS/QUDT",
+        "imports": [
+            "skos"
+        ],
+        "taxonomyPredicates": [
+            "rdfs:subClassOf",
+            "rdf:type"
+        ],
+        "baseUri": "http://qudt.org/3.2.1/schema/datatype"
+    },
+    "QUDT_SHACL_Schema": {
+        "name": "QUDT_SHACL_Schema",
+        "_type": "source",
+        "graphUri": "http://qudt.org/3.2.1/schema/shacl/qudt",
+        "graphDownloadUrl": "https://qudt.org/schema/shacl/qudt.ttl",
+        "sparql_server": {
+            "url": "_default"
+        },
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .",
+        "schemaType": "OWL",
+        "schema": null,
+        "editable": false,
+        "color": "#bcbd22",
+        "group": "STANDARDS/QUDT",
+        "imports": [
+            "QUDT_SHACL_Overlay",
+            "skos"
+        ],
+        "taxonomyPredicates": [
+            "rdfs:subClassOf",
+            "rdf:type"
+        ],
+        "baseUri": "http://qudt.org/3.2.1/schema/shacl/qudt"
+    },
+    "QUDT_SHACL_Overlay": {
+        "name": "QUDT_SHACL_Overlay",
+        "_type": "source",
+        "graphUri": "http://qudt.org/3.2.1/schema/shacl/overlay/qudt",
+        "graphDownloadUrl": "https://qudt.org/schema/shacl/overlay/qudt.ttl",
+        "sparql_server": {
+            "url": "_default"
+        },
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .",
+        "schemaType": "OWL",
+        "schema": null,
+        "editable": false,
+        "color": "#bcbd22",
+        "group": "STANDARDS/QUDT",
+        "imports": [
+            "QUDT_SHACL_Schema",
+            "owl"
+        ],
+        "taxonomyPredicates": [
+            "rdfs:subClassOf",
+            "rdf:type"
+        ],
+        "baseUri": "http://qudt.org/3.2.1/schema/shacl/overlay/qudt"
+    },
+    "QUDT_Units": {
+        "name": "QUDT_Units",
+        "_type": "source",
+        "graphUri": "http://qudt.org/3.2.1/vocab/unit",
+        "graphDownloadUrl": "https://raw.githubusercontent.com/qudt/qudt-public-repo/refs/heads/main/src/main/rdf/vocab/unit/VOCAB_QUDT-UNITS-ALL.ttl",
+        "sparql_server": {
+            "url": "_default"
+        },
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .",
+        "schemaType": "OWL",
+        "schema": null,
+        "editable": false,
+        "color": "#bcbd22",
+        "group": "STANDARDS/QUDT",
+        "imports": [
+            "QUDT_Prefixes",
+            "QUDT_Quantity_Kinds",
+            "QUDT_Systems_of_Units"
+        ],
+        "taxonomyPredicates": [
+            "rdfs:subClassOf",
+            "rdf:type"
+        ],
+        "baseUri": "http://qudt.org/3.2.1/vocab/unit"
+    },
+    "QUDT_Quantity_Kinds": {
+        "name": "QUDT_Quantity_Kinds",
+        "_type": "source",
+        "graphUri": "http://qudt.org/3.2.1/vocab/quantitykind",
+        "graphDownloadUrl": "https://raw.githubusercontent.com/qudt/qudt-public-repo/refs/heads/main/src/main/rdf/vocab/quantitykinds/VOCAB_QUDT-QUANTITY-KINDS-ALL.ttl",
+        "sparql_server": {
+            "url": "_default"
+        },
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .",
+        "schemaType": "OWL",
+        "schema": null,
+        "editable": false,
+        "color": "#bcbd22",
+        "group": "STANDARDS/QUDT",
+        "imports": [
+            "QUDT_Dimension_Vectors",
+            "QUDT_Systems_of_Quantity_Kinds"
+        ],
+        "taxonomyPredicates": [
+            "rdfs:subClassOf",
+            "rdf:type"
+        ],
+        "baseUri": "http://qudt.org/3.2.1/vocab/quantitykind"
+    },
+    "QUDT_Dimension_Vectors": {
+        "name": "QUDT_Dimension_Vectors",
+        "_type": "source",
+        "graphUri": "http://qudt.org/3.2.1/vocab/dimensionvector",
+        "graphDownloadUrl": "https://raw.githubusercontent.com/qudt/qudt-public-repo/refs/heads/main/src/main/rdf/vocab/dimensionvectors/VOCAB_QUDT-DIMENSION-VECTORS.ttl",
+        "sparql_server": {
+            "url": "_default"
+        },
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .",
+        "schemaType": "OWL",
+        "schema": null,
+        "editable": false,
+        "color": "#bcbd22",
+        "group": "STANDARDS/QUDT",
         "imports": [],
-        "taxonomyPredicates": [],
-        "baseUri": ""
+        "taxonomyPredicates": [
+            "rdfs:subClassOf",
+            "rdf:type"
+        ],
+        "baseUri": "http://qudt.org/3.2.1/vocab/dimensionvector"
+    },
+    "QUDT_Constants": {
+        "name": "QUDT_Constants",
+        "_type": "source",
+        "graphUri": "http://qudt.org/3.2.1/vocab/constant",
+        "graphDownloadUrl": "https://raw.githubusercontent.com/qudt/qudt-public-repo/refs/heads/main/src/main/rdf/vocab/constants/VOCAB_QUDT-CONSTANTS.ttl",
+        "sparql_server": {
+            "url": "_default"
+        },
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .",
+        "schemaType": "OWL",
+        "schema": null,
+        "editable": false,
+        "color": "#bcbd22",
+        "group": "STANDARDS/QUDT",
+        "imports": [
+            "QUDT_Units"
+        ],
+        "taxonomyPredicates": [
+            "rdfs:subClassOf",
+            "rdf:type"
+        ],
+        "baseUri": "http://qudt.org/3.2.1/vocab/constant"
+    },
+    "QUDT_Prefixes": {
+        "name": "QUDT_Prefixes",
+        "_type": "source",
+        "graphUri": "http://qudt.org/3.2.1/vocab/prefix",
+        "graphDownloadUrl": "https://raw.githubusercontent.com/qudt/qudt-public-repo/refs/heads/main/src/main/rdf/vocab/prefixes/VOCAB_QUDT-PREFIXES.ttl",
+        "sparql_server": {
+            "url": "_default"
+        },
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .",
+        "schemaType": "OWL",
+        "schema": null,
+        "editable": false,
+        "color": "#bcbd22",
+        "group": "STANDARDS/QUDT",
+        "imports": [],
+        "taxonomyPredicates": [
+            "rdfs:subClassOf",
+            "rdf:type"
+        ],
+        "baseUri": "http://qudt.org/3.2.1/vocab/prefix"
+    },
+    "QUDT_Systems_of_Units": {
+        "name": "QUDT_Systems_of_Units",
+        "_type": "source",
+        "graphUri": "http://qudt.org/3.2.1/vocab/sou",
+        "graphDownloadUrl": "https://raw.githubusercontent.com/qudt/qudt-public-repo/refs/heads/main/src/main/rdf/vocab/systems/VOCAB_QUDT-SYSTEM-OF-UNITS-ALL.ttl",
+        "sparql_server": {
+            "url": "_default"
+        },
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .",
+        "schemaType": "OWL",
+        "schema": null,
+        "editable": false,
+        "color": "#bcbd22",
+        "group": "STANDARDS/QUDT",
+        "imports": [
+            "QUDT_Prefixes"
+        ],
+        "taxonomyPredicates": [
+            "rdfs:subClassOf",
+            "rdf:type"
+        ],
+        "baseUri": "http://qudt.org/3.2.1/vocab/sou"
+    },
+    "QUDT_Systems_of_Quantity_Kinds": {
+        "name": "QUDT_Systems_of_Quantity_Kinds",
+        "_type": "source",
+        "graphUri": "http://qudt.org/3.2.1/vocab/soqk",
+        "graphDownloadUrl": "https://raw.githubusercontent.com/qudt/qudt-public-repo/refs/heads/main/src/main/rdf/vocab/systems/VOCAB_QUDT-SYSTEM-OF-QUANTITY-KINDS-ALL.ttl",
+        "sparql_server": {
+            "url": "_default"
+        },
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .",
+        "schemaType": "OWL",
+        "schema": null,
+        "editable": false,
+        "color": "#bcbd22",
+        "group": "STANDARDS/QUDT",
+        "imports": [
+            "QUDT_Systems_of_Units"
+        ],
+        "taxonomyPredicates": [
+            "rdfs:subClassOf",
+            "rdf:type"
+        ],
+        "baseUri": "http://qudt.org/3.2.1/vocab/soqk"
     },
     "plant_ontology": {
         "name": "plant_ontology",
@@ -441,6 +685,566 @@
             "rdf:type"
         ],
         "baseUri": "http://data.total.com/resource/tsf/ontology/tsf-standards_landscape/"
+    },
+    "Pizza": {
+        "name": "Pizza",
+        "_type": "source",
+        "graphUri": "https://raw.githubusercontent.com/owlcs/pizza-ontology/refs/heads/master/pizza.owl",
+        "graphDownloadUrl": "https://raw.githubusercontent.com/owlcs/pizza-ontology/refs/heads/master/pizza.owl",
+        "sparql_server": {
+            "url": "_default"
+        },
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .",
+        "schemaType": "OWL",
+        "schema": null,
+        "editable": false,
+        "allowIndividuals": true,
+        "color": "#bcbd22",
+        "predicates": {
+            "broaderPredicate": "",
+            "lang": "en"
+        },
+        "group": "STANDARDS/EXAMPLES",
+        "imports": [],
+        "taxonomyPredicates": [
+            "rdfs:subClassOf",
+            "rdf:type"
+        ],
+        "baseUri": "https://raw.githubusercontent.com/owlcs/pizza-ontology/refs/heads/master/pizza.owl"
+    },
+    "EMMO": {
+        "name": "EMMO",
+        "_type": "source",
+        "graphUri": "https://w3id.org/emmo#",
+        "graphDownloadUrl": "https://raw.githubusercontent.com/emmo-repo/EMMO/refs/heads/master/emmo.ttl",
+        "sparql_server": {
+            "url": "_default"
+        },
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .",
+        "schemaType": "OWL",
+        "schema": null,
+        "editable": false,
+        "allowIndividuals": false,
+        "color": "#bcbd22",
+        "predicates": {
+            "broaderPredicate": "",
+            "lang": "en"
+        },
+        "group": "STANDARDS/ABSTRACT ONTOLOGIES",
+        "imports": [],
+        "taxonomyPredicates": [
+            "rdfs:subClassOf",
+            "rdf:type"
+        ],
+        "baseUri": "https://w3id.org/emmo#"
+    },
+    "CCO_AgentOntology": {
+        "name": "CCO_AgentOntology",
+        "_type": "source",
+        "graphUri": "https://www.commoncoreontologies.org/AgentOntology",
+        "graphDownloadUrl": "https://raw.githubusercontent.com/CommonCoreOntology/CommonCoreOntologies/refs/heads/develop/src/cco-modules/AgentOntology.ttl",
+        "sparql_server": {
+            "url": "_default"
+        },
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .",
+        "schemaType": "OWL",
+        "schema": null,
+        "editable": false,
+        "color": "#bcbd22",
+        "group": "STANDARDS/COMMON_CORE_ONTOLOGIES",
+        "imports": [
+            "BFO",
+            "CCO_InformationEntityOntology",
+            "CCO_EventOntology"
+        ],
+        "taxonomyPredicates": [
+            "rdfs:subClassOf",
+            "rdf:type"
+        ],
+        "baseUri": "https://www.commoncoreontologies.org/AgentOntology"
+    },
+    "CCO_ArtifactOntology": {
+        "name": "CCO_ArtifactOntology",
+        "_type": "source",
+        "graphUri": "https://www.commoncoreontologies.org/ArtifactOntology",
+        "graphDownloadUrl": "https://raw.githubusercontent.com/CommonCoreOntology/CommonCoreOntologies/refs/heads/develop/src/cco-modules/ArtifactOntology.ttl",
+        "sparql_server": {
+            "url": "_default"
+        },
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .",
+        "schemaType": "OWL",
+        "schema": null,
+        "editable": false,
+        "color": "#bcbd22",
+        "group": "STANDARDS/COMMON_CORE_ONTOLOGIES",
+        "imports": [
+            "BFO",
+            "CCO_InformationEntityOntology"
+        ],
+        "taxonomyPredicates": [
+            "rdfs:subClassOf",
+            "rdf:type"
+        ],
+        "baseUri": "https://www.commoncoreontologies.org/ArtifactOntology"
+    },
+    "CCO_CurrencyUnitOntology": {
+        "name": "CCO_CurrencyUnitOntology",
+        "_type": "source",
+        "graphUri": "https://www.commoncoreontologies.org/CurrencyUnitOntology",
+        "graphDownloadUrl": "https://raw.githubusercontent.com/CommonCoreOntology/CommonCoreOntologies/refs/heads/develop/src/cco-modules/CurrencyUnitOntology.ttl",
+        "sparql_server": {
+            "url": "_default"
+        },
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .",
+        "schemaType": "OWL",
+        "schema": null,
+        "editable": false,
+        "color": "#bcbd22",
+        "group": "STANDARDS/COMMON_CORE_ONTOLOGIES",
+        "imports": [
+            "BFO",
+            "CCO_InformationEntityOntology"
+        ],
+        "taxonomyPredicates": [
+            "rdfs:subClassOf",
+            "rdf:type"
+        ],
+        "baseUri": "https://www.commoncoreontologies.org/CurrencyUnitOntology"
+    },
+    "CCO_EventOntology": {
+        "name": "CCO_EventOntology",
+        "_type": "source",
+        "graphUri": "https://www.commoncoreontologies.org/EventOntology",
+        "graphDownloadUrl": "https://raw.githubusercontent.com/CommonCoreOntology/CommonCoreOntologies/refs/heads/develop/src/cco-modules/EventOntology.ttl",
+        "sparql_server": {
+            "url": "_default"
+        },
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .",
+        "schemaType": "OWL",
+        "schema": null,
+        "editable": false,
+        "color": "#bcbd22",
+        "group": "STANDARDS/COMMON_CORE_ONTOLOGIES",
+        "imports": [
+            "BFO",
+            "CCO_InformationEntityOntology"
+        ],
+        "taxonomyPredicates": [
+            "rdfs:subClassOf",
+            "rdf:type"
+        ],
+        "baseUri": "https://www.commoncoreontologies.org/EventOntology"
+    },
+    "CCO_ExtendedRelationOntology": {
+        "name": "CCO_ExtendedRelationOntology",
+        "_type": "source",
+        "graphUri": "https://www.commoncoreontologies.org/ExtendedRelationOntology",
+        "graphDownloadUrl": "https://raw.githubusercontent.com/CommonCoreOntology/CommonCoreOntologies/refs/heads/develop/src/cco-modules/ExtendedRelationOntology.ttl",
+        "sparql_server": {
+            "url": "_default"
+        },
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .",
+        "schemaType": "OWL",
+        "schema": null,
+        "editable": false,
+        "color": "#bcbd22",
+        "group": "STANDARDS/COMMON_CORE_ONTOLOGIES",
+        "imports": [
+            "BFO"
+        ],
+        "taxonomyPredicates": [
+            "rdfs:subClassOf",
+            "rdf:type"
+        ],
+        "baseUri": "https://www.commoncoreontologies.org/ExtendedRelationOntology"
+    },
+    "CCO_FacilityOntology": {
+        "name": "CCO_FacilityOntology",
+        "_type": "source",
+        "graphUri": "https://www.commoncoreontologies.org/FacilityOntology",
+        "graphDownloadUrl": "https://raw.githubusercontent.com/CommonCoreOntology/CommonCoreOntologies/refs/heads/develop/src/cco-modules/FacilityOntology.ttl",
+        "sparql_server": {
+            "url": "_default"
+        },
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .",
+        "schemaType": "OWL",
+        "schema": null,
+        "editable": false,
+        "color": "#bcbd22",
+        "group": "STANDARDS/COMMON_CORE_ONTOLOGIES",
+        "imports": [
+            "BFO",
+            "CCO_ArtifactOntology"
+        ],
+        "taxonomyPredicates": [
+            "rdfs:subClassOf",
+            "rdf:type"
+        ],
+        "baseUri": "https://www.commoncoreontologies.org/FacilityOntology"
+    },
+    "CCO_GeospatialOntology": {
+        "name": "CCO_GeospatialOntology",
+        "_type": "source",
+        "graphUri": "https://www.commoncoreontologies.org/GeospatialOntology",
+        "graphDownloadUrl": "https://raw.githubusercontent.com/CommonCoreOntology/CommonCoreOntologies/refs/heads/develop/src/cco-modules/GeospatialOntology.ttl",
+        "sparql_server": {
+            "url": "_default"
+        },
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .",
+        "schemaType": "OWL",
+        "schema": null,
+        "editable": false,
+        "color": "#bcbd22",
+        "group": "STANDARDS/COMMON_CORE_ONTOLOGIES",
+        "imports": [
+            "BFO",
+            "CCO_ExtendedRelationOntology"
+        ],
+        "taxonomyPredicates": [
+            "rdfs:subClassOf",
+            "rdf:type"
+        ],
+        "baseUri": "https://www.commoncoreontologies.org/GeospatialOntology"
+    },
+    "CCO_InformationEntityOntology": {
+        "name": "CCO_InformationEntityOntology",
+        "_type": "source",
+        "graphUri": "https://www.commoncoreontologies.org/InformationEntityOntology",
+        "graphDownloadUrl": "https://raw.githubusercontent.com/CommonCoreOntology/CommonCoreOntologies/refs/heads/develop/src/cco-modules/InformationEntityOntology.ttl",
+        "sparql_server": {
+            "url": "_default"
+        },
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .",
+        "schemaType": "OWL",
+        "schema": null,
+        "editable": false,
+        "color": "#bcbd22",
+        "group": "STANDARDS/COMMON_CORE_ONTOLOGIES",
+        "imports": [
+            "BFO",
+            "CCO_GeospatialOntology",
+            "CCO_TimeOntology"
+        ],
+        "taxonomyPredicates": [
+            "rdfs:subClassOf",
+            "rdf:type"
+        ],
+        "baseUri": "https://www.commoncoreontologies.org/InformationEntityOntology"
+    },
+    "CCO_QualityOntology": {
+        "name": "CCO_QualityOntology",
+        "_type": "source",
+        "graphUri": "https://www.commoncoreontologies.org/QualityOntology",
+        "graphDownloadUrl": "https://raw.githubusercontent.com/CommonCoreOntology/CommonCoreOntologies/refs/heads/develop/src/cco-modules/QualityOntology.ttl",
+        "sparql_server": {
+            "url": "_default"
+        },
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .",
+        "schemaType": "OWL",
+        "schema": null,
+        "editable": false,
+        "color": "#bcbd22",
+        "group": "STANDARDS/COMMON_CORE_ONTOLOGIES",
+        "imports": [
+            "BFO",
+            "CCO_InformationEntityOntology"
+        ],
+        "taxonomyPredicates": [
+            "rdfs:subClassOf",
+            "rdf:type"
+        ],
+        "baseUri": "https://www.commoncoreontologies.org/QualityOntology"
+    },
+    "CCO_TimeOntology": {
+        "name": "CCO_TimeOntology",
+        "_type": "source",
+        "graphUri": "https://www.commoncoreontologies.org/TimeOntology",
+        "graphDownloadUrl": "https://raw.githubusercontent.com/CommonCoreOntology/CommonCoreOntologies/refs/heads/develop/src/cco-modules/TimeOntology.ttl",
+        "sparql_server": {
+            "url": "_default"
+        },
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .",
+        "schemaType": "OWL",
+        "schema": null,
+        "editable": false,
+        "color": "#bcbd22",
+        "group": "STANDARDS/COMMON_CORE_ONTOLOGIES",
+        "imports": [
+            "BFO",
+            "CCO_ExtendedRelationOntology"
+        ],
+        "taxonomyPredicates": [
+            "rdfs:subClassOf",
+            "rdf:type"
+        ],
+        "baseUri": "https://www.commoncoreontologies.org/TimeOntology"
+    },
+    "CCO_UnitsOfMeasureOntology": {
+        "name": "CCO_UnitsOfMeasureOntology",
+        "_type": "source",
+        "graphUri": "https://www.commoncoreontologies.org/UnitsOfMeasureOntology",
+        "graphDownloadUrl": "https://raw.githubusercontent.com/CommonCoreOntology/CommonCoreOntologies/refs/heads/develop/src/cco-modules/UnitsOfMeasureOntology.ttl",
+        "sparql_server": {
+            "url": "_default"
+        },
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .",
+        "schemaType": "OWL",
+        "schema": null,
+        "editable": false,
+        "color": "#bcbd22",
+        "group": "STANDARDS/COMMON_CORE_ONTOLOGIES",
+        "imports": [
+            "BFO",
+            "CCO_InformationEntityOntology"
+        ],
+        "taxonomyPredicates": [
+            "rdfs:subClassOf",
+            "rdf:type"
+        ],
+        "baseUri": "https://www.commoncoreontologies.org/UnitsOfMeasureOntology"
+    },
+    "IOF_supplychain": {
+        "name": "IOF_supplychain",
+        "_type": "source",
+        "graphUri": "https://spec.industrialontologies.org/ontology/supplychain/SupplyChain/",
+        "graphDownloadUrl": "https://raw.githubusercontent.com/iofoundry/ontology/refs/heads/master/supplychain/SupplyChain.rdf",
+        "sparql_server": {
+            "url": "_default"
+        },
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdfs:subClassOf ?superClass. filter(regex(str(?superClass),'BFO') )",
+        "schemaType": "OWL",
+        "schema": null,
+        "editable": false,
+        "color": "#bcbd22",
+        "group": "STANDARDS/IOF",
+        "imports": [
+            "BFO",
+            "IOF_core"
+        ],
+        "taxonomyPredicates": [
+            "rdfs:subClassOf",
+            "rdf:type"
+        ],
+        "baseUri": "https://spec.industrialontologies.org/ontology/supplychain/SupplyChain/"
+    },
+    "IOF_productionplanning": {
+        "name": "IOF_productionplanning",
+        "_type": "source",
+        "graphUri": "https://spec.industrialontologies.org/ontology/productionplanning/ProductionPlanning/",
+        "graphDownloadUrl": "https://raw.githubusercontent.com/iofoundry/ontology/refs/heads/master/productionplanning/ProductionPlanning.rdf",
+        "sparql_server": {
+            "url": "_default"
+        },
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdfs:subClassOf ?superClass. filter(regex(str(?superClass),'BFO') )",
+        "schemaType": "OWL",
+        "schema": null,
+        "editable": false,
+        "color": "#bcbd22",
+        "group": "STANDARDS/IOF",
+        "imports": [
+            "BFO",
+            "IOF_core"
+        ],
+        "taxonomyPredicates": [
+            "rdfs:subClassOf",
+            "rdf:type"
+        ],
+        "baseUri": "https://spec.industrialontologies.org/ontology/productionplanning/ProductionPlanning/"
+    },
+    "IOF_biopharma": {
+        "name": "IOF_biopharma",
+        "_type": "source",
+        "graphUri": "https://spec.industrialontologies.org/ontology/biopharma/",
+        "graphDownloadUrl": "https://raw.githubusercontent.com/iofoundry/ontology/refs/heads/master/biopharma/Metadatabiopharma.rdf",
+        "sparql_server": {
+            "url": "_default"
+        },
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdfs:subClassOf ?superClass. filter(regex(str(?superClass),'BFO') )",
+        "schemaType": "OWL",
+        "schema": null,
+        "editable": false,
+        "color": "#bcbd22",
+        "group": "STANDARDS/IOF",
+        "imports": [
+            "BFO",
+            "iof-av"
+        ],
+        "taxonomyPredicates": [
+            "rdfs:subClassOf",
+            "rdf:type"
+        ],
+        "baseUri": "https://spec.industrialontologies.org/ontology/biopharma/"
+    },
+    "iof-av": {
+        "name": "iof-av",
+        "_type": "source",
+        "graphUri": "https://spec.industrialontologies.org/ontology/core/meta/AnnotationVocabulary/",
+        "graphDownloadUrl": "https://raw.githubusercontent.com/iofoundry/ontology/refs/heads/master/core/meta/AnnotationVocabulary.rdf",
+        "sparql_server": {
+            "url": "_default"
+        },
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .",
+        "schemaType": "OWL",
+        "schema": null,
+        "editable": false,
+        "color": "#bcbd22",
+        "group": "STANDARDS/IOF",
+        "imports": [
+            "BFO"
+        ],
+        "taxonomyPredicates": [
+            "rdfs:subClassOf",
+            "rdf:type"
+        ],
+        "baseUri": "https://spec.industrialontologies.org/ontology/core/meta/AnnotationVocabulary/"
+    },
+    "rdf": {
+        "name": "rdf",
+        "_type": "source",
+        "graphUri": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+        "graphDownloadUrl": "https://www.w3.org/1999/02/22-rdf-syntax-ns",
+        "sparql_server": {
+            "url": "_default"
+        },
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .",
+        "schemaType": "OWL",
+        "schema": null,
+        "editable": false,
+        "color": "#bcbd22",
+        "group": "STANDARDS/W3C",
+        "imports": [],
+        "taxonomyPredicates": [
+            "rdfs:subClassOf",
+            "rdf:type"
+        ],
+        "baseUri": "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    },
+    "rdfs": {
+        "name": "rdfs",
+        "_type": "source",
+        "graphUri": "http://www.w3.org/2000/01/rdf-schema#",
+        "graphDownloadUrl": "https://www.w3.org/2000/01/rdf-schema",
+        "sparql_server": {
+            "url": "_default"
+        },
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .",
+        "schemaType": "OWL",
+        "schema": null,
+        "editable": false,
+        "color": "#bcbd22",
+        "group": "STANDARDS/W3C",
+        "imports": [],
+        "taxonomyPredicates": [
+            "rdfs:subClassOf",
+            "rdf:type"
+        ],
+        "baseUri": "http://www.w3.org/2000/01/rdf-schema#"
+    },
+    "owl": {
+        "name": "owl",
+        "_type": "source",
+        "graphUri": "http://www.w3.org/2002/07/owl#",
+        "graphDownloadUrl": "https://www.w3.org/2002/07/owl",
+        "sparql_server": {
+            "url": "_default"
+        },
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .",
+        "schemaType": "OWL",
+        "schema": null,
+        "editable": false,
+        "color": "#bcbd22",
+        "group": "STANDARDS/W3C",
+        "imports": [],
+        "taxonomyPredicates": [
+            "rdfs:subClassOf",
+            "rdf:type"
+        ],
+        "baseUri": "http://www.w3.org/2002/07/owl#"
+    },
+    "skos": {
+        "name": "skos",
+        "_type": "source",
+        "graphUri": "http://www.w3.org/2004/02/skos/core#",
+        "graphDownloadUrl": "https://www.w3.org/TR/skos-reference/skos.rdf",
+        "sparql_server": {
+            "url": "_default"
+        },
+        "controller": "Sparql_SKOS",
+        "topClassFilter": "?topConcept rdf:type owl:Class .",
+        "schemaType": "SKOS",
+        "schema": null,
+        "editable": false,
+        "color": "#bcbd22",
+        "group": "STANDARDS/W3C",
+        "imports": [],
+        "taxonomyPredicates": [
+            "skos:broader"
+        ],
+        "baseUri": "http://www.w3.org/2004/02/skos/core#"
+    },
+    "dcterms": {
+        "name": "dcterms",
+        "_type": "source",
+        "graphUri": "http://purl.org/dc/terms/",
+        "graphDownloadUrl": "https://www.dublincore.org/specifications/dublin-core/dcmi-terms/dublin_core_terms.nt",
+        "sparql_server": {
+            "url": "_default"
+        },
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .",
+        "schemaType": "OWL",
+        "schema": null,
+        "editable": false,
+        "color": "#bcbd22",
+        "group": "STANDARDS/W3C",
+        "imports": [],
+        "taxonomyPredicates": [
+            "rdfs:subClassOf",
+            "rdf:type"
+        ],
+        "baseUri": "http://purl.org/dc/terms/"
+    },
+    "dc": {
+        "name": "dc",
+        "_type": "source",
+        "graphUri": "http://purl.org/dc/elements/1.1/",
+        "graphDownloadUrl": "https://www.dublincore.org/specifications/dublin-core/dcmi-terms/dublin_core_elements.nt",
+        "sparql_server": {
+            "url": "_default"
+        },
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .",
+        "schemaType": "OWL",
+        "schema": null,
+        "editable": false,
+        "color": "#bcbd22",
+        "group": "STANDARDS/W3C",
+        "imports": [],
+        "taxonomyPredicates": [
+            "rdfs:subClassOf",
+            "rdf:type"
+        ],
+        "baseUri": "http://purl.org/dc/elements/1.1/"
     }
 }
 

@@ -13,7 +13,6 @@ export default defineConfig({
                 download_graph_modal: path.resolve(__dirname, "src/Component/DownloadGraphModal.tsx"),
                 upload_graph_modal: path.resolve(__dirname, "src/Component/UploadGraphModal.tsx"),
                 kg_upload_app: path.resolve(__dirname, "src/kg-upload-app.tsx"),
-                save_sparql_query_app: path.resolve(__dirname, "src/save-sparql-query.tsx"),
                 graph_management: path.resolve(__dirname, "src/graph-management.tsx"),
                 user_settings: path.resolve(__dirname, "src/user-settings.tsx"),
                 mappingModeler_upload_app: path.resolve(__dirname, "src/mappingModeler-upload-app.tsx"),

@@ -215,7 +215,10 @@ var UI = (function () {
         var $active = $(self.sourcePopupSelectors.activeSource).first();
         if ($active.length) {
             var arrowIcon = '<div class="arrow-icon slsv-invisible-button" style="height: 20px; width: 20px;"></div>';
-            $indicator.html($active.prop("outerHTML") + arrowIcon).css("display", "inline-flex").css("align-items", "center");
+            $indicator
+                .html($active.prop("outerHTML") + arrowIcon)
+                .css("display", "inline-flex")
+                .css("align-items", "center");
         } else {
             $indicator.hide().empty();
         }

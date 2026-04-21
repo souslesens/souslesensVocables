@@ -8,14 +8,10 @@
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// imports React app
-import("/assets/save_sparql_query_app.js");
-
 var SPARQL_endpoint = (function () {
     var self = {};
 
     self.currentSource;
-    self.createSaveQueryApp;
 
     self.onLoaded = function () {
         //  self.currentSource = sourceLabel;
@@ -24,31 +20,43 @@ var SPARQL_endpoint = (function () {
         //localStorage.clear();
 
         //$("#mainDialogDiv").parent().css("left", "100px");
-        function vhToPx(v) {
-            return Math.round(window.innerHeight * (v / 100));
-        }
-        function vwToPx(v) {
-            return Math.round(window.innerWidth * (v / 100));
-        }
+        $("#mainDialogDiv").css("width", "1000px");
         $("#graphDiv").html("");
         $("#mainDialogDiv").load("modules/tools/SPARQL/SPARQLendpoint.html", function () {
-            UI.openDialog("mainDialogDiv", {
-                title: "SPARQL endpoint",
-                width: vwToPx(90),
-                height: vhToPx(80),
-            });
+            UI.openDialog("mainDialogDiv", { title: "SPARQL endpoint" });
             self.initYasGui();
         });
     };
 
     self.initYasGui = function () {
-        // mount react app
-        if (self.createSaveQueryApp === undefined) {
-            console.log("React app is not ready");
-            throw new Error("React app is not ready");
-        }
-        self.unmountSaveQueryApp = self.createSaveQueryApp(Config.sparql_server.url);
+        /*  var sourceObj = Config.sources[SPARQL_endpoint.currentSource];
+        var url = sourceObj.sparql_server.url;
+        var method = sourceObj.sparql_server.method;
+        var graphUri = sourceObj.graphUri;*/
+
+        var url = Config.sparql_server.url;
+        var method = "POST";
+        var graphUri = "";
+
+        if (!method) method = "POST";
+        var url2 = `${Config.apiUrl}/yasguiQuery?url=${url}&graphUri=${graphUri}&method=${method}&t=${new Date().getTime()}`;
+
+        var yasgui = new Yasgui(document.getElementById("yasgui"), {
+            requestConfig: { endpoint: url2 },
+            copyEndpointOnNewTab: false,
+        });
+
+        yasgui.on("queryResponse", (Yasgui, tab) => {
+            $(".yasr").css("overflow", "scroll");
+            $(".yasr").css("height", "500px");
+        });
+        yasgui.on("queryError", (Yasgui, tab, err) => {
+            MainController.errorAlert(err);
+        });
     };
+    self.saveQuery = function () {};
+    
+    self.loadQuery = function () {};
 
     return self;
 })();

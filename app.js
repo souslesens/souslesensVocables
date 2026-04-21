@@ -436,7 +436,7 @@ const basicVocabularies = [
 async function loadBasicVocabularies() {
     const existingGraphs = await rdfDataModel.getGraphs();
     try {
-        for (const ontology of basicVocabularies) {
+     for (const ontology of basicVocabularies) {
             const matchingGraph = existingGraphs.find((g) => g.name === ontology.graphUri);
             const hasGraph = !!matchingGraph?.count;
             if (!hasGraph) {

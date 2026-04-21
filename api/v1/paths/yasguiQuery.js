@@ -15,22 +15,12 @@ export default function () {
         try {
             const userInfo = await userManager.getUser(req.user);
             const sources = await sourceModel.getUserSources(userInfo.user);
-            const graphs = Object.entries(sources).map(([_, source]) => source.graphUri);
 
             let query = req.body.query || req.body.update;
             const headers = {};
 
-            if (hasFromClause(query)) {
-                if (!validateFromClause(query, graphs)) {
-                    const error = new Error("DATA PROTECTION: FROM clause contains unauthorized graph URIs");
-                    error.status = 403;
-                    throw error;
-                }
-            } else if (req.query.graphUri && graphs.includes(req.query.graphUri)) {
-                query = addFromsToSparqlQuery(query, [req.query.graphUri], true);
-            } else {
-                query = addFromsToSparqlQuery(query, graphs, true);
-            }
+            const filteredQuery = await UserRequestFiltering.filterSparqlRequestAsync(query, sources, userInfo);
+            query = filteredQuery;
 
             if (req.query.method == "POST") {
                 headers["Accept"] = "application/sparql-results+json";

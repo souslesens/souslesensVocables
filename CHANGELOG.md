@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.3.0](https://github.com/souslesens/souslesensVocables/compare/3.2.1...3.3.0) (2026-04-21)
+
+
+### ⚠ BREAKING CHANGES
+
+* **api:** replace manual SPARQL FROM clause validation with UserRequestFiltering
+* **api,model:** add FROM clause validation for SPARQL queries
+
+### Features
+
+* **api,model:** add FROM clause validation for SPARQL queries ([07257d3](https://github.com/souslesens/souslesensVocables/commit/07257d331afbdd45f158166be337da3e2b8117df))
+
+
+* **api:** replace manual SPARQL FROM clause validation with UserRequestFiltering ([98443a9](https://github.com/souslesens/souslesensVocables/commit/98443a91b4aead0bc7cd19a0d10160584dc3a8fd))
+
 ### [3.2.1](https://github.com/souslesens/souslesensVocables/compare/3.2.0...3.2.1) (2026-04-20)
 
 

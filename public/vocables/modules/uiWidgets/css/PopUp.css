@@ -94,6 +94,7 @@
     border-radius: 14px;
     overflow-y: hidden;
     text-align: center;
+    z-index: 10000;
 }
 
 .vakata-contextmenu-sep {

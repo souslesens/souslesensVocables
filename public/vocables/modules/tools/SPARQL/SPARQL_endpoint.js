@@ -8,6 +8,10 @@
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+import UserDataWidget from "../../uiWidgets/userDataWidget.js";
+import MainController from "../../shared/mainController.js";
+import common from "../../shared/common.js";
+
 var SPARQL_endpoint = (function () {
     var self = {};
 
@@ -41,22 +45,93 @@ var SPARQL_endpoint = (function () {
         if (!method) method = "POST";
         var url2 = `${Config.apiUrl}/yasguiQuery?url=${url}&graphUri=${graphUri}&method=${method}&t=${new Date().getTime()}`;
 
-        var yasgui = new Yasgui(document.getElementById("yasgui"), {
+        self.yasgui = new Yasgui(document.getElementById("yasgui"), {
             requestConfig: { endpoint: url2 },
             copyEndpointOnNewTab: false,
         });
 
-        yasgui.on("queryResponse", (Yasgui, tab) => {
+        self.yasgui.on("queryResponse", (Yasgui, tab) => {
             $(".yasr").css("overflow", "scroll");
             $(".yasr").css("height", "500px");
         });
-        yasgui.on("queryError", (Yasgui, tab, err) => {
+        self.yasgui.on("queryError", (Yasgui, tab, err) => {
             MainController.errorAlert(err);
         });
     };
-    self.saveQuery = function () {};
+    self.saveQuery = function () {
+        if (!self.yasgui) {
+            return alert("SPARQL editor not initialized");
+        }
+        var queryText = self.yasgui.getTab().getYasqe().getValue();
+        if (!queryText || !queryText.trim()) {
+            return alert("Nothing to save");
+        }
+        var data = { sparqlQuery: queryText };
+        UserDataWidget.showSaveDialog("sparqlQuery", data, null, { title: "Save SPARQL Query" }, function (err, result) {
+            if (err) {
+                return MainController.errorAlert(err);
+            }
+            alert("Query saved — id: " + result.id + ", name: " + result.label);
+        });
+    };
     
-    self.loadQuery = function () {};
+    self.getLinkSPARQLAPI = function (userDataId) {
+        var url = Config.apiUrl + "/users/data/{id}/exec";
+        var baseUrl = window.location.origin;
+        url = url.replace("{id}", userDataId);
+        return baseUrl + url;
+    };
+
+    self.loadQuery = function () {
+        if (!self.yasgui) {
+            return alert("SPARQL editor not initialized");
+        }
+        var additionalContextMenu = [
+            {
+                label: "Get API link",
+                action: function (node) {
+                    var link = self.getLinkSPARQLAPI(node.id);
+                    common.copyTextToClipboard(link, function (err) {
+                        if (err) {
+                            return MainController.errorAlert(err);
+                        }
+                        alert("Link copied to clipboard: " + link);
+                    });
+                },
+            },
+        ];
+        UserDataWidget.showListDialog(
+            null,
+            {
+                filter: { data_type: "sparqlQuery", data_tool: "SPARQL" },
+                removeSaveDiv: true,
+                title: "Load SPARQL Query",
+                additionalContextMenu: additionalContextMenu,
+                zIndex: 100,
+            },
+            function (err, result) {
+                if (err) {
+                    return MainController.errorAlert(err);
+                }
+                if (!result || !result.id) {
+                    return;
+                }
+                UserDataWidget.loadUserDatabyId(result.id, function (err, userData) {
+                    if (err) {
+                        return MainController.errorAlert(err);
+                    }
+                    var queryText = userData.data_content && userData.data_content.sparqlQuery;
+                    if (!queryText) {
+                        return alert("No SPARQL query found in saved data");
+                    }
+                    self.yasgui.addTab(true, {
+                        yasqe: { value: queryText },
+                        name: userData.data_label || "Loaded query",
+                    });
+                });
+            },
+        );
+    };
 
     return self;
 })();

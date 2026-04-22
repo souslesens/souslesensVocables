@@ -1,5 +1,5 @@
 export default {
-  setupFiles: ["<rootDir>/environment.js"],
+  setupFiles: ["<rootDir>/tests/environment.js"],
   transform: {},
   testEnvironment: "node",
   moduleFileExtensions: ["js", "mjs", "cjs", "jsx", "ts", "tsx", "json", "node"],

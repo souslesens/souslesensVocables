@@ -13,6 +13,59 @@ import async from "async";
 import { Parser as SparqlParser } from "sparqljs";
 const parser = new SparqlParser({ skipValidation: true });
 
+// Splits a SPARQL update query at the first WHERE keyword found at brace depth 0.
+// Returns [updateClause, whereClause] where whereClause is null when no top-level WHERE exists.
+// Handles string literals so that { } inside "..." do not affect depth counting.
+function splitAtTopLevelWhere(query) {
+    var depth = 0;
+    var inDoubleQuote = false;
+    var inSingleQuote = false;
+
+    for (var i = 0; i < query.length; i++) {
+        var ch = query[i];
+
+        if (inDoubleQuote) {
+            if (ch === "\\") {
+                i++;
+                continue;
+            }
+            if (ch === '"') inDoubleQuote = false;
+            continue;
+        }
+        if (inSingleQuote) {
+            if (ch === "\\") {
+                i++;
+                continue;
+            }
+            if (ch === "'") inSingleQuote = false;
+            continue;
+        }
+
+        if (ch === '"') {
+            inDoubleQuote = true;
+            continue;
+        }
+        if (ch === "'") {
+            inSingleQuote = true;
+            continue;
+        }
+        if (ch === "{") {
+            depth++;
+            continue;
+        }
+        if (ch === "}") {
+            depth--;
+            continue;
+        }
+
+        if (depth === 0 && /w/i.test(ch) && /^WHERE\b/i.test(query.slice(i))) {
+            return [query.slice(0, i), query.slice(i)];
+        }
+    }
+
+    return [query, null];
+}
+
 var UserRequestFiltering = {
     existingSources: null,
 
@@ -98,41 +151,59 @@ var UserRequestFiltering = {
         }
         var operation = operationMatch[1].trim();
 
-        var graphUris = [];
+        var parts = splitAtTopLevelWhere(query);
+        var updateClause = parts[0];
+        var whereClause = parts[1];
+
+        var writeGraphUris = [];
+        var readGraphUris = [];
         var match;
 
-        var graphRegex = /(INTO|GRAPH|WITH)\s+<([^>]+)/gim;
-        /* while for multi clauses GRAPH request like : INSERT DATA {
-        GRAPH <http://fghghf/> {
-            <http://ex/A> <http://ex/p> "1"
-        }
-        GRAPH <http://testClasses/> {
-            <http://ex/B> <http://ex/p> "2"
-        }
-        }*/
-
-        while ((match = graphRegex.exec(query)) !== null) {
-            graphUris.push(match[2].trim());
+        // Graphs in the update clause (INSERT/DELETE body, WITH, CLEAR, etc.) require WRITE access.
+        var writeGraphRegex = /(INTO|GRAPH|WITH)\s+<([^>]+)/gim;
+        while ((match = writeGraphRegex.exec(updateClause)) !== null) {
+            writeGraphUris.push(match[2].trim());
         }
 
         // COPY/MOVE/ADD use: <src> TO <dest> without GRAPH/INTO/WITH keyword
         var transferRegex = /(?:COPY|MOVE|ADD)\s+<([^>]+)>\s+TO\s+<([^>]+)>/gim;
-        while ((match = transferRegex.exec(query)) !== null) {
-            graphUris.push(match[1].trim());
-            graphUris.push(match[2].trim());
+        while ((match = transferRegex.exec(updateClause)) !== null) {
+            writeGraphUris.push(match[1].trim());
+            writeGraphUris.push(match[2].trim());
         }
 
-        if (graphUris.length === 0) {
+        if (whereClause) {
+            // DELETE WHERE (short form): no { } block before WHERE means the WHERE patterns
+            // are the deletion targets and their graphs need WRITE access.
+            // INSERT/DELETE ... WHERE: graphs in WHERE are read-only sources, they only
+            // need to be accessible (any acl level is sufficient).
+            var isDeleteWhere = updateClause.indexOf("{") === -1;
+            var whereGraphRegex = /(INTO|GRAPH|WITH)\s+<([^>]+)/gim;
+            while ((match = whereGraphRegex.exec(whereClause)) !== null) {
+                if (isDeleteWhere) {
+                    writeGraphUris.push(match[2].trim());
+                } else {
+                    readGraphUris.push(match[2].trim());
+                }
+            }
+        }
+
+        if (writeGraphUris.length === 0) {
             return callback("DATA PROTECTION : operation " + operation + " needs explicit graph declaration");
         }
 
         var error = "";
-        graphUris.forEach(function (graphUri) {
+        writeGraphUris.forEach(function (graphUri) {
             if (!userGraphUrisMap[graphUri]) {
                 error += "DATA PROTECTION : graphUri not allowed for user " + graphUri + "\n";
-            } else if (userGraphUrisMap[graphUri].acl != "w") {
-                // to be fixed PB with PRIVATE sources
+            } else if (userGraphUrisMap[graphUri].acl !== "w") {
                 error += "DATA PROTECTION : current user cannot execute " + operation + " on graph " + graphUri + "\n";
+            }
+        });
+
+        readGraphUris.forEach(function (graphUri) {
+            if (!userGraphUrisMap[graphUri]) {
+                error += "DATA PROTECTION : graphUri not allowed for user " + graphUri + "\n";
             }
         });
 
@@ -201,14 +272,11 @@ var UserRequestFiltering = {
         var strippedQuery = UserRequestFiltering.stripSparqlComments(query);
         var userGraphUrisMap = UserRequestFiltering.getUserGraphUrisMap(userSourcesMap);
 
-        // SELECT queries are validated by the SPARQL parser (checkSelectQuery)
-        // Known limitation: SELECT inside a string literal (e.g. INSERT DATA { ... "SELECT ..." })
-        // triggers this branch and causes a parser error instead of a proper ACL error.
-        // Not a security hole (query is still blocked), but produces a misleading error message.
-        // Fix: use /^\s*SELECT/im to anchor to start of line and avoid matching inside literals.
-        var selectRegex = /(SELECT)/gim;
-        var selectArray = selectRegex.exec(strippedQuery);
-        if (selectArray && selectArray.length > 0) {
+        // Route to checkSelectQuery only when SELECT/ASK/CONSTRUCT/DESCRIBE is the main operation.
+        // Strip leading PREFIX declarations first so a sub-SELECT inside an INSERT/DELETE WHERE clause
+        // does not trigger the SELECT branch (e.g. INSERT { ... } WHERE { { SELECT ... } }).
+        var queryCore = strippedQuery.replace(/^(\s*PREFIX\s+\S+\s*<[^>]*>\s*\n?)+/i, "").trim();
+        if (/^SELECT\b/i.test(queryCore)) {
             UserRequestFiltering.checkSelectQuery(strippedQuery, userGraphUrisMap, function (err, result) {
                 if (err) {
                     return callback(err);

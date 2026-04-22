@@ -11,6 +11,36 @@ var OntologyModels = (function () {
 
     self.loadedSources = {};
 
+    /**
+     * @function registerSourcesModel
+     * @name registerSourcesModel
+     * @memberof OntologyModels
+     * Loads and caches the full vocabulary model for one or more sources into `Config.ontologiesVocabularyModels`.
+     * The model includes object properties, annotation/datatype properties, classes, domain/range constraints,
+     * OWL restrictions, and inherited constraints resolved through the property hierarchy.
+     * Results are persisted server-side via `writeModelOnServerCache` and read back on next call
+     * unless `options.noCache` is set.
+     *
+     * The model structure stored in `Config.ontologiesVocabularyModels[source]`:
+     * ```
+     * {
+     *   graphUri: string,
+     *   classes:             { [classUri]: { id, label, superClass, superClassLabel } },
+     *   properties:          { [propUri]:  { id, label, inverseProp, superProp } },
+     *   nonObjectProperties: { [propUri]:  { id, label, domain, range } },
+     *   constraints:         { [propUri]:  { domain, domainLabel, range, rangeLabel, label, superProp } },
+     *   restrictions:        { [propUri]:  [ { domain, range, blankNodeId, ... } ] },
+     *   classesCount:        number
+     * }
+     * ```
+     * Classes are only loaded when `classesCount <= Config.ontologyModelMaxClasses`.
+     * Blank-node superClasses are replaced with the first non-blank ancestor found.
+     *
+     * @param {string|string[]} sources - Source name or array of source names to load.
+     * @param {Object|null} options - Loading options.
+     * @param {boolean} [options.noCache=false] - Bypass server cache and re-query the triple store.
+     * @param {Function} callback - `function(err, Config.ontologiesVocabularyModels)`
+     */
     self.registerSourcesModel = function (sources, options, callback) {
         UI.message("loading ontology models");
         if (!Array.isArray(sources)) {
@@ -470,6 +500,19 @@ var OntologyModels = (function () {
         );
     };
 
+    /**
+     * @function setInversePropertiesConstaints
+     * @name setInversePropertiesConstaints
+     * @memberof OntologyModels
+     * Derives missing domain/range constraints for inverse property pairs.
+     * When property A has a domain X and its inverse B has no domain, sets B's domain to X (and vice versa).
+     * Called twice during `registerSourcesModel`: once after direct constraints are loaded,
+     * once after inherited constraints are resolved, to propagate inheritance through inverse pairs as well.
+     *
+     * @param {string} source - Source name whose `Config.ontologiesVocabularyModels[source].constraints` is updated in place.
+     * @param {Object} inversePropsMap - Flat map `{ [propUri]: inverseUri }` populated during property loading.
+     *   Each pair appears twice (A→B and B→A) so both directions are covered.
+     */
     self.setInversePropertiesConstaints = function (source, inversePropsMap) {
         for (var propId in inversePropsMap) {
             var propConstraints = Config.ontologiesVocabularyModels[source].constraints[propId];
@@ -503,6 +546,16 @@ var OntologyModels = (function () {
         }
     };
 
+    /**
+     * @function getPropertiesArray
+     * @name getPropertiesArray
+     * @memberof OntologyModels
+     * Returns all object properties of a source as a flat array.
+     * Requires `registerSourcesModel` to have been called first.
+     *
+     * @param {string} source - Source name.
+     * @returns {{ id: string, label: string, inverseProp: string|null, superProp: string|null }[]}
+     */
     self.getPropertiesArray = function (source) {
         var array = [];
         for (var prop in Config.ontologiesVocabularyModels[source].properties) {
@@ -511,6 +564,16 @@ var OntologyModels = (function () {
         return array;
     };
 
+    /**
+     * @function getAnnotationProperties
+     * @name getAnnotationProperties
+     * @memberof OntologyModels
+     * Returns all annotation and datatype properties (non-object properties) of a source as a flat array.
+     * Requires `registerSourcesModel` to have been called first.
+     *
+     * @param {string} source - Source name.
+     * @returns {{ id: string, label: string, domain: string|null, range: string|null }[]}
+     */
     self.getAnnotationProperties = function (source) {
         var array = [];
         for (var prop in Config.ontologiesVocabularyModels[source].nonObjectProperties) {
@@ -519,6 +582,14 @@ var OntologyModels = (function () {
         return array;
     };
 
+    /**
+     * @function unRegisterSourceModel
+     * @name unRegisterSourceModel
+     * @memberof OntologyModels
+     * Removes all non-basic-vocabulary sources from `Config.ontologiesVocabularyModels`.
+     * Sources listed in `Config.basicVocabularies` (rdf, rdfs, owl, skos, etc.) are preserved.
+     * Typically called when changing the active source to free memory.
+     */
     self.unRegisterSourceModel = function () {
         var basicsSources = Object.keys(Config.basicVocabularies);
         for (var source in Config.ontologiesVocabularyModels) {
@@ -528,6 +599,16 @@ var OntologyModels = (function () {
         }
     };
 
+    /**
+     * @function readModelOnServerCache
+     * @name readModelOnServerCache
+     * @memberof OntologyModels
+     * Fetches the previously persisted vocabulary model for a source from the server cache (GET /ontologyModels).
+     * Returns null if no cache exists yet, in which case `registerSourcesModel` proceeds to query the triple store.
+     *
+     * @param {string} source - Source name.
+     * @param {Function} callback - `function(err, model|null)` — model is the full `Config.ontologiesVocabularyModels[source]` object or null.
+     */
     self.readModelOnServerCache = function (source, callback) {
         const params = new URLSearchParams({
             source: source,
@@ -546,6 +627,17 @@ var OntologyModels = (function () {
             },
         });
     };
+    /**
+     * @function clearOntologyModelCache
+     * @name clearOntologyModelCache
+     * @memberof OntologyModels
+     * Deletes the server-side cache for a source (DELETE /ontologyModels) then reloads it
+     * from the triple store by calling `registerSourcesModel` with `noCache: true`.
+     * If `source` is null/undefined, clears the entire in-memory `Config.ontologiesVocabularyModels` without reloading.
+     *
+     * @param {string|null} source - Source name, or null to clear all sources.
+     * @param {Function} [callback] - `function(err, "DONE")`
+     */
     self.clearOntologyModelCache = function (source, callback) {
         if (!callback) callback = function () {};
         const params = new URLSearchParams({
@@ -573,6 +665,28 @@ var OntologyModels = (function () {
         });
     };
 
+    /**
+     * @function updateModel
+     * @name updateModel
+     * @memberof OntologyModels
+     * Applies incremental add or remove operations to the in-memory vocabulary model
+     * and propagates the change to the server cache (PUT /ontologyModels).
+     *
+     * The `data` object mirrors the model structure: keys are entry types
+     * (`classes`, `properties`, `constraints`, `restrictions`, etc.) and values are
+     * objects of `{ [id]: entry }`.
+     *
+     * Restrictions have special handling: when removing, the entry is matched by `blankNodeId`
+     * and filtered out of the array rather than deleted as a whole entry.
+     *
+     * @param {string} source - Source name.
+     * @param {Object} data - Partial model data to merge. Example:
+     *   `{ classes: { "http://ex.org/Foo": { id, label, superClass, superClassLabel } } }`
+     * @param {Object} options - Merge options.
+     * @param {boolean} [options.remove=false] - If true, remove the entries instead of adding them.
+     * @param {boolean} [options.noUpdateCache=false] - If true, skip the server cache update (in-memory only).
+     * @param {Function} callback - `function(err)`
+     */
     self.updateModel = function (source, data, options, callback) {
         if (!options) {
             options = {};
@@ -651,6 +765,18 @@ var OntologyModels = (function () {
         }
     };
 
+    /**
+     * @function updateModelOnServerCache
+     * @name updateModelOnServerCache
+     * @memberof OntologyModels
+     * Sends an incremental model update to the server (PUT /ontologyModels).
+     * Called internally by `updateModel`; prefer `updateModel` over calling this directly.
+     *
+     * @param {string} source - Source name.
+     * @param {Object} data - Partial model data (same shape as `updateModel` `data` param).
+     * @param {Function} callback - `function(err, result)`
+     * @param {Object} options - Same options as `updateModel`.
+     */
     self.updateModelOnServerCache = function (source, data, callback, options) {
         var payload = {
             source: source,
@@ -673,6 +799,18 @@ var OntologyModels = (function () {
         });
     };
 
+    /**
+     * @function writeModelOnServerCache
+     * @name writeModelOnServerCache
+     * @memberof OntologyModels
+     * Persists the full vocabulary model to the server (POST /ontologyModels), one key at a time
+     * (`classes`, `properties`, `constraints`, etc.) to avoid payload size limits.
+     * Called at the end of `registerSourcesModel` after all SPARQL queries complete.
+     *
+     * @param {string} source - Source name.
+     * @param {Object} model - Full model object (`Config.ontologiesVocabularyModels[source]`).
+     * @param {Function} callback - `function(err)`
+     */
     self.writeModelOnServerCache = function (source, model, callback) {
         var keys = Object.keys(model);
         async.eachSeries(
@@ -720,6 +858,32 @@ var OntologyModels = (function () {
         });
     };
 
+    /**
+     * @function getAllowedPropertiesBetweenNodes
+     * @name getAllowedPropertiesBetweenNodes
+     * @memberof OntologyModels
+     * Returns the object properties that are compatible between two sets of nodes,
+     * based on their class hierarchies and the domain/range constraints (or OWL restrictions) of the source and its imports.
+     *
+     * Properties are categorised into four buckets:
+     * - `both`          — domain matches a start-node ancestor AND range matches an end-node ancestor
+     * - `domain`        — domain matches only (range is unconstrained or absent)
+     * - `range`         — range matches only
+     * - `noConstraints` — property has neither domain nor range declared
+     *
+     * When `options.keepSuperClasses` is false (default), super-properties whose sub-properties
+     * already appear in the result are removed to avoid redundancy.
+     * Sub-properties that inherit their parent's constraints are automatically added to the matching bucket.
+     *
+     * @param {string} source - Active source name (imports are included automatically).
+     * @param {string|string[]|null} startNodeIds - URI(s) of the domain (subject) node(s). Pass null/[] for any domain.
+     * @param {string|string[]|null} endNodeIds - URI(s) of the range (object) node(s). Pass null/[] for any range.
+     * @param {Object} options
+     * @param {boolean} [options.restrictions=false] - Use OWL restrictions instead of rdfs:domain/range constraints.
+     * @param {boolean} [options.keepSuperClasses=false] - Keep super-properties even when a more specific sub-property matches.
+     * @param {Function} callback - `function(err, { constraints: { both, domain, range, noConstraints }, nodes: { startNode, endNode } })`
+     *   Each bucket is `{ [propUri]: constraintObject }`.
+     */
     self.getAllowedPropertiesBetweenNodes = function (source, startNodeIds, endNodeIds, options, callback) {
         if (!options) {
             options = {};
@@ -994,6 +1158,23 @@ var OntologyModels = (function () {
         );
     };
 
+    /**
+     * @function getPropertyDomainsAndRanges
+     * @name getPropertyDomainsAndRanges
+     * @memberof OntologyModels
+     * Returns the concrete classes allowed as domain and/or range for a given property,
+     * expanded to include all subclasses (descendants) via `rdfs:subClassOf`.
+     * Merges both OWL restrictions and rdfs:domain/range constraints from the source and all its imports.
+     *
+     * @param {string} source - Active source name (imports are included automatically).
+     * @param {string} propId - URI of the property to inspect.
+     * @param {string|null} objectType - Restrict result to `"range"`, `"domain"`, or null for both.
+     * @param {Function} callback - `function(err, { ranges, domains, anyRange, anyDomain })`
+     *   - `ranges`    `{ [classUri]: { id, label } }` — allowed range classes (with descendants)
+     *   - `domains`   `{ [classUri]: { id, label } }` — allowed domain classes (with descendants)
+     *   - `anyRange`  `boolean` — true when no range constraint exists (any class is valid)
+     *   - `anyDomain` `boolean` — true when no domain constraint exists (any class is valid)
+     */
     self.getPropertyDomainsAndRanges = function (source, propId, objectType, callback) {
         if (!propId) {
             return callback(null);
@@ -1122,6 +1303,20 @@ var OntologyModels = (function () {
         );
     };
 
+    /**
+     * @function getClassesConstraints
+     * @name getClassesConstraints
+     * @memberof OntologyModels
+     * Synchronous lookup — returns all rdfs:domain/range constraints for the source
+     * whose domain matches `fromClass` and/or range matches `toClass`.
+     * Both filters are optional; omitting one returns all constraints matching only the other.
+     * Does not traverse imports or class hierarchies — use `getAllowedPropertiesBetweenNodes` for that.
+     *
+     * @param {string} source - Source name.
+     * @param {string|null} fromClass - URI of the domain class to filter on, or null to skip.
+     * @param {string|null} toClass - URI of the range class to filter on, or null to skip.
+     * @returns {{ [propUri]: constraintObject }} Map of matching property constraints.
+     */
     self.getClassesConstraints = function (source, fromClass, toClass) {
         var constraints = {};
         var objs = Config.ontologiesVocabularyModels[source].constraints;
@@ -1138,6 +1333,19 @@ var OntologyModels = (function () {
         }
         return constraints;
     };
+    /**
+     * @function getClassesRestrictions
+     * @name getClassesRestrictions
+     * @memberof OntologyModels
+     * Synchronous lookup — same contract as `getClassesConstraints` but reads from the
+     * `restrictions` bucket (OWL restrictions) instead of `constraints` (rdfs:domain/range).
+     * Filters on `restriction.domain` and `restriction.range`; absent fields are treated as wildcards.
+     *
+     * @param {string} source - Source name.
+     * @param {string|null} fromClass - URI of the domain class to filter on, or null to skip.
+     * @param {string|null} toClass - URI of the range class to filter on, or null to skip.
+     * @returns {{ [propUri]: restrictionObject }} Map of matching property restrictions.
+     */
     self.getClassesRestrictions = function (source, fromClass, toClass) {
         var restrictions = {};
         var objs = Config.ontologiesVocabularyModels[source].restrictions;
@@ -1152,6 +1360,21 @@ var OntologyModels = (function () {
         return restrictions;
     };
 
+    /**
+     * @function getImplicitModel
+     * @name getImplicitModel
+     * @memberof OntologyModels
+     * Discovers the implicit property graph of a source by inspecting actual instance triples:
+     * finds all `(?sClass, ?prop, ?oClass)` combinations where subjects and objects are typed instances
+     * (excluding owl:Class, owl:NamedIndividual, owl:Restriction, rdf:Bag).
+     * rdf:* properties and dc metadata properties are filtered out.
+     * This is useful to infer a "de facto" schema when no formal domain/range declarations exist.
+     *
+     * @param {string} source - Source name. The query runs on the source graph only (not imports).
+     * @param {Object} options
+     * @param {string} [options.filter] - Additional SPARQL FILTER clause to narrow results.
+     * @param {Function} callback - `function(err, bindings)` where each binding has `{ prop, sClass, oClass, ... }`.
+     */
     self.getImplicitModel = function (source, options, callback) {
         if (!options) {
             options = {};
@@ -1238,6 +1461,32 @@ var OntologyModels = (function () {
         }
     };
 
+    /**
+     * @function getKGnonObjectProperties
+     * @name getKGnonObjectProperties
+     * @memberof OntologyModels
+     * Returns the datatype and annotation properties actually used in instance data for a source,
+     * grouped by the class of the subject. Scans the source graph plus imports and basic vocabularies.
+     * Result is cached in `Config.ontologiesVocabularyModels[source].KGnonObjectProperties` after the first call.
+     *
+     * Result structure:
+     * ```
+     * {
+     *   [classUri]: {
+     *     id: string,
+     *     label: string,
+     *     properties: [{ id: string, label: string, datatype: string }]
+     *   }
+     * }
+     * ```
+     *
+     * @param {string} source - Source name.
+     * @param {Object} options
+     * @param {boolean} [options.reload=false] - Force re-query even if already cached.
+     * @param {boolean} [options.excludeBasicVocabularies=false] - Exclude rdf/rdfs/owl/skos vocabularies from the scan.
+     * @param {string} [options.filter] - Additional SPARQL FILTER clause injected into the query.
+     * @param {Function} callback - `function(err, { [classUri]: { id, label, properties } })`
+     */
     self.getKGnonObjectProperties = function (source, options, callback) {
         if (!options) {
             options = {};

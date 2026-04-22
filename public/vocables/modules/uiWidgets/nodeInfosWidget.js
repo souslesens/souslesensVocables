@@ -587,7 +587,10 @@ defaultLang = 'en';*/
                             (!Object.keys(self.propertiesMap.properties[key].langValues).length || Object.keys(self.propertiesMap.properties[key].langValues).length == 0)
                         ) {
                             var values = self.propertiesMap.properties[key].value;
-                            var hasPlaceholderValue = values.some(function (v) {
+                            var hasRealValue = values.some(function (v) {
+                                return v && v.value !== "?";
+                            });
+                            var hasPlaceholderValue = !hasRealValue && values.some(function (v) {
                                 return v && v.value === "?";
                             });
                             strGeneratedByProp +=
@@ -603,9 +606,14 @@ defaultLang = 'en';*/
 
                             var valuesStr = "";
 
-                            values.forEach(function (valueObj, index) {
+                            var renderedCount = 0;
+                            values.forEach(function (valueObj) {
                                 var value = valueObj.value;
                                 var isPlaceholder = value === "?";
+
+                                if (isPlaceholder && hasRealValue) {
+                                    return;
+                                }
 
                                 var predicateId = valueObj.predicateId;
                                 var optionalStr = getOptionalStr(key, predicateId);
@@ -615,13 +623,14 @@ defaultLang = 'en';*/
                                     var titleAttr = uriLabel ? " title='" + uriLabel.replace(/'/g, "&#39;") + "'" : "";
                                     value = "<a target='" + self.getUriTarget(value) + "' href='" + value + "'" + titleAttr + ">" + value + "</a>";
                                 }
-                                if (index > 0) {
+                                if (renderedCount > 0) {
                                     valuesStr += "<br>";
                                 }
                                 if (isPlaceholder) {
                                     value = "<b>?</b>";
                                 }
                                 valuesStr += value + optionalStr;
+                                renderedCount++;
                             });
                             strGeneratedByProp += "<td class='detailsCellValue'><div class='detailsCellValueContent'>" + valuesStr + "</div></td>";
                             strGeneratedByProp += "</tr>";

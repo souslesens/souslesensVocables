@@ -74,7 +74,7 @@ var SPARQL_endpoint = (function () {
             alert("Query saved — id: " + result.id + ", name: " + result.label);
         });
     };
-    
+
     self.getLinkSPARQLAPI = function (userDataId) {
         var url = Config.apiUrl + "/users/data/{id}/exec";
         var baseUrl = window.location.origin;

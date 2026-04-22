@@ -20,9 +20,9 @@ const userSourcesMap = {
 };
 
 // Graph URI variables — modifier ici pour changer les graphs de test dans tout le fichier
-const rwGraph = userSourcesMap.fghghf.graphUri;      // graph autorisé en lecture/écriture
-const roGraph = userSourcesMap.testClasses.graphUri;  // graph autorisé en lecture seule
-const unknownGraph = "http://unknown/";               // graph absent du userSourcesMap
+const rwGraph = userSourcesMap.fghghf.graphUri; // graph autorisé en lecture/écriture
+const roGraph = userSourcesMap.testClasses.graphUri; // graph autorisé en lecture seule
+const unknownGraph = "http://unknown/"; // graph absent du userSourcesMap
 
 // Helper pour les messages d'erreur "cannot execute OP on graph URI"
 function errWrite(operation, graphUri) {
@@ -219,23 +219,17 @@ DELETE DATA {
 // ─── CAS MULTIPLE OPERATIONS ──────────────────────────────────────────────────
 
 test("T19 – Deux opérations autorisées séparées par ;", async () => {
-    const { err } = await filter(
-        `INSERT DATA { GRAPH <${rwGraph}> { <${rwGraph}s1> a <http://owl/Class> . } } ;\nDELETE DATA { GRAPH <${rwGraph}> { <${rwGraph}s2> a <http://owl/Class> . } }`
-    );
+    const { err } = await filter(`INSERT DATA { GRAPH <${rwGraph}> { <${rwGraph}s1> a <http://owl/Class> . } } ;\nDELETE DATA { GRAPH <${rwGraph}> { <${rwGraph}s2> a <http://owl/Class> . } }`);
     expect(err).toBeNull();
 });
 
 test("T20 – Deux opérations dont une non autorisée séparées par ;", async () => {
-    const { err } = await filter(
-        `INSERT DATA { GRAPH <${rwGraph}> { <${rwGraph}s1> a <http://owl/Class> . } } ;\nDELETE DATA { GRAPH <${roGraph}> { <${roGraph}s1> a <http://owl/Class> . } }`
-    );
+    const { err } = await filter(`INSERT DATA { GRAPH <${rwGraph}> { <${rwGraph}s1> a <http://owl/Class> . } } ;\nDELETE DATA { GRAPH <${roGraph}> { <${roGraph}s1> a <http://owl/Class> . } }`);
     expect(err).toContain(roGraph);
 });
 
 test("T21 – Deux opérations dont une sans graph explicite séparées par ;", async () => {
-    const { err } = await filter(
-        `INSERT DATA { GRAPH <${rwGraph}> { <${rwGraph}s1> a <http://owl/Class> . } } ;\nDELETE DATA { <${rwGraph}s2> a <http://owl/Class> . }`
-    );
+    const { err } = await filter(`INSERT DATA { GRAPH <${rwGraph}> { <${rwGraph}s1> a <http://owl/Class> . } } ;\nDELETE DATA { <${rwGraph}s2> a <http://owl/Class> . }`);
     expect(err).toMatch(/needs explicit graph declaration/i);
 });
 
@@ -486,23 +480,17 @@ WHERE {
 // ─── COPY / MOVE / ADD multiples via ; ────────────────────────────────────────
 
 test("Deux COPY autorisés séparés par ; passent", async () => {
-    const { err } = await filter(
-        `COPY <${rwGraph}> TO <${rwGraph}> ;\nCOPY <${rwGraph}> TO <${rwGraph}>`
-    );
+    const { err } = await filter(`COPY <${rwGraph}> TO <${rwGraph}> ;\nCOPY <${rwGraph}> TO <${rwGraph}>`);
     expect(err).toBeNull();
 });
 
 test("COPY autorisé puis MOVE non autorisé séparés par ; est bloqué", async () => {
-    const { err } = await filter(
-        `COPY <${rwGraph}> TO <${rwGraph}> ;\nMOVE <${roGraph}> TO <${rwGraph}>`
-    );
+    const { err } = await filter(`COPY <${rwGraph}> TO <${rwGraph}> ;\nMOVE <${roGraph}> TO <${rwGraph}>`);
     expect(err).toMatch(errWrite("MOVE", roGraph));
 });
 
 test("ADD autorisé puis COPY vers graph inconnu séparés par ; est bloqué", async () => {
-    const { err } = await filter(
-        `ADD <${rwGraph}> TO <${rwGraph}> ;\nCOPY <${rwGraph}> TO <${unknownGraph}>`
-    );
+    const { err } = await filter(`ADD <${rwGraph}> TO <${rwGraph}> ;\nCOPY <${rwGraph}> TO <${unknownGraph}>`);
     expect(err).toMatch(/not allowed/i);
 });
 
@@ -543,28 +531,37 @@ test("PREFIX – SELECT avec FROM graph non autorisé est bloqué", async () => 
 // ─── INSERT/DELETE avec PREFIX ────────────────────────────────────────────────
 
 test("PREFIX – T01 INSERT DATA sur graph autorisé en écriture", async () => {
-    const { err } = await filter(PFX + `INSERT DATA {
+    const { err } = await filter(
+        PFX +
+            `INSERT DATA {
   GRAPH <${rwGraph}> {
     <${rwGraph}s1> a owl:Class .
   }
-}`);
+}`,
+    );
     expect(err).toBeNull();
 });
 
 test("PREFIX – T02 DELETE DATA sur graph autorisé en écriture", async () => {
-    const { err } = await filter(PFX + `DELETE DATA {
+    const { err } = await filter(
+        PFX +
+            `DELETE DATA {
   GRAPH <${rwGraph}> {
     <${rwGraph}s1> a owl:Class .
   }
-}`);
+}`,
+    );
     expect(err).toBeNull();
 });
 
 test("PREFIX – T03 DELETE/INSERT avec WITH sur graph autorisé", async () => {
-    const { err } = await filter(PFX + `WITH <${rwGraph}>
+    const { err } = await filter(
+        PFX +
+            `WITH <${rwGraph}>
 DELETE { ?s ?p ?o }
 INSERT { ?s ?p "newValue" }
-WHERE  { ?s ?p ?o . FILTER(?s = <${rwGraph}s1>) }`);
+WHERE  { ?s ?p ?o . FILTER(?s = <${rwGraph}s1>) }`,
+    );
     expect(err).toBeNull();
 });
 
@@ -579,10 +576,13 @@ test("PREFIX – T05 COPY entre deux graphs autorisés", async () => {
 });
 
 test("PREFIX – T06 INSERT DATA sur plusieurs graphs tous autorisés", async () => {
-    const { err } = await filter(PFX + `INSERT DATA {
+    const { err } = await filter(
+        PFX +
+            `INSERT DATA {
   GRAPH <${rwGraph}> { <${rwGraph}s1> a owl:Class . }
   GRAPH <${rwGraph}> { <${rwGraph}s2> a owl:Class . }
-}`);
+}`,
+    );
     expect(err).toBeNull();
 });
 
@@ -597,24 +597,33 @@ test("PREFIX – T08 INSERT sans déclaration de graph explicite", async () => {
 });
 
 test("PREFIX – T09 INSERT sur graph absent du userSourcesMap", async () => {
-    const { err } = await filter(PFX + `INSERT DATA {
+    const { err } = await filter(
+        PFX +
+            `INSERT DATA {
   GRAPH <${unknownGraph}> { <${unknownGraph}s1> a owl:Class . }
-}`);
+}`,
+    );
     expect(err).toMatch(/not allowed/i);
 });
 
 test("PREFIX – T10 INSERT sur graph en lecture seule", async () => {
-    const { err } = await filter(PFX + `INSERT DATA {
+    const { err } = await filter(
+        PFX +
+            `INSERT DATA {
   GRAPH <${roGraph}> { <${roGraph}s1> a owl:Class . }
-}`);
+}`,
+    );
     expect(err).toMatch(errWrite("INSERT", roGraph));
 });
 
 test("PREFIX – T11 INSERT sur plusieurs graphs dont un en lecture seule", async () => {
-    const { err } = await filter(PFX + `INSERT DATA {
+    const { err } = await filter(
+        PFX +
+            `INSERT DATA {
   GRAPH <${rwGraph}>      { <${rwGraph}s1> a owl:Class . }
   GRAPH <${roGraph}> { <${roGraph}s1> a owl:Class . }
-}`);
+}`,
+    );
     expect(err).toContain(roGraph);
     expect(err).not.toContain(rwGraph);
 });
@@ -630,126 +639,153 @@ test("PREFIX – T13 DROP DEFAULT sans graph explicite", async () => {
 });
 
 test("PREFIX – T14 Casse mixte (flag /i)", async () => {
-    const { err } = await filter(PFX + `insert data {
+    const { err } = await filter(
+        PFX +
+            `insert data {
   graph <${rwGraph}> { <${rwGraph}s1> a owl:Class . }
-}`);
+}`,
+    );
     expect(err).toBeNull();
 });
 
 test("PREFIX – T15 URI dans un littéral string (bug connu : faux positif)", async () => {
-    const { err } = await filter(PFX + `INSERT DATA {
+    const { err } = await filter(
+        PFX +
+            `INSERT DATA {
   GRAPH <${rwGraph}> {
     <${rwGraph}s1> <http://label> "DELETE FROM graph <${unknownGraph}>" .
   }
-}`);
+}`,
+    );
     expect(err).toMatch(/not allowed/i);
 });
 
 // ─── CAS COMMENTAIRES AVEC PREFIX ─────────────────────────────────────────────
 
 test("PREFIX – T16 Commentaire contenant SELECT ne doit pas fausser le routing", async () => {
-    const { err } = await filter(PFX + `# SELECT ?s FROM <${rwGraph}>
+    const { err } = await filter(
+        PFX +
+            `# SELECT ?s FROM <${rwGraph}>
 DELETE DATA {
   GRAPH <${rwGraph}> { <${rwGraph}s1> a owl:Class . }
-}`);
+}`,
+    );
     expect(err).toBeNull();
 });
 
 test("PREFIX – T17 Commentaire contenant un graph non autorisé ne doit pas bloquer", async () => {
-    const { err } = await filter(PFX + `# INSERT DATA { GRAPH <${unknownGraph}> { <s> <p> <o> . } }
+    const { err } = await filter(
+        PFX +
+            `# INSERT DATA { GRAPH <${unknownGraph}> { <s> <p> <o> . } }
 INSERT DATA {
   GRAPH <${rwGraph}> { <${rwGraph}s1> a owl:Class . }
-}`);
+}`,
+    );
     expect(err).toBeNull();
 });
 
 test("PREFIX – T18 Commentaire contenant INSERT ne doit pas masquer un DELETE autorisé", async () => {
-    const { err } = await filter(PFX + `# INSERT DATA { GRAPH <${roGraph}> { <s> <p> <o> . } }
+    const { err } = await filter(
+        PFX +
+            `# INSERT DATA { GRAPH <${roGraph}> { <s> <p> <o> . } }
 DELETE DATA {
   GRAPH <${rwGraph}> { <${rwGraph}s1> a owl:Class . }
-}`);
+}`,
+    );
     expect(err).toBeNull();
 });
 
 // ─── CAS MULTIPLE OPERATIONS AVEC PREFIX ──────────────────────────────────────
 
 test("PREFIX – T19 Deux opérations autorisées séparées par ;", async () => {
-    const { err } = await filter(
-        PFX + `INSERT DATA { GRAPH <${rwGraph}> { <${rwGraph}s1> a owl:Class . } } ;\nDELETE DATA { GRAPH <${rwGraph}> { <${rwGraph}s2> a owl:Class . } }`
-    );
+    const { err } = await filter(PFX + `INSERT DATA { GRAPH <${rwGraph}> { <${rwGraph}s1> a owl:Class . } } ;\nDELETE DATA { GRAPH <${rwGraph}> { <${rwGraph}s2> a owl:Class . } }`);
     expect(err).toBeNull();
 });
 
 test("PREFIX – T20 Deux opérations dont une non autorisée séparées par ;", async () => {
-    const { err } = await filter(
-        PFX + `INSERT DATA { GRAPH <${rwGraph}> { <${rwGraph}s1> a owl:Class . } } ;\nDELETE DATA { GRAPH <${roGraph}> { <${roGraph}s1> a owl:Class . } }`
-    );
+    const { err } = await filter(PFX + `INSERT DATA { GRAPH <${rwGraph}> { <${rwGraph}s1> a owl:Class . } } ;\nDELETE DATA { GRAPH <${roGraph}> { <${roGraph}s1> a owl:Class . } }`);
     expect(err).toContain(roGraph);
 });
 
 test("PREFIX – T21 Deux opérations dont une sans graph explicite séparées par ;", async () => {
-    const { err } = await filter(
-        PFX + `INSERT DATA { GRAPH <${rwGraph}> { <${rwGraph}s1> a owl:Class . } } ;\nDELETE DATA { <${rwGraph}s2> a owl:Class . }`
-    );
+    const { err } = await filter(PFX + `INSERT DATA { GRAPH <${rwGraph}> { <${rwGraph}s1> a owl:Class . } } ;\nDELETE DATA { <${rwGraph}s2> a owl:Class . }`);
     expect(err).toMatch(/needs explicit graph declaration/i);
 });
 
 // ─── SELECT avec WHERE détaillé + PREFIX ─────────────────────────────────────
 
 test("PREFIX – SELECT avec filtres et sous-requête passe", async () => {
-    const { err } = await filter(PFX + `SELECT ?s ?label
+    const { err } = await filter(
+        PFX +
+            `SELECT ?s ?label
 FROM <${rwGraph}>
 WHERE {
   ?s a owl:Class .
   OPTIONAL { ?s rdfs:label ?label . FILTER(LANG(?label) = "fr") }
   FILTER NOT EXISTS { ?s owl:deprecated true }
-}`);
+}`,
+    );
     expect(err).toBeFalsy();
 });
 
 test("PREFIX – SELECT avec FROM NAMED autorisé passe", async () => {
-    const { err } = await filter(PFX + `SELECT ?s
+    const { err } = await filter(
+        PFX +
+            `SELECT ?s
 FROM NAMED <${rwGraph}>
-WHERE { GRAPH <${rwGraph}> { ?s ?p ?o } }`);
+WHERE { GRAPH <${rwGraph}> { ?s ?p ?o } }`,
+    );
     expect(err).toBeFalsy();
 });
 
 test("PREFIX – SELECT avec FROM autorisé et FROM NAMED non autorisé est bloqué", async () => {
-    const { err } = await filter(PFX + `SELECT ?s
+    const { err } = await filter(
+        PFX +
+            `SELECT ?s
 FROM <${rwGraph}>
 FROM NAMED <${unknownGraph}>
-WHERE { ?s ?p ?o }`);
+WHERE { ?s ?p ?o }`,
+    );
     expect(err).toMatch(/not allowed/i);
 });
 
 // ─── INSERT avec WHERE détaillé + PREFIX ─────────────────────────────────────
 
 test("PREFIX – INSERT avec WHERE et FILTER passe sur graph autorisé", async () => {
-    const { err } = await filter(PFX + `WITH <${rwGraph}>
+    const { err } = await filter(
+        PFX +
+            `WITH <${rwGraph}>
 INSERT {
   ?s rdfs:label "updated label" .
 }
 WHERE {
   ?s a owl:Class .
   FILTER NOT EXISTS { ?s rdfs:label ?label }
-}`);
+}`,
+    );
     expect(err).toBeNull();
 });
 
 test("PREFIX – INSERT avec WHERE sur graph lecture seule est bloqué", async () => {
-    const { err } = await filter(PFX + `WITH <${roGraph}>
+    const { err } = await filter(
+        PFX +
+            `WITH <${roGraph}>
 INSERT { ?s rdfs:label "x" . }
-WHERE  { ?s a owl:Class . }`);
+WHERE  { ?s a owl:Class . }`,
+    );
     expect(err).toMatch(errWrite("INSERT", roGraph));
 });
 
 test("PREFIX – INSERT ciblant graph autorisé avec source lecture seule en WHERE passe", async () => {
-    const { err } = await filter(PFX + `INSERT {
+    const { err } = await filter(
+        PFX +
+            `INSERT {
   GRAPH <${rwGraph}> { ?s rdfs:label ?label . }
 }
 WHERE {
   GRAPH <${roGraph}> { ?s rdfs:label ?label . }
-}`);
+}`,
+    );
     // roGraph est uniquement source de lecture dans le WHERE — seul rwGraph (écriture) est ciblé
     expect(err).toBeNull();
 });
@@ -757,7 +793,9 @@ WHERE {
 // ─── DELETE avec WHERE détaillé + PREFIX ─────────────────────────────────────
 
 test("PREFIX – DELETE avec WHERE et OPTIONAL passe sur graph autorisé", async () => {
-    const { err } = await filter(PFX + `WITH <${rwGraph}>
+    const { err } = await filter(
+        PFX +
+            `WITH <${rwGraph}>
 DELETE {
   ?s rdfs:label ?oldLabel .
 }
@@ -765,23 +803,30 @@ WHERE {
   ?s a owl:Class .
   OPTIONAL { ?s rdfs:label ?oldLabel }
   FILTER(STR(?oldLabel) = "old value")
-}`);
+}`,
+    );
     expect(err).toBeNull();
 });
 
 test("PREFIX – DELETE WHERE (forme courte) sur graph autorisé passe", async () => {
-    const { err } = await filter(PFX + `DELETE WHERE {
+    const { err } = await filter(
+        PFX +
+            `DELETE WHERE {
   GRAPH <${rwGraph}> {
     <${rwGraph}s1> ?p ?o .
   }
-}`);
+}`,
+    );
     expect(err).toBeNull();
 });
 
 test("PREFIX – DELETE WHERE sur graph lecture seule est bloqué", async () => {
-    const { err } = await filter(PFX + `WITH <${roGraph}>
+    const { err } = await filter(
+        PFX +
+            `WITH <${roGraph}>
 DELETE { ?s ?p ?o }
-WHERE  { ?s a owl:Class . }`);
+WHERE  { ?s a owl:Class . }`,
+    );
     expect(err).toMatch(errWrite("DELETE", roGraph));
 });
 
@@ -830,150 +875,176 @@ test("PREFIX – COPY sans URI (pas de <>) ne matche pas la regex transfert — 
 // ─── SELECT avec plusieurs FROM + PREFIX ─────────────────────────────────────
 
 test("PREFIX – SELECT avec deux FROM autorisés passe", async () => {
-    const { err } = await filter(PFX + `SELECT ?s ?p ?o
+    const { err } = await filter(
+        PFX +
+            `SELECT ?s ?p ?o
 FROM <${rwGraph}>
 FROM <${roGraph}>
-WHERE { ?s ?p ?o }`);
+WHERE { ?s ?p ?o }`,
+    );
     expect(err).toBeFalsy();
 });
 
 test("PREFIX – SELECT avec FROM autorisé et FROM non autorisé est bloqué", async () => {
-    const { err } = await filter(PFX + `SELECT ?s
+    const { err } = await filter(
+        PFX +
+            `SELECT ?s
 FROM <${rwGraph}>
 FROM <${unknownGraph}>
-WHERE { ?s ?p ?o }`);
+WHERE { ?s ?p ?o }`,
+    );
     expect(err).toMatch(/not allowed/i);
 });
 
 test("PREFIX – SELECT avec deux FROM NAMED autorisés passe", async () => {
-    const { err } = await filter(PFX + `SELECT ?s
+    const { err } = await filter(
+        PFX +
+            `SELECT ?s
 FROM NAMED <${rwGraph}>
 FROM NAMED <${roGraph}>
-WHERE { GRAPH ?g { ?s ?p ?o } }`);
+WHERE { GRAPH ?g { ?s ?p ?o } }`,
+    );
     expect(err).toBeFalsy();
 });
 
 test("PREFIX – SELECT avec FROM + FROM NAMED tous autorisés passe", async () => {
-    const { err } = await filter(PFX + `SELECT ?s
+    const { err } = await filter(
+        PFX +
+            `SELECT ?s
 FROM <${rwGraph}>
 FROM NAMED <${roGraph}>
-WHERE { ?s ?p ?o }`);
+WHERE { ?s ?p ?o }`,
+    );
     expect(err).toBeFalsy();
 });
 
 test("PREFIX – SELECT avec FROM + FROM NAMED dont un non autorisé est bloqué", async () => {
-    const { err } = await filter(PFX + `SELECT ?s
+    const { err } = await filter(
+        PFX +
+            `SELECT ?s
 FROM <${rwGraph}>
 FROM NAMED <${unknownGraph}>
-WHERE { ?s ?p ?o }`);
+WHERE { ?s ?p ?o }`,
+    );
     expect(err).toMatch(/not allowed/i);
 });
 
 // ─── INSERT avec plusieurs GRAPH + PREFIX ─────────────────────────────────────
 
 test("PREFIX – INSERT DATA dans deux graphs autorisés passe", async () => {
-    const { err } = await filter(PFX + `INSERT DATA {
+    const { err } = await filter(
+        PFX +
+            `INSERT DATA {
   GRAPH <${rwGraph}> { <${rwGraph}s1> a owl:Class . }
   GRAPH <${rwGraph}> { <${rwGraph}s2> rdfs:label "test" . }
-}`);
+}`,
+    );
     expect(err).toBeNull();
 });
 
 test("PREFIX – INSERT DATA dans graph autorisé et graph lecture seule est bloqué", async () => {
-    const { err } = await filter(PFX + `INSERT DATA {
+    const { err } = await filter(
+        PFX +
+            `INSERT DATA {
   GRAPH <${rwGraph}>      { <${rwGraph}s1> a owl:Class . }
   GRAPH <${roGraph}> { <${roGraph}s1> a owl:Class . }
-}`);
+}`,
+    );
     expect(err).toContain(roGraph);
     expect(err).not.toContain(rwGraph);
 });
 
 test("PREFIX – INSERT DATA dans graph autorisé et graph inconnu est bloqué sur les deux", async () => {
-    const { err } = await filter(PFX + `INSERT DATA {
+    const { err } = await filter(
+        PFX +
+            `INSERT DATA {
   GRAPH <${roGraph}> { <${roGraph}s1> a owl:Class . }
   GRAPH <${unknownGraph}>     { <${unknownGraph}s1> a owl:Class . }
-}`);
+}`,
+    );
     expect(err).toContain(roGraph);
     expect(err).toContain(unknownGraph);
 });
 
 test("PREFIX – INSERT avec WHERE dans plusieurs graphs autorisés passe", async () => {
-    const { err } = await filter(PFX + `INSERT {
+    const { err } = await filter(
+        PFX +
+            `INSERT {
   GRAPH <${rwGraph}> { ?s rdfs:label ?label . }
 }
 WHERE {
   GRAPH <${rwGraph}> { ?s a owl:Class . OPTIONAL { ?s rdfs:label ?label } }
   FILTER(!BOUND(?label))
-}`);
+}`,
+    );
     expect(err).toBeNull();
 });
 
 // ─── DELETE avec plusieurs GRAPH + PREFIX ─────────────────────────────────────
 
 test("PREFIX – DELETE DATA dans deux graphs autorisés passe", async () => {
-    const { err } = await filter(PFX + `DELETE DATA {
+    const { err } = await filter(
+        PFX +
+            `DELETE DATA {
   GRAPH <${rwGraph}> { <${rwGraph}s1> a owl:Class . }
   GRAPH <${rwGraph}> { <${rwGraph}s2> rdfs:label "test" . }
-}`);
+}`,
+    );
     expect(err).toBeNull();
 });
 
 test("PREFIX – DELETE DATA dans graph autorisé et graph lecture seule est bloqué", async () => {
-    const { err } = await filter(PFX + `DELETE DATA {
+    const { err } = await filter(
+        PFX +
+            `DELETE DATA {
   GRAPH <${rwGraph}>      { <${rwGraph}s1> a owl:Class . }
   GRAPH <${roGraph}> { <${roGraph}s1> a owl:Class . }
-}`);
+}`,
+    );
     expect(err).toContain(roGraph);
     expect(err).not.toContain(rwGraph);
 });
 
 test("PREFIX – DELETE WHERE dans plusieurs graphs autorisés passe", async () => {
-    const { err } = await filter(PFX + `DELETE {
+    const { err } = await filter(
+        PFX +
+            `DELETE {
   GRAPH <${rwGraph}> { ?s rdfs:label ?oldLabel . }
 }
 WHERE {
   GRAPH <${rwGraph}> { ?s a owl:Class ; rdfs:label ?oldLabel . }
   FILTER(STR(?oldLabel) = "obsolete")
-}`);
+}`,
+    );
     expect(err).toBeNull();
 });
 
 // ─── COPY / MOVE / ADD multiples via ; + PREFIX ───────────────────────────────
 
 test("PREFIX – Deux COPY autorisés séparés par ; passent", async () => {
-    const { err } = await filter(
-        PFX + `COPY <${rwGraph}> TO <${rwGraph}> ;\nCOPY <${rwGraph}> TO <${rwGraph}>`
-    );
+    const { err } = await filter(PFX + `COPY <${rwGraph}> TO <${rwGraph}> ;\nCOPY <${rwGraph}> TO <${rwGraph}>`);
     expect(err).toBeNull();
 });
 
 test("PREFIX – COPY autorisé puis MOVE non autorisé séparés par ; est bloqué", async () => {
-    const { err } = await filter(
-        PFX + `COPY <${rwGraph}> TO <${rwGraph}> ;\nMOVE <${roGraph}> TO <${rwGraph}>`
-    );
+    const { err } = await filter(PFX + `COPY <${rwGraph}> TO <${rwGraph}> ;\nMOVE <${roGraph}> TO <${rwGraph}>`);
     expect(err).toMatch(errWrite("MOVE", roGraph));
 });
 
 test("PREFIX – ADD autorisé puis COPY vers graph inconnu séparés par ; est bloqué", async () => {
-    const { err } = await filter(
-        PFX + `ADD <${rwGraph}> TO <${rwGraph}> ;\nCOPY <${rwGraph}> TO <${unknownGraph}>`
-    );
+    const { err } = await filter(PFX + `ADD <${rwGraph}> TO <${rwGraph}> ;\nCOPY <${rwGraph}> TO <${unknownGraph}>`);
     expect(err).toMatch(/not allowed/i);
 });
 
 // ─── CAS STRESS : URI de PREFIX contenant un mot-clé SPARQL ──────────────────
 
 test("STRESS – PREFIX dont l'URI contient GRAPH ne fausse pas la détection de graph", async () => {
-    const { err } = await filter(
-        `PREFIX myGraph: <http://ns/GRAPH/vocab#>\nINSERT DATA {\n  GRAPH <${rwGraph}> { <${rwGraph}s1> a <http://owl/Class> . }\n}`
-    );
+    const { err } = await filter(`PREFIX myGraph: <http://ns/GRAPH/vocab#>\nINSERT DATA {\n  GRAPH <${rwGraph}> { <${rwGraph}s1> a <http://owl/Class> . }\n}`);
     expect(err).toBeNull();
 });
 
 test("STRESS – PREFIX dont l'URI contient SELECT ne fausse pas le routing", async () => {
-    const { err } = await filter(
-        `PREFIX sel: <http://www.example.org/SELECT/vocab#>\nINSERT DATA {\n  GRAPH <${rwGraph}> { <${rwGraph}s1> a <http://owl/Class> . }\n}`
-    );
+    const { err } = await filter(`PREFIX sel: <http://www.example.org/SELECT/vocab#>\nINSERT DATA {\n  GRAPH <${rwGraph}> { <${rwGraph}s1> a <http://owl/Class> . }\n}`);
     expect(err).toBeNull();
 });
 
@@ -994,47 +1065,35 @@ test("PROXY – WITH <g> DELETE sans WHERE sur graph lecture seule est bloqué",
 // Pattern 2 : WITH GRAPH <g> INSERT DATA {...} — syntaxe non standard de sparql_SKOS.insertTriples
 // La regex capture <g> via le mot-clé GRAPH (pas via WITH, car WITH\s+< ne matche pas "WITH GRAPH <g>").
 test("PROXY – WITH GRAPH <g> INSERT DATA sur graph autorisé passe", async () => {
-    const { err } = await filter(
-        `WITH GRAPH  <${rwGraph}>  INSERT DATA  { <${rwGraph}s1> <http://rdfs/label> "test" . }`
-    );
+    const { err } = await filter(`WITH GRAPH  <${rwGraph}>  INSERT DATA  { <${rwGraph}s1> <http://rdfs/label> "test" . }`);
     expect(err).toBeNull();
 });
 
 test("PROXY – WITH GRAPH <g> INSERT DATA sur graph lecture seule est bloqué", async () => {
-    const { err } = await filter(
-        `WITH GRAPH  <${roGraph}>  INSERT DATA  { <${roGraph}s1> <http://rdfs/label> "test" . }`
-    );
+    const { err } = await filter(`WITH GRAPH  <${roGraph}>  INSERT DATA  { <${roGraph}s1> <http://rdfs/label> "test" . }`);
     expect(err).toMatch(errWrite("INSERT", roGraph));
 });
 
 // Pattern 3 : WITH GRAPH <g> INSERT {...} — sans DATA (sparql_generic.insertTriples)
 test("PROXY – WITH GRAPH <g> INSERT (sans DATA) sur graph autorisé passe", async () => {
-    const { err } = await filter(
-        `WITH GRAPH  <${rwGraph}>  INSERT  { <${rwGraph}s1> <http://rdfs/label> "test" . }`
-    );
+    const { err } = await filter(`WITH GRAPH  <${rwGraph}>  INSERT  { <${rwGraph}s1> <http://rdfs/label> "test" . }`);
     expect(err).toBeNull();
 });
 
 test("PROXY – WITH GRAPH <g> INSERT (sans DATA) sur graph lecture seule est bloqué", async () => {
-    const { err } = await filter(
-        `WITH GRAPH  <${roGraph}>  INSERT  { <${roGraph}s1> <http://rdfs/label> "test" . }`
-    );
+    const { err } = await filter(`WITH GRAPH  <${roGraph}>  INSERT  { <${roGraph}s1> <http://rdfs/label> "test" . }`);
     expect(err).toMatch(errWrite("INSERT", roGraph));
 });
 
 // Pattern 4 : with <srcG> insert {graph <dstG> {...}} where {...} — copyGraph avec offset
 test("PROXY – copyGraph avec offset (srcG = dstG, rw) passe", async () => {
-    const { err } = await filter(
-        `with <${rwGraph}>\ninsert {graph <${rwGraph}> {?s ?p ?o}}\nwhere {?s ?p ?o}`
-    );
+    const { err } = await filter(`with <${rwGraph}>\ninsert {graph <${rwGraph}> {?s ?p ?o}}\nwhere {?s ?p ?o}`);
     expect(err).toBeNull();
 });
 
 // Limitation connue : WITH <srcG> est capturé comme cible d'écriture même quand c'est une source de lecture.
 test("PROXY – copyGraph avec offset (srcG=ronly, dstG=rw) est bloqué (limitation connue)", async () => {
-    const { err } = await filter(
-        `WITH <${roGraph}>\nINSERT {GRAPH <${rwGraph}> {?s ?p ?o}}\nWHERE {?s ?p ?o}`
-    );
+    const { err } = await filter(`WITH <${roGraph}>\nINSERT {GRAPH <${rwGraph}> {?s ?p ?o}}\nWHERE {?s ?p ?o}`);
     // WITH <roGraph> est pris pour une cible écriture même si c'est une source de lecture.
     expect(err).toMatch(errWrite("INSERT", roGraph));
 });

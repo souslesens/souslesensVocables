@@ -108,9 +108,7 @@ describe("GET /users/data/{id}/exec — validation du userData", () => {
         await handler(makeReq({ id: "1" }), res, jest.fn());
 
         expect(res.status).toHaveBeenCalledWith(400);
-        expect(res.json).toHaveBeenCalledWith(
-            expect.objectContaining({ message: "This userData is not a sparqlQuery" })
-        );
+        expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ message: "This userData is not a sparqlQuery" }));
     });
 
     test("userData sans data_content.sparqlQuery retourne 400", async () => {
@@ -122,15 +120,11 @@ describe("GET /users/data/{id}/exec — validation du userData", () => {
         await handler(makeReq({ id: "1" }), res, jest.fn());
 
         expect(res.status).toHaveBeenCalledWith(400);
-        expect(res.json).toHaveBeenCalledWith(
-            expect.objectContaining({ message: "Nothing on sparqlQuery" })
-        );
+        expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ message: "Nothing on sparqlQuery" }));
     });
 
     test("paramètre format=json produit une réponse JSON (200)", async () => {
-        userDataModel.find.mockResolvedValue(
-            makeUserData(`SELECT ?s FROM <http://fghghf/> WHERE { ?s ?p ?o }`)
-        );
+        userDataModel.find.mockResolvedValue(makeUserData(`SELECT ?s FROM <http://fghghf/> WHERE { ?s ?p ?o }`));
         ConfigManager.getUserSources.mockResolvedValue(USER_SOURCES);
         ConfigManager.getUser.mockResolvedValue(REGULAR_USER);
 
@@ -322,22 +316,20 @@ DELETE DATA {
 
     test("T19 – Deux opérations autorisées séparées par ; (200)", async () => {
         const res = await execQuery(
-            `INSERT DATA { GRAPH <http://fghghf/> { <http://fghghf/s1> a <http://owl/Class> . } } ;\nDELETE DATA { GRAPH <http://fghghf/> { <http://fghghf/s2> a <http://owl/Class> . } }`
+            `INSERT DATA { GRAPH <http://fghghf/> { <http://fghghf/s1> a <http://owl/Class> . } } ;\nDELETE DATA { GRAPH <http://fghghf/> { <http://fghghf/s2> a <http://owl/Class> . } }`,
         );
         expect(res.status).toHaveBeenCalledWith(200);
     });
 
     test("T20 – Deux opérations dont une non autorisée séparées par ; est bloqué", async () => {
         const res = await execQuery(
-            `INSERT DATA { GRAPH <http://fghghf/> { <http://fghghf/s1> a <http://owl/Class> . } } ;\nDELETE DATA { GRAPH <http://testClasses/> { <http://testClasses/s1> a <http://owl/Class> . } }`
+            `INSERT DATA { GRAPH <http://fghghf/> { <http://fghghf/s1> a <http://owl/Class> . } } ;\nDELETE DATA { GRAPH <http://testClasses/> { <http://testClasses/s1> a <http://owl/Class> . } }`,
         );
         expect(res.status).not.toHaveBeenCalledWith(200);
     });
 
     test("T21 – Deux opérations dont une sans graph explicite séparées par ; est bloqué", async () => {
-        const res = await execQuery(
-            `INSERT DATA { GRAPH <http://fghghf/> { <http://fghghf/s1> a <http://owl/Class> . } } ;\nDELETE DATA { <http://fghghf/s2> a <http://owl/Class> . }`
-        );
+        const res = await execQuery(`INSERT DATA { GRAPH <http://fghghf/> { <http://fghghf/s1> a <http://owl/Class> . } } ;\nDELETE DATA { <http://fghghf/s2> a <http://owl/Class> . }`);
         expect(res.status).not.toHaveBeenCalledWith(200);
     });
 
@@ -584,23 +576,17 @@ WHERE {
     // ─── COPY / MOVE / ADD multiples via ; ────────────────────────────────────
 
     test("Deux COPY autorisés séparés par ; passent (200)", async () => {
-        const res = await execQuery(
-            `COPY <http://fghghf/> TO <http://fghghf/> ;\nCOPY <http://fghghf/> TO <http://fghghf/>`
-        );
+        const res = await execQuery(`COPY <http://fghghf/> TO <http://fghghf/> ;\nCOPY <http://fghghf/> TO <http://fghghf/>`);
         expect(res.status).toHaveBeenCalledWith(200);
     });
 
     test("COPY autorisé puis MOVE non autorisé séparés par ; est bloqué", async () => {
-        const res = await execQuery(
-            `COPY <http://fghghf/> TO <http://fghghf/> ;\nMOVE <http://testClasses/> TO <http://fghghf/>`
-        );
+        const res = await execQuery(`COPY <http://fghghf/> TO <http://fghghf/> ;\nMOVE <http://testClasses/> TO <http://fghghf/>`);
         expect(res.status).not.toHaveBeenCalledWith(200);
     });
 
     test("ADD autorisé puis COPY vers graph inconnu séparés par ; est bloqué", async () => {
-        const res = await execQuery(
-            `ADD <http://fghghf/> TO <http://fghghf/> ;\nCOPY <http://fghghf/> TO <http://unknown/>`
-        );
+        const res = await execQuery(`ADD <http://fghghf/> TO <http://fghghf/> ;\nCOPY <http://fghghf/> TO <http://unknown/>`);
         expect(res.status).not.toHaveBeenCalledWith(200);
     });
 
@@ -627,28 +613,37 @@ WHERE {
     });
 
     test("PREFIX – T01 INSERT DATA sur graph autorisé en écriture (200)", async () => {
-        const res = await execQuery(PFX + `INSERT DATA {
+        const res = await execQuery(
+            PFX +
+                `INSERT DATA {
   GRAPH <http://fghghf/> {
     <http://fghghf/s1> a owl:Class .
   }
-}`);
+}`,
+        );
         expect(res.status).toHaveBeenCalledWith(200);
     });
 
     test("PREFIX – T02 DELETE DATA sur graph autorisé en écriture (200)", async () => {
-        const res = await execQuery(PFX + `DELETE DATA {
+        const res = await execQuery(
+            PFX +
+                `DELETE DATA {
   GRAPH <http://fghghf/> {
     <http://fghghf/s1> a owl:Class .
   }
-}`);
+}`,
+        );
         expect(res.status).toHaveBeenCalledWith(200);
     });
 
     test("PREFIX – T03 DELETE/INSERT avec WITH sur graph autorisé (200)", async () => {
-        const res = await execQuery(PFX + `WITH <http://fghghf/>
+        const res = await execQuery(
+            PFX +
+                `WITH <http://fghghf/>
 DELETE { ?s ?p ?o }
 INSERT { ?s ?p "newValue" }
-WHERE  { ?s ?p ?o . FILTER(?s = <http://fghghf/s1>) }`);
+WHERE  { ?s ?p ?o . FILTER(?s = <http://fghghf/s1>) }`,
+        );
         expect(res.status).toHaveBeenCalledWith(200);
     });
 
@@ -663,10 +658,13 @@ WHERE  { ?s ?p ?o . FILTER(?s = <http://fghghf/s1>) }`);
     });
 
     test("PREFIX – T06 INSERT DATA sur plusieurs graphs tous autorisés (200)", async () => {
-        const res = await execQuery(PFX + `INSERT DATA {
+        const res = await execQuery(
+            PFX +
+                `INSERT DATA {
   GRAPH <http://fghghf/> { <http://fghghf/s1> a owl:Class . }
   GRAPH <http://fghghf/> { <http://fghghf/s2> a owl:Class . }
-}`);
+}`,
+        );
         expect(res.status).toHaveBeenCalledWith(200);
     });
 
@@ -681,24 +679,33 @@ WHERE  { ?s ?p ?o . FILTER(?s = <http://fghghf/s1>) }`);
     });
 
     test("PREFIX – T09 INSERT sur graph absent du userSourcesMap est bloqué", async () => {
-        const res = await execQuery(PFX + `INSERT DATA {
+        const res = await execQuery(
+            PFX +
+                `INSERT DATA {
   GRAPH <http://unknown/> { <http://unknown/s1> a owl:Class . }
-}`);
+}`,
+        );
         expect(res.status).not.toHaveBeenCalledWith(200);
     });
 
     test("PREFIX – T10 INSERT sur graph en lecture seule est bloqué", async () => {
-        const res = await execQuery(PFX + `INSERT DATA {
+        const res = await execQuery(
+            PFX +
+                `INSERT DATA {
   GRAPH <http://testClasses/> { <http://testClasses/s1> a owl:Class . }
-}`);
+}`,
+        );
         expect(res.status).not.toHaveBeenCalledWith(200);
     });
 
     test("PREFIX – T11 INSERT sur plusieurs graphs dont un en lecture seule est bloqué", async () => {
-        const res = await execQuery(PFX + `INSERT DATA {
+        const res = await execQuery(
+            PFX +
+                `INSERT DATA {
   GRAPH <http://fghghf/>      { <http://fghghf/s1> a owl:Class . }
   GRAPH <http://testClasses/> { <http://testClasses/s1> a owl:Class . }
-}`);
+}`,
+        );
         expect(res.status).not.toHaveBeenCalledWith(200);
     });
 
@@ -713,123 +720,154 @@ WHERE  { ?s ?p ?o . FILTER(?s = <http://fghghf/s1>) }`);
     });
 
     test("PREFIX – T14 Casse mixte (flag /i) (200)", async () => {
-        const res = await execQuery(PFX + `insert data {
+        const res = await execQuery(
+            PFX +
+                `insert data {
   graph <http://fghghf/> { <http://fghghf/s1> a owl:Class . }
-}`);
+}`,
+        );
         expect(res.status).toHaveBeenCalledWith(200);
     });
 
     test("PREFIX – T15 URI dans un littéral string (bug connu : faux positif) est bloqué", async () => {
-        const res = await execQuery(PFX + `INSERT DATA {
+        const res = await execQuery(
+            PFX +
+                `INSERT DATA {
   GRAPH <http://fghghf/> {
     <http://fghghf/s1> <http://label> "DELETE FROM graph <http://unknown/>" .
   }
-}`);
+}`,
+        );
         expect(res.status).not.toHaveBeenCalledWith(200);
     });
 
     test("PREFIX – T16 Commentaire contenant SELECT ne fausse pas le routing (200)", async () => {
-        const res = await execQuery(PFX + `# SELECT ?s FROM <http://fghghf/>
+        const res = await execQuery(
+            PFX +
+                `# SELECT ?s FROM <http://fghghf/>
 DELETE DATA {
   GRAPH <http://fghghf/> { <http://fghghf/s1> a owl:Class . }
-}`);
+}`,
+        );
         expect(res.status).toHaveBeenCalledWith(200);
     });
 
     test("PREFIX – T17 Commentaire contenant un graph non autorisé ne bloque pas (200)", async () => {
-        const res = await execQuery(PFX + `# INSERT DATA { GRAPH <http://unknown/> { <s> <p> <o> . } }
+        const res = await execQuery(
+            PFX +
+                `# INSERT DATA { GRAPH <http://unknown/> { <s> <p> <o> . } }
 INSERT DATA {
   GRAPH <http://fghghf/> { <http://fghghf/s1> a owl:Class . }
-}`);
+}`,
+        );
         expect(res.status).toHaveBeenCalledWith(200);
     });
 
     test("PREFIX – T18 Commentaire contenant INSERT ne masque pas un DELETE autorisé (200)", async () => {
-        const res = await execQuery(PFX + `# INSERT DATA { GRAPH <http://testClasses/> { <s> <p> <o> . } }
+        const res = await execQuery(
+            PFX +
+                `# INSERT DATA { GRAPH <http://testClasses/> { <s> <p> <o> . } }
 DELETE DATA {
   GRAPH <http://fghghf/> { <http://fghghf/s1> a owl:Class . }
-}`);
+}`,
+        );
         expect(res.status).toHaveBeenCalledWith(200);
     });
 
     test("PREFIX – T19 Deux opérations autorisées séparées par ; (200)", async () => {
-        const res = await execQuery(
-            PFX + `INSERT DATA { GRAPH <http://fghghf/> { <http://fghghf/s1> a owl:Class . } } ;\nDELETE DATA { GRAPH <http://fghghf/> { <http://fghghf/s2> a owl:Class . } }`
-        );
+        const res = await execQuery(PFX + `INSERT DATA { GRAPH <http://fghghf/> { <http://fghghf/s1> a owl:Class . } } ;\nDELETE DATA { GRAPH <http://fghghf/> { <http://fghghf/s2> a owl:Class . } }`);
         expect(res.status).toHaveBeenCalledWith(200);
     });
 
     test("PREFIX – T20 Deux opérations dont une non autorisée séparées par ; est bloqué", async () => {
         const res = await execQuery(
-            PFX + `INSERT DATA { GRAPH <http://fghghf/> { <http://fghghf/s1> a owl:Class . } } ;\nDELETE DATA { GRAPH <http://testClasses/> { <http://testClasses/s1> a owl:Class . } }`
+            PFX + `INSERT DATA { GRAPH <http://fghghf/> { <http://fghghf/s1> a owl:Class . } } ;\nDELETE DATA { GRAPH <http://testClasses/> { <http://testClasses/s1> a owl:Class . } }`,
         );
         expect(res.status).not.toHaveBeenCalledWith(200);
     });
 
     test("PREFIX – T21 Deux opérations dont une sans graph explicite séparées par ; est bloqué", async () => {
-        const res = await execQuery(
-            PFX + `INSERT DATA { GRAPH <http://fghghf/> { <http://fghghf/s1> a owl:Class . } } ;\nDELETE DATA { <http://fghghf/s2> a owl:Class . }`
-        );
+        const res = await execQuery(PFX + `INSERT DATA { GRAPH <http://fghghf/> { <http://fghghf/s1> a owl:Class . } } ;\nDELETE DATA { <http://fghghf/s2> a owl:Class . }`);
         expect(res.status).not.toHaveBeenCalledWith(200);
     });
 
     test("PREFIX – SELECT avec filtres et sous-requête passe (200)", async () => {
-        const res = await execQuery(PFX + `SELECT ?s ?label
+        const res = await execQuery(
+            PFX +
+                `SELECT ?s ?label
 FROM <http://fghghf/>
 WHERE {
   ?s a owl:Class .
   OPTIONAL { ?s rdfs:label ?label . FILTER(LANG(?label) = "fr") }
   FILTER NOT EXISTS { ?s owl:deprecated true }
-}`);
+}`,
+        );
         expect(res.status).toHaveBeenCalledWith(200);
     });
 
     test("PREFIX – SELECT avec FROM NAMED autorisé passe (200)", async () => {
-        const res = await execQuery(PFX + `SELECT ?s
+        const res = await execQuery(
+            PFX +
+                `SELECT ?s
 FROM NAMED <http://fghghf/>
-WHERE { GRAPH <http://fghghf/> { ?s ?p ?o } }`);
+WHERE { GRAPH <http://fghghf/> { ?s ?p ?o } }`,
+        );
         expect(res.status).toHaveBeenCalledWith(200);
     });
 
     test("PREFIX – SELECT avec FROM autorisé et FROM NAMED non autorisé est bloqué", async () => {
-        const res = await execQuery(PFX + `SELECT ?s
+        const res = await execQuery(
+            PFX +
+                `SELECT ?s
 FROM <http://fghghf/>
 FROM NAMED <http://unknown/>
-WHERE { ?s ?p ?o }`);
+WHERE { ?s ?p ?o }`,
+        );
         expect(res.status).not.toHaveBeenCalledWith(200);
     });
 
     test("PREFIX – INSERT avec WHERE et FILTER passe sur graph autorisé (200)", async () => {
-        const res = await execQuery(PFX + `WITH <http://fghghf/>
+        const res = await execQuery(
+            PFX +
+                `WITH <http://fghghf/>
 INSERT {
   ?s rdfs:label "updated label" .
 }
 WHERE {
   ?s a owl:Class .
   FILTER NOT EXISTS { ?s rdfs:label ?label }
-}`);
+}`,
+        );
         expect(res.status).toHaveBeenCalledWith(200);
     });
 
     test("PREFIX – INSERT avec WHERE sur graph lecture seule est bloqué", async () => {
-        const res = await execQuery(PFX + `WITH <http://testClasses/>
+        const res = await execQuery(
+            PFX +
+                `WITH <http://testClasses/>
 INSERT { ?s rdfs:label "x" . }
-WHERE  { ?s a owl:Class . }`);
+WHERE  { ?s a owl:Class . }`,
+        );
         expect(res.status).not.toHaveBeenCalledWith(200);
     });
 
     test("PREFIX – INSERT ciblant deux graphs dont source en lecture seule est bloqué", async () => {
-        const res = await execQuery(PFX + `INSERT {
+        const res = await execQuery(
+            PFX +
+                `INSERT {
   GRAPH <http://fghghf/> { ?s rdfs:label ?label . }
 }
 WHERE {
   GRAPH <http://testClasses/> { ?s rdfs:label ?label . }
-}`);
+}`,
+        );
         expect(res.status).not.toHaveBeenCalledWith(200);
     });
 
     test("PREFIX – DELETE avec WHERE et OPTIONAL passe sur graph autorisé (200)", async () => {
-        const res = await execQuery(PFX + `WITH <http://fghghf/>
+        const res = await execQuery(
+            PFX +
+                `WITH <http://fghghf/>
 DELETE {
   ?s rdfs:label ?oldLabel .
 }
@@ -837,23 +875,30 @@ WHERE {
   ?s a owl:Class .
   OPTIONAL { ?s rdfs:label ?oldLabel }
   FILTER(STR(?oldLabel) = "old value")
-}`);
+}`,
+        );
         expect(res.status).toHaveBeenCalledWith(200);
     });
 
     test("PREFIX – DELETE WHERE (forme courte) sur graph autorisé passe (200)", async () => {
-        const res = await execQuery(PFX + `DELETE WHERE {
+        const res = await execQuery(
+            PFX +
+                `DELETE WHERE {
   GRAPH <http://fghghf/> {
     <http://fghghf/s1> ?p ?o .
   }
-}`);
+}`,
+        );
         expect(res.status).toHaveBeenCalledWith(200);
     });
 
     test("PREFIX – DELETE WHERE sur graph lecture seule est bloqué", async () => {
-        const res = await execQuery(PFX + `WITH <http://testClasses/>
+        const res = await execQuery(
+            PFX +
+                `WITH <http://testClasses/>
 DELETE { ?s ?p ?o }
-WHERE  { ?s a owl:Class . }`);
+WHERE  { ?s a owl:Class . }`,
+        );
         expect(res.status).not.toHaveBeenCalledWith(200);
     });
 
@@ -898,141 +943,167 @@ WHERE  { ?s a owl:Class . }`);
     });
 
     test("PREFIX – SELECT avec deux FROM autorisés passe (200)", async () => {
-        const res = await execQuery(PFX + `SELECT ?s ?p ?o
+        const res = await execQuery(
+            PFX +
+                `SELECT ?s ?p ?o
 FROM <http://fghghf/>
 FROM <http://testClasses/>
-WHERE { ?s ?p ?o }`);
+WHERE { ?s ?p ?o }`,
+        );
         expect(res.status).toHaveBeenCalledWith(200);
     });
 
     test("PREFIX – SELECT avec FROM autorisé et FROM non autorisé est bloqué", async () => {
-        const res = await execQuery(PFX + `SELECT ?s
+        const res = await execQuery(
+            PFX +
+                `SELECT ?s
 FROM <http://fghghf/>
 FROM <http://unknown/>
-WHERE { ?s ?p ?o }`);
+WHERE { ?s ?p ?o }`,
+        );
         expect(res.status).not.toHaveBeenCalledWith(200);
     });
 
     test("PREFIX – SELECT avec deux FROM NAMED autorisés passe (200)", async () => {
-        const res = await execQuery(PFX + `SELECT ?s
+        const res = await execQuery(
+            PFX +
+                `SELECT ?s
 FROM NAMED <http://fghghf/>
 FROM NAMED <http://testClasses/>
-WHERE { GRAPH ?g { ?s ?p ?o } }`);
+WHERE { GRAPH ?g { ?s ?p ?o } }`,
+        );
         expect(res.status).toHaveBeenCalledWith(200);
     });
 
     test("PREFIX – SELECT avec FROM + FROM NAMED tous autorisés passe (200)", async () => {
-        const res = await execQuery(PFX + `SELECT ?s
+        const res = await execQuery(
+            PFX +
+                `SELECT ?s
 FROM <http://fghghf/>
 FROM NAMED <http://testClasses/>
-WHERE { ?s ?p ?o }`);
+WHERE { ?s ?p ?o }`,
+        );
         expect(res.status).toHaveBeenCalledWith(200);
     });
 
     test("PREFIX – SELECT avec FROM + FROM NAMED dont un non autorisé est bloqué", async () => {
-        const res = await execQuery(PFX + `SELECT ?s
+        const res = await execQuery(
+            PFX +
+                `SELECT ?s
 FROM <http://fghghf/>
 FROM NAMED <http://unknown/>
-WHERE { ?s ?p ?o }`);
+WHERE { ?s ?p ?o }`,
+        );
         expect(res.status).not.toHaveBeenCalledWith(200);
     });
 
     test("PREFIX – INSERT DATA dans deux graphs autorisés passe (200)", async () => {
-        const res = await execQuery(PFX + `INSERT DATA {
+        const res = await execQuery(
+            PFX +
+                `INSERT DATA {
   GRAPH <http://fghghf/> { <http://fghghf/s1> a owl:Class . }
   GRAPH <http://fghghf/> { <http://fghghf/s2> rdfs:label "test" . }
-}`);
+}`,
+        );
         expect(res.status).toHaveBeenCalledWith(200);
     });
 
     test("PREFIX – INSERT DATA dans graph autorisé et graph lecture seule est bloqué", async () => {
-        const res = await execQuery(PFX + `INSERT DATA {
+        const res = await execQuery(
+            PFX +
+                `INSERT DATA {
   GRAPH <http://fghghf/>      { <http://fghghf/s1> a owl:Class . }
   GRAPH <http://testClasses/> { <http://testClasses/s1> a owl:Class . }
-}`);
+}`,
+        );
         expect(res.status).not.toHaveBeenCalledWith(200);
     });
 
     test("PREFIX – INSERT DATA dans graph autorisé et graph inconnu est bloqué", async () => {
-        const res = await execQuery(PFX + `INSERT DATA {
+        const res = await execQuery(
+            PFX +
+                `INSERT DATA {
   GRAPH <http://testClasses/> { <http://testClasses/s1> a owl:Class . }
   GRAPH <http://unknown/>     { <http://unknown/s1> a owl:Class . }
-}`);
+}`,
+        );
         expect(res.status).not.toHaveBeenCalledWith(200);
     });
 
     test("PREFIX – INSERT avec WHERE dans plusieurs graphs autorisés passe (200)", async () => {
-        const res = await execQuery(PFX + `INSERT {
+        const res = await execQuery(
+            PFX +
+                `INSERT {
   GRAPH <http://fghghf/> { ?s rdfs:label ?label . }
 }
 WHERE {
   GRAPH <http://fghghf/> { ?s a owl:Class . OPTIONAL { ?s rdfs:label ?label } }
   FILTER(!BOUND(?label))
-}`);
+}`,
+        );
         expect(res.status).toHaveBeenCalledWith(200);
     });
 
     test("PREFIX – DELETE DATA dans deux graphs autorisés passe (200)", async () => {
-        const res = await execQuery(PFX + `DELETE DATA {
+        const res = await execQuery(
+            PFX +
+                `DELETE DATA {
   GRAPH <http://fghghf/> { <http://fghghf/s1> a owl:Class . }
   GRAPH <http://fghghf/> { <http://fghghf/s2> rdfs:label "test" . }
-}`);
+}`,
+        );
         expect(res.status).toHaveBeenCalledWith(200);
     });
 
     test("PREFIX – DELETE DATA dans graph autorisé et graph lecture seule est bloqué", async () => {
-        const res = await execQuery(PFX + `DELETE DATA {
+        const res = await execQuery(
+            PFX +
+                `DELETE DATA {
   GRAPH <http://fghghf/>      { <http://fghghf/s1> a owl:Class . }
   GRAPH <http://testClasses/> { <http://testClasses/s1> a owl:Class . }
-}`);
+}`,
+        );
         expect(res.status).not.toHaveBeenCalledWith(200);
     });
 
     test("PREFIX – DELETE WHERE dans plusieurs graphs autorisés passe (200)", async () => {
-        const res = await execQuery(PFX + `DELETE {
+        const res = await execQuery(
+            PFX +
+                `DELETE {
   GRAPH <http://fghghf/> { ?s rdfs:label ?oldLabel . }
 }
 WHERE {
   GRAPH <http://fghghf/> { ?s a owl:Class ; rdfs:label ?oldLabel . }
   FILTER(STR(?oldLabel) = "obsolete")
-}`);
+}`,
+        );
         expect(res.status).toHaveBeenCalledWith(200);
     });
 
     test("PREFIX – Deux COPY autorisés séparés par ; passent (200)", async () => {
-        const res = await execQuery(
-            PFX + `COPY <http://fghghf/> TO <http://fghghf/> ;\nCOPY <http://fghghf/> TO <http://fghghf/>`
-        );
+        const res = await execQuery(PFX + `COPY <http://fghghf/> TO <http://fghghf/> ;\nCOPY <http://fghghf/> TO <http://fghghf/>`);
         expect(res.status).toHaveBeenCalledWith(200);
     });
 
     test("PREFIX – COPY autorisé puis MOVE non autorisé séparés par ; est bloqué", async () => {
-        const res = await execQuery(
-            PFX + `COPY <http://fghghf/> TO <http://fghghf/> ;\nMOVE <http://testClasses/> TO <http://fghghf/>`
-        );
+        const res = await execQuery(PFX + `COPY <http://fghghf/> TO <http://fghghf/> ;\nMOVE <http://testClasses/> TO <http://fghghf/>`);
         expect(res.status).not.toHaveBeenCalledWith(200);
     });
 
     test("PREFIX – ADD autorisé puis COPY vers graph inconnu séparés par ; est bloqué", async () => {
-        const res = await execQuery(
-            PFX + `ADD <http://fghghf/> TO <http://fghghf/> ;\nCOPY <http://fghghf/> TO <http://unknown/>`
-        );
+        const res = await execQuery(PFX + `ADD <http://fghghf/> TO <http://fghghf/> ;\nCOPY <http://fghghf/> TO <http://unknown/>`);
         expect(res.status).not.toHaveBeenCalledWith(200);
     });
 
     // ─── STRESS ───────────────────────────────────────────────────────────────
 
     test("STRESS – PREFIX dont l'URI contient GRAPH ne fausse pas la détection (200)", async () => {
-        const res = await execQuery(
-            `PREFIX myGraph: <http://ns/GRAPH/vocab#>\nINSERT DATA {\n  GRAPH <http://fghghf/> { <http://fghghf/s1> a <http://owl/Class> . }\n}`
-        );
+        const res = await execQuery(`PREFIX myGraph: <http://ns/GRAPH/vocab#>\nINSERT DATA {\n  GRAPH <http://fghghf/> { <http://fghghf/s1> a <http://owl/Class> . }\n}`);
         expect(res.status).toHaveBeenCalledWith(200);
     });
 
     test("STRESS – PREFIX dont l'URI contient SELECT court-circuite le routing (limitation connue) — bloqué", async () => {
-        const res = await execQuery(
-            `PREFIX sel: <http://www.example.org/SELECT/vocab#>\nINSERT DATA {\n  GRAPH <http://fghghf/> { <http://fghghf/s1> a <http://owl/Class> . }\n}`
-        );
+        const res = await execQuery(`PREFIX sel: <http://www.example.org/SELECT/vocab#>\nINSERT DATA {\n  GRAPH <http://fghghf/> { <http://fghghf/s1> a <http://owl/Class> . }\n}`);
         expect(res.status).not.toHaveBeenCalledWith(200);
     });
 });
@@ -1047,8 +1118,7 @@ describe("GET /users/data/{id}/exec — template rendering {{limit}} / {{offset}
     });
 
     test("userData avec {{limit}} utilise LIMIT 10000 par défaut", async () => {
-        const queryWithLimit =
-            "SELECT ?s FROM <http://fghghf/> WHERE { ?s ?p ?o } {{limit}}";
+        const queryWithLimit = "SELECT ?s FROM <http://fghghf/> WHERE { ?s ?p ?o } {{limit}}";
         userDataModel.find.mockResolvedValue(makeUserData(queryWithLimit));
         ConfigManager.getUserSources.mockResolvedValue(USER_SOURCES);
         ConfigManager.getUser.mockResolvedValue(REGULAR_USER);
@@ -1069,8 +1139,7 @@ describe("GET /users/data/{id}/exec — template rendering {{limit}} / {{offset}
     });
 
     test("userData avec {{limit}} respecte le paramètre limit de la requête HTTP", async () => {
-        const queryWithLimit =
-            "SELECT ?s FROM <http://fghghf/> WHERE { ?s ?p ?o } {{limit}}";
+        const queryWithLimit = "SELECT ?s FROM <http://fghghf/> WHERE { ?s ?p ?o } {{limit}}";
         userDataModel.find.mockResolvedValue(makeUserData(queryWithLimit));
         ConfigManager.getUserSources.mockResolvedValue(USER_SOURCES);
         ConfigManager.getUser.mockResolvedValue(REGULAR_USER);

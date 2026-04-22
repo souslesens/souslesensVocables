@@ -304,7 +304,7 @@ var UserRequestFiltering = {
                 },
                 function () {
                     callback(errors.length > 0 ? errors.join("") : null, query);
-                }
+                },
             );
         }
     },

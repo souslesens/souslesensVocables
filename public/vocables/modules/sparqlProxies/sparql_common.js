@@ -162,10 +162,11 @@ var Sparql_common = (function () {
                             seenIds[id] = true;
                             uriIds.push(id);
                         }
-                    } else {
-                        console.log(id);
-
-                        uriIds.push(id);
+                    } else if (("" + id).startsWith("_:")) {
+                        if (!seenIds[id]) {
+                            seenIds[id] = true;
+                            uriIds.push(id);
+                        }
                     }
                 });
 

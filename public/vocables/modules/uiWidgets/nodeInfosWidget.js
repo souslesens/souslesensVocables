@@ -590,9 +590,11 @@ defaultLang = 'en';*/
                             var hasRealValue = values.some(function (v) {
                                 return v && v.value !== "?";
                             });
-                            var hasPlaceholderValue = !hasRealValue && values.some(function (v) {
-                                return v && v.value === "?";
-                            });
+                            var hasPlaceholderValue =
+                                !hasRealValue &&
+                                values.some(function (v) {
+                                    return v && v.value === "?";
+                                });
                             strGeneratedByProp +=
                                 "<td class='detailsCellName'>" +
                                 "<a target='" +

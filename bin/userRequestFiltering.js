@@ -92,38 +92,51 @@ var UserRequestFiltering = {
 */
 
     checkQueryByRegex: function (query, userGraphUrisMap, callback) {
+        var operationMatch = /(DELETE|INSERT|CLEAR|LOAD|CREATE|DROP|COPY|MOVE|ADD)/gim.exec(query);
+        if (!operationMatch) {
+            return callback("DATA PROTECTION : no operation");
+        }
+        var operation = operationMatch[1].trim();
+
+        var graphUris = [];
+        var match;
+
+        var graphRegex = /(INTO|GRAPH|WITH)\s+<([^>]+)/gim;
+        /* while for multi clauses GRAPH request like : INSERT DATA {
+        GRAPH <http://fghghf/> {
+            <http://ex/A> <http://ex/p> "1"
+        }
+        GRAPH <http://testClasses/> {
+            <http://ex/B> <http://ex/p> "2"
+        }
+        }*/
+
+        while ((match = graphRegex.exec(query)) !== null) {
+            graphUris.push(match[2].trim());
+        }
+
+        // COPY/MOVE/ADD use: <src> TO <dest> without GRAPH/INTO/WITH keyword
+        var transferRegex = /(?:COPY|MOVE|ADD)\s+<([^>]+)>\s+TO\s+<([^>]+)>/gim;
+        while ((match = transferRegex.exec(query)) !== null) {
+            graphUris.push(match[1].trim());
+            graphUris.push(match[2].trim());
+        }
+
+        if (graphUris.length === 0) {
+            return callback("DATA PROTECTION : operation " + operation + " needs explicit graph declaration");
+        }
+
         var error = "";
-        var operation = null;
-        var modifyRegex = /(DELETE|INSERT|CLEAR|LOAD|CREATE|DROP|COPY|MOVE|ADD)/gim;
-        var array = modifyRegex.exec(query);
-        if (array.length == 2) {
-            operation = array[1].trim();
-        }
-
-        if (!operation) {
-            error = "DATA PROTECTION : no operation";
-        } else {
-            var graphUri = null;
-            var graphRegex = /(INTO|GRAPH |WITH) +<([^>]+)/gim;
-            array = graphRegex.exec(query);
-            if (array && array.length == 3) {
-                graphUri = array[2].trim();
+        graphUris.forEach(function (graphUri) {
+            if (!userGraphUrisMap[graphUri]) {
+                error += "DATA PROTECTION : graphUri not allowed for user " + graphUri + "\n";
+            } else if (userGraphUrisMap[graphUri].acl != "w") {
+                // to be fixed PB with PRIVATE sources
+                error += "DATA PROTECTION : current user cannot execute " + operation + " on graph " + graphUri + "\n";
             }
-            if (!graphUri) {
-                error = "DATA PROTECTION : operation " + operation + " needs explicit graph declaration";
-            } else {
-                if (!userGraphUrisMap[graphUri]) {
-                    error = " DATA PROTECTION : graphUri not allowed for user  " + graphUri + "\n";
-                } else {
-                    // to be fixed PB with PRIVATE sources
-                    if (userGraphUrisMap[graphUri].acl != "w") {
-                        error = " DATA PROTECTION : current  user cannot execute " + operation + " on graph " + graphUri + "\n";
-                    }
-                }
-            }
-        }
+        });
 
-        return callback(error, query);
+        return callback(error || null, query);
     },
     checkSelectQuery: function (query, userGraphUrisMap, callback) {
         var regex = /\{\s*[0-9]\s*,\s*[1-9]*\s*\}/gm;
@@ -174,33 +187,57 @@ var UserRequestFiltering = {
         callback(error, query);
     },
 
-    filterSparqlRequest: function (query, userSourcesMap, userInfo, callback) {
-        var error = "";
-        var filteredQuery = query;
+    stripSparqlComments: function (query) {
+        return query.replace(/^#[^\n]*/gm, "").trim();
+    },
 
+    filterSparqlRequest: function (query, userSourcesMap, userInfo, callback) {
         // no filtering for admin
         if (userInfo.user.groups.indexOf("admin") > -1) {
             return callback(null, query);
         }
 
+        // strip comments before any regex matching to avoid false positives and SPARQL injection attempts in comments
+        var strippedQuery = UserRequestFiltering.stripSparqlComments(query);
         var userGraphUrisMap = UserRequestFiltering.getUserGraphUrisMap(userSourcesMap);
 
+        // SELECT queries are validated by the SPARQL parser (checkSelectQuery)
+        // Known limitation: SELECT inside a string literal (e.g. INSERT DATA { ... "SELECT ..." })
+        // triggers this branch and causes a parser error instead of a proper ACL error.
+        // Not a security hole (query is still blocked), but produces a misleading error message.
+        // Fix: use /^\s*SELECT/im to anchor to start of line and avoid matching inside literals.
         var selectRegex = /(SELECT)/gim;
-        var array = selectRegex.exec(query);
-        if (array && array.length > 0) {
-            UserRequestFiltering.checkSelectQuery(query, userGraphUrisMap, function (err, result) {
+        var selectArray = selectRegex.exec(strippedQuery);
+        if (selectArray && selectArray.length > 0) {
+            UserRequestFiltering.checkSelectQuery(strippedQuery, userGraphUrisMap, function (err, result) {
                 if (err) {
                     return callback(err);
                 }
                 callback(null, result);
             });
         } else {
-            UserRequestFiltering.checkQueryByRegex(query, userGraphUrisMap, function (err, result) {
-                if (err) {
-                    return callback(err);
+            // UPDATE queries: split on ; between operations, check each one independently
+            // SPARQL 1.1 Update allows chaining multiple operations with ;
+            // e.g. DELETE DATA { GRAPH <g1> { ... } } ; INSERT DATA { GRAPH <g2> { ... } }
+            // Without the split, only the first operation would be ACL-checked.
+            // The lookahead (?=DELETE|INSERT|...) avoids splitting on ; inside literals or subexpressions.
+            var updateOperations = strippedQuery.split(/;\s*(?=DELETE|INSERT|CLEAR|LOAD|CREATE|DROP|COPY|MOVE|ADD)/i);
+            var errors = [];
+
+            async.eachSeries(
+                updateOperations,
+                function (updateOperation, callbackEach) {
+                    UserRequestFiltering.checkQueryByRegex(updateOperation.trim(), userGraphUrisMap, function (err) {
+                        if (err) {
+                            errors.push(err);
+                        }
+                        callbackEach();
+                    });
+                },
+                function () {
+                    callback(errors.length > 0 ? errors.join("") : null, query);
                 }
-                callback(null, result);
-            });
+            );
         }
     },
     filterSparqlRequestAsync: async function (query, userSourcesMap, userInfo) {

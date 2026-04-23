@@ -15,51 +15,51 @@ const parser = new SparqlParser({ skipValidation: true });
 
 // Splits a SPARQL update query at the first WHERE keyword found at brace depth 0.
 // Returns [updateClause, whereClause] where whereClause is null when no top-level WHERE exists.
-// Handles string literals so that { } inside "..." do not affect depth counting.
+// Handles string literals so that { } inside "..." or '...' do not affect brace depth counting.
 function splitAtTopLevelWhere(query) {
-    var depth = 0;
-    var inDoubleQuote = false;
-    var inSingleQuote = false;
+    var curlyBraceDepth = 0;
+    var isInsideDoubleQuotedString = false;
+    var isInsideSingleQuotedString = false;
 
-    for (var i = 0; i < query.length; i++) {
-        var ch = query[i];
+    for (var charIndex = 0; charIndex < query.length; charIndex++) {
+        var currentChar = query[charIndex];
 
-        if (inDoubleQuote) {
-            if (ch === "\\") {
-                i++;
+        if (isInsideDoubleQuotedString) {
+            if (currentChar === "\\") {
+                charIndex++;
                 continue;
             }
-            if (ch === '"') inDoubleQuote = false;
+            if (currentChar === '"') isInsideDoubleQuotedString = false;
             continue;
         }
-        if (inSingleQuote) {
-            if (ch === "\\") {
-                i++;
+        if (isInsideSingleQuotedString) {
+            if (currentChar === "\\") {
+                charIndex++;
                 continue;
             }
-            if (ch === "'") inSingleQuote = false;
+            if (currentChar === "'") isInsideSingleQuotedString = false;
             continue;
         }
 
-        if (ch === '"') {
-            inDoubleQuote = true;
+        if (currentChar === '"') {
+            isInsideDoubleQuotedString = true;
             continue;
         }
-        if (ch === "'") {
-            inSingleQuote = true;
+        if (currentChar === "'") {
+            isInsideSingleQuotedString = true;
             continue;
         }
-        if (ch === "{") {
-            depth++;
+        if (currentChar === "{") {
+            curlyBraceDepth++;
             continue;
         }
-        if (ch === "}") {
-            depth--;
+        if (currentChar === "}") {
+            curlyBraceDepth--;
             continue;
         }
 
-        if (depth === 0 && /w/i.test(ch) && /^WHERE\b/i.test(query.slice(i))) {
-            return [query.slice(0, i), query.slice(i)];
+        if (curlyBraceDepth === 0 && /w/i.test(currentChar) && /^WHERE\b/i.test(query.slice(charIndex))) {
+            return [query.slice(0, charIndex), query.slice(charIndex)];
         }
     }
 

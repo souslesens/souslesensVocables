@@ -96,7 +96,7 @@ export default () => {
             // check that query is confom before execute
             const userSources = await ConfigManager.getUserSources(req, res);
             const user = await ConfigManager.getUser(req, res);
-            const filteredQuery = await UserRequestFiltering.filterSparqlRequestAsync(query, userSources, user);
+            const filteredQuery = await UserRequestFiltering.filterSparqlRequestAsync(renderedQuery, userSources, user);
             if (filteredQuery.parsingError) {
                 return processResponse(res, filteredQuery.parsingError, null);
             }

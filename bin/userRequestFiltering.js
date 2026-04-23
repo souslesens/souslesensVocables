@@ -13,6 +13,59 @@ import async from "async";
 import { Parser as SparqlParser } from "sparqljs";
 const parser = new SparqlParser({ skipValidation: true });
 
+// Splits a SPARQL update query at the first WHERE keyword found at brace depth 0.
+// Returns [updateClause, whereClause] where whereClause is null when no top-level WHERE exists.
+// Handles string literals so that { } inside "..." or '...' do not affect brace depth counting.
+function splitAtTopLevelWhere(query) {
+    var curlyBraceDepth = 0;
+    var isInsideDoubleQuotedString = false;
+    var isInsideSingleQuotedString = false;
+
+    for (var charIndex = 0; charIndex < query.length; charIndex++) {
+        var currentChar = query[charIndex];
+
+        if (isInsideDoubleQuotedString) {
+            if (currentChar === "\\") {
+                charIndex++;
+                continue;
+            }
+            if (currentChar === '"') isInsideDoubleQuotedString = false;
+            continue;
+        }
+        if (isInsideSingleQuotedString) {
+            if (currentChar === "\\") {
+                charIndex++;
+                continue;
+            }
+            if (currentChar === "'") isInsideSingleQuotedString = false;
+            continue;
+        }
+
+        if (currentChar === '"') {
+            isInsideDoubleQuotedString = true;
+            continue;
+        }
+        if (currentChar === "'") {
+            isInsideSingleQuotedString = true;
+            continue;
+        }
+        if (currentChar === "{") {
+            curlyBraceDepth++;
+            continue;
+        }
+        if (currentChar === "}") {
+            curlyBraceDepth--;
+            continue;
+        }
+
+        if (curlyBraceDepth === 0 && /w/i.test(currentChar) && /^WHERE\b/i.test(query.slice(charIndex))) {
+            return [query.slice(0, charIndex), query.slice(charIndex)];
+        }
+    }
+
+    return [query, null];
+}
+
 var UserRequestFiltering = {
     existingSources: null,
 
@@ -92,115 +145,231 @@ var UserRequestFiltering = {
 */
 
     checkQueryByRegex: function (query, userGraphUrisMap, callback) {
-        var error = "";
-        var operation = null;
-        var modifyRegex = /(DELETE|INSERT|CLEAR|LOAD|CREATE|DROP|COPY|MOVE|ADD)/gim;
-        var array = modifyRegex.exec(query);
-        if (array.length == 2) {
-            operation = array[1].trim();
+        var operationMatch = /(DELETE|INSERT|CLEAR|LOAD|CREATE|DROP|COPY|MOVE|ADD)/gim.exec(query);
+        if (!operationMatch) {
+            return callback("DATA PROTECTION : no operation");
+        }
+        var operation = operationMatch[1].trim();
+
+        var parts = splitAtTopLevelWhere(query);
+        var updateClause = parts[0];
+        var whereClause = parts[1];
+
+        var writeGraphUris = [];
+        var readGraphUris = [];
+        var match;
+
+        // Graphs in the update clause (INSERT/DELETE body, WITH, CLEAR, etc.) require WRITE access.
+        var writeGraphRegex = /(INTO|GRAPH|WITH)\s+<([^>]+)/gim;
+        while ((match = writeGraphRegex.exec(updateClause)) !== null) {
+            writeGraphUris.push(match[2].trim());
         }
 
-        if (!operation) {
-            error = "DATA PROTECTION : no operation";
-        } else {
-            var graphUri = null;
-            var graphRegex = /(INTO|GRAPH |WITH) +<([^>]+)/gim;
-            array = graphRegex.exec(query);
-            if (array && array.length == 3) {
-                graphUri = array[2].trim();
-            }
-            if (!graphUri) {
-                error = "DATA PROTECTION : operation " + operation + " needs explicit graph declaration";
-            } else {
-                if (!userGraphUrisMap[graphUri]) {
-                    error = " DATA PROTECTION : graphUri not allowed for user  " + graphUri + "\n";
+        // COPY/MOVE/ADD use: <src> TO <dest> without GRAPH/INTO/WITH keyword
+        var transferRegex = /(?:COPY|MOVE|ADD)\s+<([^>]+)>\s+TO\s+<([^>]+)>/gim;
+        while ((match = transferRegex.exec(updateClause)) !== null) {
+            writeGraphUris.push(match[1].trim());
+            writeGraphUris.push(match[2].trim());
+        }
+
+        if (whereClause) {
+            // DELETE WHERE (short form): no { } block before WHERE means the WHERE patterns
+            // are the deletion targets and their graphs need WRITE access.
+            // INSERT/DELETE ... WHERE: graphs in WHERE are read-only sources, they only
+            // need to be accessible (any acl level is sufficient).
+            var isDeleteWhere = updateClause.indexOf("{") === -1;
+            var whereGraphRegex = /(INTO|GRAPH|WITH)\s+<([^>]+)/gim;
+            while ((match = whereGraphRegex.exec(whereClause)) !== null) {
+                if (isDeleteWhere) {
+                    writeGraphUris.push(match[2].trim());
                 } else {
-                    // to be fixed PB with PRIVATE sources
-                    if (userGraphUrisMap[graphUri].acl != "w") {
-                        error = " DATA PROTECTION : current  user cannot execute " + operation + " on graph " + graphUri + "\n";
-                    }
+                    readGraphUris.push(match[2].trim());
                 }
             }
         }
 
-        return callback(error, query);
+        if (writeGraphUris.length === 0) {
+            return callback("DATA PROTECTION : operation " + operation + " needs explicit graph declaration");
+        }
+
+        var error = "";
+        writeGraphUris.forEach(function (graphUri) {
+            if (!userGraphUrisMap[graphUri]) {
+                error += "DATA PROTECTION : graphUri not allowed for user " + graphUri + "\n";
+            } else if (userGraphUrisMap[graphUri].acl !== "w") {
+                error += "DATA PROTECTION : current user cannot execute " + operation + " on graph " + graphUri + "\n";
+            }
+        });
+
+        readGraphUris.forEach(function (graphUri) {
+            if (!userGraphUrisMap[graphUri]) {
+                error += "DATA PROTECTION : graphUri not allowed for user " + graphUri + "\n";
+            }
+        });
+
+        return callback(error || null, query);
     },
     checkSelectQuery: function (query, userGraphUrisMap, callback) {
         var regex = /\{\s*[0-9]\s*,\s*[1-9]*\s*\}/gm;
 
         if (query.match(/<>\|!<>/)) {
             return callback(null, query);
-        } else {
-            var query2 = query;
-            try {
-                query2 = query.replace(regex, ""); // bug in  parser remove property path cardinality for parsing
-                var query3 = query2.replace(/<_:.[^>]*>/gm, "?replacementCitedBlankNodeToParse"); // cited blank nodes on queries don't pass the parser
-                var query4 = query3.replace(/<1>,/gm, ""); // ones for pathes
-                // replace aggregates variables as (count,sum,avg,min,max) because parser don't handle them
-                var query5 = query4.replace(/\b(count|sum|concat|avg|min|max|group_concat)\s*\([^)]*\)(?!\s+as\s+\?\w+)/gi, "");
+        }
 
-                var json = parser.parse(query5);
-            } catch (e) {
-                return callback(e);
+        // FROM/FROM NAMED inside sub-SELECTs are stripped before parsing (parser rejects them),
+        // so they must be captured via regex before any preprocessing.
+        var allFromUris = [];
+        var fromScanRegex = /\bFROM\s+(?:NAMED\s+)?<([^>]+)>/gi;
+        var fromScanMatch;
+        while ((fromScanMatch = fromScanRegex.exec(query)) !== null) {
+            allFromUris.push(fromScanMatch[1]);
+        }
+
+        var json;
+        try {
+            var q = query.replace(regex, ""); // bug in  parser remove property path cardinality for parsing
+            q = q.replace(/<_:.[^>]*>/gm, "?replacementCitedBlankNodeToParse"); // cited blank nodes on queries don't pass the parser
+            q = q.replace(/<1>,/gm, ""); // ones for pathes
+            q = q.replace(/\b(count|sum|concat|avg|min|max|group_concat)\s*\([^)]*\)(?!\s+as\s+\?\w+)/gi, ""); // replace aggregates variables as (count,sum,avg,min,max) because parser don't handle them
+
+            // SPARQL 1.1 parsers reject FROM/FROM NAMED inside inline sub-SELECTs.
+            // Strip those clauses from the WHERE body before parsing.
+            var firstWhereIdx = q.search(/\bWHERE\b/i);
+            if (firstWhereIdx !== -1) {
+                var head = q.slice(0, firstWhereIdx);
+                var tail = q.slice(firstWhereIdx).replace(/\bFROM\s+(?:NAMED\s+)?<[^>]*>\s*/gi, "");
+                q = head + tail;
             }
+
+            json = parser.parse(q);
+        } catch (e) {
+            var msg = e.message || String(e);
+            var unknownPrefix = /Unknown prefix:\s*(\S+)/i.exec(msg);
+            if (unknownPrefix) {
+                return callback("SPARQL parse error: prefix '" + unknownPrefix[1] + "' is not declared — add PREFIX " + unknownPrefix[1] + " <uri> at the top of your query");
+            }
+            return callback(e);
+        }
+
+        var allGraphUris = UserRequestFiltering.collectGraphUris(json.where);
+
+        // A SELECT query must declare its dataset explicitly — either via FROM/FROM NAMED
+        // at the outer level or via explicit GRAPH patterns in WHERE.
+        var hasOuterFrom = json.from && (json.from.default.length > 0 || json.from.named.length > 0);
+        if (!hasOuterFrom && allGraphUris.length === 0) {
+            return callback("DATA PROTECTION : missing from  <graph> clause ");
+        }
+
+        // Without FROM, bare triple patterns (not inside a GRAPH block) would access the
+        // endpoint's default graph — on Virtuoso the union of ALL named graphs.
+        // This is a bypass vector: one authorized GRAPH + bare triples = unrestricted read.
+        if (!hasOuterFrom && UserRequestFiltering.hasBareTriples(json.where, false)) {
+            return callback("DATA PROTECTION : bare triple patterns outside GRAPH blocks require FROM <graph> declaration");
         }
 
         var error = "";
-        if (!json.from) {
-            error += "DATA PROTECTION : missing from  <graph> clause ";
-        }
-        // check no from graph
-        else {
-            if (json.from.default.length == 0 && json.from.named.length == 0) {
-                error += "DATA PROTECTION : missing from  <graph> clause \n";
+        allFromUris.forEach(function (graphUri) {
+            if (!userGraphUrisMap[graphUri]) {
+                error += "DATA PROTECTION: graphUri " + graphUri + " not allowed for current user ";
             }
+        });
 
-            //check graphuris authorized for user
-            var fromError = "";
-            json.from.default.forEach(function (fromGraphUri) {
-                if (!userGraphUrisMap[fromGraphUri.value]) {
-                    fromError += "DATA PROTECTION: graphUri " + fromGraphUri.value + " not allowed for current user ";
-                }
-            });
+        allGraphUris.forEach(function (graphUri) {
+            if (!userGraphUrisMap[graphUri]) {
+                error += "DATA PROTECTION: graphUri " + graphUri + " not allowed for current user ";
+            }
+        });
 
-            json.from.named.forEach(function (fromGraphUri) {
-                if (!userGraphUrisMap[fromGraphUri.value]) {
-                    fromError += "DATA PROTECTION : graphUri  " + fromGraphUri.value + " not allowed for current user";
+        callback(error || null, query);
+    },
+
+    collectGraphUris: function (patterns) {
+        var uris = [];
+        if (!patterns) return uris;
+        (Array.isArray(patterns) ? patterns : [patterns]).forEach(function (p) {
+            if (!p) return;
+            if (p.type === "graph") {
+                if (p.name && p.name.termType === "NamedNode") {
+                    uris.push(p.name.value);
                 }
-            });
-            error += fromError;
+                uris = uris.concat(UserRequestFiltering.collectGraphUris(p.patterns));
+            } else if (p.type === "query") {
+                uris = uris.concat(UserRequestFiltering.collectGraphUris(p.where));
+            } else if (p.patterns) {
+                uris = uris.concat(UserRequestFiltering.collectGraphUris(p.patterns));
+            }
+        });
+        return uris;
+    },
+
+    hasBareTriples: function (patterns, insideGraph) {
+        if (!patterns) return false;
+        var ps = Array.isArray(patterns) ? patterns : [patterns];
+        for (var i = 0; i < ps.length; i++) {
+            var p = ps[i];
+            if (!p) continue;
+            if (p.type === "bgp" && !insideGraph && p.triples && p.triples.length > 0) {
+                return true;
+            }
+            if (p.type === "graph") {
+                if (UserRequestFiltering.hasBareTriples(p.patterns, true)) return true;
+            } else if (p.type === "query") {
+                if (UserRequestFiltering.hasBareTriples(p.where, false)) return true;
+            } else if (p.patterns) {
+                if (UserRequestFiltering.hasBareTriples(p.patterns, insideGraph)) return true;
+            }
         }
+        return false;
+    },
 
-        callback(error, query);
+    stripSparqlComments: function (query) {
+        return query.replace(/^#[^\n]*/gm, "").trim();
     },
 
     filterSparqlRequest: function (query, userSourcesMap, userInfo, callback) {
-        var error = "";
-        var filteredQuery = query;
-
         // no filtering for admin
         if (userInfo.user.groups.indexOf("admin") > -1) {
             return callback(null, query);
         }
 
+        // strip comments before any regex matching to avoid false positives and SPARQL injection attempts in comments
+        var strippedQuery = UserRequestFiltering.stripSparqlComments(query);
         var userGraphUrisMap = UserRequestFiltering.getUserGraphUrisMap(userSourcesMap);
 
-        var selectRegex = /(SELECT)/gim;
-        var array = selectRegex.exec(query);
-        if (array && array.length > 0) {
-            UserRequestFiltering.checkSelectQuery(query, userGraphUrisMap, function (err, result) {
+        // Route to checkSelectQuery only when SELECT/ASK/CONSTRUCT/DESCRIBE is the main operation.
+        // Strip leading PREFIX declarations first so a sub-SELECT inside an INSERT/DELETE WHERE clause
+        // does not trigger the SELECT branch (e.g. INSERT { ... } WHERE { { SELECT ... } }).
+        var queryCore = strippedQuery.replace(/^(\s*PREFIX\s+\S+\s*<[^>]*>\s*\n?)+/i, "").trim();
+        if (/^SELECT\b/i.test(queryCore)) {
+            UserRequestFiltering.checkSelectQuery(strippedQuery, userGraphUrisMap, function (err) {
                 if (err) {
                     return callback(err);
                 }
-                callback(null, result);
+                callback(null, query);
             });
         } else {
-            UserRequestFiltering.checkQueryByRegex(query, userGraphUrisMap, function (err, result) {
-                if (err) {
-                    return callback(err);
-                }
-                callback(null, result);
-            });
+            // UPDATE queries: split on ; between operations, check each one independently
+            // SPARQL 1.1 Update allows chaining multiple operations with ;
+            // e.g. DELETE DATA { GRAPH <g1> { ... } } ; INSERT DATA { GRAPH <g2> { ... } }
+            // Without the split, only the first operation would be ACL-checked.
+            // The lookahead (?=DELETE|INSERT|...) avoids splitting on ; inside literals or subexpressions.
+            var updateOperations = strippedQuery.split(/;\s*(?=DELETE|INSERT|CLEAR|LOAD|CREATE|DROP|COPY|MOVE|ADD)/i);
+            var errors = [];
+
+            async.eachSeries(
+                updateOperations,
+                function (updateOperation, callbackEach) {
+                    UserRequestFiltering.checkQueryByRegex(updateOperation.trim(), userGraphUrisMap, function (err) {
+                        if (err) {
+                            errors.push(err);
+                        }
+                        callbackEach();
+                    });
+                },
+                function () {
+                    callback(errors.length > 0 ? errors.join("") : null, query);
+                },
+            );
         }
     },
     filterSparqlRequestAsync: async function (query, userSourcesMap, userInfo) {

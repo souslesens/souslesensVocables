@@ -499,6 +499,9 @@ var UI = (function () {
         }
         $(divId).dialog("option", dialogOptions);
         $(divId).dialog("open");
+        if (options.zIndex) {
+            $(divId).closest(".ui-dialog").css("z-index", options.zIndex);
+        }
         var title = "";
         if (options.title) {
             title = options.title;

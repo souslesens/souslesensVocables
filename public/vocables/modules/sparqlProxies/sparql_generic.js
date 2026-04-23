@@ -961,12 +961,15 @@ var Sparql_generic = (function () {
                             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
                             "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>SELECT distinct * \n" +
                             fromStr +
-                            "  WHERE {\n" +
-                            "  {  ?subject   rdfs:subClassOf|rdf:type  ?firstParent.?subject rdfs:label ?subjectLabel.  ?firstParent rdf:type owl:Class. \n" +
-                            "    optional {?subject skos:prefLabel|skos:altLabel ?subjectAltLabel}\n" +
-                            "    \n" +
-                            "   }\n" +
-                            "}";
+                            "WHERE {\n" +
+                            "    ?subject rdfs:subClassOf ?firstParent .\n" +
+                            "    ?subject rdfs:label ?subjectLabel .\n" +
+                            "  filter (  exists {?firstParent rdf:type owl:Class  } || not exists{?firstParent rdf:type ?t })\n" +
+                            " filter (?firstParent!=owl:Class)\n" +
+                            "    OPTIONAL {\n" +
+                            "      ?subject skos:prefLabel|skos:altLabel ?subjectAltLabel .\n" +
+                            "    }\n" +
+                            "  }";
                     } else {
                         var query3 =
                             "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +

@@ -13,6 +13,9 @@ import async from "async";
 import { Parser as SparqlParser } from "sparqljs";
 const parser = new SparqlParser({ skipValidation: true });
 
+import NodeSqlParser from "node-sql-parser";
+const sqlParser = new NodeSqlParser.Parser();
+
 // Splits a SPARQL update query at the first WHERE keyword found at brace depth 0.
 // Returns [updateClause, whereClause] where whereClause is null when no top-level WHERE exists.
 // Handles string literals so that { } inside "..." or '...' do not affect brace depth counting.
@@ -209,6 +212,47 @@ var UserRequestFiltering = {
 
         return callback(error || null, query);
     },
+    checkSqlSelectQuery: function (query, driver, callback) {
+        var sqlDialect = driver === "pg" ? "PostgreSQL" : "TransactSQL";
+        var ast;
+        try {
+            ast = sqlParser.astify(query, { database: sqlDialect });
+        } catch (e) {
+            return callback("DATA PROTECTION: invalid SQL query: " + e.message);
+        }
+
+        var statements = Array.isArray(ast) ? ast : [ast];
+        if (statements.length > 1) {
+            return callback("DATA PROTECTION: multiple SQL statements are not allowed");
+        }
+
+        var stmt = statements[0];
+        if (stmt.type !== "select") {
+            return callback("DATA PROTECTION: only SELECT queries are allowed, got " + stmt.type.toUpperCase());
+        }
+
+        var forbiddenSchemas = ["information_schema", "pg_catalog"];
+        var tables = sqlParser.tableList(query, { database: sqlDialect });
+        var schemaError = "";
+        tables.forEach(function (tableRef) {
+            var schema = tableRef.split("::")[1];
+            if (
+                schema &&
+                forbiddenSchemas.some(function (fs) {
+                    return schema.toLowerCase() === fs;
+                })
+            ) {
+                schemaError += "DATA PROTECTION: access to schema " + schema + " is not allowed; ";
+            }
+        });
+
+        if (schemaError) {
+            return callback(schemaError);
+        }
+
+        callback(null, query);
+    },
+
     checkSelectQuery: function (query, userGraphUrisMap, callback) {
         var regex = /\{\s*[0-9]\s*,\s*[1-9]*\s*\}/gm;
 

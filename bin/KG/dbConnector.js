@@ -44,4 +44,9 @@ async function getKGModelAsync(connection, dbName, driver) {
     });
 }
 
-export { getConnection, getData, getKGModel, getKGModelAsync };
+async function getSampleData(connection, tableName, limit, driver) {
+    const tableRef = driver === "pg" ? "public." + tableName : tableName;
+    return connection(tableRef).select("*").limit(limit);
+}
+
+export { getConnection, getData, getKGModel, getKGModelAsync, getSampleData };

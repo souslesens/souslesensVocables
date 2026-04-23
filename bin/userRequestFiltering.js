@@ -227,10 +227,10 @@ var UserRequestFiltering = {
 
         var json;
         try {
-            var q = query.replace(regex, "");// bug in  parser remove property path cardinality for parsing
-            q = q.replace(/<_:.[^>]*>/gm, "?replacementCitedBlankNodeToParse");// cited blank nodes on queries don't pass the parser
-            q = q.replace(/<1>,/gm, "");// ones for pathes
-            q = q.replace(/\b(count|sum|concat|avg|min|max|group_concat)\s*\([^)]*\)(?!\s+as\s+\?\w+)/gi, "");// replace aggregates variables as (count,sum,avg,min,max) because parser don't handle them
+            var q = query.replace(regex, ""); // bug in  parser remove property path cardinality for parsing
+            q = q.replace(/<_:.[^>]*>/gm, "?replacementCitedBlankNodeToParse"); // cited blank nodes on queries don't pass the parser
+            q = q.replace(/<1>,/gm, ""); // ones for pathes
+            q = q.replace(/\b(count|sum|concat|avg|min|max|group_concat)\s*\([^)]*\)(?!\s+as\s+\?\w+)/gi, ""); // replace aggregates variables as (count,sum,avg,min,max) because parser don't handle them
 
             // SPARQL 1.1 parsers reject FROM/FROM NAMED inside inline sub-SELECTs.
             // Strip those clauses from the WHERE body before parsing.

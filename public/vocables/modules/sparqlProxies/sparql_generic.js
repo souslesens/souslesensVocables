@@ -962,7 +962,6 @@ var Sparql_generic = (function () {
                             "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>SELECT distinct * \n" +
                             fromStr +
                             "WHERE {\n" +
-
                             "    ?subject rdfs:subClassOf ?firstParent .\n" +
                             "    ?subject rdfs:label ?subjectLabel .\n" +
                             "  filter (  exists {?firstParent rdf:type owl:Class  } || not exists{?firstParent rdf:type ?t })\n" +

@@ -1454,7 +1454,9 @@ WHERE {
 // ─── SELECT avec sous-SELECT + PREFIX ────────────────────────────────────────
 
 test("PREFIX – SUBSEL SELECT outer FROM rwGraph, sous-SELECT FROM roGraph passe", async () => {
-    const { err } = await filter(PFX + `SELECT ?s ?label
+    const { err } = await filter(
+        PFX +
+            `SELECT ?s ?label
 FROM <${rwGraph}>
 WHERE {
   ?s rdf:type ?type .
@@ -1463,12 +1465,15 @@ WHERE {
     FROM <${roGraph}>
     WHERE { ?type rdfs:label ?label . }
   }
-}`);
+}`,
+    );
     expect(err).toBeFalsy();
 });
 
 test("PREFIX – SUBSEL SELECT outer FROM rwGraph, sous-SELECT FROM unknownGraph est bloqué", async () => {
-    const { err } = await filter(PFX + `SELECT ?s ?label
+    const { err } = await filter(
+        PFX +
+            `SELECT ?s ?label
 FROM <${rwGraph}>
 WHERE {
   {
@@ -1476,24 +1481,30 @@ WHERE {
     FROM <${unknownGraph}>
     WHERE { ?type rdfs:label ?label . }
   }
-}`);
+}`,
+    );
     expect(err).toMatch(/not allowed/i);
 });
 
 test("PREFIX – SUBSEL SELECT sans outer FROM, sous-SELECT FROM rwGraph est bloqué", async () => {
-    const { err } = await filter(PFX + `SELECT ?s ?label
+    const { err } = await filter(
+        PFX +
+            `SELECT ?s ?label
 WHERE {
   {
     SELECT ?type ?label
     FROM <${rwGraph}>
     WHERE { ?type rdfs:label ?label . }
   }
-}`);
+}`,
+    );
     expect(err).toMatch(/missing from/i);
 });
 
 test("PREFIX – SUBSEL SELECT outer FROM rwGraph, sous-SELECT FROM NAMED unknownGraph est bloqué", async () => {
-    const { err } = await filter(PFX + `SELECT ?s ?label
+    const { err } = await filter(
+        PFX +
+            `SELECT ?s ?label
 FROM <${rwGraph}>
 WHERE {
   {
@@ -1501,12 +1512,15 @@ WHERE {
     FROM NAMED <${unknownGraph}>
     WHERE { GRAPH <${unknownGraph}> { ?type rdfs:label ?label . } }
   }
-}`);
+}`,
+    );
     expect(err).toMatch(/not allowed/i);
 });
 
 test("PREFIX – SUBSEL SELECT outer FROM rwGraph, deux sous-SELECT FROM autorisés passent", async () => {
-    const { err } = await filter(PFX + `SELECT ?s ?label
+    const { err } = await filter(
+        PFX +
+            `SELECT ?s ?label
 FROM <${rwGraph}>
 WHERE {
   {
@@ -1519,24 +1533,30 @@ WHERE {
     FROM <${rwGraph}>
     WHERE { ?s a ?type . }
   }
-}`);
+}`,
+    );
     expect(err).toBeFalsy();
 });
 
 test("PREFIX – SUBSEL SELECT outer FROM rwGraph, sous-SELECT avec GRAPH sans FROM passe", async () => {
-    const { err } = await filter(PFX + `SELECT ?s ?label
+    const { err } = await filter(
+        PFX +
+            `SELECT ?s ?label
 FROM <${rwGraph}>
 WHERE {
   {
     SELECT ?type ?label
     WHERE { GRAPH <${roGraph}> { ?type rdfs:label ?label . } }
   }
-}`);
+}`,
+    );
     expect(err).toBeFalsy();
 });
 
 test("PREFIX – SUBSEL SELECT outer FROM rwGraph, sous-SELECT FROM roGraph + FROM NAMED rwGraph passe", async () => {
-    const { err } = await filter(PFX + `SELECT ?s ?label
+    const { err } = await filter(
+        PFX +
+            `SELECT ?s ?label
 FROM <${rwGraph}>
 WHERE {
   {
@@ -1545,7 +1565,8 @@ WHERE {
     FROM NAMED <${rwGraph}>
     WHERE { GRAPH <${rwGraph}> { ?type rdfs:label ?label . } }
   }
-}`);
+}`,
+    );
     expect(err).toBeFalsy();
 });
 
@@ -1645,27 +1666,36 @@ WHERE {
 // ─── SELECT avec GRAPH dans WHERE + PREFIX ────────────────────────────────────
 
 test("PREFIX – GRAPH-WHERE SELECT avec GRAPH rwGraph dans WHERE (sans FROM) passe", async () => {
-    const { err } = await filter(PFX + `SELECT ?s ?p ?o
+    const { err } = await filter(
+        PFX +
+            `SELECT ?s ?p ?o
 WHERE {
   GRAPH <${rwGraph}> { ?s ?p ?o . }
-}`);
+}`,
+    );
     expect(err).toBeFalsy();
 });
 
 test("PREFIX – GRAPH-WHERE SELECT avec GRAPH unknownGraph dans WHERE est bloqué", async () => {
-    const { err } = await filter(PFX + `SELECT ?s ?p ?o
+    const { err } = await filter(
+        PFX +
+            `SELECT ?s ?p ?o
 WHERE {
   GRAPH <${unknownGraph}> { ?s ?p ?o . }
-}`);
+}`,
+    );
     expect(err).toMatch(/not allowed/i);
 });
 
 test("PREFIX – GRAPH-WHERE SELECT avec GRAPH rwGraph + GRAPH roGraph dans WHERE passe", async () => {
-    const { err } = await filter(PFX + `SELECT ?s ?label
+    const { err } = await filter(
+        PFX +
+            `SELECT ?s ?label
 WHERE {
   GRAPH <${rwGraph}> { ?s a owl:Class . }
   GRAPH <${roGraph}> { ?s rdfs:label ?label . }
-}`);
+}`,
+    );
     expect(err).toBeFalsy();
 });
 
@@ -1675,21 +1705,27 @@ test("PREFIX – GRAPH-WHERE SELECT sans FROM et sans GRAPH est bloqué", async 
 });
 
 test("PREFIX – GRAPH-WHERE SELECT avec FROM rwGraph + GRAPH unknownGraph est bloqué", async () => {
-    const { err } = await filter(PFX + `SELECT ?s ?p ?o
+    const { err } = await filter(
+        PFX +
+            `SELECT ?s ?p ?o
 FROM <${rwGraph}>
 WHERE {
   GRAPH <${unknownGraph}> { ?s ?p ?o . }
-}`);
+}`,
+    );
     expect(err).toMatch(/not allowed/i);
 });
 
 test("PREFIX – GRAPH-WHERE SELECT avec FROM NAMED rwGraph + GRAPH roGraph dans WHERE passe", async () => {
-    const { err } = await filter(PFX + `SELECT ?s ?label
+    const { err } = await filter(
+        PFX +
+            `SELECT ?s ?label
 FROM NAMED <${rwGraph}>
 WHERE {
   GRAPH <${rwGraph}> { ?s a owl:Class . }
   GRAPH <${roGraph}> { ?s rdfs:label ?label . }
-}`);
+}`,
+    );
     expect(err).toBeFalsy();
 });
 
@@ -1830,7 +1866,9 @@ WHERE {
 // PREFIX variants
 
 test("PREFIX – BARE SELECT sans FROM : GRAPH autorisé + triple nu dans sous-SELECT est bloqué", async () => {
-    const { err } = await filter(PFX + `SELECT ?s ?label
+    const { err } = await filter(
+        PFX +
+            `SELECT ?s ?label
 WHERE {
   GRAPH <${rwGraph}> { ?s a owl:Class . }
   {
@@ -1839,12 +1877,15 @@ WHERE {
       ?type rdfs:label ?label .
     }
   }
-}`);
+}`,
+    );
     expect(err).toMatch(/bare triple/i);
 });
 
 test("PREFIX – BARE SELECT sans FROM : tous triples dans GRAPH passe", async () => {
-    const { err } = await filter(PFX + `SELECT ?s ?label
+    const { err } = await filter(
+        PFX +
+            `SELECT ?s ?label
 WHERE {
   GRAPH <${rwGraph}> { ?s a owl:Class . }
   {
@@ -1853,6 +1894,7 @@ WHERE {
       GRAPH <${roGraph}> { ?type rdfs:label ?label . }
     }
   }
-}`);
+}`,
+    );
     expect(err).toBeFalsy();
 });

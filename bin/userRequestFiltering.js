@@ -214,48 +214,112 @@ var UserRequestFiltering = {
 
         if (query.match(/<>\|!<>/)) {
             return callback(null, query);
-        } else {
-            var query2 = query;
-            try {
-                query2 = query.replace(regex, ""); // bug in  parser remove property path cardinality for parsing
-                var query3 = query2.replace(/<_:.[^>]*>/gm, "?replacementCitedBlankNodeToParse"); // cited blank nodes on queries don't pass the parser
-                var query4 = query3.replace(/<1>,/gm, ""); // ones for pathes
-                // replace aggregates variables as (count,sum,avg,min,max) because parser don't handle them
-                var query5 = query4.replace(/\b(count|sum|concat|avg|min|max|group_concat)\s*\([^)]*\)(?!\s+as\s+\?\w+)/gi, "");
+        }
 
-                var json = parser.parse(query5);
-            } catch (e) {
-                return callback(e);
+        // FROM/FROM NAMED inside sub-SELECTs are stripped before parsing (parser rejects them),
+        // so they must be captured via regex before any preprocessing.
+        var allFromUris = [];
+        var fromScanRegex = /\bFROM\s+(?:NAMED\s+)?<([^>]+)>/gi;
+        var fromScanMatch;
+        while ((fromScanMatch = fromScanRegex.exec(query)) !== null) {
+            allFromUris.push(fromScanMatch[1]);
+        }
+
+        var json;
+        try {
+            var q = query.replace(regex, "");// bug in  parser remove property path cardinality for parsing
+            q = q.replace(/<_:.[^>]*>/gm, "?replacementCitedBlankNodeToParse");// cited blank nodes on queries don't pass the parser
+            q = q.replace(/<1>,/gm, "");// ones for pathes
+            q = q.replace(/\b(count|sum|concat|avg|min|max|group_concat)\s*\([^)]*\)(?!\s+as\s+\?\w+)/gi, "");// replace aggregates variables as (count,sum,avg,min,max) because parser don't handle them
+
+            // SPARQL 1.1 parsers reject FROM/FROM NAMED inside inline sub-SELECTs.
+            // Strip those clauses from the WHERE body before parsing.
+            var firstWhereIdx = q.search(/\bWHERE\b/i);
+            if (firstWhereIdx !== -1) {
+                var head = q.slice(0, firstWhereIdx);
+                var tail = q.slice(firstWhereIdx).replace(/\bFROM\s+(?:NAMED\s+)?<[^>]*>\s*/gi, "");
+                q = head + tail;
             }
+
+            json = parser.parse(q);
+        } catch (e) {
+            var msg = e.message || String(e);
+            var unknownPrefix = /Unknown prefix:\s*(\S+)/i.exec(msg);
+            if (unknownPrefix) {
+                return callback("SPARQL parse error: prefix '" + unknownPrefix[1] + "' is not declared — add PREFIX " + unknownPrefix[1] + " <uri> at the top of your query");
+            }
+            return callback(e);
+        }
+
+        var allGraphUris = UserRequestFiltering.collectGraphUris(json.where);
+
+        // A SELECT query must declare its dataset explicitly — either via FROM/FROM NAMED
+        // at the outer level or via explicit GRAPH patterns in WHERE.
+        var hasOuterFrom = json.from && (json.from.default.length > 0 || json.from.named.length > 0);
+        if (!hasOuterFrom && allGraphUris.length === 0) {
+            return callback("DATA PROTECTION : missing from  <graph> clause ");
+        }
+
+        // Without FROM, bare triple patterns (not inside a GRAPH block) would access the
+        // endpoint's default graph — on Virtuoso the union of ALL named graphs.
+        // This is a bypass vector: one authorized GRAPH + bare triples = unrestricted read.
+        if (!hasOuterFrom && UserRequestFiltering.hasBareTriples(json.where, false)) {
+            return callback("DATA PROTECTION : bare triple patterns outside GRAPH blocks require FROM <graph> declaration");
         }
 
         var error = "";
-        if (!json.from) {
-            error += "DATA PROTECTION : missing from  <graph> clause ";
-        }
-        // check no from graph
-        else {
-            if (json.from.default.length == 0 && json.from.named.length == 0) {
-                error += "DATA PROTECTION : missing from  <graph> clause \n";
+        allFromUris.forEach(function (graphUri) {
+            if (!userGraphUrisMap[graphUri]) {
+                error += "DATA PROTECTION: graphUri " + graphUri + " not allowed for current user ";
             }
+        });
 
-            //check graphuris authorized for user
-            var fromError = "";
-            json.from.default.forEach(function (fromGraphUri) {
-                if (!userGraphUrisMap[fromGraphUri.value]) {
-                    fromError += "DATA PROTECTION: graphUri " + fromGraphUri.value + " not allowed for current user ";
-                }
-            });
+        allGraphUris.forEach(function (graphUri) {
+            if (!userGraphUrisMap[graphUri]) {
+                error += "DATA PROTECTION: graphUri " + graphUri + " not allowed for current user ";
+            }
+        });
 
-            json.from.named.forEach(function (fromGraphUri) {
-                if (!userGraphUrisMap[fromGraphUri.value]) {
-                    fromError += "DATA PROTECTION : graphUri  " + fromGraphUri.value + " not allowed for current user";
+        callback(error || null, query);
+    },
+
+    collectGraphUris: function (patterns) {
+        var uris = [];
+        if (!patterns) return uris;
+        (Array.isArray(patterns) ? patterns : [patterns]).forEach(function (p) {
+            if (!p) return;
+            if (p.type === "graph") {
+                if (p.name && p.name.termType === "NamedNode") {
+                    uris.push(p.name.value);
                 }
-            });
-            error += fromError;
+                uris = uris.concat(UserRequestFiltering.collectGraphUris(p.patterns));
+            } else if (p.type === "query") {
+                uris = uris.concat(UserRequestFiltering.collectGraphUris(p.where));
+            } else if (p.patterns) {
+                uris = uris.concat(UserRequestFiltering.collectGraphUris(p.patterns));
+            }
+        });
+        return uris;
+    },
+
+    hasBareTriples: function (patterns, insideGraph) {
+        if (!patterns) return false;
+        var ps = Array.isArray(patterns) ? patterns : [patterns];
+        for (var i = 0; i < ps.length; i++) {
+            var p = ps[i];
+            if (!p) continue;
+            if (p.type === "bgp" && !insideGraph && p.triples && p.triples.length > 0) {
+                return true;
+            }
+            if (p.type === "graph") {
+                if (UserRequestFiltering.hasBareTriples(p.patterns, true)) return true;
+            } else if (p.type === "query") {
+                if (UserRequestFiltering.hasBareTriples(p.where, false)) return true;
+            } else if (p.patterns) {
+                if (UserRequestFiltering.hasBareTriples(p.patterns, insideGraph)) return true;
+            }
         }
-
-        callback(error, query);
+        return false;
     },
 
     stripSparqlComments: function (query) {
@@ -277,11 +341,11 @@ var UserRequestFiltering = {
         // does not trigger the SELECT branch (e.g. INSERT { ... } WHERE { { SELECT ... } }).
         var queryCore = strippedQuery.replace(/^(\s*PREFIX\s+\S+\s*<[^>]*>\s*\n?)+/i, "").trim();
         if (/^SELECT\b/i.test(queryCore)) {
-            UserRequestFiltering.checkSelectQuery(strippedQuery, userGraphUrisMap, function (err, result) {
+            UserRequestFiltering.checkSelectQuery(strippedQuery, userGraphUrisMap, function (err) {
                 if (err) {
                     return callback(err);
                 }
-                callback(null, result);
+                callback(null, query);
             });
         } else {
             // UPDATE queries: split on ; between operations, check each one independently

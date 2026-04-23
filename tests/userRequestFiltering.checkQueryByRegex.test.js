@@ -1245,3 +1245,614 @@ WHERE {
 }`);
     expect(err).toMatch(errWrite("INSERT", roGraph));
 });
+
+// ─── SELECT avec sous-SELECT ayant des clauses FROM ───────────────────────────
+// La requête principale doit toujours avoir un FROM au niveau extérieur.
+// Les FROM dans les sous-SELECT sont vérifiés par regex (extension moteur, rejetée par le parser SPARQL 1.1).
+
+test("SUBSEL – SELECT outer FROM rwGraph, sous-SELECT FROM roGraph passe", async () => {
+    const { err } = await filter(`SELECT ?s ?label
+FROM <${rwGraph}>
+WHERE {
+  ?s a ?type .
+  {
+    SELECT ?type ?label
+    FROM <${roGraph}>
+    WHERE {
+      ?type ?p ?label .
+    }
+  }
+}`);
+    expect(err).toBeFalsy();
+});
+
+test("SUBSEL – SELECT outer FROM rwGraph, sous-SELECT FROM unknownGraph est bloqué", async () => {
+    const { err } = await filter(`SELECT ?s ?label
+FROM <${rwGraph}>
+WHERE {
+  {
+    SELECT ?type ?label
+    FROM <${unknownGraph}>
+    WHERE {
+      ?type ?p ?label .
+    }
+  }
+}`);
+    expect(err).toMatch(/not allowed/i);
+});
+
+test("SUBSEL – SELECT sans outer FROM, sous-SELECT FROM rwGraph est bloqué (missing outer FROM)", async () => {
+    const { err } = await filter(`SELECT ?s ?label
+WHERE {
+  {
+    SELECT ?type ?label
+    FROM <${rwGraph}>
+    WHERE {
+      ?type ?p ?label .
+    }
+  }
+}`);
+    expect(err).toMatch(/missing from/i);
+});
+
+test("SUBSEL – SELECT outer FROM rwGraph, sous-SELECT FROM NAMED rwGraph passe", async () => {
+    const { err } = await filter(`SELECT ?s ?label
+FROM <${rwGraph}>
+WHERE {
+  {
+    SELECT ?type ?label
+    FROM NAMED <${rwGraph}>
+    WHERE { GRAPH <${rwGraph}> { ?type ?p ?label . } }
+  }
+}`);
+    expect(err).toBeFalsy();
+});
+
+test("SUBSEL – SELECT outer FROM rwGraph, sous-SELECT FROM NAMED unknownGraph est bloqué", async () => {
+    const { err } = await filter(`SELECT ?s ?label
+FROM <${rwGraph}>
+WHERE {
+  {
+    SELECT ?type ?label
+    FROM NAMED <${unknownGraph}>
+    WHERE { GRAPH <${unknownGraph}> { ?type ?p ?label . } }
+  }
+}`);
+    expect(err).toMatch(/not allowed/i);
+});
+
+test("SUBSEL – SELECT outer FROM rwGraph, deux sous-SELECT FROM roGraph passent", async () => {
+    const { err } = await filter(`SELECT ?s ?label
+FROM <${rwGraph}>
+WHERE {
+  {
+    SELECT ?type ?label
+    FROM <${roGraph}>
+    WHERE { ?type ?p ?label . }
+  }
+  {
+    SELECT ?s
+    FROM <${roGraph}>
+    WHERE { ?s a ?type . }
+  }
+}`);
+    expect(err).toBeFalsy();
+});
+
+test("SUBSEL – SELECT outer FROM rwGraph, deux sous-SELECT dont un FROM unknownGraph est bloqué", async () => {
+    const { err } = await filter(`SELECT ?s ?label
+FROM <${rwGraph}>
+WHERE {
+  {
+    SELECT ?type ?label
+    FROM <${roGraph}>
+    WHERE { ?type ?p ?label . }
+  }
+  {
+    SELECT ?s
+    FROM <${unknownGraph}>
+    WHERE { ?s a ?type . }
+  }
+}`);
+    expect(err).toMatch(/not allowed/i);
+});
+
+test("SUBSEL – SELECT outer FROM rwGraph, sous-SELECT FROM + FROM NAMED tous autorisés passe", async () => {
+    const { err } = await filter(`SELECT ?s ?label
+FROM <${rwGraph}>
+WHERE {
+  {
+    SELECT ?type ?label
+    FROM <${roGraph}>
+    FROM NAMED <${rwGraph}>
+    WHERE { GRAPH <${rwGraph}> { ?type ?p ?label . } }
+  }
+}`);
+    expect(err).toBeFalsy();
+});
+
+test("SUBSEL – SELECT outer FROM rwGraph, sous-SELECT FROM roGraph + FROM NAMED unknownGraph est bloqué", async () => {
+    const { err } = await filter(`SELECT ?s ?label
+FROM <${rwGraph}>
+WHERE {
+  {
+    SELECT ?type ?label
+    FROM <${roGraph}>
+    FROM NAMED <${unknownGraph}>
+    WHERE { GRAPH <${unknownGraph}> { ?type ?p ?label . } }
+  }
+}`);
+    expect(err).toMatch(/not allowed/i);
+});
+
+test("SUBSEL – SELECT outer FROM rwGraph, sous-SELECT avec GRAPH (sans FROM) passe", async () => {
+    const { err } = await filter(`SELECT ?s ?label
+FROM <${rwGraph}>
+WHERE {
+  {
+    SELECT ?type ?label
+    WHERE { GRAPH <${roGraph}> { ?type ?p ?label . } }
+  }
+}`);
+    expect(err).toBeFalsy();
+});
+
+test("SUBSEL – SELECT outer FROM + FROM NAMED autorisés, sous-SELECT FROM roGraph passe", async () => {
+    const { err } = await filter(`SELECT ?s ?label
+FROM <${rwGraph}>
+FROM NAMED <${roGraph}>
+WHERE {
+  {
+    SELECT ?type ?label
+    FROM <${roGraph}>
+    WHERE { ?type ?p ?label . }
+  }
+}`);
+    expect(err).toBeFalsy();
+});
+
+test("SUBSEL – sous-SELECT imbriqué (SELECT dans SELECT) avec FROM autorisé passe", async () => {
+    const { err } = await filter(`SELECT ?s ?label
+FROM <${rwGraph}>
+WHERE {
+  {
+    SELECT ?type ?label
+    FROM <${roGraph}>
+    WHERE {
+      {
+        SELECT ?type
+        FROM <${roGraph}>
+        WHERE { ?type a ?class . }
+      }
+      ?type ?p ?label .
+    }
+  }
+}`);
+    expect(err).toBeFalsy();
+});
+
+test("SUBSEL – sous-SELECT imbriqué avec FROM unknownGraph est bloqué", async () => {
+    const { err } = await filter(`SELECT ?s ?label
+FROM <${rwGraph}>
+WHERE {
+  {
+    SELECT ?type ?label
+    FROM <${roGraph}>
+    WHERE {
+      {
+        SELECT ?type
+        FROM <${unknownGraph}>
+        WHERE { ?type a ?class . }
+      }
+      ?type ?p ?label .
+    }
+  }
+}`);
+    expect(err).toMatch(/not allowed/i);
+});
+
+// ─── SELECT avec sous-SELECT + PREFIX ────────────────────────────────────────
+
+test("PREFIX – SUBSEL SELECT outer FROM rwGraph, sous-SELECT FROM roGraph passe", async () => {
+    const { err } = await filter(PFX + `SELECT ?s ?label
+FROM <${rwGraph}>
+WHERE {
+  ?s rdf:type ?type .
+  {
+    SELECT ?type ?label
+    FROM <${roGraph}>
+    WHERE { ?type rdfs:label ?label . }
+  }
+}`);
+    expect(err).toBeFalsy();
+});
+
+test("PREFIX – SUBSEL SELECT outer FROM rwGraph, sous-SELECT FROM unknownGraph est bloqué", async () => {
+    const { err } = await filter(PFX + `SELECT ?s ?label
+FROM <${rwGraph}>
+WHERE {
+  {
+    SELECT ?type ?label
+    FROM <${unknownGraph}>
+    WHERE { ?type rdfs:label ?label . }
+  }
+}`);
+    expect(err).toMatch(/not allowed/i);
+});
+
+test("PREFIX – SUBSEL SELECT sans outer FROM, sous-SELECT FROM rwGraph est bloqué", async () => {
+    const { err } = await filter(PFX + `SELECT ?s ?label
+WHERE {
+  {
+    SELECT ?type ?label
+    FROM <${rwGraph}>
+    WHERE { ?type rdfs:label ?label . }
+  }
+}`);
+    expect(err).toMatch(/missing from/i);
+});
+
+test("PREFIX – SUBSEL SELECT outer FROM rwGraph, sous-SELECT FROM NAMED unknownGraph est bloqué", async () => {
+    const { err } = await filter(PFX + `SELECT ?s ?label
+FROM <${rwGraph}>
+WHERE {
+  {
+    SELECT ?type ?label
+    FROM NAMED <${unknownGraph}>
+    WHERE { GRAPH <${unknownGraph}> { ?type rdfs:label ?label . } }
+  }
+}`);
+    expect(err).toMatch(/not allowed/i);
+});
+
+test("PREFIX – SUBSEL SELECT outer FROM rwGraph, deux sous-SELECT FROM autorisés passent", async () => {
+    const { err } = await filter(PFX + `SELECT ?s ?label
+FROM <${rwGraph}>
+WHERE {
+  {
+    SELECT ?type ?label
+    FROM <${roGraph}>
+    WHERE { ?type rdfs:label ?label . }
+  }
+  {
+    SELECT ?s
+    FROM <${rwGraph}>
+    WHERE { ?s a ?type . }
+  }
+}`);
+    expect(err).toBeFalsy();
+});
+
+test("PREFIX – SUBSEL SELECT outer FROM rwGraph, sous-SELECT avec GRAPH sans FROM passe", async () => {
+    const { err } = await filter(PFX + `SELECT ?s ?label
+FROM <${rwGraph}>
+WHERE {
+  {
+    SELECT ?type ?label
+    WHERE { GRAPH <${roGraph}> { ?type rdfs:label ?label . } }
+  }
+}`);
+    expect(err).toBeFalsy();
+});
+
+test("PREFIX – SUBSEL SELECT outer FROM rwGraph, sous-SELECT FROM roGraph + FROM NAMED rwGraph passe", async () => {
+    const { err } = await filter(PFX + `SELECT ?s ?label
+FROM <${rwGraph}>
+WHERE {
+  {
+    SELECT ?type ?label
+    FROM <${roGraph}>
+    FROM NAMED <${rwGraph}>
+    WHERE { GRAPH <${rwGraph}> { ?type rdfs:label ?label . } }
+  }
+}`);
+    expect(err).toBeFalsy();
+});
+
+// ─── SELECT avec GRAPH dans WHERE (sans FROM) ─────────────────────────────────
+// Pattern courant où le dataset est déclaré via GRAPH dans WHERE plutôt que FROM.
+// La requête de l'utilisateur utilise ce pattern.
+
+test("GRAPH-WHERE – SELECT avec GRAPH rwGraph dans WHERE (sans FROM) passe", async () => {
+    const { err } = await filter(`SELECT ?s ?p ?o
+WHERE {
+  GRAPH <${rwGraph}> { ?s ?p ?o . }
+}`);
+    expect(err).toBeFalsy();
+});
+
+test("GRAPH-WHERE – SELECT avec GRAPH rwGraph + GRAPH roGraph dans WHERE (sans FROM) passe", async () => {
+    const { err } = await filter(`SELECT ?s ?label
+WHERE {
+  GRAPH <${rwGraph}> { ?s a ?type . }
+  GRAPH <${roGraph}> { ?type ?p ?label . }
+}`);
+    expect(err).toBeFalsy();
+});
+
+test("GRAPH-WHERE – SELECT avec GRAPH unknownGraph dans WHERE est bloqué", async () => {
+    const { err } = await filter(`SELECT ?s ?p ?o
+WHERE {
+  GRAPH <${unknownGraph}> { ?s ?p ?o . }
+}`);
+    expect(err).toMatch(/not allowed/i);
+});
+
+test("GRAPH-WHERE – SELECT avec GRAPH roGraph + GRAPH unknownGraph dans WHERE est bloqué", async () => {
+    const { err } = await filter(`SELECT ?s ?label
+WHERE {
+  GRAPH <${roGraph}> { ?s a ?type . }
+  GRAPH <${unknownGraph}> { ?type ?p ?label . }
+}`);
+    expect(err).toMatch(/not allowed/i);
+});
+
+test("GRAPH-WHERE – SELECT sans FROM et sans GRAPH est bloqué (missing from)", async () => {
+    const { err } = await filter(`SELECT ?s ?p ?o WHERE { ?s ?p ?o . }`);
+    expect(err).toMatch(/missing from/i);
+});
+
+test("GRAPH-WHERE – SELECT avec FROM rwGraph + GRAPH roGraph dans WHERE passe", async () => {
+    const { err } = await filter(`SELECT ?s ?label
+FROM <${rwGraph}>
+WHERE {
+  GRAPH <${roGraph}> { ?s ?p ?label . }
+}`);
+    expect(err).toBeFalsy();
+});
+
+test("GRAPH-WHERE – SELECT avec FROM rwGraph + GRAPH unknownGraph dans WHERE est bloqué", async () => {
+    const { err } = await filter(`SELECT ?s ?p ?o
+FROM <${rwGraph}>
+WHERE {
+  GRAPH <${unknownGraph}> { ?s ?p ?o . }
+}`);
+    expect(err).toMatch(/not allowed/i);
+});
+
+test("GRAPH-WHERE – requête utilisateur : SELECT sans FROM avec deux GRAPH (rwGraph + roGraph) passe", async () => {
+    const { err } = await filter(`${PFX}SELECT ?s ?label
+WHERE {
+  GRAPH <${rwGraph}> {
+    ?s rdf:type ?type .
+  }
+  {
+    SELECT ?type ?label
+    WHERE {
+      GRAPH <${roGraph}> {
+        ?type rdfs:label ?label .
+      }
+    }
+  }
+}`);
+    expect(err).toBeFalsy();
+});
+
+test("GRAPH-WHERE – SELECT sans FROM avec sous-SELECT GRAPH unknownGraph est bloqué", async () => {
+    const { err } = await filter(`${PFX}SELECT ?s ?label
+WHERE {
+  GRAPH <${rwGraph}> { ?s a ?type . }
+  {
+    SELECT ?type ?label
+    WHERE {
+      GRAPH <${unknownGraph}> { ?type rdfs:label ?label . }
+    }
+  }
+}`);
+    expect(err).toMatch(/not allowed/i);
+});
+
+// ─── SELECT avec GRAPH dans WHERE + PREFIX ────────────────────────────────────
+
+test("PREFIX – GRAPH-WHERE SELECT avec GRAPH rwGraph dans WHERE (sans FROM) passe", async () => {
+    const { err } = await filter(PFX + `SELECT ?s ?p ?o
+WHERE {
+  GRAPH <${rwGraph}> { ?s ?p ?o . }
+}`);
+    expect(err).toBeFalsy();
+});
+
+test("PREFIX – GRAPH-WHERE SELECT avec GRAPH unknownGraph dans WHERE est bloqué", async () => {
+    const { err } = await filter(PFX + `SELECT ?s ?p ?o
+WHERE {
+  GRAPH <${unknownGraph}> { ?s ?p ?o . }
+}`);
+    expect(err).toMatch(/not allowed/i);
+});
+
+test("PREFIX – GRAPH-WHERE SELECT avec GRAPH rwGraph + GRAPH roGraph dans WHERE passe", async () => {
+    const { err } = await filter(PFX + `SELECT ?s ?label
+WHERE {
+  GRAPH <${rwGraph}> { ?s a owl:Class . }
+  GRAPH <${roGraph}> { ?s rdfs:label ?label . }
+}`);
+    expect(err).toBeFalsy();
+});
+
+test("PREFIX – GRAPH-WHERE SELECT sans FROM et sans GRAPH est bloqué", async () => {
+    const { err } = await filter(PFX + `SELECT ?s ?p ?o WHERE { ?s ?p ?o . }`);
+    expect(err).toMatch(/missing from/i);
+});
+
+test("PREFIX – GRAPH-WHERE SELECT avec FROM rwGraph + GRAPH unknownGraph est bloqué", async () => {
+    const { err } = await filter(PFX + `SELECT ?s ?p ?o
+FROM <${rwGraph}>
+WHERE {
+  GRAPH <${unknownGraph}> { ?s ?p ?o . }
+}`);
+    expect(err).toMatch(/not allowed/i);
+});
+
+test("PREFIX – GRAPH-WHERE SELECT avec FROM NAMED rwGraph + GRAPH roGraph dans WHERE passe", async () => {
+    const { err } = await filter(PFX + `SELECT ?s ?label
+FROM NAMED <${rwGraph}>
+WHERE {
+  GRAPH <${rwGraph}> { ?s a owl:Class . }
+  GRAPH <${roGraph}> { ?s rdfs:label ?label . }
+}`);
+    expect(err).toBeFalsy();
+});
+
+// ─── AST vs regex : pas de faux positif sur les littéraux string ──────────────
+// Contrairement à l'approche regex, la traversée AST ne capture pas les URIs
+// présentes dans des littéraux string comme de vrais GRAPH patterns (cf. T15 INSERT).
+
+test("AST – URI dans un littéral string ne déclenche pas d'erreur (pas de faux positif)", async () => {
+    const { err } = await filter(`SELECT ?s ?p ?o
+FROM <${rwGraph}>
+WHERE {
+  ?s ?p "GRAPH <${unknownGraph}>" .
+}`);
+    // AST : le parser identifie correctement un littéral → unknownGraph non capturé → passe
+    expect(err).toBeFalsy();
+});
+
+test("AST – GRAPH dans un littéral string avec graph non autorisé ne bloque pas", async () => {
+    const { err } = await filter(`SELECT ?s ?p ?o
+FROM <${rwGraph}>
+WHERE {
+  GRAPH <${rwGraph}> {
+    ?s ?p "voir GRAPH <${unknownGraph}> pour détails" .
+  }
+}`);
+    // Seul <rwGraph> est un vrai GRAPH pattern → unknownGraph dans le littéral ignoré
+    expect(err).toBeFalsy();
+});
+
+// ─── PREFIX non déclaré : message d'erreur explicite ─────────────────────────
+
+test("PREFIX-ERR – SELECT avec prefix rdf non déclaré renvoie un message explicite", async () => {
+    const { err } = await filter(`SELECT ?s ?label
+FROM <${rwGraph}>
+WHERE {
+  ?s rdf:type ?type .
+}`);
+    expect(err).toMatch(/prefix.*rdf.*not declared/i);
+});
+
+test("PREFIX-ERR – SELECT avec prefix rdfs non déclaré renvoie un message explicite", async () => {
+    const { err } = await filter(`SELECT ?s ?label
+FROM <${rwGraph}>
+WHERE {
+  GRAPH <${roGraph}> { ?s rdfs:label ?label . }
+}`);
+    expect(err).toMatch(/prefix.*rdfs.*not declared/i);
+});
+
+test("PREFIX-ERR – SELECT avec prefix déclaré ne renvoie pas d'erreur de prefix", async () => {
+    const { err } = await filter(`PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+SELECT ?s ?label
+FROM <${rwGraph}>
+WHERE {
+  GRAPH <${rwGraph}> { ?s rdf:type ?type . }
+}`);
+    expect(err).toBeFalsy();
+});
+
+// ─── BYPASS via triples nus (bare BGP) sans FROM ──────────────────────────────
+// Sans FROM, les triples non encadrés par GRAPH interrogent le default graph
+// (union de tous les named graphs sur Virtuoso) → bypass ACL potentiel.
+// Le filtre doit bloquer ces requêtes même si un GRAPH autorisé est présent.
+
+test("BARE – SELECT sans FROM : GRAPH autorisé + triple nu dans WHERE est bloqué", async () => {
+    const { err } = await filter(`SELECT ?s ?p ?o
+WHERE {
+  GRAPH <${rwGraph}> { ?s a ?type . }
+  ?s ?p ?o .
+}`);
+    expect(err).toMatch(/bare triple/i);
+});
+
+test("BARE – SELECT sans FROM : GRAPH autorisé + triple nu dans sous-SELECT est bloqué (requête utilisateur)", async () => {
+    const { err } = await filter(`${PFX}SELECT ?s ?label
+WHERE {
+  GRAPH <${rwGraph}> {
+    ?s rdf:type ?type .
+  }
+  {
+    SELECT ?type ?label
+    WHERE {
+      ?type rdfs:label ?label .
+    }
+  }
+}`);
+    expect(err).toMatch(/bare triple/i);
+});
+
+test("BARE – SELECT sans FROM : GRAPH autorisé + OPTIONAL avec triple nu est bloqué", async () => {
+    const { err } = await filter(`SELECT ?s ?label
+WHERE {
+  GRAPH <${rwGraph}> { ?s a ?type . }
+  OPTIONAL { ?s ?p ?label . }
+}`);
+    expect(err).toMatch(/bare triple/i);
+});
+
+test("BARE – SELECT sans FROM : tous les triples dans GRAPH (y compris sous-SELECT) passe", async () => {
+    const { err } = await filter(`${PFX}SELECT ?s ?label
+WHERE {
+  GRAPH <${rwGraph}> { ?s rdf:type ?type . }
+  {
+    SELECT ?type ?label
+    WHERE {
+      GRAPH <${roGraph}> { ?type rdfs:label ?label . }
+    }
+  }
+}`);
+    expect(err).toBeFalsy();
+});
+
+test("BARE – SELECT avec FROM : les triples nus sont acceptés (scoppés par FROM)", async () => {
+    const { err } = await filter(`SELECT ?s ?p ?o
+FROM <${rwGraph}>
+WHERE {
+  GRAPH <${roGraph}> { ?s a ?type . }
+  ?s ?p ?o .
+}`);
+    expect(err).toBeFalsy();
+});
+
+test("BARE – SELECT avec FROM : sous-SELECT avec triples nus est accepté", async () => {
+    const { err } = await filter(`${PFX}SELECT ?s ?label
+FROM <${rwGraph}>
+WHERE {
+  GRAPH <${roGraph}> { ?s rdf:type ?type . }
+  {
+    SELECT ?type ?label
+    WHERE {
+      ?type rdfs:label ?label .
+    }
+  }
+}`);
+    expect(err).toBeFalsy();
+});
+
+// PREFIX variants
+
+test("PREFIX – BARE SELECT sans FROM : GRAPH autorisé + triple nu dans sous-SELECT est bloqué", async () => {
+    const { err } = await filter(PFX + `SELECT ?s ?label
+WHERE {
+  GRAPH <${rwGraph}> { ?s a owl:Class . }
+  {
+    SELECT ?type ?label
+    WHERE {
+      ?type rdfs:label ?label .
+    }
+  }
+}`);
+    expect(err).toMatch(/bare triple/i);
+});
+
+test("PREFIX – BARE SELECT sans FROM : tous triples dans GRAPH passe", async () => {
+    const { err } = await filter(PFX + `SELECT ?s ?label
+WHERE {
+  GRAPH <${rwGraph}> { ?s a owl:Class . }
+  {
+    SELECT ?type ?label
+    WHERE {
+      GRAPH <${roGraph}> { ?type rdfs:label ?label . }
+    }
+  }
+}`);
+    expect(err).toBeFalsy();
+});

@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.4.0](https://github.com/souslesens/souslesensVocables/compare/3.3.0...3.4.0) (2026-04-23)
+
+
+### Bug Fixes
+
+* **exec:** apply filter sparql query on query not template ([a9f472d](https://github.com/souslesens/souslesensVocables/commit/a9f472d95f60c697bbedf00d5c2b833e1309e158))
+* **searchUtil:** request of taxonomy indexation ([5a75720](https://github.com/souslesens/souslesensVocables/commit/5a75720850b9ce5e81af502c81ed534a2950ade6))
+* **userRequestFIltering:** add filtering cases + improve methods and write tests ([e508df3](https://github.com/souslesens/souslesensVocables/commit/e508df30d79fd3ed7b59ebcc978131258527a1ee))
+* **userRequestFiltering:** update for let more valid requests pass and protect SPARQL injection ([c15fd63](https://github.com/souslesens/souslesensVocables/commit/c15fd63e96edb1cb1f1f0b221987d45bfcebd3cc))
+
 ## [3.3.0](https://github.com/souslesens/souslesensVocables/compare/3.2.1...3.3.0) (2026-04-21)
 
 

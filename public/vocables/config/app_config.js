@@ -40,6 +40,7 @@ var Config = (function () {
     self.maxSelectListSize = 500;
     self.minSelectListSize = 200;
     self.whiteBoardMaxLabelLength = 20;
+    self.whiteBoardLiteralLabelLength = 25;
     self.slicedArrayLength = 100;
 
     self.dataTableOutputLimit = 500;

@@ -1228,7 +1228,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
             if (id) {
                 ok = node.id == id;
             }
-            if (k) {
+            if (ok) {
                 shape = "star";
                 size = 14;
                 matches.push(node.id);

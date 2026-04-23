@@ -1088,16 +1088,31 @@ var SparqlQuery_bot = (function () {
             if (item.object && !drawOnlySubject) {
                 if (!existingNodes[item.object]) {
                     existingNodes[item.object] = 1;
+                    var isLiteralObject = !(item.object in labelsMap);
+                    var objectLabel;
+                    var objectShape;
+                    var objectRdfType;
+                    if (isLiteralObject) {
+                        var maxLen = Config.whiteBoardLiteralLabelLength;
+                        objectLabel = item.object.length > maxLen ? item.object.substring(0, maxLen) + "..." : item.object;
+                        objectShape = shape;
+                        objectRdfType = "literal";
+                    } else {
+                        objectLabel = labelsMap[item.object] || Sparql_common.getLabelFromURI(item.object);
+                        objectShape = shape;
+                        objectRdfType = undefined;
+                    }
                     visjsData.nodes.push({
                         id: item.object,
-                        label: labelsMap[item.object],
-                        shape: shape,
+                        label: objectLabel,
+                        shape: objectShape,
                         color: "#a8da83",
                         size: Lineage_whiteboard.defaultShapeSize,
                         data: {
                             id: item.object,
-                            label: labelsMap[item.object],
+                            label: objectLabel,
                             source: self.params.source,
+                            rdfType: objectRdfType,
                         },
                     });
                 }

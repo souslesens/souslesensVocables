@@ -3255,6 +3255,8 @@ restrictionSource = Config.predicatesSource;
         } else if (node.data && node.data.context == Lineage_linkedData_mappings.context) {
             html = "...";
             // '<span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.expandIndividual();"> Expand individual</span>';
+        } else if (node.data && node.data.rdfType === "literal") {
+            html = '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.showNodeInfos();"> Node infos</span>';
         } else if (node.data && node.data.graphPopupMenusFn) {
             html = node.data.graphPopupMenusFn();
         } else {
@@ -3290,7 +3292,7 @@ restrictionSource = Config.predicatesSource;
                     '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.removeOthersFromGraph();">Remove others</span>';
             }
         }
-        if (node && !node.from) {
+        if (node && !node.from && !(node.data && node.data.rdfType === "literal")) {
             html += '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.showHierarchicalView();">Horizontal view </span>';
             html += '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.showVerticalView();">Vertical view </span>';
             html += '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.listAllNodeRelations();">List All relations </span>';

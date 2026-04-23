@@ -762,7 +762,8 @@ var UI = (function () {
             width: "auto",
             height: "auto",
             position: { my: "center", at: "center", of: window },
-        };
+        });
+        var dialogOptions = {};
         if (options.width) {
             dialogOptions.width = options.width;
         } else {

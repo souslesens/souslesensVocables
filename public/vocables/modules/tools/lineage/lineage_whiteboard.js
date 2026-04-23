@@ -1101,6 +1101,7 @@ var Lineage_whiteboard = (function () {
                 return Lineage_whiteboard.selectTreeNodeFn(event, propertiesMap);
             },
             contextMenu: SearchWidget.getJstreeConceptsContextMenu(),
+            noScroll: true,
         };
 
         JstreeWidget.loadJsTree(SearchWidget.currentTargetDiv, jstreeData, jstreeOptions);

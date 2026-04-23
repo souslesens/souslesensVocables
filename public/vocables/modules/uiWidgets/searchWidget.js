@@ -320,6 +320,7 @@ var SearchWidget = (function () {
                         return self.getJstreeConceptsContextMenu();
                     }
                 },
+                noScroll: true,
             };
 
             JstreeWidget.loadJsTree(targetDiv, jstreeData, jstreeOptions);

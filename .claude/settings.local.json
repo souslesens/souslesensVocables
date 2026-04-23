@@ -7,6 +7,7 @@
       "Grep",
       "Glob",
       "LS",
+      "Echo",
       "Bash(git status:*)",
       "Bash(git diff:*)",
       "Bash(git add:*)",
@@ -22,7 +23,10 @@
       "Bash(test:*)",
       "Bash(npm run build:*)",
       "Bash(node --check:*)",
-      "Bash(node -e \":*)"
+      "Bash(node -e \":*)",
+      "Bash(git -C /c/Users/kounnoughi/.github-issue-claude-code/workdir/souslesensVocables/claude_fix-issue-1796 remote get-url origin)",
+      "Read(//c/Users/kounnoughi/.claude/rules/**)",
+      "Read(//c/Users/kounnoughi/.claude/**)"
     ],
     "deny": [
       "Bash(git push:*)",

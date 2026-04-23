@@ -1175,6 +1175,7 @@ var Lineage_properties = (function () {
                     selectTreeNodeFn: Lineage_properties.onTreeNodeClick,
                     openAll: true,
                     withCheckboxes: true,
+                    noScroll: true,
                 };
                 options.contextMenu = self.jstreeContextMenu;
 

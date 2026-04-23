@@ -129,6 +129,7 @@ var Lineage_selection = (function () {
         };
         $("#smallDialogDiv").load("modules/tools/lineage/html/selection/lineageSelectionDialog.html", function () {
             UI.openDialog("smallDialogDiv", { title: "Selection" });
+            UI.clampAndCenterDialog("smallDialogDiv");
             try {
                 JstreeWidget.loadJsTree("lineage_selection_selectedNodesTreeDiv", jstreeData, options, function (err, result) {
                     if (MainController.currentTool == "KGquery") {

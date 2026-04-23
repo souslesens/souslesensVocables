@@ -1,0 +1,24 @@
+# Dépendances
+node_modules/
+mainapp/node_modules/
+
+# Librairies tierces bundlées (non modifiables)
+public/vocables/libs/
+
+# Build outputs
+coverage/
+mainapp/dist/
+mainapp/static/
+
+# Fichiers binaires et assets
+public/vocables/icons/
+**/*.min.js
+**/*.min.css
+**/*.map
+
+# Données et logs
+logs/
+*.log
+
+# Serena index
+.serena/

@@ -57,7 +57,7 @@ This directory contains documentation to help Claude Code understand and work ef
 ### Key Documentation Files
 
 - **[claude.md](./claude.md)** (this file) - Main overview and quick reference
-- **[function-index.md](./function-index.md)** - **CRITICAL: Function index for DRY compliance**
+
 - **[refactoring-guidelines.md](./refactoring-guidelines.md)** - Code style and refactoring rules
 - **[architecture.md](./architecture.md)** - System architecture deep dive
 - **[module-patterns.md](./module-patterns.md)** - Common module patterns with examples
@@ -419,120 +419,38 @@ Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source}, function(err, resul
 });
 ```
 
-## Recent Important Changes (2024-12-29)
-
-### Cardinality Integration in KGquery_graph
-
-**What changed:**
-- Edges now automatically calculate cardinality from instance data
-- Edge labels enriched with cardinality: `"propertyName (1)"` or `"propertyName (n)"`
-- Original labels preserved in `edge.data.originalLabel` and `edge.data.propertyLabel`
-
-**New helper function:**
-```javascript
-var originalLabel = KGquery_graph.getEdgeOriginalLabel(edge);
-```
-
-**Impact:**
-- `edge.label` contains enriched label with cardinality
-- `edge.data.maxCardinality` contains calculated value
-- Use `getEdgeOriginalLabel()` if you need label without cardinality suffix
-
-## Common Tasks & How To Do Them
-
-### Execute a SPARQL Query
-
-```javascript
-var url = Config.sources[source].sparql_server.url + "?format=json&query=";
-var query = "SELECT ?s WHERE { ?s ?p ?o } LIMIT 10";
-
-Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: source}, function(err, result) {
-    if (err) return callback(err);
-
-    result.results.bindings.forEach(function(item) {
-        console.log(item.s.value);
-    });
-
-    callback(null, result);
-});
-```
-
-### Add Nodes to Graph
-
-```javascript
-var newNode = {
-    id: nodeUri,
-    label: "Node Label",
-    shape: "box",
-    color: "#ddd",
-    data: { id: nodeUri, source: source }
-};
-
-KGquery_graph.visjsData.nodes.push(newNode);
-KGquery_graph.KGqueryGraph.data.nodes.update([newNode]);  // Update Vis.js
-```
-
-### Show a Dialog
-
-```javascript
-$("#mainDialogDiv").load("modules/path/to/template.html", function() {
-    UI.openDialog("mainDialogDiv", { title: "My Dialog" });
-    // Initialize content
-});
-```
-
-### Fill a Select Element
-
-```javascript
-var options = [
-    { id: "1", label: "Option 1" },
-    { id: "2", label: "Option 2" }
-];
-
-common.fillSelectOptions("selectId", options, false, "label", "id");
-```
-
 ## DRY Principle - MANDATORY
 
 ### Before Implementing ANY Feature
 
 **Claude Code MUST follow this workflow:**
 
-1. **Consult the Function Index FIRST**
-   - Read [function-index.md](./function-index.md) before writing any new code
-   - Search for existing functions that might fulfill your needs
-   - Check if similar functionality already exists
-
-2. **Reuse Existing Functions**
+1. **Reuse Existing Functions**
    - Use existing utility functions from `common.js`, `UI.js`, etc.
    - Use existing SPARQL methods from `sparql_proxy.js`, `sparql_generic.js`
    - Use existing UI widgets from `uiWidgets/`
 
-3. **Only Create New Functions When Necessary**
+2. **Only Create New Functions When Necessary**
    - If no existing function can fulfill the requirement
    - If the function will be reused in multiple places
-   - Document the new function with JSDoc
-
-4. **Update the Index**
-   - When creating a new public function, add it to [function-index.md](./function-index.md)
-   - Include full JSDoc signature and example usage
-
-### DRY Compliance Checklist
-
-Before writing a new function, verify:
-- [ ] Searched function-index.md for existing solutions
-- [ ] Checked common.js for utility functions
-- [ ] Checked UI.js for UI helpers
-- [ ] Checked sparql_*.js for SPARQL operations
-- [ ] No similar function exists in the target module
 
 ---
+
+## Reading Guidelines
+
+Only read `.claude/` documentation files (architecture.md, module-patterns.md, refactoring-guidelines.md, etc.) when the task explicitly requires it. Do not read them proactively at session start.
+
+## Efficient File Reading
+
+For any file > 200 lines: always Grep first to find the target line number, then Read with `offset` + `limit`. Never Read a full large file to "understand context".
+
+For files already read in the current session: do not re-read unless the file was modified.
 
 ## Principles for Working with This Codebase
 
 ### Do ✅
 
-- **CONSULT function-index.md FIRST** - Before implementing any feature
+
 - **Reuse existing functions** - Apply DRY principle rigorously
 - **Always read files before modifying** - Understand the context
 - **Preserve backward compatibility** - Many parts depend on existing APIs
@@ -545,7 +463,7 @@ Before writing a new function, verify:
 
 ### Don't ❌
 
-- **Don't duplicate existing functionality** - Check the index first!
+- **Don't duplicate existing functionality** 
 - **Don't break existing APIs** - Function signatures are contracts
 - **Don't modify global state carelessly** - Use module-level state
 - **Don't use modern async/await** - The codebase uses callbacks
@@ -575,64 +493,69 @@ console.log(Config.sources);  // See available sources
 console.log(Config.currentSource);  // Current active source
 ```
 
-## File Organization
+## Domain Concepts (SousLeSens)
 
+### Source
+
+Central concept. A **source** = one ontology or knowledge graph stored in the triple store.
+Defined in `config/sources.json`. Each source has:
+
+- `graphUri` — named graph URI in the triple store (e.g. `http://rds.posccaesar.org/ontology/...`)
+- `schemaType` — `"OWL"` or `"SKOS"` — determines which controller is used
+- `controller` — `"Sparql_OWL"` or `"Sparql_SKOS"` — the JS module handling queries
+- `sparql_server.url` — SPARQL endpoint (`"_default"` = main Virtuoso instance)
+- `predicates` — custom predicates for hierarchy (broaderPredicate, prefLabel, etc.)
+- `imports` — list of other source names whose triples are also loaded
+- `owner`, `published` — access control
+
+```javascript
+Config.sources[sourceName]          // Access source config
+Config.sources[sourceName].graphUri // Named graph URI
+Lineage_sources.activeSource        // Currently selected source name
 ```
-.claude/
-├── claude.md (this file)           # Main overview and quick reference
-├── function-index.md               # Function index for DRY (CONSULT FIRST!)
-├── refactoring-guidelines.md       # Code style rules (MUST READ)
-├── architecture.md                 # System architecture deep dive
-├── module-patterns.md              # Module patterns with examples
-├── sparql-guidelines.md            # SPARQL query guidelines
-├── coding-standards.md             # Detailed coding standards
-└── commands/                       # Custom Claude commands
+
+### OWL vs SKOS
+
+Two distinct data models with different query strategies:
+
+**OWL** (`schemaType: "OWL"`, controller: `Sparql_OWL`)
+
+- Classes (`owl:Class`), properties (`owl:ObjectProperty`, `owl:DatatypeProperty`)
+- Hierarchy via `rdfs:subClassOf`
+- Instances via `rdf:type`
+- Used for formal ontologies (ISO standards, engineering ontologies)
+
+**SKOS** (`schemaType: "SKOS"`, controller: `Sparql_SKOS`)
+
+- Concepts (`skos:Concept`), concept schemes
+- Hierarchy via `skos:broader` / `skos:narrower`
+- Labels via `skos:prefLabel`, `skos:altLabel`
+- Used for thesauri, taxonomies, controlled vocabularies (GEMET, etc.)
+
+The `schemaType` determines which SPARQL queries are generated — never assume OWL structure on a SKOS source.
+
+### Profile
+
+Controls user access. Defined in `config/profiles.json`. Each profile has:
+
+- `allowedTools` — which tools are visible (lineage, KGquery, MappingModeler, etc.)
+- `allowedSourceSchemas` — which schema types the user can access (`OWL`, `SKOS`, `INDIVIDUALS`)
+- `sourcesAccessControl` — per-source read/readwrite permissions
+- `defaultSourceAccessControl` — fallback permission
+
+```javascript
+// Current user profile available via:
+Config.userProfile
 ```
 
-## How to Update This Documentation
+### Tools
 
-When making significant changes:
-1. Update the relevant `.md` file in `.claude/`
-2. Add entry to "Recent Important Changes" section (this file)
-3. Update code examples if APIs changed
-4. Document any breaking changes prominently
+- **Lineage** — visualizes ontology/KG as interactive graph on a whiteboard. Main tool.
+- **KGquery** — builds SPARQL queries visually from a graph model, executes them, shows results in table/graph
+- **MappingModeler** — creates semantic mappings from SQL/CSV data sources to OWL/SKOS models
 
-## Getting Started Checklist
+### graphUri vs source name
 
-When Claude needs to work on this codebase:
-
-- [ ] **FIRST: Consult [function-index.md](./function-index.md)** for existing functions (DRY!)
-- [ ] Read [refactoring-guidelines.md](./refactoring-guidelines.md) for code style
-- [ ] Understand the IIFE module pattern (this file)
-- [ ] Know how to execute SPARQL queries (this file)
-- [ ] Understand async.js usage (this file)
-- [ ] Know the visjsData structure (this file)
-- [ ] Review recent changes section (this file)
-
-## Recent Important Changes (2025-01-12)
-
-### DRY Principle Implementation
-
-**What changed:**
-- Added [function-index.md](./function-index.md) - Comprehensive function index with JSDoc
-- Claude Code must consult this index BEFORE implementing any feature
-- New public functions must be added to the index with full documentation
-
-**Workflow:**
-1. Read function-index.md before writing new code
-2. Search for existing functions that fulfill requirements
-3. Reuse existing functions when possible
-4. Only create new functions when necessary
-5. Update function-index.md when creating new public functions
-
----
-
-
-## Auto-upgrade
-
-You should each time, I tell you something updating the .claude folder with claude.md then the prompt will be auto-improved
-
-
-
-*Last Updated: 2026-06-12*
-*Maintained by: Project Contributors*
+- **source name** = human key in `sources.json` (e.g. `"ISO_15926-part-14_PCA"`) — used in JS code
+- **graphUri** = actual URI of the named graph in Virtuoso — used in SPARQL `FROM` clauses
+- `Sparql_common.getFromStr(source)` converts source name → `FROM <graphUri>` clause

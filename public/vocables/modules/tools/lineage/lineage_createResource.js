@@ -37,6 +37,7 @@ var Lineage_createResource = (function () {
 
         $("#LineagePopup").load("modules/tools/lineage/html/createResourceDialog.html", function () {
             UI.openDialog("LineagePopup", { title: "Create resource in source " + self.currentSource });
+            UI.clampAndCenterDialog("LineagePopup");
             $("#editPredicate_mainDiv").remove();
             //AxiomEditor.init(Lineage_sources.activeSource)
             // $("#lineageCreateResource_labelInput") .trigger( "focus" );

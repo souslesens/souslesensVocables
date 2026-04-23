@@ -237,6 +237,13 @@ html {
 
 .lineage-tab {
     padding-left: 10px;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    position: relative;
+}
+.lineage-tab > div > .w3-display-right {
+    right: 0px;
 }
 .messageDiv {
     font-size: 14px;
@@ -250,17 +257,8 @@ html {
     margin-bottom: 0px !important;
 }
 
-#mainDialogDiv {
-    max-width: 100vw;
-    max-height: 85vh !important;
-}
-#smallDialogDiv {
-    max-width: 100vw;
-    max-height: 85vh !important;
-}
-#botPanel {
-    max-width: 100vw;
-    max-height: 85vh !important;
+.ui-dialog .ui-dialog-content {
+    box-sizing: border-box;
 }
 
 #toolsSelect > div {

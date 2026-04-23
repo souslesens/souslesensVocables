@@ -38,6 +38,7 @@ var SimpleListSelectorWidget = (function () {
             } else {
                 common.fillSelectOptions("SimpleListSelectorWidget_select", data, !options.multiple);
             }
+            UI.clampAndCenterDialog(divId);
         });
     };
 

@@ -1,6 +1,6 @@
 import { jest } from "@jest/globals";
 
-import { MainConfigObject, checkMainConfig, checkMainConfigSection, colorText, printErrorReport, readMainConfig } from "../model/config.js";
+import { MainConfigObject, checkMainConfig, checkMainConfigSection, colorText, printErrorReport, readMainConfig } from "../../model/config.js";
 
 const retrieveLogs = async (config) => {
     const results = await MainConfigObject.safeParseAsync(config);

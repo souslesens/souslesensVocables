@@ -929,6 +929,7 @@ var KGquery = (function () {
         var savedClassToVarNameMap = Object.assign({}, KGquery.classToVarNameMap);
 
         Export.showDataTable("KGquery_dataTableDialogDiv", tableCols, tableData, null, { paging: true }, function (err, datatable) {
+            $("#KGquery_dataTableDialogDiv").find(".dataTables_scrollBody").css("overflow-y", "hidden");
             $("#dataTableDivExport").on("click", "td", function () {
                 var table = $("#dataTableDivExport").DataTable();
                 var index = table.cell(this).index();

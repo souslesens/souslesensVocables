@@ -14,6 +14,7 @@ var DateWidget = (function () {
         }
         $("#" + divId).load("modules/uiWidgets/html/dateWidget.html", function () {
             UI.openDialog("smallDialogDiv", { title: "Date Filter" });
+            UI.clampAndCenterDialog("smallDialogDiv");
             DateWidget.setDatePickerOnInput("dateWidget_input", null, function (date) {});
         });
     };
@@ -79,6 +80,7 @@ var DateWidget = (function () {
 
         $("#" + divId).load("/vocables/modules/uiWidgets/rangeWidget.html", function () {
             UI.openDialog(divId, { title: " Date Range" });
+            UI.clampAndCenterDialog(divId);
             $("#slider").dateRangeSlider({
                 wheelMode: "scroll",
                 wheelSpeed: 1,

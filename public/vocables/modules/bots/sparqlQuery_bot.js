@@ -387,6 +387,7 @@ var SparqlQuery_bot = (function () {
                 );
                 $("#botPanel").css("display", "none");
                 UI.openDialog("smallDialogDiv", { title: "Binding Predicates" });
+                UI.clampAndCenterDialog("smallDialogDiv");
                 var options = { openAll: true, withCheckboxes: true };
                 JstreeWidget.loadJsTree("sparqlQueryBot_bindingPredJstree", jstreeData, options);
             });
@@ -1223,6 +1224,7 @@ var SparqlQuery_bot = (function () {
                 "<button style='float: right' onclick='SparqlQuery_bot.saveQuery()'>SaveQuery</button>",
         );
         UI.openDialog("smallDialogDiv", { title: "Edit and Execute SPARQL Query" });
+        UI.clampAndCenterDialog("smallDialogDiv");
         $("#sparqlQueryBot_outputTypeSelect").css("z-index", 101);
         $("#sparqlQueryBot_queryTitle").html(title || "");
         $("#sparqlQueryBot_queryDescription").html(description || "");

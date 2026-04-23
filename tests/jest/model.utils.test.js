@@ -1,7 +1,7 @@
 import { jest } from "@jest/globals";
 import fs from "node:fs";
 
-import { convertType, chunk, cleanupConnection, getKnexConnection, addFromsToSparqlQuery, redoIfFailure, hasFromClause, validateFromClause } from "../model/utils.js";
+import { convertType, chunk, cleanupConnection, getKnexConnection, addFromsToSparqlQuery, redoIfFailure, hasFromClause, validateFromClause } from "../../model/utils.js";
 
 describe("redoIfFailure", () => {
     test("redo", async () => {

@@ -179,6 +179,8 @@ var KGquery_NodeInfos = (function () {
             self.buildNodeInfosDisplay(uri, targetClassId, source, divId, function (err) {
                 if (err) {
                     console.log(err);
+                } else {
+                    UI.clampAndCenterDialog(divId);
                 }
                 callback(err);
             });

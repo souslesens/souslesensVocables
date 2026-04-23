@@ -1093,8 +1093,8 @@ var SparqlQuery_bot = (function () {
                     var objectShape;
                     var objectRdfType;
                     if (isLiteralObject) {
-                        var words = item.object.trim().split(/\s+/);
-                        objectLabel = words.slice(0, 2).join(" ");
+                        var maxLen = Config.whiteBoardLiteralLabelLength;
+                        objectLabel = item.object.length > maxLen ? item.object.substring(0, maxLen) + "..." : item.object;
                         objectShape = shape;
                         objectRdfType = "literal";
                     } else {

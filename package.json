@@ -31,7 +31,7 @@
         "publish:release": "sh release-new.sh",
         "init:db": "node scripts/init/db.js",
         "init:files": "node scripts/init/files.js",
-        "jest": "NODE_OPTIONS=--experimental-vm-modules jest --coverage --coverageReporters=json-summary text --all | tee ./tests/coverage/coverage.txt"
+        "jest": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --coverage --coverageReporters=json-summary text --all"
     },
     "devDependencies": {
         "@playwright/test": "^1.58.2",

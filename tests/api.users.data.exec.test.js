@@ -382,14 +382,14 @@ WHERE  { ?s a <http://owl/Class> . }`);
         expect(res.status).not.toHaveBeenCalledWith(200);
     });
 
-    test("INSERT ciblant deux graphs dont source en lecture seule est bloqué", async () => {
+    test("INSERT écrivant dans graph autorisé avec WHERE lisant depuis graph lecture seule passe (200)", async () => {
         const res = await execQuery(`INSERT {
   GRAPH <http://fghghf/> { ?s <http://rdfs/label> ?label . }
 }
 WHERE {
   GRAPH <http://testClasses/> { ?s <http://rdfs/label> ?label . }
 }`);
-        expect(res.status).not.toHaveBeenCalledWith(200);
+        expect(res.status).toHaveBeenCalledWith(200);
     });
 
     // ─── DELETE avec WHERE détaillé ───────────────────────────────────────────
@@ -851,7 +851,7 @@ WHERE  { ?s a owl:Class . }`,
         expect(res.status).not.toHaveBeenCalledWith(200);
     });
 
-    test("PREFIX – INSERT ciblant deux graphs dont source en lecture seule est bloqué", async () => {
+    test("PREFIX – INSERT écrivant dans graph autorisé avec WHERE lisant depuis graph lecture seule passe (200)", async () => {
         const res = await execQuery(
             PFX +
                 `INSERT {
@@ -861,7 +861,7 @@ WHERE {
   GRAPH <http://testClasses/> { ?s rdfs:label ?label . }
 }`,
         );
-        expect(res.status).not.toHaveBeenCalledWith(200);
+        expect(res.status).toHaveBeenCalledWith(200);
     });
 
     test("PREFIX – DELETE avec WHERE et OPTIONAL passe sur graph autorisé (200)", async () => {
@@ -1102,9 +1102,9 @@ WHERE {
         expect(res.status).toHaveBeenCalledWith(200);
     });
 
-    test("STRESS – PREFIX dont l'URI contient SELECT court-circuite le routing (limitation connue) — bloqué", async () => {
+    test("STRESS – PREFIX dont l'URI contient SELECT ne fausse plus le routing (200)", async () => {
         const res = await execQuery(`PREFIX sel: <http://www.example.org/SELECT/vocab#>\nINSERT DATA {\n  GRAPH <http://fghghf/> { <http://fghghf/s1> a <http://owl/Class> . }\n}`);
-        expect(res.status).not.toHaveBeenCalledWith(200);
+        expect(res.status).toHaveBeenCalledWith(200);
     });
 });
 

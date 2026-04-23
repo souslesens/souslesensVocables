@@ -87,8 +87,8 @@ describe("addFromToSparqlQuery", () => {
         expect(addFromsToSparqlQuery(sparql, ["http://toto.com/example"])).toStrictEqual(expected);
     });
     test("add FROM to a complexe SPARQL query", async () => {
-        const sparql = fs.readFileSync("./tests/data/sparql/bsbm4.sparql", "utf8");
-        const expected = fs.readFileSync("./tests/data/sparql/bsbm4_FROM.sparql", "utf8").slice(0, -1);
+        const sparql = fs.readFileSync("./tests/data/sparql/bsbm4.sparql", "utf8").replace(/\r\n/g, "\n");
+        const expected = fs.readFileSync("./tests/data/sparql/bsbm4_FROM.sparql", "utf8").replace(/\r\n/g, "\n").slice(0, -1);
         expect(addFromsToSparqlQuery(sparql, ["http://toto.com/example"])).toStrictEqual(expected);
     });
     test("replace FROM", async () => {

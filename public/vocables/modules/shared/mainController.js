@@ -337,7 +337,7 @@ var MainController = (function () {
 
         // set or replace tool in url params
         const params = new URLSearchParams(document.location.search);
-        if (toolId != "ConfigEditor") {
+        if (toolId != "ConfigEditor" && toolId != "UserSettings") {
             params.delete("tab");
         }
         params.set("tool", toolId);

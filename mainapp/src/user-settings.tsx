@@ -53,9 +53,9 @@ export default function UserSettings() {
 
     useEffect(() => {
         const params = new URLSearchParams(document.location.search);
-        const tab = params.get("tab") as Sections;
-        if (tab) {
-            setSelectedTab(tab);
+        const tabParam = params.get("tab");
+        if (tabParam && Object.values(Sections).includes(tabParam as Sections)) {
+            setSelectedTab(tabParam as Sections);
         }
     }, []);
 

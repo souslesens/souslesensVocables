@@ -7,7 +7,7 @@ interface EditUserDataDialogProps {
     onClose: () => void;
     onSave: () => void;
     open: boolean;
-    userDataId: number;
+    userDataId: number | null;
 }
 
 export const EditUserDataDialog = ({ onClose, onSave, open, userDataId }: EditUserDataDialogProps) => {
@@ -36,12 +36,34 @@ export const EditUserDataDialog = ({ onClose, onSave, open, userDataId }: EditUs
     const dataTypes = ["SparqlQuery", "Template", "Other"];
 
     useEffect(() => {
-        if (open && userDataId) {
+        if (open) {
             fetchUserData();
+            setJsonError(undefined);
         }
     }, [open, userDataId]);
 
     const fetchUserData = async () => {
+        if (userDataId === null) {
+            // Creation mode: initialize with empty userData (excluding backend-managed fields)
+            const emptyUserData: Partial<UserData> = {
+                data_type: "",
+                data_label: "",
+                data_comment: "",
+                data_group: "",
+                is_shared: false,
+                shared_profiles: [],
+                shared_users: [],
+                data_tool: "",
+                data_source: "",
+                readwrite: false,
+                data_content: undefined,
+            };
+            setUserData(emptyUserData as UserData);
+            setError(undefined);
+            setLoading(false);
+            return;
+        }
+
         setLoading(true);
         try {
             const response = await fetch(`/api/v1/users/data/${userDataId}`);
@@ -147,24 +169,72 @@ export const EditUserDataDialog = ({ onClose, onSave, open, userDataId }: EditUs
         }
     };
 
+    const [jsonError, setJsonError] = useState<string | undefined>();
+
     const handleSave = async () => {
         if (!userData) return;
 
+        // Validate JSON for data_content if provided
+        let dataContent: any = undefined;
+        if (userData.data_content) {
+            try {
+                dataContent = typeof userData.data_content === 'string' 
+                    ? JSON.parse(userData.data_content) 
+                    : userData.data_content;
+            } catch (err) {
+                setJsonError("Invalid JSON format in Data Content field");
+                return;
+            }
+        }
+
         setSaving(true);
         try {
-            const response = await fetch(`/api/v1/users/data/${userDataId}`, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(userData),
-            });
+            const url = userDataId === null 
+                ? `/api/v1/users/data`
+                : `/api/v1/users/data/${userDataId}`;
+            
+            const method = userDataId === null ? "POST" : "PUT";
 
-            if (response.status === 200) {
-                setError(undefined);
-                onSave();
-                onClose();
+            // Prepare payload: exclude backend-managed fields for creation
+            const payload = {
+                ...userData,
+                data_content: dataContent,
+            };
+
+            if (userDataId === null) {
+                // Remove backend-managed fields for creation
+                const { id, created_at, modification_date, data_path, owned_by, ...createPayload } = payload;
+                const response = await fetch(url, {
+                    method,
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(createPayload),
+                });
+
+                if (response.status === 200) {
+                    setError(undefined);
+                    onSave();
+                    onClose();
+                } else {
+                    const errorData = await response.json();
+                    setError(errorData.message || "Failed to save user data");
+                }
             } else {
-                const errorData = await response.json();
-                setError(errorData.message || "Failed to save user data");
+                // Update mode: keep all fields except data_path
+                const { data_path, ...updatePayload } = payload;
+                const response = await fetch(url, {
+                    method,
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(updatePayload),
+                });
+
+                if (response.status === 200) {
+                    setError(undefined);
+                    onSave();
+                    onClose();
+                } else {
+                    const errorData = await response.json();
+                    setError(errorData.message || "Failed to save user data");
+                }
             }
         } catch (err) {
             console.error(err);
@@ -177,7 +247,7 @@ export const EditUserDataDialog = ({ onClose, onSave, open, userDataId }: EditUs
 
     return (
         <Dialog fullWidth maxWidth="md" open={open} onClose={onClose}>
-            <DialogTitle>Edit User Data</DialogTitle>
+            <DialogTitle>{userDataId === null ? "Create User Data" : "Edit User Data"}</DialogTitle>
             <DialogContent>
                 <Stack spacing={3} sx={{ pt: 1 }}>
                     {error && <Alert severity="error">{error}</Alert>}
@@ -367,14 +437,14 @@ export const EditUserDataDialog = ({ onClose, onSave, open, userDataId }: EditUs
 
                     <TextField
                         disabled={loading}
-                        error={!!validationErrors?.data_content}
+                        error={!!jsonError}
                         fullWidth
-                        helperText={validationErrors?.data_content?._errors.join(", ")}
+                        helperText={jsonError}
                         label="Data Content (JSON)"
                         multiline
                         minRows={5}
-                        onChange={(e) => handleFieldChange("data_content", e.target.value === "" ? undefined : JSON.parse(e.target.value))}
-                        value={userData?.data_content ? JSON.stringify(userData.data_content, null, 2) : ""}
+                        onChange={(e) => handleFieldChange("data_content", e.target.value)}
+                        value={userData?.data_content ? (typeof userData.data_content === 'string' ? userData.data_content : JSON.stringify(userData.data_content, null, 2)) : ""}
                     />
                 </Stack>
             </DialogContent>

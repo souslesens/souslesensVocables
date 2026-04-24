@@ -376,7 +376,9 @@ var Lineage_createRelation = (function () {
                     function (callbackSeries) {
                         options.contextMenu = self.getContextMenu(options);
                         options.noScroll = 1;
-                        JstreeWidget.loadJsTree("lineageAddEdgeDialog_authorizedPredicatesTreeDiv", jstreeData, options, function (err) {});
+                        JstreeWidget.loadJsTree("lineageAddEdgeDialog_authorizedPredicatesTreeDiv", jstreeData, options, function (err) {
+                            UI.clampAndCenterDialog("smallDialogDiv");
+                        });
                         callbackSeries();
                     },
                 ],
@@ -461,9 +463,10 @@ var Lineage_createRelation = (function () {
                     // pb avec source
 
                     NodeInfosWidget.showNodeInfos(self.currentPropertiesTreeNode.data.source, self.currentPropertiesTreeNode, "mainDialogDiv", null, function () {
-                        //  $("#mainDialogDiv").parent().css("z-index", 1);
-
-                        UI.sideBySideTwoWindows("#smallDialogDiv", "#mainDialogDiv");
+                        // setTimeout defers until after NodeInfosWidget calls UI.repositionOpenDialogs()
+                        setTimeout(function () {
+                            UI.sideBySideTwoWindows("#smallDialogDiv", "#mainDialogDiv");
+                        }, 0);
                     });
                 },
             },

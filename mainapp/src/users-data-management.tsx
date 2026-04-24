@@ -15,15 +15,14 @@ import { IconButton } from "@mui/material";
 import TextField from "@mui/material/TextField";
 import { Edit, Delete } from "@mui/icons-material";
 
-import { UserData, UserDataDialog } from "./Component/UserDataDialog";
+import { UserData } from "./Component/UserDataDialog";
 import { EditUserDataDialog } from "./Component/EditUserDataDialog";
 import { DeleteDialog } from "./Component/DeleteDialog";
 import { cleanUpText } from "./Utils";
 
 export default function UsersDataManagement() {
     const [usersData, setUsersData] = useState<UserData[]>([]);
-    const [displayModal, setDisplayModal] = useState<boolean>(false);
-    const [editingUser, setEditingUser] = useState<UserData | null>(null);
+    const [displayCreateDialog, setDisplayCreateDialog] = useState<boolean>(false);
     const [displayEditDialog, setDisplayEditDialog] = useState<boolean>(false);
     const [selectedUserDataId, setSelectedUserDataId] = useState<number | null>(null);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -42,12 +41,15 @@ export default function UsersDataManagement() {
         await fetchUsersData();
     };
 
-    const handleOpenCreateModal = () => {
-        setEditingUser(null);
-        setDisplayModal(true);
+    const handleOpenCreateDialog = () => {
+        setSelectedUserDataId(null);
+        setDisplayCreateDialog(true);
     };
 
-    const handleCloseDialog = () => setDisplayModal(false);
+    const handleCloseCreateDialog = () => {
+        setDisplayCreateDialog(false);
+        setSelectedUserDataId(null);
+    };
 
     const handleOpenEditDialog = (userDataId: number) => {
         setSelectedUserDataId(userDataId);
@@ -60,6 +62,10 @@ export default function UsersDataManagement() {
     };
 
     const handleEditSave = () => {
+        void fetchUsersData();
+    };
+
+    const handleCreateSave = () => {
         void fetchUsersData();
     };
 
@@ -97,28 +103,6 @@ export default function UsersDataManagement() {
         setOrder(isAsc ? "desc" : "asc");
         setOrderBy(property);
     };
-
-    const handleSave = async (newData: UserData) => {
-        if (editingUser) {
-            // update
-            await fetch(`/api/v1/users/data/${editingUser.id}`, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(newData),
-            });
-        } else {
-            // create
-            await fetch(`/api/v1/users/data`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(newData),
-            });
-        }
-        await fetchUsersData();
-        handleCloseDialog();
-    };
-
-    const defaultUserValue = editingUser ? { ...editingUser, id: String(editingUser.id) } : {};
 
     useEffect(() => {
         void fetchUsersData();
@@ -224,14 +208,14 @@ export default function UsersDataManagement() {
                     </Table>
                 </TableContainer>
                 <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
-                    <Button variant="contained" onClick={handleOpenCreateModal}>
+                    <Button variant="contained" onClick={handleOpenCreateDialog}>
                         create
                     </Button>
                 </Stack>
             </Stack>
 
-            <UserDataDialog open={displayModal} onClose={handleCloseDialog} onSave={handleSave} defaultValue={defaultUserValue} />
-            <EditUserDataDialog open={displayEditDialog} onClose={handleCloseEditDialog} onSave={handleEditSave} userDataId={selectedUserDataId || 0} />
+            <EditUserDataDialog open={displayCreateDialog} onClose={handleCloseCreateDialog} onSave={handleCreateSave} userDataId={null} />
+            <EditUserDataDialog open={displayEditDialog} onClose={handleCloseEditDialog} onSave={handleEditSave} userDataId={selectedUserDataId} />
             <DeleteDialog
                 description={`The user data '${selectedUserDataId ? usersData.find(u => u.id === selectedUserDataId)?.data_label : ''}' will be deleted. Are you sure?`}
                 onClose={handleCloseDeleteDialog}

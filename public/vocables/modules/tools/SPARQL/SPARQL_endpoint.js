@@ -68,7 +68,7 @@ var SPARQL_endpoint = (function () {
             return alert("Nothing to save");
         }
         var data = { sparqlQuery: queryText };
-        UserDataWidget.showSaveDialog("sparqlQuery", data, null, { title: "Save SPARQL Query" }, function (err, result) {
+        UserDataWidget.showSaveDialog("sparqlQuery", data, null, { title: "Save SPARQL Query" ,zIndex: 100}, function (err, result) {
             if (err) {
                 return MainController.errorAlert(err);
             }

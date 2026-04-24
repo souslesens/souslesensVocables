@@ -186,9 +186,7 @@ var Predicates_bot = (function () {
         var range = getNonObjectPropertyRange(property);
         if (range) {
             if (range.indexOf("xsd:") === 0 || range.startsWith("http://www.w3.org/2001/XMLSchema#")) {
-                var xsdType = range.startsWith("http://www.w3.org/2001/XMLSchema#")
-                    ? "xsd:" + range.split("#")[1]
-                    : range;
+                var xsdType = range.startsWith("http://www.w3.org/2001/XMLSchema#") ? "xsd:" + range.split("#")[1] : range;
                 return "'" + Sparql_common.formatStringForTriple(value) + "'^^" + xsdType;
             }
         }
@@ -406,9 +404,7 @@ var Predicates_bot = (function () {
 
             if (literalProp) {
                 var propRange = getNonObjectPropertyRange(self.params.selectedProperty);
-                var isDateTime = self.params.selectedProperty === "xsd:dateTime" ||
-                    propRange === "xsd:dateTime" ||
-                    propRange === "http://www.w3.org/2001/XMLSchema#dateTime";
+                var isDateTime = self.params.selectedProperty === "xsd:dateTime" || propRange === "xsd:dateTime" || propRange === "http://www.w3.org/2001/XMLSchema#dateTime";
                 if (isDateTime) {
                     self.myBotEngine.promptValue("select date", "selectedObject", self.params.selectedObject || "", null, function (value) {
                         self.params.selectedObject = value;

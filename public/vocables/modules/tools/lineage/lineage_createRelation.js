@@ -49,7 +49,7 @@ var Lineage_createRelation = (function () {
             let options = {
                 openAll: true,
                 selectTreeNodeFn: Lineage_createRelation.OnSelectAuthorizedPredicatesTreeDiv,
-                noScroll:true
+                noScroll: true,
             };
             var jstreeData = [];
             var distinctProps = {};

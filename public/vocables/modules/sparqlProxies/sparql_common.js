@@ -157,16 +157,13 @@ var Sparql_common = (function () {
                 var seenIds = {};
                 var uriIds = [];
                 ids.forEach(function (id, _index) {
-                    if (("" + id).startsWith("http") || ("" + id).indexOf(":") > -1) {
-                        if (!seenIds[id]) {
-                            seenIds[id] = true;
-                            uriIds.push(id);
-                        }
-                    } else if (("" + id).startsWith("_:")) {
-                        if (!seenIds[id]) {
-                            seenIds[id] = true;
-                            uriIds.push(id);
-                        }
+                    var idStr = "" + id;
+                    var isUri = idStr.startsWith("http://") || idStr.startsWith("https://");
+                    var isPrefixedUri = /^[a-zA-Z][a-zA-Z0-9_]*:[^\s]+$/.test(idStr);
+                    var isBlankNode = idStr.startsWith("_:");
+                    if ((isUri || isPrefixedUri || isBlankNode) && !seenIds[id]) {
+                        seenIds[id] = true;
+                        uriIds.push(id);
                     }
                 });
 

@@ -446,7 +446,7 @@ var SparqlQuery_bot = (function () {
             var objectIds = null;
             var whiteboardNodes = null;
             if (self.params.queryScope == "whiteboardNodes") {
-                whiteboardNodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.getIds();
+                whiteboardNodes = self.getWhiteboardNonLiteralIds();
             } else if (self.params.queryScope == "selectedNodes") {
                 whiteboardNodes = Lineage_whiteboard.lineageVisjsGraph.network.getSelectedNodes(true);
             } else {
@@ -572,9 +572,13 @@ var SparqlQuery_bot = (function () {
             var role = null;
             var filter = "";
             if (self.params.whiteboardNodes) {
-                var filterSubject = Sparql_common.setFilter("subject", self.params.whiteboardNodes);
+                var nonLiteralNodes = self.params.whiteboardNodes.filter(function (id) {
+                    var node = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(id);
+                    return !node || !node.data || node.data.rdfType !== "literal";
+                });
+                var filterSubject = Sparql_common.setFilter("subject", nonLiteralNodes);
 
-                var filterObject = Sparql_common.setFilter("object", self.params.whiteboardNodes);
+                var filterObject = Sparql_common.setFilter("object", nonLiteralNodes);
                 filter += filterSubject.substring(0, filterSubject.length - 1) + " || " + filterObject.replace("FILTER(", "");
             }
 
@@ -1333,6 +1337,13 @@ var SparqlQuery_bot = (function () {
             }
         });
         return filteredProperties;
+    };
+
+    self.getWhiteboardNonLiteralIds = function () {
+        return Lineage_whiteboard.lineageVisjsGraph.data.nodes.getIds().filter(function (id) {
+            var node = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(id);
+            return !node || !node.data || node.data.rdfType !== "literal";
+        });
     };
 
     self.saveQuery = function () {

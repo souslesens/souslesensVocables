@@ -39,7 +39,7 @@ var Lineage_createRelation = (function () {
         Lineage_sources.showHideEditButtons(Lineage_sources.activeSource);
         var allLabelsMap = {};
         $("#smallDialogDiv").load("modules/tools/lineage/html/lineageAddEdgeDialog.html", function () {
-            UI.openDialog("smallDialogDiv", { title: "Create relation in source " + Lineage_sources.activeSource });
+            UI.openDialog("smallDialogDiv", { title: "Create relation in source " + Lineage_sources.activeSource, height: 650 });
             UI.clampAndCenterDialog("smallDialogDiv");
             self.sourceNode = edgeData.from; // Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(edgeData.from).data;
             self.targetNode = edgeData.to; //Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(edgeData.to).data;
@@ -49,6 +49,7 @@ var Lineage_createRelation = (function () {
             let options = {
                 openAll: true,
                 selectTreeNodeFn: Lineage_createRelation.OnSelectAuthorizedPredicatesTreeDiv,
+                noScroll:true
             };
             var jstreeData = [];
             var distinctProps = {};

@@ -7,7 +7,9 @@ var SourceSelectorWidget = (function () {
     var self = {};
     self.currentTreeDiv = null;
 
-    self.showSourceDialog = function (resetAll) {
+    self.showSourceDialog = function (resetAll,sourceSelectedCallback) {
+        self.sourceSelectedCallback=sourceSelectedCallback
+ 
         $("#sourceSelector_searchInput").trigger("focus");
         var onSourceSelect;
         if (resetAll) {
@@ -323,6 +325,11 @@ var SourceSelectorWidget = (function () {
         }
         $("#" + self.currentTreeDiv).dialog("close");
         self.initSource(obj.node.data.id);
+        if(self.sourceSelectedCallback){
+            self.sourceSelectedCallback(obj.node.data.id)
+        }
+
+ 
     };
 
     self.initSource = function (source) {

@@ -2,6 +2,10 @@ import { useEffect, useState } from "react";
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Stack, TextField, Autocomplete, Checkbox, FormGroup, FormControlLabel, Alert, CircularProgress } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import { UserData, UserDataSchema } from "./UserDataDialog";
+import Editor from "react-simple-code-editor";
+import Prism from "prismjs";
+import "prismjs/components/prism-json";
+import "prismjs/themes/prism.css";
 
 interface EditUserDataDialogProps {
     onClose: () => void;
@@ -170,6 +174,30 @@ export const EditUserDataDialog = ({ onClose, onSave, open, userDataId }: EditUs
     };
 
     const [jsonError, setJsonError] = useState<string | undefined>();
+    const [jsonValidationState, setJsonValidationState] = useState<{ valid: boolean; error?: string } | null>(null);
+
+    // Debounced JSON validation
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            if (userData?.data_content) {
+                const content = typeof userData.data_content === 'string' ? userData.data_content : JSON.stringify(userData.data_content);
+                try {
+                    JSON.parse(content);
+                    setJsonValidationState({ valid: true });
+                    // Clear the save-time error if JSON is now valid
+                    if (jsonError && jsonError === "Invalid JSON format in Data Content field") {
+                        setJsonError(undefined);
+                    }
+                } catch (err) {
+                    setJsonValidationState({ valid: false, error: (err as Error).message });
+                }
+            } else {
+                setJsonValidationState(null);
+            }
+        }, 500); // 500ms debounce
+
+        return () => clearTimeout(timer);
+    }, [userData?.data_content, jsonError]);
 
     const handleSave = async () => {
         if (!userData) return;
@@ -435,17 +463,48 @@ export const EditUserDataDialog = ({ onClose, onSave, open, userDataId }: EditUs
                         </FormGroup>
                     </Stack>
 
-                    <TextField
-                        disabled={loading}
-                        error={!!jsonError}
-                        fullWidth
-                        helperText={jsonError}
-                        label="Data Content (JSON)"
-                        multiline
-                        minRows={5}
-                        onChange={(e) => handleFieldChange("data_content", e.target.value)}
-                        value={userData?.data_content ? (typeof userData.data_content === 'string' ? userData.data_content : JSON.stringify(userData.data_content, null, 2)) : ""}
-                    />
+                    <div>
+                        <div
+                            style={{
+                                border: jsonValidationState?.valid === false || jsonError ? "2px solid #f44336" : "1px solid rgba(0, 0, 0, 0.23)",
+                                borderRadius: "4px",
+                                overflow: "hidden",
+                                transition: "border-color 0.2s",
+                            }}
+                        >
+                            <Editor
+                                value={userData?.data_content ? (typeof userData.data_content === 'string' ? userData.data_content : JSON.stringify(userData.data_content, null, 2)) : ""}
+                                onValueChange={(code) => handleFieldChange("data_content", code)}
+                                highlight={(code) => Prism.highlight(code, Prism.languages.json, "json")}
+                                padding={12}
+                                style={{
+                                    fontFamily: '"Fira code", "Fira Mono", monospace',
+                                    fontSize: 13,
+                                    minHeight: "140px",
+                                    backgroundColor: loading ? "#f5f5f5" : "#fafafa",
+                                }}
+                                disabled={loading}
+                            />
+                        </div>
+                        {/* Validation indicator */}
+                        <div style={{ marginTop: "4px", marginLeft: "12px", fontSize: "0.75rem" }}>
+                            {jsonError && (
+                                <span style={{ color: "#f44336" }}>
+                                    {jsonError}
+                                </span>
+                            )}
+                            {jsonValidationState?.valid === true && !jsonError && (
+                                <span style={{ color: "#4caf50" }}>
+                                    ✓ Valid JSON
+                                </span>
+                            )}
+                            {jsonValidationState?.valid === false && !jsonError && (
+                                <span style={{ color: "#ff9800" }}>
+                                    ⚠ {jsonValidationState.error}
+                                </span>
+                            )}
+                        </div>
+                    </div>
                 </Stack>
             </DialogContent>
             <DialogActions>

@@ -41,7 +41,7 @@ var NodeInfosWidget = (function () {
             if (node.data) {
                 if (node.data.rdfType === "literal") {
                     var literalValue = (node.data.id || node.id || "").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-                    self.initDialog(sourceLabel, divId, options, function () {
+                    self.initDialog(sourceLabel, divId, options || {}, function () {
                         $("#nodeInfosWidget_tabsDiv").find("li").not(":first").hide();
                         $("#nodeInfosWidget_InfosTabDiv").html("<div style='padding:10px;word-wrap:break-word;white-space:pre-wrap;'>" + literalValue + "</div>");
                     });

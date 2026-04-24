@@ -7,6 +7,7 @@ import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
+import TableSortLabel from "@mui/material/TableSortLabel";
 import Paper from "@mui/material/Paper";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
@@ -27,6 +28,8 @@ export default function UsersDataManagement() {
     const [selectedUserDataId, setSelectedUserDataId] = useState<number | null>(null);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [filtering, setFiltering] = useState("");
+    const [orderBy, setOrderBy] = useState<keyof UserData>("id");
+    const [order, setOrder] = useState<"asc" | "desc">("asc");
 
     const fetchUsersData = async () => {
         const response = await fetch("/api/v1/users/data");
@@ -89,6 +92,12 @@ export default function UsersDataManagement() {
         handleCloseDeleteDialog();
     };
 
+    const handleRequestSort = (property: keyof UserData) => {
+        const isAsc = orderBy === property && order === "asc";
+        setOrder(isAsc ? "desc" : "asc");
+        setOrderBy(property);
+    };
+
     const handleSave = async (newData: UserData) => {
         if (editingUser) {
             // update
@@ -127,19 +136,30 @@ export default function UsersDataManagement() {
                     <Table sx={{ minWidth: 650 }} aria-label="simple table">
                         <TableHead>
                             <TableRow>
-                                <TableCell style={{ fontWeight: "bold" }}>Id</TableCell>
-                                <TableCell style={{ fontWeight: "bold" }} align="right">
-                                    Label
+                                <TableCell style={{ fontWeight: "bold" }}>
+                                    <TableSortLabel active={orderBy === "id"} direction={order} onClick={() => handleRequestSort("id")}>
+                                        Id
+                                    </TableSortLabel>
                                 </TableCell>
                                 <TableCell style={{ fontWeight: "bold" }} align="right">
-                                    Type
+                                    <TableSortLabel active={orderBy === "data_label"} direction={order} onClick={() => handleRequestSort("data_label")}>
+                                        Label
+                                    </TableSortLabel>
                                 </TableCell>
                                 <TableCell style={{ fontWeight: "bold" }} align="right">
-                                    Tool
+                                    <TableSortLabel active={orderBy === "data_type"} direction={order} onClick={() => handleRequestSort("data_type")}>
+                                        Type
+                                    </TableSortLabel>
                                 </TableCell>
-
                                 <TableCell style={{ fontWeight: "bold" }} align="right">
-                                    Source
+                                    <TableSortLabel active={orderBy === "data_tool"} direction={order} onClick={() => handleRequestSort("data_tool")}>
+                                        Tool
+                                    </TableSortLabel>
+                                </TableCell>
+                                <TableCell style={{ fontWeight: "bold" }} align="right">
+                                    <TableSortLabel active={orderBy === "data_source"} direction={order} onClick={() => handleRequestSort("data_source")}>
+                                        Source
+                                    </TableSortLabel>
                                 </TableCell>
                                 <TableCell style={{ fontWeight: "bold" }} align="right">
                                     Actions
@@ -154,6 +174,30 @@ export default function UsersDataManagement() {
                                         cleanUpText(row.data_label).includes(filterText) ||
                                         cleanUpText(row.data_comment).includes(filterText)
                                     );
+                                })
+                                .slice()
+                                .sort((a, b) => {
+                                    let left = "";
+                                    let right = "";
+
+                                    if (orderBy === "id") {
+                                        left = String(a.id);
+                                        right = String(b.id);
+                                    } else if (orderBy === "data_label") {
+                                        left = a.data_label;
+                                        right = b.data_label;
+                                    } else if (orderBy === "data_type") {
+                                        left = a.data_type;
+                                        right = b.data_type;
+                                    } else if (orderBy === "data_tool") {
+                                        left = a.data_tool;
+                                        right = b.data_tool;
+                                    } else if (orderBy === "data_source") {
+                                        left = a.data_source;
+                                        right = b.data_source;
+                                    }
+
+                                    return order === "asc" ? left.localeCompare(right) : right.localeCompare(left);
                                 })
                                 .map((row) => (
                                     <TableRow key={row.id} sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>

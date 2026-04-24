@@ -39,7 +39,7 @@ var Lineage_createRelation = (function () {
         Lineage_sources.showHideEditButtons(Lineage_sources.activeSource);
         var allLabelsMap = {};
         $("#smallDialogDiv").load("modules/tools/lineage/html/lineageAddEdgeDialog.html", function () {
-            UI.openDialog("smallDialogDiv", { title: "Create relation in source " + Lineage_sources.activeSource });
+            UI.openDialog("smallDialogDiv", { title: "Create relation in source " + Lineage_sources.activeSource, height: 650 });
             UI.clampAndCenterDialog("smallDialogDiv");
             self.sourceNode = edgeData.from; // Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(edgeData.from).data;
             self.targetNode = edgeData.to; //Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(edgeData.to).data;
@@ -49,6 +49,7 @@ var Lineage_createRelation = (function () {
             let options = {
                 openAll: true,
                 selectTreeNodeFn: Lineage_createRelation.OnSelectAuthorizedPredicatesTreeDiv,
+                noScroll: true,
             };
             var jstreeData = [];
             var distinctProps = {};
@@ -375,7 +376,9 @@ var Lineage_createRelation = (function () {
                     function (callbackSeries) {
                         options.contextMenu = self.getContextMenu(options);
                         options.noScroll = 1;
-                        JstreeWidget.loadJsTree("lineageAddEdgeDialog_authorizedPredicatesTreeDiv", jstreeData, options, function (err) {});
+                        JstreeWidget.loadJsTree("lineageAddEdgeDialog_authorizedPredicatesTreeDiv", jstreeData, options, function (err) {
+                            UI.clampAndCenterDialog("smallDialogDiv");
+                        });
                         callbackSeries();
                     },
                 ],
@@ -460,9 +463,10 @@ var Lineage_createRelation = (function () {
                     // pb avec source
 
                     NodeInfosWidget.showNodeInfos(self.currentPropertiesTreeNode.data.source, self.currentPropertiesTreeNode, "mainDialogDiv", null, function () {
-                        //  $("#mainDialogDiv").parent().css("z-index", 1);
-
-                        UI.sideBySideTwoWindows("#smallDialogDiv", "#mainDialogDiv");
+                        // setTimeout defers until after NodeInfosWidget calls UI.repositionOpenDialogs()
+                        setTimeout(function () {
+                            UI.sideBySideTwoWindows("#smallDialogDiv", "#mainDialogDiv");
+                        }, 0);
                     });
                 },
             },

@@ -224,6 +224,7 @@ var MainController = (function () {
             });
     };
     self.initTool = function (toolId, callback) {
+        UI.cancelCredits();
         $("#slsv-credits-logo").remove();
         MainController.writeUserLog(authentication.currentUser, self.currentTool, self.currentSource || "");
         var toolObj = Config.userTools[toolId];

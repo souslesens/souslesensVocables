@@ -99,12 +99,37 @@ var Predicates_bot = (function () {
         return property.toLowerCase().indexOf("match") > -1;
     }
 
+    function isLiteralRange(range) {
+        if (!range) {
+            return true;
+        }
+        if (range.startsWith("http://www.w3.org/2001/XMLSchema#")) {
+            return true;
+        }
+        if (range === "http://www.w3.org/2000/01/rdf-schema#Literal") {
+            return true;
+        }
+        if (range.indexOf("xsd:") === 0) {
+            return true;
+        }
+        return false;
+    }
+
     function isLiteralProperty(property) {
         if (!property) {
             return false;
         }
         if (property.indexOf("xsd:") === 0) {
             return true;
+        }
+        for (var vocab in Config.ontologiesVocabularyModels) {
+            var model = Config.ontologiesVocabularyModels[vocab];
+            if (model && model.nonObjectProperties && model.nonObjectProperties[property]) {
+                var range = model.nonObjectProperties[property].range;
+                if (isLiteralRange(range)) {
+                    return true;
+                }
+            }
         }
         return Sparql_common.isTripleObjectString(property);
     }
@@ -135,6 +160,16 @@ var Predicates_bot = (function () {
         return false;
     }
 
+    function getNonObjectPropertyRange(property) {
+        for (var vocab in Config.ontologiesVocabularyModels) {
+            var model = Config.ontologiesVocabularyModels[vocab];
+            if (model && model.nonObjectProperties && model.nonObjectProperties[property]) {
+                return model.nonObjectProperties[property].range || null;
+            }
+        }
+        return null;
+    }
+
     function formatObject(property, value) {
         if (!value) {
             return value;
@@ -148,7 +183,14 @@ var Predicates_bot = (function () {
         if (Sparql_common.isTripleObjectString(property)) {
             return Sparql_common.formatStringForTriple(value);
         }
-        return value;
+        var range = getNonObjectPropertyRange(property);
+        if (range) {
+            if (range.indexOf("xsd:") === 0 || range.startsWith("http://www.w3.org/2001/XMLSchema#")) {
+                var xsdType = range.startsWith("http://www.w3.org/2001/XMLSchema#") ? "xsd:" + range.split("#")[1] : range;
+                return "'" + Sparql_common.formatStringForTriple(value) + "'^^" + xsdType;
+            }
+        }
+        return Sparql_common.formatStringForTriple(value);
     }
 
     /**
@@ -289,7 +331,7 @@ var Predicates_bot = (function () {
             return;
         }
 
-        if ((self.params.isObjectProperty === true || self.params.enteredUri) && !isValidObjectUri(self.params.selectedObject)) {
+        if ((self.params.isObjectProperty === true || self.params.enteredUri) && !isLiteralProperty(self.params.selectedProperty) && !isValidObjectUri(self.params.selectedObject)) {
             return MainController.errorAlert("Invalid URI: '" + self.params.selectedObject + "'. Expected http://... or prefix:localName");
         }
 
@@ -355,15 +397,15 @@ var Predicates_bot = (function () {
                 return;
             }
 
-            var literalProp;
-            if (self.params.isObjectProperty !== null && self.params.isObjectProperty !== undefined) {
+            var literalProp = isLiteralProperty(self.params.selectedProperty);
+            if (!literalProp && self.params.isObjectProperty !== null && self.params.isObjectProperty !== undefined) {
                 literalProp = !self.params.isObjectProperty;
-            } else {
-                literalProp = isLiteralProperty(self.params.selectedProperty);
             }
 
             if (literalProp) {
-                if (self.params.selectedProperty === "xsd:dateTime") {
+                var propRange = getNonObjectPropertyRange(self.params.selectedProperty);
+                var isDateTime = self.params.selectedProperty === "xsd:dateTime" || propRange === "xsd:dateTime" || propRange === "http://www.w3.org/2001/XMLSchema#dateTime";
+                if (isDateTime) {
                     self.myBotEngine.promptValue("select date", "selectedObject", self.params.selectedObject || "", null, function (value) {
                         self.params.selectedObject = value;
                         executeSave();
@@ -379,7 +421,7 @@ var Predicates_bot = (function () {
                 return;
             }
 
-            buildObjectJstreeData(isMatchProperty(self.params.selectedProperty), function (err, jstreeData, parentNodeIds) {
+            buildObjectJstreeData(!isLiteralProperty(self.params.selectedProperty), function (err, jstreeData, parentNodeIds) {
                 if (err) {
                     return MainController.errorAlert(err);
                 }

@@ -175,19 +175,16 @@ var Predicates_bot = (function () {
         "http://www.w3.org/2001/XMLSchema#float",
         "http://www.w3.org/2001/XMLSchema#double",
         "http://www.w3.org/2001/XMLSchema#decimal",
-        "xsd:integer", "xsd:int", "xsd:float", "xsd:double", "xsd:decimal",
+        "xsd:integer",
+        "xsd:int",
+        "xsd:float",
+        "xsd:double",
+        "xsd:decimal",
     ];
 
-    var xsdDateTypes = [
-        "http://www.w3.org/2001/XMLSchema#date",
-        "http://www.w3.org/2001/XMLSchema#dateTime",
-        "xsd:date", "xsd:dateTime",
-    ];
+    var xsdDateTypes = ["http://www.w3.org/2001/XMLSchema#date", "http://www.w3.org/2001/XMLSchema#dateTime", "xsd:date", "xsd:dateTime"];
 
-    var xsdBooleanTypes = [
-        "http://www.w3.org/2001/XMLSchema#boolean",
-        "xsd:boolean",
-    ];
+    var xsdBooleanTypes = ["http://www.w3.org/2001/XMLSchema#boolean", "xsd:boolean"];
 
     function getLiteralWidgetType(property, propRange) {
         var range = propRange || getNonObjectPropertyRange(property) || property;
@@ -448,14 +445,17 @@ var Predicates_bot = (function () {
                     });
                 } else if (widgetType === "boolean") {
                     self.myBotEngine.showList(
-                        [{ id: "true", label: "true" }, { id: "false", label: "false" }],
+                        [
+                            { id: "true", label: "true" },
+                            { id: "false", label: "false" },
+                        ],
                         "selectedObject",
                         null,
                         false,
                         function (value) {
                             self.params.selectedObject = value;
                             executeSave();
-                        }
+                        },
                     );
                 } else {
                     var label = widgetType === "number" ? "enter number" : "enter value";

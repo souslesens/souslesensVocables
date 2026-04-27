@@ -92,13 +92,6 @@ var Predicates_bot = (function () {
             .replace(/\s+/g, "_");
     }
 
-    function isMatchProperty(property) {
-        if (!property) {
-            return false;
-        }
-        return property.toLowerCase().indexOf("match") > -1;
-    }
-
     function isLiteralRange(range) {
         if (!range) {
             return true;
@@ -126,6 +119,12 @@ var Predicates_bot = (function () {
             var model = Config.ontologiesVocabularyModels[vocab];
             if (model && model.nonObjectProperties && model.nonObjectProperties[property]) {
                 var range = model.nonObjectProperties[property].range;
+                if (!range) {
+                    if (model.properties && model.properties[property]) {
+                        continue;
+                    }
+                    return true;
+                }
                 if (isLiteralRange(range)) {
                     return true;
                 }
@@ -168,6 +167,40 @@ var Predicates_bot = (function () {
             }
         }
         return null;
+    }
+
+    var xsdNumericTypes = [
+        "http://www.w3.org/2001/XMLSchema#integer",
+        "http://www.w3.org/2001/XMLSchema#int",
+        "http://www.w3.org/2001/XMLSchema#float",
+        "http://www.w3.org/2001/XMLSchema#double",
+        "http://www.w3.org/2001/XMLSchema#decimal",
+        "xsd:integer", "xsd:int", "xsd:float", "xsd:double", "xsd:decimal",
+    ];
+
+    var xsdDateTypes = [
+        "http://www.w3.org/2001/XMLSchema#date",
+        "http://www.w3.org/2001/XMLSchema#dateTime",
+        "xsd:date", "xsd:dateTime",
+    ];
+
+    var xsdBooleanTypes = [
+        "http://www.w3.org/2001/XMLSchema#boolean",
+        "xsd:boolean",
+    ];
+
+    function getLiteralWidgetType(property, propRange) {
+        var range = propRange || getNonObjectPropertyRange(property) || property;
+        if (xsdDateTypes.indexOf(range) > -1) {
+            return "date";
+        }
+        if (xsdNumericTypes.indexOf(range) > -1) {
+            return "number";
+        }
+        if (xsdBooleanTypes.indexOf(range) > -1) {
+            return "boolean";
+        }
+        return "text";
     }
 
     function formatObject(property, value) {
@@ -403,18 +436,37 @@ var Predicates_bot = (function () {
             }
 
             if (literalProp) {
-                var propRange = getNonObjectPropertyRange(self.params.selectedProperty);
-                var isDateTime = self.params.selectedProperty === "xsd:dateTime" || propRange === "xsd:dateTime" || propRange === "http://www.w3.org/2001/XMLSchema#dateTime";
-                if (isDateTime) {
+                var widgetType = getLiteralWidgetType(self.params.selectedProperty, null);
+
+                if (widgetType === "date") {
                     self.myBotEngine.promptValue("select date", "selectedObject", self.params.selectedObject || "", null, function (value) {
                         self.params.selectedObject = value;
                         executeSave();
                     });
-                    DateWidget.setDatePickerOnInput("botPromptInput", null, null);
+                    DateWidget.setDatePickerOnInput("botPromptInput", null, function () {
+                        $("#botPromptInput").trigger(jQuery.Event("keyup", { keyCode: 13 }));
+                    });
+                } else if (widgetType === "boolean") {
+                    self.myBotEngine.showList(
+                        [{ id: "true", label: "true" }, { id: "false", label: "false" }],
+                        "selectedObject",
+                        null,
+                        false,
+                        function (value) {
+                            self.params.selectedObject = value;
+                            executeSave();
+                        }
+                    );
                 } else {
-                    self.myBotEngine.promptTextarea("enter value", "selectedObject", self.params.selectedObject || "", function (valueSafe, rawValue) {
+                    var label = widgetType === "number" ? "enter number" : "enter value";
+                    self.myBotEngine.promptTextarea(label, "selectedObject", self.params.selectedObject || "", function (valueSafe, rawValue) {
                         var raw = rawValue !== undefined ? rawValue : valueSafe;
                         self.params.selectedObject = raw.replace(/[\r\n]+/g, " ");
+                        if (widgetType === "number" && isNaN(Number(self.params.selectedObject))) {
+                            alert("Invalid value: a number is expected (e.g. 42, 3.14)");
+                            self.functions.chooseObjectFn();
+                            return false;
+                        }
                         executeSave();
                     });
                 }
@@ -427,11 +479,20 @@ var Predicates_bot = (function () {
                 }
                 self.myBotEngine.showTree(jstreeData, null, { withCheckboxes: false, openAll: false, parentNodeIds: parentNodeIds }, null, function (selectedId) {
                     if (selectedId === "__enter_uri__") {
-                        self.myBotEngine.promptValue("enter URI", "selectedObject", "", null, function (value) {
-                            self.params.selectedObject = sanitizeUri(value);
-                            self.params.enteredUri = true;
-                            executeSave();
-                        });
+                        function promptEnterUri() {
+                            self.myBotEngine.promptValue("enter URI", "selectedObject", self.params.selectedObject || "", null, function (value) {
+                                var sanitized = sanitizeUri(value);
+                                if (!isValidObjectUri(sanitized)) {
+                                    alert("Invalid URI: '" + value + "'. Expected http://... or prefix:localName");
+                                    promptEnterUri();
+                                    return;
+                                }
+                                self.params.selectedObject = sanitized;
+                                self.params.enteredUri = true;
+                                executeSave();
+                            });
+                        }
+                        promptEnterUri();
                         return;
                     }
                     self.params.enteredUri = false;

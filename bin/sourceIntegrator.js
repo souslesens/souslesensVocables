@@ -404,7 +404,7 @@ var SourceIntegrator = {
                         },
                         editable: options.editable,
                         controller: "Sparql_OWL",
-                        topClassFilter: "?topConcept rdf:type owl:Class .?topConcept rdfs:label|skos:prefLabel ?XX.",
+                        topClassFilter: "?topConcept rdf:type owl:Class . ?topConcept rdfs:subClassOf ?superClass filter (isUri(?superClass) && not exists{?superClass rdf:type owl:Class })",
                         schemaType: "OWL",
                         allowIndividuals: options.allowIndividuals,
                         predicates: {

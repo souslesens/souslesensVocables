@@ -2,6 +2,56 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.5.0](https://github.com/souslesens/souslesensVocables/compare/3.4.0...3.5.0) (2026-04-27)
+
+
+### ⚠ BREAKING CHANGES
+
+* **model:** refactor plugin symlink management logic
+
+### Bug Fixes
+
+* **claude:** imrpove and simply code ([0897b17](https://github.com/souslesens/souslesensVocables/commit/0897b172902a574e7f32c2aec4de9f549215ede7))
+* **datatable:** acceptable dataTable but double overflow on them ([d0ca7a5](https://github.com/souslesens/souslesensVocables/commit/d0ca7a5602dd1bc82de6181ece1080f02c8fbc5f))
+* **Datatable:** Double overflow in Datatable dialog ([aef2114](https://github.com/souslesens/souslesensVocables/commit/aef2114f4dbe03c5c4e7cefa70730afec8aeb494))
+* **DataTable:** showDataTable correct view ([13a30ef](https://github.com/souslesens/souslesensVocables/commit/13a30ef0745b762cc39f109bf1f993f25d11221a))
+* **dialogs:** recenter dialogs after content display ([a7fc957](https://github.com/souslesens/souslesensVocables/commit/a7fc957c045b59ed1488d4fe8e1b4bd75a54b0d2))
+* Faire le  showSample avec knex ([43c774e](https://github.com/souslesens/souslesensVocables/commit/43c774e073091e82b295ed3890e37a4df72a14ea))
+* Fenetre problème de redimensionnement responsive encore ([762296d](https://github.com/souslesens/souslesensVocables/commit/762296d3acb43dce749b8b4012e0f90640c4a187))
+* **index_topContolPanel:** onHover extension for this component if too long ([78ab39b](https://github.com/souslesens/souslesensVocables/commit/78ab39b4db2ab4ee0e1155ecfe468329e12f7524))
+* **index.html:** home page responsive ([3f1dff1](https://github.com/souslesens/souslesensVocables/commit/3f1dff178f616eda17a2dc6fb73d447753114967))
+* **jest:** jest npm command ([4861962](https://github.com/souslesens/souslesensVocables/commit/4861962cfa0458638d1cd2d487fa14f2745e5de0))
+* **jstree:** finish jstree oveflow problems ([986d49f](https://github.com/souslesens/souslesensVocables/commit/986d49f72e7b938995da73bc4a8f1199f421dc9f))
+* **jstree:** finish jstree oveflow problems ([01c5adb](https://github.com/souslesens/souslesensVocables/commit/01c5adbbaa4c3edff5a18d0c5e151d92da8aae98))
+* **jstree:** jstree overflow dialog ([916bbac](https://github.com/souslesens/souslesensVocables/commit/916bbac258044641aac13d5493f069a8d95a4944))
+* **KGquerydialogs:** fix display and recenter them and fix overflow ([ad3f581](https://github.com/souslesens/souslesensVocables/commit/ad3f5819446043c7cd0005744e5edcfac641f13b))
+* **KGquery:** prevent zoom by added mutation observer ([5b01817](https://github.com/souslesens/souslesensVocables/commit/5b0181770de19483b1b88caafa9b90955775e513))
+* **KGQueryQueryTab:** fix sets UI ([ca25bc5](https://github.com/souslesens/souslesensVocables/commit/ca25bc5113050534aa3ae9200c0e58d67581f263))
+* **KGqueryQueryTab:** fixed div height for sets to avoid zoom and dezoom problems ([bd4846c](https://github.com/souslesens/souslesensVocables/commit/bd4846caf9cfdfce5367ea3c458677babec93635))
+* **Lineage_drawnSource:** try responsive for sources ([c4cf969](https://github.com/souslesens/souslesensVocables/commit/c4cf9694c0c58f4169000e49eef8f4568f0db762))
+* **lineage_sources:** sources duplication ([fb94e8a](https://github.com/souslesens/souslesensVocables/commit/fb94e8a0c7c5e7f3ad3dd03a89691e8ef5de8b18))
+* **lineageCreateRelation:** dialog double overflow ([48bdc5e](https://github.com/souslesens/souslesensVocables/commit/48bdc5edc1f4e49c3cf86b816d2dea48d0a0cbd4))
+* **lineage:** race condition causing duplicate sources via generation guard pattern ([00c1236](https://github.com/souslesens/souslesensVocables/commit/00c123619cd0c9796c74cce49281cb7441e87460))
+* **lineages_source_popup:** close sources pop up when close source pop up ([2cc7189](https://github.com/souslesens/souslesensVocables/commit/2cc71893d9cada0ff2f0fd9c836408ec53c6e666))
+* **MappingModeler:** overflow ([bca06f6](https://github.com/souslesens/souslesensVocables/commit/bca06f6185b4ef1fe8f35a54a21084b09db4d8fc))
+* **model:** refactor plugin symlink management logic ([9985d3f](https://github.com/souslesens/souslesensVocables/commit/9985d3fd1ed3bd4f970fe0d11c85b12ed602b28a))
+* **responsive:** change source overflowing mode error ([cb4cd96](https://github.com/souslesens/souslesensVocables/commit/cb4cd9660753d328cd3e312352f51c5da89ea09e))
+* **responsive:** color of font sources and hover improve ([5ef0898](https://github.com/souslesens/souslesensVocables/commit/5ef08988c57ec222a1ec9cf78a847a5123e699e3))
+* **responsive:** compact mode with active source ([fab3f05](https://github.com/souslesens/souslesensVocables/commit/fab3f052886acb42d0e16631c07a650829758b82))
+* **responsive:** gestion of lateral Pannel size dynamic increase ([cf5926f](https://github.com/souslesens/souslesensVocables/commit/cf5926fb68ba446eae1f2ba81816d10e88cb94c6))
+* **responsive:** lateral Panel scroll with adjustement in other files ([b48907d](https://github.com/souslesens/souslesensVocables/commit/b48907d933f63dbc035c26d335c28c3551fa1c5d))
+* **responsive:** lineage_sourcesPopup continue ([d1d0b31](https://github.com/souslesens/souslesensVocables/commit/d1d0b310f41495e7386345fe5a9c11e1249a5ab7))
+* **responsive:** lineage_sourcesPopup gestion for overflow sources ([e124259](https://github.com/souslesens/souslesensVocables/commit/e12425975785844407e26a897ae346281d068275))
+* **responsive:** popUpDiv display none for 1st time init ([a022f7d](https://github.com/souslesens/souslesensVocables/commit/a022f7dfaaecd40160f0a75deb1f7533993c901f))
+* **responsive:** visjsConfigwrapper fix responsibe + test source before changing current source in higlight + improve on mouseleave lineagesourcespopup ([af0f7eb](https://github.com/souslesens/souslesensVocables/commit/af0f7ebaecea52bf819cb5d073e8123a32dded6e))
+* **sparql:** z-index for save dialog ([ec29357](https://github.com/souslesens/souslesensVocables/commit/ec29357d96ca5a25c218564b93e3ec930f98b224))
+* **UI:** cancel sls logo after launch tool + sideBySide and createRelationDialog ([ba59d7f](https://github.com/souslesens/souslesensVocables/commit/ba59d7f36abe74fccc5227b963cce8f6c17e245d))
+* **UI:** center and double sidebar generical resolution ([2d81926](https://github.com/souslesens/souslesensVocables/commit/2d819260e7c5e003467147aeceb8fa778682e12a))
+* **UI:** conflict on dialog rebase ([9b90f1e](https://github.com/souslesens/souslesensVocables/commit/9b90f1ecb90f0c024484acfd714d13bd289fff92))
+* **UI:** no content overflow ([5521ebb](https://github.com/souslesens/souslesensVocables/commit/5521ebbab129e05564f6cf1694013d02a0af011a))
+* **UI:** overflow conflict between jstreeWidget and Datable responsive ([638dfb9](https://github.com/souslesens/souslesensVocables/commit/638dfb90b272c26a07e3ed8fbd315e0428bb27fd))
+* **UI:** resetWindowsSize ([65e888f](https://github.com/souslesens/souslesensVocables/commit/65e888f2095527fb93e1a43eb3ebdf8968208867))
+
 ## [3.4.0](https://github.com/souslesens/souslesensVocables/compare/3.3.0...3.4.0) (2026-04-23)
 
 

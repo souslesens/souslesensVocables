@@ -22,40 +22,19 @@ export default function () {
 
     GET.apiDoc = {
         security: [{ restrictLoggedUser: [] }],
-        summary: "Read content of a file",
-        description: "Read content of a file",
-        operationId: "Read content of a file",
+        summary: "Read a CSV file as a JSON array of rows",
+        description:
+            "Parses `dataDir/<dir>/<fileName>` via `dataController.readCsv`. Pass `options` to limit the number of rows " +
+            "returned (e.g. `{\"lines\":50}`) — used by MappingModeler to preview large files.",
+        operationId: "dataReadCsv",
         parameters: [
-            {
-                name: "dir",
-                description: "subDirectory in /dataDir",
-                type: "string",
-                in: "query",
-                required: true,
-            },
-            {
-                name: "fileName",
-                description: "name",
-                in: "query",
-                type: "string",
-                required: true,
-            },
-            {
-                name: "options",
-                description: 'JSON of the form {"lines": <number>"}',
-                in: "query",
-                type: "string",
-                required: false,
-            },
+            { name: "dir", in: "query", type: "string", required: true, description: "Sub-directory under `dataDir`." },
+            { name: "fileName", in: "query", type: "string", required: true, description: "CSV file name." },
+            { name: "options", in: "query", type: "string", required: false, description: "JSON-encoded options, e.g. `{\"lines\":50}`." },
         ],
-
         responses: {
-            200: {
-                description: "Results",
-                schema: {
-                    type: "object",
-                },
-            },
+            200: { description: "Parsed rows.", schema: { type: "object" } },
+            500: { description: "Read or parse error." },
         },
         tags: ["Data"],
     };

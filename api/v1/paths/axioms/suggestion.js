@@ -38,33 +38,19 @@ export default function () {
 
     GET.apiDoc = {
         security: [{ restrictLoggedUser: [] }],
-        summary: "Return a suggestion to build an axiom",
-        description: "Return a suggestion to build an axiom",
-        operationId: "Return a suggestion to build an axiom",
+        summary: "Suggest the next valid token while editing a Manchester axiom",
+        description:
+            "Powers the Manchester-syntax editor's autocomplete. Given the last token typed by the user (`lastToken`) " +
+            "and the current editor state (`options` JSON), `ManchesterSyntaxEngine.getSuggestion` returns the list of " +
+            "valid follow-up tokens (keywords, class URIs, property URIs, ...).",
+        operationId: "axiomsGetSuggestion",
         parameters: [
-            {
-                name: "lastToken",
-                description: "lastToken",
-                in: "query",
-                type: "string",
-                required: true,
-            },
-            {
-                name: "options",
-                description: "options",
-                in: "query",
-                type: "string",
-                required: false,
-            },
+            { name: "lastToken", in: "query", type: "string", required: true, description: "Last token typed by the user. Example: `SubClassOf`." },
+            { name: "options", in: "query", type: "string", required: false, description: "JSON-encoded editor state (current class URI, allowed vocabularies, ...)." },
         ],
-
         responses: {
-            200: {
-                description: "Results",
-                schema: {
-                    type: "object",
-                },
-            },
+            200: { description: "Suggested completions.", schema: { type: "object" } },
+            400: { description: "Engine error.", schema: { properties: { error: { type: "string" } } } },
         },
         tags: ["Axiom"],
     };

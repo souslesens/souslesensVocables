@@ -19,26 +19,18 @@ export default function () {
     }
 
     GET.apiDoc = {
-        summary: "return ontology model",
+        summary: "Read the cached ontology model for a source",
+        description:
+            "Returns the in-memory ontology model previously POSTed for `source`. The cache is server-process " +
+            "lifetime only (no disk persistence) — restart the server and the cache is empty.",
         security: [{ restrictLoggedUser: [] }],
         operationId: "getOntologyModel",
-
         parameters: [
-            {
-                name: "source",
-                description: "source",
-                type: "string",
-                in: "query",
-                required: true,
-            },
+            { name: "source", in: "query", type: "string", required: true, description: "Source name. Example: `IOF_core`." },
         ],
         responses: {
-            200: {
-                description: "Results",
-                schema: {
-                    type: "object",
-                },
-            },
+            200: { description: "Cached ontology model.", schema: { type: "object" } },
+            500: { description: "No cached model for this source." },
         },
         tags: ["Ontology"],
     };
@@ -58,62 +50,54 @@ export default function () {
     }
 
     POST.apiDoc = {
-        summary: "Write source model in memory cache",
+        summary: "Cache an ontology model for a source",
+        description:
+            "Stores `model` under `source` in the in-memory `ontologyModelsCache`. " +
+            "When `key` is provided, the model is stored under `cache[source][key]` (sub-key replacement); " +
+            "without `key`, the entire `cache[source]` slot is replaced.",
         security: [{ restrictLoggedUser: [] }],
-        operationId: "Write source model in memory cache",
+        operationId: "writeOntologyModel",
         parameters: [
             {
                 name: "body",
-                description: "body",
                 in: "body",
+                required: false,
                 schema: {
                     type: "object",
                     properties: {
-                        source: {
-                            type: "string",
-                        },
+                        source: { type: "string", example: "IOF_core" },
                         model: {
                             type: "string",
+                            description: "JSON-stringified model when `key` is set, else the raw model object.",
+                            example: '{"http://example.org/Asset":{"id":"http://example.org/Asset","label":"Asset"}}',
                         },
-                        key: {
-                            type: "string",
-                        },
+                        key: { type: "string", description: "Optional sub-key (e.g. `classes`, `properties`).", example: "classes" },
+                    },
+                    example: {
+                        source: "IOF_core",
+                        key: "classes",
+                        model: '{"http://example.org/Asset":{"id":"http://example.org/Asset","label":"Asset"}}',
                     },
                 },
             },
         ],
-
         responses: {
-            200: {
-                description: "Results",
-                schema: {
-                    type: "object",
-                },
-            },
+            200: { description: "Model cached." },
         },
         tags: ["Ontology"],
     };
     DELETE.apiDoc = {
-        summary: "delete ontology model",
+        summary: "Evict cached ontology model(s)",
+        description:
+            "Removes a single source from the in-memory cache when `source` is provided and not the literal `\"null\"`; " +
+            "otherwise wipes the entire cache.",
         security: [{ restrictLoggedUser: [] }],
         operationId: "deleteOntologyModel",
-
         parameters: [
-            {
-                name: "source",
-                description: "source",
-                type: "string",
-                in: "query",
-                required: false,
-            },
+            { name: "source", in: "query", type: "string", required: false, description: "Source to evict. Omit (or pass `\"null\"`) to clear the entire cache." },
         ],
         responses: {
-            200: {
-                description: "Results",
-                schema: {
-                    type: "object",
-                },
-            },
+            200: { description: "Cache evicted." },
         },
         tags: ["Ontology"],
     };
@@ -129,39 +113,54 @@ export default function () {
     }
 
     PUT.apiDoc = {
-        summary: "update ontology model",
+        summary: "Patch the cached ontology model with a delta",
+        description:
+            "Merges or removes entries inside `cache[source]`. `data` is shaped `{ entryType: { id: payload } }` with " +
+            "`entryType` being `classes`, `properties`, `restrictions`, etc. When `options.remove === \"true\"`, the " +
+            "entries listed in `data` are deleted (special handling for `restrictions` matched by `blankNodeId`). " +
+            "Otherwise entries are inserted or appended (concat for `restrictions`).",
         security: [{ restrictLoggedUser: [] }],
         operationId: "updateOntologyModel",
-
         parameters: [
             {
                 name: "body",
-                description: "body",
                 in: "body",
+                required: false,
                 schema: {
                     type: "object",
                     properties: {
-                        source: {
-                            type: "string",
-                        },
-
+                        source: { type: "string", example: "IOF_core" },
                         data: {
                             type: "object",
+                            description: "Delta to apply, keyed by entry type (`classes`, `properties`, `restrictions`, ...).",
+                            example: {
+                                classes: {
+                                    "http://example.org/Asset": { id: "http://example.org/Asset", label: "Asset" },
+                                },
+                            },
                         },
                         options: {
                             type: "object",
+                            properties: {
+                                remove: { type: "string", description: "If `\"true\"`, treat `data` as a removal patch.", example: "false" },
+                            },
+                            example: { remove: "false" },
                         },
+                    },
+                    example: {
+                        source: "IOF_core",
+                        data: {
+                            classes: {
+                                "http://example.org/Asset": { id: "http://example.org/Asset", label: "Asset" },
+                            },
+                        },
+                        options: { remove: "false" },
                     },
                 },
             },
         ],
         responses: {
-            200: {
-                description: "Results",
-                schema: {
-                    type: "object",
-                },
-            },
+            200: { description: "Cache patched." },
         },
         tags: ["Ontology"],
     };

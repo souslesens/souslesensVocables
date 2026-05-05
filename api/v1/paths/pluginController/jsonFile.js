@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import { processResponse, sanitizePath } from "../utils.js";
 
+// Route /api/v1/pluginController/jsonFile: not used client-side (no calls found in public/ or mainapp/src/). Likely deprecated.
 export default function () {
     let operations = {
         GET,

@@ -19,9 +19,12 @@ export default function () {
         }
     }
     GET.apiDoc = {
-        summary: "Returns all profiles",
+        summary: "List every profile (admin only)",
+        description:
+            "Admin-only. Returns the full `profiles.json` catalog. Each profile defines `allowedTools`, " +
+            "`allowedSourceSchemas`, `sourcesAccessControl`, optional `quota`, etc.",
         security: [{ restrictAdmin: [] }],
-        operationId: "getProfiles",
+        operationId: "adminGetProfiles",
         responses: responseSchema("Profiles", "GET"),
         tags: ["Profiles"],
     };
@@ -43,10 +46,33 @@ export default function () {
         }
     }
     POST.apiDoc = {
-        summary: "Create a new profile",
+        summary: "Create one or more profiles (admin only)",
+        description:
+            "Body is a map `profileName → Profile`. Each entry is added via `profileModel.addProfile`. " +
+            "Quota cache is invalidated after insertion. Returns the refreshed profiles catalog.",
         security: [{ restrictAdmin: [] }],
-        operationId: "createProfile",
-        parameters: [],
+        operationId: "adminCreateProfiles",
+        parameters: [
+            {
+                in: "body",
+                name: "body",
+                required: true,
+                schema: { type: "object", additionalProperties: { $ref: "#/definitions/Profile" } },
+                "x-examples": {
+                    "Add a read-only profile on BFO/IOF_core": {
+                        readers: {
+                            allowedSourceSchemas: ["OWL"],
+                            allowedTools: "lineage,KGquery",
+                            sourcesAccessControl: {
+                                "OWL/STANDARDS/TOP_ONTOLOGIES/BFO": "read",
+                                "OWL/STANDARDS/ABSTRACT ONTOLOGIES/IOF_core": "read",
+                            },
+                            theme: "default",
+                        },
+                    },
+                },
+            },
+        ],
         responses: responseSchema("Profiles", "POST"),
         tags: ["Profiles"],
     };

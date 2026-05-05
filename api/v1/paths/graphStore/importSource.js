@@ -84,37 +84,56 @@ export default function () {
     }
 
     POST.apiDoc = {
-        summary: "Access to Graph Store",
+        summary: "Register a new source and import its graph (admin only)",
+        description:
+            "Admin-only orchestration: " +
+            "(1) inserts a `sourceName → graphUri` entry in the source registry via `GraphStore.insertSourceInConfig`, " +
+            "(2) checks if the graph already exists, " +
+            "(3) optionally clears it when `options.reload === \"true\"`, " +
+            "(4) loads triples from `rdfUrl` via `GraphStore.importGraphFromUrl`. " +
+            "Skips reload if the graph already exists and `options.reload` is not `true`.",
         security: [{ restrictLoggedUser: [], restrictQuota: [] }],
-        operationId: "GraphStore",
+        operationId: "graphStoreImportSource",
         parameters: [
             {
                 name: "body",
-                description: "body",
                 in: "body",
+                required: false,
                 schema: {
                     type: "object",
                     properties: {
-                        sourceUrl: {
-                            type: "string",
-                        },
-                        sourceName: {
-                            type: "string",
-                        },
-                        graphUri: {
-                            type: "string",
-                        },
+                        sourceName: { type: "string", description: "New source key (must not collide with an existing source).", example: "IOF_core" },
+                        graphUri: { type: "string", description: "Named graph URI to fill.", example: "https://www.industrialontologies.org/core/" },
+                        rdfUrl: { type: "string", description: "Public RDF file URL to import.", example: "https://raw.githubusercontent.com/iofoundry/ontology/refs/heads/master/core/Core.rdf" },
                         options: {
                             type: "object",
+                            properties: {
+                                reload: { type: "string", description: "Set to the string `\"true\"` to drop the graph before re-loading.", example: "false" },
+                            },
+                            example: { reload: "false" },
                         },
+                    },
+                    example: {
+                        sourceName: "IOF_core",
+                        graphUri: "https://www.industrialontologies.org/core/",
+                        rdfUrl: "https://raw.githubusercontent.com/iofoundry/ontology/refs/heads/master/core/Core.rdf",
+                        options: { reload: "false" },
+                    },
+                },
+                "x-examples": {
+                    "Initial import of IOF_core": {
+                        sourceName: "IOF_core",
+                        graphUri: "https://www.industrialontologies.org/core/",
+                        rdfUrl: "https://raw.githubusercontent.com/iofoundry/ontology/refs/heads/master/core/Core.rdf",
+                        options: { reload: "false" },
                     },
                 },
             },
         ],
         responses: {
-            default: {
-                description: "Response…",
-            },
+            200: { description: "Done.", schema: { properties: { result: { type: "string", example: "DONE" } } } },
+            400: { description: "User context missing." },
+            403: { description: "Caller is not an admin." },
         },
         tags: ["Graph"],
     };

@@ -17,26 +17,17 @@ export default function () {
 
     GET.apiDoc = {
         security: [{ restrictLoggedUser: [] }],
-        summary: "Retrieve a KG mapping",
-        description: "Retrieve a KG mapping",
-        operationId: "Retrieve a KG mapping",
+        summary: "Read a saved mapping document by name",
+        description:
+            "Returns the mapping document previously saved via `POST /kg/mappings`, identified by its file name. " +
+            "Loaded by `KGcontroller.getMappings`.",
+        operationId: "kgGetMapping",
         parameters: [
-            {
-                name: "name",
-                description: "name",
-                in: "path",
-                type: "string",
-                required: true,
-            },
+            { name: "name", in: "path", type: "string", required: true, description: "Mapping file name (without extension). Example: `iof_core_assets`." },
         ],
-
         responses: {
-            200: {
-                description: "Results",
-                schema: {
-                    type: "object",
-                },
-            },
+            200: { description: "Mapping document.", schema: { type: "object" } },
+            400: { description: "Mapping not found or read error." },
         },
         tags: ["KG"],
     };

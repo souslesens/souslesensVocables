@@ -1,6 +1,7 @@
 import path from "path";
 import kGcontroller from "../../../../../bin/KG/KGcontroller.js";
 
+// Route /api/v1/kg/assets/:name: not used client-side (no calls found in public/ or mainapp/src/). Likely deprecated.
 export default function () {
     let operations = {
         GET,
@@ -17,26 +18,17 @@ export default function () {
 
     GET.apiDoc = {
         security: [{ restrictLoggedUser: [] }],
-        summary: "Retrieve a KG asset mapping",
-        description: "Retrieve a KG asset mapping",
-        operationId: "Retrieve a KG asset mapping",
+        summary: "Read the global asset-level mapping for a KG asset",
+        description:
+            "Returns the asset-level mapping document (`KGcontroller.getAssetGlobalMappings`) used to drive cross-asset " +
+            "transformations when several mappings target the same logical asset.",
+        operationId: "kgGetAssetMapping",
         parameters: [
-            {
-                name: "name",
-                description: "name",
-                in: "path",
-                type: "string",
-                required: true,
-            },
+            { name: "name", in: "path", type: "string", required: true, description: "Asset mapping name." },
         ],
-
         responses: {
-            200: {
-                description: "Results",
-                schema: {
-                    type: "object",
-                },
-            },
+            200: { description: "Asset mapping document.", schema: { type: "object" } },
+            400: { description: "Asset mapping not found or read error." },
         },
         tags: ["KG"],
     };

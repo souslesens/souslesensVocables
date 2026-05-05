@@ -20,10 +20,20 @@ export default function () {
     }
 
     GET.apiDoc = {
-        operationId: "getMinimalDatabase",
-        responses: responseSchema("DatabaseMinimal", "GET"),
+        operationId: "getUserDatabaseMinimal",
+        summary: "Get a database descriptor stripped of credentials",
+        description:
+            "Returns `id`, `name`, `driver`, `database` for the database `id` the caller is allowed to use. " +
+            "Sensitive fields (`host`, `port`, `user`, `password`) are redacted (`databaseModel.getUserDatabaseMinimal`).",
+        parameters: [
+            { in: "path", name: "id", type: "string", required: true, description: "Database id." },
+        ],
+        responses: {
+            200: { description: "Minimal database descriptor.", schema: { $ref: "#/definitions/DatabaseMinimal" } },
+            404: { description: "Database not found or not accessible." },
+            500: { description: "Server error." },
+        },
         security: [{ restrictLoggedUser: [] }],
-        summary: "Returns the table without insecure information",
         tags: ["Databases"],
     };
 

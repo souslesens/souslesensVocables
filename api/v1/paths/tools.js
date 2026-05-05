@@ -18,18 +18,25 @@ export default function () {
         }
     }
     GET.apiDoc = {
-        summary: "Returns user tools",
+        summary: "List the tools enabled for the current user's profiles",
+        description:
+            "Returns the intersection of tools enabled at the platform level (`mainConfig.tools_available`) and " +
+            "tools allowed by the caller's profiles (`profileModel.getUserTools`). Drives the home-page tool launcher.",
         security: [{ restrictLoggedUser: [] }],
-        operationId: "getTools",
+        operationId: "getUserTools",
         responses: {
             200: {
-                description: "",
+                description: "Allowed tools.",
                 schema: {
                     properties: {
                         message: { type: "string" },
-                        resources: {
-                            type: "array",
-                        },
+                        resources: { type: "array", items: { type: "string" } },
+                    },
+                },
+                examples: {
+                    "application/json": {
+                        message: "resource successfully fetched",
+                        resources: ["lineage", "KGquery", "MappingModeler"],
                     },
                 },
             },

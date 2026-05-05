@@ -28,27 +28,35 @@ export default function () {
 
     GET.apiDoc = {
         security: [{ restrictLoggedUser: [], restrictQuota: [] }],
-        summary: "Get all RDF graphs present in the triplestore",
-        description: "Get all RDF graphs present in the triplestore",
-        operationId: "Sparql get graphs",
+        summary: "List RDF graphs accessible to the current user",
+        description:
+            "Returns the subset of named graphs present in the triplestore whose URI matches the `graphUri` " +
+            "of a source the current user is allowed to read (intersection of triplestore graphs and `getUserSources`). " +
+            "Each entry comes from `rdfDataModel.getGraphs()` and exposes at least the graph `name` (its URI).",
+        operationId: "sparqlGetUserGraphs",
         parameters: [],
         responses: {
             200: {
-                description: "Indices to delete",
+                description: "Allowed RDF graphs.",
                 schema: {
                     type: "array",
                     items: {
-                        type: "string",
+                        type: "object",
+                        properties: {
+                            name: { type: "string", description: "Graph URI." },
+                        },
                     },
+                },
+                examples: {
+                    "application/json": [
+                        { name: "http://purl.obolibrary.org/obo/bfo.owl" },
+                        { name: "https://www.industrialontologies.org/core/" },
+                    ],
                 },
             },
             500: {
-                description: "Server error",
-                schema: {
-                    properties: {
-                        error: { type: "object" },
-                    },
-                },
+                description: "Server error while reading graphs from the triplestore.",
+                schema: { properties: { error: { type: "object" } } },
             },
         },
         tags: ["Sparql"],

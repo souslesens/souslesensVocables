@@ -148,55 +148,22 @@ export default function () {
 
     GET.apiDoc = {
         security: [{ restrictLoggedUser: [], restrictQuota: [] }],
-        summary: "Query Jowl server",
-        description: "Query Jowl server",
-        operationId: "Query Jowl server",
+        summary: "Run a reasoner operation on the JOWL server",
+        description:
+            "Forwards `operation` (e.g. `classify`, `consistency`, `unsatisfiable`, `inferences`) to JOWL " +
+            "(`reasoner/<operation>`). The body sent upstream is `{ graphName, operation, predicates }`. " +
+            "`predicates` is a JSON-encoded array of property URIs the reasoner should focus on.",
+        operationId: "jowlReasoner",
         parameters: [
-            {
-                name: "operation",
-                description: "operation",
-                type: "string",
-                in: "query",
-                required: true,
-            },
-            {
-                name: "graphName",
-                description: "graphName",
-                in: "query",
-                type: "string",
-                required: false,
-            },
-            {
-                name: "url",
-                description: "source graphUri or url",
-                in: "query",
-                type: "string",
-                required: false,
-            },
-            {
-                name: "predicates",
-                description: "predicates array ",
-                in: "query",
-                type: "string",
-                required: false,
-            },
-
-            {
-                name: "options",
-                description: "JSON ",
-                in: "query",
-                type: "string",
-                required: false,
-            },
+            { name: "operation", in: "query", type: "string", required: true, description: "Reasoner operation (`classify`, `consistency`, `unsatisfiable`, ...)." },
+            { name: "graphName", in: "query", type: "string", required: false, description: "Named graph URI to reason over. Example: `http://purl.obolibrary.org/obo/bfo.owl`." },
+            { name: "url", in: "query", type: "string", required: false, description: "External ontology URL (alternative to `graphName`)." },
+            { name: "predicates", in: "query", type: "string", required: false, description: "JSON-encoded predicate URI array." },
+            { name: "options", in: "query", type: "string", required: false, description: "JSON-encoded options forwarded to the reasoner." },
         ],
-
         responses: {
-            200: {
-                description: "Results",
-                schema: {
-                    type: "object",
-                },
-            },
+            200: { description: "Reasoner output (depends on `operation`).", schema: { type: "object" } },
+            500: { description: "JOWL server error." },
         },
         tags: ["JOWL"],
     };

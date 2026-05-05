@@ -61,47 +61,64 @@ export default function () {
     }
 
     GET.apiDoc = {
-        summary: "Get a specific profile",
+        summary: "Get a profile by id (current user must be a member)",
+        description:
+            "Returns profile `id` if the caller belongs to it (`profileModel.getOneUserProfile`). " +
+            "Useful to read effective `allowedTools` / `sourcesAccessControl` for the current user.",
         security: [{ restrictLoggedUser: [] }],
         operationId: "getOneProfile",
-        parameters: [],
+        parameters: [
+            { in: "path", name: "id", type: "string", required: true, description: "Profile name." },
+        ],
         responses: {
-            200: {
-                description: "Profiles",
-                schema: {
-                    $ref: "#/definitions/Profile",
-                },
-            },
+            200: { description: "Profile descriptor.", schema: { $ref: "#/definitions/Profile" } },
+            400: { description: "Profile not found or caller is not a member." },
         },
         tags: ["Profiles"],
     };
     DELETE.apiDoc = {
-        summary: "Delete a specific profile",
+        summary: "Delete a profile (admin only)",
+        description: "Removes profile `id`, invalidates the quota cache, returns the refreshed profiles catalog.",
         security: [{ restrictAdmin: [] }],
-        operationId: "DeleteOneProfile",
-        parameters: [],
+        operationId: "adminDeleteProfile",
+        parameters: [
+            { in: "path", name: "id", type: "string", required: true, description: "Profile name to delete." },
+        ],
         responses: {
             200: {
-                description: "Profiles",
+                description: "Profile deleted.",
                 schema: {
-                    $ref: "#/definitions/Profile",
+                    properties: {
+                        message: { type: "string" },
+                        resources: { $ref: "#/definitions/Profiles" },
+                    },
                 },
             },
+            500: { description: "Profile not found or persistence error." },
         },
         tags: ["Profiles"],
     };
     PUT.apiDoc = {
-        summary: "Update Profile",
+        summary: "Update a profile (admin only)",
+        description: "Replaces profile `id`. The `name` field of the body must equal the path id. Invalidates the quota cache.",
         security: [{ restrictAdmin: [] }],
-        operationId: "updateProfiles",
-        parameters: [],
+        operationId: "adminUpdateProfile",
+        parameters: [
+            { in: "path", name: "id", type: "string", required: true, description: "Profile name to update." },
+            { in: "body", name: "body", required: true, schema: { $ref: "#/definitions/Profile" } },
+        ],
         responses: {
             200: {
-                description: "Profile",
+                description: "Profile updated.",
                 schema: {
-                    $ref: "#/definitions/Profile",
+                    properties: {
+                        message: { type: "string" },
+                        reprofiles: { $ref: "#/definitions/Profiles" },
+                    },
                 },
             },
+            400: { description: "Profile does not exist." },
+            500: { description: "Mismatch between path id and body `name`, or persistence error." },
         },
         tags: ["Profiles"],
     };

@@ -12,14 +12,23 @@ export default function () {
     }
 
     GET.apiDoc = {
-        summary: "Check if a user is currently logged",
-        operationId: "check",
+        summary: "Return the authenticated user context",
+        description:
+            "Returns the resolved user object (`userManager.getUser(req.user)`), including `groups`, `allowSourceCreation` " +
+            "and `maxNumberCreatedSource`. Used by the frontend to bootstrap the session and decide which tools to expose. " +
+            "When `mainConfig.auth === \"disabled\"`, this still returns a synthetic admin user with login `admin`.",
+        operationId: "authWhoami",
         parameters: [],
         responses: {
             200: {
-                description: "Current user info",
-                schema: {
-                    $ref: "#/definitions/AuthCheck",
+                description: "Current user info.",
+                schema: { $ref: "#/definitions/AuthCheck" },
+                examples: {
+                    "application/json": {
+                        user: { id: "0", login: "admin", groups: ["admin"] },
+                        allowSourceCreation: true,
+                        maxNumberCreatedSource: 1000,
+                    },
                 },
             },
         },

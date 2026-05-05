@@ -26,18 +26,15 @@ export default function () {
 
     GET.apiDoc = {
         security: [{ restrictLoggedUser: [] }],
-        summary: "Query Jowl server to get inference parameters",
-        description: "Query Jowl server to get inference parameters",
-        operationId: "reasonerListInferenceParams",
+        summary: "List the inference parameters supported by the JOWL reasoner",
+        description:
+            "Calls `reasoner/parametres` on the JOWL server and returns the JSON describing the available " +
+            "inference parameters (used by the UI to render the reasoner configuration form).",
+        operationId: "jowlReasonerListInferenceParams",
         parameters: [],
-
         responses: {
-            200: {
-                description: "Results",
-                schema: {
-                    type: "object",
-                },
-            },
+            200: { description: "Inference parameter descriptors.", schema: { type: "object" } },
+            500: { description: "JOWL server error." },
         },
         tags: ["JOWL"],
     };

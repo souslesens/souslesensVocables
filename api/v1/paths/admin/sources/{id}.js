@@ -60,47 +60,71 @@ export default function () {
     }
 
     GET.apiDoc = {
-        summary: "This resource returns profiles list or a profile if an id is provided",
-        operationId: "getProfiles",
+        summary: "Get a single source descriptor by id",
+        description:
+            "Returns the descriptor of source `id` if the caller has access to it (`getOneUserSource`). " +
+            "Despite living under `/admin/sources/{id}`, this GET only requires a logged-in user.",
+        operationId: "adminGetOneSource",
         security: [{ restrictLoggedUser: [] }],
-        parameters: [],
+        parameters: [
+            { in: "path", name: "id", type: "string", required: true, description: "Source name. Example: `BFO`." },
+        ],
         responses: {
             200: {
-                description: "Profiles",
-                schema: {
-                    $ref: "#/definitions/Profile",
-                },
+                description: "Source descriptor.",
+                schema: { $ref: "#/definitions/Source" },
             },
+            400: { description: "Source not found or not accessible." },
         },
         tags: ["Sources"],
     };
     DELETE.apiDoc = {
-        summary: "Delete a specific source",
+        summary: "Delete a source (admin endpoint)",
+        description:
+            "Admin-only deletion of source `id`. Returns the refreshed full sources catalog. " +
+            "Does not drop the named graph in the triplestore.",
         security: [{ restrictAdmin: [] }],
-        operationId: "DeleteOneSource",
-        parameters: [],
+        operationId: "adminDeleteSource",
+        parameters: [
+            { in: "path", name: "id", type: "string", required: true, description: "Source name to delete." },
+        ],
         responses: {
             200: {
-                description: "Sources",
+                description: "Source deleted.",
                 schema: {
-                    $ref: "#/definitions/Source",
+                    properties: {
+                        message: { type: "string" },
+                        resources: { $ref: "#/definitions/Sources" },
+                    },
                 },
             },
+            500: { description: "Source not found or persistence error." },
         },
         tags: ["Sources"],
     };
     PUT.apiDoc = {
-        summary: "Update Sources",
+        summary: "Update a source descriptor (admin endpoint)",
+        description:
+            "Admin-only update of source `id`. Body must be a full `Source` descriptor whose `name` matches the path `id`. " +
+            "Returns the full sources catalog after update.",
         security: [{ restrictAdmin: [] }],
-        operationId: "updateSources",
-        parameters: [],
+        operationId: "adminUpdateSource",
+        parameters: [
+            { in: "path", name: "id", type: "string", required: true, description: "Source name to update." },
+            { in: "body", name: "body", required: true, schema: { $ref: "#/definitions/Source" } },
+        ],
         responses: {
             200: {
-                description: "Sources",
+                description: "Source updated.",
                 schema: {
-                    $ref: "#/definitions/Source",
+                    properties: {
+                        message: { type: "string" },
+                        resources: { $ref: "#/definitions/Sources" },
+                    },
                 },
             },
+            400: { description: "Source does not exist." },
+            500: { description: "Mismatch between path id and body `name`, or persistence error." },
         },
         tags: ["Sources"],
     };

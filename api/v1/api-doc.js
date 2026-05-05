@@ -358,23 +358,41 @@ const apiDoc = {
         },
         Config: {
             properties: {
-                auth: {
-                    type: "string",
+                auth: { type: "string" },
+                defaultGroups: { type: "array", items: { type: "string" } },
+                default_lang: { type: "string" },
+                sparql_server: {
+                    type: "object",
+                    properties: {
+                        url: { type: "string" },
+                    },
                 },
-                default_lang: {
-                    type: "string",
-                },
+                formalOntologySourceLabel: { type: "string" },
                 wiki: {
                     type: "object",
                     properties: {
-                        url: {
-                            type: "string",
-                        },
+                        url: { type: "string" },
                     },
                 },
-                version: {
-                    type: "string",
+                version: { type: "string" },
+                sentryDsnJsFront: { type: "string" },
+                tools_available: { type: "array", items: { type: "string" } },
+                slsPyApi: {
+                    type: "object",
+                    properties: {
+                        enabled: { type: "boolean" },
+                        url: { type: "string" },
+                    },
                 },
+                theme: {
+                    type: "object",
+                    properties: {
+                        defaultTheme: { type: "string" },
+                        selector: { type: "boolean" },
+                    },
+                },
+                sparqlDownloadLimit: { type: "integer" },
+                generalQuota: { type: "object" },
             },
             required: [],
         },

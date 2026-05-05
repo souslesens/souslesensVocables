@@ -36,40 +36,19 @@ export default function () {
 
     GET.apiDoc = {
         security: [{ restrictLoggedUser: [] }],
-        summary: "Return axiom validation",
-        description: "Return axiom validation",
-        operationId: "Return axiom validation",
+        summary: "Validate a Manchester-syntax axiom",
+        description:
+            "Parses `axiom` with `ManchesterSyntaxEngine.validateAxiom`. Returns the parse tree on success or the error " +
+            "position on failure. Used by the editor to display inline syntax errors before sending the axiom to JOWL.",
+        operationId: "axiomsValidate",
         parameters: [
-            {
-                name: "source",
-                description: "type",
-                in: "query",
-                type: "string",
-                required: true,
-            },
-            {
-                name: "axiom",
-                description: "axiom",
-                in: "query",
-                type: "string",
-                required: true,
-            },
-            {
-                name: "options",
-                description: "option",
-                in: "query",
-                type: "string",
-                required: false,
-            },
+            { name: "source", in: "query", type: "string", required: true, description: "Source name where the axiom will land. Example: `IOF_core`." },
+            { name: "axiom", in: "query", type: "string", required: true, description: "Manchester-syntax axiom body." },
+            { name: "options", in: "query", type: "string", required: false, description: "JSON-encoded options (vocabularies, prefix maps, ...)." },
         ],
-
         responses: {
-            200: {
-                description: "Results",
-                schema: {
-                    type: "object",
-                },
-            },
+            200: { description: "Parse result.", schema: { type: "object" } },
+            400: { description: "Parse error.", schema: { properties: { error: { type: "string" } } } },
         },
         tags: ["Axiom"],
     };

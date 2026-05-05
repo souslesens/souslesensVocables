@@ -51,32 +51,52 @@ export default function () {
     }
 
     DELETE.apiDoc = {
-        summary: "Delete a specific source",
-        security: [{ restrictAdmin: [] }],
-        operationId: "DeleteOneSource",
-        parameters: [],
+        summary: "Delete a source owned by the current user",
+        description:
+            "Removes the source descriptor `id` from `sources.json`. Returns the refreshed list of sources owned by the caller. " +
+            "Does **not** drop the corresponding named graph in the triplestore — use `DELETE /rdf/graph` for that.",
+        security: [{ restrictLoggedUser: [] }],
+        operationId: "deleteUserSource",
+        parameters: [
+            { in: "path", name: "id", type: "string", required: true, description: "Source name to delete. Example: `my_new_ontology`." },
+        ],
         responses: {
             200: {
-                description: "Sources",
+                description: "Source deleted. Returns the refreshed owned-sources list.",
                 schema: {
-                    $ref: "#/definitions/Source",
+                    properties: {
+                        message: { type: "string" },
+                        resources: { $ref: "#/definitions/Sources" },
+                    },
                 },
             },
+            500: { description: "Source not found or persistence error." },
         },
         tags: ["Sources"],
     };
     PUT.apiDoc = {
-        summary: "Update Sources",
-        security: [{ restrictAdmin: [] }],
-        operationId: "updateSources",
-        parameters: [],
+        summary: "Update a source descriptor",
+        description:
+            "Replaces the descriptor of source `id`. The `name` field of the body must equal the path `id`. " +
+            "Returns the refreshed list of sources owned by the caller.",
+        security: [{ restrictLoggedUser: [] }],
+        operationId: "updateUserSource",
+        parameters: [
+            { in: "path", name: "id", type: "string", required: true, description: "Source name to update." },
+            { in: "body", name: "body", required: true, schema: { $ref: "#/definitions/Source" } },
+        ],
         responses: {
             200: {
-                description: "Sources",
+                description: "Source updated.",
                 schema: {
-                    $ref: "#/definitions/Source",
+                    properties: {
+                        message: { type: "string" },
+                        resources: { $ref: "#/definitions/Sources" },
+                    },
                 },
             },
+            400: { description: "Source does not exist (use POST to create)." },
+            500: { description: "Mismatch between path id and body `name`, or persistence error." },
         },
         tags: ["Sources"],
     };

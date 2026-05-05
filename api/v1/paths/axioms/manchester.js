@@ -15,26 +15,17 @@ export default function () {
 
     GET.apiDoc = {
         security: [{ restrictLoggedUser: [] }],
-        summary: "Return manchester syntax of triples",
-        description: "Return manchester syntax of triples",
-        operationId: "Return manchester syntax of triples",
+        summary: "Convert axiom triples to Manchester syntax (in-process)",
+        description:
+            "In-process Manchester rendering (no JOWL server round-trip). Currently the body of the handler is " +
+            "commented out — kept as an HTTP entry point for the legacy `TriplesToManchester` engine.",
+        operationId: "axiomsToManchester",
         parameters: [
-            {
-                name: "triples",
-                description: "triples",
-                in: "query",
-                type: "string",
-                required: true,
-            },
+            { name: "triples", in: "query", type: "string", required: true, description: "JSON-encoded triple array to render." },
         ],
-
         responses: {
-            200: {
-                description: "Results",
-                schema: {
-                    type: "object",
-                },
-            },
+            200: { description: "Manchester string.", schema: { properties: { result: { type: "string" } } } },
+            400: { description: "Parse error.", schema: { properties: { error: { type: "string" } } } },
         },
         tags: ["Axiom"],
     };

@@ -32,16 +32,25 @@ export default function () {
     }
 
     GET.apiDoc = {
-        summary: "Logout user",
-        operationId: "logout",
+        summary: "Log out the current user and return the provider redirect URL",
+        description:
+            "Terminates the local session via `req.logout` (no-op when `mainConfig.auth === \"disabled\"`) and computes a " +
+            "`redirect` URL adapted to the configured provider: " +
+            "Keycloak → `<authServerURL>/realms/<realm>/protocol/openid-connect/logout?redirect_uri=<souslesensUrl>`, " +
+            "Auth0 → `https://<domain>/oidc/logout`, " +
+            "local/database → `/login`. " +
+            "Throws if `mainConfig.auth` is set to an unknown value.",
+        operationId: "authLogout",
         parameters: [],
         responses: {
             200: {
-                description: "Logout current user",
-                schema: {
-                    $ref: "#/definitions/AuthLogout",
+                description: "Provider-specific redirect URL.",
+                schema: { $ref: "#/definitions/AuthLogout" },
+                examples: {
+                    "application/json": { redirect: "/login" },
                 },
             },
+            500: { description: "Logout failure." },
         },
         tags: ["Authentication"],
     };

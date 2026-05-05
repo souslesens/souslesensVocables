@@ -44,62 +44,23 @@ export default function () {
 
     GET.apiDoc = {
         security: [{ restrictLoggedUser: [] }],
-        summary: "generates axioms triples from manchester syntax",
-        description: "generates axioms triples from manchester syntax",
-        operationId: "generates axioms triples from manchester syntax",
+        summary: "Compile a Manchester-syntax axiom into RDF triples",
+        description:
+            "Calls `axioms/manchester2triples` on the JOWL server: parses `manchesterContent` (relative to `classUri` and " +
+            "`axiomType`) and returns the resulting RDF triples. When `saveTriples=true` the JOWL server also persists " +
+            "the triples in `graphUri`. When `checkConsistency=true`, a reasoner pass is run before saving.",
+        operationId: "jowlManchesterToTriples",
         parameters: [
-            {
-                name: "manchesterContent",
-                description: "manchesterContent",
-                type: "string",
-                in: "query",
-                required: true,
-            },
-            {
-                name: "graphUri",
-                description: "ontology graphUri",
-                in: "query",
-                type: "string",
-                required: true,
-            },
-
-            {
-                name: "classUri",
-                description: "JSON ",
-                in: "query",
-                type: "string",
-                required: false,
-            },
-            {
-                name: "axiomType",
-                description: "JSON ",
-                in: "query",
-                type: "string",
-                required: false,
-            },
-            {
-                name: "saveTriples",
-                description: "JSON ",
-                in: "query",
-                type: "string",
-                required: false,
-            },
-            {
-                name: "checkConsistency",
-                description: "JSON ",
-                in: "query",
-                type: "string",
-                required: false,
-            },
+            { name: "manchesterContent", in: "query", type: "string", required: true, description: "Manchester-syntax axiom body. Example: `SubClassOf: BFO:0000001`." },
+            { name: "graphUri", in: "query", type: "string", required: true, description: "Target ontology graph URI. Example: `https://www.industrialontologies.org/core/`." },
+            { name: "classUri", in: "query", type: "string", required: false, description: "Subject class URI." },
+            { name: "axiomType", in: "query", type: "string", required: false, description: "Axiom type (e.g. `SubClassOf`)." },
+            { name: "saveTriples", in: "query", type: "string", required: false, description: "If `\"true\"`, persist generated triples in `graphUri`." },
+            { name: "checkConsistency", in: "query", type: "string", required: false, description: "If `\"true\"`, run a consistency check before saving." },
         ],
-
         responses: {
-            200: {
-                description: "Results",
-                schema: {
-                    type: "object",
-                },
-            },
+            200: { description: "Generated triples (and consistency report when requested).", schema: { type: "object" } },
+            500: { description: "JOWL server disabled or parse error." },
         },
         tags: ["JOWL"],
     };

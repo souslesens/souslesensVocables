@@ -3,7 +3,18 @@
 
 <!-- AUTO-DESC:START -->
 
-This page summarizes the code structure for this directory and its immediate subdirectories. It focuses on the `api / v1 / paths / graphStore` area within the `api` module. Use the table of contents below to navigate deeper.
+## Overview
+
+Lower-level triplestore operations bypassing the source layer. Most routes are admin-only and operate on raw `graphUri` values rather than source names — used during ontology onboarding and bulk import.
+
+## Modules
+
+### 1. Graph export and import (`graph.js`)
+- `GET` exports the named graph identified by `graphUri` as Turtle (`GraphStore.exportGraph`).
+- `POST` (admin-only) imports an RDF file from a public URL into a named graph.
+
+### 2. Source onboarding (`importSource.js`)
+Admin-only orchestration: registers a new `sourceName → graphUri` entry, optionally clears the existing graph, then loads triples from `rdfUrl`. The single entry point used to bootstrap a new ontology source from scratch.
 
 <!-- AUTO-DESC:END -->
 

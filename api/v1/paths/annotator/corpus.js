@@ -1,6 +1,7 @@
 import path from "path";
 import dirContentAnnotator from "../../../../bin/annotator/dirContentAnnotator.js";
 
+// Route /api/v1/annotator/corpus: not used client-side (no calls found in public/ or mainapp/src/). Likely deprecated.
 export default function () {
     let operations = {
         GET,

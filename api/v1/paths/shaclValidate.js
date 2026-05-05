@@ -7,6 +7,7 @@ import("../../../bin/shacl/validator.mjs").then((mod) => {
     Validator = mod; // true
 });
 
+// Route /api/v1/shaclValidate: not used client-side (no calls found in public/ or mainapp/src/). Likely deprecated.
 export default function () {
     let operations = {
         GET,
@@ -14,26 +15,66 @@ export default function () {
     };
 
     POST.apiDoc = {
-        summary: "Upload files",
+        summary: "Validate a triple set against SHACL shapes",
+        description:
+            "Serialises `body.triples` (SLSV-format triples) to Turtle via `RDF_IO.triples2turtle`, then runs the SHACL " +
+            "validator (`bin/shacl/validator.mjs`) using `body.shapes` as the shape graph. Returns the SHACL validation report.",
         security: [{ restrictLoggedUser: [] }],
-        operationId: "upload",
-
-        responses: {
-            200: {
-                description: "Response",
-                // schema: {}
-            },
-        },
+        operationId: "shaclValidate",
         parameters: [
             {
-                name: "triples",
-                description: "triples",
                 in: "body",
+                name: "body",
+                required: false,
                 schema: {
                     type: "object",
+                    properties: {
+                        triples: {
+                            type: "array",
+                            description: "SLSV-format triples to validate.",
+                            items: {
+                                type: "object",
+                                properties: {
+                                    s: { type: "string", example: "http://example.org/asset/1" },
+                                    p: { type: "string", example: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" },
+                                    o: { type: "string", example: "http://example.org/Asset" },
+                                },
+                            },
+                            example: [
+                                {
+                                    s: "http://example.org/asset/1",
+                                    p: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                                    o: "http://example.org/Asset",
+                                },
+                            ],
+                        },
+                        shapes: {
+                            type: "string",
+                            description: "SHACL shape graph in Turtle.",
+                            example: "@prefix sh: <http://www.w3.org/ns/shacl#> .\n@prefix ex: <http://example.org/> .\nex:AssetShape a sh:NodeShape ; sh:targetClass ex:Asset ; sh:property [ sh:path ex:id ; sh:minCount 1 ] .",
+                        },
+                    },
+                    example: {
+                        triples: [
+                            {
+                                s: "http://example.org/asset/1",
+                                p: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                                o: "http://example.org/Asset",
+                            },
+                        ],
+                        shapes: "@prefix sh: <http://www.w3.org/ns/shacl#> .\n@prefix ex: <http://example.org/> .\nex:AssetShape a sh:NodeShape ; sh:targetClass ex:Asset ; sh:property [ sh:path ex:id ; sh:minCount 1 ] .",
+                    },
                 },
             },
         ],
+        responses: {
+            200: {
+                description: "SHACL validation report.",
+                schema: { properties: { output: { type: "object" } } },
+            },
+            500: { description: "Parse or validation error." },
+        },
+        tags: ["Misc"],
     };
 
     function POST(req, res, next) {
@@ -54,34 +95,18 @@ export default function () {
 
     GET.apiDoc = {
         security: [{ restrictLoggedUser: [] }],
-        summary: "validates triples  regarding shacl turtle rules ",
-        description: "validates triples  regarding shacl turtle rules ",
-        operationId: "validates triples  regarding shacl turtle rules",
+        summary: "[GET stub] SHACL validation",
+        description:
+            "Stub — the GET handler is currently a no-op. Use `POST /shaclValidate` to validate triples against shapes.",
+        operationId: "shaclValidateGet",
         parameters: [
-            {
-                name: "shapes",
-                description: "shacl rules in turtle format",
-                type: "string",
-                in: "query",
-                required: true,
-            },
-            {
-                name: "triples",
-                description: "triples graph  in sls format",
-                type: "string",
-                in: "query",
-                required: true,
-            },
+            { name: "shapes", in: "query", type: "string", required: true, description: "SHACL rules in Turtle." },
+            { name: "triples", in: "query", type: "string", required: true, description: "SLSV-format triples." },
         ],
-
         responses: {
-            200: {
-                description: "Results",
-                schema: {
-                    type: "object",
-                },
-            },
+            200: { description: "(no-op).", schema: { type: "object" } },
         },
+        tags: ["Misc"],
     };
 
     return operations;

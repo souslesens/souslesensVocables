@@ -18,29 +18,21 @@ export default function () {
 
     GET.apiDoc = {
         security: [{ restrictLoggedUser: [] }],
-        summary: "List files in data directory",
-        description: "List files in data directory",
-        operationId: "List files in data directory",
+        summary: "List files inside a sub-directory of the data folder",
+        description:
+            "Returns the file names found under `dataDir/<dir>` via `dataController.getFilesList`. " +
+            "Used by MappingModeler and the CSV picker to populate file-selection dialogs.",
+        operationId: "dataListFiles",
         parameters: [
-            {
-                name: "dir",
-                description: "subDirectory in /dataDir",
-                type: "string",
-                in: "query",
-                required: true,
-            },
+            { name: "dir", in: "query", type: "string", required: true, description: "Sub-directory under the configured `dataDir`. Example: `CSV/maintenance`." },
         ],
-
         responses: {
             200: {
-                description: "Results",
-                schema: {
-                    type: "array",
-                    items: {
-                        type: "string",
-                    },
-                },
+                description: "File names.",
+                schema: { type: "array", items: { type: "string" } },
+                examples: { "application/json": ["assets.csv", "events.csv"] },
             },
+            500: { description: "Read error or directory traversal attempt." },
         },
         tags: ["Data"],
     };

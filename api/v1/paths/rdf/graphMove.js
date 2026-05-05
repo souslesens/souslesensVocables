@@ -23,24 +23,44 @@ export default function () {
 
     POST.apiDoc = {
         security: [{ restrictLoggedUser: [] }],
-        summary: "Move a RDF graph to another URI",
+        summary: "Move all triples from one named graph to another",
+        description:
+            "Atomically copies all triples from `sourceGraphUri` to `targetGraphUri` and clears the source graph " +
+            "(implemented by `rdfDataModel.moveGraph`, which usually wraps a SPARQL `MOVE` or `ADD` + `DROP`). " +
+            "Used to rename a source's `graphUri` without losing data.",
+        operationId: "rdfMoveGraph",
         parameters: [
             {
                 name: "body",
                 in: "body",
-                required: true,
+                required: false,
                 schema: {
                     type: "object",
-                    required: ["sourceGraphUri", "targetGraphUri"],
                     properties: {
-                        sourceGraphUri: { type: "string" },
-                        targetGraphUri: { type: "string" },
+                        sourceGraphUri: { type: "string", description: "URI of the existing graph.", example: "http://example.org/temporary/my_new_ontology" },
+                        targetGraphUri: { type: "string", description: "Destination URI.", example: "http://example.org/ontologies/my_new_ontology" },
+                    },
+                    example: {
+                        sourceGraphUri: "http://example.org/temporary/my_new_ontology",
+                        targetGraphUri: "http://example.org/ontologies/my_new_ontology",
+                    },
+                },
+                "x-examples": {
+                    "Rename BFO graph": {
+                        sourceGraphUri: "http://purl.obolibrary.org/obo/bfo.owl",
+                        targetGraphUri: "http://purl.obolibrary.org/obo/bfo-2020.owl",
                     },
                 },
             },
         ],
         responses: {
-            200: { description: "Move OK", schema: { type: "object" } },
+            200: {
+                description: "Move succeeded.",
+                schema: { properties: { message: { type: "string" } } },
+                examples: { "application/json": { message: "Graph moved successfully" } },
+            },
+            400: { description: "Missing `sourceGraphUri` or `targetGraphUri`." },
+            500: { description: "Triplestore error." },
         },
         tags: ["RDF"],
     };

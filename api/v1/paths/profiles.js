@@ -25,7 +25,11 @@ export default function () {
         }
     }
     GET.apiDoc = {
-        summary: "Returns all profiles of current user",
+        summary: "List profiles visible to the current user",
+        description:
+            "Admin callers receive the full profiles catalog (`profileModel.getAllProfiles`). " +
+            "Non-admin callers receive only the profiles they belong to (`profileModel.getUserProfiles`). " +
+            "Each profile carries `allowedTools`, `allowedSourceSchemas`, `sourcesAccessControl`, etc. — see the `Profile` definition.",
         security: [{ restrictLoggedUser: [] }],
         operationId: "getProfilesCurrentUser",
         responses: responseSchema("Profiles", "GET"),

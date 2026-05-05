@@ -18,26 +18,21 @@ export default function () {
         }
     }
     GET.apiDoc = {
-        summary: "Returns an ontology",
-        security: [{ restrictLoggedUser: [] }],
-        operationId: "getOntology",
+        summary: "Stream an ontology as Turtle by its label",
+        description:
+            "Resolves `id` (ontology label, e.g. `BFO`, `IOF_core`) to the underlying ontology file via " +
+            "`RDF_IO.getOntology` and returns it serialised as `text/turtle`. Used to expose a stable URL for tools that " +
+            "need to fetch the raw RDF (reasoners, external editors).",
+        operationId: "adminGetOntology",
         parameters: [
-            {
-                name: "id",
-                description: "Ontology id",
-                in: "path",
-                type: "string",
-                required: true,
-            },
+            { in: "path", name: "id", type: "string", required: true, description: "Ontology label. Example: `BFO`." },
         ],
+        produces: ["text/turtle"],
         responses: {
-            200: {
-                description: "Results",
-                schema: {
-                    type: "object",
-                },
-            },
+            200: { description: "Turtle content of the ontology.", schema: { type: "string" } },
+            500: { description: "Ontology not found or read error." },
         },
+        security: [{ restrictLoggedUser: [] }],
         tags: ["Ontology"],
     };
     return operations;

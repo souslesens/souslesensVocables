@@ -30,17 +30,29 @@ export default function () {
         }
     }
     GET.apiDoc = {
-        summary: "Returns current logged user",
+        summary: "Return the public profile of the current user",
+        description:
+            "Returns the current user without any credential fields (`password`, `token`, `source` are stripped). " +
+            "Special case: when `mainConfig.auth === \"disabled\"`, the endpoint returns a synthetic admin profile " +
+            "(`{ id: \"0\", login: \"admin\", groups: [\"admin\"], allowSourceCreation: true, maxNumberCreatedSource: 1000 }`).",
         security: [{ restrictLoggedUser: [] }],
         operationId: "getMe",
         parameters: [],
         responses: {
             200: {
-                description: "User",
-                schema: {
-                    $ref: "#/definitions/UserMe",
+                description: "Current user public profile.",
+                schema: { $ref: "#/definitions/UserMe" },
+                examples: {
+                    "application/json": {
+                        id: "42",
+                        login: "alice",
+                        groups: ["readers", "modelers"],
+                        allowSourceCreation: true,
+                        maxNumberCreatedSource: 5,
+                    },
                 },
             },
+            500: { description: "Server error." },
         },
         tags: ["Users"],
     };

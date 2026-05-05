@@ -7,21 +7,29 @@ export default function () {
 
     GET.apiDoc = {
         operationId: "getPrefixes",
+        summary: "Return the bundled prefix.cc namespace catalog",
+        description:
+            "Returns `model/prefixes.json` (a snapshot of prefix.cc) used by the SPARQL editor and the URI " +
+            "shorteners across the UI. Map shape: `{ <prefix>: <namespace URI> }`.",
         parameters: [],
         responses: {
             200: {
-                description: "The list of prefixes as JSON",
+                description: "Prefix → namespace map.",
                 schema: {
                     type: "object",
-                    properties: {
-                        uri: { type: "string" },
-                        prefix: { type: "string" },
+                    additionalProperties: { type: "string" },
+                },
+                examples: {
+                    "application/json": {
+                        owl: "http://www.w3.org/2002/07/owl#",
+                        rdfs: "http://www.w3.org/2000/01/rdf-schema#",
+                        bfo: "http://purl.obolibrary.org/obo/bfo.owl#",
+                        iof: "https://www.industrialontologies.org/core/",
                     },
                 },
             },
         },
         security: [{ restrictLoggedUser: [] }],
-        summary: "Retrieve the list of prefixes made by prefix.cc",
         tags: ["Misc"],
     };
 

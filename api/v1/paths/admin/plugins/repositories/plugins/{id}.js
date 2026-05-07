@@ -21,10 +21,35 @@ export default function () {
     }
 
     GET.apiDoc = {
-        operationId: "plugins.repositories.plugins.get",
-        responses: responseSchema("PluginConfig", "GET"),
+        operationId: "adminGetRepositoryPlugins",
+        summary: "List plugin sub-directories inside a cloned Git repository (admin only)",
+        description:
+            "Scans the local clone of repository `{id}` for sub-directories containing a `public/js/main.js` " +
+            "file (the plugin entry-point marker) and returns their names via `toolModel.getRepositoryPlugins`. " +
+            "When the repository contains only one plugin, `message` is a single-entry array with the repository id itself.",
+        parameters: [
+            { name: "id", in: "path", type: "string", required: true, description: "Repository identifier. Example: `slsv-plugin-example`." },
+        ],
+        responses: {
+            200: {
+                description: "Plugin directory names found in the repository.",
+                schema: {
+                    type: "object",
+                    properties: {
+                        message: {
+                            type: "array",
+                            items: { type: "string" },
+                            description: "Plugin folder names (one per discovered `public/js/main.js`).",
+                            example: ["slsv-plugin-example"],
+                        },
+                        status: { type: "integer", example: 200 },
+                    },
+                    example: { message: ["slsv-plugin-example"], status: 200 },
+                },
+            },
+            404: { description: "Repository `{id}` not found in the plugins directory or `plugins.json`." },
+        },
         security: [{ restrictAdmin: [] }],
-        summary: "Retrieve the plugin directories in the Git repository",
         tags: ["Plugins"],
     };
 

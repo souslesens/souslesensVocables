@@ -51,7 +51,7 @@ export default function () {
         operationId: "rdfGetGraphInfo",
         parameters: [
             { name: "source", in: "query", type: "string", required: true, description: "Source name. Example: `BFO`." },
-            { name: "withImports", in: "query", type: "string", enum: ["true", "false"], required: false, default: "false", description: "Aggregate counts across imported sources. Pass `true` to include imports." },
+            { name: "withImports", in: "query", type: "string", required: false, default: "false", description: "Aggregate counts across imported sources. Pass `true` to include imports." },
         ],
         responses: {
             200: {

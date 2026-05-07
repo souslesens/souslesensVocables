@@ -24,7 +24,14 @@ export default function () {
             { name: "triples", in: "query", type: "string", required: true, description: "JSON-encoded triple array to render." },
         ],
         responses: {
-            200: { description: "Manchester string.", schema: { properties: { result: { type: "string" } } } },
+            200: {
+                description: "Manchester string rendered from the supplied triples.",
+                schema: {
+                    type: "object",
+                    properties: { result: { type: "string", description: "Manchester-syntax expression.", example: "BFO_0000001 SubClassOf owl:Thing" } },
+                    example: { result: "BFO_0000001 SubClassOf owl:Thing" },
+                },
+            },
             400: { description: "Parse error.", schema: { properties: { error: { type: "string" } } } },
         },
         tags: ["Axiom"],

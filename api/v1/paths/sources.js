@@ -74,7 +74,7 @@ export default function () {
             default: { description: "Server error.", schema: { additionalProperties: true } },
         },
         parameters: [
-            { name: "ownedOnly", in: "query", type: "string", enum: ["true", "false"], required: false, description: "If `true`, restrict the result to sources owned by the caller." },
+            { name: "ownedOnly", in: "query", type: "string", required: false, description: "If `true`, restrict the result to sources owned by the caller." },
             { name: "sourcesFile", in: "query", type: "string", required: false, description: "Optional override of the default sources file (admin debugging)." },
         ],
         tags: ["Sources"],

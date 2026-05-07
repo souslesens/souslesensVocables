@@ -48,14 +48,11 @@ export default function () {
         ],
         responses: {
             200: {
-                description: "Parse result.",
+                description: "Axiom parses without syntax errors.",
                 schema: {
-                    type: "object",
-                    additionalProperties: true,
-                    description:
-                        "ANTLR parse tree produced by `OWL2ManchesterParser` for the supplied `axiom`. " +
-                        "Tree shape mirrors the Manchester-syntax grammar (rules, tokens, child nodes). " +
-                        "Parse errors surface as a `400` with `{ error }`.",
+                    type: "string",
+                    description: 'Always the literal `"OK"` when the axiom passes `OWL2ManchesterParser` without syntax errors.',
+                    example: "OK",
                 },
             },
             400: { description: "Parse error.", schema: { properties: { error: { type: "string" } } } },

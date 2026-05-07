@@ -53,8 +53,9 @@ export default function () {
                 description: "Suggested completions.",
                 schema: {
                     type: "array",
-                    items: { type: "object", additionalProperties: true, description: "Suggestion entry produced by the `antlr4-autosuggest` engine (token type, candidate text, ...)." },
-                    description: "Ordered list of valid follow-up tokens at the current parser state.",
+                    items: { type: "string", description: "Candidate token text (OWL Manchester keyword, class URI, or property URI)." },
+                    description: "Ordered list of valid follow-up token strings at the current `OWL2ManchesterParser` state, produced by `antlr4-autosuggest`.",
+                    example: ["SubClassOf", "EquivalentClasses", "DisjointClasses"],
                 },
             },
             400: { description: "Engine error.", schema: { properties: { error: { type: "string" } } } },

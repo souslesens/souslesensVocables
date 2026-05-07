@@ -35,13 +35,30 @@ export default function () {
                     type: "object",
                     additionalProperties: true,
                     description:
-                        "Model object as previously POSTed for `source`. When entries were stored under sub-keys, " +
-                        "the object is shaped `{ classes: {...}, properties: {...}, restrictions: {...}, ... }` keyed by entry type, " +
-                        "each holding URI-keyed dictionaries of model entries.",
+                        "Model object as previously POSTed for `source`. Full OWL model shape (e.g. BFO) includes: " +
+                        "`graphUri` (string) — named graph URI; " +
+                        "`classes` — URI-keyed map of `{ id, label, superClass, superClassLabel }`; " +
+                        "`properties` — URI-keyed map of `{ id, label, inverseProp, superProp }`; " +
+                        "`nonObjectProperties` — URI-keyed map of `{ id, label, domain, range }`; " +
+                        "`constraints` — URI-keyed map of `{ domain, range, domainLabel, rangeLabel, label, superProp }`; " +
+                        "`restrictions` — URI-keyed map of restriction arrays `[{ blankNodeId, ... }]`; " +
+                        "`classesCount` (integer). Shape may differ when the client POSTed a partial or custom model.",
                     example: {
+                        graphUri: "http://purl.obolibrary.org/obo/bfo.owl",
+                        classesCount: 84,
                         classes: {
-                            "http://example.org/Asset": { id: "http://example.org/Asset", label: "Asset" },
+                            "http://purl.obolibrary.org/obo/BFO_0000001": { id: "http://purl.obolibrary.org/obo/BFO_0000001", label: "entity", superClass: null, superClassLabel: null },
                         },
+                        properties: {
+                            "http://purl.obolibrary.org/obo/BFO_0000115": { id: "http://purl.obolibrary.org/obo/BFO_0000115", label: "has member part", inverseProp: "http://purl.obolibrary.org/obo/BFO_0000129", superProp: "http://purl.obolibrary.org/obo/BFO_0000178" },
+                        },
+                        nonObjectProperties: {
+                            "http://www.w3.org/2004/02/skos/core#definition": { id: "http://www.w3.org/2004/02/skos/core#definition", label: "definition", domain: null, range: null },
+                        },
+                        constraints: {
+                            "http://purl.obolibrary.org/obo/BFO_0000221": { domain: "http://purl.obolibrary.org/obo/BFO_0000203", range: "http://purl.obolibrary.org/obo/BFO_0000008", domainLabel: "temporal instant", rangeLabel: "temporal region", label: "first instant of", superProp: null },
+                        },
+                        restrictions: {},
                     },
                 },
             },
@@ -80,18 +97,20 @@ export default function () {
                 schema: {
                     type: "object",
                     properties: {
-                        source: { type: "string", example: "IOF_core" },
+                        source: { type: "string", example: "BFO" },
                         model: {
                             type: "string",
-                            description: "JSON-stringified model when `key` is set, else the raw model object.",
-                            example: '{"http://example.org/Asset":{"id":"http://example.org/Asset","label":"Asset"}}',
+                            description:
+                                "JSON-stringified sub-section when `key` is set (e.g. a URI-keyed map of class objects), " +
+                                "else the raw full model object (`{ graphUri, classes, properties, nonObjectProperties, constraints, restrictions, classesCount }`).",
+                            example: '{"http://purl.obolibrary.org/obo/BFO_0000001":{"id":"http://purl.obolibrary.org/obo/BFO_0000001","label":"entity","superClass":null,"superClassLabel":null}}',
                         },
-                        key: { type: "string", description: "Optional sub-key (e.g. `classes`, `properties`).", example: "classes" },
+                        key: { type: "string", description: "Optional sub-key: `classes`, `properties`, `nonObjectProperties`, `constraints`, `restrictions`, `classesCount`, or `graphUri`.", example: "classes" },
                     },
                     example: {
-                        source: "IOF_core",
+                        source: "BFO",
                         key: "classes",
-                        model: '{"http://example.org/Asset":{"id":"http://example.org/Asset","label":"Asset"}}',
+                        model: '{"http://purl.obolibrary.org/obo/BFO_0000001":{"id":"http://purl.obolibrary.org/obo/BFO_0000001","label":"entity","superClass":null,"superClassLabel":null}}',
                     },
                 },
             },
@@ -147,26 +166,29 @@ export default function () {
                         source: { type: "string", example: "IOF_core" },
                         data: {
                             type: "object",
-                            description: "Delta to apply, keyed by entry type (`classes`, `properties`, `restrictions`, ...).",
+                            description:
+                                "Delta keyed by entry type: `classes`, `properties`, `nonObjectProperties`, `constraints`, or `restrictions`. " +
+                                "Each value is a URI-keyed map of model entries. For `restrictions`, values are arrays of restriction objects `[{ blankNodeId, ... }]` " +
+                                "that are concatenated (insert) or filtered by `blankNodeId` (remove).",
                             example: {
                                 classes: {
-                                    "http://example.org/Asset": { id: "http://example.org/Asset", label: "Asset" },
+                                    "http://purl.obolibrary.org/obo/BFO_0000001": { id: "http://purl.obolibrary.org/obo/BFO_0000001", label: "entity", superClass: null, superClassLabel: null },
                                 },
                             },
                         },
                         options: {
                             type: "object",
                             properties: {
-                                remove: { type: "string", description: "If `\"true\"`, treat `data` as a removal patch.", example: "false" },
+                                remove: { type: "string", description: 'If `"true"`, entries in `data` are deleted from the cache. For `restrictions`, matched by `blankNodeId`.', example: "false" },
                             },
                             example: { remove: "false" },
                         },
                     },
                     example: {
-                        source: "IOF_core",
+                        source: "BFO",
                         data: {
                             classes: {
-                                "http://example.org/Asset": { id: "http://example.org/Asset", label: "Asset" },
+                                "http://purl.obolibrary.org/obo/BFO_0000001": { id: "http://purl.obolibrary.org/obo/BFO_0000001", label: "entity", superClass: null, superClassLabel: null },
                             },
                         },
                         options: { remove: "false" },

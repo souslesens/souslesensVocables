@@ -46,8 +46,7 @@ export default function () {
                             type: "boolean",
                         },
                         dataSource: {
-                            type: "object",
-                            $ref: "#/definitions/Source",
+                            $ref: "#/definitions/SourceUpdate",
                         },
                         options: {
                             type: "object",

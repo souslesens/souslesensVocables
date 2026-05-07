@@ -18,7 +18,7 @@ export default function () {
             let localSourceModel = sourceModel;
 
             let userSources;
-            if (req.query.ownedOnly) {
+            if (req.query.ownedOnly === "true") {
                 userSources = await localSourceModel.getOwnedSources(userInfo.user);
             } else {
                 userSources = await localSourceModel.getUserSources(userInfo.user);
@@ -74,7 +74,7 @@ export default function () {
             default: { description: "Server error.", schema: { additionalProperties: true } },
         },
         parameters: [
-            { name: "ownedOnly", in: "query", type: "string", required: false, description: "If true, restrict the result to sources owned by the caller." },
+            { name: "ownedOnly", in: "query", type: "string", enum: ["true", "false"], required: false, description: "If `true`, restrict the result to sources owned by the caller." },
             { name: "sourcesFile", in: "query", type: "string", required: false, description: "Optional override of the default sources file (admin debugging)." },
         ],
         tags: ["Sources"],
@@ -133,7 +133,7 @@ export default function () {
                 description: "Map of `sourceName → Source descriptor`.",
                 schema: {
                     type: "object",
-                    additionalProperties: { $ref: "#/definitions/Source" },
+                    additionalProperties: { $ref: "#/definitions/SourceCreate" },
                     example: {
                         my_new_ontology: {
                             name: "my_new_ontology",

@@ -111,7 +111,7 @@ export default function () {
         operationId: "adminUpdateSource",
         parameters: [
             { in: "path", name: "id", type: "string", required: true, description: "Source name to update." },
-            { in: "body", name: "body", required: true, schema: { $ref: "#/definitions/Source" } },
+            { in: "body", name: "body", required: true, schema: { $ref: "#/definitions/SourceUpdate" } },
         ],
         responses: {
             200: {

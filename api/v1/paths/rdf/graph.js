@@ -33,7 +33,7 @@ export default function () {
             }
 
             let graphsImports = [];
-            if (includesImports) {
+            if (includesImports === "true") {
                 graphsImports = userSources[sourceName].imports
                     .map((src) => {
                         if (userSources[src].graphUri) {
@@ -216,8 +216,8 @@ export default function () {
         consumes: ["multipart/form-data"],
         parameters: [
             { name: "source", in: "formData", required: true, type: "string", description: "Source name (key of `sources.json`). Example: `BFO`." },
-            { name: "last", in: "formData", required: true, type: "string", description: "True for the final chunk — triggers the actual upload to the triplestore." },
-            { name: "clean", in: "formData", required: true, type: "string", description: "If true, drops the temporary file and returns without uploading." },
+            { name: "last", in: "formData", required: false, type: "string", description: "Truthy string for the final chunk — triggers the actual upload to the triplestore." },
+            { name: "clean", in: "formData", required: false, type: "string", description: "Truthy string drops the temporary file and returns without uploading." },
             { name: "data", in: "formData", required: true, type: "file", format: "binary", description: "RDF chunk content." },
             { name: "identifier", in: "formData", required: false, type: "string", description: "ULID identifying the upload session. Omit on the first chunk; reuse the value returned by the server for following chunks." },
         ],

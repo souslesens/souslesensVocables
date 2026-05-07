@@ -90,55 +90,33 @@ const apiDoc = {
         },
         User: {
             type: "object",
-            additionalProperties: false,
+            additionalProperties: true,
             properties: {
-                id: {
-                    type: "string",
-                },
-                login: {
-                    type: "string",
-                },
-                password: {
-                    type: "string",
-                },
-                groups: {
-                    type: "array",
-                    items: {
-                        type: "string",
-                    },
-                },
-                _type: {
-                    type: "string",
-                },
+                id: { type: "string" },
+                login: { type: "string" },
+                password: { type: "string" },
+                groups: { type: "array", items: { type: "string" } },
+                _type: { type: "string" },
+                source: { type: "string" },
+                token: { type: "string" },
+                allowSourceCreation: { type: "boolean" },
+                maxNumberCreatedSource: { type: "number" },
             },
-            required: ["_type", "groups", "id", "login", "password"],
+            required: ["login", "groups"],
             title: "User Model",
         },
         UserMe: {
             type: "object",
-            additionalProperties: false,
+            additionalProperties: true,
             properties: {
-                id: {
-                    type: "string",
-                },
-                login: {
-                    type: "string",
-                },
-                groups: {
-                    type: "array",
-                    items: {
-                        type: "string",
-                    },
-                },
-                allowSourceCreation: {
-                    type: "boolean",
-                },
-                maxNumberCreatedSource: {
-                    type: "number",
-                },
+                id: { type: "string" },
+                login: { type: "string" },
+                groups: { type: "array", items: { type: "string" } },
+                allowSourceCreation: { type: "boolean" },
+                maxNumberCreatedSource: { type: "number" },
             },
-            required: ["_type", "groups", "id", "login", "password"],
-            title: "User Model",
+            required: ["login", "groups"],
+            title: "UserMe Model",
         },
         Source: {
             type: "object",
@@ -219,9 +197,59 @@ const apiDoc = {
             ],
             title: "Source Model",
         },
+        SourceCreate: {
+            type: "object",
+            properties: {
+                name: { type: "string" },
+                _type: { type: "string" },
+                id: { type: "string" },
+                type: { type: "string" },
+                graphUri: { type: "string", format: "uri" },
+                sparql_server: { $ref: "#/definitions/SparqlServer" },
+                controller: { type: "string" },
+                topClassFilter: { type: "string" },
+                schemaType: { type: "string" },
+                dataSource: { type: "null" },
+                schema: { type: "null" },
+                isDraft: { type: "boolean" },
+                editable: { type: "boolean" },
+                color: { type: "string" },
+                predicates: { $ref: "#/definitions/Predicates" },
+                group: { type: "string" },
+                imports: { type: "array", items: {} },
+                owner: { type: "string" },
+                published: { type: "boolean" },
+            },
+            required: ["name"],
+            title: "Source Create Model",
+        },
+        SourceUpdate: {
+            type: "object",
+            properties: {
+                name: { type: "string" },
+                _type: { type: "string" },
+                id: { type: "string" },
+                type: { type: "string" },
+                graphUri: { type: "string", format: "uri" },
+                sparql_server: { $ref: "#/definitions/SparqlServer" },
+                controller: { type: "string" },
+                topClassFilter: { type: "string" },
+                schemaType: { type: "string" },
+                dataSource: { type: "null" },
+                schema: { type: "null" },
+                isDraft: { type: "boolean" },
+                editable: { type: "boolean" },
+                color: { type: "string" },
+                predicates: { $ref: "#/definitions/Predicates" },
+                group: { type: "string" },
+                imports: { type: "array", items: {} },
+            },
+            required: ["name"],
+            title: "Source Update Model",
+        },
         Predicates: {
             type: "object",
-            additionalProperties: false,
+            additionalProperties: true,
             properties: {
                 broaderPredicate: {
                     type: "string",
@@ -230,18 +258,13 @@ const apiDoc = {
                     type: "string",
                 },
             },
-            required: ["broaderPredicate", "lang"],
             title: "Predicates",
         },
         SparqlServer: {
             type: "object",
-            additionalProperties: false,
             properties: {
                 url: {
                     type: "string",
-                },
-                xx: {
-                    type: "integer",
                 },
             },
             required: ["url"],
@@ -338,13 +361,12 @@ const apiDoc = {
         },
         Blender: {
             type: "object",
-            additionalProperties: false,
+            additionalProperties: true,
             properties: {
                 contextMenuActionStartLevel: {
                     type: "integer",
                 },
             },
-            required: ["contextMenuActionStartLevel"],
             title: "Blender",
         },
 

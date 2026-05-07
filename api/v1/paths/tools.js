@@ -30,13 +30,60 @@ export default function () {
                 schema: {
                     properties: {
                         message: { type: "string" },
-                        resources: { type: "array", items: { type: "string" } },
+                        resources: {
+                            type: "array",
+                            description: "Mixed list of tool entries and plugin entries.",
+                            items: {
+                                type: "object",
+                                properties: {
+                                    type: { type: "string", description: "`tool` or `plugin`." },
+                                    name: { type: "string" },
+                                    label: { type: "string", description: "Display label (tools only)." },
+                                    controller: { type: "string", description: "Frontend controller module (tools only)." },
+                                    useSource: { type: "boolean" },
+                                    multiSources: { type: "boolean" },
+                                    toTools: { type: "object" },
+                                    displayImports: { type: "boolean" },
+                                    publicTool: { type: "boolean" },
+                                    resetURLParamsDiv: { type: "string" },
+                                    config: { type: "object", description: "Plugin-specific config (plugins only)." },
+                                },
+                            },
+                        },
                     },
                 },
                 examples: {
                     "application/json": {
                         message: "resource successfully fetched",
-                        resources: ["lineage", "KGquery", "MappingModeler"],
+                        resources: [
+                            {
+                                type: "tool",
+                                label: "lineage",
+                                name: "lineage",
+                                controller: "Lineage_whiteboard",
+                                useSource: true,
+                                multiSources: false,
+                                toTools: {},
+                                displayImports: true,
+                                publicTool: false,
+                            },
+                            {
+                                type: "tool",
+                                label: "SPARQL endpoint",
+                                name: "SPARQL",
+                                controller: "SPARQL_endpoint",
+                                useSource: false,
+                                multiSources: false,
+                                toTools: {},
+                                resetURLParamsDiv: "mainDialogDiv",
+                                publicTool: false,
+                            },
+                            {
+                                type: "plugin",
+                                name: "myPlugin",
+                                config: { useSource: true },
+                            },
+                        ],
                     },
                 },
             },

@@ -87,7 +87,7 @@ export default function () {
                 in: "body",
                 name: "body",
                 required: true,
-                schema: { type: "object", additionalProperties: { $ref: "#/definitions/Source" } },
+                schema: { type: "object", additionalProperties: { $ref: "#/definitions/SourceCreate" } },
                 "x-examples": {
                     "Add IOF_core": {
                         IOF_core: {

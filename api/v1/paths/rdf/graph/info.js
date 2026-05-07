@@ -21,7 +21,7 @@ export default function () {
             }
 
             let graphsImports = [];
-            if (includesImports) {
+            if (includesImports === "true") {
                 graphsImports = userSources[sourceName].imports
                     .map((src) => {
                         if (userSources[src].graphUri) {
@@ -51,7 +51,7 @@ export default function () {
         operationId: "rdfGetGraphInfo",
         parameters: [
             { name: "source", in: "query", type: "string", required: true, description: "Source name. Example: `BFO`." },
-            { name: "withImports", in: "query", type: "boolean", required: false, default: false, description: "Aggregate counts across imported sources." },
+            { name: "withImports", in: "query", type: "string", enum: ["true", "false"], required: false, default: "false", description: "Aggregate counts across imported sources. Pass `true` to include imports." },
         ],
         responses: {
             200: {

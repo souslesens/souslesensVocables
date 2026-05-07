@@ -102,9 +102,9 @@ export default function () {
                         "for the upstream endpoint.",
                     properties: {
                         POST: {
-                            type: "boolean",
-                            description: "If true, send as POST and apply user-graph access filtering via `UserRequestFiltering.filterSparqlRequest`.",
-                            example: true,
+                            type: "string",
+                            description: "Truthy string (e.g. `\"true\"`) to send as POST and apply user-graph access filtering via `UserRequestFiltering.filterSparqlRequest`. Form-encoded → arrives as string.",
+                            example: "true",
                         },
                         url: {
                             type: "string",
@@ -127,7 +127,7 @@ export default function () {
                         },
                     },
                     example: {
-                        POST: true,
+                        POST: "true",
                         url: "http://virtuoso.local:8890/sparql",
                         body: '{"params":{"query":"SELECT ?s ?p ?o WHERE { ?s ?p ?o } LIMIT 10","useProxy":true},"headers":{"Accept":"application/sparql-results+json","Content-Type":"application/x-www-form-urlencoded"},"user":{"identifiant":"admin","login":"admin","groupes":["admin"]}}',
                     },

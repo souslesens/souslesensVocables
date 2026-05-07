@@ -44,13 +44,14 @@ export default function () {
                         type: "object",
                         properties: {
                             name: { type: "string", description: "Graph URI." },
+                            count: { type: "string", description: "Number of triples in the graph." },
                         },
                     },
                 },
                 examples: {
                     "application/json": [
-                        { name: "http://purl.obolibrary.org/obo/bfo.owl" },
-                        { name: "https://www.industrialontologies.org/core/" },
+                        { name: "http://purl.obolibrary.org/obo/bfo.owl", count: "6807833" },
+                        { name: "https://www.industrialontologies.org/core/", count: "1234" },
                     ],
                 },
             },

@@ -29,7 +29,22 @@ export default function () {
             { name: "source", in: "query", type: "string", required: true, description: "Source name. Example: `IOF_core`." },
         ],
         responses: {
-            200: { description: "Cached ontology model.", schema: { type: "object" } },
+            200: {
+                description: "Cached ontology model.",
+                schema: {
+                    type: "object",
+                    additionalProperties: true,
+                    description:
+                        "Model object as previously POSTed for `source`. When entries were stored under sub-keys, " +
+                        "the object is shaped `{ classes: {...}, properties: {...}, restrictions: {...}, ... }` keyed by entry type, " +
+                        "each holding URI-keyed dictionaries of model entries.",
+                    example: {
+                        classes: {
+                            "http://example.org/Asset": { id: "http://example.org/Asset", label: "Asset" },
+                        },
+                    },
+                },
+            },
             500: { description: "No cached model for this source." },
         },
         tags: ["Ontology"],

@@ -33,7 +33,27 @@ export default function () {
             { name: "options", in: "query", type: "string", required: false, description: "JSON-encoded options, e.g. `{\"lines\":50}`." },
         ],
         responses: {
-            200: { description: "Parsed rows.", schema: { type: "object" } },
+            200: {
+                description: "Parsed rows.",
+                schema: {
+                    type: "object",
+                    properties: {
+                        headers: { type: "array", items: { type: "string" }, description: "Column names extracted from the CSV header row." },
+                        data: {
+                            type: "array",
+                            items: { type: "object", additionalProperties: true },
+                            description: "Row objects keyed by header name. Capped by `options.lines` (default 1 000 000).",
+                        },
+                    },
+                    example: {
+                        headers: ["id", "label"],
+                        data: [
+                            { id: "A1", label: "Asset 1" },
+                            { id: "A2", label: "Asset 2" },
+                        ],
+                    },
+                },
+            },
             500: { description: "Read or parse error." },
         },
         tags: ["Data"],

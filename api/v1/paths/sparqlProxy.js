@@ -212,8 +212,15 @@ export default function () {
         ],
         responses: {
             200: {
-                description: "Raw response from the remote endpoint.",
-                schema: { type: "object" },
+                description: "Raw response from the remote SPARQL endpoint.",
+                schema: {
+                    type: "object",
+                    additionalProperties: true,
+                    description:
+                        "Body returned by the upstream endpoint, forwarded as-is. For SELECT queries with `Accept: application/sparql-results+json`, " +
+                        "the payload follows the SPARQL 1.1 JSON Results shape `{ head: { vars: [...] }, results: { bindings: [...] } }`. " +
+                        "For ASK / CONSTRUCT / DESCRIBE queries the shape depends on the endpoint and requested format.",
+                },
             },
             500: { description: "Proxy failure or upstream error." },
         },

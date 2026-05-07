@@ -53,7 +53,30 @@ export default function () {
             },
         ],
         responses: {
-            200: { description: "Candidate root URIs and statistics.", schema: { type: "object" } },
+            200: {
+                description: "Candidate root URIs and statistics.",
+                schema: {
+                    type: "object",
+                    properties: {
+                        uriRoots: {
+                            type: "array",
+                            items: { type: "string" },
+                            description: "Distinct URI prefixes (`http://...` minus trailing `/` or `#` segment) found among subjects.",
+                        },
+                        triples: {
+                            type: "array",
+                            items: { type: "object", additionalProperties: true },
+                            description: "Always empty in the response — cleared after counting to keep the payload small.",
+                        },
+                        triplesCount: { type: "integer", description: "Total number of triples parsed from `sourceUrl`." },
+                    },
+                    example: {
+                        uriRoots: ["https://www.industrialontologies.org/core/", "http://purl.obolibrary.org/obo"],
+                        triples: [],
+                        triplesCount: 12345,
+                    },
+                },
+            },
             500: { description: "Fetch or parse error." },
         },
         tags: ["Ontology"],

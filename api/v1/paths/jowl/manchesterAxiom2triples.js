@@ -59,7 +59,16 @@ export default function () {
             { name: "checkConsistency", in: "query", type: "string", required: false, description: "If `\"true\"`, run a consistency check before saving." },
         ],
         responses: {
-            200: { description: "Generated triples (and consistency report when requested).", schema: { type: "object" } },
+            200: {
+                description: "Generated triples (and consistency report when requested).",
+                schema: {
+                    type: "object",
+                    additionalProperties: true,
+                    description:
+                        "JOWL `manchester2triples` payload. Carries the array of generated RDF triples (typically under " +
+                        "`triples`) and, when `checkConsistency=true`, a reasoner consistency report.",
+                },
+            },
             500: { description: "JOWL server disabled or parse error." },
         },
         tags: ["JOWL"],

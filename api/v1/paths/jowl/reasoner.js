@@ -162,7 +162,17 @@ export default function () {
             { name: "options", in: "query", type: "string", required: false, description: "JSON-encoded options forwarded to the reasoner." },
         ],
         responses: {
-            200: { description: "Reasoner output (depends on `operation`).", schema: { type: "object" } },
+            200: {
+                description: "Reasoner output (depends on `operation`).",
+                schema: {
+                    type: "object",
+                    additionalProperties: true,
+                    description:
+                        "Reasoner payload forwarded from JOWL. Shape varies by `operation`: `classify` returns a class " +
+                        "hierarchy graph, `consistency` returns a `{consistent, explanation?}` object, `unsatisfiable` " +
+                        "returns an array of class URIs, `inferences` returns the inferred triples.",
+                },
+            },
             500: { description: "JOWL server error." },
         },
         tags: ["JOWL"],

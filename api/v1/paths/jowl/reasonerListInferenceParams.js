@@ -33,7 +33,16 @@ export default function () {
         operationId: "jowlReasonerListInferenceParams",
         parameters: [],
         responses: {
-            200: { description: "Inference parameter descriptors.", schema: { type: "object" } },
+            200: {
+                description: "Inference parameter descriptors.",
+                schema: {
+                    type: "object",
+                    additionalProperties: true,
+                    description:
+                        "JOWL `reasoner/parametres` payload. Describes the configurable inference parameters (id, label, " +
+                        "default value, allowed values, ...) the UI uses to render the reasoner configuration form.",
+                },
+            },
             500: { description: "JOWL server error." },
         },
         tags: ["JOWL"],

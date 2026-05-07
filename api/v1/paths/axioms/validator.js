@@ -47,7 +47,17 @@ export default function () {
             { name: "options", in: "query", type: "string", required: false, description: "JSON-encoded options (vocabularies, prefix maps, ...)." },
         ],
         responses: {
-            200: { description: "Parse result.", schema: { type: "object" } },
+            200: {
+                description: "Parse result.",
+                schema: {
+                    type: "object",
+                    additionalProperties: true,
+                    description:
+                        "ANTLR parse tree produced by `OWL2ManchesterParser` for the supplied `axiom`. " +
+                        "Tree shape mirrors the Manchester-syntax grammar (rules, tokens, child nodes). " +
+                        "Parse errors surface as a `400` with `{ error }`.",
+                },
+            },
             400: { description: "Parse error.", schema: { properties: { error: { type: "string" } } } },
         },
         tags: ["Axiom"],

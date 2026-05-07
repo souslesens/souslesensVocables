@@ -27,7 +27,19 @@ export default function () {
             { name: "name", in: "path", type: "string", required: true, description: "Asset mapping name." },
         ],
         responses: {
-            200: { description: "Asset mapping document.", schema: { type: "object" } },
+            200: {
+                description: "Aggregated asset mapping document.",
+                schema: {
+                    type: "object",
+                    properties: {
+                        mappings: { type: "array", items: { type: "object", additionalProperties: true }, description: "Concatenated `mappings` arrays from every file whose name starts with `name`." },
+                        model: { type: "object", additionalProperties: true, description: "Merged `model` from every matching mapping file." },
+                        relationalKeysMap: { type: "object", additionalProperties: true, description: "Snapshot of `KGcontroller.relationalKeysMap`." },
+                        data: { type: "object", additionalProperties: true },
+                        infos: { type: "object", additionalProperties: true },
+                    },
+                },
+            },
             400: { description: "Asset mapping not found or read error." },
         },
         tags: ["KG"],

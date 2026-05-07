@@ -36,7 +36,14 @@ export default function () {
             { name: "fileName", in: "query", type: "string", required: true, description: "File name including extension." },
         ],
         responses: {
-            200: { description: "File content.", schema: { type: "object" } },
+            200: {
+                description: "File content.",
+                schema: {
+                    type: "string",
+                    description: "Raw file content as UTF-8 text (typically JSON-stringified for `*.json` files).",
+                    example: '{"id":"assets_mapping","label":"Assets","columns":[]}',
+                },
+            },
             500: { description: "File not found or read error." },
         },
         tags: ["Data"],

@@ -69,7 +69,17 @@ export default function () {
             { name: "getManchesterExpression", in: "query", type: "string", required: false, description: "If truthy, include Manchester-syntax forms." },
         ],
         responses: {
-            200: { description: "Axioms (and optionally triples / Manchester strings).", schema: { type: "object" } },
+            200: {
+                description: "Axioms (and optionally triples / Manchester strings).",
+                schema: {
+                    type: "object",
+                    additionalProperties: true,
+                    description:
+                        "JOWL `getClassAxioms` payload. Keyed by axiom type (e.g. `SubClassOf`, `EquivalentClasses`, " +
+                        "`DisjointClasses`). Each entry carries the axiom expression and — when requested — the underlying " +
+                        "RDF triples (`triples`) and Manchester-syntax form (`manchester`).",
+                },
+            },
             500: { description: "JOWL server disabled or upstream error." },
         },
         tags: ["JOWL"],

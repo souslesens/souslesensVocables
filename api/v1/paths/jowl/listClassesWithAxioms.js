@@ -51,7 +51,14 @@ export default function () {
             { name: "graphName", in: "query", type: "string", required: true, description: "Ontology graph URI. Example: `http://purl.obolibrary.org/obo/bfo.owl`." },
         ],
         responses: {
-            200: { description: "Array of class URIs holding axioms.", schema: { type: "object" } },
+            200: {
+                description: "Array of class URIs holding axioms.",
+                schema: {
+                    type: "array",
+                    items: { type: "string", description: "Class URI." },
+                    example: ["http://purl.obolibrary.org/obo/BFO_0000001", "http://purl.obolibrary.org/obo/BFO_0000015"],
+                },
+            },
             500: { description: "JOWL server error." },
         },
         tags: ["JOWL"],

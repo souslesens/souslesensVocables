@@ -63,7 +63,25 @@ export default function () {
             },
         ],
         responses: {
-            200: { description: "Counts of triples generated and loaded.", schema: { type: "object" } },
+            200: {
+                description: "Counts of triples generated and loaded.",
+                schema: {
+                    type: "object",
+                    properties: {
+                        sampleTriples: {
+                            type: "array",
+                            items: { type: "object", additionalProperties: true },
+                            description: "Populated only when `options.sampleSize` is set: a preview slice of the generated triples (no DB write).",
+                        },
+                        totalTriplesCount: {
+                            type: "object",
+                            additionalProperties: { type: "integer" },
+                            description: "Map `tableName → number of triples loaded` for the regular (non-sample) run.",
+                        },
+                    },
+                    example: { sampleTriples: [], totalTriplesCount: { "assets.csv": 4321 } },
+                },
+            },
             500: { description: "Mapping or load error." },
         },
         tags: ["KG"],
@@ -82,7 +100,16 @@ export default function () {
             { name: "options", in: "query", type: "string", required: false, description: "JSON-encoded options object." },
         ],
         responses: {
-            200: { description: "Counts of deleted triples per table.", schema: { type: "object" } },
+            200: {
+                description: "SPARQL DELETE result.",
+                schema: {
+                    type: "object",
+                    additionalProperties: true,
+                    description:
+                        "Raw response forwarded from the SPARQL endpoint after the `DELETE WHERE` query. Shape varies by " +
+                        "triple store (Virtuoso typically returns a `{head, results}` envelope or a textual confirmation).",
+                },
+            },
             500: { description: "SPARQL DELETE error." },
         },
         tags: ["KG"],

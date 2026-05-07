@@ -30,8 +30,12 @@ export default function () {
 
         responses: {
             200: {
-                description: "Results",
-                schema: {},
+                description: "Parsed JSON content of the file.",
+                schema: {
+                    type: "object",
+                    additionalProperties: true,
+                    description: "Result of `JSON.parse` on `public/vocables/<filePath>`. Free-form: shape depends on the target file.",
+                },
             },
         },
         tags: ["Misc"],

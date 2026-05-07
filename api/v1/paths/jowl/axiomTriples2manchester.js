@@ -50,7 +50,14 @@ export default function () {
             { name: "axiomTriples", in: "query", type: "string", required: true, description: "JSON-encoded array of triples to convert." },
         ],
         responses: {
-            200: { description: "Manchester-syntax string.", schema: { type: "object" } },
+            200: {
+                description: "Manchester-syntax string.",
+                schema: {
+                    type: "string",
+                    description: "Manchester-syntax expression rendered from the supplied axiom triples.",
+                    example: "SubClassOf: BFO:0000001",
+                },
+            },
             500: { description: "JOWL server disabled or parse error." },
         },
         tags: ["JOWL"],

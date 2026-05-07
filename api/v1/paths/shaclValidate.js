@@ -104,7 +104,14 @@ export default function () {
             { name: "triples", in: "query", type: "string", required: true, description: "SLSV-format triples." },
         ],
         responses: {
-            200: { description: "(no-op).", schema: { type: "object" } },
+            200: {
+                description: "Empty response — handler is a no-op stub.",
+                schema: {
+                    type: "object",
+                    additionalProperties: false,
+                    description: "Always empty: the GET handler exits without writing a body. Use `POST /shaclValidate` instead.",
+                },
+            },
         },
         tags: ["Misc"],
     };

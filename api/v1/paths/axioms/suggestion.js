@@ -49,7 +49,14 @@ export default function () {
             { name: "options", in: "query", type: "string", required: false, description: "JSON-encoded editor state (current class URI, allowed vocabularies, ...)." },
         ],
         responses: {
-            200: { description: "Suggested completions.", schema: { type: "object" } },
+            200: {
+                description: "Suggested completions.",
+                schema: {
+                    type: "array",
+                    items: { type: "object", additionalProperties: true, description: "Suggestion entry produced by the `antlr4-autosuggest` engine (token type, candidate text, ...)." },
+                    description: "Ordered list of valid follow-up tokens at the current parser state.",
+                },
+            },
             400: { description: "Engine error.", schema: { properties: { error: { type: "string" } } } },
         },
         tags: ["Axiom"],

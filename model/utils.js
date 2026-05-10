@@ -75,13 +75,10 @@ const redoIfFailureCallback = (func, maxRedo = 10, sleepTime = 5, callbackFailur
         });
     };
 
-    redoIfFailure(promisifiedFunc, maxRedo, sleepTime, callbackFailure, ...args)
-        .then((result) => {
-            finalCallback(null, result);
-        })
-        .catch((err) => {
-            finalCallback(err);
-        });
+    redoIfFailure(promisifiedFunc, maxRedo, sleepTime, callbackFailure, ...args).then(
+        (result) => { finalCallback(null, result); },
+        (err) => { finalCallback(err); }
+    );
 };
 
 /**

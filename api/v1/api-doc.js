@@ -326,22 +326,7 @@ const apiDoc = {
                 quota: {
                     type: "object",
                     description: "Map of route → method → quota value or quota config object.",
-                    additionalProperties: {
-                        type: "object",
-                        additionalProperties: {
-                            oneOf: [
-                                { type: "number" },
-                                {
-                                    type: "object",
-                                    required: ["quota", "wholeProfileQuota"],
-                                    properties: {
-                                        quota: { type: "number" },
-                                        wholeProfileQuota: { type: "boolean" },
-                                    },
-                                },
-                            ],
-                        },
-                    },
+                    additionalProperties: true,
                 },
             },
         },

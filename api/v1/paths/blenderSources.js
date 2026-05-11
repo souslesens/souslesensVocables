@@ -1,6 +1,7 @@
 import { blenderSources } from "../../../model/blenderSources.js";
 import configManager from "../../../bin/configManager.js";
 import { responseSchema, processResponse, successfullyFetched } from "./utils.js";
+// Route /api/v1/blenderSources: not used client-side (no calls found in public/ or mainapp/src/). Likely deprecated.
 export default function () {
     let operations = {
         GET,

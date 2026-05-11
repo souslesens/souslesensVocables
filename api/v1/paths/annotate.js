@@ -31,7 +31,7 @@ export default function () {
                         sources: {
                             type: "array",
                             items: {
-                                $ref: "#/definitions/Source",
+                                $ref: "#/definitions/SourceUpdate",
                             },
                         },
                         text: {

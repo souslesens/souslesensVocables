@@ -15,10 +15,11 @@ export default function () {
     }
 
     GET.apiDoc = {
-        operationId: "plugins.get",
+        operationId: "adminGetPlugins",
+        summary: "List installed plugins (admin only)",
+        description: "Returns `toolModel.plugins`: the plugins currently registered with the platform. " + "Distinct from `GET /admin/all-tools` which also includes built-in tools.",
         responses: responseSchema("Tools", "GET"),
         security: [{ restrictAdmin: [] }],
-        summary: "Returns all available plugins",
         tags: ["Plugins"],
     };
 

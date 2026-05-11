@@ -40,33 +40,25 @@ export default function () {
 
     GET.apiDoc = {
         security: [{ restrictLoggedUser: [] }],
-        summary: "generates  manchester syntax from axioms triples",
-        description: "generates  manchester syntax from axioms triples",
-        operationId: "generates  manchester syntax from axioms triples",
+        summary: "Render axiom triples as a Manchester-syntax expression",
+        description:
+            "Reverse of `manchesterAxiom2triples`. Sends `axiomTriples` (a JSON-encoded array of triples) and " +
+            "`ontologyGraphUri` to JOWL's `axioms/triples2manchester` and returns the human-readable Manchester string.",
+        operationId: "jowlTriplesToManchester",
         parameters: [
-            {
-                name: "ontologyGraphUri",
-                description: "ontologyGraphUri",
-                type: "string",
-                in: "query",
-                required: true,
-            },
-            {
-                name: "axiomTriples",
-                description: "axiomTriples",
-                in: "query",
-                type: "string",
-                required: true,
-            },
+            { name: "ontologyGraphUri", in: "query", type: "string", required: true, description: "Target ontology graph URI." },
+            { name: "axiomTriples", in: "query", type: "string", required: true, description: "JSON-encoded array of triples to convert." },
         ],
-
         responses: {
             200: {
-                description: "Results",
+                description: "Manchester-syntax string.",
                 schema: {
-                    type: "object",
+                    type: "string",
+                    description: "Manchester-syntax expression rendered from the supplied axiom triples.",
+                    example: "SubClassOf: BFO:0000001",
                 },
             },
+            500: { description: "JOWL server disabled or parse error." },
         },
         tags: ["JOWL"],
     };

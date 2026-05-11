@@ -33,7 +33,7 @@ export default function () {
             }
 
             let graphsImports = [];
-            if (includesImports) {
+            if (includesImports === "true") {
                 graphsImports = userSources[sourceName].imports
                     .map((src) => {
                         if (userSources[src].graphUri) {
@@ -205,114 +205,97 @@ export default function () {
 
     POST.apiDoc = {
         security: [{ restrictLoggedUser: [], restrictQuota: [] }],
-        summary: "Post a RDF graph",
-        description: "Post a RDF graph",
+        summary: "Upload an RDF file into the graph of a source (chunked)",
+        description:
+            "Streams an RDF payload into the named graph attached to `source`. The endpoint supports chunked uploads: " +
+            "each call appends `data` to a temporary file identified by `identifier` (a ULID generated on the first chunk). " +
+            "When `last=true` (or when MIME is `application/n-triples`) the temporary file is moved to `data/uploaded_rdf_data/` " +
+            "and loaded into the triplestore via `rdfDataModel.loadGraph`. If `clean=true`, the temporary file is dropped without uploading. " +
+            "Supported MIME types: `application/n-triples`, `text/turtle`, `application/rdf+xml`, `application/owl+xml`, `text/n3`, `application/trig`.",
+        operationId: "rdfPostGraph",
+        consumes: ["multipart/form-data"],
         parameters: [
-            {
-                name: "last",
-                description: "last",
-                in: "formData",
-                required: true,
-                type: "boolean",
-            },
-            {
-                name: "clean",
-                description: "clean",
-                in: "formData",
-                required: true,
-                type: "boolean",
-            },
-            {
-                name: "data",
-                description: "data",
-                in: "formData",
-                required: true,
-                type: "file",
-                format: "binary",
-            },
-            {
-                name: "source",
-                description: "source",
-                in: "formData",
-                required: true,
-                type: "string",
-            },
+            { name: "source", in: "formData", required: true, type: "string", description: "Source name (key of `sources.json`). Example: `BFO`." },
+            { name: "last", in: "formData", required: false, type: "string", description: "Truthy string for the final chunk — triggers the actual upload to the triplestore." },
+            { name: "clean", in: "formData", required: false, type: "string", description: "Truthy string drops the temporary file and returns without uploading." },
+            { name: "data", in: "formData", required: true, type: "file", format: "binary", description: "RDF chunk content." },
             {
                 name: "identifier",
-                description: "identifier",
                 in: "formData",
                 required: false,
                 type: "string",
+                description: "ULID identifying the upload session. Omit on the first chunk; reuse the value returned by the server for following chunks.",
             },
         ],
         responses: {
             200: {
-                description: "Upload ok",
-                schema: {
-                    type: "object",
-                },
+                description: "Chunk accepted. Returns the upload session identifier.",
+                schema: { properties: { identifier: { type: "string" } } },
+                examples: { "application/json": { identifier: "01H7AS9Q6BN6QHV23K4BCJXHCC" } },
             },
+            500: { description: "I/O or triplestore error during upload." },
+            503: { description: "User does not have `readwrite` access to the source." },
         },
         tags: ["RDF"],
     };
 
     GET.apiDoc = {
         security: [{ restrictLoggedUser: [], restrictQuota: [] }],
-        summary: "Get a RDF graph",
-        description: "Get a RDF graph in several serialization format",
-        operationId: "RDF get graph",
+        summary: "Stream the N-Triples content of a source's graph (paginated)",
+        description:
+            "Returns a slice of the RDF graph of `source` serialised as N-Triples. " +
+            "Pagination is driven by `offset` against the page size configured in `mainConfig.sparqlDownloadLimit`. " +
+            "When `withImports=true`, triples from imported source graphs are included. " +
+            "On the first page (`offset=0`) the server prepends a `dc:contributor` triple (if missing) and import triples for the source.",
+        operationId: "rdfGetGraph",
         parameters: [
-            {
-                name: "source",
-                description: "Source name of the graph to retrieve",
-                in: "query",
-                type: "string",
-                required: true,
-            },
-            {
-                name: "offset",
-                description: "SPARQL OFFSET",
-                in: "query",
-                type: "string",
-                required: true,
-            },
-            {
-                name: "withImports",
-                description: "Include imports",
-                in: "query",
-                type: "boolean",
-                required: false,
-                default: false,
-            },
+            { name: "source", in: "query", type: "string", required: true, description: "Source name. Example: `IOF_core`." },
+            { name: "offset", in: "query", type: "string", required: true, description: "SPARQL OFFSET (number of triples already received)." },
+            { name: "withImports", in: "query", type: "string", required: false, default: "false", description: "If true, also stream imported sources' triples." },
         ],
         responses: {
             200: {
-                description: "The RDF data",
+                description: "Page of N-Triples plus pagination cursor.",
                 schema: {
-                    type: "object",
+                    properties: {
+                        graph_size: { type: "integer", description: "Total triple count in the graph." },
+                        next_offset: { type: "integer", description: "Offset for the next page, or null when last page reached." },
+                        data: { type: "string", description: "N-Triples payload for this page." },
+                    },
+                },
+                examples: {
+                    "application/json": {
+                        graph_size: 1234,
+                        next_offset: 5000,
+                        data:
+                            "<http://purl.obolibrary.org/obo/BFO_0000001> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .\n" +
+                            "<http://purl.obolibrary.org/obo/BFO_0000002> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://purl.obolibrary.org/obo/BFO_0000001> .",
+                    },
                 },
             },
+            404: { description: "Source not found in the user's accessible sources." },
+            500: { description: "Server error." },
         },
         tags: ["RDF"],
     };
 
     DELETE.apiDoc = {
         security: [{ restrictLoggedUser: [], restrictQuota: [] }],
-        summary: "DELETE a RDF graph",
-        parameters: [
-            {
-                name: "source",
-                description: "Source name of the graph to delete",
-                in: "query",
-                type: "string",
-                required: true,
-            },
-        ],
+        summary: "Drop the named graph attached to a source",
+        description:
+            "Issues a SPARQL `DROP GRAPH` on the `graphUri` of `source`. The source descriptor itself is **not** removed " +
+            "from `sources.json` — only the triples in the triplestore. Requires `readwrite` access on the source.",
+        operationId: "rdfDeleteGraph",
+        parameters: [{ name: "source", in: "query", type: "string", required: true, description: "Source name whose graph must be cleared." }],
         responses: {
             200: {
-                description: "delete OK",
-                schema: { type: "object" },
+                description: "Graph dropped.",
+                schema: { properties: { message: { type: "string" } } },
+                examples: { "application/json": { message: "BFO deleted" } },
             },
+            404: { description: "Source not found." },
+            500: { description: "Triplestore error." },
+            503: { description: "User does not have `readwrite` access to the source." },
         },
         tags: ["RDF"],
     };

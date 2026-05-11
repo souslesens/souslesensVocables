@@ -639,7 +639,8 @@ const KGbuilder_triplesWriter = {
                                             return callbackWhilst(err);
                                         }
                                         if (!result.results || !result.results.bindings) {
-                                            return callbackWhilst(null, 0);
+                                            resultSize = 0;
+                                            return callbackWhilst();
                                         }
                                         if (isSample) {
                                             var bindings = result.results.bindings;
@@ -690,8 +691,8 @@ const KGbuilder_triplesWriter = {
                 if (err) {
                     return callback(err);
                 }
-                var sampleResults = { sampleTriples: sampleResults, totalTriples: sampleResults.length };
-                return callback(null, isSample ? sampleResults : { triplesDeleted: totalDeleted });
+                var sampleResult = { sampleTriples: sampleResults, totalTriples: sampleResults.length };
+                return callback(null, isSample ? sampleResult : { triplesDeleted: totalDeleted });
             },
         );
     },

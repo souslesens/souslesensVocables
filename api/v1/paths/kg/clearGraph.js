@@ -19,31 +19,34 @@ export default function () {
 
     POST.apiDoc = {
         security: [{ restrictLoggedUser: [], restrictQuota: [] }],
-        summary: "Creates triples from csv file",
-        description: "Takes a csv filename and directory and returns triples",
-        operationId: "createTriplesFromCsvOrTable",
+        summary: "Drop all triples from a KG named graph",
+        description:
+            "Wipes the entire content of `graphUri` via `KGtripleBuilder.clearGraph` (SPARQL `CLEAR GRAPH`). " + "Used before a full KG rebuild; does not remove the source descriptor itself.",
+        operationId: "kgClearGraph",
         parameters: [
             {
                 name: "body",
-                description: "sparqlServerUrl",
                 in: "body",
+                required: false,
                 schema: {
                     type: "object",
                     properties: {
-                        graphUri: { type: "string" },
+                        graphUri: {
+                            type: "string",
+                            description: "Named graph URI to clear.",
+                            example: "https://www.industrialontologies.org/core/",
+                        },
                     },
+                    example: { graphUri: "https://www.industrialontologies.org/core/" },
                 },
-                required: false,
+                "x-examples": {
+                    "Clear IOF_core graph": { graphUri: "https://www.industrialontologies.org/core/" },
+                },
             },
         ],
-
         responses: {
-            200: {
-                description: "Results",
-                schema: {
-                    type: "object",
-                },
-            },
+            200: { description: "Graph cleared." },
+            500: { description: "SPARQL CLEAR error." },
         },
         tags: ["KG"],
     };

@@ -31,15 +31,31 @@ export default function () {
 
     GET.apiDoc = {
         security: [{ restrictLoggedUser: [] }],
-        summary: "Returns serveur configuration",
-        operationId: "config.get",
+        summary: "Return the public server configuration",
+        description:
+            "Returns the subset of `mainConfig` safe to expose to logged-in users (auth mode, default language, " +
+            "available tools, theme, version, SPARQL download limit, general quota, ...). Credentials of " +
+            "`sparql_server` (`user`, `password`) are stripped before returning.",
+        operationId: "configGet",
         parameters: [],
         responses: {
             200: {
-                description: "JSON serialization of server configuration",
-                schema: {
-                    items: {
-                        $ref: "#/definitions/Config",
+                description: "Public server configuration.",
+                schema: { $ref: "#/definitions/Config" },
+                examples: {
+                    "application/json": {
+                        auth: "disabled",
+                        defaultGroups: ["admin"],
+                        default_lang: "en",
+                        sparql_server: { url: "http://localhost:8890/sparql" },
+                        formalOntologySourceLabel: "IDO-3",
+                        wiki: { url: "https://wiki.example.com" },
+                        sentryDsnJsFront: "",
+                        tools_available: ["lineage", "KGquery", "admin"],
+                        slsPyApi: { enabled: false, url: "http://localhost:8000" },
+                        theme: { defaultTheme: "default", selector: true },
+                        sparqlDownloadLimit: 10000,
+                        generalQuota: {},
                     },
                 },
             },
@@ -62,17 +78,42 @@ export default function () {
 
     PUT.apiDoc = {
         security: [{ restrictAdmin: [] }],
-        summary: "Returns serveur configuration",
-        operationId: "config.put",
-        responses: {
-            200: {
-                description: "JSON serialization of server configuration",
+        summary: "Update the writeable subset of the server configuration (admin)",
+        description:
+            "Admin-only. Updates `defaultGroups`, `tools_available`, `theme` and `generalQuota` in `mainConfig.json`. " + "All other fields are preserved. Returns the new full configuration.",
+        operationId: "configPut",
+        parameters: [
+            {
+                in: "body",
+                name: "body",
+                required: false,
                 schema: {
-                    items: {
-                        $ref: "#/definitions/Config",
+                    type: "object",
+                    properties: {
+                        defaultGroups: { type: "array", items: { type: "string" }, example: ["admin"] },
+                        tools_available: { type: "array", items: { type: "string" }, example: ["lineage", "KGquery", "MappingModeler", "admin"] },
+                        theme: {
+                            type: "object",
+                            properties: {
+                                defaultTheme: { type: "string", example: "default" },
+                                selector: { type: "boolean", example: true },
+                            },
+                            example: { defaultTheme: "default", selector: true },
+                        },
+                        generalQuota: { type: "object", example: {} },
+                    },
+                    example: {
+                        defaultGroups: ["admin"],
+                        tools_available: ["lineage", "KGquery", "MappingModeler", "admin"],
+                        theme: { defaultTheme: "default", selector: true },
+                        generalQuota: {},
                     },
                 },
             },
+        ],
+        responses: {
+            200: { description: "Updated configuration.", schema: { $ref: "#/definitions/Config" } },
+            500: { description: "Persistence error." },
         },
         tags: ["Config"],
     };

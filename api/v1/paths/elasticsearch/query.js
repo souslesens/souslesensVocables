@@ -41,29 +41,45 @@ export default function () {
 
     POST.apiDoc = {
         security: [{ restrictLoggedUser: [], restrictQuota: [] }],
-        summary: "Elasticsearch query",
-        description: "Elasticsearch query",
-        operationId: "Elasticsearch query",
+        summary: "Execute an Elasticsearch query through the server proxy",
+        description:
+            "Forwards `query` to the configured Elasticsearch endpoint via `elasticRestProxy.executePostQuery`. " +
+            "When the platform config is loaded, `indexes` are first checked against the caller's accessible " +
+            "sources via `UserRequestFiltering.validateElasticSearchIndices` (read scope) — requests targeting " +
+            "indices outside that scope are rejected. Used by the search UI (`_search`) and by the source-cleanup " +
+            "flow (`_delete_by_query`).",
+        operationId: "elasticsearchQuery",
         parameters: [
             {
                 name: "body",
-                description: "body",
+                description: "Elasticsearch operation payload.",
                 in: "body",
+                required: true,
                 schema: {
                     type: "object",
+                    required: ["url", "query", "indexes"],
                     properties: {
-                        query: {
-                            type: "object",
-                        },
                         url: {
                             type: "string",
+                            description: "Elasticsearch endpoint suffix appended to the indices, e.g. `_search` or `_delete_by_query`.",
+                            example: "_search",
+                        },
+                        query: {
+                            type: "object",
+                            description: "Raw Elasticsearch query DSL body forwarded as-is.",
+                            example: { query: { match: { label: "asset" } }, size: 10 },
                         },
                         indexes: {
                             type: "array",
-                            items: {
-                                type: "string",
-                            },
+                            items: { type: "string" },
+                            description: "Indices to target (lowercase source names). Filtered by user access.",
+                            example: ["iof_core"],
                         },
+                    },
+                    example: {
+                        url: "_search",
+                        indexes: ["iof_core"],
+                        query: { query: { match: { label: "asset" } }, size: 10 },
                     },
                 },
             },
@@ -71,10 +87,32 @@ export default function () {
 
         responses: {
             200: {
-                description: "Results",
+                description: "Raw Elasticsearch response body (passes through `hits`, `aggregations`, `deleted`, etc.).",
                 schema: {
                     type: "object",
+                    additionalProperties: true,
+                    example: {
+                        took: 4,
+                        timed_out: false,
+                        hits: {
+                            total: { value: 1, relation: "eq" },
+                            hits: [
+                                {
+                                    _index: "iof_core",
+                                    _id: "abc123",
+                                    _score: 1.0,
+                                    _source: { id: "http://example.org/Asset", label: "Asset" },
+                                },
+                            ],
+                        },
+                    },
                 },
+            },
+            403: {
+                description: "Caller has no read access to one of the requested `indexes`.",
+            },
+            500: {
+                description: "Elasticsearch error or proxy failure.",
             },
         },
         tags: ["ElasticSearch"],

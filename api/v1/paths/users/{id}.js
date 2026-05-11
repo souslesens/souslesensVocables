@@ -21,17 +21,15 @@ export default function () {
         }
     }
     GET.apiDoc = {
-        summary: "Returns a specific user",
+        summary: "Get a user account by id (admin only)",
+        description: "Admin endpoint: returns the full `User` record (including hashed password and token).",
         security: [{ restrictAdmin: [] }],
         operationId: "getOneUser",
-        parameters: [],
+        parameters: [{ in: "path", name: "id", type: "string", required: true, description: "User id (login)." }],
         responses: {
-            200: {
-                description: "User",
-                schema: {
-                    $ref: "#/definitions/User",
-                },
-            },
+            200: { description: "User record.", schema: { $ref: "#/definitions/User" } },
+            404: { description: "User not found." },
+            500: { description: "Server error." },
         },
         tags: ["Users"],
     };
@@ -55,17 +53,23 @@ export default function () {
         }
     }
     DELETE.apiDoc = {
-        summary: "Delete a specific user",
+        summary: "Delete a user account (admin only)",
+        description: "Removes user `id` and returns the refreshed user catalog.",
         security: [{ restrictAdmin: [] }],
-        operationId: "DeleteOneUser",
-        parameters: [],
+        operationId: "deleteOneUser",
+        parameters: [{ in: "path", name: "id", type: "string", required: true, description: "User id (login) to delete." }],
         responses: {
             200: {
-                description: "Users",
+                description: "User deleted.",
                 schema: {
-                    $ref: "#/definitions/User",
+                    properties: {
+                        message: { type: "string" },
+                        resources: { $ref: "#/definitions/Users" },
+                    },
                 },
             },
+            404: { description: "User not found." },
+            500: { description: "Server error." },
         },
         tags: ["Users"],
     };

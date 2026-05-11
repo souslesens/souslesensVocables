@@ -19,18 +19,21 @@ const apiDoc = {
     },
     definitions: {
         AuthCheck: {
+            type: "object",
             properties: {
                 logged: {
                     type: "boolean",
                 },
                 user: {
                     type: "object",
+                    additionalProperties: true,
                 },
                 authSource: {
                     type: "string",
                 },
                 auth: {
                     type: "object",
+                    additionalProperties: true,
                 },
             },
             required: [],
@@ -60,7 +63,11 @@ const apiDoc = {
                 name: {
                     type: "string",
                 },
-                config: {},
+                config: {
+                    type: "object",
+                    additionalProperties: true,
+                    description: "Tool/plugin-specific config (free-form).",
+                },
             },
         },
         Tools: {
@@ -71,6 +78,8 @@ const apiDoc = {
         },
         PluginConfig: {
             type: "object",
+            additionalProperties: true,
+            description: "Free-form plugin config payload.",
         },
         BlenderSources: {
             type: "object",
@@ -90,55 +99,33 @@ const apiDoc = {
         },
         User: {
             type: "object",
-            additionalProperties: false,
+            additionalProperties: true,
             properties: {
-                id: {
-                    type: "string",
-                },
-                login: {
-                    type: "string",
-                },
-                password: {
-                    type: "string",
-                },
-                groups: {
-                    type: "array",
-                    items: {
-                        type: "string",
-                    },
-                },
-                _type: {
-                    type: "string",
-                },
+                id: { type: "string" },
+                login: { type: "string" },
+                password: { type: "string" },
+                groups: { type: "array", items: { type: "string" } },
+                _type: { type: "string" },
+                source: { type: "string" },
+                token: { type: "string" },
+                allowSourceCreation: { type: "boolean" },
+                maxNumberCreatedSource: { type: "number" },
             },
-            required: ["_type", "groups", "id", "login", "password"],
+            required: ["login", "groups"],
             title: "User Model",
         },
         UserMe: {
             type: "object",
-            additionalProperties: false,
+            additionalProperties: true,
             properties: {
-                id: {
-                    type: "string",
-                },
-                login: {
-                    type: "string",
-                },
-                groups: {
-                    type: "array",
-                    items: {
-                        type: "string",
-                    },
-                },
-                allowSourceCreation: {
-                    type: "boolean",
-                },
-                maxNumberCreatedSource: {
-                    type: "number",
-                },
+                id: { type: "string" },
+                login: { type: "string" },
+                groups: { type: "array", items: { type: "string" } },
+                allowSourceCreation: { type: "boolean" },
+                maxNumberCreatedSource: { type: "number" },
             },
-            required: ["_type", "groups", "id", "login", "password"],
-            title: "User Model",
+            required: ["login", "groups"],
+            title: "UserMe Model",
         },
         Source: {
             type: "object",
@@ -173,7 +160,7 @@ const apiDoc = {
                     type: "string",
                 },
                 dataSource: {
-                    type: "null",
+                    $ref: "#/definitions/DataSource",
                 },
                 schema: {
                     type: "null",
@@ -195,7 +182,7 @@ const apiDoc = {
                 },
                 imports: {
                     type: "array",
-                    items: {},
+                    items: { type: "string" },
                 },
             },
             required: [
@@ -211,7 +198,6 @@ const apiDoc = {
                 "isDraft",
                 "name",
                 "predicates",
-                "schema",
                 "schemaType",
                 "sparql_server",
                 "topClassFilter",
@@ -219,9 +205,78 @@ const apiDoc = {
             ],
             title: "Source Model",
         },
+        SourceCreate: {
+            type: "object",
+            properties: {
+                name: { type: "string" },
+                _type: { type: "string" },
+                id: { type: "string" },
+                type: { type: "string" },
+                graphUri: { type: "string", format: "uri" },
+                sparql_server: { $ref: "#/definitions/SparqlServer" },
+                controller: { type: "string" },
+                topClassFilter: { type: "string" },
+                schemaType: { type: "string" },
+                dataSource: { $ref: "#/definitions/DataSource" },
+                schema: { type: "null" },
+                isDraft: { type: "boolean" },
+                editable: { type: "boolean" },
+                color: { type: "string" },
+                predicates: { $ref: "#/definitions/Predicates" },
+                group: { type: "string" },
+                imports: { type: "array", items: { type: "string" } },
+                owner: { type: "string" },
+                published: { type: "boolean" },
+            },
+            required: ["name"],
+            title: "Source Create Model",
+        },
+        SourceUpdate: {
+            type: "object",
+            properties: {
+                name: { type: "string" },
+                _type: { type: "string" },
+                id: { type: "string" },
+                type: { type: "string" },
+                graphUri: { type: "string", format: "uri" },
+                sparql_server: { $ref: "#/definitions/SparqlServer" },
+                controller: { type: "string" },
+                topClassFilter: { type: "string" },
+                schemaType: { type: "string" },
+                dataSource: { $ref: "#/definitions/DataSource" },
+                schema: { type: "null" },
+                isDraft: { type: "boolean" },
+                editable: { type: "boolean" },
+                color: { type: "string" },
+                predicates: { $ref: "#/definitions/Predicates" },
+                group: { type: "string" },
+                imports: { type: "array", items: { type: "string" } },
+            },
+            required: ["name"],
+            title: "Source Update Model",
+        },
+        DataSource: {
+            type: "object",
+            "x-nullable": true,
+            properties: {
+                type: { type: "string" },
+                connection: { type: "string" },
+                dbName: { type: "string" },
+                table_schema: { type: "string" },
+                local_dictionary: {
+                    type: "object",
+                    properties: {
+                        table: { type: "string" },
+                        idColumn: { type: "string" },
+                        labelColumn: { type: "string" },
+                    },
+                },
+            },
+            title: "DataSource",
+        },
         Predicates: {
             type: "object",
-            additionalProperties: false,
+            additionalProperties: true,
             properties: {
                 broaderPredicate: {
                     type: "string",
@@ -230,18 +285,13 @@ const apiDoc = {
                     type: "string",
                 },
             },
-            required: ["broaderPredicate", "lang"],
             title: "Predicates",
         },
         SparqlServer: {
             type: "object",
-            additionalProperties: false,
             properties: {
                 url: {
                     type: "string",
-                },
-                xx: {
-                    type: "integer",
                 },
             },
             required: ["url"],
@@ -249,30 +299,34 @@ const apiDoc = {
         },
         Profile: {
             type: "object",
+            required: ["id", "name"],
             properties: {
+                id: { type: "string" },
+                name: { type: "string" },
+                _type: { type: "string", default: "profile" },
+                theme: { type: "string", default: "" },
                 allowedSourceSchemas: {
                     type: "array",
-                    items: {
-                        type: "string",
-                    },
-                },
-                allowedSources: {
-                    type: "string",
-                },
-                forbiddenSources: {
-                    type: "array",
-                    items: {
-                        type: "string",
-                    },
+                    items: { type: "string", enum: ["OWL", "SKOS"] },
                 },
                 allowedTools: {
-                    type: "string",
+                    type: "array",
+                    items: { type: "string" },
                 },
-                blender: {
-                    $ref: "#/definitions/Blender",
+                allowedDatabases: {
+                    type: "array",
+                    items: { type: "string" },
                 },
-                theme: {
-                    type: "string",
+                sourcesAccessControl: {
+                    type: "object",
+                    additionalProperties: { type: "string" },
+                    description: "Map of source name → access level (read|readwrite).",
+                },
+                isShared: { type: "boolean", default: true },
+                quota: {
+                    type: "object",
+                    description: "Map of route → method → quota value or quota config object.",
+                    additionalProperties: true,
                 },
             },
         },
@@ -334,21 +388,22 @@ const apiDoc = {
         },
         GetSources: {
             type: "object",
-            properties: {},
+            additionalProperties: true,
+            description: "Free-form sources map (legacy placeholder).",
         },
         Blender: {
             type: "object",
-            additionalProperties: false,
+            additionalProperties: true,
             properties: {
                 contextMenuActionStartLevel: {
                     type: "integer",
                 },
             },
-            required: ["contextMenuActionStartLevel"],
             title: "Blender",
         },
 
         AuthLogout: {
+            type: "object",
             properties: {
                 redirect: {
                     type: "string",
@@ -357,28 +412,48 @@ const apiDoc = {
             required: [],
         },
         Config: {
+            type: "object",
             properties: {
-                auth: {
-                    type: "string",
+                auth: { type: "string" },
+                defaultGroups: { type: "array", items: { type: "string" } },
+                default_lang: { type: "string" },
+                sparql_server: {
+                    type: "object",
+                    properties: {
+                        url: { type: "string" },
+                    },
                 },
-                default_lang: {
-                    type: "string",
-                },
+                formalOntologySourceLabel: { type: "string" },
                 wiki: {
                     type: "object",
                     properties: {
-                        url: {
-                            type: "string",
-                        },
+                        url: { type: "string" },
                     },
                 },
-                version: {
-                    type: "string",
+                version: { type: "string" },
+                sentryDsnJsFront: { type: "string" },
+                tools_available: { type: "array", items: { type: "string" } },
+                slsPyApi: {
+                    type: "object",
+                    properties: {
+                        enabled: { type: "boolean" },
+                        url: { type: "string" },
+                    },
                 },
+                theme: {
+                    type: "object",
+                    properties: {
+                        defaultTheme: { type: "string" },
+                        selector: { type: "boolean" },
+                    },
+                },
+                sparqlDownloadLimit: { type: "integer" },
+                generalQuota: { type: "object", additionalProperties: true },
             },
             required: [],
         },
         SparqlQueryResponse: {
+            type: "object",
             properties: {
                 head: {
                     type: "object",
@@ -398,6 +473,7 @@ const apiDoc = {
                     },
                 },
                 results: {
+                    type: "object",
                     properties: {
                         distinct: { type: "boolean" },
                         order: { type: "boolean" },
@@ -662,6 +738,8 @@ const apiDoc = {
         },
         UserDataContent: {
             type: "object",
+            additionalProperties: true,
+            description: "Free-form payload — shape depends on `data_type` (e.g. `sparqlQuery`, `template`).",
         },
     },
     tags: [

@@ -93,7 +93,8 @@ export default function () {
             {
                 in: "query",
                 name: "t",
-                type: "integer",
+                type: "string",
+                description: "Cache-busting timestamp (ignored server-side).",
             },
             {
                 in: "body",

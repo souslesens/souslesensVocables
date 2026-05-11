@@ -18,34 +18,28 @@ export default function () {
 
     POST.apiDoc = {
         security: [{ restrictLoggedUser: [] }],
-        summary: "Create new directory in a subdirectory of data",
-        description: "Create new directory in a subdirectory of data",
-        operationId: "Create new directory in a subdirectory of data",
+        summary: "Create a new directory under the data folder",
+        description: "Creates `dataDir/<dir>/<newDirName>` via `dataController.createDirectory`.",
+        operationId: "dataCreateDirectory",
         parameters: [
             {
                 name: "body",
-                description: "body",
                 in: "body",
+                required: false,
                 schema: {
                     type: "object",
                     properties: {
-                        dir: {
-                            type: "string",
-                        },
-                        newDirName: {
-                            type: "string",
-                        },
+                        dir: { type: "string", description: "Parent sub-directory under `dataDir`.", example: "CSV" },
+                        newDirName: { type: "string", description: "Name of the directory to create.", example: "maintenance" },
                     },
+                    example: { dir: "CSV", newDirName: "maintenance" },
                 },
+                "x-examples": { "Create CSV/maintenance": { dir: "CSV", newDirName: "maintenance" } },
             },
         ],
         responses: {
-            200: {
-                description: "Results",
-                schema: {
-                    type: "object",
-                },
-            },
+            200: { description: "Directory created." },
+            500: { description: "Filesystem error or directory traversal attempt." },
         },
         tags: ["Data"],
     };

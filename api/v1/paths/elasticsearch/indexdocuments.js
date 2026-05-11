@@ -118,35 +118,59 @@ export default function () {
 
     POST.apiDoc = {
         security: [{ restrictLoggedUser: [], restrictQuota: [] }],
-        summary: "Elasticsearch index documents in dir",
-        description: "Elasticsearch index documents in dir",
-        operationId: "Elasticsearch index documents in dir",
+        summary: "Index files from a server directory into Elasticsearch",
+        description:
+            "Recursively walks `rootDir` on the server filesystem, filters by accepted extensions " +
+            "(doc, docx, pdf, xls, xlsx, ppt, pptx, odt, ods, html, txt, csv) and maximum file size, " +
+            "then indexes each file into `indexName` via the Elasticsearch attachment pipeline " +
+            "(`/_doc/{id}?pipeline=pdf_attachment`). Returns the raw Elasticsearch response for the last " +
+            "indexed document. Binary formats (PDF, Office) are base64-encoded before indexing.",
+        operationId: "elasticsearchIndexDocuments",
         parameters: [
             {
                 name: "body",
-                description: "body",
+                description: "Indexing payload.",
                 in: "body",
+                required: true,
                 schema: {
                     type: "object",
+                    required: ["indexName", "rootDir"],
                     properties: {
                         indexName: {
                             type: "string",
+                            description: "Elasticsearch index name (must have the attachment ingest pipeline configured). Example: `docs_iof`.",
+                            example: "docs_iof",
                         },
                         rootDir: {
                             type: "string",
+                            description: "Absolute server-side path of the directory to crawl recursively.",
+                            example: "/app/data/documents/iof",
                         },
                     },
+                    example: { indexName: "docs_iof", rootDir: "/app/data/documents/iof" },
                 },
             },
         ],
 
         responses: {
             200: {
-                description: "Results",
+                description:
+                    "Raw Elasticsearch `/_doc` response for the last indexed file. Shape depends on Elasticsearch " +
+                    "version and pipeline — typically `{ _index, _id, _version, result, _shards, ... }`.",
                 schema: {
                     type: "object",
+                    additionalProperties: true,
+                    description: "Elasticsearch document-index response passthrough for the last processed file.",
+                    example: {
+                        _index: "docs_iof",
+                        _id: "report_2024.pdf",
+                        _version: 1,
+                        result: "created",
+                        _shards: { total: 2, successful: 1, failed: 0 },
+                    },
                 },
             },
+            400: { description: "Directory not found or Elasticsearch pipeline error." },
         },
         tags: ["ElasticSearch"],
     };

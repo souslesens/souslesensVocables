@@ -24,19 +24,14 @@ export default function () {
         }
     }
     GET.apiDoc = {
-        summary: "Returns all sources",
+        summary: "List every source visible to the caller (admin endpoint)",
+        description:
+            "Admin variant of `GET /sources`: returns the full list of sources accessible to the caller (`getUserSources`). " +
+            "For an actual admin user, this corresponds to all sources defined in `sources.json`.",
         security: [{ restrictAdmin: [] }],
-        operationId: "getSources",
+        operationId: "adminGetSources",
         responses: responseSchema("Sources", "GET"),
-        parameters: [
-            {
-                name: "sourcesFile",
-                description: "name",
-                in: "query",
-                type: "string",
-                required: false,
-            },
-        ],
+        parameters: [{ name: "sourcesFile", in: "query", type: "string", required: false, description: "Optional override of the default sources file." }],
         tags: ["Sources"],
     };
 
@@ -79,10 +74,32 @@ export default function () {
         }
     }
     POST.apiDoc = {
-        summary: "Update Sources",
+        summary: "Create one or more sources (admin endpoint)",
+        description: "Admin variant of `POST /sources` without quota enforcement. Body is a map `sourceName → Source descriptor`. " + "Returns the full sources catalog after insertion.",
         security: [{ restrictAdmin: [] }],
-        operationId: "updateSources",
-        parameters: [],
+        operationId: "adminCreateSources",
+        parameters: [
+            {
+                in: "body",
+                name: "body",
+                required: true,
+                schema: { type: "object", additionalProperties: { $ref: "#/definitions/SourceCreate" } },
+                "x-examples": {
+                    "Add IOF_core": {
+                        IOF_core: {
+                            name: "IOF_core",
+                            graphUri: "https://www.industrialontologies.org/core/",
+                            sparql_server: { url: "_default" },
+                            controller: "Sparql_OWL",
+                            schemaType: "OWL",
+                            group: "STANDARDS/ABSTRACT ONTOLOGIES",
+                            imports: ["BFO", "iof-av"],
+                            editable: false,
+                        },
+                    },
+                },
+            },
+        ],
         responses: responseSchema("Sources", "POST"),
         tags: ["Sources"],
     };

@@ -13,18 +13,14 @@ export default function () {
     }
 
     GET.apiDoc = {
-        operationId: "getOneDatabase",
-        parameters: [],
+        operationId: "adminGetOneDatabase",
+        parameters: [{ in: "path", name: "id", type: "string", required: true, description: "Database id from `databases.json`." }],
         responses: {
-            200: {
-                description: "Databases",
-                schema: {
-                    $ref: "#/definitions/Database",
-                },
-            },
+            200: { description: "Database descriptor.", schema: { $ref: "#/definitions/Database" } },
+            500: { description: "Database not found or persistence error." },
         },
         security: [{ restrictAdmin: [] }],
-        summary: "Get a specific database",
+        summary: "Get a database descriptor by id (admin only)",
         tags: ["Databases"],
     };
 
@@ -52,23 +48,23 @@ export default function () {
     }
 
     DELETE.apiDoc = {
-        summary: "Delete a specific database",
+        summary: "Delete a database descriptor (admin only)",
+        description: "Removes database `id` from `databases.json`. Returns the refreshed catalog.",
         security: [{ restrictAdmin: [] }],
-        operationId: "DeleteOneDatabase",
-        parameters: [],
+        operationId: "adminDeleteOneDatabase",
+        parameters: [{ in: "path", name: "id", type: "string", required: true, description: "Database id to delete." }],
         responses: {
             200: {
-                description: "The specified database was deleted successfully",
+                description: "Database deleted.",
                 schema: {
-                    $ref: "#/definitions/Database",
+                    properties: {
+                        message: { type: "string" },
+                        resources: { $ref: "#/definitions/Databases" },
+                    },
                 },
             },
-            400: {
-                description: "The database identifier was missing from the request",
-                schema: {
-                    $ref: "#/definitions/Database",
-                },
-            },
+            400: { description: "Missing `id` in path." },
+            500: { description: "Persistence error." },
         },
         tags: ["Databases"],
     };
@@ -97,23 +93,46 @@ export default function () {
     }
 
     PUT.apiDoc = {
-        summary: "Update a specific database",
+        summary: "Update a database descriptor (admin only)",
+        description: "Body must wrap the descriptor under a `database` key. Returns the refreshed catalog.",
         security: [{ restrictAdmin: [] }],
-        operationId: "UpdateOneDatabase",
-        parameters: [],
+        operationId: "adminUpdateOneDatabase",
+        parameters: [
+            { in: "path", name: "id", type: "string", required: true, description: "Database id to update." },
+            {
+                in: "body",
+                name: "body",
+                required: false,
+                schema: {
+                    type: "object",
+                    properties: { database: { $ref: "#/definitions/Database" } },
+                    example: {
+                        database: {
+                            id: "pg_assets",
+                            name: "pg_assets",
+                            driver: "pg",
+                            host: "db.example.org",
+                            port: 5432,
+                            database: "assets",
+                            user: "sls_reader",
+                            password: "<secret>",
+                        },
+                    },
+                },
+            },
+        ],
         responses: {
             200: {
-                description: "The specified database was updated successfully",
+                description: "Database updated.",
                 schema: {
-                    $ref: "#/definitions/Database",
+                    properties: {
+                        message: { type: "string" },
+                        resources: { $ref: "#/definitions/Databases" },
+                    },
                 },
             },
-            400: {
-                description: "The database identifier was missing from the request",
-                schema: {
-                    $ref: "#/definitions/Database",
-                },
-            },
+            400: { description: "Missing body." },
+            500: { description: "Persistence error." },
         },
         tags: ["Databases"],
     };

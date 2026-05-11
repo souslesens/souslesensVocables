@@ -15,10 +15,11 @@ export default function () {
     }
 
     GET.apiDoc = {
-        operationId: "plugins.config.get",
+        operationId: "adminGetPluginsConfig",
+        summary: "Read the plugins configuration file (admin only)",
+        description: "Returns the raw plugins configuration (`toolModel.readConfig`) — enabled state, install paths, options.",
         responses: responseSchema("PluginConfig", "GET"),
         security: [{ restrictAdmin: [] }],
-        summary: "Retrieve the plugins configuration",
         tags: ["Plugins"],
     };
 
@@ -39,10 +40,43 @@ export default function () {
     }
 
     PUT.apiDoc = {
-        operationId: "plugins.config.put",
-        responses: responseSchema("Tools", "PUT"),
+        operationId: "adminPutPluginsConfig",
+        summary: "Persist the plugins configuration (admin only)",
+        description: "Writes `body.plugins` through `toolModel.writeConfig`. Returns `400` if `plugins` is missing.",
+        parameters: [
+            {
+                in: "body",
+                name: "body",
+                required: false,
+                schema: {
+                    type: "object",
+                    properties: {
+                        plugins: {
+                            type: "object",
+                            description: "Map keyed by plugin name with enabled flag and options.",
+                            example: {
+                                lineage: { enabled: true },
+                                KGquery: { enabled: true },
+                                MappingModeler: { enabled: false },
+                            },
+                        },
+                    },
+                    example: {
+                        plugins: {
+                            lineage: { enabled: true },
+                            KGquery: { enabled: true },
+                            MappingModeler: { enabled: false },
+                        },
+                    },
+                },
+            },
+        ],
+        responses: {
+            200: { description: "Saved.", schema: { properties: { message: { type: "string" } } } },
+            400: { description: "Missing `plugins` body." },
+            500: { description: "Persistence error." },
+        },
         security: [{ restrictAdmin: [] }],
-        summary: "Save the plugins configuration",
         tags: ["Plugins"],
     };
 

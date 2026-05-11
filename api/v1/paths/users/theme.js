@@ -18,18 +18,19 @@ export default function () {
     }
 
     GET.apiDoc = {
-        description: "Retrieve the theme from the profile of the current logged user",
+        summary: "Get the UI theme attached to the current user's first profile",
+        description:
+            "Resolves the theme from the caller's first group (`profileModel.getThemeFromProfile`). " + "Used by the frontend on bootstrap to apply the right CSS variant before any other request.",
+        operationId: "getUserTheme",
         parameters: [],
         responses: {
             200: {
-                description: "Theme’s name",
-                schema: {
-                    type: "string",
-                },
+                description: "Theme name.",
+                schema: { properties: { theme: { type: "string" } } },
+                examples: { "application/json": { theme: "default" } },
             },
         },
         security: [{ restrictLoggedUser: [] }],
-        summary: "Get the logged user profile theme",
         tags: ["Users"],
     };
 

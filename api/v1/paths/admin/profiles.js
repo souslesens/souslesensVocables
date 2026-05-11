@@ -62,7 +62,7 @@ export default function () {
                     "Add a read-only profile on BFO/IOF_core": {
                         readers: {
                             allowedSourceSchemas: ["OWL"],
-                            allowedTools: "lineage,KGquery",
+                            allowedTools: ["lineage", "KGquery"],
                             sourcesAccessControl: {
                                 "OWL/STANDARDS/TOP_ONTOLOGIES/BFO": "read",
                                 "OWL/STANDARDS/ABSTRACT ONTOLOGIES/IOF_core": "read",

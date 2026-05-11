@@ -299,30 +299,49 @@ const apiDoc = {
         },
         Profile: {
             type: "object",
+            required: ["id", "name"],
             properties: {
+                id: { type: "string" },
+                name: { type: "string" },
+                _type: { type: "string", default: "profile" },
+                theme: { type: "string", default: "" },
                 allowedSourceSchemas: {
                     type: "array",
-                    items: {
-                        type: "string",
-                    },
-                },
-                allowedSources: {
-                    type: "string",
-                },
-                forbiddenSources: {
-                    type: "array",
-                    items: {
-                        type: "string",
-                    },
+                    items: { type: "string", enum: ["OWL", "SKOS"] },
                 },
                 allowedTools: {
-                    type: "string",
+                    type: "array",
+                    items: { type: "string" },
                 },
-                blender: {
-                    $ref: "#/definitions/Blender",
+                allowedDatabases: {
+                    type: "array",
+                    items: { type: "string" },
                 },
-                theme: {
-                    type: "string",
+                sourcesAccessControl: {
+                    type: "object",
+                    additionalProperties: { type: "string" },
+                    description: "Map of source name → access level (read|readwrite).",
+                },
+                isShared: { type: "boolean", default: true },
+                quota: {
+                    type: "object",
+                    description: "Map of route → method → quota value or quota config object.",
+                    additionalProperties: {
+                        type: "object",
+                        additionalProperties: {
+                            oneOf: [
+                                { type: "number" },
+                                {
+                                    type: "object",
+                                    required: ["quota", "wholeProfileQuota"],
+                                    properties: {
+                                        quota: { type: "number" },
+                                        wholeProfileQuota: { type: "boolean" },
+                                    },
+                                },
+                            ],
+                        },
+                    },
                 },
             },
         },

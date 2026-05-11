@@ -7,10 +7,10 @@
 
 .infosTable {
     background-color: @dark-background-color !important;
-
     padding: 8px 24px !important;
     border-collapse: collapse !important;
     border-spacing: 0px !important;
+    max-width: 100%;
 }
 /*
 th, td{
@@ -27,7 +27,9 @@ th, td{
     padding: 24px;
     background-color: @dark-background-color !important;
     border-radius: 14px;
-    /*max-height: 90vh;*/
+    max-width: 100%;
+    overflow: auto;
+    box-sizing: border-box;
 }
 .detailsCellValue {
     .font-table;

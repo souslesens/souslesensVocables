@@ -19,13 +19,9 @@ export default function () {
     GET.apiDoc = {
         security: [{ restrictLoggedUser: [] }],
         summary: "List files inside a sub-directory of the data folder",
-        description:
-            "Returns the file names found under `dataDir/<dir>` via `dataController.getFilesList`. " +
-            "Used by MappingModeler and the CSV picker to populate file-selection dialogs.",
+        description: "Returns the file names found under `dataDir/<dir>` via `dataController.getFilesList`. " + "Used by MappingModeler and the CSV picker to populate file-selection dialogs.",
         operationId: "dataListFiles",
-        parameters: [
-            { name: "dir", in: "query", type: "string", required: true, description: "Sub-directory under the configured `dataDir`. Example: `CSV/maintenance`." },
-        ],
+        parameters: [{ name: "dir", in: "query", type: "string", required: true, description: "Sub-directory under the configured `dataDir`. Example: `CSV/maintenance`." }],
         responses: {
             200: {
                 description: "File names.",

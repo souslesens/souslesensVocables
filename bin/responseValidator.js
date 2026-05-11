@@ -74,9 +74,7 @@ function appendMismatch(logFilePath, mismatch) {
     fs.appendFile(logFilePath, line, (err) => {
         if (err) console.warn("[response-validator] cannot write log:", err.message);
     });
-    console.warn(
-        `[response-validator] ${mismatch.method} ${mismatch.route} :: ${mismatch.jsonPath || "(root)"} expected=${JSON.stringify(mismatch.schemaExpected)} actualType=${mismatch.actualType}`,
-    );
+    console.warn(`[response-validator] ${mismatch.method} ${mismatch.route} :: ${mismatch.jsonPath || "(root)"} expected=${JSON.stringify(mismatch.schemaExpected)} actualType=${mismatch.actualType}`);
 }
 
 export function attachResponseValidator(app, apiDoc, options = {}) {

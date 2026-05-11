@@ -84,8 +84,8 @@ export default function () {
             "Central SPARQL proxy used by every frontend tool (Lineage, KGquery, MappingModeler, ...). " +
             "Forwards the SPARQL query carried in `body.body.params.query` to `body.url`. " +
             "When `body.POST` is truthy, the request is sent as POST and goes through `UserRequestFiltering.filterSparqlRequest` " +
-            "which read `FROM` clauses to restrict the query to graphs the current user is allowed to read. " ,
-           
+            "which read `FROM` clauses to restrict the query to graphs the current user is allowed to read. ",
+
         security: [{ restrictLoggedUser: [], restrictQuota: [] }],
         operationId: "sparqlProxyPost",
         parameters: [
@@ -103,7 +103,8 @@ export default function () {
                     properties: {
                         POST: {
                             type: "string",
-                            description: "Truthy string (e.g. `\"true\"`) to send as POST and apply user-graph access filtering via `UserRequestFiltering.filterSparqlRequest`. Form-encoded → arrives as string.",
+                            description:
+                                'Truthy string (e.g. `"true"`) to send as POST and apply user-graph access filtering via `UserRequestFiltering.filterSparqlRequest`. Form-encoded → arrives as string.',
                             example: "true",
                         },
                         url: {
@@ -205,9 +206,7 @@ export default function () {
                 in: "query",
                 required: false,
                 type: "string",
-                description:
-                    "JSON-stringified options forwarded to endpoint (headers, auth, etc.). " +
-                    "Example: `{\"headers\":{\"Accept\":\"application/sparql-results+json\"}}`.",
+                description: "JSON-stringified options forwarded to endpoint (headers, auth, etc.). " + 'Example: `{"headers":{"Accept":"application/sparql-results+json"}}`.',
             },
         ],
         responses: {

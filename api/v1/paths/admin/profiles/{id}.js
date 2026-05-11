@@ -62,14 +62,10 @@ export default function () {
 
     GET.apiDoc = {
         summary: "Get a profile by id (current user must be a member)",
-        description:
-            "Returns profile `id` if the caller belongs to it (`profileModel.getOneUserProfile`). " +
-            "Useful to read effective `allowedTools` / `sourcesAccessControl` for the current user.",
+        description: "Returns profile `id` if the caller belongs to it (`profileModel.getOneUserProfile`). " + "Useful to read effective `allowedTools` / `sourcesAccessControl` for the current user.",
         security: [{ restrictLoggedUser: [] }],
         operationId: "getOneProfile",
-        parameters: [
-            { in: "path", name: "id", type: "string", required: true, description: "Profile name." },
-        ],
+        parameters: [{ in: "path", name: "id", type: "string", required: true, description: "Profile name." }],
         responses: {
             200: { description: "Profile descriptor.", schema: { $ref: "#/definitions/Profile" } },
             400: { description: "Profile not found or caller is not a member." },
@@ -81,9 +77,7 @@ export default function () {
         description: "Removes profile `id`, invalidates the quota cache, returns the refreshed profiles catalog.",
         security: [{ restrictAdmin: [] }],
         operationId: "adminDeleteProfile",
-        parameters: [
-            { in: "path", name: "id", type: "string", required: true, description: "Profile name to delete." },
-        ],
+        parameters: [{ in: "path", name: "id", type: "string", required: true, description: "Profile name to delete." }],
         responses: {
             200: {
                 description: "Profile deleted.",

@@ -51,7 +51,8 @@ export default function () {
                         shapes: {
                             type: "string",
                             description: "SHACL shape graph in Turtle.",
-                            example: "@prefix sh: <http://www.w3.org/ns/shacl#> .\n@prefix ex: <http://example.org/> .\nex:AssetShape a sh:NodeShape ; sh:targetClass ex:Asset ; sh:property [ sh:path ex:id ; sh:minCount 1 ] .",
+                            example:
+                                "@prefix sh: <http://www.w3.org/ns/shacl#> .\n@prefix ex: <http://example.org/> .\nex:AssetShape a sh:NodeShape ; sh:targetClass ex:Asset ; sh:property [ sh:path ex:id ; sh:minCount 1 ] .",
                         },
                     },
                     example: {
@@ -96,8 +97,7 @@ export default function () {
     GET.apiDoc = {
         security: [{ restrictLoggedUser: [] }],
         summary: "[GET stub] SHACL validation",
-        description:
-            "Stub — the GET handler is currently a no-op. Use `POST /shaclValidate` to validate triples against shapes.",
+        description: "Stub — the GET handler is currently a no-op. Use `POST /shaclValidate` to validate triples against shapes.",
         operationId: "shaclValidateGet",
         parameters: [
             { name: "shapes", in: "query", type: "string", required: true, description: "SHACL rules in Turtle." },

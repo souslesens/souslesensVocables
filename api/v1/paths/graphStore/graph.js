@@ -37,9 +37,7 @@ export default function () {
             "Calls `GraphStore.exportGraph` against the main triplestore (URL + credentials taken from `mainConfig.sparql_server`) " +
             "and returns the serialised Turtle of the named graph identified by `graphUri`.",
         operationId: "graphStoreExportGraph",
-        parameters: [
-            { name: "graphUri", in: "query", type: "string", required: true, description: "URI of the named graph to export. Example: `http://purl.obolibrary.org/obo/bfo.owl`." },
-        ],
+        parameters: [{ name: "graphUri", in: "query", type: "string", required: true, description: "URI of the named graph to export. Example: `http://purl.obolibrary.org/obo/bfo.owl`." }],
         responses: {
             200: {
                 description: "Turtle serialisation of the graph.",
@@ -88,7 +86,11 @@ export default function () {
                 schema: {
                     type: "object",
                     properties: {
-                        sourceUrl: { type: "string", description: "Public URL of the RDF file.", example: "https://raw.githubusercontent.com/BFO-ontology/BFO-2020/refs/heads/master/21838-2/owl/bfo-core.ttl" },
+                        sourceUrl: {
+                            type: "string",
+                            description: "Public URL of the RDF file.",
+                            example: "https://raw.githubusercontent.com/BFO-ontology/BFO-2020/refs/heads/master/21838-2/owl/bfo-core.ttl",
+                        },
                         graphUri: { type: "string", description: "Target named graph URI.", example: "http://purl.obolibrary.org/obo/bfo.owl" },
                     },
                     example: {

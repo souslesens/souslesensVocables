@@ -61,10 +61,8 @@ export default function () {
                     properties: {
                         ndjson: {
                             type: "string",
-                            description:
-                                "Newline-delimited JSON for Elasticsearch `/_msearch`: alternating header lines " +
-                                "(`{\"index\":\"<name>\"}`) and query body lines.",
-                            example: "{\"index\":\"iof_core\"}\n{\"query\":{\"match\":{\"label\":\"asset\"}},\"size\":5}\n",
+                            description: "Newline-delimited JSON for Elasticsearch `/_msearch`: alternating header lines " + '(`{"index":"<name>"}`) and query body lines.',
+                            example: '{"index":"iof_core"}\n{"query":{"match":{"label":"asset"}},"size":5}\n',
                         },
                         indexes: {
                             type: "array",
@@ -75,7 +73,7 @@ export default function () {
                     },
                     example: {
                         indexes: ["iof_core"],
-                        ndjson: "{\"index\":\"iof_core\"}\n{\"query\":{\"match\":{\"label\":\"asset\"}},\"size\":5}\n",
+                        ndjson: '{"index":"iof_core"}\n{"query":{"match":{"label":"asset"}},"size":5}\n',
                     },
                 },
             },
@@ -83,9 +81,7 @@ export default function () {
 
         responses: {
             200: {
-                description:
-                    "Elasticsearch `responses` array — one entry per query in the NDJSON, each shaped as a " +
-                    "standard Elasticsearch search response (`{ hits, took, timed_out, ... }`).",
+                description: "Elasticsearch `responses` array — one entry per query in the NDJSON, each shaped as a " + "standard Elasticsearch search response (`{ hits, took, timed_out, ... }`).",
                 schema: {
                     type: "array",
                     items: {

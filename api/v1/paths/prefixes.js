@@ -8,9 +8,7 @@ export default function () {
     GET.apiDoc = {
         operationId: "getPrefixes",
         summary: "Return the bundled prefix.cc namespace catalog",
-        description:
-            "Returns `model/prefixes.json` (a snapshot of prefix.cc) used by the SPARQL editor and the URI " +
-            "shorteners across the UI. Map shape: `{ <prefix>: <namespace URI> }`.",
+        description: "Returns `model/prefixes.json` (a snapshot of prefix.cc) used by the SPARQL editor and the URI " + "shorteners across the UI. Map shape: `{ <prefix>: <namespace URI> }`.",
         parameters: [],
         responses: {
             200: {

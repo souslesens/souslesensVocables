@@ -31,9 +31,7 @@ export default function () {
         security: [{ restrictAdmin: [] }],
         operationId: "adminGetSources",
         responses: responseSchema("Sources", "GET"),
-        parameters: [
-            { name: "sourcesFile", in: "query", type: "string", required: false, description: "Optional override of the default sources file." },
-        ],
+        parameters: [{ name: "sourcesFile", in: "query", type: "string", required: false, description: "Optional override of the default sources file." }],
         tags: ["Sources"],
     };
 
@@ -77,9 +75,7 @@ export default function () {
     }
     POST.apiDoc = {
         summary: "Create one or more sources (admin endpoint)",
-        description:
-            "Admin variant of `POST /sources` without quota enforcement. Body is a map `sourceName → Source descriptor`. " +
-            "Returns the full sources catalog after insertion.",
+        description: "Admin variant of `POST /sources` without quota enforcement. Body is a map `sourceName → Source descriptor`. " + "Returns the full sources catalog after insertion.",
         security: [{ restrictAdmin: [] }],
         operationId: "adminCreateSources",
         parameters: [

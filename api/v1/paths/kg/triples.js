@@ -96,7 +96,7 @@ export default function () {
         operationId: "kgDeleteTriples",
         parameters: [
             { name: "source", in: "query", type: "string", required: false, description: "Source name. Example: `IOF_core`." },
-            { name: "tables", in: "query", type: "string", required: false, description: "JSON array of table names (e.g. `[\"assets.csv\"]`). Empty/omitted = all tables." },
+            { name: "tables", in: "query", type: "string", required: false, description: 'JSON array of table names (e.g. `["assets.csv"]`). Empty/omitted = all tables.' },
             { name: "options", in: "query", type: "string", required: false, description: "JSON-encoded options object." },
         ],
         responses: {

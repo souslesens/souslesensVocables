@@ -77,13 +77,7 @@ export default function () {
                 },
                 "x-examples": {
                     "Set dc:title on IOF_core": {
-                        addedData: [
-                            [
-                                "https://www.industrialontologies.org/core/",
-                                "http://purl.org/dc/terms/title",
-                                '"Industrial Ontology Foundry – Core"',
-                            ],
-                        ],
+                        addedData: [["https://www.industrialontologies.org/core/", "http://purl.org/dc/terms/title", '"Industrial Ontology Foundry – Core"']],
                         removedData: [],
                     },
                 },
@@ -99,13 +93,9 @@ export default function () {
     GET.apiDoc = {
         security: [{ restrictLoggedUser: [], restrictQuota: [] }],
         summary: "Read metadata triples of a source's graph",
-        description:
-            "Returns metadata-level triples (titles, creators, imports, versioning) of the named graph attached to `source`, " +
-            "as fetched by `rdfDataModel.getRdfMetadata`.",
+        description: "Returns metadata-level triples (titles, creators, imports, versioning) of the named graph attached to `source`, " + "as fetched by `rdfDataModel.getRdfMetadata`.",
         operationId: "rdfGetGraphMetadata",
-        parameters: [
-            { name: "source", in: "query", type: "string", required: true, description: "Source name." },
-        ],
+        parameters: [{ name: "source", in: "query", type: "string", required: true, description: "Source name." }],
         responses: {
             200: {
                 description: "Graph URI and its metadata triples.",

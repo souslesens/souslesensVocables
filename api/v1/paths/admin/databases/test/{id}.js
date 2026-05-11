@@ -23,9 +23,7 @@ export default function () {
         description:
             "Opens an admin-restricted connection (`databaseModel.getAdminRestrictedConnection`) and runs `SELECT 1`. " +
             "Returns `200` if the round-trip succeeds, `403` if the host is unreachable (`EHOSTUNREACH`), `500` otherwise.",
-        parameters: [
-            { in: "path", name: "id", type: "string", required: true, description: "Database id to test." },
-        ],
+        parameters: [{ in: "path", name: "id", type: "string", required: true, description: "Database id to test." }],
         responses: {
             200: {
                 description: "Connection OK.",

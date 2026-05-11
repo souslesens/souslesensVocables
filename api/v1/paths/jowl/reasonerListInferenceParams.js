@@ -28,8 +28,7 @@ export default function () {
         security: [{ restrictLoggedUser: [] }],
         summary: "List the inference parameters supported by the JOWL reasoner",
         description:
-            "Calls `reasoner/parametres` on the JOWL server and returns the JSON describing the available " +
-            "inference parameters (used by the UI to render the reasoner configuration form).",
+            "Calls `reasoner/parametres` on the JOWL server and returns the JSON describing the available " + "inference parameters (used by the UI to render the reasoner configuration form).",
         operationId: "jowlReasonerListInferenceParams",
         parameters: [],
         responses: {

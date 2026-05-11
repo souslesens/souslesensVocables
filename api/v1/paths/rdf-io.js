@@ -39,12 +39,9 @@ export default function () {
         security: [{ restrictLoggedUser: [] }],
         summary: "Parse a Turtle string into SLSV-format triples",
         description:
-            "Parses `turtle` (a Turtle/N3 document supplied as a query string) using `rdf-parse`. Returns the array of " +
-            "`{ s, p, o }` triples and the prefix map declared in the document.",
+            "Parses `turtle` (a Turtle/N3 document supplied as a query string) using `rdf-parse`. Returns the array of " + "`{ s, p, o }` triples and the prefix map declared in the document.",
         operationId: "rdfIoTurtleToTriples",
-        parameters: [
-            { name: "turtle", in: "query", type: "string", required: true, description: "Turtle/N3 document body." },
-        ],
+        parameters: [{ name: "turtle", in: "query", type: "string", required: true, description: "Turtle/N3 document body." }],
         responses: {
             200: {
                 description: "Parsed triples + prefix map.",

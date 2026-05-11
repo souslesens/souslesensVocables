@@ -25,9 +25,7 @@ export default function () {
         description: "Admin endpoint: returns the full `User` record (including hashed password and token).",
         security: [{ restrictAdmin: [] }],
         operationId: "getOneUser",
-        parameters: [
-            { in: "path", name: "id", type: "string", required: true, description: "User id (login)." },
-        ],
+        parameters: [{ in: "path", name: "id", type: "string", required: true, description: "User id (login)." }],
         responses: {
             200: { description: "User record.", schema: { $ref: "#/definitions/User" } },
             404: { description: "User not found." },
@@ -59,9 +57,7 @@ export default function () {
         description: "Removes user `id` and returns the refreshed user catalog.",
         security: [{ restrictAdmin: [] }],
         operationId: "deleteOneUser",
-        parameters: [
-            { in: "path", name: "id", type: "string", required: true, description: "User id (login) to delete." },
-        ],
+        parameters: [{ in: "path", name: "id", type: "string", required: true, description: "User id (login) to delete." }],
         responses: {
             200: {
                 description: "User deleted.",

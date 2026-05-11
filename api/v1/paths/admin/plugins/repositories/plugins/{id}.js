@@ -27,9 +27,7 @@ export default function () {
             "Scans the local clone of repository `{id}` for sub-directories containing a `public/js/main.js` " +
             "file (the plugin entry-point marker) and returns their names via `toolModel.getRepositoryPlugins`. " +
             "When the repository contains only one plugin, `message` is a single-entry array with the repository id itself.",
-        parameters: [
-            { name: "id", in: "path", type: "string", required: true, description: "Repository identifier. Example: `slsv-plugin-example`." },
-        ],
+        parameters: [{ name: "id", in: "path", type: "string", required: true, description: "Repository identifier. Example: `slsv-plugin-example`." }],
         responses: {
             200: {
                 description: "Plugin directory names found in the repository.",

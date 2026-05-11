@@ -22,9 +22,7 @@ export default function () {
             "Returns the set of mapping files (`KGbuilder_main.getSourceMappingsFiles`) that have already been used " +
             "to generate triples in `source`'s graph. Used by the UI to offer 'recreate triples' / 'delete triples' actions.",
         operationId: "kgListMappingFiles",
-        parameters: [
-            { name: "source", in: "query", type: "string", required: true, description: "Source name. Example: `IOF_core`." },
-        ],
+        parameters: [{ name: "source", in: "query", type: "string", required: true, description: "Source name. Example: `IOF_core`." }],
         responses: {
             200: {
                 description: "Array of mapping file names.",

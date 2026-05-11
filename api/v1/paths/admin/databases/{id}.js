@@ -14,9 +14,7 @@ export default function () {
 
     GET.apiDoc = {
         operationId: "adminGetOneDatabase",
-        parameters: [
-            { in: "path", name: "id", type: "string", required: true, description: "Database id from `databases.json`." },
-        ],
+        parameters: [{ in: "path", name: "id", type: "string", required: true, description: "Database id from `databases.json`." }],
         responses: {
             200: { description: "Database descriptor.", schema: { $ref: "#/definitions/Database" } },
             500: { description: "Database not found or persistence error." },
@@ -54,9 +52,7 @@ export default function () {
         description: "Removes database `id` from `databases.json`. Returns the refreshed catalog.",
         security: [{ restrictAdmin: [] }],
         operationId: "adminDeleteOneDatabase",
-        parameters: [
-            { in: "path", name: "id", type: "string", required: true, description: "Database id to delete." },
-        ],
+        parameters: [{ in: "path", name: "id", type: "string", required: true, description: "Database id to delete." }],
         responses: {
             200: {
                 description: "Database deleted.",

@@ -349,9 +349,15 @@ var KGquery_NodeInfos = (function () {
 
             if (uri) {
                 var uriValue =
-                    "<a target='_blank' href='" + uri + "'>" + uri + "</a>" +
+                    "<a target='_blank' href='" +
+                    uri +
+                    "'>" +
+                    uri +
+                    "</a>" +
                     "&nbsp;<button class='w3-button nodesInfos-iconsButtons' style='font-size:10px;margin-left:7px;'" +
-                    " onclick='KGquery_NodeInfos.copyUri(\"" + uri + "\",$(this))'>" +
+                    " onclick='KGquery_NodeInfos.copyUri(\"" +
+                    uri +
+                    "\",$(this))'>" +
                     "<input type='image' src='./icons/CommonIcons/CopyIcon.png'>" +
                     "</button>";
                 properties.unshift({ column_name: "URI", value: uriValue });

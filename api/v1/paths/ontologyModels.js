@@ -21,13 +21,10 @@ export default function () {
     GET.apiDoc = {
         summary: "Read the cached ontology model for a source",
         description:
-            "Returns the in-memory ontology model previously POSTed for `source`. The cache is server-process " +
-            "lifetime only (no disk persistence) — restart the server and the cache is empty.",
+            "Returns the in-memory ontology model previously POSTed for `source`. The cache is server-process " + "lifetime only (no disk persistence) — restart the server and the cache is empty.",
         security: [{ restrictLoggedUser: [] }],
         operationId: "getOntologyModel",
-        parameters: [
-            { name: "source", in: "query", type: "string", required: true, description: "Source name. Example: `IOF_core`." },
-        ],
+        parameters: [{ name: "source", in: "query", type: "string", required: true, description: "Source name. Example: `IOF_core`." }],
         responses: {
             200: {
                 description: "Cached ontology model.",
@@ -50,13 +47,25 @@ export default function () {
                             "http://purl.obolibrary.org/obo/BFO_0000001": { id: "http://purl.obolibrary.org/obo/BFO_0000001", label: "entity", superClass: null, superClassLabel: null },
                         },
                         properties: {
-                            "http://purl.obolibrary.org/obo/BFO_0000115": { id: "http://purl.obolibrary.org/obo/BFO_0000115", label: "has member part", inverseProp: "http://purl.obolibrary.org/obo/BFO_0000129", superProp: "http://purl.obolibrary.org/obo/BFO_0000178" },
+                            "http://purl.obolibrary.org/obo/BFO_0000115": {
+                                id: "http://purl.obolibrary.org/obo/BFO_0000115",
+                                label: "has member part",
+                                inverseProp: "http://purl.obolibrary.org/obo/BFO_0000129",
+                                superProp: "http://purl.obolibrary.org/obo/BFO_0000178",
+                            },
                         },
                         nonObjectProperties: {
                             "http://www.w3.org/2004/02/skos/core#definition": { id: "http://www.w3.org/2004/02/skos/core#definition", label: "definition", domain: null, range: null },
                         },
                         constraints: {
-                            "http://purl.obolibrary.org/obo/BFO_0000221": { domain: "http://purl.obolibrary.org/obo/BFO_0000203", range: "http://purl.obolibrary.org/obo/BFO_0000008", domainLabel: "temporal instant", rangeLabel: "temporal region", label: "first instant of", superProp: null },
+                            "http://purl.obolibrary.org/obo/BFO_0000221": {
+                                domain: "http://purl.obolibrary.org/obo/BFO_0000203",
+                                range: "http://purl.obolibrary.org/obo/BFO_0000008",
+                                domainLabel: "temporal instant",
+                                rangeLabel: "temporal region",
+                                label: "first instant of",
+                                superProp: null,
+                            },
                         },
                         restrictions: {},
                     },
@@ -105,7 +114,11 @@ export default function () {
                                 "else the raw full model object (`{ graphUri, classes, properties, nonObjectProperties, constraints, restrictions, classesCount }`).",
                             example: '{"http://purl.obolibrary.org/obo/BFO_0000001":{"id":"http://purl.obolibrary.org/obo/BFO_0000001","label":"entity","superClass":null,"superClassLabel":null}}',
                         },
-                        key: { type: "string", description: "Optional sub-key: `classes`, `properties`, `nonObjectProperties`, `constraints`, `restrictions`, `classesCount`, or `graphUri`.", example: "classes" },
+                        key: {
+                            type: "string",
+                            description: "Optional sub-key: `classes`, `properties`, `nonObjectProperties`, `constraints`, `restrictions`, `classesCount`, or `graphUri`.",
+                            example: "classes",
+                        },
                     },
                     example: {
                         source: "BFO",
@@ -122,14 +135,10 @@ export default function () {
     };
     DELETE.apiDoc = {
         summary: "Evict cached ontology model(s)",
-        description:
-            "Removes a single source from the in-memory cache when `source` is provided and not the literal `\"null\"`; " +
-            "otherwise wipes the entire cache.",
+        description: 'Removes a single source from the in-memory cache when `source` is provided and not the literal `"null"`; ' + "otherwise wipes the entire cache.",
         security: [{ restrictLoggedUser: [] }],
         operationId: "deleteOntologyModel",
-        parameters: [
-            { name: "source", in: "query", type: "string", required: false, description: "Source to evict. Omit (or pass `\"null\"`) to clear the entire cache." },
-        ],
+        parameters: [{ name: "source", in: "query", type: "string", required: false, description: 'Source to evict. Omit (or pass `"null"`) to clear the entire cache.' }],
         responses: {
             200: { description: "Cache evicted." },
         },
@@ -150,7 +159,7 @@ export default function () {
         summary: "Patch the cached ontology model with a delta",
         description:
             "Merges or removes entries inside `cache[source]`. `data` is shaped `{ entryType: { id: payload } }` with " +
-            "`entryType` being `classes`, `properties`, `restrictions`, etc. When `options.remove === \"true\"`, the " +
+            '`entryType` being `classes`, `properties`, `restrictions`, etc. When `options.remove === "true"`, the ' +
             "entries listed in `data` are deleted (special handling for `restrictions` matched by `blankNodeId`). " +
             "Otherwise entries are inserted or appended (concat for `restrictions`).",
         security: [{ restrictLoggedUser: [] }],

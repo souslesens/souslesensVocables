@@ -219,7 +219,13 @@ export default function () {
             { name: "last", in: "formData", required: false, type: "string", description: "Truthy string for the final chunk — triggers the actual upload to the triplestore." },
             { name: "clean", in: "formData", required: false, type: "string", description: "Truthy string drops the temporary file and returns without uploading." },
             { name: "data", in: "formData", required: true, type: "file", format: "binary", description: "RDF chunk content." },
-            { name: "identifier", in: "formData", required: false, type: "string", description: "ULID identifying the upload session. Omit on the first chunk; reuse the value returned by the server for following chunks." },
+            {
+                name: "identifier",
+                in: "formData",
+                required: false,
+                type: "string",
+                description: "ULID identifying the upload session. Omit on the first chunk; reuse the value returned by the server for following chunks.",
+            },
         ],
         responses: {
             200: {
@@ -280,9 +286,7 @@ export default function () {
             "Issues a SPARQL `DROP GRAPH` on the `graphUri` of `source`. The source descriptor itself is **not** removed " +
             "from `sources.json` — only the triples in the triplestore. Requires `readwrite` access on the source.",
         operationId: "rdfDeleteGraph",
-        parameters: [
-            { name: "source", in: "query", type: "string", required: true, description: "Source name whose graph must be cleared." },
-        ],
+        parameters: [{ name: "source", in: "query", type: "string", required: true, description: "Source name whose graph must be cleared." }],
         responses: {
             200: {
                 description: "Graph dropped.",

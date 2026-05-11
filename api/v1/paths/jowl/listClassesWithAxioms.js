@@ -47,9 +47,7 @@ export default function () {
             "Forwards `axioms/listClassesWithAxioms` to the JOWL server. Used by the UI to highlight axiomatised " +
             "classes (those carrying restrictions, equivalent classes, disjointness, etc.) in the lineage tree.",
         operationId: "jowlListClassesWithAxioms",
-        parameters: [
-            { name: "graphName", in: "query", type: "string", required: true, description: "Ontology graph URI. Example: `http://purl.obolibrary.org/obo/bfo.owl`." },
-        ],
+        parameters: [{ name: "graphName", in: "query", type: "string", required: true, description: "Ontology graph URI. Example: `http://purl.obolibrary.org/obo/bfo.owl`." }],
         responses: {
             200: {
                 description: "Array of class URIs holding axioms.",

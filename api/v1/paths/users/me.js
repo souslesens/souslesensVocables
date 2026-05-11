@@ -33,8 +33,8 @@ export default function () {
         summary: "Return the public profile of the current user",
         description:
             "Returns the current user without any credential fields (`password`, `token`, `source` are stripped). " +
-            "Special case: when `mainConfig.auth === \"disabled\"`, the endpoint returns a synthetic admin profile " +
-            "(`{ id: \"0\", login: \"admin\", groups: [\"admin\"], allowSourceCreation: true, maxNumberCreatedSource: 1000 }`).",
+            'Special case: when `mainConfig.auth === "disabled"`, the endpoint returns a synthetic admin profile ' +
+            '(`{ id: "0", login: "admin", groups: ["admin"], allowSourceCreation: true, maxNumberCreatedSource: 1000 }`).',
         security: [{ restrictLoggedUser: [] }],
         operationId: "getMe",
         parameters: [],

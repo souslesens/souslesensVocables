@@ -80,9 +80,7 @@ export default function () {
     }
     POST.apiDoc = {
         summary: "Create one or more user accounts (admin only)",
-        description:
-            "Body is a map `userId → User`. Each entry is added via `userModel.addUserAccount`. " +
-            "Empty `password` is rejected with `400`. Returns the refreshed user catalog.",
+        description: "Body is a map `userId → User`. Each entry is added via `userModel.addUserAccount`. " + "Empty `password` is rejected with `400`. Returns the refreshed user catalog.",
         security: [{ restrictAdmin: [] }],
         operationId: "adminCreateUsers",
         parameters: [

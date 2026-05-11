@@ -62,13 +62,10 @@ export default function () {
     GET.apiDoc = {
         summary: "Get a single source descriptor by id",
         description:
-            "Returns the descriptor of source `id` if the caller has access to it (`getOneUserSource`). " +
-            "Despite living under `/admin/sources/{id}`, this GET only requires a logged-in user.",
+            "Returns the descriptor of source `id` if the caller has access to it (`getOneUserSource`). " + "Despite living under `/admin/sources/{id}`, this GET only requires a logged-in user.",
         operationId: "adminGetOneSource",
         security: [{ restrictLoggedUser: [] }],
-        parameters: [
-            { in: "path", name: "id", type: "string", required: true, description: "Source name. Example: `BFO`." },
-        ],
+        parameters: [{ in: "path", name: "id", type: "string", required: true, description: "Source name. Example: `BFO`." }],
         responses: {
             200: {
                 description: "Source descriptor.",
@@ -80,14 +77,10 @@ export default function () {
     };
     DELETE.apiDoc = {
         summary: "Delete a source (admin endpoint)",
-        description:
-            "Admin-only deletion of source `id`. Returns the refreshed full sources catalog. " +
-            "Does not drop the named graph in the triplestore.",
+        description: "Admin-only deletion of source `id`. Returns the refreshed full sources catalog. " + "Does not drop the named graph in the triplestore.",
         security: [{ restrictAdmin: [] }],
         operationId: "adminDeleteSource",
-        parameters: [
-            { in: "path", name: "id", type: "string", required: true, description: "Source name to delete." },
-        ],
+        parameters: [{ in: "path", name: "id", type: "string", required: true, description: "Source name to delete." }],
         responses: {
             200: {
                 description: "Source deleted.",
@@ -104,9 +97,7 @@ export default function () {
     };
     PUT.apiDoc = {
         summary: "Update a source descriptor (admin endpoint)",
-        description:
-            "Admin-only update of source `id`. Body must be a full `Source` descriptor whose `name` matches the path `id`. " +
-            "Returns the full sources catalog after update.",
+        description: "Admin-only update of source `id`. Body must be a full `Source` descriptor whose `name` matches the path `id`. " + "Returns the full sources catalog after update.",
         security: [{ restrictAdmin: [] }],
         operationId: "adminUpdateSource",
         parameters: [

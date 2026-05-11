@@ -20,9 +20,7 @@ export default function () {
             "In-process Manchester rendering (no JOWL server round-trip). Currently the body of the handler is " +
             "commented out — kept as an HTTP entry point for the legacy `TriplesToManchester` engine.",
         operationId: "axiomsToManchester",
-        parameters: [
-            { name: "triples", in: "query", type: "string", required: true, description: "JSON-encoded triple array to render." },
-        ],
+        parameters: [{ name: "triples", in: "query", type: "string", required: true, description: "JSON-encoded triple array to render." }],
         responses: {
             200: {
                 description: "Manchester string rendered from the supplied triples.",

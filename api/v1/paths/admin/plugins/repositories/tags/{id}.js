@@ -27,9 +27,7 @@ export default function () {
             "Returns up to 5 tags from the local clone of repository `{id}`, sorted descending by refname " +
             "(latest first) via `toolModel.getRepositoryTags`. Used by the admin UI to pick a specific plugin " +
             "version before installation.",
-        parameters: [
-            { name: "id", in: "path", type: "string", required: true, description: "Repository identifier. Example: `slsv-plugin-example`." },
-        ],
+        parameters: [{ name: "id", in: "path", type: "string", required: true, description: "Repository identifier. Example: `slsv-plugin-example`." }],
         responses: {
             200: {
                 description: "Most recent Git tags (max 5, newest first).",

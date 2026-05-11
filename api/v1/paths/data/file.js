@@ -27,9 +27,7 @@ export default function () {
     GET.apiDoc = {
         security: [{ restrictLoggedUser: [] }],
         summary: "Read the content of a file in the data folder",
-        description:
-            "Returns the parsed content (JSON when applicable, else raw text) of `dataDir/<dir>/<fileName>` " +
-            "via `dataController.readFile`.",
+        description: "Returns the parsed content (JSON when applicable, else raw text) of `dataDir/<dir>/<fileName>` " + "via `dataController.readFile`.",
         operationId: "dataReadFile",
         parameters: [
             { name: "dir", in: "query", type: "string", required: true, description: "Sub-directory under `dataDir`." },
@@ -63,8 +61,7 @@ export default function () {
         security: [{ restrictLoggedUser: [] }],
         summary: "Write content into a file in the data folder",
         description:
-            "Persists `data` (string, typically JSON-stringified) into `dataDir/<dir>/<fileName>` via " +
-            "`dataController.saveDataToFile`. Creates the file if missing, overwrites otherwise.",
+            "Persists `data` (string, typically JSON-stringified) into `dataDir/<dir>/<fileName>` via " + "`dataController.saveDataToFile`. Creates the file if missing, overwrites otherwise.",
         operationId: "dataSaveFile",
         parameters: [
             {

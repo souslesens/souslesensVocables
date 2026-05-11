@@ -57,9 +57,7 @@ export default function () {
             "Does **not** drop the corresponding named graph in the triplestore — use `DELETE /rdf/graph` for that.",
         security: [{ restrictLoggedUser: [] }],
         operationId: "deleteUserSource",
-        parameters: [
-            { in: "path", name: "id", type: "string", required: true, description: "Source name to delete. Example: `my_new_ontology`." },
-        ],
+        parameters: [{ in: "path", name: "id", type: "string", required: true, description: "Source name to delete. Example: `my_new_ontology`." }],
         responses: {
             200: {
                 description: "Source deleted. Returns the refreshed owned-sources list.",
@@ -76,9 +74,7 @@ export default function () {
     };
     PUT.apiDoc = {
         summary: "Update a source descriptor",
-        description:
-            "Replaces the descriptor of source `id`. The `name` field of the body must equal the path `id`. " +
-            "Returns the refreshed list of sources owned by the caller.",
+        description: "Replaces the descriptor of source `id`. The `name` field of the body must equal the path `id`. " + "Returns the refreshed list of sources owned by the caller.",
         security: [{ restrictLoggedUser: [] }],
         operationId: "updateUserSource",
         parameters: [

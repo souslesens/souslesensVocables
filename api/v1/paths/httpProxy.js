@@ -72,7 +72,6 @@ export default function () {
         tags: ["Misc"],
     };
 
-
     /* Not used route with bug , I think deprecated by POST route that can handle both */
     function GET(req, res, next) {
         try {
@@ -86,14 +85,10 @@ export default function () {
     }
     GET.apiDoc = {
         summary: "Generic HTTP proxy (GET)",
-        description:
-            "GET variant of the generic HTTP proxy. Forwards `req.query` as the call options to the upstream server. " +
-            "No SPARQL filtering — see `/sparqlProxy` for that.",
+        description: "GET variant of the generic HTTP proxy. Forwards `req.query` as the call options to the upstream server. " + "No SPARQL filtering — see `/sparqlProxy` for that.",
         security: [{ restrictLoggedUser: [] }],
         operationId: "httpProxyGet",
-        parameters: [
-            { name: "url", in: "query", type: "string", required: true, description: "Upstream URL." },
-        ],
+        parameters: [{ name: "url", in: "query", type: "string", required: true, description: "Upstream URL." }],
         responses: {
             default: { description: "Raw response from the upstream server." },
         },

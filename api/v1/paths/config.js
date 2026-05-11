@@ -80,8 +80,7 @@ export default function () {
         security: [{ restrictAdmin: [] }],
         summary: "Update the writeable subset of the server configuration (admin)",
         description:
-            "Admin-only. Updates `defaultGroups`, `tools_available`, `theme` and `generalQuota` in `mainConfig.json`. " +
-            "All other fields are preserved. Returns the new full configuration.",
+            "Admin-only. Updates `defaultGroups`, `tools_available`, `theme` and `generalQuota` in `mainConfig.json`. " + "All other fields are preserved. Returns the new full configuration.",
         operationId: "configPut",
         parameters: [
             {

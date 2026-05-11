@@ -42,9 +42,7 @@ export default function () {
     GET.apiDoc = {
         security: [{ restrictLoggedUser: [] }],
         summary: "Introspect the schema of a configured database",
-        description:
-            "Returns the table-to-columns map of database `name` by calling `dbConnector.getKGModel`. " +
-            "Used by MappingModeler to populate column pickers when designing a mapping.",
+        description: "Returns the table-to-columns map of database `name` by calling `dbConnector.getKGModel`. " + "Used by MappingModeler to populate column pickers when designing a mapping.",
         operationId: "kgGetModel",
         parameters: [
             { name: "type", in: "query", type: "string", required: true, description: "Datasource type (e.g. `sql`, `csv`)." },

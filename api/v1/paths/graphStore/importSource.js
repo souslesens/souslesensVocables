@@ -89,7 +89,7 @@ export default function () {
             "Admin-only orchestration: " +
             "(1) inserts a `sourceName → graphUri` entry in the source registry via `GraphStore.insertSourceInConfig`, " +
             "(2) checks if the graph already exists, " +
-            "(3) optionally clears it when `options.reload === \"true\"`, " +
+            '(3) optionally clears it when `options.reload === "true"`, ' +
             "(4) loads triples from `rdfUrl` via `GraphStore.importGraphFromUrl`. " +
             "Skips reload if the graph already exists and `options.reload` is not `true`.",
         security: [{ restrictLoggedUser: [], restrictQuota: [] }],
@@ -108,7 +108,7 @@ export default function () {
                         options: {
                             type: "object",
                             properties: {
-                                reload: { type: "string", description: "Set to the string `\"true\"` to drop the graph before re-loading.", example: "false" },
+                                reload: { type: "string", description: 'Set to the string `"true"` to drop the graph before re-loading.', example: "false" },
                             },
                             example: { reload: "false" },
                         },

@@ -55,8 +55,8 @@ export default function () {
             { name: "graphUri", in: "query", type: "string", required: true, description: "Target ontology graph URI. Example: `https://www.industrialontologies.org/core/`." },
             { name: "classUri", in: "query", type: "string", required: false, description: "Subject class URI." },
             { name: "axiomType", in: "query", type: "string", required: false, description: "Axiom type (e.g. `SubClassOf`)." },
-            { name: "saveTriples", in: "query", type: "string", required: false, description: "If `\"true\"`, persist generated triples in `graphUri`." },
-            { name: "checkConsistency", in: "query", type: "string", required: false, description: "If `\"true\"`, run a consistency check before saving." },
+            { name: "saveTriples", in: "query", type: "string", required: false, description: 'If `"true"`, persist generated triples in `graphUri`.' },
+            { name: "checkConsistency", in: "query", type: "string", required: false, description: 'If `"true"`, run a consistency check before saving.' },
         ],
         responses: {
             200: {

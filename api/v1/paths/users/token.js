@@ -18,8 +18,7 @@ export default function () {
     POST.apiDoc = {
         summary: "(Re)generate the API token for a user",
         description:
-            "Generates a fresh API token for `login` via `userModel.generateUserToken` and persists it. " +
-            "The returned token is intended for non-interactive API access (Authorization header).",
+            "Generates a fresh API token for `login` via `userModel.generateUserToken` and persists it. " + "The returned token is intended for non-interactive API access (Authorization header).",
         security: [{ restrictLoggedUser: [] }],
         operationId: "generateUserToken",
         parameters: [

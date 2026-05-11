@@ -34,9 +34,7 @@ export default function () {
             "Runs `toolModel.fetchRepository` on the Git repository identified by `{id}`. On success the local " +
             "clone is updated to `HEAD`. Requires that the repository was previously registered in `plugins.json` " +
             "via `GET /admin/plugins/repositories`.",
-        parameters: [
-            { name: "id", in: "path", type: "string", required: true, description: "Repository identifier as declared in `plugins.json`. Example: `slsv-plugin-example`." },
-        ],
+        parameters: [{ name: "id", in: "path", type: "string", required: true, description: "Repository identifier as declared in `plugins.json`. Example: `slsv-plugin-example`." }],
         responses: {
             200: {
                 description: "Repository updated successfully.",

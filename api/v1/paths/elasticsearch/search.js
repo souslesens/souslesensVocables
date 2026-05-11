@@ -37,7 +37,7 @@ export default function () {
                         indices: {
                             type: "array",
                             items: { type: "string" },
-                            description: "Index names to search (lowercase source names). Example: `[\"iof_core\", \"gemet\"]`.",
+                            description: 'Index names to search (lowercase source names). Example: `["iof_core", "gemet"]`.',
                             example: ["iof_core", "gemet"],
                         },
                         uris: {

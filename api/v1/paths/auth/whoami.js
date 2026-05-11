@@ -16,7 +16,7 @@ export default function () {
         description:
             "Returns the resolved user object (`userManager.getUser(req.user)`), including `groups`, `allowSourceCreation` " +
             "and `maxNumberCreatedSource`. Used by the frontend to bootstrap the session and decide which tools to expose. " +
-            "When `mainConfig.auth === \"disabled\"`, this still returns a synthetic admin user with login `admin`.",
+            'When `mainConfig.auth === "disabled"`, this still returns a synthetic admin user with login `admin`.',
         operationId: "authWhoami",
         parameters: [],
         responses: {

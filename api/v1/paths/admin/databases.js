@@ -20,9 +20,7 @@ export default function () {
         responses: responseSchema("Databases", "GET"),
         security: [{ restrictAdmin: [] }],
         summary: "List all configured external databases (admin only)",
-        description:
-            "Admin-only. Returns the full `databases.json` catalog. Each entry exposes `driver`, `host`, " +
-            "`port`, `database`, `user` (passwords are also included — admin endpoint).",
+        description: "Admin-only. Returns the full `databases.json` catalog. Each entry exposes `driver`, `host`, " + "`port`, `database`, `user` (passwords are also included — admin endpoint).",
         tags: ["Databases"],
     };
 
@@ -50,8 +48,7 @@ export default function () {
         responses: responseSchema("Databases", "POST"),
         security: [{ restrictAdmin: [] }],
         summary: "Register a new external database (admin only)",
-        description:
-            "Body must wrap the descriptor under a `database` key (`req.body.database`). Returns the refreshed catalog.",
+        description: "Body must wrap the descriptor under a `database` key (`req.body.database`). Returns the refreshed catalog.",
         parameters: [
             {
                 in: "body",

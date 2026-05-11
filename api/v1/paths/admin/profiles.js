@@ -20,9 +20,7 @@ export default function () {
     }
     GET.apiDoc = {
         summary: "List every profile (admin only)",
-        description:
-            "Admin-only. Returns the full `profiles.json` catalog. Each profile defines `allowedTools`, " +
-            "`allowedSourceSchemas`, `sourcesAccessControl`, optional `quota`, etc.",
+        description: "Admin-only. Returns the full `profiles.json` catalog. Each profile defines `allowedTools`, " + "`allowedSourceSchemas`, `sourcesAccessControl`, optional `quota`, etc.",
         security: [{ restrictAdmin: [] }],
         operationId: "adminGetProfiles",
         responses: responseSchema("Profiles", "GET"),
@@ -48,8 +46,7 @@ export default function () {
     POST.apiDoc = {
         summary: "Create one or more profiles (admin only)",
         description:
-            "Body is a map `profileName → Profile`. Each entry is added via `profileModel.addProfile`. " +
-            "Quota cache is invalidated after insertion. Returns the refreshed profiles catalog.",
+            "Body is a map `profileName → Profile`. Each entry is added via `profileModel.addProfile`. " + "Quota cache is invalidated after insertion. Returns the refreshed profiles catalog.",
         security: [{ restrictAdmin: [] }],
         operationId: "adminCreateProfiles",
         parameters: [

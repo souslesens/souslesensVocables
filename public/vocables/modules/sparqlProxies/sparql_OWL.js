@@ -773,7 +773,9 @@ var Sparql_OWL = (function () {
         if (options.filter) {
             query += options.filter;
         }
-
+        if(!filterStr){
+            filterStr = "";
+        }
         query += filterStr;
 
         //   query+="filter(!isBlank(?superClassSubClass))"

@@ -53,25 +53,33 @@ export default function () {
 
     GET.apiDoc = {
         security: [{ restrictAdmin: [] }],
-        summary: "Elasticsearch clean indices",
-        description: "Return all indices not described in sources.json",
-        operationId: "Elasticsearch clean indices",
+        summary: "Preview orphan Elasticsearch indices (dry-run)",
+        description:
+            "Returns the indices present in the Elasticsearch cluster whose names do not match any source declared " +
+            "in `sources.json` (case-insensitive). Read-only — nothing is deleted. The admin UI calls this first to " +
+            "show the user the deletion candidates before confirming.",
+        operationId: "elasticsearchListOrphanIndices",
         parameters: [],
         responses: {
             200: {
-                description: "Indices to delete",
+                description: "Orphan indices that would be removed by `POST /elasticsearch/clean`.",
                 schema: {
+                    type: "object",
                     properties: {
-                        toDelete: { type: "array", items: { type: "string" } },
+                        toDelete: {
+                            type: "array",
+                            items: { type: "string" },
+                            description: "Index names with no matching entry in `sources.json`.",
+                        },
                     },
+                    example: { toDelete: ["legacy_v1", "test_index"] },
                 },
             },
             500: {
-                description: "Server error",
+                description: "Failed to query Elasticsearch or load `sources.json`.",
                 schema: {
-                    properties: {
-                        error: { type: "object" },
-                    },
+                    type: "object",
+                    properties: { error: { type: "object" } },
                 },
             },
         },
@@ -80,25 +88,33 @@ export default function () {
 
     POST.apiDoc = {
         security: [{ restrictAdmin: [] }],
-        summary: "Elasticsearch clean indices",
-        description: "Delete all indices not described in sources.json",
-        operationId: "Elasticsearch clean indices",
+        summary: "Delete orphan Elasticsearch indices",
+        description:
+            "Deletes every index returned by the matching `GET /elasticsearch/clean` call (indices not declared in " +
+            "`sources.json`). Destructive — admin-only. Used by the admin tool's *Clean indices* button after the " +
+            "user confirms the dry-run list.",
+        operationId: "elasticsearchDeleteOrphanIndices",
         parameters: [],
         responses: {
             200: {
-                description: "Indices deleted",
+                description: "Indices that were deleted.",
                 schema: {
+                    type: "object",
                     properties: {
-                        deleted: { type: "array", items: { type: "string" } },
+                        deleted: {
+                            type: "array",
+                            items: { type: "string" },
+                            description: "Index names removed from the Elasticsearch cluster.",
+                        },
                     },
+                    example: { deleted: ["legacy_v1", "test_index"] },
                 },
             },
             500: {
-                description: "Server error",
+                description: "Elasticsearch deletion failure.",
                 schema: {
-                    properties: {
-                        error: { type: "object" },
-                    },
+                    type: "object",
+                    properties: { error: { type: "object" } },
                 },
             },
         },

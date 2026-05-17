@@ -53,54 +53,34 @@ export default function () {
 
     GET.apiDoc = {
         security: [{ restrictLoggedUser: [] }],
-        summary: "get existing axioms for a class from owl API",
-        description: "get existing axioms for a class from owl API",
-        operationId: "get existing axioms for a class from owl API",
+        summary: "Fetch axioms attached to a class via the JOWL server",
+        description:
+            "Forwards a `getClassAxioms` call to the configured JOWL server (`mainConfig.jowlServer.url`). " +
+            "Returns the OWL axioms attached to `classUri` in the named graph `graphUri`. " +
+            "Set `getTriples=true` to include the underlying RDF triples and `getManchesterExpression=true` to include " +
+            "the Manchester-syntax form. Filter on `axiomType` to limit the result (e.g. `SubClassOf`, `EquivalentClasses`). " +
+            "Returns `500` if the JOWL server is disabled.",
+        operationId: "jowlGetClassAxioms",
         parameters: [
-            {
-                name: "graphUri",
-                description: "ontologyGraphUri",
-                type: "string",
-                in: "query",
-                required: true,
-            },
-            {
-                name: "classUri",
-                description: "class URI",
-                in: "query",
-                type: "string",
-                required: true,
-            },
-            {
-                name: "axiomType",
-                description: "axiomType",
-                in: "query",
-                type: "string",
-                required: false,
-            },
-            {
-                name: "getTriples",
-                description: "getTriples",
-                in: "query",
-                type: "string",
-                required: false,
-            },
-            {
-                name: "getManchesterExpression",
-                description: "getManchesterExpression",
-                in: "query",
-                type: "string",
-                required: false,
-            },
+            { name: "graphUri", in: "query", type: "string", required: true, description: "Named graph holding the ontology. Example: `http://purl.obolibrary.org/obo/bfo.owl`." },
+            { name: "classUri", in: "query", type: "string", required: true, description: "Class URI to inspect. Example: `http://purl.obolibrary.org/obo/BFO_0000015`." },
+            { name: "axiomType", in: "query", type: "string", required: false, description: "Restrict to a single axiom type." },
+            { name: "getTriples", in: "query", type: "string", required: false, description: "If truthy, include underlying RDF triples." },
+            { name: "getManchesterExpression", in: "query", type: "string", required: false, description: "If truthy, include Manchester-syntax forms." },
         ],
-
         responses: {
             200: {
-                description: "Results",
+                description: "Axioms (and optionally triples / Manchester strings).",
                 schema: {
                     type: "object",
+                    additionalProperties: true,
+                    description:
+                        "JOWL `getClassAxioms` payload. Keyed by axiom type (e.g. `SubClassOf`, `EquivalentClasses`, " +
+                        "`DisjointClasses`). Each entry carries the axiom expression and — when requested — the underlying " +
+                        "RDF triples (`triples`) and Manchester-syntax form (`manchester`).",
                 },
             },
+            500: { description: "JOWL server disabled or upstream error." },
         },
         tags: ["JOWL"],
     };

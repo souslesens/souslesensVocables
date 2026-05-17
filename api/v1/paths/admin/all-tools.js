@@ -16,10 +16,13 @@ export default function () {
     }
 
     GET.apiDoc = {
-        operationId: "all-tools.get",
+        operationId: "adminGetAllTools",
+        summary: "List every tool known to the platform (admin only)",
+        description:
+            "Returns the full tool catalog (`toolModel.allTools`), including tools currently disabled or hidden from the UI. " +
+            "Useful for admins to inspect available capabilities before enabling them via `PUT /admin/plugins/config`.",
         responses: responseSchema("Tools", "GET"),
         security: [{ restrictAdmin: [] }],
-        summary: "Returns all existing tools wether they are made available or not",
         tags: ["Tools"],
     };
 

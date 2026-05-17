@@ -58,31 +58,25 @@ export default function () {
 
     POST.apiDoc = {
         security: [{ restrictLoggedUser: [], restrictQuota: [] }],
-        summary: "Post a RDF graph by url",
-        description: "Post a RDF graph by url",
+        summary: "Load an RDF file from a remote URL into a source's graph",
+        description:
+            "Server-side fetch of `url` (typically a Turtle/RDF-XML/OWL file), persisted under " +
+            "`data/uploaded_rdf_data/<basename>` then loaded into the triplestore via `rdfDataModel.loadGraph`. " +
+            "The file is removed after loading. Requires `readwrite` access on the source.",
+        operationId: "rdfPostGraphUrl",
+        consumes: ["multipart/form-data", "application/x-www-form-urlencoded"],
         parameters: [
-            {
-                name: "url",
-                description: "url",
-                in: "formData",
-                required: true,
-                type: "string",
-            },
-            {
-                name: "source",
-                description: "source",
-                in: "formData",
-                required: true,
-                type: "string",
-            },
+            { name: "url", in: "formData", required: true, type: "string", description: "Public URL of the RDF file to import. Example: BFO TTL on GitHub." },
+            { name: "source", in: "formData", required: true, type: "string", description: "Target source name." },
         ],
         responses: {
             200: {
-                description: "Upload ok",
-                schema: {
-                    type: "object",
-                },
+                description: "Loaded.",
+                schema: { properties: { message: { type: "string" } } },
+                examples: { "application/json": { message: "ok" } },
             },
+            500: { description: "Fetch or triplestore load failure." },
+            503: { description: "User does not have `readwrite` access to the source." },
         },
         tags: ["RDF"],
     };

@@ -440,18 +440,10 @@ var SearchWidget = (function () {
             },
         };
 
-        items.exportSearchResults = {
-            label: "Export search results",
-            action: function (_e) {
-                Export.exportTreeToDataTable(null, null);
-            },
-        };
-
         if (MainController.currentTool == "lineage" || MainController.currentTool == "KGmappings") {
             items.graphNode = {
                 label: "graph Node",
                 action: function (_e) {
-                    // pb avec source
                     var selectedNodes = $("#LineageNodesJsTreeDiv").jstree().get_selected(true);
                     if (selectedNodes.length > 1) {
                         Lineage_whiteboard.drawNodesAndParents(selectedNodes, 0);
@@ -464,12 +456,17 @@ var SearchWidget = (function () {
                     }
                 },
             };
-            items.copyNodes = {
-                label: "Copy Node(s)",
-                action: function (e) {
-                    common.copyTextToClipboard(JSON.stringify(self.currentTreeNode));
-                },
-            };
+        }
+
+        items.axioms = {
+            label: "Node axioms",
+            action: function (e) {
+                UI.setDialogTitle("#smallDialogDiv", "Axioms of resource " + self.currentTreeNode.data.label);
+                NodeInfosAxioms.init(self.currentTreeNode.data.source, self.currentTreeNode, "smallDialogDiv");
+            },
+        };
+
+        if (MainController.currentTool == "lineage" || MainController.currentTool == "KGmappings") {
             if (Lineage_sources.isSourceEditableForUser(self.currentTreeNode.data.source)) {
                 items.createSubClass = {
                     label: "Create SubClass",
@@ -480,56 +477,18 @@ var SearchWidget = (function () {
                     },
                 };
             }
-            items.createRelation = {
-                label: "Create Relation",
-                action: function (_e) {
-                    var fromData = { id: self.currentTreeNode.data.id, label: self.currentTreeNode.data.label, source: self.currentTreeNode.data.source };
-                    fromData.data = JSON.parse(JSON.stringify(fromData));
-                    self.currentCreateRelation = { from: fromData, to: null };
-                    /*var toData={id: Lineage_whiteboard.currentGraphNode.id, label: Lineage_whiteboard.currentGraphNode.label, source: Lineage_whiteboard.currentGraphNode.data.source}; 
-                    var edgeData = {from:fromData, to:toData};
-                     Lineage_createRelation.showAddEdgeFromGraphDialog(edgeData, function (err, result) {
-                            if (err) {
-                                return callback(err.responseText);
-                            }
-                            return null;
-                        });*/
+            items.copyNodes = {
+                label: "Copy Node(s)",
+                action: function (e) {
+                    common.copyTextToClipboard(JSON.stringify(self.currentTreeNode));
                 },
             };
-            if (self.currentCreateRelation && self.currentCreateRelation.from) {
-                items.createRelation = {
-                    label: "Create Relation with " + self.currentCreateRelation.from.label,
-                    action: function (_e) {
-                        var toData = { id: self.currentTreeNode.data.id, label: self.currentTreeNode.data.label, source: self.currentTreeNode.data.source };
-                        self.currentCreateRelation.to = toData;
-                        self.currentCreateRelation.to.data = JSON.parse(JSON.stringify(toData));
-                        // draw both nodes before displaying dialog
-                        var nodesToDisplay = [self.currentCreateRelation.from, self.currentCreateRelation.to];
-                        var existingNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
-                        nodesToDisplay = nodesToDisplay.filter(function (node) {
-                            return !existingNodes[node.id];
-                        });
-                        Lineage_whiteboard.drawNodesAndParents(nodesToDisplay, 1, { drawBeforeCallback: true }, function () {
-                            var relation = common.array.deepCloneWithFunctions(self.currentCreateRelation);
-                            self.currentCreateRelation = null;
-                            Lineage_createRelation.showAddEdgeFromGraphDialog(relation, function (err, result) {
-                                if (err) {
-                                    return callback(err.responseText);
-                                }
-                                return null;
-                            });
-                        });
-                    },
-                };
-            }
         }
 
-        items.axioms = {
-            label: "Node axioms",
-            action: function (e) {
-                UI.setDialogTitle("#smallDialogDiv", "Axioms of resource " + self.currentTreeNode.data.label);
-
-                NodeInfosAxioms.init(self.currentTreeNode.data.source, self.currentTreeNode, "smallDialogDiv");
+        items.exportSearchResults = {
+            label: "Export",
+            action: function (_e) {
+                Export.exportTreeToDataTable(null, null);
             },
         };
 

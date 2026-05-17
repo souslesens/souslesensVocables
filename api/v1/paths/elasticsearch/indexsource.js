@@ -116,40 +116,57 @@ export default function () {
 
     POST.apiDoc = {
         security: [{ restrictLoggedUser: [], restrictQuota: [] }],
-        summary: "Elasticsearch index source",
-        description: "Elasticsearch index source",
-        operationId: "Elasticsearch index source",
+        summary: "Index ontology nodes from a source into Elasticsearch",
+        description:
+            "Bulk-indexes an array of ontology node descriptors into Elasticsearch under `indexName` via " +
+            "`elasticRestProxy.indexSource`. Before indexing, checks whether the index belongs to a private source " +
+            "(owner-only) or a shared source (validated against the caller's write-scope via " +
+            "`UserRequestFiltering.validateElasticSearchIndices`). Used by the admin tool and MappingModeler to " +
+            "make source content searchable. `options.replaceIndex: true` drops and recreates the index before bulk load.",
+        operationId: "elasticsearchIndexSource",
         parameters: [
             {
                 name: "body",
-                description: "body",
+                description: "Indexing payload.",
                 in: "body",
+                required: true,
                 schema: {
                     type: "object",
+                    required: ["indexName", "data"],
                     properties: {
                         indexName: {
                             type: "string",
+                            description: "Elasticsearch index name (lowercase source name). Example: `iof_core`.",
+                            example: "iof_core",
                         },
                         data: {
                             type: "array",
+                            description: "Ontology nodes to index.",
                             items: {
                                 type: "object",
                                 properties: {
-                                    id: { type: "string" },
-                                    label: { type: "string" },
-                                    type: { type: "string" },
-                                    parents: { type: "array", items: { type: "string" } },
-                                    skosLabel: { type: "array", items: { type: "string" } },
+                                    id: { type: "string", description: "Node URI.", example: "http://www.industrialontologies.org/core/Asset" },
+                                    label: { type: "string", example: "Asset" },
+                                    type: { type: "string", description: "OWL type (e.g. `owl:Class`, `owl:ObjectProperty`).", example: "owl:Class" },
+                                    parents: { type: "array", items: { type: "string" }, description: "Parent URIs.", example: [] },
+                                    skosLabel: { type: "array", items: { type: "string" }, description: "SKOS alt-labels.", example: [] },
                                 },
                             },
+                            example: [{ id: "http://www.industrialontologies.org/core/Asset", label: "Asset", type: "owl:Class", parents: [], skosLabel: [] }],
                         },
                         options: {
                             type: "object",
                             properties: {
-                                owlType: { type: "string" },
-                                replaceIndex: { type: "boolean" },
+                                owlType: { type: "string", description: "OWL schema type filter applied during indexing.", example: "owl:Class" },
+                                replaceIndex: { type: "boolean", description: "When `true`, deletes the existing index before bulk load.", example: false },
                             },
+                            example: { owlType: "owl:Class", replaceIndex: false },
                         },
+                    },
+                    example: {
+                        indexName: "iof_core",
+                        data: [{ id: "http://www.industrialontologies.org/core/Asset", label: "Asset", type: "owl:Class", parents: [], skosLabel: [] }],
+                        options: { replaceIndex: false },
                     },
                 },
             },
@@ -157,11 +174,15 @@ export default function () {
 
         responses: {
             200: {
-                description: "Results",
+                description: "Indexing completed successfully.",
                 schema: {
-                    type: "object",
+                    type: "string",
+                    description: "Confirmation string returned by `elasticRestProxy.indexSource`.",
+                    example: "done",
                 },
             },
+            400: { description: "Elasticsearch rejected the indexing request." },
+            403: { description: "Caller has no write access to the target index." },
         },
         tags: ["ElasticSearch"],
     };

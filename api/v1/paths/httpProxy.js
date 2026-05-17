@@ -31,18 +31,48 @@ export default function () {
         }
     }
     POST.apiDoc = {
-        summary: "Send a request to a different domain",
+        summary: "Generic HTTP proxy (POST)",
+        description:
+            "Generic CORS-bypass HTTP proxy. Unlike `/sparqlProxy`, this endpoint does **not** apply any SPARQL filtering — " +
+            "use it for non-SPARQL upstream calls (REST APIs, web pages, raw HTTP). Set `body.POST=true` to forward as POST, " +
+            "otherwise the call is forwarded as GET with `body.options` merged into the request options.",
         security: [{ restrictLoggedUser: [] }],
-        operationId: "httpProxy",
-        parameters: [],
-        responses: {
-            default: {
-                description: "Response provided by the proxied server",
+        operationId: "httpProxyPost",
+        parameters: [
+            {
+                in: "body",
+                name: "body",
+                required: false,
+                schema: {
+                    type: "object",
+                    properties: {
+                        POST: { type: "boolean", example: false },
+                        url: { type: "string", example: "http://data.industryportal.enit.fr/ontologies?apikey=<token>" },
+                        body: {
+                            type: "string",
+                            description: "JSON-encoded `{ headers, params }` for POST mode.",
+                            example: '{"headers":{"Accept":"application/json"},"params":{}}',
+                        },
+                        options: {
+                            type: "string",
+                            description: "JSON-encoded request options for GET mode.",
+                            example: '{"headers":{"Accept":"application/json"}}',
+                        },
+                    },
+                    example: {
+                        GET: true,
+                        url: "http://data.industryportal.enit.fr/ontologies?apikey=<token>",
+                    },
+                },
             },
+        ],
+        responses: {
+            default: { description: "Raw response from the upstream server." },
         },
         tags: ["Misc"],
     };
 
+    /* Not used route with bug , I think deprecated by POST route that can handle both */
     function GET(req, res, next) {
         try {
             httpProxy.get(req.query, function (err, result) {
@@ -54,14 +84,13 @@ export default function () {
         }
     }
     GET.apiDoc = {
-        summary: "Retrieve a request from a different domain",
+        summary: "Generic HTTP proxy (GET)",
+        description: "GET variant of the generic HTTP proxy. Forwards `req.query` as the call options to the upstream server. " + "No SPARQL filtering — see `/sparqlProxy` for that.",
         security: [{ restrictLoggedUser: [] }],
-        operationId: "httpProxy",
-        parameters: [],
+        operationId: "httpProxyGet",
+        parameters: [{ name: "url", in: "query", type: "string", required: true, description: "Upstream URL." }],
         responses: {
-            default: {
-                description: "Response provided by the proxied server",
-            },
+            default: { description: "Raw response from the upstream server." },
         },
         tags: ["Misc"],
     };

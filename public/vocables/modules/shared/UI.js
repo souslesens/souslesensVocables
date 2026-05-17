@@ -6,6 +6,7 @@ import MainController from "../../modules/shared/mainController.js";
 
 var UI = (function () {
     var self = {};
+    var pendingCreditsGif = null;
 
     self.menuBarShowed = true;
     self.LateralPanelShowed = true;
@@ -33,11 +34,17 @@ var UI = (function () {
 
     self.setCredits = function () {
         var gif = $(`<img src="images/souslesensVocables.gif">`).on("load", function () {
+            if (pendingCreditsGif !== gif) return;
             $("#graphAndCommandScreen").append(
                 "<div id='slsv-credits-logo' style='position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;z-index:0;'>" + $(this).prop("outerHTML") + "</div>",
             );
             UI.resetWindowSize();
         });
+        pendingCreditsGif = gif;
+    };
+
+    self.cancelCredits = function () {
+        pendingCreditsGif = null;
     };
     self.cleanPage = function () {
         $("#graphDiv").empty();
@@ -458,6 +465,9 @@ var UI = (function () {
 
     self.clampAndCenterDialog = function (dialogTarget) {
         try {
+            if (typeof dialogTarget === "string" && !dialogTarget.startsWith("#")) {
+                dialogTarget = "#" + dialogTarget;
+            }
             var $contentDiv = $(dialogTarget);
             var maxDialogWidth = Math.floor(window.innerWidth * 0.95);
             var maxDialogHeight = Math.floor(window.innerHeight * 0.92);
@@ -533,16 +543,19 @@ var UI = (function () {
         $(existingWindow).dialog("option", { width: widthexistingWindow, height: targetH });
         $(newWindow).dialog("option", { width: widthNewWindow, height: targetH });
 
+        // Re-read after resize: dialog "height" sets content height, wrapper is taller (titlebar + borders)
+        const actualH = Math.max(existingWindowConvert.outerHeight(), newWindowConvert.outerHeight());
+
         const offL = existingWindowConvert.offset() || { left: gap, top: gap };
-        const top = Math.min(Math.max(gap, offL.top), windowHeight - gap - targetH);
+        const top = Math.min(Math.max(gap, offL.top), windowHeight - gap - actualH);
         $(newWindow).dialog("option", "position", {
             my: "right top",
-            at: `right+${gap} top+${top}`,
+            at: `right-${gap} top+${top}`,
             of: window,
         });
         $(existingWindow).dialog("option", "position", {
             my: "left top",
-            at: `left-${gap} top+${top}`,
+            at: `left+${gap} top+${top}`,
             of: window,
         });
 
@@ -553,6 +566,10 @@ var UI = (function () {
         try {
             newWindowConvert.draggable("option", "containment", "window");
         } catch (e) {}
+
+        $(newWindow).one("dialogclose", function () {
+            self.clampAndCenterDialog(existingWindow);
+        });
     };
 
     //keep

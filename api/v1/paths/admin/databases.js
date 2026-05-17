@@ -16,10 +16,11 @@ export default function () {
     }
 
     GET.apiDoc = {
-        operationId: "getDatabases",
+        operationId: "adminGetDatabases",
         responses: responseSchema("Databases", "GET"),
         security: [{ restrictAdmin: [] }],
-        summary: "Returns all the databases from the configuration",
+        summary: "List all configured external databases (admin only)",
+        description: "Admin-only. Returns the full `databases.json` catalog. Each entry exposes `driver`, `host`, " + "`port`, `database`, `user` (passwords are also included — admin endpoint).",
         tags: ["Databases"],
     };
 
@@ -43,10 +44,50 @@ export default function () {
     }
 
     POST.apiDoc = {
-        operationId: "addDatabase",
+        operationId: "adminAddDatabase",
         responses: responseSchema("Databases", "POST"),
         security: [{ restrictAdmin: [] }],
-        summary: "Add a new database in the configuration",
+        summary: "Register a new external database (admin only)",
+        description: "Body must wrap the descriptor under a `database` key (`req.body.database`). Returns the refreshed catalog.",
+        parameters: [
+            {
+                in: "body",
+                name: "body",
+                required: false,
+                schema: {
+                    type: "object",
+                    properties: {
+                        database: { $ref: "#/definitions/Database" },
+                    },
+                    example: {
+                        database: {
+                            id: "pg_assets",
+                            name: "pg_assets",
+                            driver: "pg",
+                            host: "db.example.org",
+                            port: 5432,
+                            database: "assets",
+                            user: "sls_reader",
+                            password: "<secret>",
+                        },
+                    },
+                },
+                "x-examples": {
+                    "Add Postgres datasource": {
+                        database: {
+                            id: "pg_assets",
+                            name: "pg_assets",
+                            driver: "pg",
+                            host: "db.example.org",
+                            port: 5432,
+                            database: "assets",
+                            user: "sls_reader",
+                            password: "<secret>",
+                        },
+                    },
+                },
+            },
+        ],
         tags: ["Databases"],
     };
 

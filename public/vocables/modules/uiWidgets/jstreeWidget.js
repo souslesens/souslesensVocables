@@ -100,7 +100,7 @@ var JstreeWidget = (function () {
 
         var jstreeData2 = [];
         jstreeData.forEach(function (item) {
-            if (item.parent != item.id) {
+            if (item?.parent != item?.id) {
                 jstreeData2.push(item);
             }
         });

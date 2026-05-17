@@ -413,7 +413,7 @@ var MappingModeler = (function () {
             sourceOrderArray = sourceOrderArray.concat(Config.sources[MappingModeler.currentSLSsource].imports);
             var startIndex = 2;
             if (parentName == "Properties") {
-                startIndex = 5;
+                startIndex = 7;
             }
             var index = 0;
             sourceOrderArray.forEach(function (source) {
@@ -801,16 +801,35 @@ var MappingModeler = (function () {
                 { id: "valuesOfColumn", label: "values Of column" },
                 { id: "rdfs:member", label: "_rdfs:member_" },
                 { id: "rdfs:subClassOf", label: "_rdfs:subClassOf_" },
+                { id: "rdf:type", label: "_rdf:type_" },
             ];
             var options = { includesnoConstraintsProperties: true };
             var fromLabel = MappingColumnsGraph.visjsGraph.data.nodes.get(self.currentRelation.from.id).label;
             var toLabel = MappingColumnsGraph.visjsGraph.data.nodes.get(self.currentRelation.to.id).label;
             //Axioms_suggestions.getValidPropertiesForClasses(MappingModeler.currentSLSsource, self.currentRelation.from.classId, self.currentRelation.to.classId, options, function (err, properties) {
             MappingColumnsGraph.relationMessage(fromLabel, toLabel);
+
+            var fromClassId = self.currentRelation.from.classId;
+            var toClassId = self.currentRelation.to.classId;
+            var fromClassIsUri = fromClassId && fromClassId.startsWith("http");
+            var toClassIsUri = toClassId && toClassId.startsWith("http");
+            if (!fromClassIsUri || !toClassIsUri) {
+                var missingClassLabels = [];
+                if (!fromClassIsUri) {
+                    missingClassLabels.push('"' + fromLabel + '"');
+                    fromClassId = null;
+                }
+                if (!toClassIsUri) {
+                    missingClassLabels.push('"' + toLabel + '"');
+                    toClassId = null;
+                }
+                alert("Warning: column" + (missingClassLabels.length > 1 ? "s " : " ") + missingClassLabels.join(" and ") + " ha" + (missingClassLabels.length > 1 ? "ve" : "s") + " no associated class. No constraint help is available — all properties will be shown.");
+            }
+
             OntologyModels.getAllowedPropertiesBetweenNodes(
                 MappingModeler.currentSLSsource,
-                self.currentRelation.from.classId,
-                self.currentRelation.to.classId,
+                fromClassId,
+                toClassId,
                 { keepSuperClasses: true },
                 function (err, result) {
                     if (err) {

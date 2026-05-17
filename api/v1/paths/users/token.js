@@ -16,17 +16,33 @@ export default function () {
     }
 
     POST.apiDoc = {
-        summary: "Update user token",
-        description: "Update user token",
+        summary: "(Re)generate the API token for a user",
+        description:
+            "Generates a fresh API token for `login` via `userModel.generateUserToken` and persists it. " + "The returned token is intended for non-interactive API access (Authorization header).",
         security: [{ restrictLoggedUser: [] }],
-        parameters: [],
-        responses: {
-            200: {
-                description: "",
+        operationId: "generateUserToken",
+        parameters: [
+            {
+                in: "body",
+                name: "body",
+                required: false,
                 schema: {
                     type: "object",
+                    properties: {
+                        login: { type: "string", description: "Login of the user whose token must be (re)generated.", example: "alice" },
+                    },
+                    example: { login: "alice" },
                 },
+                "x-examples": { "Rotate alice's token": { login: "alice" } },
             },
+        ],
+        responses: {
+            200: {
+                description: "New token.",
+                schema: { properties: { token: { type: "string" } } },
+                examples: { "application/json": { token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." } },
+            },
+            500: { description: "Server error." },
         },
         tags: ["Users"],
     };

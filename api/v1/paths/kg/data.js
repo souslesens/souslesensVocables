@@ -58,40 +58,35 @@ export default function () {
     }
 
     GET.apiDoc = {
-        summary: "Retrieve data from a database",
+        summary: "Read rows from a configured database (sample or SQL query)",
+        description:
+            "Two modes depending on parameters: " +
+            "(a) `tableName` provided → returns up to `limit` (default 200) sample rows from that table; " +
+            "(b) `sqlQuery` provided → executes a `SELECT` query, validated by `UserRequestFiltering.checkSqlSelectQuery` " +
+            "to forbid writes/joins on tables outside the user's scope. Database access is gated by " +
+            "`databaseModel.getUserConnection` (profile-driven).",
         security: [{ restrictLoggedUser: [] }],
-        operationId: "retrieveDataFromDb",
+        operationId: "kgGetData",
         parameters: [
-            {
-                in: "query",
-                name: "dbName",
-                type: "string",
-                required: true,
-            },
-            {
-                in: "query",
-                name: "tableName",
-                type: "string",
-                required: false,
-            },
-            {
-                in: "query",
-                name: "limit",
-                type: "integer",
-                required: false,
-            },
-            {
-                in: "query",
-                name: "sqlQuery",
-                type: "string",
-                required: false,
-            },
+            { in: "query", name: "dbName", type: "string", required: true, description: "Database id from `databases.json`." },
+            { in: "query", name: "tableName", type: "string", required: false, description: "Sample-mode: table to read." },
+            { in: "query", name: "limit", type: "string", required: false, description: "Max rows in sample mode (default 200)." },
+            { in: "query", name: "sqlQuery", type: "string", required: false, description: "Query-mode: full `SELECT` statement." },
         ],
         responses: {
             200: {
-                description: "Results of the SQL query.",
+                description: "Rows from the database.",
+                schema: {
+                    properties: {
+                        rows: { type: "array", items: { type: "object" } },
+                    },
+                },
             },
+            400: { description: "Neither `tableName` nor `sqlQuery` supplied." },
+            403: { description: "User has no access to this database, or SQL query was rejected by the filter." },
+            500: { description: "Database error." },
         },
+        tags: ["KG"],
     };
 
     return operations;

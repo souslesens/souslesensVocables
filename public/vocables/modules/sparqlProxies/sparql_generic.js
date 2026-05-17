@@ -1194,20 +1194,44 @@ var Sparql_generic = (function () {
 
                 // add orphan parents to all data
                 function (callbackSeries) {
+                    var orphanParentIds = [];
                     for (var key in allClassesMap) {
                         allClassesMap[key].parents.forEach(function (parentId) {
-                            if (parentId && parentId != sourceLabel && !allClassesMap[parentId]) {
-                                allClassesMap[parentId] = {
-                                    id: parentId,
-                                    label: Sparql_common.getLabelFromURI(parentId),
-                                    skoslabels: [],
-                                    parents: [sourceLabel],
-                                    type: "owl:class",
-                                };
+                            if (parentId && parentId != sourceLabel && !allClassesMap[parentId] && orphanParentIds.indexOf(parentId) < 0) {
+                                orphanParentIds.push(parentId);
                             }
                         });
                     }
-                    callbackSeries();
+
+                    if (schemaType !== "OWL" || orphanParentIds.length === 0) {
+                        orphanParentIds.forEach(function (parentId) {
+                            allClassesMap[parentId] = {
+                                id: parentId,
+                                label: Sparql_common.getLabelFromURI(parentId),
+                                skoslabels: [],
+                                parents: [sourceLabel],
+                                type: "owl:class",
+                            };
+                        });
+                        return callbackSeries();
+                    }
+
+                    var idFilter = Sparql_common.setFilter("id", orphanParentIds);
+                    Sparql_OWL.getLabelsMap(sourceLabel, { filter: idFilter }, function (err, labelsMap) {
+                        if (err) {
+                            labelsMap = {};
+                        }
+                        orphanParentIds.forEach(function (parentId) {
+                            allClassesMap[parentId] = {
+                                id: parentId,
+                                label: labelsMap[parentId] || Sparql_common.getLabelFromURI(parentId),
+                                skoslabels: [],
+                                parents: [sourceLabel],
+                                type: "owl:class",
+                            };
+                        });
+                        callbackSeries();
+                    });
                 },
             ],
             function (err) {

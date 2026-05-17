@@ -41,33 +41,29 @@ export default function () {
 
     GET.apiDoc = {
         security: [{ restrictLoggedUser: [] }],
-        summary: "Retrieve SQL model",
-        description: "Retrieve SQL model",
-        operationId: "Retrieve SQL model",
+        summary: "Introspect the schema of a configured database",
+        description: "Returns the table-to-columns map of database `name` by calling `dbConnector.getKGModel`. " + "Used by MappingModeler to populate column pickers when designing a mapping.",
+        operationId: "kgGetModel",
         parameters: [
-            {
-                name: "type",
-                description: "type",
-                in: "query",
-                type: "string",
-                required: true,
-            },
-            {
-                name: "name",
-                description: "name",
-                in: "query",
-                type: "string",
-                required: true,
-            },
+            { name: "type", in: "query", type: "string", required: true, description: "Datasource type (e.g. `sql`, `csv`)." },
+            { name: "name", in: "query", type: "string", required: true, description: "Database id from `databases.json`." },
         ],
-
         responses: {
             200: {
-                description: "Results",
+                description: "Table → columns map.",
                 schema: {
                     type: "object",
+                    additionalProperties: { type: "array", items: { type: "string" } },
+                },
+                examples: {
+                    "application/json": {
+                        assets: ["asset_id", "name", "manufacturer", "install_date"],
+                        maintenance_events: ["event_id", "asset_id", "type", "date"],
+                    },
                 },
             },
+            500: { description: "Database connection failure." },
+            503: { description: "Connection refused by the database." },
         },
         tags: ["KG"],
     };

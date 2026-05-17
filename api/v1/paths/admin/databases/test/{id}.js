@@ -18,32 +18,22 @@ export default function () {
     }
 
     GET.apiDoc = {
-        operationId: "testDatabase",
-        parameters: [
-            {
-                description: "Database identifier",
-                in: "path",
-                name: "id",
-                required: true,
-                type: "string",
-            },
-        ],
+        operationId: "adminTestDatabase",
+        summary: "Probe the connection to a configured database (admin only)",
+        description:
+            "Opens an admin-restricted connection (`databaseModel.getAdminRestrictedConnection`) and runs `SELECT 1`. " +
+            "Returns `200` if the round-trip succeeds, `403` if the host is unreachable (`EHOSTUNREACH`), `500` otherwise.",
+        parameters: [{ in: "path", name: "id", type: "string", required: true, description: "Database id to test." }],
         responses: {
             200: {
-                description: "The connection was establish successfully",
-                schema: { $ref: "#/definitions/Database" },
+                description: "Connection OK.",
+                schema: { properties: { message: { type: "string" } } },
+                examples: { "application/json": { message: "The remote database server is running" } },
             },
-            403: {
-                description: "The credential do not allow to establish the connection",
-                schema: { $ref: "#/definitions/Database" },
-            },
-            404: {
-                description: "The remote server cannot be found",
-                schema: { $ref: "#/definitions/Database" },
-            },
+            403: { description: "Host unreachable." },
+            500: { description: "Connection or auth failure." },
         },
         security: [{ restrictAdmin: [] }],
-        summary: "Test the connection to the database",
         tags: ["Databases"],
     };
 

@@ -26,33 +26,23 @@ export default function () {
 
     GET.apiDoc = {
         security: [{ restrictLoggedUser: [] }],
-        summary: "Read content of a file",
-        description: "Read content of a file",
-        operationId: "Read content of a file",
+        summary: "Read the content of a file in the data folder",
+        description: "Returns the parsed content (JSON when applicable, else raw text) of `dataDir/<dir>/<fileName>` " + "via `dataController.readFile`.",
+        operationId: "dataReadFile",
         parameters: [
-            {
-                name: "dir",
-                description: "subDirectory in /dataDir",
-                type: "string",
-                in: "query",
-                required: true,
-            },
-            {
-                name: "fileName",
-                description: "fileName",
-                in: "query",
-                type: "string",
-                required: true,
-            },
+            { name: "dir", in: "query", type: "string", required: true, description: "Sub-directory under `dataDir`." },
+            { name: "fileName", in: "query", type: "string", required: true, description: "File name including extension." },
         ],
-
         responses: {
             200: {
-                description: "Results",
+                description: "File content.",
                 schema: {
-                    type: "object",
+                    type: "string",
+                    description: "Raw file content as UTF-8 text (typically JSON-stringified for `*.json` files).",
+                    example: '{"id":"assets_mapping","label":"Assets","columns":[]}',
                 },
             },
+            500: { description: "File not found or read error." },
         },
         tags: ["Data"],
     };
@@ -69,38 +59,37 @@ export default function () {
 
     POST.apiDoc = {
         security: [{ restrictLoggedUser: [] }],
-        summary: "Save Data to file",
-        description: "Save Data to file",
-        operationId: "Save Data to file",
+        summary: "Write content into a file in the data folder",
+        description:
+            "Persists `data` (string, typically JSON-stringified) into `dataDir/<dir>/<fileName>` via " + "`dataController.saveDataToFile`. Creates the file if missing, overwrites otherwise.",
+        operationId: "dataSaveFile",
         parameters: [
             {
                 name: "body",
-                description: "body",
                 in: "body",
+                required: false,
                 schema: {
                     type: "object",
                     properties: {
-                        dir: {
-                            type: "string",
-                        },
-                        fileName: {
-                            type: "string",
-                        },
+                        dir: { type: "string", description: "Sub-directory under `dataDir`.", example: "mappings/IOF_core" },
+                        fileName: { type: "string", description: "File name including extension.", example: "assets_mapping.json" },
                         data: {
                             type: "string",
+                            description: "Raw payload (typically JSON-stringified).",
+                            example: '{"id":"assets_mapping","label":"Assets","columns":[]}',
                         },
+                    },
+                    example: {
+                        dir: "mappings/IOF_core",
+                        fileName: "assets_mapping.json",
+                        data: '{"id":"assets_mapping","label":"Assets","columns":[]}',
                     },
                 },
             },
         ],
-
         responses: {
-            200: {
-                description: "Results",
-                schema: {
-                    type: "object",
-                },
-            },
+            200: { description: "File saved." },
+            500: { description: "Write error or directory traversal attempt." },
         },
         tags: ["Data"],
     };
@@ -147,45 +136,22 @@ export default function () {
 
     DELETE.apiDoc = {
         security: [{ restrictLoggedUser: [] }],
-        summary: "Delete a file",
-        description: "Delete a file from a sub-directory of data",
-        operationId: "Delete a file",
+        summary: "Delete a file from the data folder",
+        description:
+            "Removes `dataDir/<dir>/<fileName>`. When `source` is provided, the caller must hold `readwrite` access on " +
+            "that source (either explicitly via `sourcesAccessControl` or via the profile's `defaultSourceAccessControl`). " +
+            "Admin users bypass the check.",
+        operationId: "dataDeleteFile",
         parameters: [
-            {
-                name: "dir",
-                description: "subDirectory in /dataDir",
-                type: "string",
-                in: "query",
-                required: true,
-            },
-            {
-                name: "fileName",
-                description: "fileName",
-                in: "query",
-                type: "string",
-                required: true,
-            },
-            {
-                name: "source",
-                description: "source name for access control check",
-                in: "query",
-                type: "string",
-                required: false,
-            },
+            { name: "dir", in: "query", type: "string", required: true, description: "Sub-directory under `dataDir`." },
+            { name: "fileName", in: "query", type: "string", required: true, description: "File name to delete." },
+            { name: "source", in: "query", type: "string", required: false, description: "Source whose access control governs this deletion." },
         ],
         responses: {
-            200: {
-                description: "File deleted",
-                schema: {
-                    type: "object",
-                },
-            },
-            403: {
-                description: "Access denied",
-                schema: {
-                    type: "object",
-                },
-            },
+            200: { description: "File deleted." },
+            403: { description: "User lacks `readwrite` access on the source." },
+            404: { description: "File does not exist." },
+            500: { description: "Filesystem error." },
         },
         tags: ["Data"],
     };

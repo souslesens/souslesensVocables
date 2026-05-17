@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import { processResponse, sanitizePath } from "../utils.js";
 
+// Route /api/v1/pluginController/jsonFile: not used client-side (no calls found in public/ or mainapp/src/). Likely deprecated.
 export default function () {
     let operations = {
         GET,
@@ -29,8 +30,12 @@ export default function () {
 
         responses: {
             200: {
-                description: "Results",
-                schema: {},
+                description: "Parsed JSON content of the file.",
+                schema: {
+                    type: "object",
+                    additionalProperties: true,
+                    description: "Result of `JSON.parse` on `public/vocables/<filePath>`. Free-form: shape depends on the target file.",
+                },
             },
         },
         tags: ["Misc"],

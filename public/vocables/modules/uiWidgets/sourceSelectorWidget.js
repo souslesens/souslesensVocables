@@ -7,13 +7,13 @@ var SourceSelectorWidget = (function () {
     var self = {};
     self.currentTreeDiv = null;
 
-    self.showSourceDialog = function (resetAll,sourceSelectedCallback) {
-        self.sourceSelectedCallback=sourceSelectedCallback
-        $("#sourceSelector_searchInput").trigger("focus");
+    self.showSourceDialog = function (resetAll, sourceSelectedCallback) {
+        self.sourceSelectedCallback = sourceSelectedCallback;
 
+        $("#sourceSelector_searchInput").trigger("focus");
         var onSourceSelect;
         if (resetAll) {
-            Lineage_sources.loadedSources = {};
+            Lineage_sources.clearRegistrations();
             onSourceSelect = SourceSelectorWidget.onSourceSelect;
         } else {
             onSourceSelect = SourceSelectorWidget.onSourceSelect_AddSource;
@@ -45,6 +45,7 @@ var SourceSelectorWidget = (function () {
         $("#" + targetDivId).load("./modules/uiWidgets/html/sourceSelector.html", function (err) {
             try {
                 UI.openDialog(targetDivId, { title: "Source Selector" });
+                UI.clampAndCenterDialog(targetDivId);
             } catch (e) {}
             self.loadSourcesTreeDiv("sourceSelector_jstreeDiv", jsTreeOptions);
             $("#sourceSelector_searchInput").trigger("focus");
@@ -64,6 +65,7 @@ var SourceSelectorWidget = (function () {
 
             if (isDialog) {
                 UI.openDialog(targetDivId, { title: "Source Selector" });
+                UI.clampAndCenterDialog(targetDivId);
             }
             if (callback) {
                 callback();
@@ -323,8 +325,8 @@ var SourceSelectorWidget = (function () {
         }
         $("#" + self.currentTreeDiv).dialog("close");
         self.initSource(obj.node.data.id);
-        if(self.sourceSelectedCallback){
-            self.sourceSelectedCallback(obj.node.data.id)
+        if (self.sourceSelectedCallback) {
+            self.sourceSelectedCallback(obj.node.data.id);
         }
     };
 

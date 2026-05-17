@@ -130,12 +130,17 @@ var KGquery_filter = (function () {
                     return callback(err, result);
                 });
             },
+            noScroll: true,
         };
 
         var sampleSizeHtml = '<div style="margin-right: 10px;">' + '  <button onclick="KGquery_filter.setKGquerySampleSize()"> Sample</button></div>`;';
 
         jstreeOptions.additionalHTMLComponent = sampleSizeHtml;
-
+        jstreeOptions.onAfterOpenNodeFn = function () {
+            UI.repositionOpenDialogs();
+            $("#smallDialogDiv").css("overflow", "hidden");
+            $("#smallDialogDiv").css("height", "unset");
+        };
         JstreeWidget.loadJsTree(null, jstreeData, jstreeOptions, function () {
             JstreeWidget.openNodeDescendants(null, "root");
 
@@ -175,6 +180,7 @@ var KGquery_filter = (function () {
                 });
                 jstreeWidget.setjsTreeCheckedNodes(null, preCheckedOptions);
             }
+            UI.repositionOpenDialogs();
         });
     };
 

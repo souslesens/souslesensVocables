@@ -1,4 +1,160 @@
 {
+    
+    "iof-av": {
+        "name": "iof-av",
+        "_type": "source",
+        "graphUri": "https://spec.industrialontologies.org/ontology/core/meta/AnnotationVocabulary/",
+        "graphDownloadUrl": "https://raw.githubusercontent.com/iofoundry/ontology/refs/heads/master/core/meta/AnnotationVocabulary.rdf",
+        "sparql_server": {
+            "url": "_default"
+        },
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .",
+        "schemaType": "OWL",
+        "schema": null,
+        "editable": false,
+        "color": "#bcbd22",
+        "group": "STANDARDS/IOF",
+        "imports": [
+            "BFO"
+        ],
+        "taxonomyPredicates": [
+            "rdfs:subClassOf",
+            "rdf:type"
+        ],
+        "baseUri": "https://spec.industrialontologies.org/ontology/core/meta/AnnotationVocabulary/"
+    },
+    "rdf": {
+        "name": "rdf",
+        "_type": "source",
+        "graphUri": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+        "graphDownloadUrl": "https://www.w3.org/1999/02/22-rdf-syntax-ns",
+        "sparql_server": {
+            "url": "_default"
+        },
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .",
+        "schemaType": "OWL",
+        "schema": null,
+        "editable": false,
+        "color": "#bcbd22",
+        "group": "STANDARDS/W3C",
+        "imports": [],
+        "taxonomyPredicates": [
+            "rdfs:subClassOf",
+            "rdf:type"
+        ],
+        "baseUri": "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    },
+    "rdfs": {
+        "name": "rdfs",
+        "_type": "source",
+        "graphUri": "http://www.w3.org/2000/01/rdf-schema#",
+        "graphDownloadUrl": "https://www.w3.org/2000/01/rdf-schema",
+        "sparql_server": {
+            "url": "_default"
+        },
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .",
+        "schemaType": "OWL",
+        "schema": null,
+        "editable": false,
+        "color": "#bcbd22",
+        "group": "STANDARDS/W3C",
+        "imports": [],
+        "taxonomyPredicates": [
+            "rdfs:subClassOf",
+            "rdf:type"
+        ],
+        "baseUri": "http://www.w3.org/2000/01/rdf-schema#"
+    },
+    "owl": {
+        "name": "owl",
+        "_type": "source",
+        "graphUri": "http://www.w3.org/2002/07/owl#",
+        "graphDownloadUrl": "https://www.w3.org/2002/07/owl",
+        "sparql_server": {
+            "url": "_default"
+        },
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .",
+        "schemaType": "OWL",
+        "schema": null,
+        "editable": false,
+        "color": "#bcbd22",
+        "group": "STANDARDS/W3C",
+        "imports": [],
+        "taxonomyPredicates": [
+            "rdfs:subClassOf",
+            "rdf:type"
+        ],
+        "baseUri": "http://www.w3.org/2002/07/owl#"
+    },
+    "skos": {
+        "name": "skos",
+        "_type": "source",
+        "graphUri": "http://www.w3.org/2004/02/skos/core#",
+        "graphDownloadUrl": "https://www.w3.org/TR/skos-reference/skos.rdf",
+        "sparql_server": {
+            "url": "_default"
+        },
+        "controller": "Sparql_SKOS",
+        "topClassFilter": "?topConcept rdf:type owl:Class .",
+        "schemaType": "SKOS",
+        "schema": null,
+        "editable": false,
+        "color": "#bcbd22",
+        "group": "STANDARDS/W3C",
+        "imports": [],
+        "taxonomyPredicates": [
+            "skos:broader"
+        ],
+        "baseUri": "http://www.w3.org/2004/02/skos/core#"
+    },
+    "dcterms": {
+        "name": "dcterms",
+        "_type": "source",
+        "graphUri": "http://purl.org/dc/terms/",
+        "graphDownloadUrl": "https://www.dublincore.org/specifications/dublin-core/dcmi-terms/dublin_core_terms.nt",
+        "sparql_server": {
+            "url": "_default"
+        },
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .",
+        "schemaType": "OWL",
+        "schema": null,
+        "editable": false,
+        "color": "#bcbd22",
+        "group": "STANDARDS/W3C",
+        "imports": [],
+        "taxonomyPredicates": [
+            "rdfs:subClassOf",
+            "rdf:type"
+        ],
+        "baseUri": "http://purl.org/dc/terms/"
+    },
+    "dc": {
+        "name": "dc",
+        "_type": "source",
+        "graphUri": "http://purl.org/dc/elements/1.1/",
+        "graphDownloadUrl": "https://www.dublincore.org/specifications/dublin-core/dcmi-terms/dublin_core_elements.nt",
+        "sparql_server": {
+            "url": "_default"
+        },
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .",
+        "schemaType": "OWL",
+        "schema": null,
+        "editable": false,
+        "color": "#bcbd22",
+        "group": "STANDARDS/W3C",
+        "imports": [],
+        "taxonomyPredicates": [
+            "rdfs:subClassOf",
+            "rdf:type"
+        ],
+        "baseUri": "http://purl.org/dc/elements/1.1/"
+    },
     "GEMET": {
         "name": "GEMET",
         "_type": "source",
@@ -624,68 +780,7 @@
         "taxonomyPredicates": [],
         "baseUri": "http://purl.obolibrary.org/obo/cido.owl#"
     },
-    "TSF_GAIA_TEST": {
-        "name": "TSF_GAIA_TEST",
-        "_type": "source",
-        "id": "01GH9BYD174FK5Z85D3EX4CMVV",
-        "graphUri": "http://data.total.com/resource/tsf/ontology/gaia-test/",
-        "sparql_server": {
-            "url": "_default"
-        },
-        "controller": "Sparql_OWL",
-        "topClassFilter": "?topConcept rdf:type owl:Class .",
-        "schemaType": "OWL",
-        "dataSource": null,
-        "schema": null,
-        "isDraft": false,
-        "editable": true,
-        "allowIndividuals": true,
-        "color": "#bcbd22",
-        "predicates": {
-            "broaderPredicate": "",
-            "lang": ""
-        },
-        "group": "TSF/DRAFTS",
-        "imports": [
-            "ISO_15926-part-14_PCA"
-        ],
-        "taxonomyPredicates": [
-            "rdfs:subClassOf",
-            "rdf:type"
-        ],
-        "baseUri": "http://data.total.com/resource/tsf/ontology/gaia-test/"
-    },
-    "TSF_STANDARDS_LANDSCAPE": {
-        "name": "TSF_STANDARDS_LANDSCAPE",
-        "_type": "source",
-        "id": "01GW2ECMJ446HAB9CGSMHEZK1A",
-        "graphUri": "http://data.total.com/resource/tsf/ontology/tsf-standards_landscape/",
-        "sparql_server": {
-            "url": "_default"
-        },
-        "controller": "Sparql_OWL",
-        "topClassFilter": "?topConcept rdf:type  owl:Class.\n",
-        "schemaType": "OWL",
-        "dataSource": null,
-        "schema": null,
-        "isDraft": false,
-        "editable": true,
-        "allowIndividuals": true,
-        "color": "#bcbd22",
-        "predicates": {
-            "broaderPredicate": "",
-            "lang": ""
-        },
-        "group": "TSF/DRAFTS",
-        "imports": [
-            "ISO_15926-part-14_PCA"
-        ],
-        "taxonomyPredicates": [
-            "rdfs:subClassOf",
-            "rdf:type"
-        ],
-        "baseUri": "http://data.total.com/resource/tsf/ontology/tsf-standards_landscape/"
-    },
+    
     "Pizza": {
         "name": "Pizza",
         "_type": "source",
@@ -1090,161 +1185,6 @@
             "rdf:type"
         ],
         "baseUri": "https://spec.industrialontologies.org/ontology/biopharma/"
-    },
-    "iof-av": {
-        "name": "iof-av",
-        "_type": "source",
-        "graphUri": "https://spec.industrialontologies.org/ontology/core/meta/AnnotationVocabulary/",
-        "graphDownloadUrl": "https://raw.githubusercontent.com/iofoundry/ontology/refs/heads/master/core/meta/AnnotationVocabulary.rdf",
-        "sparql_server": {
-            "url": "_default"
-        },
-        "controller": "Sparql_OWL",
-        "topClassFilter": "?topConcept rdf:type owl:Class .",
-        "schemaType": "OWL",
-        "schema": null,
-        "editable": false,
-        "color": "#bcbd22",
-        "group": "STANDARDS/IOF",
-        "imports": [
-            "BFO"
-        ],
-        "taxonomyPredicates": [
-            "rdfs:subClassOf",
-            "rdf:type"
-        ],
-        "baseUri": "https://spec.industrialontologies.org/ontology/core/meta/AnnotationVocabulary/"
-    },
-    "rdf": {
-        "name": "rdf",
-        "_type": "source",
-        "graphUri": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
-        "graphDownloadUrl": "https://www.w3.org/1999/02/22-rdf-syntax-ns",
-        "sparql_server": {
-            "url": "_default"
-        },
-        "controller": "Sparql_OWL",
-        "topClassFilter": "?topConcept rdf:type owl:Class .",
-        "schemaType": "OWL",
-        "schema": null,
-        "editable": false,
-        "color": "#bcbd22",
-        "group": "STANDARDS/W3C",
-        "imports": [],
-        "taxonomyPredicates": [
-            "rdfs:subClassOf",
-            "rdf:type"
-        ],
-        "baseUri": "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-    },
-    "rdfs": {
-        "name": "rdfs",
-        "_type": "source",
-        "graphUri": "http://www.w3.org/2000/01/rdf-schema#",
-        "graphDownloadUrl": "https://www.w3.org/2000/01/rdf-schema",
-        "sparql_server": {
-            "url": "_default"
-        },
-        "controller": "Sparql_OWL",
-        "topClassFilter": "?topConcept rdf:type owl:Class .",
-        "schemaType": "OWL",
-        "schema": null,
-        "editable": false,
-        "color": "#bcbd22",
-        "group": "STANDARDS/W3C",
-        "imports": [],
-        "taxonomyPredicates": [
-            "rdfs:subClassOf",
-            "rdf:type"
-        ],
-        "baseUri": "http://www.w3.org/2000/01/rdf-schema#"
-    },
-    "owl": {
-        "name": "owl",
-        "_type": "source",
-        "graphUri": "http://www.w3.org/2002/07/owl#",
-        "graphDownloadUrl": "https://www.w3.org/2002/07/owl",
-        "sparql_server": {
-            "url": "_default"
-        },
-        "controller": "Sparql_OWL",
-        "topClassFilter": "?topConcept rdf:type owl:Class .",
-        "schemaType": "OWL",
-        "schema": null,
-        "editable": false,
-        "color": "#bcbd22",
-        "group": "STANDARDS/W3C",
-        "imports": [],
-        "taxonomyPredicates": [
-            "rdfs:subClassOf",
-            "rdf:type"
-        ],
-        "baseUri": "http://www.w3.org/2002/07/owl#"
-    },
-    "skos": {
-        "name": "skos",
-        "_type": "source",
-        "graphUri": "http://www.w3.org/2004/02/skos/core#",
-        "graphDownloadUrl": "https://www.w3.org/TR/skos-reference/skos.rdf",
-        "sparql_server": {
-            "url": "_default"
-        },
-        "controller": "Sparql_SKOS",
-        "topClassFilter": "?topConcept rdf:type owl:Class .",
-        "schemaType": "SKOS",
-        "schema": null,
-        "editable": false,
-        "color": "#bcbd22",
-        "group": "STANDARDS/W3C",
-        "imports": [],
-        "taxonomyPredicates": [
-            "skos:broader"
-        ],
-        "baseUri": "http://www.w3.org/2004/02/skos/core#"
-    },
-    "dcterms": {
-        "name": "dcterms",
-        "_type": "source",
-        "graphUri": "http://purl.org/dc/terms/",
-        "graphDownloadUrl": "https://www.dublincore.org/specifications/dublin-core/dcmi-terms/dublin_core_terms.nt",
-        "sparql_server": {
-            "url": "_default"
-        },
-        "controller": "Sparql_OWL",
-        "topClassFilter": "?topConcept rdf:type owl:Class .",
-        "schemaType": "OWL",
-        "schema": null,
-        "editable": false,
-        "color": "#bcbd22",
-        "group": "STANDARDS/W3C",
-        "imports": [],
-        "taxonomyPredicates": [
-            "rdfs:subClassOf",
-            "rdf:type"
-        ],
-        "baseUri": "http://purl.org/dc/terms/"
-    },
-    "dc": {
-        "name": "dc",
-        "_type": "source",
-        "graphUri": "http://purl.org/dc/elements/1.1/",
-        "graphDownloadUrl": "https://www.dublincore.org/specifications/dublin-core/dcmi-terms/dublin_core_elements.nt",
-        "sparql_server": {
-            "url": "_default"
-        },
-        "controller": "Sparql_OWL",
-        "topClassFilter": "?topConcept rdf:type owl:Class .",
-        "schemaType": "OWL",
-        "schema": null,
-        "editable": false,
-        "color": "#bcbd22",
-        "group": "STANDARDS/W3C",
-        "imports": [],
-        "taxonomyPredicates": [
-            "rdfs:subClassOf",
-            "rdf:type"
-        ],
-        "baseUri": "http://purl.org/dc/elements/1.1/"
     }
 }
 

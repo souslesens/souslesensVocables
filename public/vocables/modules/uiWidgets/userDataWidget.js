@@ -363,6 +363,7 @@ var UserDataWidget = (function () {
 
             if (divId == "smallDialogDiv") {
                 UI.openDialog(divId, options);
+                UI.clampAndCenterDialog(divId);
             }
 
             if (callback) {

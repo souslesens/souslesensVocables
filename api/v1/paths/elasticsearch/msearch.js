@@ -42,23 +42,38 @@ export default function () {
 
     POST.apiDoc = {
         security: [{ restrictLoggedUser: [], restrictQuota: [] }],
-        summary: "Elasticsearch msearch",
-        description: "Elasticsearch msearch",
-        operationId: "Elasticsearch msearch",
+        summary: "Execute a multi-search (msearch) request via Elasticsearch",
+        description:
+            "Forwards an NDJSON-encoded multi-search payload to the Elasticsearch `/_msearch` endpoint via " +
+            "`elasticRestProxy.executeMsearch`. When `ConfigManager.config` is loaded, `indexes` are first " +
+            "validated against the caller's accessible sources (read scope). Returns the raw `responses` array " +
+            "from the Elasticsearch msearch result — one entry per query header in the NDJSON.",
+        operationId: "elasticsearchMsearch",
         parameters: [
             {
                 name: "body",
-                description: "body",
+                description: "Multi-search payload.",
                 in: "body",
+                required: true,
                 schema: {
                     type: "object",
+                    required: ["ndjson", "indexes"],
                     properties: {
                         ndjson: {
                             type: "string",
+                            description: "Newline-delimited JSON for Elasticsearch `/_msearch`: alternating header lines " + '(`{"index":"<name>"}`) and query body lines.',
+                            example: '{"index":"iof_core"}\n{"query":{"match":{"label":"asset"}},"size":5}\n',
                         },
                         indexes: {
                             type: "array",
+                            items: { type: "string" },
+                            description: "Index names used for access-control validation.",
+                            example: ["iof_core"],
                         },
+                    },
+                    example: {
+                        indexes: ["iof_core"],
+                        ndjson: '{"index":"iof_core"}\n{"query":{"match":{"label":"asset"}},"size":5}\n',
                     },
                 },
             },
@@ -66,11 +81,25 @@ export default function () {
 
         responses: {
             200: {
-                description: "Results",
+                description: "Elasticsearch `responses` array — one entry per query in the NDJSON, each shaped as a " + "standard Elasticsearch search response (`{ hits, took, timed_out, ... }`).",
                 schema: {
-                    type: "object",
+                    type: "array",
+                    items: {
+                        type: "object",
+                        additionalProperties: true,
+                        description: "Single msearch response entry from Elasticsearch.",
+                    },
+                    example: [
+                        {
+                            took: 3,
+                            timed_out: false,
+                            hits: { total: { value: 1, relation: "eq" }, hits: [{ _index: "iof_core", _id: "abc", _source: { label: "Asset" } }] },
+                        },
+                    ],
                 },
             },
+            400: { description: "Elasticsearch rejected the request or access-control validation failed." },
+            403: { description: "Caller has no read access to one of the requested `indexes`." },
         },
         tags: ["ElasticSearch"],
     };

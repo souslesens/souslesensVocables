@@ -18,10 +18,12 @@ export default function () {
     }
 
     GET.apiDoc = {
-        operationId: "getDatabasesName",
+        operationId: "getUserDatabaseNames",
+        summary: "List databases (id + name only) accessible to the current user",
+        description:
+            "Lightweight variant of `GET /admin/databases`. Returns only `{ id, name }` per database the caller can use, " + "with no host/credentials. Used by MappingModeler's database picker.",
         responses: responseSchema("DatabaseNames", "GET"),
         security: [{ restrictLoggedUser: [] }],
-        summary: "Returns all databases name",
         tags: ["Databases"],
     };
 

@@ -1,6 +1,6 @@
 .popupMenuWidgetDiv {
-    z-index: 20;
-    position: absolute;
+    z-index: 300;
+    position: fixed;
     flex-direction: column;
     padding: 5px;
     text-align: center;
@@ -94,6 +94,7 @@
     border-radius: 14px;
     overflow-y: hidden;
     text-align: center;
+    z-index: 10000;
 }
 
 .vakata-contextmenu-sep {

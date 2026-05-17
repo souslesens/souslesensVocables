@@ -224,11 +224,13 @@ var MainController = (function () {
             });
     };
     self.initTool = function (toolId, callback) {
+        UI.cancelCredits();
+        $("#slsv-credits-logo").remove();
         MainController.writeUserLog(authentication.currentUser, self.currentTool, self.currentSource || "");
         var toolObj = Config.userTools[toolId];
         self.initControllers();
         Clipboard.clear();
-        Lineage_sources.loadedSources = {};
+        Lineage_sources.clearRegistrations();
         /*  if(!Config.userTools[toolId].controller)
                 Config.userTools[toolId].controller= window[toolId]*/
         if (Config.userTools[toolId].controller.onLoaded) {

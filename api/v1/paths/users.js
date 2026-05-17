@@ -45,11 +45,37 @@ export default function () {
         }
     }
     GET.apiDoc = {
-        summary: "Return a list of all User Accounts in the same profiles",
+        summary: "List users sharing a profile with the caller",
+        description:
+            "Admin callers receive every user account. Non-admin callers only see users whose profiles overlap with the " +
+            "caller's `isShared` profiles. Each entry exposes only `login` and `profiles` (groups) — never the password or token.",
         security: [{ restrictLoggedUser: [] }],
         operationId: "getAllUsersWithProfiles",
         parameters: [],
-        responses: responseSchema("Users", "GET"),
+        responses: {
+            200: {
+                description: "Visible users.",
+                schema: {
+                    properties: {
+                        message: { type: "string" },
+                        resources: {
+                            type: "array",
+                            items: {
+                                type: "object",
+                                additionalProperties: {
+                                    type: "object",
+                                    properties: {
+                                        login: { type: "string" },
+                                        profiles: { type: "array", items: { type: "string" } },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+            default: { description: "Server error.", schema: { additionalProperties: true } },
+        },
         tags: ["Users"],
     };
 

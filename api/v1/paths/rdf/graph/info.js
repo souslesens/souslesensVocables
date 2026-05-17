@@ -21,7 +21,7 @@ export default function () {
             }
 
             let graphsImports = [];
-            if (includesImports) {
+            if (includesImports === "true") {
                 graphsImports = userSources[sourceName].imports
                     .map((src) => {
                         if (userSources[src].graphUri) {
@@ -44,36 +44,33 @@ export default function () {
 
     GET.apiDoc = {
         security: [{ restrictLoggedUser: [], restrictQuota: [] }],
-        summary: "Get a RDF graph info (size and pageSize)",
-        operationId: "RDF get graph info",
+        summary: "Return graph URI and total triple count for a source",
+        description:
+            "Lightweight endpoint (a single `COUNT(*)` SPARQL query) used by the UI to display graph size before " +
+            "downloading via `GET /rdf/graph`. When `withImports=true`, the count aggregates triples from imported sources too.",
+        operationId: "rdfGetGraphInfo",
         parameters: [
-            {
-                name: "source",
-                description: "Source name of the graph to retrieve",
-                in: "query",
-                type: "string",
-                required: true,
-            },
-            {
-                name: "withImports",
-                description: "",
-                in: "query",
-                type: "boolean",
-                required: false,
-                default: false,
-            },
+            { name: "source", in: "query", type: "string", required: true, description: "Source name. Example: `BFO`." },
+            { name: "withImports", in: "query", type: "string", required: false, default: "false", description: "Aggregate counts across imported sources. Pass `true` to include imports." },
         ],
         responses: {
             200: {
-                description: "The RDF graph info",
+                description: "Graph URI and triple count.",
                 schema: {
                     properties: {
                         graph: { type: "string" },
                         graphSize: { type: "number" },
-                        pageSize: { type: "number" },
+                    },
+                },
+                examples: {
+                    "application/json": {
+                        graph: "http://purl.obolibrary.org/obo/bfo.owl",
+                        graphSize: 1452,
                     },
                 },
             },
+            404: { description: "Source not accessible to the current user." },
+            500: { description: "Triplestore error." },
         },
         tags: ["RDF"],
     };

@@ -28,31 +28,29 @@ export default function () {
         }
     }
     POST.apiDoc = {
-        summary: "Upload files",
+        summary: "Upload one or more CSV files into `data/CSV/<path>`",
+        description:
+            "Multipart upload. Each file in `req.files` is moved under `data/CSV/<path>/<file.name>`. " +
+            "Paths escaping `data/CSV/` are rejected with `403 forbidden path`. The target directory is created on demand. " +
+            "Returns `201 { done: true }` on success.",
         security: [{ restrictLoggedUser: [] }],
-        operationId: "upload",
-        parameters: [],
+        operationId: "uploadCsvFiles",
+        consumes: ["multipart/form-data"],
+        parameters: [
+            { name: "path", in: "formData", required: true, type: "string", description: "Sub-path under `data/CSV/`. Example: `maintenance`." },
+            { name: "files", in: "formData", required: true, type: "file", description: "One or more CSV files to upload." },
+        ],
         responses: {
-            200: {
-                description: "Response",
-                schema: {
-                    type: "array",
-                    items: {
-                        type: "object",
-                        properties: {
-                            user: {
-                                type: "string",
-                            },
-                            tool: {
-                                type: "string",
-                            },
-                            timestamp: {
-                                type: "string",
-                            },
-                        },
-                    },
-                },
+            201: {
+                description: "Files uploaded.",
+                schema: { properties: { done: { type: "boolean" } } },
+                examples: { "application/json": { done: true } },
             },
+            403: {
+                description: "Forbidden path (directory traversal attempt).",
+                schema: { properties: { done: { type: "boolean" }, message: { type: "string" } } },
+            },
+            500: { description: "Upload error." },
         },
         tags: ["Data"],
     };

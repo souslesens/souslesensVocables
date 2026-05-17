@@ -34,6 +34,7 @@ var SavedQueriesWidget = (function () {
         $("#" + targetDiv).load("./modules/uiWidgets/html/savedQueriesWidget.html", function () {
             if (targetDiv.indexOf("Dialog") > -1) {
                 UI.openDialog(targetDiv, { title: "Saved Queries" });
+                UI.clampAndCenterDialog(targetDiv);
             }
             /*if (slsvSource) {
                 self.list(slsvSource, null, path);

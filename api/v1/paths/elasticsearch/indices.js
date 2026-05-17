@@ -18,18 +18,27 @@ export default function () {
 
     GET.apiDoc = {
         security: [{ restrictLoggedUser: [], restrictQuota: [] }],
-        summary: "Get ElasticSearch indices",
-        description: "Get ElasticSearch indices",
-        operationId: "Get ElasticSearch indices",
+        summary: "List Elasticsearch indices known to the configured cluster",
+        description:
+            "Returns every index name reported by `indexModel.getIndices` (lowercase, as Elasticsearch stores them). " +
+            "The search UI uses this list to detect which sources have a full-text index available and to populate " +
+            "the multi-source search picker.",
+        operationId: "getElasticsearchIndices",
 
         responses: {
             200: {
-                description: "Results",
+                description: "Index names from the Elasticsearch cluster.",
                 schema: {
                     type: "array",
-                    items: {
-                        type: "string",
-                    },
+                    items: { type: "string" },
+                    example: ["iof_core", "gemet", "ecosystem-ontology"],
+                },
+            },
+            500: {
+                description: "Elasticsearch unreachable or returned an error.",
+                schema: {
+                    type: "object",
+                    properties: { error: { type: "object" } },
                 },
             },
         },

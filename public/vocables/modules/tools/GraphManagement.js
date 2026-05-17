@@ -22,6 +22,7 @@ const GraphManagement = (function () {
                     <div style="width:90vw;height: 90vh"><div id="mount-graph-management-here"></div></div>
             `);
             UI.openDialog("mainDialogDiv", { title: "Graph Management" });
+            UI.clampAndCenterDialog("mainDialogDiv");
             self.umountKGUploadApp = self.createApp();
         }, 200);
     };

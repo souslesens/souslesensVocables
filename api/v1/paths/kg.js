@@ -1,6 +1,8 @@
 import path from "path";
 import kGbuilder from "../../../bin/KG/KGbuilder.js";
 
+// Route POST /kg: not used client-side (no calls found in public/).
+// Likely deprecated — active routes are sub-paths /kg/data, /kg/model, /kg/triples, /kg/mappings, /kg/clearGraph.
 export default function () {
     let operations = {
         POST,
@@ -44,8 +46,7 @@ export default function () {
                             type: "boolean",
                         },
                         dataSource: {
-                            type: "object",
-                            $ref: "#/definitions/Source",
+                            $ref: "#/definitions/SourceUpdate",
                         },
                         options: {
                             type: "object",

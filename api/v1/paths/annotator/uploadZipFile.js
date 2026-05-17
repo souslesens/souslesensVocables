@@ -1,6 +1,7 @@
 import DirContentAnnotator from "../../../../bin/annotator/dirContentAnnotator.js";
 import { processResponse } from "../utils.js";
 
+// Route /api/v1/annotator/uploadZipFile: not used client-side (no calls found in public/ or mainapp/src/). Likely deprecated.
 export default function () {
     let operations = {
         POST,
@@ -36,7 +37,7 @@ export default function () {
             { in: "formData", required: true, name: "EvaluateToolZipFile", type: "file", description: "The file to upload" },
             { in: "formData", required: true, name: "sources", type: "string", description: "Sources as JSON" },
             { in: "formData", required: true, name: "corpusName", type: "string", description: "Corpus' name" },
-            { in: "formData", required: true, name: "options", type: "string", description: "Additional options as JSON" },
+            { in: "formData", required: false, name: "options", type: "string", description: "Additional options as JSON" },
         ],
         responses: {
             200: {

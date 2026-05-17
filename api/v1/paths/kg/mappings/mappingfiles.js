@@ -17,26 +17,18 @@ export default function () {
 
     GET.apiDoc = {
         security: [{ restrictLoggedUser: [] }],
-        summary: "Retrieve mappings files used by a source with triples created on it",
-        description: "Retrieve mappings files used by a source with triples created on it",
-        operationId: "Retrieve mappings files used by a source with triples created on it",
-        parameters: [
-            {
-                name: "source",
-                description: "source",
-                in: "query",
-                type: "string",
-                required: true,
-            },
-        ],
-
+        summary: "List mapping files that produced triples for a source",
+        description:
+            "Returns the set of mapping files (`KGbuilder_main.getSourceMappingsFiles`) that have already been used " +
+            "to generate triples in `source`'s graph. Used by the UI to offer 'recreate triples' / 'delete triples' actions.",
+        operationId: "kgListMappingFiles",
+        parameters: [{ name: "source", in: "query", type: "string", required: true, description: "Source name. Example: `IOF_core`." }],
         responses: {
             200: {
-                description: "Results",
-                schema: {
-                    type: "object",
-                },
+                description: "Array of mapping file names.",
+                schema: { type: "array", items: { type: "string" } },
             },
+            400: { description: "Source not found or read error." },
         },
         tags: ["KG"],
     };

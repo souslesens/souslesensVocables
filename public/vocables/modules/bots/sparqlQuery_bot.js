@@ -387,6 +387,7 @@ var SparqlQuery_bot = (function () {
                 );
                 $("#botPanel").css("display", "none");
                 UI.openDialog("smallDialogDiv", { title: "Binding Predicates" });
+                UI.clampAndCenterDialog("smallDialogDiv");
                 var options = { openAll: true, withCheckboxes: true };
                 JstreeWidget.loadJsTree("sparqlQueryBot_bindingPredJstree", jstreeData, options);
             });
@@ -445,7 +446,7 @@ var SparqlQuery_bot = (function () {
             var objectIds = null;
             var whiteboardNodes = null;
             if (self.params.queryScope == "whiteboardNodes") {
-                whiteboardNodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.getIds();
+                whiteboardNodes = self.getWhiteboardNonLiteralIds();
             } else if (self.params.queryScope == "selectedNodes") {
                 whiteboardNodes = Lineage_whiteboard.lineageVisjsGraph.network.getSelectedNodes(true);
             } else {
@@ -571,9 +572,13 @@ var SparqlQuery_bot = (function () {
             var role = null;
             var filter = "";
             if (self.params.whiteboardNodes) {
-                var filterSubject = Sparql_common.setFilter("subject", self.params.whiteboardNodes);
+                var nonLiteralNodes = self.params.whiteboardNodes.filter(function (id) {
+                    var node = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(id);
+                    return !node || !node.data || node.data.rdfType !== "literal";
+                });
+                var filterSubject = Sparql_common.setFilter("subject", nonLiteralNodes);
 
-                var filterObject = Sparql_common.setFilter("object", self.params.whiteboardNodes);
+                var filterObject = Sparql_common.setFilter("object", nonLiteralNodes);
                 filter += filterSubject.substring(0, filterSubject.length - 1) + " || " + filterObject.replace("FILTER(", "");
             }
 
@@ -1088,16 +1093,31 @@ var SparqlQuery_bot = (function () {
             if (item.object && !drawOnlySubject) {
                 if (!existingNodes[item.object]) {
                     existingNodes[item.object] = 1;
+                    var isLiteralObject = !(item.object in labelsMap);
+                    var objectLabel;
+                    var objectShape;
+                    var objectRdfType;
+                    if (isLiteralObject) {
+                        var maxLen = Config.whiteBoardLiteralLabelLength;
+                        objectLabel = item.object.length > maxLen ? item.object.substring(0, maxLen) + "..." : item.object;
+                        objectShape = shape;
+                        objectRdfType = "literal";
+                    } else {
+                        objectLabel = labelsMap[item.object] || Sparql_common.getLabelFromURI(item.object);
+                        objectShape = shape;
+                        objectRdfType = undefined;
+                    }
                     visjsData.nodes.push({
                         id: item.object,
-                        label: labelsMap[item.object],
-                        shape: shape,
+                        label: objectLabel,
+                        shape: objectShape,
                         color: "#a8da83",
                         size: Lineage_whiteboard.defaultShapeSize,
                         data: {
                             id: item.object,
-                            label: labelsMap[item.object],
+                            label: objectLabel,
                             source: self.params.source,
+                            rdfType: objectRdfType,
                         },
                     });
                 }
@@ -1208,6 +1228,7 @@ var SparqlQuery_bot = (function () {
                 "<button style='float: right' onclick='SparqlQuery_bot.saveQuery()'>SaveQuery</button>",
         );
         UI.openDialog("smallDialogDiv", { title: "Edit and Execute SPARQL Query" });
+        UI.clampAndCenterDialog("smallDialogDiv");
         $("#sparqlQueryBot_outputTypeSelect").css("z-index", 101);
         $("#sparqlQueryBot_queryTitle").html(title || "");
         $("#sparqlQueryBot_queryDescription").html(description || "");
@@ -1316,6 +1337,13 @@ var SparqlQuery_bot = (function () {
             }
         });
         return filteredProperties;
+    };
+
+    self.getWhiteboardNonLiteralIds = function () {
+        return Lineage_whiteboard.lineageVisjsGraph.data.nodes.getIds().filter(function (id) {
+            var node = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(id);
+            return !node || !node.data || node.data.rdfType !== "literal";
+        });
     };
 
     self.saveQuery = function () {

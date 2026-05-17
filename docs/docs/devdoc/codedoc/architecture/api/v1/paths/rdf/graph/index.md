@@ -3,7 +3,18 @@
 
 <!-- AUTO-DESC:START -->
 
-This page summarizes the code structure for this directory and its immediate subdirectories. It focuses on the `api / v1 / paths / rdf / graph` area within the `api` module. Use the table of contents below to navigate deeper.
+## Overview
+
+Read-only and patch endpoints for graph-level metadata, used by the UI before/while displaying a source's content.
+
+## Modules
+
+### 1. `info.js`
+Returns `{ graph, graphSize }` after a single `COUNT(*)` SPARQL query. Aggregates imported graphs when `withImports=true`.
+
+### 2. `metadata.js`
+- `GET` returns metadata-level triples (`dc:title`, `dc:creator`, `owl:imports`, version annotations) of the source's graph.
+- `POST` applies a delta: `addedData` triples are inserted, `removedData` triples are deleted.
 
 <!-- AUTO-DESC:END -->
 

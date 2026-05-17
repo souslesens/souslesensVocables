@@ -27,6 +27,7 @@ var ConfigEditor = (function () {
 
         self.umountKGUploadApp = self.createApp();
         UI.openDialog("mainDialogDiv", { title: "Config Editor" });
+        UI.clampAndCenterDialog("mainDialogDiv");
     };
 
     return self;

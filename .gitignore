@@ -15,6 +15,7 @@ out
 
 # Logs
 logs/*.log*
+logs/schema-mismatches.jsonl
 *.log
 npm-debug.log*
 yarn-debug.log*
@@ -23,6 +24,7 @@ lerna-debug.log*
 
 # editors
 .idea
+.serena/
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
@@ -164,4 +166,13 @@ mainapp/static/assets
 /plugins/Lifex_cost/
 /plugins/
 /public/tutorials/
+# worktree isolation (github-issue-claude-code)
+vite.config.worktree.js
+start-worktree.sh
+start-worktree.cmd
+*/vite.config.worktree.js
+WORKTREE.md
+.env.local
 
+.serena/
+.claude/settings.local.jsonclaude-code-lsp-enforcement-kit

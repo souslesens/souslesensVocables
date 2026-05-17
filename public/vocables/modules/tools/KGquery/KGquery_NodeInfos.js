@@ -5,6 +5,7 @@ import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import UI from "../../shared/UI.js";
 import MainController from "../../shared/mainController.js";
+import common from "../../shared/common.js";
 
 var KGquery_NodeInfos = (function () {
     var self = {};
@@ -24,6 +25,12 @@ var KGquery_NodeInfos = (function () {
             str += "</tr>";
         }
         return str;
+    };
+
+    self.copyUri = function (text, caller) {
+        common.copyTextToClipboard(text, function () {
+            caller.css("border-width", "3px");
+        });
     };
 
     self.generatePropertiesBloc = function (title, properties) {
@@ -166,6 +173,7 @@ var KGquery_NodeInfos = (function () {
         self.currentSource = source;
         self.uri = uri;
         self.currentTargetClassId = targetClassId;
+        self.currentDialogDivId = divId;
 
         var classNode = KGquery_graph.visjsData.nodes.find(function (node) {
             return node.id === targetClassId;
@@ -179,6 +187,8 @@ var KGquery_NodeInfos = (function () {
             self.buildNodeInfosDisplay(uri, targetClassId, source, divId, function (err) {
                 if (err) {
                     console.log(err);
+                } else {
+                    UI.clampAndCenterDialog(divId);
                 }
                 callback(err);
             });
@@ -221,7 +231,7 @@ var KGquery_NodeInfos = (function () {
                                 UI.openDialog(divId, { title: "Infos : " + datatypeResult.label.value });
                             }
 
-                            $("#" + divId).dialog("option", "position", { my: "center", at: "center", of: window });
+                            UI.clampAndCenterDialog(divId);
                             self.currentDatatypesResult = datatypeResult;
                             callbackSeries();
                         },
@@ -335,6 +345,22 @@ var KGquery_NodeInfos = (function () {
                     column_name: readablePropName,
                     value: propValue,
                 });
+            }
+
+            if (uri) {
+                var uriValue =
+                    "<a target='_blank' href='" +
+                    uri +
+                    "'>" +
+                    uri +
+                    "</a>" +
+                    "&nbsp;<button class='w3-button nodesInfos-iconsButtons' style='font-size:10px;margin-left:7px;'" +
+                    " onclick='KGquery_NodeInfos.copyUri(\"" +
+                    uri +
+                    "\",$(this))'>" +
+                    "<input type='image' src='./icons/CommonIcons/CopyIcon.png'>" +
+                    "</button>";
+                properties.unshift({ column_name: "URI", value: uriValue });
             }
 
             var str = "";
@@ -619,11 +645,13 @@ var KGquery_NodeInfos = (function () {
                 var title = nodeName + " Properties";
                 var html = self.generateSparqlResultsPave(title, queryResult, columnsToKeep);
                 $("#" + tabId).html(html);
+                UI.clampAndCenterDialog(self.currentDialogDivId);
 
                 self.loadPavesForClass(node.id, self.uri, self.currentTargetClassName, tabId, node.id, function (err) {
                     if (err) {
                         console.log("Error loading panes:", err);
                     }
+                    UI.clampAndCenterDialog(self.currentDialogDivId);
                 });
             });
         });

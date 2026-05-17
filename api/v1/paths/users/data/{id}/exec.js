@@ -96,7 +96,7 @@ export default () => {
             // check that query is confom before execute
             const userSources = await ConfigManager.getUserSources(req, res);
             const user = await ConfigManager.getUser(req, res);
-            const filteredQuery = await UserRequestFiltering.filterSparqlRequestAsync(query, userSources, user);
+            const filteredQuery = await UserRequestFiltering.filterSparqlRequestAsync(renderedQuery, userSources, user);
             if (filteredQuery.parsingError) {
                 return processResponse(res, filteredQuery.parsingError, null);
             }
@@ -122,21 +122,21 @@ export default () => {
     };
 
     GET.apiDoc = {
-        summary: "Execute sparql query",
-        description: "Execute the query contained in the userData and return the result",
+        summary: "Execute the action stored in a UserData entry",
+        description:
+            "Two execution modes depending on the UserData `data_type`: " +
+            "(a) `sparqlQuery` — the stored SPARQL query is templated with `req.query` (Jinja-like, supporting " +
+            "`{{limit}}`, `{{offset}}` and arbitrary variables), filtered through `UserRequestFiltering` and " +
+            "executed against the configured triplestore. The output format is selected by the `format` query parameter " +
+            "(`json` by default, else any RDF format mapped in `RDF_FORMATS_MIMETYPES`); " +
+            "(b) `jsFunction` — the stored JavaScript function is run via `RemoteCodeRunner.runUserDataFunction` with " +
+            "the caller's user/sources/tools as context. Returns `400` for any other `data_type` or empty payload.",
+        operationId: "userDataExec",
         parameters: [
-            {
-                type: "number",
-                in: "path",
-                name: "id",
-                required: true,
-            },
-            {
-                type: "string",
-                in: "query",
-                name: "format",
-                required: false,
-            },
+            { in: "path", name: "id", type: "number", required: true, description: "UserData id." },
+            { in: "query", name: "format", type: "string", required: false, description: "Output format for `sparqlQuery` mode (`json`, `turtle`, `n3`, ...)." },
+            { in: "query", name: "limit", type: "string", required: false, description: "Override the `{{limit}}` template variable." },
+            { in: "query", name: "offset", type: "string", required: false, description: "Override the `{{offset}}` template variable." },
         ],
         responses: {
             200: {

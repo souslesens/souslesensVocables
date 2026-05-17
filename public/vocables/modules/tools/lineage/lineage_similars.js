@@ -581,6 +581,7 @@ var Lineage_similars = (function () {
             self.parentClassJstreeLoaded = false;
             $("#smallDialogDiv").load("modules/tools/lineage/html/lineageSimilarsSaveDialog.html", function () {
                 UI.openDialog("smallDialogDiv", { title: "Save Similars" });
+                UI.clampAndCenterDialog("smallDialogDiv");
                 self.save.drawWhiteboardSimilarsTaxonomy(function () {});
             });
         },

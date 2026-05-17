@@ -29,6 +29,7 @@ import { sourceModel } from "./model/sources.js";
 import { rdfDataModel } from "./model/rdfData.js";
 import { quotaModel } from "./model/quota.js";
 import apiDoc from "./api/v1/api-doc.js";
+import { attachResponseValidator } from "./bin/responseValidator.js";
 import session from "express-session";
 
 const config = readMainConfig();
@@ -211,6 +212,8 @@ app.get("/metrics", async (req, res) => {
     res.set("Content-Type", register.contentType);
     res.end(await register.metrics());
 });
+
+attachResponseValidator(app, apiDoc, { logPath: "logs/schema-mismatches.jsonl" });
 
 openapi.initialize({
     apiDoc: apiDoc,

@@ -1,9 +1,16 @@
-<div id="lineage_drawnSources" className="Lineage_objectDivContainer" style="display: flex; flex-direction: row; align-items: center; padding: 5px">
-    <button id="ChangeSourceButton" class="slsv-button-source" onclick="SourceSelectorWidget.showSourceDialog(true)">Change source</button>
-    <div id="AddSourceButton" class="slsv-button-source" style="padding: 3px 12px; margin-bottom: 4px" onclick="SourceSelectorWidget.showSourceDialog(false)">
-        <button class="slsv-invisible-button add-icon" style="height: 25px; width: 29px"></button>
+<div id="lineage_drawnSources" class="Lineage_objectDivContainer" style="display: flex; flex-direction: row; align-items: center; padding: 4px 6px; flex-wrap: nowrap; scrollbar-width: thin; gap: 6px">
+    <div class="lineage-action-group">
+        <button id="ChangeSourceButton" class="slsv-button-source" onclick="SourceSelectorWidget.showSourceDialog(true)">Change source</button>
+        <div id="lineage_compactSourceIndicator" style="display: none"></div>
     </div>
-    <button id="AllSourceButton" class="slsv-button-source" onclick="Lineage_sources.setAllWhiteBoardSources()">All</button>
+    <div id="lineage_sourcesPopup" style="display: flex; flex-direction: row; align-items: center; gap: 6px; flex-shrink: 0">
+        <div id="lineage_sourceButtons" style="display: flex; flex-direction: row">
+            <div id="AddSourceButton" class="slsv-button-source" style="padding: 3px 10px; display: inline-flex; align-items: center" onclick="SourceSelectorWidget.showSourceDialog(false)">
+                <button class="slsv-invisible-button add-icon" style="height: 25px; width: 29px"></button>
+            </div>
+            <button id="AllSourceButton" class="slsv-button-source" onclick="Lineage_sources.setAllWhiteBoardSources()">All</button>
+        </div>
+        <div class="lineage-sources-separator"></div>
+        <div id="lineage_r_addPanel" style="display: flex; flex-direction: row; align-items: center; gap: 4px"></div>
+    </div>
 </div>
-
-<div id="lineage_r_addPanel"></div>

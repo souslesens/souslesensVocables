@@ -39,6 +39,14 @@ var NodeInfosWidget = (function () {
         if (typeof node == "object") {
             self.currentNode = node;
             if (node.data) {
+                if (node.data.rdfType === "literal") {
+                    var literalValue = (node.data.id || node.id || "").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                    self.initDialog(sourceLabel, divId, options || {}, function () {
+                        $("#nodeInfosWidget_tabsDiv").find("li").not(":first").hide();
+                        $("#nodeInfosWidget_InfosTabDiv").html("<div style='padding:10px;word-wrap:break-word;white-space:pre-wrap;'>" + literalValue + "</div>");
+                    });
+                    return;
+                }
                 if (node.data.type && node.data.type.indexOf("literal") > -1) {
                     return;
                 }
@@ -109,6 +117,7 @@ var NodeInfosWidget = (function () {
                     $("#addPredicateButton").insertAfter($("#mainDialogDiv").parent().find(".ui-dialog-title"));
                     $("#addPredicateButton").css("margin-left", "25px !important");
                     //  $("#addRestrictionButton").css("margin-left", "25px !important");
+                    UI.repositionOpenDialogs();
                 });
             }
         });
@@ -587,9 +596,14 @@ defaultLang = 'en';*/
                             (!Object.keys(self.propertiesMap.properties[key].langValues).length || Object.keys(self.propertiesMap.properties[key].langValues).length == 0)
                         ) {
                             var values = self.propertiesMap.properties[key].value;
-                            var hasPlaceholderValue = values.some(function (v) {
-                                return v && v.value === "?";
+                            var hasRealValue = values.some(function (v) {
+                                return v && v.value !== "?";
                             });
+                            var hasPlaceholderValue =
+                                !hasRealValue &&
+                                values.some(function (v) {
+                                    return v && v.value === "?";
+                                });
                             strGeneratedByProp +=
                                 "<td class='detailsCellName'>" +
                                 "<a target='" +
@@ -603,9 +617,14 @@ defaultLang = 'en';*/
 
                             var valuesStr = "";
 
-                            values.forEach(function (valueObj, index) {
+                            var renderedCount = 0;
+                            values.forEach(function (valueObj) {
                                 var value = valueObj.value;
                                 var isPlaceholder = value === "?";
+
+                                if (isPlaceholder && hasRealValue) {
+                                    return;
+                                }
 
                                 var predicateId = valueObj.predicateId;
                                 var optionalStr = getOptionalStr(key, predicateId);
@@ -615,13 +634,14 @@ defaultLang = 'en';*/
                                     var titleAttr = uriLabel ? " title='" + uriLabel.replace(/'/g, "&#39;") + "'" : "";
                                     value = "<a target='" + self.getUriTarget(value) + "' href='" + value + "'" + titleAttr + ">" + value + "</a>";
                                 }
-                                if (index > 0) {
+                                if (renderedCount > 0) {
                                     valuesStr += "<br>";
                                 }
                                 if (isPlaceholder) {
                                     value = "<b>?</b>";
                                 }
                                 valuesStr += value + optionalStr;
+                                renderedCount++;
                             });
                             strGeneratedByProp += "<td class='detailsCellValue'><div class='detailsCellValueContent'>" + valuesStr + "</div></td>";
                             strGeneratedByProp += "</tr>";
@@ -1736,14 +1756,17 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
 
             html += "</table></div>";
 
-            if (!targetDiv) {
+            var isNewDialog = !targetDiv;
+            if (isNewDialog) {
                 targetDiv = "smallDialogDiv";
                 UI.openDialog(targetDiv, { title: " Node Restrictions" });
                 $("#addPredicateButton").remove();
-
                 $("#deleteButton").remove();
             }
             $("#" + targetDiv).html(html);
+            if (isNewDialog) {
+                UI.repositionOpenDialogs();
+            }
 
             if (callback) {
                 callback();

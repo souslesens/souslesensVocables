@@ -2,16 +2,16 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { jest } from "@jest/globals";
-import { cleanupConnection as cleanupConnectionMock, getKnexConnection as getKnexConnectionMock } from "../model/__mocks__/utils.js";
-import { convertType } from "../model/utils.js";
+import { cleanupConnection as cleanupConnectionMock, getKnexConnection as getKnexConnectionMock } from "../../model/__mocks__/utils.js";
+import { convertType } from "../../model/utils.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-jest.unstable_mockModule("../model/utils.js", () => ({ cleanupConnection: cleanupConnectionMock, getKnexConnection: getKnexConnectionMock, convertType: convertType }));
+jest.unstable_mockModule("../../model/utils.js", () => ({ cleanupConnection: cleanupConnectionMock, getKnexConnection: getKnexConnectionMock, convertType: convertType }));
 
-const { profileModel, ProfileModel } = await import("../model/profiles.js");
-const { ToolModel } = await import("../model/tools.js");
+const { profileModel, ProfileModel } = await import("../../model/profiles.js");
+const { ToolModel } = await import("../../model/tools.js");
 
 describe("Test the Profilemodel module", () => {
     let allTools;
@@ -20,7 +20,7 @@ describe("Test the Profilemodel module", () => {
 
     beforeAll(() => {
         dbProfiles = JSON.parse(fs.readFileSync(path.join("tests", "data", "config", "profiles.json")));
-        toolsModel = new ToolModel(path.join(__dirname, "data", "plugins"));
+        toolsModel = new ToolModel(path.join(__dirname, "../data", "plugins"));
         allTools = toolsModel.allTools.filter((tool) => profileModel._mainConfig.tools_available.includes(tool.name));
     });
 

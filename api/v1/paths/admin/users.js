@@ -14,9 +14,10 @@ export default function () {
         }
     }
     GET.apiDoc = {
-        summary: "Return a list of all User Accounts",
+        summary: "List every user account (admin only)",
+        description: "Admin-only. Returns the full user catalog from `users.json`, sorted by login. Includes hashed passwords and tokens.",
         security: [{ restrictAdmin: [] }],
-        operationId: "getAllUsers",
+        operationId: "adminGetAllUsers",
         parameters: [],
         responses: responseSchema("Users", "GET"),
         tags: ["Users"],
@@ -41,10 +42,21 @@ export default function () {
         }
     }
     PUT.apiDoc = {
-        summary: "Update a User Account",
+        summary: "Update one or more user accounts (admin only)",
+        description:
+            "Body is a map `userId → User`. Each entry is passed to `userModel.updateUserAccount`. " +
+            "If a `password` field is present and empty, the request is rejected with `400 Password cannot be empty`. " +
+            "Returns the refreshed user catalog.",
         security: [{ restrictAdmin: [] }],
-        operationId: "updateUsers",
-        parameters: [],
+        operationId: "adminUpdateUsers",
+        parameters: [
+            {
+                in: "body",
+                name: "body",
+                required: true,
+                schema: { type: "object", additionalProperties: { $ref: "#/definitions/User" } },
+            },
+        ],
         responses: responseSchema("Users", "PUT"),
         tags: ["Users"],
     };
@@ -67,10 +79,29 @@ export default function () {
         }
     }
     POST.apiDoc = {
-        summary: "Create a new user",
+        summary: "Create one or more user accounts (admin only)",
+        description: "Body is a map `userId → User`. Each entry is added via `userModel.addUserAccount`. " + "Empty `password` is rejected with `400`. Returns the refreshed user catalog.",
         security: [{ restrictAdmin: [] }],
-        operationId: "createUser",
-        parameters: [],
+        operationId: "adminCreateUsers",
+        parameters: [
+            {
+                in: "body",
+                name: "body",
+                required: true,
+                schema: { type: "object", additionalProperties: { $ref: "#/definitions/User" } },
+                "x-examples": {
+                    "Add user alice": {
+                        alice: {
+                            id: "alice",
+                            login: "alice",
+                            password: "<hashed>",
+                            groups: ["modelers"],
+                            _type: "user",
+                        },
+                    },
+                },
+            },
+        ],
         responses: responseSchema("Users", "POST"),
         tags: ["Users"],
     };

@@ -333,6 +333,7 @@ var CommonBotFunctions = (function () {
 
             $("#smallDialogDiv").html("<div id='showParentsJstreeDiv' style='overflow:auto; max-height:400px'></div>");
             UI.openDialog("smallDialogDiv", { title: "Parents of " + classLabel });
+            UI.clampAndCenterDialog("smallDialogDiv");
             $("#smallDialogDiv").parent().css("z-index", 10000);
             JstreeWidget.loadJsTree("showParentsJstreeDiv", jstreeData, { openAll: true });
 

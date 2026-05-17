@@ -42,26 +42,22 @@ export default function () {
 
     GET.apiDoc = {
         security: [{ restrictLoggedUser: [] }],
-        summary: "get  classes with axioms from owl API",
-        description: "get  classes with axioms from owl API",
-        operationId: "get  classes with axioms from owl API",
-        parameters: [
-            {
-                name: "graphName",
-                description: "ontologyGraphUri",
-                type: "string",
-                in: "query",
-                required: true,
-            },
-        ],
-
+        summary: "List classes that carry at least one OWL axiom",
+        description:
+            "Forwards `axioms/listClassesWithAxioms` to the JOWL server. Used by the UI to highlight axiomatised " +
+            "classes (those carrying restrictions, equivalent classes, disjointness, etc.) in the lineage tree.",
+        operationId: "jowlListClassesWithAxioms",
+        parameters: [{ name: "graphName", in: "query", type: "string", required: true, description: "Ontology graph URI. Example: `http://purl.obolibrary.org/obo/bfo.owl`." }],
         responses: {
             200: {
-                description: "Results",
+                description: "Array of class URIs holding axioms.",
                 schema: {
-                    type: "object",
+                    type: "array",
+                    items: { type: "string", description: "Class URI." },
+                    example: ["http://purl.obolibrary.org/obo/BFO_0000001", "http://purl.obolibrary.org/obo/BFO_0000015"],
                 },
             },
+            500: { description: "JOWL server error." },
         },
         tags: ["JOWL"],
     };

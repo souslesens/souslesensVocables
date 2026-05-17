@@ -92,12 +92,37 @@ var Predicates_bot = (function () {
             .replace(/\s+/g, "_");
     }
 
-    function isMatchProperty(property) {
-        if (!property) {
-            return false;
+    function isLiteralRange(range) {
+        if (!range) {
+            return true;
         }
-        return property.toLowerCase().indexOf("match") > -1;
+        if (range.startsWith("http://www.w3.org/2001/XMLSchema#")) {
+            return true;
+        }
+        if (range === "http://www.w3.org/2000/01/rdf-schema#Literal") {
+            return true;
+        }
+        if (range.indexOf("xsd:") === 0) {
+            return true;
+        }
+        return false;
     }
+
+    var knownLiteralProperties = [
+        "http://purl.org/dc/elements/1.1/identifier",
+        "http://purl.org/dc/elements/1.1/title",
+        "http://purl.org/dc/elements/1.1/description",
+        "http://purl.org/dc/elements/1.1/subject",
+        "http://purl.org/dc/elements/1.1/creator",
+        "http://purl.org/dc/elements/1.1/contributor",
+        "http://purl.org/dc/elements/1.1/publisher",
+        "http://purl.org/dc/elements/1.1/date",
+        "http://purl.org/dc/elements/1.1/type",
+        "http://purl.org/dc/elements/1.1/format",
+        "http://purl.org/dc/elements/1.1/source",
+        "http://purl.org/dc/elements/1.1/language",
+        "http://purl.org/dc/elements/1.1/rights",
+    ];
 
     function isLiteralProperty(property) {
         if (!property) {
@@ -105,6 +130,24 @@ var Predicates_bot = (function () {
         }
         if (property.indexOf("xsd:") === 0) {
             return true;
+        }
+        if (knownLiteralProperties.indexOf(property) > -1) {
+            return true;
+        }
+        for (var vocab in Config.ontologiesVocabularyModels) {
+            var model = Config.ontologiesVocabularyModels[vocab];
+            if (model && model.nonObjectProperties && model.nonObjectProperties[property]) {
+                var range = model.nonObjectProperties[property].range;
+                if (!range) {
+                    if (model.properties && model.properties[property]) {
+                        continue;
+                    }
+                    return true;
+                }
+                if (isLiteralRange(range)) {
+                    return true;
+                }
+            }
         }
         return Sparql_common.isTripleObjectString(property);
     }
@@ -135,6 +178,47 @@ var Predicates_bot = (function () {
         return false;
     }
 
+    function getNonObjectPropertyRange(property) {
+        for (var vocab in Config.ontologiesVocabularyModels) {
+            var model = Config.ontologiesVocabularyModels[vocab];
+            if (model && model.nonObjectProperties && model.nonObjectProperties[property]) {
+                return model.nonObjectProperties[property].range || null;
+            }
+        }
+        return null;
+    }
+
+    var xsdNumericTypes = [
+        "http://www.w3.org/2001/XMLSchema#integer",
+        "http://www.w3.org/2001/XMLSchema#int",
+        "http://www.w3.org/2001/XMLSchema#float",
+        "http://www.w3.org/2001/XMLSchema#double",
+        "http://www.w3.org/2001/XMLSchema#decimal",
+        "xsd:integer",
+        "xsd:int",
+        "xsd:float",
+        "xsd:double",
+        "xsd:decimal",
+    ];
+
+    var xsdDateTypes = ["http://www.w3.org/2001/XMLSchema#date", "http://www.w3.org/2001/XMLSchema#dateTime", "xsd:date", "xsd:dateTime"];
+
+    var xsdBooleanTypes = ["http://www.w3.org/2001/XMLSchema#boolean", "xsd:boolean"];
+
+    function getLiteralWidgetType(property, propRange) {
+        var range = propRange || getNonObjectPropertyRange(property) || property;
+        if (xsdDateTypes.indexOf(range) > -1) {
+            return "date";
+        }
+        if (xsdNumericTypes.indexOf(range) > -1) {
+            return "number";
+        }
+        if (xsdBooleanTypes.indexOf(range) > -1) {
+            return "boolean";
+        }
+        return "text";
+    }
+
     function formatObject(property, value) {
         if (!value) {
             return value;
@@ -148,7 +232,14 @@ var Predicates_bot = (function () {
         if (Sparql_common.isTripleObjectString(property)) {
             return Sparql_common.formatStringForTriple(value);
         }
-        return value;
+        var range = getNonObjectPropertyRange(property);
+        if (range) {
+            if (range.indexOf("xsd:") === 0 || range.startsWith("http://www.w3.org/2001/XMLSchema#")) {
+                var xsdType = range.startsWith("http://www.w3.org/2001/XMLSchema#") ? "xsd:" + range.split("#")[1] : range;
+                return "'" + Sparql_common.formatStringForTriple(value) + "'^^" + xsdType;
+            }
+        }
+        return Sparql_common.formatStringForTriple(value);
     }
 
     /**
@@ -289,7 +380,7 @@ var Predicates_bot = (function () {
             return;
         }
 
-        if ((self.params.isObjectProperty === true || self.params.enteredUri) && !isValidObjectUri(self.params.selectedObject)) {
+        if ((self.params.isObjectProperty === true || self.params.enteredUri) && !isLiteralProperty(self.params.selectedProperty) && !isValidObjectUri(self.params.selectedObject)) {
             return MainController.errorAlert("Invalid URI: '" + self.params.selectedObject + "'. Expected http://... or prefix:localName");
         }
 
@@ -355,41 +446,72 @@ var Predicates_bot = (function () {
                 return;
             }
 
-            var literalProp;
-            if (self.params.isObjectProperty !== null && self.params.isObjectProperty !== undefined) {
+            var literalProp = isLiteralProperty(self.params.selectedProperty);
+            if (!literalProp && self.params.isObjectProperty !== null && self.params.isObjectProperty !== undefined) {
                 literalProp = !self.params.isObjectProperty;
-            } else {
-                literalProp = isLiteralProperty(self.params.selectedProperty);
             }
 
             if (literalProp) {
-                if (self.params.selectedProperty === "xsd:dateTime") {
+                var widgetType = getLiteralWidgetType(self.params.selectedProperty, null);
+
+                if (widgetType === "date") {
                     self.myBotEngine.promptValue("select date", "selectedObject", self.params.selectedObject || "", null, function (value) {
                         self.params.selectedObject = value;
                         executeSave();
                     });
-                    DateWidget.setDatePickerOnInput("botPromptInput", null, null);
+                    DateWidget.setDatePickerOnInput("botPromptInput", null, function () {
+                        $("#botPromptInput").trigger(jQuery.Event("keyup", { keyCode: 13 }));
+                    });
+                } else if (widgetType === "boolean") {
+                    self.myBotEngine.showList(
+                        [
+                            { id: "true", label: "true" },
+                            { id: "false", label: "false" },
+                        ],
+                        "selectedObject",
+                        null,
+                        false,
+                        function (value) {
+                            self.params.selectedObject = value;
+                            executeSave();
+                        },
+                    );
                 } else {
-                    self.myBotEngine.promptTextarea("enter value", "selectedObject", self.params.selectedObject || "", function (valueSafe, rawValue) {
+                    var label = widgetType === "number" ? "enter number" : "enter value";
+                    self.myBotEngine.promptTextarea(label, "selectedObject", self.params.selectedObject || "", function (valueSafe, rawValue) {
                         var raw = rawValue !== undefined ? rawValue : valueSafe;
                         self.params.selectedObject = raw.replace(/[\r\n]+/g, " ");
+                        if (widgetType === "number" && isNaN(Number(self.params.selectedObject))) {
+                            alert("Invalid value: a number is expected (e.g. 42, 3.14)");
+                            self.functions.chooseObjectFn();
+                            return false;
+                        }
                         executeSave();
                     });
                 }
                 return;
             }
 
-            buildObjectJstreeData(isMatchProperty(self.params.selectedProperty), function (err, jstreeData, parentNodeIds) {
+            buildObjectJstreeData(!isLiteralProperty(self.params.selectedProperty), function (err, jstreeData, parentNodeIds) {
                 if (err) {
                     return MainController.errorAlert(err);
                 }
                 self.myBotEngine.showTree(jstreeData, null, { withCheckboxes: false, openAll: false, parentNodeIds: parentNodeIds }, null, function (selectedId) {
                     if (selectedId === "__enter_uri__") {
-                        self.myBotEngine.promptValue("enter URI", "selectedObject", "", null, function (value) {
-                            self.params.selectedObject = sanitizeUri(value);
-                            self.params.enteredUri = true;
-                            executeSave();
-                        });
+                        function promptEnterUri() {
+                            self.myBotEngine.promptValue("enter URI", "selectedObject", self.params.selectedObject || "", null, function (value) {
+                                var sanitized = sanitizeUri(value);
+                                if (!isValidObjectUri(sanitized)) {
+                                    alert("Invalid URI: '" + value + "'. Expected http://... or prefix:localName");
+                                    promptEnterUri();
+                                    return;
+                                }
+                                self.params.selectedObject = sanitized;
+                                self.params.enteredUri = true;
+                                executeSave();
+                            });
+                        }
+                        promptEnterUri();
                         return;
                     }
                     self.params.enteredUri = false;

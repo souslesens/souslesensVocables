@@ -129,24 +129,26 @@ class ToolModel {
             return;
         }
 
-        // Get plugins if repo is multiplugin
-        const plugins = Array.isArray(repo.plugins) ? repo.plugins : [];
+        // Determine the expected symlink name for a single-plugin repository
+        const expectedMonoPluginName = repo.plugins === undefined ? path.parse(repo.url).name : null;
 
-        // Remove symbolic links that point to plugins belonging to this repo.
-        plugins.forEach((pluginName) => {
-            const pluginPath = path.join(directoryPlugins, pluginName);
-
+        // Remove symlink for single-plugin repository
+        if (expectedMonoPluginName) {
+            const pluginPath = path.join(directoryPlugins, expectedMonoPluginName);
             if (fs.existsSync(pluginPath) && fs.lstatSync(pluginPath).isSymbolicLink()) {
-                const target = fs.readlinkSync(pluginPath);
+                fs.unlinkSync(pluginPath);
+            }
+        }
 
-                // Only remove target relative to the current repository. It
-                // will avoid to remove a plugin with the same name from another
-                // repository.
-                if (path.basename(path.dirname(target)) === repositoryId) {
+        // Remove symlinks for multi-plugin repository
+        if (Array.isArray(repo.plugins)) {
+            repo.plugins.forEach((pluginName) => {
+                const pluginPath = path.join(directoryPlugins, pluginName);
+                if (fs.existsSync(pluginPath) && fs.lstatSync(pluginPath).isSymbolicLink()) {
                     fs.unlinkSync(pluginPath);
                 }
-            }
-        });
+            });
+        }
 
         const filteredRepositories = Object.fromEntries(Object.entries(repositories).filter(([identifier, _data]) => identifier !== repositoryId));
 
@@ -336,7 +338,7 @@ class ToolModel {
             // Remove useless symlinks
             currentPlugins.forEach((plugin) => {
                 if (!nextPlugins.includes(plugin)) {
-                    const pluginPath = path.join(directoryPlugins, plugin);
+                    const pluginPath = path.resolve(path.join(directoryPlugins, plugin));
 
                     const stats = fs.lstatSync(pluginPath, { throwIfNoEntry: false });
                     if (stats !== undefined && stats.isSymbolicLink()) {
@@ -347,26 +349,25 @@ class ToolModel {
 
             // Add the new plugin symlinks if necessary
             Object.entries(repositories).map(([identifier, data]) => {
-                try {
-                    if (data.plugins === undefined) {
-                        const pluginPath = path.join(directoryPlugins, path.parse(data.url).name);
-                        if (!fs.existsSync(pluginPath)) {
-                            fs.symlinkSync(path.resolve(path.join(directoryPluginsRepositories, identifier)), pluginPath);
-                        }
-                    } else {
-                        data.plugins.forEach((plugin) => {
-                            try {
-                                const pluginPath = path.join(directoryPlugins, plugin);
-                                if (!fs.existsSync(pluginPath)) {
-                                    fs.symlinkSync(path.resolve(path.join(directoryPluginsRepositories, identifier, plugin)), pluginPath);
-                                }
-                            } catch (error) {
-                                console.error(identifier, error);
-                            }
-                        });
+                if (data.plugins === undefined) {
+                    const pluginName = path.parse(data.url).name;
+                    const pluginPath = path.resolve(path.join(directoryPlugins, pluginName));
+                    const sourcePath = path.resolve(path.join(directoryPluginsRepositories, identifier));
+
+                    if (fs.lstatSync(pluginPath, { throwIfNoEntry: false })) {
+                        fs.unlinkSync(pluginPath);
                     }
-                } catch (error) {
-                    console.error(identifier, error);
+                    fs.symlinkSync(sourcePath, pluginPath);
+                } else {
+                    data.plugins.forEach((plugin) => {
+                        const pluginPath = path.resolve(path.join(directoryPlugins, plugin));
+                        const sourcePath = path.resolve(path.join(directoryPluginsRepositories, identifier, plugin));
+
+                        if (fs.lstatSync(pluginPath, { throwIfNoEntry: false })) {
+                            fs.unlinkSync(pluginPath);
+                        }
+                        fs.symlinkSync(sourcePath, pluginPath);
+                    });
                 }
             });
         } catch (error) {

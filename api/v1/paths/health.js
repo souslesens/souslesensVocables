@@ -41,27 +41,37 @@ export default function () {
         }
     }
     GET.apiDoc = {
-        summary: "Return health of souslesens",
+        summary: "Probe the upstream services SLSV depends on",
+        description:
+            "Pings Virtuoso (SPARQL), ElasticSearch and the Spacy server in parallel. " +
+            "Only the services listed in `mainConfig.health_enabled_services` (default: `virtuoso`, `elasticsearch`, `spacyserver`) " +
+            "count toward the global verdict. Returns `200` only if every probed service answered, `500` otherwise. " +
+            "Open endpoint — no auth required (suitable for liveness/readiness probes).",
         security: [],
         operationId: "getHealth",
         parameters: [],
         responses: {
             200: {
-                description: "OK",
+                description: "All probed services healthy.",
                 schema: {
                     properties: {
                         health: {
-                            type: "string",
+                            type: "object",
+                            additionalProperties: { type: "boolean" },
                         },
                     },
                 },
+                examples: {
+                    "application/json": { health: { virtuoso: true, elasticsearch: true, spacyserver: true } },
+                },
             },
             500: {
-                description: "ERROR",
+                description: "At least one probed service is down.",
                 schema: {
                     properties: {
                         health: {
-                            type: "string",
+                            type: "object",
+                            additionalProperties: { type: "boolean" },
                         },
                     },
                 },

@@ -19,26 +19,59 @@ export default function () {
     }
 
     GET.apiDoc = {
-        summary: "return ontology model",
+        summary: "Read the cached ontology model for a source",
+        description:
+            "Returns the in-memory ontology model previously POSTed for `source`. The cache is server-process " + "lifetime only (no disk persistence) — restart the server and the cache is empty.",
         security: [{ restrictLoggedUser: [] }],
         operationId: "getOntologyModel",
-
-        parameters: [
-            {
-                name: "source",
-                description: "source",
-                type: "string",
-                in: "query",
-                required: true,
-            },
-        ],
+        parameters: [{ name: "source", in: "query", type: "string", required: true, description: "Source name. Example: `IOF_core`." }],
         responses: {
             200: {
-                description: "Results",
+                description: "Cached ontology model.",
                 schema: {
                     type: "object",
+                    additionalProperties: true,
+                    description:
+                        "Model object as previously POSTed for `source`. Full OWL model shape (e.g. BFO) includes: " +
+                        "`graphUri` (string) — named graph URI; " +
+                        "`classes` — URI-keyed map of `{ id, label, superClass, superClassLabel }`; " +
+                        "`properties` — URI-keyed map of `{ id, label, inverseProp, superProp }`; " +
+                        "`nonObjectProperties` — URI-keyed map of `{ id, label, domain, range }`; " +
+                        "`constraints` — URI-keyed map of `{ domain, range, domainLabel, rangeLabel, label, superProp }`; " +
+                        "`restrictions` — URI-keyed map of restriction arrays `[{ blankNodeId, ... }]`; " +
+                        "`classesCount` (integer). Shape may differ when the client POSTed a partial or custom model.",
+                    example: {
+                        graphUri: "http://purl.obolibrary.org/obo/bfo.owl",
+                        classesCount: 84,
+                        classes: {
+                            "http://purl.obolibrary.org/obo/BFO_0000001": { id: "http://purl.obolibrary.org/obo/BFO_0000001", label: "entity", superClass: null, superClassLabel: null },
+                        },
+                        properties: {
+                            "http://purl.obolibrary.org/obo/BFO_0000115": {
+                                id: "http://purl.obolibrary.org/obo/BFO_0000115",
+                                label: "has member part",
+                                inverseProp: "http://purl.obolibrary.org/obo/BFO_0000129",
+                                superProp: "http://purl.obolibrary.org/obo/BFO_0000178",
+                            },
+                        },
+                        nonObjectProperties: {
+                            "http://www.w3.org/2004/02/skos/core#definition": { id: "http://www.w3.org/2004/02/skos/core#definition", label: "definition", domain: null, range: null },
+                        },
+                        constraints: {
+                            "http://purl.obolibrary.org/obo/BFO_0000221": {
+                                domain: "http://purl.obolibrary.org/obo/BFO_0000203",
+                                range: "http://purl.obolibrary.org/obo/BFO_0000008",
+                                domainLabel: "temporal instant",
+                                rangeLabel: "temporal region",
+                                label: "first instant of",
+                                superProp: null,
+                            },
+                        },
+                        restrictions: {},
+                    },
                 },
             },
+            500: { description: "No cached model for this source." },
         },
         tags: ["Ontology"],
     };
@@ -58,62 +91,56 @@ export default function () {
     }
 
     POST.apiDoc = {
-        summary: "Write source model in memory cache",
+        summary: "Cache an ontology model for a source",
+        description:
+            "Stores `model` under `source` in the in-memory `ontologyModelsCache`. " +
+            "When `key` is provided, the model is stored under `cache[source][key]` (sub-key replacement); " +
+            "without `key`, the entire `cache[source]` slot is replaced.",
         security: [{ restrictLoggedUser: [] }],
-        operationId: "Write source model in memory cache",
+        operationId: "writeOntologyModel",
         parameters: [
             {
                 name: "body",
-                description: "body",
                 in: "body",
+                required: false,
                 schema: {
                     type: "object",
                     properties: {
-                        source: {
-                            type: "string",
-                        },
+                        source: { type: "string", example: "BFO" },
                         model: {
                             type: "string",
+                            description:
+                                "JSON-stringified sub-section when `key` is set (e.g. a URI-keyed map of class objects), " +
+                                "else the raw full model object (`{ graphUri, classes, properties, nonObjectProperties, constraints, restrictions, classesCount }`).",
+                            example: '{"http://purl.obolibrary.org/obo/BFO_0000001":{"id":"http://purl.obolibrary.org/obo/BFO_0000001","label":"entity","superClass":null,"superClassLabel":null}}',
                         },
                         key: {
                             type: "string",
+                            description: "Optional sub-key: `classes`, `properties`, `nonObjectProperties`, `constraints`, `restrictions`, `classesCount`, or `graphUri`.",
+                            example: "classes",
                         },
+                    },
+                    example: {
+                        source: "BFO",
+                        key: "classes",
+                        model: '{"http://purl.obolibrary.org/obo/BFO_0000001":{"id":"http://purl.obolibrary.org/obo/BFO_0000001","label":"entity","superClass":null,"superClassLabel":null}}',
                     },
                 },
             },
         ],
-
         responses: {
-            200: {
-                description: "Results",
-                schema: {
-                    type: "object",
-                },
-            },
+            200: { description: "Model cached." },
         },
         tags: ["Ontology"],
     };
     DELETE.apiDoc = {
-        summary: "delete ontology model",
+        summary: "Evict cached ontology model(s)",
+        description: 'Removes a single source from the in-memory cache when `source` is provided and not the literal `"null"`; ' + "otherwise wipes the entire cache.",
         security: [{ restrictLoggedUser: [] }],
         operationId: "deleteOntologyModel",
-
-        parameters: [
-            {
-                name: "source",
-                description: "source",
-                type: "string",
-                in: "query",
-                required: false,
-            },
-        ],
+        parameters: [{ name: "source", in: "query", type: "string", required: false, description: 'Source to evict. Omit (or pass `"null"`) to clear the entire cache.' }],
         responses: {
-            200: {
-                description: "Results",
-                schema: {
-                    type: "object",
-                },
-            },
+            200: { description: "Cache evicted." },
         },
         tags: ["Ontology"],
     };
@@ -129,39 +156,57 @@ export default function () {
     }
 
     PUT.apiDoc = {
-        summary: "update ontology model",
+        summary: "Patch the cached ontology model with a delta",
+        description:
+            "Merges or removes entries inside `cache[source]`. `data` is shaped `{ entryType: { id: payload } }` with " +
+            '`entryType` being `classes`, `properties`, `restrictions`, etc. When `options.remove === "true"`, the ' +
+            "entries listed in `data` are deleted (special handling for `restrictions` matched by `blankNodeId`). " +
+            "Otherwise entries are inserted or appended (concat for `restrictions`).",
         security: [{ restrictLoggedUser: [] }],
         operationId: "updateOntologyModel",
-
         parameters: [
             {
                 name: "body",
-                description: "body",
                 in: "body",
+                required: false,
                 schema: {
                     type: "object",
                     properties: {
-                        source: {
-                            type: "string",
-                        },
-
+                        source: { type: "string", example: "IOF_core" },
                         data: {
                             type: "object",
+                            description:
+                                "Delta keyed by entry type: `classes`, `properties`, `nonObjectProperties`, `constraints`, or `restrictions`. " +
+                                "Each value is a URI-keyed map of model entries. For `restrictions`, values are arrays of restriction objects `[{ blankNodeId, ... }]` " +
+                                "that are concatenated (insert) or filtered by `blankNodeId` (remove).",
+                            example: {
+                                classes: {
+                                    "http://purl.obolibrary.org/obo/BFO_0000001": { id: "http://purl.obolibrary.org/obo/BFO_0000001", label: "entity", superClass: null, superClassLabel: null },
+                                },
+                            },
                         },
                         options: {
                             type: "object",
+                            properties: {
+                                remove: { type: "string", description: 'If `"true"`, entries in `data` are deleted from the cache. For `restrictions`, matched by `blankNodeId`.', example: "false" },
+                            },
+                            example: { remove: "false" },
                         },
+                    },
+                    example: {
+                        source: "BFO",
+                        data: {
+                            classes: {
+                                "http://purl.obolibrary.org/obo/BFO_0000001": { id: "http://purl.obolibrary.org/obo/BFO_0000001", label: "entity", superClass: null, superClassLabel: null },
+                            },
+                        },
+                        options: { remove: "false" },
                     },
                 },
             },
         ],
         responses: {
-            200: {
-                description: "Results",
-                schema: {
-                    type: "object",
-                },
-            },
+            200: { description: "Cache patched." },
         },
         tags: ["Ontology"],
     };

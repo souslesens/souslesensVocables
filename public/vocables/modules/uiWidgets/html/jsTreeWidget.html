@@ -1,12 +1,12 @@
 <div>
-    <input
-        id="jstreeWidget_searchInput"
-        style="width: 35%; height: 33.5px; border-bottom-right-radius: 14px; border-top-right-radius: 14px"
-        value=""
-        onkeyup="if (event.keyCode == 13 || event.keyCode == 9){JstreeWidget.searchValue($(this).val())}"
-    />
-    <div style="width: 350px; height: 200px; overflow: auto">
-        <div id="jstreeWidget_treeDiv"></div>
+    <div id="jstreeWidget_scrollableContent" style="max-height: calc(85vh - 80px); overflow: auto">
+        <input
+            id="jstreeWidget_searchInput"
+            style="width: 35%; height: 33.5px; border-bottom-right-radius: 14px; border-top-right-radius: 14px"
+            value=""
+            onkeyup="if (event.keyCode == 13 || event.keyCode == 9){JstreeWidget.searchValue($(this).val())}"
+        />
+        <div id="jstreeWidget_treeDiv" style="width: 600px"></div>
     </div>
     <div style="display: flex">
         <button id="jstreeWidget_okButton" onclick="JstreeWidget.validateSelfDialog()">OK</button>

@@ -4,6 +4,7 @@ var ImportFileWidget = (function () {
     self.showImportDialog = function (onValidateFn) {
         $("#smallDialogDiv").load("modules/uiWidgets/html/importDialog.html", function () {
             UI.openDialog("smallDialogDiv", { title: "Import JSON File" });
+            UI.clampAndCenterDialog("smallDialogDiv");
             $("#importFileButton").on("click", function () {
                 const file = $("#importFileInput")[0].files[0];
                 if (!file) {

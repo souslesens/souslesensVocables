@@ -3,80 +3,80 @@
 
 ## Workspace Trust
 
-This repository and all its worktrees are trusted local environments.
+Repo + worktrees = trusted local env.
 
-Claude does not need to ask for confirmation before:
+Claude no ask confirmation for:
 - Editing files
 - Running git commands
 - Applying multiple changes
-within this workspace.
+in workspace.
 
 
 # Claude Permissions
 
-Claude is allowed to:
-- Read, create, update, and delete files within this repository and its worktrees
-- Execute git commands locally, including add, commit, branch, and diff
-- Modify code freely without requesting confirmation for each change
+Claude allowed:
+- Read, create, update, delete files in repo + worktrees
+- Local git: add, commit, branch, diff
+- Modify code freely, no per-change confirmation
 
-Claude is NOT allowed to:
-- Push commits to any remote
-- Create or modify GitHub pull requests
-- Modify issues or comments on GitHub
-- Perform any action on GitHub requiring write permissions
+Claude NOT allowed:
+- Push commits to remote
+- Create/modify GitHub PRs
+- Modify GitHub issues/comments
+- Any GitHub write action
 
 Claude MUST:
-- Ask explicit user permission before any GitHub write operation
-- Ask before pushing, even if explicitly told to "finish the task"
+- Ask explicit permission before GitHub write op
+- Ask before push, even if told "finish task"
 
 # Avoid useless comments
 
-Write self‑explanatory code: prefer expressive, precise names and clear structure over comments.
-Use descriptive identifiers (variables, functions, classes) that convey intent and domain meaning.
-Comments are only allowed for:
+Write self‑explanatory code: expressive precise names + clear structure over comments.
+Use descriptive identifiers (variables, functions, classes) conveying intent + domain meaning.
+Comments only for:
 
-Complex logic that isn’t obvious from the code,
-Business decisions or domain rationale,
-Temporary patches/workarounds (include why and removal conditions),
-Separating long multi‑step processes (section headers or brief overviews).
+Complex logic not obvious from code,
+Business decisions / domain rationale,
+Temporary patches/workarounds (include why + removal conditions),
+Separating long multi‑step processes (section headers / brief overviews).
 
 
-Avoid redundant or obvious comments (e.g., “increment i”, restating what the code plainly does).
-Aim for minimal comments by making the code self‑documenting through naming, structure, and small focused functions
+No redundant/obvious comments (e.g. "increment i", restating code).
+Minimal comments via self‑documenting code: naming, structure, small focused functions
 
 ## Overview
 
-This directory contains documentation to help Claude Code understand and work effectively with the SousLeSens Vocables codebase.
+Docs to help Claude Code work with SousLeSens Vocables codebase.
 
 ## Project Description
 
-**SousLeSens Vocables** is a semantic web platform for knowledge graph visualization, ontology management, and SPARQL query building. It provides a rich web-based interface for exploring and manipulating RDF/OWL ontologies stored in triple stores.
+**SousLeSens Vocables** = semantic web platform for knowledge graph viz, ontology mgmt, SPARQL query building. Web UI for exploring + manipulating RDF/OWL ontologies in triple stores.
 
 ## Quick Reference
 
 ### Key Documentation Files
 
-- **[claude.md](./claude.md)** (this file) - Main overview and quick reference
-- **[function-index.md](./function-index.md)** - **CRITICAL: Function index for DRY compliance**
-- **[refactoring-guidelines.md](./refactoring-guidelines.md)** - Code style and refactoring rules
+- **[claude.md](./claude.md)** (this file) - Main overview + quick reference
+
+- **[refactoring-guidelines.md](./refactoring-guidelines.md)** - Code style + refactoring rules
 - **[architecture.md](./architecture.md)** - System architecture deep dive
-- **[module-patterns.md](./module-patterns.md)** - Common module patterns with examples
-- **[sparql-guidelines.md](./sparql-guidelines.md)** - SPARQL execution and query building
+- **[module-patterns.md](./module-patterns.md)** - Common module patterns + examples
+- **[sparql-guidelines.md](./sparql-guidelines.md)** - SPARQL execution + query building
 - **[coding-standards.md](./coding-standards.md)** - Detailed coding standards
 
 ### Technology Stack
 
 **Frontend:**
-- JavaScript ES6+ with module system (`import`/`export`)
-- jQuery for DOM manipulation and AJAX
-- Vis.js for graph visualization
-- JSTree for hierarchical tree displays
-- Async.js for callback-based async flow control
+- JavaScript ES6+ module system (`import`/`export`)
+- jQuery for DOM + AJAX
+- Vis.js for graph viz
+- JSTree for hierarchical trees
+- Async.js for callback async flow
 
 **Backend:**
-- Node.js with Express.js
-- SPARQL for semantic data queries
-- Integration with triple stores (Virtuoso, GraphDB, etc.)
+- Node.js + Express.js
+- SPARQL for semantic queries
+- Triple store integration (Virtuoso, GraphDB, etc.)
 
 **Build Tools:**
 - Webpack for bundling
@@ -114,11 +114,11 @@ window.ModuleName = ModuleName;
 
 **Why both exports?**
 - `export default` for ES6 module imports
-- `window.ModuleName` for inline HTML event handlers like `onclick="ModuleName.method()"`
+- `window.ModuleName` for inline HTML handlers like `onclick="ModuleName.method()"`
 
 ### 2. Async Flow Control with async.js
 
-**The codebase uses async.js (NOT async/await):**
+**Codebase uses async.js (NOT async/await):**
 
 ```javascript
 // Sequential execution
@@ -184,7 +184,7 @@ doSomething(param, function(err, result) {
 
 ### Main Method: Sparql_proxy.querySPARQL_GET_proxy
 
-**This is the primary way to execute SPARQL queries:**
+**Primary way to execute SPARQL queries:**
 
 ```javascript
 var url = Config.sources[source].sparql_server.url + "?format=json&query=";
@@ -254,43 +254,43 @@ Sparql_generic.getNodeChildren(source, nodeId, options, callback);
 
 #### `tools/KGquery/` - Knowledge Graph Query Builder
 - **KGquery.js** - Main orchestrator, query execution
-- **KGquery_graph.js** - Graph visualization with Vis.js, cardinality management
-- **KGquery_paths.js** - Shortest path finding between nodes
-- **KGquery_filter.js** - Query filtering and optional predicates
+- **KGquery_graph.js** - Graph viz with Vis.js, cardinality mgmt
+- **KGquery_paths.js** - Shortest path between nodes
+- **KGquery_filter.js** - Query filtering + optional predicates
 - **KGquery_predicates.js** - SPARQL query building
 - **KGquery_proxy.js** - API for programmatic access
 
 #### `tools/lineage/` - Ontology Lineage and Visualization
-- **lineage_whiteboard.js** - Main visualization controller (5000+ lines)
-- **lineage_sources.js** - Source management
-- **lineage_selection.js** - Node selection handling
-- **lineage_relations.js** - Relationship management
-- **lineage_graphTraversal.js** - Graph traversal algorithms
+- **lineage_whiteboard.js** - Main viz controller (5000+ lines)
+- **lineage_sources.js** - Source mgmt
+- **lineage_selection.js** - Node selection
+- **lineage_relations.js** - Relationship mgmt
+- **lineage_graphTraversal.js** - Graph traversal algos
 
 #### `sparqlProxies/` - SPARQL Execution Layer
 - **sparql_proxy.js** - Main proxy for executing SPARQL (**USE THIS**)
 - **sparql_common.js** - Common SPARQL utilities
-- **sparql_generic.js** - Generic SPARQL operations (CRUD)
-- **sparql_OWL.js** - OWL-specific queries
-- **sparql_SKOS.js** - SKOS-specific queries
+- **sparql_generic.js** - Generic SPARQL ops (CRUD)
+- **sparql_OWL.js** - OWL queries
+- **sparql_SKOS.js** - SKOS queries
 
 #### `uiWidgets/` - Reusable UI Components
-- **JstreeWidget.js** - Hierarchical tree wrapper (jsTree library)
-- **NodeInfosWidget.js** - Node information display with tabs
-- **PopupMenuWidget.js** - Context menus with smart positioning
+- **JstreeWidget.js** - Hierarchical tree wrapper (jsTree)
+- **NodeInfosWidget.js** - Node info display + tabs
+- **PopupMenuWidget.js** - Context menus + smart positioning
 - **SimpleListSelectorWidget.js** - Basic list selection
 - **DateWidget.js** - Date range filtering
 
 #### `shared/` - Shared Utilities
 - **common.js** - Common utility functions
-- **mainController.js** - Application controller
-- **ontologyModels.js** - Ontology data management
+- **mainController.js** - App controller
+- **ontologyModels.js** - Ontology data mgmt
 
 ## Important Data Structures
 
 ### Graph Data (visjsData)
 
-**Used throughout for graph visualization:**
+**Used throughout for graph viz:**
 
 ```javascript
 {
@@ -419,145 +419,63 @@ Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source}, function(err, resul
 });
 ```
 
-## Recent Important Changes (2024-12-29)
-
-### Cardinality Integration in KGquery_graph
-
-**What changed:**
-- Edges now automatically calculate cardinality from instance data
-- Edge labels enriched with cardinality: `"propertyName (1)"` or `"propertyName (n)"`
-- Original labels preserved in `edge.data.originalLabel` and `edge.data.propertyLabel`
-
-**New helper function:**
-```javascript
-var originalLabel = KGquery_graph.getEdgeOriginalLabel(edge);
-```
-
-**Impact:**
-- `edge.label` contains enriched label with cardinality
-- `edge.data.maxCardinality` contains calculated value
-- Use `getEdgeOriginalLabel()` if you need label without cardinality suffix
-
-## Common Tasks & How To Do Them
-
-### Execute a SPARQL Query
-
-```javascript
-var url = Config.sources[source].sparql_server.url + "?format=json&query=";
-var query = "SELECT ?s WHERE { ?s ?p ?o } LIMIT 10";
-
-Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: source}, function(err, result) {
-    if (err) return callback(err);
-
-    result.results.bindings.forEach(function(item) {
-        console.log(item.s.value);
-    });
-
-    callback(null, result);
-});
-```
-
-### Add Nodes to Graph
-
-```javascript
-var newNode = {
-    id: nodeUri,
-    label: "Node Label",
-    shape: "box",
-    color: "#ddd",
-    data: { id: nodeUri, source: source }
-};
-
-KGquery_graph.visjsData.nodes.push(newNode);
-KGquery_graph.KGqueryGraph.data.nodes.update([newNode]);  // Update Vis.js
-```
-
-### Show a Dialog
-
-```javascript
-$("#mainDialogDiv").load("modules/path/to/template.html", function() {
-    UI.openDialog("mainDialogDiv", { title: "My Dialog" });
-    // Initialize content
-});
-```
-
-### Fill a Select Element
-
-```javascript
-var options = [
-    { id: "1", label: "Option 1" },
-    { id: "2", label: "Option 2" }
-];
-
-common.fillSelectOptions("selectId", options, false, "label", "id");
-```
-
 ## DRY Principle - MANDATORY
 
 ### Before Implementing ANY Feature
 
 **Claude Code MUST follow this workflow:**
 
-1. **Consult the Function Index FIRST**
-   - Read [function-index.md](./function-index.md) before writing any new code
-   - Search for existing functions that might fulfill your needs
-   - Check if similar functionality already exists
-
-2. **Reuse Existing Functions**
-   - Use existing utility functions from `common.js`, `UI.js`, etc.
+1. **Reuse Existing Functions**
+   - Use existing utils from `common.js`, `UI.js`, etc.
    - Use existing SPARQL methods from `sparql_proxy.js`, `sparql_generic.js`
    - Use existing UI widgets from `uiWidgets/`
 
-3. **Only Create New Functions When Necessary**
-   - If no existing function can fulfill the requirement
-   - If the function will be reused in multiple places
-   - Document the new function with JSDoc
-
-4. **Update the Index**
-   - When creating a new public function, add it to [function-index.md](./function-index.md)
-   - Include full JSDoc signature and example usage
-
-### DRY Compliance Checklist
-
-Before writing a new function, verify:
-- [ ] Searched function-index.md for existing solutions
-- [ ] Checked common.js for utility functions
-- [ ] Checked UI.js for UI helpers
-- [ ] Checked sparql_*.js for SPARQL operations
-- [ ] No similar function exists in the target module
+2. **Only Create New Functions When Necessary**
+   - No existing function fits requirement
+   - Function reused in multiple places
 
 ---
+
+## Reading Guidelines
+
+Read `.claude/` docs (architecture.md, module-patterns.md, refactoring-guidelines.md, etc.) only when task requires. No proactive reads at session start.
+
+## Efficient File Reading
+
+File > 200 lines: Grep first for target line, then Read with `offset` + `limit`. Never Read full large file for "context".
+
+Files already read in session: no re-read unless modified.
 
 ## Principles for Working with This Codebase
 
 ### Do ✅
 
-- **CONSULT function-index.md FIRST** - Before implementing any feature
-- **Reuse existing functions** - Apply DRY principle rigorously
-- **Always read files before modifying** - Understand the context
+
+- **Reuse existing functions** - DRY rigorously
+- **Always read files before modifying** - Get context
 - **Preserve backward compatibility** - Many parts depend on existing APIs
-- **Follow existing patterns** - Don't introduce new paradigms
-- **Use async.js for async flow** - Don't introduce Promises or async/await
-- **Handle all errors** - Use error-first callbacks consistently
-- **Test thoroughly** - Consider null/undefined, empty arrays, edge cases
-- **Update documentation** - Keep these files current when making changes
+- **Follow existing patterns** - No new paradigms
+- **Use async.js for async flow** - No Promises / async/await
+- **Handle all errors** - Error-first callbacks consistently
+- **Test thoroughly** - Cover null/undefined, empty arrays, edge cases
+- **Update documentation** - Keep files current on changes
 - **Update function-index.md** - When creating new public functions
 
 ### Don't ❌
 
-- **Don't duplicate existing functionality** - Check the index first!
-- **Don't break existing APIs** - Function signatures are contracts
+- **Don't duplicate existing functionality** 
+- **Don't break existing APIs** - Function signatures = contracts
 - **Don't modify global state carelessly** - Use module-level state
-- **Don't use modern async/await** - The codebase uses callbacks
-- **Don't remove "unused" code** - It may be called from HTML or plugins
-- **Don't add dependencies lightly** - Keep the stack lean
+- **Don't use modern async/await** - Codebase uses callbacks
+- **Don't remove "unused" code** - May be called from HTML/plugins
+- **Don't add dependencies lightly** - Keep stack lean
 - **Don't mix coding styles** - Follow refactoring-guidelines.md
-- **Don't skip the dual export** - Both ES6 and window.X are needed
+- **Don't skip the dual export** - Both ES6 + window.X needed
 
 ## Debugging Tips
 
 ### Check the Browser Console
-Most errors appear in browser console with stack traces
+Errors appear in browser console with stack traces
 
 ### Enable SPARQL Query Logging
 ```javascript
@@ -575,64 +493,69 @@ console.log(Config.sources);  // See available sources
 console.log(Config.currentSource);  // Current active source
 ```
 
-## File Organization
+## Domain Concepts (SousLeSens)
 
+### Source
+
+Central concept. **source** = one ontology / KG in triple store.
+Defined in `config/sources.json`. Each source has:
+
+- `graphUri` — named graph URI in triple store (e.g. `http://rds.posccaesar.org/ontology/...`)
+- `schemaType` — `"OWL"` or `"SKOS"` — determines controller
+- `controller` — `"Sparql_OWL"` or `"Sparql_SKOS"` — JS module handling queries
+- `sparql_server.url` — SPARQL endpoint (`"_default"` = main Virtuoso instance)
+- `predicates` — custom predicates for hierarchy (broaderPredicate, prefLabel, etc.)
+- `imports` — list of other source names whose triples also load
+- `owner`, `published` — access control
+
+```javascript
+Config.sources[sourceName]          // Access source config
+Config.sources[sourceName].graphUri // Named graph URI
+Lineage_sources.activeSource        // Currently selected source name
 ```
-.claude/
-├── claude.md (this file)           # Main overview and quick reference
-├── function-index.md               # Function index for DRY (CONSULT FIRST!)
-├── refactoring-guidelines.md       # Code style rules (MUST READ)
-├── architecture.md                 # System architecture deep dive
-├── module-patterns.md              # Module patterns with examples
-├── sparql-guidelines.md            # SPARQL query guidelines
-├── coding-standards.md             # Detailed coding standards
-└── commands/                       # Custom Claude commands
+
+### OWL vs SKOS
+
+Two distinct data models, different query strategies:
+
+**OWL** (`schemaType: "OWL"`, controller: `Sparql_OWL`)
+
+- Classes (`owl:Class`), properties (`owl:ObjectProperty`, `owl:DatatypeProperty`)
+- Hierarchy via `rdfs:subClassOf`
+- Instances via `rdf:type`
+- For formal ontologies (ISO standards, engineering ontologies)
+
+**SKOS** (`schemaType: "SKOS"`, controller: `Sparql_SKOS`)
+
+- Concepts (`skos:Concept`), concept schemes
+- Hierarchy via `skos:broader` / `skos:narrower`
+- Labels via `skos:prefLabel`, `skos:altLabel`
+- For thesauri, taxonomies, controlled vocabularies (GEMET, etc.)
+
+`schemaType` determines generated SPARQL — never assume OWL structure on SKOS source.
+
+### Profile
+
+Controls user access. Defined in `config/profiles.json`. Each profile has:
+
+- `allowedTools` — visible tools (lineage, KGquery, MappingModeler, etc.)
+- `allowedSourceSchemas` — accessible schema types (`OWL`, `SKOS`, `INDIVIDUALS`)
+- `sourcesAccessControl` — per-source read/readwrite permissions
+- `defaultSourceAccessControl` — fallback permission
+
+```javascript
+// Current user profile available via:
+Config.userProfile
 ```
 
-## How to Update This Documentation
+### Tools
 
-When making significant changes:
-1. Update the relevant `.md` file in `.claude/`
-2. Add entry to "Recent Important Changes" section (this file)
-3. Update code examples if APIs changed
-4. Document any breaking changes prominently
+- **Lineage** — visualizes ontology/KG as interactive graph on whiteboard. Main tool.
+- **KGquery** — builds SPARQL queries visually from graph model, executes, shows results in table/graph
+- **MappingModeler** — creates semantic mappings from SQL/CSV data sources to OWL/SKOS models
 
-## Getting Started Checklist
+### graphUri vs source name
 
-When Claude needs to work on this codebase:
-
-- [ ] **FIRST: Consult [function-index.md](./function-index.md)** for existing functions (DRY!)
-- [ ] Read [refactoring-guidelines.md](./refactoring-guidelines.md) for code style
-- [ ] Understand the IIFE module pattern (this file)
-- [ ] Know how to execute SPARQL queries (this file)
-- [ ] Understand async.js usage (this file)
-- [ ] Know the visjsData structure (this file)
-- [ ] Review recent changes section (this file)
-
-## Recent Important Changes (2025-01-12)
-
-### DRY Principle Implementation
-
-**What changed:**
-- Added [function-index.md](./function-index.md) - Comprehensive function index with JSDoc
-- Claude Code must consult this index BEFORE implementing any feature
-- New public functions must be added to the index with full documentation
-
-**Workflow:**
-1. Read function-index.md before writing new code
-2. Search for existing functions that fulfill requirements
-3. Reuse existing functions when possible
-4. Only create new functions when necessary
-5. Update function-index.md when creating new public functions
-
----
-
-
-## Auto-upgrade
-
-You should each time, I tell you something updating the .claude folder with claude.md then the prompt will be auto-improved
-
-
-
-*Last Updated: 2026-06-12*
-*Maintained by: Project Contributors*
+- **source name** = human key in `sources.json` (e.g. `"ISO_15926-part-14_PCA"`) — used in JS code
+- **graphUri** = actual URI of named graph in Virtuoso — used in SPARQL `FROM` clauses
+- `Sparql_common.getFromStr(source)` converts source name → `FROM <graphUri>` clause

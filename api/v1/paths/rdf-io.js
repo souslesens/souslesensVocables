@@ -37,26 +37,28 @@ export default function () {
 
     GET.apiDoc = {
         security: [{ restrictLoggedUser: [] }],
-        summary: "transform turtle into json triples",
-        description: "transform turtle into json triples",
-        operationId: "transform turtle into json triples",
-        parameters: [
-            {
-                name: "turtle",
-                description: "turtle string",
-                type: "string",
-                in: "query",
-                required: true,
-            },
-        ],
-
+        summary: "Parse a Turtle string into SLSV-format triples",
+        description:
+            "Parses `turtle` (a Turtle/N3 document supplied as a query string) using `rdf-parse`. Returns the array of " + "`{ s, p, o }` triples and the prefix map declared in the document.",
+        operationId: "rdfIoTurtleToTriples",
+        parameters: [{ name: "turtle", in: "query", type: "string", required: true, description: "Turtle/N3 document body." }],
         responses: {
             200: {
-                description: "Results",
+                description: "Parsed triples + prefix map.",
                 schema: {
-                    type: "object",
+                    properties: {
+                        triples: {
+                            type: "array",
+                            items: {
+                                type: "object",
+                                properties: { s: { type: "string" }, p: { type: "string" }, o: { type: "string" } },
+                            },
+                        },
+                        prefixMap: { type: "object", additionalProperties: { type: "string" } },
+                    },
                 },
             },
+            500: { description: "Parse error." },
         },
         tags: ["RDF"],
     };

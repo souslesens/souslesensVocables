@@ -28,10 +28,29 @@ export default function () {
     }
 
     GET.apiDoc = {
-        operationId: "plugins.repositories.fetch.get",
-        responses: responseSchema("PluginConfig", "GET"),
+        operationId: "adminFetchPluginRepository",
+        summary: "Pull the latest commits for a registered plugin repository (admin only)",
+        description:
+            "Runs `toolModel.fetchRepository` on the Git repository identified by `{id}`. On success the local " +
+            "clone is updated to `HEAD`. Requires that the repository was previously registered in `plugins.json` " +
+            "via `GET /admin/plugins/repositories`.",
+        parameters: [{ name: "id", in: "path", type: "string", required: true, description: "Repository identifier as declared in `plugins.json`. Example: `slsv-plugin-example`." }],
+        responses: {
+            200: {
+                description: "Repository updated successfully.",
+                schema: {
+                    type: "object",
+                    properties: {
+                        message: { type: "string", example: "The repository was updated successsfully" },
+                        status: { type: "integer", example: 200 },
+                    },
+                    example: { message: "The repository was updated successsfully", status: 200 },
+                },
+            },
+            404: { description: "Repository `{id}` not found in `plugins.json`." },
+            500: { description: "Git fetch failed." },
+        },
         security: [{ restrictAdmin: [] }],
-        summary: "Update the plugin Git repository",
         tags: ["Plugins"],
     };
 

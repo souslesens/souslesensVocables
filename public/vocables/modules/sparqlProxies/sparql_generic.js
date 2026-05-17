@@ -961,12 +961,15 @@ var Sparql_generic = (function () {
                             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
                             "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>SELECT distinct * \n" +
                             fromStr +
-                            "  WHERE {\n" +
-                            "  {  ?subject   rdfs:subClassOf|rdf:type  ?firstParent.?subject rdfs:label ?subjectLabel.  ?firstParent rdf:type owl:Class. \n" +
-                            "    optional {?subject skos:prefLabel|skos:altLabel ?subjectAltLabel}\n" +
-                            "    \n" +
-                            "   }\n" +
-                            "}";
+                            "WHERE {\n" +
+                            "    ?subject rdfs:subClassOf ?firstParent .\n" +
+                            "    ?subject rdfs:label ?subjectLabel .\n" +
+                            "  filter (  exists {?firstParent rdf:type owl:Class  } || not exists{?firstParent rdf:type ?t })\n" +
+                            " filter (?firstParent!=owl:Class)\n" +
+                            "    OPTIONAL {\n" +
+                            "      ?subject skos:prefLabel|skos:altLabel ?subjectAltLabel .\n" +
+                            "    }\n" +
+                            "  }";
                     } else {
                         var query3 =
                             "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
@@ -1191,20 +1194,44 @@ var Sparql_generic = (function () {
 
                 // add orphan parents to all data
                 function (callbackSeries) {
+                    var orphanParentIds = [];
                     for (var key in allClassesMap) {
                         allClassesMap[key].parents.forEach(function (parentId) {
-                            if (parentId && parentId != sourceLabel && !allClassesMap[parentId]) {
-                                allClassesMap[parentId] = {
-                                    id: parentId,
-                                    label: Sparql_common.getLabelFromURI(parentId),
-                                    skoslabels: [],
-                                    parents: [sourceLabel],
-                                    type: "owl:class",
-                                };
+                            if (parentId && parentId != sourceLabel && !allClassesMap[parentId] && orphanParentIds.indexOf(parentId) < 0) {
+                                orphanParentIds.push(parentId);
                             }
                         });
                     }
-                    callbackSeries();
+
+                    if (schemaType !== "OWL" || orphanParentIds.length === 0) {
+                        orphanParentIds.forEach(function (parentId) {
+                            allClassesMap[parentId] = {
+                                id: parentId,
+                                label: Sparql_common.getLabelFromURI(parentId),
+                                skoslabels: [],
+                                parents: [sourceLabel],
+                                type: "owl:class",
+                            };
+                        });
+                        return callbackSeries();
+                    }
+
+                    var idFilter = Sparql_common.setFilter("id", orphanParentIds);
+                    Sparql_OWL.getLabelsMap(sourceLabel, { filter: idFilter }, function (err, labelsMap) {
+                        if (err) {
+                            labelsMap = {};
+                        }
+                        orphanParentIds.forEach(function (parentId) {
+                            allClassesMap[parentId] = {
+                                id: parentId,
+                                label: labelsMap[parentId] || Sparql_common.getLabelFromURI(parentId),
+                                skoslabels: [],
+                                parents: [sourceLabel],
+                                type: "owl:class",
+                            };
+                        });
+                        callbackSeries();
+                    });
                 },
             ],
             function (err) {

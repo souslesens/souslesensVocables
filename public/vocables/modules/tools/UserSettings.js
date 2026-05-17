@@ -13,6 +13,7 @@ const UserSettings = (() => {
             $("#mainDialogDiv").on("dialogclose", (event, ui) => self.unload());
             $("#mainDialogDiv").html(`<div style="width:90vw;height:80vh"><div id="mount-user-settings-here"></div></div>`);
             UI.openDialog("mainDialogDiv", { title: "User Settings" });
+            UI.clampAndCenterDialog("mainDialogDiv");
 
             self.mountApp = self.createApp();
         }, 200);

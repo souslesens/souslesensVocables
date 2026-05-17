@@ -208,7 +208,7 @@ var MappingModeler_bot = (function () {
             );
         },
         listDatatypePropertyRangeFn: function () {
-            var choices = ["", "xsd:string", "xsd:int", "xsd:float", "xsd:dateTime"];
+            var choices = ["", "URI","xsd:string", "xsd:int", "xsd:float", "xsd:dateTime"];
             self.myBotEngine.showList(choices, "datatypePropertyRange");
         },
         listVocabsFn: function () {

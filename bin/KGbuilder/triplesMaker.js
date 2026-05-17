@@ -397,7 +397,10 @@ var TriplesMaker = {
                     } else if (columnMappings[mapping.objColId]) {
                         // if object is a column
                         object = TriplesMaker.getColumnUri(line, mapping.objColId, columnMappings, rowIndex, tableProcessingParams);
-                    } else if (mapping.transform) {
+
+                }
+
+                    else if (mapping.transform) {
                         var objStr = line[mapping.o];
                         object = tableProcessingParams.jsFunctionsMap[mapping.s](objStr, "o", mapping.p, line, mapping);
                     } else if (mapping.isString) {
@@ -452,6 +455,19 @@ var TriplesMaker = {
                         var object = null;
                         if (value && value.startsWith("http:")) {
                             object = "<" + value + ">";
+                        }
+                        // cas ou le other predicate a un range URI (property est un objectProperty
+                            // ne fonctionne que si l'objet est mappé en tant que colonne
+                        else if (item.range == "URI") {
+                            var colId=null;
+                            for (var col in columnMappings){
+                                if(columnMappings[col].id==item.object)
+                                    colId=col;
+                            }
+                            if(colId)
+                            object = TriplesMaker.getColumnUri(line, colId, columnMappings, rowIndex, tableProcessingParams)
+
+
                         } else {
                             object = TriplesMaker.getFormatedLiteral(line, {
                                 dataType: item.range,
@@ -693,10 +709,17 @@ var TriplesMaker = {
             if (str == undefined || str == null) {
                 return null;
             }
-            if (mapping.dataType == "xsd:string") {
+
+            else if (mapping.dataType == "xsd:string") {
                 str = '"' + util.formatStringForTriple(str, false) + '"^^' + mapping.dataType;
             }
-            if (mapping.dataType == "xsd:float") {
+
+            else if (mapping.dataType == "xsd:string") {
+                str = '"' + util.formatStringForTriple(str, false) + '"^^' + mapping.dataType;
+            }
+
+
+            else if (mapping.dataType == "xsd:float") {
                 if (str == "0") {
                     str = "0.0";
                 }
@@ -708,7 +731,7 @@ var TriplesMaker = {
                     // str = null
                 }
             }
-            if (mapping.dataType == "xsd:int") {
+            else if (mapping.dataType == "xsd:int") {
                 if (util.isInt(str)) {
                     str = '"' + str + '"^^' + mapping.dataType;
                 } else {

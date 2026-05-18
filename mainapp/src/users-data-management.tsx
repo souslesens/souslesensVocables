@@ -12,12 +12,15 @@ import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import { IconButton } from "@mui/material";
 import TextField from "@mui/material/TextField";
-import { Edit, Delete } from "@mui/icons-material";
+import Tooltip from "@mui/material/Tooltip";
+import { Edit, Delete, Launch } from "@mui/icons-material";
 
 import { UserData } from "./Component/UserDataDialog";
 import { EditUserDataDialog } from "./Component/EditUserDataDialog";
 import { DeleteDialog } from "./Component/DeleteDialog";
 import { cleanUpText } from "./Utils";
+
+const LAUNCHABLE_TOOLS = ["lineage"];
 
 export default function UsersDataManagement() {
     const [usersData, setUsersData] = useState<UserData[]>([]);
@@ -90,6 +93,17 @@ export default function UsersDataManagement() {
         }
 
         handleCloseDeleteDialog();
+    };
+
+    const handleLaunch = (userDataId: number, dataTool: string, dataSource: string) => {
+        let url = window.location.origin + window.location.pathname;
+        url += `?tool=${dataTool}`;
+        if (dataSource) {
+            url += `&source=${dataSource}`;
+        }
+        url += `&dataId=${userDataId}`;
+
+        window.location.href = url;
     };
 
     const handleRequestSort = (property: keyof UserData) => {
@@ -186,6 +200,17 @@ export default function UsersDataManagement() {
                                                 <IconButton aria-label="delete" color="error" onClick={() => handleOpenDeleteDialog(row.id, row.data_label)} size="small" title="Delete">
                                                     <Delete />
                                                 </IconButton>
+                                                <Tooltip title={row.data_tool ? `Launch ${row.data_tool} with this data` : ""} disableHoverListener={!row.data_tool}>
+                                                    <IconButton
+                                                        aria-label="launch"
+                                                        color="info"
+                                                        disabled={!LAUNCHABLE_TOOLS.includes(row.data_tool)}
+                                                        onClick={() => handleLaunch(row.id, row.data_tool, row.data_source)}
+                                                        size="small"
+                                                    >
+                                                        <Launch />
+                                                    </IconButton>
+                                                </Tooltip>
                                             </Stack>
                                         </TableCell>
                                     </TableRow>

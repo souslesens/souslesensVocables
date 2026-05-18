@@ -317,40 +317,46 @@ var Lineage_whiteboard = (function () {
      * @returns {Object} - The context menu items object.
      */
     self.jstreeContextMenu = function () {
-        var items = {};
+        return function (node) {
+            if (!node || node?.data?.type !== "source") {
+                return {};
+            }
 
-        items.addSimilarlabels = {
-            label: "add similars (label)",
-            action: function (_e) {
-                Lineage_whiteboard.drawSimilarsNodes("sameLabel");
-            },
-        };
-        items.metaData = {
-            label: "metadata",
-            action: function (_e) {
-                var sourceLabel = $("#sourceSelector_jstreeDiv").jstree().get_selected()[0];
-                var source = $("#sourceSelector_jstreeDiv").jstree().get_node(sourceLabel);
-                if (!source || source?.data?.type != "source") {
-                    return;
-                }
-                Lineage_sources.menuActions.sourceMetaData(source);
-            },
-        };
-        if (authentication.currentUser.groupes.indexOf("admin") > -1) {
-            items.wikiPage = {
-                label: "Wiki page",
+            var items = {};
+
+            items.metaData = {
+                label: "metadata",
                 action: function (_e) {
-                    var sourceLabel = $("#sourceSelector_jstreeDiv").jstree().get_selected()[0];
-                    var source = $("#sourceSelector_jstreeDiv").jstree().get_node(sourceLabel);
-                    if (!source || source?.data?.type != "source") {
-                        return;
+                    var resolvedId = node.data && node.data.id ? node.data.id : node.id;
+                    if (resolvedId && resolvedId.startsWith("Recent ")) {
+                        resolvedId = resolvedId.substring("Recent ".length);
                     }
-                    Lineage_whiteboard.showWikiPage(source);
+                    var resolvedNode = resolvedId !== node.id
+                        ? Object.assign({}, node, { id: resolvedId, data: Object.assign({}, node.data, { id: resolvedId }) })
+                        : node;
+                    Lineage_sources.menuActions.sourceMetaData(resolvedNode);
                 },
             };
-        }
 
-        return items;
+            items.copyGraphUri = {
+                label: "Copy graph URI",
+                action: function (_e) {
+                    var sourceId = node.data && node.data.id ? node.data.id : node.id;
+                    if (sourceId && sourceId.startsWith("Recent ")) {
+                        sourceId = sourceId.substring("Recent ".length);
+                    }
+                    var graphUri = Config.sources[sourceId] ? Config.sources[sourceId].graphUri : null;
+                    if (!graphUri) {
+                        return alert("No graph URI found for this source");
+                    }
+                    common.copyTextToClipboard(graphUri, function (_err, _result) {
+                        alert("copied to clipboard: " + graphUri);
+                    });
+                },
+            };
+
+            return items;
+        };
     };
 
     /**

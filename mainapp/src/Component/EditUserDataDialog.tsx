@@ -37,7 +37,15 @@ export const EditUserDataDialog = ({ onClose, onSave, open, userDataId }: EditUs
     const [profilesFetched, setProfilesFetched] = useState(false);
     const [usersFetched, setUsersFetched] = useState(false);
 
-    const dataTypes = ["SparqlQuery", "Template", "Other"];
+    const dataTypes = [
+        "annotationPropertiesTemplate",
+        "annotationPropertiesTemplateAssignment",
+        "jsFunction",
+        "KGmodelGraph",
+        "savedQueries",
+        "savedWhiteboards",
+        "sparqlQuery",
+    ];
 
     useEffect(() => {
         if (open) {
@@ -298,7 +306,7 @@ export const EditUserDataDialog = ({ onClose, onSave, open, userDataId }: EditUs
                             id="data_type"
                             onChange={(_e, value) => handleFieldChange("data_type", value)}
                             options={dataTypes}
-                            renderInput={(params) => <TextField {...params} error={!!validationErrors?.data_type} helperText={validationErrors?.data_type?._errors.join(", ")} label="Type" required />}
+                            renderInput={(params) => <TextField {...params} error={!!validationErrors?.data_type} helperText={validationErrors?.data_type?._errors.join(", ")} label="Type" />}
                             value={userData?.data_type || ""}
                         />
 
@@ -316,7 +324,6 @@ export const EditUserDataDialog = ({ onClose, onSave, open, userDataId }: EditUs
                                     error={!!validationErrors?.data_tool || !!toolsError}
                                     helperText={toolsError || validationErrors?.data_tool?._errors.join(", ")}
                                     label="Tool"
-                                    required
                                     InputProps={{
                                         ...params.InputProps,
                                         endAdornment: (
@@ -345,7 +352,6 @@ export const EditUserDataDialog = ({ onClose, onSave, open, userDataId }: EditUs
                                     error={!!validationErrors?.data_source || !!sourcesError}
                                     helperText={sourcesError || validationErrors?.data_source?._errors.join(", ")}
                                     label="Source"
-                                    required
                                     InputProps={{
                                         ...params.InputProps,
                                         endAdornment: (

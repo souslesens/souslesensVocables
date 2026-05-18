@@ -1238,6 +1238,7 @@ var KGquery_graph = (function () {
             return callback();
         }
         var commonSubClassEdges =  {}
+        var subclassGrouped = {}
         commonSuperClassNotInGraph.forEach(function(superClassUri){
             var subClassUris = directSuperClassMaps[superClassUri];
 
@@ -1251,6 +1252,8 @@ var KGquery_graph = (function () {
             });
             
             commonSubClassEdges[superClassUri] = [];
+            subclassGrouped[superClassUri] = [];
+
             for (let i = 0; i < subclassEdges.length; i++) {
                 for (let j = i + 1; j < subclassEdges.length; j++) {
                     const edgesGroup1 = subclassEdges[i];
@@ -1263,13 +1266,31 @@ var KGquery_graph = (function () {
                                 var newEdge = common.array.deepCloneWithFunctions(edge1);
                                 newEdge.id = superClassUri + "_" + edge1.data.propertyId+ edge1.to;
                                 newEdge.from = superClassUri;
-                                commonSubClassEdges[superClassUri].push(common.array.deepCloneWithFunctions(newEdge));
+                                var isAlreadyPresent = commonSubClassEdges[superClassUri].some(function(item) { return item.id === newEdge.id; });
+                                if(!isAlreadyPresent){
+                                    commonSubClassEdges[superClassUri].push( common.array.deepCloneWithFunctions(newEdge));
+                                }
+                                if(!subclassGrouped[superClassUri].includes(subClassUri1)){
+                                    subclassGrouped[superClassUri].push(subClassUri1);
+                                }
+                                if(!subclassGrouped[superClassUri].includes(subClassUri2)){
+                                    subclassGrouped[superClassUri].push(subClassUri2);
+                                }
                             }
                             if(edge1.to == subClassUri1 && edge2.to == subClassUri2 && edge1.from == edge2.from && edge1.data.propertyId == edge2.data.propertyId){
                                 var newEdge = common.array.deepCloneWithFunctions(edge1);
                                 newEdge.id = edge1.from + "_" + edge1.data.propertyId+ superClassUri;
                                 newEdge.to = superClassUri;
-                                commonSubClassEdges[superClassUri].push(common.array.deepCloneWithFunctions(newEdge));
+                                var isAlreadyPresent = commonSubClassEdges[superClassUri].some(function(item) { return item.id === newEdge.id; });
+                                if(!isAlreadyPresent){
+                                    commonSubClassEdges[superClassUri].push( common.array.deepCloneWithFunctions(newEdge));
+                                }
+                                if(!subclassGrouped[superClassUri].includes(subClassUri1)){
+                                    subclassGrouped[superClassUri].push(subClassUri1);
+                                }
+                                if(!subclassGrouped[superClassUri].includes(subClassUri2)){
+                                    subclassGrouped[superClassUri].push(subClassUri2);
+                                }
                             }
                             
                         });
@@ -1278,6 +1299,64 @@ var KGquery_graph = (function () {
             }
             
             
+        });
+
+        Object.keys(subclassGrouped).forEach(function (superClassUri) {
+            if (subclassGrouped[superClassUri].length === 0) {
+                return;
+            }
+            var label = Sparql_common.getLabelFromURI(superClassUri);
+            var nodeOptions = {
+                shape: self.visjsNodeOptions.shape,
+                color: Lineage_whiteboard.getSourceColor(source),
+                data: {
+                    subclasses: subclassGrouped[superClassUri],
+                    source: source,
+                },
+            };
+            var node=VisjsUtil.getVisjsNode(source, superClassUri, label, null, nodeOptions);
+            node.data.id=superClassUri;
+            node.data.label=label;
+            node.data.nonObjectProperties = subclassGrouped[superClassUri].reduce(function (acc, subClassUri) {
+                var subclassNode = visjsData.nodes.find(function (n) { return n.id === subClassUri; });
+                if (subclassNode && subclassNode.data && subclassNode.data.nonObjectProperties) {
+                    return acc.concat(subclassNode.data.nonObjectProperties);
+                }
+                return acc;
+            }, []);
+            visjsData.nodes.push(node);
+        });
+
+        var groupedSubclassUris = Object.values(subclassGrouped).reduce(function (acc, subclasses) {
+            return acc.concat(subclasses);
+        }, []);
+        visjsData.nodes.forEach(function (node) {
+            if (groupedSubclassUris.includes(node.id)) {
+                node.hidden = true;
+            }
+        });
+
+        var subclassToSuperclassMap = {};
+        Object.keys(subclassGrouped).forEach(function (superClassUri) {
+            subclassGrouped[superClassUri].forEach(function (subClassUri) {
+                subclassToSuperclassMap[subClassUri] = superClassUri;
+            });
+        });
+
+        Object.keys(commonSubClassEdges).forEach(function (superClassUri) {
+            commonSubClassEdges[superClassUri].forEach(function (edge) {
+                var from = subclassToSuperclassMap[edge.from] || edge.from;
+                var to = subclassToSuperclassMap[edge.to] || edge.to;
+                var newEdge = common.array.deepCloneWithFunctions(edge);
+                newEdge.from = from;
+                newEdge.to = to;
+                newEdge.id = from + "_" + edge.data.propertyId + to;
+                newEdge.data.subclassEdge=true;
+                var isAlreadyPresent = visjsData.edges.some(function (e) { return e.id === newEdge.id; });
+                if (!isAlreadyPresent) {
+                    visjsData.edges.push(newEdge);
+                }
+            });
         });
 
     }

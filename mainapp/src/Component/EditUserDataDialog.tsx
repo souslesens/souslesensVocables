@@ -219,7 +219,7 @@ export const EditUserDataDialog = ({ onClose, onSave, open, userDataId }: EditUs
             };
 
             if (userDataId === null) {
-                const { id, created_at, modification_date, data_path, owned_by, ...createPayload } = payload;
+                const { id, created_at, modification_date, owned_by, ...createPayload } = payload;
                 const response = await fetch(url, {
                     method,
                     headers: { "Content-Type": "application/json" },
@@ -235,7 +235,7 @@ export const EditUserDataDialog = ({ onClose, onSave, open, userDataId }: EditUs
                     setError(errorData.message ?? "Failed to save user data");
                 }
             } else {
-                const { data_path, ...updatePayload } = payload;
+                const { ...updatePayload } = payload;
                 const response = await fetch(url, {
                     method,
                     headers: { "Content-Type": "application/json" },

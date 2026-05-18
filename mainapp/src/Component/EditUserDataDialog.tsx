@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Stack, TextField, Autocomplete, Checkbox, FormGroup, FormControlLabel, Alert, CircularProgress } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import { UserData, UserDataSchema } from "./UserDataDialog";
@@ -39,16 +39,11 @@ export const EditUserDataDialog = ({ onClose, onSave, open, userDataId }: EditUs
 
     const dataTypes = ["annotationPropertiesTemplate", "annotationPropertiesTemplateAssignment", "jsFunction", "KGmodelGraph", "savedQueries", "savedWhiteboards", "sparqlQuery"];
 
-    useEffect(() => {
-        if (open) {
-            fetchUserData();
-            setJsonError(undefined);
-        }
-    }, [open, userDataId]);
+    const [jsonError, setJsonError] = useState<string | undefined>();
+    const [jsonValidationState, setJsonValidationState] = useState<{ valid: boolean; error?: string } | null>(null);
 
-    const fetchUserData = async () => {
+    const fetchUserData = useCallback(async () => {
         if (userDataId === null) {
-            // Creation mode: initialize with empty userData (excluding backend-managed fields)
             const emptyUserData: Partial<UserData> = {
                 data_type: "",
                 data_label: "",
@@ -72,20 +67,20 @@ export const EditUserDataDialog = ({ onClose, onSave, open, userDataId }: EditUs
         try {
             const response = await fetch(`/api/v1/users/data/${userDataId}`);
             if (response.status === 200) {
-                const data = await response.json();
+                const data = (await response.json()) as UserData;
                 setUserData(data);
                 setError(undefined);
             } else {
                 setError("Failed to load user data");
             }
-        } catch (err) {
-            console.error(err);
+        } catch {
+            console.error("Failed to fetch user data");
             setError("An error occurred while loading user data");
         }
         setLoading(false);
-    };
+    }, [userDataId]);
 
-    const fetchSources = async () => {
+    const fetchSources = useCallback(async () => {
         if (sourcesFetched) return;
         setSourcesLoading(true);
         try {
@@ -93,19 +88,19 @@ export const EditUserDataDialog = ({ onClose, onSave, open, userDataId }: EditUs
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-            const data = await response.json();
+            const data = (await response.json()) as { resources?: Record<string, unknown> };
             const sourcesList = Object.keys(data.resources || {}).sort();
             setAvailableSources(sourcesList);
             setSourcesFetched(true);
             setSourcesError(null);
-        } catch (err) {
+        } catch {
             setSourcesError("Failed to load sources");
-            console.error("Failed to fetch sources:", err);
+            console.error("Failed to fetch sources");
         }
         setSourcesLoading(false);
-    };
+    }, [sourcesFetched]);
 
-    const fetchTools = async () => {
+    const fetchTools = useCallback(async () => {
         if (toolsFetched) return;
         setToolsLoading(true);
         try {
@@ -113,19 +108,19 @@ export const EditUserDataDialog = ({ onClose, onSave, open, userDataId }: EditUs
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-            const data = await response.json();
-            const toolsList = (data.resources || []).map((tool: any) => tool.name).sort();
+            const data = (await response.json()) as { resources?: { name: string }[] };
+            const toolsList = (data.resources || []).map((tool) => tool.name).sort();
             setAvailableTools(toolsList);
             setToolsFetched(true);
             setToolsError(null);
-        } catch (err) {
+        } catch {
             setToolsError("Failed to load tools");
-            console.error("Failed to fetch tools:", err);
+            console.error("Failed to fetch tools");
         }
         setToolsLoading(false);
-    };
+    }, [toolsFetched]);
 
-    const fetchProfiles = async () => {
+    const fetchProfiles = useCallback(async () => {
         if (profilesFetched) return;
         setProfilesLoading(true);
         try {
@@ -133,19 +128,19 @@ export const EditUserDataDialog = ({ onClose, onSave, open, userDataId }: EditUs
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-            const data = await response.json();
+            const data = (await response.json()) as { resources?: Record<string, unknown> };
             const profilesList = Object.keys(data.resources || {}).sort();
             setAvailableProfiles(profilesList);
             setProfilesFetched(true);
             setProfilesError(null);
-        } catch (err) {
+        } catch {
             setProfilesError("Failed to load profiles");
-            console.error("Failed to fetch profiles:", err);
+            console.error("Failed to fetch profiles");
         }
         setProfilesLoading(false);
-    };
+    }, [profilesFetched]);
 
-    const fetchUsers = async () => {
+    const fetchUsers = useCallback(async () => {
         if (usersFetched) return;
         setUsersLoading(true);
         try {
@@ -153,28 +148,32 @@ export const EditUserDataDialog = ({ onClose, onSave, open, userDataId }: EditUs
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-            const data = await response.json();
-            const usersList = (data.resources || []).flatMap((item: any) => Object.keys(item)).sort();
+            const data = (await response.json()) as { resources?: Record<string, unknown>[] };
+            const usersList = (data.resources || []).flatMap((item) => Object.keys(item)).sort();
             setAvailableUsers(usersList);
             setUsersFetched(true);
             setUsersError(null);
-        } catch (err) {
+        } catch {
             setUsersError("Failed to load users");
-            console.error("Failed to fetch users:", err);
+            console.error("Failed to fetch users");
         }
         setUsersLoading(false);
-    };
+    }, [usersFetched]);
 
     const handleFieldChange = (fieldName: keyof UserData, value: UserData[keyof UserData]) => {
         if (userData) {
-            setUserData({ ...userData, [fieldName]: value });
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            setUserData({ ...userData, [fieldName]: value } as UserData);
         }
     };
 
-    const [jsonError, setJsonError] = useState<string | undefined>();
-    const [jsonValidationState, setJsonValidationState] = useState<{ valid: boolean; error?: string } | null>(null);
+    useEffect(() => {
+        if (open) {
+            void fetchUserData();
+            setJsonError(undefined);
+        }
+    }, [open, fetchUserData]);
 
-    // Debounced JSON validation
     useEffect(() => {
         const timer = setTimeout(() => {
             if (userData?.data_content) {
@@ -182,7 +181,6 @@ export const EditUserDataDialog = ({ onClose, onSave, open, userDataId }: EditUs
                 try {
                     JSON.parse(content);
                     setJsonValidationState({ valid: true });
-                    // Clear the save-time error if JSON is now valid
                     if (jsonError && jsonError === "Invalid JSON format in Data Content field") {
                         setJsonError(undefined);
                     }
@@ -192,7 +190,7 @@ export const EditUserDataDialog = ({ onClose, onSave, open, userDataId }: EditUs
             } else {
                 setJsonValidationState(null);
             }
-        }, 500); // 500ms debounce
+        }, 500);
 
         return () => clearTimeout(timer);
     }, [userData?.data_content, jsonError]);
@@ -200,12 +198,11 @@ export const EditUserDataDialog = ({ onClose, onSave, open, userDataId }: EditUs
     const handleSave = async () => {
         if (!userData) return;
 
-        // Validate JSON for data_content if provided
-        let dataContent: any = undefined;
+        let dataContent: unknown = undefined;
         if (userData.data_content) {
             try {
                 dataContent = typeof userData.data_content === "string" ? JSON.parse(userData.data_content) : userData.data_content;
-            } catch (err) {
+            } catch {
                 setJsonError("Invalid JSON format in Data Content field");
                 return;
             }
@@ -214,17 +211,14 @@ export const EditUserDataDialog = ({ onClose, onSave, open, userDataId }: EditUs
         setSaving(true);
         try {
             const url = userDataId === null ? `/api/v1/users/data` : `/api/v1/users/data/${userDataId}`;
-
             const method = userDataId === null ? "POST" : "PUT";
 
-            // Prepare payload: exclude backend-managed fields for creation
             const payload = {
                 ...userData,
                 data_content: dataContent,
             };
 
             if (userDataId === null) {
-                // Remove backend-managed fields for creation
                 const { id, created_at, modification_date, data_path, owned_by, ...createPayload } = payload;
                 const response = await fetch(url, {
                     method,
@@ -237,11 +231,10 @@ export const EditUserDataDialog = ({ onClose, onSave, open, userDataId }: EditUs
                     onSave();
                     onClose();
                 } else {
-                    const errorData = await response.json();
-                    setError(errorData.message || "Failed to save user data");
+                    const errorData = (await response.json()) as { message?: string };
+                    setError(errorData.message ?? "Failed to save user data");
                 }
             } else {
-                // Update mode: keep all fields except data_path
                 const { data_path, ...updatePayload } = payload;
                 const response = await fetch(url, {
                     method,
@@ -254,12 +247,12 @@ export const EditUserDataDialog = ({ onClose, onSave, open, userDataId }: EditUs
                     onSave();
                     onClose();
                 } else {
-                    const errorData = await response.json();
-                    setError(errorData.message || "Failed to save user data");
+                    const errorData = (await response.json()) as { message?: string };
+                    setError(errorData.message ?? "Failed to save user data");
                 }
             }
-        } catch (err) {
-            console.error(err);
+        } catch {
+            console.error("Save failed");
             setError("An error occurred while saving user data");
         }
         setSaving(false);
@@ -478,7 +471,6 @@ export const EditUserDataDialog = ({ onClose, onSave, open, userDataId }: EditUs
                                 disabled={loading}
                             />
                         </div>
-                        {/* Validation indicator */}
                         <div style={{ marginTop: "4px", marginLeft: "12px", fontSize: "0.75rem" }}>
                             {jsonError && <span style={{ color: "#f44336" }}>{jsonError}</span>}
                             {jsonValidationState?.valid === true && !jsonError && <span style={{ color: "#4caf50" }}>✓ Valid JSON</span>}

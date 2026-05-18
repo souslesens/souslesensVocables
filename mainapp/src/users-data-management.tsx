@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { createRoot } from "react-dom/client";
 
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -36,11 +35,6 @@ export default function UsersDataManagement() {
         setUsersData(data);
     };
 
-    const deleteUserData = async (userDataId: number) => {
-        await fetch(`/api/v1/users/data/${userDataId}`, { method: "DELETE" });
-        await fetchUsersData();
-    };
-
     const handleOpenCreateDialog = () => {
         setSelectedUserDataId(null);
         setDisplayCreateDialog(true);
@@ -69,7 +63,7 @@ export default function UsersDataManagement() {
         void fetchUsersData();
     };
 
-    const handleOpenDeleteDialog = (userDataId: number, userDataLabel: string) => {
+    const handleOpenDeleteDialog = (userDataId: number, _userDataLabel: string) => {
         setSelectedUserDataId(userDataId);
         setIsDeleteDialogOpen(true);
     };
@@ -88,11 +82,11 @@ export default function UsersDataManagement() {
             if (response.status === 200) {
                 await fetchUsersData();
             } else {
-                const errorData = await response.json();
+                const errorData = (await response.json()) as { message?: string };
                 console.error(errorData.message);
             }
-        } catch (error) {
-            console.error(error);
+        } catch {
+            console.error("Delete failed");
         }
 
         handleCloseDeleteDialog();

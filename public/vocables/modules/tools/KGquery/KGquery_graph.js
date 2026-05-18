@@ -361,7 +361,6 @@ var KGquery_graph = (function () {
                             });
                         },
                         function (callbackSeries) {
-                            return callbackSeries();
                             KGquery_graph.message("getInferredClassValueDataTypes");
                             OntologyModels.getInferredClassValueDataTypes(source, {}, function (err, result) {
                                 if (err) {
@@ -1038,8 +1037,6 @@ var KGquery_graph = (function () {
                 },
                 // load annotationProperties
                 function (callbackSeries) {
-                    // test without annotation properties for performance issue on large graph
-                    return callbackSeries();
                     KGquery_graph.message("loading datatypeProperties");
                     OntologyModels.getKGnonObjectProperties(source, {}, function (err, nonObjectPropertiesmap) {
                         if (err) {
@@ -1059,8 +1056,7 @@ var KGquery_graph = (function () {
                 },
                 // add cardinalities
                 function (callbackSeries) {
-                    // test without annotation properties for performance issue on large graph
-                    return callbackSeries();
+                 
                     self.addCardinalityToEdges(source, visjsData, function (err) {
                         if (err) {
                             console.log("Error adding cardinalities:", err);
@@ -1205,22 +1201,56 @@ var KGquery_graph = (function () {
             },
         );
     };
+    /**
+     * Detects graph nodes that share a common superclass not present in the graph,
+     * groups them under a synthetic superclass node, and rewrites edges accordingly.
+     *
+     * The algorithm works in four phases:
+     *  1. **Superclass discovery** — for every node URI, fetch its hierarchy via
+     *     `OntologyModels.getClassHierarchyTreeData` and record how many graph nodes
+     *     share the same direct superclass.
+     *  2. **Common-edge detection** — for each superclass that covers ≥ 2 graph nodes
+     *     and is itself absent from the graph, compare each pair of sibling subclasses:
+     *     if two subclasses share an outgoing edge (same target + same property) or an
+     *     incoming edge (same source + same property), that edge is promoted to the
+     *     superclass level and stored in `commonSubClassEdges`.
+     *  3. **Superclass node injection** — a new vis.js node is created for every
+     *     superclass that has at least one grouped subclass. Its `data.subclasses` lists
+     *     the grouped children; its `data.nonObjectProperties` is the union of all
+     *     subclasses' datatype properties.
+     *  4. **Subclass hiding + edge rewriting** — grouped subclass nodes are hidden
+     *     (`hidden: true`); promoted edges have their `from`/`to` replaced by the
+     *     superclass URI when the original endpoint was itself a grouped subclass, and
+     *     their `id` is rebuilt as `from_propertyIdto`.
+     *
+     * @function
+     * @name manageSubclasses
+     * @memberof module:KGquery_graph
+     * @param {string}   source    - Source name (key in `Config.sources`).
+     * @param {Object}   visjsData - Vis.js graph data mutated in place.
+     * @param {Array}    visjsData.nodes - Node array; new superclass nodes are pushed here.
+     * @param {Array}    visjsData.edges - Edge array; promoted edges are pushed here.
+     * @param {Function} callback  - Error-first callback `(err) => void`.
+     * @returns {void}
+     */
     self.manageSubclasses = function (source, visjsData, callback) {
         if (!visjsData || !visjsData.edges || visjsData.edges.length === 0) {
             return callback();
         }
         KGquery_graph.message("managing subclasses ...");
-        var nodesUris= visjsData.nodes?.map(node=>node.id) || [];
-        // one or empty node no need to manage subclasses
-        if(nodesUris.length<2){
+        var nodesUris = visjsData.nodes?.map(node => node.id) || [];
+        // Need at least two nodes for sibling detection to make sense
+        if (nodesUris.length < 2) {
             return callback();
         }
+
+        // --- Phase 1: discover direct superclasses for each graph node ---
         var descendatsMaps = {};
         var directSuperClassCounts = {};
         var directSuperClassMaps = {};
-        nodesUris.forEach(function(nodeUri){
+        nodesUris.forEach(function (nodeUri) {
             descendatsMaps[nodeUri] = OntologyModels.getClassHierarchyTreeData(source, nodeUri, "descendants");
-            if(descendatsMaps[nodeUri]  && descendatsMaps[nodeUri].length>0){
+            if (descendatsMaps[nodeUri] && descendatsMaps[nodeUri].length > 0) {
                 var directSuperClass = descendatsMaps[nodeUri][0].superClass;
                 directSuperClassCounts[directSuperClass] = (directSuperClassCounts[directSuperClass] || 0) + 1;
                 if (!directSuperClassMaps[directSuperClass]) {
@@ -1228,79 +1258,88 @@ var KGquery_graph = (function () {
                 }
                 directSuperClassMaps[directSuperClass].push(nodeUri);
             }
-
         });
-        if(Object.keys(directSuperClassCounts).length == 0){
+
+        if (Object.keys(directSuperClassCounts).length === 0) {
             return callback();
         }
-        var commonSuperClassNotInGraph = Object.keys(directSuperClassCounts).filter(function(item){ return directSuperClassCounts[item] > 1  && !nodesUris.includes(item)});
-        if(commonSuperClassNotInGraph.length == 0){ 
+
+        // Keep only superclasses shared by ≥ 2 graph nodes and not already in the graph
+        var commonSuperClassNotInGraph = Object.keys(directSuperClassCounts).filter(function (item) {
+            return directSuperClassCounts[item] > 1 && !nodesUris.includes(item);
+        });
+        if (commonSuperClassNotInGraph.length === 0) {
             return callback();
         }
-        var commonSubClassEdges =  {}
-        var subclassGrouped = {}
-        commonSuperClassNotInGraph.forEach(function(superClassUri){
+
+        // --- Phase 2: detect edges shared by sibling subclasses ---
+        // commonSubClassEdges[superClassUri] — edges promoted to the superclass level
+        // subclassGrouped[superClassUri]     — subclass URIs that will be hidden
+        var commonSubClassEdges = {};
+        var subclassGrouped = {};
+        commonSuperClassNotInGraph.forEach(function (superClassUri) {
             var subClassUris = directSuperClassMaps[superClassUri];
 
-            
-            var subclassEdges = []
-            subClassUris.forEach(function(subClassUri) {
-                var edgesConcerned = visjsData.edges.filter(function(edge) {
+            // Collect all edges touching each subclass, preserving index alignment with subClassUris
+            var subclassEdges = [];
+            subClassUris.forEach(function (subClassUri) {
+                var edgesConcerned = visjsData.edges.filter(function (edge) {
                     return edge.from === subClassUri || edge.to === subClassUri;
                 });
-                subclassEdges.push( edgesConcerned);
+                subclassEdges.push(edgesConcerned);
             });
-            
+
             commonSubClassEdges[superClassUri] = [];
             subclassGrouped[superClassUri] = [];
 
+            // Compare every pair of siblings (i, j) to find matching edges
             for (let i = 0; i < subclassEdges.length; i++) {
                 for (let j = i + 1; j < subclassEdges.length; j++) {
                     const edgesGroup1 = subclassEdges[i];
                     const edgesGroup2 = subclassEdges[j];
                     const subClassUri1 = subClassUris[i];
                     const subClassUri2 = subClassUris[j];
-                    edgesGroup1.forEach(function(edge1) {
-                        edgesGroup2.forEach(function(edge2) {
-                            if(edge1.from == subClassUri1 && edge2.from == subClassUri2 && edge1.to == edge2.to && edge1.data.propertyId == edge2.data.propertyId){
+                    edgesGroup1.forEach(function (edge1) {
+                        edgesGroup2.forEach(function (edge2) {
+                            // Outgoing match: both subclasses point to the same target via the same property
+                            if (edge1.from == subClassUri1 && edge2.from == subClassUri2 && edge1.to == edge2.to && edge1.data.propertyId == edge2.data.propertyId) {
                                 var newEdge = common.array.deepCloneWithFunctions(edge1);
-                                newEdge.id = superClassUri + "_" + edge1.data.propertyId+ edge1.to;
+                                newEdge.id = superClassUri + "_" + edge1.data.propertyId + edge1.to;
                                 newEdge.from = superClassUri;
-                                var isAlreadyPresent = commonSubClassEdges[superClassUri].some(function(item) { return item.id === newEdge.id; });
-                                if(!isAlreadyPresent){
-                                    commonSubClassEdges[superClassUri].push( common.array.deepCloneWithFunctions(newEdge));
+                                var isAlreadyPresent = commonSubClassEdges[superClassUri].some(function (item) { return item.id === newEdge.id; });
+                                if (!isAlreadyPresent) {
+                                    commonSubClassEdges[superClassUri].push(common.array.deepCloneWithFunctions(newEdge));
                                 }
-                                if(!subclassGrouped[superClassUri].includes(subClassUri1)){
+                                if (!subclassGrouped[superClassUri].includes(subClassUri1)) {
                                     subclassGrouped[superClassUri].push(subClassUri1);
                                 }
-                                if(!subclassGrouped[superClassUri].includes(subClassUri2)){
+                                if (!subclassGrouped[superClassUri].includes(subClassUri2)) {
                                     subclassGrouped[superClassUri].push(subClassUri2);
                                 }
                             }
-                            if(edge1.to == subClassUri1 && edge2.to == subClassUri2 && edge1.from == edge2.from && edge1.data.propertyId == edge2.data.propertyId){
+                            // Incoming match: both subclasses receive an edge from the same source via the same property
+                            if (edge1.to == subClassUri1 && edge2.to == subClassUri2 && edge1.from == edge2.from && edge1.data.propertyId == edge2.data.propertyId) {
                                 var newEdge = common.array.deepCloneWithFunctions(edge1);
-                                newEdge.id = edge1.from + "_" + edge1.data.propertyId+ superClassUri;
+                                newEdge.id = edge1.from + "_" + edge1.data.propertyId + superClassUri;
                                 newEdge.to = superClassUri;
-                                var isAlreadyPresent = commonSubClassEdges[superClassUri].some(function(item) { return item.id === newEdge.id; });
-                                if(!isAlreadyPresent){
-                                    commonSubClassEdges[superClassUri].push( common.array.deepCloneWithFunctions(newEdge));
+                                var isAlreadyPresent = commonSubClassEdges[superClassUri].some(function (item) { return item.id === newEdge.id; });
+                                if (!isAlreadyPresent) {
+                                    commonSubClassEdges[superClassUri].push(common.array.deepCloneWithFunctions(newEdge));
                                 }
-                                if(!subclassGrouped[superClassUri].includes(subClassUri1)){
+                                if (!subclassGrouped[superClassUri].includes(subClassUri1)) {
                                     subclassGrouped[superClassUri].push(subClassUri1);
                                 }
-                                if(!subclassGrouped[superClassUri].includes(subClassUri2)){
+                                if (!subclassGrouped[superClassUri].includes(subClassUri2)) {
                                     subclassGrouped[superClassUri].push(subClassUri2);
                                 }
                             }
-                            
                         });
                     });
                 }
             }
-            
-            
         });
 
+        // --- Phase 3: inject a synthetic node for each non-empty superclass group ---
         Object.keys(subclassGrouped).forEach(function (superClassUri) {
             if (subclassGrouped[superClassUri].length === 0) {
                 return;
@@ -1314,9 +1353,10 @@ var KGquery_graph = (function () {
                     source: source,
                 },
             };
-            var node=VisjsUtil.getVisjsNode(source, superClassUri, label, null, nodeOptions);
-            node.data.id=superClassUri;
-            node.data.label=label;
+            var node = VisjsUtil.getVisjsNode(source, superClassUri, label, null, nodeOptions);
+            node.data.id = superClassUri;
+            node.data.label = label;
+            // Merge datatype properties from all grouped subclasses
             node.data.nonObjectProperties = subclassGrouped[superClassUri].reduce(function (acc, subClassUri) {
                 var subclassNode = visjsData.nodes.find(function (n) { return n.id === subClassUri; });
                 if (subclassNode && subclassNode.data && subclassNode.data.nonObjectProperties) {
@@ -1327,6 +1367,7 @@ var KGquery_graph = (function () {
             visjsData.nodes.push(node);
         });
 
+        // --- Phase 4a: hide grouped subclass nodes ---
         var groupedSubclassUris = Object.values(subclassGrouped).reduce(function (acc, subclasses) {
             return acc.concat(subclasses);
         }, []);
@@ -1336,6 +1377,8 @@ var KGquery_graph = (function () {
             }
         });
 
+        // --- Phase 4b: rewrite promoted edges, replacing any grouped endpoint with its superclass ---
+        // Reverse map: subClassUri → superClassUri
         var subclassToSuperclassMap = {};
         Object.keys(subclassGrouped).forEach(function (superClassUri) {
             subclassGrouped[superClassUri].forEach(function (subClassUri) {
@@ -1351,7 +1394,7 @@ var KGquery_graph = (function () {
                 newEdge.from = from;
                 newEdge.to = to;
                 newEdge.id = from + "_" + edge.data.propertyId + to;
-                newEdge.data.subclassEdge=true;
+                newEdge.data.subclassEdge = true;
                 var isAlreadyPresent = visjsData.edges.some(function (e) { return e.id === newEdge.id; });
                 if (!isAlreadyPresent) {
                     visjsData.edges.push(newEdge);
@@ -1359,6 +1402,7 @@ var KGquery_graph = (function () {
             });
         });
 
+        return callback();
     }
     /**
      * Gets the original label of an edge (without cardinality suffix)

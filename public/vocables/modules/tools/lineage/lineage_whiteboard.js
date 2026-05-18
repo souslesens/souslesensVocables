@@ -331,9 +331,7 @@ var Lineage_whiteboard = (function () {
                     if (resolvedId && resolvedId.startsWith("Recent ")) {
                         resolvedId = resolvedId.substring("Recent ".length);
                     }
-                    var resolvedNode = resolvedId !== node.id
-                        ? Object.assign({}, node, { id: resolvedId, data: Object.assign({}, node.data, { id: resolvedId }) })
-                        : node;
+                    var resolvedNode = resolvedId !== node.id ? Object.assign({}, node, { id: resolvedId, data: Object.assign({}, node.data, { id: resolvedId }) }) : node;
                     Lineage_sources.menuActions.sourceMetaData(resolvedNode);
                 },
             };

@@ -152,7 +152,7 @@ var TriplesMaker = {
                 if (column.type == "Column") {
                     select.push(column.id);
                 }
-                if (MappingParser.columnsMappingsObjects.includes(column.type)) {
+                if (MappingParser.columnsMappingsObjects.includes(column.type) && column.type !== "URI") {
                     if (column.rdfsLabel) {
                         select.push(column.rdfsLabel);
                     }
@@ -422,10 +422,11 @@ var TriplesMaker = {
                 }
             }
             // process columnToColumnMappings
+            var allColumnsMappings = tableProcessingParams.allColumnsMappings || columnMappings;
             for (var edgeId in tableProcessingParams.columnToColumnEdgesMap) {
                 var edge = tableProcessingParams.columnToColumnEdgesMap[edgeId];
-                var subjectUri = TriplesMaker.getColumnUri(line, edge.from, columnMappings, rowIndex, tableProcessingParams);
-                var objectUri = TriplesMaker.getColumnUri(line, edge.to, columnMappings, rowIndex, tableProcessingParams);
+                var subjectUri = TriplesMaker.getColumnUri(line, edge.from, allColumnsMappings, rowIndex, tableProcessingParams);
+                var objectUri = TriplesMaker.getColumnUri(line, edge.to, allColumnsMappings, rowIndex, tableProcessingParams);
                 var property = TriplesMaker.getPropertyUri(edge.data.id);
 
                 if (edge.isRestriction) {

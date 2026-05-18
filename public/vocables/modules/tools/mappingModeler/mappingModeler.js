@@ -824,63 +824,64 @@ var MappingModeler = (function () {
                     missingClassLabels.push('"' + toLabel + '"');
                     toClassId = null;
                 }
-                alert("Warning: column" + (missingClassLabels.length > 1 ? "s " : " ") + missingClassLabels.join(" and ") + " ha" + (missingClassLabels.length > 1 ? "ve" : "s") + " no associated class. No constraint help is available — all properties will be shown.");
+                alert(
+                    "Warning: column" +
+                        (missingClassLabels.length > 1 ? "s " : " ") +
+                        missingClassLabels.join(" and ") +
+                        " ha" +
+                        (missingClassLabels.length > 1 ? "ve" : "s") +
+                        " no associated class. No constraint help is available — all properties will be shown.",
+                );
             }
 
-            OntologyModels.getAllowedPropertiesBetweenNodes(
-                MappingModeler.currentSLSsource,
-                fromClassId,
-                toClassId,
-                { keepSuperClasses: true },
-                function (err, result) {
-                    if (err) {
-                        return MainController.errorAlert(err);
-                    }
-                    var properties = [];
-                    for (var group in result.constraints) {
-                        for (var propId in result.constraints[group]) {
-                            properties.push({
-                                id: propId,
-                                label: result.constraints[group][propId].label,
-                                source: result.constraints[group][propId].source,
-                                resourceType: "ObjectProperty",
-                            });
-                        }
-                    }
-                    properties = common.array.distinctValues(properties, "id");
-                    properties = common.array.sort(properties, "label");
-                    properties.forEach(function (item) {
-                        if (!item.label) {
-                            item.label = Sparql_common.getLabelFromURI(item.id);
-                        }
-                        item.label = item.source.substring(0, 3) + ":" + item.label;
-                    });
-                    properties = common.array.sort(properties, "label");
-                    //To add NewObjects only one time
-                    var propertiesCopy = JSON.parse(JSON.stringify(properties));
-                    propertiesCopy.unshift(...newObjects);
-
-                    MappingModelerRelations.listPossibleRelations(function (err, jstreeData) {
-                        if (err) {
-                            MainController.errorAlert(err);
-                        }
-                        jstreeData.forEach(function (item) {
-                            if (item?.data?.fromColumn?.id == self.currentRelation.from.id && item?.data?.toColumn?.id == self.currentRelation.to.id) {
-                                var restrictionProperty = propertiesCopy.filter(function (prop) {
-                                    return prop.id == item?.data?.property?.id;
-                                });
-                                if (restrictionProperty.length > 0) {
-                                    restrictionProperty[0].highlight = "yellow";
-                                }
-                            }
+            OntologyModels.getAllowedPropertiesBetweenNodes(MappingModeler.currentSLSsource, fromClassId, toClassId, { keepSuperClasses: true }, function (err, result) {
+                if (err) {
+                    return MainController.errorAlert(err);
+                }
+                var properties = [];
+                for (var group in result.constraints) {
+                    for (var propId in result.constraints[group]) {
+                        properties.push({
+                            id: propId,
+                            label: result.constraints[group][propId].label,
+                            source: result.constraints[group][propId].source,
+                            resourceType: "ObjectProperty",
                         });
+                    }
+                }
+                properties = common.array.distinctValues(properties, "id");
+                properties = common.array.sort(properties, "label");
+                properties.forEach(function (item) {
+                    if (!item.label) {
+                        item.label = Sparql_common.getLabelFromURI(item.id);
+                    }
+                    item.label = item.source.substring(0, 3) + ":" + item.label;
+                });
+                properties = common.array.sort(properties, "label");
+                //To add NewObjects only one time
+                var propertiesCopy = JSON.parse(JSON.stringify(properties));
+                propertiesCopy.unshift(...newObjects);
 
-                        self.loadSuggestionSelectJstree(propertiesCopy, "Properties");
+                MappingModelerRelations.listPossibleRelations(function (err, jstreeData) {
+                    if (err) {
+                        MainController.errorAlert(err);
+                    }
+                    jstreeData.forEach(function (item) {
+                        if (item?.data?.fromColumn?.id == self.currentRelation.from.id && item?.data?.toColumn?.id == self.currentRelation.to.id) {
+                            var restrictionProperty = propertiesCopy.filter(function (prop) {
+                                return prop.id == item?.data?.property?.id;
+                            });
+                            if (restrictionProperty.length > 0) {
+                                restrictionProperty[0].highlight = "yellow";
+                            }
+                        }
                     });
 
-                    //self.setSuggestionsSelect(properties, false, newObjects);
-                },
-            );
+                    self.loadSuggestionSelectJstree(propertiesCopy, "Properties");
+                });
+
+                //self.setSuggestionsSelect(properties, false, newObjects);
+            });
         } else if (self.currentResourceType == "RowIndex") {
             self.onSuggestionsSelect(null, { node: { id: "RowIndex" } });
         } else if (self.currentResourceType == "VirtualColumn") {

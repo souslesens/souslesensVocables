@@ -361,6 +361,7 @@ var KGquery_graph = (function () {
                             });
                         },
                         function (callbackSeries) {
+                            return callbackSeries();
                             KGquery_graph.message("getInferredClassValueDataTypes");
                             OntologyModels.getInferredClassValueDataTypes(source, {}, function (err, result) {
                                 if (err) {
@@ -1037,6 +1038,8 @@ var KGquery_graph = (function () {
                 },
                 // load annotationProperties
                 function (callbackSeries) {
+                    // test without annotation properties for performance issue on large graph
+                    return callbackSeries();
                     KGquery_graph.message("loading datatypeProperties");
                     OntologyModels.getKGnonObjectProperties(source, {}, function (err, nonObjectPropertiesmap) {
                         if (err) {
@@ -1056,9 +1059,20 @@ var KGquery_graph = (function () {
                 },
                 // add cardinalities
                 function (callbackSeries) {
+                    // test without annotation properties for performance issue on large graph
+                    return callbackSeries();
                     self.addCardinalityToEdges(source, visjsData, function (err) {
                         if (err) {
                             console.log("Error adding cardinalities:", err);
+                        }
+                        callbackSeries(err);
+                    });
+                },
+                // gestion of subclasses to not overload the graph
+                function (callbackSeries) {
+                    self.manageSubclasses(source, visjsData, function (err) {
+                         if (err) {
+                            console.log("Error managing subclasses:", err);
                         }
                         callbackSeries(err);
                     });
@@ -1191,7 +1205,82 @@ var KGquery_graph = (function () {
             },
         );
     };
+    self.manageSubclasses = function (source, visjsData, callback) {
+        if (!visjsData || !visjsData.edges || visjsData.edges.length === 0) {
+            return callback();
+        }
+        KGquery_graph.message("managing subclasses ...");
+        var nodesUris= visjsData.nodes?.map(node=>node.id) || [];
+        // one or empty node no need to manage subclasses
+        if(nodesUris.length<2){
+            return callback();
+        }
+        var descendatsMaps = {};
+        var directSuperClassCounts = {};
+        var directSuperClassMaps = {};
+        nodesUris.forEach(function(nodeUri){
+            descendatsMaps[nodeUri] = OntologyModels.getClassHierarchyTreeData(source, nodeUri, "descendants");
+            if(descendatsMaps[nodeUri]  && descendatsMaps[nodeUri].length>0){
+                var directSuperClass = descendatsMaps[nodeUri][0].superClass;
+                directSuperClassCounts[directSuperClass] = (directSuperClassCounts[directSuperClass] || 0) + 1;
+                if (!directSuperClassMaps[directSuperClass]) {
+                    directSuperClassMaps[directSuperClass] = [];
+                }
+                directSuperClassMaps[directSuperClass].push(nodeUri);
+            }
 
+        });
+        if(Object.keys(directSuperClassCounts).length == 0){
+            return callback();
+        }
+        var commonSuperClassNotInGraph = Object.keys(directSuperClassCounts).filter(function(item){ return directSuperClassCounts[item] > 1  && !nodesUris.includes(item)});
+        if(commonSuperClassNotInGraph.length == 0){ 
+            return callback();
+        }
+        var commonSubClassEdges =  {}
+        commonSuperClassNotInGraph.forEach(function(superClassUri){
+            var subClassUris = directSuperClassMaps[superClassUri];
+
+            
+            var subclassEdges = []
+            subClassUris.forEach(function(subClassUri) {
+                var edgesConcerned = visjsData.edges.filter(function(edge) {
+                    return edge.from === subClassUri || edge.to === subClassUri;
+                });
+                subclassEdges.push( edgesConcerned);
+            });
+            
+            commonSubClassEdges[superClassUri] = [];
+            for (let i = 0; i < subclassEdges.length; i++) {
+                for (let j = i + 1; j < subclassEdges.length; j++) {
+                    const edgesGroup1 = subclassEdges[i];
+                    const edgesGroup2 = subclassEdges[j];
+                    const subClassUri1 = subClassUris[i];
+                    const subClassUri2 = subClassUris[j];
+                    edgesGroup1.forEach(function(edge1) {
+                        edgesGroup2.forEach(function(edge2) {
+                            if(edge1.from == subClassUri1 && edge2.from == subClassUri2 && edge1.to == edge2.to && edge1.data.propertyId == edge2.data.propertyId){
+                                var newEdge = common.array.deepCloneWithFunctions(edge1);
+                                newEdge.id = superClassUri + "_" + edge1.data.propertyId+ edge1.to;
+                                newEdge.from = superClassUri;
+                                commonSubClassEdges[superClassUri].push(common.array.deepCloneWithFunctions(newEdge));
+                            }
+                            if(edge1.to == subClassUri1 && edge2.to == subClassUri2 && edge1.from == edge2.from && edge1.data.propertyId == edge2.data.propertyId){
+                                var newEdge = common.array.deepCloneWithFunctions(edge1);
+                                newEdge.id = edge1.from + "_" + edge1.data.propertyId+ superClassUri;
+                                newEdge.to = superClassUri;
+                                commonSubClassEdges[superClassUri].push(common.array.deepCloneWithFunctions(newEdge));
+                            }
+                            
+                        });
+                    });
+                }
+            }
+            
+            
+        });
+
+    }
     /**
      * Gets the original label of an edge (without cardinality suffix)
      * @function

@@ -86,6 +86,16 @@ var KGquery_graph = (function () {
         var source = KGquery.currentSource;
         var visjsData = { nodes: [], edges: [] };
 
+        // Check for pending KGmodelGraph userdata
+        if (KGquery._pendingKGmodelGraph && KGquery._pendingKGmodelGraph.data_content) {
+            self.visjsData = KGquery._pendingKGmodelGraph.data_content;
+            KGquery._pendingKGmodelGraph = null;
+            $("#waitImg").css("display", "none");
+            self.drawModel(options?.displayGraphInList);
+            KGquery.initVarNamesMap();
+            return;
+        }
+
         $("#waitImg").css("display", "block");
         if (!options) {
             options = {};

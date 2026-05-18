@@ -20,7 +20,7 @@ import { EditUserDataDialog } from "./Component/EditUserDataDialog";
 import { DeleteDialog } from "./Component/DeleteDialog";
 import { cleanUpText } from "./Utils";
 
-const LAUNCHABLE_TOOLS = ["lineage", "SPARQL"];
+const LAUNCHABLE_TOOLS = ["lineage", "SPARQL", "KGquery"];
 
 export default function UsersDataManagement() {
     const [usersData, setUsersData] = useState<UserData[]>([]);

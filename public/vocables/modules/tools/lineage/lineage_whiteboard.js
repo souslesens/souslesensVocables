@@ -313,44 +313,46 @@ var Lineage_whiteboard = (function () {
      * @function
      * @name jstreeContextMenu
      * @memberof module:Lineage_whiteboard
-     * Generates a custom context menu for the jsTree component, providing additional actions based on user permissions.
-     * @returns {Object} - The context menu items object.
+     * Generates a custom context menu for the jsTree source selector. Returns a function so jstree
+     * passes the right-clicked node at call time, enabling per-node conditional items.
+     * Only shows the menu on source nodes (not folder nodes).
+     * @returns {function} - A function that receives the right-clicked node and returns the menu items object.
      */
     self.jstreeContextMenu = function () {
-        var items = {};
+        return function (node) {
+            if (!node || node.data?.type !== "source") {
+                return {};
+            }
 
-        items.addSimilarlabels = {
-            label: "add similars (label)",
-            action: function (_e) {
-                Lineage_whiteboard.drawSimilarsNodes("sameLabel");
-            },
-        };
-        items.metaData = {
-            label: "metadata",
-            action: function (_e) {
-                var sourceLabel = $("#sourceSelector_jstreeDiv").jstree().get_selected()[0];
-                var source = $("#sourceSelector_jstreeDiv").jstree().get_node(sourceLabel);
-                if (!source || source?.data?.type != "source") {
-                    return;
-                }
-                Lineage_sources.menuActions.sourceMetaData(source);
-            },
-        };
-        if (authentication.currentUser.groupes.indexOf("admin") > -1) {
-            items.wikiPage = {
-                label: "Wiki page",
+            var sourceId = node.data && node.data.id ? node.data.id : node.id;
+            if (sourceId && sourceId.startsWith("Recent ")) {
+                sourceId = sourceId.substring("Recent ".length);
+            }
+
+            var items = {};
+
+            items.metaData = {
+                label: "metadata",
                 action: function (_e) {
-                    var sourceLabel = $("#sourceSelector_jstreeDiv").jstree().get_selected()[0];
-                    var source = $("#sourceSelector_jstreeDiv").jstree().get_node(sourceLabel);
-                    if (!source || source?.data?.type != "source") {
-                        return;
-                    }
-                    Lineage_whiteboard.showWikiPage(source);
+                    Lineage_sources.menuActions.sourceMetaData(node);
                 },
             };
-        }
 
-        return items;
+            items.copyGraphUri = {
+                label: "Copy graph URI",
+                action: function (_e) {
+                    var graphUri = Config.sources[sourceId] ? Config.sources[sourceId].graphUri : null;
+                    if (!graphUri) {
+                        return alert("No graph URI found for this source");
+                    }
+                    common.copyTextToClipboard(graphUri, function (_err, _result) {
+                        alert("copied to clipboard: " + graphUri);
+                    });
+                },
+            };
+
+            return items;
+        };
     };
 
     /**

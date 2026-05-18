@@ -456,7 +456,7 @@ var TriplesMaker = {
                         if (value && value.startsWith("http:")) {
                             object = "<" + value + ">";
                         }
-                        // cas ou le other predicate a un range URI (property est un objectProperty
+                        // cas ou le other predicate a un range URI (property est un objectProperty)
                             // ne fonctionne que si l'objet est mappé en tant que colonne
                         else if (item.range == "URI") {
                             var colId=null;

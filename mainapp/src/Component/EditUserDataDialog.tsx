@@ -37,15 +37,7 @@ export const EditUserDataDialog = ({ onClose, onSave, open, userDataId }: EditUs
     const [profilesFetched, setProfilesFetched] = useState(false);
     const [usersFetched, setUsersFetched] = useState(false);
 
-    const dataTypes = [
-        "annotationPropertiesTemplate",
-        "annotationPropertiesTemplateAssignment",
-        "jsFunction",
-        "KGmodelGraph",
-        "savedQueries",
-        "savedWhiteboards",
-        "sparqlQuery",
-    ];
+    const dataTypes = ["annotationPropertiesTemplate", "annotationPropertiesTemplateAssignment", "jsFunction", "KGmodelGraph", "savedQueries", "savedWhiteboards", "sparqlQuery"];
 
     useEffect(() => {
         if (open) {
@@ -162,9 +154,7 @@ export const EditUserDataDialog = ({ onClose, onSave, open, userDataId }: EditUs
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             const data = await response.json();
-            const usersList = (data.resources || [])
-                .flatMap((item: any) => Object.keys(item))
-                .sort();
+            const usersList = (data.resources || []).flatMap((item: any) => Object.keys(item)).sort();
             setAvailableUsers(usersList);
             setUsersFetched(true);
             setUsersError(null);
@@ -188,7 +178,7 @@ export const EditUserDataDialog = ({ onClose, onSave, open, userDataId }: EditUs
     useEffect(() => {
         const timer = setTimeout(() => {
             if (userData?.data_content) {
-                const content = typeof userData.data_content === 'string' ? userData.data_content : JSON.stringify(userData.data_content);
+                const content = typeof userData.data_content === "string" ? userData.data_content : JSON.stringify(userData.data_content);
                 try {
                     JSON.parse(content);
                     setJsonValidationState({ valid: true });
@@ -214,9 +204,7 @@ export const EditUserDataDialog = ({ onClose, onSave, open, userDataId }: EditUs
         let dataContent: any = undefined;
         if (userData.data_content) {
             try {
-                dataContent = typeof userData.data_content === 'string' 
-                    ? JSON.parse(userData.data_content) 
-                    : userData.data_content;
+                dataContent = typeof userData.data_content === "string" ? JSON.parse(userData.data_content) : userData.data_content;
             } catch (err) {
                 setJsonError("Invalid JSON format in Data Content field");
                 return;
@@ -225,10 +213,8 @@ export const EditUserDataDialog = ({ onClose, onSave, open, userDataId }: EditUs
 
         setSaving(true);
         try {
-            const url = userDataId === null 
-                ? `/api/v1/users/data`
-                : `/api/v1/users/data/${userDataId}`;
-            
+            const url = userDataId === null ? `/api/v1/users/data` : `/api/v1/users/data/${userDataId}`;
+
             const method = userDataId === null ? "POST" : "PUT";
 
             // Prepare payload: exclude backend-managed fields for creation
@@ -479,7 +465,7 @@ export const EditUserDataDialog = ({ onClose, onSave, open, userDataId }: EditUs
                             }}
                         >
                             <Editor
-                                value={userData?.data_content ? (typeof userData.data_content === 'string' ? userData.data_content : JSON.stringify(userData.data_content, null, 2)) : ""}
+                                value={userData?.data_content ? (typeof userData.data_content === "string" ? userData.data_content : JSON.stringify(userData.data_content, null, 2)) : ""}
                                 onValueChange={(code) => handleFieldChange("data_content", code)}
                                 highlight={(code) => Prism.highlight(code, Prism.languages.json, "json")}
                                 padding={12}
@@ -494,21 +480,9 @@ export const EditUserDataDialog = ({ onClose, onSave, open, userDataId }: EditUs
                         </div>
                         {/* Validation indicator */}
                         <div style={{ marginTop: "4px", marginLeft: "12px", fontSize: "0.75rem" }}>
-                            {jsonError && (
-                                <span style={{ color: "#f44336" }}>
-                                    {jsonError}
-                                </span>
-                            )}
-                            {jsonValidationState?.valid === true && !jsonError && (
-                                <span style={{ color: "#4caf50" }}>
-                                    ✓ Valid JSON
-                                </span>
-                            )}
-                            {jsonValidationState?.valid === false && !jsonError && (
-                                <span style={{ color: "#ff9800" }}>
-                                    ⚠ {jsonValidationState.error}
-                                </span>
-                            )}
+                            {jsonError && <span style={{ color: "#f44336" }}>{jsonError}</span>}
+                            {jsonValidationState?.valid === true && !jsonError && <span style={{ color: "#4caf50" }}>✓ Valid JSON</span>}
+                            {jsonValidationState?.valid === false && !jsonError && <span style={{ color: "#ff9800" }}>⚠ {jsonValidationState.error}</span>}
                         </div>
                     </div>
                 </Stack>

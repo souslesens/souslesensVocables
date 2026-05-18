@@ -81,10 +81,10 @@ export default function UsersDataManagement() {
 
     const handleDeleteUserData = async () => {
         if (!selectedUserDataId) return;
-        
+
         try {
             const response = await fetch(`/api/v1/users/data/${selectedUserDataId}`, { method: "DELETE" });
-            
+
             if (response.status === 200) {
                 await fetchUsersData();
             } else {
@@ -94,7 +94,7 @@ export default function UsersDataManagement() {
         } catch (error) {
             console.error(error);
         }
-        
+
         handleCloseDeleteDialog();
     };
 
@@ -110,12 +110,7 @@ export default function UsersDataManagement() {
     return (
         <>
             <Stack direction="column" spacing={{ xs: 2 }} sx={{ m: 4 }} useFlexGap>
-                <TextField 
-                    label="Search..." 
-                    id="filter-user-data" 
-                    onChange={(event) => setFiltering(event.target.value)} 
-                    fullWidth
-                />
+                <TextField label="Search..." id="filter-user-data" onChange={(event) => setFiltering(event.target.value)} fullWidth />
                 <TableContainer sx={{ height: "400px" }} component={Paper}>
                     <Table sx={{ minWidth: 650 }} aria-label="simple table">
                         <TableHead>
@@ -154,10 +149,7 @@ export default function UsersDataManagement() {
                             {usersData
                                 .filter((row) => {
                                     const filterText = cleanUpText(filtering);
-                                    return (
-                                        cleanUpText(row.data_label).includes(filterText) ||
-                                        cleanUpText(row.data_comment).includes(filterText)
-                                    );
+                                    return cleanUpText(row.data_label).includes(filterText) || cleanUpText(row.data_comment).includes(filterText);
                                 })
                                 .slice()
                                 .sort((a, b) => {
@@ -217,7 +209,7 @@ export default function UsersDataManagement() {
             <EditUserDataDialog open={displayCreateDialog} onClose={handleCloseCreateDialog} onSave={handleCreateSave} userDataId={null} />
             <EditUserDataDialog open={displayEditDialog} onClose={handleCloseEditDialog} onSave={handleEditSave} userDataId={selectedUserDataId} />
             <DeleteDialog
-                description={`The user data '${selectedUserDataId ? usersData.find(u => u.id === selectedUserDataId)?.data_label : ''}' will be deleted. Are you sure?`}
+                description={`The user data '${selectedUserDataId ? usersData.find((u) => u.id === selectedUserDataId)?.data_label : ""}' will be deleted. Are you sure?`}
                 onClose={handleCloseDeleteDialog}
                 onDelete={handleDeleteUserData}
                 isOpen={isDeleteDialogOpen}

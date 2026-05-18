@@ -57,23 +57,24 @@ var KGquery = (function () {
      * @public
      */
     self.onLoaded = function () {
-        //Lineage_sources.showHideEditButtons = UI.disableEditButtons;
-        //self.oldshowHideEditButtons=Lineage_sources.showHideEditButtons;
-        //Lineage_sources.showHideEditButtons = UI.disableEditButtons;
         UI.initMenuBar(KGquery.loadSource);
         KGquery_graph.visjsData = null;
         UserDataWidget.currentTreeNode = null;
 
-        //KGquery.clearAll();
+        KGquery.clearAll();
         UI.disableEditButtons();
         if (Config.clientCache.KGquery) {
             KGquery_myQueries.load(null, Config.clientCache.KGquery);
         }
-        //self.clearAll();
         $("#messageDiv").attr("id", "KGquery_messageDiv");
         $("#waitImg").attr("id", "KGquery_waitImg");
         $("#MappingModeler_currentDataSourceDiv").remove();
         KGquery.initMyQuery();
+
+        if (Config.pendingUserData && Config.pendingUserData.data_type === "KGmodelGraph") {
+            KGquery._pendingKGmodelGraph = Config.pendingUserData;
+            Config.pendingUserData = null;
+        }
     };
     /**
      * Unloads the module and restores initial state.

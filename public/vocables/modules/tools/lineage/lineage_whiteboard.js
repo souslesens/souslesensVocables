@@ -313,20 +313,13 @@ var Lineage_whiteboard = (function () {
      * @function
      * @name jstreeContextMenu
      * @memberof module:Lineage_whiteboard
-     * Generates a custom context menu for the jsTree source selector. Returns a function so jstree
-     * passes the right-clicked node at call time, enabling per-node conditional items.
-     * Only shows the menu on source nodes (not folder nodes).
-     * @returns {function} - A function that receives the right-clicked node and returns the menu items object.
+     * Generates a custom context menu for the jsTree component, providing additional actions based on user permissions.
+     * @returns {Object} - The context menu items object.
      */
     self.jstreeContextMenu = function () {
         return function (node) {
-            if (!node || node.data?.type !== "source") {
+            if (!node || node?.data?.type !== "source") {
                 return {};
-            }
-
-            var sourceId = node.data && node.data.id ? node.data.id : node.id;
-            if (sourceId && sourceId.startsWith("Recent ")) {
-                sourceId = sourceId.substring("Recent ".length);
             }
 
             var items = {};
@@ -334,13 +327,22 @@ var Lineage_whiteboard = (function () {
             items.metaData = {
                 label: "metadata",
                 action: function (_e) {
-                    Lineage_sources.menuActions.sourceMetaData(node);
+                    var resolvedId = node.data && node.data.id ? node.data.id : node.id;
+                    if (resolvedId && resolvedId.startsWith("Recent ")) {
+                        resolvedId = resolvedId.substring("Recent ".length);
+                    }
+                    var resolvedNode = resolvedId !== node.id ? Object.assign({}, node, { id: resolvedId, data: Object.assign({}, node.data, { id: resolvedId }) }) : node;
+                    Lineage_sources.menuActions.sourceMetaData(resolvedNode);
                 },
             };
 
             items.copyGraphUri = {
                 label: "Copy graph URI",
                 action: function (_e) {
+                    var sourceId = node.data && node.data.id ? node.data.id : node.id;
+                    if (sourceId && sourceId.startsWith("Recent ")) {
+                        sourceId = sourceId.substring("Recent ".length);
+                    }
                     var graphUri = Config.sources[sourceId] ? Config.sources[sourceId].graphUri : null;
                     if (!graphUri) {
                         return alert("No graph URI found for this source");

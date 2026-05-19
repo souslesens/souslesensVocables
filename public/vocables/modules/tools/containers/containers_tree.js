@@ -51,7 +51,7 @@ var Containers_tree = (function () {
         var jstreeData = [];
         self.idsMap = {};
         var existingNodes = {};
-
+        self.rootContainer=Config.sources[source].graphUri + "container/root"
         // set rootnodes
         data.forEach(function (item) {
             var id = item.member.value;
@@ -338,7 +338,8 @@ var Containers_tree = (function () {
         $("#" + jstreeDiv).bind("move_node.jstree", function (e, data) {
             function getjstreeIdUri(id) {
                 var node = $("#lineage_containers_containersJstree").jstree().get_node(id);
-                var uri = node && node.data ? node.data.id : "x";
+
+                var uri = node && node.data ? node.data.id :  self.rootContainer;
                 return uri;
             }
 
@@ -461,41 +462,43 @@ var Containers_tree = (function () {
 
         var triples = [];
 
-        if (self.currentContainer && self.currentContainer.id != containerUri) {
+        if (self.currentContainer  ) {
+            if(self.currentContainer.id == containerUri) {
+                return alert("wrong container label")
+            }
             triples.push({
                 subject: "<" + self.currentContainer.data.id + ">",
                 predicate: " rdfs:member",
                 object: "<" + containerUri + ">",
             });
         } else {
-            var containerChildURI = containerUri + "/child";
-            triples.push({
+
+          //  var containerChildURI = containerUri + "/child";
+            /*triples.push({
                 subject: "<" + containerUri + ">",
                 predicate: " rdfs:member",
                 object: "<" + containerChildURI + ">",
-            });
+            });*/
+
             triples.push({
+                subject: "<" + self.rootContainer + ">",
+                predicate: " rdfs:member",
+                object: "<" + containerUri + ">",
+            })
+        }
+           /* triples.push({
                 subject: "<" + containerChildURI + ">",
                 predicate: " rdf:type",
                 object: "<http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag>",
-            });
+            });*/
             triples.push({
-                subject: containerChildURI,
+                subject: containerUri,
                 predicate: " rdfs:label",
                 object: newContainerLabel + " Child",
             });
-        }
 
-        triples.push({
-            subject: "<" + containerUri + ">",
-            predicate: " rdf:type",
-            object: "<http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag>",
-        });
-        triples.push({
-            subject: containerUri,
-            predicate: " rdfs:label",
-            object: newContainerLabel,
-        });
+
+
         Sparql_generic.insertTriples(source, triples, null, function (err, result) {
             if (err) {
                 return MainController.errorAlert(err.responseText);

@@ -4,6 +4,11 @@
     background-repeat: no-repeat;
 }
 
+.arrow-icon-up {
+    background-image: url(@arrow-icon);
+    background-repeat: no-repeat;
+}
+
 .moreOptions-icon {
     background-image: url(@moreOptions-icon);
     background-repeat: no-repeat;

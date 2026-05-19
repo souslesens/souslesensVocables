@@ -10,6 +10,7 @@ import DataSourceManager from "../mappingModeler/dataSourcesManager.js";
 import MainController from "../../shared/mainController.js";
 import ImportFileWidget from "../../uiWidgets/importFileWidget.js";
 import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
+import PopupMenuWidget from "../../uiWidgets/popupMenuWidget.js";
 
 var KGquery_graph = (function () {
     var self = {};
@@ -27,6 +28,15 @@ var KGquery_graph = (function () {
                 KGquery.addEdge(node, nodeEvent);
             } else {
                 self.currentGraphNode = node;
+                var fullNode = (self.KGqueryGraph && self.KGqueryGraph.data && self.KGqueryGraph.data.nodes.get(node.id)) || node;
+                var hasSubclasses = fullNode.data && fullNode.data.subclasses && fullNode.data.subclasses.length > 0;
+                if (hasSubclasses) {
+                    var container = document.getElementById("KGquery_graphDiv");
+                    var rect = container ? container.getBoundingClientRect() : { left: 0, top: 0 };
+                    var clickEvent = { clientX: (point && point.x ? point.x : 0) + rect.left, clientY: (point && point.y ? point.y : 0) + rect.top };
+                    self.onSubclassExpandClick(node.id, clickEvent);
+                    return;
+                }
                 if (nodeEvent.ctrlKey) {
                     NodeInfosWidget.showNodeInfos(KGquery.currentSource, node, "smallDialogDiv", {});
                 } else {
@@ -1304,7 +1314,7 @@ var KGquery_graph = (function () {
                             // Outgoing match: both subclasses point to the same target via the same property
                             if (edge1.from == subClassUri1 && edge2.from == subClassUri2 && edge1.to == edge2.to && edge1.data.propertyId == edge2.data.propertyId) {
                                 var newEdge = common.array.deepCloneWithFunctions(edge1);
-                                newEdge.id = superClassUri + "_" + edge1.data.propertyId + edge1.to;
+                                newEdge.id = superClassUri + "_" + edge1.data.propertyId + "_" + edge1.to;
                                 newEdge.from = superClassUri;
                                 var isAlreadyPresent = commonSubClassEdges[superClassUri].some(function (item) { return item.id === newEdge.id; });
                                 if (!isAlreadyPresent) {
@@ -1320,7 +1330,7 @@ var KGquery_graph = (function () {
                             // Incoming match: both subclasses receive an edge from the same source via the same property
                             if (edge1.to == subClassUri1 && edge2.to == subClassUri2 && edge1.from == edge2.from && edge1.data.propertyId == edge2.data.propertyId) {
                                 var newEdge = common.array.deepCloneWithFunctions(edge1);
-                                newEdge.id = edge1.from + "_" + edge1.data.propertyId + superClassUri;
+                                newEdge.id = edge1.from + "_" + edge1.data.propertyId + "_" + superClassUri;
                                 newEdge.to = superClassUri;
                                 var isAlreadyPresent = commonSubClassEdges[superClassUri].some(function (item) { return item.id === newEdge.id; });
                                 if (!isAlreadyPresent) {
@@ -1345,9 +1355,14 @@ var KGquery_graph = (function () {
                 return;
             }
             var label = Sparql_common.getLabelFromURI(superClassUri);
+            var textMeasureCtx = document.createElement("canvas").getContext("2d");
+            textMeasureCtx.font = "14px arial,verdana,sans-serif";
+            var textWidthCanvas = textMeasureCtx.measureText(label).width;
             var nodeOptions = {
                 shape: self.visjsNodeOptions.shape,
                 color: Lineage_whiteboard.getSourceColor(source),
+                font: { align: "left" },
+                widthConstraint: { minimum: textWidthCanvas + 30 },
                 data: {
                     subclasses: subclassGrouped[superClassUri],
                     source: source,
@@ -1368,17 +1383,7 @@ var KGquery_graph = (function () {
         });
 
         // --- Phase 4a: hide grouped subclass nodes ---
-        var groupedSubclassUris = Object.values(subclassGrouped).reduce(function (acc, subclasses) {
-            return acc.concat(subclasses);
-        }, []);
-        visjsData.nodes.forEach(function (node) {
-            if (groupedSubclassUris.includes(node.id)) {
-                node.hidden = true;
-            }
-        });
-
-        // --- Phase 4b: rewrite promoted edges, replacing any grouped endpoint with its superclass ---
-        // Reverse map: subClassUri → superClassUri
+        // Reverse map: subClassUri → superClassUri (needed by both 4a and 4b)
         var subclassToSuperclassMap = {};
         Object.keys(subclassGrouped).forEach(function (superClassUri) {
             subclassGrouped[superClassUri].forEach(function (subClassUri) {
@@ -1386,19 +1391,76 @@ var KGquery_graph = (function () {
             });
         });
 
+        var groupedSubclassUris = Object.values(subclassGrouped).reduce(function (acc, subclasses) {
+            return acc.concat(subclasses);
+        }, []);
+        visjsData.nodes.forEach(function (node) {
+            if (groupedSubclassUris.includes(node.id)) {
+                node.hidden = true;
+                if (!node.data) node.data = {};
+                node.data.superclass = subclassToSuperclassMap[node.id];
+            }
+        });
+
+        // --- Phase 4b: for each edge touching a grouped subclass, keep the original edge AND add a
+        //     superclass-substituted copy so both the subclass and its superclass stay connected ---
+
         Object.keys(commonSubClassEdges).forEach(function (superClassUri) {
             commonSubClassEdges[superClassUri].forEach(function (edge) {
-                var from = subclassToSuperclassMap[edge.from] || edge.from;
-                var to = subclassToSuperclassMap[edge.to] || edge.to;
-                var newEdge = common.array.deepCloneWithFunctions(edge);
-                newEdge.from = from;
-                newEdge.to = to;
-                newEdge.id = from + "_" + edge.data.propertyId + to;
-                newEdge.data.subclassEdge = true;
-                var isAlreadyPresent = visjsData.edges.some(function (e) { return e.id === newEdge.id; });
-                if (!isAlreadyPresent) {
-                    visjsData.edges.push(newEdge);
+                var isOriginalAlreadyPresent = visjsData.edges.some(function (e) { return e.id === edge.id; });
+                if (!isOriginalAlreadyPresent) {
+                    visjsData.edges.push(edge);
                 }
+
+                var superFrom = subclassToSuperclassMap[edge.from] || edge.from;
+                var superTo = subclassToSuperclassMap[edge.to] || edge.to;
+                var superEdge = common.array.deepCloneWithFunctions(edge);
+                superEdge.from = superFrom;
+                superEdge.to = superTo;
+                superEdge.id = superFrom + "_" + edge.data.propertyId + "_" + superTo;
+                superEdge.data.subclassEdge = true;
+                var isSuperEdgeAlreadyPresent = visjsData.edges.some(function (e) { return e.id === superEdge.id; });
+                if (!isSuperEdgeAlreadyPresent) {
+                    visjsData.edges.push(superEdge);
+                }
+            });
+        });
+
+        // --- Phase 4c: catch edges touching a grouped subclass that Phase 2 missed.
+        //     Emit every distinct promotion variant:
+        //     (Super(from), to), (from, Super(to)), (Super(from), Super(to)).
+        var rawEdgesSnapshot = visjsData.edges.slice();
+        rawEdgesSnapshot.forEach(function (edge) {
+            var superFromUri = subclassToSuperclassMap[edge.from];
+            var superToUri = subclassToSuperclassMap[edge.to];
+            if (!superFromUri && !superToUri) {
+                return;
+            }
+            var variants = [];
+            if (superFromUri) {
+                variants.push({ from: superFromUri, to: edge.to });
+            }
+            if (superToUri) {
+                variants.push({ from: edge.from, to: superToUri });
+            }
+            if (superFromUri && superToUri) {
+                variants.push({ from: superFromUri, to: superToUri });
+            }
+            variants.forEach(function (variant) {
+                if (variant.from === edge.from && variant.to === edge.to) {
+                    return;
+                }
+                var promotedId = variant.from + "_" + edge.data.propertyId + "_" + variant.to;
+                var alreadyExists = visjsData.edges.some(function (e) { return e.id === promotedId; });
+                if (alreadyExists) {
+                    return;
+                }
+                var promotedEdge = common.array.deepCloneWithFunctions(edge);
+                promotedEdge.from = variant.from;
+                promotedEdge.to = variant.to;
+                promotedEdge.id = promotedId;
+                promotedEdge.data.subclassEdge = true;
+                visjsData.edges.push(promotedEdge);
             });
         });
 
@@ -1499,6 +1561,213 @@ var KGquery_graph = (function () {
      *    - Font settings
 
          */
+    /**
+     * Creates absolutely-positioned `<button class="arrow-icon slsv">` elements over
+     * every vis.js node whose `data.subclasses` is non-empty.
+     * The container is set to `position:relative` so child buttons are positioned
+     * relative to it. Each button carries a `data-node-id` attribute for later
+     * position updates and stores the node id for the click handler.
+     */
+    self.renderSubclassExpandButtons = function () {
+        var container = document.getElementById("KGquery_graphDiv");
+        if (!container || !self.KGqueryGraph) return;
+
+        container.style.position = "relative";
+        container.querySelectorAll(".subclass-expand-btn").forEach(function (btn) { btn.remove(); });
+
+        var allNodes = self.KGqueryGraph.data.nodes.get();
+        var btnNodes = allNodes.filter(function (node) {
+            if (node.hidden || !node.data) return false;
+            var hasSubclasses = node.data.subclasses && node.data.subclasses.length > 0;
+            var hasSuperclass = !!node.data.superclass;
+            return hasSubclasses || hasSuperclass;
+        });
+        if (btnNodes.length === 0) return;
+
+        var ctx = document.createElement("canvas").getContext("2d");
+        ctx.font = "14px arial,verdana,sans-serif";
+        var widthUpdates = btnNodes.map(function (node) {
+            var labelWidth = ctx.measureText(node.label || "").width;
+            var newMin = labelWidth + 30;
+            var existing = (node.widthConstraint && node.widthConstraint.minimum) || 0;
+            return { id: node.id, widthConstraint: { minimum: Math.max(newMin, existing) } };
+        });
+        self.KGqueryGraph.data.nodes.update(widthUpdates);
+
+        self.KGqueryGraph.network.once("afterDrawing", function () {
+            self.renderSubclassExpandButtonsInternal(btnNodes);
+        });
+    };
+
+    self.renderSubclassExpandButtonsInternal = function (btnNodes) {
+        var container = document.getElementById("KGquery_graphDiv");
+        if (!container || !self.KGqueryGraph) return;
+        var scale = self.KGqueryGraph.network.getScale();
+        var btnSize = Math.round(20 * scale);
+        var ctx = document.createElement("canvas").getContext("2d");
+        ctx.font = "14px arial,verdana,sans-serif";
+        btnNodes.forEach(function (node) {
+            var positions = self.KGqueryGraph.network.getPositions([node.id]);
+            var nodePos = positions[node.id];
+            if (!nodePos) return;
+            var labelWidth = ctx.measureText(node.label || "").width;
+            var domPos = self.KGqueryGraph.network.canvasToDOM({
+                x: nodePos.x + labelWidth / 2 + 5,
+                y: nodePos.y,
+            });
+            var isCollapse = !!node.data.superclass && !(node.data.subclasses && node.data.subclasses.length > 0);
+            var iconClass = isCollapse ? "arrow-icon-up" : "arrow-icon";
+            var transform = isCollapse ? "translate(0,-50%) rotate(-180deg)" : "translate(0,-50%)";
+            var btn = document.createElement("button");
+            btn.className = iconClass + " slsv slsv-invisible-button subclass-expand-btn";
+            btn.dataset.nodeId = node.id;
+            btn.dataset.btnType = isCollapse ? "collapse" : "expand";
+            btn.style.cssText =
+                "position:absolute;" +
+                "left:" + domPos.x + "px;" +
+                "top:" + domPos.y + "px;" +
+                "transform:" + transform + ";" +
+                "width:" + btnSize + "px;" +
+                "height:" + btnSize + "px;" +
+                "cursor:pointer;" +
+                "pointer-events:all;";
+            btn.addEventListener("click", function (event) {
+                event.stopPropagation();
+                if (isCollapse) {
+                    self.onSuperclassCollapseClick(node.id, event);
+                } else {
+                    self.onSubclassExpandClick(node.id, event);
+                }
+            });
+            container.appendChild(btn);
+        });
+    };
+
+    /**
+     * Updates the `left`/`top` of every `.subclass-expand-btn` to follow their node
+     * during zoom and pan. Called on every `afterDrawing` event.
+     */
+    self.updateSubclassExpandButtonPositions = function () {
+        var container = document.getElementById("KGquery_graphDiv");
+        if (!container || !self.KGqueryGraph) return;
+        var scale = self.KGqueryGraph.network.getScale();
+        var btnSize = Math.round(20 * scale);
+        var ctx = document.createElement("canvas").getContext("2d");
+        ctx.font = "14px arial,verdana,sans-serif";
+        container.querySelectorAll(".subclass-expand-btn").forEach(function (btn) {
+            var node = self.KGqueryGraph.data.nodes.get(btn.dataset.nodeId);
+            if (!node) return;
+            var positions = self.KGqueryGraph.network.getPositions([node.id]);
+            var nodePos = positions[node.id];
+            if (!nodePos) return;
+            var labelWidth = ctx.measureText(node.label || "").width;
+            var domPos = self.KGqueryGraph.network.canvasToDOM({
+                x: nodePos.x + labelWidth / 2 + 1,
+                y: nodePos.y,
+            });
+            btn.style.left = domPos.x + "px";
+            btn.style.top = domPos.y + "px";
+            btn.style.width = btnSize + "px";
+            btn.style.height = btnSize + "px";
+        });
+    };
+
+    /**
+     * Click handler for a superclass node's expand button.
+     * @param {string} nodeId - URI of the superclass node.
+     */
+    self.onSubclassExpandClick = function (nodeId, event) {
+        var node = self.KGqueryGraph.data.nodes.get(nodeId);
+        if (!node || !node.data || !node.data.subclasses || node.data.subclasses.length === 0) return;
+
+        var html = "";
+        node.data.subclasses.forEach(function (subclassUri) {
+            var label = self.labelsMap[subclassUri] || Sparql_common.getLabelFromURI(subclassUri);
+            html += '    <span class="popupMenuItem" onclick="event.stopPropagation(); KGquery_graph.onSubclassSelected(\'' + nodeId + '\', \'' + subclassUri + '\');"> ' + label + ' </span>';
+        });
+
+        $("#popupMenuWidgetDiv").html(html);
+        var point = { x: event.clientX, y: event.clientY };
+        PopupMenuWidget.showPopup(point, "popupMenuWidgetDiv");
+        self.attachSubclassPopupDismiss();
+    };
+
+    self.onSubclassSelected = function (superclassId, subclassId) {
+        $(document).off("mousedown.kgquerySubclassDismiss");
+        PopupMenuWidget.hidePopup("popupMenuWidgetDiv");
+        self.inheritWidthConstraint(superclassId, subclassId);
+        self.KGqueryGraph.data.nodes.update({ id: superclassId, hidden: true });
+        self.KGqueryGraph.data.nodes.update({ id: subclassId, hidden: false });
+        var container = document.getElementById("KGquery_graphDiv");
+        if (container) {
+            var btn = container.querySelector('.subclass-expand-btn[data-node-id="' + superclassId + '"]');
+            if (btn) btn.remove();
+        }
+        self.renderSubclassExpandButtons();
+
+        var subclassNode = self.KGqueryGraph.data.nodes.get(subclassId);
+        if (subclassNode && self.visjsOptions && typeof self.visjsOptions.onclickFn === "function") {
+            self.visjsOptions.onclickFn(subclassNode, { x: 0, y: 0 }, { ctrlKey: false });
+        }
+    };
+
+    self.inheritWidthConstraint = function (fromId, toId) {
+        var fromNode = self.KGqueryGraph.data.nodes.get(fromId);
+        var toNode = self.KGqueryGraph.data.nodes.get(toId);
+        if (!fromNode || !toNode) return;
+        var fromMin = (fromNode.widthConstraint && fromNode.widthConstraint.minimum) || 0;
+        var toMin = (toNode.widthConstraint && toNode.widthConstraint.minimum) || 0;
+        var newMin = Math.max(fromMin, toMin);
+        if (newMin > 0) {
+            self.KGqueryGraph.data.nodes.update({ id: toId, widthConstraint: { minimum: newMin } });
+        }
+    };
+
+    /**
+     * Click handler for a subclass node's collapse button (returns to superclass).
+     * @param {string} nodeId - URI of the subclass node currently shown.
+     * @param {Event} event - Click event for popup positioning.
+     */
+    self.onSuperclassCollapseClick = function (nodeId, event) {
+        var node = self.KGqueryGraph.data.nodes.get(nodeId);
+        if (!node || !node.data || !node.data.superclass) return;
+
+        var superclassUri = node.data.superclass;
+        var label = self.labelsMap[superclassUri] || Sparql_common.getLabelFromURI(superclassUri);
+        var html = '    <span class="popupMenuItem" onclick="event.stopPropagation(); KGquery_graph.onSuperclassSelected(\'' + nodeId + '\', \'' + superclassUri + '\');"> ' + label + ' </span>';
+
+        $("#popupMenuWidgetDiv").html(html);
+        var point = { x: event.clientX, y: event.clientY };
+        PopupMenuWidget.showPopup(point, "popupMenuWidgetDiv");
+        self.attachSubclassPopupDismiss();
+    };
+
+    self.attachSubclassPopupDismiss = function () {
+        setTimeout(function () {
+            $(document).off("mousedown.kgquerySubclassDismiss");
+            $(document).on("mousedown.kgquerySubclassDismiss", function (evt) {
+                if (!$(evt.target).closest("#popupMenuWidgetDiv").length) {
+                    PopupMenuWidget.hidePopup("popupMenuWidgetDiv");
+                    $(document).off("mousedown.kgquerySubclassDismiss");
+                }
+            });
+        }, 0);
+    };
+
+    self.onSuperclassSelected = function (subclassId, superclassId) {
+        $(document).off("mousedown.kgquerySubclassDismiss");
+        PopupMenuWidget.hidePopup("popupMenuWidgetDiv");
+        self.inheritWidthConstraint(subclassId, superclassId);
+        self.KGqueryGraph.data.nodes.update({ id: subclassId, hidden: true });
+        self.KGqueryGraph.data.nodes.update({ id: superclassId, hidden: false });
+        var container = document.getElementById("KGquery_graphDiv");
+        if (container) {
+            var btn = container.querySelector('.subclass-expand-btn[data-node-id="' + subclassId + '"]');
+            if (btn) btn.remove();
+        }
+        self.renderSubclassExpandButtons();
+    };
+
     self.drawModel = function (displayGraphInList, callback) {
         if (!self.visjsData) {
             return alert("no graph model");
@@ -1511,6 +1780,20 @@ var KGquery_graph = (function () {
         KGquery_graph.message("drawing graph");
         self.visjsData.nodes = common.removeDuplicatesFromArray(self.visjsData.nodes, "id");
         self.visjsData.edges = common.removeDuplicatesFromArray(self.visjsData.edges, "id");
+
+        // Reset subclass/superclass visibility to default on full redraw:
+        // grouped subclasses hidden, synthetic superclasses shown.
+        self.visjsData.nodes.forEach(function (node) {
+            if (!node.data) return;
+            var isSuperclassNode = node.data.subclasses && node.data.subclasses.length > 0;
+            var isGroupedSubclass = !!node.data.superclass;
+            if (isSuperclassNode) {
+                node.hidden = false;
+            } else if (isGroupedSubclass) {
+                node.hidden = true;
+            }
+        });
+
         self.visjsData.nodes.forEach(function (item) {
             self.labelsMap[item.id] = item.label || item.id;
         });
@@ -1604,6 +1887,11 @@ var KGquery_graph = (function () {
                 }
             });
             self.KGqueryGraph.data.nodes.update(nodes_fonts);
+
+            self.renderSubclassExpandButtons();
+            self.KGqueryGraph.network.on("afterDrawing", function () {
+                self.updateSubclassExpandButtonPositions();
+            });
 
             if (callback) {
                 callback();

@@ -10,6 +10,36 @@ var KGquery_predicates = (function () {
         "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
         "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>";
 
+    /**
+     * Builds the rdf:type predicate fragment for a class variable.
+     * Handles three cases:
+     *  - regular class node             -> ?var rdf:type <uri>.
+     *  - synthetic superclass node      -> ?varClass rdfs:subClassOf <uri>. ?var rdf:type ?varClass.
+     *  - hidden grouped subclass node   -> infer via its superclass (same subClassOf pattern,
+     *                                       but using node.data.superclass as the URI).
+     * varName MUST start with "?".
+     */
+    self.buildClassTypePredicate = function (varName, classUri) {
+        var node = null;
+        if (KGquery_graph && KGquery_graph.KGqueryGraph && KGquery_graph.KGqueryGraph.data && KGquery_graph.KGqueryGraph.data.nodes) {
+            node = KGquery_graph.KGqueryGraph.data.nodes.get(classUri);
+        }
+        var effectiveUri = classUri;
+        var useSubClassOf = false;
+        if (node && node.data) {
+            if (node.data.subclasses && node.data.subclasses.length > 0) {
+                useSubClassOf = true;
+            } else if (node.hidden && node.data.superclass) {
+                effectiveUri = node.data.superclass;
+                useSubClassOf = true;
+            }
+        }
+        if (useSubClassOf) {
+            return varName + "Class rdfs:subClassOf <" + effectiveUri + ">.\n" + varName + " rdf:type " + varName + "Class.\n";
+        }
+        return varName + " rdf:type <" + effectiveUri + ">.\n";
+    };
+
     self.setRdfTypePredicates = function (queryElement, predicatesSubjectsMap) {
         if (!queryElement.toNode) {
             //return;
@@ -27,7 +57,8 @@ var KGquery_predicates = (function () {
 
         var subjectUri = queryElement.fromNode.id;
 
-        var predicate = subjectVarName + "  rdf:type <" + subjectUri + ">. ";
+        var predicate = self.buildClassTypePredicate(subjectVarName, subjectUri);
+
         if (predicatesSubjectsMap[subjectVarName].predicates.indexOf(predicate) < 0) {
             predicatesSubjectsMap[subjectVarName].predicates.push(predicate);
         }
@@ -41,7 +72,7 @@ var KGquery_predicates = (function () {
                 };
             }
             var objectUri = queryElement.toNode.id;
-            var predicate = objectVarName + "  rdf:type <" + objectUri + ">.";
+            var predicate = self.buildClassTypePredicate(objectVarName, objectUri);
             if (predicatesSubjectsMap[objectVarName].predicates.indexOf(predicate) < 0) {
                 predicatesSubjectsMap[objectVarName].predicates.push(predicate);
             }
@@ -69,7 +100,7 @@ var KGquery_predicates = (function () {
                 predicatesSubjectsMap[startVarName] = { isOptional: false, predicates: [] };
                 // for transitive nodes of path that are note already typed
                 var itemUri = KGquery.varNameToClassMap[startVarName];
-                var predicate = startVarName + "  rdf:type <" + itemUri + ">.";
+                var predicate = self.buildClassTypePredicate(startVarName, itemUri);
                 predicatesSubjectsMap[startVarName].predicates.push(predicate);
             }
 

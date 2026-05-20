@@ -21,7 +21,7 @@ var KGquery_predicates = (function () {
      */
     self.buildClassTypePredicate = function (varName, classUri) {
         var node = null;
-        if ( KGquery_graph  && KGquery_graph.KGqueryGraph && KGquery_graph.KGqueryGraph.data && KGquery_graph.KGqueryGraph.data.nodes) {
+        if (KGquery_graph && KGquery_graph.KGqueryGraph && KGquery_graph.KGqueryGraph.data && KGquery_graph.KGqueryGraph.data.nodes) {
             node = KGquery_graph.KGqueryGraph.data.nodes.get(classUri);
         }
         var effectiveUri = classUri;
@@ -35,8 +35,7 @@ var KGquery_predicates = (function () {
             }
         }
         if (useSubClassOf) {
-            return varName + "Class rdfs:subClassOf <" + effectiveUri + ">.\n"
-                 + varName + " rdf:type " + varName + "Class.\n";
+            return varName + "Class rdfs:subClassOf <" + effectiveUri + ">.\n" + varName + " rdf:type " + varName + "Class.\n";
         }
         return varName + " rdf:type <" + effectiveUri + ">.\n";
     };

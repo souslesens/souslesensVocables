@@ -1066,7 +1066,6 @@ var KGquery_graph = (function () {
                 },
                 // add cardinalities
                 function (callbackSeries) {
-                 
                     self.addCardinalityToEdges(source, visjsData, function (err) {
                         if (err) {
                             console.log("Error adding cardinalities:", err);
@@ -1077,7 +1076,7 @@ var KGquery_graph = (function () {
                 // gestion of subclasses to not overload the graph
                 function (callbackSeries) {
                     self.manageSubclasses(source, visjsData, function (err) {
-                         if (err) {
+                        if (err) {
                             console.log("Error managing subclasses:", err);
                         }
                         callbackSeries(err);
@@ -1248,7 +1247,7 @@ var KGquery_graph = (function () {
             return callback();
         }
         KGquery_graph.message("managing subclasses ...");
-        var nodesUris = visjsData.nodes?.map(node => node.id) || [];
+        var nodesUris = visjsData.nodes?.map((node) => node.id) || [];
         // Need at least two nodes for sibling detection to make sense
         if (nodesUris.length < 2) {
             return callback();
@@ -1316,7 +1315,9 @@ var KGquery_graph = (function () {
                                 var newEdge = common.array.deepCloneWithFunctions(edge1);
                                 newEdge.id = superClassUri + "_" + edge1.data.propertyId + "_" + edge1.to;
                                 newEdge.from = superClassUri;
-                                var isAlreadyPresent = commonSubClassEdges[superClassUri].some(function (item) { return item.id === newEdge.id; });
+                                var isAlreadyPresent = commonSubClassEdges[superClassUri].some(function (item) {
+                                    return item.id === newEdge.id;
+                                });
                                 if (!isAlreadyPresent) {
                                     commonSubClassEdges[superClassUri].push(common.array.deepCloneWithFunctions(newEdge));
                                 }
@@ -1332,7 +1333,9 @@ var KGquery_graph = (function () {
                                 var newEdge = common.array.deepCloneWithFunctions(edge1);
                                 newEdge.id = edge1.from + "_" + edge1.data.propertyId + "_" + superClassUri;
                                 newEdge.to = superClassUri;
-                                var isAlreadyPresent = commonSubClassEdges[superClassUri].some(function (item) { return item.id === newEdge.id; });
+                                var isAlreadyPresent = commonSubClassEdges[superClassUri].some(function (item) {
+                                    return item.id === newEdge.id;
+                                });
                                 if (!isAlreadyPresent) {
                                     commonSubClassEdges[superClassUri].push(common.array.deepCloneWithFunctions(newEdge));
                                 }
@@ -1373,7 +1376,9 @@ var KGquery_graph = (function () {
             node.data.label = label;
             // Merge datatype properties from all grouped subclasses
             node.data.nonObjectProperties = subclassGrouped[superClassUri].reduce(function (acc, subClassUri) {
-                var subclassNode = visjsData.nodes.find(function (n) { return n.id === subClassUri; });
+                var subclassNode = visjsData.nodes.find(function (n) {
+                    return n.id === subClassUri;
+                });
                 if (subclassNode && subclassNode.data && subclassNode.data.nonObjectProperties) {
                     return acc.concat(subclassNode.data.nonObjectProperties);
                 }
@@ -1407,7 +1412,9 @@ var KGquery_graph = (function () {
 
         Object.keys(commonSubClassEdges).forEach(function (superClassUri) {
             commonSubClassEdges[superClassUri].forEach(function (edge) {
-                var isOriginalAlreadyPresent = visjsData.edges.some(function (e) { return e.id === edge.id; });
+                var isOriginalAlreadyPresent = visjsData.edges.some(function (e) {
+                    return e.id === edge.id;
+                });
                 if (!isOriginalAlreadyPresent) {
                     visjsData.edges.push(edge);
                 }
@@ -1419,7 +1426,9 @@ var KGquery_graph = (function () {
                 superEdge.to = superTo;
                 superEdge.id = superFrom + "_" + edge.data.propertyId + "_" + superTo;
                 superEdge.data.subclassEdge = true;
-                var isSuperEdgeAlreadyPresent = visjsData.edges.some(function (e) { return e.id === superEdge.id; });
+                var isSuperEdgeAlreadyPresent = visjsData.edges.some(function (e) {
+                    return e.id === superEdge.id;
+                });
                 if (!isSuperEdgeAlreadyPresent) {
                     visjsData.edges.push(superEdge);
                 }
@@ -1451,7 +1460,9 @@ var KGquery_graph = (function () {
                     return;
                 }
                 var promotedId = variant.from + "_" + edge.data.propertyId + "_" + variant.to;
-                var alreadyExists = visjsData.edges.some(function (e) { return e.id === promotedId; });
+                var alreadyExists = visjsData.edges.some(function (e) {
+                    return e.id === promotedId;
+                });
                 if (alreadyExists) {
                     return;
                 }
@@ -1465,7 +1476,7 @@ var KGquery_graph = (function () {
         });
 
         return callback();
-    }
+    };
     /**
      * Gets the original label of an edge (without cardinality suffix)
      * @function
@@ -1573,7 +1584,9 @@ var KGquery_graph = (function () {
         if (!container || !self.KGqueryGraph) return;
 
         container.style.position = "relative";
-        container.querySelectorAll(".subclass-expand-btn").forEach(function (btn) { btn.remove(); });
+        container.querySelectorAll(".subclass-expand-btn").forEach(function (btn) {
+            btn.remove();
+        });
 
         var allNodes = self.KGqueryGraph.data.nodes.get();
         var btnNodes = allNodes.filter(function (node) {
@@ -1624,11 +1637,21 @@ var KGquery_graph = (function () {
             btn.dataset.btnType = isCollapse ? "collapse" : "expand";
             btn.style.cssText =
                 "position:absolute;" +
-                "left:" + domPos.x + "px;" +
-                "top:" + domPos.y + "px;" +
-                "transform:" + transform + ";" +
-                "width:" + btnSize + "px;" +
-                "height:" + btnSize + "px;" +
+                "left:" +
+                domPos.x +
+                "px;" +
+                "top:" +
+                domPos.y +
+                "px;" +
+                "transform:" +
+                transform +
+                ";" +
+                "width:" +
+                btnSize +
+                "px;" +
+                "height:" +
+                btnSize +
+                "px;" +
                 "cursor:pointer;" +
                 "pointer-events:all;";
             btn.addEventListener("click", function (event) {
@@ -1683,7 +1706,7 @@ var KGquery_graph = (function () {
         var html = "";
         node.data.subclasses.forEach(function (subclassUri) {
             var label = self.labelsMap[subclassUri] || Sparql_common.getLabelFromURI(subclassUri);
-            html += '    <span class="popupMenuItem" onclick="event.stopPropagation(); KGquery_graph.onSubclassSelected(\'' + nodeId + '\', \'' + subclassUri + '\');"> ' + label + ' </span>';
+            html += '    <span class="popupMenuItem" onclick="event.stopPropagation(); KGquery_graph.onSubclassSelected(\'' + nodeId + "', '" + subclassUri + "');\"> " + label + " </span>";
         });
 
         $("#popupMenuWidgetDiv").html(html);
@@ -1734,7 +1757,7 @@ var KGquery_graph = (function () {
 
         var superclassUri = node.data.superclass;
         var label = self.labelsMap[superclassUri] || Sparql_common.getLabelFromURI(superclassUri);
-        var html = '    <span class="popupMenuItem" onclick="event.stopPropagation(); KGquery_graph.onSuperclassSelected(\'' + nodeId + '\', \'' + superclassUri + '\');"> ' + label + ' </span>';
+        var html = '    <span class="popupMenuItem" onclick="event.stopPropagation(); KGquery_graph.onSuperclassSelected(\'' + nodeId + "', '" + superclassUri + "');\"> " + label + " </span>";
 
         $("#popupMenuWidgetDiv").html(html);
         var point = { x: event.clientX, y: event.clientY };

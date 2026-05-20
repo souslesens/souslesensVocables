@@ -28,15 +28,15 @@ var KGquery_graph = (function () {
                 KGquery.addEdge(node, nodeEvent);
             } else {
                 self.currentGraphNode = node;
-                var fullNode = (self.KGqueryGraph && self.KGqueryGraph.data && self.KGqueryGraph.data.nodes.get(node.id)) || node;
-                var hasSubclasses = fullNode.data && fullNode.data.subclasses && fullNode.data.subclasses.length > 0;
-                if (hasSubclasses) {
-                    var container = document.getElementById("KGquery_graphDiv");
-                    var rect = container ? container.getBoundingClientRect() : { left: 0, top: 0 };
-                    var clickEvent = { clientX: (point && point.x ? point.x : 0) + rect.left, clientY: (point && point.y ? point.y : 0) + rect.top };
-                    self.onSubclassExpandClick(node.id, clickEvent);
-                    return;
-                }
+                // var fullNode = (self.KGqueryGraph && self.KGqueryGraph.data && self.KGqueryGraph.data.nodes.get(node.id)) || node;
+                // var hasSubclasses = fullNode.data && fullNode.data.subclasses && fullNode.data.subclasses.length > 0;
+                // if (hasSubclasses) {
+                //     var container = document.getElementById("KGquery_graphDiv");
+                //     var rect = container ? container.getBoundingClientRect() : { left: 0, top: 0 };
+                //     var clickEvent = { clientX: (point && point.x ? point.x : 0) + rect.left, clientY: (point && point.y ? point.y : 0) + rect.top };
+                //     self.onSubclassExpandClick(node.id, clickEvent);
+                //     return;
+                // }
                 if (nodeEvent.ctrlKey) {
                     NodeInfosWidget.showNodeInfos(KGquery.currentSource, node, "smallDialogDiv", {});
                 } else {

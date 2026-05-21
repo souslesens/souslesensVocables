@@ -10,6 +10,7 @@ import SourceSelectorWidget from "../uiWidgets/sourceSelectorWidget.js";
 import GraphLoader from "./graphLoader.js";
 import UI from "../../modules/shared/UI.js";
 import Authentification from "./authentification.js";
+import UserDataWidget from "../uiWidgets/userDataWidget.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -338,7 +339,7 @@ var MainController = (function () {
 
         // set or replace tool in url params
         const params = new URLSearchParams(document.location.search);
-        if (toolId != "ConfigEditor") {
+        if (toolId != "ConfigEditor" && toolId != "UserSettings") {
             params.delete("tab");
         }
         params.set("tool", toolId);
@@ -364,16 +365,24 @@ var MainController = (function () {
         // old or new url
         if (paramsMap.tool) {
             var tool = paramsMap["tool"];
+            var source = paramsMap["source"];
+            var dataId = paramsMap["dataId"];
 
-            if (tool) {
-                var source = paramsMap["source"];
+            if (source) {
+                self.currentSource = source;
+            }
 
-                var url = window.location.href;
-
-                // if tool available load it in responsive
-                if (source) {
-                    self.currentSource = source;
-                }
+            if (dataId) {
+                UserDataWidget.loadUserDatabyId(dataId, function (err, userData) {
+                    if (!err && userData) {
+                        Config.pendingUserData = userData;
+                        MainController.onToolSelect(tool);
+                    } else {
+                        console.error("Failed to load user data:", err);
+                        MainController.onToolSelect(tool);
+                    }
+                });
+            } else {
                 MainController.onToolSelect(tool);
             }
         }

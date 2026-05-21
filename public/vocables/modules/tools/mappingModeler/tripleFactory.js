@@ -195,7 +195,7 @@ var TripleFactory = (function () {
             if (!self.checkCurrentTable) {
                 return;
             }
-            if (!confirm("Do you really want to delete  triples created with KGCreator in datasource " + DataSourceManager.currentConfig.currentDataSource.name)) {
+            if (!confirm("Do you really want to delete triples in table " + MappingModeler.currentTable.name)) {
                 return;
             }
 

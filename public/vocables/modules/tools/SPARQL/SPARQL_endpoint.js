@@ -18,18 +18,23 @@ var SPARQL_endpoint = (function () {
     self.currentSource;
 
     self.onLoaded = function () {
-        //  self.currentSource = sourceLabel;
-        // self.currentSparql_server = Config.sources[sourceLabel].sparql_server;
-        //  self.currentSparql_server = Config.sparql_server.urlsparql_server;
-        //localStorage.clear();
-
-        //$("#mainDialogDiv").parent().css("left", "100px");
         $("#mainDialogDiv").css("width", "1000px");
         $("#graphDiv").html("");
         $("#mainDialogDiv").load("modules/tools/SPARQL/SPARQLendpoint.html", function () {
             UI.openDialog("mainDialogDiv", { title: "SPARQL endpoint" });
             UI.clampAndCenterDialog("mainDialogDiv");
             self.initYasGui();
+
+            if (Config.pendingUserData && Config.pendingUserData.data_type === "sparqlQuery") {
+                var queryText = Config.pendingUserData.data_content && Config.pendingUserData.data_content.sparqlQuery;
+                if (queryText) {
+                    self.yasgui.addTab(true, {
+                        yasqe: { value: queryText },
+                        name: Config.pendingUserData.data_label || "Loaded query",
+                    });
+                }
+                Config.pendingUserData = null;
+            }
         });
     };
 

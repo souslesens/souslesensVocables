@@ -127,11 +127,19 @@ var Lineage_whiteboard = (function () {
         $("KGquery_messageDiv").attr("id", "messageDiv");
         $("KGquery_waitImg").attr("id", "waitImg");
 
-        self.resetVisjsGraph();
         $("#rightControlPanelDiv").load("./modules/tools/lineage/html/whiteBoardButtons.html", function () {
             UI.resetWindowSize();
         });
         self.installLegendAutoHideOnNodeInfos();
+
+        if (Config.pendingUserData && Config.pendingUserData.data_content) {
+            self.loadGraphFromJSON(Config.pendingUserData.data_content);
+            Config.pendingUserData = null;
+            self._pendingDataLoaded = true;
+            return;
+        }
+
+        self.resetVisjsGraph();
     };
 
     /**
@@ -208,6 +216,11 @@ var Lineage_whiteboard = (function () {
             $("#lateralPanelDiv").load("./modules/tools/lineage/html/lateralPanel.html", function () {
                 Lineage_whiteboard.initWhiteboardTab();
                 //  Lineage_whiteboard.initClassesTab();
+
+                if (self._pendingDataLoaded) {
+                    return;
+                }
+
                 Lineage_whiteboard.initUI();
             });
         });
@@ -4850,7 +4863,7 @@ attrs.color=self.getSourceColor(superClassValue)
             }
         });
 
-        if (Lineage_whiteboard.lineageVisjsGraph?.data?.nodes || Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
+        if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
             Lineage_whiteboard.addVisDataToGraph(visjsData);
 
             Lineage_whiteboard.lineageVisjsGraph.network.fit();

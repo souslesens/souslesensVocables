@@ -1669,6 +1669,7 @@ var Lineage_whiteboard = (function () {
             options = {};
         }
         options.selectGraph = 1;
+        options.includeSources=[MainController.currentSource]
         var existingNodes = self.lineageVisjsGraph.getExistingIdsMap();
 
         var visjsData = { nodes: [], edges: [] };
@@ -1854,7 +1855,7 @@ var Lineage_whiteboard = (function () {
         }
         options.skipRestrictions = 1;
         options.selectGraph = 1;
-
+        options.includeSources=[MainController.currentSource]
         options.filter = ' FILTER (regex(str(?child1),"http"))';
 
         Sparql_generic.getNodeChildren(source, null, parentIds, depth, options, function (err, result) {

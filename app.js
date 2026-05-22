@@ -360,19 +360,28 @@ if (config.auth == "disabled") {
     });
 } else if (config.auth == "keycloak" || config.auth == "auth0") {
     app.get("/login", function (req, res, next) {
+        const redirect = formatRedirectPath(req.query.redirect);
+        req.session.returnTo = redirect;
         passport.authenticate(config.auth, { scope: ["openid", "email", "profile"] })(req, res, next);
     });
     app.get("/login/callback", function (req, res, next) {
-        passport.authenticate(config.auth, { successRedirect: "/vocables", failureRedirect: "/login" })(req, res, next);
+        const redirect = req.session.returnTo || formatRedirectPath(req.query.redirect);
+        delete req.session.returnTo;
+        passport.authenticate(config.auth, { successRedirect: redirect, failureRedirect: "/login" })(req, res, next);
     });
 } else {
     app.get("/login", function (req, res, next) {
-        const redirect = formatRedirectPath(req.query.redirect);
+        const redirect = req.session.returnTo || formatRedirectPath(req.query.redirect);
         res.render("login", { title: "souslesensVocables - Login", redirect: redirect });
     });
     app.post("/auth/login", function (req, res, next) {
         const redirect = formatRedirectPath(req.query.redirect);
-        passport.authenticate("local", { successRedirect: redirect, failureRedirect: "/login", failureMessage: true })(req, res, next);
+        req.session.returnTo = redirect;
+        passport.authenticate("local", {
+            successRedirect: redirect,
+            failureRedirect: "/login?redirect=" + encodeURIComponent(redirect),
+            failureMessage: true,
+        })(req, res, next);
     });
 }
 // catch 404 and forward to error handler

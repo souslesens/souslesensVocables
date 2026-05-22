@@ -860,6 +860,7 @@ var KGquery_graph = (function () {
      */
     self.loadSaved = function () {
         var displayGraphInList = $("#KGquery_displayGraphInList").prop("checked");
+        self.visjsData = null;
         self.drawVisjsModel("saved", { displayGraphInList: displayGraphInList });
     };
 

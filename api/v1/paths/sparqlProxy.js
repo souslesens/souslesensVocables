@@ -16,7 +16,6 @@ export default function () {
                 var body = JSON.parse(req.body.body);
                 var query = body.params.query;
 
-
                 if (ConfigManager.config && req.body.url.indexOf(ConfigManager.config.sparql_server.url) == 0) {
                     if (ConfigManager.config.sparql_server.user) {
                         body.params.auth = {

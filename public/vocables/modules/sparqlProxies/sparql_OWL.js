@@ -492,7 +492,9 @@ var Sparql_OWL = (function () {
             query += " OPTIONAL { ?subject rdfs:label ?subjectLabel.}";
         }
         query += " }}\n";
-        query += " filter( ?subjectGraph" + i + " in " + fromList + " ).\n";
+
+        // what is the reason of this filter ?????
+        //  query += " filter( ?subjectGraph" + i + " in " + fromList + " ).\n";
         query += " OPTIONAL {?subject rdfs:subClassOf ?subjectSuperClass.}\n";
         //query += " }\n";
         ancestorsDepth = Math.min(ancestorsDepth, self.ancestorsDepth);

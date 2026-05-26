@@ -52,6 +52,7 @@ var Similars_bot = (function () {
         _OR: {
             "exact match": { exactMatchFn: { elasticQueryFn: { filterResultsWorkflowFn: {} } } },
             "fuzzy match": { fuzzyMatchFn: { elasticQueryFn: { filterResultsWorkflowFn: {} } } },
+            AIsimilars: { aiSimilarsFn: { filterResultsWorkflowFn: {} } },
         },
     };
     self.filterResultsWorkflow = {
@@ -210,6 +211,15 @@ var Similars_bot = (function () {
         sourceWorkflowFn: function () {
             self.myBotEngine.currentObj = self.sourceWorkflow;
             self.myBotEngine.nextStep();
+        },
+
+        aiSimilarsFn: function () {
+            Lineage_similars.drawSourceAISimilars(Lineage_sources.activeSource, self.params.source[0], self.params.mode, self.params.nodeSelection, "no draw", function (err, result) {
+                if (err) {
+                    return self.myBotEngine.end(err);
+                }
+                self.myBotEngine.nextStep();
+            });
         },
     };
     return self;

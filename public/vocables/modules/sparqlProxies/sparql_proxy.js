@@ -38,8 +38,8 @@ var Sparql_proxy = (function () {
         if (url.indexOf("_default") == 0) {
             url = Config.sparql_server.url;
         }
-        if(query.toUpperCase().indexOf("CONSTRUCT ")>-1){
-            url=url.replace("json","text%2Fturtle")
+        if (query.toUpperCase().indexOf("CONSTRUCT ") > -1) {
+            url = url.replace("json", "text%2Fturtle");
         }
 
         var sourceParams;
@@ -121,7 +121,6 @@ query=query.replace(/GRAPH ?[a-zA-Z0-9]+\{/,"{")
             if (query.toUpperCase().indexOf("CONSTRUCT ") > -1) {
                 headers = { "Content-Type": "text/turtle; charset=UTF-8" };
             }
-
 
             query = Sparql_common.addBasicVocabulariesPrefixes(query);
             var body = {

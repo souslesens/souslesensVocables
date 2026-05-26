@@ -328,8 +328,137 @@ var elasticRestProxy = {
                     if (!options.replaceIndex) {
                         return callbackSeries();
                     }
-
                     var mappings = {
+                        settings: {
+                            analysis: {
+                                filter: {
+                                    english_stop: {
+                                        type: "stop",
+                                        stopwords: "_english_",
+                                    },
+                                    english_stemmer: {
+                                        type: "stemmer",
+                                        language: "english",
+                                    },
+                                },
+                                tokenizer: {
+                                    edge_ngram_tokenizer: {
+                                        type: "edge_ngram",
+                                        min_gram: 2,
+                                        max_gram: 20,
+                                        token_chars: ["letter", "digit"],
+                                    },
+                                    trigram_tokenizer: {
+                                        type: "ngram",
+                                        min_gram: 3,
+                                        max_gram: 3,
+                                        token_chars: ["letter", "digit"],
+                                    },
+                                },
+                                analyzer: {
+                                    ontology_index_analyzer: {
+                                        type: "custom",
+                                        tokenizer: "standard",
+                                        filter: ["lowercase", "asciifolding", "english_stop", "english_stemmer"],
+                                    },
+                                    ontology_search_analyzer: {
+                                        type: "custom",
+                                        tokenizer: "standard",
+                                        filter: ["lowercase", "asciifolding", "english_stop", "english_stemmer"],
+                                    },
+                                    ontology_edge_analyzer: {
+                                        type: "custom",
+                                        tokenizer: "edge_ngram_tokenizer",
+                                        filter: ["lowercase", "asciifolding"],
+                                    },
+                                    ontology_trigram_analyzer: {
+                                        type: "custom",
+                                        tokenizer: "trigram_tokenizer",
+                                        filter: ["lowercase", "asciifolding"],
+                                    },
+                                    keyword_text_analyzer: {
+                                        type: "custom",
+                                        tokenizer: "keyword",
+                                        filter: ["lowercase", "asciifolding"],
+                                    },
+                                },
+                                normalizer: {
+                                    ontology_keyword_normalizer: {
+                                        type: "custom",
+                                        filter: ["lowercase", "asciifolding"],
+                                    },
+                                },
+                            },
+                        },
+                        mappings: {
+                            properties: {
+                                label: {
+                                    type: "text",
+                                    analyzer: "ontology_index_analyzer",
+                                    search_analyzer: "ontology_search_analyzer",
+                                    fields: {
+                                        keyword: {
+                                            type: "keyword",
+                                            normalizer: "ontology_keyword_normalizer",
+                                        },
+                                        raw_text: {
+                                            type: "text",
+                                            analyzer: "keyword_text_analyzer",
+                                        },
+                                        edge: {
+                                            type: "text",
+                                            analyzer: "ontology_edge_analyzer",
+                                            search_analyzer: "standard",
+                                        },
+                                        trigram: {
+                                            type: "text",
+                                            analyzer: "ontology_trigram_analyzer",
+                                            search_analyzer: "standard",
+                                        },
+                                    },
+                                },
+                                skoslabels: {
+                                    type: "text",
+                                    fielddata: true,
+                                    fields: {
+                                        keyword: {
+                                            type: "keyword",
+                                            ignore_above: 256,
+                                            normalizer: "lowercase_normalizer",
+                                        },
+                                    },
+                                },
+
+                                id: {
+                                    type: "text",
+                                    fielddata: true,
+                                    fields: {
+                                        keyword: {
+                                            type: "keyword",
+                                            ignore_above: 256,
+                                        },
+                                    },
+                                },
+                                parents: {
+                                    type: "text",
+                                    fields: {
+                                        keyword: {
+                                            type: "keyword",
+                                            ignore_above: 256,
+                                        },
+                                    },
+                                },
+                                owlType: {
+                                    type: "keyword",
+                                },
+                                lang: {
+                                    type: "keyword",
+                                },
+                            },
+                        },
+                    };
+
+                    var mappingsOld = {
                         settings: {
                             analysis: {
                                 normalizer: {

@@ -1,7 +1,5 @@
 import { processResponse } from "./utils.js";
 
-
-
 export default function () {
     let operations = {
         GET,
@@ -32,14 +30,14 @@ export default function () {
                 description: "classUri",
                 in: "body",
                 type: "string",
-                required:true,
+                required: true,
             },
             {
                 name: "divId",
                 description: "divId",
                 in: "body",
                 type: "string",
-                required:true,
+                required: true,
             },
         ],
     };

@@ -722,11 +722,35 @@ var MappingColumnsGraph = (function () {
          * @returns {void}
          */
         removeNodeFromGraph: function () {
-            if (confirm("Delete node?")) {
-                var edges = self.visjsGraph.network.getConnectedEdges(self.currentGraphNode.id);
-                self.removeEdge(edges);
-                self.removeNode(self.currentGraphNode.id);
+            if (!confirm("Delete node?")) {
+                return;
             }
+            var node = self.currentGraphNode;
+            if (node.data && node.data.type === "Class") {
+                var allConnectedColumns = self.getClassColumns(node);
+                var currentTable = MappingModeler.currentTable ? MappingModeler.currentTable.name : null;
+                var columnsFromOtherTables = allConnectedColumns.filter(function (col) {
+                    return col.data && col.data.dataTable !== currentTable;
+                });
+                if (columnsFromOtherTables.length > 0) {
+                    var edgesToRemove = allConnectedColumns
+                        .filter(function (col) {
+                            return col.data && col.data.dataTable === currentTable;
+                        })
+                        .map(function (col) {
+                            return self.visjsGraph.network.getConnectedEdges(col.id);
+                        })
+                        .reduce(function (acc, val) {
+                            return acc.concat(val);
+                        }, []);
+                    self.removeEdge(edgesToRemove);
+                    self.saveVisjsGraph();
+                    return;
+                }
+            }
+            var edges = self.visjsGraph.network.getConnectedEdges(node.id);
+            self.removeEdge(edges);
+            self.removeNode(node.id);
         },
 
         /**

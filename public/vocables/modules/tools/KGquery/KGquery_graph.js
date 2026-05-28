@@ -1244,7 +1244,7 @@ var KGquery_graph = (function () {
      * @returns {void}
      */
     self.manageSubclasses = function (source, visjsData, callback) {
-        if (!visjsData || !visjsData.edges || visjsData.edges.length === 0) {
+        if (!visjsData || !visjsData.edges || visjsData.edges.length === 0) {            
             return callback();
         }
         KGquery_graph.message("managing subclasses ...");
@@ -1261,12 +1261,18 @@ var KGquery_graph = (function () {
         nodesUris.forEach(function (nodeUri) {
             descendatsMaps[nodeUri] = OntologyModels.getClassHierarchyTreeData(source, nodeUri, "descendants");
             if (descendatsMaps[nodeUri] && descendatsMaps[nodeUri].length > 0) {
-                var directSuperClass = descendatsMaps[nodeUri][0].superClass;
-                directSuperClassCounts[directSuperClass] = (directSuperClassCounts[directSuperClass] || 0) + 1;
-                if (!directSuperClassMaps[directSuperClass]) {
-                    directSuperClassMaps[directSuperClass] = [];
+                var directSuperClass = descendatsMaps[nodeUri][0]?.superClass;
+                if(directSuperClass) {
+                    directSuperClassCounts[directSuperClass] = (directSuperClassCounts[directSuperClass] || 0) + 1;
+                    if (!directSuperClassMaps[directSuperClass]) {
+                        directSuperClassMaps[directSuperClass] = [];
+                    }
+                    directSuperClassMaps[directSuperClass].push(nodeUri);
+                }else{
+                    console.log("No direct superclass found for node " + nodeUri);
                 }
-                directSuperClassMaps[directSuperClass].push(nodeUri);
+
+                
             }
         });
 
@@ -1281,6 +1287,17 @@ var KGquery_graph = (function () {
         if (commonSuperClassNotInGraph.length === 0) {
             return callback();
         }
+
+        // Map node URI → its direct superclass when that superclass is itself a regrouping target.
+        // Used to relax the pair-match in Phase 2: two edges may be considered equivalent when their
+        // endpoints differ but both endpoints will be merged under the same regrouping superclass.
+        var nodeToRegroupingSuperClass = {};
+        nodesUris.forEach(function (nodeUri) {
+            var directSuper = descendatsMaps[nodeUri] && descendatsMaps[nodeUri][0] ? descendatsMaps[nodeUri][0].superClass : null;
+            if (directSuper && commonSuperClassNotInGraph.includes(directSuper)) {
+                nodeToRegroupingSuperClass[nodeUri] = directSuper;
+            }
+        });
 
         // --- Phase 2: detect edges shared by sibling subclasses ---
         // commonSubClassEdges[superClassUri] — edges promoted to the superclass level
@@ -1311,8 +1328,16 @@ var KGquery_graph = (function () {
                     const subClassUri2 = subClassUris[j];
                     edgesGroup1.forEach(function (edge1) {
                         edgesGroup2.forEach(function (edge2) {
+                            var outgoingTargetsMatch =
+                                edge1.to == edge2.to ||
+                                (nodeToRegroupingSuperClass[edge1.to] &&
+                                    nodeToRegroupingSuperClass[edge1.to] === nodeToRegroupingSuperClass[edge2.to]);
+                            var incomingSourcesMatch =
+                                edge1.from == edge2.from ||
+                                (nodeToRegroupingSuperClass[edge1.from] &&
+                                    nodeToRegroupingSuperClass[edge1.from] === nodeToRegroupingSuperClass[edge2.from]);
                             // Outgoing match: both subclasses point to the same target via the same property
-                            if (edge1.from == subClassUri1 && edge2.from == subClassUri2 && edge1.to == edge2.to && edge1.data.propertyId == edge2.data.propertyId) {
+                            if (edge1.from == subClassUri1 && edge2.from == subClassUri2 && outgoingTargetsMatch && edge1.data.propertyId == edge2.data.propertyId) {
                                 var newEdge = common.array.deepCloneWithFunctions(edge1);
                                 newEdge.id = superClassUri + "_" + edge1.data.propertyId + "_" + edge1.to;
                                 newEdge.from = superClassUri;
@@ -1330,7 +1355,7 @@ var KGquery_graph = (function () {
                                 }
                             }
                             // Incoming match: both subclasses receive an edge from the same source via the same property
-                            if (edge1.to == subClassUri1 && edge2.to == subClassUri2 && edge1.from == edge2.from && edge1.data.propertyId == edge2.data.propertyId) {
+                            if (edge1.to == subClassUri1 && edge2.to == subClassUri2 && incomingSourcesMatch && edge1.data.propertyId == edge2.data.propertyId) {
                                 var newEdge = common.array.deepCloneWithFunctions(edge1);
                                 newEdge.id = edge1.from + "_" + edge1.data.propertyId + "_" + superClassUri;
                                 newEdge.to = superClassUri;

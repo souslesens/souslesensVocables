@@ -1244,7 +1244,7 @@ var KGquery_graph = (function () {
      * @returns {void}
      */
     self.manageSubclasses = function (source, visjsData, callback) {
-        if (!visjsData || !visjsData.edges || visjsData.edges.length === 0) {            
+        if (!visjsData || !visjsData.edges || visjsData.edges.length === 0) {
             return callback();
         }
         KGquery_graph.message("managing subclasses ...");
@@ -1262,17 +1262,15 @@ var KGquery_graph = (function () {
             descendatsMaps[nodeUri] = OntologyModels.getClassHierarchyTreeData(source, nodeUri, "descendants");
             if (descendatsMaps[nodeUri] && descendatsMaps[nodeUri].length > 0) {
                 var directSuperClass = descendatsMaps[nodeUri][0]?.superClass;
-                if(directSuperClass) {
+                if (directSuperClass) {
                     directSuperClassCounts[directSuperClass] = (directSuperClassCounts[directSuperClass] || 0) + 1;
                     if (!directSuperClassMaps[directSuperClass]) {
                         directSuperClassMaps[directSuperClass] = [];
                     }
                     directSuperClassMaps[directSuperClass].push(nodeUri);
-                }else{
+                } else {
                     console.log("No direct superclass found for node " + nodeUri);
                 }
-
-                
             }
         });
 
@@ -1328,14 +1326,9 @@ var KGquery_graph = (function () {
                     const subClassUri2 = subClassUris[j];
                     edgesGroup1.forEach(function (edge1) {
                         edgesGroup2.forEach(function (edge2) {
-                            var outgoingTargetsMatch =
-                                edge1.to == edge2.to ||
-                                (nodeToRegroupingSuperClass[edge1.to] &&
-                                    nodeToRegroupingSuperClass[edge1.to] === nodeToRegroupingSuperClass[edge2.to]);
+                            var outgoingTargetsMatch = edge1.to == edge2.to || (nodeToRegroupingSuperClass[edge1.to] && nodeToRegroupingSuperClass[edge1.to] === nodeToRegroupingSuperClass[edge2.to]);
                             var incomingSourcesMatch =
-                                edge1.from == edge2.from ||
-                                (nodeToRegroupingSuperClass[edge1.from] &&
-                                    nodeToRegroupingSuperClass[edge1.from] === nodeToRegroupingSuperClass[edge2.from]);
+                                edge1.from == edge2.from || (nodeToRegroupingSuperClass[edge1.from] && nodeToRegroupingSuperClass[edge1.from] === nodeToRegroupingSuperClass[edge2.from]);
                             // Outgoing match: both subclasses point to the same target via the same property
                             if (edge1.from == subClassUri1 && edge2.from == subClassUri2 && outgoingTargetsMatch && edge1.data.propertyId == edge2.data.propertyId) {
                                 var newEdge = common.array.deepCloneWithFunctions(edge1);
@@ -1749,7 +1742,16 @@ var KGquery_graph = (function () {
         var itemsHtml = "";
         node.data.subclasses.forEach(function (subclassUri) {
             var label = self.labelsMap[subclassUri] || Sparql_common.getLabelFromURI(subclassUri);
-            itemsHtml += '    <span class="popupMenuItem"' + itemStyle + ' onclick="event.stopPropagation(); KGquery_graph.onSubclassSelected(\'' + nodeId + "', '" + subclassUri + "');\"> " + label + " </span>";
+            itemsHtml +=
+                '    <span class="popupMenuItem"' +
+                itemStyle +
+                " onclick=\"event.stopPropagation(); KGquery_graph.onSubclassSelected('" +
+                nodeId +
+                "', '" +
+                subclassUri +
+                "');\"> " +
+                label +
+                " </span>";
         });
 
         var html = itemsHtml;
@@ -1988,7 +1990,6 @@ var KGquery_graph = (function () {
                 if (self.KGqueryGraph && self.KGqueryGraph.network) {
                     self.KGqueryGraph.network.stopSimulation();
                     self.KGqueryGraph.network.setOptions({ physics: { enabled: false } });
-                  
                 }
             }, 5000);
             self.KGqueryGraph.network.once("stabilized", function () {

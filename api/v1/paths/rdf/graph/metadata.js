@@ -63,7 +63,7 @@ export default function () {
                 in: "body",
                 description:
                     "Metadata entries to add and to remove. Each entry is an object describing one predicate/object pair " +
-                    "on the graph URI: `{ metadata, value, type, datatype?, \"xml:lang\"? }`. " +
+                    'on the graph URI: `{ metadata, value, type, datatype?, "xml:lang"? }`. ' +
                     "`type` is one of `uri`, `literal`, `typed-literal`.",
                 schema: {
                     type: "object",

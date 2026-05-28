@@ -376,7 +376,7 @@ var MappingsDetails = (function () {
         html += isColumnAllreadyMapped
             ? `<button class='slsv-button-1' id='class-datatype' style='padding:6px 6px;margin:0px;margin-right: 5px;' onclick='MappingsDetails.setNodeAsMainColumn("${column.id}")'>set as mainColumn </button>`
             : "";
-        html += `<button class='slsv-button-1' id='class-datatype' style='padding:6px 6px;margin:0px;margin-right: 5px;' onclick='MappingsDetails.showSpecificMappingsBot("${column.id}")'> More mappings... </button>`;
+        html += `<button class='slsv-button-1' id='class-datatype' style='padding:6px 6px;margin:0px;margin-right: 5px;' onclick='MappingsDetails.saveMappingsDetailsToVisjsGraph("${column.id}");MappingsDetails.showSpecificMappingsBot("${column.id}")'> More mappings... </button>`;
         html += `<button class='slsv-button-1' id='class-datatype' style='padding:6px 6px;margin:0px;margin-right: 5px;' onclick='MappingsDetails.saveMappingsDetailsToVisjsGraph("${column.id}");MappingsDetails.afterSaveColumnTechnicalMappingsDialog() '> Save </button> </td></tr></table>`;
 
         $("#" + divId).html(html);

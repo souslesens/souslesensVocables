@@ -1261,12 +1261,16 @@ var KGquery_graph = (function () {
         nodesUris.forEach(function (nodeUri) {
             descendatsMaps[nodeUri] = OntologyModels.getClassHierarchyTreeData(source, nodeUri, "descendants");
             if (descendatsMaps[nodeUri] && descendatsMaps[nodeUri].length > 0) {
-                var directSuperClass = descendatsMaps[nodeUri][0].superClass;
-                directSuperClassCounts[directSuperClass] = (directSuperClassCounts[directSuperClass] || 0) + 1;
-                if (!directSuperClassMaps[directSuperClass]) {
-                    directSuperClassMaps[directSuperClass] = [];
+                var directSuperClass = descendatsMaps[nodeUri][0]?.superClass;
+                if (directSuperClass) {
+                    directSuperClassCounts[directSuperClass] = (directSuperClassCounts[directSuperClass] || 0) + 1;
+                    if (!directSuperClassMaps[directSuperClass]) {
+                        directSuperClassMaps[directSuperClass] = [];
+                    }
+                    directSuperClassMaps[directSuperClass].push(nodeUri);
+                } else {
+                    console.log("No direct superclass found for node " + nodeUri);
                 }
-                directSuperClassMaps[directSuperClass].push(nodeUri);
             }
         });
 
@@ -1281,6 +1285,17 @@ var KGquery_graph = (function () {
         if (commonSuperClassNotInGraph.length === 0) {
             return callback();
         }
+
+        // Map node URI → its direct superclass when that superclass is itself a regrouping target.
+        // Used to relax the pair-match in Phase 2: two edges may be considered equivalent when their
+        // endpoints differ but both endpoints will be merged under the same regrouping superclass.
+        var nodeToRegroupingSuperClass = {};
+        nodesUris.forEach(function (nodeUri) {
+            var directSuper = descendatsMaps[nodeUri] && descendatsMaps[nodeUri][0] ? descendatsMaps[nodeUri][0].superClass : null;
+            if (directSuper && commonSuperClassNotInGraph.includes(directSuper)) {
+                nodeToRegroupingSuperClass[nodeUri] = directSuper;
+            }
+        });
 
         // --- Phase 2: detect edges shared by sibling subclasses ---
         // commonSubClassEdges[superClassUri] — edges promoted to the superclass level
@@ -1311,8 +1326,11 @@ var KGquery_graph = (function () {
                     const subClassUri2 = subClassUris[j];
                     edgesGroup1.forEach(function (edge1) {
                         edgesGroup2.forEach(function (edge2) {
+                            var outgoingTargetsMatch = edge1.to == edge2.to || (nodeToRegroupingSuperClass[edge1.to] && nodeToRegroupingSuperClass[edge1.to] === nodeToRegroupingSuperClass[edge2.to]);
+                            var incomingSourcesMatch =
+                                edge1.from == edge2.from || (nodeToRegroupingSuperClass[edge1.from] && nodeToRegroupingSuperClass[edge1.from] === nodeToRegroupingSuperClass[edge2.from]);
                             // Outgoing match: both subclasses point to the same target via the same property
-                            if (edge1.from == subClassUri1 && edge2.from == subClassUri2 && edge1.to == edge2.to && edge1.data.propertyId == edge2.data.propertyId) {
+                            if (edge1.from == subClassUri1 && edge2.from == subClassUri2 && outgoingTargetsMatch && edge1.data.propertyId == edge2.data.propertyId) {
                                 var newEdge = common.array.deepCloneWithFunctions(edge1);
                                 newEdge.id = superClassUri + "_" + edge1.data.propertyId + "_" + edge1.to;
                                 newEdge.from = superClassUri;
@@ -1330,7 +1348,7 @@ var KGquery_graph = (function () {
                                 }
                             }
                             // Incoming match: both subclasses receive an edge from the same source via the same property
-                            if (edge1.to == subClassUri1 && edge2.to == subClassUri2 && edge1.from == edge2.from && edge1.data.propertyId == edge2.data.propertyId) {
+                            if (edge1.to == subClassUri1 && edge2.to == subClassUri2 && incomingSourcesMatch && edge1.data.propertyId == edge2.data.propertyId) {
                                 var newEdge = common.array.deepCloneWithFunctions(edge1);
                                 newEdge.id = edge1.from + "_" + edge1.data.propertyId + "_" + superClassUri;
                                 newEdge.to = superClassUri;
@@ -1403,6 +1421,8 @@ var KGquery_graph = (function () {
         visjsData.nodes.forEach(function (node) {
             if (groupedSubclassUris.includes(node.id)) {
                 node.hidden = true;
+                node.physics = false;
+                node.fixed = { x: true, y: true };
                 if (!node.data) node.data = {};
                 node.data.superclass = subclassToSuperclassMap[node.id];
             }
@@ -1474,6 +1494,19 @@ var KGquery_graph = (function () {
                 promotedEdge.data.subclassEdge = true;
                 visjsData.edges.push(promotedEdge);
             });
+        });
+
+        // Disable physics on edges touching any grouped (hidden) subclass — they're invisible and
+        // otherwise still contribute to the layout simulation, slowing layout and shaking the graph.
+        var groupedSet = {};
+        groupedSubclassUris.forEach(function (uri) {
+            groupedSet[uri] = true;
+        });
+        visjsData.edges.forEach(function (edge) {
+            if (groupedSet[edge.from] || groupedSet[edge.to]) {
+                edge.physics = false;
+                edge.hidden = true;
+            }
         });
 
         return callback();
@@ -1704,24 +1737,57 @@ var KGquery_graph = (function () {
         var node = self.KGqueryGraph.data.nodes.get(nodeId);
         if (!node || !node.data || !node.data.subclasses || node.data.subclasses.length === 0) return;
 
-        var html = "";
+        var needsScroll = node.data.subclasses.length > 5;
+        var itemStyle = needsScroll ? ' style="display:block; flex-shrink:0; padding:4px 8px;"' : "";
+        var itemsHtml = "";
         node.data.subclasses.forEach(function (subclassUri) {
             var label = self.labelsMap[subclassUri] || Sparql_common.getLabelFromURI(subclassUri);
-            html += '    <span class="popupMenuItem" onclick="event.stopPropagation(); KGquery_graph.onSubclassSelected(\'' + nodeId + "', '" + subclassUri + "');\"> " + label + " </span>";
+            itemsHtml +=
+                '    <span class="popupMenuItem"' +
+                itemStyle +
+                " onclick=\"event.stopPropagation(); KGquery_graph.onSubclassSelected('" +
+                nodeId +
+                "', '" +
+                subclassUri +
+                "');\"> " +
+                label +
+                " </span>";
         });
 
+        var html = itemsHtml;
+        if (needsScroll) {
+            html = '<div class="subclassPopupScroll" style="display:flex; flex-direction:column; max-height:150px; overflow-y:auto; min-width:200px;">' + itemsHtml + "</div>";
+        }
         $("#popupMenuWidgetDiv").html(html);
         var point = { x: event.clientX, y: event.clientY };
         PopupMenuWidget.showPopup(point, "popupMenuWidgetDiv");
         self.attachSubclassPopupDismiss();
     };
 
+    self.setNodePhysics = function (nodeId, enabled) {
+        self.KGqueryGraph.data.nodes.update({
+            id: nodeId,
+            hidden: !enabled,
+            physics: enabled,
+            fixed: enabled ? { x: false, y: false } : { x: true, y: true },
+        });
+        var edgeUpdates = [];
+        self.KGqueryGraph.data.edges.forEach(function (edge) {
+            if (edge.from === nodeId || edge.to === nodeId) {
+                edgeUpdates.push({ id: edge.id, hidden: !enabled, physics: enabled });
+            }
+        });
+        if (edgeUpdates.length > 0) {
+            self.KGqueryGraph.data.edges.update(edgeUpdates);
+        }
+    };
+
     self.onSubclassSelected = function (superclassId, subclassId) {
         $(document).off("mousedown.kgquerySubclassDismiss");
         PopupMenuWidget.hidePopup("popupMenuWidgetDiv");
         self.inheritWidthConstraint(superclassId, subclassId);
-        self.KGqueryGraph.data.nodes.update({ id: superclassId, hidden: true });
-        self.KGqueryGraph.data.nodes.update({ id: subclassId, hidden: false });
+        self.setNodePhysics(superclassId, false);
+        self.setNodePhysics(subclassId, true);
         var container = document.getElementById("KGquery_graphDiv");
         if (container) {
             var btn = container.querySelector('.subclass-expand-btn[data-node-id="' + superclassId + '"]');
@@ -1782,8 +1848,8 @@ var KGquery_graph = (function () {
         $(document).off("mousedown.kgquerySubclassDismiss");
         PopupMenuWidget.hidePopup("popupMenuWidgetDiv");
         self.inheritWidthConstraint(subclassId, superclassId);
-        self.KGqueryGraph.data.nodes.update({ id: subclassId, hidden: true });
-        self.KGqueryGraph.data.nodes.update({ id: superclassId, hidden: false });
+        self.setNodePhysics(subclassId, false);
+        self.setNodePhysics(superclassId, true);
         var container = document.getElementById("KGquery_graphDiv");
         if (container) {
             var btn = container.querySelector('.subclass-expand-btn[data-node-id="' + subclassId + '"]');
@@ -1915,6 +1981,22 @@ var KGquery_graph = (function () {
             self.renderSubclassExpandButtons();
             self.KGqueryGraph.network.on("afterDrawing", function () {
                 self.updateSubclassExpandButtonPositions();
+            });
+
+            if (self.spatializationTimeoutId) {
+                clearTimeout(self.spatializationTimeoutId);
+            }
+            self.spatializationTimeoutId = setTimeout(function () {
+                if (self.KGqueryGraph && self.KGqueryGraph.network) {
+                    self.KGqueryGraph.network.stopSimulation();
+                    self.KGqueryGraph.network.setOptions({ physics: { enabled: false } });
+                }
+            }, 5000);
+            self.KGqueryGraph.network.once("stabilized", function () {
+                if (self.spatializationTimeoutId) {
+                    clearTimeout(self.spatializationTimeoutId);
+                    self.spatializationTimeoutId = null;
+                }
             });
 
             if (callback) {

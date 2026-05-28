@@ -151,7 +151,8 @@ var Lineage_createSLSVsource = (function () {
         $.ajax({
             type: "POST",
             url: `${Config.apiUrl}/sources`,
-            data: payload,
+            contentType: "application/json",
+            data: JSON.stringify(payload),
             dataType: "json",
             success: function (data, _textStatus, _jqXHR) {
                 return callback(null, data);

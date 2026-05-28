@@ -1428,6 +1428,8 @@ var KGquery_graph = (function () {
         visjsData.nodes.forEach(function (node) {
             if (groupedSubclassUris.includes(node.id)) {
                 node.hidden = true;
+                node.physics = false;
+                node.fixed = { x: true, y: true };
                 if (!node.data) node.data = {};
                 node.data.superclass = subclassToSuperclassMap[node.id];
             }
@@ -1499,6 +1501,19 @@ var KGquery_graph = (function () {
                 promotedEdge.data.subclassEdge = true;
                 visjsData.edges.push(promotedEdge);
             });
+        });
+
+        // Disable physics on edges touching any grouped (hidden) subclass — they're invisible and
+        // otherwise still contribute to the layout simulation, slowing layout and shaking the graph.
+        var groupedSet = {};
+        groupedSubclassUris.forEach(function (uri) {
+            groupedSet[uri] = true;
+        });
+        visjsData.edges.forEach(function (edge) {
+            if (groupedSet[edge.from] || groupedSet[edge.to]) {
+                edge.physics = false;
+                edge.hidden = true;
+            }
         });
 
         return callback();
@@ -1747,12 +1762,30 @@ var KGquery_graph = (function () {
         self.attachSubclassPopupDismiss();
     };
 
+    self.setNodePhysics = function (nodeId, enabled) {
+        self.KGqueryGraph.data.nodes.update({
+            id: nodeId,
+            hidden: !enabled,
+            physics: enabled,
+            fixed: enabled ? { x: false, y: false } : { x: true, y: true },
+        });
+        var edgeUpdates = [];
+        self.KGqueryGraph.data.edges.forEach(function (edge) {
+            if (edge.from === nodeId || edge.to === nodeId) {
+                edgeUpdates.push({ id: edge.id, hidden: !enabled, physics: enabled });
+            }
+        });
+        if (edgeUpdates.length > 0) {
+            self.KGqueryGraph.data.edges.update(edgeUpdates);
+        }
+    };
+
     self.onSubclassSelected = function (superclassId, subclassId) {
         $(document).off("mousedown.kgquerySubclassDismiss");
         PopupMenuWidget.hidePopup("popupMenuWidgetDiv");
         self.inheritWidthConstraint(superclassId, subclassId);
-        self.KGqueryGraph.data.nodes.update({ id: superclassId, hidden: true });
-        self.KGqueryGraph.data.nodes.update({ id: subclassId, hidden: false });
+        self.setNodePhysics(superclassId, false);
+        self.setNodePhysics(subclassId, true);
         var container = document.getElementById("KGquery_graphDiv");
         if (container) {
             var btn = container.querySelector('.subclass-expand-btn[data-node-id="' + superclassId + '"]');
@@ -1813,8 +1846,8 @@ var KGquery_graph = (function () {
         $(document).off("mousedown.kgquerySubclassDismiss");
         PopupMenuWidget.hidePopup("popupMenuWidgetDiv");
         self.inheritWidthConstraint(subclassId, superclassId);
-        self.KGqueryGraph.data.nodes.update({ id: subclassId, hidden: true });
-        self.KGqueryGraph.data.nodes.update({ id: superclassId, hidden: false });
+        self.setNodePhysics(subclassId, false);
+        self.setNodePhysics(superclassId, true);
         var container = document.getElementById("KGquery_graphDiv");
         if (container) {
             var btn = container.querySelector('.subclass-expand-btn[data-node-id="' + subclassId + '"]');
@@ -1946,6 +1979,23 @@ var KGquery_graph = (function () {
             self.renderSubclassExpandButtons();
             self.KGqueryGraph.network.on("afterDrawing", function () {
                 self.updateSubclassExpandButtonPositions();
+            });
+
+            if (self.spatializationTimeoutId) {
+                clearTimeout(self.spatializationTimeoutId);
+            }
+            self.spatializationTimeoutId = setTimeout(function () {
+                if (self.KGqueryGraph && self.KGqueryGraph.network) {
+                    self.KGqueryGraph.network.stopSimulation();
+                    self.KGqueryGraph.network.setOptions({ physics: { enabled: false } });
+                  
+                }
+            }, 5000);
+            self.KGqueryGraph.network.once("stabilized", function () {
+                if (self.spatializationTimeoutId) {
+                    clearTimeout(self.spatializationTimeoutId);
+                    self.spatializationTimeoutId = null;
+                }
             });
 
             if (callback) {

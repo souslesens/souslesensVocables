@@ -1729,12 +1729,18 @@ var KGquery_graph = (function () {
         var node = self.KGqueryGraph.data.nodes.get(nodeId);
         if (!node || !node.data || !node.data.subclasses || node.data.subclasses.length === 0) return;
 
-        var html = "";
+        var needsScroll = node.data.subclasses.length > 5;
+        var itemStyle = needsScroll ? ' style="display:block; flex-shrink:0; padding:4px 8px;"' : "";
+        var itemsHtml = "";
         node.data.subclasses.forEach(function (subclassUri) {
             var label = self.labelsMap[subclassUri] || Sparql_common.getLabelFromURI(subclassUri);
-            html += '    <span class="popupMenuItem" onclick="event.stopPropagation(); KGquery_graph.onSubclassSelected(\'' + nodeId + "', '" + subclassUri + "');\"> " + label + " </span>";
+            itemsHtml += '    <span class="popupMenuItem"' + itemStyle + ' onclick="event.stopPropagation(); KGquery_graph.onSubclassSelected(\'' + nodeId + "', '" + subclassUri + "');\"> " + label + " </span>";
         });
 
+        var html = itemsHtml;
+        if (needsScroll) {
+            html = '<div class="subclassPopupScroll" style="display:flex; flex-direction:column; max-height:150px; overflow-y:auto; min-width:200px;">' + itemsHtml + "</div>";
+        }
         $("#popupMenuWidgetDiv").html(html);
         var point = { x: event.clientX, y: event.clientY };
         PopupMenuWidget.showPopup(point, "popupMenuWidgetDiv");

@@ -191,6 +191,7 @@ var UI = (function () {
     self.sourcePopupSelectors = {
         panel: "#index_topContolPanel",
         bar: "#lineage_drawnSources",
+        spacer: "#index_topControlSpacer",
         popup: "#lineage_sourcesPopup",
         addPanel: "#lineage_r_addPanel",
         sourceButtons: "#lineage_sourceButtons",
@@ -217,18 +218,109 @@ var UI = (function () {
         return $popup[0].getBoundingClientRect().right > $bar[0].getBoundingClientRect().right + 1;
     };
 
-    self.refreshSourcePopupIndicator = function () {
-        var $indicator = $(self.sourcePopupSelectors.compactIndicator);
-        var $active = $(self.sourcePopupSelectors.activeSource).first();
-        if ($active.length) {
-            var arrowIcon = '<div class="arrow-icon slsv-invisible-button" style="height: 20px; width: 20px;"></div>';
-            $indicator
-                .html($active.prop("outerHTML") + arrowIcon)
-                .css("display", "inline-flex")
-                .css("align-items", "center");
-        } else {
-            $indicator.hide().empty();
+    // Fixed source order: active source first, then its imports as declared in
+    // Config.sources[activeSource].imports. Chips not in that list keep DOM order at the end.
+    self.orderedSourceChips = function ($addPanel) {
+        var chips = $addPanel.children(".Lineage_sourceLabelDiv").toArray();
+        var activeSource = window.Lineage_sources && Lineage_sources.activeSource;
+        if (!activeSource || !window.Config || !Config.sources[activeSource]) {
+            return chips;
         }
+        var imports = Config.sources[activeSource].imports || [];
+        if (!Array.isArray(imports)) {
+            imports = [imports];
+        }
+        var orderedSources = [activeSource].concat(imports);
+        var rankOf = function (chip) {
+            var source = Lineage_sources.sourceDivsMap[chip.id];
+            var rank = orderedSources.indexOf(source);
+            return rank < 0 ? orderedSources.length : rank;
+        };
+        chips.sort(function (chipA, chipB) {
+            return rankOf(chipA) - rankOf(chipB);
+        });
+        return chips;
+    };
+
+    self._isDistributingSourceChips = false;
+
+    // Progressive compact mode: show as many source chips inline (in the always-visible
+    // indicator) as fit within the bar, with a minimum of one. The remaining chips stay in
+    // the popup panel, so chips shown inline disappear from the hover popup. An arrow icon is
+    // appended when overflow chips remain.
+    self.distributeSourceChips = function () {
+        if (self._isDistributingSourceChips) {
+            return;
+        }
+        var addPanel = $(self.sourcePopupSelectors.addPanel);
+        var indicator = $(self.sourcePopupSelectors.compactIndicator);
+        var bar = $(self.sourcePopupSelectors.bar);
+        if (!addPanel.length || !indicator.length || !bar.length) {
+            return;
+        }
+        // Never reshuffle chips while the user has the popup open.
+        if ($(self.sourcePopupSelectors.popup).is(":visible")) {
+            return;
+        }
+
+        self._isDistributingSourceChips = true;
+        // Suspend the panel observer: moving chips mutates the panel and would otherwise
+        // retrigger this distribution in an endless loop.
+        var wasObservingSourceList = !!self.sourceListObserver;
+        if (wasObservingSourceList) {
+            self.disconnectSourceListObserver();
+        }
+        try {
+            // Bring every chip back into the popup panel, then lay them out in the fixed order
+            // (active source then its imports) so the inline selection never reshuffles.
+            indicator.find(".Lineage_sourceLabelDiv").appendTo(addPanel);
+            indicator.empty();
+
+            var sourceChips = self.orderedSourceChips(addPanel);
+            if (!sourceChips.length) {
+                indicator.hide();
+                return;
+            }
+            sourceChips.forEach(function (chip) {
+                addPanel.append(chip);
+            });
+
+            indicator.css({ display: "inline-flex", alignItems: "center", gap: "4px" });
+
+            // In compact mode the popup is hidden, so the bar shrinks to its content and its
+            // right edge no longer reflects the room available. The flex spacer's right edge is
+            // the real limit (left edge of the right-side toolbar items) and stays fixed as the
+            // panel grows. Fall back to the bar when the spacer is absent.
+            var spacer = $(self.sourcePopupSelectors.spacer);
+            var availableRightEdge = spacer.length ? spacer[0].getBoundingClientRect().right : bar[0].getBoundingClientRect().right;
+            // Keep room for the trailing moreOptions icon (~20px) plus a small safety gap.
+            var trailingIconReservedWidth = 30;
+            var inlineChipCount = 0;
+            for (var chipIndex = 0; chipIndex < sourceChips.length; chipIndex++) {
+                indicator.append(sourceChips[chipIndex]);
+                var chipFitsWithinAvailableSpace = indicator[0].getBoundingClientRect().right <= availableRightEdge - trailingIconReservedWidth;
+                if (!chipFitsWithinAvailableSpace && inlineChipCount >= 1) {
+                    // Chip overflowed: send it back to the popup ahead of the remaining chips.
+                    addPanel.prepend(sourceChips[chipIndex]);
+                    break;
+                }
+                inlineChipCount++;
+            }
+
+            if (inlineChipCount < sourceChips.length) {
+                var moreOptionsIconHtml = '<div class="moreOptions-icon slsv-invisible-button" style="height: 20px; width: 20px;"></div>';
+                indicator.append(moreOptionsIconHtml);
+            }
+        } finally {
+            self._isDistributingSourceChips = false;
+            if (wasObservingSourceList) {
+                self.observeSourceList();
+            }
+        }
+    };
+
+    self.refreshSourcePopupIndicator = function () {
+        self.distributeSourceChips();
     };
 
     self.cancelSourcePopupHide = function () {
@@ -378,6 +470,8 @@ var UI = (function () {
         self.disconnectSourceContextMenuObserver();
         self.disconnectSourceListObserver();
         self.unbindSourcePanelHandlers();
+        // Return chips that were shown inline to the popup panel so the full row renders.
+        $(self.sourcePopupSelectors.compactIndicator).find(".Lineage_sourceLabelDiv").appendTo(self.sourcePopupSelectors.addPanel);
         $(self.sourcePopupSelectors.compactIndicator).hide().empty();
         $(self.sourcePopupSelectors.popup).css({ position: "", visibility: "", flexWrap: "", padding: "" }).removeClass("sources-popup-panel");
         $(self.sourcePopupSelectors.addPanel).css("flexDirection", "row");
@@ -387,6 +481,8 @@ var UI = (function () {
     // Restore popup inline but invisible to measure whether it would still overflow;
     // leaves it hidden if overflow persists so the caller can keep compact mode.
     self.sourcePopupInlineWouldOverflow = function () {
+        // Measure the full set: chips shown inline must rejoin the panel first.
+        $(self.sourcePopupSelectors.compactIndicator).find(".Lineage_sourceLabelDiv").appendTo(self.sourcePopupSelectors.addPanel);
         $(self.sourcePopupSelectors.addPanel).css("flexDirection", "row");
         $(self.sourcePopupSelectors.sourceButtons).css("flexDirection", "row");
         var $popup = $(self.sourcePopupSelectors.popup);
@@ -419,6 +515,8 @@ var UI = (function () {
         }
         if (!self.sourcePopupInlineWouldOverflow()) {
             self.exitSourcePopupCompactMode();
+        } else {
+            self.distributeSourceChips();
         }
     };
 

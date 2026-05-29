@@ -709,9 +709,7 @@ var MappingModeler = (function () {
                     color = "#333";
                 }
 
-                var isBothClasses =
-                    MappingColumnsGraph.isClassColumn(self.currentRelation.from) &&
-                    MappingColumnsGraph.isClassColumn(self.currentRelation.to);
+                var isBothClasses = MappingColumnsGraph.isClassColumn(self.currentRelation.from) && MappingColumnsGraph.isClassColumn(self.currentRelation.to);
 
                 var createEdge = function (restrictionType, cardinality) {
                     var edge = MappingColumnsGraph.getVisjsObjectPropertyEdge(
@@ -738,9 +736,7 @@ var MappingModeler = (function () {
                         objectPropertyUri: resourceUri,
                     };
                     CreateRestriction_bot.start(CreateRestriction_bot.workflowChooseConstraintTypeFn, botParams, function (err) {
-                        var restrictionType = CreateRestriction_bot.params.constraintType
-                            ? CreateRestriction_bot.params.constraintType.trim()
-                            : "http://www.w3.org/2002/07/owl#someValuesFrom";
+                        var restrictionType = CreateRestriction_bot.params.constraintType ? CreateRestriction_bot.params.constraintType.trim() : "http://www.w3.org/2002/07/owl#someValuesFrom";
                         var cardinality = null;
                         if (restrictionType.indexOf("ardinality") > -1) {
                             cardinality = {

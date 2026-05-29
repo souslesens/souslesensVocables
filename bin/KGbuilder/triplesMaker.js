@@ -426,7 +426,7 @@ var TriplesMaker = {
                 var property = TriplesMaker.getPropertyUri(edge.data.id);
 
                 if (edge.isRestriction) {
-                    var triples = TriplesMaker.getRestrictionTriples(subjectUri, property, objectUri, edge.retrictionType, null);
+                    var triples = TriplesMaker.getRestrictionTriples(subjectUri, property, objectUri, edge.restrictionType, { cardinality: edge.cardinality });
                     triples.forEach(function (triple) {
                         addTriple(triple.s, triple.p, triple.o);
                     });
@@ -748,11 +748,24 @@ var TriplesMaker = {
             o: predicateUri,
         });
 
-        triples.push({
-            s: blankNode,
-            p: "<" + restrictionType + ">",
-            o: objectUri,
-        });
+        if (options.cardinality && options.cardinality.value) {
+            triples.push({
+                s: blankNode,
+                p: "<" + restrictionType + ">",
+                o: '"' + options.cardinality.value + '"^^<http://www.w3.org/2001/XMLSchema#nonNegativeInteger>',
+            });
+            triples.push({
+                s: blankNode,
+                p: "<http://www.w3.org/2002/07/owl#onClass>",
+                o: objectUri,
+            });
+        } else {
+            triples.push({
+                s: blankNode,
+                p: "<" + restrictionType + ">",
+                o: objectUri,
+            });
+        }
 
         triples.push({
             s: subjectUri,

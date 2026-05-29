@@ -122,7 +122,7 @@ var MappingColumnsGraph = (function () {
      * @param uri
      * @returns {{data: {id, source: (*|null), type}, color: *, arrows: {to: {type, enabled: boolean}}, from, to, label, smooth: {forceDirection: string, roundness: number, type: string}}}
      */
-    self.getVisjsObjectPropertyEdge = function (from, to, label, arrowType, property, uri, color) {
+    self.getVisjsObjectPropertyEdge = function (from, to, label, arrowType, property, uri, color, restrictionType, cardinality) {
         var edge = {
             from: from,
             to: to,
@@ -143,6 +143,8 @@ var MappingColumnsGraph = (function () {
                 id: uri,
                 type: uri,
                 source: property ? property.source : null,
+                restrictionType: restrictionType || null,
+                cardinality: cardinality || null,
             },
             color: color,
         };
@@ -472,6 +474,21 @@ var MappingColumnsGraph = (function () {
             }
         });
         return classId;
+    };
+
+    self.isClassColumn = function (node) {
+        if (!node) return false;
+        if (!node.id) {
+            node = { id: node };
+        }
+        var visjsNode = self.visjsGraph.data.nodes.get(node.id);
+        if (!visjsNode) return false;
+        var nodeData = visjsNode.data;
+        if (nodeData.definedInColumn) {
+            var mainNode = self.visjsGraph.data.nodes.get(nodeData.definedInColumn);
+            nodeData = mainNode ? mainNode.data : nodeData;
+        }
+        return nodeData.rdfType == "owl:Class";
     };
 
     self.getClassColumns = function (node) {

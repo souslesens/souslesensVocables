@@ -5,6 +5,7 @@ import VisjsGraphClass from "../../graph/VisjsGraphClass.js";
 import Axioms_graph from "../axioms/axioms_graph.js";
 import Axioms_suggestions from "../axioms/axioms_suggestions.js";
 import CommonBotFunctions from "../../bots/_commonBotFunctions.js";
+import CreateRestriction_bot from "../../bots/createRestriction_bot.js";
 import common from "../../shared/common.js";
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 import Clipboard from "../../shared/clipboard.js";
@@ -707,22 +708,51 @@ var MappingModeler = (function () {
                     self.currentRelation.label = resourceUri;
                     color = "#333";
                 }
-                var edge = MappingColumnsGraph.getVisjsObjectPropertyEdge(
-                    self.currentRelation.from.id,
-                    self.currentRelation.to.id,
-                    self.currentRelation.label,
-                    arrowType,
-                    property,
-                    resourceUri,
-                    color,
-                );
 
-                MappingColumnsGraph.addEdge([edge]);
+                var isBothClasses =
+                    MappingColumnsGraph.isClassColumn(self.currentRelation.from) &&
+                    MappingColumnsGraph.isClassColumn(self.currentRelation.to);
 
-                self.currentRelation = null;
-                MappingColumnsGraph.relationMessage();
-                //$("#axioms_legend_suggestionsSelect").empty();
-                JstreeWidget.empty("suggestionsSelectJstreeDiv");
+                var createEdge = function (restrictionType, cardinality) {
+                    var edge = MappingColumnsGraph.getVisjsObjectPropertyEdge(
+                        self.currentRelation.from.id,
+                        self.currentRelation.to.id,
+                        self.currentRelation.label,
+                        arrowType,
+                        property,
+                        resourceUri,
+                        color,
+                        restrictionType,
+                        cardinality,
+                    );
+                    MappingColumnsGraph.addEdge([edge]);
+                    self.currentRelation = null;
+                    MappingColumnsGraph.relationMessage();
+                    JstreeWidget.empty("suggestionsSelectJstreeDiv");
+                };
+
+                if (isBothClasses) {
+                    var botParams = {
+                        source: self.currentSLSsource,
+                        currentNode: { id: self.currentRelation.from.classId },
+                        objectPropertyUri: resourceUri,
+                    };
+                    CreateRestriction_bot.start(CreateRestriction_bot.workflowChooseConstraintTypeFn, botParams, function (err) {
+                        var restrictionType = CreateRestriction_bot.params.constraintType
+                            ? CreateRestriction_bot.params.constraintType.trim()
+                            : "http://www.w3.org/2002/07/owl#someValuesFrom";
+                        var cardinality = null;
+                        if (restrictionType.indexOf("ardinality") > -1) {
+                            cardinality = {
+                                type: restrictionType,
+                                value: CreateRestriction_bot.params.cardinality,
+                            };
+                        }
+                        createEdge(restrictionType, cardinality);
+                    });
+                } else {
+                    createEdge(null, null);
+                }
             }
         }
     };

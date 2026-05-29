@@ -1614,58 +1614,73 @@ var OntologyModels = (function () {
             Config.ontologiesVocabularyModels[source];
         }
         var filterStr = options.filter || "";
-        var limitSize = 100;
-        var offset = 0;
-        var allBindings = [];
-        var resultSize = 1;
-
         var sourceGraphUri = Config.sources[source].graphUri;
-        var baseQuery =
+        var url = Config.sparql_server.url + "?format=json&query=";
+        var allBindings = [];
+
+        var classesQuery =
             "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
             "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
-            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
-            "SELECT distinct ?class ?prop ?datatype  FROM   <" +
+            "SELECT distinct ?class FROM <" +
             sourceGraphUri +
-            ">" +
-            " WHERE {   \n" +
-            // " ?s rdf:type+ ?class.\n" +
-            " ?s rdf:type ?class.\n" +
+            "> WHERE {\n" +
+            "  ?s rdf:type ?class.\n" +
             "  filter (?class not in (owl:NamedIndividual))\n" +
-            "  ?s ?prop ?v.\n" +
-            "   bind (datatype(?v) as ?datatype)\n" +
-            "  filter (?prop not in (<http://souslesens.org/KGcreator#mappingFile>,<http://purl.org/dc/terms/created>))\n" +
-            "\n" +
-            filterStr +
             "}";
 
-        var url = Config.sparql_server.url + "?format=json&query=";
+        var chunkSize = 20;
 
         UI.message("loading ", false, true);
-        async.whilst(
-            function () {
-                return resultSize > 0;
-            },
-            function (callbackWhilst) {
-                var query2 = baseQuery + " LIMIT " + limitSize + " OFFSET " + offset;
-                Sparql_proxy.querySPARQL_GET_proxy(url, query2, null, {}, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, classesQuery, null, {}, function (err, result) {
+            if (err) {
+                return callback(err);
+            }
+            var classes = result.results.bindings.map(function (binding) {
+                return binding.class.value;
+            });
+
+            var chunks = [];
+            for (var chunkIndex = 0; chunkIndex < classes.length; chunkIndex += chunkSize) {
+                chunks.push(classes.slice(chunkIndex, chunkIndex + chunkSize));
+            }
+
+            async.eachSeries(
+                chunks,
+                function (classChunk, callbackEach) {
+                    var valuesStr = classChunk.map(function (uri) { return "<" + uri + ">"; }).join(" ");
+                    var query2 =
+                        "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
+                        "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+                        "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+                        "SELECT distinct ?class ?prop ?datatype FROM <" +
+                        sourceGraphUri +
+                        "> WHERE {\n" +
+                        "  VALUES ?class { " + valuesStr + " }\n" +
+                        "  ?s rdf:type ?class.\n" +
+                        "  ?s ?prop ?v.\n" +
+                        "  bind (datatype(?v) as ?datatype)\n" +
+                        "  filter (?prop not in (<http://souslesens.org/KGcreator#mappingFile>,<http://purl.org/dc/terms/created>))\n" +
+                        "\n" +
+                        filterStr +
+                        "}";
+
+                    Sparql_proxy.querySPARQL_GET_proxy(url, query2, null, {}, function (err, result) {
+                        if (err) {
+                            return callbackEach(err);
+                        }
+                        allBindings = allBindings.concat(result.results.bindings);
+                        callbackEach();
+                    });
+                },
+                function (err) {
                     if (err) {
-                        return callbackWhilst(err);
+                        return callback(err);
                     }
-                    var bindings = result.results.bindings;
-                    allBindings = allBindings.concat(bindings);
-                    offset += bindings.length;
-                    resultSize = bindings.length;
-                    callbackWhilst();
-                });
-            },
-            function (err) {
-                if (err) {
-                    return callback(err);
-                }
-                UI.message("", true);
-                return callback(null, allBindings);
-            },
-        );
+                    UI.message("", true);
+                    return callback(null, allBindings);
+                },
+            );
+        });
     };
     /**
      *  calculate top classes from classes taxonomy

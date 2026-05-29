@@ -1647,7 +1647,11 @@ var OntologyModels = (function () {
             async.eachSeries(
                 chunks,
                 function (classChunk, callbackEach) {
-                    var valuesStr = classChunk.map(function (uri) { return "<" + uri + ">"; }).join(" ");
+                    var valuesStr = classChunk
+                        .map(function (uri) {
+                            return "<" + uri + ">";
+                        })
+                        .join(" ");
                     var query2 =
                         "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
                         "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
@@ -1655,7 +1659,9 @@ var OntologyModels = (function () {
                         "SELECT distinct ?class ?prop ?datatype FROM <" +
                         sourceGraphUri +
                         "> WHERE {\n" +
-                        "  VALUES ?class { " + valuesStr + " }\n" +
+                        "  VALUES ?class { " +
+                        valuesStr +
+                        " }\n" +
                         "  ?s rdf:type ?class.\n" +
                         "  ?s ?prop ?v.\n" +
                         "  bind (datatype(?v) as ?datatype)\n" +

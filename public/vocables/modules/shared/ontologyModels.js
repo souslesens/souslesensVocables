@@ -1614,9 +1614,13 @@ var OntologyModels = (function () {
             Config.ontologiesVocabularyModels[source];
         }
         var filterStr = options.filter || "";
+        var limitSize = 100;
+        var offset = 0;
+        var allBindings = [];
+        var resultSize = 1;
 
         var sourceGraphUri = Config.sources[source].graphUri;
-        var query =
+        var baseQuery =
             "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
             "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
@@ -1634,17 +1638,34 @@ var OntologyModels = (function () {
             filterStr +
             "}";
 
-        let url = Config.sparql_server.url + "?format=json&query=";
+        var url = Config.sparql_server.url + "?format=json&query=";
 
         UI.message("loading ", false, true);
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function (err, result) {
-            if (err) {
-                return callback(err);
+        async.whilst(
+            function () {
+                return resultSize > 0;
+            },
+            function (callbackWhilst) {
+                var query2 = baseQuery + " LIMIT " + limitSize + " OFFSET " + offset;
+                Sparql_proxy.querySPARQL_GET_proxy(url, query2, null, {}, function (err, result) {
+                    if (err) {
+                        return callbackWhilst(err);
+                    }
+                    var bindings = result.results.bindings;
+                    allBindings = allBindings.concat(bindings);
+                    offset += bindings.length;
+                    resultSize = bindings.length;
+                    callbackWhilst();
+                });
+            },
+            function (err) {
+                if (err) {
+                    return callback(err);
+                }
+                UI.message("", true);
+                return callback(null, allBindings);
             }
-
-            UI.message("", true);
-            return callback(null, result.results.bindings);
-        });
+        );
     };
     /**
      *  calculate top classes from classes taxonomy

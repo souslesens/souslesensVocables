@@ -95,29 +95,42 @@ var query = "SELECT ?s WHERE { ?s ?p ?o. " + filterStr + " }";
 
 ### 4. Pagination Pattern
 
+Standard pagination variable names (follow KGquery.js as reference):
+
+- `limitSize` — max bindings per request (page size)
+- `offset` — SPARQL OFFSET, increments by `bindings.length` each page
+- `resultSize` — count from last page; init to `1` so loop starts; `0` stops loop
+- `totalSize` — running total (optional, for progress display)
+- `limitCondition` — boolean flag to break early (e.g. sample mode)
+- `query2` — page-specific query string built from base query + LIMIT/OFFSET
+
 ```javascript
-var offset = 0;
 var limitSize = 10000;
-var allResults = [];
+var offset = 0;
+var resultSize = 1;
+var totalSize = 0;
+var limitCondition = true;
+var allBindings = [];
 
 async.whilst(
-    function() { return resultSize > 0; },
+    function() { return resultSize > 0 && limitCondition; },
     function(callbackWhilst) {
-        var query = baseQuery + " LIMIT " + limitSize + " OFFSET " + offset;
+        var query2 = baseQuery + " limit " + limitSize + " offset " + offset;
 
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source}, function(err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query2, "", { source: source }, function(err, result) {
             if (err) return callbackWhilst(err);
 
             var bindings = result.results.bindings;
+            offset += bindings.length;
+            totalSize += bindings.length;
             resultSize = bindings.length;
-            offset += resultSize;
-            allResults = allResults.concat(bindings);
+            allBindings = allBindings.concat(bindings);
 
             callbackWhilst();
         });
     },
     function(err) {
-        callback(err, allResults);
+        callback(err, allBindings);
     }
 );
 ```

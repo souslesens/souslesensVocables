@@ -1664,7 +1664,7 @@ var OntologyModels = (function () {
                 }
                 UI.message("", true);
                 return callback(null, allBindings);
-            }
+            },
         );
     };
     /**

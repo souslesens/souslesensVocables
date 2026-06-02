@@ -61,23 +61,59 @@ export default function () {
             {
                 name: "body",
                 in: "body",
-                description: "Triples to add and triples to remove. Each triple is `[subject, predicate, object]`.",
+                description:
+                    "Metadata entries to add and to remove. Each entry is an object describing one predicate/object pair " +
+                    'on the graph URI: `{ metadata, value, type, datatype?, "xml:lang"? }`. ' +
+                    "`type` is one of `uri`, `literal`, `typed-literal`.",
                 schema: {
                     type: "object",
                     properties: {
                         addedData: {
                             type: "array",
-                            items: { type: "array", items: { type: "string" } },
+                            items: {
+                                type: "object",
+                                properties: {
+                                    id: { type: "number" },
+                                    isNew: { type: "boolean" },
+                                    metadata: { type: "string" },
+                                    value: { type: "string" },
+                                    type: { type: "string" },
+                                    datatype: { type: "string" },
+                                    "xml:lang": { type: "string" },
+                                },
+                                required: ["metadata", "value", "type"],
+                                additionalProperties: true,
+                            },
                         },
                         removedData: {
                             type: "array",
-                            items: { type: "array", items: { type: "string" } },
+                            items: {
+                                type: "object",
+                                properties: {
+                                    id: { type: "number" },
+                                    isNew: { type: "boolean" },
+                                    metadata: { type: "string" },
+                                    value: { type: "string" },
+                                    type: { type: "string" },
+                                    datatype: { type: "string" },
+                                    "xml:lang": { type: "string" },
+                                },
+                                required: ["metadata", "value", "type"],
+                                additionalProperties: true,
+                            },
                         },
                     },
                 },
                 "x-examples": {
                     "Set dc:title on IOF_core": {
-                        addedData: [["https://www.industrialontologies.org/core/", "http://purl.org/dc/terms/title", '"Industrial Ontology Foundry – Core"']],
+                        addedData: [
+                            {
+                                metadata: "http://purl.org/dc/terms/title",
+                                value: "Industrial Ontology Foundry – Core",
+                                type: "literal",
+                                "xml:lang": "en",
+                            },
+                        ],
                         removedData: [],
                     },
                 },

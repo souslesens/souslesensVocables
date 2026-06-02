@@ -289,7 +289,7 @@ var Predicates_bot = (function () {
                     if (model) {
                         for (var key in model.properties) {
                             var p = model.properties[key];
-                            if (!seen[p.id]) {
+                            if (!seen[p.id] && !model.nonObjectProperties[p.id]) {
                                 seen[p.id] = true;
                                 nodes.push({ id: p.id, text: p.label || p.id, parent: "__src__" + vocab, data: { id: p.id, isObjectProperty: true } });
                             }

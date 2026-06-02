@@ -2,6 +2,49 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.7.0](https://github.com/souslesens/souslesensVocables/compare/3.6.0...3.7.0) (2026-05-28)
+
+
+### Features
+
+* add a deletion button in user data management table ([3ffcb59](https://github.com/souslesens/souslesensVocables/commit/3ffcb59843989dc1cccafaae671562e5f8b7ff08))
+* add a modal to show a formular for adding user data ([e0fe5d7](https://github.com/souslesens/souslesensVocables/commit/e0fe5d71b4d699b55d22b96fa61f12e3f2ccaac5))
+* add user data management tool ([9fd153a](https://github.com/souslesens/souslesensVocables/commit/9fd153a34247b2236004f240790bab9dd213ae05))
+* **api:** add allowedsources route ([61431e5](https://github.com/souslesens/souslesensVocables/commit/61431e59d5596a90cc06c5c481f2654b0b5ce6cf))
+* **api:** add allowedsources/<profile> route ([58062df](https://github.com/souslesens/souslesensVocables/commit/58062df82cf131f7ffa5422333bc4e887161e2c6))
+* improve button with confirmation ([957ae74](https://github.com/souslesens/souslesensVocables/commit/957ae74e09da96910940d59522741bea1dc298fe))
+* **mainapp:** make type/tool/source optional and update data types list ([9765fb8](https://github.com/souslesens/souslesensVocables/commit/9765fb8d754d0e474bad58657a6ce33a49d86dd6))
+* replace user data modal by a dialog box ([7c1a1b7](https://github.com/souslesens/souslesensVocables/commit/7c1a1b781c395e958a74581ee79089cc9b0dbc16))
+* **upload:** display warning when graph contains blank nodes ([41d7e5e](https://github.com/souslesens/souslesensVocables/commit/41d7e5e50720006f757d589b7a6ffcf1e45fb0ec))
+* **user-settings:** integrate UsersDataManagement as editable tab in UserSettings ([8024b9d](https://github.com/souslesens/souslesensVocables/commit/8024b9d41fb8b4709f0d040b0b22ff633b5240c4))
+* **user-settings:** integrate UsersDataManagement as tab in UserSettings ([9ca3fb3](https://github.com/souslesens/souslesensVocables/commit/9ca3fb30cf1190576adaf5dc1d61fdc78c4f27fc))
+* **users-data-management:** launch lineage tool with saved data ([d60137b](https://github.com/souslesens/souslesensVocables/commit/d60137b3731a0f2a3c8c11dff550a21939b8749c))
+* **users-data:** add KGquery tool support to Launch button ([dbe6e6c](https://github.com/souslesens/souslesensVocables/commit/dbe6e6caaf5e71d0244868a346576daca301daf9))
+* **users-data:** add SPARQL tool support to Launch button ([bd9eca1](https://github.com/souslesens/souslesensVocables/commit/bd9eca11fc1af7072e0fd78051a43a100f03a92c))
+* **usersdata:** add autocomplete for shared profiles and users ([bfeb679](https://github.com/souslesens/souslesensVocables/commit/bfeb679ebe918f8267585dd109dda133f2d76c9b))
+* **UserSettings:** add UserDataDialog ([afcdebf](https://github.com/souslesens/souslesensVocables/commit/afcdebfbdad2f61ae40532bd7b7b786b34465ca1))
+* **userSettings:** sort usersdata table ([ed08177](https://github.com/souslesens/souslesensVocables/commit/ed08177a1f948b630a1f5b28ff8160bffc1d642b))
+* **userSettings:** use same form for add a new userData ([377ca09](https://github.com/souslesens/souslesensVocables/commit/377ca099c01570dcfed7832132da26ed19eec7d4))
+* **userSettings:** usersData filtering ([7ae7bec](https://github.com/souslesens/souslesensVocables/commit/7ae7bec6642bc5c6a602478b209ced6cf52d799f))
+* **usersSettings:** validade usersdata json ([979bfad](https://github.com/souslesens/souslesensVocables/commit/979bfad46f7d4e3532cc298ca5069963c63d87fd))
+
+
+### Bug Fixes
+
+* **auth:** preserve URL parameters after login redirect ([6287e07](https://github.com/souslesens/souslesensVocables/commit/6287e07acfeda44fa5c9004be54d5d660c0b9bfc))
+* **kgquery_graph:** max spatialisation time ([c8ac06f](https://github.com/souslesens/souslesensVocables/commit/c8ac06fa65fdae313495ca9a14b5b4fda4ef2166))
+* **kgquery_graph:** subclasses ([de1d53a](https://github.com/souslesens/souslesensVocables/commit/de1d53a66e6f5d4187ea753fcfbfccd73c3e3940))
+* **kgquery_graph:** subclasses pop up max length ([32f42d1](https://github.com/souslesens/souslesensVocables/commit/32f42d166453c6c61ab64c57fd19fe497085dbe1))
+* **KGqueryNodeInfos:** responsive tab + add URI ([97e08ba](https://github.com/souslesens/souslesensVocables/commit/97e08bab03f0f84cbdc6fa96509065187dcdf1d3))
+* **mainapp:** resolve ESLint errors and improve TypeScript type safety ([c8051da](https://github.com/souslesens/souslesensVocables/commit/c8051da479ac568b3f34bc160283884730b27bf0))
+* **mainapp:** resolve TypeScript errors and remove unused yasgui-wrapper ([f1ab028](https://github.com/souslesens/souslesensVocables/commit/f1ab028df0bef8971ad2c12a575e0e593c504bb7))
+* **MappingModeler:** overflow triples ([c700684](https://github.com/souslesens/souslesensVocables/commit/c700684efad38e282a695ad950856f3103826499))
+* **swagger:** additional properties and boolean string treatment ([6419e12](https://github.com/souslesens/souslesensVocables/commit/6419e12fa9c1e90f51f2c29685c7155ead119ee9))
+* **swagger:** admin/profile api ([a696f60](https://github.com/souslesens/souslesensVocables/commit/a696f60f2d23ce3075a3bcf9ae3095ea1872e55e))
+* **swagger:** admin/profile api ([a7ca5ab](https://github.com/souslesens/souslesensVocables/commit/a7ca5ab539684c9ee2f68daf6b6c7e0bbfef58d1))
+* **swagger:** ontocreator routes for adding source openapi schema ([b0db18a](https://github.com/souslesens/souslesensVocables/commit/b0db18aa8f8be168a6a297acab0656e6c2a1bb71))
+* **userSettings:** don't reset url params ([3268677](https://github.com/souslesens/souslesensVocables/commit/326867795fa06fa31ba457b7f3a5cf4d9216aa6e))
+
 ## [3.6.0](https://github.com/souslesens/souslesensVocables/compare/3.5.0...3.6.0) (2026-04-28)
 
 ## [3.5.0](https://github.com/souslesens/souslesensVocables/compare/3.4.0...3.5.0) (2026-04-27)

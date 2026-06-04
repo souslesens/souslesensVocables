@@ -612,6 +612,23 @@ class BotEngineClass {
                     const label = ids.join(", ");
                     resolveSelection(ids, label, checkedNodes);
                 });
+
+            $("#" + treeDivId).on("check_node.jstree uncheck_node.jstree", function () {
+                setTimeout(function () {
+                    var tree = $("#" + treeDivId).jstree(true);
+                    if (!tree) {
+                        return;
+                    }
+                    var hasCheckedLeaf = tree.get_checked(true).some(function (n) {
+                        return !tree.is_parent(n);
+                    });
+                    if (hasCheckedLeaf) {
+                        $("#" + searchInputId).val("");
+                        tree.search("");
+                    }
+                    $("#" + searchInputId).prop("disabled", hasCheckedLeaf);
+                }, 0);
+            });
         }
     }
 

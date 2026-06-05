@@ -91,7 +91,19 @@ var TripleFactory = (function () {
             return alert(" no mappings selected");
         }
         var filterMappingIds = [];
+        // a leaf predicate (id composite "columnId>predicate") fait cocher en cascade son parent colonne :
+        // on exclut alors l'id colonne nu pour ne garder que le prédicat sélectionné
+        var parentColumnIdsOfSelectedPredicates = {};
         checkedNodes.forEach(function (item) {
+            if (item.id.indexOf(">") > -1) {
+                var parentColumnId = item.id.split(">")[0];
+                parentColumnIdsOfSelectedPredicates[parentColumnId] = true;
+            }
+        });
+        checkedNodes.forEach(function (item) {
+            if (parentColumnIdsOfSelectedPredicates[item.id]) {
+                return;
+            }
             filterMappingIds.push(item.id);
         });
         try {
@@ -877,7 +889,7 @@ var TripleFactory = (function () {
                     if (otherPredicates) {
                         otherPredicates.forEach(function (item) {
                             jstreeData.push({
-                                id: item.property,
+                                id: obj.node.id + ">" + item.property,
                                 text: item.property,
                                 parent: obj.node.id,
                                 data: { type: "otherPredicate" },
@@ -956,11 +968,8 @@ var TripleFactory = (function () {
                 var parentNode = $("#detailedMappings_filterMappingsTree").jstree("get_node", item.parent);
                 var columnClassPredicate = MappingColumnsGraph.getColumnClass(parentNode);
                 if (columnClassPredicate) {
-                    // Pour rdfsLabel et rdfType, l'id contient "parentId>predicate", donc on prend la partie après ">"
-                    var predicateId = item.id;
-                    if (item.data.type == "rdfsLabel" || item.data.type == "rdfType") {
-                        predicateId = item.id.split(">")[1];
-                    }
+                    // otherPredicate, rdfsLabel et rdfType ont un id composite "parentId>predicate" : on prend la partie après ">"
+                    var predicateId = item.id.split(">")[1];
                     filterMappingIds.push({ id: predicateId, type: "otherPredicate", classUri: columnClassPredicate });
                     nodeIdsToFilter[item.parent] = true;
                 }

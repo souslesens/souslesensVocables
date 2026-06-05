@@ -730,20 +730,7 @@ var MappingModeler = (function () {
                 };
 
                 if (isBothClasses) {
-                    var botParams = {
-                        source: self.currentSLSsource,
-                        currentNode: { id: self.currentRelation.from.classId },
-                        objectPropertyUri: resourceUri,
-                    };
-                    CreateRestriction_bot.start(CreateRestriction_bot.workflowChooseConstraintTypeFn, botParams, function (err) {
-                        var restrictionType = CreateRestriction_bot.params.constraintType ? CreateRestriction_bot.params.constraintType.trim() : "http://www.w3.org/2002/07/owl#someValuesFrom";
-                        var cardinality = null;
-                        if (restrictionType.indexOf("ardinality") > -1) {
-                            cardinality = {
-                                type: restrictionType,
-                                value: CreateRestriction_bot.params.cardinality,
-                            };
-                        }
+                    self.promptRestrictionType(self.currentSLSsource, self.currentRelation.from.classId, resourceUri, function (err, restrictionType, cardinality) {
                         createEdge(restrictionType, cardinality);
                     });
                 } else {
@@ -751,6 +738,26 @@ var MappingModeler = (function () {
                 }
             }
         }
+    };
+
+    self.promptRestrictionType = function (source, fromClassId, propertyUri, callback) {
+        var botParams = {
+            source: source,
+            currentNode: { id: fromClassId },
+            objectPropertyUri: propertyUri,
+        };
+        CreateRestriction_bot.start(CreateRestriction_bot.workflowChooseConstraintTypeFn, botParams, function (err) {
+            if (err) return callback(err);
+            var restrictionType = CreateRestriction_bot.params.constraintType ? CreateRestriction_bot.params.constraintType.trim() : "http://www.w3.org/2002/07/owl#someValuesFrom";
+            var cardinality = null;
+            if (restrictionType.indexOf("ardinality") > -1) {
+                cardinality = {
+                    type: restrictionType,
+                    value: CreateRestriction_bot.params.cardinality,
+                };
+            }
+            callback(null, restrictionType, cardinality);
+        });
     };
 
     /**

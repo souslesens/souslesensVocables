@@ -135,31 +135,55 @@ var MappingModelerRelations = (function () {
     };
 
     self.applyColumnRelations = function () {
-        var relations = $("#mappingModelerRelations_jstreeDiv").jstree().get_checked(true);
+        var checkedItems = $("#mappingModelerRelations_jstreeDiv").jstree().get_checked(true);
+        var relations = checkedItems.filter(function (item) {
+            return item.parent !== "#";
+        });
         if (relations.length == 0) {
             alert("Please select at least one relation");
             return;
         }
-        relations.forEach(function (item) {
-            if (item.parent == "#") return;
-            var relation = item.data;
-            var edge = MappingColumnsGraph.getVisjsObjectPropertyEdge(
-                relation.fromColumn.id,
-                relation.toColumn.id,
-                relation.property.label,
-                "diamond",
-                relation.property.id,
-                relation.property.id,
-                MappingModeler.propertyColor,
-            );
+        async.eachSeries(
+            relations,
+            function (item, callbackEach) {
+                var relation = item.data;
+                var fromClassId = MappingColumnsGraph.getColumnClass(relation.fromColumn.id);
+                var toClassId = MappingColumnsGraph.getColumnClass(relation.toColumn.id);
+                var isBothClasses = fromClassId && toClassId;
 
-            MappingColumnsGraph.addEdge([edge]);
-        });
+                var buildAndAddEdge = function (restrictionType, cardinality) {
+                    var edge = MappingColumnsGraph.getVisjsObjectPropertyEdge(
+                        relation.fromColumn.id,
+                        relation.toColumn.id,
+                        relation.property.label,
+                        "diamond",
+                        relation.property.id,
+                        relation.property.id,
+                        MappingModeler.propertyColor,
+                        restrictionType,
+                        cardinality,
+                    );
+                    MappingColumnsGraph.addEdge([edge]);
+                    callbackEach();
+                };
 
-        MappingColumnsGraph.saveVisjsGraph(function () {
-            $("#MappingModeler_leftTabs").tabs("option", "active", 1);
-            UIcontroller.onActivateLeftPanelTab("MappingModeler_columnsTab");
-        });
+                if (isBothClasses) {
+                    MappingModeler.promptRestrictionType(DataSourcesManager.currentSlsvSource, fromClassId, relation.property.id, function (err, restrictionType, cardinality) {
+                        if (err) return callbackEach(err);
+                        buildAndAddEdge(restrictionType, cardinality);
+                    });
+                } else {
+                    buildAndAddEdge(null, null);
+                }
+            },
+            function (err) {
+                if (err) return MainController.errorAlert(err);
+                MappingColumnsGraph.saveVisjsGraph(function () {
+                    $("#MappingModeler_leftTabs").tabs("option", "active", 1);
+                    UIcontroller.onActivateLeftPanelTab("MappingModeler_columnsTab");
+                });
+            },
+        );
     };
 
     return self;

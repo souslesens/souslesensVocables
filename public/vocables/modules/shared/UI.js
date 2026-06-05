@@ -222,15 +222,15 @@ var UI = (function () {
     // Config.sources[activeSource].imports. Chips not in that list keep DOM order at the end.
     self.orderedSourceChips = function ($addPanel) {
         var chips = $addPanel.children(".Lineage_sourceLabelDiv").toArray();
-        var activeSource = window.Lineage_sources && Lineage_sources.activeSource;
-        if (!activeSource || !window.Config || !Config.sources[activeSource]) {
+        var currentSource = window.MainController && MainController.currentSource;
+        if (!currentSource || !window.Config || !Config.sources[currentSource]) {
             return chips;
         }
-        var imports = Config.sources[activeSource].imports || [];
+        var imports = Config.sources[currentSource].imports || [];
         if (!Array.isArray(imports)) {
             imports = [imports];
         }
-        var orderedSources = [activeSource].concat(imports);
+        var orderedSources = [currentSource].concat(imports);
         var rankOf = function (chip) {
             var source = Lineage_sources.sourceDivsMap[chip.id];
             var rank = orderedSources.indexOf(source);

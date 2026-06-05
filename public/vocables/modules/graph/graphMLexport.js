@@ -29,9 +29,21 @@ var GraphMlExport = (function () {
 
      */
 
-    self.VisjsDataToGraphMl = function (visjsData) {
-        // remove orphan nodes or edges
+    function escapeXml(str) {
+        if (!str) {
+            return "";
+        }
+        return String(str)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/[^\x00-\x7F]/g, function (ch) {
+                return "&#x" + ch.codePointAt(0).toString(16).toUpperCase() + ";";
+            });
+    }
 
+    self.VisjsDataToGraphMl = function (visjsData) {
         var nodesMap = {};
         visjsData.nodes.forEach(function (node) {
             nodesMap[node.id] = node;
@@ -65,52 +77,45 @@ var GraphMlExport = (function () {
         xml += '  <key for="node" id="d1" yfiles.type="nodegraphics"/>\n<key id="d2" for="edge" yfiles.type="edgegraphics"/>\n' + ' <graph edgedefault="directed" id="G">';
 
         visjsData.nodes.forEach(function (node) {
-            if (!node.label) {
-                node.label = "?";
-            }
-            node.label = node.label.replace("&", "&amp;");
-
+            var label = escapeXml(node.label || "?");
             var color = common.RGBtoHexColor(node.color.background || node.color);
             xml +=
                 ' \n<node id="' +
-                node.id +
+                escapeXml(node.id) +
                 '">\n' +
                 '  <data key="d1">\n' +
                 "        <y:ShapeNode>\n" +
-                '          <y:Shape type="roundrectangle"/>                              <!-- node shape -->\n' +
+                '          <y:Shape type="roundrectangle"/>\n' +
                 '          <y:Geometry height="30.0" width="' +
-                node.label.length * 7 +
-                ".0" +
-                '" x="0.0" y="0.0"/> <!-- position and size -->\n' +
+                label.length * 7 +
+                '.0" x="0.0" y="0.0"/>\n' +
                 '          <y:Fill color="' +
                 color +
-                '" transparent="false"/>            <!-- fill color -->\n' +
-                '          <y:BorderStyle color="#000000" type="line" width="1.0"/> <!-- border -->\n' +
+                '" transparent="false"/>\n' +
+                '          <y:BorderStyle color="#000000" type="line" width="1.0"/>\n' +
                 "          <y:NodeLabel>" +
-                node.label +
-                "</y:NodeLabel>                    <!-- label text -->\n" +
+                label +
+                "</y:NodeLabel>\n" +
                 "        </y:ShapeNode>\n" +
                 "      </data>" +
                 "</node>\n";
         });
 
         visjsData.edges.forEach(function (edge) {
-            if (!edge.label) edge.label = "";
-            edge.label = edge.label.replace("&", "&amp;");
+            var label = escapeXml(edge.label || "");
             xml +=
                 '     <edge source="' +
-                edge.from +
+                escapeXml(edge.from) +
                 '" target="' +
-                edge.to +
+                escapeXml(edge.to) +
                 '">\n' +
-                //' <data key="d8"/>\n' +
                 '      <data key="d2">\n' +
                 "        <y:PolyLineEdge>\n" +
                 '          <y:Path sx="-55.0" sy="0.0" tx="47.5" ty="0.0"/>\n' +
                 '          <y:LineStyle color="#000000" type="line" width="1.0"/>\n' +
                 '          <y:Arrows source="none" target="standard"/>\n' +
                 "          <y:EdgeLabel>" +
-                edge.label +
+                label +
                 "</y:EdgeLabel>\n" +
                 '          <y:BendStyle smoothed="false"/>\n' +
                 "        </y:PolyLineEdge>\n" +

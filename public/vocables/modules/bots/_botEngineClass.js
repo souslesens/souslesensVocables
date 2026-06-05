@@ -741,6 +741,8 @@ class BotEngineClass {
         if (!this.history.step.includes(this.history.currentIndex)) {
             this.history.step.push(this.history.currentIndex);
         }
+        var savedContainerWidth = null;
+        var savedDialogWidth = null;
         $("#" + this.divId)
             .find("#bot_resourcesProposalSelect")
             .hide();
@@ -756,6 +758,14 @@ class BotEngineClass {
                 // this.nextStep();
             });
         }
+
+        $("#" + this.divId)
+            .find("#botPromptInput")
+            .on("keydown", (evt) => {
+                if (evt.keyCode == 13) {
+                    evt.preventDefault();
+                }
+            });
 
         $("#" + this.divId)
             .find("#botPromptInput")
@@ -784,6 +794,10 @@ class BotEngineClass {
                     this.history.VarFilling[this.history.currentIndex] = { VarFilled: varToFill, valueFilled: value.trim() };
 
                     this.currentBot.params[varToFill] = value.trim();
+                    if (savedContainerWidth !== null && $("#botPanel").dialog("instance")) {
+                        $("#botContainerDiv").css("width", savedContainerWidth + "px");
+                        $("#botPanel").dialog("option", "width", savedDialogWidth);
+                    }
                     this.insertBotMessage(value);
                     $("#" + this.divId)
                         .find("#botPromptInput")
@@ -808,6 +822,16 @@ class BotEngineClass {
         $("#" + this.divId)
             .find("#botPromptInput")
             .trigger("focus");
+        if (options && options.expandDialog && $("#botPanel").length && $("#botPanel").dialog("instance")) {
+            savedContainerWidth = $("#botContainerDiv").width();
+            savedDialogWidth = $("#botPanel").dialog("widget").outerWidth();
+            var dialogChrome = savedDialogWidth - savedContainerWidth;
+            var expandedWidth = 600;
+            if (expandedWidth > savedContainerWidth) {
+                $("#botContainerDiv").css("width", expandedWidth + "px");
+                $("#botPanel").dialog("option", "width", expandedWidth + dialogChrome);
+            }
+        }
         if (!this.history.step.includes(this.history.currentIndex)) {
             this.history.step.push(this.history.currentIndex);
         }

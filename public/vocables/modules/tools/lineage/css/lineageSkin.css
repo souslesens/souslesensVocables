@@ -42,7 +42,7 @@
 }
 
 .Lineage_selectedSourceDiv {
-    border: 2px solid @source-color !important;
+    border: 4px solid @source-color !important;
     font-weight: bold;
 }
 
@@ -373,8 +373,7 @@
     border: 2px solid @button1-color;
     border-radius: 14px;
 }
-.sources-popup-panel .Lineage_sourceLabelDiv,
-#lineage_compactSourceIndicator .Lineage_sourceLabelDiv {
+.sources-popup-panel .Lineage_sourceLabelDiv {
     color: black !important;
 }
 #LineageVisjsLegendCanvas {

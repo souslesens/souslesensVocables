@@ -325,16 +325,22 @@ var TriplesMaker = {
 
             for (var columnId in columnMappings) {
                 // filter columns
+                var allowedPredicates = null;
                 if (options.filterMappingIds) {
                     var columnIsDirectlySelected = options.filterMappingIds.indexOf(columnId) > -1;
-                    var columnHasCompositeFilter = options.filterMappingIds.some(function (filterId) {
-                        return filterId.split(">")[0] === columnId && filterId.split(">")[1];
-                    });
-                    var filterHasOnlyPredicates = options.filterMappingIds.every(function (filterId) {
-                        return filterId.indexOf(">") < 0 && (MappingParser.isConstantUri(filterId) || MappingParser.isConstantPrefixedUri(filterId));
-                    });
-                    if (!columnIsDirectlySelected && !columnHasCompositeFilter && !filterHasOnlyPredicates) {
+                    var compositePredicates = [];
+                    for (var filterIndex = 0; filterIndex < options.filterMappingIds.length; filterIndex++) {
+                        var filterId = options.filterMappingIds[filterIndex];
+                        var filterParts = filterId.split(">");
+                        if (filterParts[0] === columnId && filterParts[1]) {
+                            compositePredicates.push(filterParts[1]);
+                        }
+                    }
+                    if (!columnIsDirectlySelected && compositePredicates.length === 0) {
                         continue;
+                    }
+                    if (!columnIsDirectlySelected) {
+                        allowedPredicates = compositePredicates;
                     }
                 }
 
@@ -347,20 +353,6 @@ var TriplesMaker = {
                 }
                 if (!columnUri) {
                     continue;
-                }
-
-                var allowedPredicates = null;
-                if (options.filterMappingIds) {
-                    var compositePredicates = options.filterMappingIds
-                        .filter(function (filterId) {
-                            return filterId.split(">")[0] === columnId && filterId.split(">")[1];
-                        })
-                        .map(function (filterId) {
-                            return filterId.split(">")[1];
-                        });
-                    if (compositePredicates.length > 0) {
-                        allowedPredicates = compositePredicates;
-                    }
                 }
 
                 var mappings = columnMappings[columnId].mappings;
@@ -426,7 +418,7 @@ var TriplesMaker = {
                 var property = TriplesMaker.getPropertyUri(edge.data.id);
 
                 if (edge.isRestriction) {
-                    var triples = TriplesMaker.getRestrictionTriples(subjectUri, property, objectUri, edge.retrictionType, null);
+                    var triples = TriplesMaker.getRestrictionTriples(subjectUri, property, objectUri, edge.restrictionType, { cardinality: edge.cardinality });
                     triples.forEach(function (triple) {
                         addTriple(triple.s, triple.p, triple.o);
                     });
@@ -748,11 +740,24 @@ var TriplesMaker = {
             o: predicateUri,
         });
 
-        triples.push({
-            s: blankNode,
-            p: "<" + restrictionType + ">",
-            o: objectUri,
-        });
+        if (options.cardinality && options.cardinality.value) {
+            triples.push({
+                s: blankNode,
+                p: "<" + restrictionType + ">",
+                o: '"' + options.cardinality.value + '"^^<http://www.w3.org/2001/XMLSchema#nonNegativeInteger>',
+            });
+            triples.push({
+                s: blankNode,
+                p: "<http://www.w3.org/2002/07/owl#onClass>",
+                o: objectUri,
+            });
+        } else {
+            triples.push({
+                s: blankNode,
+                p: "<" + restrictionType + ">",
+                o: objectUri,
+            });
+        }
 
         triples.push({
             s: subjectUri,

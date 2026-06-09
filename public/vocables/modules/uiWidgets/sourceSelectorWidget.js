@@ -338,6 +338,12 @@ var SourceSelectorWidget = (function () {
         if (source) {
             params.set("source", source);
         }
+        // nodeInfosURI is a one-shot param: keep it during initial load (urlParam_nodeInfosURI
+        // still set), remove it when the user changes source (urlParam_nodeInfosURI already consumed).
+        var lineageTools = Config.userTools && Config.userTools["lineage"];
+        if (!lineageTools || !lineageTools.urlParam_nodeInfosURI) {
+            params.delete("nodeInfosURI");
+        }
         common.storeLocally(source, "recentSources", 8);
         window.history.replaceState(null, "", `?${params.toString()}`);
         MainController.initTool(MainController.currentTool, function (err, result) {

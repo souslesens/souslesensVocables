@@ -101,6 +101,9 @@ var NodeInfosWidget = (function () {
             self.visitedNodes.currentIndex = index;
         }
 
+        var nodeIdStr = typeof nodeId === "string" ? nodeId : nodeId && nodeId.id ? nodeId.id : null;
+        $(document).trigger("nodeInfosWidget:show", { nodeId: nodeIdStr, source: sourceLabel, divId: divId });
+
         self.initDialog(sourceLabel, divId, options, function () {
             //  self.initDialog(sourceLabel, divId, options, function () {
             if (true || !options.showAxioms) {
@@ -180,6 +183,7 @@ var NodeInfosWidget = (function () {
                     close: function (event, ui) {
                         $("#addPredicateButton").remove();
                         $("#deleteButton").remove();
+                        $(document).trigger("nodeInfosWidget:close", { divId: self.divId });
                     },
                 });
                 UI.openDialog(divId, { title: " Node infos :" });

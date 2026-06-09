@@ -367,9 +367,23 @@ var MainController = (function () {
             var tool = paramsMap["tool"];
             var source = paramsMap["source"];
             var dataId = paramsMap["dataId"];
+            var nodeInfosURI = paramsMap["nodeInfosURI"];
 
             if (source) {
-                self.currentSource = source;
+                // Resolve source name case-insensitively against loaded Config.sources
+                var resolvedSource =
+                    Object.keys(Config.sources).find(function (key) {
+                        return key.toLowerCase() === source.toLowerCase();
+                    }) || source;
+                self.currentSource = resolvedSource;
+                // Correct urlParam_source set in async step 1 before Config.sources was loaded
+                if (Config.userTools[tool]) {
+                    Config.userTools[tool].urlParam_source = resolvedSource;
+                }
+            }
+
+            if (nodeInfosURI && Config.userTools[tool]) {
+                Config.userTools[tool].urlParam_nodeInfosURI = nodeInfosURI;
             }
 
             if (dataId) {
@@ -390,6 +404,7 @@ var MainController = (function () {
             callback();
         }
     };
+
     self.errorAlert = function (err) {
         var message = "";
         // rajouter le status de l'erreur

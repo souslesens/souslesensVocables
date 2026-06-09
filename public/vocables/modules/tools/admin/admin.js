@@ -145,6 +145,101 @@ $("#sourceDivControlPanelDiv").html(html);*/
         // UI.message(sources[0] + " processing...");
         Sparql_proxy.exportGraph(sources[0]);
     };
+
+    /**
+     * Generates one node-infos snapshot HTML per class of the selected source and downloads them as a zip.
+     * The server drives a headless browser (Playwright) over `?tool=lineage&source=...&nodeInfosURI=<class uri>`
+     * and reads the classes from its own ontology model cache, so only the source name is sent.
+     */
+    self.exportClassesSnapshots = function () {
+        var sources = SourceSelectorWidget.getCheckedSources();
+        if (sources.length != 1) {
+            return alert("select a single source");
+        }
+        var source = sources[0];
+
+        $("#waitImg").css("display", "block");
+        UI.message(source + " generating classes snapshots... this can take a while");
+
+        fetch(`${Config.apiUrl}/admin/snapshots`, {
+            method: "POST",
+            credentials: "same-origin",
+            headers: { "Content-Type": "application/json" },
+            // clientSocketId lets the server push per-class progress to this tab (see snapshotsSocketMessage).
+            body: JSON.stringify({ source: source, clientSocketId: Config.clientSocketId }),
+        })
+            .then(function (response) {
+                if (!response.ok) {
+                    return response.json().then(function (errorBody) {
+                        return Promise.reject(errorBody.ERROR || "snapshots export failed");
+                    });
+                }
+                return response.blob();
+            })
+            .then(function (zipBlob) {
+                var blobUrl = URL.createObjectURL(zipBlob);
+                var a = document.createElement("a");
+                a.href = blobUrl;
+                a.download = source + "_snapshots.zip";
+                a.click();
+                URL.revokeObjectURL(blobUrl);
+                self.hideSnapshotsProgress();
+                $("#waitImg").css("display", "none");
+                UI.message(source + " snapshots downloaded", true);
+            })
+            .catch(function (error) {
+                self.hideSnapshotsProgress();
+                $("#waitImg").css("display", "none");
+                MainController.errorAlert(error);
+            });
+    };
+
+    /**
+     * Handles per-class progress pushed over the `adminSnapshots` socket channel while a snapshots export runs,
+     * updating a progress bar next to #messageDiv. Routed here from socketIoProxy.
+     */
+    self.snapshotsSocketMessage = function (message) {
+        if (!message || typeof message != "object") {
+            return;
+        }
+
+        var progressBar = document.getElementById("adminSnapshotsProgress");
+        if (!progressBar) {
+            var messageDiv = $("#messageDiv");
+            if (messageDiv.length == 0) {
+                return;
+            }
+            var wrapper = $("#adminSnapshotsProgressWrapper");
+            if (wrapper.length == 0) {
+                messageDiv.wrap('<div id="adminSnapshotsProgressWrapper" style="display:inline-flex; align-items:center; gap:8px;"></div>');
+                wrapper = $("#adminSnapshotsProgressWrapper");
+            }
+            $('<progress id="adminSnapshotsProgress" max="100" value="0" style="width:200px;"></progress>').prependTo(wrapper);
+            progressBar = document.getElementById("adminSnapshotsProgress");
+        }
+
+        var percent = message.total > 0 ? Math.round((message.processed / message.total) * 100) : 0;
+        progressBar.value = percent;
+        progressBar.style.display = "block";
+
+        if (message.operation == "finished") {
+            var doneStr = message.source + " : " + message.processed + "/" + message.total + " snapshots generated";
+            if (message.failures) {
+                doneStr += " (" + message.failures + " failed)";
+            }
+            UI.message(doneStr + ", building zip...");
+        } else {
+            UI.message(message.source + " : " + percent + "% (" + message.processed + "/" + message.total + ") " + (message.classUri || ""));
+        }
+    };
+
+    self.hideSnapshotsProgress = function () {
+        var progressBar = document.getElementById("adminSnapshotsProgress");
+        if (progressBar) {
+            progressBar.style.display = "none";
+            progressBar.value = 0;
+        }
+    };
     self.getClassesLineage = function () {
         //   var sources =SourceSelectorWidget.getCheckedSources();
         var sources = SourceSelectorWidget.getCheckedSources();

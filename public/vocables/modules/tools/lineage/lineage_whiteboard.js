@@ -162,6 +162,56 @@ var Lineage_whiteboard = (function () {
 
     /**
      * @function
+     * @name installNodeInfosUrlSync
+     * @memberof module:Lineage_whiteboard
+     * Installs document-level listeners that keep the URL's nodeInfosURI param in sync
+     * with the currently open NodeInfosWidget dialog.
+     * Opening a node info panel adds the URI to the URL; closing it removes it.
+     * @returns {void}
+     */
+    self.installNodeInfosUrlSync = function () {
+        if (self._nodeInfosUrlSyncInstalled) {
+            return;
+        }
+        self._nodeInfosUrlSyncInstalled = true;
+
+        $(document).on("nodeInfosWidget:show.lineageUrlSync", function (evt, data) {
+            if (MainController.currentTool !== "lineage" || data.divId !== "mainDialogDiv" || !data.nodeId) {
+                return;
+            }
+            // Build query manually so nodeInfosURI stays human-readable (: and / are valid unencoded in query strings)
+            var params = new URLSearchParams(document.location.search);
+            params.delete("nodeInfosURI");
+            var base = params.toString();
+            var newQuery = base ? base + "&nodeInfosURI=" + data.nodeId : "nodeInfosURI=" + data.nodeId;
+            window.history.replaceState(null, "", "?" + newQuery);
+        });
+
+        $(document).on("nodeInfosWidget:close.lineageUrlSync", function (evt, data) {
+            if (MainController.currentTool !== "lineage" || data.divId !== "mainDialogDiv") {
+                return;
+            }
+            var params = new URLSearchParams(document.location.search);
+            params.delete("nodeInfosURI");
+            window.history.replaceState(null, "", "?" + params.toString());
+        });
+    };
+
+    /**
+     * @function
+     * @name uninstallNodeInfosUrlSync
+     * @memberof module:Lineage_whiteboard
+     * Removes the document-level listeners installed by installNodeInfosUrlSync.
+     * @returns {void}
+     */
+    self.uninstallNodeInfosUrlSync = function () {
+        $(document).off("nodeInfosWidget:show.lineageUrlSync");
+        $(document).off("nodeInfosWidget:close.lineageUrlSync");
+        self._nodeInfosUrlSyncInstalled = false;
+    };
+
+    /**
+     * @function
      * @name unload
      * @memberof module:Lineage_whiteboard
      * Unloads the Lineage whiteboard by clearing the graph display and resetting the lateral panel.
@@ -181,6 +231,7 @@ var Lineage_whiteboard = (function () {
             namespace: "lineageLegendAutoHide",
         });
         self._legendAutoHideInstalled = false;
+        self.uninstallNodeInfosUrlSync();
     };
 
     /**
@@ -209,6 +260,9 @@ var Lineage_whiteboard = (function () {
      * @returns {void}
      */
     self.loadSources = function (options) {
+        var nodeInfosURI = Config.userTools["lineage"].urlParam_nodeInfosURI || null;
+        Config.userTools["lineage"].urlParam_nodeInfosURI = null;
+
         Lineage_sources.loadSources(MainController.currentSource, function (err) {
             if (err) {
                 return MainController.errorAlert(err);
@@ -222,6 +276,16 @@ var Lineage_whiteboard = (function () {
                 }
 
                 Lineage_whiteboard.initUI();
+                Lineage_whiteboard.installNodeInfosUrlSync();
+
+                if (nodeInfosURI) {
+                    // Headless snapshot export (admin/snapshots.js) waits on window.nodeInfosSnapshotReady so it
+                    // never captures a half-rendered widget. Flag flips true only once ALL async sections finished.
+                    window.nodeInfosSnapshotReady = false;
+                    NodeInfosWidget.showNodeInfos(MainController.currentSource, nodeInfosURI, "mainDialogDiv", {}, function () {
+                        window.nodeInfosSnapshotReady = true;
+                    });
+                }
             });
         });
     };

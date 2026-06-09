@@ -1,5 +1,6 @@
 import KGcreator_run from "../tools/KGcreator/KGcreator_run.js";
 import MappingModeler from "../tools/mappingModeler/mappingModeler.js";
+import Admin from "../tools/admin/admin.js";
 
 const socket = io();
 // client-side
@@ -14,6 +15,10 @@ socket.on("disconnect", () => {
 
 socket.on("KGbuilder", function (message) {
     MappingModeler.socketMessage(message);
+});
+
+socket.on("adminSnapshots", function (message) {
+    Admin.snapshotsSocketMessage(message);
 });
 
 socket.connect("ws://localhost:8080/", "echo-protocol");

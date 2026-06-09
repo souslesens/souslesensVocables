@@ -17,7 +17,6 @@ import NodeInfosAxioms from "../tools/axioms/nodeInfosAxioms.js";
 import Axioms_manager from "../tools/axioms/axioms_manager.js";
 import CreateRestriction_bot from "../bots/createRestriction_bot.js";
 import OntologyModels from "../shared/ontologyModels.js";
-import Export from "../shared/export.js";
 
 var NodeInfosWidget = (function () {
     var self = {};
@@ -120,8 +119,6 @@ var NodeInfosWidget = (function () {
                     //  $("#addRestrictionButton").insertAfter($("#mainDialogDiv").parent().find(".ui-dialog-title"));
                     $("#addPredicateButton").insertAfter($("#mainDialogDiv").parent().find(".ui-dialog-title"));
                     $("#addPredicateButton").css("margin-left", "25px !important");
-                    $("#exportSnapshotButton").insertAfter($("#mainDialogDiv").parent().find(".ui-dialog-title"));
-                    $("#exportSnapshotButton").css("margin-left", "25px !important");
                     //  $("#addRestrictionButton").css("margin-left", "25px !important");
                     UI.repositionOpenDialogs();
                 });
@@ -174,7 +171,6 @@ var NodeInfosWidget = (function () {
             $("#" + divId).load("modules/uiWidgets/html/nodeInfosWidget.html", function (err) {
                 $("#addPredicateButton").remove();
                 $("#deleteButton").remove();
-                $("#exportSnapshotButton").remove();
                 $("#" + divId).dialog("close");
                 $("#" + divId).dialog({
                     open: function (event, ui) {
@@ -321,8 +317,6 @@ var NodeInfosWidget = (function () {
                 "onclick='Predicates_bot.start(Lineage_sources.activeSource)'>  Add Predicate </button>";
 
             str += "<button id='deleteButton' class='w3-button slsv-right-top-bar-button nodeInfos-button' onclick='NodeInfosWidget.deleteNode()'> Delete </button>";
-            str +=
-                "<button id='exportSnapshotButton' class='w3-button slsv-right-top-bar-button nodeInfos-button' onclick='NodeInfosWidget.exportSnapshot(\"nodeInfosWidget_InfosTabDiv\")'> Export Snapshot </button>";
             str += "<div id='sourceBrowser_addPropertyDiv' style='display:none'>";
         }
 
@@ -1821,21 +1815,11 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
         return safeNodeId.replace(/[^a-zA-Z0-9.\-_]+/g, "_") + ".html";
     };
 
-    self.exportSnapshot = function (divId) {
-        self.buildSnapshotHtml(divId, function (err, html) {
-            if (err || !html) {
-                return;
-            }
-            Export.downloadStringAsFile(html, self.getSnapshotFileName(), "text/html");
-        });
-    };
-
     /**
      * Builds the self-contained snapshot HTML string for the node infos rendered in `divId`,
      * resolving which internal URIs to inline (vs. keep as external links) via a SPARQL lookup.
      * Returns the HTML through `callback(err, htmlString)` instead of triggering a download,
-     * so it can be reused both by the in-app "Export Snapshot" button and by the headless
-     * batch export (Playwright reads the returned string).
+     * so the headless batch export (Playwright reads the returned string) can reuse it.
      */
     self.buildSnapshotHtml = function (divId, callback) {
         const sourceEl = document.getElementById(divId);

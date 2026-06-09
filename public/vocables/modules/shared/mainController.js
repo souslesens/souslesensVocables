@@ -371,9 +371,10 @@ var MainController = (function () {
 
             if (source) {
                 // Resolve source name case-insensitively against loaded Config.sources
-                var resolvedSource = Object.keys(Config.sources).find(function (key) {
-                    return key.toLowerCase() === source.toLowerCase();
-                }) || source;
+                var resolvedSource =
+                    Object.keys(Config.sources).find(function (key) {
+                        return key.toLowerCase() === source.toLowerCase();
+                    }) || source;
                 self.currentSource = resolvedSource;
                 // Correct urlParam_source set in async step 1 before Config.sources was loaded
                 if (Config.userTools[tool]) {

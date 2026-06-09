@@ -4,6 +4,8 @@ import path from "path";
 import { fileURLToPath } from "url";
 import fs from "fs";
 
+const CHUNK_SIZE = 10 * 1024 * 1024; // 10 MB
+
 // ESM equivalent of __dirname
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -64,7 +66,15 @@ app.use(bodyParser.urlencoded({
     extended: true
 }));*/
 
-app.use(fileUpload());
+app.use(
+    fileUpload({
+        useTempFiles: true,
+        tempFileDir: "/tmp/",
+        limits: {
+            fileSize: CHUNK_SIZE + 1024 * 1024, // 11 MB (10 MB + 1 MB margin)
+        },
+    }),
+);
 
 // logger
 app.use(morganLogger("dev"));

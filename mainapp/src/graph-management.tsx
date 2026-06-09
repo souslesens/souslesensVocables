@@ -182,11 +182,7 @@ export default function GraphManagement() {
                                         <TableRow key={source.name}>
                                             <TableCell sx={{ overflowWrap: "anywhere" }}>{source.name}</TableCell>
                                             <TableCell>
-                                                <Link
-                                                    href={source.graphUri}
-                                                    target="_blank"
-                                                    sx={{ overflowWrap: "anywhere" }}
-                                                >
+                                                <Link href={source.graphUri} target="_blank" sx={{ overflowWrap: "anywhere" }}>
                                                     {source.graphUri}
                                                 </Link>
                                             </TableCell>

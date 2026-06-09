@@ -353,7 +353,14 @@ const SourcesTable = () => {
                                                             >
                                                                 <Download />
                                                             </IconButton>
-                                                            <IconButton aria-label="edit" color="primary" onClick={() => handleOpenModal(source, true)} size="small" title={"Edit Repository"} sx={{ padding: "5px" }}>
+                                                            <IconButton
+                                                                aria-label="edit"
+                                                                color="primary"
+                                                                onClick={() => handleOpenModal(source, true)}
+                                                                size="small"
+                                                                title={"Edit Repository"}
+                                                                sx={{ padding: "5px" }}
+                                                            >
                                                                 <Edit />
                                                             </IconButton>
                                                             <ButtonWithConfirmation size="small" buttonSx={{ padding: "5px" }} label="Delete" func={handleDeleteSource} args={[source]} />

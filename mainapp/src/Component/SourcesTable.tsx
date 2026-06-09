@@ -238,7 +238,7 @@ const SourcesTable = () => {
                 });
 
                 return (
-                    <Stack direction="column" spacing={{ xs: 2 }} sx={{ m: 4 }} useFlexGap>
+                    <Stack direction="column" spacing={{ xs: 1 }} sx={{ m: 2 }} useFlexGap>
                         <Snackbar autoHideDuration={15000} open={snackOpen} onClose={handleSnackbarClose}>
                             <Alert onClose={handleSnackbarClose} severity={snackSeverity} sx={{ width: "100%" }}>
                                 {Array.from(snackMessages).map((msg) => (
@@ -250,10 +250,11 @@ const SourcesTable = () => {
                             </Alert>
                         </Snackbar>
                         <Stack direction="row">
-                            <TextField sx={{ width: "100px" }} select id="filter-sources" label="Filters" value="" onChange={handleAddFilter}>
+                            <TextField size="small" sx={{ width: "100px" }} select id="filter-sources" label="Filters" value="" onChange={handleAddFilter}>
                                 <MenuItem value="group">group:</MenuItem>
                             </TextField>
                             <TextField
+                                size="small"
                                 sx={{ flex: 1 }}
                                 inputRef={searchInputRef}
                                 value={filteringChars}
@@ -265,39 +266,41 @@ const SourcesTable = () => {
                                 }}
                             />
                         </Stack>
-                        <TableContainer sx={{ height: "400px" }} component={Paper}>
-                            <Table stickyHeader>
+                        <TableContainer sx={{ maxHeight: "calc(100vh - 350px)", overflow: "auto" }} component={Paper}>
+                            <Table stickyHeader size="small" sx={{ tableLayout: "fixed", width: "100%" }}>
                                 <TableHead>
                                     <TableRow>
-                                        <TableCell style={{ fontWeight: "bold" }}>
+                                        <TableCell style={{ fontWeight: "bold", width: "22%" }}>
                                             <TableSortLabel active={orderBy === "name"} direction={order} onClick={() => handleRequestSort("name")}>
                                                 Name
                                             </TableSortLabel>
                                         </TableCell>
-                                        <TableCell style={{ fontWeight: "bold", width: "100%" }}>
+                                        <TableCell style={{ fontWeight: "bold", width: "22%" }}>
                                             <TableSortLabel active={orderBy === "graphUri"} direction={order} onClick={() => handleRequestSort("graphUri")}>
                                                 Graph URI
                                             </TableSortLabel>
                                         </TableCell>
-                                        <TableCell align="center" style={{ fontWeight: "bold", whiteSpace: "nowrap" }}>
+                                        <TableCell align="center" style={{ fontWeight: "bold", width: "8%" }}>
                                             <TableSortLabel active={orderBy === "graphSize"} direction={order} onClick={() => handleRequestSort("graphSize")}>
-                                                Graph size
+                                                <Stack direction="column" spacing={0} sx={{ alignItems: "center", lineHeight: 1.2 }} useFlexGap>
+                                                    <div>Graph Size</div>
+                                                </Stack>
                                             </TableSortLabel>
                                         </TableCell>
-                                        <TableCell align="center" style={{ fontWeight: "bold" }}>
+                                        <TableCell align="center" style={{ fontWeight: "bold", width: "30%" }}>
                                             <TableSortLabel active={orderBy === "group"} direction={order} onClick={() => handleRequestSort("group")}>
                                                 Group
                                             </TableSortLabel>
                                         </TableCell>
-                                        <TableCell align="center" style={{ fontWeight: "bold" }}>
+                                        <TableCell align="center" style={{ fontWeight: "bold", width: "4%", whiteSpace: "nowrap" }}>
                                             Data
                                         </TableCell>
-                                        <TableCell align="center" style={{ fontWeight: "bold" }}>
+                                        <TableCell align="center" style={{ fontWeight: "bold", width: "14%", whiteSpace: "nowrap" }}>
                                             Actions
                                         </TableCell>
                                     </TableRow>
                                 </TableHead>
-                                <TableBody sx={{ width: "100%", overflow: "visible" }}>
+                                <TableBody sx={{ "& .MuiTableCell-body": { py: "20px" } }}>
                                     {sortedSources
                                         .filter((source) => {
                                             return filterSearchBar(source, filteringChars);
@@ -309,10 +312,10 @@ const SourcesTable = () => {
                                             const validity = checkSource(source);
                                             return (
                                                 <TableRow key={source.name}>
-                                                    <TableCell>{source.name}</TableCell>
+                                                    <TableCell sx={{ overflowWrap: "anywhere" }}>{source.name}</TableCell>
                                                     <TableCell>
                                                         {validity.status ? (
-                                                            <Link href={source.graphUri} target="_blank">
+                                                            <Link href={source.graphUri} target="_blank" sx={{ overflowWrap: "anywhere" }}>
                                                                 {source.graphUri}
                                                             </Link>
                                                         ) : (
@@ -332,12 +335,13 @@ const SourcesTable = () => {
                                                         </Stack>
                                                     </TableCell>
                                                     <TableCell align="center">
-                                                        <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
+                                                        <Stack direction="row" justifyContent="center" spacing={0.5} useFlexGap>
                                                             <IconButton
                                                                 color="primary"
                                                                 sx={{
                                                                     // FIXME Need to override the jquery css
                                                                     color: "rgb(25, 118, 210) !important",
+                                                                    padding: "5px",
                                                                 }}
                                                                 title={"Download JSON"}
                                                                 href={createSingleSourceDownloadUrl(
@@ -349,10 +353,10 @@ const SourcesTable = () => {
                                                             >
                                                                 <Download />
                                                             </IconButton>
-                                                            <IconButton aria-label="edit" color="primary" onClick={() => handleOpenModal(source, true)} size="small" title={"Edit Repository"}>
+                                                            <IconButton aria-label="edit" color="primary" onClick={() => handleOpenModal(source, true)} size="small" title={"Edit Repository"} sx={{ padding: "5px" }}>
                                                                 <Edit />
                                                             </IconButton>
-                                                            <ButtonWithConfirmation label="Delete" func={handleDeleteSource} args={[source]} />
+                                                            <ButtonWithConfirmation size="small" buttonSx={{ padding: "5px" }} label="Delete" func={handleDeleteSource} args={[source]} />
                                                         </Stack>
                                                     </TableCell>
                                                 </TableRow>

@@ -584,6 +584,11 @@ var UI = (function () {
         ["#mainDialogDiv", "#smallDialogDiv", "#botPanel", "#widgetGenericDialogDiv"].forEach(function (dialogId) {
             try {
                 if ($(dialogId).dialog("isOpen")) {
+                    var hasDedicatedResizeHandler = dialogId === "#mainDialogDiv" && $("#mount-graph-management-here").length > 0;
+                    if (!hasDedicatedResizeHandler) {
+                        $(dialogId).dialog("option", "width", "auto");
+                        $(dialogId).dialog("option", "height", "auto");
+                    }
                     self.clampAndCenterDialog(dialogId);
                 }
             } catch (e) {}

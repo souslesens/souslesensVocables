@@ -131,66 +131,75 @@ export default function GraphManagement() {
             {displayModal === "metadata" && currentSource ? (
                 <MetadataModal open={true} onClose={() => setDisplayModal(null)} sourceName={currentSource.name} isReadOnly={currentSource.accessControl !== "readwrite"} />
             ) : null}
-            <Stack direction="column" spacing={{ xs: 2 }} sx={{ m: 4 }} useFlexGap>
+            <Stack direction="column" spacing={{ xs: 1 }} sx={{ m: 1 }} useFlexGap>
                 <TextField
                     inputProps={{ autoComplete: "off" }}
                     label="Search Sources by name"
                     id="search-graph"
+                    size="small"
                     onChange={(event) => {
                         setFilteringChars(event.target.value);
                     }}
                 />
 
-                <TableContainer sx={{ height: "400px" }} component={Paper}>
-                    <Table stickyHeader>
+                <TableContainer sx={{ maxHeight: "calc(90vh - 220px)", overflow: "auto" }} component={Paper}>
+                    <Table stickyHeader size="small" sx={{ tableLayout: "fixed", width: "100%" }}>
                         <TableHead>
                             <TableRow>
-                                <TableCell style={{ fontWeight: "bold" }}>
+                                <TableCell style={{ fontWeight: "bold", width: "17%" }}>
                                     <TableSortLabel active={orderBy === "name"} direction={order} onClick={() => handleRequestSort("name")}>
                                         Sources
                                     </TableSortLabel>
                                 </TableCell>
-                                <TableCell style={{ fontWeight: "bold", width: "100%" }}>
+                                <TableCell style={{ fontWeight: "bold", width: "18%" }}>
                                     <TableSortLabel active={orderBy === "graphUri"} direction={order} onClick={() => handleRequestSort("graphUri")}>
                                         Graph URI
                                     </TableSortLabel>
                                 </TableCell>
-                                <TableCell align="center" style={{ fontWeight: "bold", whiteSpace: "nowrap" }}>
+                                <TableCell align="center" style={{ fontWeight: "bold", width: "22%" }}>
                                     <TableSortLabel active={orderBy === "group"} direction={order} onClick={() => handleRequestSort("group")}>
                                         Group
                                     </TableSortLabel>
                                 </TableCell>
-                                <TableCell align="center" style={{ fontWeight: "bold", whiteSpace: "nowrap" }}>
+                                <TableCell align="center" style={{ fontWeight: "bold", width: "8%" }}>
                                     <TableSortLabel active={orderBy === "graphSize"} direction={order} onClick={() => handleRequestSort("graphSize")}>
-                                        <Stack direction="row" spacing={1} sx={{ alignItems: "center" }} useFlexGap>
+                                        <Stack direction="column" spacing={0} sx={{ alignItems: "center", lineHeight: 1.2 }} useFlexGap>
                                             <div>Graph Size</div>
                                             <Typography variant="caption">(Triple)</Typography>
                                         </Stack>
                                     </TableSortLabel>
                                 </TableCell>
-                                <TableCell align="center" style={{ fontWeight: "bold" }}>
+                                <TableCell align="center" style={{ fontWeight: "bold", width: "35%", whiteSpace: "nowrap" }}>
                                     Actions
                                 </TableCell>
                             </TableRow>
                         </TableHead>
-                        <TableBody sx={{ width: "100%", overflow: "visible" }}>
+                        <TableBody sx={{ "& .MuiTableCell-body": { py: "20px" } }}>
                             {memoizedSources
                                 .filter((source) => cleanUpText(source.name).includes(cleanUpText(filteringChars)))
                                 .map((source) => {
                                     return (
                                         <TableRow key={source.name}>
-                                            <TableCell>{source.name}</TableCell>
+                                            <TableCell sx={{ overflowWrap: "anywhere" }}>{source.name}</TableCell>
                                             <TableCell>
-                                                <Link href={source.graphUri} target="_blank">
+                                                <Link
+                                                    href={source.graphUri}
+                                                    target="_blank"
+                                                    sx={{ overflowWrap: "anywhere" }}
+                                                >
                                                     {source.graphUri}
                                                 </Link>
                                             </TableCell>
                                             <TableCell align="center">{source.group ? <Chip label={source.group} size="small" /> : ""}</TableCell>
-                                            <TableCell align="center">{humanizeSize(getGraphSize(source, graphs))}</TableCell>
+                                            <TableCell align="center" sx={{ width: 200 }}>
+                                                {humanizeSize(getGraphSize(source, graphs))}
+                                            </TableCell>
                                             <TableCell align="center">
-                                                <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
+                                                <Stack direction="row" justifyContent="center" spacing={0.5} useFlexGap>
                                                     <Button
+                                                        size="small"
                                                         variant="outlined"
+                                                        sx={{ padding: "5px" }}
                                                         onClick={() => {
                                                             setCurrentSource(source);
                                                             setDisplayModal("metadata");
@@ -199,9 +208,11 @@ export default function GraphManagement() {
                                                         Metadata
                                                     </Button>
                                                     <Button
+                                                        size="small"
                                                         variant="contained"
                                                         disabled={source.accessControl != "readwrite"}
                                                         color="secondary"
+                                                        sx={{ padding: "5px" }}
                                                         onClick={() => {
                                                             setCurrentSource(source);
                                                             setDisplayModal("upload");
@@ -210,8 +221,10 @@ export default function GraphManagement() {
                                                         Upload
                                                     </Button>
                                                     <Button
+                                                        size="small"
                                                         variant="contained"
                                                         color="primary"
+                                                        sx={{ padding: "5px" }}
                                                         onClick={() => {
                                                             setCurrentSource(source);
                                                             setDisplayModal("download");
@@ -219,7 +232,7 @@ export default function GraphManagement() {
                                                     >
                                                         Download
                                                     </Button>
-                                                    <ButtonWithConfirmation label="Delete" func={deleteGraph} args={[source]} />
+                                                    <ButtonWithConfirmation size="small" buttonSx={{ padding: "5px" }} label="Delete" func={deleteGraph} args={[source]} />
                                                 </Stack>
                                             </TableCell>
                                         </TableRow>

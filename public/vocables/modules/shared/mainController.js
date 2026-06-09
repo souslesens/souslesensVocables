@@ -367,6 +367,7 @@ var MainController = (function () {
             var tool = paramsMap["tool"];
             var source = paramsMap["source"];
             var dataId = paramsMap["dataId"];
+            var nodeInfosURI = paramsMap["nodeInfosURI"] ? decodeURIComponent(paramsMap["nodeInfosURI"]) : null;
 
             if (source) {
                 self.currentSource = source;
@@ -385,10 +386,42 @@ var MainController = (function () {
             } else {
                 MainController.onToolSelect(tool);
             }
+
+            if (nodeInfosURI && source) {
+                self.openNodeInfosFromUrlParam(source, nodeInfosURI);
+            }
         }
         if (callback) {
             callback();
         }
+    };
+
+    /**
+     * Opens the NodeInfosWidget for `nodeUri` once the tool UI and the source ontology model are ready.
+     * Triggered by the `nodeInfosURI` URL param (e.g. the headless snapshot export navigates to
+     * `?tool=lineage&source=X&nodeInfosURI=<encoded uri>`). Polls because `onToolSelect` loads the tool
+     * asynchronously and may reset open dialogs while loading.
+     */
+    self.openNodeInfosFromUrlParam = function (source, nodeUri) {
+        // Reset before opening; set true only once NodeInfosWidget finished ALL its async sections
+        // (common infos, restrictions, class hierarchy...). The headless snapshot export waits on this flag
+        // so it doesn't capture a half-rendered widget.
+        window.nodeInfosSnapshotReady = false;
+        var maxAttempts = 60;
+        var attempt = 0;
+        var poll = setInterval(function () {
+            attempt++;
+            var ontologyReady = Config.ontologiesVocabularyModels && Config.ontologiesVocabularyModels[source];
+            if (window.NodeInfosWidget && ontologyReady) {
+                clearInterval(poll);
+                window.NodeInfosWidget.showNodeInfos(source, nodeUri, "mainDialogDiv", { resetVisited: true }, function () {
+                    window.nodeInfosSnapshotReady = true;
+                });
+            } else if (attempt >= maxAttempts) {
+                clearInterval(poll);
+                console.error("openNodeInfosFromUrlParam: timed out waiting for tool/ontology for source " + source);
+            }
+        }, 500);
     };
     self.errorAlert = function (err) {
         var message = "";

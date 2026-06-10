@@ -2,6 +2,7 @@ import { chromium } from "playwright";
 import JSZip from "jszip";
 import { ontologyModelsCache } from "../ontologyModels.js";
 import SocketManager from "../../../../bin/socketManager.js";
+import { mainConfigModel } from "../../../../model/mainConfig.js";
 
 // Socket.io channel the client listens on to drive the snapshots progress bar.
 const SNAPSHOTS_PROGRESS_CHANNEL = "adminSnapshots";
@@ -9,6 +10,13 @@ const SNAPSHOTS_PROGRESS_CHANNEL = "adminSnapshots";
 // How long (ms) to wait, per class, for the lineage page to auto-open the NodeInfosWidget
 // (driven by the `nodeInfosURI` URL param) and render its content before giving up on that class.
 const NODE_INFOS_RENDER_TIMEOUT_MS = 30000;
+
+// Upper bound on classes per export. Each class spawns a full headless page load (~seconds + memory),
+// so an unbounded source could exhaust server resources / hang the request. Sources above this are rejected.
+const MAX_SNAPSHOT_CLASSES = 500;
+
+// Fallback listen port, mirroring bin/www (process.env.PORT || config.listenPort || 3010).
+const DEFAULT_LISTEN_PORT = 3010;
 
 // Browser-side: waits until the NodeInfosWidget (auto-opened via the nodeInfosURI URL param) has FULLY
 // rendered — signalled by `window.nodeInfosSnapshotReady`, set in the showNodeInfos completion callback once
@@ -59,9 +67,19 @@ export default function () {
         if (classUris.length === 0) {
             return res.status(404).send({ ERROR: "no classes in cached ontology model for source '" + source + "'" });
         }
+        if (classUris.length > MAX_SNAPSHOT_CLASSES) {
+            return res.status(413).send({
+                ERROR: "source '" + source + "' has " + classUris.length + " classes; snapshot export is limited to " + MAX_SNAPSHOT_CLASSES + " classes",
+            });
+        }
 
-        // Same-origin base URL the admin's browser used; Playwright loads pages from here.
-        const baseUrl = req.protocol + "://" + req.get("host");
+        // Server-controlled base URL the headless browser loads pages from. It runs inside this same
+        // container/process host, so loopback is always reachable. Deliberately NOT derived from the
+        // request Host header (which the client controls) to avoid SSRF / forwarding the admin cookie
+        // to an attacker-chosen host. Override with SNAPSHOTS_BASE_URL only if Playwright runs elsewhere.
+        const mainConfig = await mainConfigModel.getConfig();
+        const listenPort = process.env.PORT || (mainConfig && mainConfig.listenPort) || DEFAULT_LISTEN_PORT;
+        const baseUrl = process.env.SNAPSHOTS_BASE_URL || "http://127.0.0.1:" + listenPort;
         // Forward the admin's own session cookie so the headless browser is authenticated as them.
         // Scoped to the throw-away browser context below and discarded when that context closes.
         const sessionCookie = req.headers.cookie || "";
@@ -76,7 +94,15 @@ export default function () {
 
         let browser;
         try {
-            browser = await chromium.launch({ headless: true });
+            // In the container we point Playwright at the Alpine system Chromium (no musl build is shipped
+            // by Playwright). Running as root there requires --no-sandbox; left default for local dev,
+            // where the Playwright-managed Chromium keeps its sandbox.
+            const systemChromiumPath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH;
+            browser = await chromium.launch({
+                headless: true,
+                executablePath: systemChromiumPath || undefined,
+                args: systemChromiumPath ? ["--no-sandbox"] : [],
+            });
             const context = await browser.newContext({
                 extraHTTPHeaders: sessionCookie ? { Cookie: sessionCookie } : {},
                 ignoreHTTPSErrors: true,
@@ -163,6 +189,7 @@ export default function () {
             200: { description: "Zip archive of per-class snapshot HTML files." },
             400: { description: "Missing source." },
             404: { description: "No cached ontology model / classes for the source." },
+            413: { description: "Source has more classes than the export limit (" + MAX_SNAPSHOT_CLASSES + ")." },
             500: { description: "Snapshot generation failed." },
         },
         tags: ["Admin"],

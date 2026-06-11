@@ -169,23 +169,15 @@ $("#sourceDivControlPanelDiv").html(html);*/
             body: JSON.stringify({ source: source, clientSocketId: Config.clientSocketId }),
         })
             .then(function (response) {
+                if (response.status === 202) {
+                    // Job started in background — download triggered by the finished socket event.
+                    return;
+                }
                 if (!response.ok) {
                     return response.json().then(function (errorBody) {
                         return Promise.reject(errorBody.ERROR || "snapshots export failed");
                     });
                 }
-                return response.blob();
-            })
-            .then(function (zipBlob) {
-                var blobUrl = URL.createObjectURL(zipBlob);
-                var a = document.createElement("a");
-                a.href = blobUrl;
-                a.download = source + "_snapshots.zip";
-                a.click();
-                URL.revokeObjectURL(blobUrl);
-                self.hideSnapshotsProgress();
-                $("#waitImg").css("display", "none");
-                UI.message(source + " snapshots downloaded", true);
             })
             .catch(function (error) {
                 self.hideSnapshotsProgress();
@@ -227,7 +219,24 @@ $("#sourceDivControlPanelDiv").html(html);*/
             if (message.failures) {
                 doneStr += " (" + message.failures + " failed)";
             }
-            UI.message(doneStr + ", building zip...");
+            if (message.downloadUrl) {
+                UI.message(doneStr + ", downloading zip...");
+                var downloadAnchor = document.createElement("a");
+                downloadAnchor.href = message.downloadUrl;
+                downloadAnchor.download = message.source + "_snapshots.zip";
+                document.body.appendChild(downloadAnchor);
+                downloadAnchor.click();
+                document.body.removeChild(downloadAnchor);
+                self.hideSnapshotsProgress();
+                $("#waitImg").css("display", "none");
+                UI.message(message.source + " snapshots downloaded", true);
+            } else {
+                UI.message(doneStr);
+            }
+        } else if (message.operation == "error") {
+            self.hideSnapshotsProgress();
+            $("#waitImg").css("display", "none");
+            MainController.errorAlert(message.error || "snapshots export failed");
         } else {
             UI.message(message.source + " : " + percent + "% (" + message.processed + "/" + message.total + ") " + (message.classUri || ""));
         }

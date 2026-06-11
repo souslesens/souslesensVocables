@@ -398,7 +398,7 @@ var MainController = (function () {
         return matchedSource;
     };
     /**
-     * Displays the node infos panel for a node without launching any SousLeSens tool (action=null).
+     * Displays the node infos panel for a node without launching any SousLeSens tool (action=nodeInfos).
      * Registers the owning source so ontology queries resolve, then renders the NodeInfosWidget
      * inline (no dialog) into the main content area on an otherwise bare page.
      * @function
@@ -427,8 +427,8 @@ var MainController = (function () {
             }
             Lineage_sources.activeSource = source;
             self.currentSource = source;
-            // Clean, reload-safe URL: nodeURI (human-readable) + action=null, no tool
-            window.history.replaceState(null, "", "?nodeURI=" + nodeURI + "&action=null");
+            // Clean, reload-safe URL: nodeURI (human-readable) + action=nodeInfos, no tool
+            window.history.replaceState(null, "", "?nodeURI=" + nodeURI + "&action=nodeInfos");
             // Render the standard node infos panel (dialog) for the familiar boxed look
             var node = { data: { id: nodeURI } };
             NodeInfosWidget.showNodeInfos(source, node, "mainDialogDiv", { hideModifyButtons: true });
@@ -463,10 +463,10 @@ var MainController = (function () {
 
         // Node URI flow: open the node infos directly. Works with or without a "tool" param.
         // action: "lineage" (default) -> whiteboard + node infos; "browse" -> Browse tool;
-        //         "null" -> node infos panel only, no tool launched.
+        //         "nodeInfos" -> node infos panel only, no tool launched.
         if (nodeURI && self.currentSource) {
-            // "null" action: render the node infos panel only, without launching any tool
-            if (action === "null") {
+            // "nodeInfos" action: render the node infos panel only, without launching any tool
+            if (action === "nodeInfos") {
                 self.showNodeInfosStandalone(self.currentSource, nodeURI);
                 if (callback) {
                     callback();

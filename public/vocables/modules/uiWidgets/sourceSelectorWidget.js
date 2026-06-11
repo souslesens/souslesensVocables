@@ -7,13 +7,6 @@ var SourceSelectorWidget = (function () {
     var self = {};
     self.currentTreeDiv = null;
 
-    // jstree uses node ids as CSS selectors internally (querySelector('#' + id)).
-    // Group names from sources.json can be URIs (colons, slashes, spaces) → invalid selectors → crash.
-    function sanitizeJstreeId(str) {
-        var sanitized = str.replace(/[^a-zA-Z0-9_-]/g, "_");
-        return sanitized || "_";
-    }
-
     self.showSourceDialog = function (resetAll, sourceSelectedCallback) {
         self.sourceSelectedCallback = sourceSelectedCallback;
 
@@ -125,18 +118,19 @@ var SourceSelectorWidget = (function () {
                 if (group) {
                     var subGroups = group.split("/");
                     subGroups.forEach(function (subGroup, index) {
-                        var sanitizedId = sanitizeJstreeId(subGroup);
-                        var nodeParent = index > 0 ? sanitizeJstreeId(subGroups[index - 1]) : parent;
-                        if (!distinctGroups[sanitizedId]) {
-                            distinctGroups[sanitizedId] = 1;
+                        if (index > 0) {
+                            parent = subGroups[index - 1];
+                        }
+                        if (!distinctGroups[subGroup]) {
+                            distinctGroups[subGroup] = 1;
                             treeData.push({
-                                id: sanitizedId,
+                                id: subGroup,
                                 text: subGroup,
                                 type: "Folder",
-                                parent: nodeParent,
+                                parent: parent,
                             });
                         }
-                        group = sanitizedId;
+                        group = subGroup;
                     });
                 } else {
                     group = othersGroup + "_" + parent;
@@ -155,6 +149,14 @@ var SourceSelectorWidget = (function () {
                         parent: "#",
                     });
                 }
+                // Skip sources whose name contains characters that break jstree's internal querySelector
+                // (tab, slash, colon, leading/trailing whitespace). These are invalid source names
+                // that can only be cleaned up via the config editor.
+                if (sourceLabel !== sourceLabel.trim() || /[\/:]/.test(sourceLabel)) {
+                    console.warn("sourceSelectorWidget: skipping corrupted source name:", JSON.stringify(sourceLabel));
+                    return;
+                }
+
                 if (!distinctNodes[sourceLabel]) {
                     distinctNodes[sourceLabel] = 1;
 

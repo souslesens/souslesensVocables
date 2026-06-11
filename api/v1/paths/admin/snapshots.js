@@ -1,22 +1,19 @@
 import { chromium } from "playwright";
 import JSZip from "jszip";
+import { randomUUID } from "crypto";
 import { ontologyModelsCache } from "../ontologyModels.js";
 import SocketManager from "../../../../bin/socketManager.js";
 import { mainConfigModel } from "../../../../model/mainConfig.js";
 
-// Socket.io channel the client listens on to drive the snapshots progress bar.
 const SNAPSHOTS_PROGRESS_CHANNEL = "adminSnapshots";
-
-// How long (ms) to wait, per class, for the lineage page to auto-open the NodeInfosWidget
-// (driven by the `nodeInfosURI` URL param) and render its content before giving up on that class.
 const NODE_INFOS_RENDER_TIMEOUT_MS = 30000;
-
-// Upper bound on classes per export. Each class spawns a full headless page load (~seconds + memory),
-// so an unbounded source could exhaust server resources / hang the request. Sources above this are rejected.
 const MAX_SNAPSHOT_CLASSES = 500;
-
-// Fallback listen port, mirroring bin/www (process.env.PORT || config.listenPort || 3010).
 const DEFAULT_LISTEN_PORT = 3010;
+// Unclaimed zips are purged after this delay to avoid unbounded memory growth.
+const ZIP_DOWNLOAD_TTL_MS = 10 * 60 * 1000;
+
+// jobId → { zipBuffer: Buffer, source: string }
+const pendingZips = new Map();
 
 // Browser-side: waits until the NodeInfosWidget (auto-opened via the nodeInfosURI URL param) has FULLY
 // rendered — signalled by `window.nodeInfosSnapshotReady`, set in the showNodeInfos completion callback once
@@ -44,14 +41,114 @@ function buildSnapshotInPage(renderTimeoutMs) {
     });
 }
 
+async function _runSnapshotJob(jobId, source, classUris, baseUrl, sessionCookie, clientSocketId) {
+    const total = classUris.length;
+    const emitProgress = function (payload) {
+        if (clientSocketId) {
+            SocketManager.message(clientSocketId, SNAPSHOTS_PROGRESS_CHANNEL, payload);
+        }
+    };
+
+    let browser;
+    try {
+        const systemChromiumPath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH;
+        browser = await chromium.launch({
+            headless: true,
+            executablePath: systemChromiumPath || undefined,
+            args: systemChromiumPath ? ["--no-sandbox"] : [],
+        });
+        const context = await browser.newContext({
+            extraHTTPHeaders: sessionCookie ? { Cookie: sessionCookie } : {},
+            ignoreHTTPSErrors: true,
+        });
+        const page = await context.newPage();
+
+        const zip = new JSZip();
+        const failures = [];
+
+        emitProgress({ operation: "start", source: source, processed: 0, total: total });
+
+        let processed = 0;
+        for (const classUri of classUris) {
+            const pageUrl = baseUrl + "/vocables/?tool=lineage&source=" + encodeURIComponent(source) + "&nodeInfosURI=" + encodeURIComponent(classUri);
+            try {
+                await page.goto(pageUrl, { waitUntil: "load", timeout: NODE_INFOS_RENDER_TIMEOUT_MS });
+                const snapshot = await page.evaluate(buildSnapshotInPage, NODE_INFOS_RENDER_TIMEOUT_MS);
+                zip.file(snapshot.fileName, snapshot.html);
+            } catch (classError) {
+                failures.push({ classUri: classUri, error: classError.message || String(classError) });
+            }
+            processed++;
+            emitProgress({ operation: "progress", source: source, processed: processed, total: total, classUri: classUri });
+        }
+
+        await context.close();
+        await browser.close();
+        browser = null;
+
+        if (Object.keys(zip.files).length === 0) {
+            emitProgress({ operation: "error", source: source, error: "no snapshot could be generated", failures: failures });
+            return;
+        }
+        if (failures.length > 0) {
+            zip.file("_failures.json", JSON.stringify(failures, null, 2));
+        }
+
+        const zipBuffer = await zip.generateAsync({ type: "nodebuffer" });
+        pendingZips.set(jobId, { zipBuffer: zipBuffer, source: source });
+        setTimeout(function () {
+            pendingZips.delete(jobId);
+        }, ZIP_DOWNLOAD_TTL_MS);
+
+        emitProgress({
+            operation: "finished",
+            source: source,
+            processed: processed,
+            total: total,
+            failures: failures.length,
+            downloadUrl: "/api/v1/admin/snapshots?jobId=" + jobId,
+        });
+    } catch (error) {
+        if (browser) {
+            try {
+                await browser.close();
+            } catch (closeError) {
+                console.error("snapshots: failed to close browser", closeError);
+            }
+        }
+        console.error("snapshots job error", error);
+        emitProgress({ operation: "error", source: source, error: error.message || String(error) });
+    }
+}
+
 export default function () {
     let operations = {
+        GET,
         POST,
     };
 
+    ///// GET api/v1/admin/snapshots?jobId=<uuid>
+    // Serves a previously generated zip (stored in-memory by a background snapshot job) and removes it
+    // from the pending map so it cannot be downloaded twice.
+    async function GET(req, res, _next) {
+        const jobId = req.query && req.query.jobId;
+        if (!jobId) {
+            return res.status(400).send({ ERROR: "missing jobId" });
+        }
+        const entry = pendingZips.get(jobId);
+        if (!entry) {
+            return res.status(404).send({ ERROR: "zip not found or already downloaded" });
+        }
+        pendingZips.delete(jobId);
+        res.setHeader("Content-Type", "application/zip");
+        res.setHeader("Content-Disposition", 'attachment; filename="' + entry.source + '_snapshots.zip"');
+        return res.status(200).send(entry.zipBuffer);
+    }
+
     ///// POST api/v1/admin/snapshots
-    // Generates one node-infos snapshot HTML per class of a source (headless, via Playwright),
-    // then returns them bundled in a single zip download.
+    // Starts a background snapshot job (headless Playwright per class of source) and returns 202 + jobId
+    // immediately so nginx does not time out. Progress is pushed via socket.io (adminSnapshots channel).
+    // When done, emits a `finished` event with `downloadUrl` pointing to the GET endpoint above.
     async function POST(req, res, _next) {
         const source = req.body && req.body.source;
         if (!source) {
@@ -80,93 +177,48 @@ export default function () {
         const mainConfig = await mainConfigModel.getConfig();
         const listenPort = process.env.PORT || (mainConfig && mainConfig.listenPort) || DEFAULT_LISTEN_PORT;
         const baseUrl = process.env.SNAPSHOTS_BASE_URL || "http://127.0.0.1:" + listenPort;
-        // Forward the admin's own session cookie so the headless browser is authenticated as them.
-        // Scoped to the throw-away browser context below and discarded when that context closes.
         const sessionCookie = req.headers.cookie || "";
-        // The client's socket.io id (sent in the body) so progress can be pushed to that browser tab only.
         const clientSocketId = req.body && req.body.clientSocketId;
-        const total = classUris.length;
-        const emitProgress = function (payload) {
-            if (clientSocketId) {
-                SocketManager.message(clientSocketId, SNAPSHOTS_PROGRESS_CHANNEL, payload);
-            }
-        };
+        const jobId = randomUUID();
 
-        let browser;
-        try {
-            // In the container we point Playwright at the Alpine system Chromium (no musl build is shipped
-            // by Playwright). Running as root there requires --no-sandbox; left default for local dev,
-            // where the Playwright-managed Chromium keeps its sandbox.
-            const systemChromiumPath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH;
-            browser = await chromium.launch({
-                headless: true,
-                executablePath: systemChromiumPath || undefined,
-                args: systemChromiumPath ? ["--no-sandbox"] : [],
-            });
-            const context = await browser.newContext({
-                extraHTTPHeaders: sessionCookie ? { Cookie: sessionCookie } : {},
-                ignoreHTTPSErrors: true,
-            });
-            const page = await context.newPage();
+        res.status(202).send({ jobId: jobId });
 
-            const zip = new JSZip();
-            const failures = [];
-
-            emitProgress({ operation: "start", source: source, processed: 0, total: total });
-
-            let processed = 0;
-            for (const classUri of classUris) {
-                const pageUrl = baseUrl + "/vocables/?tool=lineage&source=" + encodeURIComponent(source) + "&nodeInfosURI=" + encodeURIComponent(classUri);
-                try {
-                    await page.goto(pageUrl, { waitUntil: "load", timeout: NODE_INFOS_RENDER_TIMEOUT_MS });
-                    const snapshot = await page.evaluate(buildSnapshotInPage, NODE_INFOS_RENDER_TIMEOUT_MS);
-                    zip.file(snapshot.fileName, snapshot.html);
-                } catch (classError) {
-                    failures.push({ classUri: classUri, error: classError.message || String(classError) });
-                }
-                processed++;
-                emitProgress({ operation: "progress", source: source, processed: processed, total: total, classUri: classUri });
-            }
-
-            emitProgress({ operation: "finished", source: source, processed: processed, total: total, failures: failures.length });
-
-            // Closing the context discards the forwarded session cookie; close the browser too.
-            await context.close();
-            await browser.close();
-            browser = null;
-
-            if (Object.keys(zip.files).length === 0) {
-                return res.status(500).send({ ERROR: "no snapshot could be generated", failures: failures });
-            }
-            if (failures.length > 0) {
-                zip.file("_failures.json", JSON.stringify(failures, null, 2));
-            }
-
-            const zipBuffer = await zip.generateAsync({ type: "nodebuffer" });
-            res.setHeader("Content-Type", "application/zip");
-            res.setHeader("Content-Disposition", 'attachment; filename="' + source + "_snapshots.zip" + '"');
-            return res.status(200).send(zipBuffer);
-        } catch (error) {
-            if (browser) {
-                try {
-                    await browser.close();
-                } catch (closeError) {
-                    console.error("snapshots: failed to close browser", closeError);
-                }
-            }
-            console.error("snapshots export error", error);
-            return res.status(500).send({ ERROR: error.message || String(error) });
-        }
+        _runSnapshotJob(jobId, source, classUris, baseUrl, sessionCookie, clientSocketId).catch(function (error) {
+            console.error("snapshots: unhandled job error", error);
+        });
     }
 
+    GET.apiDoc = {
+        summary: "Download a previously generated snapshots zip",
+        description: "Serves the zip produced by a background snapshot job (started via POST) and removes it from the server. One-time download.",
+        operationId: "downloadSourceSnapshots",
+        security: [{ restrictAdmin: [] }],
+        parameters: [
+            {
+                name: "jobId",
+                in: "query",
+                required: true,
+                type: "string",
+                description: "Job id returned by POST /admin/snapshots.",
+            },
+        ],
+        produces: ["application/zip"],
+        responses: {
+            200: { description: "Zip archive of per-class snapshot HTML files." },
+            400: { description: "Missing jobId." },
+            404: { description: "Zip not found or already downloaded." },
+        },
+        tags: ["Admin"],
+    };
+
     POST.apiDoc = {
-        summary: "Export node-infos snapshots for all classes of a source as a zip",
+        summary: "Start a background export of node-infos snapshots for all classes of a source",
         description:
-            "For each class of `source` (read from the server's in-memory ontology model cache), a headless browser " +
-            "(Playwright) loads the lineage page with `nodeInfosURI=<class uri>`, lets the app render the NodeInfosWidget, " +
-            "builds a self-contained snapshot HTML, and adds it to a zip under the client-derived node file name. The admin's session " +
-            "cookie is forwarded to the headless browser for authentication and discarded once the export completes. " +
-            "Returns the zip as a download. The source must have been opened in the app at least once so its model is cached.",
+            "Validates the source, then immediately returns 202 with a `jobId`. A background job drives a headless browser " +
+            "(Playwright) over `?tool=lineage&source=...&nodeInfosURI=<class uri>` for each class and pushes per-class progress " +
+            "on the `adminSnapshots` socket channel. When all classes are processed the channel receives a `finished` event " +
+            "containing a `downloadUrl` for GET /admin/snapshots?jobId=<jobId>. The source must have been opened in the app " +
+            "at least once so its model is cached.",
         operationId: "exportSourceSnapshots",
         security: [{ restrictAdmin: [] }],
         parameters: [
@@ -179,18 +231,19 @@ export default function () {
                     required: ["source"],
                     properties: {
                         source: { type: "string", description: "Source name. Example: `LIFEX_FPSO`.", example: "LIFEX_FPSO" },
-                        clientSocketId: { type: "string", description: "Optional socket.io client id to receive per-class progress on the `adminSnapshots` channel." },
+                        clientSocketId: {
+                            type: "string",
+                            description: "Optional socket.io client id to receive per-class progress on the `adminSnapshots` channel.",
+                        },
                     },
                 },
             },
         ],
-        produces: ["application/zip"],
         responses: {
-            200: { description: "Zip archive of per-class snapshot HTML files." },
+            202: { description: "Job started. Body: `{ jobId: string }`." },
             400: { description: "Missing source." },
             404: { description: "No cached ontology model / classes for the source." },
             413: { description: "Source has more classes than the export limit (" + MAX_SNAPSHOT_CLASSES + ")." },
-            500: { description: "Snapshot generation failed." },
         },
         tags: ["Admin"],
     };

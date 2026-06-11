@@ -359,33 +359,142 @@ var MainController = (function () {
     self.test = function () {
         //   bc.postMessage("bc")
     };
+    /**
+     * Derives the source name owning a node from its URI.
+     * Convention: in http://.../<source>/<node>, the path segment preceding the node name
+     * is the source label (case-insensitive). Falls back to matching the longest source
+     * graphUri/baseUri that prefixes the node URI.
+     * @function
+     * @name getSourceFromNodeURI
+     * @memberof MainController
+     * @param {string} nodeURI - The full URI of the node.
+     * @returns {string|null} The resolved source name, or null if none matches.
+     */
+    self.getSourceFromNodeURI = function (nodeURI) {
+        if (!nodeURI) {
+            return null;
+        }
+        // Primary: the path segment preceding the node name resolves to a known source
+        var parts = nodeURI.split("/");
+        if (parts.length >= 2) {
+            var segment = parts[parts.length - 2];
+            var bySegment = Object.keys(Config.sources).find(function (key) {
+                return key.toLowerCase() === segment.toLowerCase();
+            });
+            if (bySegment) {
+                return bySegment;
+            }
+        }
+        // Fallback: the source whose graphUri/baseUri is the longest prefix of the node URI
+        var matchedSource = null;
+        var matchedLen = -1;
+        Object.keys(Config.sources).forEach(function (key) {
+            var graphUri = Config.sources[key].graphUri || Config.sources[key].baseUri;
+            if (graphUri && nodeURI.indexOf(graphUri) === 0 && graphUri.length > matchedLen) {
+                matchedSource = key;
+                matchedLen = graphUri.length;
+            }
+        });
+        return matchedSource;
+    };
+    /**
+     * Displays the node infos panel for a node without launching any SousLeSens tool (action=null).
+     * Registers the owning source so ontology queries resolve, then renders the NodeInfosWidget
+     * inline (no dialog) into the main content area on an otherwise bare page.
+     * @function
+     * @name showNodeInfosStandalone
+     * @memberof MainController
+     * @param {string} source - The source owning the node.
+     * @param {string} nodeURI - The URI of the node to display.
+     * @returns {void}
+     */
+    self.showNodeInfosStandalone = function (source, nodeURI) {
+        if (!source || !nodeURI) {
+            return;
+        }
+        // Bare page: clear content and suppress the credits logo so it doesn't overlap the panel
+        $("#graphDiv").empty();
+        $("#lateralPanelDiv").empty();
+        $("#Lineage_graphEditionButtons").hide();
+        $("#index_topContolPanel").hide();
+        $("#rightControlPanelDiv").hide();
+        UI.cancelCredits();
+        $("#slsv-credits-logo").remove();
+
+        Lineage_sources.registerSource(source, function (err) {
+            if (err) {
+                return MainController.errorAlert(err);
+            }
+            Lineage_sources.activeSource = source;
+            self.currentSource = source;
+            // Clean, reload-safe URL: nodeURI (human-readable) + action=null, no tool
+            window.history.replaceState(null, "", "?nodeURI=" + nodeURI + "&action=null");
+            // Render the standard node infos panel (dialog) for the familiar boxed look
+            var node = { data: { id: nodeURI } };
+            NodeInfosWidget.showNodeInfos(source, node, "mainDialogDiv", { hideModifyButtons: true });
+        });
+    };
     self.parseUrlParam = function (callback) {
         var paramsMap = common.getUrlParamsMap();
 
-        // old or new url
-        if (paramsMap.tool) {
-            var tool = paramsMap["tool"];
-            var source = paramsMap["source"];
-            var dataId = paramsMap["dataId"];
-            var nodeInfosURI = paramsMap["nodeInfosURI"];
+        var tool = paramsMap["tool"];
+        var source = paramsMap["source"];
+        var dataId = paramsMap["dataId"];
+        var nodeURI = paramsMap["nodeURI"];
+        var action = paramsMap["action"];
 
-            if (source) {
-                // Resolve source name case-insensitively against loaded Config.sources
-                var resolvedSource =
-                    Object.keys(Config.sources).find(function (key) {
-                        return key.toLowerCase() === source.toLowerCase();
-                    }) || source;
-                self.currentSource = resolvedSource;
-                // Correct urlParam_source set in async step 1 before Config.sources was loaded
-                if (Config.userTools[tool]) {
-                    Config.userTools[tool].urlParam_source = resolvedSource;
+        // When a node URI is given without an explicit source, derive it from the URI
+        if (!source && nodeURI) {
+            source = self.getSourceFromNodeURI(nodeURI);
+        }
+
+        // Resolve source name case-insensitively against loaded Config.sources
+        if (source) {
+            var resolvedSource =
+                Object.keys(Config.sources).find(function (key) {
+                    return key.toLowerCase() === source.toLowerCase();
+                }) || source;
+            self.currentSource = resolvedSource;
+            // Correct urlParam_source set in async step 1 before Config.sources was loaded
+            if (tool && Config.userTools[tool]) {
+                Config.userTools[tool].urlParam_source = resolvedSource;
+            }
+        }
+
+        // Node URI flow: open the node infos directly. Works with or without a "tool" param.
+        // action: "lineage" (default) -> whiteboard + node infos; "browse" -> Browse tool;
+        //         "null" -> node infos panel only, no tool launched.
+        if (nodeURI && self.currentSource) {
+            // "null" action: render the node infos panel only, without launching any tool
+            if (action === "null") {
+                self.showNodeInfosStandalone(self.currentSource, nodeURI);
+                if (callback) {
+                    callback();
                 }
+                return;
             }
 
-            if (nodeInfosURI && Config.userTools[tool]) {
-                Config.userTools[tool].urlParam_nodeInfosURI = nodeInfosURI;
+            var targetTool;
+            if (action) {
+                targetTool = action === "browse" ? "Browse" : "lineage";
+            } else if (tool === "Browse") {
+                targetTool = "Browse";
+            } else {
+                targetTool = "lineage";
             }
+            if (Config.userTools[targetTool]) {
+                Config.userTools[targetTool].urlParam_source = self.currentSource;
+                Config.userTools[targetTool].urlParam_nodeURI = nodeURI;
+                MainController.onToolSelect(targetTool);
+                if (callback) {
+                    callback();
+                }
+                return;
+            }
+        }
 
+        // Standard tool flow (no node URI)
+        if (tool) {
             if (dataId) {
                 UserDataWidget.loadUserDatabyId(dataId, function (err, userData) {
                     if (!err && userData) {

@@ -164,7 +164,7 @@ var Lineage_whiteboard = (function () {
      * @function
      * @name installNodeInfosUrlSync
      * @memberof module:Lineage_whiteboard
-     * Installs document-level listeners that keep the URL's nodeInfosURI param in sync
+     * Installs document-level listeners that keep the URL's nodeURI param in sync
      * with the currently open NodeInfosWidget dialog.
      * Opening a node info panel adds the URI to the URL; closing it removes it.
      * @returns {void}
@@ -179,21 +179,29 @@ var Lineage_whiteboard = (function () {
             if (MainController.currentTool !== "lineage" || data.divId !== "mainDialogDiv" || !data.nodeId) {
                 return;
             }
-            // Build query manually so nodeInfosURI stays human-readable (: and / are valid unencoded in query strings)
+            // Clean, ordered URL: tool, source, then nodeURI (kept human-readable since : and / are
+            // valid unencoded in query strings). action is dropped (lineage is the default).
             var params = new URLSearchParams(document.location.search);
-            params.delete("nodeInfosURI");
-            var base = params.toString();
-            var newQuery = base ? base + "&nodeInfosURI=" + data.nodeId : "nodeInfosURI=" + data.nodeId;
-            window.history.replaceState(null, "", "?" + newQuery);
+            var source = params.get("source") || MainController.currentSource;
+            var query = "tool=lineage";
+            if (source) {
+                query += "&source=" + source;
+            }
+            query += "&nodeURI=" + data.nodeId;
+            window.history.replaceState(null, "", "?" + query);
         });
 
         $(document).on("nodeInfosWidget:close.lineageUrlSync", function (evt, data) {
             if (MainController.currentTool !== "lineage" || data.divId !== "mainDialogDiv") {
                 return;
             }
-            var params = new URLSearchParams(document.location.search);
-            params.delete("nodeInfosURI");
-            window.history.replaceState(null, "", "?" + params.toString());
+            // Closing the panel: keep the clean tool + source URL, drop nodeURI (and any leftover action)
+            var source = new URLSearchParams(document.location.search).get("source") || MainController.currentSource;
+            var query = "tool=lineage";
+            if (source) {
+                query += "&source=" + source;
+            }
+            window.history.replaceState(null, "", "?" + query);
         });
     };
 
@@ -260,8 +268,10 @@ var Lineage_whiteboard = (function () {
      * @returns {void}
      */
     self.loadSources = function (options) {
-        var nodeInfosURI = Config.userTools["lineage"].urlParam_nodeInfosURI || null;
-        Config.userTools["lineage"].urlParam_nodeInfosURI = null;
+        // Consume one-shot nodeURI param captured in MainController.parseUrlParam.
+        // (action=browse is routed to the Browse tool earlier and never reaches here.)
+        var nodeURI = Config.userTools["lineage"].urlParam_nodeURI || null;
+        Config.userTools["lineage"].urlParam_nodeURI = null;
 
         Lineage_sources.loadSources(MainController.currentSource, function (err) {
             if (err) {
@@ -278,8 +288,8 @@ var Lineage_whiteboard = (function () {
                 Lineage_whiteboard.initUI();
                 Lineage_whiteboard.installNodeInfosUrlSync();
 
-                if (nodeInfosURI) {
-                    NodeInfosWidget.showNodeInfos(MainController.currentSource, nodeInfosURI, "mainDialogDiv");
+                if (nodeURI) {
+                    NodeInfosWidget.showNodeInfos(MainController.currentSource, nodeURI, "mainDialogDiv");
                 }
             });
         });

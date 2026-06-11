@@ -100,6 +100,21 @@ const MainConfigObject = z
                 url: z.string().url().optional(),
             })
             .strict(),
+        llm: z
+            .object({
+                provider: z.enum(["anthropic"]),
+                anthropic: z
+                    .object({
+                        apiKey: z.string(),
+                        defaultModel: z.string().default("claude-sonnet-4-6"),
+                        maxTokens: z.number().positive().max(32768).default(1024),
+                        rateLimitTPM: z.number().positive().default(28000),
+                    })
+                    .strict()
+                    .optional(),
+            })
+            .strict()
+            .optional(),
         database: z
             .object({
                 user: z.string(),

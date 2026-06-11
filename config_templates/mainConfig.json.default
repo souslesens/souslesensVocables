@@ -76,6 +76,15 @@
         "enabled": true,
         "url": "http://localhost:8008"
     },
+    "llm": {
+        "provider": "anthropic",
+        "anthropic": {
+            "apiKey": "sk-ant-api03-...",
+            "defaultModel": "claude-sonnet-4-6",
+            "maxTokens": 1024,
+            "rateLimitTPM": 28000
+        }
+    },
     "database": {
         "host": "localhost",
         "port": 5432,

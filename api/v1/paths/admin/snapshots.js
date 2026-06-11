@@ -70,8 +70,7 @@ async function _runSnapshotJob(jobId, source, classUris, baseUrl, sessionCookie,
 
         let processed = 0;
         for (const classUri of classUris) {
-            const pageUrl =
-                baseUrl + "/vocables/?tool=lineage&source=" + encodeURIComponent(source) + "&nodeInfosURI=" + encodeURIComponent(classUri);
+            const pageUrl = baseUrl + "/vocables/?tool=lineage&source=" + encodeURIComponent(source) + "&nodeInfosURI=" + encodeURIComponent(classUri);
             try {
                 await page.goto(pageUrl, { waitUntil: "load", timeout: NODE_INFOS_RENDER_TIMEOUT_MS });
                 const snapshot = await page.evaluate(buildSnapshotInPage, NODE_INFOS_RENDER_TIMEOUT_MS);
@@ -158,9 +157,7 @@ export default function () {
 
         const ontologyModel = ontologyModelsCache[source];
         if (!ontologyModel || !ontologyModel.classes) {
-            return res
-                .status(404)
-                .send({ ERROR: "no cached ontology model for source '" + source + "'. Open the source in the app first so its model is registered." });
+            return res.status(404).send({ ERROR: "no cached ontology model for source '" + source + "'. Open the source in the app first so its model is registered." });
         }
 
         const classUris = Object.keys(ontologyModel.classes);

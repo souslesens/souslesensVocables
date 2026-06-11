@@ -148,7 +148,7 @@ $("#sourceDivControlPanelDiv").html(html);*/
 
     /**
      * Generates one node-infos snapshot HTML per class of the selected source and downloads them as a zip.
-     * The server drives a headless browser (Playwright) over `?tool=lineage&source=...&nodeInfosURI=<class uri>`
+     * The server drives a headless browser (Playwright) over `?tool=lineage&source=...&nodeURI=<class uri>`
      * and reads the classes from its own ontology model cache, so only the source name is sent.
      */
     self.exportClassesSnapshots = function () {

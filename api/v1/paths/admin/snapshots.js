@@ -19,7 +19,7 @@ const SNAPSHOT_BATCH_PAUSE_MS = 2000;
 // jobId → { zipBuffer: Buffer, source: string }
 const pendingZips = new Map();
 
-// Browser-side: waits until the NodeInfosWidget (auto-opened via the nodeInfosURI URL param) has FULLY
+// Browser-side: waits until the NodeInfosWidget (auto-opened via the nodeURI URL param) has FULLY
 // rendered — signalled by `window.nodeInfosSnapshotReady`, set in the showNodeInfos completion callback once
 // all async sections (common infos, restrictions, class hierarchy...) are done — then builds the
 // self-contained snapshot HTML and resolves with it plus the client-derived file name.
@@ -75,7 +75,7 @@ async function _runSnapshotJob(jobId, source, classUris, baseUrl, sessionCookie,
             const batch = classUris.slice(batchStart, batchStart + SNAPSHOT_BATCH_SIZE);
 
             for (const classUri of batch) {
-                const pageUrl = baseUrl + "/vocables/?tool=lineage&source=" + encodeURIComponent(source) + "&nodeInfosURI=" + encodeURIComponent(classUri);
+                const pageUrl = baseUrl + "/vocables/?tool=lineage&source=" + encodeURIComponent(source) + "&nodeURI=" + encodeURIComponent(classUri);
                 // Fresh page per class, closed immediately — prevents Chromium memory accumulation.
                 const page = await context.newPage();
                 try {
@@ -232,7 +232,7 @@ export default function () {
         summary: "Start a background export of node-infos snapshots for all classes of a source",
         description:
             "Validates the source, then immediately returns 202 with a `jobId`. A background job drives a headless browser " +
-            "(Playwright) over `?tool=lineage&source=...&nodeInfosURI=<class uri>` for each class and pushes per-class progress " +
+            "(Playwright) over `?tool=lineage&source=...&nodeURI=<class uri>` for each class and pushes per-class progress " +
             "on the `adminSnapshots` socket channel. When all classes are processed the channel receives a `finished` event " +
             "containing a `downloadUrl` for GET /admin/snapshots?jobId=<jobId>. The source must have been opened in the app " +
             "at least once so its model is cached.",

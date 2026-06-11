@@ -513,6 +513,7 @@ var MainController = (function () {
             callback();
         }
     };
+
     self.errorAlert = function (err) {
         var message = "";
         // rajouter le status de l'erreur

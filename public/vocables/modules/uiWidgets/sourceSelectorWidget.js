@@ -149,6 +149,14 @@ var SourceSelectorWidget = (function () {
                         parent: "#",
                     });
                 }
+                // Skip sources whose name contains characters that break jstree's internal querySelector
+                // (tab, slash, colon, leading/trailing whitespace). These are invalid source names
+                // that can only be cleaned up via the config editor.
+                if (sourceLabel !== sourceLabel.trim() || /[\/:]/.test(sourceLabel)) {
+                    console.warn("sourceSelectorWidget: skipping corrupted source name:", JSON.stringify(sourceLabel));
+                    return;
+                }
+
                 if (!distinctNodes[sourceLabel]) {
                     distinctNodes[sourceLabel] = 1;
 

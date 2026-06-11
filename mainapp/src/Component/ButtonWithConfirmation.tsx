@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button, Box, CircularProgress, ButtonGroup } from "@mui/material";
+import { Button, Box, CircularProgress, ButtonGroup, SxProps, Theme } from "@mui/material";
 import { red } from "@mui/material/colors";
 
 type ButtonWithConfirmationProps = {
@@ -9,9 +9,11 @@ type ButtonWithConfirmationProps = {
     args: any[];
     label: string;
     disabled?: boolean;
+    size?: "small" | "medium" | "large";
+    buttonSx?: SxProps<Theme>;
 };
 
-const ButtonWithConfirmation = ({ func, args, label, disabled }: ButtonWithConfirmationProps) => {
+const ButtonWithConfirmation = ({ func, args, label, disabled, size = "medium", buttonSx }: ButtonWithConfirmationProps) => {
     const [btnState, setBtnState] = useState<"initial" | "confirm" | "loading" | "done" | "error">("initial");
 
     const handleConfirm = async () => {
@@ -28,7 +30,7 @@ const ButtonWithConfirmation = ({ func, args, label, disabled }: ButtonWithConfi
 
     if (btnState === "initial") {
         return (
-            <Button disabled={disabled} variant="outlined" color="error" onClick={() => setBtnState("confirm")}>
+            <Button disabled={disabled} size={size} sx={buttonSx} variant="outlined" color="error" onClick={() => setBtnState("confirm")}>
                 {label}
             </Button>
         );
@@ -38,7 +40,7 @@ const ButtonWithConfirmation = ({ func, args, label, disabled }: ButtonWithConfi
         return (
             <>
                 <Box sx={{ position: "relative" }}>
-                    <Button disabled={true} variant="contained" color="error">
+                    <Button disabled={true} size={size} sx={buttonSx} variant="contained" color="error">
                         Loading
                     </Button>
                     <CircularProgress
@@ -59,11 +61,12 @@ const ButtonWithConfirmation = ({ func, args, label, disabled }: ButtonWithConfi
 
     if (btnState === "confirm") {
         return (
-            <ButtonGroup variant="contained" aria-label="Basic button group" color="error">
-                <Button variant="contained" color="error" onClick={handleConfirm}>
+            <ButtonGroup size={size} variant="contained" aria-label="Basic button group" color="error">
+                <Button sx={buttonSx} variant="contained" color="error" onClick={handleConfirm}>
                     Ok
                 </Button>
                 <Button
+                    sx={buttonSx}
                     variant="outlined"
                     color="error"
                     onClick={() => {
@@ -78,6 +81,8 @@ const ButtonWithConfirmation = ({ func, args, label, disabled }: ButtonWithConfi
     if (btnState === "done" || btnState === "error") {
         return (
             <Button
+                size={size}
+                sx={buttonSx}
                 variant="outlined"
                 color="error"
                 onClick={() => {

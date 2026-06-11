@@ -1046,14 +1046,16 @@ defaultLang = 'en';*/
         };
         if (jstreeData.length == 0) {
             $("#nodeInfos_classHierarchyDiv").hide();
-            return;
+            return callback();
         } else {
             $("#classHierarchyTreeDiv").show();
         }
 
-        JstreeWidget.loadJsTree("classHierarchyTreeDiv", jstreeData, options);
-
-        callback();
+        // Call back only once the jstree has actually rendered (loaded.jstree), so a snapshot taken right
+        // after this completes includes the hierarchy instead of an empty container.
+        JstreeWidget.loadJsTree("classHierarchyTreeDiv", jstreeData, options, function () {
+            callback();
+        });
     };
     self.showPropBreakdown = function (sourceLabel, nodeId, divId, callback) {
         var jstreeData = [];
@@ -1124,14 +1126,16 @@ defaultLang = 'en';*/
         };
         if (jstreeData.length == 0) {
             $("#nodeInfos_classHierarchyDiv").hide();
-            return;
+            return callback();
         } else {
             $("#classHierarchyTreeDiv").show();
         }
 
-        JstreeWidget.loadJsTree("classHierarchyTreeDiv", jstreeData, options);
-
-        callback();
+        // Call back only once the jstree has actually rendered (loaded.jstree), so a snapshot taken right
+        // after this completes includes the hierarchy instead of an empty container.
+        JstreeWidget.loadJsTree("classHierarchyTreeDiv", jstreeData, options, function () {
+            callback();
+        });
     };
 
     self.onClickLink = function (nodeId) {
@@ -1800,6 +1804,140 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
                 return MainController.errorAlert(err);
             }
             self.showRestrictionInfos(self.currentNode, "nodeInfos_restrictionsDiv", false);
+        });
+    };
+    /**
+     * Builds the snapshot file name from the node the infos were opened on (its URI, sanitized to a safe
+     * file name). Client-side single source of truth, used both by the in-app download and the batch export.
+     */
+    self.getSnapshotFileName = function (nodeId) {
+        var safeNodeId = nodeId || self.currentNodeId || "snapshot";
+        return safeNodeId.replace(/[^a-zA-Z0-9.\-_]+/g, "_") + ".html";
+    };
+
+    /**
+     * Builds the self-contained snapshot HTML string for the node infos rendered in `divId`,
+     * resolving which internal URIs to inline (vs. keep as external links) via a SPARQL lookup.
+     * Returns the HTML through `callback(err, htmlString)` instead of triggering a download,
+     * so the headless batch export (Playwright reads the returned string) can reuse it.
+     */
+    self.buildSnapshotHtml = function (divId, callback) {
+        const sourceEl = document.getElementById(divId);
+        if (!sourceEl) {
+            return callback(null, null);
+        }
+
+        const clone = sourceEl.cloneNode(true);
+
+        clone.querySelectorAll(".jstree-icon, .jstree-themeicon, .jstree-themeicon-custom").forEach(function (el) {
+            el.remove();
+        });
+
+        clone.querySelectorAll("button.nodesInfos-iconsButtons").forEach(function (el) {
+            el.remove();
+        });
+
+        clone.querySelectorAll('input[type="image"]').forEach(function (el) {
+            el.remove();
+        });
+
+        clone.querySelectorAll("button.KGquery_smallButton.deleteIcon").forEach(function (el) {
+            el.remove();
+        });
+
+        clone.querySelectorAll('div.slsv-button-2[onclick*="showAddRestrictionWidget"]').forEach(function (el) {
+            el.remove();
+        });
+
+        clone.querySelectorAll('[role="tablist"]').forEach(function (el) {
+            el.remove();
+        });
+
+        clone.querySelectorAll("a.jstree-anchor").forEach(function (anchor) {
+            const span = document.createElement("span");
+            span.textContent = anchor.textContent;
+            anchor.replaceWith(span);
+        });
+
+        clone.querySelectorAll(".jstree-node, .jstree-children, .jstree-container-ul").forEach(function (el) {
+            el.removeAttribute("class");
+            el.removeAttribute("style");
+            el.removeAttribute("role");
+            el.removeAttribute("aria-selected");
+            el.removeAttribute("aria-level");
+            el.removeAttribute("aria-expanded");
+        });
+
+        const slsvAnchors = Array.from(clone.querySelectorAll('a[target="_slsvCallback"]'));
+        const uniqueUris = slsvAnchors
+            .map(function (anchor) {
+                return anchor.getAttribute("href");
+            })
+            .filter(function (href, index, arr) {
+                return href && arr.indexOf(href) === index;
+            });
+
+        function applyLinkTransforms(internalUriSet) {
+            slsvAnchors.forEach(function (anchor) {
+                const href = anchor.getAttribute("href");
+                if (internalUriSet[href]) {
+                    anchor.replaceWith(document.createTextNode(anchor.textContent));
+                } else {
+                    anchor.removeAttribute("onclick");
+                    anchor.setAttribute("target", "_blank");
+                }
+            });
+        }
+
+        function buildHtml() {
+            let css = "";
+            for (const sheet of document.styleSheets) {
+                try {
+                    for (const rule of sheet.cssRules) {
+                        css += rule.cssText + "\n";
+                    }
+                } catch (e) {
+                    console.warn("stylesheet inaccessible");
+                }
+            }
+
+            return `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+${css}
+</style>
+</head>
+<body>
+${clone.outerHTML}
+</body>
+</html>`;
+        }
+
+        if (uniqueUris.length === 0 || !self.currentSource || !Config.sources[self.currentSource]) {
+            applyLinkTransforms({});
+            return callback(null, buildHtml());
+        }
+
+        const valuesClause = uniqueUris
+            .map(function (uri) {
+                return "<" + uri + ">";
+            })
+            .join(" ");
+        const fromClause = Sparql_common.getFromStr(self.currentSource);
+        const query = "SELECT DISTINCT ?uri " + fromClause + " WHERE { VALUES ?uri { " + valuesClause + " } ?uri ?p ?o . }";
+        const sparqlUrl = Config.sources[self.currentSource].sparql_server.url + "?format=json&query=";
+
+        Sparql_proxy.querySPARQL_GET_proxy(sparqlUrl, query, "", { source: self.currentSource }, function (err, result) {
+            const internalUriSet = {};
+            if (!err && result && result.results) {
+                result.results.bindings.forEach(function (binding) {
+                    internalUriSet[binding.uri.value] = true;
+                });
+            }
+            applyLinkTransforms(internalUriSet);
+            callback(null, buildHtml());
         });
     };
 

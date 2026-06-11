@@ -289,7 +289,12 @@ var Lineage_whiteboard = (function () {
                 Lineage_whiteboard.installNodeInfosUrlSync();
 
                 if (nodeURI) {
-                    NodeInfosWidget.showNodeInfos(MainController.currentSource, nodeURI, "mainDialogDiv");
+                    // Headless snapshot export (admin/snapshots.js) waits on window.nodeInfosSnapshotReady so it
+                    // never captures a half-rendered widget. Flag flips true only once ALL async sections finished.
+                    window.nodeInfosSnapshotReady = false;
+                    NodeInfosWidget.showNodeInfos(MainController.currentSource, nodeURI, "mainDialogDiv", {}, function () {
+                        window.nodeInfosSnapshotReady = true;
+                    });
                 }
             });
         });

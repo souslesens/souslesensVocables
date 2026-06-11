@@ -11,6 +11,10 @@ const MAX_SNAPSHOT_CLASSES = 500;
 const DEFAULT_LISTEN_PORT = 3010;
 // Unclaimed zips are purged after this delay to avoid unbounded memory growth.
 const ZIP_DOWNLOAD_TTL_MS = 10 * 60 * 1000;
+// Process classes in batches with a pause between each batch so Node.js GC can reclaim
+// server-side heap accumulated from the headless browser's API calls back to this server.
+const SNAPSHOT_BATCH_SIZE = 5;
+const SNAPSHOT_BATCH_PAUSE_MS = 2000;
 
 // jobId → { zipBuffer: Buffer, source: string }
 const pendingZips = new Map();
@@ -67,22 +71,32 @@ async function _runSnapshotJob(jobId, source, classUris, baseUrl, sessionCookie,
         emitProgress({ operation: "start", source: source, processed: 0, total: total });
 
         let processed = 0;
-        for (const classUri of classUris) {
-            const pageUrl = baseUrl + "/vocables/?tool=lineage&source=" + encodeURIComponent(source) + "&nodeInfosURI=" + encodeURIComponent(classUri);
-            // Create a fresh page per class and close it immediately after — prevents Chromium
-            // memory from accumulating across N navigations of the full SLS app (OOM on large sources).
-            const page = await context.newPage();
-            try {
-                await page.goto(pageUrl, { waitUntil: "load", timeout: NODE_INFOS_RENDER_TIMEOUT_MS });
-                const snapshot = await page.evaluate(buildSnapshotInPage, NODE_INFOS_RENDER_TIMEOUT_MS);
-                zip.file(snapshot.fileName, snapshot.html);
-            } catch (classError) {
-                failures.push({ classUri: classUri, error: classError.message || String(classError) });
-            } finally {
-                await page.close();
+        for (let batchStart = 0; batchStart < classUris.length; batchStart += SNAPSHOT_BATCH_SIZE) {
+            const batch = classUris.slice(batchStart, batchStart + SNAPSHOT_BATCH_SIZE);
+
+            for (const classUri of batch) {
+                const pageUrl = baseUrl + "/vocables/?tool=lineage&source=" + encodeURIComponent(source) + "&nodeInfosURI=" + encodeURIComponent(classUri);
+                // Fresh page per class, closed immediately — prevents Chromium memory accumulation.
+                const page = await context.newPage();
+                try {
+                    await page.goto(pageUrl, { waitUntil: "load", timeout: NODE_INFOS_RENDER_TIMEOUT_MS });
+                    const snapshot = await page.evaluate(buildSnapshotInPage, NODE_INFOS_RENDER_TIMEOUT_MS);
+                    zip.file(snapshot.fileName, snapshot.html);
+                } catch (classError) {
+                    failures.push({ classUri: classUri, error: classError.message || String(classError) });
+                } finally {
+                    await page.close();
+                }
+                processed++;
+                emitProgress({ operation: "progress", source: source, processed: processed, total: total, classUri: classUri });
             }
-            processed++;
-            emitProgress({ operation: "progress", source: source, processed: processed, total: total, classUri: classUri });
+
+            // Pause between batches so Node.js GC can reclaim heap from the batch's API calls.
+            if (batchStart + SNAPSHOT_BATCH_SIZE < classUris.length) {
+                await new Promise(function (resolve) {
+                    setTimeout(resolve, SNAPSHOT_BATCH_PAUSE_MS);
+                });
+            }
         }
 
         await context.close();

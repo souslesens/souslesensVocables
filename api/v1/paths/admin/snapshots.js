@@ -61,8 +61,6 @@ async function _runSnapshotJob(jobId, source, classUris, baseUrl, sessionCookie,
             extraHTTPHeaders: sessionCookie ? { Cookie: sessionCookie } : {},
             ignoreHTTPSErrors: true,
         });
-        const page = await context.newPage();
-
         const zip = new JSZip();
         const failures = [];
 
@@ -71,12 +69,17 @@ async function _runSnapshotJob(jobId, source, classUris, baseUrl, sessionCookie,
         let processed = 0;
         for (const classUri of classUris) {
             const pageUrl = baseUrl + "/vocables/?tool=lineage&source=" + encodeURIComponent(source) + "&nodeInfosURI=" + encodeURIComponent(classUri);
+            // Create a fresh page per class and close it immediately after — prevents Chromium
+            // memory from accumulating across N navigations of the full SLS app (OOM on large sources).
+            const page = await context.newPage();
             try {
                 await page.goto(pageUrl, { waitUntil: "load", timeout: NODE_INFOS_RENDER_TIMEOUT_MS });
                 const snapshot = await page.evaluate(buildSnapshotInPage, NODE_INFOS_RENDER_TIMEOUT_MS);
                 zip.file(snapshot.fileName, snapshot.html);
             } catch (classError) {
                 failures.push({ classUri: classUri, error: classError.message || String(classError) });
+            } finally {
+                await page.close();
             }
             processed++;
             emitProgress({ operation: "progress", source: source, processed: processed, total: total, classUri: classUri });

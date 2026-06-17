@@ -69,7 +69,7 @@ var SearchWidget = (function () {
             $("#GenericTools_allExactMatchSearchCBX").removeProp("checked");
         } else {
             if (!$("#GenericTools_allExactMatchSearchCBX").prop("checked")) {
-                term += "*";
+                //   term += "*";
             }
         }
         var selectedSources = [];

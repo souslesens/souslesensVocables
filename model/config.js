@@ -102,13 +102,24 @@ const MainConfigObject = z
             .strict(),
         llm: z
             .object({
-                provider: z.enum(["anthropic"]),
+                provider: z.enum(["anthropic", "openrouter"]),
                 anthropic: z
                     .object({
                         apiKey: z.string(),
                         defaultModel: z.string().default("claude-sonnet-4-6"),
                         maxTokens: z.number().positive().max(32768).default(1024),
                         rateLimitTPM: z.number().positive().default(28000),
+                    })
+                    .strict()
+                    .optional(),
+                openrouter: z
+                    .object({
+                        apiKey: z.string(),
+                        defaultModel: z.string(),
+                        maxTokens: z.number().positive().max(32768).default(1024),
+                        rateLimitTPM: z.number().positive().default(28000),
+                        appUrl: z.string().url().optional(),
+                        appName: z.string().optional(),
                     })
                     .strict()
                     .optional(),

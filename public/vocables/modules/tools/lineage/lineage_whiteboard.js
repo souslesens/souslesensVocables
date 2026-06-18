@@ -1996,16 +1996,13 @@ var Lineage_whiteboard = (function () {
 
                         for (var i = 1; i < depth + 1; i++) {
                             if (item["child" + i]) {
-                                let childNodeSource = item["child" + i + "Graph"] ? Sparql_common.getSourceFromGraphUri(item["child" + i + "Graph"], source) : source;
+                                let childNodeSource = item["child" + i + "Graph"] ? Sparql_common.getSourceFromGraphUri(item["child" + i + "Graph"], null) : source;
 
                                 if (!existingIds[item["child" + i]]) {
                                     var attrs = self.getNodeVisjAttrs(item["child" + i + "Type"], item.subject, childNodeSource);
                                     var isIndividualId = namedLinkedDataMap[item["child" + i]];
 
-                                    var xxx = item["child" + i + "Label"];
-                                    if (item["child" + i] == "http://data.total.com/resource/tsf/ontology/apps-categories/greg/Synergi_S_-_SYNERGI") {
-                                        var x = 3;
-                                    }
+
                                     if (isIndividualId) {
                                         attrs.shape = self.namedIndividualShape;
                                     }

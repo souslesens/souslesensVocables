@@ -178,38 +178,42 @@ var MappingParser = {
     },
 
     getColumnToColumnMappings: function (mappingData, table, filterMappingIds, allColumnsMappings) {
-        var columnsMap = {};
+        var tableColumnsMap = {};
+        var uriNodesMap = {};
         var edgeMap = {};
 
-        // ✅ filterMappingIds peut être: null / undefined / [] / array non vide
-        // - si array non vide => on filtre
-        // - sinon => on ne filtre pas (on garde toutes les edges column->column)
         var hasFilter = Array.isArray(filterMappingIds) && filterMappingIds.length > 0;
 
         mappingData.nodes.forEach(function (node) {
-            if (node.data && MappingParser.columnsMappingsObjects.includes(node.data.type) && node.data.dataTable == table) {
-                columnsMap[node.id] = node;
+            if (!node.data || !MappingParser.columnsMappingsObjects.includes(node.data.type)) {
+                return;
+            }
+            if (node.data.type === "URI") {
+                uriNodesMap[node.id] = node;
+            } else if (node.data.dataTable == table) {
+                tableColumnsMap[node.id] = node;
             }
         });
 
         mappingData.edges.forEach(function (edge) {
-            if (columnsMap[edge.from] && columnsMap[edge.to] && (!hasFilter || filterMappingIds.indexOf(edge.id) > -1)) {
-                var fromColumn = columnsMap[edge.from];
-                var toColumn = columnsMap[edge.to];
+            var fromIsTableColumn = !!tableColumnsMap[edge.from];
+            var toIsTableColumn = !!tableColumnsMap[edge.to];
+            var fromIsUri = !!uriNodesMap[edge.from];
+            var toIsUri = !!uriNodesMap[edge.to];
 
-                if (fromColumn.data.definedInColumn) {
-                    fromColumn = allColumnsMappings[fromColumn.data.definedInColumn];
-                } else {
-                    fromColumn = fromColumn.data;
-                }
+            var edgeInvolvesCurrentTable = (fromIsTableColumn || toIsTableColumn) && (fromIsTableColumn || fromIsUri) && (toIsTableColumn || toIsUri);
 
-                if (toColumn.data.definedInColumn) {
-                    toColumn = allColumnsMappings[toColumn.data.definedInColumn];
-                } else {
-                    toColumn = toColumn.data;
-                }
+            if (!edgeInvolvesCurrentTable || (hasFilter && filterMappingIds.indexOf(edge.id) < 0)) {
+                return;
+            }
 
-                //if edge is not from rdf, rdfs or owl and if from and to are rdf:typeClass the edge represents a restriction
+            var fromNode = tableColumnsMap[edge.from] || uriNodesMap[edge.from];
+            var toNode = tableColumnsMap[edge.to] || uriNodesMap[edge.to];
+
+            var fromColumn = fromNode.data.definedInColumn ? allColumnsMappings[fromNode.data.definedInColumn] : fromNode.data;
+            var toColumn = toNode.data.definedInColumn ? allColumnsMappings[toNode.data.definedInColumn] : toNode.data;
+
+            //if edge is not from rdf, rdfs or owl and if from and to are rdf:typeClass the edge represents a restriction
                 if (edge.data && edge.data.id && edge.data.id.indexOf("owl") < 0 && edge.data.id.indexOf("rdf") < 0) {
                     var isRestriction = fromColumn.rdfType == "owl:Class" && toColumn.rdfType == "owl:Class";
                     edge.isRestriction = isRestriction;
@@ -219,8 +223,7 @@ var MappingParser = {
                     }
                 }
 
-                edgeMap[edge.id] = edge;
-            }
+            edgeMap[edge.id] = edge;
         });
 
         return edgeMap;

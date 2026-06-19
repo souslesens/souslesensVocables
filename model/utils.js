@@ -20,6 +20,15 @@ const RDF_FORMATS_MIMETYPES = {
  * @param {object} args - other parameters to pass to the func
  * @returns {Promise<Any>} - Return of the func
  */
+const DEFINITIVE_PG_ERROR_CLASSES = ["42", "22", "23", "26", "28"];
+
+const isDefinitiveError = (e) => {
+    if (e && e.code && typeof e.code === "string") {
+        return DEFINITIVE_PG_ERROR_CLASSES.some((cls) => e.code.startsWith(cls));
+    }
+    return false;
+};
+
 const redoIfFailure = async (func, maxRedo = 5, sleepTime = 5, callbackFailure = null, ...args) => {
     let i = 0;
     let newSleepTime = sleepTime;
@@ -28,6 +37,10 @@ const redoIfFailure = async (func, maxRedo = 5, sleepTime = 5, callbackFailure =
         try {
             return await func(...args);
         } catch (e) {
+            if (isDefinitiveError(e)) {
+                console.error(`Definitive error (code ${e.code}), stopping retries: ${e.message}`);
+                throw e;
+            }
             if (i >= maxRedo) {
                 throw e;
             }

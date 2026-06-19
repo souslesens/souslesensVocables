@@ -69,7 +69,7 @@ var SearchWidget = (function () {
             $("#GenericTools_allExactMatchSearchCBX").removeProp("checked");
         } else {
             if (!$("#GenericTools_allExactMatchSearchCBX").prop("checked")) {
-                term += "*";
+                //   term += "*";
             }
         }
         var selectedSources = [];
@@ -609,7 +609,9 @@ var SearchWidget = (function () {
 
     self.searchOrShowTopConcepts = function (options, callback) {
         var term = (options && options.term) || $("#searchWidget_searchTermInput").val();
+
         if (term && term.trim()) {
+            if (term.match(/[ -_.]/g)) term = '"' + term + '"';
             self.searchTermInSources(options, callback);
         } else {
             self.showTopConcepts(options && options.sourceLabel, options);

@@ -175,7 +175,9 @@ class BotEngineClass {
 
             if (callback) {
                 var ret = callback(valueSafe, value);
-                if (ret === false) return;
+                if (ret === false) {
+                    return;
+                }
             }
 
             this.nextStep();
@@ -216,6 +218,7 @@ class BotEngineClass {
             this.reset();
         });
     }
+
     nextStep(returnValue, varToFill) {
         $("#" + this.divId)
             .find("#botFilterProposalDiv")
@@ -386,7 +389,9 @@ class BotEngineClass {
                   .parents()
                   .filter('div[role="dialog"]')[0];
               var idDialog = "#" + $(dialogWindow).attr("aria-describedby");*/
-            $("#" + this.divId).dialog("close");
+            try {
+                $("#" + this.divId).dialog("close");
+            } catch (e) {}
         } else {
             $("#botPanel").dialog("close");
         }
@@ -430,6 +435,7 @@ class BotEngineClass {
     close() {
         $("#botPanel").css("display", "none");
     }
+
     message(message) {
         $("#" + this.divId)
             .find("#botMessage")
@@ -494,7 +500,10 @@ class BotEngineClass {
                 }
 
                 if (varToFill) {
-                    this.history.VarFilling[this.history.currentIndex] = { VarFilled: varToFill, valueFilled: selectedValue };
+                    this.history.VarFilling[this.history.currentIndex] = {
+                        VarFilled: varToFill,
+                        valueFilled: selectedValue,
+                    };
                     if (Array.isArray(this.currentBot.params[varToFill])) {
                         this.currentBot.params[varToFill].push(selectedValue);
                     } else {
@@ -507,6 +516,7 @@ class BotEngineClass {
                 this.nextStep(returnValue || selectedValue);
             });
     }
+
     showTree(jstreeData, varToFill, treeOptions, returnValue, callback) {
         if (!treeOptions) {
             treeOptions = {};
@@ -604,7 +614,9 @@ class BotEngineClass {
                 .find("#botTreeValidateBtn")
                 .on("click", () => {
                     const checkedNodes = JstreeWidget.getjsTreeCheckedNodes(treeDivId);
-                    if (checkedNodes.length === 0) return;
+                    if (checkedNodes.length === 0) {
+                        return;
+                    }
 
                     const leafNodes = checkedNodes.filter((n) => n.type !== "Folder");
                     const rawIds = leafNodes.map((n) => (n.data && n.data.id ? n.data.id : n.id));
@@ -633,7 +645,9 @@ class BotEngineClass {
     }
 
     filterList(evt) {
-        if (!this.lastFilterListStr) this.lastFilterListStr = "";
+        if (!this.lastFilterListStr) {
+            this.lastFilterListStr = "";
+        }
         //var str = $(this).val();
         var str = $(evt.currentTarget).val();
         if (!str && this.lastFilterListStr.length < str.length) {
@@ -715,7 +729,9 @@ class BotEngineClass {
 
         var doSearch = function () {
             var term = filterInput.val();
-            if (!term || term.trim() === "") return;
+            if (!term || term.trim() === "") {
+                return;
+            }
             searchFn(term, function (results) {
                 isSearchMode = true;
                 self.currentList = results;
@@ -726,10 +742,16 @@ class BotEngineClass {
                     selectEl.off("click");
                     selectEl.on("click", function (clickEvt) {
                         var selectedValue = $(clickEvt.currentTarget).val();
-                        if (!selectedValue) return;
-                        if (Array.isArray(selectedValue)) selectedValue = selectedValue[0];
+                        if (!selectedValue) {
+                            return;
+                        }
+                        if (Array.isArray(selectedValue)) {
+                            selectedValue = selectedValue[0];
+                        }
                         var text = $(clickEvt.currentTarget).find("option:selected").text();
-                        if (!text) return;
+                        if (!text) {
+                            return;
+                        }
                         self.insertBotMessage(text);
                         onSearchResultSelected(selectedValue);
                     });
@@ -742,7 +764,9 @@ class BotEngineClass {
             if (evt.key === "Enter" || evt.keyCode === 13) {
                 doSearch();
             } else {
-                if (isSearchMode) return;
+                if (isSearchMode) {
+                    return;
+                }
                 self.filterList(evt);
             }
         });
@@ -808,7 +832,10 @@ class BotEngineClass {
                         return this.previousStep();
                     }
                     //Il faut attribuer l'objet aux bon numéro de currentObject
-                    this.history.VarFilling[this.history.currentIndex] = { VarFilled: varToFill, valueFilled: value.trim() };
+                    this.history.VarFilling[this.history.currentIndex] = {
+                        VarFilled: varToFill,
+                        valueFilled: value.trim(),
+                    };
 
                     this.currentBot.params[varToFill] = value.trim();
                     if (savedContainerWidth !== null && $("#botPanel").dialog("instance")) {
@@ -930,6 +957,7 @@ class BotEngineClass {
         });
         return queryText;
     }
+
     clearProposalSelect() {
         $("#" + this.divId)
             .find("#bot_resourcesProposalSelect")
@@ -1012,6 +1040,7 @@ class BotEngineClass {
             physics: { enabled: true },
         });
     }
+
     fillStartParams(params) {
         var startParams = [];
         var param;
@@ -1038,6 +1067,7 @@ class BotEngineClass {
 
         return;
     }
+
     deleteLastMessages(numberOfMessagesToRemove) {
         if (!numberOfMessagesToRemove) {
             numberOfMessagesToRemove = 1;

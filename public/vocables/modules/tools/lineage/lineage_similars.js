@@ -106,7 +106,8 @@ var Lineage_similars = (function () {
      * @memberof module:Lineage_similars
      * @returns {void}
      */
-    self.onValidateSources = function () {};
+    self.onValidateSources = function () {
+    };
 
     /**
      * Initiates the drawing of similar nodes based on the current mode.
@@ -155,8 +156,8 @@ var Lineage_similars = (function () {
         var whiteboardLabelsMap = {};
         nodes.forEach(function (node) {
             if (node.data.label) {
-                whiteboardLabelsMap[node.data.label] = { fromNode: node, similars: [] };
-                whiteboardLabelsMap[node.data.label.toLowerCase()] = { fromNode: node, similars: [] };
+                whiteboardLabelsMap[node.data.label] = {fromNode: node, similars: []};
+                whiteboardLabelsMap[node.data.label.toLowerCase()] = {fromNode: node, similars: []};
             }
         });
         var size = 100;
@@ -183,11 +184,17 @@ var Lineage_similars = (function () {
                 mode = "fuzzyMatch";
             }
         }
-        var options = { fields: ["label", "skoslabels"] };
+        var options = {fields: ["label", "skoslabels"]};
         async.eachSeries(
             slices,
             function (words, callbackEach) {
                 currentWordsCount += words.length;
+                words.forEach(function (word) {
+                    if (word.match(/[ -_.]/g)) {
+                        word = '"' + word + '"';
+                    }
+                });
+
                 SearchUtil.getElasticSearchMatches(words, indexes, mode, 0, 10000, options, function (err, result) {
                     if (err) {
                         return callbackEach(err);
@@ -236,77 +243,90 @@ var Lineage_similars = (function () {
                 }
                 var existingNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
 
-                var visjsData = { nodes: [], edges: [] };
-
+                var visjsData = {nodes: [], edges: []};
+                var distinctSimilarLabels = {};
                 for (var label in whiteboardLabelsMap) {
                     var whiteboardNode = whiteboardLabelsMap[label];
+                    if (whiteboardNode.fromNode.label) {
 
-                    whiteboardNode.similars.forEach(function (similar) {
-                        var similarSource;
-                        if (!similar.parents || !Config.sources[similar.parents[0]]) {
-                            return;
-                        }
-                        similarSource = similar.parents[0];
-                        if (similarsSources.indexOf(similarSource) < 0) {
-                            similarsSources.push(similarSource);
-                        }
-                        var color = Lineage_whiteboard.getSourceColor(similarSource);
-                        var shape = Lineage_whiteboard.defaultShape;
-                        // without counting source
-                        var similarsParents = similar.parents.length > 1 ? similar.parents.slice(1, similar.parents.length) : [];
-                        if (similar.type == "NamedIndividual") {
-                            shape = Lineage_whiteboard.namedIndividualShape;
-                        }
-                        if (!existingNodes[similar.id]) {
-                            existingNodes[similar.id] = 1;
-                            visjsData.nodes.push({
-                                id: similar.id,
-                                label: similar.label,
-                                shape: shape,
-                                color: color,
-                                size: Lineage_whiteboard.defaultShapeSize,
-                                data: {
-                                    id: similar.id,
-                                    label: similar.label,
-                                    source: similarSource,
-                                    parents: similarsParents,
-                                },
-                            });
-                        }
 
-                        var edgeId = whiteboardNode.fromNode.id + "_" + similar.id;
-                        var inverseEdgeId = similar.id + "_" + whiteboardNode.fromNode.id;
-                        if (!existingNodes[edgeId] && !existingNodes[inverseEdgeId] && whiteboardNode.fromNode.id != similar.id) {
-                            existingNodes[edgeId] = 1;
+                        var nWords = whiteboardNode.fromNode.label.split(" ").length;
+                        whiteboardNode.similars.forEach(function (similar) {
+                            var nWords2 = similar.label.split(" ").length;
+                            if (nWords != nWords2) {
+                                return;
+                            }
 
-                            visjsData.edges.push({
-                                id: edgeId,
-                                from: whiteboardNode.fromNode.id,
-                                to: similar.id,
-                                data: {
-                                    source: Lineage_sources.activeSource,
-                                    label: "sameLabel",
-                                },
-                                arrows: {
-                                    to: {
-                                        enabled: true,
-                                        type: "solid",
-                                        scaleFactor: 0.5,
-                                    },
+                            var similarSource;
+                            if (!similar.parents || !Config.sources[similar.parents[0]]) {
+                                return;
+                            }
+                            similarSource = similar.parents[0];
+                            if (similarsSources.indexOf(similarSource) < 0) {
+                                similarsSources.push(similarSource);
+                            }
+                            var color = Lineage_whiteboard.getSourceColor(similarSource);
+                            var shape = Lineage_whiteboard.defaultShape;
+                            // without counting source
+                            var similarsParents = similar.parents.length > 1 ? similar.parents.slice(1, similar.parents.length) : [];
+                            if (similar.type == "NamedIndividual") {
+                                shape = Lineage_whiteboard.namedIndividualShape;
+                            }
+                            if (!distinctSimilarLabels[similar.label]) {
+                                distinctSimilarLabels[similar.label] = 1;
 
-                                    from: {
-                                        enabled: true,
-                                        type: "solid",
-                                        scaleFactor: 0.5,
-                                    },
-                                },
+                                if (!existingNodes[similar.id]) {
+                                    existingNodes[similar.id] = 1;
+                                    visjsData.nodes.push({
+                                        id: similar.id,
+                                        label: similar.label,
+                                        shape: shape,
+                                        color: color,
+                                        size: Lineage_whiteboard.defaultShapeSize,
+                                        data: {
+                                            id: similar.id,
+                                            label: similar.label,
+                                            source: similarSource,
+                                            parents: similarsParents,
+                                        },
+                                    });
+                                }
 
-                                dashes: true,
-                                color: "green",
-                                width: 2,
-                            });
-                        }
-                    });
+                                var edgeId = whiteboardNode.fromNode.id + "_" + similar.id;
+                                var inverseEdgeId = similar.id + "_" + whiteboardNode.fromNode.id;
+                                if (!existingNodes[edgeId] && !existingNodes[inverseEdgeId] && whiteboardNode.fromNode.id != similar.id) {
+                                    existingNodes[edgeId] = 1;
+
+                                    visjsData.edges.push({
+                                        id: edgeId,
+                                        from: whiteboardNode.fromNode.id,
+                                        to: similar.id,
+                                        data: {
+                                            source: Lineage_sources.activeSource,
+                                            label: "sameLabel",
+                                        },
+                                        arrows: {
+                                            to: {
+                                                enabled: true,
+                                                type: "solid",
+                                                scaleFactor: 0.5,
+                                            },
+
+                                            from: {
+                                                enabled: true,
+                                                type: "solid",
+                                                scaleFactor: 0.5,
+                                            },
+                                        },
+
+                                        dashes: true,
+                                        color: "green",
+                                        width: 2,
+                                    });
+                                }
+                            }
+                        });
+                    }
                 }
                 self.visjsData = visjsData;
                 if (visjsData.edges.length == 0) {
@@ -380,16 +400,19 @@ var Lineage_similars = (function () {
 
             Sparql_OWL.getLabelsMap(fromSource, null, function (err, labelsMap) {
                 self.visjsData.edges.forEach(function (edge) {
-                    if (labelsMap[edge.from] == nodesMap[edge.to].label) predicate = "sls:hasExactSimilarLabel";
-                    else predicate = "sls:hasSimilarLabel";
+                    if (labelsMap[edge.from] == nodesMap[edge.to].label) {
+                        predicate = "sls:hasExactSimilarLabel";
+                    } else {
+                        predicate = "sls:hasSimilarLabel";
+                    }
                     dataSet.push([labelsMap[edge.from], predicate, nodesMap[edge.to].label, edge.from, edge.to]);
                 });
                 var cols = [
-                    { title: "label 1", defaultContent: "" },
-                    { title: "predicate", defaultContent: "" },
-                    { title: "label 2", defaultContent: "" },
-                    { title: "URI 1", defaultContent: "" },
-                    { title: "URI 2", defaultContent: "" },
+                    {title: "label 1", defaultContent: ""},
+                    {title: "predicate", defaultContent: ""},
+                    {title: "label 2", defaultContent: ""},
+                    {title: "URI 1", defaultContent: ""},
+                    {title: "URI 2", defaultContent: ""},
                 ];
 
                 Export.showDataTable(null, cols, dataSet);
@@ -410,8 +433,11 @@ var Lineage_similars = (function () {
             Sparql_OWL.getLabelsMap(fromSource, null, function (err, labelsMap) {
                 var triples = [];
                 self.visjsData.edges.forEach(function (edge) {
-                    if (labelsMap[edge.from] == labelsMap[edge.to]) predicate = "http://souslesens.org/resource/hasExactSimilarLabel";
-                    else predicate = "http://souslesens.org/resource/hasSimilarLabel";
+                    if (labelsMap[edge.from] == labelsMap[edge.to]) {
+                        predicate = "http://souslesens.org/resource/hasExactSimilarLabel";
+                    } else {
+                        predicate = "http://souslesens.org/resource/hasSimilarLabel";
+                    }
 
                     triples.push({
                         subject: edge.from,
@@ -511,20 +537,20 @@ var Lineage_similars = (function () {
                 var cleaned_label2 = node2.data.label.toLowerCase().replace(/ /g, "");
                 if (mode == "exactMatch") {
                     if (cleaned_label1 == cleaned_label2) {
-                        commonNodes.push({ fromNode: node1, toNode: node2 });
+                        commonNodes.push({fromNode: node1, toNode: node2});
                     }
                     if (node1.label == node2.label) {
-                        commonNodes.push({ fromNode: node1, toNode: node2 });
+                        commonNodes.push({fromNode: node1, toNode: node2});
                     }
                 } else {
                     if (cleaned_label1.includes(cleaned_label2) || cleaned_label2.includes(cleaned_label1)) {
-                        commonNodes.push({ fromNode: node1, toNode: node2 });
+                        commonNodes.push({fromNode: node1, toNode: node2});
                     }
                 }
             });
         });
 
-        var visjsData = { nodes: [], edges: [] };
+        var visjsData = {nodes: [], edges: []};
         commonNodes.forEach(function (item) {
             var edgeId = item.fromNode.id + "_" + item.toNode.id;
             var inverseEdgeId = item.toNode.id + "_" + item.fromNode.id;
@@ -572,7 +598,7 @@ var Lineage_similars = (function () {
         if (!self.currentSource) {
             return alert("no source selected");
         }
-        var options = { jstreeDiv: "lineageSimilars_sourcesTreeDiv" };
+        var options = {jstreeDiv: "lineageSimilars_sourcesTreeDiv"};
         SearchWidget.showTopConcepts(self.currentSource, options);
         self.parentClassJstreeLoaded = true;
     };
@@ -580,9 +606,10 @@ var Lineage_similars = (function () {
         showDialog: function () {
             self.parentClassJstreeLoaded = false;
             $("#smallDialogDiv").load("modules/tools/lineage/html/lineageSimilarsSaveDialog.html", function () {
-                UI.openDialog("smallDialogDiv", { title: "Save Similars" });
+                UI.openDialog("smallDialogDiv", {title: "Save Similars"});
                 UI.clampAndCenterDialog("smallDialogDiv");
-                self.save.drawWhiteboardSimilarsTaxonomy(function () {});
+                self.save.drawWhiteboardSimilarsTaxonomy(function () {
+                });
             });
         },
         contextMenuSimilars: function (node) {
@@ -645,7 +672,7 @@ var Lineage_similars = (function () {
                                 id: source,
                                 text: source,
                                 parent: "#",
-                                data: { id: source, label: source, type: "source" },
+                                data: {id: source, label: source, type: "source"},
                             });
                             sources[source] = true;
                         }
@@ -654,7 +681,7 @@ var Lineage_similars = (function () {
                             id: node.id,
                             text: node.data.label,
                             parent: source,
-                            data: { id: nodeId, label: node.data.label, type: "node", source: source },
+                            data: {id: nodeId, label: node.data.label, type: "node", source: source},
                         });
                         var similars = similarsTaxonomy[nodeId];
                         if (similars && similars.length > 0) {
@@ -665,7 +692,12 @@ var Lineage_similars = (function () {
                                         id: similarNode.id,
                                         text: similarNode.data.label,
                                         parent: node.id,
-                                        data: { id: similarNode.id, label: similarNode.data.label, type: "similars", source: similarNode.data.source },
+                                        data: {
+                                            id: similarNode.id,
+                                            label: similarNode.data.label,
+                                            type: "similars",
+                                            source: similarNode.data.source,
+                                        },
                                     });
                                 }
                             });
@@ -674,7 +706,7 @@ var Lineage_similars = (function () {
                 }
             }
 
-            var options = { withCheckboxes: true, contextMenu: self.save.contextMenuSimilars };
+            var options = {withCheckboxes: true, contextMenu: self.save.contextMenuSimilars};
             JstreeWidget.loadJsTree("lineageSimilars_similarsTreeDiv", jstreeData, options, function () {
                 $("#lineageSimilars_similarsTreeDiv").jstree(true).open_all();
                 if (callback) {
@@ -743,6 +775,90 @@ var Lineage_similars = (function () {
             });
         },
     };
+
+    self.drawSourceAISimilars = function (fromSource, toSource, mode, selectedMode, output, callback) {
+        function execQuery(listA, listB, callback2) {
+            //  var listBlabels = Object.keys(labelsMap);
+
+            //  listAlabels=common.array.slice(listAlabels,3000)[0]
+
+            const response = fetch(`${Config.apiUrl}/ai/similarLabels`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    listA: listA,
+                    listB: listB,
+                }),
+            })
+                .then(function (response) {
+                    return response.json();
+                })
+                .then(function (data) {
+                    console.log("SUCCESS:", data);
+                })
+                .catch(function (error) {
+                    console.error("ERROR:", error);
+                });
+        }
+
+        self.visjsData = null;
+        self.similarsSources = null;
+        var nodes = self.getStartingNodes(selectedMode);
+        if (!nodes) {
+            return alert("no nodes selected)");
+        }
+        var whiteboardLabelsMap = {};
+
+        var listA = [];
+        var listB = [];
+        nodes.forEach(function (node) {
+            if (node.data.label) {
+                //   whiteboardLabelsMap[node.data.label] = { fromNode: node, similars: [] };
+                if (node.data.source == fromSource) {
+                    listA.push({label: node.data.label, id: node.data.id});
+                } else {
+                    listB.push({label: node.data.label, id: node.data.id});
+                }
+            }
+        });
+
+        if (toSource) {
+            var options = {filter: ""};
+            Sparql_OWL.getDictionary(toSource, options, null, function (err, result) {
+                if (err) {
+                    return callback(err);
+                }
+                var labelsMap = {};
+                result.forEach(function (item) {
+                    if (item.label) {
+                        labelsMap[item.label.value] = item.id.value;
+                        listB.push({label: item.label.value, id: item.id.value});
+                    }
+                });
+
+                execQuery(listA, listB, function (err, result) {
+                    if (err) {
+                        return callback(err);
+                    }
+                    return callback(null, result);
+                });
+            });
+        } else {
+            if (listB.length > 0) {
+                execQuery(listA, listB, function (err, result) {
+                    if (err) {
+                        return callback(err);
+                    }
+                    return callback(null, result);
+                });
+            } else {
+                alert("no source b");
+            }
+        }
+    };
+
     return self;
 })();
 

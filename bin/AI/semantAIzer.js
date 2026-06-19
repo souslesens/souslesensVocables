@@ -1,6 +1,6 @@
 import "dotenv/config";
 import Anthropic from "@anthropic-ai/sdk";
-import Fuse from "fuse.js";
+import Fuse from "fuse.js";  
 
 // ─── Config ───────────────────────────────────────────────────
 const CHUNK_SIZE = 15; // reduced to stay under rate limit

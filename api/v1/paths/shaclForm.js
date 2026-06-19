@@ -19,25 +19,17 @@ export default function () {
         },
         parameters: [
             {
-                name: "graphUri",
-                description: "graphUri",
+                name: "body",
                 in: "body",
-                type: "string",
                 required: true,
-            },
-            {
-                name: "classUri",
-                description: "classUri",
-                in: "body",
-                type: "string",
-                required: true,
-            },
-            {
-                name: "divId",
-                description: "divId",
-                in: "body",
-                type: "string",
-                required: true,
+                schema: {
+                    type: "object",
+                    properties: {
+                        triples: { type: "array", items: { type: "object" } },
+                        shapes: { type: "string", description: "shacl rules in turtle format" },
+                    },
+                    required: ["triples", "shapes"],
+                },
             },
         ],
     };

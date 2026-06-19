@@ -680,6 +680,8 @@ var Lineage_sources = (function () {
         if (source !== "_defaultSource") {
             if (self.isSourceEditableForUser(source)) {
                 html += '<span class="popupMenuItem" onclick="Lineage_sources.menuActions.editSource();">Edit</span>';
+                html += '<span class="popupMenuItem" onclick="Lineage_sources.menuActions.refreshIndexes();">Refresh indexes</span>';
+                html += '<span class="popupMenuItem" onclick="Lineage_sources.menuActions.clearOntologyModelCache();">Clear ontology model cache</span>';
             }
             html += '<span class="popupMenuItem" onclick="Lineage_sources.menuActions.downloadGraph();">Download</span>';
         }
@@ -1083,6 +1085,25 @@ var Lineage_sources = (function () {
          */
         sourceMetaData: function () {
             window.MetaDataDialog.open(Lineage_sources.activeSource);
+        },
+
+        refreshIndexes: function () {
+            var source = Lineage_sources.activeSource;
+            if (!confirm("Refresh index for " + source + " ?")) {
+                return;
+            }
+            $("#waitImg").css("display", "block");
+            SearchUtil.generateElasticIndex(source, { indexProperties: 1, indexNamedIndividuals: 1 }, function (err, _result) {
+                $("#waitImg").css("display", "none");
+                if (err) {
+                    return MainController.errorAlert(err);
+                }
+                UI.message("Index refreshed: " + source, true);
+            });
+        },
+
+        clearOntologyModelCache: function () {
+            Admin.clearOntologyModelCache(Lineage_sources.activeSource);
         },
     };
 

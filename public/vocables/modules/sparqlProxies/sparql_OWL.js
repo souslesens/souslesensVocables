@@ -229,8 +229,8 @@ var Sparql_OWL = (function () {
             "OPTIONAL {?child1 rdfs:label ?child1Label." +
             Sparql_common.getLangFilter(sourceLabel, "child1Label") +
             "}" +
-            "OPTIONAL {?child1 rdf:type ?child1Type.}" +
-            "OPTIONAL {?child1 rdfs:subClassOf ?child1SuperClass.}";
+            "OPTIONAL {?child1 rdf:type ?child1Type.}";
+        //  "OPTIONAL {?child1 rdfs:subClassOf ?child1SuperClass.}";
 
         for (let i = 1; i < descendantsDepth; i++) {
             query +=
@@ -492,7 +492,9 @@ var Sparql_OWL = (function () {
             query += " OPTIONAL { ?subject rdfs:label ?subjectLabel.}";
         }
         query += " }}\n";
-        query += " filter( ?subjectGraph" + i + " in " + fromList + " ).\n";
+
+        // what is the reason of this filter ?????
+        //  query += " filter( ?subjectGraph" + i + " in " + fromList + " ).\n";
         query += " OPTIONAL {?subject rdfs:subClassOf ?subjectSuperClass.}\n";
         //query += " }\n";
         ancestorsDepth = Math.min(ancestorsDepth, self.ancestorsDepth);

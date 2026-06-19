@@ -152,7 +152,7 @@ var TriplesMaker = {
                 if (column.type == "Column") {
                     select.push(column.id);
                 }
-                if (MappingParser.columnsMappingsObjects.includes(column.type)) {
+                if (MappingParser.columnsMappingsObjects.includes(column.type) && column.type !== "URI") {
                     if (column.rdfsLabel) {
                         select.push(column.rdfsLabel);
                     }
@@ -386,6 +386,8 @@ var TriplesMaker = {
                                 return;
                             }
                         }
+                    } else if (line[mapping.o].indexOf("http") == 0) {
+                        object = "<" + line[mapping.o] + ">";
                     } else if (columnMappings[mapping.objColId]) {
                         // if object is a column
                         object = TriplesMaker.getColumnUri(line, mapping.objColId, columnMappings, rowIndex, tableProcessingParams);
@@ -411,10 +413,11 @@ var TriplesMaker = {
                 }
             }
             // process columnToColumnMappings
+            var allColumnsMappings = tableProcessingParams.allColumnsMappings || columnMappings;
             for (var edgeId in tableProcessingParams.columnToColumnEdgesMap) {
                 var edge = tableProcessingParams.columnToColumnEdgesMap[edgeId];
-                var subjectUri = TriplesMaker.getColumnUri(line, edge.from, columnMappings, rowIndex, tableProcessingParams);
-                var objectUri = TriplesMaker.getColumnUri(line, edge.to, columnMappings, rowIndex, tableProcessingParams);
+                var subjectUri = TriplesMaker.getColumnUri(line, edge.from, allColumnsMappings, rowIndex, tableProcessingParams);
+                var objectUri = TriplesMaker.getColumnUri(line, edge.to, allColumnsMappings, rowIndex, tableProcessingParams);
                 var property = TriplesMaker.getPropertyUri(edge.data.id);
 
                 if (edge.isRestriction) {
@@ -444,6 +447,15 @@ var TriplesMaker = {
                         var object = null;
                         if (value && value.startsWith("http:")) {
                             object = "<" + value + ">";
+                        }
+                        // cas ou le other predicate a un range URI (property est un objectProperty)
+                        // ne fonctionne que si l'objet est mappé en tant que colonne
+                        else if (item.range == "URI") {
+                            var colId = null;
+                            for (var col in columnMappings) {
+                                if (columnMappings[col].id == item.object) colId = col;
+                            }
+                            if (colId) object = TriplesMaker.getColumnUri(line, colId, columnMappings, rowIndex, tableProcessingParams);
                         } else {
                             object = TriplesMaker.getFormatedLiteral(line, {
                                 dataType: item.range,
@@ -582,7 +594,12 @@ var TriplesMaker = {
 
         var id = null;
 
-        if (columnParams.uriType == "fromLabel") {
+        var str = dataItem[columnParams.id];
+
+        if (str && str.indexOf("http") === 0) {
+            // URI
+            return "<" + str + ">";
+        } else if (columnParams.uriType == "fromLabel") {
             // cross lines value for the column
 
             if (dataItem[columnParams.id]) {
@@ -684,11 +701,11 @@ var TriplesMaker = {
             }
             if (str == undefined || str == null) {
                 return null;
-            }
-            if (mapping.dataType == "xsd:string") {
+            } else if (mapping.dataType == "xsd:string") {
                 str = '"' + util.formatStringForTriple(str, false) + '"^^' + mapping.dataType;
-            }
-            if (mapping.dataType == "xsd:float") {
+            } else if (mapping.dataType == "xsd:string") {
+                str = '"' + util.formatStringForTriple(str, false) + '"^^' + mapping.dataType;
+            } else if (mapping.dataType == "xsd:float") {
                 if (str == "0") {
                     str = "0.0";
                 }
@@ -699,8 +716,7 @@ var TriplesMaker = {
                     str = '"' + util.formatStringForTriple(str, false) + '"^^' + "xsd:string";
                     // str = null
                 }
-            }
-            if (mapping.dataType == "xsd:int") {
+            } else if (mapping.dataType == "xsd:int") {
                 if (util.isInt(str)) {
                     str = '"' + str + '"^^' + mapping.dataType;
                 } else {

@@ -833,6 +833,7 @@ var MappingModeler = (function () {
                 { id: "function", label: "function" },
                 { id: "valuesOfColumn", label: "values Of column" },
                 { id: "rdfs:member", label: "_rdfs:member_" },
+                { id: "rdf:type", label: "_rdf:type_" },
                 { id: "rdfs:subClassOf", label: "_rdfs:subClassOf_" },
                 { id: "rdf:type", label: "_rdf:type_" },
             ];

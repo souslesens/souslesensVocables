@@ -188,6 +188,12 @@ var Lineage_similars = (function () {
             slices,
             function (words, callbackEach) {
                 currentWordsCount += words.length;
+                words.forEach(function (word) {
+                    if (word.match(/[ -_.]/g)) {
+                        word = '"' + word + '"';
+                    }
+                });
+
                 SearchUtil.getElasticSearchMatches(words, indexes, mode, 0, 10000, options, function (err, result) {
                     if (err) {
                         return callbackEach(err);
@@ -237,76 +243,87 @@ var Lineage_similars = (function () {
                 var existingNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
 
                 var visjsData = { nodes: [], edges: [] };
-
+                var distinctSimilarLabels = {};
                 for (var label in whiteboardLabelsMap) {
                     var whiteboardNode = whiteboardLabelsMap[label];
+                    if (whiteboardNode.fromNode.label) {
+                        var nWords = whiteboardNode.fromNode.label.split(" ").length;
+                        whiteboardNode.similars.forEach(function (similar) {
+                            var nWords2 = similar.label.split(" ").length;
+                            if (nWords != nWords2) {
+                                return;
+                            }
 
-                    whiteboardNode.similars.forEach(function (similar) {
-                        var similarSource;
-                        if (!similar.parents || !Config.sources[similar.parents[0]]) {
-                            return;
-                        }
-                        similarSource = similar.parents[0];
-                        if (similarsSources.indexOf(similarSource) < 0) {
-                            similarsSources.push(similarSource);
-                        }
-                        var color = Lineage_whiteboard.getSourceColor(similarSource);
-                        var shape = Lineage_whiteboard.defaultShape;
-                        // without counting source
-                        var similarsParents = similar.parents.length > 1 ? similar.parents.slice(1, similar.parents.length) : [];
-                        if (similar.type == "NamedIndividual") {
-                            shape = Lineage_whiteboard.namedIndividualShape;
-                        }
-                        if (!existingNodes[similar.id]) {
-                            existingNodes[similar.id] = 1;
-                            visjsData.nodes.push({
-                                id: similar.id,
-                                label: similar.label,
-                                shape: shape,
-                                color: color,
-                                size: Lineage_whiteboard.defaultShapeSize,
-                                data: {
-                                    id: similar.id,
-                                    label: similar.label,
-                                    source: similarSource,
-                                    parents: similarsParents,
-                                },
-                            });
-                        }
+                            var similarSource;
+                            if (!similar.parents || !Config.sources[similar.parents[0]]) {
+                                return;
+                            }
+                            similarSource = similar.parents[0];
+                            if (similarsSources.indexOf(similarSource) < 0) {
+                                similarsSources.push(similarSource);
+                            }
+                            var color = Lineage_whiteboard.getSourceColor(similarSource);
+                            var shape = Lineage_whiteboard.defaultShape;
+                            // without counting source
+                            var similarsParents = similar.parents.length > 1 ? similar.parents.slice(1, similar.parents.length) : [];
+                            if (similar.type == "NamedIndividual") {
+                                shape = Lineage_whiteboard.namedIndividualShape;
+                            }
+                            if (!distinctSimilarLabels[similar.label]) {
+                                distinctSimilarLabels[similar.label] = 1;
 
-                        var edgeId = whiteboardNode.fromNode.id + "_" + similar.id;
-                        var inverseEdgeId = similar.id + "_" + whiteboardNode.fromNode.id;
-                        if (!existingNodes[edgeId] && !existingNodes[inverseEdgeId] && whiteboardNode.fromNode.id != similar.id) {
-                            existingNodes[edgeId] = 1;
+                                if (!existingNodes[similar.id]) {
+                                    existingNodes[similar.id] = 1;
+                                    visjsData.nodes.push({
+                                        id: similar.id,
+                                        label: similar.label,
+                                        shape: shape,
+                                        color: color,
+                                        size: Lineage_whiteboard.defaultShapeSize,
+                                        data: {
+                                            id: similar.id,
+                                            label: similar.label,
+                                            source: similarSource,
+                                            parents: similarsParents,
+                                        },
+                                    });
+                                }
 
-                            visjsData.edges.push({
-                                id: edgeId,
-                                from: whiteboardNode.fromNode.id,
-                                to: similar.id,
-                                data: {
-                                    source: Lineage_sources.activeSource,
-                                    label: "sameLabel",
-                                },
-                                arrows: {
-                                    to: {
-                                        enabled: true,
-                                        type: "solid",
-                                        scaleFactor: 0.5,
-                                    },
+                                var edgeId = whiteboardNode.fromNode.id + "_" + similar.id;
+                                var inverseEdgeId = similar.id + "_" + whiteboardNode.fromNode.id;
+                                if (!existingNodes[edgeId] && !existingNodes[inverseEdgeId] && whiteboardNode.fromNode.id != similar.id) {
+                                    existingNodes[edgeId] = 1;
 
-                                    from: {
-                                        enabled: true,
-                                        type: "solid",
-                                        scaleFactor: 0.5,
-                                    },
-                                },
+                                    visjsData.edges.push({
+                                        id: edgeId,
+                                        from: whiteboardNode.fromNode.id,
+                                        to: similar.id,
+                                        data: {
+                                            source: Lineage_sources.activeSource,
+                                            label: "sameLabel",
+                                        },
+                                        arrows: {
+                                            to: {
+                                                enabled: true,
+                                                type: "solid",
+                                                scaleFactor: 0.5,
+                                            },
 
-                                dashes: true,
-                                color: "green",
-                                width: 2,
-                            });
-                        }
-                    });
+                                            from: {
+                                                enabled: true,
+                                                type: "solid",
+                                                scaleFactor: 0.5,
+                                            },
+                                        },
+
+                                        dashes: true,
+                                        color: "green",
+                                        width: 2,
+                                    });
+                                }
+                            }
+                        });
+                    }
                 }
                 self.visjsData = visjsData;
                 if (visjsData.edges.length == 0) {
@@ -380,8 +397,11 @@ var Lineage_similars = (function () {
 
             Sparql_OWL.getLabelsMap(fromSource, null, function (err, labelsMap) {
                 self.visjsData.edges.forEach(function (edge) {
-                    if (labelsMap[edge.from] == nodesMap[edge.to].label) predicate = "sls:hasExactSimilarLabel";
-                    else predicate = "sls:hasSimilarLabel";
+                    if (labelsMap[edge.from] == nodesMap[edge.to].label) {
+                        predicate = "sls:hasExactSimilarLabel";
+                    } else {
+                        predicate = "sls:hasSimilarLabel";
+                    }
                     dataSet.push([labelsMap[edge.from], predicate, nodesMap[edge.to].label, edge.from, edge.to]);
                 });
                 var cols = [
@@ -410,8 +430,11 @@ var Lineage_similars = (function () {
             Sparql_OWL.getLabelsMap(fromSource, null, function (err, labelsMap) {
                 var triples = [];
                 self.visjsData.edges.forEach(function (edge) {
-                    if (labelsMap[edge.from] == labelsMap[edge.to]) predicate = "http://souslesens.org/resource/hasExactSimilarLabel";
-                    else predicate = "http://souslesens.org/resource/hasSimilarLabel";
+                    if (labelsMap[edge.from] == labelsMap[edge.to]) {
+                        predicate = "http://souslesens.org/resource/hasExactSimilarLabel";
+                    } else {
+                        predicate = "http://souslesens.org/resource/hasSimilarLabel";
+                    }
 
                     triples.push({
                         subject: edge.from,
@@ -665,7 +688,12 @@ var Lineage_similars = (function () {
                                         id: similarNode.id,
                                         text: similarNode.data.label,
                                         parent: node.id,
-                                        data: { id: similarNode.id, label: similarNode.data.label, type: "similars", source: similarNode.data.source },
+                                        data: {
+                                            id: similarNode.id,
+                                            label: similarNode.data.label,
+                                            type: "similars",
+                                            source: similarNode.data.source,
+                                        },
                                     });
                                 }
                             });
@@ -743,6 +771,90 @@ var Lineage_similars = (function () {
             });
         },
     };
+
+    self.drawSourceAISimilars = function (fromSource, toSource, mode, selectedMode, output, callback) {
+        function execQuery(listA, listB, callback2) {
+            //  var listBlabels = Object.keys(labelsMap);
+
+            //  listAlabels=common.array.slice(listAlabels,3000)[0]
+
+            const response = fetch(`${Config.apiUrl}/ai/similarLabels`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    listA: listA,
+                    listB: listB,
+                }),
+            })
+                .then(function (response) {
+                    return response.json();
+                })
+                .then(function (data) {
+                    console.log("SUCCESS:", data);
+                })
+                .catch(function (error) {
+                    console.error("ERROR:", error);
+                });
+        }
+
+        self.visjsData = null;
+        self.similarsSources = null;
+        var nodes = self.getStartingNodes(selectedMode);
+        if (!nodes) {
+            return alert("no nodes selected)");
+        }
+        var whiteboardLabelsMap = {};
+
+        var listA = [];
+        var listB = [];
+        nodes.forEach(function (node) {
+            if (node.data.label) {
+                //   whiteboardLabelsMap[node.data.label] = { fromNode: node, similars: [] };
+                if (node.data.source == fromSource) {
+                    listA.push({ label: node.data.label, id: node.data.id });
+                } else {
+                    listB.push({ label: node.data.label, id: node.data.id });
+                }
+            }
+        });
+
+        if (toSource) {
+            var options = { filter: "" };
+            Sparql_OWL.getDictionary(toSource, options, null, function (err, result) {
+                if (err) {
+                    return callback(err);
+                }
+                var labelsMap = {};
+                result.forEach(function (item) {
+                    if (item.label) {
+                        labelsMap[item.label.value] = item.id.value;
+                        listB.push({ label: item.label.value, id: item.id.value });
+                    }
+                });
+
+                execQuery(listA, listB, function (err, result) {
+                    if (err) {
+                        return callback(err);
+                    }
+                    return callback(null, result);
+                });
+            });
+        } else {
+            if (listB.length > 0) {
+                execQuery(listA, listB, function (err, result) {
+                    if (err) {
+                        return callback(err);
+                    }
+                    return callback(null, result);
+                });
+            } else {
+                alert("no source b");
+            }
+        }
+    };
+
     return self;
 })();
 

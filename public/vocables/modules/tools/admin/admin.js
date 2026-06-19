@@ -82,6 +82,11 @@ $("#sourceDivControlPanelDiv").html(html);*/
             return;
         }
 
+        var skipIndividuals = false;
+        if (!confirm("index name individuals also")) {
+            skipIndividuals = true;
+        }
+
         async.eachSeries(
             sources,
             function (source, callbackEach) {
@@ -94,6 +99,7 @@ $("#sourceDivControlPanelDiv").html(html);*/
                     {
                         indexProperties: 1,
                         indexNamedIndividuals: 1,
+                        skipIndividuals: skipIndividuals,
                     },
                     function (err, _result) {
                         UI.message("DONE " + source, true);

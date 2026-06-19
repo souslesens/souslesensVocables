@@ -374,7 +374,7 @@ var TriplesMaker = {
                     // getColumnUri function handle all cases
                     // protect from null values from others javascript types
                     if (line[mapping.o] == undefined || line[mapping.o] == null) {
-                        if (mapping.isConstantUri ) {
+                        if (mapping.isConstantUri) {
                             // uri
                             object = "<" + mapping.o + ">";
                         } else if (mapping.isConstantPrefixedUri) {
@@ -386,13 +386,9 @@ var TriplesMaker = {
                                 return;
                             }
                         }
-                    }
-
-                    else if (line[mapping.o].indexOf("http")==0){
-                        object = "<" +line[mapping.o] + ">";
-                    }
-
-                    else if (columnMappings[mapping.objColId]) {
+                    } else if (line[mapping.o].indexOf("http") == 0) {
+                        object = "<" + line[mapping.o] + ">";
+                    } else if (columnMappings[mapping.objColId]) {
                         // if object is a column
                         object = TriplesMaker.getColumnUri(line, mapping.objColId, columnMappings, rowIndex, tableProcessingParams);
                     } else if (mapping.transform) {
@@ -598,14 +594,12 @@ var TriplesMaker = {
 
         var id = null;
 
-        var str=dataItem[columnParams.id]
+        var str = dataItem[columnParams.id];
 
-        if (str && str.indexOf("http") === 0){// URI
+        if (str && str.indexOf("http") === 0) {
+            // URI
             return "<" + str + ">";
-        }
-
-
-        else if (columnParams.uriType == "fromLabel") {
+        } else if (columnParams.uriType == "fromLabel") {
             // cross lines value for the column
 
             if (dataItem[columnParams.id]) {

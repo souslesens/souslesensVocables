@@ -458,7 +458,7 @@ var elasticRestProxy = {
                         },
                     };
 
-                    var mappings= {
+                    var mappings = {
                         settings: {
                             analysis: {
                                 normalizer: {
@@ -468,69 +468,66 @@ var elasticRestProxy = {
                                         filter: ["lowercase", "asciifolding"],
                                     },
                                 },
-                                "analyzer": {
-                                    "english_stemmed": {
-                                        "tokenizer": "standard",
-                                        "filter": [
-                                            "lowercase",
-                                            "porter_stem"
-                                        ]
-                                    }
+                                analyzer: {
+                                    english_stemmed: {
+                                        tokenizer: "standard",
+                                        filter: ["lowercase", "porter_stem"],
+                                    },
                                 },
                             },
                         },
-                        "mappings": {
-                            "properties": {
-                                "owlType": {
-                                    "type": "keyword"
+                        mappings: {
+                            properties: {
+                                owlType: {
+                                    type: "keyword",
                                 },
-                                "label": {
-                                    "type": "text",
-                                    "analyzer": "english_stemmed",
-                                    "fields": {
-                                        "keyword": {
-                                            "type": "keyword",
-                                            "normalizer": "lowercase_normalizer",
-                                            "ignore_above": 256
-                                        }
-                                    }
+                                label: {
+                                    type: "text",
+                                    analyzer: "english_stemmed",
+                                    fields: {
+                                        keyword: {
+                                            type: "keyword",
+                                            normalizer: "lowercase_normalizer",
+                                            ignore_above: 256,
+                                        },
+                                    },
                                 },
-                                "id": {
-                                    "type": "text",
-                                    "fields": {
-                                        "keyword": {
-                                            "type": "keyword",
-                                            "ignore_above": 256
-                                        }
-                                    }
+                                id: {
+                                    type: "text",
+                                    fields: {
+                                        keyword: {
+                                            type: "keyword",
+                                            ignore_above: 256,
+                                        },
+                                    },
                                 },
-                                "skoslabels": {
-                                    "type": "text",
-                                    "analyzer": "english_stemmed",
-                                    "fields": {
-                                        "keyword": {
-                                            "type": "keyword",
-                                            "normalizer": "lowercase_normalizer",
-                                            "ignore_above": 256
-                                        }
-                                    }
+                                skoslabels: {
+                                    type: "text",
+                                    analyzer: "english_stemmed",
+                                    fields: {
+                                        keyword: {
+                                            type: "keyword",
+                                            normalizer: "lowercase_normalizer",
+                                            ignore_above: 256,
+                                        },
+                                    },
                                 },
-                                "lang": {
-                                    "type": "keyword"
+                                lang: {
+                                    type: "keyword",
                                 },
-                                "parents": {
-                                    "type": "text",
-                                    "fields": {
-                                        "keyword": {
-                                            "type": "keyword",
-                                            "ignore_above": 256
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                                parents: {
+                                    type: "text",
+                                    fields: {
+                                        keyword: {
+                                            type: "keyword",
+                                            ignore_above: 256,
+                                        },
+                                    },
+                                },
+                            },
+                        },
 
-                     /*   mappings: {
+                        /*   mappings: {
                             [indexName]: {
                                 properties: {
                                     label: {
@@ -603,7 +600,8 @@ var elasticRestProxy = {
                     elasticRestProxy.forwardRequest(requestOptions, function (error, _response, _body) {
                         if (error) {
                             return callbackSeries(error);
-                        }if(_body.error){
+                        }
+                        if (_body.error) {
                             return callbackSeries(_body.error);
                         }
                         return callbackSeries();

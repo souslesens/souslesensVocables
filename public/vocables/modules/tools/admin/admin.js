@@ -82,9 +82,9 @@ $("#sourceDivControlPanelDiv").html(html);*/
             return;
         }
 
-        var skipIndividuals=false
+        var skipIndividuals = false;
         if (!confirm("index name individuals also")) {
-            skipIndividuals=true
+            skipIndividuals = true;
         }
 
         async.eachSeries(
@@ -99,7 +99,7 @@ $("#sourceDivControlPanelDiv").html(html);*/
                     {
                         indexProperties: 1,
                         indexNamedIndividuals: 1,
-                        skipIndividuals:skipIndividuals
+                        skipIndividuals: skipIndividuals,
                     },
                     function (err, _result) {
                         UI.message("DONE " + source, true);

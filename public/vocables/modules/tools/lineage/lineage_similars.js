@@ -106,8 +106,7 @@ var Lineage_similars = (function () {
      * @memberof module:Lineage_similars
      * @returns {void}
      */
-    self.onValidateSources = function () {
-    };
+    self.onValidateSources = function () {};
 
     /**
      * Initiates the drawing of similar nodes based on the current mode.
@@ -156,8 +155,8 @@ var Lineage_similars = (function () {
         var whiteboardLabelsMap = {};
         nodes.forEach(function (node) {
             if (node.data.label) {
-                whiteboardLabelsMap[node.data.label] = {fromNode: node, similars: []};
-                whiteboardLabelsMap[node.data.label.toLowerCase()] = {fromNode: node, similars: []};
+                whiteboardLabelsMap[node.data.label] = { fromNode: node, similars: [] };
+                whiteboardLabelsMap[node.data.label.toLowerCase()] = { fromNode: node, similars: [] };
             }
         });
         var size = 100;
@@ -184,7 +183,7 @@ var Lineage_similars = (function () {
                 mode = "fuzzyMatch";
             }
         }
-        var options = {fields: ["label", "skoslabels"]};
+        var options = { fields: ["label", "skoslabels"] };
         async.eachSeries(
             slices,
             function (words, callbackEach) {
@@ -243,13 +242,11 @@ var Lineage_similars = (function () {
                 }
                 var existingNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
 
-                var visjsData = {nodes: [], edges: []};
+                var visjsData = { nodes: [], edges: [] };
                 var distinctSimilarLabels = {};
                 for (var label in whiteboardLabelsMap) {
                     var whiteboardNode = whiteboardLabelsMap[label];
                     if (whiteboardNode.fromNode.label) {
-
-
                         var nWords = whiteboardNode.fromNode.label.split(" ").length;
                         whiteboardNode.similars.forEach(function (similar) {
                             var nWords2 = similar.label.split(" ").length;
@@ -408,11 +405,11 @@ var Lineage_similars = (function () {
                     dataSet.push([labelsMap[edge.from], predicate, nodesMap[edge.to].label, edge.from, edge.to]);
                 });
                 var cols = [
-                    {title: "label 1", defaultContent: ""},
-                    {title: "predicate", defaultContent: ""},
-                    {title: "label 2", defaultContent: ""},
-                    {title: "URI 1", defaultContent: ""},
-                    {title: "URI 2", defaultContent: ""},
+                    { title: "label 1", defaultContent: "" },
+                    { title: "predicate", defaultContent: "" },
+                    { title: "label 2", defaultContent: "" },
+                    { title: "URI 1", defaultContent: "" },
+                    { title: "URI 2", defaultContent: "" },
                 ];
 
                 Export.showDataTable(null, cols, dataSet);
@@ -537,20 +534,20 @@ var Lineage_similars = (function () {
                 var cleaned_label2 = node2.data.label.toLowerCase().replace(/ /g, "");
                 if (mode == "exactMatch") {
                     if (cleaned_label1 == cleaned_label2) {
-                        commonNodes.push({fromNode: node1, toNode: node2});
+                        commonNodes.push({ fromNode: node1, toNode: node2 });
                     }
                     if (node1.label == node2.label) {
-                        commonNodes.push({fromNode: node1, toNode: node2});
+                        commonNodes.push({ fromNode: node1, toNode: node2 });
                     }
                 } else {
                     if (cleaned_label1.includes(cleaned_label2) || cleaned_label2.includes(cleaned_label1)) {
-                        commonNodes.push({fromNode: node1, toNode: node2});
+                        commonNodes.push({ fromNode: node1, toNode: node2 });
                     }
                 }
             });
         });
 
-        var visjsData = {nodes: [], edges: []};
+        var visjsData = { nodes: [], edges: [] };
         commonNodes.forEach(function (item) {
             var edgeId = item.fromNode.id + "_" + item.toNode.id;
             var inverseEdgeId = item.toNode.id + "_" + item.fromNode.id;
@@ -598,7 +595,7 @@ var Lineage_similars = (function () {
         if (!self.currentSource) {
             return alert("no source selected");
         }
-        var options = {jstreeDiv: "lineageSimilars_sourcesTreeDiv"};
+        var options = { jstreeDiv: "lineageSimilars_sourcesTreeDiv" };
         SearchWidget.showTopConcepts(self.currentSource, options);
         self.parentClassJstreeLoaded = true;
     };
@@ -606,10 +603,9 @@ var Lineage_similars = (function () {
         showDialog: function () {
             self.parentClassJstreeLoaded = false;
             $("#smallDialogDiv").load("modules/tools/lineage/html/lineageSimilarsSaveDialog.html", function () {
-                UI.openDialog("smallDialogDiv", {title: "Save Similars"});
+                UI.openDialog("smallDialogDiv", { title: "Save Similars" });
                 UI.clampAndCenterDialog("smallDialogDiv");
-                self.save.drawWhiteboardSimilarsTaxonomy(function () {
-                });
+                self.save.drawWhiteboardSimilarsTaxonomy(function () {});
             });
         },
         contextMenuSimilars: function (node) {
@@ -672,7 +668,7 @@ var Lineage_similars = (function () {
                                 id: source,
                                 text: source,
                                 parent: "#",
-                                data: {id: source, label: source, type: "source"},
+                                data: { id: source, label: source, type: "source" },
                             });
                             sources[source] = true;
                         }
@@ -681,7 +677,7 @@ var Lineage_similars = (function () {
                             id: node.id,
                             text: node.data.label,
                             parent: source,
-                            data: {id: nodeId, label: node.data.label, type: "node", source: source},
+                            data: { id: nodeId, label: node.data.label, type: "node", source: source },
                         });
                         var similars = similarsTaxonomy[nodeId];
                         if (similars && similars.length > 0) {
@@ -706,7 +702,7 @@ var Lineage_similars = (function () {
                 }
             }
 
-            var options = {withCheckboxes: true, contextMenu: self.save.contextMenuSimilars};
+            var options = { withCheckboxes: true, contextMenu: self.save.contextMenuSimilars };
             JstreeWidget.loadJsTree("lineageSimilars_similarsTreeDiv", jstreeData, options, function () {
                 $("#lineageSimilars_similarsTreeDiv").jstree(true).open_all();
                 if (callback) {
@@ -817,15 +813,15 @@ var Lineage_similars = (function () {
             if (node.data.label) {
                 //   whiteboardLabelsMap[node.data.label] = { fromNode: node, similars: [] };
                 if (node.data.source == fromSource) {
-                    listA.push({label: node.data.label, id: node.data.id});
+                    listA.push({ label: node.data.label, id: node.data.id });
                 } else {
-                    listB.push({label: node.data.label, id: node.data.id});
+                    listB.push({ label: node.data.label, id: node.data.id });
                 }
             }
         });
 
         if (toSource) {
-            var options = {filter: ""};
+            var options = { filter: "" };
             Sparql_OWL.getDictionary(toSource, options, null, function (err, result) {
                 if (err) {
                     return callback(err);
@@ -834,7 +830,7 @@ var Lineage_similars = (function () {
                 result.forEach(function (item) {
                     if (item.label) {
                         labelsMap[item.label.value] = item.id.value;
-                        listB.push({label: item.label.value, id: item.id.value});
+                        listB.push({ label: item.label.value, id: item.id.value });
                     }
                 });
 

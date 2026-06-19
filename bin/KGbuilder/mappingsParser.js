@@ -214,14 +214,14 @@ var MappingParser = {
             var toColumn = toNode.data.definedInColumn ? allColumnsMappings[toNode.data.definedInColumn] : toNode.data;
 
             //if edge is not from rdf, rdfs or owl and if from and to are rdf:typeClass the edge represents a restriction
-                if (edge.data && edge.data.id && edge.data.id.indexOf("owl") < 0 && edge.data.id.indexOf("rdf") < 0) {
-                    var isRestriction = fromColumn.rdfType == "owl:Class" && toColumn.rdfType == "owl:Class";
-                    edge.isRestriction = isRestriction;
-                    if (isRestriction) {
-                        edge.restrictionType = edge.data.restrictionType || null;
-                        edge.cardinality = edge.data.cardinality || null;
-                    }
+            if (edge.data && edge.data.id && edge.data.id.indexOf("owl") < 0 && edge.data.id.indexOf("rdf") < 0) {
+                var isRestriction = fromColumn.rdfType == "owl:Class" && toColumn.rdfType == "owl:Class";
+                edge.isRestriction = isRestriction;
+                if (isRestriction) {
+                    edge.restrictionType = edge.data.restrictionType || null;
+                    edge.cardinality = edge.data.cardinality || null;
                 }
+            }
 
             edgeMap[edge.id] = edge;
         });

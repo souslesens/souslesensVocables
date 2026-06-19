@@ -85,7 +85,7 @@ function createOpenRouterAdapter(openRouterConfig) {
                 messages: [{ role: "user", content: prompt }],
                 maxTokens: options?.maxTokens,
             },
-            callback
+            callback,
         );
     }
 

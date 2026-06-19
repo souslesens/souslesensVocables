@@ -25,7 +25,7 @@ function createAnthropicAdapter(anthropicConfig) {
                 messages: [{ role: "user", content: prompt }],
                 maxTokens: options?.maxTokens,
             },
-            callback
+            callback,
         );
     }
 

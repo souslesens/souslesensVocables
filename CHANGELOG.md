@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.8.0](https://github.com/souslesens/souslesensVocables/compare/3.7.0...3.8.0) (2026-06-19)
+
+
+### Features
+
+* **Lineage_sources:** compact mode improve ([decf1bf](https://github.com/souslesens/souslesensVocables/commit/decf1bf2ad95bae02476fe47f39e240116deedfb))
+
+
+### Bug Fixes
+
+* **admin/snapshot:** context superposition only page by page ([b77a54e](https://github.com/souslesens/souslesensVocables/commit/b77a54ed6d198eeebf2dfd4587e7184d4f5f60af))
+* **admin:** snapshot by job to avoid timeout ([f2f520a](https://github.com/souslesens/souslesensVocables/commit/f2f520ac973c103e4c153ffc64c317a0efff0d7b))
+* **Config editor:** tab sources responsive ([40ccd50](https://github.com/souslesens/souslesensVocables/commit/40ccd507e2a7d7138855c73f92adf93f9a43ee64))
+* **ConfigEditor:** can supress corrupted sources + revert sourceSelector ([132be60](https://github.com/souslesens/souslesensVocables/commit/132be60c5459559764f511232225a931cbc8c6cb))
+* **graph management:** responsive ([81ed817](https://github.com/souslesens/souslesensVocables/commit/81ed81745ba7165f4d858a80d242d7b680a608f7))
+* **MappingModeler:** choose restriction type ([5bee56d](https://github.com/souslesens/souslesensVocables/commit/5bee56db885863354fca676eaada7f4a6419b7bc))
+* **MappingModeler:** isolated otherPredicates treatment ([f4f155d](https://github.com/souslesens/souslesensVocables/commit/f4f155d3652592fd653456fad99e8948dbe68322))
+* **OntologyModel:**  getInferredClassValueDataTypes 100 by 100 to avoid timeout ([8620a8b](https://github.com/souslesens/souslesensVocables/commit/8620a8be8c6f0dc246c7ad3c3f0d682e75cd021a))
+* **OntologyModel:**  getInferredClassValueDataTypes optimization by chunks ([2b26325](https://github.com/souslesens/souslesensVocables/commit/2b263251a2e323824633ec41e4dd38b1729c2027))
+* **snapshot:** batches with pause to not overload node ([d5f34e7](https://github.com/souslesens/souslesensVocables/commit/d5f34e759068a5922bd435b727a3a35dad4627dc))
+* **snapshot:** playright docker file ([7c3138c](https://github.com/souslesens/souslesensVocables/commit/7c3138c3cebfea10efc69f91cee5d6a3754e1da5))
+* **Sourcelector:** corrupted sources don't break jstree ([1d33260](https://github.com/souslesens/souslesensVocables/commit/1d3326070797a8dcf3689ee6dad63393c03aa2af))
+* **SourceSelector:** sanitize jstree group for uri groups ([ee46561](https://github.com/souslesens/souslesensVocables/commit/ee46561c4f79df76af63fd96cd278dadfabfc64c))
+
 ## [3.7.0](https://github.com/souslesens/souslesensVocables/compare/3.6.0...3.7.0) (2026-05-28)
 
 

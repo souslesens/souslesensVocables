@@ -1,8 +1,10 @@
 import common from "./common.js";
 import SearchUtil from "../search/searchUtil.js";
 import Sparql_common from "../sparqlProxies/sparql_common.js";
+import Lineage_whiteboard from "../tools/lineage/lineage_whiteboard.js";
 
 import MainController from "./mainController.js";
+import Lineage_nodeCentricGraph from "../tools/lineage/lineage_nodeCentricGraph.js";
 
 var Export = (function () {
     var self = {};
@@ -507,7 +509,7 @@ fixedColumns: true*/
         }
         if (visjsGraph == "KGquery_graph.KGqueryGraph") {
             html += `<span class="popupMenuItem" onclick="KGquery_graph.exportVisjsGraph();">JSON</span>`;
-        }
+             }
         if (visjsGraph == "Lineage_whiteboard.graph") {
             html += `<span class="popupMenuItem" onclick="Lineage_whiteboard.graph.exportWhiteboard();">JSON</span>`;
         }
@@ -550,6 +552,18 @@ fixedColumns: true*/
         link.click();
         document.body.removeChild(link);
         URL.revokeObjectURL(link.href);
+    };
+
+    self.downloadText = function (text, fileName) {
+
+        const blob = new Blob([text], { type: "text/plain; charset=utf-8" });
+        const link = document.createElement("a");
+
+        link.href = URL.createObjectURL(blob);
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     };
 
     /**

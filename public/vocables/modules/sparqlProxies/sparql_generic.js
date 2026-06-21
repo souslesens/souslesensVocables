@@ -1496,6 +1496,9 @@ var Sparql_generic = (function () {
                     // processedParents guards against cycles (e.g. OWL reflexive subClassOf triples materialized by reasoner)
                     var processedParents = {};
                     function buildParentChain(nodeId) {
+                      if(self.processedParents[nodeId])
+                          return []
+                        self.processedParents[nodeId]=1
                         var obj = allClassesMap[nodeId];
                         if (!obj || obj._chainBuilt) return obj ? obj.parents : [];
                         if (processedParents[nodeId]) return [];
@@ -1505,7 +1508,7 @@ var Sparql_generic = (function () {
                         obj._chainBuilt = true;
                         return obj.parents;
                     }
-
+                    self.processedParents={}
                     for (var key in allClassesMap) {
                         buildParentChain(key);
                         delete allClassesMap[key]._directParents;

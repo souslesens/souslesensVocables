@@ -883,7 +883,8 @@ var TripleFactory = (function () {
             var toMappingNode = self.columnsMap[edge.to];
             var toClassNode = classNodesMap[edge.to];
             if (fromMappingNode && toMappingNode) {
-                var label = fromMappingNode.label + "-" + edge.label + "->" + toMappingNode.label;
+                var jstreeEdgeLabel = edge.label === "a" ? "rdf:type" : edge.label;
+                var label = fromMappingNode.label + "-" + jstreeEdgeLabel + "->" + toMappingNode.label;
                 treeData.push({
                     id: edge.id,
                     text: label,

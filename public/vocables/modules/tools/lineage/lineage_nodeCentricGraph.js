@@ -24,7 +24,10 @@ var Lineage_nodeCentricGraph = (function () {
      * @returns {object} nodes: newNodes, edges: newEdges, hierarchical sub‑graph
      * (nodes with level, and the traversed edges)
      */
-    self.getHierarchicalViewVisjsdata = function (rootNodeId) {
+    self.getHierarchicalViewVisjsdata = function (rootNodeId,options) {
+        if(!options){
+            options={}
+        }
         var edgesFromMap = {};
         var edgesToMap = {};
         var nodesMap = {};
@@ -54,7 +57,8 @@ var Lineage_nodeCentricGraph = (function () {
             if (!existingNodes[nodeId]) {
                 existingNodes[nodeId] = 1;
                 nodesMap[nodeId].level = level;
-                newNodes.push(nodesMap[nodeId]);
+                var node = nodesMap[nodeId]
+                newNodes.push(node);
                 var edges = edgesFromMap[nodeId];
                 if (edges) {
                     edges.forEach(function (edge) {
@@ -68,12 +72,26 @@ var Lineage_nodeCentricGraph = (function () {
 
                 //relations inverses
                 edges = edgesToMap[nodeId];
-                if (false && edges) {
+                if (options.inverse && edges) {
                     edges.forEach(function (edge) {
                         if (!existingNodes[edge.id]) {
                             existingNodes[edge.id] = 1;
                             newEdges.push(edge);
                             recurse(edge.from, level + 1);
+                        }
+                    });
+                }
+
+                // subClassOf or rdftype
+                if (edges) {
+                    edges.forEach(function (edge) {
+                        var nodeTo = nodesMap[edge.to]
+                        if (edge.data && edge.data.type == "parent") {
+                            if (!existingNodes[edge.id]) {
+                                existingNodes[edge.id] = 1;
+                                newEdges.push(edge);
+                                recurse(edge.from, level + 1);
+                            }
                         }
                     });
                 }
@@ -91,7 +109,7 @@ var Lineage_nodeCentricGraph = (function () {
             }
         }
 
-        return { nodes: newNodes, edges: newEdges };
+        return {nodes: newNodes, edges: newEdges};
     };
 
     /**
@@ -163,7 +181,7 @@ var Lineage_nodeCentricGraph = (function () {
     self.listAllNodeRelations = function (rootNodeId) {
         var nodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
         var edges = Lineage_whiteboard.lineageVisjsGraph.data.edges.get();
-        var visjsData = { nodes: nodes, edges: edges };
+        var visjsData = {nodes: nodes, edges: edges};
 
         GraphPaths_bot.start(visjsData, rootNodeId, null);
 
@@ -172,6 +190,96 @@ var Lineage_nodeCentricGraph = (function () {
         common.copyTextToClipboard(str);
 
         return;
+    };
+
+
+    /**
+     * provides a text of the tree calculated from a root node
+     */
+    self.exportVisjsGraphTreeText = function () {
+        var rootNode = Lineage_whiteboard.currentGraphNode;
+        if (!rootNode) {
+            return alert("select a node as root for the tree and do it again")
+        }
+
+        var hierarchicalVisjsData = self.getHierarchicalViewVisjsdata(rootNode.id,{inverse:1});
+
+        var edgesFromMap = {}
+        var nodesMap = {}
+
+        var visitedNodes={}
+
+        hierarchicalVisjsData.nodes.forEach(function (node) {
+            nodesMap[node.id] = node
+
+        })
+        hierarchicalVisjsData.edges.forEach(function (edge) {
+            if (!edgesFromMap[edge.from]) {
+                edgesFromMap[edge.from] = []
+            }
+            edgesFromMap[edge.from].push(edge)
+
+
+
+
+           // if(edge.data && edge.data.type=="parent"){
+                if(edge.data ){
+                if (!edgesFromMap[edge.to]) {
+                    edgesFromMap[edge.to] = []
+                }
+                edgesFromMap[edge.to].push({
+                    from:edge.to,
+                    to:edge.from,
+                    data:edge.data,
+                    id:common.getRandomHexaId(6),
+                    label:edge.label
+                })
+                    if(edge.data.type!=="parent")
+                    nodesMap[edge.to].data.relation=edge.label
+            }else{
+                nodesMap[edge.to].data.relation=edge.label
+            }
+        })
+
+        if (!nodesMap[rootNode.id]) {
+            return alert("select a node as root for the tree and do it again")
+        }
+
+        var nl=String.fromCharCode(10)
+        var str=rootNode.label+nl
+        function recurse(x, nodeId,parentNode) {
+            str += "│"
+            var node = nodesMap[nodeId]
+            for (var i = 0; i < node.level; i++) {
+                str += " "
+            }
+            if(parentNode && parentNode.data){
+                node.data.label= node.data.label.replace(parentNode.data.label,"")
+            }
+            var label=node.data.label
+            if(node.data.relation)
+                label="["+node.data.relation+"]──>"+label
+            str +="├──" +label + nl
+
+            if (edgesFromMap[nodeId]){
+                edgesFromMap[nodeId].forEach(function (edge) {
+                    if (!visitedNodes[edge.to]) {
+
+                        if(nodesMap[edge.to]) {
+                            visitedNodes[edge.to] = 1
+                            recurse(str, edge.to, node)
+                        }
+                }
+                })
+        }
+
+console.log(str)
+        }
+        var text = recurse("", rootNode.id)
+        var fileName = rootNode.data.source + "_" + rootNode.data.label + "_tree.txt"
+        Export.downloadJSON(str, fileName);
+
+
     };
 
     return self;

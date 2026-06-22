@@ -54,7 +54,7 @@ export type Msg =
     | { type: "sources"; payload: RD<string, ServerSource[]> }
     | { type: "users"; payload: RD<string, User[]> };
 
-type EditionTab = "settings" | "users" | "profiles" | "sources" | "databases" | "plugins" | "logs";
+export type EditionTab = "settings" | "users" | "profiles" | "sources" | "databases" | "plugins" | "logs";
 
 const initialModel: Model = {
     users: loading(),
@@ -76,6 +76,8 @@ const initialModel: Model = {
 };
 
 const ModelContext = createContext<{ model: Model; updateModel: Dispatch<Msg> } | null>(null);
+
+export { ModelContext };
 
 export function useModel() {
     const modelContext = useContext(ModelContext);

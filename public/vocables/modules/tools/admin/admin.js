@@ -594,6 +594,14 @@ $("#sourceDivControlPanelDiv").html(html);*/
     self.manageAnnotationTemplateAssignments = function () {
         return AdminAnnotationPropertiesTemplate.openAssignmentsManager();
     };
+
+    self.showLogs = function () {
+        $("#mainDialogDiv").load("modules/tools/admin/logsDialog.html", function () {
+            UI.openDialog("mainDialogDiv", { title: "Logs", width: 1200, height: 800 });
+            window.LogsTableModal.open();
+        });
+    };
+
     return self;
 })();
 

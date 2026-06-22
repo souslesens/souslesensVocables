@@ -77,6 +77,8 @@ const initialModel: Model = {
 
 const ModelContext = createContext<{ model: Model; updateModel: Dispatch<Msg> } | null>(null);
 
+export { ModelContext };
+
 export function useModel() {
     const modelContext = useContext(ModelContext);
     if (modelContext === null) {

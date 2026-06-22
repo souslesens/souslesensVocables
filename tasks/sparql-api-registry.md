@@ -1,90 +1,127 @@
-# Exposer les requêtes SPARQL en API Swagger — l'idée
+# Exposer les requêtes SPARQL en API Swagger
 
-## Problème
+> Document de conception, à valider. L'objectif est de transformer les fonctions de requêtes SPARQL du frontend en véritables routes d'API REST, nommées et documentées, sans réécrire la logique existante.
 
-Les ~128 fonctions de requêtes (`getNodeChildren`, `getNodeInfos`, `getObjectProperties`...) vivent dans le **frontend** (`public/vocables/modules/sparqlProxies/`). Chacune construit une string SPARQL et l'envoie au backend via **un seul** endpoint générique (`/api/v1/sparqlProxy`) qui relaie du SPARQL brut.
 
-→ Aucune de ces requêtes n'est exposée ni documentée individuellement. Un consommateur d'API ne voit que « envoie-moi du SPARQL ».
+Aujourd'hui, environ 128 fonctions de requêtes (`getNodeChildren`, `getNodeInfos`, `getObjectProperties`, etc.) sont définies dans le **frontend**, dans le répertoire `public/vocables/modules/sparqlProxies/`.
 
-## Objectif
+Chacune de ces fonctions construit une chaîne de caractères SPARQL, puis l'envoie au backend en passant par **un unique endpoint générique** : `/api/v1/sparqlProxy`. Et récupère les résultats en les traitants.
 
-Exposer chaque requête comme une **route REST nommée et documentée** dans Swagger UI — sans dupliquer la logique ni écrire 128 fichiers à la main.
+## 2. L'objectif
 
-## Les 3 briques
+Exposer chaque requête comme une **route REST nommée et documentée** dans Swagger UI.
 
-### 1. Registre déclaratif (source de vérité)
+Deux contraintes fortes encadrent cet objectif :
 
-Un descripteur par requête :
+1. Ne **pas dupliquer** la logique de construction des requêtes (les fonctions du frontend restent la seule source).
+2. Ne **pas écrire 128 fichiers de route à la main** (la documentation et le routage doivent être générés).
+
+## 3. L'approche : trois briques
+
+La solution repose sur trois composants qui s'articulent ensemble.
+
+### Brique 1 — Un registre déclaratif (la source de vérité)
+
+On définit un **descripteur par requête**. C'est un simple objet de configuration qui décrit la fonction :
 
 ```js
 {
   name: "getNodeChildren",
   module: "Sparql_OWL",
   description: "...",
-  params: [ { name: "source", type: "string", required: true }, ... ],
+  params: [
+    { name: "source", type: "string", required: true },
+    // ... autres paramètres
+  ],
   responseSchema: "#/definitions/SparqlQueryResponse",
   expose: true
 }
 ```
 
-Le registre alimente **les deux** sorties à partir d'une seule définition :
-- génération des `apiDoc.paths` → Swagger montre N routes détaillées ;
-- validation des params + routage de l'exécution.
+À partir de cette **unique définition**, le registre alimente **deux sorties distinctes** :
 
-> Registre ≠ une route générique unique. C'est la **donnée** à partir de laquelle on génère N routes nommées distinctes. `express-openapi` accepte un `apiDoc` pré-rempli.
+- la **génération de la documentation** (`apiDoc.paths`), pour que Swagger affiche N routes détaillées et lisibles ;
+- la **validation des paramètres** entrants et le **routage** vers la bonne fonction lors de l'exécution.
 
-### 2. Génération auto du registre (AST + JSDoc)
+> **Point important à ne pas confondre :** le registre n'est *pas* une route générique unique déguisée. C'est la **donnée** à partir de laquelle on génère N routes nommées bien distinctes. La librairie `express-openapi` sait justement accepter un objet `apiDoc` pré-rempli, ce qui rend cette génération possible.
 
-On extrait le squelette du registre par parsing statique des fichiers frontend :
+### Brique 2 — La génération automatique du registre (AST + JSDoc)
 
-| Donnée | Source | Couverture |
+Remplir 128 descripteurs à la main serait fastidieux et vite désynchronisé du code. On génère donc le **squelette du registre** automatiquement, par **analyse statique** des fichiers du frontend (sans exécuter le code).
+
+Voici ce qu'on peut extraire, et avec quelle fiabilité :
+
+| Donnée extraite | Source | Couverture |
 |---|---|---|
-| Nom de fonction, params, arité, position du `callback` | AST | **100%** |
-| Description (fonction + params) | JSDoc | **~1/3** (JSDoc partielle) |
-| Types, schéma de sortie, exemples | — | absent → défauts |
+| Nom de la fonction, paramètres, arité, position du `callback` | Analyse de l'AST | **100 %** |
+| Description, types précis, schéma de la réponse, exemples, drapeau `expose` | Commentaires JSDoc enrichis | dépend de la JSDoc écrite sur chaque fonction |
 
-Outils : `acorn`/`espree` (AST, cible `self.NAME = function`) + `comment-parser` (JSDoc lâches).
+Outils envisagés : `acorn` ou `espree` pour l'analyse de l'AST (en ciblant le motif `self.NOM = function`), et `comment-parser` pour lire les blocs JSDoc, même incomplets.
 
-**Hybride** : l'auto-génération garantit la **complétude** (jamais désync sur noms/params) et **signale les fonctions sans JSDoc**. Une couche d'**override manuel léger** ajoute ce que la JSDoc ne porte pas (types, schéma de réponse, exemples, flag `expose`).
+**Tout passe par la JSDoc.** Pas de fichier d'override séparé : toute l'information complémentaire (types, schéma de réponse, exemples, `expose`) vit dans le bloc JSDoc, à côté de la fonction. La JSDoc supporte déjà nativement les types (`@param {string}`), et des **tags personnalisés** portent le reste, lus par `comment-parser` :
+
+```js
+/**
+ * Récupère les enfants directs d'un nœud.
+ * @param {string} source - nom de la source
+ * @param {string} nodeId - URI du nœud parent
+ * @responseSchema #/definitions/SparqlQueryResponse
+ * @example getNodeChildren("ISO_15926", "http://...")
+ * @expose
+ */
+self.getNodeChildren = function (source, nodeId, options, callback) { ... }
+```
+
+Ainsi :
+
+- l'**AST garantit la complétude** : le registre ne peut jamais être désynchronisé du code sur les noms et les paramètres, et il **signale les fonctions dépourvues de JSDoc** ;
+- la **JSDoc est la seule source du complément** : enrichir une fonction = éditer son bloc JSDoc, au même endroit que le code. Source unique, pas de second fichier à maintenir.
 
 ```
-AST + JSDoc ──> squelette auto (complet, jamais désync)
-   override  ──> types, responseSchema, examples, expose
+AST       ──> noms, params, arité (complet, jamais désynchronisé)
+JSDoc     ──> description, types, responseSchema, examples, expose
         ▼
    registre final ──> apiDoc.paths  +  validation
 ```
 
-### 3. Exécution via remoteCodeRunner (réutilise le code frontend)
+### Brique 3 — L'exécution via remoteCodeRunner (réutilise le code frontend)
 
-`bin/remoteCodeRunner.js` fait déjà tourner du code frontend dans Node : mocke `window`/`$`, route `$.ajax` vers `/sparqlProxy`, charge `Config`+sources, applique `UserRequestFiltering` (contrôle d'accès préservé).
+Le fichier `bin/remoteCodeRunner.js` sait **déjà** faire tourner du code frontend à l'intérieur de Node. Pour cela, il :
 
-→ La route appelle directement `Sparql_OWL.getNodeChildren(...)` **tel quel**. Zéro réécriture des query-builders.
+- mocke `window` et `$` (jQuery) ;
+- redirige les appels `$.ajax` vers `/sparqlProxy` ;
+- charge la configuration `Config` et les sources ;
+- applique `UserRequestFiltering`, ce qui **préserve le contrôle d'accès**.
 
-**3 blockers à régler avant usage en API :**
-1. **Concurrence** — globals module-level (`activeCallback`, `currentUserContext`) non sûrs en concurrent → refactorer en contexte par appel. *(non négociable)*
-2. **Garde plugins-only** — `runUserDataFunction` refuse les chemins hors `plugins/` → ajouter une méthode `runVocablesFn` autorisée sur `public/vocables/modules/`.
-3. **Mocks fragiles** — `$`/`document`/`vis` sont des stubs → n'exposer que les fonctions « pures requête » (`expose: true`).
+Concrètement, la route d'API pourra donc appeler directement `Sparql_OWL.getNodeChildren(...)` **tel quel**, sans aucune réécriture des fonctions de construction de requêtes.
 
-## Schéma global
+Trois points bloquants doivent toutefois être réglés avant de pouvoir s'en servir dans une API :
+
+1. **La concurrence.** Le code utilise actuellement des variables globales au niveau du module (`activeCallback`, `currentUserContext`). Elles ne sont pas sûres en contexte concurrent (plusieurs appels simultanés se marcheraient dessus). Il faut les refactorer en un **contexte propre à chaque appel**. *(Point non négociable.)*
+2. **La garde « plugins uniquement ».** La fonction `runUserDataFunction` refuse aujourd'hui tout chemin situé hors du répertoire `plugins/`. Il faut ajouter une méthode `runVocablesFn` qui autorise l'exécution de code situé dans `public/vocables/modules/`.
+
+
+## 4. Schéma d'ensemble
 
 ```
 registre (auto AST+JSDoc + override)
-   ├──> apiDoc.paths        → Swagger: N routes nommées et documentées
-   ├──> validation params
+   ├──> apiDoc.paths        → Swagger : N routes nommées et documentées
+   ├──> validation des paramètres
    └──> route /query/:name  → runVocablesFn(module, fn, params, userCtx)
-                                   └──> exec réelle des fns frontend (remoteCodeRunner)
+                                   └──> exécution réelle des fonctions frontend
+                                        (via remoteCodeRunner)
 ```
 
-## Pourquoi cette approche
+## 5. Pourquoi cette approche
 
-- **DRY** : les query-builders restent à un seul endroit, jamais réécrits.
-- **Complétude garantie** : le registre auto suit le code, pas de dérive.
-- **Doc native** : N routes détaillées dans Swagger UI existant, pas un proxy opaque.
-- **Sécurité préservée** : filtrage d'accès SPARQL déjà câblé dans remoteCodeRunner.
+- **DRY** : les fonctions de construction de requêtes restent à un seul endroit et ne sont jamais réécrites.
+- **Complétude garantie** : le registre généré suit automatiquement le code ; pas de dérive possible.
+- **Documentation native** : on obtient N routes détaillées dans le Swagger UI déjà en place, au lieu d'un proxy opaque.
+- **Sécurité préservée** : le filtrage des accès SPARQL est déjà câblé dans remoteCodeRunner et reste actif.
 
-## Prochaines étapes
+## 6. Prochaines étapes
 
-1. Extracteur AST+JSDoc → registre JSON réel sur `sparql_OWL.js`.
-2. Trier les fonctions « pures » exposables (`expose: true`).
-3. `runVocablesFn` concurrent-safe (sans globals, sans garde plugins).
-4. Génération `apiDoc.paths` + route `/query/:name` → bout-en-bout sur 2-3 requêtes.
+1. Écrire l'extracteur AST + JSDoc pour produire un premier registre JSON réel à partir de `sparql_OWL.js`.
+2. Identifier et trier les fonctions « pures », celles qui sont réellement exposables (`expose: true`).
+3. Rendre `runVocablesFn` sûr en concurrence (suppression des globales, levée de la garde « plugins uniquement »).
+4. Générer les `apiDoc.paths` et la route `/query/:name`, puis valider la chaîne complète de bout en bout sur 2 ou 3 requêtes.

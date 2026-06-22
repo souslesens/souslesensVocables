@@ -1,4 +1,5 @@
 import { ChangeEvent, useEffect, useMemo, useState } from "react";
+import { createRoot } from "react-dom/client";
 import {
     Alert,
     Box,
@@ -125,8 +126,8 @@ function LogsTableComponent({ logFiles }: { logFiles: LogFiles }) {
     }
 
     return (
-        <Stack direction="column" spacing={{ xs: 2 }} sx={{ m: 4 }} useFlexGap>
-            <Stack direction="row" spacing={{ xs: 2 }} useFlexGap>
+        <Box sx={{ display: "flex", flexDirection: "column", height: "100%", p: 2 }}>
+            <Stack direction="row" spacing={{ xs: 2 }} useFlexGap sx={{ mb: 2 }}>
                 <TextField
                     select
                     id="select-start-period"
@@ -178,7 +179,7 @@ function LogsTableComponent({ logFiles }: { logFiles: LogFiles }) {
                     }}
                 />
             </Stack>
-            <TableContainer sx={{ height: "400px" }} component={Paper}>
+            <TableContainer sx={{ flex: 1, minHeight: 0 }} component={Paper}>
                 <Table stickyHeader>
                     <TableHead>
                         <TableRow>
@@ -228,11 +229,29 @@ function LogsTableComponent({ logFiles }: { logFiles: LogFiles }) {
                     </TableBody>
                 </Table>
             </TableContainer>
-            <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
+            <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap sx={{ mt: 2 }}>
                 <CsvDownloader filename="logs.csv" datas={memoizedLogs}>
                     <Button variant="outlined">Download CSV</Button>
                 </CsvDownloader>
             </Stack>
-        </Stack>
+        </Box>
     );
 }
+
+declare global {
+    interface Window {
+        LogsTable: {
+            createApp: () => void;
+        };
+    }
+}
+
+window.LogsTable = {
+    createApp: () => {
+        const container = document.getElementById("mount-logs-table-here");
+
+        const root = createRoot(container!);
+        root.render(<LogsTable />);
+        return root;
+    },
+};

@@ -17,6 +17,7 @@ export default defineConfig({
                 user_settings: path.resolve(__dirname, "src/user-settings.tsx"),
                 mappingModeler_upload_app: path.resolve(__dirname, "src/mappingModeler-upload-app.tsx"),
                 metadata_dialog: path.resolve(__dirname, "src/Component/MetadataModal.tsx"),
+                logs_table_modal: path.resolve(__dirname, "src/Component/LogsTableModal.tsx"),
             },
             output: {
                 entryFileNames: `assets/[name].js`,

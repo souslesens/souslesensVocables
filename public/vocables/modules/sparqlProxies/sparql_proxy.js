@@ -13,17 +13,41 @@ import Sparql_common from "./sparql_common.js";
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+/**
+ * Sparql_proxy Module
+ * Low-level execution layer for SPARQL queries. Wraps every query in an AJAX call
+ * to the backend `/sparqlProxy` endpoint (which forwards it to the triple store),
+ * handling GET/POST method selection, custom headers, CONSTRUCT vs SELECT response
+ * formats and query history logging. This is the single entry point used by all
+ * higher-level modules (Sparql_OWL, Sparql_SKOS, Sparql_generic) to talk to an endpoint.
+ * @module Sparql_proxy
+ */
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 var Sparql_proxy = (function () {
     var self = {};
     self.queriesHistory = {};
 
     /**
-     * @param {string} url - URL of the sparql endpoint to query
-     * @param {string} query - SPARQL query to execute
-     * @param {string} queryOptions - appended to the url
-     * @param {Object} options - options.source is the name of the source being queried
-     * @param {Function} callback - Function called to process the result of the query
+     * Executes a SPARQL query against an endpoint through the backend `/sparqlProxy`.
+     * Resolves the effective endpoint URL (`_default` → main Virtuoso), picks the HTTP
+     * method from the source config (`sparql_server.method`), sets the `Accept` header
+     * (`application/sparql-results+json` for SELECT/ASK, `text/turtle` for CONSTRUCT),
+     * prepends basic vocabulary prefixes and posts the query. The query itself is passed
+     * in by the caller; this function does not build SPARQL, only transports it.
+     * @function
+     * @name querySPARQL_GET_proxy
+     * @memberof module:Sparql_proxy
+     * @param {string} url - URL of the SPARQL endpoint to query (`_default` resolves to `Config.sparql_server.url`)
+     * @param {string} query - SPARQL query string to execute (SELECT, ASK, CONSTRUCT, INSERT, DELETE)
+     * @param {string} queryOptions - Extra URL parameters appended to the endpoint URL
+     * @param {Object} options - Execution options
+     * @param {string} [options.source] - Source name used to look up `Config.sources[source]` (endpoint, method, headers)
+     * @param {string} [options.acceptHeader] - Overrides the `Accept` header sent to the endpoint
+     * @param {boolean} [options.dontCacheCurrentQuery] - When true, does not store the query in `self.currentQuery`
+     * @param {string} [options.caller] - Key under which the query body is pushed into `self.queriesHistory`
+     * @param {Function} callback - Error-first callback `(err, result)`; `result` is the parsed JSON (`result.results.bindings`) or raw turtle for CONSTRUCT
+     * @returns {void}
      */
     self.querySPARQL_GET_proxy = function (url, query, queryOptions, options, callback) {
         if (!options) {
@@ -203,6 +227,17 @@ query=query.replace(/GRAPH ?[a-zA-Z0-9]+\{/,"{")
         });
     };
 
+    /**
+     * Exports the full content of a source's named graph as Turtle and copies it to the clipboard.
+     * Runs `CONSTRUCT { ?s ?p ?o } WHERE { GRAPH <graphUri> { ?s ?p ?o } }` against the source
+     * endpoint with an `application/x-nice-turtle` Accept header, then writes the returned turtle
+     * to the clipboard via {@link module:common}.
+     * @function
+     * @name exportGraph
+     * @memberof module:Sparql_proxy
+     * @param {string} source - Source name whose `graphUri` and `sparql_server.url` are read from `Config.sources`
+     * @returns {void}
+     */
     self.exportGraph = function (source) {
         var graphUri = Config.sources[source].graphUri;
         var graphUriStr = "";
@@ -254,6 +289,19 @@ query=query.replace(/GRAPH ?[a-zA-Z0-9]+\{/,"{")
         });
     };
 
+    /**
+     * Promise-based wrapper around {@link module:Sparql_proxy.querySPARQL_GET_proxy} for
+     * callers using async/await instead of error-first callbacks. Resolves with the query
+     * result, rejects with the error.
+     * @function
+     * @name executeAsyncQuery
+     * @memberof module:Sparql_proxy
+     * @param {string} url - URL of the SPARQL endpoint to query
+     * @param {string} query - SPARQL query string to execute
+     * @param {string} queryOptions - Extra URL parameters appended to the endpoint URL
+     * @param {Object} options - Execution options (see {@link module:Sparql_proxy.querySPARQL_GET_proxy})
+     * @returns {Promise<Object>} Resolves with the parsed query result, rejects with the error
+     */
     self.executeAsyncQuery = async function (url, query, queryOptions, options) {
         let promise = new Promise(function (resolve, reject) {
             self.querySPARQL_GET_proxy(url, query, queryOptions, options, function (err, result) {
@@ -268,6 +316,16 @@ query=query.replace(/GRAPH ?[a-zA-Z0-9]+\{/,"{")
         return promise;
     };
 
+    /**
+     * Injects a `FROM <labelsGraphUri>` clause into a query when it references any
+     * `?xxxLabel` variable, so the dedicated labels graph is searched alongside the data.
+     * Returns the query unchanged if it has no `WHERE` keyword or no `?...Label` variables.
+     * @function
+     * @name addFromLabelsGraphToQuery
+     * @memberof module:Sparql_proxy
+     * @param {string} query - SPARQL query to augment
+     * @returns {string} The query with a `FROM <Config.labelsGraphUri>` clause inserted before `WHERE`, or the original query if not applicable
+     */
     self.addFromLabelsGraphToQuery = function (query) {
         var p = query.toLowerCase().indexOf("where");
         if (p < 0) {

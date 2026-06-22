@@ -14,8 +14,34 @@ import Sparql_proxy from "./sparql_proxy.js";
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+/**
+ * Sparql_SKOS Module
+ * SKOS controller: builds and runs the SPARQL queries for sources whose `schemaType` is
+ * `"SKOS"`. Navigates thesauri/taxonomies via `skos:broader`/`skos:narrower`, reads labels
+ * through `skos:prefLabel`/`skos:altLabel`, and supports SKOS collections. It is selected per
+ * source through `Config.sources[source].controller` and invoked by {@link module:Sparql_generic};
+ * query building blocks (prefixes, predicates, FROM clause, limit) come from
+ * {@link module:Sparql_generic.getSourceVariables} and execution from {@link module:Sparql_proxy}.
+ * @module Sparql_SKOS
+ */
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 var Sparql_SKOS = (function () {
+    /**
+     * Returns the top concepts of a SKOS source (concept-scheme roots). Runs
+     * `select distinct ?topConcept ?topConceptLabel ... WHERE { <topConceptFilter>
+     * ?topConcept prefLabel ?topConceptLabel. }` ordered by label, optionally restricting to a
+     * language and to concepts reachable from given collections.
+     * @function
+     * @name getTopConcepts
+     * @memberof module:Sparql_SKOS
+     * @param {string} sourceLabel - SKOS source name to query
+     * @param {Object} options - Query options
+     * @param {boolean} [options.noLang] - Skip the preferred-language filter
+     * @param {(string|string[])} [options.filterCollections] - Collection URI(s) the top concepts must belong to
+     * @param {Function} callback - Error-first callback `(err, bindings)` with the top-concept bindings
+     * @returns {void}
+     */
     self.getTopConcepts = function (sourceLabel, options, callback) {
         var sourceVariables = Sparql_generic.getSourceVariables(sourceLabel);
         var query = "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>";
@@ -40,35 +66,31 @@ var Sparql_SKOS = (function () {
     };
 
     /**
-         *
-         * request example with collection filtering
-         PREFIX  terms:<http://purl.org/dc/terms/> PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX  skos:<http://www.w3.org/2004/02/skos/core#> PREFIX  elements:<http://purl.org/dc/elements/1.1/>  select distinct ?child1,?child1Label, ?subjectLabel,?collLabel  FROM <http://souslesens/thesaurus/TEST/>   WHERE {?child1 skos:broader ?subject.
-
-  ?subject skos:prefLabel ?subjectLabel.
-
-  OPTIONAL{ ?child1 skos:prefLabel ?child1Label. } .filter( ?subject =<http://souslesens/thesaurus/TEST/9d53e3925c>)OPTIONAL{?child1 rdf:type ?child1Type.}
-
-  ?collection skos:member* ?acollection. ?acollection rdf:type skos:Collection.   ?collection skos:prefLabel ?collLabel.  ?acollection skos:prefLabel ?acollLabel.filter (?collection= <http://souslesens/thesaurus/TEST/5d97abb964> )
-   ?acollection skos:member ?aconcept. ?aconcept rdf:type skos:Concept.?aconcept skos:prefLabel ?aconceptLabel.
-  ?childX skos:broader ?aconcept.?childX skos:prefLabel ?childLabel.  ?childX skos:broader* ?child1
-
-}ORDER BY ?child1Label limit 1000
-
-         *
-         * @param
-            sourceLabel
-         * @param
-            words
-         * @param
-            ids
-         * @param
-            descendantsDepth
-         * @param
-            options
-         * @param
-            callback
-         */
-
+     * Returns the children of node(s) down to a given depth in a SKOS hierarchy. Builds nested
+     * `OPTIONAL` blocks chaining `?childN+1 skos:broader ?childN` (up to `optionalDepth`), each
+     * fetching the child's preferred label (optionally language-filtered) and `rdf:type`. The
+     * `ids`/`words` parent filter is required.
+     *
+     * Example (collection-filtered children):
+     * ```sparql
+     * select distinct ?child1 ?child1Label ?subjectLabel
+     * FROM <http://souslesens/thesaurus/TEST/>
+     * WHERE { ?child1 skos:broader ?subject. ?subject skos:prefLabel ?subjectLabel.
+     *         OPTIONAL { ?child1 skos:prefLabel ?child1Label. } filter(?subject = <...>) }
+     * ORDER BY ?child1Label limit 1000
+     * ```
+     * @function
+     * @name getNodeChildren
+     * @memberof module:Sparql_SKOS
+     * @param {string} sourceLabel - SKOS source name to query
+     * @param {(string|string[])} words - Label word(s) identifying the parent; mutually exclusive with `ids`
+     * @param {(string|string[])} ids - Parent concept URI(s) whose children are fetched
+     * @param {number} descendantsDepth - Number of `skos:broader` levels to expand (capped at `optionalDepth`)
+     * @param {Object} [options] - Query options
+     * @param {boolean} [options.noLang] - Skip the language filter on labels
+     * @param {Function} callback - Error-first callback `(err, bindings)` with the children, label-enriched and sorted by `child1Label`
+     * @returns {void}
+     */
     self.getNodeChildren = function (sourceLabel, words, ids, descendantsDepth, options, callback) {
         $("#waitImg").css("display", "block");
 
@@ -128,6 +150,21 @@ var Sparql_SKOS = (function () {
         });
     };
 
+    /**
+     * Returns the concepts belonging to a SKOS collection (and their `skos:broader` links). With
+     * no collection, lists all non-collection subjects; with a collection URI, walks
+     * `?collection skos:member* ?acollection` to the target collection and returns its members'
+     * concepts with their preferred labels (filtered to English).
+     * @function
+     * @name getCollectionNodes
+     * @memberof module:Sparql_SKOS
+     * @param {string} sourceLabel - SKOS source name to query
+     * @param {string} collection - Collection URI whose member concepts are fetched (empty = all concepts)
+     * @param {Object} [options] - Query options
+     * @param {Object} [options.filter] - `{predicates}` to restrict the predicates returned
+     * @param {Function} callback - Error-first callback `(err, bindings)` with the collection's concept bindings
+     * @returns {void}
+     */
     self.getCollectionNodes = function (sourceLabel, collection, options, callback) {
         $("#waitImg").css("display", "block");
 
@@ -191,6 +228,26 @@ var Sparql_SKOS = (function () {
         });
     };
 
+    /**
+     * Returns the ancestors of node(s) up to a given depth in a SKOS hierarchy. Builds nested
+     * `OPTIONAL` blocks chaining `?broaderN-1 skos:broader ?broaderN` (up to `optionalDepth`),
+     * each fetching the broader concept's preferred label and type. Can search alt labels and
+     * exclude collection-only branches.
+     * @function
+     * @name getNodeParents
+     * @memberof module:Sparql_SKOS
+     * @param {string} sourceLabel - SKOS source name to query
+     * @param {(string|string[])} words - Label word(s) identifying the start node; mutually exclusive with `ids`
+     * @param {(string|string[])} ids - Start concept URI(s) whose ancestors are fetched
+     * @param {number} ancestorsDepth - Number of `skos:broader` levels to climb (capped at `optionalDepth`)
+     * @param {Object} [options] - Query options
+     * @param {boolean} [options.noLang] - Skip the language filter on labels
+     * @param {boolean} [options.searchAltLabels] - Also match `skos:altLabel` on the start node
+     * @param {(string|string[])} [options.filterCollections] - Exclude ancestors that are members of these collections
+     * @param {number} [options.limit] - Result limit (defaults to `Config.queryLimit`)
+     * @param {Function} callback - Error-first callback `(err, bindings)` with the ancestor bindings
+     * @returns {void}
+     */
     self.getNodeParents = function (sourceLabel, words, ids, ancestorsDepth, options, callback) {
         $("#waitImg").css("display", "block");
 
@@ -259,6 +316,21 @@ var Sparql_SKOS = (function () {
         });
     };
 
+    /**
+     * Returns all triples (`?id ?prop ?value`) describing a concept. Delegates to a non-SKOS
+     * controller when the source's `controllerName` is not `Sparql_SKOS`. Can also fetch
+     * value/property labels and restrict to a given property.
+     * @function
+     * @name getNodeInfos
+     * @memberof module:Sparql_SKOS
+     * @param {string} sourceLabel - Source name to query
+     * @param {(string|string[])} conceptId - Concept URI(s) to describe
+     * @param {Object} [options] - Query options
+     * @param {(string|string[])} [options.propertyFilter] - Restrict to these property URIs
+     * @param {boolean} [options.getValuesLabels] - Also fetch `skos:prefLabel` of values and properties
+     * @param {Function} callback - Error-first callback `(err, bindings)` with the concept's triples
+     * @returns {void}
+     */
     self.getNodeInfos = function (sourceLabel, conceptId, options, callback) {
         $("#waitImg").css("display", "block");
         if (!options) options = {};
@@ -288,6 +360,20 @@ var Sparql_SKOS = (function () {
         });
     };
 
+    /**
+     * Returns all concept items of a SKOS source with their preferred labels. Delegates to a
+     * non-SKOS controller when applicable. Supports an extra filter, a language filter, and
+     * restriction to members of given collections.
+     * @function
+     * @name getItems
+     * @memberof module:Sparql_SKOS
+     * @param {string} sourceLabel - Source name to query
+     * @param {Object} [options] - Query options
+     * @param {string} [options.filter] - Extra SPARQL pattern appended to the WHERE clause
+     * @param {(string|string[])} [options.filterCollections] - Collection URI(s) the items must belong to
+     * @param {Function} callback - Error-first callback `(err, bindings)` with the item bindings
+     * @returns {void}
+     */
     self.getItems = function (sourceLabel, options, callback) {
         $("#waitImg").css("display", "block");
         if (!options) {
@@ -327,6 +413,18 @@ var Sparql_SKOS = (function () {
 
     /*******************************************end basic requests (mode read) **************************************************************/
 
+    /**
+     * Returns the full ancestor chain of a concept via the transitive closure
+     * `?subject skos:broader* ?broader`, fetching each broader concept's label and type.
+     * Falls back to top concepts for non-SKOS sources.
+     * @function
+     * @name getSingleNodeAllGenealogy
+     * @memberof module:Sparql_SKOS
+     * @param {string} sourceLabel - Source name to query
+     * @param {string} id - Concept URI whose ancestors are fetched
+     * @param {Function} callback - Error-first callback `(err, bindings)` with the ancestor bindings
+     * @returns {void}
+     */
     self.getSingleNodeAllGenealogy = function (sourceLabel, id, callback) {
         if (Config.sources[sourceLabel].controllerName != "Sparql_SKOS") {
             Config.sources[sourceLabel].controller.getTopConcepts(sourceLabel, { source: sourceLabel }, function (err, result) {
@@ -361,6 +459,18 @@ var Sparql_SKOS = (function () {
         });
     };
 
+    /**
+     * Returns the full set of descendants of a concept via the transitive closure over inverse
+     * broader / narrower predicates (`?subject ^skos:broader*|skos:narrower* ?narrower`),
+     * fetching each descendant's label and type.
+     * @function
+     * @name getSingleNodeAllDescendants
+     * @memberof module:Sparql_SKOS
+     * @param {string} sourceLabel - Source name to query
+     * @param {string} id - Concept URI whose descendants are fetched
+     * @param {Function} callback - Error-first callback `(err, bindings)` with the descendant bindings
+     * @returns {void}
+     */
     self.getSingleNodeAllDescendants = function (sourceLabel, id, callback) {
         var sourceVariables = Sparql_generic.getSourceVariables(sourceLabel);
 
@@ -391,6 +501,16 @@ var Sparql_SKOS = (function () {
         });
     };
 
+    /**
+     * Fetches the preferred label and `rdf:type` of a single concept, optionally language-filtered.
+     * @function
+     * @name getNodeLabel
+     * @memberof module:Sparql_SKOS
+     * @param {string} sourceLabel - Source name to query
+     * @param {string} id - Concept URI whose label is fetched
+     * @param {Function} callback - Error-first callback `(err, bindings)` with the label/type bindings
+     * @returns {void}
+     */
     self.getNodeLabel = function (sourceLabel, id, callback) {
         var sourceVariables = Sparql_generic.getSourceVariables(sourceLabel);
         var query = "";
@@ -418,6 +538,17 @@ var Sparql_SKOS = (function () {
         });
     };
 
+    /**
+     * Fetches every outgoing triple for a list of subjects, batching the ids into slices of
+     * 2000 (`?subject ?prop ?value. FILTER(?subject in (...))`) and concatenating results.
+     * @function
+     * @name getNodesAllTriples
+     * @memberof module:Sparql_SKOS
+     * @param {string} sourceLabel - Source name to query
+     * @param {string[]} subjectIds - Subject URIs whose triples are fetched
+     * @param {Function} callback - Error-first callback `(err, triples)` with the concatenated triple bindings
+     * @returns {void}
+     */
     self.getNodesAllTriples = function (sourceLabel, subjectIds, callback) {
         var sourceVariables = Sparql_generic.getSourceVariables(sourceLabel);
         var sliceSize = 2000;
@@ -448,6 +579,20 @@ var Sparql_SKOS = (function () {
         );
     };
 
+    /**
+     * Deletes triples matching a subject/predicate/object pattern from the source's named graph
+     * (`with <graphUri> DELETE { ?s ?p ?o } WHERE { ?s ?p ?o <filters> }`), each component
+     * contributing a `Sparql_common.getUriFilter` clause.
+     * @function
+     * @name deleteTriples
+     * @memberof module:Sparql_SKOS
+     * @param {string} sourceLabel - Source name whose graph is edited
+     * @param {string} subjectUri - Subject URI to match (optional)
+     * @param {string} predicateUri - Predicate URI to match (optional)
+     * @param {string} objectUri - Object URI to match (optional)
+     * @param {Function} callback - Error-first callback `(err, bindings)`
+     * @returns {void}
+     */
     self.deleteTriples = function (sourceLabel, subjectUri, predicateUri, objectUri, callback) {
         if (!subjectUri && !subjectUri && !subjectUri) return call("no subject predicate and object filter : cannot delete");
 
@@ -467,6 +612,16 @@ var Sparql_SKOS = (function () {
         });
     };
 
+    /**
+     * Serialises a triple descriptor into a SPARQL triple string: URI objects are
+     * angle-bracketed, literals are single-quoted with an optional `@lang` tag. An inverse
+     * predicate (prefixed with `^`) swaps subject and object.
+     * @function
+     * @name triplesObjectToString
+     * @memberof module:Sparql_SKOS
+     * @param {Object} item - Triple descriptor with `subject`, `predicate`, `object`, `valueType`, and optional `sourceVariables.lang`
+     * @returns {string} A single `subject predicate object . ` SPARQL triple string
+     */
     self.triplesObjectToString = function (item) {
         var valueStr = "";
         if (item.valueType == "uri") valueStr = "<" + item.object + ">";
@@ -483,6 +638,18 @@ var Sparql_SKOS = (function () {
         } else return "<" + item.subject + "> <" + item.predicate + "> " + valueStr + ". ";
     };
 
+    /**
+     * Inserts triples into the source's named graph as a single
+     * `WITH GRAPH <graphUri> INSERT DATA { ... }` statement, serialising each triple via
+     * {@link module:Sparql_SKOS.triplesObjectToString}.
+     * @function
+     * @name insertTriples
+     * @memberof module:Sparql_SKOS
+     * @param {string} sourceLabel - Source name whose graph receives the triples
+     * @param {Object[]} triples - Triple descriptor objects to insert
+     * @param {Function} callback - Error-first callback `(err)`
+     * @returns {void}
+     */
     self.insertTriples = function (sourceLabel, triples, callback) {
         var graphUri = Config.sources[sourceLabel].graphUri;
         var insertTriplesStr = "";
@@ -499,6 +666,18 @@ var Sparql_SKOS = (function () {
         });
     };
 
+    /**
+     * Replaces all triples of a subject in the source's graph: deletes every `?s ?p ?o` for the
+     * subject, then inserts the supplied triples, in one combined `WITH GRAPH ... DELETE ... ;
+     * INSERT DATA ...` statement. The subject is taken from the first triple.
+     * @function
+     * @name update
+     * @memberof module:Sparql_SKOS
+     * @param {string} sourceLabel - Source name whose graph is edited
+     * @param {Object[]} triples - Replacement triple descriptors (all sharing the same subject)
+     * @param {Function} callback - Error-first callback `(err)`
+     * @returns {void}
+     */
     self.update = function (sourceLabel, triples, callback) {
         var graphUri = Config.sources[sourceLabel].graphUri;
         var _deleteTriplesStr = "";
@@ -535,6 +714,16 @@ var Sparql_SKOS = (function () {
         });
     };
 
+    /**
+     * Empties the source's named graph by deleting all its triples
+     * (`WITH <graphUri> DELETE { ?s ?p ?o }`).
+     * @function
+     * @name deleteGraph
+     * @memberof module:Sparql_SKOS
+     * @param {string} sourceLabel - Source name whose graph is emptied
+     * @param {Function} callback - Error-first callback `(err)`
+     * @returns {void}
+     */
     self.deleteGraph = function (sourceLabel, callback) {
         var graphUri = Config.sources[sourceLabel].graphUri;
 
@@ -545,6 +734,17 @@ var Sparql_SKOS = (function () {
         });
     };
 
+    /**
+     * Copies a source's entire named graph into another graph using a single SPARQL
+     * `COPY <fromGraph> TO <toGraph>` statement.
+     * @function
+     * @name copyGraph
+     * @memberof module:Sparql_SKOS
+     * @param {string} fromSourceLabel - Source name whose graph is the copy origin
+     * @param {string} toGraphUri - Destination graph URI
+     * @param {Function} callback - Error-first callback `(err)`
+     * @returns {void}
+     */
     self.copyGraph = function (fromSourceLabel, toGraphUri, callback) {
         var fromGraphUri = Config.sources[fromSourceLabel].graphUri;
         var query = " COPY <" + fromGraphUri + "> TO <" + toGraphUri + ">;";
@@ -554,6 +754,19 @@ var Sparql_SKOS = (function () {
         });
     };
 
+    /**
+     * Backfills missing `<field>Type` and `<field>Label` cells for a family of indexed fields
+     * (`field`, `field1` … up to the first gap, max 20) in result bindings. Defaults the type to
+     * `skos:Concept` (or `options.type`) and derives labels from the URI's local name.
+     * @function
+     * @name setBindingsOptionalProperties
+     * @memberof module:Sparql_SKOS
+     * @param {Array<Object>} bindings - Result bindings to enrich in place
+     * @param {string} _field - Base variable name; indexed variants are processed until the first missing one
+     * @param {Object} [options] - Enrichment options
+     * @param {string} [options.type] - Type URI to use instead of the default `skos:Concept`
+     * @returns {Array<Object>} The same bindings with type/label cells filled in
+     */
     self.setBindingsOptionalProperties = function (bindings, _field, options) {
         if (!options) options = {};
         bindings.forEach(function (item) {
@@ -584,6 +797,16 @@ var Sparql_SKOS = (function () {
         return bindings;
     };
 
+    /**
+     * Lists the distinct languages used in a source's `skos:prefLabel` literals, via
+     * `select distinct ?language WHERE { ?p skos:prefLabel ?o. BIND(LANG(?o) AS ?language) }`.
+     * @function
+     * @name getSourceLangsList
+     * @memberof module:Sparql_SKOS
+     * @param {string} sourceLabel - Source name to query
+     * @param {Function} callback - Error-first callback `(err, langs)` with the array of language codes
+     * @returns {void}
+     */
     self.getSourceLangsList = function (sourceLabel, callback) {
         var sourceVariables = Sparql_generic.getSourceVariables(sourceLabel);
         var query =

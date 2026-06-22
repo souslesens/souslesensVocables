@@ -13,6 +13,16 @@ import Lineage_sources from "../tools/lineage/lineage_sources.js";
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+/**
+ * Sparql_common Module
+ * Shared helpers for building SPARQL query fragments and parsing results, used by
+ * every controller (Sparql_OWL, Sparql_SKOS, Sparql_generic). Provides string/URI
+ * escaping, FILTER / VALUES clause builders, `FROM <graph>` clause assembly from a
+ * source and its imports, prefix injection, date filters and source↔graphUri lookups.
+ * It builds SPARQL text fragments; it does not execute queries (that is {@link module:Sparql_proxy}).
+ * @module Sparql_common
+ */
+
 var Sparql_common = (function () {
     var self = {};
     self.withoutImports = false;
@@ -29,6 +39,16 @@ var Sparql_common = (function () {
         return c1 == c2;
     };
 
+    /**
+     * Builds a `FILTER (lang(?var)='xx')` clause restricting a label variable to the
+     * source's preferred language (`Config.sources[source].pref_lang`).
+     * @function
+     * @name getLangFilter
+     * @memberof module:Sparql_common
+     * @param {string} source - Source name used to read `pref_lang`
+     * @param {string} conceptName - Variable name (without `?`) the language filter applies to
+     * @returns {string} A ` FILTER (lang(?conceptName)='lang')` clause, or `""` if the source or `pref_lang` is missing
+     */
     self.getLangFilter = function (source, conceptName) {
         var sourceObj = Config.sources[source];
         if (!sourceObj) {
@@ -41,6 +61,15 @@ var Sparql_common = (function () {
         return " FILTER (lang(?" + conceptName + ")='" + pref_lang + "')";
     };
 
+    /**
+     * Flattens SPARQL JSON result bindings into plain objects, replacing each
+     * `{type, value}` cell with its `.value` string.
+     * @function
+     * @name getBindingsValues
+     * @memberof module:Sparql_common
+     * @param {Array<Object>} bindings - `results.bindings` array from a SPARQL JSON response
+     * @returns {Array<Object>} One plain object per binding, mapping each variable name to its string value
+     */
     self.getBindingsValues = function (bindings) {
         var values = [];
         bindings.forEach(function (item) {
@@ -53,6 +82,30 @@ var Sparql_common = (function () {
         return values;
     };
 
+    /**
+     * Builds a SPARQL restriction clause for a variable, either from a list of identifiers
+     * (URIs/prefixed names/blank nodes) or from a list of label words.
+     * - With `ids`: emits a `FILTER(?var in (...))` / `FILTER(?var = ...)` clause, or a
+     *   `VALUES ?var { ... }` block when `options.values` is set. URIs are deduplicated and
+     *   capped at 100 entries; blank nodes are excluded from `VALUES` (SPARQL 1.1 restriction).
+     * - With `words`: emits a `FILTER(regex(?varLabel, "...", "i"))` clause, or an exact-match
+     *   `FILTER(?varLabel in (...))` / equality when `options.exactMatch` is set.
+     *
+     * Note: although `varName` accepts an array, only the clause for the **first** variable is
+     * returned (the multi-variable joining code is currently unreachable).
+     * @function
+     * @name setFilter
+     * @memberof module:Sparql_common
+     * @param {(string|string[])} varName - Variable name(s) (without `?`) the filter applies to
+     * @param {(string|string[])} ids - Identifier(s) to match; ignored when `words` is provided
+     * @param {(string|string[])} words - Label word(s) to match by regex/exact match
+     * @param {Object} [options] - Filter options
+     * @param {boolean} [options.exactMatch] - Match labels/ids exactly instead of by regex
+     * @param {boolean} [options.values] - Emit a `VALUES` block instead of a `FILTER ... in` clause
+     * @param {(boolean|number)} [options.useFilterKeyWord] - Force `FILTER(... in ...)` form instead of `VALUES` (set automatically; pass `1` to require it)
+     * @param {string} [options.labelSuffix="Label"] - Suffix appended to the variable name for label matching
+     * @returns {string} A SPARQL FILTER/VALUES fragment, or `""` when no ids/words are supplied
+     */
     self.setFilter = function (varName, ids, words, options) {
         if (!options) {
             options = {};
@@ -228,6 +281,15 @@ var Sparql_common = (function () {
         return filter;
     };
 
+    /**
+     * Pretty-prints a SPARQL query by inserting line breaks before the main keywords
+     * (`PREFIX`, `SELECT`, `FROM`, `WHERE`, `LIMIT`) and upper-casing them.
+     * @function
+     * @name formatSparqlQuery
+     * @memberof module:Sparql_common
+     * @param {string} query - SPARQL query to reformat
+     * @returns {string} The query with keywords placed on their own lines
+     */
     self.formatSparqlQuery = function (query) {
         return query.replace(/PREFIX|SELECT|FROM|WHERE|LIMIT/gim, function (value) {
             if (query.indexOf("\n" + value) < 0)
@@ -237,6 +299,20 @@ var Sparql_common = (function () {
         });
     };
 
+    /**
+     * Enriches SPARQL results with property labels: collects the property URIs missing a
+     * `<propVariable>Label`, fetches their labels via {@link module:Sparql_OWL.getObjectProperties}
+     * (using a `setFilter` clause), and injects a literal `<propVariable>Label` cell into each
+     * result row. Falls back to the URI fragment when no label is found.
+     * @function
+     * @name setSparqlResultPropertiesLabels
+     * @memberof module:Sparql_common
+     * @param {string} sourceLabel - Source name queried for the property labels
+     * @param {Array<Object>} SparqlResults - Result bindings to enrich in place
+     * @param {string} propVariable - Variable name holding the property URI (its label goes to `propVariable + "Label"`)
+     * @param {Function} callback - Error-first callback `(err, SparqlResults)` returning the enriched results
+     * @returns {void}
+     */
     self.setSparqlResultPropertiesLabels = function (sourceLabel, SparqlResults, propVariable, callback) {
         if (SparqlResults.length == 0) {
             return callback(null, SparqlResults);
@@ -275,6 +351,20 @@ var Sparql_common = (function () {
         });
     };
 
+    /**
+     * Builds the triple pattern that fetches a variable's `rdfs:label` (optionally also
+     * `skos:prefLabel`) into a `<variable>Label` variable, with a language filter favouring
+     * `Config.default_lang` or untagged literals. Returns a plain pattern, an `OPTIONAL {...}`
+     * block, or a filter-free `OPTIONAL` when the caller already filters on the label variable.
+     * @function
+     * @name getVariableLangLabel
+     * @memberof module:Sparql_common
+     * @param {string} variable - Variable name (without `?`) whose label is fetched into `<variable>Label`
+     * @param {boolean} [optional] - Wrap the pattern in an `OPTIONAL { ... }` block
+     * @param {boolean} [skosPrefLabel] - Also match `skos:prefLabel` in addition to `rdfs:label`
+     * @param {string} [filterStr] - Existing filter string; if it references `<variable>Label`, the language filter is dropped to avoid conflicts
+     * @returns {string} A SPARQL triple pattern (optionally wrapped in `OPTIONAL`) binding the label variable
+     */
     self.getVariableLangLabel = function (variable, optional, skosPrefLabel, filterStr) {
         //lang doesnt ot work whern filter contains var label
 
@@ -342,6 +432,19 @@ var Sparql_common = (function () {
         return str.replace(/\\/g, "\\\\").replace(/"/g, "'").replace(/\n/g, "\\n").replace(/\r/g, "\\r").replace(/\t/g, "\\t");
     }
 
+    /**
+     * Builds a `FILTER` clause matching a variable against URIs, literals and/or Virtuoso
+     * blank nodes (`nodeID://`). A single string-typed `{value, isString, lang, datatype}`
+     * object yields an equality filter with optional language tag or `^^<datatype>`. Arrays
+     * are split into standard values (compared directly, `in (...)` when several) and blank
+     * nodes (compared via `str(?var)`), combined with `||`.
+     * @function
+     * @name getUriFilter
+     * @memberof module:Sparql_common
+     * @param {string} varName - Variable name (without `?`) the filter applies to
+     * @param {(string|string[]|Object)} values - URI/literal string(s), or a `{value, isString, lang, datatype}` literal descriptor
+     * @returns {string} A SPARQL `filter (...)` clause terminated with `.`
+     */
     self.getUriFilter = function (varName, values) {
         if (values.value) {
             if (values.isString) {
@@ -425,10 +528,30 @@ var Sparql_common = (function () {
         return filterStr + ".";
     };
 
+    /**
+     * Alias of {@link module:Sparql_common.formatStringForTriple}.
+     * @function
+     * @name formatString
+     * @memberof module:Sparql_common
+     * @param {string} str - String to escape
+     * @param {boolean} [forUri] - When true, also replace spaces/`-`/`/` with `_` for use in a URI
+     * @returns {?string} The escaped string, or `null` if the input is not a string
+     */
     self.formatString = function (str, forUri) {
         return self.formatStringForTriple(str, forUri);
     };
 
+    /**
+     * Escapes a string so it can be embedded safely as a SPARQL triple literal: trims,
+     * removes backslashes, escapes quotes, newlines, tabs and `$`, normalises `@`→`_` and
+     * non-breaking spaces. With `forUri`, also replaces spaces, hyphens and slashes with `_`.
+     * @function
+     * @name formatStringForTriple
+     * @memberof module:Sparql_common
+     * @param {string} str - String to escape
+     * @param {boolean} [forUri] - When true, also make the string URI-safe (spaces/`-`/`/` → `_`)
+     * @returns {?string} The escaped string, or `null` if the input is falsy/non-string
+     */
     self.formatStringForTriple = function (str, forUri) {
         if (!str || !str.replace) {
             return null;
@@ -458,12 +581,28 @@ var Sparql_common = (function () {
         return str;
     };
 
+    /**
+     * Replaces URL percent-escape sequences (`%xx`) with `_` to produce a clean identifier.
+     * @function
+     * @name formatUrl
+     * @memberof module:Sparql_common
+     * @param {string} str - URL string to clean
+     * @returns {string} The string with `%...` sequences replaced by `_`
+     */
     self.formatUrl = function (str) {
         str = str.replace(/%\d*/gm, "_");
 
         return str;
     };
 
+    /**
+     * Builds a map from graph URI to source name covering a source and all of its imports.
+     * @function
+     * @name getSourceGraphUrisMap
+     * @memberof module:Sparql_common
+     * @param {string} sourceLabel - Source name whose own graph and imports are included
+     * @returns {Object<string,string>} Map keyed by graph URI, valued by source name
+     */
     self.getSourceGraphUrisMap = function (sourceLabel) {
         //set graphUrisMap
         var graphUrisMap = {};
@@ -482,6 +621,16 @@ var Sparql_common = (function () {
         return graphUrisMap;
     };
 
+    /**
+     * Resolves the source name owning a resource URI by stripping the local name (after the
+     * last `#` or `/`) and looking the resulting namespace up among a source's import scope.
+     * @function
+     * @name getSourceFromUri
+     * @memberof module:Sparql_common
+     * @param {string} uri - Resource URI to resolve
+     * @param {string} [mainSource] - Source providing the import scope to search; if omitted, all sources are searched
+     * @returns {?string} The owning source name, or `null` if the URI has no namespace separator
+     */
     self.getSourceFromUri = function (uri, mainSource) {
         var p = uri.lastIndexOf("#");
         if (p < 0) {
@@ -494,6 +643,16 @@ var Sparql_common = (function () {
         return self.getSourceFromGraphUri(uri.substring(0, p + 1), mainSource);
     };
 
+    /**
+     * Given a list of graph URIs, returns the matching source within `mainSource`'s import
+     * scope; defaults to `mainSource` when none of the imports match.
+     * @function
+     * @name getSourceFromGraphUris
+     * @memberof module:Sparql_common
+     * @param {string[]} graphUris - Graph URIs to look up
+     * @param {string} mainSource - Source whose own graph and imports define the search scope
+     * @returns {string} The matching source name, or `mainSource` as fallback
+     */
     self.getSourceFromGraphUris = function (graphUris, mainSource) {
         if (graphUris.indexOf(Config.sources[mainSource].graphUri) > -1) {
             return mainSource;
@@ -514,6 +673,16 @@ var Sparql_common = (function () {
         return targetSource;
     };
 
+    /**
+     * Resolves a single graph URI to its source name. With `mainSource`, searches only that
+     * source plus its imports; without it, searches (and caches) all sources in `Config.sources`.
+     * @function
+     * @name getSourceFromGraphUri
+     * @memberof module:Sparql_common
+     * @param {string} graphUri - Graph URI to resolve
+     * @param {string} [mainSource] - Source defining the import scope; when omitted, all sources are searched via the cached `self.graphUrisMap`
+     * @returns {(string|undefined)} The matching source name, or `undefined` if no source uses that graph
+     */
     self.getSourceFromGraphUri = function (graphUri, mainSource) {
         if (mainSource) {
             if (!Config.sources[mainSource].imports) {
@@ -541,6 +710,15 @@ var Sparql_common = (function () {
         }
     };
 
+    /**
+     * Extracts the local name of a URI: the substring after the last `#`, or after the last
+     * `/` when there is no `#`.
+     * @function
+     * @name getLabelFromURI
+     * @memberof module:Sparql_common
+     * @param {string} id - URI to extract the local name from
+     * @returns {(string|undefined)} The local name, or `undefined` if the input has no `.indexOf` (not a string)
+     */
     self.getLabelFromURI = function (id) {
         if (!id || !id.indexOf) {
             return;
@@ -555,6 +733,16 @@ var Sparql_common = (function () {
         }
     };
 
+    /**
+     * Wraps a SPARQL pattern fragment in a `GRAPH <graphUri> { ... }` block targeting the
+     * source's named graph (looked up in `Config.basicVocabularies` then `Config.sources`).
+     * @function
+     * @name setFilterGraph
+     * @memberof module:Sparql_common
+     * @param {string} source - Source name whose `graphUri` scopes the pattern
+     * @param {string} filter - SPARQL pattern fragment to wrap
+     * @returns {string} The fragment wrapped in `GRAPH <...> {}`, or the unchanged fragment if the source is unknown
+     */
     self.setFilterGraph = function (source, filter) {
         var graphUri;
         if (Config.basicVocabularies[source]) {
@@ -567,6 +755,23 @@ var Sparql_common = (function () {
         return "GRAPH <" + graphUri + "> {" + filter + "}";
     };
 
+    /**
+     * Assembles the `FROM <graphUri>` (or `FROM NAMED <graphUri>`) clauses for a SPARQL query,
+     * covering the source's own graph plus, unless suppressed, all of its imported sources'
+     * graphs. Also honours `Lineage_sources.fromAllWhiteboardSources`, dictionary sources when
+     * `self.includeImports` is set, and any `options.includeSources` / `options.excludeImports`.
+     * This is the canonical way to scope a query to a source and is used pervasively.
+     * @function
+     * @name getFromStr
+     * @memberof module:Sparql_common
+     * @param {string} source - Source name to scope the query to
+     * @param {boolean} [named] - Emit `FROM NAMED` instead of `FROM`
+     * @param {boolean} [withoutImports] - Exclude imported graphs (defaults to `self.withoutImports`)
+     * @param {Object} [options] - Extra scoping options
+     * @param {string[]} [options.excludeImports] - Import source names to skip
+     * @param {(string|string[])} [options.includeSources] - Additional source names whose graphs to add
+     * @returns {string} A concatenation of `FROM`/`FROM NAMED` clauses, `""` when the source has no graph, or `"XXX no graphUri"` when the source is unknown
+     */
     self.getFromStr = function (source, named, withoutImports, options) {
         if (!options) {
             options = {};
@@ -659,6 +864,15 @@ var Sparql_common = (function () {
         return fromStr;
     };
 
+    /**
+     * Formats a date as a SPARQL `"..."^^xsd:dateTime` typed literal.
+     * @function
+     * @name getSparqlDate
+     * @memberof module:Sparql_common
+     * @param {Date} [date] - Date to format; defaults to now
+     * @param {boolean} [withHours] - Include the time component in the RDF string
+     * @returns {string} A `"<rdf-date>"^^xsd:dateTime` literal
+     */
     self.getSparqlDate = function (date, withHours) {
         if (!date) {
             date = new Date();
@@ -673,6 +887,17 @@ var Sparql_common = (function () {
         return str + "^^xsd:dateTime";*/
     };
 
+    /**
+     * Finds which source owns a URI by querying the default server for the named graph
+     * containing it: `SELECT ?g WHERE { graph ?g { <uri> ?p ?o } } LIMIT 1`, then matching
+     * the returned graph URI against `Config.sources`.
+     * @function
+     * @name getSourceFromUriInDefaultServer
+     * @memberof module:Sparql_common
+     * @param {string} uri - Resource URI to locate
+     * @param {Function} callback - Error-first callback `(err, source)`; `source` is the owning source name, or `null` if the URI is in no graph
+     * @returns {void}
+     */
     self.getSourceFromUriInDefaultServer = function (uri, callback) {
         var query = "select ?g where  {graph ?g {<" + uri + "> ?p ?o}} limit 1";
         var graph;
@@ -695,6 +920,16 @@ var Sparql_common = (function () {
         });
     };
 
+    /**
+     * Expands prefixed names (`prefix:local`) in a SPARQL string into full `<uri>` form using
+     * the supplied prefix→namespace map, handling a trailing `.` after the local name.
+     * @function
+     * @name replaceSparqlPrefixByUri
+     * @memberof module:Sparql_common
+     * @param {string} str - SPARQL string containing prefixed names
+     * @param {Object<string,string>} prefixes - Map of prefix to namespace URI
+     * @returns {string} The string with prefixed names replaced by full `<uri>` references
+     */
     self.replaceSparqlPrefixByUri = function (str, prefixes) {
         for (var key in prefixes) {
             prefixes[key] = prefixes[key].replace("<", "");
@@ -711,6 +946,17 @@ var Sparql_common = (function () {
         }
         return str;
     };
+    /**
+     * Builds a SPARQL property-path alternation (`p1|p2|...`) from a list of custom predicates,
+     * optionally appending `^rdfs:member` for member-based hierarchies.
+     * @function
+     * @name getSpecificPredicates
+     * @memberof module:Sparql_common
+     * @param {Object} options - Predicate options
+     * @param {(string|string[])} options.specificPredicates - Predicate(s) to combine into the property path
+     * @param {boolean} [options.memberPredicate] - Append `^rdfs:member` to the path
+     * @returns {?string} The property-path alternation string, or `null` if no `specificPredicates` are provided
+     */
     self.getSpecificPredicates = function (options) {
         var str = " ";
 
@@ -732,6 +978,21 @@ var Sparql_common = (function () {
         return null;
     };
 
+    /**
+     * Builds a SPARQL date-range filter on a variable's `owl:hasValue` date. When only a
+     * start date and a `precision` (sec/min/hour/day/month/year) are given, derives the end
+     * date by widening the start to that precision's boundaries, then emits
+     * `filter(?dateValue >= start)` / `filter(?dateValue <= end)` clauses.
+     * @function
+     * @name setDateRangeSparqlFilter
+     * @memberof module:Sparql_common
+     * @param {string} varName - Variable name (without `?`) carrying the date value
+     * @param {Date} startDate - Range start (mutated when `precision` is used)
+     * @param {Date} [endDate] - Range end; derived from `startDate` + `precision` when omitted
+     * @param {Object} [options] - Filter options
+     * @param {string} [options.precision] - One of `sec`, `min`, `hour`, `day`, `month`, `year` to derive the end date
+     * @returns {string} A SPARQL pattern binding `?dateValue` plus the range `filter(...)` clauses
+     */
     self.setDateRangeSparqlFilter = function (varName, startDate, endDate, options) {
         if (!options) {
             options = {};
@@ -787,6 +1048,23 @@ var Sparql_common = (function () {
         return filter;
     };
 
+    /**
+     * Heuristically decides whether a triple's object should be treated as a string literal,
+     * based mainly on the property name (label/comment/definition/description/example); the
+     * `object`-based branches all fall through to `false`, so the decision is effectively
+     * property-driven.
+     *
+     * Used by the predicate widgets/bots to drive both UI and SPARQL generation: showing String
+     * operators and hiding the vocabulary/class selector (`predicatesSelectorWidget`), quoting the
+     * value in the generated `Filter(...)` (`individualValuefilterWidget`), and formatting the value
+     * as a plain literal rather than a URI/typed literal (`predicates_bot`).
+     * @function
+     * @name isTripleObjectString
+     * @memberof module:Sparql_common
+     * @param {string} property - Property URI or name of the triple
+     * @param {string} [object] - Object value of the triple
+     * @returns {boolean} `true` when the object is a textual literal property, `false` otherwise
+     */
     self.isTripleObjectString = function (property, object) {
         if (property.toLowerCase().indexOf("label") > -1) {
             return true;
@@ -814,6 +1092,16 @@ var Sparql_common = (function () {
         return false;
     };
 
+    /**
+     * Rewrites a SELECT query to declare PREFIX clauses for every namespace used as a full
+     * `<uri>` in the WHERE clause: collects distinct namespaces, assigns generated `ns1`, `ns2`
+     * … prefixes, replaces the full URIs with prefixed names and prepends the PREFIX block.
+     * @function
+     * @name setPrefixesInSelectQuery
+     * @memberof module:Sparql_common
+     * @param {string} query - SELECT query whose WHERE clause contains full `<uri>` references
+     * @returns {string} The query with generated `PREFIX nsN: <...>` declarations and prefixed names in the WHERE clause
+     */
     self.setPrefixesInSelectQuery = function (query) {
         var whereIndex = query.toLowerCase().indexOf("where");
 
@@ -856,6 +1144,15 @@ var Sparql_common = (function () {
         return query;
     };
 
+    /**
+     * Prepends PREFIX declarations for the basic vocabularies (`rdfs`, `rdf`, `owl`) to a query
+     * when they are not already declared before the WHERE clause.
+     * @function
+     * @name addBasicVocabulariesPrefixes
+     * @memberof module:Sparql_common
+     * @param {string} query - SPARQL query to augment
+     * @returns {string} The query with any missing rdfs/rdf/owl PREFIX declarations prepended
+     */
     self.addBasicVocabulariesPrefixes = function (query) {
         var whereIndex = query.toLowerCase().indexOf("where");
         var prefixesStr = query.substring(0, whereIndex);
@@ -872,11 +1169,29 @@ var Sparql_common = (function () {
         return query;
     };
 
+    /**
+     * Parses the integer part of a typed literal value of the form `"42"^^xsd:integer`.
+     * @function
+     * @name getIntFromTypeLiteral
+     * @memberof module:Sparql_common
+     * @param {string} value - Typed literal string (value optionally followed by `^^datatype`)
+     * @returns {number} The integer value parsed from the literal's lexical part
+     */
     self.getIntFromTypeLiteral = function (value) {
         var valueStr = value.split("^")[0];
         return parseInt(valueStr);
     };
 
+    /**
+     * Builds a short prefixed label for a URI of the form `xxx:localName`, where `xxx` is the
+     * first three characters of the source name and `localName` is the URI's local part.
+     * @function
+     * @name getPrefixedLabelFromURI
+     * @memberof module:Sparql_common
+     * @param {string} source - Source name whose first 3 characters form the prefix
+     * @param {string} uri - URI whose local name is used
+     * @returns {string} `"<prefix>:<localName>"`, the bare `uri` if no source, or `""` if no uri
+     */
     self.getPrefixedLabelFromURI = function (source, uri) {
         if (!uri) {
             return "";

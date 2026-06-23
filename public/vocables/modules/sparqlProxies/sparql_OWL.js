@@ -111,6 +111,7 @@ var Sparql_OWL = (function () {
      * @param {(string|string[])} [options.filterCollections] - Restrict to top concepts reachable from these collections
      * @param {Function} callback - Error-first callback `(err, bindings)` with `?topConcept`/`?topConceptLabel`(/`?subjectGraph`)
      * @returns {void}
+     * @expose
      */
     self.getTopConcepts = function (sourceLabel, options, callback) {
         if (!options) {
@@ -220,6 +221,7 @@ var Sparql_OWL = (function () {
      * @param {number} [options.limit] - Result limit (defaults to `Config.queryLimit`)
      * @param {Function} callback - Error-first callback `(err, bindings)` with `?subject`/`?child1…`(labels), label-enriched
      * @returns {void}
+     * @expose
      */
     self.getNodeChildren = function (sourceLabel, words, ids, descendantsDepth, options, callback) {
         if (!options) {
@@ -433,6 +435,7 @@ var Sparql_OWL = (function () {
      * @param {number} [options.limit] - Result limit (defaults to `Config.queryLimit`)
      * @param {Function} callback - Error-first callback `(err, bindings)` with `?prop`/`?value`(/labels/graph)
      * @returns {void}
+     * @expose
      */
     self.getNodeInfos = function (sourceLabel, conceptId, options, callback) {
         if (!options) {

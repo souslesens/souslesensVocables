@@ -54,6 +54,14 @@ var Sparql_proxy = (function () {
             options = {};
         }
 
+        // Short-circuit: return the built query string without executing it.
+        // Triggered by options.returnQueryStr (direct callers) or by server-side
+        // AsyncLocalStorage context set by remoteCodeRunner for the API route.
+        var serverWantsQueryStr = typeof globalThis.__getReturnQueryStr === "function" && globalThis.__getReturnQueryStr();
+        if (options.returnQueryStr === true || serverWantsQueryStr) {
+            return callback(null, { query: query });
+        }
+
         // query=query.replace(/[\n\r]/g," ")
         if (false) {
             query = self.addFromLabelsGraphToQuery(query);

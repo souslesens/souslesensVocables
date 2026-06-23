@@ -1,6 +1,7 @@
 import { register } from "node:module";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { AsyncLocalStorage } from "node:async_hooks";
 import async from "async";
 import httpProxy from "./httpProxy.js";
 import UserRequestFiltering from "./userRequestFiltering.js";
@@ -10,29 +11,25 @@ const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "
 // Register custom loader to remap vocables paths
 register("./remoteCodeRunnerLoader.js", import.meta.url);
 
-// Global variable to store the active callback
-// WARNING: This implementation is NOT safe for concurrent executions.
-// If multiple runUserDataFunction calls overlap, they will share these globals.
-// Consider refactoring to pass context through function parameters if concurrency is needed.
-let activeCallback = null;
+// Per-call context stored here; replaces the old module-level globals.
+// AsyncLocalStorage propagates through the async call chain of a single
+// invocation without leaking into concurrent calls.
+const callContextStorage = new AsyncLocalStorage();
 
-// Global variable to store the current user context for SPARQL filtering
-let currentUserContext = null;
-
-// Global handler to catch ALL unhandled rejections during module execution
+// Global handler for unhandled rejections during module execution.
+// callContextStorage lets us find the right callback even under concurrency.
 process.on("unhandledRejection", (reason, _promise) => {
     console.error("[RemoteCodeRunner] Unhandled rejection caught:", reason);
-    if (activeCallback) {
-        const cb = activeCallback;
-        activeCallback = null;
-        cb(reason instanceof Error ? reason : new Error(String(reason)));
+    const context = callContextStorage.getStore();
+    if (context && context.resolve) {
+        context.resolve(reason instanceof Error ? reason : new Error(String(reason)), null);
     }
 });
 
 /**
  * Format an error for jQuery ajax error callback
- * @param {Error|string} err - The error to format
- * @returns {object} Object with responseText property
+ * @param {Error|string} err
+ * @returns {object}
  */
 function formatAjaxError(err) {
     return { responseText: err.toString ? err.toString() : String(err) };
@@ -40,8 +37,8 @@ function formatAjaxError(err) {
 
 /**
  * Add authentication to params if using default SPARQL server
- * @param {string} sparqlUrl - The SPARQL endpoint URL
- * @param {object} params - The request params to modify
+ * @param {string} sparqlUrl
+ * @param {object} params
  */
 function addSparqlAuth(sparqlUrl, params) {
     if (!globalThis.Config || !globalThis.Config.sparql_server) {
@@ -60,9 +57,9 @@ function addSparqlAuth(sparqlUrl, params) {
 
 /**
  * Handle SPARQL POST request through httpProxy
- * @param {object} data - The request data
- * @param {function} success - Success callback
- * @param {function} error - Error callback
+ * @param {object} data
+ * @param {function} success
+ * @param {function} error
  */
 function handleSparqlPost(data, success, error) {
     const body = JSON.parse(data.body);
@@ -71,6 +68,9 @@ function handleSparqlPost(data, success, error) {
     const params = body.params || {};
 
     addSparqlAuth(sparqlUrl, params);
+
+    const context = callContextStorage.getStore();
+    const userContext = context && context.userContext;
 
     const executeQuery = function (filteredQuery) {
         params.query = filteredQuery;
@@ -83,9 +83,8 @@ function handleSparqlPost(data, success, error) {
         });
     };
 
-    if (currentUserContext && currentUserContext.user && currentUserContext.userSources) {
-        // Filter SPARQL request based on user permissions
-        UserRequestFiltering.filterSparqlRequest(params.query, currentUserContext.userSources, currentUserContext.user, function (parsingError, filteredQuery) {
+    if (userContext && userContext.user && userContext.userSources) {
+        UserRequestFiltering.filterSparqlRequest(params.query, userContext.userSources, userContext.user, function (parsingError, filteredQuery) {
             if (parsingError) {
                 if (error) error({ responseText: "SPARQL filtering error: " + parsingError });
                 return;
@@ -93,16 +92,15 @@ function handleSparqlPost(data, success, error) {
             executeQuery(filteredQuery);
         });
     } else {
-        // No user context, execute without filtering
         executeQuery(params.query);
     }
 }
 
 /**
  * Handle GET request through httpProxy
- * @param {object} data - The request data
- * @param {function} success - Success callback
- * @param {function} error - Error callback
+ * @param {object} data
+ * @param {function} success
+ * @param {function} error
  */
 function handleGetRequest(data, success, error) {
     const getUrl = data.url;
@@ -128,7 +126,7 @@ if (typeof globalThis.window === "undefined") {
         querySelectorAll: () => [],
     };
 
-    // jQuery mock with ajax support that routes to backend code directly
+    // jQuery mock with ajax support that routes to backend code directly (only for sparqlProxy calls)
     const jQueryMock = function (_selector) {
         return { remove: () => {}, html: () => {}, css: () => {}, on: () => {}, off: () => {}, prop: () => {} };
     };
@@ -164,6 +162,13 @@ if (typeof globalThis.window === "undefined") {
     };
     globalThis.MainController = { errorAlert: (err) => console.error("[MainController]", err) };
     globalThis.Sparql_common = { getLabelFromURI: (uri) => uri };
+
+    // Expose a getter so sparql_proxy.js can check the per-call returnQueryStr flag
+    // without a direct Node.js dependency (gracefully absent in browser context).
+    globalThis.__getReturnQueryStr = () => {
+        const context = callContextStorage.getStore();
+        return (context && context.returnQueryStr) === true;
+    };
 }
 
 // Load Config lazily
@@ -229,9 +234,16 @@ async function loadConfig() {
 // async from npm
 globalThis.async = async;
 
+// Mapping from public module name to its file path relative to projectRoot
+const VOCABLES_MODULE_PATHS = {
+    Sparql_OWL: "public/vocables/modules/sparqlProxies/sparql_OWL.js",
+    Sparql_SKOS: "public/vocables/modules/sparqlProxies/sparql_SKOS.js",
+    Sparql_generic: "public/vocables/modules/sparqlProxies/sparql_generic.js",
+};
+
 const RemoteCodeRunner = {
     /**
-     * Execute a user data function with optional user context for request filtering
+     * Execute a user data function with optional user context for request filtering.
      * @param {object} userData - The user data containing modulePath and params
      * @param {object} userContext - Optional user context with user and userSources for SPARQL filtering
      * @param {function} callback - Callback function (err, result)
@@ -267,41 +279,81 @@ const RemoteCodeRunner = {
             return callback(new Error(`Access denied: user does not have rights on plugin '${pluginName}'`));
         }
 
-        // Store user context for $.ajax filtering
-        currentUserContext = userContext;
-
         const params = userData.data_content.params || {};
 
         let callbackCalled = false;
         const safeCallback = (err, result) => {
             if (callbackCalled) return;
             callbackCalled = true;
-            activeCallback = null;
-            // Clear user context after execution
-            currentUserContext = null;
             callback(err, result);
         };
 
-        // Activate global handler for this execution
-        activeCallback = safeCallback;
-
-        // Load Config then the user module
-        loadConfig()
-            .then(() => import(userData.data_content.modulePath))
-            .then((mod) => {
-                try {
-                    const maybePromise = mod.run(params, function (err, result) {
-                        safeCallback(err, result);
-                    });
-                    // If run() returns a Promise, catch any rejection
-                    if (maybePromise && typeof maybePromise.then === "function") {
-                        maybePromise.catch((e) => safeCallback(e));
+        callContextStorage.run({ userContext, returnQueryStr: false, resolve: safeCallback }, () => {
+            // Load Config then the user module
+            loadConfig()
+                .then(() => import(userData.data_content.modulePath))
+                .then((mod) => {
+                    try {
+                        const maybePromise = mod.run(params, function (err, result) {
+                            safeCallback(err, result);
+                        });
+                        // If run() returns a Promise, catch any rejection
+                        if (maybePromise && typeof maybePromise.then === "function") {
+                            maybePromise.catch((e) => safeCallback(e));
+                        }
+                    } catch (e) {
+                        safeCallback(e);
                     }
-                } catch (e) {
-                    safeCallback(e);
-                }
-            })
-            .catch((e) => safeCallback(e));
+                })
+                .catch((e) => safeCallback(e));
+        });
+    },
+
+    /**
+     * Execute a vocables SPARQL function by name, bypassing the plugins-only restriction.
+     * The function is looked up on the module's default export (the IIFE self object).
+     * User context is propagated via AsyncLocalStorage for concurrent-safe SPARQL filtering.
+     * @param {object} request - { moduleName, functionName, args, returnQueryStr }
+     * @param {object} userContext - { user, userSources } for SPARQL access filtering
+     * @param {function} callback - Error-first callback (err, result)
+     */
+    runVocablesFn: function (request, userContext, callback) {
+        const { moduleName, functionName, args = [], returnQueryStr = false } = request;
+
+        const modulePath = VOCABLES_MODULE_PATHS[moduleName];
+        if (!modulePath) {
+            return callback(new Error(`Unknown vocables module: ${moduleName}. Allowed: ${Object.keys(VOCABLES_MODULE_PATHS).join(", ")}`));
+        }
+
+        let callbackCalled = false;
+        const safeCallback = (err, result) => {
+            if (callbackCalled) return;
+            callbackCalled = true;
+            callback(err, result);
+        };
+
+        callContextStorage.run({ userContext, returnQueryStr, resolve: safeCallback }, () => {
+            loadConfig()
+                .then(() => import(modulePath))
+                .then((mod) => {
+                    const moduleExport = mod.default || globalThis[moduleName];
+                    if (!moduleExport) {
+                        return safeCallback(new Error(`Module ${moduleName} did not export a default value`));
+                    }
+
+                    const targetFn = moduleExport[functionName];
+                    if (typeof targetFn !== "function") {
+                        return safeCallback(new Error(`${moduleName}.${functionName} is not a function`));
+                    }
+
+                    try {
+                        targetFn(...args, safeCallback);
+                    } catch (e) {
+                        safeCallback(e);
+                    }
+                })
+                .catch((e) => safeCallback(e));
+        });
     },
 };
 

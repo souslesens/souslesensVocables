@@ -1,0 +1,2437 @@
+[
+  {
+    "name": "getSourceTaxonomyPredicates",
+    "module": "Sparql_OWL",
+    "description": "Sparql_OWL Module",
+    "params": [
+      {
+        "name": "source",
+        "type": "string",
+        "required": true,
+        "description": "Source name whose `taxonomyPredicates` are read (null → default `rdfs:subClassOf`)"
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "required": false,
+        "description": "Predicate options"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "getTopConcepts",
+    "module": "Sparql_OWL",
+    "description": "Returns the top-level classes of an OWL source: `owl:Class` instances that have no parent",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "OWL source name to query"
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "required": false,
+        "description": "Query options"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": true,
+    "example": null
+  },
+  {
+    "name": "getNodeChildren",
+    "module": "Sparql_OWL",
+    "description": "Returns the children of node(s) down to a given depth in an OWL class hierarchy. Matches",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "OWL source name to query"
+      },
+      {
+        "name": "words",
+        "type": "(string|string[])",
+        "required": true,
+        "description": "Label word(s) for fuzzy/exact parent match; mutually exclusive with `ids`"
+      },
+      {
+        "name": "ids",
+        "type": "(string|string[])",
+        "required": true,
+        "description": "Parent class URI(s) whose children are fetched"
+      },
+      {
+        "name": "descendantsDepth",
+        "type": "number",
+        "required": true,
+        "description": "Number of taxonomy levels to expand"
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "required": false,
+        "description": "Query options"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": true,
+    "example": null
+  },
+  {
+    "name": "getNodesDescendants",
+    "module": "Sparql_OWL",
+    "description": "Returns the full set of descendant classes of given parent class(es) via the transitive",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "OWL source name to query"
+      },
+      {
+        "name": "ids",
+        "type": "(string|string[])",
+        "required": true,
+        "description": "Parent class URI(s) whose descendants are fetched"
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "required": false,
+        "description": "Query options"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "getNodesGraphUri",
+    "module": "Sparql_OWL",
+    "description": "Returns the named graph(s) each given resource lives in",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "Source name whose endpoint is queried"
+      },
+      {
+        "name": "ids",
+        "type": "(string|string[])",
+        "required": true,
+        "description": "Resource URI(s) to locate"
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "required": false,
+        "description": "Reserved options object"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "getNodeInfos",
+    "module": "Sparql_OWL",
+    "description": "Returns all triples describing a resource (`<conceptId> ?prop ?value`), optionally also",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "OWL source name to query"
+      },
+      {
+        "name": "conceptId",
+        "type": "string",
+        "required": true,
+        "description": "URI of the resource to describe"
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "required": false,
+        "description": "Query options"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": true,
+    "example": null
+  },
+  {
+    "name": "getNodeParents",
+    "module": "Sparql_OWL",
+    "description": "Returns the ancestors of node(s) up to a given depth in an OWL hierarchy. Builds nested",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "OWL source name to query"
+      },
+      {
+        "name": "words",
+        "type": "(string|string[])",
+        "required": true,
+        "description": "Label word(s) identifying the start node; mutually exclusive with `ids`"
+      },
+      {
+        "name": "ids",
+        "type": "(string|string[])",
+        "required": true,
+        "description": "Start class URI(s) whose ancestors are fetched"
+      },
+      {
+        "name": "ancestorsDepth",
+        "type": "number",
+        "required": true,
+        "description": "Number of levels to climb (capped as described above)"
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "required": false,
+        "description": "Query options"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "getEntityAncestorsArray",
+    "module": "Sparql_OWL",
+    "description": "Returns the ordered array of ancestor class URIs of an entity, by querying",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "OWL source name to query"
+      },
+      {
+        "name": "id",
+        "type": "string",
+        "required": true,
+        "description": "URI of the entity whose ancestors are fetched"
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "required": false,
+        "description": "Query options"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "getNodesAncestorsOrDescendantsOld",
+    "module": "Sparql_OWL",
+    "description": "Legacy version of {@link module:Sparql_OWL.getNodesAncestorsOrDescendants}: returns",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "OWL source name to query"
+      },
+      {
+        "name": "classIds",
+        "type": "(string|string[])",
+        "required": true,
+        "description": "Class URI(s) whose hierarchy is built"
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "required": false,
+        "description": "Query options"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "getNodesAncestorsOrDescendants",
+    "module": "Sparql_OWL",
+    "description": "Returns the ancestor (or descendant) hierarchies of given class(es), supporting multiple",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "OWL source name to query"
+      },
+      {
+        "name": "classIds",
+        "type": "(string|string[])",
+        "required": true,
+        "description": "Class URI(s) whose hierarchy is built"
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "required": false,
+        "description": "Query options"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "getNodesTypesMap",
+    "module": "Sparql_OWL",
+    "description": "Returns a map of each resource URI to its (semicolon-joined) `rdf:type`/`rdfs:subClassOf`",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "OWL source name to query"
+      },
+      {
+        "name": "ids",
+        "type": "(string|string[])",
+        "required": true,
+        "description": "Resource URI(s) whose types are fetched"
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "required": false,
+        "description": "Query options"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "getFilteredTriples2",
+    "module": "Sparql_OWL",
+    "description": "Alternative to {@link module:Sparql_OWL.getFilteredTriples} that resolves the type and",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "OWL source name to query"
+      },
+      {
+        "name": "subjectIds",
+        "type": "(string|string[])",
+        "required": true,
+        "description": "Subject URI(s) to match (optional)"
+      },
+      {
+        "name": "propertyIds",
+        "type": "(string|string[])",
+        "required": true,
+        "description": "Property URI(s) to match (optional)"
+      },
+      {
+        "name": "objectIds",
+        "type": "(string|string[])",
+        "required": true,
+        "description": "Object URI(s) to match (optional)"
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "required": false,
+        "description": "Query options"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "getFilteredTriples",
+    "module": "Sparql_OWL",
+    "description": "Returns triples filtered by any combination of subject/property/object ids, with subject,",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "OWL source name to query"
+      },
+      {
+        "name": "subjectIds",
+        "type": "(string|string[])",
+        "required": true,
+        "description": "Subject URI(s) to match (optional)"
+      },
+      {
+        "name": "propertyIds",
+        "type": "(string|string[])",
+        "required": true,
+        "description": "Property URI(s) to match (optional)"
+      },
+      {
+        "name": "objectIds",
+        "type": "(string|string[])",
+        "required": true,
+        "description": "Object URI(s) to match (optional)"
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "required": false,
+        "description": "Query options"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "getItems",
+    "module": "Sparql_OWL",
+    "description": "Returns every subject of the source with its label, `rdf:type` and taxonomy superclass",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "OWL source name to query"
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "required": false,
+        "description": "Query options"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "listObjectProperties",
+    "module": "Sparql_OWL",
+    "description": "Lists all `owl:ObjectProperty` of a source with their label, super-property, domain and",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "OWL source name to query"
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "required": false,
+        "description": "Reserved options object"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "getObjectPropertiesDomainAndRange",
+    "module": "Sparql_OWL",
+    "description": "Returns object (or datatype) properties with their domains, ranges, sub-properties and",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "OWL source name to query"
+      },
+      {
+        "name": "domainIds",
+        "type": "(string|string[])",
+        "required": true,
+        "description": "Domain (or range) class URI(s) to filter by (optional)"
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "required": false,
+        "description": "Query options"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "getObjectSubProperties",
+    "module": "Sparql_OWL",
+    "description": "Returns the transitive sub-properties of given properties",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "OWL source name to query"
+      },
+      {
+        "name": "propertyIds",
+        "type": "(string|string[])",
+        "required": true,
+        "description": "Property URI(s) whose sub-properties are fetched"
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "required": false,
+        "description": "Query options"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "getObjectRestrictions",
+    "module": "Sparql_OWL",
+    "description": "Returns OWL restrictions on classes: matches `?subject rdfs:subClassOf ?node`, `?node",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "OWL source name to query"
+      },
+      {
+        "name": "subClassIds",
+        "type": "(string|string[])",
+        "required": true,
+        "description": "Class URI(s) carrying the restrictions (or restriction values when `inverseRestriction`)"
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "required": false,
+        "description": "Query options"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "getNamedIndividuals",
+    "module": "Sparql_OWL",
+    "description": "Returns the `owl:NamedIndividual` instances of given class(es): matches",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "OWL source name to query"
+      },
+      {
+        "name": "ids",
+        "type": "(string|string[])",
+        "required": true,
+        "description": "Class URI(s) whose individuals are fetched"
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "required": false,
+        "description": "Query options"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "getCollectionNodes",
+    "module": "Sparql_OWL",
+    "description": "Returns the concepts belonging to a SKOS collection within an OWL source (mixed",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "Source name to query"
+      },
+      {
+        "name": "collection",
+        "type": "string",
+        "required": true,
+        "description": "Collection URI whose members are fetched (empty = all subjects)"
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "required": false,
+        "description": "Query options"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "getNodesTypes",
+    "module": "Sparql_OWL",
+    "description": "Returns the `rdf:type` triples (with their graph) for given resources, batching the ids",
+    "params": [
+      {
+        "name": "source",
+        "type": "string",
+        "required": true,
+        "description": "Source name whose endpoint is queried"
+      },
+      {
+        "name": "ids",
+        "type": "(string|string[])",
+        "required": true,
+        "description": "Resource URI(s) whose types are fetched"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "getNodesOwlTypeMap",
+    "module": "Sparql_OWL",
+    "description": "Returns a map of each resource URI to a simplified OWL type — `\"NamedIndividual\"`,",
+    "params": [
+      {
+        "name": "source",
+        "type": "string",
+        "required": true,
+        "description": "Source name whose endpoint is queried"
+      },
+      {
+        "name": "ids",
+        "type": "(string|string[])",
+        "required": true,
+        "description": "Resource URI(s) whose OWL type is determined"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "getPropertiesRestrictionsDescription",
+    "module": "Sparql_OWL",
+    "description": "Returns, for given properties, the restrictions that use them and the source/target",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "OWL source name to query"
+      },
+      {
+        "name": "propIds",
+        "type": "(string|string[])",
+        "required": true,
+        "description": "Property URI(s) whose restrictions are described"
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "required": false,
+        "description": "Query options"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "getNodesLabelTypesAndGraph",
+    "module": "Sparql_OWL",
+    "description": "Returns each resource's label plus its (comma-joined) types and graphs, using",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "OWL source name to query"
+      },
+      {
+        "name": "ids",
+        "type": "(string|string[])",
+        "required": true,
+        "description": "Resource URI(s) to describe"
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "required": false,
+        "description": "Query options"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "getUrisLabelsMap",
+    "module": "Sparql_OWL",
+    "description": "Returns a map of URI → `rdfs:label` for given URIs (`?s rdfs:label ?sLabel`), falling back",
+    "params": [
+      {
+        "name": "source",
+        "type": "string",
+        "required": true,
+        "description": "Source name to query"
+      },
+      {
+        "name": "uris",
+        "type": "string[]",
+        "required": true,
+        "description": "URIs whose labels are fetched"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "getLabelsMap",
+    "module": "Sparql_OWL",
+    "description": "Returns a map of URI → `rdfs:label` for a source, paginating through results in pages of",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "OWL source name to query"
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "required": false,
+        "description": "Query options"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "getDictionary",
+    "module": "Sparql_OWL",
+    "description": "Returns the dictionary of a source — the list of its resources as `{id, label}` (plus the",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "OWL source name to query"
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "required": false,
+        "description": "Query options"
+      },
+      {
+        "name": "processor",
+        "type": "Function",
+        "required": false,
+        "description": "Optional `(pageBindings, cb)` processor invoked per page; if omitted, pages are accumulated"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "getPredicates",
+    "module": "Sparql_OWL",
+    "description": "Lists the distinct predicates used in a source, with their graph and label",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "OWL source name to query"
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "required": false,
+        "description": "Query options"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "getObjectProperties",
+    "module": "Sparql_OWL",
+    "description": "Lists all `owl:ObjectProperty` of a source with their labels",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "OWL source name to query"
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "required": false,
+        "description": "Query options"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "getUrisNamedGraph",
+    "module": "Sparql_OWL",
+    "description": "Returns the named graph each given URI lives in (`GRAPH ?g { ?id ?p ?o }`), batching the",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "Source name defining the import scope"
+      },
+      {
+        "name": "ids",
+        "type": "string[]",
+        "required": true,
+        "description": "URIs to locate"
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "required": false,
+        "description": "Query options"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "getGraphsByRegex",
+    "module": "Sparql_OWL",
+    "description": "Finds graphs whose `owl:versionIRI` matches a regex pattern, returning the matching",
+    "params": [
+      {
+        "name": "pattern",
+        "type": "string",
+        "required": true,
+        "description": "Regular expression matched against each graph's version IRI"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "generateInverseRestrictions",
+    "module": "Sparql_OWL",
+    "description": "Materialises the inverse of every restriction using a given property: fetches the",
+    "params": [
+      {
+        "name": "source",
+        "type": "string",
+        "required": true,
+        "description": "Source name whose graph is edited"
+      },
+      {
+        "name": "propId",
+        "type": "string",
+        "required": true,
+        "description": "Property URI whose restrictions are inverted"
+      },
+      {
+        "name": "inversePropId",
+        "type": "string",
+        "required": true,
+        "description": "Property URI used in the generated inverse restrictions"
+      },
+      {
+        "name": "cardinality",
+        "type": "number",
+        "required": true,
+        "description": "Cardinality for the generated restrictions"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "getPropertiesInheritedConstraints",
+    "module": "Sparql_OWL",
+    "description": "Returns, for each given property, the domain/range inherited from its super-properties",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "OWL source name to query"
+      },
+      {
+        "name": "properties",
+        "type": "string[]",
+        "required": true,
+        "description": "Property URIs whose inherited constraints are fetched"
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "required": true,
+        "description": "Query options"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "getInferredPropertiesDomainsAndRanges",
+    "module": "Sparql_OWL",
+    "description": "Returns all object properties of a source with their inferred domains, ranges,",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "OWL source name to query"
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "required": false,
+        "description": "Query options"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "getInferredPropertiesDomainsAndRangesOld",
+    "module": "Sparql_OWL",
+    "description": "Legacy single-query version of {@link module:Sparql_OWL.getInferredPropertiesDomainsAndRanges},",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "OWL source name to query"
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "required": true,
+        "description": "Query options"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "getPropertiesWithoutDomainsAndRanges",
+    "module": "Sparql_OWL",
+    "description": "Returns the object properties that have no domain or range, even via super-properties or",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "OWL source name to query"
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "required": true,
+        "description": "Query options"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "getAllTriples",
+    "module": "Sparql_OWL",
+    "description": "Returns all triples of a source (or explicit graph) with subject/predicate/object labels,",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "OWL source name to query (or null with `options.graphUri`)"
+      },
+      {
+        "name": "role",
+        "type": "string",
+        "required": true,
+        "description": "Variable (`subject`/`predicate`/`object`) the `ids` filter applies to"
+      },
+      {
+        "name": "ids",
+        "type": "(string|string[])",
+        "required": true,
+        "description": "URI(s) restricting the chosen role"
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "required": false,
+        "description": "Query options"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "getTriples",
+    "module": "Sparql_OWL",
+    "description": "Returns raw `?s ?p ?o` triples of a source (or explicit graph), with an optional filter,",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "OWL source name to query (or null with `options.graphUri`)"
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "required": false,
+        "description": "Query options"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "getStoredQueries",
+    "module": "Sparql_OWL",
+    "description": "Returns the stored queries saved for a given scope from the stored-queries graph",
+    "params": [
+      {
+        "name": "source",
+        "type": "string",
+        "required": true,
+        "description": "Source name to query"
+      },
+      {
+        "name": "scope",
+        "type": "string",
+        "required": true,
+        "description": "Scope value matched against `slsv:hasScope`"
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "required": false,
+        "description": "Reserved options object"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "generateOWL",
+    "module": "Sparql_OWL",
+    "description": "Serialises a source to Turtle by paginating `DESCRIBE ?s ?p ?o` queries (`text/turtle`",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "OWL source name to serialise"
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "required": false,
+        "description": "Query options"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "getDistinctClassLabels",
+    "module": "Sparql_OWL",
+    "description": "Returns the distinct labels (or another property's values) of instances of given classes",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "OWL source name to query"
+      },
+      {
+        "name": "classIds",
+        "type": "(string|string[])",
+        "required": true,
+        "description": "Class URI(s) whose instances' labels are fetched"
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "required": false,
+        "description": "Query options"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "getDataTypePropertyValues",
+    "module": "Sparql_OWL",
+    "description": "Returns the distinct object values of a datatype property across the source",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "OWL source name to query"
+      },
+      {
+        "name": "propertyUri",
+        "type": "string",
+        "required": true,
+        "description": "URI of the datatype property whose values are fetched"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "getIndividualsType",
+    "module": "Sparql_OWL",
+    "description": "Returns the (non-`owl:NamedIndividual`) `rdf:type`(s) of given individuals, batching the",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "OWL source name to query"
+      },
+      {
+        "name": "allIds",
+        "type": "string[]",
+        "required": true,
+        "description": "Individual URIs whose class types are fetched"
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "required": false,
+        "description": "Reserved options object"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "getIndividualsOfClass",
+    "module": "Sparql_OWL",
+    "description": "Returns the `owl:NamedIndividual` instances of given classes with their labels",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "OWL source name to query"
+      },
+      {
+        "name": "classIds",
+        "type": "string[]",
+        "required": true,
+        "description": "Class URIs whose individuals are fetched"
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "required": false,
+        "description": "Reserved options object"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "getLabelsMapFromLabelsGraph",
+    "module": "Sparql_OWL",
+    "description": "Returns a map of URI → label fetched from the dedicated labels graph",
+    "params": [
+      {
+        "name": "ids",
+        "type": "string[]",
+        "required": true,
+        "description": "URIs whose labels are fetched from the labels graph"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "clearGraph",
+    "module": "Sparql_OWL",
+    "description": "Empties a named graph by POSTing to the backend `/kg/clearGraph` endpoint (not a SPARQL query).",
+    "params": [
+      {
+        "name": "graphUri",
+        "type": "string",
+        "required": true,
+        "description": "URI of the graph to clear"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "getIndividualsOfClassDistinctProperties",
+    "module": "Sparql_OWL",
+    "description": "Builds (but does not yet execute) a query for the distinct properties used by individuals",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "OWL source name to query"
+      },
+      {
+        "name": "classId",
+        "type": "string",
+        "required": true,
+        "description": "Class URI whose individuals' properties are inspected"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "copyUriTriplesFromSourceToSource",
+    "module": "Sparql_OWL",
+    "description": "Intended to copy a resource's triples from one source to another. Currently fetches the",
+    "params": [
+      {
+        "name": "fromSource",
+        "type": "string",
+        "required": true,
+        "description": "Source name to copy the resource from"
+      },
+      {
+        "name": "toSource",
+        "type": "string",
+        "required": true,
+        "description": "Destination source name"
+      },
+      {
+        "name": "subjectUri",
+        "type": "string",
+        "required": true,
+        "description": "URI of the resource to copy"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "getAllDescendants",
+    "module": "Sparql_OWL",
+    "description": "Returns all descendants of given resources via a configurable taxonomy predicate, with",
+    "params": [
+      {
+        "name": "source",
+        "type": "string",
+        "required": true,
+        "description": "Source name to query"
+      },
+      {
+        "name": "resourcesIds",
+        "type": "(string|string[])",
+        "required": true,
+        "description": "Ancestor resource URI(s) whose descendants are fetched"
+      },
+      {
+        "name": "taxonomyPredicate",
+        "type": "string",
+        "required": false,
+        "description": "=\"rdfs:subClassOf\"] - Predicate defining the parent relation"
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "required": false,
+        "description": "Query options"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "getGraphsWithSameClasses",
+    "module": "Sparql_OWL",
+    "description": "Finds the named graphs that share subjects with a source's graph: an inner",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "OWL source name whose subjects anchor the search"
+      },
+      {
+        "name": "filter",
+        "type": "string",
+        "required": true,
+        "description": "SPARQL filter restricting the inner subjects"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "createSkgFromOntology",
+    "module": "Sparql_OWL",
+    "description": "Generates a Semantic Knowledge Graph (SKG) from an OWL ontology into a target graph, in a",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "OWL source name to transform"
+      },
+      {
+        "name": "skgGraphUri",
+        "type": "string",
+        "required": true,
+        "description": "Target graph URI receiving the generated SKG triples"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "getTopConcepts",
+    "module": "Sparql_SKOS",
+    "description": "The MIT License",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "SKOS source name to query"
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "required": true,
+        "description": "Query options"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "getNodeChildren",
+    "module": "Sparql_SKOS",
+    "description": "Returns the children of node(s) down to a given depth in a SKOS hierarchy. Builds nested",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "SKOS source name to query"
+      },
+      {
+        "name": "words",
+        "type": "(string|string[])",
+        "required": true,
+        "description": "Label word(s) identifying the parent; mutually exclusive with `ids`"
+      },
+      {
+        "name": "ids",
+        "type": "(string|string[])",
+        "required": true,
+        "description": "Parent concept URI(s) whose children are fetched"
+      },
+      {
+        "name": "descendantsDepth",
+        "type": "number",
+        "required": true,
+        "description": "Number of `skos:broader` levels to expand (capped at `optionalDepth`)"
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "required": false,
+        "description": "Query options"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "getCollectionNodes",
+    "module": "Sparql_SKOS",
+    "description": "Returns the concepts belonging to a SKOS collection (and their `skos:broader` links). With",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "SKOS source name to query"
+      },
+      {
+        "name": "collection",
+        "type": "string",
+        "required": true,
+        "description": "Collection URI whose member concepts are fetched (empty = all concepts)"
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "required": false,
+        "description": "Query options"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "getNodeParents",
+    "module": "Sparql_SKOS",
+    "description": "Returns the ancestors of node(s) up to a given depth in a SKOS hierarchy. Builds nested",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "SKOS source name to query"
+      },
+      {
+        "name": "words",
+        "type": "(string|string[])",
+        "required": true,
+        "description": "Label word(s) identifying the start node; mutually exclusive with `ids`"
+      },
+      {
+        "name": "ids",
+        "type": "(string|string[])",
+        "required": true,
+        "description": "Start concept URI(s) whose ancestors are fetched"
+      },
+      {
+        "name": "ancestorsDepth",
+        "type": "number",
+        "required": true,
+        "description": "Number of `skos:broader` levels to climb (capped at `optionalDepth`)"
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "required": false,
+        "description": "Query options"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "getNodeInfos",
+    "module": "Sparql_SKOS",
+    "description": "Returns all triples (`?id ?prop ?value`) describing a concept. Delegates to a non-SKOS",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "Source name to query"
+      },
+      {
+        "name": "conceptId",
+        "type": "(string|string[])",
+        "required": true,
+        "description": "Concept URI(s) to describe"
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "required": false,
+        "description": "Query options"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "getItems",
+    "module": "Sparql_SKOS",
+    "description": "Returns all concept items of a SKOS source with their preferred labels. Delegates to a",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "Source name to query"
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "required": false,
+        "description": "Query options"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "getSingleNodeAllGenealogy",
+    "module": "Sparql_SKOS",
+    "description": "/**",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "Source name to query"
+      },
+      {
+        "name": "id",
+        "type": "string",
+        "required": true,
+        "description": "Concept URI whose ancestors are fetched"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "getSingleNodeAllDescendants",
+    "module": "Sparql_SKOS",
+    "description": "Returns the full set of descendants of a concept via the transitive closure over inverse",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "Source name to query"
+      },
+      {
+        "name": "id",
+        "type": "string",
+        "required": true,
+        "description": "Concept URI whose descendants are fetched"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "getNodeLabel",
+    "module": "Sparql_SKOS",
+    "description": "Fetches the preferred label and `rdf:type` of a single concept, optionally language-filtered.",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "Source name to query"
+      },
+      {
+        "name": "id",
+        "type": "string",
+        "required": true,
+        "description": "Concept URI whose label is fetched"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "getNodesAllTriples",
+    "module": "Sparql_SKOS",
+    "description": "Fetches every outgoing triple for a list of subjects, batching the ids into slices of",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "Source name to query"
+      },
+      {
+        "name": "subjectIds",
+        "type": "string[]",
+        "required": true,
+        "description": "Subject URIs whose triples are fetched"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "deleteTriples",
+    "module": "Sparql_SKOS",
+    "description": "Deletes triples matching a subject/predicate/object pattern from the source's named graph",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "Source name whose graph is edited"
+      },
+      {
+        "name": "subjectUri",
+        "type": "string",
+        "required": true,
+        "description": "Subject URI to match (optional)"
+      },
+      {
+        "name": "predicateUri",
+        "type": "string",
+        "required": true,
+        "description": "Predicate URI to match (optional)"
+      },
+      {
+        "name": "objectUri",
+        "type": "string",
+        "required": true,
+        "description": "Object URI to match (optional)"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "triplesObjectToString",
+    "module": "Sparql_SKOS",
+    "description": "Serialises a triple descriptor into a SPARQL triple string: URI objects are",
+    "params": [
+      {
+        "name": "item",
+        "type": "Object",
+        "required": true,
+        "description": "Triple descriptor with `subject`, `predicate`, `object`, `valueType`, and optional `sourceVariables.lang`"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "insertTriples",
+    "module": "Sparql_SKOS",
+    "description": "Inserts triples into the source's named graph as a single",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "Source name whose graph receives the triples"
+      },
+      {
+        "name": "triples",
+        "type": "Object[]",
+        "required": true,
+        "description": "Triple descriptor objects to insert"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "update",
+    "module": "Sparql_SKOS",
+    "description": "Replaces all triples of a subject in the source's graph: deletes every `?s ?p ?o` for the",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "Source name whose graph is edited"
+      },
+      {
+        "name": "triples",
+        "type": "Object[]",
+        "required": true,
+        "description": "Replacement triple descriptors (all sharing the same subject)"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "deleteGraph",
+    "module": "Sparql_SKOS",
+    "description": "Empties the source's named graph by deleting all its triples",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "Source name whose graph is emptied"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "copyGraph",
+    "module": "Sparql_SKOS",
+    "description": "Copies a source's entire named graph into another graph using a single SPARQL",
+    "params": [
+      {
+        "name": "fromSourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "Source name whose graph is the copy origin"
+      },
+      {
+        "name": "toGraphUri",
+        "type": "string",
+        "required": true,
+        "description": "Destination graph URI"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "setBindingsOptionalProperties",
+    "module": "Sparql_SKOS",
+    "description": "Backfills missing `<field>Type` and `<field>Label` cells for a family of indexed fields",
+    "params": [
+      {
+        "name": "bindings",
+        "type": "Array<Object>",
+        "required": true,
+        "description": "Result bindings to enrich in place"
+      },
+      {
+        "name": "_field",
+        "type": "string",
+        "required": true,
+        "description": "Base variable name; indexed variants are processed until the first missing one"
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "required": false,
+        "description": "Enrichment options"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "getSourceLangsList",
+    "module": "Sparql_SKOS",
+    "description": "Lists the distinct languages used in a source's `skos:prefLabel` literals, via",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "Source name to query"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "getSourceVariables",
+    "module": "Sparql_generic",
+    "description": "The MIT License",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "Source name to compute query variables for"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "getTopConcepts",
+    "module": "Sparql_generic",
+    "description": "/**********************************************************************************************************************************/",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "Source name to query"
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "required": false,
+        "description": "Controller-specific options"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "getNodeInfos",
+    "module": "Sparql_generic",
+    "description": "Returns all properties/triples describing a node (or nodes) by delegating to the source",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "Source name to query"
+      },
+      {
+        "name": "conceptId",
+        "type": "(string|string[])",
+        "required": true,
+        "description": "URI(s) of the node(s) to describe"
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "required": false,
+        "description": "Controller-specific options"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "getItems",
+    "module": "Sparql_generic",
+    "description": "Returns all items (concepts/classes) of a source by delegating to its controller.",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "Source name to query"
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "required": false,
+        "description": "Controller-specific options"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "getCollectionNodes",
+    "module": "Sparql_generic",
+    "description": "Returns the member nodes of a collection (SKOS collection / grouping) by delegating to",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "Source name to query"
+      },
+      {
+        "name": "collection",
+        "type": "string",
+        "required": true,
+        "description": "URI of the collection whose members are fetched"
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "required": false,
+        "description": "Controller-specific options"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "getNodeChildren",
+    "module": "Sparql_generic",
+    "description": "Returns the children of node(s) down to a given depth, delegating to the source controller.",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "Source name to query"
+      },
+      {
+        "name": "words",
+        "type": "(string|string[])",
+        "required": true,
+        "description": "Label word(s) to match; mutually exclusive with `ids`"
+      },
+      {
+        "name": "ids",
+        "type": "(string|string[])",
+        "required": true,
+        "description": "Parent node URI(s) whose children are fetched"
+      },
+      {
+        "name": "descendantsDepth",
+        "type": "number",
+        "required": true,
+        "description": "Depth of descendants to retrieve"
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "required": false,
+        "description": "Controller-specific options (merged with `{depth: 0, source}`)"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "getNodeParents",
+    "module": "Sparql_generic",
+    "description": "Returns the ancestors of node(s) up to a given depth, delegating to the source controller.",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "Source name to query"
+      },
+      {
+        "name": "words",
+        "type": "(string|string[])",
+        "required": true,
+        "description": "Label word(s) to match; mutually exclusive with `ids`"
+      },
+      {
+        "name": "ids",
+        "type": "(string|string[])",
+        "required": true,
+        "description": "Child node URI(s) whose ancestors are fetched"
+      },
+      {
+        "name": "ancestorsDepth",
+        "type": "number",
+        "required": true,
+        "description": "Depth of ancestors to retrieve"
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "required": false,
+        "description": "Controller-specific options (merged with `{depth: 0, source}`)"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "getSingleNodeAllGenealogy",
+    "module": "Sparql_generic",
+    "description": "/**",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "Source name to query"
+      },
+      {
+        "name": "id",
+        "type": "string",
+        "required": true,
+        "description": "URI of the node whose ancestors are fetched"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "getSingleNodeAllDescendants",
+    "module": "Sparql_generic",
+    "description": "Returns the full set of descendants of a node by running a transitive-closure query over",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "Source name to query"
+      },
+      {
+        "name": "id",
+        "type": "string",
+        "required": true,
+        "description": "URI of the node whose descendants are fetched"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "getNodeLabel",
+    "module": "Sparql_generic",
+    "description": "Fetches the preferred label and `rdf:type` of a single node, optionally filtered by",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "Source name to query"
+      },
+      {
+        "name": "id",
+        "type": "string",
+        "required": true,
+        "description": "URI of the node whose label is fetched"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "getEndPointAllGraphsMap",
+    "module": "Sparql_generic",
+    "description": "Lists all named graphs available on an endpoint by running",
+    "params": [
+      {
+        "name": "sparqlServerUrl",
+        "type": "string",
+        "required": false,
+        "description": "Endpoint URL to query; defaults to the main server"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "getNodesAllTriples",
+    "module": "Sparql_generic",
+    "description": "Fetches every outgoing triple (`?subject ?prop ?value`) for a list of subjects, batching",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "Source name to query"
+      },
+      {
+        "name": "subjectIds",
+        "type": "string[]",
+        "required": true,
+        "description": "Subject URIs whose triples are fetched"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "deleteTriples",
+    "module": "Sparql_generic",
+    "description": "Deletes triples matching a subject/predicate/object pattern from a source's named graph.",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "Source name whose graph is edited"
+      },
+      {
+        "name": "subjectUri",
+        "type": "string",
+        "required": true,
+        "description": "Subject URI to match (optional)"
+      },
+      {
+        "name": "predicateUri",
+        "type": "string",
+        "required": true,
+        "description": "Predicate URI to match (optional)"
+      },
+      {
+        "name": "object",
+        "type": "(string|Object)",
+        "required": true,
+        "description": "Object to match: a URI/literal string or a literal descriptor (optional)"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "triplesObjectToString",
+    "module": "Sparql_generic",
+    "description": "Serialises a triple descriptor object into a SPARQL/Turtle triple string, choosing the",
+    "params": [
+      {
+        "name": "item",
+        "type": "Object",
+        "required": true,
+        "description": "Triple descriptor with `subject`/`s`, `predicate`/`p`, `object`/`o`, and optional `lang`, `isString`, `valueType`"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "getDefaultSparqlPrefixesStr",
+    "module": "Sparql_generic",
+    "description": "Builds a `PREFIX key: <uri>` string for every prefix declared in",
+    "params": [],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "insertTriples",
+    "module": "Sparql_generic",
+    "description": "Inserts triples into a source's named graph (or an explicit `options.graphUri`). Each",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "Source name whose graph receives the triples (may be null if `options.graphUri` is set)"
+      },
+      {
+        "name": "_triples",
+        "type": "Object[]",
+        "required": true,
+        "description": "Triple descriptor objects to insert"
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "required": false,
+        "description": "Insert options"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "deleteTriplesWithFilter",
+    "module": "Sparql_generic",
+    "description": "Deletes triples from a source's graph matching a SPARQL filter expression",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "Source name whose graph is edited"
+      },
+      {
+        "name": "filter",
+        "type": "string",
+        "required": true,
+        "description": "SPARQL filter expression selecting the triples to delete; empty deletes all (after confirmation)"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "copyGraph",
+    "module": "Sparql_generic",
+    "description": "Copies all triples from a source's graph into another graph using paginated",
+    "params": [
+      {
+        "name": "fromSourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "Source name whose graph is the copy origin"
+      },
+      {
+        "name": "toGraphUri",
+        "type": "string",
+        "required": true,
+        "description": "Destination graph URI"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "getDistinctPredicates",
+    "module": "Sparql_generic",
+    "description": "Lists the distinct predicates used in a source, with their optional labels. Runs",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "Source name to query"
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "required": false,
+        "description": "Reserved options object"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "copyNodes",
+    "module": "Sparql_generic",
+    "description": "Copies selected nodes (and their properties) from a source into a target graph, optionally",
+    "params": [
+      {
+        "name": "fromSourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "Source name the nodes come from"
+      },
+      {
+        "name": "toGraphUri",
+        "type": "string",
+        "required": true,
+        "description": "Destination graph URI"
+      },
+      {
+        "name": "sourceIds",
+        "type": "string[]",
+        "required": true,
+        "description": "URIs of the nodes to copy"
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "required": false,
+        "description": "Copy options"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "sortBindings",
+    "module": "Sparql_generic",
+    "description": "Sorts SPARQL result bindings in place by the string value of a given field (missing",
+    "params": [
+      {
+        "name": "bindings",
+        "type": "Array<Object>",
+        "required": true,
+        "description": "Result bindings to sort"
+      },
+      {
+        "name": "field",
+        "type": "string",
+        "required": true,
+        "description": "Variable name to sort by (`binding[field].value`)"
+      },
+      {
+        "name": "_options",
+        "type": "Object",
+        "required": false,
+        "description": "Reserved (unused)"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "setMissingLabels",
+    "module": "Sparql_generic",
+    "description": "Fills missing `<field>Label` cells in result bindings by deriving a label from the",
+    "params": [
+      {
+        "name": "bindings",
+        "type": "Array<Object>",
+        "required": true,
+        "description": "Result bindings to enrich in place"
+      },
+      {
+        "name": "_fields",
+        "type": "(string|string[])",
+        "required": true,
+        "description": "Variable name(s) whose labels to backfill"
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "required": false,
+        "description": "Reserved options object"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "setBindingsOptionalProperties",
+    "module": "Sparql_generic",
+    "description": "Backfills missing `<field>Type` and `<field>Label` cells for a family of indexed fields",
+    "params": [
+      {
+        "name": "bindings",
+        "type": "Array<Object>",
+        "required": true,
+        "description": "Result bindings to enrich in place"
+      },
+      {
+        "name": "_fields",
+        "type": "(string|string[])",
+        "required": true,
+        "description": "Base variable name(s); indexed variants 0–4 are processed"
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "required": false,
+        "description": "Enrichment options"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "getLangFilterStr",
+    "module": "Sparql_generic",
+    "description": "Builds a SPARQL language filter that keeps a variable's literals in the requested",
+    "params": [
+      {
+        "name": "options",
+        "type": "Object",
+        "required": true,
+        "description": "Filter options"
+      },
+      {
+        "name": "variable",
+        "type": "string",
+        "required": true,
+        "description": "SPARQL variable expression (including `?`) the filter applies to"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "getSourceTaxonomy",
+    "module": "Sparql_generic",
+    "description": "Builds the complete subsumption taxonomy (class/concept hierarchy) of a source as a flat",
+    "params": [
+      {
+        "name": "sourceLabel",
+        "type": "string",
+        "required": true,
+        "description": "Source name whose taxonomy is built"
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "required": false,
+        "description": "Build options"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "createDecapitalizedLabelTriples",
+    "module": "Sparql_generic",
+    "description": "For every item whose preferred label is capitalised, inserts a `skos:altLabel` triple",
+    "params": [
+      {
+        "name": "source",
+        "type": "string",
+        "required": true,
+        "description": "Source name to process"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  },
+  {
+    "name": "triplesToTurtle",
+    "module": "Sparql_generic",
+    "description": "Stub intended to serialise an array of triples into Turtle (not yet implemented).",
+    "params": [
+      {
+        "name": "triples",
+        "type": "Object[]",
+        "required": true,
+        "description": "Triple descriptors to serialise"
+      }
+    ],
+    "responseSchema": "#/definitions/SparqlQueryResponse",
+    "expose": false,
+    "example": null
+  }
+]

@@ -1473,10 +1473,14 @@ var Sparql_generic = (function () {
                     }
 
                     // build full ancestor chain following chosen parents only (memoized)
+                    // processedParents guards against cycles (e.g. OWL reflexive subClassOf triples materialized by reasoner)
+                    var processedParents = {};
                     function buildParentChain(nodeId) {
                         var obj = allClassesMap[nodeId];
                         if (!obj || obj._chainBuilt) return obj ? obj.parents : [];
-                        var chosenParent = chosenParents[nodeId];
+                        if (processedParents[nodeId]) return [];
+                        processedParents[nodeId] = 1;
+                        var chosenParent = chosenParents[nodeId] !== nodeId ? chosenParents[nodeId] : null;
                         obj.parents = chosenParent ? [chosenParent].concat(buildParentChain(chosenParent)) : [];
                         obj._chainBuilt = true;
                         return obj.parents;

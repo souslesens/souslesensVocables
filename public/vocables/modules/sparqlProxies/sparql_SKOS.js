@@ -60,6 +60,7 @@ var Sparql_SKOS = (function () {
             if (err) {
                 return callback(err);
             }
+            if (result.query) return callback(null, result);
             result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, "topConcept");
             return callback(null, result.results.bindings);
         });
@@ -143,6 +144,7 @@ var Sparql_SKOS = (function () {
             if (err) {
                 return callback(err);
             }
+            if (result.query) return callback(null, result);
             result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["subject", "child"]);
 
             result.results.bindings = Sparql_generic.sortBindings(result.results.bindings, "child1Label");
@@ -223,6 +225,7 @@ var Sparql_SKOS = (function () {
             if (err) {
                 return callback(err);
             }
+            if (result.query) return callback(null, result);
             result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["subject", "predicate"]);
             return callback(null, result.results.bindings);
         });
@@ -311,6 +314,7 @@ var Sparql_SKOS = (function () {
             if (err) {
                 return callback(err);
             }
+            if (result.query) return callback(null, result);
             result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["subject", "broader"]);
             return callback(null, result.results.bindings);
         });
@@ -356,6 +360,7 @@ var Sparql_SKOS = (function () {
             if (err) {
                 return callback(err);
             }
+            if (result.query) return callback(null, result);
             return callback(null, result.results.bindings);
         });
     };
@@ -406,6 +411,7 @@ var Sparql_SKOS = (function () {
             if (err) {
                 return callback(err);
             }
+            if (result.query) return callback(null, result);
             result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, "subject");
             return callback(null, result.results.bindings);
         });

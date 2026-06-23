@@ -1,6 +1,6 @@
 import { register } from "node:module";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { AsyncLocalStorage } from "node:async_hooks";
 import async from "async";
 import httpProxy from "./httpProxy.js";
@@ -190,7 +190,9 @@ async function loadConfig() {
     const { profileModel } = await import("../model/profiles.js");
     globalThis.Config.profiles = await profileModel.getAllProfiles();
 
-    // Initialize ontologiesVocabularyModels from basicVocabularies (like frontend app_config.js)
+    // Mirror frontend app_config.js: basicVocabularies is the static set of RDF/OWL/SKOS vocabs;
+    // ontologiesVocabularyModels starts as a copy and is expanded with all source graphUris.
+    // sparql_common.js reads Config.basicVocabularies directly, so both must be set.
     const basicVocabularies = {
         rdf: { graphUri: "https://www.w3.org/1999/02/22-rdf-syntax-ns" },
         rdfs: { graphUri: "https://www.w3.org/2000/01/rdf-schema" },
@@ -200,6 +202,7 @@ async function loadConfig() {
         dcterms: { graphUri: "http://purl.org/dc/terms/" },
         dc: { graphUri: "http://purl.org/dc/elements/1.1/" },
     };
+    globalThis.Config.basicVocabularies = basicVocabularies;
     globalThis.Config.ontologiesVocabularyModels = JSON.parse(JSON.stringify(basicVocabularies));
 
     // Add sources with graphUri to ontologiesVocabularyModels
@@ -228,11 +231,13 @@ async function loadConfig() {
 // async from npm
 globalThis.async = async;
 
-// Mapping from public module name to its file path relative to projectRoot
+// Mapping from public module name to its absolute file URL.
+// Must be file:// URLs, not relative paths — bare specifiers like "public/..."
+// are treated as npm package names by Node's default resolver.
 const VOCABLES_MODULE_PATHS = {
-    Sparql_OWL: "public/vocables/modules/sparqlProxies/sparql_OWL.js",
-    Sparql_SKOS: "public/vocables/modules/sparqlProxies/sparql_SKOS.js",
-    Sparql_generic: "public/vocables/modules/sparqlProxies/sparql_generic.js",
+    Sparql_OWL: pathToFileURL(path.join(projectRoot, "public/vocables/modules/sparqlProxies/sparql_OWL.js")).href,
+    Sparql_SKOS: pathToFileURL(path.join(projectRoot, "public/vocables/modules/sparqlProxies/sparql_SKOS.js")).href,
+    Sparql_generic: pathToFileURL(path.join(projectRoot, "public/vocables/modules/sparqlProxies/sparql_generic.js")).href,
 };
 
 const RemoteCodeRunner = {

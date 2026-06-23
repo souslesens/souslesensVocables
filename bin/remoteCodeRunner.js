@@ -163,12 +163,6 @@ if (typeof globalThis.window === "undefined") {
     globalThis.MainController = { errorAlert: (err) => console.error("[MainController]", err) };
     globalThis.Sparql_common = { getLabelFromURI: (uri) => uri };
 
-    // Expose a getter so sparql_proxy.js can check the per-call returnQueryStr flag
-    // without a direct Node.js dependency (gracefully absent in browser context).
-    globalThis.__getReturnQueryStr = () => {
-        const context = callContextStorage.getStore();
-        return (context && context.returnQueryStr) === true;
-    };
 }
 
 // Load Config lazily
@@ -288,7 +282,7 @@ const RemoteCodeRunner = {
             callback(err, result);
         };
 
-        callContextStorage.run({ userContext, returnQueryStr: false, resolve: safeCallback }, () => {
+        callContextStorage.run({ userContext, resolve: safeCallback }, () => {
             // Load Config then the user module
             loadConfig()
                 .then(() => import(userData.data_content.modulePath))
@@ -313,12 +307,12 @@ const RemoteCodeRunner = {
      * Execute a vocables SPARQL function by name, bypassing the plugins-only restriction.
      * The function is looked up on the module's default export (the IIFE self object).
      * User context is propagated via AsyncLocalStorage for concurrent-safe SPARQL filtering.
-     * @param {object} request - { moduleName, functionName, args, returnQueryStr }
+     * @param {object} request - { moduleName, functionName, args }
      * @param {object} userContext - { user, userSources } for SPARQL access filtering
      * @param {function} callback - Error-first callback (err, result)
      */
     runVocablesFn: function (request, userContext, callback) {
-        const { moduleName, functionName, args = [], returnQueryStr = false } = request;
+        const { moduleName, functionName, args = [] } = request;
 
         const modulePath = VOCABLES_MODULE_PATHS[moduleName];
         if (!modulePath) {
@@ -332,7 +326,7 @@ const RemoteCodeRunner = {
             callback(err, result);
         };
 
-        callContextStorage.run({ userContext, returnQueryStr, resolve: safeCallback }, () => {
+        callContextStorage.run({ userContext, resolve: safeCallback }, () => {
             loadConfig()
                 .then(() => import(modulePath))
                 .then((mod) => {

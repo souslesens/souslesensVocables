@@ -185,7 +185,7 @@ var Sparql_OWL = (function () {
             url = self.sparql_url;
         }
 
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel, returnQueryStr: options && options.returnQueryStr }, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -331,7 +331,7 @@ var Sparql_OWL = (function () {
             url = self.sparql_url;
         }
 
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel, returnQueryStr: options && options.returnQueryStr }, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -377,7 +377,7 @@ var Sparql_OWL = (function () {
         if (self.no_params) {
             url = self.sparql_url;
         }
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel, returnQueryStr: options && options.returnQueryStr }, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -409,7 +409,7 @@ var Sparql_OWL = (function () {
         if (self.no_params) {
             url = self.sparql_url;
         }
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel, returnQueryStr: options && options.returnQueryStr }, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -492,7 +492,7 @@ var Sparql_OWL = (function () {
         if (self.no_params) {
             url = self.sparql_url;
         }
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel, returnQueryStr: options && options.returnQueryStr }, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -630,7 +630,7 @@ var Sparql_OWL = (function () {
             url = self.sparql_url;
         }
 
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel, returnQueryStr: options && options.returnQueryStr }, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -696,7 +696,7 @@ var Sparql_OWL = (function () {
         if (self.no_params) {
             url = self.sparql_url;
         }
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel, returnQueryStr: options && options.returnQueryStr }, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -797,7 +797,7 @@ var Sparql_OWL = (function () {
                 url = self.sparql_url;
             }
         }
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel, returnQueryStr: options && options.returnQueryStr }, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -932,6 +932,7 @@ var Sparql_OWL = (function () {
             {
                 source: sourceLabel,
                 dontCacheCurrentQuery: true,
+                returnQueryStr: options && options.returnQueryStr,
             },
             function (err, result) {
                 if (err) {
@@ -1075,6 +1076,7 @@ var Sparql_OWL = (function () {
             {
                 source: sourceLabel,
                 dontCacheCurrentQuery: true,
+                returnQueryStr: options && options.returnQueryStr,
             },
             function (err, result) {
                 if (err) {
@@ -1175,7 +1177,7 @@ var Sparql_OWL = (function () {
         if (self.no_params) {
             url = self.sparql_url;
         }
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel, returnQueryStr: options && options.returnQueryStr }, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -1296,6 +1298,7 @@ var Sparql_OWL = (function () {
                 {
                     source: sourceLabel,
                     caller: "getFilteredTriples",
+                    returnQueryStr: options && options.returnQueryStr,
                 },
                 function (err, result) {
                     if (err) {
@@ -1426,7 +1429,7 @@ var Sparql_OWL = (function () {
         if (self.no_params) {
             url = self.sparql_url;
         }
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel, returnQueryStr: options && options.returnQueryStr }, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -1468,7 +1471,7 @@ var Sparql_OWL = (function () {
         if (self.no_params) {
             url = self.sparql_url;
         }
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel, returnQueryStr: options && options.returnQueryStr }, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -1603,7 +1606,7 @@ var Sparql_OWL = (function () {
         if (self.no_params) {
             url = self.sparql_url;
         }
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel, returnQueryStr: options && options.returnQueryStr }, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -1665,7 +1668,7 @@ var Sparql_OWL = (function () {
         self.graphUri = Config.sources[sourceLabel].graphUri;
         self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
         var url = self.sparql_url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel, returnQueryStr: options && options.returnQueryStr }, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -1802,6 +1805,7 @@ var Sparql_OWL = (function () {
             {
                 source: sourceLabel,
                 caller: null,
+                returnQueryStr: options && options.returnQueryStr,
             },
             function (err, result) {
                 if (err) {
@@ -1889,7 +1893,7 @@ var Sparql_OWL = (function () {
         query += " limit " + limit;
 
         var url = self.sparql_url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel, returnQueryStr: options && options.returnQueryStr }, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -1950,7 +1954,7 @@ var Sparql_OWL = (function () {
 
         query += " limit " + sourceVariables.limit + " ";
 
-        Sparql_proxy.querySPARQL_GET_proxy(sourceVariables.url, query, sourceVariables.queryOptions, { source: sourceLabel }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(sourceVariables.url, query, sourceVariables.queryOptions, { source: sourceLabel, returnQueryStr: options && options.returnQueryStr }, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -2129,7 +2133,7 @@ var Sparql_OWL = (function () {
         if (self.no_params) {
             url = self.sparql_url;
         }
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel, returnQueryStr: options && options.returnQueryStr }, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -2181,7 +2185,7 @@ var Sparql_OWL = (function () {
         query += " LIMIT 10000";
 
         var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, _result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel, returnQueryStr: options && options.returnQueryStr }, function (err, _result) {
             if (err) {
                 return callback(err);
             }
@@ -2305,7 +2309,7 @@ var Sparql_OWL = (function () {
 
                 self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
                 var url = self.sparql_url + "?format=json&query=";
-                Sparql_proxy.querySPARQL_GET_proxy(url, query2, "", { source: sourceLabel }, function (err, result) {
+                Sparql_proxy.querySPARQL_GET_proxy(url, query2, "", { source: sourceLabel, returnQueryStr: options && options.returnQueryStr }, function (err, result) {
                     if (err) {
                         return callbackWhilst(err);
                     }
@@ -2428,7 +2432,7 @@ var Sparql_OWL = (function () {
 
                 self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
                 var url = self.sparql_url + "?format=json&query=";
-                Sparql_proxy.querySPARQL_GET_proxy(url, query2, "", { source: sourceLabel }, function (err, result) {
+                Sparql_proxy.querySPARQL_GET_proxy(url, query2, "", { source: sourceLabel, returnQueryStr: options && options.returnQueryStr }, function (err, result) {
                     if (err) {
                         return callbackWhilst(err);
                     }
@@ -2490,7 +2494,7 @@ var Sparql_OWL = (function () {
         query += "" + "{ ?sub ?property ?obj ." + Sparql_common.getVariableLangLabel("property", true, true) + "}" + "} LIMIT 10000";
 
         var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel, returnQueryStr: options && options.returnQueryStr }, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -2535,7 +2539,7 @@ var Sparql_OWL = (function () {
         query += options.withGraph ? " }" : "";
         query += "  }   limit 10000";
         var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel, returnQueryStr: options && options.returnQueryStr }, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -2711,7 +2715,7 @@ var Sparql_OWL = (function () {
         } else {
             url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
         }
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel, returnQueryStr: options && options.returnQueryStr }, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -2827,7 +2831,7 @@ var Sparql_OWL = (function () {
             "} LIMIT 10000";
 
         var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel, returnQueryStr: options && options.returnQueryStr }, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -2906,7 +2910,7 @@ var Sparql_OWL = (function () {
         query += "  }" + "} LIMIT 10000";
 
         var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, _result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel, returnQueryStr: options && options.returnQueryStr }, function (err, _result) {
             if (err) {
                 return callback(err);
             }
@@ -2953,7 +2957,7 @@ var Sparql_OWL = (function () {
             "} LIMIT 20000";
 
         var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, _result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel, returnQueryStr: options && options.returnQueryStr }, function (err, _result) {
             if (err) {
                 return callback(err);
             }
@@ -3031,7 +3035,7 @@ var Sparql_OWL = (function () {
                 query += "}LIMIT 10000";
 
                 var url = Config.sources[sourceLabel || "_defaultSource"].sparql_server.url + "?format=json&query=";
-                Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, _result) {
+                Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel, returnQueryStr: options && options.returnQueryStr }, function (err, _result) {
                     if (err) {
                         return callbackEach(err);
                     }
@@ -3100,7 +3104,7 @@ var Sparql_OWL = (function () {
         query += " LIMIT 10000";
 
         var url = Config.sources[sourceLabel] ? Config.sources[sourceLabel].sparql_server.url : Config.sparql_server.url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, _result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel, returnQueryStr: options && options.returnQueryStr }, function (err, _result) {
             if (err) {
                 return callback(err);
             }
@@ -3130,7 +3134,7 @@ var Sparql_OWL = (function () {
         var query = "PREFIX slsv:<" + Config.storedQueries_graphUri + "> \n" + "select * " + fromStr + ' where {?s ?p ?o.?s slsv:hasScope "' + scope + '"}order by ?label';
 
         var url = Config.sparql_server.url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: source }, function (err, _result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: source, returnQueryStr: options && options.returnQueryStr }, function (err, _result) {
             if (err) {
                 return callback(err);
             }
@@ -3185,6 +3189,7 @@ var Sparql_OWL = (function () {
                         source: sourceLabel,
                         acceptHeader: "text/turtle",
                         // acceptHeader: "application/rdf+xml",
+                        returnQueryStr: options && options.returnQueryStr,
                     },
 
                     function (err, result) {
@@ -3260,7 +3265,7 @@ var Sparql_OWL = (function () {
             " ?label  }} limit 10000";
 
         var url = Config.sparql_server.url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, _result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel, returnQueryStr: options && options.returnQueryStr }, function (err, _result) {
             if (err) {
                 return callback(err);
             }
@@ -3336,7 +3341,7 @@ var Sparql_OWL = (function () {
                     filterStr +
                     "filter (?type!=owl:NamedIndividual)  } limit 10000";
                 var url = Config.sparql_server.url + "?format=json&query=";
-                Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, _result) {
+                Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel, returnQueryStr: options && options.returnQueryStr }, function (err, _result) {
                     if (err) {
                         return callbackEach(err);
                     }
@@ -3390,7 +3395,7 @@ var Sparql_OWL = (function () {
                     "  FILTER (?type2=owl:NamedIndividual) " +
                     "?id rdfs:label ?label  }} limit 10000";
                 var url = Config.sparql_server.url + "?format=json&query=";
-                Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, _result) {
+                Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel, returnQueryStr: options && options.returnQueryStr }, function (err, _result) {
                     if (err) {
                         return callbackEach(err);
                     }
@@ -3626,7 +3631,7 @@ var Sparql_OWL = (function () {
                 var query2 = "" + query;
                 query2 += " limit " + (limitSize + 1) + " offset " + offset;
 
-                Sparql_proxy.querySPARQL_GET_proxy(url, query2, "", { source: source }, function (err, result) {
+                Sparql_proxy.querySPARQL_GET_proxy(url, query2, "", { source: source, returnQueryStr: options && options.returnQueryStr }, function (err, result) {
                     if (err) {
                         return callbackWhilst(err);
                     }

@@ -56,7 +56,7 @@ var Sparql_SKOS = (function () {
         query += "  } ORDER BY ?topConceptLabel ";
         query += "limit " + sourceVariables.limit + " ";
 
-        Sparql_proxy.querySPARQL_GET_proxy(sourceVariables.url, query, sourceVariables.queryOptions, { source: sourceLabel }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(sourceVariables.url, query, sourceVariables.queryOptions, { source: sourceLabel, returnQueryStr: options && options.returnQueryStr }, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -139,7 +139,7 @@ var Sparql_SKOS = (function () {
         query += "} ";
         query += "limit " + sourceVariables.limit + " ";
 
-        Sparql_proxy.querySPARQL_GET_proxy(sourceVariables.url, query, sourceVariables.queryOptions, { source: sourceLabel }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(sourceVariables.url, query, sourceVariables.queryOptions, { source: sourceLabel, returnQueryStr: options && options.returnQueryStr }, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -219,7 +219,7 @@ var Sparql_SKOS = (function () {
                      query += " limit " + sourceVariables.limit + " ";*/
         }
 
-        Sparql_proxy.querySPARQL_GET_proxy(sourceVariables.url, query, sourceVariables.queryOptions, { source: sourceLabel }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(sourceVariables.url, query, sourceVariables.queryOptions, { source: sourceLabel, returnQueryStr: options && options.returnQueryStr }, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -402,7 +402,7 @@ var Sparql_SKOS = (function () {
         query += "  } ";
         query += "limit " + sourceVariables.limit + " ";
 
-        Sparql_proxy.querySPARQL_GET_proxy(sourceVariables.url, query, sourceVariables.queryOptions, { source: sourceLabel }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(sourceVariables.url, query, sourceVariables.queryOptions, { source: sourceLabel, returnQueryStr: options && options.returnQueryStr }, function (err, result) {
             if (err) {
                 return callback(err);
             }

@@ -55,7 +55,8 @@ export default function () {
             const paramsWithoutCallback = entry.params.filter((param) => param.name !== "callback");
             const positionalArgs = paramsWithoutCallback.map((param) => {
                 if (param.name === "options") {
-                    return params.options || {};
+                    const optionsFromRequest = params.options || {};
+                    return { ...optionsFromRequest, returnQueryStr };
                 }
                 return params[param.name];
             });
@@ -67,7 +68,7 @@ export default function () {
 
             const userContext = { user, userSources, tools: userTools };
 
-            RemoteCodeRunner.runVocablesFn({ moduleName, functionName: name, args: positionalArgs, returnQueryStr }, userContext, function (err, result) {
+            RemoteCodeRunner.runVocablesFn({ moduleName, functionName: name, args: positionalArgs }, userContext, function (err, result) {
                 if (err) {
                     return res.status(500).json({ message: err.message || String(err) });
                 }

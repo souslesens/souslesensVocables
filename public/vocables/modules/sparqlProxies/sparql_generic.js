@@ -843,7 +843,7 @@ var Sparql_generic = (function () {
             fromStr +
             " WHERE {?s ?p ?o. optional{?p ?x ?pLabel. filter(?x in (skos:prefLabel,rdfs:label))}}";
         var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (_err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel, returnQueryStr: options && options.returnQueryStr }, function (_err, result) {
             result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["p"]);
             return callback(null, result.results.bindings);
         });

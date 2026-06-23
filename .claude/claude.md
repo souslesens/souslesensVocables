@@ -1,3 +1,17 @@
+# Central Agent Rules
+
+Shared cross-agent rules live in:
+
+`C:\Users\kounnoughi\OneDrive - Jems\Documents\Obsidian Vault\AI\second-brain\Agent Rules\GLOBAL_AGENT_RULES.md`
+
+Read that file for global behavior across Claude Code, Codex, and future agents. If Karim asks to change a global agent rule, update the central file first, then update relevant adapters according to:
+
+`C:\Users\kounnoughi\OneDrive - Jems\Documents\Obsidian Vault\AI\second-brain\Agent Rules\RULE_CHANGE_PROTOCOL.md`
+
+Local/project-specific rules in this file still apply after these shared rules.
+
+---
+
 # SousLeSens Vocables - Claude Code Guidelines
 
 
@@ -472,22 +486,92 @@ Files already read in session: no re-read unless modified.
 - **Don't mix coding styles** - Follow refactoring-guidelines.md
 - **Don't skip the dual export** - Both ES6 + window.X needed
 
+## Code Readability Rules (MANDATORY)
+
+### No chained array/string methods
+
+Never chain `.split()`, `.map()`, `.filter()`, `.find()`, `.reduce()` one after another.
+Each step must be its own named variable so a human can read the intermediate state.
+
+```javascript
+// WRONG
+const lines = rawJsDoc.split("\n").map((l) => l.trim()).filter((l) => l.length > 0);
+
+// RIGHT
+const rawLines = rawJsDoc.split("\n");
+const trimmedLines = rawLines.map((line) => line.trim());
+const nonEmptyLines = trimmedLines.filter((line) => line.length > 0);
+```
+
+Chaining `.join()` after a single `.map()` is acceptable only when the result is extracted to a named variable first.
+
+### Extract regex into named constants
+
+Never put a regex literal directly inside `.match()`, `.replace()`, `.test()`, or `.split()`.
+Declare it as a named `const` above the usage, with a `Regex` suffix in camelCase. Never use UPPER_CASE for regex constants.
+
+```javascript
+// WRONG — inline regex
+const match = line.match(/^@param\s+\{([^}]+)\}\s+(\[?[\w.]+\]?)/);
+const cleaned = name.replace(/^\[|\]$/g, "");
+
+// WRONG — UPPER_CASE not allowed for regex
+const PARAM_TAG_RE = /^@param\s+\{([^}]+)\}\s+(\[?[\w.]+\]?)/;
+
+// RIGHT
+const paramTagRegex = /^@param\s+\{([^}]+)\}\s+(\[?[\w.]+\]?)/;
+const optionalBracketsRegex = /^\[|\]$/g;
+const match = line.match(paramTagRegex);
+const cleaned = name.replace(optionalBracketsRegex, "");
+```
+
+### No abbreviated names in callbacks
+
+Never use single-letter or cryptic names in `.map()`, `.filter()`, `.find()`, `.forEach()` callbacks.
+Always use the full semantic name for what the element represents.
+
+```javascript
+// WRONG
+registry.find((e) => e.name === name)
+entry.params.filter((p) => p.required)
+missingParams.map((p) => p.name)
+
+// RIGHT
+registry.find((registryEntry) => registryEntry.name === name)
+entry.params.filter((param) => param.required)
+missingParams.map((param) => param.name)
+```
+
+Destructured match groups: rename abbreviated captures immediately.
+
+```javascript
+// WRONG
+const [, type, rawName, desc] = paramMatch;
+
+// RIGHT
+const [, type, rawName, description] = paramMatch;
+```
+
 ## Debugging Tips
 
 ### Check the Browser Console
+
 Errors appear in browser console with stack traces
 
 ### Enable SPARQL Query Logging
+
 ```javascript
 Sparql_proxy.debugSparql = true;  // Logs all queries
 ```
 
 ### Inspect visjsData
+
 ```javascript
 console.log(KGquery_graph.visjsData);  // See current graph data
 ```
 
 ### Check Config
+
 ```javascript
 console.log(Config.sources);  // See available sources
 console.log(Config.currentSource);  // Current active source

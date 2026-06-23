@@ -235,7 +235,11 @@ var MappingTransform = (function () {
             $.ajax({
                 type: "GET",
                 url: Config.apiUrl + "/data/csv",
-                data: { dir: "CSV/" + (MappingModeler && MappingModeler.currentSLSsource ? MappingModeler.currentSLSsource : task.dsId), fileName: task.table },
+                data: {
+                    dir: "CSV/" + (MappingModeler && MappingModeler.currentSLSsource ? MappingModeler.currentSLSsource : task.dsId),
+                    fileName: task.table,
+                    options: JSON.stringify({ lines: 5000 }),
+                },
                 dataType: "json",
                 success: function (csvResult) {
                     if (!done) {

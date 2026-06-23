@@ -332,7 +332,7 @@ var DataSourceManager = (function () {
                     var payload = {
                         fileName: fileName,
                         dir: "CSV/" + slsvSource,
-                        lines: 100,
+                        options: JSON.stringify({ lines: 100 }),
                     };
                     $.ajax({
                         type: "GET",

@@ -10,6 +10,7 @@ export default function () {
         if (req.query.options) {
             options = JSON.parse(req.query.options);
         }
+
         dataController.readCsv(req.query.dir, req.query.fileName, options, function (err, result) {
             if (err) {
                 res.status(err.status || 500).json(err);

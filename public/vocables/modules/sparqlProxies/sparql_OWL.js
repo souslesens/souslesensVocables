@@ -97,8 +97,18 @@ var Sparql_OWL = (function () {
     };
     /**
      * Returns the top-level classes of an OWL source: `owl:Class` instances that have no parent
-     * via the source's taxonomy predicates (or that match the source's configured
-     * `topClassFilter`). Blank nodes are excluded; labels are fetched optionally and language-filtered.
+     * via the source's taxonomy predicates. Blank nodes are excluded; labels are fetched optionally
+     * and language-filtered.
+     *
+     * **Top-class filter priority** (first match wins):
+     * 1. `options.skipTopClassFilter` → no filter at all
+     * 2. `sources.json[source].topClassFilter` (non-empty, non-`"_default"`) → custom SPARQL filter string
+     * 3. Default: `?topConcept rdf:type owl:Class. FILTER(NOT EXISTS { ?topConcept <taxonomyPredicate> ?z })`
+     *
+     * **Other source-level config knobs** (`sources.json`):
+     * - `schemaType: "KNOWLEDGE_GRAPH"` — omits the `?topConcept rdf:type owl:Class.` triple
+     * - `sparql_server.no_params` — sends query as plain URL body instead of `?query=` param
+     *
      * @function
      * @name getTopConcepts
      * @memberof module:Sparql_OWL
@@ -106,9 +116,10 @@ var Sparql_OWL = (function () {
      * @param {Object} [options] - Query options
      * @param {boolean} [options.selectGraph] - Also bind each triple's named graph (`?subjectGraph`)
      * @param {boolean} [options.withoutImports] - Exclude imported graphs from the `FROM` clause
-     * @param {boolean} [options.skipTopClassFilter] - Do not apply the top-class filter
-     * @param {string} [options.filter] - Extra SPARQL filter appended to the query
-     * @param {(string|string[])} [options.filterCollections] - Restrict to top concepts reachable from these collections
+     * @param {boolean} [options.skipTopClassFilter] - Do not apply any top-class filter
+     * @param {string} [options.filter] - Extra SPARQL filter appended after the top-class filter
+     * @param {(string|string[])} [options.filterCollections] - Restrict to top concepts reachable from these SKOS collections
+     * @param {boolean} [options.returnQueryStr] - Return the SPARQL query string instead of executing it
      * @param {Function} callback - Error-first callback `(err, bindings)` with `?topConcept`/`?topConceptLabel`(/`?subjectGraph`)
      * @returns {void}
      * @expose
@@ -189,6 +200,7 @@ var Sparql_OWL = (function () {
             if (err) {
                 return callback(err);
             }
+            if (result.query) return callback(null, result);
             result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, "topConcept", {
                 type: "http://www.w3.org/2002/07/owl#Class",
                 source: sourceLabel,
@@ -335,6 +347,7 @@ var Sparql_OWL = (function () {
             if (err) {
                 return callback(err);
             }
+            if (result.query) return callback(null, result);
             result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["subject", "child"], { source: sourceLabel });
             return callback(null, result.results.bindings);
         });
@@ -381,6 +394,7 @@ var Sparql_OWL = (function () {
             if (err) {
                 return callback(err);
             }
+            if (result.query) return callback(null, result);
 
             return callback(null, result.results.bindings);
         });
@@ -413,6 +427,7 @@ var Sparql_OWL = (function () {
             if (err) {
                 return callback(err);
             }
+            if (result.query) return callback(null, result);
 
             return callback(null, result.results.bindings);
         });
@@ -496,6 +511,7 @@ var Sparql_OWL = (function () {
             if (err) {
                 return callback(err);
             }
+            if (result.query) return callback(null, result);
             return callback(null, result.results.bindings);
         });
     };
@@ -634,6 +650,7 @@ var Sparql_OWL = (function () {
             if (err) {
                 return callback(err);
             }
+            if (result.query) return callback(null, result);
             result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["subject", "broader"], { source: sourceLabel });
             return callback(null, result.results.bindings);
         });
@@ -700,6 +717,7 @@ var Sparql_OWL = (function () {
             if (err) {
                 return callback(err);
             }
+            if (result.query) return callback(null, result);
             result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["subject", "parent"], { source: sourceLabel });
 
             var parentsArray = [];
@@ -801,6 +819,7 @@ var Sparql_OWL = (function () {
             if (err) {
                 return callback(err);
             }
+            if (result.query) return callback(null, result);
 
             result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["class", "superClass", "subClass"], { source: sourceLabel });
 
@@ -938,6 +957,7 @@ var Sparql_OWL = (function () {
                 if (err) {
                     return callback(err);
                 }
+                if (result.query) return callback(null, result);
 
                 result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["class", "superClass", "superClassSubClass"], { source: sourceLabel });
 
@@ -1082,6 +1102,7 @@ var Sparql_OWL = (function () {
                 if (err) {
                     return callback(err);
                 }
+                if (result.query) return callback(null, result);
                 var map = {};
                 result.results.bindings.forEach(function (item) {
                     map[item.id.value] = item.types.value;
@@ -1181,6 +1202,7 @@ var Sparql_OWL = (function () {
             if (err) {
                 return callback(err);
             }
+            if (result.query) return callback(null, result);
             return callback(null, result.results.bindings);
         });
     };
@@ -1304,6 +1326,7 @@ var Sparql_OWL = (function () {
                     if (err) {
                         return callbackQuery(err);
                     }
+                    if (result.query) return callbackQuery(null, result);
                     result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["object", "prop", "subject"], {
                         source: sourceLabel,
                         caller: "getFilteredTriples",
@@ -1433,6 +1456,7 @@ var Sparql_OWL = (function () {
             if (err) {
                 return callback(err);
             }
+            if (result.query) return callback(null, result);
 
             result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, "subject", { source: sourceLabel });
             return callback(null, result.results.bindings);
@@ -1475,6 +1499,7 @@ var Sparql_OWL = (function () {
             if (err) {
                 return callback(err);
             }
+            if (result.query) return callback(null, result);
             result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["prop", "superPropLabel"], { source: sourceLabel });
             return callback(null, result.results.bindings);
         });
@@ -1610,6 +1635,7 @@ var Sparql_OWL = (function () {
             if (err) {
                 return callback(err);
             }
+            if (result.query) return callback(null, result);
             result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["prop", "inverseProp", "domain", "range"], { source: sourceLabel });
             if (options.addInverseRestrictions) {
                 delete options.addInverseRestrictions;
@@ -1672,6 +1698,7 @@ var Sparql_OWL = (function () {
             if (err) {
                 return callback(err);
             }
+            if (result.query) return callback(null, result);
             result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["property", "subProperty"], { source: sourceLabel });
             return callback(null, result.results.bindings);
         });
@@ -1811,6 +1838,7 @@ var Sparql_OWL = (function () {
                 if (err) {
                     return callback(err);
                 }
+                if (result.query) return callback(null, result);
                 Sparql_common.setSparqlResultPropertiesLabels(sourceLabel, result.results.bindings, "prop", function (err, result2) {
                     if (err) {
                         return callback(err);
@@ -1897,6 +1925,7 @@ var Sparql_OWL = (function () {
             if (err) {
                 return callback(err);
             }
+            if (result.query) return callback(null, result);
             result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["node", "subject"], { source: sourceLabel });
             return callback(null, result.results.bindings);
         });
@@ -1958,6 +1987,7 @@ var Sparql_OWL = (function () {
             if (err) {
                 return callback(err);
             }
+            if (result.query) return callback(null, result);
             result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["subject", "predicate"], { source: sourceLabel });
             return callback(null, result.results.bindings);
         });
@@ -2137,6 +2167,7 @@ var Sparql_OWL = (function () {
             if (err) {
                 return callback(err);
             }
+            if (result.query) return callback(null, result);
             result.results.bindings = Sparql_generic.setMissingLabels(result.results.bindings, ["prop", "subProp", "sourceClass", "targetClass"]);
             return callback(null, result.results.bindings);
         });
@@ -2313,6 +2344,7 @@ var Sparql_OWL = (function () {
                     if (err) {
                         return callbackWhilst(err);
                     }
+                    if (result.query) return callbackWhilst(null, result);
                     result = result.results.bindings;
                     resultSize = result.length;
                     totalSize += resultSize;
@@ -2436,6 +2468,7 @@ var Sparql_OWL = (function () {
                     if (err) {
                         return callbackWhilst(err);
                     }
+                    if (result.query) return callbackWhilst(null, result);
                     result = result.results.bindings; // Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["label"], { source: sourceLabel });
                     resultSize = result.length;
                     offset += limitSize;
@@ -2498,6 +2531,7 @@ var Sparql_OWL = (function () {
             if (err) {
                 return callback(err);
             }
+            if (result.query) return callback(null, result);
 
             return callback(null, result.results.bindings);
         });
@@ -2543,6 +2577,7 @@ var Sparql_OWL = (function () {
             if (err) {
                 return callback(err);
             }
+            if (result.query) return callback(null, result);
 
             return callback(null, result.results.bindings);
         });
@@ -2719,6 +2754,7 @@ var Sparql_OWL = (function () {
             if (err) {
                 return callback(err);
             }
+            if (result.query) return callback(null, result);
             result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["prop", "propRange", "domain", "range", "subProp", "inverseProp"], {
                 source: sourceLabel,
             });
@@ -2835,6 +2871,7 @@ var Sparql_OWL = (function () {
             if (err) {
                 return callback(err);
             }
+            if (result.query) return callback(null, result);
             result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["propDomain", "propRange", "domain", "range", "subProp", "inverseProp"], {
                 source: sourceLabel,
             });

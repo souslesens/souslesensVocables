@@ -140,6 +140,7 @@ var csvCrawler = {
             var jsonData = [];
             var jsonDataFetch = [];
             var fetchSize = 1000;
+            var linesRead = 0;
             var stream = fs.createReadStream(connector.filePath);
 
             var parser = csv({
@@ -162,12 +163,20 @@ var csvCrawler = {
                         }
                         if (emptyLine) return;
 
+                        linesRead++;
                         jsonDataFetch.push(data);
-                        if (maxLines && jsonData.length > maxLines / fetchSize) {
-                            jsonDataFetch = [];
-                        } else if (fetchSize && jsonDataFetch.length >= fetchSize) {
-                            jsonData.push(jsonDataFetch);
 
+                        if (maxLines && linesRead >= maxLines) {
+                            if (jsonDataFetch.length > 0) {
+                                jsonData.push(jsonDataFetch);
+                            }
+                            stream.destroy();
+                            parser.destroy();
+                            return callback(null, { headers: headers, data: jsonData });
+                        }
+
+                        if (fetchSize && jsonDataFetch.length >= fetchSize) {
+                            jsonData.push(jsonDataFetch);
                             jsonDataFetch = [];
                         }
                     })

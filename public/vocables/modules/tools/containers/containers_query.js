@@ -68,7 +68,7 @@ var Containers_query = (function () {
             pathOperator +
             " ?member.\n" +
             "  ?parent rdfs:member ?member .\n" +
-            "?member rdf:type ?memberType." +
+            "  OPTIONAL{?member rdf:type ?memberType.}" +
             "  OPTIONAL{?member rdfs:member ?subMember} " +
             "   OPTIONAL{?member rdfs:label ?memberLabel} \n" +
             "   OPTIONAL{?parent rdfs:label ?parentLabel} \n" +

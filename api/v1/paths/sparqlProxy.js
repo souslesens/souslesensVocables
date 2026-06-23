@@ -15,16 +15,6 @@ export default function () {
             if (req.body.POST) {
                 var body = JSON.parse(req.body.body);
                 var query = body.params.query;
-                if (false && (query.indexOf("http://purl.obolibrary.org/obo/vo.owl") > -1 || query.indexOf("http://purl.obolibrary.org/obo") > -1)) {
-                    try {
-                        Parliament.execPostQuery(query, function (err, result) {
-                            processResponse(res, err, result);
-                        });
-                    } catch (e) {
-                        next(e);
-                    }
-                    return;
-                }
 
                 if (ConfigManager.config && req.body.url.indexOf(ConfigManager.config.sparql_server.url) == 0) {
                     if (ConfigManager.config.sparql_server.user) {

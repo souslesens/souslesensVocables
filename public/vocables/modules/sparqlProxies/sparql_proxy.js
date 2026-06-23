@@ -67,6 +67,10 @@ var Sparql_proxy = (function () {
         if (url.indexOf("_default") == 0) {
             url = Config.sparql_server.url;
         }
+        if (query.toUpperCase().indexOf("CONSTRUCT ") > -1) {
+            url = url.replace("json", "text%2Fturtle");
+        }
+
         var sourceParams;
         var headers = {};
         if (options.source) {

@@ -58,9 +58,9 @@ var SubGraph = (function () {
                                 strFrom +
                                 "WHERE {" +
                                 "  ?s rdfs:subClassOf+ ?o. ?o rdf:type ?type " +
-                                filter +
-                                filterPropStr +
-                                optionalStr +
+                                (filter || "") +
+                                (filterPropStr || "") +
+                                (optionalStr || "") +
                                 " { ?o owl:onProperty ?property. ?o owl:someValuesFrom|owl:onClass ?targetClass  optional { ?o ?cardinalityType  ?cardinalityValue. filter (?cardinalityType in (owl:minCardinality,owl:maxCardinality,owl:cardinality,owl:maxQualifiedCardinality,owl:minQualifiedCardinality,owl:qualifiedCardinality))}}\n" +
                                 "  } limit 10000";
                             self.query(sourceLabel, query, function (err, result) {
@@ -512,7 +512,7 @@ var SubGraph = (function () {
             fromStr +
             " WHERE {\n" +
             "  ?s ?p ?o. " +
-            filter +
+            (filter || "") +
             "} limit 10000";
 
         self.query(sourceLabel, query, function (err, result) {

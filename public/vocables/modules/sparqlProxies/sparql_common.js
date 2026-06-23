@@ -292,9 +292,10 @@ var Sparql_common = (function () {
      */
     self.formatSparqlQuery = function (query) {
         return query.replace(/PREFIX|SELECT|FROM|WHERE|LIMIT/gim, function (value) {
-            if (query.indexOf("\n" + value) < 0)
+            if (query.indexOf("\n" + value) < 0) {
                 // we do it only once
                 return "\n" + value.toUpperCase();
+            }
             return value;
         });
     };
@@ -427,6 +428,7 @@ var Sparql_common = (function () {
 
         return filterStr;
     };*/
+
     // new version that handles blank nodes (nodeID://)
     function escapeSparqlStringLiteral(str) {
         return str.replace(/\\/g, "\\\\").replace(/"/g, "'").replace(/\n/g, "\\n").replace(/\r/g, "\\r").replace(/\t/g, "\\t");
@@ -838,15 +840,16 @@ var Sparql_common = (function () {
             }
         }
 
-        if (self.includeImports) {
-            for (var source in Config.sources) {
-                if (from.indexOf(Config.sources[source].graphUri) < 0) {
-                    if (Config.sources[source].isDictionary) {
-                        fromStr += from + "  <" + Config.sources[source].graphUri + "> ";
-                    }
+        if (options.includeSources) {
+            if (!Array.isArray(options.includeSources)) options.includeSources = [options.includeSources];
+            options.includeSources.forEach(function (source) {
+                var importGraphUri = Config.sources[source].graphUri;
+                if (importGraphUri && from.indexOf(importGraphUri) < 0) {
+                    fromStr += from + "  <" + Config.sources[source].graphUri + "> ";
                 }
-            }
+            });
         }
+
         if (options.includeSources) {
             if (!Array.isArray(options.includeSources)) {
                 options.includeSources = [options.includeSources];

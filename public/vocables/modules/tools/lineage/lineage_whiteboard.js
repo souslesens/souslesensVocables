@@ -3314,7 +3314,7 @@ if(item.subject.value=='_:b02d0194c19'){
         if (node && !node.from && !(node.data && node.data.rdfType === "literal")) {
             html += '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.showHierarchicalView();">Horizontal view </span>';
             html += '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.showVerticalView();">Vertical view </span>';
-            html += `<span class="popupMenuItem" style="font-family: Courier" onclick="Lineage_nodeCentricGraph.exportVisjsGraphTreeText();">tree text</span>`;
+            html += `<span class="popupMenuItem" style="font-family: Courier" onclick="Lineage_nodeCentricGraph.showVisjsGraphTreeTextDialog();">tree text</span>`;
 
             html += '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.listAllNodeRelations();">List All relations </span>';
             html += '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.drawAxioms();">Draw xioms</span>';

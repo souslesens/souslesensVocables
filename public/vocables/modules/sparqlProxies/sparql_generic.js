@@ -1170,6 +1170,7 @@ var Sparql_generic = (function () {
                     function buildParentChain(nodeId) {
                       if(self.processedParents[nodeId])
                           return []
+
                         self.processedParents[nodeId]=1
                         var obj = allClassesMap[nodeId];
                         if (!obj || obj._chainBuilt) return obj ? obj.parents : [];

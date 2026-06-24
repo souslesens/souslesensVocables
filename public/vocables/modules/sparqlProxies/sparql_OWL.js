@@ -2282,7 +2282,7 @@ var Sparql_OWL = (function () {
         });
     };
 
-    self.getPropertiesInheritedConstraints = function (sourceLabel, properties, options, callback) {
+    self.getPropertiesInheritedConstraints = function (sourceLabel, properties, options, callback) {etNodeChilren
         var fromStr = Sparql_common.getFromStr(sourceLabel, options.withGraph, options.withoutImports);
         var filterProps = Sparql_common.setFilter("prop0", properties, null, { useFilterKeyWord: 1 });
         var query =

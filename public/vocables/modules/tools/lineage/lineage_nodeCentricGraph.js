@@ -311,8 +311,8 @@ if(false) {
         $("#mainDialogDiv").load("modules/tools/lineage/html/lineage_textTreeDialog.html", function () {
             //   self.loadVisjsGraphTreeTextJstree()
             $("#mainDialogDiv").dialog("open");
-            $("#mainDialogDiv").width(1000);
-            //   UI.clampAndCenterDialog("mainDialogDiv");
+           // $("#mainDialogDiv").width(1000);
+             UI.clampAndCenterDialog("mainDialogDiv");
 
 
             //   $("#Lineage_graphTraversal_numberOfPathes").prop("disabled", true);
@@ -517,7 +517,7 @@ if(false && node.data.isInverse)
 
         var nl = String.fromCharCode(10)
         var nl = "<br>"
-        var whiteSpace = "|&nbsp;&nbsp;"
+        var whiteSpace = "&nbsp;"
         var str = ""
 
 
@@ -591,15 +591,15 @@ var rootNode = Lineage_whiteboard.currentGraphNode;
     /**   --------------recurse---------*/
 
     function recurse( nodeId, level,parentId) {
-        str += "│"
+var hasDirectRelation=false
         var node = nodesMap[nodeId]
-        for (var i = 1; i < level; i++) {
+        for (var i = 1; i <= level; i++) {
 
-                str += "──"
-
+              //  str += "──"
+            str += "+&nbsp;&nbsp;"
 
         }
-
+     //   str += "│"
 
         var label = node.data.label
 
@@ -610,13 +610,13 @@ var rootNode = Lineage_whiteboard.currentGraphNode;
 
 
         if (level ===0) {
-            str += label + nl
+           ;// str += label + nl
         } else {
             var edgesTo=edgesToMap[node.id]
-            if(edgesTo) {
+            if(edgesTo && !inverses) {
                 edgesTo.forEach(function (edgeTo) {
                     if (edgeTo.from === parentId && edgeTo.label) {
-                        label = "─<i>[" + edgeTo.label + "]</i>──>" + label
+                        label = "<i>[" + edgeTo.label + "]</i>─>" +whiteSpace+ label
                     }
                 })
             }else {
@@ -624,14 +624,16 @@ var rootNode = Lineage_whiteboard.currentGraphNode;
                 if (edgesFrom) {
                     edgesFrom.forEach(function (edgeFrom) {
                         if (edgeFrom.to === parentId && edgeFrom.label) {
-                            label = "<─<i>[" + edgeFrom.label + "]</i>──" + label
+                            label = "<─<i>[" + edgeFrom.label + "]</i>"+whiteSpace + label
                         }
                     })
+                }else  {
+
                 }
             }
 
         }
-        str += "── " + label + nl
+        str += "" + label + nl
 
         if (edgesFromMap[nodeId]) {
             edgesFromMap[nodeId].forEach(function (edge) {
@@ -645,6 +647,7 @@ var rootNode = Lineage_whiteboard.currentGraphNode;
                                 }
                             }
                             else if(relations ) {
+                                hasDirectRelation=true
                                 recurse(edge.to, level + 1, node.id)
                             }
                         }
@@ -665,7 +668,7 @@ var rootNode = Lineage_whiteboard.currentGraphNode;
                                     recurse(edge.from, level + 1, node.id)
                                 }
                             }
-                            else if(inverses ) {
+                            else if(inverses  && !hasDirectRelation) {
                                 recurse(edge.from, level + 1, node.id)
                             }
                         }

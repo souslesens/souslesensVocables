@@ -364,6 +364,13 @@ const KGbuilder_triplesWriter = {
         return str;
     },
 
+    formatSparqlResource: function (resourceId) {
+        if (resourceId && resourceId.startsWith("http")) {
+            return "<" + resourceId + ">";
+        }
+        return resourceId;
+    },
+
     formatSampleTriples: function (bindings, item) {
         var sampleTriples = [];
 
@@ -391,6 +398,19 @@ const KGbuilder_triplesWriter = {
                         var predicateUri = "<" + item.propertyUri + ">";
                         var objectUri = "<" + binding.obj.value + ">";
                         sampleTriples.push(subjectUri + " " + predicateUri + " " + objectUri);
+                    }
+                });
+            },
+            ClassRelation: function () {
+                bindings.forEach(function (binding) {
+                    if (binding.sub && binding.targetClass) {
+                        var subjectUri = "<" + binding.sub.value + ">";
+                        var predicateUri = KGbuilder_triplesWriter.formatSparqlResource(item.propertyUri);
+                        var objectUri = KGbuilder_triplesWriter.formatSparqlResource(binding.targetClass.value);
+                        sampleTriples.push(subjectUri + " " + predicateUri + " " + objectUri);
+                        if (item.propertyUri === "rdfs:subClassOf") {
+                            sampleTriples.push(subjectUri + " rdf:type owl:Class");
+                        }
                     }
                 });
             },
@@ -505,6 +525,47 @@ const KGbuilder_triplesWriter = {
                         "} " +
                         "}",
                     deleteClause: "DELETE { " + "GRAPH <" + graphUri + "> { " + "?sub <" + item.propertyUri + "> ?obj . " + "} " + "}",
+                };
+            },
+            ClassRelation: function () {
+                var formattedPredicate = KGbuilder_triplesWriter.formatSparqlResource(item.propertyUri);
+                var formattedTargetClass = KGbuilder_triplesWriter.formatSparqlResource(item.targetClassUri);
+                var subjectRdfTypeClause = "";
+                if (item.subjectRdfType) {
+                    subjectRdfTypeClause = "?sub rdf:type " + KGbuilder_triplesWriter.formatSparqlResource(item.subjectRdfType) + " . ";
+                }
+                return {
+                    selectVars: "?sub ?targetClass",
+                    whereClause:
+                        "WHERE { " +
+                        "GRAPH <" +
+                        graphUri +
+                        "> { " +
+                        "{ " +
+                        "SELECT ?sub ?targetClass " +
+                        "WHERE { " +
+                        "?sub " +
+                        formattedPredicate +
+                        " ?targetClass . " +
+                        "FILTER (?targetClass = " +
+                        formattedTargetClass +
+                        ") . " +
+                        subjectRdfTypeClause +
+                        "} " +
+                        "LIMIT " +
+                        batchSize +
+                        " " +
+                        "} " +
+                        "} " +
+                        "}",
+                    deleteClause:
+                        "DELETE { GRAPH <" +
+                        graphUri +
+                        "> { ?sub " +
+                        formattedPredicate +
+                        " ?targetClass . " +
+                        (item.propertyUri === "rdfs:subClassOf" ? "?sub rdf:type owl:Class . " : "") +
+                        "} }",
                 };
             },
         };

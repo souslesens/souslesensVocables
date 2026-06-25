@@ -100,7 +100,6 @@ var Containers_graph = (function () {
                     }
                 }
 
-
                 // edge from childParent to Child
                 if (item.child) {
                     var edgeId = item.childParent.value + "_" + "member" + "_" + item.child.value;
@@ -116,8 +115,9 @@ var Containers_graph = (function () {
                             data: {
                                 from: item.childParent.value,
                                 to: item.child.value,
-                                source: source ,
-                                type:"hasMember"},
+                                source: source,
+                                type: "hasMember",
+                            },
                             font: { multi: true, size: 10 },
 
                             //  dashes: true,
@@ -272,7 +272,7 @@ var Containers_graph = (function () {
                                         from: item.parent.value,
                                         to: item.member.value,
                                         source: source,
-                                        type:"hasMember"
+                                        type: "hasMember",
                                     },
                                     //  dashes: true,
                                     width: type == "container" ? 1 : 0.5,

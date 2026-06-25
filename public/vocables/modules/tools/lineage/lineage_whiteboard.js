@@ -1931,7 +1931,7 @@ var Lineage_whiteboard = (function () {
         options.skipRestrictions = 1;
         options.selectGraph = 1;
         options.includeSources = [MainController.currentSource];
-       // options.filter = ' FILTER (regex(str(?child1),"http"))';
+        // options.filter = ' FILTER (regex(str(?child1),"http"))';
 
         Sparql_generic.getNodeChildren(source, null, parentIds, depth, options, function (err, result) {
             if (err) {
@@ -5367,7 +5367,6 @@ attrs.color=self.getSourceColor(superClassValue)
             self.initUI();
         }
     };
-
 
     return self;
 })();

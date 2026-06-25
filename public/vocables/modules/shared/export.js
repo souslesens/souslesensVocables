@@ -509,7 +509,7 @@ fixedColumns: true*/
         }
         if (visjsGraph == "KGquery_graph.KGqueryGraph") {
             html += `<span class="popupMenuItem" onclick="KGquery_graph.exportVisjsGraph();">JSON</span>`;
-             }
+        }
         if (visjsGraph == "Lineage_whiteboard.graph") {
             html += `<span class="popupMenuItem" onclick="Lineage_whiteboard.graph.exportWhiteboard();">JSON</span>`;
         }
@@ -555,7 +555,6 @@ fixedColumns: true*/
     };
 
     self.downloadText = function (text, fileName) {
-
         const blob = new Blob([text], { type: "text/plain; charset=utf-8" });
         const link = document.createElement("a");
 

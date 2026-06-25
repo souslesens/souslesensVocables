@@ -446,10 +446,9 @@ var TriplesMaker = {
                         addTriple(triple.s, triple.p, triple.o);
                         if (!tableProcessingParams.isSampleData) {
                             var metaDataTriples = TriplesMaker.getMetaDataTriples(triple.s, tableProcessingParams.tableInfos.table);
-                            batchTriples = batchTriples.concat(metaDataTriples)
+                            batchTriples = batchTriples.concat(metaDataTriples);
                         }
-                           });
-
+                    });
                 } else {
                     addTriple(subjectUri, property, objectUri);
                 }
@@ -755,7 +754,7 @@ var TriplesMaker = {
         return objectStr;
     },
 
-    getRestrictionTriples: function (subjectUri, predicateUri, objectUri, restrictionType,tableProcessingParams, options) {
+    getRestrictionTriples: function (subjectUri, predicateUri, objectUri, restrictionType, tableProcessingParams, options) {
         if (!options) {
             options = {};
         }

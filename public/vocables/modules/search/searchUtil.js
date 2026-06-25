@@ -525,7 +525,7 @@ indexes.push(source.toLowerCase());
         var bulQueryStr = "";
         var slices = common.array.slice(words, 100);
         var allResults = [];
-        size=900//for fuzzy match
+        size=options.size || 900//for fuzzy match
         async.eachSeries(
             slices,
             function (wordSlice, callbackEach) {

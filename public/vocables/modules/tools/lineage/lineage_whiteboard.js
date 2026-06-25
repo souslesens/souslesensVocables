@@ -29,6 +29,7 @@ import LegendOverlayWidget from "../../uiWidgets/legendOverlayWidget.js";
 import Lineage_legendOverlay from "./lineage_legendOverlay.js";
 import Axioms_graph from "../axioms/axioms_graph.js";
 import Axioms_manager from "../axioms/axioms_manager.js";
+import KGquery from "../KGquery/KGquery.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -1930,7 +1931,7 @@ var Lineage_whiteboard = (function () {
         options.skipRestrictions = 1;
         options.selectGraph = 1;
         options.includeSources = [MainController.currentSource];
-        options.filter = ' FILTER (regex(str(?child1),"http"))';
+        // options.filter = ' FILTER (regex(str(?child1),"http"))';
 
         Sparql_generic.getNodeChildren(source, null, parentIds, depth, options, function (err, result) {
             if (err) {
@@ -2994,7 +2995,9 @@ restrictionSource = Config.predicatesSource;
                     if (!item.subject.value.startsWith("http") || !item.value.value.startsWith("http")) {
                         return;
                     }
-
+                    if (item.subject.value == "_:b02d0194c19") {
+                        var x = 3;
+                    }
                     if (!existingNodes[item.subject.value]) {
                         existingNodes[item.subject.value] = 1;
 
@@ -3384,6 +3387,8 @@ restrictionSource = Config.predicatesSource;
         if (node && !node.from && !(node.data && node.data.rdfType === "literal")) {
             html += '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.showHierarchicalView();">Horizontal view </span>';
             html += '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.showVerticalView();">Vertical view </span>';
+            html += `<span class="popupMenuItem" style="font-family: Courier" onclick="Lineage_nodeCentricGraph.showVisjsGraphTreeTextDialog();">tree text</span>`;
+
             html += '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.listAllNodeRelations();">List All relations </span>';
             html += '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.drawAxioms();">Draw xioms</span>';
         }

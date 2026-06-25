@@ -325,28 +325,16 @@ var TriplesMaker = {
 
             for (var columnId in columnMappings) {
                 // filter columns
-                var allowedPredicateFilters = null;
                 if (options.filterMappingIds) {
                     var columnIsDirectlySelected = options.filterMappingIds.indexOf(columnId) > -1;
-                    var compositePredicateFilters = [];
-                    for (var filterIndex = 0; filterIndex < options.filterMappingIds.length; filterIndex++) {
-                        var filterMappingId = options.filterMappingIds[filterIndex];
-                        if (typeof filterMappingId !== "string") {
-                            continue;
-                        }
-                        var filterParts = filterMappingId.split(">");
-                        if (filterParts[0] === columnId && filterParts[1]) {
-                            compositePredicateFilters.push({
-                                predicate: filterParts[1],
-                                object: filterParts[2] || null,
-                            });
-                        }
-                    }
-                    if (!columnIsDirectlySelected && compositePredicateFilters.length === 0) {
+                    var columnHasCompositeFilter = options.filterMappingIds.some(function (filterId) {
+                        return filterId.split(">")[0] === columnId && filterId.split(">")[1];
+                    });
+                    var filterHasOnlyPredicates = options.filterMappingIds.every(function (filterId) {
+                        return filterId.indexOf(">") < 0 && (MappingParser.isConstantUri(filterId) || MappingParser.isConstantPrefixedUri(filterId));
+                    });
+                    if (!columnIsDirectlySelected && !columnHasCompositeFilter && !filterHasOnlyPredicates) {
                         continue;
-                    }
-                    if (!columnIsDirectlySelected) {
-                        allowedPredicateFilters = compositePredicateFilters;
                     }
                 }
 
@@ -361,6 +349,20 @@ var TriplesMaker = {
                     continue;
                 }
 
+                var allowedPredicates = null;
+                if (options.filterMappingIds) {
+                    var compositePredicates = options.filterMappingIds
+                        .filter(function (filterId) {
+                            return filterId.split(">")[0] === columnId && filterId.split(">")[1];
+                        })
+                        .map(function (filterId) {
+                            return filterId.split(">")[1];
+                        });
+                    if (compositePredicates.length > 0) {
+                        allowedPredicates = compositePredicates;
+                    }
+                }
+
                 var mappings = columnMappings[columnId].mappings;
                 mappings.forEach(function (mapping) {
                     if (!mapping) {
@@ -369,22 +371,8 @@ var TriplesMaker = {
                     if (!columnId) {
                         return;
                     }
-                    if (allowedPredicateFilters) {
-                        var mappingIsAllowed = false;
-                        allowedPredicateFilters.forEach(function (predicateFilter) {
-                            if (mappingIsAllowed) {
-                                return;
-                            }
-                            if (predicateFilter.predicate === mapping.p && (!predicateFilter.object || predicateFilter.object === mapping.o)) {
-                                mappingIsAllowed = true;
-                            }
-                            if (predicateFilter.predicate === "rdfs:subClassOf" && mapping.p === "rdf:type" && mapping.o === "owl:Class") {
-                                mappingIsAllowed = true;
-                            }
-                        });
-                        if (!mappingIsAllowed) {
-                            return;
-                        }
+                    if (allowedPredicates && allowedPredicates.indexOf(mapping.p) < 0) {
+                        return;
                     }
 
                     var object = null;
@@ -441,9 +429,13 @@ var TriplesMaker = {
                 var property = TriplesMaker.getPropertyUri(edge.data.id);
 
                 if (edge.isRestriction) {
-                    var triples = TriplesMaker.getRestrictionTriples(subjectUri, property, objectUri, edge.restrictionType, { cardinality: edge.cardinality });
+                    var triples = TriplesMaker.getRestrictionTriples(subjectUri, property, objectUri, edge.retrictionType, tableProcessingParams);
                     triples.forEach(function (triple) {
                         addTriple(triple.s, triple.p, triple.o);
+                        if (!tableProcessingParams.isSampleData) {
+                            var metaDataTriples = TriplesMaker.getMetaDataTriples(triple.s, tableProcessingParams.tableInfos.table);
+                            batchTriples = batchTriples.concat(metaDataTriples);
+                        }
                     });
                 } else {
                     addTriple(subjectUri, property, objectUri);
@@ -750,7 +742,7 @@ var TriplesMaker = {
         return objectStr;
     },
 
-    getRestrictionTriples: function (subjectUri, predicateUri, objectUri, restrictionType, options) {
+    getRestrictionTriples: function (subjectUri, predicateUri, objectUri, restrictionType, tableProcessingParams, options) {
         if (!options) {
             options = {};
         }
@@ -776,24 +768,11 @@ var TriplesMaker = {
             o: predicateUri,
         });
 
-        if (options.cardinality && options.cardinality.value) {
-            triples.push({
-                s: blankNode,
-                p: "<" + restrictionType + ">",
-                o: '"' + options.cardinality.value + '"^^<http://www.w3.org/2001/XMLSchema#nonNegativeInteger>',
-            });
-            triples.push({
-                s: blankNode,
-                p: "<http://www.w3.org/2002/07/owl#onClass>",
-                o: objectUri,
-            });
-        } else {
-            triples.push({
-                s: blankNode,
-                p: "<" + restrictionType + ">",
-                o: objectUri,
-            });
-        }
+        triples.push({
+            s: blankNode,
+            p: "<" + restrictionType + ">",
+            o: objectUri,
+        });
 
         triples.push({
             s: subjectUri,

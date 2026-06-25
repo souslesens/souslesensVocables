@@ -1,0 +1,18 @@
+<div>
+    <div style="display: flex; flex-direction: row; min-width: 800px">
+        <div style="width: 350px; height: 500px">
+            <div id="VisjsGraphTreeTextJstree"></div>
+
+            <input type="checkbox" checked="checked" id="VisjsGraphTreeTextClasHierarchyCBX" />Class hierarchy<br />
+            <input type="checkbox" id="VisjsGraphTreeTextOutgoingRelationsCBX" />Outgoing relations<br />
+            <input type="checkbox" id="VisjsGraphTreeTextIngoingRelationsCBX" />Ingoing relations<br />
+            <br />
+            <input type="checkbox" id="VisjsGraphTreeTextIngoingNoRoot" />No rootNode<br />
+            <button onclick="Lineage_nodeCentricGraph.exportVisjsGraphTreeText()">OK</button>
+        </div>
+        <div style="width: 600px; height: 800px">
+            <!--  <textarea id="VisjsGraphTreeTextTA" style="width:600px;height:800px;overflow:auto"></textarea>-->
+            <div id="VisjsGraphTreeTextTA" style="width: 600px; height: 800px; overflow: auto; background-color: white; font-family: ui-monospace" contenteditable="true"></div>
+        </div>
+    </div>
+</div>

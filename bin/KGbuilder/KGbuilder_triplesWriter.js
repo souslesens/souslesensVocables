@@ -234,7 +234,7 @@ const KGbuilder_triplesWriter = {
                 sendImmediately: false,
             };
         }
-
+        // count triples for progress bar before deletion  by batch
         httpProxy.post(sparqlServerUrl, null, paramsCount, function (err, countResult) {
             if (err) {
                 return callback(err);

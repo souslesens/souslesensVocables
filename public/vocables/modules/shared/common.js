@@ -881,6 +881,8 @@ str = str.replace(/%2F/gm, "/");*/
         "#f27c96",
     ];
 
+    self.palette5colors = ["#8B1E3F", "#C05621", "#6B8E23", "#0F766E", "#1F4E79"];
+
     self.resourceColorPalettes = {};
     self.quantumModelmappingSources = {
         "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/PhysicalQuantity": "ISO_15926-part-14",

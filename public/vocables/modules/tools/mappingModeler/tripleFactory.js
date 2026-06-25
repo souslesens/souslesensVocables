@@ -91,22 +91,8 @@ var TripleFactory = (function () {
             return alert(" no mappings selected");
         }
         var filterMappingIds = [];
-        // a leaf predicate (id composite "columnId>predicate") fait cocher en cascade son parent colonne :
-        // on exclut alors l'id colonne nu pour ne garder que le prédicat sélectionné
-        var parentColumnIdsOfSelectedPredicates = {};
         checkedNodes.forEach(function (item) {
-            var filterMappingId = item.data && item.data.filterMappingId ? item.data.filterMappingId : item.id;
-            if (filterMappingId.indexOf(">") > -1) {
-                var parentColumnId = filterMappingId.split(">")[0];
-                parentColumnIdsOfSelectedPredicates[parentColumnId] = true;
-            }
-        });
-        checkedNodes.forEach(function (item) {
-            var filterMappingId = item.data && item.data.filterMappingId ? item.data.filterMappingId : item.id;
-            if (parentColumnIdsOfSelectedPredicates[filterMappingId]) {
-                return;
-            }
-            filterMappingIds.push(filterMappingId);
+            filterMappingIds.push(item.id);
         });
         try {
             var offset = parseInt($("#mappingTripleFactory_offset").val());
@@ -855,18 +841,12 @@ var TripleFactory = (function () {
         ];
 
         self.columnsMap = {};
-        var classNodesMap = {};
-        var allColumnNodesById = {};
         nodes.forEach(function (node) {
-            if (node.data && node.data.type === "Class") {
-                classNodesMap[node.id] = node;
-            }
-            if (node.data && MappingModeler.columnsMappingsObjects.includes(node.data.type)) {
-                allColumnNodesById[node.id] = node;
-                if (node.data.dataTable == table) {
-                    self.columnsMap[node.id] = node;
-                    // add node to treeData only if node master or if he adding a new other predicate compared to the master node
-                    if (!node.data.definedInColumn || (node.data.otherPredicates && node.data.otherPredicates.length > 0)) {
+            if (node.data && MappingModeler.columnsMappingsObjects.includes(node.data.type) && (node.data.dataTable == table || node.data.type == "Class")) {
+                self.columnsMap[node.id] = node;
+                // add node to treeData only if node master or if he adding a new other predicate compared to the master node
+                if (!node.data.definedInColumn || (node.data.otherPredicates && node.data.otherPredicates.length > 0)) {
+                    if (node.data.type != "Class") {
                         treeData.push({
                             id: node.id,
                             text: node.label,
@@ -879,37 +859,12 @@ var TripleFactory = (function () {
         });
 
         edges.forEach(function (edge) {
-            var fromMappingNode = self.columnsMap[edge.from];
-            var toMappingNode = self.columnsMap[edge.to];
-            var toClassNode = classNodesMap[edge.to];
-            if (fromMappingNode && toMappingNode) {
-                var label = fromMappingNode.label + "-" + edge.label + "->" + toMappingNode.label;
+            if (self.columnsMap[edge.from] && self.columnsMap[edge.to]) {
+                var label = self.columnsMap[edge.from].label + "-" + edge.label + "->" + self.columnsMap[edge.to].label;
                 treeData.push({
                     id: edge.id,
                     text: label,
                     parent: "Relations",
-                });
-            } else if (fromMappingNode && toClassNode && edge.data && (edge.data.type === "rdfs:subClassOf" || edge.data.type === "rdf:type")) {
-                var targetClassLabel = toClassNode.label || edge.to;
-                var effectiveRdfType = fromMappingNode.data.rdfType;
-                if (!effectiveRdfType && fromMappingNode.data.definedInColumn) {
-                    var definingColumnNode = allColumnNodesById[fromMappingNode.data.definedInColumn];
-                    if (definingColumnNode) {
-                        effectiveRdfType = definingColumnNode.data.rdfType;
-                    }
-                }
-                var filterPredicate = effectiveRdfType === "owl:Class" ? "rdfs:subClassOf" : edge.data.type;
-                var rawEdgeLabel = edge.label === "a" ? "rdf:type" : edge.label;
-                var edgeDisplayLabel = rawEdgeLabel || filterPredicate;
-                var classRelationLabel = fromMappingNode.label + "-" + edgeDisplayLabel + "->" + targetClassLabel;
-                treeData.push({
-                    id: edge.id,
-                    text: classRelationLabel,
-                    parent: "Relations",
-                    data: {
-                        type: "classRelation",
-                        filterMappingId: edge.from + ">" + filterPredicate + ">" + toClassNode.data.id,
-                    },
                 });
             }
         });
@@ -924,7 +879,7 @@ var TripleFactory = (function () {
                     if (otherPredicates) {
                         otherPredicates.forEach(function (item) {
                             jstreeData.push({
-                                id: obj.node.id + ">" + item.property,
+                                id: item.property,
                                 text: item.property,
                                 parent: obj.node.id,
                                 data: { type: "otherPredicate" },
@@ -938,6 +893,14 @@ var TripleFactory = (function () {
                             text: "rdfs:label",
                             parent: obj.node.id,
                             data: { type: "rdfsLabel" },
+                        });
+                    }
+                    if (obj.node.data.rdfType) {
+                        jstreeData.push({
+                            id: obj.node.id + ">" + "rdf:type",
+                            text: "rdf:type",
+                            parent: obj.node.id,
+                            data: { type: "rdfType" },
                         });
                     }
                     JstreeWidget.addNodesToJstree(divId, obj.node.id, jstreeData);
@@ -975,25 +938,6 @@ var TripleFactory = (function () {
                     return;
                 }
                 edge = edge[0];
-                var fromMappingNode = mappingNodes[edge.from];
-                var toMappingNode = mappingNodes[edge.to];
-                if (
-                    fromMappingNode &&
-                    toMappingNode &&
-                    toMappingNode.data &&
-                    toMappingNode.data.type === "Class" &&
-                    edge.data &&
-                    (edge.data.type === "rdfs:subClassOf" || edge.data.type === "rdf:type")
-                ) {
-                    filterMappingIds.push({
-                        id: item.id,
-                        type: "ClassRelation",
-                        subjectRdfType: fromMappingNode.data.rdfType,
-                        targetClassUri: toMappingNode.data.id,
-                        propertyUri: edge.data.id || edge.data.type,
-                    });
-                    return;
-                }
                 var startingClass;
                 if (edge.from && mappingNodes[edge.from]) {
                     startingClass = MappingColumnsGraph.getColumnClass(mappingNodes[edge.from]);
@@ -1014,8 +958,11 @@ var TripleFactory = (function () {
                 var parentNode = $("#detailedMappings_filterMappingsTree").jstree("get_node", item.parent);
                 var columnClassPredicate = MappingColumnsGraph.getColumnClass(parentNode);
                 if (columnClassPredicate) {
-                    // otherPredicate, rdfsLabel et rdfType ont un id composite "parentId>predicate" : on prend la partie après ">"
-                    var predicateId = item.id.split(">")[1];
+                    // Pour rdfsLabel et rdfType, l'id contient "parentId>predicate", donc on prend la partie après ">"
+                    var predicateId = item.id;
+                    if (item.data.type == "rdfsLabel" || item.data.type == "rdfType") {
+                        predicateId = item.id.split(">")[1];
+                    }
                     filterMappingIds.push({ id: predicateId, type: "otherPredicate", classUri: columnClassPredicate });
                     nodeIdsToFilter[item.parent] = true;
                 }

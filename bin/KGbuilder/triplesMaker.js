@@ -436,7 +436,12 @@ var TriplesMaker = {
                     var triples = TriplesMaker.getRestrictionTriples(subjectUri, property, objectUri, edge.retrictionType, tableProcessingParams);
                     triples.forEach(function (triple) {
                         addTriple(triple.s, triple.p, triple.o);
+                        if (!tableProcessingParams.isSampleData) {
+                            var metaDataTriples = TriplesMaker.getMetaDataTriples(triple.s, tableProcessingParams.tableInfos.table);
+                            batchTriples = batchTriples.concat(metaDataTriples)
+                        }
                            });
+
                 } else {
                     addTriple(subjectUri, property, objectUri);
                 }
@@ -781,10 +786,7 @@ var TriplesMaker = {
             p: "rdfs:subClassOf",
             o: blankNode,
         });
-        if (!tableProcessingParams.isSampleData) {
-            var metaDataTriples = TriplesMaker.getMetaDataTriples(blankNode, tableProcessingParams.tableInfos.table);
-            triples = triples.concat(metaDataTriples)
-        }
+
         TriplesMaker.existingRestrictions[subjectUri + predicateUri + objectUri] = 1;
 
         return triples;

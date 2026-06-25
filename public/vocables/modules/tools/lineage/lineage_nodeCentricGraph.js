@@ -8,6 +8,7 @@ import Lineage_graphPaths from "./lineage_graphPaths.js";
 import GraphPaths_bot from "../../bots/graphPaths_bot.js";
 import common from "../../shared/common.js";
 import JstreeWidget from "../../uiWidgets/jstreeWidget.js";
+import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 
 var Lineage_nodeCentricGraph = (function () {
     var self = {};
@@ -35,16 +36,16 @@ var Lineage_nodeCentricGraph = (function () {
         var nodesMap = {};
         var existingNodes = {};
 
-        var allNodes= Lineage_whiteboard.lineageVisjsGraph.data.nodes.get()
-        allNodes=JSON.parse(JSON.stringify(allNodes))
+        var allNodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get()
+        allNodes = JSON.parse(JSON.stringify(allNodes))
 
         allNodes.forEach(function (item) {
             item.data.relation = null;
             nodesMap[item.id] = item;
         });
 
-        var allEdges= Lineage_whiteboard.lineageVisjsGraph.data.edges.get()
-        allEdges=JSON.parse(JSON.stringify(allEdges))
+        var allEdges = Lineage_whiteboard.lineageVisjsGraph.data.edges.get()
+        allEdges = JSON.parse(JSON.stringify(allEdges))
 
 
         allEdges.forEach(function (item) {
@@ -54,27 +55,26 @@ var Lineage_nodeCentricGraph = (function () {
 
             edgesFromMap[item.from].push(item);
 
-          /*  if(options.parents) {
-                if (item.data && item.data.type === "parent") {
-                    var newEdge = {
-                        from: item.to,
-                        to: item.from,
-                        data: item.data,
-                        id: common.getRandomHexaId(6),
-                        label: item.label
-                    }
-                    // nodesMap[edge.from].data.isInverse=true
-                    if (newEdge.data.type === "parent") {
-                        // newEdge.data.type = null;
-                    }
+            /*  if(options.parents) {
+                  if (item.data && item.data.type === "parent") {
+                      var newEdge = {
+                          from: item.to,
+                          to: item.from,
+                          data: item.data,
+                          id: common.getRandomHexaId(6),
+                          label: item.label
+                      }
+                      // nodesMap[edge.from].data.isInverse=true
+                      if (newEdge.data.type === "parent") {
+                          // newEdge.data.type = null;
+                      }
 
-                    if (!edgesFromMap[item.to]) {
-                        edgesFromMap[item.to] = [];
-                    }
-                    edgesFromMap[item.to].push(item);
-                }
-            }*/
-
+                      if (!edgesFromMap[item.to]) {
+                          edgesFromMap[item.to] = [];
+                      }
+                      edgesFromMap[item.to].push(item);
+                  }
+              }*/
 
 
             if (!edgesToMap[item.to]) {
@@ -85,43 +85,41 @@ var Lineage_nodeCentricGraph = (function () {
         });
 
 
+        if (false) {
+            /*reverse relations*/
+            for (var key in edgesToMap) {
+                var edges = edgesToMap[key]
+                //    var isParent = (edge.data && edge.data.type == "parent")
+                //  var ok = edge.data && edge.data.type === "parent"
+                edges.forEach(function (edge) {
+
+                    if (edge.data.type === "parent") {
+                        if (!existingNodes[edge.id]) {
+                            var newEdge = {
+                                from: edge.to,
+                                to: edge.from,
+                                data: edge.data,
+                                id: common.getRandomHexaId(6),
+                                label: edge.label
+                            }
+                            nodesMap[edge.from].data.isInverse = true
+                            if (newEdge.data.type === "parent") {
+                                // newEdge.data.type = null;
+                            }
+
+                            if (!edgesFromMap[newEdge.from]) {
+                                edgesFromMap[newEdge.from] = [];
+                            }
+                            edgesFromMap[newEdge.from].push(newEdge);
 
 
-if(false) {
-    /*reverse relations*/
-    for (var key in edgesToMap) {
-        var edges = edgesToMap[key]
-        //    var isParent = (edge.data && edge.data.type == "parent")
-        //  var ok = edge.data && edge.data.type === "parent"
-        edges.forEach(function (edge) {
-
-            if (edge.data.type === "parent") {
-                if (!existingNodes[edge.id]) {
-                    var newEdge = {
-                        from: edge.to,
-                        to: edge.from,
-                        data: edge.data,
-                        id: common.getRandomHexaId(6),
-                        label: edge.label
+                        }
                     }
-                    nodesMap[edge.from].data.isInverse = true
-                    if (newEdge.data.type === "parent") {
-                        // newEdge.data.type = null;
-                    }
-
-                    if (!edgesFromMap[newEdge.from]) {
-                        edgesFromMap[newEdge.from] = [];
-                    }
-                    edgesFromMap[newEdge.from].push(newEdge);
+                })
 
 
-                }
             }
-        })
-
-
-    }
-}
+        }
 
 
         var newNodes = [];
@@ -152,7 +150,7 @@ if(false) {
                                 if (!isParent) {
                                     ok = true
                                 }
-                            } else if (options.relations ) {
+                            } else if (options.relations) {
                                 if (!isParent) {
                                     ok = true
                                 }
@@ -161,8 +159,9 @@ if(false) {
                                 if (!existingNodes[edge.id]) {
                                     existingNodes[edge.id] = 1;
                                     newEdges.push(edge);
-                                    if(!options.stopPropagation)
-                                    recurse(edge.to, level + 1);
+                                    if (!options.stopPropagation) {
+                                        recurse(edge.to, level + 1);
+                                    }
                                 }
                             }
 
@@ -170,45 +169,45 @@ if(false) {
                     }
                 }
 
-     /*  else {
-                    //relations inverses
-                    var inverseEdges = edgesToMap[nodeId];
-                    if (inverseEdges) {
+                /*  else {
+                               //relations inverses
+                               var inverseEdges = edgesToMap[nodeId];
+                               if (inverseEdges) {
 
-                        inverseEdges.forEach(function (edge) {
-                            var isParent = (edge.data && edge.data.type == "parent")
+                                   inverseEdges.forEach(function (edge) {
+                                       var isParent = (edge.data && edge.data.type == "parent")
 
-                            var ok = false
-                            if (isParent && options.parents) {
-                                ok = true
-                            } else if (options.inverse) {
-                                ok = false
-                            } else if (options.relations) {
-                                if (!isParent) {
-                                    ok = true
-                                }
-                            }
-                            if (ok) {
-                                if (!existingNodes[edge.id]) {
-                                    var newEdge = {
-                                        from: edge.to,
-                                        to: edge.from,
-                                        data: edge.data,
-                                        id: common.getRandomHexaId(6),
-                                        label: edge.label
-                                    }
-                                    existingNodes[newEdge.id] = 1;
-                                    newEdges.push(newEdge);
-                                    recurse(edge.from, level + 1);
-
-
-                                }
-                            }
-                        })
-                    }
+                                       var ok = false
+                                       if (isParent && options.parents) {
+                                           ok = true
+                                       } else if (options.inverse) {
+                                           ok = false
+                                       } else if (options.relations) {
+                                           if (!isParent) {
+                                               ok = true
+                                           }
+                                       }
+                                       if (ok) {
+                                           if (!existingNodes[edge.id]) {
+                                               var newEdge = {
+                                                   from: edge.to,
+                                                   to: edge.from,
+                                                   data: edge.data,
+                                                   id: common.getRandomHexaId(6),
+                                                   label: edge.label
+                                               }
+                                               existingNodes[newEdge.id] = 1;
+                                               newEdges.push(newEdge);
+                                               recurse(edge.from, level + 1);
 
 
-                }*/
+                                           }
+                                       }
+                                   })
+                               }
+
+
+                           }*/
             }
         }
 
@@ -311,8 +310,8 @@ if(false) {
         $("#mainDialogDiv").load("modules/tools/lineage/html/lineage_textTreeDialog.html", function () {
             //   self.loadVisjsGraphTreeTextJstree()
             $("#mainDialogDiv").dialog("open");
-           // $("#mainDialogDiv").width(1000);
-             UI.clampAndCenterDialog("mainDialogDiv");
+            // $("#mainDialogDiv").width(1000);
+            UI.clampAndCenterDialog("mainDialogDiv");
 
 
             //   $("#Lineage_graphTraversal_numberOfPathes").prop("disabled", true);
@@ -357,149 +356,6 @@ if(false) {
     /**
      * provides a text of the tree calculated from a root node
      */
-    self.exportVisjsGraphTreeTextOld= function () {
-        var rootNode = Lineage_whiteboard.currentGraphNode;
-        var rooNodes = []
-        if (rootNode) {
-            rooNodes.push(rootNode)
-            ;//  return alert("select a node as root for the tree and do it again")
-        } else {
-            var edgesFromMap = {}
-            var edgesToMap = {}
-            Lineage_whiteboard.lineageVisjsGraph.data.edges.get().forEach(function (edge) {
-                edgesFromMap[edge.from] = edge
-                edgesToMap[edge.to] = edge
-            })
-            Lineage_whiteboard.lineageVisjsGraph.data.nodes.get().forEach(function (node) {
-                if (edgesToMap[node.id] && !edgesFromMap[node.id]) {
-                    if (rooNodes.indexOf(node) < 0) {
-                        rooNodes.push(node)
-                    }
-                }
-            })
-
-
-        }
-
-        var nl = String.fromCharCode(10)
-        var nl = "<br>"
-        var whiteSpace = "|&nbsp;&nbsp;"
-        var str = ""
-
-        rooNodes.forEach(function (rootNode) {
-            var selectedEdges = [];//$("#VisjsGraphTreeTextJstree").jstree().get_checked()
-
-            var parents = $("#VisjsGraphTreeTextClasHierarchyCBX").prop("checked")
-            var relations = $("#VisjsGraphTreeTextOutgoingRelationsCBX").prop("checked")
-            var inverse = $("#VisjsGraphTreeTextIngoingRelationsCBX").prop("checked")
-            var stopPropagation=flase
-            var hierarchicalVisjsData = self.getHierarchicalViewVisjsdata(rootNode.id, {
-                inverse: inverse,
-                parents: parents,
-                relations: relations,
-
-            });
-
-            var edgesFromMap = {}
-            var nodesMap = {}
-
-            var visitedNodes = {}
-
-            hierarchicalVisjsData.nodes.forEach(function (node) {
-
-                nodesMap[node.id] = node
-
-            })
-            hierarchicalVisjsData.edges.forEach(function (edge) {
-
-                if (!edgesFromMap[edge.from]) {
-                    edgesFromMap[edge.from] = []
-                }
-                edgesFromMap[edge.from].push(edge)
-                nodesMap[edge.to].data.relation = edge.label
-
-            })
-
-            if (!nodesMap[rootNode.id]) {
-                return alert("select a node as root for the tree and do it again")
-            }
-
-
-            function recurse(x, nodeId, level) {
-                str += "│"
-                var node = nodesMap[nodeId]
-                for (var i = 1; i < node.level; i++) {
-                    if (i < node.level - 2) {
-                        str += whiteSpace
-                    } else if (i == node.level - 2) {
-                        str += "├"
-                    } else {
-                        str += "──"
-                    }
-
-                }
-
-                /* if (parentNode && parentNode.data) {
-                     ;//  node.data.label= node.data.label.replace(parentNode.data.label,"")
-                 }*/
-                var label = node.data.label
-
-                var color = Lineage_whiteboard.getPropertyColor(node.data.source, "palette5colors")
-                if (color) {
-                    label = "<span style=color:" + color + ">" + label + "</span>"
-                }
-                if (node.data.relation) {
-                    if (true || selectedEdges.length < 0 || selectedEdges.indexOf(node.data.relation) > -1) {// draw only selected relations
-if(false && node.data.isInverse)
-    label = "<──<i>[" + node.data.relation + "]</i>──" + label
-                        else
-                        label = "<i>[" + node.data.relation + "]</i>──>" + label
-                    }
-                }
-                if (node.level == 1) {
-                    str += label + nl
-                } else {
-                    str += "── " + label + nl
-                }
-
-                if (edgesFromMap[nodeId]) {
-                    edgesFromMap[nodeId].forEach(function (edge) {
-                        if (!visitedNodes[edge.to]) {
-
-                            if (nodesMap[edge.to]) {
-                                visitedNodes[edge.to] = 1
-                                if( !stopPropagation)
-                                recurse(str, edge.to, node, level + 1)
-                            }
-                        }
-                    })
-
-
-                }
-            }
-
-            var text = recurse("", rootNode.id, 0)
-
-
-        })
-
-        //   $("#VisjsGraphTreeTextTA").html(str)
-
-        const editor = document.getElementById("VisjsGraphTreeTextTA");
-
-        editor.innerHTML = str
-        common.copyTextToClipboard(str, function (err, result) {
-            if (err) {
-                return UI.message(err);
-            }
-            UI.message(result);
-        });
-        /*   var fileName = rootNode.data.source + "_" + rootNode.data.label + "_tree.txt"
-           Export.downloadJSON(str, fileName);*/
-
-
-    };
-
 
 
     self.exportVisjsGraphTreeText = function () {
@@ -510,9 +366,10 @@ if(false && node.data.isInverse)
         var inverses = $("#VisjsGraphTreeTextIngoingRelationsCBX").prop("checked")
         var noRootNode = $("#VisjsGraphTreeTextIngoingNoRoot").prop("checked")
 
+        var showSuperClasses = true
 
 
-        var stopPropagation=false
+        var stopPropagation = false
 
 
         var nl = String.fromCharCode(10)
@@ -521,187 +378,208 @@ if(false && node.data.isInverse)
         var str = ""
 
 
+        var edgesFromMap = {};
+        var edgesToMap = {};
+        var nodesMap = {};
+        var existingNodes = {};
 
 
+        /* -------------------------initiates allnodes and edges map---------------*/
+        var allNodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get()
+        allNodes = JSON.parse(JSON.stringify(allNodes))
 
-    var edgesFromMap = {};
-    var edgesToMap = {};
-    var nodesMap = {};
-    var existingNodes = {};
+        allNodes.forEach(function (item) {
+            item.data.relation = null;
+            nodesMap[item.id] = item;
+        });
 
-
-
-
-
-
-    /* -------------------------initiates allnodes and edges map---------------*/
-    var allNodes= Lineage_whiteboard.lineageVisjsGraph.data.nodes.get()
-    allNodes=JSON.parse(JSON.stringify(allNodes))
-
-    allNodes.forEach(function (item) {
-        item.data.relation = null;
-        nodesMap[item.id] = item;
-    });
-
-    var allEdges= Lineage_whiteboard.lineageVisjsGraph.data.edges.get()
-    allEdges=JSON.parse(JSON.stringify(allEdges))
+        var allEdges = Lineage_whiteboard.lineageVisjsGraph.data.edges.get()
+        allEdges = JSON.parse(JSON.stringify(allEdges))
 
 
-    allEdges.forEach(function (item) {
-        if (!edgesFromMap[item.from]) {
-            edgesFromMap[item.from] = [];
-        }
-        edgesFromMap[item.from].push(item);
+        allEdges.forEach(function (item) {
+            if (!edgesFromMap[item.from]) {
+                edgesFromMap[item.from] = [];
+            }
+            edgesFromMap[item.from].push(item);
 
-        if (!edgesToMap[item.to]) {
-            edgesToMap[item.to] = [];
-        }
-
-        edgesToMap[item.to].push(item);
-    });
-
-
-/**-----------------get rootNodesArray-----------------------*/
-
-var rootNode = Lineage_whiteboard.currentGraphNode;
-        var rooNodes = []
-        if (rootNode && !noRootNode) {
-            rooNodes.push(rootNode)
-            ;//  return alert("select a node as root for the tree and do it again")
-        } else {
-
-
-            allNodes.forEach(function (node) {
-                if (edgesToMap[node.id] && !edgesFromMap[node.id]) {
-                    if (rooNodes.indexOf(node) < 0) {
-                        rooNodes.push(node)
-                    }
-                }
-            })
-
-
-        }
-
-
-
-
-        var   visitedNodes={}
-    rooNodes.forEach(function(rootNode){
-
-    /**   --------------recurse---------*/
-
-    function recurse( nodeId, level,parentId) {
-var hasDirectRelation=false
-        var node = nodesMap[nodeId]
-        for (var i = 1; i <= level; i++) {
-
-              //  str += "──"
-            str += "+&nbsp;&nbsp;"
-
-        }
-     //   str += "│"
-
-        var label = node.data.label
-
-        var color = Lineage_whiteboard.getPropertyColor(node.data.source, "palette5colors")
-        if (color) {
-            label = "<span style=color:" + color + ">" + label + "</span>"
-        }
-
-
-        if (level ===0) {
-           ;// str += label + nl
-        } else {
-            var edgesTo=edgesToMap[node.id]
-            if(edgesTo && !inverses) {
-                edgesTo.forEach(function (edgeTo) {
-                    if (edgeTo.from === parentId && edgeTo.label) {
-                        label = "<i>[" + edgeTo.label + "]</i>─>" +whiteSpace+ label
-                    }
-                })
-            }else {
-                var edgesFrom = edgesFromMap[node.id]
-                if (edgesFrom) {
-                    edgesFrom.forEach(function (edgeFrom) {
-                        if (edgeFrom.to === parentId && edgeFrom.label) {
-                            label = "<─<i>[" + edgeFrom.label + "]</i>"+whiteSpace + label
-                        }
-                    })
-                }else  {
-
-                }
+            if (!edgesToMap[item.to]) {
+                edgesToMap[item.to] = [];
             }
 
-        }
-        str += "" + label + nl
+            edgesToMap[item.to].push(item);
+        });
 
-        if (edgesFromMap[nodeId]) {
-            edgesFromMap[nodeId].forEach(function (edge) {
-                if (!visitedNodes[edge.id]) {
-                    if (nodesMap[edge.to]) {
-                     visitedNodes[edge.id] = 1
-                        if (!stopPropagation) {
-                            if( edge.data.type=="parent" ) {
-                                if (parents && edge.data ) {
-                                    recurse(edge.to, level + 1, node.id)
-                                }
-                            }
-                            else if(relations ) {
-                                hasDirectRelation=true
-                                recurse(edge.to, level + 1, node.id)
+        var rootNode = Lineage_whiteboard.currentGraphNode;
+        async.series([
+
+
+
+            //get SuperClasses optional
+            function (callbackSeries) {
+                if (!showSuperClasses) {
+                    return callbackSeries()
+                }
+                var ids=Object.keys(nodesMap)
+                Sparql_OWL.getNodeParents(rootNode.data.source,null,ids,1, null, function(err, result){
+                    if(err){
+                        return callbackSeries()
+                    }
+                    result.forEach(function(item){
+                        nodesMap[item.subject.value].data.parentLabel=item.broader1Label?item.broader1Label.value:null;
+
+                    })
+                    return callbackSeries()
+                })
+
+
+
+            },
+            function (callbackSeries) {
+                /**-----------------get rootNodesArray-----------------------*/
+
+
+                var rooNodes = []
+                if (rootNode && !noRootNode) {
+                    rooNodes.push(rootNode)
+                    ;//  return alert("select a node as root for the tree and do it again")
+                } else {
+
+
+                    allNodes.forEach(function (node) {
+                        if (edgesToMap[node.id] && !edgesFromMap[node.id]) {
+                            if (rooNodes.indexOf(node) < 0) {
+                                rooNodes.push(node)
                             }
                         }
-                    }
+                    })
+
+
                 }
-            })
 
 
-        }
-        if (edgesToMap[nodeId]) {
-            edgesToMap[nodeId].forEach(function (edge) {
-                if (!visitedNodes[edge.id]) {
-                    if (nodesMap[edge.from]) {
-                       visitedNodes[edge.id] = 1
-                        if (!stopPropagation) {
-                            if( edge.data.type=="parent" ) {
-                                if (parents && edge.data ) {
-                                    recurse(edge.from, level + 1, node.id)
+                var visitedNodes = {}
+                rooNodes.forEach(function (rootNode) {
+
+                    /**   --------------recurse---------*/
+
+                    function recurse(nodeId, level, parentId) {
+                        var hasDirectRelation = false
+                        var node = nodesMap[nodeId]
+                        for (var i = 1; i <= level; i++) {
+
+                            //  str += "──"
+                            str += "+&nbsp;&nbsp;"
+
+                        }
+                        //   str += "│"
+
+                        var label = node.data.label
+                        if(showSuperClasses && node.data.parentLabel){
+                            label+=" (" +node.data.parentLabel+")"
+                        }
+
+                        var color = Lineage_whiteboard.getPropertyColor(node.data.source, "palette5colors")
+                        if (color) {
+                            label = "<span style=color:" + color + ">" + label + "</span>"
+                        }
+
+
+                        if (level === 0) {
+                            ;// str += label + nl
+                        } else {
+                            var edgesTo = edgesToMap[node.id]
+                            if (edgesTo && !inverses) {
+                                edgesTo.forEach(function (edgeTo) {
+                                    if (edgeTo.from === parentId && edgeTo.label) {
+                                        label = "<i>[" + edgeTo.label + "]</i>─>" + whiteSpace + label
+                                    }
+                                })
+                            } else {
+                                var edgesFrom = edgesFromMap[node.id]
+                                if (edgesFrom) {
+                                    edgesFrom.forEach(function (edgeFrom) {
+                                        if (edgeFrom.to === parentId && edgeFrom.label) {
+                                            label = "<─<i>[" + edgeFrom.label + "]</i>" + whiteSpace + label
+                                        }
+                                    })
+                                } else {
+
                                 }
                             }
-                            else if(inverses  && !hasDirectRelation) {
-                                recurse(edge.from, level + 1, node.id)
-                            }
+
+                        }
+                        str += "" + label + nl
+
+                        if (edgesFromMap[nodeId]) {
+                            edgesFromMap[nodeId].forEach(function (edge) {
+                                if (!visitedNodes[edge.id]) {
+                                    if (nodesMap[edge.to]) {
+                                        visitedNodes[edge.id] = 1
+                                        if (!stopPropagation) {
+                                            if (edge.data.type == "parent") {
+                                                if (parents && edge.data) {
+                                                    recurse(edge.to, level + 1, node.id)
+                                                }
+                                            } else if (relations) {
+                                                hasDirectRelation = true
+                                                recurse(edge.to, level + 1, node.id)
+                                            }
+                                        }
+                                    }
+                                }
+                            })
+
+
+                        }
+                        if (edgesToMap[nodeId]) {
+                            edgesToMap[nodeId].forEach(function (edge) {
+                                if (!visitedNodes[edge.id]) {
+                                    if (nodesMap[edge.from]) {
+                                        visitedNodes[edge.id] = 1
+                                        if (!stopPropagation) {
+                                            if (edge.data.type == "parent") {
+                                                if (parents && edge.data) {
+                                                    recurse(edge.from, level + 1, node.id)
+                                                }
+                                            } else if (inverses && !hasDirectRelation) {
+                                                recurse(edge.from, level + 1, node.id)
+                                            }
+                                        }
+                                    }
+                                }
+                            })
+
+
                         }
                     }
-                }
-            })
+
+                    recurse(rootNode.id, 0, null)
 
 
-        }
+                })
+
+
+                //   $("#VisjsGraphTreeTextTA").html(str)
+
+                const editor = document.getElementById("VisjsGraphTreeTextTA");
+
+                editor.innerHTML = str
+                common.copyTextToClipboard(str, function (err, result) {
+                    if (err) {
+                        return UI.message(err);
+                    }
+                    UI.message(result);
+                });
+
+
+            }
+        ], function (err) {
+
+        })
+
+
     }
-
-       recurse( rootNode.id, 0,null)
-
-
-    })
-
-    //   $("#VisjsGraphTreeTextTA").html(str)
-
-    const editor = document.getElementById("VisjsGraphTreeTextTA");
-
-    editor.innerHTML = str
-    common.copyTextToClipboard(str, function (err, result) {
-        if (err) {
-            return UI.message(err);
-        }
-        UI.message(result);
-    });
-
-
-
-
-
-}
     return self;
 })();
 

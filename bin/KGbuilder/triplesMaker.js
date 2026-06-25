@@ -429,7 +429,7 @@ var TriplesMaker = {
                 var property = TriplesMaker.getPropertyUri(edge.data.id);
 
                 if (edge.isRestriction) {
-                    var triples = TriplesMaker.getRestrictionTriples(subjectUri, property, objectUri, edge.retrictionType, tableProcessingParams);
+                    var triples = TriplesMaker.getRestrictionTriples(subjectUri, property, objectUri, edge.restrictionType, tableProcessingParams);
                     triples.forEach(function (triple) {
                         addTriple(triple.s, triple.p, triple.o);
                         if (!tableProcessingParams.isSampleData) {

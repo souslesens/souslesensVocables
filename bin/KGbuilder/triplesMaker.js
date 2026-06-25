@@ -325,22 +325,28 @@ var TriplesMaker = {
 
             for (var columnId in columnMappings) {
                 // filter columns
-                var allowedPredicates = null;
+                var allowedPredicateFilters = null;
                 if (options.filterMappingIds) {
                     var columnIsDirectlySelected = options.filterMappingIds.indexOf(columnId) > -1;
-                    var compositePredicates = [];
+                    var compositePredicateFilters = [];
                     for (var filterIndex = 0; filterIndex < options.filterMappingIds.length; filterIndex++) {
-                        var filterId = options.filterMappingIds[filterIndex];
-                        var filterParts = filterId.split(">");
+                        var filterMappingId = options.filterMappingIds[filterIndex];
+                        if (typeof filterMappingId !== "string") {
+                            continue;
+                        }
+                        var filterParts = filterMappingId.split(">");
                         if (filterParts[0] === columnId && filterParts[1]) {
-                            compositePredicates.push(filterParts[1]);
+                            compositePredicateFilters.push({
+                                predicate: filterParts[1],
+                                object: filterParts[2] || null,
+                            });
                         }
                     }
-                    if (!columnIsDirectlySelected && compositePredicates.length === 0) {
+                    if (!columnIsDirectlySelected && compositePredicateFilters.length === 0) {
                         continue;
                     }
                     if (!columnIsDirectlySelected) {
-                        allowedPredicates = compositePredicates;
+                        allowedPredicateFilters = compositePredicateFilters;
                     }
                 }
 
@@ -363,8 +369,22 @@ var TriplesMaker = {
                     if (!columnId) {
                         return;
                     }
-                    if (allowedPredicates && allowedPredicates.indexOf(mapping.p) < 0) {
-                        return;
+                    if (allowedPredicateFilters) {
+                        var mappingIsAllowed = false;
+                        allowedPredicateFilters.forEach(function (predicateFilter) {
+                            if (mappingIsAllowed) {
+                                return;
+                            }
+                            if (predicateFilter.predicate === mapping.p && (!predicateFilter.object || predicateFilter.object === mapping.o)) {
+                                mappingIsAllowed = true;
+                            }
+                            if (predicateFilter.predicate === "rdfs:subClassOf" && mapping.p === "rdf:type" && mapping.o === "owl:Class") {
+                                mappingIsAllowed = true;
+                            }
+                        });
+                        if (!mappingIsAllowed) {
+                            return;
+                        }
                     }
 
                     var object = null;
@@ -421,9 +441,13 @@ var TriplesMaker = {
                 var property = TriplesMaker.getPropertyUri(edge.data.id);
 
                 if (edge.isRestriction) {
-                    var triples = TriplesMaker.getRestrictionTriples(subjectUri, property, objectUri, edge.restrictionType, { cardinality: edge.cardinality });
+                    var triples = TriplesMaker.getRestrictionTriples(subjectUri, property, objectUri, edge.restrictionType, tableProcessingParams);
                     triples.forEach(function (triple) {
                         addTriple(triple.s, triple.p, triple.o);
+                        if (!tableProcessingParams.isSampleData) {
+                            var metaDataTriples = TriplesMaker.getMetaDataTriples(triple.s, tableProcessingParams.tableInfos.table);
+                            batchTriples = batchTriples.concat(metaDataTriples);
+                        }
                     });
                 } else {
                     addTriple(subjectUri, property, objectUri);
@@ -730,7 +754,7 @@ var TriplesMaker = {
         return objectStr;
     },
 
-    getRestrictionTriples: function (subjectUri, predicateUri, objectUri, restrictionType, options) {
+    getRestrictionTriples: function (subjectUri, predicateUri, objectUri, restrictionType, tableProcessingParams, options) {
         if (!options) {
             options = {};
         }

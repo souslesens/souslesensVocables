@@ -176,3 +176,10 @@ WORKTREE.md
 
 .serena/
 .claude/settings.local.jsonclaude-code-lsp-enforcement-kit
+
+# agent tooling (no code)
+.agents/
+.claude/
+.codex/
+.playwright-mcp/
+AGENTS.md
